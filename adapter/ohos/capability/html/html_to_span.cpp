@@ -78,6 +78,18 @@ FontStyle StringToFontStyle(const std::string& fontStyle)
     return fontStyle == "italic" ? FontStyle::ITALIC : FontStyle::NORMAL;
 }
 
+SuperscriptStyle StringToSuperscriptStyle(const std::string& superscriptStyle)
+{
+    if (superscriptStyle == "superscript") {
+        return SuperscriptStyle::SUPERSCRIPT;
+    } else if (superscriptStyle == "subscript") {
+        return SuperscriptStyle::SUBSCRIPT;
+    } else if (superscriptStyle == "normal") {
+        return SuperscriptStyle::NORMAL;
+    }
+    return SuperscriptStyle::NONE;
+}
+
 TextDecorationStyle StringToTextDecorationStyle(const std::string& textDecorationStyle)
 {
     std::string value = StringUtils::TrimStr(textDecorationStyle);
@@ -256,6 +268,8 @@ void HtmlToSpan::InitFont(
         font->fontStyle = StringToFontStyle(value);
     } else if (key == "font-family") {
         font->fontFamilies = ParseFontFamily(value);
+    } else if (key == "font-superscript") {
+        font->superscript = StringToSuperscriptStyle(value);
     } else if (key == "font-variant") { // not support
     }
 }
@@ -938,6 +952,10 @@ void HtmlToSpan::AddStyleSpan(const std::string& element, SpanInfo& info)
         InitDecoration("text-decoration-line", "underline", "decoration", styles);
     } else if (element == "i" || element == "em") {
         InitFont("font-style", "italic", "font", styles);
+    } else if (element == "sup") {
+        InitFont("font-superscript", "superscript", "font", styles);
+    } else if (element == "sub") {
+        InitFont("font-superscript", "subscript", "font", styles);
     }
 
     for (auto [key, value] : styles) {

@@ -85,6 +85,13 @@ enum class FontStyle {
     NONE
 };
 
+enum class SuperscriptStyle {
+    NORMAL,
+    SUPERSCRIPT,
+    SUBSCRIPT,
+    NONE
+};
+
 namespace StringUtils {
 inline std::string ToString(const FontStyle& fontStyle)
 {
@@ -606,6 +613,8 @@ public:
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         StrokeWidth, Dimension, Dimension(0.0f, DimensionUnit::PX), TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE(StrokeColor, Color, TextStyleAttribute::RE_CREATE);
+    ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
+        Superscript, SuperscriptStyle, SuperscriptStyle::NORMAL, TextStyleAttribute::RE_CREATE);
 
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
         OptimizeTrailingSpace, bool, false, ParagraphStyleAttribute::RE_CREATE);

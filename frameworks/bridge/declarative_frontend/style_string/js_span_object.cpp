@@ -83,6 +83,7 @@ void JSFontSpan::JSBind(BindingTarget globalObj)
     JSClass<JSFontSpan>::CustomProperty("fontFamily", &JSFontSpan::GetFontFamily, &JSFontSpan::SetFontFamily);
     JSClass<JSFontSpan>::CustomProperty("strokeWidth", &JSFontSpan::GetStrokeWidth, &JSFontSpan::SetStrokeWidth);
     JSClass<JSFontSpan>::CustomProperty("strokeColor", &JSFontSpan::GetStrokeColor, &JSFontSpan::SetStrokeColor);
+    JSClass<JSFontSpan>::CustomProperty("superscript", &JSFontSpan::GetSuperscript, &JSFontSpan::SetSuperscript);
     JSClass<JSFontSpan>::Bind(globalObj, JSFontSpan::Constructor, JSFontSpan::Destructor);
 }
 
@@ -122,6 +123,7 @@ RefPtr<FontSpan> JSFontSpan::ParseJsFontSpan(const JSRef<JSObject>& obj)
     ParseJsFontStyle(obj, font);
     ParseJsStrokeWidth(obj, font);
     ParseJsStrokeColor(obj, font);
+    ParseJsSuperscript(obj, font);
     return AceType::MakeRefPtr<FontSpan>(font);
 }
 
@@ -257,6 +259,21 @@ void JSFontSpan::ParseJsStrokeColor(const JSRef<JSObject>& obj, Font& font)
     }
 }
 
+void JSFontSpan::ParseJsSuperscript(const JSRef<JSObject>& obj, Font& font)
+{
+    if (obj->HasProperty("superscript")) {
+        auto style = obj->GetProperty("superscript");
+        OHOS::Ace::SuperscriptStyle superscriptStyle = SuperscriptStyle::NORMAL;
+        if (!style->IsNull() && style->IsNumber()) {
+            auto value = style->ToNumber<int32_t>();
+            if (value >= 0 && value < static_cast<int32_t>(SuperscriptStyle::NONE)) {
+                superscriptStyle = static_cast<SuperscriptStyle>(value);
+            }
+        }
+        font.superscript = superscriptStyle;
+    }
+}
+
 void JSFontSpan::GetFontColor(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(fontSpan_);
@@ -346,6 +363,18 @@ void JSFontSpan::GetStrokeColor(const JSCallbackInfo& info)
 }
 
 void JSFontSpan::SetStrokeColor(const JSCallbackInfo& info) {}
+
+void JSFontSpan::GetSuperscript(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(fontSpan_);
+    if (!fontSpan_->GetFont().superscript.has_value()) {
+        return;
+    }
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(static_cast<int32_t>(fontSpan_->GetFont().superscript.value()))));
+    info.SetReturnValue(ret);
+}
+
+void JSFontSpan::SetSuperscript(const JSCallbackInfo& info) {}
 
 const RefPtr<FontSpan>& JSFontSpan::GetFontSpan()
 {

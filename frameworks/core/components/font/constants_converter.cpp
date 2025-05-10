@@ -118,6 +118,27 @@ Rosen::FontStyle ConvertTxtFontStyle(FontStyle fontStyle)
     return convertValue;
 }
 
+Rosen::TextBadgeType ConvertTxtBadgeType(SuperscriptStyle superscript)
+{
+    Rosen::TextBadgeType convertValue;
+    switch (superscript) {
+        case SuperscriptStyle::NORMAL:
+            convertValue = Rosen::TextBadgeType::BADGE_NONE;
+            break;
+        case SuperscriptStyle::SUPERSCRIPT:
+            convertValue = Rosen::TextBadgeType::SUPERSCRIPT;
+            break;
+        case SuperscriptStyle::SUBSCRIPT:
+            convertValue = Rosen::TextBadgeType::SUBSCRIPT;
+            break;
+        default:
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextBadgeType setting error! Now using default TextBadgeType");
+            convertValue = Rosen::TextBadgeType::BADGE_NONE;
+            break;
+    }
+    return convertValue;
+}
+
 Rosen::TextBaseline ConvertTxtTextBaseline(TextBaseline textBaseline)
 {
     Rosen::TextBaseline convertValue;
@@ -388,6 +409,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     txtStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
         textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     txtStyle.fontStyle = ConvertTxtFontStyle(textStyle.GetFontStyle());
+    txtStyle.badgeType = ConvertTxtBadgeType(textStyle.GetSuperscript());
 
     if (textStyle.GetWordSpacing().Unit() == DimensionUnit::PERCENT) {
         txtStyle.wordSpacing = textStyle.GetWordSpacing().Value() * txtStyle.fontSize;

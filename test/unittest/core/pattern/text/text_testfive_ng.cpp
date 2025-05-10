@@ -2290,6 +2290,7 @@ HWTEST_F(TextTestFiveNg, EncodeTlv002, TestSize.Level1)
     textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
     spanItem->fontStyle->UpdateTextShadow({ textShadow });
     spanItem->fontStyle->UpdateItalicFontStyle(Ace::FontStyle::ITALIC);
+    spanItem->fontStyle->UpdateSuperscript(SuperscriptStyle::SUBSCRIPT);
     spanItem->fontStyle->UpdateFontWeight(Ace::FontWeight::W200);
     std::vector<std::string> fontFamilies;
     fontFamilies.emplace_back("Arial");
