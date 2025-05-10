@@ -564,7 +564,7 @@ void GridPattern::CheckScrollable()
     auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(gridLayoutProperty);
     if (((info_.endIndex_ - info_.startIndex_ + 1) < info_.childrenCount_) ||
-        (info_.GetTotalHeightOfItemsInView(GetMainGap()) > GetMainContentSize())) {
+        (GreatNotEqual(info_.GetTotalHeightOfItemsInView(GetMainGap()), GetMainContentSize()))) {
         scrollable_ = true;
     } else {
         scrollable_ = info_.startMainLineIndex_ != 0 || GetAlwaysEnabled();
@@ -1128,13 +1128,13 @@ OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
     if (info_.startIndex_ == 0 && info_.startMainLineIndex_ == 0) {
         auto startPos = info_.currentOffset_;
         auto newStartPos = startPos + delta;
-        if (startPos > 0 && newStartPos > 0) {
+        if (GreatNotEqual(startPos, 0) && GreatNotEqual(newStartPos, 0)) {
             offset.start = delta;
         }
-        if (startPos > 0 && newStartPos <= 0) {
+        if (GreatNotEqual(startPos, 0) && LessOrEqual(newStartPos, 0)) {
             offset.start = -startPos;
         }
-        if (startPos <= 0 && newStartPos > 0) {
+        if (LessOrEqual(startPos, 0) && GreatNotEqual(newStartPos, 0)) {
             offset.start = newStartPos;
         }
     }
@@ -1151,13 +1151,13 @@ OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
             endPos = info_.currentOffset_ + GetMainContentSize();
         }
         float newEndPos = endPos + delta;
-        if (endPos < mainSize && newEndPos < mainSize) {
+        if (LessNotEqual(endPos, mainSize) && LessNotEqual(newEndPos, mainSize)) {
             offset.end = delta;
         }
-        if (endPos < mainSize && newEndPos >= mainSize) {
+        if (LessNotEqual(endPos, mainSize) && GreatOrEqual(newEndPos, mainSize)) {
             offset.end = mainSize - endPos;
         }
-        if (endPos >= mainSize && newEndPos < mainSize) {
+        if (GreatOrEqual(endPos, mainSize) && LessNotEqual(newEndPos, mainSize)) {
             offset.end = newEndPos - mainSize;
         }
     }
