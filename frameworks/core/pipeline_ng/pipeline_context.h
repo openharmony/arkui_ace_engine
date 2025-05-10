@@ -1368,8 +1368,8 @@ private:
 
     std::list<TouchEvent> touchEvents_;
 
-    std::map<WeakPtr<FrameNode>, std::list<DragPointerEvent>> dragEvents_;
-    std::map<WeakPtr<FrameNode>, std::list<MouseEvent>> mouseEvents_;
+    std::map<RefPtr<FrameNode>, std::list<DragPointerEvent>> dragEvents_;
+    std::map<RefPtr<FrameNode>, std::list<MouseEvent>> mouseEvents_;
     std::vector<std::function<void(const std::vector<std::string>&)>> dumpListeners_;
 
     RefPtr<FrameNode> rootNode_;
