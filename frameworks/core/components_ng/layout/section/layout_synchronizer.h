@@ -18,10 +18,15 @@
 #include "base/memory/ace_type.h"
 namespace OHOS::Ace::NG {
 class LayoutProperty;
+class WaterFlowLayoutProperty;
+class ListLayoutProperty;
+class SwiperLayoutProperty;
 class StaggeredFillAlgorithm;
 class LayoutSynchronizer {
 public:
     static void Sync(const RefPtr<LayoutProperty>& props, StaggeredFillAlgorithm& fillAlgo);
+private:
+    static void SyncWaterFlow(const RefPtr<WaterFlowLayoutProperty>& props, StaggeredFillAlgorithm& fillAlgo);
 };
 } // namespace OHOS::Ace::NG
 #endif
