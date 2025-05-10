@@ -203,7 +203,7 @@ bool ResampleAlgo::GetResamplePointerEvent(std::vector<T>& events,
             return false;
         }
     }
-    float alpha = (static_cast<float>(resampleTime) - iterTime) / delta;
+    float alpha = (static_cast<int64_t>(resampleTime) - static_cast<int64_t>(iterTime)) / static_cast<double>(delta);
     resample.x = Lerp(iter->x, nextIter->x, alpha);
     resample.y = Lerp(iter->y, nextIter->y, alpha);
     resample.screenX = Lerp(iter->screenX, nextIter->screenX, alpha);
