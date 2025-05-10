@@ -135,7 +135,7 @@ OrientationFit CalculateFlip(ImageRotateOrientation orientation)
         case ImageRotateOrientation::UP_MIRROR:
             return OrientationFit::HORIZONTAL_FLIP;
         case ImageRotateOrientation::DOWN_MIRROR:
-            return OrientationFit::VERTICAL_FILP;
+            return OrientationFit::VERTICAL_FLIP;
         default:
             return OrientationFit::NONE;
     }
