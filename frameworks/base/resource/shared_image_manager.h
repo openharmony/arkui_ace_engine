@@ -47,7 +47,7 @@ public:
     explicit SharedImageManager(const RefPtr<TaskExecutor>& taskExecutor) :
         sharedImageTotalSize_(0), taskExecutor_(taskExecutor) {
         sharedImageCacheThreshold_ = SystemProperties::getFormSharedImageCacheThreshold();
-        LOGI("getFormSharedImageCacheThreshold %{public}u", sharedImageCacheThreshold_);
+        LOGI("getFormSharedImageCacheThreshold %{public}d", sharedImageCacheThreshold_);
     }
     ~SharedImageManager() override = default;
     void AddSharedImage(const std::string& name, SharedImage&& sharedImage);
