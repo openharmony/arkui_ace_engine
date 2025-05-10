@@ -141,6 +141,8 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     } else if (animationValue->IsBoolean()) {
         smooth = animationValue->ToBoolean();
     }
+    auto optionCanOverScroll = obj->GetProperty("canOverScroll");
+    bool canStayOverScroll = optionCanOverScroll->IsBoolean() ? optionCanOverScroll->ToBoolean() : false;
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         EventReport::ReportScrollableErrorEvent("Scroller", ScrollableErrorType::CONTROLLER_NOT_BIND,
@@ -150,6 +152,7 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     ContainerScope scope(instanceId_);
     auto direction = scrollController->GetScrollDirection();
     auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
+    scrollController->SetCanStayOverScroll(canStayOverScroll);
     scrollController->AnimateTo(position, static_cast<float>(duration), curve, smooth, canOverScroll);
 }
 

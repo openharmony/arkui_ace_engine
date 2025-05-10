@@ -493,6 +493,9 @@ void Scrollable::HandleTouchUp()
     if (nestedScrolling_) {
         return;
     }
+    if (CanStayOverScroll()) {
+        return;
+    }
     // outBoundaryCallback_ is only set in ScrollablePattern::SetEdgeEffect and when the edge effect is spring
     if (outBoundaryCallback_ && outBoundaryCallback_()) {
         if (state_ != AnimationState::SPRING && scrollOverCallback_) {
@@ -773,6 +776,9 @@ void Scrollable::HandleDragEnd(const GestureEvent& info, bool isFromPanEnd)
     if (isAxisEvent) {
         ProcessAxisEndEvent();
         return;
+    }
+    if (CanStayOverScroll()) {
+        SetCanStayOverScroll(false);
     }
     // avoid no render frame when drag end
     if (!isFromPanEnd) {
