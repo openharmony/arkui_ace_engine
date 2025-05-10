@@ -23,20 +23,21 @@ namespace {
 constexpr uint32_t DELAY_TIME_FOR_IMAGE_DATA_CLEAN = 30000;
 constexpr char MEMORY_IMAGE_HEAD[] = "memory://";
 
-constexpr uint32_t MAX_SIZE_FOR_EACH_IMAGE = 2000000;
-constexpr uint32_t MAX_NUM_OF_IMAGE = 5;
+constexpr uint32_t MAX_SIZE_FOR_TOTAL_IMAGE = 10000000;
 
 } // namespace
 
 std::function<void()> SharedImageManager::GenerateClearImageDataCallback(const std::string& name, size_t dataSize)
 {
-    auto clearImageDataCallback = [wp = AceType::WeakClaim(this), picName = name]() {
+    auto clearImageDataCallback = [wp = AceType::WeakClaim(this), picName = name, dataSize = dataSize]() {
         auto sharedImageManager = wp.Upgrade();
         if (!sharedImageManager) {
             return;
         }
         {
+            LOGW("clear image cache name: %{public}s", picName.c_str());
             std::lock_guard<std::mutex> lockImageMap(sharedImageManager->sharedImageMapMutex_);
+            sharedImageManager->sharedImageTotalSize_ -= dataSize;
             sharedImageManager->sharedImageMap_.erase(picName);
         }
         {
@@ -119,14 +120,22 @@ bool SharedImageManager::UpdateImageMap(const std::string& name, const SharedIma
     bool isClear = false;
     auto iter = sharedImageMap_.find(name);
     if (iter != sharedImageMap_.end()) {
+        int32_t diffSize = sharedImage.size() - iter->second.size();
+        sharedImageTotalSize_ += diffSize;
         iter->second = sharedImage;
     } else {
+        sharedImageTotalSize_ += sharedImage.size();
         sharedImageMap_.emplace(name, sharedImage);
-        if (sharedImageMap_.size() > MAX_NUM_OF_IMAGE) {
+        if (sharedImageMap_.size() > sharedImageCacheThreshold_) {
+            LOGW("will clear %{public}s cache, sharedImageMap_ size %{public}d max cache: %{public}d",
+                name.c_str(), static_cast<int>(sharedImageMap_.size()), sharedImageCacheThreshold_);
             isClear = true;
         }
     }
-    if (sharedImage.size() > MAX_SIZE_FOR_EACH_IMAGE) {
+
+    if (sharedImageTotalSize_ > MAX_SIZE_FOR_TOTAL_IMAGE) {
+        LOGW("will clear %{public}s cache, sharedImageTotalSize_ size %{public}d",
+            name.c_str(), sharedImageTotalSize_);
         isClear = true;
     }
     return isClear;
@@ -168,6 +177,14 @@ bool SharedImageManager::RegisterLoader(const std::string& name, const WeakPtr<I
 
 bool SharedImageManager::Remove(const std::string& name)
 {
+    std::lock_guard<std::mutex> lockImageMap(sharedImageMapMutex_);
+    auto iter = sharedImageMap_.find(name);
+    if (iter == sharedImageMap_.end()) {
+        LOGW("Remove failed: image data of %{private}s does not found in SharedImageMap", name.c_str());
+        return false;
+    }
+    sharedImageTotalSize_ -= iter->second.size();
+    LOGW("clear image cache name: %{public}s", name.c_str());
     int res = static_cast<int>(sharedImageMap_.erase(name));
     return (res != 0);
 }
