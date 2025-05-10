@@ -4660,11 +4660,23 @@ struct ArkUINavigationModifier {
     void (*setSystemBarStyle)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*setEnableToolBarAdaptation)(ArkUINodeHandle node, ArkUI_Bool enbale);
     void (*resetEnableToolBarAdaptation)(ArkUINodeHandle node);
+    void (*setOnNavigationModeChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnNavigationModeChange)(ArkUINodeHandle node);
+    void (*setOnTitleModeChange)(ArkUINodeHandle node, void* callback, void* eventInfo);
+    void (*resetOnTitleModeChange)(ArkUINodeHandle node);
+    void (*setNavigationIsCustomAnimation)(ArkUINodeHandle node, ArkUI_Bool isCustom);
+    void (*resetNavigationIsCustomAnimation)(ArkUINodeHandle node);
+    void (*setToolBar)(ArkUINodeHandle node, ArkUIBarItem* items, ArkUI_Uint32 length);
+    void (*resetToolBar)(ArkUINodeHandle node);
+    void (*setOnNavBarStateChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnNavBarStateChange)(ArkUINodeHandle node);
 };
 
 struct ArkUINavRouterModifier {
     void (*setNavRouteMode)(ArkUINodeHandle node, ArkUI_Int32 mode);
     void (*resetNavRouteMode)(ArkUINodeHandle node);
+    void (*setOnStateChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnStateChange)(ArkUINodeHandle node);
 };
 
 struct ArkUIGaugeModifier {
@@ -4873,6 +4885,8 @@ struct ArkUISideBarContainerModifier {
     void (*setSideBarContainerDivider)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units,
         ArkUI_Int32 length, ArkUI_Uint32 color);
     void (*resetSideBarContainerDivider)(ArkUINodeHandle node);
+    void (*setSideBarOnChange)(ArkUINodeHandle node, void* callback);
+    void (*resetSideBarOnChange)(ArkUINodeHandle node);
 };
 
 struct ArkUICalendarPickerModifier {
