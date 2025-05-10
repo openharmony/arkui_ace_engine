@@ -1214,6 +1214,9 @@ public:
 
     void OnLoadFinished(const std::string& param);
 
+    void SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight, double borderRadiusBottomLeft,
+        double borderRadiusBottomRight);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();

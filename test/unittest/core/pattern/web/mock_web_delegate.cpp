@@ -1246,4 +1246,7 @@ std::string WebDelegate::GetCurrentLanguage()
 void WebDelegate::RegisterWebWindowFocusChangedListener() {}
 void WebDelegate::UnRegisterWebWindowFocusChangedListener() {}
 void WebDelegate::OnDragAttach() {}
+void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight,
+    double borderRadiusBottomLeft, double borderRadiusBottomRight)
+{}
 } // namespace OHOS::Ace
