@@ -1048,6 +1048,7 @@ private:
     void UpdateTouchpadSlidingStatus(const GestureEvent& event);
     CursorStyleInfo GetAndUpdateCursorStyleInfo(
         const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
+    bool UpdateKeyboardSafeArea(bool hideOrClose, double height = 0.0f);
 
     void HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer);
     void FormatIndex(int32_t& startIndex, int32_t& endIndex);
