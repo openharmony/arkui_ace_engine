@@ -144,6 +144,8 @@ public:
         UndoRedoRecord& record) = 0;
     virtual void UpdateRecordAfterChange(int32_t start, int32_t length, UndoRedoRecord& record) = 0;
 
+    static std::unique_ptr<RichEditorUndoManager> Create(bool isSpanStringMode,
+        const WeakPtr<RichEditorPattern>& pattern);
     void UndoByRecords();
     void RedoByRecords();
     void RecordSelectionBefore();
