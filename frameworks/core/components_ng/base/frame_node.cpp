@@ -2847,8 +2847,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto& cacheMatrixInfo = GetOrRefreshMatrixFromCache();
     auto paintRect = cacheMatrixInfo.paintRectWithTransform;
     if (!isActive_) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test. Rect is %{public}s",
-            GetTag().c_str(), paintRect.ToString().c_str());
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s/%{public}d is inActive, needn't do touch test. Rect is %{public}s",
+            GetTag().c_str(), GetId(), paintRect.ToString().c_str());
         int32_t parentId = -1;
         auto parent = GetAncestorNodeOfFrame(true);
         if (parent) {
@@ -2864,7 +2864,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             TipsTouchTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, result,
                 responseLinkResult, isDispatch);
         }
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s eventHub not enabled, need't do touch test", GetTag().c_str());
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s/%{public}d eventHub not enabled, needn't do touch test",
+            GetTag().c_str(), GetId());
         return HitTestResult::OUT_OF_REGION;
     }
 
@@ -3307,7 +3308,8 @@ HitTestResult FrameNode::AxisTest(const PointF& globalPoint, const PointF& paren
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, AxisTestResult& axisResult)
 {
     if (!isActive_ || (eventHub_ && !eventHub_->IsEnabled())) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test", GetTag().c_str());
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s/%{public}d is inActive, needn't do touch test",
+            GetTag().c_str(), GetId());
         return HitTestResult::OUT_OF_REGION;
     }
     {
