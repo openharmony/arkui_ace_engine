@@ -14,6 +14,7 @@
  */
 #include "layout_synchronizer.h"
 
+#include "core/components_ng/layout/section/staggered_fill_algorithm.h"
 #include "frameworks/core/components_ng/base/frame_node.h"
 #include "frameworks/core/components_ng/pattern/list/list_layout_property.h"
 #include "frameworks/core/components_ng/pattern/list/list_pattern.h"
@@ -21,10 +22,9 @@
 #include "frameworks/core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "frameworks/core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "frameworks/core/components_ng/pattern/waterflow/water_flow_pattern.h"
-#include "core/components_ng/layout/section/staggered_fill_algorithm.h"
 namespace OHOS::Ace::NG {
 
-void LayoutSynchronizer::Sync(const RefPtr<LayoutProperty>& props, const StaggeredFillAlgorithm& fillAlgo)
+void LayoutSynchronizer::Sync(const RefPtr<LayoutProperty>& props, StaggeredFillAlgorithm& fillAlgo)
 {
     if (auto p = AceType::DynamicCast<WaterFlowLayoutProperty>(props); p) {
         auto host = p->GetHost();
@@ -32,16 +32,17 @@ void LayoutSynchronizer::Sync(const RefPtr<LayoutProperty>& props, const Stagger
         int32_t startIdx = pattern->GetBeginIndex();
         int32_t endIdx = pattern->GetEndIndex();
         float startPos = pattern->GetStoredOffset() + pattern->GetPendingDelta();
-        if (startIdx != fillAlgo.StartIdx()) {
-            std::cout << "WARNING startIdx = " << startIdx << " " << fillAlgo.StartIdx().value_or(-1) << "\n";
-        }
-        if (endIdx != fillAlgo.EndIdx()) {
-            std::cout << "WARNING endIdx = " << endIdx << " " << fillAlgo.EndIdx().value_or(-1) << "\n";
-
-        }
-        if (startPos != fillAlgo.StartPos()) {
-            std::cout << "WARNING offset = " << startPos << " " << fillAlgo.StartPos().value_or(0.0f) << "\n";
-            
+        if (startIdx != fillAlgo.StartIdx() || endIdx != fillAlgo.EndIdx()) {
+            LOGW("WaterFlow item ranges are out of sync: component range = %d - %d, fill range = %d - %d", startIdx,
+                endIdx, fillAlgo.StartIdx().value_or(-1), fillAlgo.EndIdx().value_or(-1));
+        } else if (startPos != fillAlgo.StartPos()) {
+            if (!fillAlgo.StartPos()) {
+                LOGW("WaterFlow startPos not available yet in fillAlgo");
+            } else {
+                float diff = startPos - fillAlgo.StartPos().value_or(0.0f);
+                fillAlgo.OnSlidingOffsetUpdate(diff);
+                LOGI("adjusted offset by %f", diff);
+            }
         }
     } else if (auto p = AceType::DynamicCast<ListLayoutProperty>(props); p) {
     } else if (auto p = AceType::DynamicCast<SwiperLayoutProperty>(props); p) {

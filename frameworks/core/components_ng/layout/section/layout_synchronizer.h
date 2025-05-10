@@ -21,7 +21,7 @@ class LayoutProperty;
 class StaggeredFillAlgorithm;
 class LayoutSynchronizer {
 public:
-    static void Sync(const RefPtr<LayoutProperty>& props, const StaggeredFillAlgorithm& fillAlgo);
+    static void Sync(const RefPtr<LayoutProperty>& props, StaggeredFillAlgorithm& fillAlgo);
 };
 } // namespace OHOS::Ace::NG
 #endif
