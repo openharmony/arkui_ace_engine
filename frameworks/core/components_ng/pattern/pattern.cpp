@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +16,7 @@
 #include "core/components_ng/pattern/pattern.h"
 
 #include "core/components_ng/pattern/corner_mark/corner_mark.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 void Pattern::OnColorModeChange(uint32_t colorMode)
@@ -90,5 +90,73 @@ int32_t Pattern::OnRecvCommand(const std::string& command)
         return OnInjectionEvent(command);
     }
     return RET_FAILED;
+}
+
+void Pattern::UnRegisterResource(const std::string& key)
+{
+    RemoveResObj(key);
+}
+ 
+template<typename T>
+void Pattern::RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
+{
+    auto&& updateFunc = [weakptr = AceType::WeakClaim(this), key, this](const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weakptr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateResource<T>(key, resObj);
+    };
+    AddResObj(key, resObj, std::move(updateFunc));
+    UpdateProperty<T>(key, value, GetHost());
+}
+ 
+template void Pattern::RegisterResource<CalcDimension>(
+    const std::string&, const RefPtr<ResourceObject>&, CalcDimension);
+template void Pattern::RegisterResource<Color>(
+    const std::string&, const RefPtr<ResourceObject>&, Color);
+template void Pattern::RegisterResource<float>(
+    const std::string&, const RefPtr<ResourceObject>&, float);
+template void Pattern::RegisterResource<std::u16string>(
+    const std::string&, const RefPtr<ResourceObject>&, std::u16string);
+template void Pattern::RegisterResource<std::vector<std::string>>(
+    const std::string&, const RefPtr<ResourceObject>&, std::vector<std::string>);
+template<typename T>
+
+void Pattern::UpdateResource(const std::string& key, const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    T value = ParseResObjToValue<T>(resObj);
+    UpdateProperty<T>(key, value, frameNode);
+    if (frameNode->GetRerenderable()) {
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+ 
+template<typename T>
+T Pattern::ParseResObjToValue(const RefPtr<ResourceObject>& resObj)
+{
+    T value{};
+    CHECK_NULL_RETURN(resObj, value);
+    if constexpr (std::is_same_v<T, std::string>) {
+        ResourceParseUtils::ParseResString(resObj, value);
+    } else if constexpr(std::is_same_v<T, Color>) {
+        ResourceParseUtils::ParseResColor(resObj, value);
+    } else if constexpr(std::is_same_v<T, double>) {
+        ResourceParseUtils::ParseResDouble(resObj, value);
+    } else if constexpr(std::is_same_v<T, CalcDimension>) {
+        ResourceParseUtils::ParseResDimensionFpNG(resObj, value, false);
+    } else if constexpr(std::is_same_v<T, float>) {
+        double tempValue;
+        ResourceParseUtils::ParseResDouble(resObj, tempValue);
+    } else if constexpr(std::is_same_v<T, std::vector<std::string>>) {
+        ResourceParseUtils::ParseResFontFamilies(resObj, value);
+    }
+    return value;
+}
+ 
+template<typename T>
+void Pattern::UpdateProperty(const std::string& key, T value, RefPtr<FrameNode> frameNode)
+{
+    UpdatePropertyImpl(key, AceType::MakeRefPtr<PropertyValue<T>>(value), frameNode);
 }
 } // namespace OHOS::Ace::NG
