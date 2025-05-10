@@ -5984,4 +5984,56 @@ void TextPattern::DumpRecord(const std::string& record, bool stateChange)
     }
     frameRecord_.append("[" + record + "]");
 }
+
+#define DEFINE_PROP_HANDLER(KEY_TYPE, VALUE_TYPE, UPDATE_METHOD)                   \
+    {                                                                              \
+        #KEY_TYPE, [](TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) { \
+            if (auto castedVal = DynamicCast<PropertyValue<VALUE_TYPE>>(value)) {  \
+                prop->UPDATE_METHOD(castedVal->value);                             \
+            }                                                                      \
+        }                                                                          \
+    }
+ 
+void TextPattern::UpdatePropertyImpl(
+    const std::string& key, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto property = frameNode->GetLayoutPropertyPtr<TextLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    using Handler = std::function<void(TextLayoutProperty*, RefPtr<PropertyValueBase>)>;
+    static const std::unordered_map<std::string, Handler> handlers = {
+        DEFINE_PROP_HANDLER(FontSize, CalcDimension, UpdateFontSize),
+        DEFINE_PROP_HANDLER(TextIndent, CalcDimension, UpdateTextIndent),
+        DEFINE_PROP_HANDLER(MinFontScale, float, UpdateMinFontScale),
+        DEFINE_PROP_HANDLER(MaxFontScale, float, UpdateMaxFontScale),
+        DEFINE_PROP_HANDLER(LineHeight, CalcDimension, UpdateLineHeight),
+        DEFINE_PROP_HANDLER(AdaptMaxFontSize, CalcDimension, UpdateAdaptMaxFontSize),
+        DEFINE_PROP_HANDLER(AdaptMinFontSize, CalcDimension, UpdateAdaptMinFontSize),
+        DEFINE_PROP_HANDLER(BaselineOffset, CalcDimension, UpdateBaselineOffset),
+        DEFINE_PROP_HANDLER(TextCaretColor, Color, UpdateCursorColor),
+        DEFINE_PROP_HANDLER(SelectedBackgroundColor, Color, UpdateSelectedBackgroundColor),
+        DEFINE_PROP_HANDLER(TextDecorationColor, Color, UpdateTextDecorationColor),
+        DEFINE_PROP_HANDLER(Content, std::string, UpdateContent),
+        DEFINE_PROP_HANDLER(FontFamily, std::vector<std::string>, UpdateFontFamily),
+        { "TextColor",
+            [node = WeakClaim(RawPtr((frameNode))), weak = WeakClaim(this)](
+                TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                    prop->UpdateTextColorByRender(intVal->value);
+                    auto frameNode = node.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    auto pattern = weak.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, intVal->value, frameNode);
+                    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+                    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+                    pattern->UpdateFontColor(intVal->value);
+                }
+            } },
+    };
+    auto it = handlers.find(key);
+    if (it != handlers.end()) {
+        it->second(property, value);
+    }
+}
 } // namespace OHOS::Ace::NG
