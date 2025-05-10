@@ -3944,6 +3944,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _UIContext_getMaxFontScale(ptr: KPointer): number
     @ani.unsafe.Direct
+    native static _StateStylesOps_onStateStyleChange(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _DrawableDescriptor_ctor(): KPointer
     @ani.unsafe.Direct
     native static _DrawableDescriptor_getFinalizer(): KPointer

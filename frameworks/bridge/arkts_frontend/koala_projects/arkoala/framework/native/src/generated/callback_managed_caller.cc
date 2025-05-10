@@ -3658,6 +3658,26 @@ void callManagedCallback_SpringBackAction_VoidSync(Ark_VMContext vmContext, Ark_
     argsSerializer.writeSpringBackAction(parameter);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
+void callManagedCallback_StateStylesChange(Ark_Int32 resourceId, Ark_Int32 currentState)
+{
+    CallbackBuffer _buffer = {{}, {}};
+    const Ark_CallbackResource _callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    _buffer.resourceHolder.holdCallbackResource(&_callbackResourceSelf);
+    Serializer argsSerializer = Serializer((KSerializerBuffer)&(_buffer.buffer), sizeof(_buffer.buffer), &(_buffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_Callback_StateStylesChange);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(currentState);
+    enqueueCallback(&_buffer);
+}
+void callManagedCallback_StateStylesChangeSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 currentState)
+{
+    uint8_t _buffer[4096];
+    Serializer argsSerializer = Serializer((KSerializerBuffer)&_buffer, sizeof(_buffer), nullptr);
+    argsSerializer.writeInt32(Kind_Callback_StateStylesChange);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(currentState);
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
+}
 void callManagedCallback_String_Number_Void(Ark_Int32 resourceId, Ark_String value, Ark_Number index)
 {
     CallbackBuffer _buffer = {{}, {}};
@@ -7341,6 +7361,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_SheetDismiss_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SheetDismiss_Void);
         case Kind_Callback_SheetType_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SheetType_Void);
         case Kind_Callback_SpringBackAction_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SpringBackAction_Void);
+        case Kind_Callback_StateStylesChange: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_StateStylesChange);
         case Kind_Callback_String_Number_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_String_Number_Void);
         case Kind_Callback_String_Opt_Object_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_String_Opt_Object_Void);
         case Kind_Callback_String_PasteEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_String_PasteEvent_Void);
@@ -7631,6 +7652,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_SheetDismiss_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SheetDismiss_VoidSync);
         case Kind_Callback_SheetType_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SheetType_VoidSync);
         case Kind_Callback_SpringBackAction_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SpringBackAction_VoidSync);
+        case Kind_Callback_StateStylesChange: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_StateStylesChangeSync);
         case Kind_Callback_String_Number_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_String_Number_VoidSync);
         case Kind_Callback_String_Opt_Object_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_String_Opt_Object_VoidSync);
         case Kind_Callback_String_PasteEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_String_PasteEvent_VoidSync);

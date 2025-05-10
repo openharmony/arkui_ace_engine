@@ -1342,6 +1342,8 @@ typedef struct Callback_SheetType_Void Callback_SheetType_Void;
 typedef struct Opt_Callback_SheetType_Void Opt_Callback_SheetType_Void;
 typedef struct Callback_SpringBackAction_Void Callback_SpringBackAction_Void;
 typedef struct Opt_Callback_SpringBackAction_Void Opt_Callback_SpringBackAction_Void;
+typedef struct Callback_StateStylesChange Callback_StateStylesChange;
+typedef struct Opt_Callback_StateStylesChange Opt_Callback_StateStylesChange;
 typedef struct Callback_String_Number_Void Callback_String_Number_Void;
 typedef struct Opt_Callback_String_Number_Void Opt_Callback_String_Number_Void;
 typedef struct Callback_String_Opt_Object_Void Callback_String_Opt_Object_Void;
@@ -10248,6 +10250,15 @@ typedef struct Opt_Callback_SpringBackAction_Void {
     Ark_Tag tag;
     Callback_SpringBackAction_Void value;
 } Opt_Callback_SpringBackAction_Void;
+typedef struct Callback_StateStylesChange {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 currentState);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 currentState);
+} Callback_StateStylesChange;
+typedef struct Opt_Callback_StateStylesChange {
+    Ark_Tag tag;
+    Callback_StateStylesChange value;
+} Opt_Callback_StateStylesChange;
 typedef struct Callback_String_Number_Void {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_String value, const Ark_Number index);
@@ -23326,6 +23337,11 @@ typedef struct GENERATED_ArkUIUIContextAccessor {
     Ark_Number (*getMaxFontScale)(Ark_UIContext peer);
 } GENERATED_ArkUIUIContextAccessor;
 
+typedef struct GENERATED_ArkUIStateStylesOpsAccessor {
+    void (*onStateStyleChange)(Ark_NativePointer node,
+                               const Callback_StateStylesChange* stateStyleChange);
+} GENERATED_ArkUIStateStylesOpsAccessor;
+
 typedef struct GENERATED_ArkUIDrawableDescriptorAccessor {
     void (*destroyPeer)(Ark_DrawableDescriptor peer);
     Ark_DrawableDescriptor (*ctor)();
@@ -26574,6 +26590,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIWorkerEventListenerAccessor* (*getWorkerEventListenerAccessor)();
     const GENERATED_ArkUIRestrictedWorkerAccessor* (*getRestrictedWorkerAccessor)();
     const GENERATED_ArkUIUIContextAccessor* (*getUIContextAccessor)();
+    const GENERATED_ArkUIStateStylesOpsAccessor* (*getStateStylesOpsAccessor)();
     const GENERATED_ArkUIDrawableDescriptorAccessor* (*getDrawableDescriptorAccessor)();
     const GENERATED_ArkUILayeredDrawableDescriptorAccessor* (*getLayeredDrawableDescriptorAccessor)();
     const GENERATED_ArkUIPixelMapDrawableDescriptorAccessor* (*getPixelMapDrawableDescriptorAccessor)();

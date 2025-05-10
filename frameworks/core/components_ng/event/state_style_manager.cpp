@@ -91,7 +91,7 @@ void StateStyleManager::HandleTouchDown()
         node->GetTag().c_str(), node->GetId());
 #endif
     HandleScrollingParent();
-    if (!hasScrollingParent_) {
+    if (!hasScrollingParent_ || scrollingFeatureForbidden_) {
         UpdateCurrentUIState(UI_STATE_PRESSED);
         PostListItemPressStyleTask(currentState_);
     } else {
@@ -131,6 +131,9 @@ void StateStyleManager::HandleTouchUp()
 
 static bool IsCanUpdate(UIState subscribers, UIState handlingState, UIState currentState)
 {
+    if (subscribers == UI_STATE_UNKNOWN) {
+        return false;
+    }
     return ((subscribers & handlingState) == handlingState || currentState == UI_STATE_NORMAL);
 }
 

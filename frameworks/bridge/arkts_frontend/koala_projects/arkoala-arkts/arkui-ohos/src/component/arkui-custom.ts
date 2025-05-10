@@ -934,6 +934,22 @@ export class RestrictedWorker implements MaterializedBase {
         thisSerializer.release()
     }
 }
+
+export class StateStylesOps {
+    public static onStateStyleChange(node: KPointer, stateStyleChange: Callback_StateStylesChange): void {
+        const node_casted = node as (KPointer)
+        const stateStyleChange_casted = stateStyleChange as (Callback_StateStylesChange)
+        StateStylesOps.onStateStyleChange_serialize(node_casted, stateStyleChange_casted)
+        return
+    }
+    private static onStateStyleChange_serialize(node: KPointer, stateStyleChange: Callback_StateStylesChange): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(stateStyleChange)
+        ArkUIGeneratedNativeModule._StateStylesOps_onStateStyleChange(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+
 export type Context_getGroupDir_Callback = (result: string) => void;
 export enum PointerStyle {
     DEFAULT = 0,
@@ -1066,6 +1082,7 @@ export type RestrictedWorker_onmessage_Callback = (event: MessageEvents) => void
 export interface SystemBarStyle {
     statusBarContentColor?: string;
 }
+export type Callback_StateStylesChange = (currentState: int32) => void;
 export class ContextInternal {
     public static fromPtr(ptr: KPointer): Context {
         const obj : Context = new Context()

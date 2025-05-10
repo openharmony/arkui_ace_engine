@@ -12686,6 +12686,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // UIContextAccessor
+    namespace StateStylesOpsAccessor {
+    void OnStateStyleChangeImpl(Ark_NativePointer node,
+                                const Callback_StateStylesChange* stateStyleChange)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetOnStateStyleChange(frameNode, convValue);
+    }
+    } // StateStylesOpsAccessor
     namespace DrawableDescriptorAccessor {
     void DestroyPeerImpl(Ark_DrawableDescriptor peer)
     {
@@ -20822,6 +20833,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct UIContextPeer {
         virtual ~UIContextPeer() = default;
     };
+    const GENERATED_ArkUIStateStylesOpsAccessor* GetStateStylesOpsAccessor()
+    {
+        static const GENERATED_ArkUIStateStylesOpsAccessor StateStylesOpsAccessorImpl {
+            StateStylesOpsAccessor::OnStateStyleChangeImpl,
+        };
+        return &StateStylesOpsAccessorImpl;
+    }
     const GENERATED_ArkUIDrawableDescriptorAccessor* GetDrawableDescriptorAccessor()
     {
         static const GENERATED_ArkUIDrawableDescriptorAccessor DrawableDescriptorAccessorImpl {
@@ -24286,6 +24304,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetWorkerEventListenerAccessor,
             GetRestrictedWorkerAccessor,
             GetUIContextAccessor,
+            GetStateStylesOpsAccessor,
             GetDrawableDescriptorAccessor,
             GetLayeredDrawableDescriptorAccessor,
             GetPixelMapDrawableDescriptorAccessor,
