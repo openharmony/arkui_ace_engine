@@ -38,6 +38,7 @@ bool RichEditorSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     SetEnableSubWindowMenu(true);
     CheckEnableContainerModal();
     IF_TRUE(request.requestCode == REQUEST_RECREATE, needRefreshMenu_ = false);
+    pattern->UpdateAIMenuOptions();
     return true;
 }
 
@@ -244,9 +245,10 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     if (!isFirstHandle && IsSingleHandle()) {
         overlayManager->SetIsHandleLineShow(true);
     }
+    pattern->UpdateAIMenuOptions();
     pattern->CalculateHandleOffsetAndShowOverlay();
     overlayManager->MarkInfoChange((isFirstHandle ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE) | DIRTY_SELECT_AREA |
-                            DIRTY_SELECT_TEXT | DIRTY_COPY_ALL_ITEM);
+                            DIRTY_SELECT_TEXT | DIRTY_COPY_ALL_ITEM | DIRTY_AI_MENU_ITEM);
     ProcessOverlay({ .animation = true, .requestCode = recreateAfterMoveDone_ ? REQUEST_RECREATE : 0 });
     recreateAfterMoveDone_ = false;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -412,6 +414,26 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
             if (pattern->GetTextDetectEnable() && !pattern->HasFocus()) {
                 pattern->ResetSelection();
             }
+            break;
+        default:
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Unsupported menu option id %{public}d", id);
+            break;
+    }
+}
+
+void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType type, const std::string& labelInfo)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "MenuActionId=%{public}d, MenuType=%{public}d, labelInfo=%{public}s",
+        id, type, labelInfo.c_str());
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (labelInfo.empty()) {
+        OnMenuItemAction(id, type);
+        return;
+    }
+    switch (id) {
+        case OptionMenuActionId::AI_MENU_OPTION:
+            pattern->HandleAIMenuOption(labelInfo);
             break;
         default:
             TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Unsupported menu option id %{public}d", id);

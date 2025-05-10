@@ -3054,6 +3054,7 @@ bool RichEditorPattern::HandleClickSelection(const OHOS::Ace::GestureEvent& info
     CHECK_NULL_RETURN(!selectOverlay_->GetIsHandleMoving(), true);
     if (SelectOverlayIsOn()) {
         selectOverlay_->SwitchToOverlayMode();
+        UpdateAIMenuOptions();
         selectOverlay_->ToggleMenu();
     } else {
         CalculateHandleOffsetAndShowOverlay();
@@ -8302,6 +8303,25 @@ void RichEditorPattern::HandleOnShare()
     TextShareAdapter::StartTextShareTask(containerId, contentRect, shareWord);
 }
 
+void RichEditorPattern::HandleAIMenuOption(const std::string& labelInfo)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleAIMenuOption labelInfo=%{public}s", labelInfo.c_str());
+    TextPattern::HandleAIMenuOption(labelInfo);
+}
+
+void RichEditorPattern::UpdateAIMenuOptions()
+{
+    if (copyOption_ != CopyOptions::Local || !NeedShowAIDetect()) {
+        SetIsShowAIMenuOption(false);
+        return;
+    }
+    auto aiItemOptions = GetAIItemOption();
+    auto isShowAIMenuOption = TextPattern::PrepareAIMenuOptions(aiItemOptions);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateAIMenuOptions isShowAIMenuOption=%{public}d", isShowAIMenuOption);
+    SetIsShowAIMenuOption(isShowAIMenuOption);
+    SetAIItemOption(aiItemOptions);
+}
+
 std::function<void(Offset)> RichEditorPattern::GetThumbnailCallback()
 {
     return [wk = WeakClaim(this)](const Offset& point) {
@@ -9087,6 +9107,13 @@ void RichEditorPattern::UpdateSelectMenuInfo(SelectMenuInfo& menuInfo)
     if (textResponseType_.has_value()) {
         menuInfo.responseType = static_cast<int32_t>(textResponseType_.value());
     }
+
+    if (IsShowAIMenuOption() && !GetAIItemOption().empty()) {
+        auto firstSpanItem = GetAIItemOption().begin()->second;
+        menuInfo.aiMenuOptionType = firstSpanItem.type;
+        return;
+    }
+    menuInfo.aiMenuOptionType = TextDataDetectType::INVALID;
 }
 
 RectF RichEditorPattern::GetCaretRect() const

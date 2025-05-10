@@ -733,6 +733,8 @@ public:
     void OnCopyOperation(bool isUsingExternalKeyboard = false);
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     void HandleOnShare();
+    void HandleAIMenuOption(const std::string& labelInfo = "") override;
+    void UpdateAIMenuOptions() override;
     void HandleDraggableFlag(bool isTouchSelectArea);
     void SetIsTextDraggable(bool isTextDraggable = true) override;
     bool JudgeContentDraggable();

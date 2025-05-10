@@ -19,6 +19,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/base/mock_task_executor.h"
+#include "core/common/ai/data_detector_adapter.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 
@@ -33,6 +34,24 @@ int32_t callBack2 = 0;
 int32_t callBack3 = 0;
 int32_t testNumber0 = 0;
 int32_t testNumber5 = 5;
+
+// include span string and position
+struct AISpanTestInfo {
+    std::variant<std::string, std::u16string> content;
+    vector<Ace::AISpan> aiSpans;
+};
+
+const AISpanTestInfo U16_TEXT_FOR_AI_INFO =
+                    { std::u16string(u"phone: 12345678900,url: www.baidu.com Hello World"),
+                        { {7, 18, "12345678900", TextDataDetectType::PHONE_NUMBER},
+                        {24, 37, "www.baidu.com", TextDataDetectType::URL} }
+                    };
+
+const AISpanTestInfo U16_TEXT_FOR_AI_INFO_2 =
+                    { std::u16string(u"email: 1234@abc.com,date: 2025.09.12, "),
+                        { {7, 19, "1234@abc.com", TextDataDetectType::EMAIL},
+                        {26, 36, "2025.09.12", TextDataDetectType::DATE_TIME} }
+                    };
 } // namespace
 
 class RichEditorMenuTestNg : public RichEditorCommonTestNg {
@@ -976,4 +995,112 @@ HWTEST_F(RichEditorMenuTestNg, HideMenu001, TestSize.Level1)
     EXPECT_NE(richEditorPattern->selectOverlay_, nullptr);
 }
 
+/**
+ * @tc.name: UpdateAIMenuOptions
+ * @tc.desc: test UpdateAIMenuOptions function with valid textSelector
+ *           check single ai entity in selection range
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMenuTestNg, UpdateAIMenuOptions001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+
+    /**
+     * @tc.steps: step1. preset conditions
+     */
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = std::get<std::u16string>(U16_TEXT_FOR_AI_INFO.content);
+    spanItem->position = spanItem->content.length();
+    pattern->spans_.emplace_back(spanItem);
+
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+    pattern->pManager_->AddParagraph({ .paragraph = mockParagraph, .start = 0, .end = 100 });
+
+    pattern->SetTextDetectEnable(true);
+    pattern->copyOption_ = CopyOptions::Local;
+
+    auto aiSpan1 = U16_TEXT_FOR_AI_INFO.aiSpans[0];
+    auto aiSpan2 = U16_TEXT_FOR_AI_INFO.aiSpans[1];
+    std::map<int32_t, Ace::AISpan> aiSpanMap;
+    aiSpanMap[aiSpan1.start] = aiSpan1;
+    aiSpanMap[aiSpan2.start] = aiSpan2;
+    pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
+
+    /**
+     * @tc.steps: step2. call UpdateAIMenuOptions function.
+     */
+    pattern->textSelector_.Update(0, 22);
+    pattern->UpdateAIMenuOptions();
+    pattern->HandleAIMenuOption();
+    EXPECT_EQ(pattern->GetAIItemOption().size(), 1);
+    auto aiSpan = pattern->GetAIItemOption().begin()->second;
+    EXPECT_EQ(aiSpan.type, TextDataDetectType::PHONE_NUMBER);
+    EXPECT_EQ(pattern->IsShowAIMenuOption(), true);
+
+    pattern->textSelector_.Update(20, 37);
+    pattern->UpdateAIMenuOptions();
+    EXPECT_EQ(pattern->GetAIItemOption().size(), 1);
+    aiSpan = pattern->GetAIItemOption().begin()->second;
+    EXPECT_EQ(aiSpan.type, TextDataDetectType::URL);
+    EXPECT_EQ(pattern->IsShowAIMenuOption(), true);
+}
+
+/**
+ * @tc.name: UpdateAIMenuOptions
+ * @tc.desc: test UpdateAIMenuOptions function with valid textSelector
+ *           check multi ai entity in selection range
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMenuTestNg, UpdateAIMenuOptions002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+
+    /**
+     * @tc.steps: step1. prepare spanItem with at least 2 ai entity
+     */
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = std::get<std::u16string>(U16_TEXT_FOR_AI_INFO_2.content);
+    spanItem->position = spanItem->content.length();
+    pattern->spans_.emplace_back(spanItem);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> selectedRects { RectF(0, 0, 20, 20), RectF(30, 30, 20, 20), RectF(60, 60, 20, 20) };
+    EXPECT_CALL(*paragraph, GetRectsForPlaceholders(_)).WillRepeatedly(SetArgReferee<0>(selectedRects));
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+
+    pattern->SetTextDetectEnable(true);
+    pattern->copyOption_ = CopyOptions::Local;
+
+    auto aiSpan1 = U16_TEXT_FOR_AI_INFO_2.aiSpans[0];
+    auto aiSpan2 = U16_TEXT_FOR_AI_INFO_2.aiSpans[1];
+    std::map<int32_t, Ace::AISpan> aiSpanMap;
+    aiSpanMap[aiSpan1.start] = aiSpan1;
+    aiSpanMap[aiSpan2.start] = aiSpan2;
+    pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
+
+    /**
+     * @tc.steps: step2. call UpdateAIMenuOptions function.
+     * @tc.expected: isShowAIMenuOption is false.
+     */
+    pattern->textSelector_.Update(0, 40);
+    pattern->UpdateAIMenuOptions();
+    EXPECT_EQ(pattern->GetAIItemOption().size(), 1);
+    auto aiSpan = pattern->GetAIItemOption().begin()->second;
+    EXPECT_EQ(aiSpan.type, TextDataDetectType::EMAIL);
+    EXPECT_EQ(pattern->IsShowAIMenuOption(), false);
+
+    pattern->textSelector_.Update(7, 19);
+    pattern->SetTextDetectEnable(false);
+    pattern->UpdateAIMenuOptions();
+    EXPECT_EQ(pattern->IsShowAIMenuOption(), false);
+
+    pattern->SetTextDetectEnable(true);
+    pattern->copyOption_ = CopyOptions::InApp;
+    pattern->UpdateAIMenuOptions();
+    EXPECT_EQ(pattern->IsShowAIMenuOption(), false);
+}
 }
