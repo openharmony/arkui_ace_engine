@@ -6905,9 +6905,13 @@ void JSViewAbstract::JsNotifyDragStartRequest(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsCancelDataLoading(const std::string& key)
 {
+    if (key.empty()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Invalid input parameter.");
+        return;
+    }
     auto ret = ViewAbstractModel::GetInstance()->CancelDataLoading(key);
     if (ret != 0) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Invalid input parameter.");
+        JSException::Throw(ERROR_CODE_DRAG_OPERATION_FAILED, "%s", "Operation failed.");
     }
 }
 
