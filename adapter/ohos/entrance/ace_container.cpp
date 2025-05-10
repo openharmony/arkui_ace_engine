@@ -85,6 +85,7 @@ const char IS_FOCUS_ACTIVE_KEY[] = "persist.gesture.smart_gesture_enable";
 std::mutex g_mutexFormRenderFontFamily;
 constexpr uint32_t RES_TYPE_CROWN_ROTATION_STATUS = 129;
 constexpr int32_t EXTENSION_HALF_SCREEN_MODE = 2;
+constexpr int32_t DARK_RES_DUMP_MIN_SIZE = 3;
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
 #else
@@ -2100,8 +2101,50 @@ bool AceContainer::DumpInfo(const std::vector<std::string>& params)
     if (DumpRSNodeByStringID(params)) {
         return true;
     }
+
+    if (DumpExistDarkRes(params)) {
+        return true;
+    }
     CHECK_NULL_RETURN(pipelineContext_, false);
     return pipelineContext_->Dump(params);
+}
+
+bool AceContainer::DumpExistDarkRes(const std::vector<std::string>& params)
+{
+    if (!params.empty() && params[0] == "-existdarkresbyid" && (params.size() >= DARK_RES_DUMP_MIN_SIZE)) {
+        DumpLog::GetInstance().Print("------------DumpExistDarkResByID------------");
+        auto bundleName = params[1];
+        auto moduleName = params[2];
+        auto resourceId = params[3];
+        auto resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName, instanceId_);
+        if (!resourceAdapter) {
+            DumpLog::GetInstance().Print(1, "Cannot find resourceAdapter with bundleName:" + bundleName +
+                ", moduleName:" + moduleName);
+            return true;
+        }
+        bool existDarkRes = resourceAdapter->ExistDarkResById(resourceId);
+        DumpLog::GetInstance().Print(1, std::string(existDarkRes ? "" : "Doesn't ") +
+            "Exit dark res with resourceId:" + resourceId);
+        return true;
+    }
+    if (!params.empty() && params[0] == "-existdarkresbyname" && (params.size() > DARK_RES_DUMP_MIN_SIZE)) {
+        DumpLog::GetInstance().Print("------------DumpExistDarkResByName------------");
+        auto bundleName = params[1];
+        auto moduleName = params[2];
+        auto resourceName = params[3];
+        auto resourceType = params[4];
+        auto resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName, instanceId_);
+        if (!resourceAdapter) {
+            DumpLog::GetInstance().Print(1, "Cannot find resourceAdapter with bundleName:" + bundleName +
+                ", moduleName:" + moduleName);
+            return true;
+        }
+        bool existDarkRes = resourceAdapter->ExistDarkResByName(resourceName, resourceType);
+        DumpLog::GetInstance().Print(1, std::string(existDarkRes ? "" : "Doesn't ") +
+            "Exit dark res with resourceName:" + resourceName + ", resourceType:" + resourceType);
+        return true;
+    }
+    return false;
 }
 
 bool AceContainer::DumpRSNodeByStringID(const std::vector<std::string>& params)

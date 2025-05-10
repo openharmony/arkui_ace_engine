@@ -347,6 +347,8 @@ public:
 
     bool DumpRSNodeByStringID(const std::vector<std::string>& params);
 
+    bool DumpExistDarkRes(const std::vector<std::string>& params);
+
     bool OnDumpInfo(const std::vector<std::string>& params);
 
     void TriggerGarbageCollection() override;
