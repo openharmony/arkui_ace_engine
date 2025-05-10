@@ -595,6 +595,7 @@ struct custombutton {
             this.onMenuWidthChange()
             this.onShowMenuWithTimer()
             this.cancelMenuDisappearTimer()
+            this.stopPropagation()
           } else {
             this.onCancelMenuTimer()
             this.menuDisappearTimer(MENU_MOUSEOUT_DISAPPEAR_TIME)
@@ -636,6 +637,9 @@ struct custombutton {
         }))
         .onHover((isHover: boolean, event: HoverEvent) => {
           this.onHoverMinimizeButton(isHover)
+          if (isHover) {
+            this.stopPropagation()
+          }
           this.getUIContext()?.animateTo({ duration: 0 }, () => {
             if (isHover) {
               this.minimizeScale = 1.1
@@ -673,6 +677,9 @@ struct custombutton {
         }))
         .onHover((isHover: boolean, event: HoverEvent) => {
           this.onHoverCloseButton(isHover)
+          if (isHover) {
+            this.stopPropagation()
+          }
           this.getUIContext()?.animateTo({ duration: 0 }, () => {
             if (isHover) {
               this.closeScale = 1.1

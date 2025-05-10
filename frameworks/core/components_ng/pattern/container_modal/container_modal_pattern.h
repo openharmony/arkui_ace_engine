@@ -245,6 +245,11 @@ public:
         return titleMgr_;
     }
 
+    bool GetIsShowTitle() const
+    {
+        return isTitleShow_;
+    }
+
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
     {

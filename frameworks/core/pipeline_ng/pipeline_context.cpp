@@ -4274,10 +4274,8 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
     auto titleMgr = containerPattern->GetTitleManager();
     if (titleMgr) {
         if (isShowTitle_) {
-            titleMgr->SetIsFloatingMode(false);
             titleMgr->UpdateTargetNodesBarMargin();
         } else {
-            titleMgr->SetIsFloatingMode(true);
             titleMgr->ResetExpandStackNode();
         }
     }
