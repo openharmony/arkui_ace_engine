@@ -319,7 +319,7 @@ public:
 
     virtual void NotifyOnPreDraw() = 0;
 
-    virtual bool CallRouterBackToPopPage() = 0;
+    virtual bool CallRouterBackToPopPage(bool* isUserAccept = nullptr) = 0;
 
     virtual bool PopPageStackOverlay()
     {

@@ -151,7 +151,7 @@ public:
 
     bool ClearInvisiblePages(const std::function<void()>& listener = nullptr);
 
-    bool CallRouterBackToPopPage() override;
+    bool CallRouterBackToPopPage(bool* isUserAccept = nullptr) override;
 
     void SetSinglePageId(int32_t pageId);
 

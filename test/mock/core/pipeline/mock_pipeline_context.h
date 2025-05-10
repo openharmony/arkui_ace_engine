@@ -67,7 +67,7 @@ public:
         backCallback_ = callback;
     }
 
-    bool CallRouterBackToPopPage() override
+    bool CallRouterBackToPopPage(bool* isUserAccept = nullptr) override
     {
         if (backCallback_) {
             backCallback_();

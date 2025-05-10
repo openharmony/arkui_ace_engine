@@ -211,11 +211,7 @@ void RenderStage::HandleDragEnd()
     controllerOut_->NotifyStopListener();
     SetDisableTouchEvent(true);
     auto dragLimit = DRAG_LIMIT / pipelineContext->GetViewScale();
-    if (fabs(dragOffsetX_) >= dragLimit) {
-        controllerIn_->UpdatePlayedTime(TRANSITION_WATCH_DURATION - tickTime_);
-        controllerOut_->UpdatePlayedTime(TRANSITION_WATCH_DURATION - tickTime_);
-        pipelineContext->CallRouterBackToPopPage();
-    } else {
+    auto forwardFunc = [&] () {
         controllerIn_->Forward();
         controllerOut_->Forward();
         controllerIn_->AddStopListener([weakRenderStage = WeakClaim(this), contextWeak = context_] {
@@ -247,6 +243,21 @@ void RenderStage::HandleDragEnd()
             transitionOut->SetTouchable(false);
             SetPageHidden(nextTopElement, true);
         });
+    };
+    if (fabs(dragOffsetX_) >= dragLimit) {
+        controllerIn_->UpdatePlayedTime(TRANSITION_WATCH_DURATION - tickTime_);
+        controllerOut_->UpdatePlayedTime(TRANSITION_WATCH_DURATION - tickTime_);
+        bool isUserAccept = false;
+        pipelineContext->CallRouterBackToPopPage(&isUserAccept);
+        if (isUserAccept) {
+            controllerIn_->UpdatePlayedTime(tickTime_);
+            controllerOut_->UpdatePlayedTime(tickTime_);
+            forwardFunc();
+            controllerIn_->Finish();
+            controllerOut_->Finish();
+        }
+    } else {
+        forwardFunc();
     }
     ResetDragOffset();
 }

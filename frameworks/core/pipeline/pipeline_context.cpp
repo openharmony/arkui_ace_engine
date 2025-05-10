@@ -1270,7 +1270,7 @@ void PipelineContext::ExitAnimation()
 }
 
 // return true if user accept or page is not last, return false if others condition
-bool PipelineContext::CallRouterBackToPopPage()
+bool PipelineContext::CallRouterBackToPopPage(bool* isUserAccept)
 {
     CHECK_RUN_ON(PLATFORM);
     auto frontend = weakFrontend_.Upgrade();
@@ -1282,6 +1282,9 @@ bool PipelineContext::CallRouterBackToPopPage()
     if (frontend->OnBackPressed()) {
         // if user accept
         LOGI("CallRouterBackToPopPage(): user consume the back key event");
+        if (isUserAccept) {
+            *isUserAccept = true;
+        }
         return true;
     }
     auto stageElement = GetStageElement();

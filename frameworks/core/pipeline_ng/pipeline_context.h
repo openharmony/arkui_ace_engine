@@ -343,7 +343,7 @@ public:
 
     void NotifyOnPreDraw() override {}
 
-    bool CallRouterBackToPopPage() override
+    bool CallRouterBackToPopPage(bool* isUserAccept = nullptr) override
     {
         return OnBackPressed();
     }
