@@ -13,12 +13,58 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/symbol/symbol_model_static.h"
-
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/symbol/symbol_model_ng.h"
+#include "core/components_ng/pattern/symbol/symbol_model_static.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
+
+void SymbolModelStatic::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize)
+{
+    if (fontSize.has_value()) {
+        SymbolModelNG::SetFontSize(frameNode, fontSize.value());
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            TextLayoutProperty, FontSize, PROPERTY_UPDATE_MEASURE, frameNode);
+        frameNode->GetLayoutProperty<TextLayoutProperty>()->OnPropertyChangeMeasure();
+    }
+}
+
+void SymbolModelStatic::SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& fontWeight)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (fontWeight.has_value()) {
+        SymbolModelNG::SetFontWeight(frameNode, fontWeight.value());
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, FontWeight, PROPERTY_UPDATE_MEASURE, frameNode);
+        frameNode->GetLayoutProperty<TextLayoutProperty>()->OnPropertyChangeMeasure();
+    }
+}
+
+void SymbolModelStatic::SetRenderingStrategy(FrameNode* frameNode, const std::optional<uint32_t>& renderingStrategy)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (renderingStrategy.has_value()) {
+        SymbolModelNG::SetRenderingStrategy(frameNode, renderingStrategy.value());
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            TextLayoutProperty, SymbolRenderingStrategy, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
+        frameNode->GetLayoutProperty<TextLayoutProperty>()->OnPropertyChangeMeasure();
+    }
+}
+
+void SymbolModelStatic::SetSymbolEffect(FrameNode* frameNode, const std::optional<uint32_t>& effectStrategy)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (effectStrategy.has_value()) {
+        SymbolModelNG::SetSymbolEffect(frameNode, effectStrategy.value());
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, SymbolEffectStrategy,
+            PROPERTY_UPDATE_MEASURE_SELF, frameNode);
+        frameNode->GetLayoutProperty<TextLayoutProperty>()->OnPropertyChangeMeasure();
+    }
+}
 
 void SymbolModelStatic::SetMinFontScale(FrameNode* frameNode, const std::optional<float>& optValue)
 {

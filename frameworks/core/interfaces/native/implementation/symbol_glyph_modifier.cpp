@@ -59,7 +59,7 @@ void FontSizeImpl(Ark_NativePointer node,
     }
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);
-    SymbolModelNG::SetFontSize(frameNode, convValue);
+    SymbolModelStatic::SetFontSize(frameNode, convValue);
 }
 void FontColorImpl(Ark_NativePointer node,
                    const Opt_Array_ResourceColor* value)
@@ -82,7 +82,7 @@ void FontWeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<Ace::FontWeight>(*value);
-    SymbolModelNG::SetFontWeight(frameNode, convValue);
+    SymbolModelStatic::SetFontWeight(frameNode, convValue);
 }
 void EffectStrategyImpl(Ark_NativePointer node,
                         const Opt_SymbolEffectStrategy* value)
@@ -90,7 +90,7 @@ void EffectStrategyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<SymbolEffectType>(*value);
-    SymbolModelNG::SetSymbolEffect(frameNode, EnumToInt(convValue));
+    SymbolModelStatic::SetSymbolEffect(frameNode, EnumToInt(convValue));
 }
 void RenderingStrategyImpl(Ark_NativePointer node,
                            const Opt_SymbolRenderingStrategy* value)
@@ -98,7 +98,7 @@ void RenderingStrategyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<RenderingStrategy>(*value);
-    SymbolModelNG::SetRenderingStrategy(frameNode, EnumToInt(convValue));
+    SymbolModelStatic::SetRenderingStrategy(frameNode, EnumToInt(convValue));
 }
 void MinFontScaleImpl(Ark_NativePointer node,
                       const Opt_Union_Number_Resource* value)

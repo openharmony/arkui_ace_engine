@@ -27,7 +27,7 @@ public:
     void SetColor(const Color& value) override;
     void SetDraggable(bool draggable) override;
     void SetResponseRegion(bool isUserSetResponseRegion) override;
-    static void SetColor(FrameNode* frameNode, const std::optional<Color>& value);
+    static void SetColor(FrameNode* frameNode, const Color& value);
     static void SetDraggable(FrameNode* frameNode, bool draggable);
     static void SetResponseRegion(
         FrameNode* frameNode, const std::vector<DimensionRect>& regions, bool isUserSetResponseRegion);
