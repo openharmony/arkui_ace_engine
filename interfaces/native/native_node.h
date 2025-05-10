@@ -1906,7 +1906,7 @@ typedef enum {
      * .value[2].f32：width of the right edge. The unit is vp. \n
      * .value[3].f32：width of the bottom edge. The unit is vp. \n
      *
-     * @since 18
+     * @since 19
      */
     NODE_BACKGROUND_IMAGE_RESIZABLE_WITH_SLICE = 100,
     
