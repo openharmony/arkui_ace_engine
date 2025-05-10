@@ -40,7 +40,7 @@ public:
 
         RefPtr<TokenThemeWrapper> BuildWrapper(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            auto wrapper = AceType::Claim(new CheckboxThemeWrapper());
+            auto wrapper = AceType::MakeRefPtr<CheckboxThemeWrapper>();
             if (!themeConstants) {
                 return wrapper;
             }

@@ -87,7 +87,7 @@ public:
 
         RefPtr<SwiperIndicatorTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<SwiperIndicatorTheme> theme = AceType::Claim(new SwiperIndicatorTheme());
+            RefPtr<SwiperIndicatorTheme> theme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
             if (!themeConstants) {
                 return theme;
             }

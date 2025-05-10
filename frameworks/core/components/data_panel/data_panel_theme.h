@@ -34,7 +34,7 @@ public:
 
         RefPtr<DataPanelTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<DataPanelTheme> theme = AceType::Claim(new DataPanelTheme());
+            RefPtr<DataPanelTheme> theme = AceType::MakeRefPtr<DataPanelTheme>();
             if (!themeConstants) {
                 return theme;
             }

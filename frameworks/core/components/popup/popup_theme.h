@@ -50,7 +50,7 @@ public:
 
         RefPtr<PopupTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<PopupTheme> theme = AceType::Claim(new PopupTheme());
+            RefPtr<PopupTheme> theme = AceType::MakeRefPtr<PopupTheme>();
             if (!themeConstants) {
                 return theme;
             }

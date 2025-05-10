@@ -36,7 +36,7 @@ public:
 
         RefPtr<LinearIndicatorTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<LinearIndicatorTheme> theme = AceType::Claim(new LinearIndicatorTheme());
+            RefPtr<LinearIndicatorTheme> theme = AceType::MakeRefPtr<LinearIndicatorTheme>();
             if (!themeConstants) {
                 return theme;
             }

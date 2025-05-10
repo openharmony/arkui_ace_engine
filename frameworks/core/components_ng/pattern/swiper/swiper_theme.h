@@ -38,7 +38,7 @@ public:
 
         RefPtr<SwiperTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<SwiperTheme> theme = AceType::Claim(new SwiperTheme());
+            RefPtr<SwiperTheme> theme = AceType::MakeRefPtr<SwiperTheme>();
             if (!themeConstants) {
                 return theme;
             }

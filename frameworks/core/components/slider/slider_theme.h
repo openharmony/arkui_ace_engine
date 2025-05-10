@@ -53,7 +53,7 @@ public:
 
         RefPtr<SliderTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<SliderTheme> theme = AceType::Claim(new SliderTheme());
+            RefPtr<SliderTheme> theme = AceType::MakeRefPtr<SliderTheme>();
             if (!themeConstants) {
                 return theme;
             }

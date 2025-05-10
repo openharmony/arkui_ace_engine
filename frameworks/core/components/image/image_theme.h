@@ -39,7 +39,7 @@ public:
 
         RefPtr<ImageTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<ImageTheme> theme = AceType::Claim(new ImageTheme());
+            RefPtr<ImageTheme> theme = AceType::MakeRefPtr<ImageTheme>();
             if (!themeConstants) {
                 return theme;
             }

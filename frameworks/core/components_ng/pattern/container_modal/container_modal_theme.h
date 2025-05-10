@@ -80,7 +80,7 @@ public:
 
         RefPtr<ContainerModalTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<ContainerModalTheme> theme = AceType::Claim(new ContainerModalTheme());
+            RefPtr<ContainerModalTheme> theme = AceType::MakeRefPtr<ContainerModalTheme>();
             if (!themeConstants) {
                 return theme;
             }

@@ -40,7 +40,7 @@ public:
 
         RefPtr<CloseIconTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<CloseIconTheme> theme = AceType::Claim(new CloseIconTheme());
+            RefPtr<CloseIconTheme> theme = AceType::MakeRefPtr<CloseIconTheme>();
             if (!themeConstants) {
                 return theme;
             }

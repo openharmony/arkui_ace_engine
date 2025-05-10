@@ -43,7 +43,7 @@ public:
 
         RefPtr<ProgressTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<ProgressTheme> theme = AceType::Claim(new ProgressTheme());
+            RefPtr<ProgressTheme> theme = AceType::MakeRefPtr<ProgressTheme>();
             if (!themeConstants) {
                 return theme;
             }

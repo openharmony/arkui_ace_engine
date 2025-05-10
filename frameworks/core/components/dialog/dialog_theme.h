@@ -62,7 +62,7 @@ public:
 
         RefPtr<DialogTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<DialogTheme> theme = AceType::Claim(new DialogTheme());
+            RefPtr<DialogTheme> theme = AceType::MakeRefPtr<DialogTheme>();
             if (!themeConstants) {
                 return theme;
             }

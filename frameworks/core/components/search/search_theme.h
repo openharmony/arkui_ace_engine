@@ -43,7 +43,7 @@ public:
 
         RefPtr<SearchTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<SearchTheme> theme = AceType::Claim(new SearchTheme());
+            RefPtr<SearchTheme> theme = AceType::MakeRefPtr<SearchTheme>();
             if (!themeConstants) {
                 return theme;
             }

@@ -40,7 +40,7 @@ public:
 
         RefPtr<AdvancedPatternTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<AdvancedPatternTheme> theme = AceType::Claim(new AdvancedPatternTheme());
+            RefPtr<AdvancedPatternTheme> theme = AceType::MakeRefPtr<AdvancedPatternTheme>();
             if (!themeConstants) {
                 return theme;
             }

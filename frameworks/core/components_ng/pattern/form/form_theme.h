@@ -39,7 +39,7 @@ public:
 
         RefPtr<FormTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<FormTheme> theme = AceType::Claim(new FormTheme());
+            RefPtr<FormTheme> theme = AceType::MakeRefPtr<FormTheme>();
             if (!themeConstants) {
                 return theme;
             }

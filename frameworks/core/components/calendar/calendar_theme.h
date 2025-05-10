@@ -143,11 +143,11 @@ public:
 
         RefPtr<CalendarTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<CalendarTheme> theme = AceType::Claim(new CalendarTheme());
+            RefPtr<CalendarTheme> theme = AceType::MakeRefPtr<CalendarTheme>();
             if (!themeConstants) {
                 return theme;
             }
-            theme = AceType::Claim(new CalendarTheme());
+            theme = AceType::MakeRefPtr<CalendarTheme>();
             ParseNewPattern(themeConstants, theme);
             ParsePattern(themeConstants, theme);
             return theme;

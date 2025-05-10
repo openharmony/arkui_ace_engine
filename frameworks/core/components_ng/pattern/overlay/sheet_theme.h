@@ -73,7 +73,7 @@ public:
 
         RefPtr<SheetTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<SheetTheme> theme = AceType::Claim(new SheetTheme());
+            RefPtr<SheetTheme> theme = AceType::MakeRefPtr<SheetTheme>();
             if (!themeConstants) {
                 return theme;
             }

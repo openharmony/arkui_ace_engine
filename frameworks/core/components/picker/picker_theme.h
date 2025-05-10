@@ -67,7 +67,7 @@ public:
 
         RefPtr<PickerTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<PickerTheme> theme = AceType::Claim(new PickerTheme());
+            RefPtr<PickerTheme> theme = AceType::MakeRefPtr<PickerTheme>();
             InitTheme(theme, themeConstants);
             return theme;
         }
@@ -211,7 +211,7 @@ public:
     PickerTheme() = default;
     RefPtr<PickerTheme> clone() const
     {
-        auto theme = AceType::Claim(new PickerTheme());
+        auto theme = AceType::MakeRefPtr<PickerTheme>();
         theme->selectedOptionSize_ = selectedOptionSize_;
         theme->selectedOptionStyle_ = selectedOptionStyle_;
         theme->normalOptionSize_ = normalOptionSize_;

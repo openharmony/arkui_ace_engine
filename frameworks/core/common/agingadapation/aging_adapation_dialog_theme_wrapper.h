@@ -32,7 +32,7 @@ public:
 
         RefPtr<TokenThemeWrapper> BuildWrapper(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            auto theme = AceType::Claim(new AgingAdapationDialogThemeWrapper());
+            auto theme = AceType::MakeRefPtr<AgingAdapationDialogThemeWrapper>();
             InitTheme(theme, themeConstants);
             return theme;
         }

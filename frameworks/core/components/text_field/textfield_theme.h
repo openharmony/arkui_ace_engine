@@ -44,7 +44,7 @@ public:
 
         RefPtr<TextFieldTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<TextFieldTheme> theme = AceType::Claim(new TextFieldTheme());
+            RefPtr<TextFieldTheme> theme = AceType::MakeRefPtr<TextFieldTheme>();
             if (!themeConstants) {
                 return theme;
             }

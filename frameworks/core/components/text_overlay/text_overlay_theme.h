@@ -44,7 +44,7 @@ public:
 
         RefPtr<TextOverlayTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<TextOverlayTheme> theme = AceType::Claim(new TextOverlayTheme());
+            RefPtr<TextOverlayTheme> theme = AceType::MakeRefPtr<TextOverlayTheme>();
             if (!themeConstants) {
                 return theme;
             }

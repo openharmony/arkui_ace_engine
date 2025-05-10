@@ -32,7 +32,7 @@ public:
     public:
         Builder()
         {
-            columnInfo_ = AceType::Claim(new GridColumnInfo());
+            columnInfo_ = AceType::MakeRefPtr<GridColumnInfo>();
         }
         void SetXsSizeColumn(uint32_t xsSizeColumn, const Dimension& offset = UNDEFINED_DIMENSION)
         {

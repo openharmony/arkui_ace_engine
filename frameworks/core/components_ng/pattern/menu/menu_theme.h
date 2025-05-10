@@ -55,7 +55,7 @@ public:
 
         RefPtr<MenuTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<MenuTheme> theme = AceType::Claim(new MenuTheme());
+            RefPtr<MenuTheme> theme = AceType::MakeRefPtr<MenuTheme>();
             if (!themeConstants) {
                 return theme;
             }

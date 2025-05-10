@@ -24,7 +24,7 @@ constexpr uint64_t FOCUS_COLOR = 125831021;
 
 RefPtr<AppTheme> AppTheme::Builder::Build(const RefPtr<ThemeConstants>& themeConstants) const
 {
-    RefPtr<AppTheme> theme = AceType::Claim(new AppTheme());
+    RefPtr<AppTheme> theme = AceType::MakeRefPtr<AppTheme>();
     if (!themeConstants) {
         return theme;
     }

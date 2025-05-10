@@ -39,7 +39,7 @@ public:
 
         RefPtr<RefreshTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<RefreshTheme> theme = AceType::Claim(new RefreshTheme());
+            RefPtr<RefreshTheme> theme = AceType::MakeRefPtr<RefreshTheme>();
             if (!themeConstants) {
                 return theme;
             }

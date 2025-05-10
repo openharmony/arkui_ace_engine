@@ -296,7 +296,7 @@ public:
 
         RefPtr<CheckboxTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<CheckboxTheme> theme = AceType::Claim(new CheckboxTheme());
+            RefPtr<CheckboxTheme> theme = AceType::MakeRefPtr<CheckboxTheme>();
             if (!themeConstants) {
                 LOGI("Build AppTheme error, themeConstants is null!");
                 return theme;
@@ -363,7 +363,7 @@ public:
 
         RefPtr<SwitchTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<SwitchTheme> theme = AceType::Claim(new SwitchTheme());
+            RefPtr<SwitchTheme> theme = AceType::MakeRefPtr<SwitchTheme>();
             if (!themeConstants) {
                 LOGE("Build AppTheme error, themeConstants is null!");
                 return theme;
@@ -476,7 +476,7 @@ public:
 
         RefPtr<RadioTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<RadioTheme> theme = AceType::Claim(new RadioTheme());
+            RefPtr<RadioTheme> theme = AceType::MakeRefPtr<RadioTheme>();
             if (!themeConstants) {
                 return theme;
             }

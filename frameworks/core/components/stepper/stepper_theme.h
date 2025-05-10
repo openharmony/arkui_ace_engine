@@ -44,7 +44,7 @@ public:
 
         RefPtr<StepperTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<StepperTheme> theme = AceType::Claim(new StepperTheme());
+            RefPtr<StepperTheme> theme = AceType::MakeRefPtr<StepperTheme>();
             if (!themeConstants) {
                 return theme;
             }

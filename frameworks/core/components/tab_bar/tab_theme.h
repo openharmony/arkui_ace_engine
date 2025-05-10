@@ -48,7 +48,7 @@ public:
 
         RefPtr<TabTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<TabTheme> theme = AceType::Claim(new TabTheme());
+            RefPtr<TabTheme> theme = AceType::MakeRefPtr<TabTheme>();
             if (!themeConstants) {
                 return theme;
             }

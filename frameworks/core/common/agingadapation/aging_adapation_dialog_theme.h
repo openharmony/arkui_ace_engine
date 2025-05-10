@@ -46,7 +46,7 @@ public:
 
         RefPtr<AgingAdapationDialogTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<AgingAdapationDialogTheme> theme = AceType::Claim(new AgingAdapationDialogTheme());
+            RefPtr<AgingAdapationDialogTheme> theme = AceType::MakeRefPtr<AgingAdapationDialogTheme>();
             InitTheme(theme, themeConstants);
             return theme;
         }

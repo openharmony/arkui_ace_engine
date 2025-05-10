@@ -39,7 +39,7 @@ public:
 
         RefPtr<ArcListItemTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<ArcListItemTheme> theme = AceType::Claim(new ArcListItemTheme());
+            RefPtr<ArcListItemTheme> theme = AceType::MakeRefPtr<ArcListItemTheme>();
             if (!themeConstants) {
                 return theme;
             }

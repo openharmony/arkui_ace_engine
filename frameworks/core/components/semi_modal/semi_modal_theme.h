@@ -34,7 +34,7 @@ public:
 
         RefPtr<SemiModalTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<SemiModalTheme> theme = AceType::Claim(new SemiModalTheme());
+            RefPtr<SemiModalTheme> theme = AceType::MakeRefPtr<SemiModalTheme>();
             if (!themeConstants) {
                 return theme;
             }
