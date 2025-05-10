@@ -308,5 +308,13 @@ void FormRendererGroup::RecoverRenderer(const std::vector<FormRequest>& formRequ
     HILOG_INFO("user not verified, delay recover renderer");
     PreInitAddForm(currentComp);
 }
+
+bool FormRendererGroup::IsManagerDelegateValid(const OHOS::AAFwk::Want& want)
+{
+    if (formRenderer_ == nullptr) {
+        return true;
+    }
+    return formRenderer_->IsManagerDelegateValid(want);
+}
 }  // namespace Ace
 }  // namespace OHOS
