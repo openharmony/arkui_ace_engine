@@ -97,9 +97,6 @@ void StaggeredFillAlgorithm::Prepare(const SizeF& viewport, Axis axis, int32_t t
 
     UpdateCachedCnt();
     LayoutSynchronizer::Sync(props_, *this);
-    for (auto& section : sections_) {
-        std::cout << "curren tsection = " << section.ToString() << "\n";
-    }
 }
 
 void StaggeredFillAlgorithm::OnLayoutFinished(const SizeF& viewport, Axis axis)
