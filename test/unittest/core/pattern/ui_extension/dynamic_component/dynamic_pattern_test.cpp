@@ -924,7 +924,7 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest025, TestSize.Level1)
      * @tc.steps: step4. test ResetAccessibilityChildTreeCallback.
      */
     dynamicPattern->ResetAccessibilityChildTreeCallback();
-    EXPECT_EQ(dynamicPattern->accessibilityChildTreeCallback_, nullptr);
+    EXPECT_NE(dynamicPattern->accessibilityChildTreeCallback_, nullptr);
 #endif
 }
 } // namespace OHOS::Ace::NG

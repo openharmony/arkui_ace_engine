@@ -155,6 +155,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager001, TestSize.Level1)
     Accessibility::AccessibilityElementInfo nodeInfo;
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     accessibilityProperty->SetAccessibilityRole("test");
+    accessibilityProperty->SetAccessibilityCustomRole("test");
     accessibilityProperty->SetUserRangeCurrentValue(5);
     accessibilityProperty->SetUserRangeMinValue(1);
     accessibilityProperty->SetUserRangeMaxValue(10);
@@ -228,6 +229,14 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager003, TestSize.Level1)
     nodeInfo.SetParent(0);
     jsAccessibilityManager->UpdateAccessibilityVisible(frameNode, nodeInfo);
     EXPECT_EQ(nodeInfo.GetAccessibilityVisible(), false);
+
+    /**
+     * @tc.steps: step3. test with page_node
+     */
+    Accessibility::AccessibilityElementInfo nodeInfoNew;
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1,
+        AceType::MakeRefPtr<Pattern>(), false);
+    jsAccessibilityManager->UpdateAccessibilityVisible(pageNode, nodeInfoNew);
 }
 
 /**
@@ -1500,7 +1509,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
 
 /**
  * @tc.name: ConvertActionTypeToBoolen001
- * @tc.desc: UpdateAccessibilityElementInfo
+ * @tc.desc: ConvertActionTypeToBoolen
  * @tc.type: FUNC
  */
  HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen001, TestSize.Level1)
@@ -1558,7 +1567,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
 
 /**
  * @tc.name: ConvertActionTypeToBoolen002
- * @tc.desc: UpdateAccessibilityElementInfo
+ * @tc.desc: ConvertActionTypeToBoolen
  * @tc.type: FUNC
  */
  HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen002, TestSize.Level1)
@@ -1605,7 +1614,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
 
 /**
  * @tc.name: ConvertActionTypeToBoolen003
- * @tc.desc: UpdateAccessibilityElementInfo
+ * @tc.desc: ConvertActionTypeToBoolen
  * @tc.type: FUNC
  */
  HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen003, TestSize.Level1)
@@ -1840,7 +1849,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager034, TestSize.Level1)
      * @tc.steps: step2. check empty infos
      */
     std::list<Accessibility::AccessibilityElementInfo> infos;
-    EXPECT_NO_THROW(jsAccessibilityManager->UpdateElementInfosTreeId(infos));
+    jsAccessibilityManager->UpdateElementInfosTreeId(infos);
     EXPECT_TRUE(infos.empty());
 
     /**
@@ -1850,7 +1859,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager034, TestSize.Level1)
     info.SetBelongTreeId(0);
     info.SetAccessibilityId(100);
     infos.push_back(info);
-    EXPECT_NO_THROW(jsAccessibilityManager->UpdateElementInfosTreeId(infos));
+    jsAccessibilityManager->UpdateElementInfosTreeId(infos);
 
     /**
      * @tc.steps: step4. check info with treeId > 0
@@ -1860,6 +1869,149 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager034, TestSize.Level1)
     info.SetAccessibilityId(100);
     info.SetParent(10);
     infos.push_back(info);
-    EXPECT_NO_THROW(jsAccessibilityManager->UpdateElementInfosTreeId(infos));
+    jsAccessibilityManager->UpdateElementInfosTreeId(infos);
+}
+/**
+* @tc.name: JsAccessibilityManager035
+* @tc.desc: UpdateVirtualNodeChildAccessibilityElementInfo
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager, test node
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+
+    Framework::CommonProperty commonProperty;
+    commonProperty.innerWindowId = 10;
+    AccessibilityElementInfo nodeParentInfo;
+    AccessibilityElementInfo nodeInfo;
+    auto frameNode = FrameNode::CreateFrameNode("frameNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    
+    /**
+     * @tc.steps: step2. test with frameNode nullptr
+     */
+    jsAccessibilityManager->UpdateVirtualNodeChildAccessibilityElementInfo(nullptr,
+        commonProperty, nodeParentInfo, nodeInfo, context);
+    
+    /**
+     * @tc.steps: step3. test with frameNode
+     */
+    jsAccessibilityManager->UpdateVirtualNodeChildAccessibilityElementInfo(frameNode,
+        commonProperty, nodeParentInfo, nodeInfo, context);
+    EXPECT_EQ(nodeInfo.GetInnerWindowId(), 10);
+
+    /**
+     * @tc.steps: step3. test UpdateVirtualNodeAccessibilityElementInfo
+     */;
+    AccessibilityElementInfo nodeInfoNew;
+    auto rootNode = FrameNode::CreateFrameNode("rootNode",
+    ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    rootNode->AddChild(frameNode);
+    jsAccessibilityManager->UpdateVirtualNodeAccessibilityElementInfo(nullptr, nullptr,
+        commonProperty, nodeInfoNew, context);
+    jsAccessibilityManager->UpdateVirtualNodeAccessibilityElementInfo(rootNode, nullptr,
+        commonProperty, nodeInfoNew, context);
+    jsAccessibilityManager->UpdateVirtualNodeAccessibilityElementInfo(rootNode, frameNode,
+        commonProperty, nodeInfoNew, context);
+    EXPECT_EQ(nodeInfoNew.GetInnerWindowId(), 10);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager036
+ * @tc.desc: UpdateVirtualNodeFocus
+ * @tc.type: FUNC
+ */
+ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager036, TestSize.Level1)
+ {
+    /**
+    * @tc.steps: step1. construct JsAccessibilityManager
+    */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+
+    /**
+    * @tc.steps: step2. test UpdateVirtualNodeFocus
+    */
+    Accessibility::AccessibilityElementInfo nodeInfo;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    frameNode->SetGeometryNode(geometryNode);
+    frameNode->SetAccessibilityNodeVirtual();
+    jsAccessibilityManager->SaveLast(0, frameNode);
+    /**
+    * @tc.steps: step3. expect GetAccessibilityFocusState true.
+    */
+    jsAccessibilityManager->UpdateVirtualNodeFocus();
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->GetAccessibilityFocusState());
+ }
+
+/**
+ * @tc.name: JsAccessibilityManager037
+ * @tc.desc: UpdateAccessibilityNextFocusIdMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager037, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct JsAccessibilityManager
+    */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    /**
+    * @tc.steps: step2. test UpdateAccessibilityNextFocusIdMap expect update success
+    */
+    const int32_t containerIdA = 1;
+    const std::string nextFocusKeyA = "test_key";
+    const int64_t preAccessibilityIdA = 100;
+    jsAccessibilityManager->UpdateAccessibilityNextFocusIdMap(containerIdA, nextFocusKeyA, preAccessibilityIdA);
+    EXPECT_EQ(jsAccessibilityManager->nextFocusMapWithSubWindow_.size(), 1);
+    /**
+    * @tc.steps: step3. test UpdateAccessibilityNextFocusIdMap expect update fail
+    */
+    const int32_t containerIdB = 2;
+    const std::string nextFocusKeyB = "";
+    const int64_t preAccessibilityIdB = 200;
+    jsAccessibilityManager->UpdateAccessibilityNextFocusIdMap(containerIdA, nextFocusKeyA, preAccessibilityIdA);
+    EXPECT_EQ(jsAccessibilityManager->nextFocusMapWithSubWindow_.size(), 1);
+    /**
+    * @tc.steps: step4. test UpdateAccessibilityNextFocusIdMap expect update contained data
+    */
+    const int32_t containerIdC = 3;
+    const std::string nextFocusKeyC = "key3";
+    const int64_t preAccessibilityIdC = 301;
+    jsAccessibilityManager->UpdateAccessibilityNextFocusIdMap(containerIdC, "key1", 300);
+    jsAccessibilityManager->UpdateAccessibilityNextFocusIdMap(containerIdC, nextFocusKeyC, preAccessibilityIdC);
+    EXPECT_EQ(jsAccessibilityManager->nextFocusMapWithSubWindow_[containerIdC][nextFocusKeyC], preAccessibilityIdC);
+    EXPECT_EQ(jsAccessibilityManager->nextFocusMapWithSubWindow_.size(), 2);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager038
+ * @tc.desc: IsSendAccessibilityEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager038, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct JsAccessibilityManager
+    */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto pipelineContext = MockContainer::Current()->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    jsAccessibilityManager->SetPipelineContext(pipelineContext);
+    /**
+    * @tc.steps: step2. test IsSendAccessibilityEvent accessibilityEvent type with default value
+    */
+    AccessibilityEvent accessibilityEvent;
+    EXPECT_TRUE(jsAccessibilityManager->IsSendAccessibilityEvent(accessibilityEvent));
 }
 } // namespace OHOS::Ace::NG
