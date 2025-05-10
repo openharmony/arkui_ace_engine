@@ -27,6 +27,8 @@ public:
     static std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info, size_t optionIndex);
     static void GetMenuShowInSubwindow(NG::MenuParam& menuParam);
     static void ParseMenuArrowParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+    static void ParseMenuShowInSubWindowParam(
+        const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam, bool isCheckThemeValue = true);
     static void ParseLayoutRegionMargin(const JSRef<JSVal>& jsValue, std::optional<CalcDimension>& calcDimension);
     static void ParseMenuLayoutRegionMarginParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuBlurStyleOption(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);

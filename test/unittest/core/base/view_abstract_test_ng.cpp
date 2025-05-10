@@ -1767,6 +1767,7 @@ HWTEST_F(ViewAbstractTestNg, OpenMenu001, TestSize.Level1)
      */
     auto pipelineContext = PipelineContext::GetCurrentContext();
     MenuParam menuParam;
+    menuParam.isShowInSubWindow = false;
     menuParam.previewMode = MenuPreviewMode::IMAGE;
     auto contentNode =
         FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -1822,6 +1823,7 @@ HWTEST_F(ViewAbstractTestNg, UpdateMenu001, TestSize.Level1)
      */
     auto pipelineContext = PipelineContext::GetCurrentContext();
     MenuParam menuParam;
+    menuParam.isShowInSubWindow = false;
     auto contentNode =
         FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
@@ -1870,6 +1872,7 @@ HWTEST_F(ViewAbstractTestNg, UpdateMenu002, TestSize.Level1)
      */
     auto pipelineContext = PipelineContext::GetCurrentContext();
     MenuParam menuParam;
+    menuParam.isShowInSubWindow = false;
     auto contentNode =
         FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
@@ -1921,10 +1924,10 @@ HWTEST_F(ViewAbstractTestNg, UpdateMenu003, TestSize.Level1)
      */
     auto pipelineContext = PipelineContext::GetCurrentContext();
     MenuParam menuParam;
+    menuParam.isShowInSubWindow = false;
     auto contentNode =
         FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    RefPtr<FrameNode> contentNode2 = nullptr;
     auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     ViewStackProcessor::GetInstance()->Push(targetNode);
@@ -1987,6 +1990,7 @@ HWTEST_F(ViewAbstractTestNg, UpdateMenu004, TestSize.Level1)
      */
     auto pipelineContext = PipelineContext::GetCurrentContext();
     MenuParam menuParam;
+    menuParam.isShowInSubWindow = false;
     auto contentNode =
         FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
@@ -2050,6 +2054,7 @@ HWTEST_F(ViewAbstractTestNg, CloseMenu001, TestSize.Level1)
      */
     auto pipelineContext = PipelineContext::GetCurrentContext();
     MenuParam menuParam;
+    menuParam.isShowInSubWindow = false;
     auto contentNode =
         FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
@@ -2099,6 +2104,7 @@ HWTEST_F(ViewAbstractTestNg, CloseMenu002, TestSize.Level1)
      */
     auto pipelineContext = PipelineContext::GetCurrentContext();
     MenuParam menuParam;
+    menuParam.isShowInSubWindow = false;
     auto contentNode =
         FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
