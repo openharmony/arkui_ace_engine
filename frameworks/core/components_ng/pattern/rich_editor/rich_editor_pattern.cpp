@@ -1376,7 +1376,7 @@ void RichEditorPattern::UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpan
         spanNode->UpdateItalicFontStyle(textStyle.GetFontStyle());
         spanNode->UpdateFontWeight(textStyle.GetFontWeight());
         spanNode->UpdateFontFamily(textStyle.GetFontFamilies());
-        spanNode->UpdateTextDecoration(std::vector<TextDecoration> { textStyle.GetTextDecorationEnd() });
+        spanNode->UpdateTextDecoration(std::vector<TextDecoration> { textStyle.GetTextDecorationFirst() });
         spanNode->UpdateTextDecorationColorWithoutCheck(textStyle.GetTextDecorationColor());
         spanNode->UpdateTextDecorationStyle(textStyle.GetTextDecorationStyle());
         spanNode->UpdateLineThicknessScale(textStyle.GetLineThicknessScale());
@@ -2714,8 +2714,15 @@ void RichEditorPattern::UpdateStyledStringDecorationType(int32_t start, int32_t 
         std::vector<TextDecoration>({ type }), colorOption, styleOption, lineThicknessScale, options, start, end);
     auto updateDecorationSpanFunc = [&type](const RefPtr<DecorationSpan>& oriDecorationSpan) -> RefPtr<DecorationSpan> {
         CHECK_NULL_RETURN(oriDecorationSpan, nullptr);
-        type == TextDecoration::NONE ? oriDecorationSpan->RemoveTextDecorationType(TextDecoration::UNDERLINE)
-                                     : oriDecorationSpan->AddTextDecorationType(TextDecoration::UNDERLINE);
+        if (type == TextDecoration::NONE) {
+            oriDecorationSpan->RemoveTextDecorationType(TextDecoration::UNDERLINE);
+        } else {
+            auto lastTypes = oriDecorationSpan->GetTextDecorationTypes();
+            oriDecorationSpan->SetTextDecorationTypes(std::vector<TextDecoration> { type });
+            for (auto lastType : lastTypes) {
+                oriDecorationSpan->AddTextDecorationType(lastType);
+            }
+        }
         return oriDecorationSpan;
     };
     UpdateSpansStyleInRange<DecorationSpan>(start, end, decorationSpan, updateDecorationSpanFunc);

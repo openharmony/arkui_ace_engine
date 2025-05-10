@@ -405,7 +405,7 @@ void SpanString::ProcessMultiDecorationSpanForIntersection(
     int32_t intersectionEnd = std::min(end, lastSpanEnd);
 
     bool spanInRight = lastSpanStart <= start && lastSpanEnd <= end;
-    bool isInclude = lastSpanStart >= start && lastSpanEnd <= end;
+    bool isInclude = lastSpanStart <= start && lastSpanEnd >= end;
 
     int32_t newStart = 0;
     int32_t newEnd = 0;
