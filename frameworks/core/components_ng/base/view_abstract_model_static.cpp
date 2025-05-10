@@ -747,4 +747,252 @@ void ViewAbstractModelStatic::BindBackground(FrameNode* frameNode,
     }
 }
 
+void ViewAbstractModelStatic::SetFlexGrow(FrameNode* frameNode, float value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetFlexGrow(frameNode, value);
+}
+
+void ViewAbstractModelStatic::SetFlexShrink(FrameNode* frameNode, float value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetFlexShrink(frameNode, value);
+}
+
+void ViewAbstractModelStatic::SetFlexBasis(FrameNode* frameNode, const std::optional<Dimension>& optValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (optValue.has_value()) {
+        Dimension value = optValue.value();
+        // flexbasis don't support percent case.
+        if (value.Unit() == DimensionUnit::PERCENT) {
+            value.SetUnit(DimensionUnit::AUTO);
+        }
+        ViewAbstract::SetFlexBasis(frameNode, value);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetPadding(FrameNode* frameNode, const std::optional<PaddingProperty>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ViewAbstract::SetPadding(frameNode, value.value());
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetMargin(FrameNode* frameNode, const std::optional<PaddingProperty>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ViewAbstract::SetMargin(frameNode, value.value());
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetAspectRatio(FrameNode* frameNode, float ratio)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetAspectRatio(frameNode, ratio);
+}
+
+void ViewAbstractModelStatic::ResetAspectRatio(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetAspectRatio(frameNode);
+}
+
+void ViewAbstractModelStatic::SetLayoutWeight(FrameNode* frameNode, float value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLayoutWeight(frameNode, value);
+}
+
+void ViewAbstractModelStatic::SetAlignSelf(FrameNode* frameNode, FlexAlign value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetAlignSelf(frameNode, value);
+}
+
+void ViewAbstractModelStatic::SetLayoutDirection(FrameNode* frameNode, TextDirection value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLayoutDirection(frameNode, value);
+}
+
+void ViewAbstractModelStatic::SetBorderStyle(FrameNode *frameNode, const BorderStyleProperty& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBorderStyle(frameNode, value);
+}
+
+void ViewAbstractModelStatic::SetBorderWidth(FrameNode *frameNode, const BorderWidthProperty& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBorderWidth(frameNode, value);
+}
+
+void ViewAbstractModelStatic::SetBorderColor(FrameNode *frameNode, const BorderColorProperty& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBorderColor(frameNode, value);
+}
+
+void ViewAbstractModelStatic::SetBorderRadius(FrameNode *frameNode, const BorderRadiusProperty& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBorderRadius(frameNode, value);
+}
+
+void ViewAbstractModelStatic::SetDashGap(FrameNode *frameNode, const BorderWidthProperty& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDashGap(frameNode, value);
+}
+
+void ViewAbstractModelStatic::SetDashWidth(FrameNode *frameNode, const BorderWidthProperty& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDashWidth(frameNode, value);
+}
+
+void ViewAbstractModelStatic::SetAlign(FrameNode* frameNode, Alignment alignment)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetAlign(frameNode, alignment);
+}
+
+void ViewAbstractModelStatic::SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetPosition(frameNode, value);
+}
+
+void ViewAbstractModelStatic::SetPositionEdges(FrameNode* frameNode, const EdgesParam& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetPositionEdges(frameNode, value);
+}
+
+void ViewAbstractModelStatic::SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetPositionLocalizedEdges(frameNode, needLocalized);
+}
+
+
+void ViewAbstractModelStatic::SetMarkAnchorStart(FrameNode* frameNode, const std::optional<Dimension>& markAnchorStart)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    if (markAnchorStart.has_value()) {
+        layoutProperty->UpdateMarkAnchorStart(markAnchorStart.value());
+    } else {
+        layoutProperty->ResetMarkAnchorStart();
+    }
+}
+
+void ViewAbstractModelStatic::MarkAnchor(FrameNode* frameNode, const std::optional<OffsetT<Dimension>>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(Anchor, *value, frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Anchor, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::ResetMarkAnchorStart(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetMarkAnchorStart(frameNode);
+}
+
+void ViewAbstractModelStatic::SetOffset(FrameNode* frameNode, const OffsetT<Dimension>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetOffset(frameNode, value);
+}
+
+void ViewAbstractModelStatic::SetOffsetEdges(FrameNode* frameNode, const EdgesParam& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetOffsetEdges(frameNode, value);
+}
+
+void ViewAbstractModelStatic::SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetOffsetLocalizedEdges(frameNode, needLocalized);
+}
+
+void ViewAbstractModelStatic::UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
+}
+
+void ViewAbstractModelStatic::SetAlignRules(FrameNode* frameNode,
+    const std::optional<std::map<AlignDirection, AlignRule>>& alignRules)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (alignRules.has_value()) {
+        ViewAbstract::SetAlignRules(frameNode, alignRules.value());
+    } else {
+        ViewAbstract::ResetAlignRules(frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetBias(FrameNode* frameNode, const std::optional<BiasPair>& biasPair)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (biasPair.has_value()) {
+        ViewAbstract::SetBias(frameNode, biasPair.value());
+    } else {
+        ViewAbstract::ResetBias(frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetBias(FrameNode* frameNode, const std::optional<float>& horisontal,
+    const std::optional<float>& vertical)
+{
+    auto biasPair = BiasPair(DEFAULT_BIAS, DEFAULT_BIAS);
+    if (horisontal.has_value()) {
+        biasPair.first = horisontal.value();
+    }
+    if (vertical.has_value()) {
+        biasPair.second = vertical.value();
+    }
+    ViewAbstract::SetBias(frameNode, biasPair);
+}
+
+void ViewAbstractModelStatic::SetPixelRound(FrameNode* frameNode, uint16_t value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetPixelRound(frameNode, value);
+}
+
+void ViewAbstractModelStatic::SetMaxWidth(FrameNode* frameNode, const CalcDimension& minWidth)
+{
+    if (minWidth.Unit() == DimensionUnit::CALC) {
+        ViewAbstract::SetMaxWidth(frameNode, NG::CalcLength(minWidth.CalcValue()));
+    } else {
+        ViewAbstract::SetMaxWidth(frameNode, NG::CalcLength(minWidth));
+    }
+}
+
+void ViewAbstractModelStatic::SetMaxHeight(FrameNode* frameNode, const CalcDimension& minHeight)
+{
+    if (minHeight.Unit() == DimensionUnit::CALC) {
+        ViewAbstract::SetMaxHeight(frameNode, NG::CalcLength(minHeight.CalcValue()));
+    } else {
+        ViewAbstract::SetMaxHeight(frameNode, NG::CalcLength(minHeight));
+    }
+}
+
 } // namespace OHOS::Ace::NG

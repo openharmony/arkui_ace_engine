@@ -698,6 +698,17 @@ EdgesParam Convert(const Ark_Edges& src)
 }
 
 template<>
+EdgesParam Convert(const Ark_LocalizedEdges& src)
+{
+    EdgesParam edges;
+    edges.start = OptConvert<Dimension>(src.start);
+    edges.top = OptConvert<Dimension>(src.top);
+    edges.end = OptConvert<Dimension>(src.end);
+    edges.bottom = OptConvert<Dimension>(src.bottom);
+    return edges;
+}
+
+template<>
 PaddingProperty Convert(const Ark_Length& src)
 {
     auto value = OptConvert<CalcLength>(src);
@@ -1642,7 +1653,7 @@ void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src)
 template<>
 Dimension Convert(const Ark_Length& src)
 {
-    if (src.type == Ark_Tag::INTEROP_TAG_RESOURCE) {
+    if (src.type == Ark_Tag::INTEROP_TAG_RESOURCE || src.type == Ark_RuntimeType::INTEROP_RUNTIME_OBJECT) {
         auto resource = ArkValue<Ark_Resource>(src);
         ResourceConverter converter(resource);
         return converter.ToDimension().value_or(Dimension());
@@ -1741,9 +1752,9 @@ template<>
 PaddingProperty Convert(const Ark_LocalizedPadding& src)
 {
     PaddingProperty dst;
-    dst.left = OptConvert<CalcLength>(src.start);
+    dst.start = OptConvert<CalcLength>(src.start);
     dst.top = OptConvert<CalcLength>(src.top);
-    dst.right = OptConvert<CalcLength>(src.end);
+    dst.end = OptConvert<CalcLength>(src.end);
     dst.bottom = OptConvert<CalcLength>(src.bottom);
     return dst;
 }
@@ -1862,6 +1873,16 @@ BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src)
 }
 
 template<>
+BorderColorProperty Convert(const Ark_ResourceColor& src)
+{
+    BorderColorProperty dst;
+    if (auto borderColor = Converter::OptConvert<Color>(src); borderColor.has_value()) {
+        dst.SetColor(borderColor.value());
+    }
+    return dst;
+}
+
+template<>
 BorderRadiusProperty Convert(const Ark_BorderRadiuses& src)
 {
     BorderRadiusProperty borderRadius;
@@ -1930,16 +1951,27 @@ template<>
 BorderWidthProperty Convert(const Ark_LengthMetrics& src)
 {
     BorderWidthProperty dst;
-    LOGE("Convert [Ark_LengthMetrics] to [BorderWidthProperty] is not implemented yet");
+    if (auto width = Converter::Convert<Dimension>(src); !width.IsNegative()) {
+        dst.SetBorderWidth(width);
+        dst.multiValued = false;
+    }
     return dst;
 }
 
 template<>
 BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
 {
-    BorderWidthProperty dst;
-    LOGE("ARKOALA: Convert to [BorderWidthProperty] from [Ark_LocalizedEdgeWidths] is not supported\n");
-    return dst;
+    BorderWidthProperty widthProperty;
+    widthProperty.topDimen = Converter::OptConvert<Dimension>(src.top);
+    Validator::ValidateNonNegative(widthProperty.topDimen);
+    widthProperty.leftDimen = Converter::OptConvert<Dimension>(src.start);
+    Validator::ValidateNonNegative(widthProperty.leftDimen);
+    widthProperty.bottomDimen = Converter::OptConvert<Dimension>(src.bottom);
+    Validator::ValidateNonNegative(widthProperty.bottomDimen);
+    widthProperty.rightDimen = Converter::OptConvert<Dimension>(src.end);
+    Validator::ValidateNonNegative(widthProperty.rightDimen);
+    widthProperty.multiValued = true;
+    return widthProperty;
 }
 
 template<>

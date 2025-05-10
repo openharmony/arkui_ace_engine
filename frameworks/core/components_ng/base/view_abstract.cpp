@@ -4233,6 +4233,12 @@ void ViewAbstract::SetOffsetEdges(FrameNode* frameNode, const EdgesParam& value)
     ACE_UPDATE_NODE_RENDER_CONTEXT(OffsetEdges, value, frameNode);
 }
 
+void ViewAbstract::MarkAnchor(FrameNode* frameNode, const OffsetT<Dimension>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(Anchor, value, frameNode);
+}
+
 void ViewAbstract::MarkAnchor(FrameNode* frameNode, const std::optional<OffsetT<Dimension>>& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -4265,14 +4271,10 @@ void ViewAbstract::SetPadding(FrameNode* frameNode, const CalcLength& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, padding, frameNode);
 }
 
-void ViewAbstract::SetPadding(FrameNode* frameNode, const std::optional<PaddingProperty>& value)
+void ViewAbstract::SetPadding(FrameNode* frameNode, const PaddingProperty& value)
 {
     CHECK_NULL_VOID(frameNode);
-    if (value) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, value, frameNode);
 }
 
 void ViewAbstract::SetMargin(FrameNode* frameNode, const CalcLength& value)
@@ -4283,14 +4285,10 @@ void ViewAbstract::SetMargin(FrameNode* frameNode, const CalcLength& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, margin, frameNode);
 }
 
-void ViewAbstract::SetMargin(FrameNode* frameNode, const std::optional<PaddingProperty>& value)
+void ViewAbstract::SetMargin(FrameNode* frameNode, const PaddingProperty& value)
 {
     CHECK_NULL_VOID(frameNode);
-    if (value) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, value, frameNode);
 }
 
 void ViewAbstract::SetLayoutDirection(FrameNode* frameNode, TextDirection value)
@@ -4317,18 +4315,14 @@ void ViewAbstract::SetAlignSelf(FrameNode* frameNode, FlexAlign value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, AlignSelf, value, frameNode);
 }
 
-void ViewAbstract::SetFlexBasis(FrameNode* frameNode, const std::optional<Dimension>& optValue)
+void ViewAbstract::SetFlexBasis(FrameNode* frameNode, const Dimension& value)
 {
     CHECK_NULL_VOID(frameNode);
-    if (optValue.has_value()) {
-        if (LessNotEqual(optValue.value().Value(), 0.0f)) {
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, Dimension(), frameNode);
-            return;
-        }
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, optValue.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, frameNode);
+    if (LessNotEqual(value.Value(), 0.0f)) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, Dimension(), frameNode);
+        return;
     }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, value, frameNode);
 }
 
 void ViewAbstract::ResetFlexShrink(FrameNode* frameNode)
@@ -4409,15 +4403,10 @@ void ViewAbstract::SetMaxHeight(FrameNode* frameNode, const CalcLength& maxHeigh
     layoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, maxHeight));
 }
 
-void ViewAbstract::SetAlignRules(FrameNode* frameNode,
-    const std::optional<std::map<AlignDirection, AlignRule>>& alignRules)
+void ViewAbstract::SetAlignRules(FrameNode* frameNode, const std::map<AlignDirection, AlignRule>& alignRules)
 {
     CHECK_NULL_VOID(frameNode);
-    if (alignRules.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, AlignRules, alignRules.value(), frameNode);
-    } else {
-        ResetAlignRules(frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, AlignRules, alignRules, frameNode);
 }
 
 std::map<AlignDirection, AlignRule> ViewAbstract::GetAlignRules(FrameNode* frameNode)
@@ -6008,26 +5997,9 @@ NG::BorderWidthProperty ViewAbstract::GetOuterBorderWidth(FrameNode* frameNode)
     return outBorderWidth.value_or(borderWidth);
 }
 
-void ViewAbstract::SetBias(FrameNode* frameNode, const std::optional<BiasPair>& biasPair)
+void ViewAbstract::SetBias(FrameNode* frameNode, const BiasPair& biasPair)
 {
     CHECK_NULL_VOID(frameNode);
-    if (biasPair.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Bias, biasPair.value(), frameNode);
-    } else {
-        ResetBias(frameNode);
-    }
-}
-
-void ViewAbstract::SetBias(FrameNode* frameNode, const std::optional<float>& horisontal,
-    const std::optional<float>& vertical)
-{
-    auto biasPair = BiasPair(DEFAULT_BIAS, DEFAULT_BIAS);
-    if (horisontal.has_value()) {
-        biasPair.first = horisontal.value();
-    }
-    if (vertical.has_value()) {
-        biasPair.second = vertical.value();
-    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Bias, biasPair, frameNode);
 }
 
@@ -6312,18 +6284,6 @@ void ViewAbstract::SetMarkAnchorStart(Dimension& markAnchorStart)
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateMarkAnchorStart(markAnchorStart);
-}
-
-void ViewAbstract::SetMarkAnchorStart(FrameNode* frameNode, const std::optional<Dimension>& markAnchorStart)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    if (markAnchorStart.has_value()) {
-        layoutProperty->UpdateMarkAnchorStart(markAnchorStart.value());
-    } else {
-        layoutProperty->ResetMarkAnchorStart();
-    }
 }
 
 void ViewAbstract::ResetMarkAnchorStart()

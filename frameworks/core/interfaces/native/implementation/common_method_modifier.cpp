@@ -1740,7 +1740,7 @@ void Width0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto result = Converter::OptConvert<CalcLength>(*value);
+    auto result = Converter::OptConvert<CalcDimension>(*value);
     Validator::ValidateNonNegative(result);
     if (AceType::TypeId(frameNode) == CounterNode::TypeId()) {
         if (!result) {
@@ -1753,7 +1753,7 @@ void Width0Impl(Ark_NativePointer node,
             ViewAbstract::ClearWidthOrHeight(frameNode, true);
             return;
         }
-        ViewAbstract::SetWidth(frameNode, *result);
+        ViewAbstractModelStatic::SetWidth(frameNode, *result);
     }
 }
 void Width1Impl(Ark_NativePointer node,
@@ -1769,7 +1769,7 @@ void Height0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto result = Converter::OptConvert<CalcLength>(*value);
+    auto result = Converter::OptConvert<CalcDimension>(*value);
     Validator::ValidateNonNegative(result);
     if (AceType::TypeId(frameNode) == CounterNode::TypeId()) {
         if (!result) {
@@ -1782,7 +1782,7 @@ void Height0Impl(Ark_NativePointer node,
             ViewAbstract::ClearWidthOrHeight(frameNode, false);
             return;
         }
-        ViewAbstract::SetHeight(frameNode, *result);
+        ViewAbstractModelStatic::SetHeight(frameNode, *result);
     }
 }
 void Height1Impl(Ark_NativePointer node,
@@ -1858,21 +1858,21 @@ void ConstraintSizeImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    auto minWidth = Converter::OptConvert<CalcLength>(optValue->minWidth);
+    auto minWidth = Converter::OptConvert<CalcDimension>(optValue->minWidth);
     if (minWidth) {
-        ViewAbstract::SetMinWidth(frameNode, minWidth.value());
+        ViewAbstractModelStatic::SetMinWidth(frameNode, minWidth.value());
     }
-    auto minHeight = Converter::OptConvert<CalcLength>(optValue->minHeight);
+    auto minHeight = Converter::OptConvert<CalcDimension>(optValue->minHeight);
     if (minHeight) {
-        ViewAbstract::SetMinHeight(frameNode, minHeight.value());
+        ViewAbstractModelStatic::SetMinHeight(frameNode, minHeight.value());
     }
-    auto maxWidth = Converter::OptConvert<CalcLength>(optValue->maxWidth);
+    auto maxWidth = Converter::OptConvert<CalcDimension>(optValue->maxWidth);
     if (maxWidth) {
-        ViewAbstract::SetMaxWidth(frameNode, maxWidth.value());
+        ViewAbstractModelStatic::SetMaxWidth(frameNode, maxWidth.value());
     }
-    auto maxHeight = Converter::OptConvert<CalcLength>(optValue->maxHeight);
+    auto maxHeight = Converter::OptConvert<CalcDimension>(optValue->maxHeight);
     if (maxHeight) {
-        ViewAbstract::SetMaxHeight(frameNode, maxHeight.value());
+        ViewAbstractModelStatic::SetMaxHeight(frameNode, maxHeight.value());
     }
 }
 void TouchableImpl(Ark_NativePointer node,
@@ -1943,7 +1943,7 @@ void LayoutWeightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto weight = Converter::OptConvert<float>(*value);
     if (weight) {
-        ViewAbstract::SetLayoutWeight(frameNode, weight.value());
+        ViewAbstractModelStatic::SetLayoutWeight(frameNode, weight.value());
     }
 }
 void ChainWeightImpl(Ark_NativePointer node,
@@ -1959,7 +1959,7 @@ void PaddingImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetPadding(frameNode, Converter::OptConvert<PaddingProperty>(*value));
+    ViewAbstractModelStatic::SetPadding(frameNode, Converter::OptConvert<PaddingProperty>(*value));
 }
 void SafeAreaPaddingImpl(Ark_NativePointer node,
                          const Opt_Union_Padding_LengthMetrics_LocalizedPadding* value)
@@ -1988,7 +1988,7 @@ void MarginImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetMargin(frameNode, Converter::OptConvert<PaddingProperty>(*value));
+    ViewAbstractModelStatic::SetMargin(frameNode, Converter::OptConvert<PaddingProperty>(*value));
 }
 void BackgroundColor0Impl(Ark_NativePointer node,
                           const Opt_ResourceColor* value)
@@ -2019,7 +2019,7 @@ void PixelRoundImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetPixelRound(frameNode, *convValue);
+    ViewAbstractModelStatic::SetPixelRound(frameNode, *convValue);
 }
 void BackgroundImageSizeImpl(Ark_NativePointer node,
                              const Opt_Union_SizeOptions_ImageSize* value)
@@ -2186,27 +2186,27 @@ void BorderImpl(Ark_NativePointer node,
     }
     auto style = Converter::OptConvert<BorderStyleProperty>(optValue->style);
     if (style) {
-        ViewAbstract::SetBorderStyle(frameNode, style.value());
+        ViewAbstractModelStatic::SetBorderStyle(frameNode, style.value());
     }
     auto width = Converter::OptConvert<BorderWidthProperty>(optValue->width);
     if (width) {
-        ViewAbstract::SetBorderWidth(frameNode, width.value());
+        ViewAbstractModelStatic::SetBorderWidth(frameNode, width.value());
     }
     auto color = Converter::OptConvert<BorderColorProperty>(optValue->color);
     if (color) {
-        ViewAbstract::SetBorderColor(frameNode, color.value());
+        ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
     }
     auto radius = Converter::OptConvert<BorderRadiusProperty>(optValue->radius);
     if (radius) {
-        ViewAbstract::SetBorderRadius(frameNode, radius.value());
+        ViewAbstractModelStatic::SetBorderRadius(frameNode, radius.value());
     }
     auto dashGap = Converter::OptConvert<BorderWidthProperty>(optValue->dashGap);
     if (dashGap) {
-        ViewAbstract::SetDashGap(frameNode, dashGap.value());
+        ViewAbstractModelStatic::SetDashGap(frameNode, dashGap.value());
     }
     auto dashWidth = Converter::OptConvert<BorderWidthProperty>(optValue->dashWidth);
     if (dashWidth) {
-        ViewAbstract::SetDashWidth(frameNode, dashWidth.value());
+        ViewAbstractModelStatic::SetDashWidth(frameNode, dashWidth.value());
     }
 }
 void BorderStyleImpl(Ark_NativePointer node,
@@ -2217,7 +2217,7 @@ void BorderStyleImpl(Ark_NativePointer node,
     auto style = Converter::OptConvert<BorderStyleProperty>(*value);
     if (style) {
         // TODO: Reset value
-        ViewAbstract::SetBorderStyle(frameNode, style.value());
+        ViewAbstractModelStatic::SetBorderStyle(frameNode, style.value());
     }
 }
 void BorderWidthImpl(Ark_NativePointer node,
@@ -2228,7 +2228,7 @@ void BorderWidthImpl(Ark_NativePointer node,
     auto width = Converter::OptConvert<BorderWidthProperty>(*value);
     if (width) {
         // TODO: Reset value
-        ViewAbstract::SetBorderWidth(frameNode, width.value());
+        ViewAbstractModelStatic::SetBorderWidth(frameNode, width.value());
     }
 }
 void BorderColorImpl(Ark_NativePointer node,
@@ -2239,7 +2239,7 @@ void BorderColorImpl(Ark_NativePointer node,
     auto color = Converter::OptConvert<BorderColorProperty>(*value);
     if (color) {
         // TODO: Reset value
-        ViewAbstract::SetBorderColor(frameNode, color.value());
+        ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
     }
 }
 void BorderRadiusImpl(Ark_NativePointer node,
@@ -2250,7 +2250,7 @@ void BorderRadiusImpl(Ark_NativePointer node,
     auto radiuses = Converter::OptConvert<BorderRadiusProperty>(*value);
     if (radiuses) {
         // TODO: Reset value
-        ViewAbstract::SetBorderRadius(frameNode, radiuses.value());
+        ViewAbstractModelStatic::SetBorderRadius(frameNode, radiuses.value());
     }
 }
 void BorderImageImpl(Ark_NativePointer node,
@@ -3489,7 +3489,7 @@ void FlexGrowImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetFlexGrow(frameNode, *convValue);
+    ViewAbstractModelStatic::SetFlexGrow(frameNode, *convValue);
 }
 void FlexShrinkImpl(Ark_NativePointer node,
                     const Opt_Number* value)
@@ -3501,7 +3501,7 @@ void FlexShrinkImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetFlexShrink(frameNode, *convValue);
+    ViewAbstractModelStatic::SetFlexShrink(frameNode, *convValue);
 }
 void FlexBasisImpl(Ark_NativePointer node,
                    const Opt_Union_Number_String* value)
@@ -3511,7 +3511,7 @@ void FlexBasisImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);
-    ViewAbstract::SetFlexBasis(frameNode, convValue);
+    ViewAbstractModelStatic::SetFlexBasis(frameNode, convValue);
 }
 void AlignSelfImpl(Ark_NativePointer node,
                    const Opt_ItemAlign* value)
@@ -3521,7 +3521,7 @@ void AlignSelfImpl(Ark_NativePointer node,
     auto align = Converter::OptConvert<OHOS::Ace::FlexAlign>(*value);
     if (align) {
         // TODO: Reset value
-        ViewAbstract::SetAlignSelf(frameNode, align.value());
+        ViewAbstractModelStatic::SetAlignSelf(frameNode, align.value());
     }
 }
 void DisplayPriorityImpl(Ark_NativePointer node,
@@ -3554,7 +3554,7 @@ void DirectionImpl(Ark_NativePointer node,
     auto direction = Converter::OptConvert<TextDirection>(*value);
     if (direction) {
         // TODO: Reset value
-        ViewAbstract::SetLayoutDirection(frameNode, direction.value());
+        ViewAbstractModelStatic::SetLayoutDirection(frameNode, direction.value());
     }
 }
 void AlignImpl(Ark_NativePointer node,
@@ -3565,7 +3565,7 @@ void AlignImpl(Ark_NativePointer node,
     auto alignment = Converter::OptConvert<Alignment>(*value);
     if (alignment) {
         // TODO: Reset value
-        ViewAbstract::SetAlign(frameNode, alignment.value());
+        ViewAbstractModelStatic::SetAlign(frameNode, alignment.value());
     }
 }
 void PositionImpl(Ark_NativePointer node,
@@ -3582,19 +3582,19 @@ void PositionImpl(Ark_NativePointer node,
         case CASE_0: {
             auto x = Converter::ConvertOrDefault(optValue->value0.x, Dimension());
             auto y = Converter::ConvertOrDefault(optValue->value0.y, Dimension());
-            ViewAbstract::SetPosition(frameNode, { x, y });
+            ViewAbstractModelStatic::SetPosition(frameNode, { x, y });
             break;
         }
         case CASE_1: {
 #ifdef WRONG_GEN
             auto result = Converter::ConvertOrDefault(optValue->value1, EdgesParam());
-            ViewAbstract::SetPositionEdges(frameNode, result);
+            ViewAbstractModelStatic::SetPositionEdges(frameNode, result);
 #endif
             break;
         }
         case CASE_2:
             LOGE("ARKOALA: LocalizedEdges is not fully support.");
-            ViewAbstract::SetPositionLocalizedEdges(frameNode, true);
+            ViewAbstractModelStatic::SetPositionLocalizedEdges(frameNode, true);
             break;
 
         default:
@@ -3610,15 +3610,15 @@ void MarkAnchorImpl(Ark_NativePointer node,
     auto anchorOpt = Converter::OptConvert<PositionWithLocalization>(*value);
     if (anchorOpt) {
         if (anchorOpt->second && anchorOpt->first.has_value()) {
-            ViewAbstract::SetMarkAnchorStart(frameNode, anchorOpt->first->GetX());
-            ViewAbstract::MarkAnchor(frameNode, anchorOpt->first);
+            ViewAbstractModelStatic::SetMarkAnchorStart(frameNode, anchorOpt->first->GetX());
+            ViewAbstractModelStatic::MarkAnchor(frameNode, anchorOpt->first);
             return;
         }
-        ViewAbstract::MarkAnchor(frameNode, anchorOpt->first);
+        ViewAbstractModelStatic::MarkAnchor(frameNode, anchorOpt->first);
     } else {
-        ViewAbstract::MarkAnchor(frameNode, std::nullopt);
+        ViewAbstractModelStatic::MarkAnchor(frameNode, std::nullopt);
     }
-    ViewAbstract::ResetMarkAnchorStart(frameNode);
+    ViewAbstractModelStatic::ResetMarkAnchorStart(frameNode);
 }
 void OffsetImpl(Ark_NativePointer node,
                 const Opt_Union_Position_Edges_LocalizedEdges* value)
@@ -3629,10 +3629,10 @@ void OffsetImpl(Ark_NativePointer node,
     auto varOpt = Converter::OptConvert<OffsetOrEdgesParam>(*value);
     CHECK_NULL_VOID(varOpt);
     if (auto offset = std::get_if<std::optional<OffsetT<Dimension>>>(&varOpt.value()); offset) {
-        ViewAbstract::SetOffset(frameNode, offset->value());
+        ViewAbstractModelStatic::SetOffset(frameNode, offset->value());
     } else if (auto edges = std::get_if<std::optional<EdgesParamOptions>>(&varOpt.value()); edges) {
-        ViewAbstract::SetOffsetEdges(frameNode, edges->value().value);
-        ViewAbstract::SetOffsetLocalizedEdges(frameNode, edges->value().isLocalized);
+        ViewAbstractModelStatic::SetOffsetEdges(frameNode, edges->value().value);
+        ViewAbstractModelStatic::SetOffsetLocalizedEdges(frameNode, edges->value().isLocalized);
     } else {
         LOGE("ARKOALA CommonMethod::OffsetImpl: incorrect value");
     }
@@ -3683,13 +3683,13 @@ void AlignRules0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convMapValue = Converter::OptConvert<std::map<AlignDirection, AlignRule>>(*value);
-    ViewAbstract::SetAlignRules(frameNode, convMapValue);
+    ViewAbstractModelStatic::SetAlignRules(frameNode, convMapValue);
     auto optValue = Converter::GetOptPtr(value);
     auto convBiasValue = optValue ? Converter::OptConvert<BiasOpt>(optValue->bias) : std::nullopt;
     if (convBiasValue.has_value()) {
-        ViewAbstract::SetBias(frameNode, convBiasValue.value().first, convBiasValue.value().second);
+        ViewAbstractModelStatic::SetBias(frameNode, convBiasValue.value().first, convBiasValue.value().second);
     } else {
-        ViewAbstract::SetBias(frameNode, std::nullopt);
+        ViewAbstractModelStatic::SetBias(frameNode, std::nullopt);
     }
 }
 void AlignRules1Impl(Ark_NativePointer node,
@@ -3698,13 +3698,13 @@ void AlignRules1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convMapValue = Converter::OptConvert<std::map<AlignDirection, AlignRule>>(*value);
-    ViewAbstract::SetAlignRules(frameNode, convMapValue);
+    ViewAbstractModelStatic::SetAlignRules(frameNode, convMapValue);
     auto optValue = Converter::GetOptPtr(value);
     auto convBiasValue = optValue ? Converter::OptConvert<BiasOpt>(optValue->bias) : std::nullopt;
     if (convBiasValue.has_value()) {
-        ViewAbstract::SetBias(frameNode, convBiasValue.value().first, convBiasValue.value().second);
+        ViewAbstractModelStatic::SetBias(frameNode, convBiasValue.value().first, convBiasValue.value().second);
     } else {
-        ViewAbstract::SetBias(frameNode, std::nullopt);
+        ViewAbstractModelStatic::SetBias(frameNode, std::nullopt);
     }
 }
 void AspectRatioImpl(Ark_NativePointer node,
@@ -3717,13 +3717,13 @@ void AspectRatioImpl(Ark_NativePointer node,
         auto ratio = result.value();
         if (ratio <= 0.0) {
             if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-                ViewAbstract::ResetAspectRatio(frameNode);
+                ViewAbstractModelStatic::ResetAspectRatio(frameNode);
                 return;
             } else {
                 ratio = 1.0;
             }
         }
-        ViewAbstract::SetAspectRatio(frameNode, ratio);
+        ViewAbstractModelStatic::SetAspectRatio(frameNode, ratio);
     }
 }
 void ClickEffect0Impl(Ark_NativePointer node,
@@ -4845,7 +4845,7 @@ void ExpandSafeAreaImpl(Ark_NativePointer node,
         }
         opts.edges = safeAreaEdge;
     }
-    ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
+    ViewAbstractModelStatic::UpdateSafeAreaExpandOpts(frameNode, opts);
 }
 void BackgroundImpl(Ark_NativePointer node,
                     const Opt_CustomNodeBuilder* builder,

@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -82,27 +83,27 @@ void PointLightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(themeConstants);
     if (pointLightStyle) {
         if (pointLightStyle->lightSource) {
-            ViewAbstractModelNG::SetLightPosition(frameNode, pointLightStyle->lightSource->x,
+            ViewAbstractModelStatic::SetLightPosition(frameNode, pointLightStyle->lightSource->x,
                 pointLightStyle->lightSource->y,
                 pointLightStyle->lightSource->z);
-            ViewAbstractModelNG::SetLightIntensity(frameNode,
+            ViewAbstractModelStatic::SetLightIntensity(frameNode,
                 pointLightStyle->lightSource->intensity);
-            ViewAbstractModelNG::SetLightColor(frameNode, pointLightStyle->lightSource->lightColor);
+            ViewAbstractModelStatic::SetLightColor(frameNode, pointLightStyle->lightSource->lightColor);
         } else {
-            ViewAbstractModelNG::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
-            ViewAbstractModelNG::SetLightIntensity(frameNode, std::nullopt);
-            ViewAbstractModelNG::SetLightColor(frameNode, std::nullopt);
+            ViewAbstractModelStatic::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+            ViewAbstractModelStatic::SetLightIntensity(frameNode, std::nullopt);
+            ViewAbstractModelStatic::SetLightColor(frameNode, std::nullopt);
         }
         // illuminated
-        ViewAbstractModelNG::SetLightIlluminated(frameNode, pointLightStyle->illuminationType, themeConstants);
+        ViewAbstractModelStatic::SetLightIlluminated(frameNode, pointLightStyle->illuminationType, themeConstants);
         // bloom
-        ViewAbstractModelNG::SetBloom(frameNode, pointLightStyle->bloom, themeConstants);
+        ViewAbstractModelStatic::SetBloom(frameNode, pointLightStyle->bloom, themeConstants);
     } else {
-        ViewAbstractModelNG::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
-        ViewAbstractModelNG::SetLightIntensity(frameNode, std::nullopt);
-        ViewAbstractModelNG::SetLightColor(frameNode, std::nullopt);
-        ViewAbstractModelNG::SetLightIlluminated(frameNode, std::nullopt, themeConstants);
-        ViewAbstractModelNG::SetBloom(frameNode, std::nullopt, themeConstants);
+        ViewAbstractModelStatic::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+        ViewAbstractModelStatic::SetLightIntensity(frameNode, std::nullopt);
+        ViewAbstractModelStatic::SetLightColor(frameNode, std::nullopt);
+        ViewAbstractModelStatic::SetLightIlluminated(frameNode, std::nullopt, themeConstants);
+        ViewAbstractModelStatic::SetBloom(frameNode, std::nullopt, themeConstants);
     }
 #endif
 }
