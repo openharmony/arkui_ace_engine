@@ -908,6 +908,7 @@ public:
 
     bool SetParentLayoutConstraint(const SizeF& size) const override;
     void ForceSyncGeometryNode();
+    bool IsGeometrySizeChange() const;
 
     template<typename T>
     RefPtr<T> FindFocusChildNodeOfClass()

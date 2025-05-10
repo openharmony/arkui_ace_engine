@@ -5329,6 +5329,14 @@ void FrameNode::ForceSyncGeometryNode()
     renderContext_->SyncGeometryProperties(RawPtr(geometryNode_));
 }
 
+bool FrameNode::IsGeometrySizeChange() const
+{
+    if (oldGeometryNode_ && geometryNode_) {
+        return oldGeometryNode_->GetFrameSize() != geometryNode_->GetFrameSize();
+    }
+    return false;
+}
+
 const std::pair<uint64_t, OffsetF>& FrameNode::GetCachedGlobalOffset() const
 {
     return cachedGlobalOffset_;
