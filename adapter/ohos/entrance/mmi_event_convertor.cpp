@@ -602,7 +602,8 @@ void ConvertAxisEventToTouchEvent(const std::shared_ptr<MMI::PointerEvent>& poin
         .SetTime(TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime())))
         .SetDeviceId(pointerEvent->GetDeviceId())
         .SetTargetDisplayId(pointerEvent->GetTargetDisplayId())
-        .SetTouchEventId(pointerEvent->GetId());
+        .SetTouchEventId(pointerEvent->GetId())
+        .SetPointerEvent(pointerEvent);
 
     touchEvt.pointers.emplace_back(std::move(touchPoint));
 }

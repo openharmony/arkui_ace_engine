@@ -505,6 +505,8 @@ void AceViewOhos::ProcessAxisEventWithTouch(const std::shared_ptr<MMI::PointerEv
         fakeAxisRawEvt->SetAxisValue(MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL, 0.0);
         fakeAxisRawEvt->SetAxisValue(MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL, 0.0);
         ConvertAxisEventToTouchEvent(fakeAxisRawEvt, event, axisFakePntEvt_);
+        // fakeAxisRawEvt aciton will be update lately, use original pointerEvent.
+        event.SetPointerEvent(pointerEvent);
         touchEventCallback_(event, nullptr, node);
         fakeAxisRawEvt->SetAxisValue(MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL, axisScrollVertBak);
         fakeAxisRawEvt->SetAxisValue(MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL, axisScrollHoriBak);
