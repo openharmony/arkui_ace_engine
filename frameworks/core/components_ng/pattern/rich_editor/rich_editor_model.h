@@ -264,6 +264,11 @@ struct SymbolSpanOptions : SpanOptionBase {
     }
 };
 
+struct BuilderSpanOptions : SpanOptionBase {
+    std::optional<int32_t> offset;
+    RefPtr<NG::UINode> customNode;
+};
+
 struct PlaceholderOptions {
     std::optional<std::u16string> value;
     std::optional<FontWeight> fontWeight;
@@ -296,6 +301,8 @@ struct PreviewTextInfo {
         return jsonValue->ToString();
     }
 };
+
+enum class UndoStyle { CLEAR_STYLE = 0, KEEP_STYLE = 1 };
 
 class ACE_EXPORT RichEditorBaseControllerBase : public AceType {
     DECLARE_ACE_TYPE(RichEditorBaseControllerBase, AceType);
@@ -394,6 +401,7 @@ public:
     virtual void SetMaxLines(uint32_t value) {};
     virtual void SetStopBackPress(bool isStopBackPress) {};
     virtual void SetKeyboardAppearance(KeyboardAppearance value) {};
+    virtual void SetSupportStyledUndo(bool enabled) {};
 
 private:
     static std::unique_ptr<RichEditorModel> instance_;
