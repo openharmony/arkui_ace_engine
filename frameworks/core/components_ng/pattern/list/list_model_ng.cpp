@@ -612,7 +612,6 @@ void ListModelNG::CreateWithResourceObjLaneGutter(const RefPtr<ResourceObject>& 
         CalcDimension laneGutter;
         if (ResourceParseUtils::ParseResDimensionVp(resObj, laneGutter)) {
             ListModelNG::SetLaneGutter(AceType::RawPtr(frameNode), laneGutter);
-            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     };
     pattern->AddResObj("LaneGutter", resObj, std::move(updateFunc));
@@ -633,7 +632,6 @@ void ListModelNG::CreateWithResourceObjLaneConstrain(
         CalcDimension minLengthValue;
         if (ResourceParseUtils::ParseResDimensionVp(resObjMinLengthValue, minLengthValue)) {
             ListModelNG::SetLaneMinLength(AceType::RawPtr(frameNode), minLengthValue);
-            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     };
     pattern->AddResObj("ListMinLength", resObjMinLengthValue, std::move(minLengthupdateFunc));
@@ -645,7 +643,6 @@ void ListModelNG::CreateWithResourceObjLaneConstrain(
         CalcDimension maxLengthValue;
         if (ResourceParseUtils::ParseResDimensionVp(resObjMaxLengthValue, maxLengthValue)) {
             ListModelNG::SetLaneMaxLength(AceType::RawPtr(frameNode), maxLengthValue);
-            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     };
     pattern->AddResObj("ListMaxLength", resObjMaxLengthValue, std::move(maxLengthupdateFunc));
