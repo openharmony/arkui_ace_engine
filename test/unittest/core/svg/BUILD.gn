@@ -86,7 +86,6 @@ ohos_unittest("parse_test_ng") {
       "ACE_ENABLE_GPU",
       "NEW_SKIA",
     ]
-    include_dirs = [ "//third_party/skia" ]
   }
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]

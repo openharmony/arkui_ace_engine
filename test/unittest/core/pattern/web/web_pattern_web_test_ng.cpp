@@ -28,8 +28,8 @@
 #include "core/components_ng/pattern/web/web_pattern.h"
 #undef private
 #undef protected
-#include "base/web/webview/ohos_nweb/include/nweb.h"
-#include "base/web/webview/ohos_nweb/include/nweb_handler.h"
+#include "nweb.h"
+#include "nweb_handler.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"

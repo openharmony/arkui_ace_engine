@@ -27,7 +27,7 @@
 #define private public
 #include "test/mock/base/mock_task_executor.h"
 
-#include "base/web/webview/ohos_nweb/include/nweb_handler.h"
+#include "nweb_handler.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"

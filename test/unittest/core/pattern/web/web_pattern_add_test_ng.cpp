@@ -35,7 +35,7 @@
 #undef private
 #include "test/mock/core/common/mock_udmf.h"
 
-#include "base/web/webview/ohos_nweb/include/nweb_date_time_chooser.h"
+#include "nweb_date_time_chooser.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_v2/inspector/inspector_constants.h"

@@ -42,7 +42,6 @@ ohos_unittest("html_convert_test") {
     "$ace_root/test/unittest:ace_core_extra",
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
-    "$graphic_2d_path/rosen/modules/render_service_client:librender_service_client",
   ]
 
   external_deps = [

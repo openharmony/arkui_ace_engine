@@ -32,7 +32,7 @@
 #include "test/mock/core/common/mock_image_analyzer_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
-#include "base/web/webview/ohos_nweb/include/nweb_handler.h"
+#include "nweb_handler.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
