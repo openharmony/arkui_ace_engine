@@ -339,4 +339,102 @@ HWTEST_F(TextFieldPatternTestSix, ProcessAutoFillOnFocus005, TestSize.Level0)
     EXPECT_EQ(stateHolder->IsAutoFillPasswordTriggered(), true);
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
+
+/**
+ * @tc.name: BeforeAutoFillAnimation001
+ * @tc.desc: test testInput text BeforeAutoFillAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSix, BeforeAutoFillAnimation001, TestSize.Level0)
+{
+    CreateTextField();
+
+    // set enableAutoFillAnimation not meet the animation conditions
+    layoutProperty_->UpdateEnableAutoFillAnimation(false);
+
+    std::u16string content = u"openharmony";
+    AceAutoFillType type = AceAutoFillType::ACE_PASSWORD;
+    pattern_->BeforeAutoFillAnimation(content, type);
+
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern_->autoFillController_->GetAutoFillTextUtf16Value()),
+        StringUtils::Str16ToStr8(content));
+}
+
+/**
+ * @tc.name: BeforeAutoFillAnimation002
+ * @tc.desc: test testInput text BeforeAutoFillAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSix, BeforeAutoFillAnimation002, TestSize.Level0)
+{
+    CreateTextField();
+
+    // set autofillType not meet the animation conditions
+    AceAutoFillType type = AceAutoFillType::ACE_USER_NAME;
+    std::u16string content = u"openharmony";
+    pattern_->BeforeAutoFillAnimation(content, type);
+
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern_->autoFillController_->GetAutoFillTextUtf16Value()),
+        StringUtils::Str16ToStr8(content));
+    EXPECT_EQ(pattern_->autoFillController_->GetAutoFillAnimationStatus(), AutoFillAnimationStatus::INIT);
+}
+
+/**
+ * @tc.name: BeforeAutoFillAnimation003
+ * @tc.desc: test testInput text BeforeAutoFillAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSix, BeforeAutoFillAnimation003, TestSize.Level0)
+{
+    CreateTextField();
+
+    // set text length not meet the animation conditions
+    std::u16string content = u"";
+    AceAutoFillType type = AceAutoFillType::ACE_PASSWORD;
+    pattern_->BeforeAutoFillAnimation(content, type);
+
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern_->autoFillController_->GetAutoFillTextUtf16Value()),
+        StringUtils::Str16ToStr8(content));
+    EXPECT_EQ(pattern_->autoFillController_->GetAutoFillAnimationStatus(), AutoFillAnimationStatus::INIT);
+}
+
+/**
+ * @tc.name: BeforeAutoFillAnimation004
+ * @tc.desc: test testInput text BeforeAutoFillAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSix, BeforeAutoFillAnimation004, TestSize.Level0)
+{
+    CreateTextField();
+
+    // set text length not meet the animation conditions by maxLength attribute
+    layoutProperty_->UpdateMaxLength(0);
+
+    std::u16string content = u"openharmony";
+    AceAutoFillType type = AceAutoFillType::ACE_PASSWORD;
+    pattern_->BeforeAutoFillAnimation(content, type);
+
+    std::u16string emptyContent = u"";
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern_->autoFillController_->GetAutoFillTextUtf16Value()),
+        StringUtils::Str16ToStr8(emptyContent));
+    EXPECT_EQ(pattern_->autoFillController_->GetAutoFillAnimationStatus(), AutoFillAnimationStatus::INIT);
+}
+
+/**
+ * @tc.name: BeforeAutoFillAnimation005
+ * @tc.desc: test testInput text BeforeAutoFillAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSix, BeforeAutoFillAnimation005, TestSize.Level0)
+{
+    CreateTextField();
+
+    // all attribute  meet the animation conditions
+    std::u16string content = u"openharmony";
+    AceAutoFillType type = AceAutoFillType::ACE_PASSWORD;
+    pattern_->BeforeAutoFillAnimation(content, type);
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern_->autoFillController_->GetAutoFillTextUtf16Value()),
+        StringUtils::Str16ToStr8(content));
+    EXPECT_EQ(pattern_->autoFillController_->GetAutoFillAnimationStatus(), AutoFillAnimationStatus::INIT);
+}
 } // namespace OHOS::Ace::NG
