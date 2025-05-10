@@ -327,26 +327,28 @@ void ParseDialogBorderStyle(DialogProperties& dialogProperties, ArkUIDialogHandl
 void ParseDialogWidth(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
 {
     CHECK_NULL_VOID(controllerHandler);
-    if (!dialogProperties.width.has_value() && controllerHandler->widthValue.has_value()) {
-        auto unitEnum = controllerHandler->widthUnit;
-        if (unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC) {
-            dialogProperties.width = Dimension(controllerHandler->widthValue.value(), OHOS::Ace::DimensionUnit::VP);
-        } else {
-            dialogProperties.width = Dimension(controllerHandler->widthValue.value(), unitEnum);
-        }
+    if (!controllerHandler->widthValue) {
+        return;
+    }
+    auto unitEnum = controllerHandler->widthUnit;
+    if (unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC) {
+        dialogProperties.width = Dimension(controllerHandler->widthValue.value(), OHOS::Ace::DimensionUnit::VP);
+    } else {
+        dialogProperties.width = Dimension(controllerHandler->widthValue.value(), unitEnum);
     }
 }
 
 void ParseDialogHeight(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
 {
     CHECK_NULL_VOID(controllerHandler);
-    if (!dialogProperties.height.has_value() && controllerHandler->heightValue.has_value()) {
-        auto unitEnum = controllerHandler->heightUnit;
-        if (unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC) {
-            dialogProperties.height = Dimension(controllerHandler->heightValue.value(), OHOS::Ace::DimensionUnit::VP);
-        } else {
-            dialogProperties.height = Dimension(controllerHandler->heightValue.value(), unitEnum);
-        }
+    if (!controllerHandler->heightValue) {
+        return;
+    }
+    auto unitEnum = controllerHandler->heightUnit;
+    if (unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC) {
+        dialogProperties.height = Dimension(controllerHandler->heightValue.value(), OHOS::Ace::DimensionUnit::VP);
+    } else {
+        dialogProperties.height = Dimension(controllerHandler->heightValue.value(), unitEnum);
     }
 }
 
@@ -548,22 +550,24 @@ int32_t ConvertBlurStyle(int32_t originBlurStyle)
 void openCustomDialogWithNewPipeline(std::function<void(int32_t)>&& callback)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog IsCurrentUseNewPipeline.");
-    auto task = [callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
+    auto dialogProperties = g_dialogProperties;
+    dialogProperties.customCNode = g_dialogProperties.customCNode;
+    auto task = [callback, dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
         CHECK_NULL_VOID(overlayManager);
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "open custom dialog isShowInSubWindow %{public}d",
-            g_dialogProperties.isShowInSubWindow);
-        if (g_dialogProperties.isShowInSubWindow) {
-            SubwindowManager::GetInstance()->OpenCustomDialogNG(g_dialogProperties, std::move(callback));
-            if (g_dialogProperties.isModal) {
+            dialogProperties.isShowInSubWindow);
+        if (dialogProperties.isShowInSubWindow) {
+            SubwindowManager::GetInstance()->OpenCustomDialogNG(dialogProperties, std::move(callback));
+            if (dialogProperties.isModal) {
                 TAG_LOGW(AceLogTag::ACE_OVERLAY, "temporary not support isShowInSubWindow and isModal");
             }
         } else {
-            overlayManager->OpenCustomDialog(g_dialogProperties, std::move(callback));
+            overlayManager->OpenCustomDialog(dialogProperties, std::move(callback));
         }
     };
-    if (g_dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+    if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
         NG::DialogManager::ShowInEmbeddedOverlay(
-            std::move(task), "ArkUIOverlayShowDialog", g_dialogProperties.dialogLevelUniqueId);
+            std::move(task), "ArkUIOverlayShowDialog", dialogProperties.dialogLevelUniqueId);
     } else {
         MainWindowOverlay(std::move(task), "ArkUIOverlayShowDialog", nullptr);
     }
@@ -798,6 +802,10 @@ ArkUI_Int32 RegisterOnDidDisappearDialog(
 ArkUI_Int32 OpenCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_Int32 dialogId))
 {
     CHECK_NULL_RETURN(handle, ERROR_CODE_PARAM_INVALID);
+    g_dialogProperties.maskRect = std::nullopt;
+    g_dialogProperties.borderRadius = std::nullopt;
+    g_dialogProperties.width = std::nullopt;
+    g_dialogProperties.height = std::nullopt;
     ParseDialogProperties(g_dialogProperties, handle);
     g_dialogProperties.customCNode = reinterpret_cast<FrameNode*>(handle->contentHandle);
     auto promptDialogAttr = ParseDialogPropertiesFromProps(g_dialogProperties);
@@ -839,6 +847,7 @@ ArkUI_Int32 UpdateCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_
         if (promptDialogAttr.offset.has_value()) {
             g_dialogProperties.offset = promptDialogAttr.offset.value();
         }
+        g_dialogProperties.customCNode = reinterpret_cast<FrameNode*>(handle->contentHandle);
         auto node = g_dialogProperties.customCNode;
         auto nodePtr = node.Upgrade();
         CHECK_NULL_RETURN(nodePtr, ERROR_CODE_PARAM_INVALID);
