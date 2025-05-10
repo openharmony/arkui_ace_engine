@@ -1329,6 +1329,13 @@ void FrontendDelegateImpl::OnLayoutCompleted(const std::string& componentId) {}
 
 void FrontendDelegateImpl::OnDrawCompleted(const std::string& componentId) {}
 
+void FrontendDelegateImpl::OnDrawChildrenCompleted(const std::string& componentId) {}
+
+bool FrontendDelegateImpl::IsDrawChildrenCallbackFuncExist(const std::string& componentId)
+{
+    return false;
+}
+
 void FrontendDelegateImpl::OnMediaQueryUpdate(bool isSynchronous)
 {
     if (mediaQueryInfo_->GetIsInit()) {
