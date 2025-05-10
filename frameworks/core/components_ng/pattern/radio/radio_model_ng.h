@@ -52,6 +52,8 @@ public:
     void SetOnChangeEvent(ChangeEvent&& onChangeEvent) override;
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
+    void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
+        const RadioColorType radioColorType) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     void SetBuilder(std::function<void()>&& buildFunc) override;
@@ -78,6 +80,8 @@ public:
     static std::string GetRadioGroup(FrameNode* frameNode);
     static void SetRadioOptions(FrameNode* frameNode, const std::string& value,
         const std::string& group, int32_t indicator);
+private:
+    std::string ColorTypeToString(const RadioColorType radioColorType);
 };
 } // namespace OHOS::Ace::NG
 
