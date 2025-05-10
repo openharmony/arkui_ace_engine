@@ -92,6 +92,30 @@ void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, float chi
         idealSize.SetHeight(finalSize.Height());
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
+    auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicy.has_value());
+    auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+    auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+    if (widthLayoutPolicy != LayoutCalPolicy::NO_MATCH || heightLayoutPolicy != LayoutCalPolicy::NO_MATCH) {
+        auto policySize = MeasureSelfByLayoutPolicy(layoutWrapper, childHeight + padding.Height(),
+            widthLayoutPolicy, heightLayoutPolicy);
+        idealSize.UpdateSizeWithCheck(policySize);
+        layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
+    }
+}
+
+OptionalSizeF GridRowLayoutAlgorithm::MeasureSelfByLayoutPolicy(LayoutWrapper* layoutWrapper, float childHeight,
+    LayoutCalPolicy widthLayoutPolicy, LayoutCalPolicy heightLayoutPolicy)
+{
+    OptionalSizeF realSize;
+    if (heightLayoutPolicy != LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+        return realSize;
+    }
+    auto fixIdealSize = UpdateOptionSizeByCalcLayoutConstraint({std::nullopt, childHeight},
+        layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
+        layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
+    realSize.SetHeight(fixIdealSize.Height());
+    return realSize;
 }
 
 /* Measure each child and return total height */
