@@ -19,6 +19,7 @@
 #include "arkoala_api_generated.h"
 
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_item_model_static.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -161,7 +162,7 @@ void OnSelectImpl(Ark_NativePointer node,
     auto onSelect = [arkCallback = CallbackHelper(*optValue)](bool isSelected) {
         arkCallback.Invoke(isSelected);
     };
-    GridItemModelNG::SetOnSelect(frameNode, onSelect);
+    GridItemModelStatic::SetOnSelect(frameNode, onSelect);
 }
 void _onChangeEvent_selectedImpl(Ark_NativePointer node,
                                  const Callback_Opt_Boolean_Void* callback)
@@ -174,7 +175,7 @@ void _onChangeEvent_selectedImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(Converter::ArkValue<Opt_Boolean>(isSelected));
     };
-    GridItemModelNG::SetSelectChangeEvent(frameNode, std::move(onEvent));
+    GridItemModelStatic::SetSelectChangeEvent(frameNode, std::move(onEvent));
 }
 } // GridItemAttributeModifier
 const GENERATED_ArkUIGridItemModifier* GetGridItemModifier()
