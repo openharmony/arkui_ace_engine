@@ -449,13 +449,23 @@ int32_t ImageSourceInfo::GetContainerId() const
     return containerId_;
 }
 
+void ImageSourceInfo::SetImageHdr(bool isHdr)
+{
+    isHdr_ = isHdr;
+}
+
+bool ImageSourceInfo::IsImageHdr() const
+{
+    return isHdr_;
+}
+
 std::string ImageSourceInfo::GetTaskKey() const
 {
     // only svg sets fillColor
     if (isSvg_ && fillColor_.has_value()) {
         return cacheKey_ + fillColor_.value().ColorToString() + std::to_string(containerId_);
     }
-    return cacheKey_ + std::to_string(containerId_);
+    return cacheKey_ + std::to_string(containerId_) + std::to_string(isHdr_);
 }
 
 ImageSourceInfo ImageSourceInfo::CreateImageSourceInfoWithHost(const RefPtr<NG::FrameNode>& host)

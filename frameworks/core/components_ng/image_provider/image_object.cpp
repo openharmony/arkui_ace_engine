@@ -33,6 +33,11 @@ const ImageSourceInfo& ImageObject::GetSourceInfo() const
     return src_;
 }
 
+void ImageObject::SetImageSourceInfoHdr(bool isHdr)
+{
+    src_.SetImageHdr(isHdr);
+}
+
 RefPtr<ImageData> ImageObject::GetData() const
 {
     std::shared_lock lock(dataMutex_);

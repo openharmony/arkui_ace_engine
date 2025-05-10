@@ -45,6 +45,7 @@ public:
 
     const SizeF& GetImageSize() const;
     const ImageSourceInfo& GetSourceInfo() const;
+    void SetImageSourceInfoHdr(bool isHdr);
     RefPtr<ImageData> GetData() const;
     int32_t GetFrameCount() const;
     ImageRotateOrientation GetOrientation() const;
@@ -89,7 +90,7 @@ public:
     }
 
 protected:
-    const ImageSourceInfo src_;
+    ImageSourceInfo src_;
     ImageRotateOrientation orientation_ = ImageRotateOrientation::UP;
     ImageRotateOrientation userOrientation_ = ImageRotateOrientation::UP;
     SizeF imageSize_ { -1.0, -1.0 };

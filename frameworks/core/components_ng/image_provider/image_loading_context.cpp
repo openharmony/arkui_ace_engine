@@ -187,7 +187,9 @@ void ImageLoadingContext::OnMakeCanvasImage()
     }
 
     // step4: [MakeCanvasImage] according to [targetSize]
+    src_.SetImageHdr(GetIsHdrDecoderNeed());
     canvasKey_ = ImageUtils::GenerateImageKey(src_, targetSize);
+    imageObj_->SetImageSourceInfoHdr(GetIsHdrDecoderNeed());
     imageObj_->SetImageDfxConfig(imageDfxConfig_);
     imageObj_->MakeCanvasImage(WeakClaim(this), targetSize, userDefinedSize.has_value(), syncLoad_);
 }
