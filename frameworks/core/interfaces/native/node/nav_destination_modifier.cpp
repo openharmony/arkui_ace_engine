@@ -332,8 +332,15 @@ void SetNavDestinationSystemBarStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto contentColor = Color(value);
-    NavDestinationModelNG::SetSystemBarStyle(frameNode, contentColor);
+    RefPtr<SystemBarStyle> style = SystemBarStyle::CreateStyleFromColor(value);
+    NavDestinationModelNG::SetSystemBarStyle(frameNode, style);
+}
+
+void ResetNavDestinationSystemBarStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetSystemBarStyle(frameNode, nullptr);
 }
 
 void SetCustomBackButtonNode(ArkUINodeHandle node, ArkUINodeHandle backButtonNode)
@@ -407,6 +414,156 @@ void ResetEnableNavigationIndicator(ArkUINodeHandle node)
     NavDestinationModelNG::SetEnableNavigationIndicator(frameNode, navigationIndicator);
 }
 
+void SetNavDestinationOnShown(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onShown = reinterpret_cast<std::function<void()>*>(callback);
+        NavDestinationModelNG::SetOnShown(frameNode, std::move(*onShown));
+    } else {
+        NavDestinationModelNG::SetOnShown(frameNode, nullptr);
+    }
+}
+
+void ResetNavDestinationOnShown(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetOnShown(frameNode, nullptr);
+}
+
+void SetNavDestinationOnHidden(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onHidden = reinterpret_cast<std::function<void()>*>(callback);
+        NavDestinationModelNG::SetOnHidden(frameNode, std::move(*onHidden));
+    } else {
+        NavDestinationModelNG::SetOnHidden(frameNode, nullptr);
+    }
+}
+
+void ResetNavDestinationOnHidden(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetOnHidden(frameNode, nullptr);
+}
+
+void SetNavDestinationOnWillHide(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillHide = reinterpret_cast<std::function<void()>*>(callback);
+        NavDestinationModelNG::SetOnWillHide(frameNode, std::move(*onWillHide));
+    } else {
+        NavDestinationModelNG::SetOnWillHide(frameNode, nullptr);
+    }
+}
+
+void ResetNavDestinationOnWillHide(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetOnWillHide(frameNode, nullptr);
+}
+
+void SetNavDestinationOnWillAppear(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillAppear = reinterpret_cast<std::function<void()>*>(callback);
+        NavDestinationModelNG::SetOnWillAppear(frameNode, std::move(*onWillAppear));
+    } else {
+        NavDestinationModelNG::SetOnWillAppear(frameNode, nullptr);
+    }
+}
+
+void ResetNavDestinationOnWillAppear(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetOnWillAppear(frameNode, nullptr);
+}
+
+void SetNavDestinationOnWillShow(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillShow = reinterpret_cast<std::function<void()>*>(callback);
+        NavDestinationModelNG::SetOnWillShow(frameNode, std::move(*onWillShow));
+    } else {
+        NavDestinationModelNG::SetOnWillShow(frameNode, nullptr);
+    }
+}
+
+void ResetNavDestinationOnWillShow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetOnWillShow(frameNode, nullptr);
+}
+
+void SetNavDestinationOnWillDisappear(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillDisappear = reinterpret_cast<std::function<void()>*>(callback);
+        NavDestinationModelNG::SetOnWillDisAppear(frameNode, std::move(*onWillDisappear));
+    } else {
+        NavDestinationModelNG::SetOnWillDisAppear(frameNode, nullptr);
+    }
+}
+
+void ResetNavDestinationOnWillDisappear(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetOnWillDisAppear(frameNode, nullptr);
+}
+
+void SetNavDestinationOnBackPressed(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onBackPressed = reinterpret_cast<std::function<bool()>*>(callback);
+        NavDestinationModelNG::SetOnBackPressed(frameNode, std::move(*onBackPressed));
+    } else {
+        NavDestinationModelNG::SetOnBackPressed(frameNode, nullptr);
+    }
+}
+void ResetNavDestinationOnBackPressed(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetOnBackPressed(frameNode, nullptr);
+}
+
+void SetNavDestinationOnReady(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onReady = reinterpret_cast<std::function<void(RefPtr<NavDestinationContext>)>*>(callback);
+        NavDestinationModelNG::SetOnReady(frameNode, std::move(*onReady));
+    } else {
+        NavDestinationModelNG::SetOnReady(frameNode, nullptr);
+    }
+}
+
+void ResetNavDestinationOnReady(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetOnReady(frameNode, nullptr);
+}
 namespace NodeModifier {
 const ArkUINavDestinationModifier* GetNavDestinationModifier()
 {
@@ -440,6 +597,7 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         .setNavDestinationOnCoordScrollUpdateAction = SetNavDestinationOnCoordScrollUpdateAction,
         .setNavDestinationOnCoordScrollEndAction = SetNavDestinationOnCoordScrollEndAction,
         .setNavDestinationSystemBarStyle = SetNavDestinationSystemBarStyle,
+        .resetNavDestinationSystemBarStyle = ResetNavDestinationSystemBarStyle,
         .setCustomBackButtonNode = SetCustomBackButtonNode,
         .setPreferredOrientation = SetPreferredOrientation,
         .resetPreferredOrientation = ResetPreferredOrientation,
@@ -447,6 +605,22 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         .resetEnableStatusBar = ResetEnableStatusBar,
         .setEnableNavigationIndicator = SetEnableNavigationIndicator,
         .resetEnableNavigationIndicator = ResetEnableNavigationIndicator,
+        .setNavDestinationOnShown = SetNavDestinationOnShown,
+        .resetNavDestinationOnShown = ResetNavDestinationOnShown,
+        .setNavDestinationOnHidden = SetNavDestinationOnHidden,
+        .resetNavDestinationOnHidden = ResetNavDestinationOnHidden,
+        .setNavDestinationOnWillHide = SetNavDestinationOnWillHide,
+        .resetNavDestinationOnWillHide = ResetNavDestinationOnWillHide,
+        .setNavDestinationOnWillAppear = SetNavDestinationOnWillAppear,
+        .resetNavDestinationOnWillAppear = ResetNavDestinationOnWillAppear,
+        .setNavDestinationOnWillShow = SetNavDestinationOnWillShow,
+        .resetNavDestinationOnWillShow = ResetNavDestinationOnWillShow,
+        .setNavDestinationOnWillDisappear = SetNavDestinationOnWillDisappear,
+        .resetNavDestinationOnWillDisappear = ResetNavDestinationOnWillDisappear,
+        .setNavDestinationOnBackPressed = SetNavDestinationOnBackPressed,
+        .resetNavDestinationOnBackPressed = ResetNavDestinationOnBackPressed,
+        .setNavDestinationOnReady = SetNavDestinationOnReady,
+        .resetNavDestinationOnReady = ResetNavDestinationOnReady,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

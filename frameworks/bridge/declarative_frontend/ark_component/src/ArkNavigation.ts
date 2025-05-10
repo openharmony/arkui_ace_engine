@@ -217,7 +217,12 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     modifierWithKey(this._modifiersWithKeys, NavigationEnableToolBarAdaptationModifier.identity, NavigationEnableToolBarAdaptationModifier, value);
     return this;
   }
-}
+
+  systemBarStyle(style: Optional<SystemBarStyle>): NavigationAttribute {
+    modifierWithKey(this._modifiersWithKeys, NavigationSystemBarStyleModifier.identity, NavigationSystemBarStyleModifier, style);
+    return this;
+  }
+} 
 
 class OnTitleModeChangeModifier extends ModifierWithKey<((titleMode: NavigationTitleMode) => void)> {
   constructor(value: (titleMode: NavigationTitleMode) => void) {
@@ -638,6 +643,22 @@ class NavigationEnableToolBarAdaptationModifier extends ModifierWithKey<boolean 
   }
 }
 
+class NavigationSystemBarStyleModifier extends ModifierWithKey<Optional<SystemBarStyle>> {
+  constructor(value: Optional<SystemBarStyle>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('systemBarStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if(reset || !this.value) {
+      getUINativeModule().navigation.resetSystemBarStyle(node);
+    } else {
+      getUINativeModule().navigation.setSystemBarStyle(node, this.value.statusBarContentColor);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !(this.stageValue.statusBarContentColor === this.value.statusBarContentColor);
+  }
+}
 // @ts-ignore
 globalThis.Navigation.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {

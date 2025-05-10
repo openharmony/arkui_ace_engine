@@ -485,8 +485,15 @@ void SetSystemBarStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto contentColor = Color(value);
-    NavigationModelNG::SetSystemBarStyle(frameNode, contentColor);
+    RefPtr<SystemBarStyle> style = SystemBarStyle::CreateStyleFromColor(value);
+    NavigationModelNG::SetSystemBarStyle(frameNode, style);
+}
+
+void ResetSystemBarStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetSystemBarStyle(frameNode, nullptr);
 }
 
 void SetEnableToolBarAdaptation(ArkUINodeHandle node, ArkUI_Bool enable)
@@ -660,6 +667,7 @@ const ArkUINavigationModifier* GetNavigationModifier()
         .setOnCoordScrollUpdateAction = SetOnCoordScrollUpdateAction,
         .setOnCoordScrollEndAction = SetOnCoordScrollEndAction,
         .setSystemBarStyle = SetSystemBarStyle,
+        .resetSystemBarStyle = ResetSystemBarStyle,
         .setEnableToolBarAdaptation = SetEnableToolBarAdaptation,
         .resetEnableToolBarAdaptation = ResetEnableToolBarAdaptation,
         .setOnNavigationModeChange = SetOnNavigationModeChange,

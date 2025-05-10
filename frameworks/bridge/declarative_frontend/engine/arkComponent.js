@@ -23693,7 +23693,9 @@ class ArkNavDestinationComponent extends ArkComponent {
     return this;
   }
   toolbarConfiguration(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, NavDestinationToolBarConfigurationModifier.identity,
+      NavDestinationToolBarConfigurationModifier, value);
+    return this;
   }
   hideBackButton(value) {
     modifierWithKey(this._modifiersWithKeys, NavDestinationHideBackButtonModifier.identity,
@@ -23716,13 +23718,44 @@ class ArkNavDestinationComponent extends ArkComponent {
     return this;
   }
   onShown(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnShownModifier.identity,
+      NavDestinationOnShownModifier, callback);
+    return this;
   }
   onHidden(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnHiddenModifier.identity,
+      NavDestinationOnHiddenModifier, callback);
+    return this;
+  }
+  onWillHide(callback) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnWillHideModifier.identity,
+      NavDestinationOnWillHideModifier, callback);
+    return this;
+  }
+  onWillAppear(callback) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnWillAppearModifier.identity,
+      NavDestinationOnWillAppearModifier, callback);
+    return this;
+  }
+  onWillShow(callback) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnWillShowModifier.identity,
+      NavDestinationOnWillShowModifier, callback);
+    return this;
+  }
+  onWillDisappear(callback) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnWillDisappearModifier.identity,
+      NavDestinationOnWillDisappearModifier, callback);
+    return this;
   }
   onBackPressed(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnBackPressedModifier.identity,
+      NavDestinationOnBackPressedModifier, callback);
+    return this;
+  }
+  onReady(callback) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnReadyModifier.identity,
+      NavDestinationOnReadyModifier, callback);
+    return this;
   }
   ignoreLayoutSafeArea(types, edges) {
     let opts = new ArkSafeAreaExpandOpts();
@@ -23787,6 +23820,10 @@ class ArkNavDestinationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, EnableNavigationIndicatorModifier.identity, EnableNavigationIndicatorModifier, enable);
     return this;
   }
+  systemBarStyle(style) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationSystemBarStyleModifier.identity, NavDestinationSystemBarStyleModifier, style);
+    return this;
+  }
 }
 
 class HideTitleBarModifier extends ModifierWithKey {
@@ -23818,6 +23855,23 @@ class NavDestinationHideToolBarModifier extends ModifierWithKey {
   }
 }
 NavDestinationHideToolBarModifier.identity = Symbol('hideToolBar');
+
+class NavDestinationToolBarConfigurationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetToolBarConfiguration(node);
+    } else {
+      getUINativeModule().navDestination.setToolBarConfiguration(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+NavDestinationToolBarConfigurationModifier.identity = Symbol('toolBarConfiguration');
 
 class NavDestinationHideBackButtonModifier extends ModifierWithKey {
   constructor(value) {
@@ -23966,6 +24020,136 @@ class EnableNavigationIndicatorModifier extends ModifierWithKey {
   }
 }
 EnableNavigationIndicatorModifier.identity = Symbol('enableNavigationIndicator');
+
+class NavDestinationSystemBarStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().navDestination.resetSystemBarStyle(node);
+    } else {
+      getUINativeModule().navDestination.setSystemBarStyle(node, this.value.statusBarContentColor);
+    }
+  }
+  checkObjectDiff() {
+    return !(this.stageValue.statusBarContentColor === this.value.statusBarContentColor);
+  }
+}
+NavDestinationSystemBarStyleModifier.identity = Symbol('systemBarStyle');
+
+class NavDestinationOnShownModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnShown(node);
+    } else {
+      getUINativeModule().navDestination.setOnShown(node, this.value);
+    }
+  }
+}
+NavDestinationOnShownModifier.identity = Symbol('onShown');
+
+class NavDestinationOnHiddenModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnHidden(node);
+    } else {
+      getUINativeModule().navDestination.setOnHidden(node, this.value);
+    }
+  }
+}
+NavDestinationOnHiddenModifier.identity = Symbol('onHidden');
+
+class NavDestinationOnWillHideModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnWillHide(node);
+    } else {
+      getUINativeModule().navDestination.setOnWillHide(node, this.value);
+    }
+  }
+}
+NavDestinationOnWillHideModifier.identity = Symbol('onWillHide');
+
+class NavDestinationOnWillAppearModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnWillAppear(node);
+    } else {
+      getUINativeModule().navDestination.setOnWillAppear(node, this.value);
+    }
+  }
+}
+NavDestinationOnWillAppearModifier.identity = Symbol('onWillAppear');
+
+class NavDestinationOnWillShowModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnWillShow(node);
+    } else {
+      getUINativeModule().navDestination.setOnWillShow(node, this.value);
+    }
+  }
+}
+NavDestinationOnWillShowModifier.identity = Symbol('onWillShow');
+
+class NavDestinationOnWillDisappearModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnWillDisappear(node);
+    } else {
+      getUINativeModule().navDestination.setOnWillDisappear(node, this.value);
+    }
+  }
+}
+NavDestinationOnWillDisappearModifier.identity = Symbol('onWillDisappear');
+
+class NavDestinationOnBackPressedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnBackPressed(node);
+    } else {
+      getUINativeModule().navDestination.setOnBackPressed(node, this.value);
+    }
+  }
+}
+NavDestinationOnBackPressedModifier.identity = Symbol('onBackPressed');
+
+class NavDestinationOnReadyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnReady(node);
+    } else {
+      getUINativeModule().navDestination.setOnReady(node, this.value);
+    }
+  }
+}
+NavDestinationOnReadyModifier.identity = Symbol('onReady');
 
 //@ts-ignore
 if (globalThis.NavDestination !== undefined) {
@@ -24831,6 +25015,11 @@ class ArkNavigationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, NavigationEnableToolBarAdaptationModifier.identity, NavigationEnableToolBarAdaptationModifier, value);
     return this;
   }
+
+  systemBarStyle(style) {
+    modifierWithKey(this._modifiersWithKeys, NavigationSystemBarStyleModifier.identity, NavigationSystemBarStyleModifier, style);
+    return this;
+  }
 }
 
 class OnTitleModeChangeModifier extends ModifierWithKey {
@@ -25232,6 +25421,24 @@ class NavigationEnableToolBarAdaptationModifier extends ModifierWithKey {
   }
 }
 NavigationEnableToolBarAdaptationModifier.identity = Symbol('enableToolBarAdaptation');
+
+class NavigationSystemBarStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().navigation.resetSystemBarStyle(node);
+    } else {
+      getUINativeModule().navigation.setSystemBarStyle(node, this.value.statusBarContentColor);
+    }
+  }
+  checkObjectDiff() {
+    return !(this.stageValue.statusBarContentColor === this.value.statusBarContentColor);
+  }
+}
+NavigationSystemBarStyleModifier.identity = Symbol('systemBarStyle');
 
 class MenusModifier extends ModifierWithKey {
   constructor(value) {
