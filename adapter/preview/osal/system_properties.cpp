@@ -27,6 +27,7 @@ constexpr char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
 constexpr char PROPERTY_DEVICE_TYPE_TWO_IN_ONE[] = "2in1";
 constexpr char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
 constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
+constexpr int32_t DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD = 20;
 
 static constexpr char UNDEFINED_PARAM[] = "undefined parameter";
 
@@ -118,6 +119,7 @@ bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
 int32_t SystemProperties::touchAccelarate_ = 0;
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
+int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -410,4 +412,8 @@ bool SystemProperties::IsPageTransitionFreeze()
     return pageTransitionFrzEnabled_;
 }
 
+int32_t SystemProperties::getFormSharedImageCacheThreshold()
+{
+    return formSharedImageCacheThreshold_;
+}
 } // namespace OHOS::Ace

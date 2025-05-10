@@ -59,6 +59,7 @@ constexpr float DEFAULT_ANIMATION_SCALE = 1.0f;
 float animationScale_ = DEFAULT_ANIMATION_SCALE;
 constexpr int32_t DEFAULT_DRAG_START_DAMPING_RATIO = 20;
 constexpr int32_t DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD_IN_VP = 10;
+constexpr int32_t DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD = 20;
 std::shared_mutex mutex_;
 const std::regex FOLD_TYPE_REGEX("^(\\d+)(,\\d+){3,}$");
 #ifdef ENABLE_ROSEN_BACKEND
@@ -604,6 +605,7 @@ bool SystemProperties::taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentE
 int32_t SystemProperties::dragDropFrameworkStatus_ = ReadDragDropFrameworkStatus();
 int32_t SystemProperties::touchAccelarate_ = ReadTouchAccelarateMode();
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
+int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -755,6 +757,8 @@ void SystemProperties::InitDeviceInfo(
     faultInjectEnabled_  = IsFaultInjectEnabled();
     windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
     taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
+    formSharedImageCacheThreshold_ =
+        system::GetIntParameter("const.form.shared_image.cache_threshold", DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD);
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -1187,4 +1191,8 @@ bool SystemProperties::IsPageTransitionFreeze()
     return pageTransitionFrzEnabled_;
 }
 
+int32_t SystemProperties::getFormSharedImageCacheThreshold()
+{
+    return formSharedImageCacheThreshold_;
+}
 } // namespace OHOS::Ace

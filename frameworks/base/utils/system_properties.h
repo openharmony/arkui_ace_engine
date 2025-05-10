@@ -717,6 +717,8 @@ public:
 
     static bool IsPageTransitionFreeze();
 
+    static int32_t getFormSharedImageCacheThreshold();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -806,6 +808,7 @@ private:
     static int32_t dragDropFrameworkStatus_;
     static int32_t touchAccelarate_;
     static bool pageTransitionFrzEnabled_;
+    static int32_t formSharedImageCacheThreshold_;
 };
 
 } // namespace OHOS::Ace

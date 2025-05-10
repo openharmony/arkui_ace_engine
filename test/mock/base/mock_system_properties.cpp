@@ -23,6 +23,7 @@ namespace OHOS::Ace {
 namespace {
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
+constexpr int32_t DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD = 20;
 
 void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 {
@@ -86,6 +87,7 @@ int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
 bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
+int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD;
 
 bool g_irregularGrid = true;
 bool g_segmentedWaterflow = true;
@@ -292,4 +294,8 @@ bool SystemProperties::IsPageTransitionFreeze()
     return pageTransitionFrzEnabled_;
 }
 
+int32_t SystemProperties::getFormSharedImageCacheThreshold()
+{
+    return formSharedImageCacheThreshold_;
+}
 } // namespace OHOS::Ace
