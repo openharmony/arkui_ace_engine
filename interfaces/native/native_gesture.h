@@ -836,7 +836,7 @@ int32_t OH_ArkUI_GetGestureParam_distanceThreshold(ArkUI_GestureRecognizer* reco
 *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
 *         Returns {@link ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED} if the gesture recognizer type is
 *                 not supported.
-* @since 18
+* @since 19
 */
 ArkUI_ErrorCode OH_ArkUI_PanGesture_SetDistanceMap(
     ArkUI_GestureRecognizer* recognizer, int size, int* toolTypeArray, double* distanceArray);
@@ -852,7 +852,7 @@ ArkUI_ErrorCode OH_ArkUI_PanGesture_SetDistanceMap(
 *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
 *         Returns {@link ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED} if the gesture recognizer type is
 *                 not supported.
-* @since 18
+* @since 19
 */
 ArkUI_ErrorCode OH_ArkUI_PanGesture_GetDistanceByToolType(
     ArkUI_GestureRecognizer* recognizer, int toolType, double* distance);
