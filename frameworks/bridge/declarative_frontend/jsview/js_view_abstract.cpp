@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -10159,5 +10158,14 @@ uint8_t JSViewAbstract::GetPixelRoundMode()
     auto pipeline = PipelineBase::GetCurrentContext();
     return pipeline ? static_cast<uint8_t>(pipeline->GetPixelRoundMode())
                     : static_cast<uint8_t>(PixelRoundMode::PIXEL_ROUND_ON_LAYOUT_FINISH);
+}
+
+void JSViewAbstract::UnRegisterResource(const std::string& key)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern(); 
+    CHECK_NULL_VOID(pattern);
+    pattern->UnRegisterResource(key);
 }
 } // namespace OHOS::Ace::Framework
