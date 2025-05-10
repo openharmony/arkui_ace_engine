@@ -122,17 +122,17 @@ RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(const ImageSourceIn
     return imageObj;
 }
 
-void ImageProvider::FailCallback(
-    const std::string& key, const std::string& errorMsg, int32_t errorCode, bool sync, int32_t containerId)
+void ImageProvider::FailCallback(const std::string& key, const std::string& errorMsg, const ImageErrorInfo& errorInfo,
+    bool sync, int32_t containerId)
 {
     auto ctxs = EndTask(key);
-    auto notifyLoadFailTask = [ctxs, errorMsg, errorCode] {
+    auto notifyLoadFailTask = [ctxs, errorMsg, errorInfo] {
         for (auto&& it : ctxs) {
             auto ctx = it.Upgrade();
             if (!ctx) {
                 continue;
             }
-            ctx->FailCallback(errorMsg, errorCode);
+            ctx->FailCallback(errorMsg, errorInfo);
         }
     };
 
@@ -174,25 +174,21 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     // load image data
     auto imageLoader = ImageLoader::CreateImageLoader(src);
     if (!imageLoader) {
-        FailCallback(src.GetTaskKey(), "unknown source type.",
-            static_cast<int32_t>(ImageErrorCode::CREATE_IMAGE_UNKNOWN_SOURCE_TYPE), sync, src.GetContainerId());
+        errorInfo = { ImageErrorCode::CREATE_IMAGE_UNKNOWN_SOURCE_TYPE, "unknown source type." };
+        FailCallback(src.GetTaskKey(), "Failed to create image loader.", errorInfo, sync, src.GetContainerId());
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     RefPtr<ImageData> data = imageLoader->GetImageData(src, errorInfo, WeakClaim(RawPtr(pipeline)));
     if (!data) {
-        FailCallback(src.GetTaskKey(),
-            errorInfo.errorCode == ImageErrorCode::DEFAULT ? "Failed to load image data" : errorInfo.errorMessage,
-            static_cast<int32_t>(errorInfo.errorCode), sync, src.GetContainerId());
+        FailCallback(src.GetTaskKey(), "Failed to load image data", errorInfo, sync, src.GetContainerId());
         return;
     }
 
     // build ImageObject
     RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(src, errorInfo, data);
     if (!imageObj) {
-        FailCallback(src.GetTaskKey(),
-            (errorInfo.errorCode == ImageErrorCode::DEFAULT ? "Failed to build image object" : errorInfo.errorMessage),
-            static_cast<int32_t>(errorInfo.errorCode), sync, src.GetContainerId());
+        FailCallback(src.GetTaskKey(), "Failed to build image object", errorInfo, sync, src.GetContainerId());
         return;
     }
 
@@ -366,27 +362,26 @@ void ImageProvider::DownLoadImage(const UriDownLoadConfig& downLoadConfig)
         ContainerScope scope(instanceId);
         ACE_SCOPED_TRACE("DownloadImageSuccess %s, [%zu]", downLoadConfig.imageDfxConfig.ToStringWithSrc().c_str(),
             imageData.size());
+        ImageErrorInfo errorInfo;
         if (!GreatNotEqual(imageData.size(), 0)) {
             ImageProvider::FailCallback(downLoadConfig.taskKey, "The length of imageData from netStack is not positive",
-                static_cast<int32_t>(ImageErrorCode::DEFAULT), downLoadConfig.sync, containerId);
+                errorInfo, downLoadConfig.sync, containerId);
             return;
         }
         auto data = ImageData::MakeFromDataWithCopy(imageData.data(), imageData.size());
-        ImageErrorInfo errorInfo;
         RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(downLoadConfig.src, errorInfo, data);
         if (!imageObj) {
-            ImageProvider::FailCallback(downLoadConfig.taskKey, (errorInfo.errorCode == ImageErrorCode::DEFAULT ?
-                "After download successful, imageObject Create fail" : errorInfo.errorMessage),
-                static_cast<int32_t>(errorInfo.errorCode), downLoadConfig.sync, containerId);
+            ImageProvider::FailCallback(downLoadConfig.taskKey, "After download successful, imageObject Create fail",
+                errorInfo, downLoadConfig.sync, containerId);
             return;
         }
         ImageProvider::DownLoadSuccessCallback(imageObj, downLoadConfig.taskKey, downLoadConfig.sync, containerId);
     };
     downloadCallback.failCallback = [taskKey = downLoadConfig.taskKey, sync = downLoadConfig.sync,
-                                        containerId = downLoadConfig.src.GetContainerId()](
-                                        std::string errorMessage, int32_t errorCode, bool async, int32_t instanceId) {
+                                        containerId = downLoadConfig.src.GetContainerId()](std::string errorMessage,
+                                        ImageErrorInfo errorInfo, bool async, int32_t instanceId) {
         ContainerScope scope(instanceId);
-        ImageProvider::FailCallback(taskKey, errorMessage, errorCode, sync, containerId);
+        ImageProvider::FailCallback(taskKey, errorMessage, errorInfo, sync, containerId);
     };
     downloadCallback.cancelCallback = downloadCallback.failCallback;
     if (downLoadConfig.hasProgressCallback) {
@@ -554,9 +549,8 @@ void ImageProvider::MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const 
     if (image) {
         SuccessCallback(image, key, imageDecoderOptions.sync, obj->GetSourceInfo().GetContainerId());
     } else {
-        FailCallback(key,
-            (errorInfo.errorCode == ImageErrorCode::DEFAULT ? "Failed to decode image" : errorInfo.errorMessage),
-            static_cast<int32_t>(errorInfo.errorCode), imageDecoderOptions.sync, obj->GetSourceInfo().GetContainerId());
+        FailCallback(
+            key, "Failed to decode image", errorInfo, imageDecoderOptions.sync, obj->GetSourceInfo().GetContainerId());
     }
 }
 } // namespace OHOS::Ace::NG

@@ -98,7 +98,7 @@ void RosenFontLoader::LoadFromNetwork(const RefPtr<PipelineBase>& context)
                     },
                     TaskExecutor::TaskType::UI, "ArkUIFontLoadFromList");
             };
-            downloadCallback.failCallback = [](std::string errorMessage, int32_t /* errorCode */, bool async,
+            downloadCallback.failCallback = [](std::string errorMessage, ImageErrorInfo /* errorInfo */, bool async,
                                                 int32_t instanceId) {
                 TAG_LOGW(
                     AceLogTag::ACE_FONT, "Sync Download font Failed,errorMessage is %{public}s", errorMessage.c_str());

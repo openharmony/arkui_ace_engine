@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_IMAGE_EVENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_IMAGE_EVENT_H
 
+#include "base/image/image_defines.h"
 #include "core/event/ace_events.h"
 
 namespace OHOS::Ace {
@@ -99,9 +100,10 @@ public:
         : BaseEventInfo("LoadImageFailEvent"), componentWidth_(componentWidth), componentHeight_(componentHeight),
           errorMessage_(std::move(errorMessage))
     {}
-    LoadImageFailEvent(double componentWidth, double componentHeight, std::string errorMessage, int32_t errorCode)
+    LoadImageFailEvent(
+        double componentWidth, double componentHeight, std::string errorMessage, const ImageErrorInfo& errorInfo)
         : BaseEventInfo("LoadImageFailEvent"), componentWidth_(componentWidth), componentHeight_(componentHeight),
-          errorMessage_(std::move(errorMessage)), errorCode_(errorCode)
+          errorMessage_(std::move(errorMessage)), errorInfo_(errorInfo)
     {}
     ~LoadImageFailEvent() override = default;
 
@@ -120,16 +122,16 @@ public:
         return errorMessage_;
     }
 
-    int32_t GetErrorCode() const
+    ImageErrorInfo GetErrorInfo() const
     {
-        return errorCode_;
+        return errorInfo_;
     }
 
 private:
     double componentWidth_ = 0.0;
     double componentHeight_ = 0.0;
     std::string errorMessage_;
-    int32_t errorCode_ = -1;
+    ImageErrorInfo errorInfo_;
 };
 
 } // namespace OHOS::Ace

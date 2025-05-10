@@ -1197,8 +1197,10 @@ ArkUINativeModuleValue ImageBridge::SetOnError(ArkUIRuntimeCallInfo* runtimeCall
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        const char* errKeys[] = { "code" };
-        Local<JSValueRef> errValues[] = { panda::NumberRef::New(vm, event.GetErrorCode()) };
+        const char* errKeys[] = { "code", "message" };
+        Local<JSValueRef> errValues[] = { panda::NumberRef::New(
+            vm, static_cast<int32_t>(event.GetErrorInfo().errorCode)),
+            panda::StringRef::NewFromUtf8(vm, event.GetErrorInfo().errorMessage.c_str()) };
         auto errObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(errKeys), errKeys, errValues);
         const char* keys[] = { "componentWidth", "componentHeight", "message", "error" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, event.GetComponentWidth()),

@@ -210,7 +210,7 @@ HWTEST_F(ImageProviderTestNg, NotifiersTest001, TestSize.Level1)
         callbackFlag = 2;
         return;
     };
-    auto callback3 = [](const ImageSourceInfo& src, const std::string& errorMsg, int32_t errorCode) {
+    auto callback3 = [](const ImageSourceInfo& src, const std::string& errorMsg, const ImageErrorInfo& errorInfo) {
         callbackFlag = 3;
         return;
     };
@@ -635,7 +635,7 @@ HWTEST_F(ImageProviderTestNg, NotifiersTest002, TestSize.Level1)
         callbackFlag = 2;
         return;
     };
-    auto callback3 = [](const ImageSourceInfo& src, const std::string& errorMsg, int32_t errorCode) {
+    auto callback3 = [](const ImageSourceInfo& src, const std::string& errorMsg, const ImageErrorInfo& errorInfo) {
         callbackFlag = 3;
         return;
     };

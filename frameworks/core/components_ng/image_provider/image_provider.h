@@ -34,7 +34,7 @@ namespace OHOS::Ace::NG {
 using DataReadyNotifyTask = std::function<void(const ImageSourceInfo& src)>;
 using LoadSuccessNotifyTask = std::function<void(const ImageSourceInfo& src)>;
 using LoadFailNotifyTask =
-    std::function<void(const ImageSourceInfo& src, const std::string& errorMsg, int32_t errorCode)>;
+    std::function<void(const ImageSourceInfo& src, const std::string& errorMsg, const ImageErrorInfo& errorInfo)>;
 using OnCompleteInDataReadyNotifyTask = std::function<void(const ImageSourceInfo& src)>;
 
 struct LoadNotifier {
@@ -147,8 +147,8 @@ private:
     // helper functions to end task and callback to LoadingContexts
     static void SuccessCallback(
         const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync = false, int32_t containerId = 0);
-    static void FailCallback(const std::string& key, const std::string& errorMsg, int32_t errorCode, bool sync = false,
-        int32_t containerId = 0);
+    static void FailCallback(const std::string& key, const std::string& errorMsg, const ImageErrorInfo& errorInfo,
+        bool sync = false, int32_t containerId = 0);
 
     struct Task {
         CancelableCallback<void()> bgTask_;

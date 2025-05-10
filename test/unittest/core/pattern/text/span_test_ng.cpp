@@ -1152,7 +1152,7 @@ HWTEST_F(SpanTestNg, ImageSpanEventTest002, TestSize.Level1)
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
     auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    LoadImageFailEvent loadImageFailEvent(WIDTH, HEIGHT, "image load error!", -1);
+    LoadImageFailEvent loadImageFailEvent(WIDTH, HEIGHT, "image load error!", {});
     eventHub->FireErrorEvent(loadImageFailEvent);
     EXPECT_EQ(isTrigger, true);
 }
