@@ -62,7 +62,7 @@ HWTEST_F(SwiperArkoalaTest, Basic001, TestSize.Level1)
     EXPECT_EQ(lazy_.GetRange(), std::pair(0, 1));
     EXPECT_EQ(GetChildRect(frameNode_, 0).ToString(), "RectT (0.00, 0.00) - [480.00 x 800.00]");
 
-    pattern_->UpdateOffset(-200.0f);
+    pattern_->UpdateCurrentOffset(-200.0f);
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(0, 2));
     EXPECT_EQ(pattern_->GetEndIndex(), 1);
@@ -77,9 +77,9 @@ HWTEST_F(SwiperArkoalaTest, Basic001, TestSize.Level1)
     EXPECT_EQ(GetChildRect(frameNode_, 1).ToString(), "RectT (-110.00, 0.00) - [480.00 x 800.00]");
     EXPECT_EQ(GetChildRect(frameNode_, 2).ToString(), "RectT (380.00, 0.00) - [480.00 x 800.00]");
 
-    pattern_->UpdateOffset(300.0f);
+    pattern_->UpdateCurrentOffset(300.0f);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(0, 2));
+    EXPECT_EQ(lazy_.GetRange(), std::pair(0, 3));
     EXPECT_EQ(GetChildRect(frameNode_, 0).ToString(), "RectT (-300.00, 0.00) - [480.00 x 800.00]");
     EXPECT_EQ(GetChildRect(frameNode_, 1).ToString(), "RectT (190.00, 0.00) - [480.00 x 800.00]");
 
