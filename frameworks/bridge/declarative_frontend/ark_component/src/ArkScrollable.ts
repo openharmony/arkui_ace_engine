@@ -95,8 +95,8 @@ class BackToTopModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class ScrollBarMarginModifier extends ModifierWithKey<ArkScrollBarMagin> {
-  constructor(value: ArkScrollBarMagin) {
+class ScrollBarMarginModifier extends ModifierWithKey<ScrollBarMargin> {
+  constructor(value: ScrollBarMargin) {
     super(value);
   }
   static identity: Symbol = Symbol('scrollBarMargin');
@@ -104,7 +104,7 @@ class ScrollBarMarginModifier extends ModifierWithKey<ArkScrollBarMagin> {
     if (reset) {
       getUINativeModule().scrollable.resetScrollBarMargin(node);
     } else {
-      getUINativeModule().scrollable.setScrollBarMargin(node, this.value.start?.value, this.value.end?.value);
+      getUINativeModule().scrollable.setScrollBarMargin(node, this.value.start, this.value.end);
     }
   }
 }
@@ -161,11 +161,8 @@ export class ArkScrollable<T> extends ArkComponent implements ScrollableCommonMe
       modifierWithKey(this._modifiersWithKeys, BackToTopModifier.identity, BackToTopModifier, value);
       return this;
     }
-    scrollBarMargin(start?: LengthMetrics, end?:LengthMetrics): this {
-      let scrollBarMagin: ArkScrollBarMagin = new ArkScrollBarMagin();
-      scrollBarMagin.start = start;
-      scrollBarMagin.end = end;
-      modifierWithKey(this._modifiersWithKeys, ScrollBarMarginModifier.identity, ScrollBarMarginModifier, scrollBarMagin);
+    scrollBarMargin(margin: ScrollBarMargin): T {
+      modifierWithKey(this._modifiersWithKeys, ScrollBarMarginModifier.identity, ScrollBarMarginModifier, margin);
       return this;
     }
 }

@@ -6338,7 +6338,7 @@ int32_t SetScrollBarMargin(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
         }
     }
     GetFullImpl()->getNodeModifiers()->getScrollableModifier()->setScrollBarMargin(
-        node->uiNodeHandle, marginStart, marginEnd);
+        node->uiNodeHandle, marginStart, UNIT_VP, marginEnd, UNIT_VP);
     return ERROR_CODE_NO_ERROR;
 }
 
