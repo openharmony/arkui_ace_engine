@@ -27,6 +27,7 @@ abstract class ViewBuildNodeBase {
     protected childrenWeakrefMap_ = new Map<number, WeakRef<IView>>();
     protected updateFuncByElmtId = new UpdateFuncsByElmtId();
     protected id_: number;
+    protected shareLocalStorage_: LocalStorage = undefined;
     protected static arkThemeScopeManager: ArkThemeScopeManager | undefined = undefined;
   
     public abstract ifElseBranchUpdateFunctionDirtyRetaken(): void;
@@ -174,5 +175,11 @@ abstract class ViewBuildNodeBase {
                 child.onGlobalThemeChanged();
             }
         });
+    }
+    public getShareLocalStorage(): LocalStorage {
+        return this.shareLocalStorage_;
+    }
+    public setShareLocalStorage(localStorage: LocalStorage): void {
+        this.shareLocalStorage_ = localStorage;
     }
 }

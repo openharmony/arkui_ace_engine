@@ -67,6 +67,7 @@ declare interface BuildOptions {
   nestingBuilderSupported?: boolean;
   lazyBuildSupported?: boolean;
   bindedViewOfBuilderNode?:ViewPU;
+  localStorage?:LocalStorage;
 }
 
 declare interface RegisterParams {
