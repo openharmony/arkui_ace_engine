@@ -3546,6 +3546,19 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     return true;
 }
 
+void GetTextDiffObscured(
+    const std::string& beforeText, const std::string& latestContent, std::string& addedText, std::string& removedText)
+{
+    auto changeLen = beforeText.length() - latestContent.length();
+    char16_t obscuring =
+        Localization::GetInstance()->GetLanguage() == "ar" ? OBSCURING_CHARACTER_FOR_AR : OBSCURING_CHARACTER;
+    if (changeLen > 0) {
+        addedText = UtfUtils::Str16DebugToStr8(std::u16string(changeLen, obscuring));
+    } else if (changeLen < 0) {
+        removedText = UtfUtils::Str16DebugToStr8(std::u16string(-changeLen, obscuring));
+    }
+}
+
 void TextFieldPattern::AddTextFireOnChange()
 {
     auto host = GetHost();
@@ -3561,6 +3574,7 @@ void TextFieldPattern::AddTextFireOnChange()
         CHECK_NULL_VOID(eventHub);
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
+        auto newText = UtfUtils::Str16DebugToStr8(pattern->GetTextContentController()->GetTextUtf16Value());
         layoutProperty->UpdateValue(pattern->GetTextContentController()->GetTextUtf16Value());
         ChangeValueInfo changeValueInfo;
         changeValueInfo.value = pattern->GetBodyTextValue();
@@ -3574,6 +3588,25 @@ void TextFieldPattern::AddTextFireOnChange()
         eventHub->FireOnChange(changeValueInfo);
 
         pattern->RecordTextInputEvent();
+        std::string addedText, removedText;
+        if (pattern->IsInPasswordMode()) {
+            GetTextDiffObscured(pattern->textCache_, newText, addedText, removedText);
+        } else {
+            DetectTextDiff(pattern->textCache_, newText, addedText, removedText);
+        }
+        if (!addedText.empty() && removedText.empty()) {
+            SEC_TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+                "textCache, in=%{public}s, newText=%{public}s, addedText=%{public}s", pattern->textCache_.c_str(),
+                newText.c_str(), addedText.c_str());
+            pattern->OnAccessibilityEventTextChange(TextChangeType::ADD, addedText);
+        }
+        if (!removedText.empty() && addedText.empty()) {
+            SEC_TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+                "textCache, in=%{public}s, newText=%{public}s, removedText=%{public}s", pattern->textCache_.c_str(),
+                newText.c_str(), removedText.c_str());
+            pattern->OnAccessibilityEventTextChange(TextChangeType::REMOVE, removedText);
+        }
+        pattern->textCache_ = newText;
     });
 }
 
@@ -3963,6 +3996,7 @@ void TextFieldPattern::InitEditingValueText(std::u16string content)
     if (HasInputOperation()) {
         return;
     }
+    textCache_ = UtfUtils::Str16DebugToStr8(content);
     contentController_->SetTextValueOnly(std::move(content));
     selectController_->UpdateCaretIndex(GetTextUtf16Value().length());
     if (GetIsPreviewText() && GetTextUtf16Value().empty()) {
@@ -3980,6 +4014,7 @@ bool TextFieldPattern::InitValueText(std::u16string content)
     if (HasInputOperation() && content != u"") {
         return false;
     }
+    textCache_ = UtfUtils::Str16DebugToStr8(content);
     ChangeValueInfo changeValueInfo;
     changeValueInfo.oldContent = GetBodyTextValue();
     changeValueInfo.value = content;
@@ -11057,5 +11092,18 @@ void TextFieldPattern::BeforeAutoFillAnimation(const std::u16string& content, co
     } else {
         onFinishCallback();
     }
+}
+
+void TextFieldPattern::OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    AccessibilityEvent event;
+    event.type = AccessibilityEventType::TEXT_CHANGE;
+    event.nodeId = host->GetAccessibilityId();
+    event.extraEventInfo.insert({ changeType, changeString });
+    pipeline->SendEventToAccessibilityWithNode(event, GetHost());
 }
 } // namespace OHOS::Ace::NG

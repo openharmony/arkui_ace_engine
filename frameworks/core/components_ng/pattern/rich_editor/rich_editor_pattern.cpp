@@ -587,6 +587,7 @@ void RichEditorPattern::AfterStyledStringChange(int32_t start, int32_t length, c
         eventHub->FireOnStyledStringDidChange(changeValue);
     }
     ForceTriggerAvoidOnCaretChange();
+    ReportAfterContentChangeEvent();
 }
 
 void RichEditorPattern::AfterStyledStringChange(const UndoRedoRecord& record, bool isUndo)
@@ -1537,6 +1538,35 @@ void RichEditorPattern::AfterContentChange(RichEditorChangeValue& changeValue)
         eventHub->FireOnDidChange(changeValue);
     }
     ForceTriggerAvoidOnCaretChange();
+    ReportAfterContentChangeEvent();
+}
+
+void RichEditorPattern::ReportAfterContentChangeEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    std::string currentContent;
+    if (isSpanStringMode_) {
+        CHECK_NULL_VOID(styledString_);
+        currentContent = styledString_->GetString();
+    } else {
+        std::u16string u16Str;
+        GetContentBySpans(u16Str);
+        currentContent = UtfUtils::Str16DebugToStr8(u16Str);
+    }
+    std::string addedText, removedText;
+    DetectTextDiff(textCache_, currentContent, addedText, removedText);
+    if (!addedText.empty() && removedText.empty()) {
+        SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "textCache, in=%{public}s, newText=%{public}s, addedText=%{public}s",
+            textCache_.c_str(), currentContent.c_str(), addedText.c_str());
+        OnAccessibilityEventTextChange(TextChangeType::ADD, addedText);
+    } else if (!removedText.empty() && addedText.empty()) {
+        SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "textCache, in=%{public}s, newText=%{public}s, removedText=%{public}s",
+            textCache_.c_str(), currentContent.c_str(), removedText.c_str());
+        OnAccessibilityEventTextChange(TextChangeType::REMOVE, removedText);
+    }
+    textCache_ = currentContent;
 }
 
 void RichEditorPattern::SpanNodeFission(RefPtr<SpanNode>& spanNode)
@@ -12339,5 +12369,18 @@ void RichEditorPattern::OnReportRichEditorEvent(const std::string& event)
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(EVENT, value);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "nodeId:[%{public}d] RichEditor reportComponentChangeEvent %{public}s", frameId_,
         event.c_str());
+}
+
+void RichEditorPattern::OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    AccessibilityEvent event;
+    event.type = AccessibilityEventType::TEXT_CHANGE;
+    event.nodeId = host->GetAccessibilityId();
+    event.extraEventInfo.insert({changeType, changeString});
+    pipeline->SendEventToAccessibilityWithNode(event, GetHost());
 }
 } // namespace OHOS::Ace::NG
