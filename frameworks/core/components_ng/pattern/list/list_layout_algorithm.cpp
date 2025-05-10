@@ -1943,12 +1943,14 @@ int32_t ListLayoutAlgorithm::GetMidIndex(LayoutWrapper* layoutWrapper, bool useP
     return totalItemCount_ - 1;
 }
 
-void ListLayoutAlgorithm::SyncGeometry(RefPtr<LayoutWrapper>& wrapper)
+void ListLayoutAlgorithm::SyncGeometry(RefPtr<LayoutWrapper>& wrapper, bool isDirty)
 {
     CHECK_NULL_VOID(wrapper);
     auto host = wrapper->GetHostNode();
     CHECK_NULL_VOID(host);
-    host->ForceSyncGeometryNode();
+    if (!(isDirty && host->IsGeometrySizeChange())) {
+        host->ForceSyncGeometryNode();
+    }
     host->ResetLayoutAlgorithm();
     host->RebuildRenderContextTree();
 }
@@ -2156,7 +2158,7 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
         } else {
             cachedCount++;
         }
-        SyncGeometry(wrapper);
+        SyncGeometry(wrapper, isDirty);
         wrapper->SetActive(false);
         curIndex++;
     }
@@ -2202,7 +2204,7 @@ int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
         } else {
             cachedCount++;
         }
-        SyncGeometry(wrapper);
+        SyncGeometry(wrapper, isDirty);
         wrapper->SetActive(false);
         curIndex--;
     }
