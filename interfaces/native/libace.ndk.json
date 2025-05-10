@@ -2616,15 +2616,15 @@
         "name": "OH_ArkUI_KeyEvent_Dispatch"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "19",
         "name": "OH_ArkUI_KeyEvent_IsNumLockOn"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "19",
         "name": "OH_ArkUI_KeyEvent_IsCapsLockOn"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "19",
         "name": "OH_ArkUI_KeyEvent_IsScrollLockOn"
     },
     {
