@@ -457,7 +457,6 @@ protected:
     virtual void OnSucceedCancel() {}
     virtual void RemoveUnsupportEvent(int32_t touchId) {}
     bool ShouldResponse() override;
-    bool CheckoutDownFingers(int32_t fingerId);
 
     void HandleWillAccept();
     void HandleDidAccept();

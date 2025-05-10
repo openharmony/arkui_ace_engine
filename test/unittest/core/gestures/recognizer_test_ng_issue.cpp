@@ -168,12 +168,6 @@ HWTEST_F(RecognizerTestNgIssue, LongPressRecognizerIssue003, TestSize.Level1)
         .SetTiltY(10.0f)
         .SetTargetDisplayId(2);
     longPressRecognizer->HandleEvent(moveEvent);
-    /**
-     * @tc.steps: No need check downFingers for fingerList.
-     */
-    auto context = PipelineContext::GetCurrentContext();
-    ASSERT_NE(context, nullptr);
-    context->eventManager_ = nullptr;
     longPressRecognizer->OnAccepted();
     EXPECT_EQ(eventInfo.GetTimeStamp().time_since_epoch().count(), moveTime);
     EXPECT_EQ(eventInfo.GetRepeat(), false);
