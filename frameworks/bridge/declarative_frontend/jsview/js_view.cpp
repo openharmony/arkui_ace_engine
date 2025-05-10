@@ -695,6 +695,13 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         return jsView->jsViewFunction_->ExecuteOnDumpInfo();
     };
 
+    auto clearAllRecycleFunc = [weak = AceType::WeakClaim(this)]() -> void {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        ContainerScope scope(jsView->GetInstanceId());
+        jsView->jsViewFunction_->ExecuteClearAllRecycle();
+    };
+
     auto getThisFunc = [weak = AceType::WeakClaim(this)]() -> void* {
         auto jsView = weak.Upgrade();
         CHECK_NULL_RETURN(jsView, nullptr);
@@ -733,6 +740,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         .setActiveFunc = std::move(setActiveFunc),
         .onDumpInfoFunc = std::move(onDumpInfoFunc),
         .onDumpInspectorFunc = std::move(onDumpInspectorFunc),
+        .clearAllRecycleFunc = std::move(clearAllRecycleFunc),
         .getThisFunc = std::move(getThisFunc),
         .recycleFunc = std::move(recycleFunc),
         .reuseFunc = std::move(reuseFunc),

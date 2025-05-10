@@ -62,4 +62,6 @@ interface IView {
     debugInfoDirtDescendantElementIdsInternal(depth: number, recursive: boolean, counter: ProfileRecursionCounter): string;
 
     onGlobalThemeChanged(): void;
+
+    clearAllRecycle(): void;
 }
