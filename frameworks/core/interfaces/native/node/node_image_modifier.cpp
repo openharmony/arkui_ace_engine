@@ -776,7 +776,7 @@ void ResetHdrBrightness(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, HdrBrightness, frameNode);
+    ImageModelNG::SetHdrBrightness(frameNode, HDR_BRIGHTNESS_MAX);
 }
 
 int32_t GetFitOriginalSize(ArkUINodeHandle node)
