@@ -321,6 +321,12 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
     } else {
         selectInfo.menuInfo.showCopyAll = true;
     }
+
+    if (isSelectAll_) {
+        selectInfo.menuInfo.showCopyAll = false;
+        isSelectAll_ = false;
+    }
+
     auto value = GetSelectedText();
     auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
     if (!queryWord.empty()) {
@@ -799,7 +805,7 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
         case OptionMenuActionId::COPY:
             quickMenuCallback_->Continue(
                 OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY, OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
-            pattern->CloseSelectOverlay();
+            HideMenu(true);
             break;
         case OptionMenuActionId::CUT:
             quickMenuCallback_->Continue(
@@ -814,6 +820,7 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
         case OptionMenuActionId::SELECT_ALL:
             quickMenuCallback_->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_SELECT_ALL,
                 OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
+            isSelectAll_ = true;
             break;
         case OptionMenuActionId::TRANSLATE:
             HandleOnTranslate();
