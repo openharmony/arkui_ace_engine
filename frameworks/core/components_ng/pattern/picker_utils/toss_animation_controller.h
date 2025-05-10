@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TIME_PICKER_TOSS_ANIMATION_CONTROLLER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TIME_PICKER_TOSS_ANIMATION_CONTROLLER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PICKER_UTILS_TOSS_ANIMATION_CONTROLLER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PICKER_UTILS_TOSS_ANIMATION_CONTROLLER_H
 
 #include "core/components/picker/picker_animation.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {
-class TimePickerColumnPattern;
-
-class TimePickerTossAnimationController : public virtual AceType {
-    DECLARE_ACE_TYPE(TimePickerTossAnimationController, AceType);
+class PickerColumnPattern;
+class TossAnimationController : public virtual AceType {
+    DECLARE_ACE_TYPE(TossAnimationController, AceType);
 
 public:
-    TimePickerTossAnimationController() = default;
-    ~TimePickerTossAnimationController() = default;
+    TossAnimationController() = default;
+    ~TossAnimationController() = default;
 
-    void SetColumn(const WeakPtr<TimePickerColumnPattern>& value)
+    void SetColumn(const WeakPtr<PickerColumnPattern>& value)
     {
         column_ = value;
     }
@@ -74,13 +72,13 @@ private:
     double speed_ = 0.0;
     int32_t showCount_ = 0;
     double end_ = 0.0;
-    WeakPtr<TimePickerColumnPattern> column_;
+    WeakPtr<PickerColumnPattern> column_;
     WeakPtr<PipelineContext> pipeline_;
 
     RefPtr<NodeAnimatablePropertyFloat> property_;
 
-    ACE_DISALLOW_COPY_AND_MOVE(TimePickerTossAnimationController);
+    ACE_DISALLOW_COPY_AND_MOVE(TossAnimationController);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TIME_PICKER_TOSS_ANIMATION_CONTROLLER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PICKER_UTILS_TOSS_ANIMATION_CONTROLLER_H

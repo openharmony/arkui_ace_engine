@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_paint_method.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_accessibility_property.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/components_ng/pattern/picker_utils/picker_column_pattern.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
 #endif
