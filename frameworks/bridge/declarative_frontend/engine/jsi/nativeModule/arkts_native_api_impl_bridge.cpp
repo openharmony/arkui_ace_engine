@@ -626,6 +626,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetRotate));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRotate"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetRotate));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRotateAngle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetRotateAngle));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRotateAngle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetRotateAngle));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGeometryTransition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetGeometryTransition));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGeometryTransition"),
