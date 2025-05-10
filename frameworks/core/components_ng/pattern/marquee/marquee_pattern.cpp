@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -714,5 +713,44 @@ void MarqueePattern::OnFontScaleConfigurationUpdate()
         auto playStatus = paintProperty->GetPlayerStatus().value_or(false);
         pattern->StopMarqueeAnimation(playStatus);
     });
+}
+
+void MarqueePattern::UpdatePropertyImpl(
+    const std::string& key, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto property = frameNode->GetLayoutPropertyPtr<MarqueeLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    using Handler = std::function<void(MarqueeLayoutProperty*, RefPtr<PropertyValueBase>)>;
+    static const std::unordered_map<std::string, Handler> handlers = {
+        { "FontSize",
+            [](MarqueeLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<CalcDimension>>(value)) {
+                    prop->UpdateFontSize(intVal->value);
+                }
+            } },
+        { "TextColor",
+            [node = WeakClaim(RawPtr((frameNode))), weak = WeakClaim(this)](
+                MarqueeLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                auto frameNode = node.Upgrade();
+                CHECK_NULL_VOID(frameNode);
+                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, intVal->value, frameNode);
+                    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+                    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+                    prop->UpdateFontColor(intVal->value);
+                }
+            } },
+        { "FontFamily",
+            [](MarqueeLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto intVal = DynamicCast<PropertyValue<std::vector<std::string>>>(value)) {
+                    prop->UpdateFontFamily(intVal->value);
+                }
+            } },
+    };
+    auto it = handlers.find(key);
+    if (it != handlers.end()) {
+        it->second(property, value);
+    }
 }
 } // namespace OHOS::Ace::NG
