@@ -56,10 +56,6 @@
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "ui/rs_surface_node.h"
 #include "core/components_ng/pattern/web/web_select_overlay.h"
-#include "core/components_ng/pattern/text_field/text_select_controller.h"
-#include "core/common/ai/ai_write_adapter.h"
-#include "core/common/ime/text_input_client.h"
-#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
 class WebDelegateObserver;
@@ -764,13 +760,6 @@ public:
     void RegisterSurfaceDensityCallback();
     void SetSurfaceDensity(double density);
 
-    bool IsShowAIWrite();
-    int GetSelectStartIndex() const;
-    int GetSelectEndIndex() const;
-    std::string GetAllTextInfo() const;
-    void GetHandleInfo(SelectOverlayInfo& infoHandle);
-    void HandleOnAIWrite();
-
 private:
     friend class WebContextSelectOverlay;
     friend class WebSelectOverlay;
@@ -1048,12 +1037,6 @@ private:
     CursorStyleInfo GetAndUpdateCursorStyleInfo(
         const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
 
-    void HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer);
-    void FormatIndex(int32_t& startIndex, int32_t& endIndex);
-    std::u16string GetSelectedValue(int32_t startIndex, int32_t endIndex);
-    RefPtr<TextFieldTheme> GetTheme() const;
-    void GetAIWriteInfo(AIWriteInfo& info);
-
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
     std::optional<std::string> customScheme_;
@@ -1238,11 +1221,6 @@ private:
     bool keyboardGetready_ = false;
 
     std::optional<int32_t> dataListNodeId_ = std::nullopt;
-
-    RectF firstInfoHandle_;
-    RectF secondInfoHandle_;
-    RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
-    std::u16string content_;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
