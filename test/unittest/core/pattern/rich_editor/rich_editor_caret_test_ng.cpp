@@ -177,7 +177,7 @@ HWTEST_F(RichEditorCaretTestNg, CaretColorTest001, TestSize.Level1)
 HWTEST_F(RichEditorCaretTestNg, SetCaretPosition001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = AceType::MakeRefPtr<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"SetCaretPosition");

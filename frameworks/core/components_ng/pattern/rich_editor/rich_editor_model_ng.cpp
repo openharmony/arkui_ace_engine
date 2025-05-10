@@ -18,6 +18,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/rich_editor/styled_string_rich_editor_pattern.h"
 
 namespace OHOS::Ace::NG {
 void RichEditorModelNG::Create(bool isStyledStringMode)
@@ -25,8 +26,11 @@ void RichEditorModelNG::Create(bool isStyledStringMode)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::RICH_EDITOR_ETS_TAG, nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    using PatternCreator = std::function<RefPtr<Pattern>(void)>;
+    PatternCreator ssPatternCreator = []() { return AceType::MakeRefPtr<StyledStringRichEditorPattern>(); };
+    PatternCreator oldPatternCreator = []() { return AceType::MakeRefPtr<RichEditorPattern>(); };
+    PatternCreator patternCreator = isStyledStringMode ? ssPatternCreator : oldPatternCreator;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_ETS_TAG, nodeId, patternCreator);
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, TextAlign::START);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, WordBreak, WordBreak::BREAK_WORD);

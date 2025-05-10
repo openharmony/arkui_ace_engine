@@ -228,7 +228,7 @@ void RichEditorStyledStringExtendTestNg::SetUp()
 {
     RichEditorStyledStringCommonTestNg::SetUp();
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
     auto mutableStr = CreateTextStyledString(INIT_U16STRING_1);
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->SetStyledString(mutableStr);
@@ -239,7 +239,7 @@ void RichEditorStyledStringExtendTestNg::SetUp()
 void RichEditorStyledStringExtendTestNg::TearDown()
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->ClearOperationRecords();
     RichEditorStyledStringCommonTestNg::TearDown();
@@ -286,7 +286,7 @@ void RichEditorStyledStringExtendTestNg::DoActionWithRecord(const OperationRecor
 void RichEditorStyledStringExtendTestNg::DoTestActions(bool needUndo)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     for (const auto& record : testRecords) {
         DoActionWithRecord(record);
@@ -301,7 +301,7 @@ void RichEditorStyledStringExtendTestNg::DoTestActions(bool needUndo)
 void RichEditorStyledStringExtendTestNg::SetCaretOrSelectionWithRecord(const UndoRedoRecord& record)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->ResetSelection();
     richEditorPattern->SetCaretPosition(record.selectionBefore.end);
@@ -313,7 +313,7 @@ void RichEditorStyledStringExtendTestNg::SetCaretOrSelectionWithRecord(const Und
 void RichEditorStyledStringExtendTestNg::CheckUndoRecord(const UndoRedoRecord& record)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     ASSERT_NE(richEditorPattern->undoManager_, nullptr);
     auto& undoRecords = richEditorPattern->undoManager_->undoRecords_;
@@ -324,7 +324,7 @@ void RichEditorStyledStringExtendTestNg::CheckUndoRecord(const UndoRedoRecord& r
 void RichEditorStyledStringExtendTestNg::InsertValueWithRecord(const UndoRedoRecord& record)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     SetCaretOrSelectionWithRecord(record);
     richEditorPattern->InsertValueInStyledString(record.styledStringAfter->GetU16string(), true);
@@ -334,7 +334,7 @@ void RichEditorStyledStringExtendTestNg::InsertValueWithRecord(const UndoRedoRec
 void RichEditorStyledStringExtendTestNg::DeleteValueWithRecord(const UndoRedoRecord& record)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     SetCaretOrSelectionWithRecord(record);
     richEditorPattern->DeleteValueInStyledString(record.rangeBefore.start, record.rangeBefore.GetLength());
@@ -344,7 +344,7 @@ void RichEditorStyledStringExtendTestNg::DeleteValueWithRecord(const UndoRedoRec
 void RichEditorStyledStringExtendTestNg::HandleDragWithRecord(const UndoRedoRecord& record)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->isDragSponsor_ = false;
     richEditorPattern->SetCaretPosition(record.selectionBefore.end);
@@ -356,7 +356,7 @@ void RichEditorStyledStringExtendTestNg::HandleDragWithRecord(const UndoRedoReco
     const UndoRedoRecord& recordStep2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->isDragSponsor_ = true;
     richEditorPattern->dragRange_ = { recordStep2.rangeBefore.start, recordStep2.rangeBefore.end};
@@ -378,7 +378,7 @@ void RichEditorStyledStringExtendTestNg::HandleDragWithRecord(const UndoRedoReco
 void RichEditorStyledStringExtendTestNg::HandlePasteStringWithRecord(const UndoRedoRecord& record)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     SetCaretOrSelectionWithRecord(record);
     richEditorPattern->InsertValueByPaste(record.styledStringAfter->GetU16string());
@@ -388,7 +388,7 @@ void RichEditorStyledStringExtendTestNg::HandlePasteStringWithRecord(const UndoR
 void RichEditorStyledStringExtendTestNg::HandlePasteStyledStringWithRecord(const UndoRedoRecord& record)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     SetCaretOrSelectionWithRecord(record);
     richEditorPattern->InsertStyledStringByPaste(record.styledStringAfter);
@@ -398,7 +398,7 @@ void RichEditorStyledStringExtendTestNg::HandlePasteStyledStringWithRecord(const
 void RichEditorStyledStringExtendTestNg::SetStyledStringWithRecord(const UndoRedoRecord& record)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     SetCaretOrSelectionWithRecord(record);
     richEditorPattern->SetStyledString(record.styledStringAfter);
@@ -409,7 +409,7 @@ void RichEditorStyledStringExtendTestNg::HandleUpdateSelectStyleWithRecord(const
     KeyCode keyCode)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     SetCaretOrSelectionWithRecord(record);
     richEditorPattern->HandleSelectFontStyle(keyCode);
@@ -442,7 +442,7 @@ std::string RichEditorStyledStringExtendTestNg::GetRecordString(const UndoRedoRe
 HWTEST_F(RichEditorStyledStringExtendTestNg, HandleSelectFontStyle, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     ASSERT_NE(richEditorPattern->styledString_, nullptr);
     auto keyCode = KeyCode::KEY_B;
@@ -492,7 +492,7 @@ HWTEST_F(RichEditorStyledStringExtendTestNg, HandleSelectFontStyle, TestSize.Lev
 HWTEST_F(RichEditorStyledStringExtendTestNg, RecordOperation001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     ASSERT_NE(richEditorPattern->styledString_, nullptr);
     // step1 insert value
@@ -544,7 +544,7 @@ HWTEST_F(RichEditorStyledStringExtendTestNg, RecordOperation001, TestSize.Level1
 HWTEST_F(RichEditorStyledStringExtendTestNg, RecordOperation002, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     ASSERT_NE(richEditorPattern->styledString_, nullptr);
 
@@ -609,7 +609,7 @@ HWTEST_F(RichEditorStyledStringExtendTestNg, RecordOperation002, TestSize.Level1
 HWTEST_F(RichEditorStyledStringExtendTestNg, RecordOperation003, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     ASSERT_NE(richEditorPattern->styledString_, nullptr);
 
@@ -658,7 +658,7 @@ HWTEST_F(RichEditorStyledStringExtendTestNg, RecordOperation003, TestSize.Level1
 HWTEST_F(RichEditorStyledStringExtendTestNg, HandleUndoAction001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     ASSERT_NE(richEditorPattern->styledString_, nullptr);
     DoTestActions();
@@ -712,7 +712,7 @@ HWTEST_F(RichEditorStyledStringExtendTestNg, HandleUndoAction001, TestSize.Level
 HWTEST_F(RichEditorStyledStringExtendTestNg, HandleRedoAction001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     ASSERT_NE(richEditorPattern->styledString_, nullptr);
     DoTestActions(true);

@@ -31,7 +31,7 @@ void RichEditorStyledStringCommonTestNg::SetUp()
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     richEditorNode_ = FrameNode::GetOrCreateFrameNode(
-        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StyledStringRichEditorPattern>(); });
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     richEditorPattern->InitScrollablePattern();

@@ -442,8 +442,10 @@ HWTEST_F(RichEditorTouchTestNg, UpdateSelectionByTouchMove001, TestSize.Level1)
  */
 HWTEST_F(RichEditorTouchTestNg, UpdateSelectionByTouchMove002, TestSize.Level1)
 {
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto richEditorNode = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StyledStringRichEditorPattern>(); });
+    auto richEditorPattern = richEditorNode->GetPattern<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->isEditing_ = true;
     richEditorPattern->isSpanStringMode_ = true;
