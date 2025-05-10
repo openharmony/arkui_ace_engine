@@ -347,14 +347,6 @@ void ListPattern::CheckScrollItemRange()
     }
 }
 
-RefPtr<FrameNode> ListPattern::GetOrCreateChildByIndex(uint32_t index)
-{
-    if (adapter_ && adapter_->getItemFunc) {
-        return adapter_->getItemFunc(index);
-    }
-    return nullptr;
-}
-
 void ListPattern::UpdateListDirectionInCardStyle()
 {
     if (isNeedToUpdateListDirection_) {
