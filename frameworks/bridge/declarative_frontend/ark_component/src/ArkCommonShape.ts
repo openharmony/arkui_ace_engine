@@ -92,8 +92,15 @@ class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<
       this._modifiersWithKeys, CommonShapeForegroundColorModifier.identity, CommonShapeForegroundColorModifier, value);
     return this;
   }
+  resetCommonShapeOptions(): void {
+    modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+      CommonShapeWidthModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+      CommonShapeHeightModifier, undefined);
+  }
   initialize(value: Object[]): this {
     if (isUndefined(value[0]) || isNull(value[0])) {
+      this.resetCommonShapeOptions();
       return this;
     }
     const value_casted = value[0] as CommonShapeOptionsParam;

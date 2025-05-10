@@ -27,8 +27,17 @@ class ArkPathComponent extends ArkCommonShapeComponent implements PathAttribute 
     modifierWithKey(this._modifiersWithKeys, CommandsModifier.identity, CommandsModifier, value);
     return this;
   }
+  resetPathOptions(): void {
+    modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+      CommonShapeWidthModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+      CommonShapeHeightModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, CommandsModifier.identity,
+      CommandsModifier, undefined);
+  }
   initialize(value: Object[]): this {
     if (isUndefined(value[0]) || isNull(value[0])) {
+      this.resetPathOptions();
       return this;
     }
     const value_casted = value[0] as PathOptionsParam;

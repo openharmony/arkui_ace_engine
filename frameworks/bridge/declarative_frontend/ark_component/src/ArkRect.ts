@@ -81,6 +81,18 @@ class ArkRectComponent extends ArkCommonShapeComponent implements RectAttribute 
     modifierWithKey(this._modifiersWithKeys, RectRadiusModifier.identity, RectRadiusModifier, value);
     return this;
   }
+  resetRectOptions(): void {
+    modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+      CommonShapeWidthModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+      CommonShapeHeightModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, RectRadiusModifier.identity,
+      RectRadiusModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, RectRadiusWidthModifier.identity,
+      RectRadiusWidthModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, RectRadiusHeightModifier.identity,
+      RectRadiusHeightModifier, undefined);
+  }
   initializeRoundedRectOptions(value: RectOptionsParam): void {
     if (isUndefined(value) || isNull(value)) {
       return;
@@ -108,6 +120,7 @@ class ArkRectComponent extends ArkCommonShapeComponent implements RectAttribute 
   }
   initialize(value: Object[]): this {
     if (isUndefined(value[0]) || isNull(value[0])) {
+      this.resetRectOptions();
       return this;
     }
     const value_casted = value[0] as RectOptionsParam;
