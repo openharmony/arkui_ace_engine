@@ -2299,7 +2299,7 @@ typedef enum {
     ARKUI_ERROR_CODE_CALLBACK_INVALID = 190002,
     /**
      * @error operation is not allowed for current drag drop phase.
-     * @since 16
+     * @since 19
      */
     ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED = 190004,
     /**
