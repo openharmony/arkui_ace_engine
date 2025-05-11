@@ -69,9 +69,11 @@ public:
 
     void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) const override;
     void OnAccessibilityChildTreeDeregister() const override;
-    void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId) const override;
+    void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId) override;
     void OnAccessibilityDumpChildInfo(
         const std::vector<std::string>& params, std::vector<std::string>& info) const override;
+    void TransferAccessibilityRectInfo(bool isForce = false);
+    void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
 
     void InitializeAccessibility();
     void ResetAccessibilityChildTreeCallback();
@@ -98,6 +100,8 @@ private:
     bool HandleKeyEvent(const KeyEvent& event) override;
     void HandleFocusEvent() override;
     void HandleBlurEvent() override;
+    bool IsAncestorNodeGeometryChange(FrameNodeChangeInfoFlag flag);
+    bool IsAncestorNodeTransformChange(FrameNodeChangeInfoFlag flag);
 
     void OnAttachToFrameNode() override;
     void RegisterPipelineEvent(int32_t instanceId);
@@ -105,6 +109,11 @@ private:
 
     void AddToPageEventController();
     void ReleasePageEvent() const;
+    AccessibilityParentRectInfo GetAccessibilityRectInfo() const;
+    void RegisterAccessibilitySAObserverCallback(int32_t instanceId);
+    void UnRegisterAccessibilitySAObserverCallback(int32_t instanceId);
+    void RegisterSingleHandTransformChangedCallback(int32_t instanceId);
+    void UnRegisterSingleHandTransformChangedCallback(int32_t instanceId);
 
     RefPtr<DynamicComponentRenderer> dynamicComponentRenderer_;
     bool adaptiveWidth_ = false;
@@ -116,6 +125,8 @@ private:
     RefPtr<AccessibilitySessionAdapterIsolatedComponent> accessibilitySessionAdapter_;
     std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_ = nullptr;
     bool isVisible_ = true;
+    int32_t surfacePositionCallBackId_ = -1;
+    std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
 
     static int32_t dynamicGenerator_; // only run on JS thread, and do not require mutex
     ACE_DISALLOW_COPY_AND_MOVE(DynamicPattern);

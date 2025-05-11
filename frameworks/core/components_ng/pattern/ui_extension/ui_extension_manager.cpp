@@ -189,6 +189,33 @@ void UIExtensionManager::RecycleExtensionId(int32_t id)
     UIExtensionIdUtility::GetInstance().RecycleExtensionId(id);
 }
 
+void UIExtensionManager::RegisterSingleHandTransformChangedCallback(
+    int32_t nodeId, std::function<void()>&& callback)
+{
+    if (callback == nullptr) {
+        return;
+    }
+
+    singleHandTransformChangedCallbackMap_[nodeId] = std::move(callback);
+}
+
+void UIExtensionManager::UnregisterSingleHandTransformChangedCallback(int32_t nodeId)
+{
+    singleHandTransformChangedCallbackMap_.erase(nodeId);
+}
+
+void UIExtensionManager::HandleSingleHandTransformChangedCallback()
+{
+    SingleHandTransformChangedCallbackMap callbackMap;
+    std::swap(callbackMap, singleHandTransformChangedCallbackMap_);
+    for (const auto& iter : callbackMap) {
+        if (iter.second) {
+            iter.second();
+        }
+    }
+    std::swap(callbackMap, singleHandTransformChangedCallbackMap_);
+}
+
 void UIExtensionManager::AddAliveUIExtension(int32_t nodeId, const WeakPtr<UIExtensionPattern>& uiExtension)
 {
     std::lock_guard<std::mutex> aliveUIExtensionMutex(aliveUIExtensionMutex_);
@@ -549,6 +576,8 @@ void UIExtensionManager::TransferAccessibilityRectInfo()
             uiExtension->TransferAccessibilityRectInfo();
         }
     }
+
+    HandleSingleHandTransformChangedCallback();
 }
 
 void UIExtensionManager::UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data,
