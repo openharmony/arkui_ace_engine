@@ -6664,7 +6664,7 @@ class ScrollBarMarginModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().scrollable.resetScrollBarMargin(node);
     } else {
-      getUINativeModule().scrollable.setScrollBarMargin(node, this.value);
+      getUINativeModule().scrollable.setScrollBarMargin(node, this.value.start, this.value.end);
     }
   }
 }

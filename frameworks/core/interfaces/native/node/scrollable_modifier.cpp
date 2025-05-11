@@ -267,13 +267,14 @@ int32_t GetBackToTop(ArkUINodeHandle node)
     return ScrollableModelNG::GetBackToTop(frameNode);
 }
 
-void SetScrollBarMargin(ArkUINodeHandle node, ArkUI_Float32 marginStart, ArkUI_Float32 marginEnd)
+void SetScrollBarMargin(ArkUINodeHandle node, ArkUI_Float32 marginStart, ArkUI_Int32 marginStartLengthUnit,
+    ArkUI_Float32 marginEnd, ArkUI_Int32 marginEndLengthUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ScrollBarMargin scrollBarMargin;
-    scrollBarMargin.start_ = Dimension(marginStart, DimensionUnit::VP);
-    scrollBarMargin.end_ = Dimension(marginEnd, DimensionUnit::VP);
+    scrollBarMargin.start_ = Dimension(marginStart, static_cast<OHOS::Ace::DimensionUnit>(marginStartLengthUnit));
+    scrollBarMargin.end_ = Dimension(marginEnd, static_cast<OHOS::Ace::DimensionUnit>(marginEndLengthUnit));
     ScrollableModelNG::SetScrollBarMargin(frameNode, scrollBarMargin);
 }
 
