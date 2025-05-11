@@ -182,8 +182,8 @@ class TextAreaCopyOptionModifier extends ModifierWithKey<CopyOptions> {
   }
 }
 
-class TextAreaMaxLinesModifier extends ModifierWithKey<number | undefined> {
-  constructor(value: number | undefined) {
+class TextAreaMaxLinesModifier extends ModifierWithKey<ArkTextFieldMaxLines> {
+  constructor(value: ArkTextFieldMaxLines) {
     super(value);
   }
   static identity: Symbol = Symbol('textAreaMaxLines');
@@ -191,11 +191,12 @@ class TextAreaMaxLinesModifier extends ModifierWithKey<number | undefined> {
     if (reset) {
       getUINativeModule().textArea.resetMaxLines(node);
     } else {
-      getUINativeModule().textArea.setMaxLines(node, this.value!);
+      getUINativeModule().textArea.setMaxLines(node, this.value.value!, this.value.overflowMode!);
     }
   }
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
+      !isBaseOrResourceEqual(this.stageValue.overflowMode, this.value.overflowMode);
   }
 }
 
@@ -1457,8 +1458,11 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     modifierWithKey(this._modifiersWithKeys, TextAreaSelectionMenuHiddenModifier.identity, TextAreaSelectionMenuHiddenModifier, value);
     return this;
   }
-  maxLines(value: number): TextAreaAttribute {
-    modifierWithKey(this._modifiersWithKeys, TextAreaMaxLinesModifier.identity, TextAreaMaxLinesModifier, value);
+  maxLines(value: number, options?:MaxLinesOptions): TextAreaAttribute {
+    let arkValue: ArkTextFieldMaxLines = new ArkTextFieldMaxLines();
+    arkValue.value = value;
+    arkValue.overflowMode = options?.overflowMode;
+    modifierWithKey(this._modifiersWithKeys, TextAreaMaxLinesModifier.identity, TextAreaMaxLinesModifier, arkValue);
     return this;
   }
   minLines(value: number): TextAreaAttribute {

@@ -88,12 +88,13 @@ void ResetTextAreaSelectionMenuHidden(ArkUINodeHandle node)
     TextFieldModelNG::SetSelectionMenuHidden(frameNode, DEFAULT_SELECTION_MENU_HIDDEN);
 }
 
-void SetTextAreaMaxLines(ArkUINodeHandle node, ArkUI_Uint32 maxLine)
+void SetTextAreaMaxLines(ArkUINodeHandle node, ArkUI_Uint32 maxLine, ArkUI_Uint32 overflowMode)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetMaxViewLines(frameNode, maxLine);
     TextFieldModelNG::SetNormalMaxViewLines(frameNode, maxLine);
+    TextFieldModelNG::SetOverflowMode(frameNode, static_cast<OverflowMode>(overflowMode));
 }
 
 void SetTextAreaMinLines(ArkUINodeHandle node, ArkUI_Uint32 minLine)

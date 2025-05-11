@@ -679,4 +679,36 @@ HWTEST_F(TextFieldAlgorithmTest, DidExceedMaxLines, TestSize.Level1)
     EXPECT_FALSE(textInputLayoutAlgorithm->DidExceedMaxLines(maxSize));
 }
 
+/**
+ * @tc.name: UpdateTextAreaMaxLines
+ * @tc.desc: Test the function UpdateTextAreaMaxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, UpdateTextAreaMaxLines, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
+    GetFocus();
+
+    auto paintProperty = pattern_->GetPaintProperty<TextFieldPaintProperty>();
+    PaddingProperty paddingProperty { .top = CalcLength(300), .bottom = CalcLength(300) };
+    paintProperty->UpdatePaddingByUser(paddingProperty);
+    MarginProperty margin = { CalcLength(1), CalcLength(3), CalcLength(5), CalcLength(7) };
+    paintProperty->UpdateMarginByUser(margin);
+
+    auto textFieldLayoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    TextStyle textStyle;
+    textFieldLayoutProperty->UpdateOverflowMode(OverflowMode::SCROLL);
+    textFieldLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
+    textFieldLayoutProperty->UpdateNormalMaxViewLines(1);
+    auto textAreaLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextAreaLayoutAlgorithm>();
+    textAreaLayoutAlgorithm->UpdateTextAreaMaxLines(textStyle, textFieldLayoutProperty);
+    EXPECT_EQ(textStyle.GetMaxLines(), INT32_MAX);
+    textFieldLayoutProperty->UpdateTextOverflow(TextOverflow::CLIP);
+    textAreaLayoutAlgorithm->UpdateTextAreaMaxLines(textStyle, textFieldLayoutProperty);
+    EXPECT_EQ(textStyle.GetMaxLines(), INT32_MAX);
+
+    textFieldLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    textAreaLayoutAlgorithm->UpdateTextAreaMaxLines(textStyle, textFieldLayoutProperty);
+    EXPECT_EQ(textStyle.GetMaxLines(), 1);
+}
 } // namespace OHOS::Ace::NG //

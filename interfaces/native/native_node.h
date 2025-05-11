@@ -3649,6 +3649,21 @@ typedef enum {
      * @since 20
      */
     NODE_TEXT_AREA_LINE_SPACING = 8028,
+ 
+    /**
+     * @brief Set the max lines of the node with scroll.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: max lines count with scroll.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: max line count with scroll.\n
+     *
+     * @since 20
+     *
+     */
+    NODE_TEXT_AREA_MAX_LINES_WITH_SCROLL = 8030,
 
     /**
      * @brief Set the line height of the node. This attribute can be set, reset, and obtained as required through APIs.
