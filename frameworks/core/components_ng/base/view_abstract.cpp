@@ -258,6 +258,7 @@ void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color)
 
 void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<Pattern>();
     CHECK_NULL_VOID(pattern);
     auto &&updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject> &resObj) {
@@ -346,6 +347,7 @@ void ViewAbstract::SetBackgroundImage(FrameNode* frameNode, const ImageSourceInf
 void ViewAbstract::SetBackgroundImage(
     FrameNode* frameNode, const ImageSourceInfo& src, const RefPtr<ResourceObject>& resObj)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<Pattern>();
     CHECK_NULL_VOID(pattern);
     auto &&updateFunc = [weak = AceType::WeakClaim(frameNode),
@@ -426,7 +428,9 @@ void ViewAbstract::SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosi
 
     if (SystemProperties::ConfigChangePerform()) {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
         RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
         auto&& updateFunc = [bgImgPosition, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
             auto frameNode = weak.Upgrade();
@@ -446,7 +450,9 @@ void ViewAbstract::SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosi
 void ViewAbstract::SetBackgroundImagePosition(FrameNode* frameNode, BackgroundImagePosition& bgImgPosition)
 {
     if (SystemProperties::ConfigChangePerform()) {
+        CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
         RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
         auto&& updateFunc = [bgImgPosition, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
             auto frameNode = weak.Upgrade();
