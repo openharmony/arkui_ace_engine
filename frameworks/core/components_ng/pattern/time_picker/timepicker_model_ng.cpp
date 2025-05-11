@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -339,6 +340,25 @@ void TimePickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(theme);
+
+    auto pickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject> resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+
+        auto timePickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+        CHECK_NULL_VOID(timePickerPattern);
+
+        PickerTextStyle &pickerTextStyleValue = const_cast<PickerTextStyle &>(value);
+        pickerTextStyleValue.PickerReloadResource();
+        timePickerPattern->UpdateDisappearTextStyle(pickerTextStyleValue);
+    };
+
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    pickerPattern->AddResObj("TimePickerDisappearTextStyle", resObj, std::move(updateFunc));
+
     auto disappearStyle = theme->GetDisappearOptionStyle();
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearFontSize,
@@ -365,6 +385,25 @@ void TimePickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& theme, con
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(theme);
+
+    auto pickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject> resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+
+        auto timePickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+        CHECK_NULL_VOID(timePickerPattern);
+
+        PickerTextStyle &pickerTextStyleValue = const_cast<PickerTextStyle &>(value);
+        pickerTextStyleValue.PickerReloadResource();
+        timePickerPattern->UpdateNormalTextStyle(pickerTextStyleValue);
+    };
+
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    pickerPattern->AddResObj("TimePickerNormalTextStyle", resObj, std::move(updateFunc));
+
     auto normalStyle = theme->GetOptionStyle(false, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize, ConvertFontScaleValue(value.fontSize.value()));
@@ -390,6 +429,25 @@ void TimePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, c
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(theme);
+
+    auto pickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject> resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+
+        auto timePickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+        CHECK_NULL_VOID(timePickerPattern);
+
+        PickerTextStyle &pickerTextStyleValue = const_cast<PickerTextStyle &>(value);
+        pickerTextStyleValue.PickerReloadResource();
+        timePickerPattern->UpdateSelectedTextStyle(pickerTextStyleValue);
+    };
+
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    pickerPattern->AddResObj("TimePickerSelectedTextStyle", resObj, std::move(updateFunc));
+
     auto selectedStyle = theme->GetOptionStyle(true, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedFontSize,

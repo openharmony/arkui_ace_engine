@@ -635,7 +635,9 @@ void DatePickerColumnPattern::UpdatePickerTextProperties(uint32_t index, uint32_
     const RefPtr<TextLayoutProperty>& textLayoutProperty,
     const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(pickerTheme);

@@ -38,6 +38,8 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -300,6 +302,111 @@ void ParseDatePickerEffectOption(PickerDialogInfo& pickerDialog, const JSRef<JSO
         JSViewAbstract::ParseEffectOption(effectOptionValue, pickerDialog.effectOption.value());
     }
 }
+
+void ParseTextStyleFontFamily(const JSRef<JSVal>& fontFamily, NG::PickerTextStyle& textStyle, const std::string& key)
+{
+    std::vector<std::string> families;
+    RefPtr<ResourceObject> fontFamilyResObj;
+    if (JSViewAbstract::ParseJsFontFamilies(fontFamily, families, fontFamilyResObj)) {
+        textStyle.fontFamily = families;
+        JSDatePicker::IsUserDefinedFontFamily(key);
+    }
+
+    if (fontFamilyResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::PickerTextStyle& textStyle) {
+            std::vector<std::string> families;
+            ResourceParseUtils::ParseResFontFamilies(resObj, families);
+            textStyle.fontFamily = families;
+        };
+        std::string resKey = key + ".fontFamily";
+        textStyle.PickerAddResource(resKey, fontFamilyResObj, std::move(updateFunc));
+    }
+}
+
+void ParseTextStyleFontSize(const JSRef<JSVal>& fontSize, NG::PickerTextStyle& textStyle, const std::string& key)
+{
+    CalcDimension size;
+    RefPtr<ResourceObject> fontSizeResObj;
+    if (!JSViewAbstract::ParseJsDimensionFp(fontSize, size, fontSizeResObj) ||
+        size.Unit() == DimensionUnit::PERCENT) {
+        textStyle.fontSize = Dimension(-1);
+    } else {
+        textStyle.fontSize = size;
+    }
+
+    if (fontSizeResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::PickerTextStyle& textStyle) {
+            CalcDimension size;
+            ResourceParseUtils::ParseResDimensionFp(resObj, size);
+            if (size.Unit() == DimensionUnit::PERCENT) {
+                textStyle.fontSize = Dimension(-1);
+            } else {
+                textStyle.fontSize = size;
+            }
+        };
+        std::string resKey = key + ".fontSize";
+        textStyle.PickerAddResource(resKey, fontSizeResObj, std::move(updateFunc));
+    }
+}
+
+void ParseTextStyleWithResObj(
+    const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle, const std::string& key)
+{
+    auto fontColor = paramObj->GetProperty("color");
+    auto fontOptions = paramObj->GetProperty("font");
+
+    Color textColor;
+    RefPtr<ResourceObject> colorResObj;
+    if (JSViewAbstract::ParseJsColor(fontColor, textColor, colorResObj)) {
+        textStyle.textColor = textColor;
+    }
+
+    if (colorResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::PickerTextStyle& textStyle) {
+            Color textColor;
+            ResourceParseUtils::ParseResColor(resObj, textColor);
+            textStyle.textColor = textColor;
+        };
+        std::string resKey = key + ".color";
+        textStyle.PickerAddResource(resKey, colorResObj, std::move(updateFunc));
+    }
+
+    if (!fontOptions->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> fontObj = JSRef<JSObject>::Cast(fontOptions);
+    auto fontSize = fontObj->GetProperty("size");
+    auto fontWeight = fontObj->GetProperty("weight");
+    auto fontFamily = fontObj->GetProperty("family");
+    auto fontStyle = fontObj->GetProperty("style");
+    if (fontSize->IsNull() || fontSize->IsUndefined()) {
+        textStyle.fontSize = Dimension(-1);
+    } else {
+        ParseTextStyleFontSize(fontSize, textStyle, key);
+    }
+
+    if (!fontWeight->IsNull() && !fontWeight->IsUndefined()) {
+        std::string weight;
+        if (fontWeight->IsNumber()) {
+            weight = std::to_string(fontWeight->ToNumber<int32_t>());
+        } else {
+            JSViewAbstract::ParseJsString(fontWeight, weight);
+        }
+        textStyle.fontWeight = ConvertStrToFontWeight(weight);
+    }
+
+    if (!fontFamily->IsNull() && !fontFamily->IsUndefined()) {
+        ParseTextStyleFontFamily(fontFamily, textStyle, key);
+    }
+
+    if (fontStyle->IsNumber()) {
+        auto style = fontStyle->ToNumber<int32_t>();
+        if (style < 0 || style > 1) {
+            return;
+        }
+        textStyle.fontStyle = static_cast<FontStyle>(style);
+    }
+}
 } // namespace
 
 void JSDatePicker::JSBind(BindingTarget globalObj)
@@ -477,7 +584,11 @@ void JSDatePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
     if (info[0]->IsObject()) {
-        JSDatePicker::ParseTextStyle(info[0], textStyle, "disappearTextStyle");
+        if (SystemProperties::ConfigChangePerform()) {
+            ParseTextStyleWithResObj(info[0], textStyle, "disappearTextStyle");
+        } else {
+            JSDatePicker::ParseTextStyle(info[0], textStyle, "disappearTextStyle");
+        }
     }
     DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
@@ -488,7 +599,11 @@ void JSDatePicker::SetTextStyle(const JSCallbackInfo& info)
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
     if (info[0]->IsObject()) {
-        JSDatePicker::ParseTextStyle(info[0], textStyle, "textStyle");
+        if (SystemProperties::ConfigChangePerform()) {
+            ParseTextStyleWithResObj(info[0], textStyle, "textStyle");
+        } else {
+            JSDatePicker::ParseTextStyle(info[0], textStyle, "textStyle");
+        }
     }
     DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
@@ -508,7 +623,11 @@ void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
     if (info[0]->IsObject()) {
-        JSDatePicker::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
+        if (SystemProperties::ConfigChangePerform()) {
+            ParseTextStyleWithResObj(info[0], textStyle, "selectedTextStyle");
+        } else {
+            JSDatePicker::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
+        }
     }
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
     if (textStyle.textColor.has_value() && theme->IsCircleDial()) {
@@ -1583,7 +1702,11 @@ void JSTimePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
     if (info[0]->IsObject()) {
-        JSDatePicker::ParseTextStyle(info[0], textStyle, "disappearTextStyleTime");
+        if (SystemProperties::ConfigChangePerform()) {
+            ParseTextStyleWithResObj(info[0], textStyle, "disappearTextStyleTime");
+        } else {
+            JSDatePicker::ParseTextStyle(info[0], textStyle, "disappearTextStyleTime");
+        }
     }
     TimePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
@@ -1594,7 +1717,11 @@ void JSTimePicker::SetTextStyle(const JSCallbackInfo& info)
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
     if (info[0]->IsObject()) {
-        JSDatePicker::ParseTextStyle(info[0], textStyle, "textStyleTime");
+        if (SystemProperties::ConfigChangePerform()) {
+            ParseTextStyleWithResObj(info[0], textStyle, "textStyleTime");
+        } else {
+            JSDatePicker::ParseTextStyle(info[0], textStyle, "textStyleTime");
+        }
     }
     TimePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
@@ -1605,7 +1732,11 @@ void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
     if (info[0]->IsObject()) {
-        JSDatePicker::ParseTextStyle(info[0], textStyle, "selectedTextStyleTime");
+        if (SystemProperties::ConfigChangePerform()) {
+            ParseTextStyleWithResObj(info[0], textStyle, "selectedTextStyleTime");
+        } else {
+            JSDatePicker::ParseTextStyle(info[0], textStyle, "selectedTextStyleTime");
+        }
     }
     TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
     if (textStyle.textColor.has_value() && theme->IsCircleDial()) {

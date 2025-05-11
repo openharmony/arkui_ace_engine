@@ -25,6 +25,8 @@ class ACE_EXPORT CalendarPickerModelNG : public CalendarPickerModel {
 public:
     void Create(const CalendarSettingData& settingData) override;
     void SetEdgeAlign(const CalendarEdgeAlign& alignType, const DimensionOffset& offset) override;
+    void SetEdgeAlign(const NG::CalendarEdgeAlign& alignType, const DimensionOffset& offset,
+        const std::vector<RefPtr<ResourceObject>>& resArray) override;
     void SetTextStyle(const PickerTextStyle& textStyle) override;
     void SetOnChange(SelectedChangeEvent&& onChange) override;
     void SetChangeEvent(SelectedChangeEvent&& onChange) override;

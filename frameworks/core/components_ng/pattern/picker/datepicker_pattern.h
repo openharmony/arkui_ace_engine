@@ -49,6 +49,14 @@ public:
 
     ~DatePickerPattern() override = default;
 
+    void OnColorModeChange(uint32_t colorMode) override
+    {
+        LinearLayoutPattern::OnColorModeChange(colorMode);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkModifyDone();
+    }
+
     bool IsAtomicNode() const override
     {
         return true;
@@ -767,6 +775,10 @@ public:
 
     void SetDigitalCrownSensitivity(int32_t crownSensitivity);
     void UpdateUserSetSelectColor();
+    void UpdateDisappearTextStyle(const PickerTextStyle& textStyle);
+    void UpdateNormalTextStyle(const PickerTextStyle& textStyle);
+    void UpdateSelectedTextStyle(const PickerTextStyle& textStyle);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

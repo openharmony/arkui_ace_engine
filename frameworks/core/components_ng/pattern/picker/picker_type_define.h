@@ -20,6 +20,7 @@
 
 #include "core/components/common/properties/text_style.h"
 #include "core/components/picker/picker_data.h"
+#include "core/common/resource/resource_object.h"
 #include "frameworks/base/i18n/time_format.h"
 
 namespace OHOS::Ace::NG {
@@ -51,6 +52,13 @@ constexpr int32_t INVALID_SELECTED_COLUMN_INDEX = -1;
 constexpr int32_t CROWN_SENSITIVITY_MIN = 0;
 constexpr int32_t CROWN_SENSITIVITY_MAX = 2;
 
+struct PickerTextStyle;
+
+struct PickerTextStyleResourceUpdate {
+    RefPtr<ResourceObject> resObj;
+    std::function<void(const RefPtr<ResourceObject>&, NG::PickerTextStyle&)> updateFunc;
+};
+
 struct PickerTextStyle {
     std::optional<Color> textColor;
     std::optional<Dimension> fontSize;
@@ -60,7 +68,31 @@ struct PickerTextStyle {
     std::optional<Dimension> minFontSize;
     std::optional<Dimension> maxFontSize;
     std::optional<Ace::TextOverflow> textOverflow;
+    std::unordered_map<std::string, NG::PickerTextStyleResourceUpdate> textStyleResMap_;
+
+    void PickerAddResource(const std::string& key, const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, NG::PickerTextStyle&)>&& updateFunc);
+
+    void PickerReloadResource();
 };
+
+inline void PickerTextStyle::PickerAddResource(const std::string& key, const RefPtr<ResourceObject>& resObj,
+    std::function<void(const RefPtr<ResourceObject>&, NG::PickerTextStyle&)>&& updateFunc)
+{
+    if (resObj == nullptr || !updateFunc) {
+        return;
+    }
+
+    textStyleResMap_[key] = { resObj, std::move(updateFunc) };
+}
+
+inline void PickerTextStyle::PickerReloadResource()
+{
+    for (const auto& [key, resourceUpdater] : textStyleResMap_) {
+        resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+    }
+}
+
 struct PickerTextProperties {
     PickerTextStyle disappearTextStyle_;
     PickerTextStyle normalTextStyle_;
