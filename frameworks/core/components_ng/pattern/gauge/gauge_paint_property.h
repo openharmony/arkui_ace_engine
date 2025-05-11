@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GAUGE_GAUGE_PAINT_PROPERTY_H
 
 #include "core/common/container.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -42,6 +43,29 @@ struct GaugeShadowOptions {
         return radius == rhs.radius && offsetX == rhs.offsetX && offsetY == rhs.offsetY &&
                isShadowVisible == rhs.isShadowVisible;
     }
+    using UpdateFunc = std::function<void(const RefPtr<ResourceObject>&, GaugeShadowOptions&)>;
+    void AddResource(const std::string& key, const RefPtr<ResourceObject>& resObj, UpdateFunc&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = { resObj, std::move(updateFunc) };
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.obj, *this);
+        }
+    }
+
+private:
+    struct ResourceUpdater {
+        RefPtr<ResourceObject> obj;
+        UpdateFunc updateFunc;
+    };
+
+    std::unordered_map<std::string, ResourceUpdater> resMap_;
 };
 class GaugePaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(GaugePaintProperty, PaintProperty)
