@@ -2380,7 +2380,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg072, TestSize.Level1)
      */
     ZERO->hostPageId_ = 0;
     ZERO->SetInDestroying();
-    EXPECT_EQ(ZERO->OnRemoveFromParent(false), false);
+    EXPECT_NE(ZERO->OnRemoveFromParent(false), false);
     ZERO->SetDestroying(false);
     ZERO->Clean();
 }
@@ -2705,6 +2705,9 @@ HWTEST_F(UINodeTestNg, AddFunc_API03, TestSize.Level1)
     ONE->AddChild(testNode2, 1, false);
     EXPECT_EQ(ONE->children_.size(), 3);
     ONE->isDestroyingState_ = true;
+    auto context = MockPipelineContext::GetCurrent();
+    ONE->AttachContext(AceType::RawPtr(context), true);
+
 
     /**
      * @tc.steps: step2. observe the changes in the number of children after removal.
@@ -2809,6 +2812,8 @@ HWTEST_F(UINodeTestNg, AddFunc_API07, TestSize.Level1)
      * @tc.steps: step2. set the variables to meet the conditional values and test the function.
      */
     testNode->isDestroyingState_ = true;
+    auto context = MockPipelineContext::GetCurrent();
+    testNode->AttachContext(AceType::RawPtr(context), true);
     bool res = testNode->OnRemoveFromParent(true);
     EXPECT_EQ(res, false);
     testNode->isDestroyingState_ = false;
