@@ -57,6 +57,9 @@ public:
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide) override;
     void SetEnablePaging(bool enablePaging) override;
     void SetInitialOffset(const OffsetT<CalcDimension>& offset) override;
+    void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) override;
+    void CreateWithResourceObjIntervalSize(const RefPtr<ResourceObject>& resObj) override;
+    void CreateWithResourceObjSnapPaginations(std::vector<RefPtr<ResourceObject>>& resObjs) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetScrollController(
