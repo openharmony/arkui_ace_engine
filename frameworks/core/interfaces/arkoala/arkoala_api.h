@@ -3202,6 +3202,10 @@ struct ArkUIFolderStackModifier {
     void (*resetEnableAnimation)(ArkUINodeHandle node);
     void (*setAutoHalfFold)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetAutoHalfFold)(ArkUINodeHandle node);
+    void (*setOnFolderStateChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnFolderStateChange)(ArkUINodeHandle node);
+    void (*setOnHoverStatusChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnHoverStatusChange)(ArkUINodeHandle node);
 };
 
 struct ArkUINavigatorModifier {
@@ -3295,6 +3299,30 @@ struct ArkUIVideoModifier {
     void (*resetVideoSurfaceBackgroundColor)(ArkUINodeHandle node);
     void (*setVideoShortcutKeyEnabled)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetVideoShortcutKeyEnabled)(ArkUINodeHandle node);
+    void (*setOnStart)(ArkUINodeHandle node, void* callback);
+    void (*resetOnStart)(ArkUINodeHandle node);
+    void (*setOnPause)(ArkUINodeHandle node, void* callback);
+    void (*resetOnPause)(ArkUINodeHandle node);
+    void (*setOnFinish)(ArkUINodeHandle node, void* callback);
+    void (*resetOnFinish)(ArkUINodeHandle node);
+    void (*setOnFullscreenChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnFullscreenChange)(ArkUINodeHandle node);
+    void (*setOnPrepared)(ArkUINodeHandle node, void* callback);
+    void (*resetOnPrepared)(ArkUINodeHandle node);
+    void (*setOnSeeking)(ArkUINodeHandle node, void* callback);
+    void (*resetOnSeeking)(ArkUINodeHandle node);
+    void (*setOnSeeked)(ArkUINodeHandle node, void* callback);
+    void (*resetOnSeeked)(ArkUINodeHandle node);
+    void (*setOnUpdate)(ArkUINodeHandle node, void* callback);
+    void (*resetOnUpdate)(ArkUINodeHandle node);
+    void (*setOnError)(ArkUINodeHandle node, void* callback);
+    void (*resetOnError)(ArkUINodeHandle node);
+    void (*setOnStop)(ArkUINodeHandle node, void* callback);
+    void (*resetOnStop)(ArkUINodeHandle node);
+    void (*setEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableAnalyzer)(ArkUINodeHandle node);
+    void (*setAnalyzerConfig)(ArkUINodeHandle node, void* config);
+    void (*resetAnalyzerConfig)(ArkUINodeHandle node);
 };
 
 struct ArkUIVideoControllerModifier {
@@ -3430,7 +3458,8 @@ struct ArkUIScrollableModifier {
     void (*setBackToTop)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetBackToTop)(ArkUINodeHandle node);
     ArkUI_Int32 (*getBackToTop)(ArkUINodeHandle node);
-    void (*setScrollBarMargin)(ArkUINodeHandle node, ArkUI_Float32 marginStart, ArkUI_Float32 marginEnd);
+    void (*setScrollBarMargin)(ArkUINodeHandle node, ArkUI_Float32 marginStart, ArkUI_Int32 marginStartLengthUnit,
+        ArkUI_Float32 marginEnd, ArkUI_Int32 marginEndLengthUnit);
     void (*resetScrollBarMargin)(ArkUINodeHandle node);
     void (*getScrollBarMargin)(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2]);
 };
@@ -3467,7 +3496,7 @@ struct ArkUIScrollModifier {
     ArkUI_Bool (*getEnableScrollInteraction)(ArkUINodeHandle node);
     void (*setEnableScrollInteraction)(ArkUINodeHandle node, ArkUI_Bool enableScrollInteraction);
     void (*resetEnableScrollInteraction)(ArkUINodeHandle node);
-    void (*setScrollTo)(ArkUINodeHandle node, const ArkUI_Float32 (*values)[8]);
+    void (*setScrollTo)(ArkUINodeHandle node, const ArkUI_Float32 (*values)[9]);
     void (*setScrollEdge)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetScrollTo)(ArkUINodeHandle node);
     void (*resetScrollEdge)(ArkUINodeHandle node);
@@ -3629,6 +3658,18 @@ struct ArkUIStepperItemModifier {
     void (*resetStatus)(ArkUINodeHandle node);
 };
 
+struct ArkUIStepperModifier {
+    void (*setStepperOnFinish)(ArkUINodeHandle node, void* callback);
+    void (*resetStepperOnFinish)(ArkUINodeHandle node);
+    void (*setStepperOnSkip)(ArkUINodeHandle node, void* callback);
+    void (*resetStepperOnSkip)(ArkUINodeHandle node);
+    void (*setStepperOnChange)(ArkUINodeHandle node, void* callback);
+    void (*resetStepperOnChange)(ArkUINodeHandle node);
+    void (*setStepperOnNext)(ArkUINodeHandle node, void* callback);
+    void (*resetStepperOnNext)(ArkUINodeHandle node);
+    void (*setStepperOnPrevious)(ArkUINodeHandle node, void* callback);
+    void (*resetStepperOnPrevious)(ArkUINodeHandle node);
+};
 struct ArkUITabContentModifier {
     void (*setTabContentBuilder)(ArkUINodeHandle node, ArkUI_Int32 methodId);
     void (*setTabContentLabel)(ArkUINodeHandle node, ArkUI_CharPtr label);
@@ -5756,6 +5797,13 @@ struct ArkUITextAreaControllerModifier {
     ArkUINodeHandle (*getTextAreaController)(ArkUINodeHandle node);
 };
 
+struct ArkUICanvasModifier {
+    void (*setCanvasOnReady)(ArkUINodeHandle node, void* callback);
+    void (*resetCanvasOnReady)(ArkUINodeHandle node);
+    void (*setCanvasEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetCanvasEnableAnalyzer)(ArkUINodeHandle node);
+};
+
 struct ArkUICanvasRenderingContext2DModifier {
     ArkUINodeHandle (*getCanvasRenderingContext2D)(ArkUINodeHandle node);
     void (*setCanvasBeginPath)(ArkUINodeHandle node);
@@ -6283,6 +6331,8 @@ struct ArkUINodeModifiers {
     const ArkUIIndicatorComponentModifier* (*getIndicatorComponentModifier)();
     const ArkUILazyGridLayoutModifier* (*getLazyGridLayoutModifier)();
     const ArkUIEmbeddedComponentModifier* (*getEmbeddedComponentModifier)();
+    const ArkUICanvasModifier* (*getCanvasModifier)();
+    const ArkUIStepperModifier* (*getStepperModifier)();
 };
 
 // same as inner defines in property.h

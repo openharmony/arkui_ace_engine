@@ -65,6 +65,20 @@ private:
     std::function<void()> callback_;
 };
 
+class PropertyValueBase : public virtual AceType {
+    DECLARE_ACE_TYPE(PropertyValueBase, AceType);
+public:
+    virtual ~PropertyValueBase() = default;
+};
+ 
+template<typename T>
+class PropertyValue : public PropertyValueBase {
+    DECLARE_ACE_TYPE(PropertyValue<T>, PropertyValueBase);
+public:
+    T value;
+    explicit PropertyValue(const T& val) : value(val) {}
+};
+ 
 // Pattern is the base class for different measure, layout and paint behavior.
 class ACE_FORCE_EXPORT Pattern : public virtual AceType {
     DECLARE_ACE_TYPE(Pattern, AceType);
@@ -719,6 +733,24 @@ public:
     {
         return false;
     }
+
+    void UnRegisterResource(const std::string& key);
+ 
+    template<typename T>
+    void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value);
+ 
+    template<typename T>
+    void UpdateResource(const std::string& key, const RefPtr<ResourceObject>& resObj);
+    
+    template<typename T>
+    void UpdateProperty(const std::string& key, T value, RefPtr<FrameNode> frameNode);
+ 
+    template<typename T>
+    T ParseResObjToValue(const RefPtr<ResourceObject>& resObj);
+ 
+    virtual void UpdatePropertyImpl(
+        const std::string& key, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {};
+
 
 protected:
     virtual void OnAttachToFrameNode() {}

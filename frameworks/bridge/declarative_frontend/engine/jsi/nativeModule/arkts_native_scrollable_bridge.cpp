@@ -515,25 +515,26 @@ ArkUINativeModuleValue ScrollableBridge::SetScrollBarMargin(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     auto scrollableModifier = nodeModifiers->getScrollableModifier();
     CHECK_NULL_RETURN(scrollableModifier, panda::JSValueRef::Undefined(vm));
-    CalcDimension marginStart;
-    CalcDimension marginEnd;
-    if (marginStartArg->IsObject(vm)) {
-        if (ArkTSUtils::ParseJsDimensionVpNG(vm, marginStartArg, marginStart)) {
+    CalcDimension marginStart = Dimension(0.0f, DimensionUnit::VP);
+    CalcDimension marginEnd = Dimension(0.0f, DimensionUnit::VP);
+
+    if (!marginStartArg->IsUndefined() && !marginStartArg.IsNull() && marginStartArg->IsObject(vm)) {
+        if (ArkTSUtils::ParseJsLengthMetrics(vm, marginStartArg, marginStart)) {
             if (LessNotEqual(marginStart.Value(), 0.0)) {
                 marginStart.SetValue(0.0);
             }
         }
     }
-    if (marginEndArg->IsObject(vm)) {
-        if (ArkTSUtils::ParseJsDimensionVpNG(vm, marginEndArg, marginEnd)) {
+    if (!marginEndArg->IsUndefined() && !marginEndArg.IsNull() && marginEndArg->IsObject(vm)) {
+        if (ArkTSUtils::ParseJsLengthMetrics(vm, marginEndArg, marginEnd)) {
             if (LessNotEqual(marginEnd.Value(), 0.0)) {
                 marginEnd.SetValue(0.0);
             }
         }
     }
 
-    GetArkUINodeModifiers()->getScrollableModifier()->setScrollBarMargin(
-        nativeNode, marginStart.Value(), marginEnd.Value());
+    GetArkUINodeModifiers()->getScrollableModifier()->setScrollBarMargin(nativeNode, marginStart.Value(),
+        static_cast<int32_t>(marginStart.Unit()), marginEnd.Value(), static_cast<int32_t>(marginEnd.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 

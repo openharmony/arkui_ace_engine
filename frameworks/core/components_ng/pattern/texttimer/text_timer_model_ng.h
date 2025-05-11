@@ -50,6 +50,11 @@ public:
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
+    void CreateWithResourceObj(JsTextTimerResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) override;
+    void HandleTextColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    void HandleFontWeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    void HandleFontSize(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    void HandleFontFamily(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<TextTimerController> InitTextController(FrameNode* frameNode);
     static void SetIsCountDown(FrameNode* frameNode, bool isCountDown);

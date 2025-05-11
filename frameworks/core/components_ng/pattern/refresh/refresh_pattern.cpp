@@ -317,6 +317,21 @@ void RefreshPattern::OnColorConfigurationUpdate()
     }
 }
 
+void RefreshPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    if (isCustomBuilderExist_ || !hasLoadingText_) {
+        return;
+    }
+    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(loadingTextNode_);
+    auto textLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue());
+    loadingTextNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void RefreshPattern::InitChildNode()
 {
     if (isCustomBuilderExist_) {

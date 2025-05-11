@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/models/gauge_model_impl.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 
@@ -55,8 +56,8 @@ GaugeModel* GaugeModel::GetInstance()
 
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
-    constexpr Color ERROR_COLOR = Color(0xFFE84026);
-    constexpr float FIX_ANGLE = 720.0f;
+constexpr Color ERROR_COLOR = Color(0xFFE84026);
+constexpr float FIX_ANGLE = 720.0f;
 
 void JSGauge::JSBind(BindingTarget globalObj)
 {
@@ -280,10 +281,22 @@ void JSGauge::ConvertResourceColor(const JsiRef<JsiValue>& itemParam, std::vecto
 void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
 {
     CalcDimension strokeWidth;
-    if (!ParseJsDimensionVpNG(info[0], strokeWidth) || strokeWidth.Unit() == DimensionUnit::PERCENT) {
-        strokeWidth = CalcDimension(0);
+    RefPtr<ResourceObject> resObj;
+    if (SystemProperties::ConfigChangePerform()) {
+        bool state = ParseJsDimensionVpNG(info[0], strokeWidth, resObj);
+        if (resObj) {
+            GaugeModel::GetInstance()->CreateWithResourceObj(OHOS::Ace::GaugeResourceType::STROKE_WIDTH, resObj);
+        } else if (state && strokeWidth.Unit() != DimensionUnit::PERCENT) {
+            GaugeModel::GetInstance()->SetStrokeWidth(strokeWidth);
+        } else {
+            GaugeModel::GetInstance()->SetStrokeWidth(CalcDimension(0));
+        }
+    } else {
+        if (!ParseJsDimensionVpNG(info[0], strokeWidth) || strokeWidth.Unit() == DimensionUnit::PERCENT) {
+            strokeWidth = CalcDimension(0);
+        }
+        GaugeModel::GetInstance()->SetStrokeWidth(strokeWidth);
     }
-    GaugeModel::GetInstance()->SetStrokeWidth(strokeWidth);
 }
 
 void JSGauge::SetLabelConfig(const JSCallbackInfo& info)
@@ -302,6 +315,81 @@ void JSGauge::SetLabelConfig(const JSCallbackInfo& info)
     if (ParseJsColor(labelColor, currentColor)) {
         GaugeModel::GetInstance()->SetMarkedTextColor(currentColor);
     }
+}
+
+void HandleShadowRadius(const JSRef<JSVal>& jsRadius, NG::GaugeShadowOptions& shadowOptions)
+{
+    RefPtr<ResourceObject> radiusResObj;
+    double radius = 0.0;
+    bool state = JSViewAbstract::ParseJsDouble(jsRadius, radius, radiusResObj);
+    if (radiusResObj) {
+        auto&& radiusUpdateFunc = [](const RefPtr<ResourceObject>& resObj, NG::GaugeShadowOptions& shadowOptions) {
+            double radius = 0.0;
+            if (ResourceParseUtils::ParseResDouble(resObj, radius) && !NonPositive(radius)) {
+                shadowOptions.radius = radius;
+            } else {
+                shadowOptions.radius = NG::DEFAULT_GAUGE_SHADOW_RADIUS;
+            }
+        };
+        shadowOptions.AddResource("gauge.shadow.radius", radiusResObj, std::move(radiusUpdateFunc));
+    } else if (state && !NonPositive(radius)) {
+        shadowOptions.radius = radius;
+    } else {
+        shadowOptions.radius = NG::DEFAULT_GAUGE_SHADOW_RADIUS;
+    }
+}
+
+void HandleShadowOffsetX(const JSRef<JSVal>& jsOffsetX, NG::GaugeShadowOptions& shadowOptions)
+{
+    RefPtr<ResourceObject> offsetXResObj;
+    double offsetX = 0.0;
+    bool stateX = JSViewAbstract::ParseJsDouble(jsOffsetX, offsetX, offsetXResObj);
+    if (offsetXResObj) {
+        auto&& offsetXUpdateFunc = [](const RefPtr<ResourceObject>& resObj, NG::GaugeShadowOptions& shadowOptions) {
+            double offsetX = 0.0;
+            if (ResourceParseUtils::ParseResDouble(resObj, offsetX)) {
+                shadowOptions.offsetX = offsetX;
+            } else {
+                shadowOptions.offsetX = NG::DEFAULT_GAUGE_SHADOW_OFFSETX;
+            }
+        };
+        shadowOptions.AddResource("gauge.shadow.offsetX", offsetXResObj, std::move(offsetXUpdateFunc));
+    } else if (stateX) {
+        shadowOptions.offsetX = offsetX;
+    } else {
+        shadowOptions.offsetX = NG::DEFAULT_GAUGE_SHADOW_OFFSETX;
+    }
+}
+
+void HandleShadowOffsetY(const JSRef<JSVal>& jsOffsetY, NG::GaugeShadowOptions& shadowOptions)
+{
+    RefPtr<ResourceObject> offsetYResObj;
+    double offsetY = 0.0;
+    bool stateY = JSViewAbstract::ParseJsDouble(jsOffsetY, offsetY, offsetYResObj);
+    if (offsetYResObj) {
+        auto&& offsetYUpdateFunc = [](const RefPtr<ResourceObject>& resObj, NG::GaugeShadowOptions& shadowOptions) {
+            double offsetY = 0.0;
+            if (ResourceParseUtils::ParseResDouble(resObj, offsetY)) {
+                shadowOptions.offsetY = offsetY;
+            } else {
+                shadowOptions.offsetY = NG::DEFAULT_GAUGE_SHADOW_OFFSETY;
+            }
+        };
+        shadowOptions.AddResource("gauge.shadow.offsetY", offsetYResObj, std::move(offsetYUpdateFunc));
+    } else if (stateY) {
+        shadowOptions.offsetY = offsetY;
+    } else {
+        shadowOptions.offsetY = NG::DEFAULT_GAUGE_SHADOW_OFFSETY;
+    }
+}
+
+void HandleShadowOptionsWithConfigChange(const JSRef<JSVal>& jsRadius, const JSRef<JSVal>& jsOffsetX,
+    const JSRef<JSVal>& jsOffsetY, NG::GaugeShadowOptions& shadowOptions)
+{
+    HandleShadowRadius(jsRadius, shadowOptions);
+    HandleShadowOffsetX(jsOffsetX, shadowOptions);
+    HandleShadowOffsetY(jsOffsetY, shadowOptions);
+    GaugeModel::GetInstance()->SetShadowOptions(shadowOptions);
 }
 
 void JSGauge::SetShadowOptions(const JSCallbackInfo& info)
@@ -323,30 +411,34 @@ void JSGauge::SetShadowOptions(const JSCallbackInfo& info)
     JSRef<JSVal> jsOffsetX = paramObject->GetProperty("offsetX");
     JSRef<JSVal> jsOffsetY = paramObject->GetProperty("offsetY");
 
-    double radius = 0.0;
-    if (!ParseJsDouble(jsRadius, radius)) {
-        radius = NG::DEFAULT_GAUGE_SHADOW_RADIUS;
+    if (SystemProperties::ConfigChangePerform()) {
+        HandleShadowOptionsWithConfigChange(jsRadius, jsOffsetX, jsOffsetY, shadowOptions);
+    } else {
+        double radius = 0.0;
+        if (!ParseJsDouble(jsRadius, radius)) {
+            radius = NG::DEFAULT_GAUGE_SHADOW_RADIUS;
+        }
+
+        if (NonPositive(radius)) {
+            radius = NG::DEFAULT_GAUGE_SHADOW_RADIUS;
+        }
+
+        double offsetX = 0.0;
+        if (!ParseJsDouble(jsOffsetX, offsetX)) {
+            offsetX = NG::DEFAULT_GAUGE_SHADOW_OFFSETX;
+        }
+
+        double offsetY = 0.0;
+        if (!ParseJsDouble(jsOffsetY, offsetY)) {
+            offsetY = NG::DEFAULT_GAUGE_SHADOW_OFFSETY;
+        }
+
+        shadowOptions.radius = radius;
+        shadowOptions.offsetX = offsetX;
+        shadowOptions.offsetY = offsetY;
+
+        GaugeModel::GetInstance()->SetShadowOptions(shadowOptions);
     }
-
-    if (NonPositive(radius)) {
-        radius = NG::DEFAULT_GAUGE_SHADOW_RADIUS;
-    }
-
-    double offsetX = 0.0;
-    if (!ParseJsDouble(jsOffsetX, offsetX)) {
-        offsetX = NG::DEFAULT_GAUGE_SHADOW_OFFSETX;
-    }
-
-    double offsetY = 0.0;
-    if (!ParseJsDouble(jsOffsetY, offsetY)) {
-        offsetY = NG::DEFAULT_GAUGE_SHADOW_OFFSETY;
-    }
-
-    shadowOptions.radius = radius;
-    shadowOptions.offsetX = offsetX;
-    shadowOptions.offsetY = offsetY;
-
-    GaugeModel::GetInstance()->SetShadowOptions(shadowOptions);
 }
 
 void JSGauge::SetDescription(const JSCallbackInfo& info)
@@ -378,6 +470,59 @@ void JSGauge::SetDescription(const JSCallbackInfo& info)
     }
 }
 
+void HandleIndicatorIcon(const JSRef<JSVal>& jsIcon)
+{
+    std::string iconPath;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        bool state = JSViewAbstract::ParseJsMedia(jsIcon, iconPath, resObj);
+        if (resObj) {
+            GaugeModel::GetInstance()->CreateWithResourceObj(OHOS::Ace::GaugeResourceType::INDICATOR_ICON, resObj);
+        } else if (state) {
+            GaugeModel::GetInstance()->SetIndicatorIconPath(iconPath, "", "");
+        } else {
+            GaugeModel::GetInstance()->ResetIndicatorIconPath();
+        }
+    } else {
+        if (JSViewAbstract::ParseJsMedia(jsIcon, iconPath)) {
+            std::string bundleName;
+            std::string moduleName;
+            JSViewAbstract::GetJsMediaBundleInfo(jsIcon, bundleName, moduleName);
+            GaugeModel::GetInstance()->SetIndicatorIconPath(iconPath, bundleName, moduleName);
+        } else {
+            GaugeModel::GetInstance()->ResetIndicatorIconPath();
+        }
+    }
+}
+
+void HandleIndicatorSpace(const JSRef<JSVal>& jsSpace)
+{
+    CalcDimension space;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        bool state = JSViewAbstract::ParseJsDimensionVpNG(jsSpace, space, resObj);
+        if (resObj) {
+            GaugeModel::GetInstance()->CreateWithResourceObj(OHOS::Ace::GaugeResourceType::INDICATOR_SPACE, resObj);
+        } else if (state) {
+            if (space.IsNegative()) {
+                space = NG::INDICATOR_DISTANCE_TO_TOP;
+            }
+            GaugeModel::GetInstance()->SetIndicatorSpace(space);
+        } else {
+            space = NG::INDICATOR_DISTANCE_TO_TOP;
+            GaugeModel::GetInstance()->ResetIndicatorSpace();
+        }
+    } else {
+        if (!JSViewAbstract::ParseJsDimensionVpNG(jsSpace, space, false)) {
+            space = NG::INDICATOR_DISTANCE_TO_TOP;
+        }
+        if (space.IsNegative()) {
+            space = NG::INDICATOR_DISTANCE_TO_TOP;
+        }
+        GaugeModel::GetInstance()->SetIndicatorSpace(space);
+    }
+}
+
 void JSGauge::SetIndicator(const JSCallbackInfo& info)
 {
     if (info[0]->IsNull()) {
@@ -397,23 +542,7 @@ void JSGauge::SetIndicator(const JSCallbackInfo& info)
     JSRef<JSVal> jsIcon = paramObject->GetProperty("icon");
     JSRef<JSVal> jsSpace = paramObject->GetProperty("space");
 
-    std::string iconPath;
-    if (ParseJsMedia(jsIcon, iconPath)) {
-        std::string bundleName;
-        std::string moduleName;
-        GetJsMediaBundleInfo(jsIcon, bundleName, moduleName);
-        GaugeModel::GetInstance()->SetIndicatorIconPath(iconPath, bundleName, moduleName);
-    } else {
-        GaugeModel::GetInstance()->ResetIndicatorIconPath();
-    }
-
-    CalcDimension space;
-    if (!ParseJsDimensionVpNG(jsSpace, space, false)) {
-        space = NG::INDICATOR_DISTANCE_TO_TOP;
-    }
-    if (space.IsNegative()) {
-        space = NG::INDICATOR_DISTANCE_TO_TOP;
-    }
-    GaugeModel::GetInstance()->SetIndicatorSpace(space);
+    HandleIndicatorIcon(jsIcon);
+    HandleIndicatorSpace(jsSpace);
 }
 } // namespace OHOS::Ace::Framework

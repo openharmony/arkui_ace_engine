@@ -6030,7 +6030,7 @@ int32_t SetScrollTo(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     auto* fullImpl = GetFullImpl();
     int32_t defaultUnit = GetDefaultUnit(node, UNIT_VP);
-    ArkUI_Float32 values[ALLOW_SIZE_8] = { 0.0, defaultUnit, 0.0, defaultUnit, DEFAULT_DURATION, 1, 0.0, 0.0 };
+    ArkUI_Float32 values[ALLOW_SIZE_9] = { 0.0, defaultUnit, 0.0, defaultUnit, DEFAULT_DURATION, 1, 0.0, 0.0, 0 };
     values[0] = item->value[0].f32;
     values[1] = defaultUnit;
     values[2] = item->value[1].f32;
@@ -6047,6 +6047,9 @@ int32_t SetScrollTo(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     if (item->size > NUM_5) {
         values[NUM_7] = static_cast<ArkUI_Float32>(item->value[NUM_5].i32);
+    }
+    if (item->size > NUM_6) {
+        values[NUM_8] = static_cast<ArkUI_Float32>(item->value[NUM_6].i32);
     }
     fullImpl->getNodeModifiers()->getScrollModifier()->setScrollTo(node->uiNodeHandle, &values);
     return ERROR_CODE_NO_ERROR;
@@ -6376,7 +6379,7 @@ int32_t SetScrollBarMargin(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
         }
     }
     GetFullImpl()->getNodeModifiers()->getScrollableModifier()->setScrollBarMargin(
-        node->uiNodeHandle, marginStart, marginEnd);
+        node->uiNodeHandle, marginStart, UNIT_VP, marginEnd, UNIT_VP);
     return ERROR_CODE_NO_ERROR;
 }
 

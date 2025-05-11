@@ -893,4 +893,116 @@ void PatternLockPattern::InitSkipUnselectedPoint()
         skipUnselectedPoint_ = patternLockPaintProperty->GetSkipUnselectedPointValue();
     }
 }
+
+void PatternLockPattern::UpdateSelectedColor(const Color& color, bool isFristLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (pipelineContext->IsSystmColorChange() || isFristLoad) {
+        paintProperty->UpdateSelectedColor(color);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void PatternLockPattern::UpdatePathColor(const Color& color, bool isFristLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (pipelineContext->IsSystmColorChange() || isFristLoad) {
+        paintProperty->UpdatePathColor(color);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void PatternLockPattern::UpdateActiveColor(const Color& color, bool isFristLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (pipelineContext->IsSystmColorChange() || isFristLoad) {
+        paintProperty->UpdateActiveColor(color);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void PatternLockPattern::UpdateRegularColor(const Color& color, bool isFristLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (pipelineContext->IsSystmColorChange() || isFristLoad) {
+        paintProperty->UpdateRegularColor(color);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void PatternLockPattern::UpdateCircleRadius(const CalcDimension& radius, bool isFristLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (pipelineContext->IsSystmColorChange() || isFristLoad) {
+        paintProperty->UpdateCircleRadius(radius);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void PatternLockPattern::UpdateSideLength(const CalcDimension& sideLength, bool isFristLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto layoutProperty = host->GetLayoutProperty<PatternLockLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (pipelineContext->IsSystmColorChange() || isFristLoad) {
+        layoutProperty->UpdateSideLength(sideLength);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void PatternLockPattern::UpdateActiveCircleColor(const Color& color, bool isFristLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (pipelineContext->IsSystmColorChange() || isFristLoad) {
+        paintProperty->UpdateActiveCircleColor(color);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -27,6 +27,7 @@ public:
     void SetImageAIOptions(void* options) override;
     void DetachRenderContext() override;
     static void SetOnReady(FrameNode* frameNode, std::function<void()>&& onReady);
+    static void EnableAnalyzer(FrameNode* frameNode, bool enable);
     static RefPtr<AceType> GetCanvasPattern(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 };

@@ -130,13 +130,27 @@ void JSPatternLock::SetSelectedColor(const JSCallbackInfo& info)
         return;
     }
     Color selectedColor;
-    if (!ParseJsColor(info[0], selectedColor)) {
-        RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
-        CHECK_NULL_VOID(patternLockTheme);
-        selectedColor = patternLockTheme->GetSelectedColor();
+    RefPtr<ResourceObject> resObj;
+    if (SystemProperties::ConfigChangePerform()) {
+        bool state = ParseJsColor(info[0], selectedColor, resObj);
+        if (resObj) {
+            PatternLockModel::GetInstance()->CreateWithResourceObj(JsResourceType::SELECTEDCOLOR, resObj);
+        } else if (state) {
+            PatternLockModel::GetInstance()->SetSelectedColor(selectedColor);
+        } else {
+            RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+            CHECK_NULL_VOID(patternLockTheme);
+            selectedColor = patternLockTheme->GetSelectedColor();
+            PatternLockModel::GetInstance()->SetSelectedColor(selectedColor);
+        }
+    } else {
+        if (!ParseJsColor(info[0], selectedColor)) {
+            RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+            CHECK_NULL_VOID(patternLockTheme);
+            selectedColor = patternLockTheme->GetSelectedColor();
+        }
+        PatternLockModel::GetInstance()->SetSelectedColor(selectedColor);
     }
-
-    PatternLockModel::GetInstance()->SetSelectedColor(selectedColor);
 }
 void JSPatternLock::SetAutoReset(const JSCallbackInfo& info)
 {
@@ -156,13 +170,28 @@ void JSPatternLock::SetPathColor(const JSCallbackInfo& info)
         return;
     }
     Color pathColor;
-    if (!ParseJsColor(info[0], pathColor)) {
-        RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
-        CHECK_NULL_VOID(patternLockTheme);
-        pathColor = patternLockTheme->GetPathColor();
-    }
+    RefPtr<ResourceObject> resObj;
+    if (SystemProperties::ConfigChangePerform()) {
+        bool state = ParseJsColor(info[0], pathColor, resObj);
+        if (resObj) {
+            PatternLockModel::GetInstance()->CreateWithResourceObj(JsResourceType::PATHCOLOR, resObj);
+        } else if (state) {
+            PatternLockModel::GetInstance()->SetPathColor(pathColor);
+        } else {
+            RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+            CHECK_NULL_VOID(patternLockTheme);
+            pathColor = patternLockTheme->GetPathColor();
+            PatternLockModel::GetInstance()->SetPathColor(pathColor);
+        }
+    } else {
+        if (!ParseJsColor(info[0], pathColor)) {
+            RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+            CHECK_NULL_VOID(patternLockTheme);
+            pathColor = patternLockTheme->GetPathColor();
+        }
 
-    PatternLockModel::GetInstance()->SetPathColor(pathColor);
+        PatternLockModel::GetInstance()->SetPathColor(pathColor);
+    }
 }
 void JSPatternLock::SetActiveColor(const JSCallbackInfo& info)
 {
@@ -170,13 +199,28 @@ void JSPatternLock::SetActiveColor(const JSCallbackInfo& info)
         return;
     }
     Color activeColor;
-    if (!ParseJsColor(info[0], activeColor)) {
-        RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
-        CHECK_NULL_VOID(patternLockTheme);
-        activeColor = patternLockTheme->GetActiveColor();
-    }
+    RefPtr<ResourceObject> resObj;
+    if (SystemProperties::ConfigChangePerform()) {
+        bool state = ParseJsColor(info[0], activeColor, resObj);
+        if (resObj) {
+            PatternLockModel::GetInstance()->CreateWithResourceObj(JsResourceType::ACTIVECOLOR, resObj);
+        } else if (state) {
+            PatternLockModel::GetInstance()->SetActiveColor(activeColor);
+        } else {
+            RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+            CHECK_NULL_VOID(patternLockTheme);
+            activeColor = patternLockTheme->GetActiveColor();
+            PatternLockModel::GetInstance()->SetActiveColor(activeColor);
+        }
+    } else {
+        if (!ParseJsColor(info[0], activeColor)) {
+            RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+            CHECK_NULL_VOID(patternLockTheme);
+            activeColor = patternLockTheme->GetActiveColor();
+        }
 
-    PatternLockModel::GetInstance()->SetActiveColor(activeColor);
+        PatternLockModel::GetInstance()->SetActiveColor(activeColor);
+    }
 }
 void JSPatternLock::SetRegularColor(const JSCallbackInfo& info)
 {
@@ -184,13 +228,28 @@ void JSPatternLock::SetRegularColor(const JSCallbackInfo& info)
         return;
     }
     Color regularColor;
-    if (!ParseJsColor(info[0], regularColor)) {
-        RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
-        CHECK_NULL_VOID(patternLockTheme);
-        regularColor = patternLockTheme->GetRegularColor();
-    }
+    RefPtr<ResourceObject> resObj;
+    if (SystemProperties::ConfigChangePerform()) {
+        bool state = ParseJsColor(info[0], regularColor, resObj);
+        if (resObj) {
+            PatternLockModel::GetInstance()->CreateWithResourceObj(JsResourceType::REGULARCOLOR, resObj);
+        } else if (state) {
+            PatternLockModel::GetInstance()->SetRegularColor(regularColor);
+        } else {
+            RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+            CHECK_NULL_VOID(patternLockTheme);
+            regularColor = patternLockTheme->GetRegularColor();
+            PatternLockModel::GetInstance()->SetRegularColor(regularColor);
+        }
+    } else {
+        if (!ParseJsColor(info[0], regularColor)) {
+            RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+            CHECK_NULL_VOID(patternLockTheme);
+            regularColor = patternLockTheme->GetRegularColor();
+        }
 
-    PatternLockModel::GetInstance()->SetRegularColor(regularColor);
+        PatternLockModel::GetInstance()->SetRegularColor(regularColor);
+    }
 }
 void JSPatternLock::SetCircleRadius(const JSCallbackInfo& info)
 {
@@ -198,20 +257,35 @@ void JSPatternLock::SetCircleRadius(const JSCallbackInfo& info)
         return;
     }
     CalcDimension radius;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (!ParseJsDimensionVp(info[0], radius)) {
-            return;
-        }
-        if (radius.IsNonNegative()) {
+    RefPtr<ResourceObject> resObj;
+    if (SystemProperties::ConfigChangePerform()) {
+        bool state = ParseJsDimensionVp(info[0], radius, resObj);
+        if (resObj) {
+            PatternLockModel::GetInstance()->CreateWithResourceObj(JsResourceType::CIRCLERADIUS, resObj);
+        } else if (state && !radius.IsNonPositive()) {
             PatternLockModel::GetInstance()->SetCircleRadius(radius);
-        }
-    } else {
-        if (!ParseJsDimensionVp(info[0], radius) || radius.IsNonPositive()) {
+        } else {
             RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
             CHECK_NULL_VOID(patternLockTheme);
             radius = patternLockTheme->GetCircleRadius();
+            PatternLockModel::GetInstance()->SetCircleRadius(radius);
         }
-        PatternLockModel::GetInstance()->SetCircleRadius(radius);
+    } else {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            if (!ParseJsDimensionVp(info[0], radius)) {
+                return;
+            }
+            if (radius.IsNonNegative()) {
+                PatternLockModel::GetInstance()->SetCircleRadius(radius);
+            }
+        } else {
+            if (!ParseJsDimensionVp(info[0], radius) || radius.IsNonPositive()) {
+                RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+                CHECK_NULL_VOID(patternLockTheme);
+                radius = patternLockTheme->GetCircleRadius();
+            }
+            PatternLockModel::GetInstance()->SetCircleRadius(radius);
+        }
     }
 }
 void JSPatternLock::SetSideLength(const JSCallbackInfo& info)
@@ -220,13 +294,28 @@ void JSPatternLock::SetSideLength(const JSCallbackInfo& info)
         return;
     }
     CalcDimension sideLength;
-    if (!ParseJsDimensionVp(info[0], sideLength)) {
-        RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
-        CHECK_NULL_VOID(patternLockTheme);
-        sideLength = patternLockTheme->GetSideLength();
-    }
+    RefPtr<ResourceObject> resObj;
+    if (SystemProperties::ConfigChangePerform()) {
+        bool state = ParseJsDimensionVp(info[0], sideLength, resObj);
+        if (resObj) {
+            PatternLockModel::GetInstance()->CreateWithResourceObj(JsResourceType::SIDELENGTH, resObj);
+        } else if (state && sideLength.IsNonNegative()) {
+            PatternLockModel::GetInstance()->SetSideLength(sideLength);
+        } else {
+            RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+            CHECK_NULL_VOID(patternLockTheme);
+            sideLength = patternLockTheme->GetSideLength();
+            PatternLockModel::GetInstance()->SetSideLength(sideLength);
+        }
+    } else {
+        if (!ParseJsDimensionVp(info[0], sideLength)) {
+            RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+            CHECK_NULL_VOID(patternLockTheme);
+            sideLength = patternLockTheme->GetSideLength();
+        }
 
-    PatternLockModel::GetInstance()->SetSideLength(sideLength);
+        PatternLockModel::GetInstance()->SetSideLength(sideLength);
+    }
 }
 void JSPatternLock::SetPathStrokeWidth(const JSCallbackInfo& info)
 {
@@ -263,10 +352,23 @@ void JSPatternLock::SetDotConnect(const JSCallbackInfo& args)
 void JSPatternLock::SetActiveCircleColor(const JSRef<JSVal>& info)
 {
     Color activeColor;
-    if (!ParseJsColor(info, activeColor)) {
-        activeColor = Color::TRANSPARENT;
+    RefPtr<ResourceObject> resObj;
+    if (SystemProperties::ConfigChangePerform()) {
+        bool state = ParseJsColor(info, activeColor, resObj);
+        if (resObj) {
+            PatternLockModel::GetInstance()->CreateWithResourceObj(JsResourceType::ACTIVECIRCLECOLOR, resObj);
+        } else if (state) {
+            PatternLockModel::GetInstance()->SetActiveCircleColor(activeColor);
+        } else {
+            activeColor = Color::TRANSPARENT;
+            PatternLockModel::GetInstance()->SetActiveCircleColor(activeColor);
+        }
+    } else {
+        if (!ParseJsColor(info, activeColor)) {
+            activeColor = Color::TRANSPARENT;
+        }
+        PatternLockModel::GetInstance()->SetActiveCircleColor(activeColor);
     }
-    PatternLockModel::GetInstance()->SetActiveCircleColor(activeColor);
 }
 void JSPatternLock::SetActiveCircleRadius(const JSRef<JSVal>& info)
 {

@@ -44,6 +44,7 @@
 #include "core/interfaces/native/node/nav_router_modifier.h"
 #include "core/interfaces/native/node/navigation_modifier.h"
 #include "core/interfaces/native/node/navigator_modifier.h"
+#include "core/interfaces/native/node/node_canvas_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_common_modifier.h"
 #include "core/interfaces/native/node/node_container_modifier.h"
@@ -100,6 +101,7 @@
 #include "core/interfaces/native/node/shape_modifier.h"
 #include "core/interfaces/native/node/side_bar_container_modifier.h"
 #include "core/interfaces/native/node/stepper_item_modifier.h"
+#include "core/interfaces/native/node/stepper_modifier.h"
 #include "core/interfaces/native/node/swiper_controller_modifier.h"
 #include "core/interfaces/native/node/tab_content_modifier.h"
 #include "core/interfaces/native/node/tabs_modifier.h"
@@ -311,6 +313,8 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
     #else
         .getEmbeddedComponentModifier = nullptr,
     #endif
+        .getCanvasModifier = NodeModifier::GetCanvasModifier,
+        .getStepperModifier = NodeModifier::GetStepperModifier,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, MODIFIER_COUNTS, 0, 0); // don't move this line.
     return &impl;

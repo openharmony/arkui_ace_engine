@@ -78,6 +78,10 @@ public:
     void ParseResObjDividerColor(const RefPtr<ResourceObject>& resObj) override;
     void ParseResObjDividerStartMargin(const RefPtr<ResourceObject>& resObj) override;
     void ParseResObjDividerEndMargin(const RefPtr<ResourceObject>& resObj) override;
+    void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) override;
+    void CreateWithResourceObjLaneGutter(const RefPtr<ResourceObject>& resObj) override;
+    void CreateWithResourceObjLaneConstrain(const RefPtr<ResourceObject>& resObjMinLengthValue,
+        const RefPtr<ResourceObject>& resObjMaxLengthValue) override;
 
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth);

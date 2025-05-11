@@ -14,6 +14,8 @@
  */
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
 
+#include "core/pipeline_ng/pipeline_context.h"
+
 namespace OHOS::Ace::NG {
 
 void DataPanelPattern::OnAttachToFrameNode() {}
@@ -124,5 +126,37 @@ RefPtr<FrameNode> DataPanelPattern::BuildContentModifierNode()
     double max = paintProperty->GetMax().value_or(DEFAULT_MAX_VALUE);
     DataPanelConfiguration config(tmpArry, max, enabled);
     return (makeFunc_.value())(config);
+}
+
+void DataPanelPattern::UpdateTrackBackground(const Color& color, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<DataPanelPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+        paintProperty->UpdateTrackBackground(color);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void DataPanelPattern::UpdateStrokeWidth(const CalcDimension& strokeWidth, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = host->GetPaintProperty<DataPanelPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+        paintProperty->UpdateStrokeWidth(strokeWidth);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 } // namespace OHOS::Ace::NG

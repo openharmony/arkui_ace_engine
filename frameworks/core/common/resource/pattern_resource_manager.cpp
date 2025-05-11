@@ -27,6 +27,9 @@ void PatternResourceManager::AddResource(
     if (resObj == nullptr || !updateFunc) {
         return;
     }
+    if (resMap_.count(key) > 0) {
+        resCacheMap_.clear();
+    }
     resMap_[key] = { resObj, std::move(updateFunc) };
 }
 

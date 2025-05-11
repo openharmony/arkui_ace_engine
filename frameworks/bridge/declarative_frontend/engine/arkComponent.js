@@ -6664,7 +6664,7 @@ class ScrollBarMarginModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().scrollable.resetScrollBarMargin(node);
     } else {
-      getUINativeModule().scrollable.setScrollBarMargin(node, this.value);
+      getUINativeModule().scrollable.setScrollBarMargin(node, this.value.start, this.value.end);
     }
   }
 }
@@ -12533,6 +12533,16 @@ class ArkFolderStackComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, FolderStackAutoHalfFoldModifier.identity, FolderStackAutoHalfFoldModifier, value);
     return this;
   }
+  onFolderStateChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, FolderStackOnFolderStateChangeModifier.identity,
+      FolderStackOnFolderStateChangeModifier, callback);
+    return this;
+  }
+  onHoverStatusChange(handler) {
+    modifierWithKey(this._modifiersWithKeys, FolderStackOnHoverStatusChangeModifier.identity,
+      FolderStackOnHoverStatusChangeModifier, handler);
+    return this;
+  }
 }
 
 class FolderStackAlignContentModifier extends ModifierWithKey {
@@ -12576,6 +12586,34 @@ class FolderStackAutoHalfFoldModifier extends ModifierWithKey {
   }
 }
 FolderStackAutoHalfFoldModifier.identity = Symbol('folderStackAutoHalfFold');
+
+class FolderStackOnFolderStateChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().folderStack.resetOnFolderStateChange(node);
+    } else {
+      getUINativeModule().folderStack.setOnFolderStateChange(node, this.value);
+    }
+  }
+}
+FolderStackOnFolderStateChangeModifier.identity = Symbol('folderStackOnFolderStateChange');
+
+class FolderStackOnHoverStatusChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().folderStack.resetOnHoverStatusChange(node);
+    } else {
+      getUINativeModule().folderStack.setOnHoverStatusChange(node, this.value);
+    }
+  }
+}
+FolderStackOnHoverStatusChangeModifier.identity = Symbol('folderStackOnHoverStatusChange');
 
 // @ts-ignore
 if (globalThis.FolderStack !== undefined) {
@@ -17603,6 +17641,181 @@ class VideoEnableShortcutKeyModifier extends ModifierWithKey {
   }
 }
 VideoEnableShortcutKeyModifier.identity = Symbol('videoEnableShortcutKey');
+
+class VideoOnStartModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOnStart(node);
+    } else {
+      getUINativeModule().video.setOnStart(node, this.value);
+    }
+  }
+}
+VideoOnStartModifier.identity = Symbol('videoOnStart');
+
+class VideoOnPauseModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOnPause(node);
+    } else {
+      getUINativeModule().video.setOnPause(node, this.value);
+    }
+  }
+}
+VideoOnPauseModifier.identity = Symbol('videoOnPause');
+
+class VideoOnFinishModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOnFinish(node);
+    } else {
+      getUINativeModule().video.setOnFinish(node, this.value);
+    }
+  }
+}
+VideoOnFinishModifier.identity = Symbol('videoOnFinish');
+
+class VideoOnFullscreenChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOnFullscreenChange(node);
+    } else {
+      getUINativeModule().video.setOnFullscreenChange(node, this.value);
+    }
+  }
+}
+VideoOnFullscreenChangeModifier.identity = Symbol('videoOnFullscreenChange');
+
+class VideoOnPreparedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOnPrepared(node);
+    } else {
+      getUINativeModule().video.setOnPrepared(node, this.value);
+    }
+  }
+}
+VideoOnPreparedModifier.identity = Symbol('videoOnPrepared');
+
+class VideoOnSeekingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOnSeeking(node);
+    } else {
+      getUINativeModule().video.setOnSeeking(node, this.value);
+    }
+  }
+}
+VideoOnSeekingModifier.identity = Symbol('videoOnSeeking');
+
+class VideoOnSeekedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOnSeeked(node);
+    } else {
+      getUINativeModule().video.setOnSeeked(node, this.value);
+    }
+  }
+}
+VideoOnSeekedModifier.identity = Symbol('videoOnSeeked');
+
+class VideoOnUpdateModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOnUpdate(node);
+    } else {
+      getUINativeModule().video.setOnUpdate(node, this.value);
+    }
+  }
+}
+VideoOnUpdateModifier.identity = Symbol('videoOnUpdate');
+
+class VideoOnErrorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOnError(node);
+    } else {
+      getUINativeModule().video.setOnError(node, this.value);
+    }
+  }
+}
+VideoOnErrorModifier.identity = Symbol('videoOnError');
+
+class VideoOnStopModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOnStop(node);
+    } else {
+      getUINativeModule().video.setOnStop(node, this.value);
+    }
+  }
+}
+VideoOnStopModifier.identity = Symbol('videoOnStop');
+
+class VideoEnableAnalyzerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetEnableAnalyzer(node);
+    } else {
+      getUINativeModule().video.setEnableAnalyzer(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoEnableAnalyzerModifier.identity = Symbol('videoEnableAnalyzer');
+
+class VideoAnalyzerConfigModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetAnalyzerConfig(node);
+    } else {
+      getUINativeModule().video.setAnalyzerConfig(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoAnalyzerConfigModifier.identity = Symbol('videoAnalyzerConfig');
+
 class ArkVideoComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -17645,34 +17858,53 @@ class ArkVideoComponent extends ArkComponent {
     return this;
   }
   onStart(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, VideoOnStartModifier.identity, VideoOnStartModifier, callback);
+    return this;
   }
   onPause(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, VideoOnPauseModifier.identity, VideoOnPauseModifier, callback);
+    return this;
   }
   onFinish(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, VideoOnFinishModifier.identity, VideoOnFinishModifier, event);
+    return this;
   }
   onFullscreenChange(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, VideoOnFullscreenChangeModifier.identity,
+      VideoOnFullscreenChangeModifier, callback);
+    return this;
   }
   onPrepared(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, VideoOnPreparedModifier.identity, VideoOnPreparedModifier, callback);
+    return this;
   }
   onSeeking(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, VideoOnSeekingModifier.identity, VideoOnSeekingModifier, callback);
+    return this;
   }
   onSeeked(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, VideoOnSeekedModifier.identity, VideoOnSeekedModifier, callback);
+    return this;
   }
   onUpdate(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, VideoOnUpdateModifier.identity, VideoOnUpdateModifier, callback);
+    return this;
   }
   onError(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, VideoOnErrorModifier.identity, VideoOnErrorModifier, callback);
+    return this;
   }
   onStop(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, VideoOnStopModifier.identity, VideoOnStopModifier, callback);
+    return this;
+  }
+  enableAnalyzer(enable) {
+    modifierWithKey(this._modifiersWithKeys, VideoEnableAnalyzerModifier.identity, VideoEnableAnalyzerModifier, enable);
+    return this;
+  }
+  analyzerConfig(config) {
+    modifierWithKey(this._modifiersWithKeys, VideoAnalyzerConfigModifier.identity, VideoAnalyzerConfigModifier, config);
+    return this;
   }
 }
 // @ts-ignore
@@ -28570,28 +28802,108 @@ class ArkStepperComponent extends ArkComponent {
     super(nativePtr, classType);
   }
   onFinish(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, StepperOnFinishModifier.identity, StepperOnFinishModifier, callback);
+    return this;
   }
   onSkip(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, StepperOnSkipModifier.identity, StepperOnSkipModifier, callback);
+    return this;
   }
   onChange(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, StepperOnChangeModifier.identity, StepperOnChangeModifier, callback);
+    return this;
   }
   onNext(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, StepperOnNextModifier.identity, StepperOnNextModifier, callback);
+    return this;
   }
   onPrevious(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, StepperOnPreviousModifier.identity, StepperOnPreviousModifier, callback);
+    return this;
   }
 }
+
+class StepperOnFinishModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().stepper.resetOnFinish(node);
+    }
+    else {
+      getUINativeModule().stepper.setOnFinish(node, this.value);
+    }
+  }
+}
+StepperOnFinishModifier.identity = Symbol('onFinish');
+
+class StepperOnSkipModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().stepper.resetOnSkip(node);
+    }
+    else {
+      getUINativeModule().stepper.setOnSkip(node, this.value);
+    }
+  }
+}
+StepperOnSkipModifier.identity = Symbol('onSkip');
+
+class StepperOnChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().stepper.resetOnChange(node);
+    }
+    else {
+      getUINativeModule().stepper.setOnChange(node, this.value);
+    }
+  }
+}
+StepperOnChangeModifier.identity = Symbol('onChange');
+
+class StepperOnNextModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().stepper.resetOnNext(node);
+    }
+    else {
+      getUINativeModule().stepper.setOnNext(node, this.value);
+    }
+  }
+}
+StepperOnNextModifier.identity = Symbol('onNext');
+
+class StepperOnPreviousModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().stepper.resetOnPrevious(node);
+    }
+    else {
+      getUINativeModule().stepper.setOnPrevious(node, this.value);
+    }
+  }
+}
+StepperOnPreviousModifier.identity = Symbol('onPrevious');
 // @ts-ignore
 if (globalThis.Stepper !== undefined) {
   globalThis.Stepper.attributeModifier = function (modifier) {
     attributeModifierFunc.call(this, modifier, (nativePtr) => {
       return new ArkStepperComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.CommonModifier(nativePtr, classType);
+      return new modifierJS.StepperModifier(nativePtr, classType);
     });
   };
 }
@@ -35393,9 +35705,47 @@ class ArkCanvasComponent extends ArkComponent {
     super(nativePtr, classType);
   }
   onReady(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, CanvasOnReadyModifier.identity, CanvasOnReadyModifier, event);
+    return this;
+  }
+  enableAnalyzer(value) {
+    modifierWithKey(this._modifiersWithKeys, CanvasEnableAnalyzerModifier.identity, CanvasEnableAnalyzerModifier, value);
+    return this;
   }
 }
+
+class CanvasOnReadyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().canvas.resetCanvasOnReady(node);
+    } else {
+      getUINativeModule().canvas.setCanvasOnReady(node, this.value);
+    }
+  }
+}
+CanvasOnReadyModifier.identity = Symbol('canvasOnReady');
+
+class CanvasEnableAnalyzerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().canvas.resetCanvasEnableAnalyzer(node);
+    }
+    else {
+      getUINativeModule().canvas.setCanvasEnableAnalyzer(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+CanvasEnableAnalyzerModifier.identity = Symbol('canvasEnableAnalyzer');
+
 // @ts-ignore
 if (globalThis.Canvas !== undefined) {
   globalThis.Canvas.attributeModifier = function (modifier) {

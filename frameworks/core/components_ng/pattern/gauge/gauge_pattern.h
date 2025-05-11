@@ -169,6 +169,10 @@ public:
         return contentModifierNode_ != nullptr;
     }
 
+    void UpdateStrokeWidth(const CalcDimension& strokeWidth, bool isFirstLoad = false);
+    void UpdateIndicatorIconPath(const std::string& iconPath, const std::string& bundleName,
+        const std::string& moduleName, bool isFirstLoad = false);
+    void UpdateIndicatorSpace(const CalcDimension& space, bool isFirstLoad = false);
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;

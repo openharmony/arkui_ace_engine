@@ -822,6 +822,7 @@ private:
     void GetCurrentScrollHeight();
     void RecoverAvoidKeyboardStatus();
     void RecoverScrollOrResizeAvoidStatus();
+    bool IsNeedChangeScrollHeight(float height);
 
     // broadcast
     void SendTextUpdateEvent();

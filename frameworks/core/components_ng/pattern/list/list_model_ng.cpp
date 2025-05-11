@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -578,6 +579,76 @@ void ListModelNG::SetListFriction(FrameNode* frameNode, double friction)
         pattern->SetFriction(FRICTION);
     }
     pattern->SetFriction(friction);
+}
+
+void ListModelNG::CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(resObj);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        double friction = -1.0;
+        if (ResourceParseUtils::ParseResDouble(resObj, friction)) {
+            pattern->SetFriction(friction);
+        }
+    };
+    pattern->AddResObj("ListFriction", resObj, std::move(updateFunc));
+}
+
+void ListModelNG::CreateWithResourceObjLaneGutter(const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(resObj);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        CalcDimension laneGutter;
+        if (ResourceParseUtils::ParseResDimensionVp(resObj, laneGutter)) {
+            ListModelNG::SetLaneGutter(AceType::RawPtr(frameNode), laneGutter);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    };
+    pattern->AddResObj("LaneGutter", resObj, std::move(updateFunc));
+}
+
+void ListModelNG::CreateWithResourceObjLaneConstrain(
+    const RefPtr<ResourceObject>& resObjMinLengthValue, const RefPtr<ResourceObject>& resObjMaxLengthValue)
+{
+    CHECK_NULL_VOID(resObjMinLengthValue || resObjMaxLengthValue);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& minLengthupdateFunc = [weak = AceType::WeakClaim(frameNode)](
+                                     const RefPtr<ResourceObject>& resObjMinLengthValue) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        CalcDimension minLengthValue;
+        if (ResourceParseUtils::ParseResDimensionVp(resObjMinLengthValue, minLengthValue)) {
+            ListModelNG::SetLaneMinLength(AceType::RawPtr(frameNode), minLengthValue);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    };
+    pattern->AddResObj("ListMinLength", resObjMinLengthValue, std::move(minLengthupdateFunc));
+
+    auto&& maxLengthupdateFunc = [weak = AceType::WeakClaim(frameNode)](
+                                     const RefPtr<ResourceObject>& resObjMaxLengthValue) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        CalcDimension maxLengthValue;
+        if (ResourceParseUtils::ParseResDimensionVp(resObjMaxLengthValue, maxLengthValue)) {
+            ListModelNG::SetLaneMaxLength(AceType::RawPtr(frameNode), maxLengthValue);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    };
+    pattern->AddResObj("ListMaxLength", resObjMaxLengthValue, std::move(maxLengthupdateFunc));
 }
 
 void ListModelNG::SetListMaintainVisibleContentPosition(FrameNode* frameNode, bool enabled)

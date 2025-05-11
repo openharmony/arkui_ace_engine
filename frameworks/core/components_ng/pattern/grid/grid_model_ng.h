@@ -72,6 +72,7 @@ public:
     void SetOnReachEnd(OnReachEvent&& onReachEnd) override;
     RefPtr<ScrollControllerBase> CreatePositionController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
+    void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) override;
 
     DisplayMode GetDisplayMode() const override;
 

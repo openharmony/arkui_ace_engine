@@ -716,8 +716,14 @@ public:
     }
 
     static bool CheckColor(const JSRef<JSVal>& jsValue, Color& result, const char* componentName, const char* propName);
+    static bool CheckColor(
+        const JSRef<JSVal>& jsValue, Color& result, const char* componentName, const char* propName,
+        RefPtr<ResourceObject>& resourceObject);
     static bool CheckLength(
         const JSRef<JSVal>& jsValue, CalcDimension& result, const char* componentName, const char* propName);
+    static bool CheckLength(
+        const JSRef<JSVal>& jsValue, CalcDimension& result, const char* componentName, const char* propName,
+        RefPtr<ResourceObject>& resourceObject);
     static bool CheckResource(RefPtr<ResourceObject> resourceObject,
         RefPtr<ResourceWrapper> resourceWrapper);
     static bool CheckCustomSymbolId(RefPtr<ResourceWrapper> resourceWrapper, JSRef<JSVal>& resId,
@@ -762,6 +768,16 @@ public:
         const std::optional<Dimension>& radiusTopEnd, const std::optional<Dimension>& radiusBottomStart,
         const std::optional<Dimension>& radiusBottomEnd);
     static void ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
+    template<typename T>
+    static void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
+    {
+        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern(); 
+        CHECK_NULL_VOID(pattern);
+        pattern->RegisterResource<T>(key, resObj, value);
+    }
+    static void UnRegisterResource(const std::string& key);
 
 private:
     static bool ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& result, RefPtr<ResourceObject>& resObj);

@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_v2/list/list_properties.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 
@@ -95,6 +96,10 @@ public:
     virtual void ParseResObjDividerStartMargin(const RefPtr<ResourceObject>& resObj) {};
     virtual void ParseResObjDividerEndMargin(const RefPtr<ResourceObject>& resObj) {};
 
+    virtual void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithResourceObjLaneGutter(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithResourceObjLaneConstrain(
+        const RefPtr<ResourceObject>& resObjMinLengthValue, const RefPtr<ResourceObject>& resObjMaxLengthValue) {};
 #ifdef SUPPORT_DIGITAL_CROWN
     virtual void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) {}
 #endif

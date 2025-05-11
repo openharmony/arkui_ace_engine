@@ -66,6 +66,9 @@ public:
         return contentModifierNode_ != nullptr;
     }
 
+    void UpdateTrackBackground(const Color& color, bool isFirstLoad = false);
+    void UpdateStrokeWidth(const CalcDimension& strokeWidth, bool isFirstLoad = false);
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;

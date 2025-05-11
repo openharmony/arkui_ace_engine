@@ -131,14 +131,18 @@ void JSCounter::JSHeight(const JSCallbackInfo& args)
     }
 
     Dimension value;
-    if (!ConvertFromJSValue(args[0], value)) {
+    RefPtr<ResourceObject> heightResObj;
+    if (!ConvertFromJSValue(args[0], value, heightResObj)) {
         return;
     }
-
-    if (LessNotEqual(value.Value(), 0.0)) {
-        return;
+    if (SystemProperties::ConfigChangePerform() && heightResObj) {
+        CounterModel::GetInstance()->CreateWithResourceObj(JsCounterResourceType::Height, heightResObj);
+    } else {
+        if (LessNotEqual(value.Value(), 0.0)) {
+            return;
+        }
+        CounterModel::GetInstance()->SetHeight(value);
     }
-    CounterModel::GetInstance()->SetHeight(value);
     args.ReturnSelf();
 }
 
@@ -149,14 +153,18 @@ void JSCounter::JSWidth(const JSCallbackInfo& args)
     }
 
     Dimension value;
-    if (!ConvertFromJSValue(args[0], value)) {
+    RefPtr<ResourceObject> widthResObj;
+    if (!ConvertFromJSValue(args[0], value, widthResObj)) {
         return;
     }
-
-    if (LessNotEqual(value.Value(), 0.0)) {
-        return;
+    if (SystemProperties::ConfigChangePerform() && widthResObj) {
+        CounterModel::GetInstance()->CreateWithResourceObj(JsCounterResourceType::Width, widthResObj);
+    } else {
+        if (LessNotEqual(value.Value(), 0.0)) {
+            return;
+        }
+        CounterModel::GetInstance()->SetWidth(value);
     }
-    CounterModel::GetInstance()->SetWidth(value);
     args.ReturnSelf();
 }
 
@@ -166,15 +174,21 @@ void JSCounter::SetSize(const JSCallbackInfo& args)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
 
         Dimension height;
-        if (ConvertFromJSValue(obj->GetProperty("height"), height) && height.IsValid()) {
-            if (GreatOrEqual(height.Value(), 0.0)) {
+        RefPtr<ResourceObject> heightResObj;
+
+        if (ConvertFromJSValue(obj->GetProperty("height"), height, heightResObj)) {
+            if (SystemProperties::ConfigChangePerform() && heightResObj) {
+                CounterModel::GetInstance()->CreateWithResourceObj(JsCounterResourceType::Height, heightResObj);
+            } else if (height.IsValid() && GreatOrEqual(height.Value(), 0.0)) {
                 CounterModel::GetInstance()->SetHeight(height);
             }
         }
-
         Dimension width;
-        if (ConvertFromJSValue(obj->GetProperty("width"), width) && width.IsValid()) {
-            if (GreatOrEqual(width.Value(), 0.0)) {
+        RefPtr<ResourceObject> widthResObj;
+        if (ConvertFromJSValue(obj->GetProperty("width"), width, widthResObj)) {
+            if (SystemProperties::ConfigChangePerform() && widthResObj) {
+                CounterModel::GetInstance()->CreateWithResourceObj(JsCounterResourceType::Width, widthResObj);
+            } else if (width.IsValid() && GreatOrEqual(width.Value(), 0.0)) {
                 CounterModel::GetInstance()->SetWidth(width);
             }
         }
@@ -208,11 +222,15 @@ void JSCounter::JsBackgroundColor(const JSCallbackInfo& args)
     }
 
     Color color;
-    if (!ParseJsColor(args[0], color)) {
-        return;
+    RefPtr<ResourceObject> resObj;
+    if (ParseJsColor(args[0], color, resObj)) {
+        if (SystemProperties::ConfigChangePerform() && resObj) {
+            CounterModel::GetInstance()->CreateWithResourceObj(JsCounterResourceType::BackgroundColor, resObj);
+        } else {
+            CounterModel::GetInstance()->SetBackgroundColor(color);
+        }
+        args.ReturnSelf();
     }
-    CounterModel::GetInstance()->SetBackgroundColor(color);
-    args.ReturnSelf();
 }
 
 void JSCounter::Create()

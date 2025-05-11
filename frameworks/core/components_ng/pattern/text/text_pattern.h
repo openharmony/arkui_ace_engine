@@ -888,6 +888,8 @@ protected:
     bool ShowShadow(const PointF& textOffset, const Color& color);
     virtual PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect);
     bool hasUrlSpan_ = false;
+    void UpdatePropertyImpl(
+        const std::string& key, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) override;
 
 private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);

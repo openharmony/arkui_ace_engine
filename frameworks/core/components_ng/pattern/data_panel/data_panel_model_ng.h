@@ -38,6 +38,7 @@ public:
     void SetTrackBackground(const Color& trackBackgroundColor) override;
     void SetStrokeWidth(const Dimension& strokeWidth) override;
     void SetShadowOption(const DataPanelShadow& shadowOption) override;
+    void CreateWithResourceObj(DataPanelResourceType colorType, const RefPtr<ResourceObject>& resObj) override;
 
     static void SetCloseEffect(FrameNode* frameNode, bool isClose);
     static void SetTrackBackground(FrameNode* frameNode, const Color& trackBackgroundColor);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_CANVAS_MODIFIER_H
-#define FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_CANVAS_MODIFIER_H
+#ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_STEPPER_MODIFIER_H
+#define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_STEPPER_MODIFIER_H
 
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
-const ArkUICanvasModifier* GetCanvasModifier();
-void SetCanvasOnReady(ArkUINodeHandle node, void* callback);
-void ResetCanvasOnReady(ArkUINodeHandle node);
-void SetCanvasEnableAnalyzer(ArkUINodeHandle node, ArkUI_Bool value);
-void ResetCanvasEnableAnalyzer(ArkUINodeHandle node);
-} // namespace OHOS::Ace::NG::NodeModifier
-#endif
+const ArkUIStepperModifier* GetStepperModifier();
+}
+
+#endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_STEPPER_MODIFIER_H

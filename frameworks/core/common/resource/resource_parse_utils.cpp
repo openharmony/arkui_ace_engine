@@ -774,4 +774,7 @@ bool ResourceParseUtils::ConvertFromResObj(const RefPtr<ResourceObject>& resObj,
     }
     return false;
 }
+
+template bool ResourceParseUtils::ConvertFromResObjNG<Dimension>(
+    const RefPtr<ResourceObject>& resObj, Dimension& result);
 }

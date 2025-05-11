@@ -140,34 +140,68 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
     if (ConvertGradientColor(info[0], gradient)) {
         ProgressModel::GetInstance()->SetGradientColor(gradient);
     } else {
+        RefPtr<ResourceObject> resObj;
         Color endColor;
         Color beginColor;
-        if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal)) {
-            if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY)) {
-                endColor = theme->GetRingProgressEndSideColor();
-                beginColor = theme->GetRingProgressBeginSideColor();
-                colorVal = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleSelectColor()
-                                                                     : theme->GetTrackSelectedColor();
+        if (SystemProperties::ConfigChangePerform()) {
+            bool state = false;
+            if (!info[0]->IsNull() && !info[0]->IsUndefined()) {
+                state = ParseJsColor(info[0], colorVal, resObj);
+            }
+            if (resObj) {
+                ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::COLOR, resObj);
+            } else if (state || Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+                if (!state) {
+                    endColor = theme->GetRingProgressEndSideColor();
+                    beginColor = theme->GetRingProgressBeginSideColor();
+                    colorVal = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleSelectColor()
+                                                                         : theme->GetTrackSelectedColor();
+                }
+                NG::GradientColor endSideColor;
+                NG::GradientColor beginSideColor;
+                endSideColor.SetLinearColor(LinearColor(endColor));
+                endSideColor.SetDimension(Dimension(0.0f));
+                beginSideColor.SetLinearColor(LinearColor(beginColor));
+                beginSideColor.SetDimension(Dimension(1.0f));
+                gradient.AddColor(endSideColor);
+                gradient.AddColor(beginSideColor);
+
+                ProgressModel::GetInstance()->SetGradientColor(gradient);
+                ProgressModel::GetInstance()->SetColor(colorVal);
             } else {
                 ProgressModel::GetInstance()->ResetGradientColor();
                 ProgressModel::GetInstance()->ResetColor();
                 return;
             }
-        } else {
-            endColor = colorVal;
-            beginColor = colorVal;
-        }
 
-        NG::GradientColor endSideColor;
-        NG::GradientColor beginSideColor;
-        endSideColor.SetLinearColor(LinearColor(endColor));
-        endSideColor.SetDimension(Dimension(0.0f));
-        beginSideColor.SetLinearColor(LinearColor(beginColor));
-        beginSideColor.SetDimension(Dimension(1.0f));
-        gradient.AddColor(endSideColor);
-        gradient.AddColor(beginSideColor);
-        ProgressModel::GetInstance()->SetGradientColor(gradient);
-        ProgressModel::GetInstance()->SetColor(colorVal);
+        } else {
+            if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal)) {
+                if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+                    endColor = theme->GetRingProgressEndSideColor();
+                    beginColor = theme->GetRingProgressBeginSideColor();
+                    colorVal = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleSelectColor()
+                                                                         : theme->GetTrackSelectedColor();
+                } else {
+                    ProgressModel::GetInstance()->ResetGradientColor();
+                    ProgressModel::GetInstance()->ResetColor();
+                    return;
+                }
+            } else {
+                endColor = colorVal;
+                beginColor = colorVal;
+            }
+
+            NG::GradientColor endSideColor;
+            NG::GradientColor beginSideColor;
+            endSideColor.SetLinearColor(LinearColor(endColor));
+            endSideColor.SetDimension(Dimension(0.0f));
+            beginSideColor.SetLinearColor(LinearColor(beginColor));
+            beginSideColor.SetDimension(Dimension(1.0f));
+            gradient.AddColor(endSideColor);
+            gradient.AddColor(beginSideColor);
+            ProgressModel::GetInstance()->SetGradientColor(gradient);
+            ProgressModel::GetInstance()->SetColor(colorVal);
+        }
     }
 }
 

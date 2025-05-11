@@ -55,6 +55,7 @@ public:
     void ResetStrokeRadius() override;
     void SetBorderRadius(const Dimension& value) override;
     void ResetBorderRadius() override;
+    void CreateWithResourceObj(JsProgressResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, double value, double max, NG::ProgressType type);
     static void SetValue(FrameNode* frameNode, double value);
