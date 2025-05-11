@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
+#include "core/components_ng/pattern/data_panel/data_panel_model_static.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter_union.h"
@@ -136,13 +137,13 @@ void SetDataPanelOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(options);
     auto panelOptions = Converter::OptConvert<Converter::DataPanelOptions>(*options);
     if (panelOptions.has_value()) {
-        DataPanelModelNG::SetValues(frameNode, panelOptions.value().values);
-        DataPanelModelNG::SetMax(frameNode, panelOptions.value().max);
-        DataPanelModelNG::SetType(frameNode, EnumToInt(panelOptions.value().type));
+        DataPanelModelStatic::SetValues(frameNode, panelOptions.value().values);
+        DataPanelModelStatic::SetMax(frameNode, panelOptions.value().max);
+        DataPanelModelStatic::SetType(frameNode, EnumToInt(panelOptions.value().type));
     } else {
-        DataPanelModelNG::SetValues(frameNode, std::nullopt);
-        DataPanelModelNG::SetMax(frameNode, std::nullopt);
-        DataPanelModelNG::SetType(frameNode, std::nullopt);
+        DataPanelModelStatic::SetValues(frameNode, std::nullopt);
+        DataPanelModelStatic::SetMax(frameNode, std::nullopt);
+        DataPanelModelStatic::SetType(frameNode, std::nullopt);
     }
 }
 } // DataPanelInterfaceModifier
@@ -168,12 +169,12 @@ void ValueColorsImpl(Ark_NativePointer node,
     if (convArray.size() > 0) {
         if (find_if(convArray.begin(), convArray.end(), [](auto item) {return item.GetColors().size() == 0;})
             != convArray.end()) {
-            DataPanelModelNG::SetValueColors(frameNode, std::nullopt);
+                DataPanelModelStatic::SetValueColors(frameNode, std::nullopt);
             return;
         }
-        DataPanelModelNG::SetValueColors(frameNode, convArray);
+        DataPanelModelStatic::SetValueColors(frameNode, convArray);
     } else {
-        DataPanelModelNG::SetValueColors(frameNode, std::nullopt);
+        DataPanelModelStatic::SetValueColors(frameNode, std::nullopt);
     }
 }
 void TrackBackgroundColorImpl(Ark_NativePointer node,
@@ -182,7 +183,7 @@ void TrackBackgroundColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto color = value ? Converter::OptConvert<Color>(*value) : std::nullopt;
-    DataPanelModelNG::SetTrackBackground(frameNode, color);
+    DataPanelModelStatic::SetTrackBackground(frameNode, color);
 }
 void StrokeWidthImpl(Ark_NativePointer node,
                      const Opt_Length* value)
@@ -191,7 +192,7 @@ void StrokeWidthImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto width = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
     Validator::ValidateNonNegative(width);
-    DataPanelModelNG::SetStrokeWidth(frameNode, width);
+    DataPanelModelStatic::SetStrokeWidth(frameNode, width);
 }
 void TrackShadowImpl(Ark_NativePointer node,
                      const Opt_DataPanelShadowOptions* value)
