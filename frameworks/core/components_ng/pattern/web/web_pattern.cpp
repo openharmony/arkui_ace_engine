@@ -3051,6 +3051,13 @@ void WebPattern::OnIntrinsicSizeEnabledUpdate(bool value)
     }
 }
 
+void WebPattern::OnCssDisplayChangeEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateCssDisplayChangeEnabled(value);
+    }
+}
+
 void WebPattern::OnNativeEmbedRuleTagUpdate(const std::string& tag)
 {
     if (delegate_) {
@@ -3407,6 +3414,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateAllowWindowOpenMethod(GetAllowWindowOpenMethodValue(isAllowWindowOpenMethod_));
         delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
         delegate_->UpdateIntrinsicSizeEnabled(GetIntrinsicSizeEnabledValue(false));
+        delegate_->UpdateCssDisplayChangeEnabled(GetCssDisplayChangeEnabledValue(false));
         delegate_->UpdateNativeEmbedRuleTag(GetNativeEmbedRuleTagValue(""));
         delegate_->UpdateNativeEmbedRuleType(GetNativeEmbedRuleTypeValue(""));
 
