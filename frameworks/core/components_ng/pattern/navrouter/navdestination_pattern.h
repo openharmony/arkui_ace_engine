@@ -269,6 +269,7 @@ public:
     void OnCoordScrollStart() override;
     float OnCoordScrollUpdate(float offset, float currentOffset) override;
     void OnCoordScrollEnd() override;
+    void UpdateBackgroundColor();
     bool NeedCoordWithScroll() override
     {
         return IsNeedHandleScroll();

@@ -73,6 +73,7 @@ public:
     virtual void SetHideItemText(bool isHideItemText) {};
     virtual void SetEnableToolBarAdaptation(bool disable) {};
     virtual void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) = 0;
+    virtual void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems, NG::MoreButtonOptions&& opt) {}
     virtual void GetToolBarItems(std::list<RefPtr<AceType>>& items) {};
     virtual void SetToolbarOptions(NG::NavigationToolbarOptions&& opt) {}
     virtual void SetToolbarMorebuttonOptions(NG::MoreButtonOptions&& opt) {}
@@ -85,9 +86,13 @@ public:
     virtual void SetUsrNavigationMode(NG::NavigationMode mode) = 0;
     virtual void SetNavBarPosition(NG::NavBarPosition mode) = 0;
     virtual void SetNavBarWidth(const Dimension& value, bool isDoubleBind = false) = 0;
+    virtual void SetNavBarWidth(const RefPtr<ResourceObject>& navBarWidthResObj) {}
     virtual void SetMinNavBarWidth(const Dimension& value) = 0;
     virtual void SetMaxNavBarWidth(const Dimension& value) = 0;
+    virtual void SetMinNavBarWidth(const RefPtr<ResourceObject>& minNavBarWidthResObj) {}
+    virtual void SetMaxNavBarWidth(const RefPtr<ResourceObject>& maxNavBarWidthResObj) {}
     virtual void SetMinContentWidth(const Dimension& value) = 0;
+    virtual void SetMinContentWidth(const RefPtr<ResourceObject>& minContentWidthResObj) {}
     virtual void SetOnNavBarStateChange(std::function<void(bool)>&& onNavBarStateChange) = 0;
     virtual void SetOnNavigationModeChange(std::function<void(NG::NavigationMode)>&& onNavigationModeChange);
     virtual void SetOnNavBarWidthChangeEvent(OnNavBarWidthChangeEvent event) {};

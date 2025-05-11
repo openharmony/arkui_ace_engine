@@ -48,6 +48,7 @@ private:
     static void SetControlButtonIcon(SideBarControlButtonType iconType, JSRef<JSVal> icon);
     static void ParseControlButtonOG(JSRef<JSObject> value);
     static void ParseControlButtonNG(JSRef<JSObject> value);
+    static void ProcessDividerProperties(const JSRef<JSObject>& obj);
 };
 
 } // namespace OHOS::Ace::Framework

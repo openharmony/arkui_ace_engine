@@ -24,6 +24,7 @@ class ACE_FORCE_EXPORT NavDestinationModelNG : public OHOS::Ace::NavDestinationM
 public:
     void Create() override;
     void Create(std::function<void()>&& deepRenderFunc, RefPtr<NG::NavDestinationContext> context = nullptr) override;
+    void RegisterBackgroundColorUpdateCallback(const RefPtr<NavDestinationGroupNode>& navDestinationNode);
     void SetHideTitleBar(bool hideTitleBar, bool animated) override;
     void SetHideBackButton(bool hideBackButton) override;
     void SetTitle(const std::string& title, bool hasSubTitle) override;
@@ -47,6 +48,7 @@ public:
     void SetHideToolBar(bool hideToolBar, bool animated) override;
     static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated);
     void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) override;
+    void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems, MoreButtonOptions&& opt) override;
     void SetCustomToolBar(const RefPtr<AceType>& customNode) override;
     void SetHideItemText(bool isHideItemText) override;
     void SetToolBarOptions(NavigationToolbarOptions&& opt) override;

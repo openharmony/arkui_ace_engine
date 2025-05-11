@@ -221,7 +221,7 @@ public:
     float OnCoordScrollUpdate(float offset);
     void OnCoordScrollEnd();
 
-    void SetTitlebarOptions(NavigationTitlebarOptions&& opt);
+    void SetTitlebarOptions(NavigationTitlebarOptions& opt);
 
     NavigationTitlebarOptions GetTitleBarOptions() const
     {

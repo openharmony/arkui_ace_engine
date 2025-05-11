@@ -378,7 +378,7 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest002, TestSize.Level1)
     auto navToolbarPattern = frameNode->GetPattern<NavToolbarPattern>();
     EXPECT_NE(navToolbarPattern, nullptr);
     NavigationToolbarOptions opt;
-    navToolbarPattern->SetToolbarOptions(std::move(opt));
+    navToolbarPattern->SetToolbarOptions(opt);
 }
 
 /**
@@ -398,7 +398,7 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest003, TestSize.Level1)
     BlurStyleOption blurStyleOption;
     blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
     opt.bgOptions.blurStyleOption = blurStyleOption;
-    navToolbarPattern->SetToolbarOptions(std::move(opt));
+    navToolbarPattern->SetToolbarOptions(opt);
 }
 
 /**
@@ -417,7 +417,7 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest004, TestSize.Level1)
     BlurStyleOption blurStyleOption;
     blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
     opt.bgOptions.blurStyleOption = blurStyleOption;
-    navToolbarPattern->SetToolbarOptions(std::move(opt));
+    navToolbarPattern->SetToolbarOptions(opt);
 }
 
 /**
@@ -434,7 +434,7 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest005, TestSize.Level1)
     EXPECT_NE(navToolbarPattern, nullptr);
     NavigationToolbarOptions opt;
     opt.bgOptions.color = std::make_optional(FRONT_COLOR);
-    navToolbarPattern->SetToolbarOptions(std::move(opt));
+    navToolbarPattern->SetToolbarOptions(opt);
 }
 
 /**
@@ -533,7 +533,7 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest009, TestSize.Level1)
     EXPECT_NE(navToolbarPattern, nullptr);
     NavigationToolbarOptions opt;
     opt.brOptions.textHideOptions = true;
-    navToolbarPattern->SetToolbarOptions(std::move(opt));
+    navToolbarPattern->SetToolbarOptions(opt);
 }
 
 /**
@@ -554,7 +554,7 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest010, TestSize.Level1)
     blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
     opt.bgOptions.blurStyleOption = blurStyleOption;
     opt.brOptions.textHideOptions = true;
-    navToolbarPattern->SetToolbarOptions(std::move(opt));
+    navToolbarPattern->SetToolbarOptions(opt);
     navToolbarPattern->OnModifyDone();
     EXPECT_EQ(
         navToolbarPattern->options_.bgOptions.color, FRONT_COLOR);
@@ -577,7 +577,7 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest011, TestSize.Level1)
     auto navToolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
     EXPECT_NE(navToolbarPattern, nullptr);
     NavigationToolbarOptions opt;
-    navToolbarPattern->SetToolbarOptions(std::move(opt));
+    navToolbarPattern->SetToolbarOptions(opt);
     navToolbarPattern->OnModifyDone();
     EXPECT_EQ(
         navToolbarPattern->options_.brOptions.textHideOptions, false);
@@ -596,7 +596,7 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest012, TestSize.Level1)
     EXPECT_NE(navToolbarPattern, nullptr);
     NavigationToolbarOptions opt;
     opt.brOptions.textHideOptions = false;
-    navToolbarPattern->SetToolbarOptions(std::move(opt));
+    navToolbarPattern->SetToolbarOptions(opt);
     navToolbarPattern->OnModifyDone();
     EXPECT_EQ(
         navToolbarPattern->options_.brOptions.textHideOptions, false);
@@ -658,7 +658,7 @@ HWTEST_F(ToolBarTestNg, HandleTitleBarAndToolBarAnimation002, TestSize.Level1)
     ASSERT_NE(toolbarPattern, nullptr);
     NavigationToolbarOptions opt;
     opt.brOptions.textHideOptions = true;
-    toolbarPattern->SetToolbarOptions(std::move(opt));
+    toolbarPattern->SetToolbarOptions(opt);
     toolbarPattern->OnModifyDone();
 
     auto toolBarLayoutProperty = toolBarNode->GetLayoutProperty();
@@ -1132,7 +1132,7 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternHandleLongPressEventTest007, TestSize.Leve
     blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
     opt.bgOptions.blurStyleOption = blurStyleOption;
     opt.brOptions.textHideOptions = true;
-    toolbarPattern->SetToolbarOptions(std::move(opt));
+    toolbarPattern->SetToolbarOptions(opt);
     toolbarPattern->OnModifyDone();
     EXPECT_EQ(
         toolbarPattern->options_.bgOptions.color, FRONT_COLOR);
@@ -1202,7 +1202,7 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternHandleLongPressEventTest008, TestSize.Leve
     blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
     opt.bgOptions.blurStyleOption = blurStyleOption;
     opt.brOptions.textHideOptions = true;
-    toolbarPattern->SetToolbarOptions(std::move(opt));
+    toolbarPattern->SetToolbarOptions(opt);
     toolbarPattern->OnModifyDone();
     EXPECT_EQ(
         toolbarPattern->options_.bgOptions.color, FRONT_COLOR);
@@ -1272,7 +1272,7 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternHandleLongPressEventTest009, TestSize.Leve
     blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
     opt.bgOptions.blurStyleOption = blurStyleOption;
     opt.brOptions.textHideOptions = true;
-    toolbarPattern->SetToolbarOptions(std::move(opt));
+    toolbarPattern->SetToolbarOptions(opt);
     toolbarPattern->OnModifyDone();
     EXPECT_EQ(
         toolbarPattern->options_.bgOptions.color, FRONT_COLOR);

@@ -27,6 +27,11 @@ struct NavigationBackgroundOptions {
     std::optional<Color> color;
     std::optional<BlurStyleOption> blurStyleOption;
     std::optional<EffectOption> effectOption;
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, NavigationBackgroundOptions&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
 
     bool operator== (const NavigationBackgroundOptions& other) const
     {
@@ -36,6 +41,22 @@ struct NavigationBackgroundOptions {
     bool operator!= (const NavigationBackgroundOptions& other) const
     {
         return !(*this == other);
+    }
+
+    void AddResource(const std::string& key, const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, NavigationBackgroundOptions&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = { resObj, std::move(updateFunc) };
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
     }
 };
 
