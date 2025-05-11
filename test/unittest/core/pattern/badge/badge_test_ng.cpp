@@ -1065,4 +1065,181 @@ HWTEST_F(BadgeTestNg, BadgeDumpSimplifyInfoTest001, TestSize.Level1)
     EXPECT_EQ(layoutProperty_->GetBadgeTextColorValue(), Color::GREEN);
     EXPECT_EQ(layoutProperty_->GetBadgeFontSizeValue(), BADGE_FONT_SIZE);
 }
+
+/**
+ * @tc.name: BadgePatternTest001
+ * @tc.desc: Test UpdateBadgeValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, UpdateBadgePatternTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create badge and get frameNode.
+     */
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    
+    /**
+     * @tc.steps: step2. call UpdateBadgeValue with different conditions
+     */
+    pattern_->UpdateBadgeValue(VALUE, true);  // isFirstLoad = true
+    auto layoutProperty = pattern_->GetLayoutProperty<BadgeLayoutProperty>();
+    EXPECT_EQ(layoutProperty->GetBadgeValue(), VALUE);
+    
+    pattern_->UpdateBadgeValue(VALUE, false); // isFirstLoad = false
+    EXPECT_EQ(layoutProperty->GetBadgeValue(), VALUE); // should not update
+}
+
+/**
+ * @tc.name: BadgePatternTest002
+ * @tc.desc: Test UpdateColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, UpdateBadgePatternTest002, TestSize.Level1)
+{
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    
+    Color testColor = Color::RED;
+    pattern_->UpdateColor(testColor, true);
+    auto layoutProperty = pattern_->GetLayoutProperty<BadgeLayoutProperty>();
+    EXPECT_EQ(layoutProperty->GetBadgeTextColor(), testColor);
+    
+    Color testColor2 = Color::BLUE;
+    pattern_->UpdateColor(testColor2, false);
+    EXPECT_EQ(layoutProperty->GetBadgeTextColor(), testColor); // should not update
+}
+
+/**
+ * @tc.name: BadgePatternTest003
+ * @tc.desc: Test UpdateBadgeColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, UpdateBadgePatternTest003, TestSize.Level1)
+{
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    
+    Color testColor = Color::GREEN;
+    pattern_->UpdateBadgeColor(testColor, true);
+    auto layoutProperty = pattern_->GetLayoutProperty<BadgeLayoutProperty>();
+    EXPECT_EQ(layoutProperty->GetBadgeColor(), testColor);
+    
+    Color testColor2 = Color::RED;
+    pattern_->UpdateBadgeColor(testColor2, false);
+    EXPECT_EQ(layoutProperty->GetBadgeColor(), testColor); // should not update
+}
+
+/**
+ * @tc.name: BadgePatternTest004
+ * @tc.desc: Test UpdateBorderColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, UpdateBadgePatternTest004, TestSize.Level1)
+{
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    
+    Color testColor = Color::BLACK;
+    pattern_->UpdateBorderColor(testColor, true);
+    auto layoutProperty = pattern_->GetLayoutProperty<BadgeLayoutProperty>();
+    EXPECT_EQ(layoutProperty->GetBadgeBorderColor(), testColor);
+    
+    Color testColor2 = Color::WHITE;
+    pattern_->UpdateBorderColor(testColor2, false);
+    EXPECT_EQ(layoutProperty->GetBadgeBorderColor(), testColor); // should not update
+}
+
+/**
+ * @tc.name: BadgePatternTest005
+ * @tc.desc: Test UpdateFontWeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, UpdateBadgePatternTest005, TestSize.Level1)
+{
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    
+    FontWeight fontWeight = FontWeight::BOLD;
+    pattern_->UpdateFontWeight(fontWeight, true);
+    auto layoutProperty = pattern_->GetLayoutProperty<BadgeLayoutProperty>();
+    EXPECT_EQ(layoutProperty->GetBadgeFontWeight(), fontWeight);
+    
+    FontWeight fontWeight2 = FontWeight::NORMAL;
+    pattern_->UpdateFontWeight(fontWeight2, false);
+    EXPECT_EQ(layoutProperty->GetBadgeFontWeight(), fontWeight); // should not update
+}
+
+/**
+ * @tc.name: BadgePatternTest006
+ * @tc.desc: Test UpdateFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, UpdateBadgePatternTest006, TestSize.Level1)
+{
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    
+    CalcDimension fontSize(BADGE_FONT_SIZE);
+    pattern_->UpdateFontSize(fontSize, false, true);
+    auto layoutProperty = pattern_->GetLayoutProperty<BadgeLayoutProperty>();
+    EXPECT_EQ(layoutProperty->GetBadgeFontSize(), fontSize);
+    EXPECT_FALSE(layoutProperty->GetFontSizeIsDefault());
+    
+    CalcDimension fontSize2(BADGE_FONT_SIZE);
+    pattern_->UpdateFontSize(fontSize2, true, false);
+    EXPECT_EQ(layoutProperty->GetBadgeFontSize(), fontSize); // should not update
+}
+
+/**
+ * @tc.name: BadgePatternTest007
+ * @tc.desc: Test UpdateBadgeCircleSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, UpdateBadgePatternTest007, TestSize.Level1)
+{
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    
+    CalcDimension size(BADGE_FONT_SIZE);
+    pattern_->UpdateBadgeCircleSize(size, false, true);
+    auto layoutProperty = pattern_->GetLayoutProperty<BadgeLayoutProperty>();
+    EXPECT_EQ(layoutProperty->GetBadgeCircleSize(), size);
+    EXPECT_FALSE(layoutProperty->GetBadgeSizeIsDefault());
+    
+    CalcDimension size2(BADGE_FONT_SIZE);
+    pattern_->UpdateBadgeCircleSize(size2, true, false);
+    EXPECT_EQ(layoutProperty->GetBadgeCircleSize(), size); // should not update
+}
+
+/**
+ * @tc.name: BadgePatternTest009
+ * @tc.desc: Test UpdateBadgePosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, UpdateBadgePatternTest008, TestSize.Level1)
+{
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    
+    CalcDimension posX(BADGE_FONT_SIZE);
+    pattern_->UpdateBadgePositionX(posX, true);
+    auto layoutProperty = pattern_->GetLayoutProperty<BadgeLayoutProperty>();
+    EXPECT_EQ(layoutProperty->GetBadgePositionX(), posX);
+    
+    CalcDimension posY(BADGE_FONT_SIZE);
+    pattern_->UpdateBadgePositionY(posY, true);
+    EXPECT_EQ(layoutProperty->GetBadgePositionY(), posY);
+}
+
+/**
+ * @tc.name: BadgePatternTest010
+ * @tc.desc: Test UpdateBorderWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, UpdateBadgePatternTest009, TestSize.Level1)
+{
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    
+    CalcDimension width(BADGE_FONT_SIZE);
+    pattern_->UpdateBorderWidth(width, true);
+    auto layoutProperty = pattern_->GetLayoutProperty<BadgeLayoutProperty>();
+    EXPECT_EQ(layoutProperty->GetBadgeBorderWidth(), width);
+    
+    CalcDimension width2(BADGE_FONT_SIZE);
+    pattern_->UpdateBorderWidth(width2, false);
+    EXPECT_EQ(layoutProperty->GetBadgeBorderWidth(), width); // should not update
+}
 } // namespace OHOS::Ace::NG

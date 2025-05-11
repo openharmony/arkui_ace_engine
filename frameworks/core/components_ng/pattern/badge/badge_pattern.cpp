@@ -218,4 +218,161 @@ void BadgePattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
         json->Put("BadgeFontSize", badgeFontSize.value().ToString().c_str());
     }
 }
+
+void BadgePattern::UpdateBadgeValue(const std::string& badgeValue, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+        layoutProperty->UpdateBadgeValue(badgeValue);
+    }
+}
+
+void BadgePattern::UpdateColor(const Color& color, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+        layoutProperty->UpdateBadgeTextColor(color);
+    }
+}
+
+void BadgePattern::UpdateBadgeColor(const Color& badgeColor, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+        layoutProperty->UpdateBadgeColor(badgeColor);
+    }
+}
+
+void BadgePattern::UpdateBorderColor(const Color& borderColor, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+        layoutProperty->UpdateBadgeBorderColor(borderColor);
+    }
+}
+
+void BadgePattern::UpdateFontWeight(FontWeight fontWeight, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+        layoutProperty->UpdateBadgeFontWeight(fontWeight);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void BadgePattern::UpdateFontSize(const CalcDimension& fontSize, bool isDefaultFontSize, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+        layoutProperty->UpdateBadgeFontSize(fontSize);
+        auto originFontSizeFlag = layoutProperty->GetFontSizeIsDefault();
+        auto originBadgeSize = layoutProperty->GetBadgeSizeIsDefault();
+        if (originFontSizeFlag != isDefaultFontSize) {
+            layoutProperty->SetIsDefault(isDefaultFontSize, originBadgeSize);
+        }
+    }
+}
+
+void BadgePattern::UpdateBadgeCircleSize(
+    const CalcDimension& badgeCircleSize, bool isDefaultBadgeSize, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+        auto originFontSizeFlag = layoutProperty->GetFontSizeIsDefault();
+        auto originBadgeSize = layoutProperty->GetBadgeSizeIsDefault();
+        layoutProperty->UpdateBadgeCircleSize(badgeCircleSize);
+        if (originBadgeSize != isDefaultBadgeSize) {
+            layoutProperty->SetIsDefault(originFontSizeFlag, isDefaultBadgeSize);
+        }
+    }
+}
+
+void BadgePattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (host->GetRerenderable()) {
+        host->MarkModifyDone();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void BadgePattern::UpdateBadgePositionX(const CalcDimension& positionX, bool isFirstLoad)
+{
+    auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+        layoutProperty->UpdateBadgePositionX(positionX);
+    }
+}
+
+void BadgePattern::UpdateBadgePositionY(const CalcDimension& positionY, bool isFirstLoad)
+{
+    auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+        layoutProperty->UpdateBadgePositionY(positionY);
+    }
+}
+
+void BadgePattern::UpdateBorderWidth(const CalcDimension& borderWidth, bool isFirstLoad)
+{
+    auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+        layoutProperty->UpdateBadgeBorderWidth(borderWidth);
+    }
+}
 } // namespace OHOS::Ace::NG
