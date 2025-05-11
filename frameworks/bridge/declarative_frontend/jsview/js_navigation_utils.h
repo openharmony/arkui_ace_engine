@@ -22,6 +22,7 @@
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
+#include "frameworks/core/common/resource/resource_parse_utils.h"
 #include "frameworks/core/components_ng/base/frame_node.h"
 #include "frameworks/core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "frameworks/core/components_ng/pattern/navigation/navigation_options.h"

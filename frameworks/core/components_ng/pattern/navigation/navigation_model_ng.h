@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_MODEL_NG_H
 
+#include "core/common/resource/resource_object.h"
 #include "core/components_ng/pattern/navigation/navigation_model.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -33,10 +34,21 @@ public:
     void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath) override;
     bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
         const std::string& title, bool ignoreMainTitle = false) override;
+    bool ParseCommonMainTitle(bool hasSubTitle, bool hasMainTitle, const RefPtr<ResourceObject>& subResObj,
+        const RefPtr<ResourceObject>& mainResObj, bool ignoreMainTitle = false) override;
+    void ParseCommonSubTitle(bool hasSubTitle, RefPtr<NG::FrameNode>& subTitle,
+        const RefPtr<NG::TitleBarPattern>& titleBarPattern, const RefPtr<NG::TitleBarNode>& titleBarNode,
+        NG::FrameNode* frameNode, const RefPtr<ResourceObject>& resObj) override;
+    void UpdateMainTitle(const bool hasSubTitle,  NG::FrameNode* frameNode,
+        const RefPtr<ResourceObject>& mainResObj) override;
+    void UpdateTitleBarNode(const RefPtr<NG::NavBarNode>& navBarNode,
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<NG::TitleBarPattern>& titleBarPattern) override;
+
     void SetTitle(const std::string& title, bool hasSubTitle = false) override;
     void SetTitlebarOptions(NavigationTitlebarOptions&& opt) override;
     void SetCustomTitle(const RefPtr<AceType>& customNode) override;
     void SetTitleHeight(const Dimension& height, bool isValid = true) override;
+    void SetTitleHeight(const RefPtr<ResourceObject>& resObj, bool isValid = true) override;
     void SetTitleMode(NG::NavigationTitleMode mode) override;
     void SetSubtitle(const std::string& subtitle) override;
     void SetEnableModeChangeAnimation(bool isEnable) override;
@@ -46,6 +58,21 @@ public:
     void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const std::string& src,
         const ImageOption& imageOption, RefPtr<PixelMap>& pixMap, const std::vector<std::string>& nameList,
         bool userDefinedAccessibilityText = false, const std::string& backButtonAccessibilityText = "") override;
+    void SetBackButtonIconSrcRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const RefPtr<ResourceObject>& resObj, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText = false,
+        const std::string& backButtonAccessibilityText = "") override;
+    void SetBackButtonIconTextRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
+        const RefPtr<ResourceObject>& resObj) override;
+    void SetBackButtonIconSrcAndTextRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const RefPtr<ResourceObject>& backButtonResObj, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
+        const RefPtr<ResourceObject>& backButtonTextResObj) override;
+    void UpdateBackButtonIcon(const std::vector<std::string>& nameList, RefPtr<PixelMap>& pixMap,
+        const ImageOption& imageOption, const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        NG::FrameNode* frameNode, const RefPtr<ResourceObject>& backButtonIconResObj) override;
     void SetHideBackButton(bool hideBackButton) override;
     void SetHideToolBar(bool hideToolBar, bool animated = false) override;
     void SetCustomToolBar(const RefPtr<AceType>& customNode) override;

@@ -31,9 +31,25 @@ public:
     void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol, const std::string& src,
         const ImageOption& imageOption, RefPtr<PixelMap>& pixMap, const std::vector<std::string>& nameList,
         bool userDefinedAccessibilityText = false, const std::string& backButtonAccessibilityText = "") override;
+    void SetBackButtonIconSrcRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const RefPtr<ResourceObject>& resObj, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText = false,
+        const std::string& backButtonAccessibilityText = "") override;
+    void SetBackButtonIconTextRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
+        const RefPtr<ResourceObject>& resObj) override;
+    void SetBackButtonIconSrcAndTextRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const RefPtr<ResourceObject>& backButtonResObj, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
+        const RefPtr<ResourceObject>& backButtonTextResObj) override;
+    void UpdateBackButtonIcon(const std::vector<std::string>& nameList, RefPtr<PixelMap>& pixMap,
+        const ImageOption& imageOption, const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        NG::FrameNode* frameNode, const RefPtr<ResourceObject>& backButtonIconResObj) override;
     void SetSubtitle(const std::string& subtitle) override;
     void SetCustomTitle(const RefPtr<AceType>& customNode) override;
     void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) override;
+    void SetTitleHeight(const RefPtr<ResourceObject>& resObj, bool isValid = true) override;
     void SetOnShown(std::function<void()>&& onShow) override;
     void SetOnHidden(std::function<void()>&& onHidden) override;
     void SetOnWillAppear(std::function<void()>&& willAppear) override;
@@ -111,6 +127,14 @@ public:
     void SetEnableNavigationIndicator(const std::optional<bool>& navigationIndicator) override;
     static void SetEnableNavigationIndicator(
         FrameNode* frameNode, const std::optional<bool>& navigationIndicator);
+    bool ParseCommonMainTitle(bool hasSubTitle, bool hasMainTitle, const RefPtr<ResourceObject>& subResObj,
+        const RefPtr<ResourceObject>& mainResObj, bool ignoreMainTitle = false) override;
+    void UpdateSubTitle(const RefPtr<NG::TitleBarNode>& titleBarNode,
+        const RefPtr<ResourceObject>& subResObj) override;
+    void UpdateMainTitle(const bool hasSubTitle, const RefPtr<ResourceObject>& mainResObj,
+        NG::FrameNode* frameNode) override;
+    void UpdateTitleBarNode(const RefPtr<NG::NavDestinationGroupNode>& navDestinationNode,
+            const RefPtr<NG::TitleBarNode>& titleBarNode) override;
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

@@ -46,8 +46,24 @@ void ParseSymbolAndIcon(const JSCallbackInfo& info, NG::BarItem& toolBarItem,
         toolBarItem.iconSymbol = iconSymbol;
     }
     auto itemIconObject = itemObject->GetProperty("icon");
-    if (JSViewAbstract::ParseJsMedia(itemIconObject, icon)) {
-        toolBarItem.icon = icon;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> iconResObj;
+        if (JSViewAbstract::ParseJsMedia(itemIconObject, icon, iconResObj)) {
+            toolBarItem.icon = icon;
+        }
+        if (iconResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& iconResObj, NG::BarItem& toolBarItem) {
+                std::string result;
+                if (ResourceParseUtils::ParseResMedia(iconResObj, result)) {
+                    toolBarItem.icon = result;
+                }
+            };
+            toolBarItem.AddResource("navigation.toolbarItem.iconResObj", iconResObj, std::move(updateFunc));
+        }
+    } else {
+        if (JSViewAbstract::ParseJsString(itemIconObject, icon)) {
+            toolBarItem.icon = icon;
+        }
     }
 
     auto itemActiveSymbolIconObject = itemObject->GetProperty("activeSymbolIcon");
@@ -57,8 +73,23 @@ void ParseSymbolAndIcon(const JSCallbackInfo& info, NG::BarItem& toolBarItem,
         toolBarItem.activeIconSymbol = activeSymbol;
     }
     auto itemActiveIconObject = itemObject->GetProperty("activeIcon");
-    if (JSViewAbstract::ParseJsMedia(itemActiveIconObject, activeIcon)) {
-        toolBarItem.activeIcon = activeIcon;
+
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> activeIconResObj;
+        if (JSViewAbstract::ParseJsMedia(itemActiveIconObject, activeIcon, activeIconResObj)) {
+            toolBarItem.activeIcon = activeIcon;
+        }
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& activeIconResObj, NG::BarItem& toolBarItem) {
+            std::string result;
+            if (ResourceParseUtils::ParseResMedia(activeIconResObj, result)) {
+                toolBarItem.activeIcon = result;
+            }
+        };
+        toolBarItem.AddResource("navigation.toolbarItem.activeIconResObj", activeIconResObj, std::move(updateFunc));
+    } else {
+        if (JSViewAbstract::ParseJsMedia(itemActiveIconObject, activeIcon)) {
+            toolBarItem.activeIcon = activeIcon;
+        }
     }
 }
 
@@ -159,6 +190,55 @@ void ParseToolBarItemAction(const WeakPtr<NG::FrameNode>& targetNode,
     };
     toolBarItem.action = onItemClick;
 }
+
+void ParseBarItemsValue(const JSRef<JSObject>& itemObject, NG::BarItem& toolBarItem)
+{
+    std::string value;
+    auto itemValueObject = itemObject->GetProperty("value");
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> itemValueResObj;
+        if (JSViewAbstract::ParseJsString(itemValueObject, value, itemValueResObj)) {
+            toolBarItem.text = value;
+        }
+        if (itemValueResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& itemValueResObj, NG::BarItem& toolBarItem) {
+                std::string valueResult;
+                if (ResourceParseUtils::ParseResString(itemValueResObj, valueResult)) {
+                    toolBarItem.text = valueResult;
+                }
+            };
+            toolBarItem.AddResource("toolBarItem.value", itemValueResObj, std::move(updateFunc));
+        }
+    } else {
+        if (JSViewAbstract::ParseJsString(itemValueObject, value)) {
+            toolBarItem.text = value;
+        }
+    }
+}
+void ParseBarItemsIcon(const JSRef<JSObject>& itemObject, NG::BarItem& toolBarItem)
+{
+    std::string icon;
+    auto itemIconObject = itemObject->GetProperty("icon");
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> itemIconResObj;
+        if (JSViewAbstract::ParseJsMedia(itemIconObject, icon, itemIconResObj)) {
+            toolBarItem.icon = icon;
+        }
+        if (itemIconResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& itemIconResObj, NG::BarItem& toolBarItem) {
+                std::string iconResult;
+                if (ResourceParseUtils::ParseResMedia(itemIconResObj, iconResult)) {
+                    toolBarItem.icon = iconResult;
+                }
+            };
+            toolBarItem.AddResource("navigation.barItem.icon", itemIconResObj, std::move(updateFunc));
+        }
+    } else {
+        if (JSViewAbstract::ParseJsMedia(itemIconObject, icon)) {
+            toolBarItem.icon = icon;
+        }
+    }
+}
 }
 
 void JSNavigationUtils::ParseToolbarItemsConfiguration(const WeakPtr<NG::FrameNode>& targetNode,
@@ -175,8 +255,24 @@ void JSNavigationUtils::ParseToolbarItemsConfiguration(const WeakPtr<NG::FrameNo
         std::string text;
         auto itemObject = JSRef<JSObject>::Cast(item);
         auto itemValueObject = itemObject->GetProperty("value");
-        if (JSViewAbstract::ParseJsString(itemValueObject, text)) {
-            toolBarItem.text = text;
+        if (SystemProperties::ConfigChangePerform()) {
+            RefPtr<ResourceObject> navigationResObj;
+            if (JSViewAbstract::ParseJsString(itemValueObject, text, navigationResObj)) {
+                toolBarItem.text = text;
+            }
+            if (navigationResObj) {
+                auto&& updateFunc = [](const RefPtr<ResourceObject>& navigationResObj, NG::BarItem& toolBarItem) {
+                    std::string result;
+                    if (ResourceParseUtils::ParseResString(navigationResObj, result)) {
+                        toolBarItem.text = result;
+                    }
+                };
+                toolBarItem.AddResource("navigation.toolbarItem.textResObj", navigationResObj, std::move(updateFunc));
+            }
+        } else {
+            if (JSViewAbstract::ParseJsString(itemValueObject, text)) {
+                toolBarItem.text = text;
+            }
         }
 
         ParseToolBarItemAction(targetNode, info, itemObject, toolBarItem);
@@ -290,11 +386,7 @@ void JSNavigationUtils::ParseBarItems(const WeakPtr<NG::FrameNode>& targetNode,
         }
         auto itemObject = JSRef<JSObject>::Cast(item);
         NG::BarItem toolBarItem;
-        std::string value;
-        auto itemValueObject = itemObject->GetProperty("value");
-        if (JSViewAbstract::ParseJsString(itemValueObject, value)) {
-            toolBarItem.text = value;
-        }
+        ParseBarItemsValue(itemObject, toolBarItem);
 
         auto itemSymbolIconObject = itemObject->GetProperty("symbolIcon");
         if (itemSymbolIconObject->IsObject()) {
@@ -302,11 +394,7 @@ void JSNavigationUtils::ParseBarItems(const WeakPtr<NG::FrameNode>& targetNode,
             JSViewAbstract::SetSymbolOptionApply(info, iconSymbol, itemSymbolIconObject);
             toolBarItem.iconSymbol = iconSymbol;
         }
-        std::string icon;
-        auto itemIconObject = itemObject->GetProperty("icon");
-        if (JSViewAbstract::ParseJsMedia(itemIconObject, icon)) {
-            toolBarItem.icon = icon;
-        }
+        ParseBarItemsIcon(itemObject, toolBarItem);
 
         auto itemEnabledObject = itemObject->GetProperty("isEnabled");
         if (itemEnabledObject->IsBoolean()) {

@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
+#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 
 namespace OHOS::Ace {
 using NavigationTransitionEvent = std::function<NG::NavigationTransition(
@@ -54,6 +55,7 @@ public:
     virtual void SetTitlebarOptions(NG::NavigationTitlebarOptions&& opt) {}
     virtual void SetCustomTitle(const RefPtr<AceType>& customNode) = 0;
     virtual void SetTitleHeight(const Dimension& height, bool isValid = true) = 0;
+    virtual void SetTitleHeight(const RefPtr<ResourceObject>& resObj, bool isValid = true) = 0;
     virtual void SetTitleMode(NG::NavigationTitleMode mode) = 0;
     virtual void SetSubtitle(const std::string& subtitle) = 0;
     virtual void SetEnableModeChangeAnimation(bool isEnable) = 0;
@@ -65,6 +67,21 @@ public:
         const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
         const std::vector<std::string>& nameList, bool userDefinedAccessibilityText = false,
         const std::string& backButtonAccessibilityText = "");
+    virtual void SetBackButtonIconSrcRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const RefPtr<ResourceObject>& resObj, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText = false,
+        const std::string& backButtonAccessibilityText = "");
+    virtual void SetBackButtonIconTextRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
+        const RefPtr<ResourceObject>& resObj);
+    virtual void SetBackButtonIconSrcAndTextRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const RefPtr<ResourceObject>& backButtonResObj, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
+        const RefPtr<ResourceObject>& backButtonTextResObj);
+    virtual void UpdateBackButtonIcon(const std::vector<std::string>& nameList, RefPtr<PixelMap>& pixMap,
+        const NG::ImageOption& imageOption, const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        NG::FrameNode* frameNode, const RefPtr<ResourceObject>& backButtonIconResObj);
     virtual void SetHideBackButton(bool hideBackButton) = 0;
     virtual void SetHideToolBar(bool hideToolBar, bool animated = false) = 0;
     virtual void SetCustomToolBar(const RefPtr<AceType>& customNode) = 0;
@@ -101,6 +118,15 @@ public:
     virtual void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) {};
     virtual void SetRecoverable(bool recoverable) {}
     virtual void SetEnableDragBar(bool recoverable) {}
+    virtual bool ParseCommonMainTitle(bool hasSubTitle, bool hasMainTitle, const RefPtr<ResourceObject>& subResObj,
+        const RefPtr<ResourceObject>& mainResObj, bool ignoreMainTitle = false) {return false;};
+    virtual void ParseCommonSubTitle(bool hasSubTitle, RefPtr<NG::FrameNode>& subTitle,
+        const RefPtr<NG::TitleBarPattern>& titleBarPattern, const RefPtr<NG::TitleBarNode>& titleBarNode,
+        NG::FrameNode* frameNode, const RefPtr<ResourceObject>& resObj) {};
+    virtual void UpdateMainTitle(const bool hasSubTitle, NG::FrameNode* frameNode,
+        const RefPtr<ResourceObject>& mainResObj) {};
+    virtual void UpdateTitleBarNode(const RefPtr<NG::NavBarNode>& navBarNode,
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<NG::TitleBarPattern>& titleBarPattern) {};
 
 private:
     static std::unique_ptr<NavigationModel> instance_;
