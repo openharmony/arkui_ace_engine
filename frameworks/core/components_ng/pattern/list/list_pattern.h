@@ -408,6 +408,8 @@ public:
         repeatDifference_ = repeatDifference;
     }
 
+    void OnColorModeChange(uint32_t colorMode) override;
+
 protected:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;

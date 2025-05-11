@@ -15,10 +15,11 @@
 
 #include "core/components_ng/pattern/list/list_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/common/resource/resource_parse_utils.h"
@@ -1149,5 +1150,81 @@ void ListModelNG::ScrollToItemInGroup(
         align = ScrollAlign::START;
     }
     listPattern->ScrollToItemInGroup(index, indexInGroup, smooth, align);
+}
+
+void ListModelNG::ParseResObjDividerStrokeWidth(const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(resObj);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            return;
+        }
+        V2::ItemDivider divider = GetDivider(frameNode);
+        divider.strokeWidth = result;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider, frameNode);
+    };
+    pattern->AddResObj("list.divider.strokeWidth", resObj, std::move(updateFunc));
+}
+
+void ListModelNG::ParseResObjDividerColor(const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(resObj);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        Color result;
+        if (!ResourceParseUtils::ParseResColor(resObj, result)) {
+            return;
+        }
+        V2::ItemDivider divider = GetDivider(frameNode);
+        divider.color = result;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider, frameNode);
+    };
+    pattern->AddResObj("list.divider.color", resObj, std::move(updateFunc));
+}
+
+void ListModelNG::ParseResObjDividerStartMargin(const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(resObj);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            return;
+        }
+        V2::ItemDivider divider = GetDivider(frameNode);
+        divider.startMargin = result;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider, frameNode);
+    };
+    pattern->AddResObj("list.divider.startMargin", resObj, std::move(updateFunc));
+}
+
+void ListModelNG::ParseResObjDividerEndMargin(const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(resObj);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            return;
+        }
+        V2::ItemDivider divider = GetDivider(frameNode);
+        divider.endMargin = result;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider, frameNode);
+    };
+    pattern->AddResObj("list.divider.endMargin", resObj, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG
