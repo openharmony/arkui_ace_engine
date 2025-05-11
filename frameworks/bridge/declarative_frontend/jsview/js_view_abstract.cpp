@@ -2510,17 +2510,15 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
     bool syncMode = false;
     ParseBackgroundImageOption(info, repeatIndex, syncMode);
     ViewAbstractModel::GetInstance()->SetBackgroundImageSyncMode(syncMode);
+    RefPtr<ResourceObject> backgroundImageResObj;
     if (jsBackgroundImage->IsString()) {
         src = jsBackgroundImage->ToString();
         ViewAbstractModel::GetInstance()->SetBackgroundImage(
             ImageSourceInfo { src, bundle, module }, GetThemeConstants());
-    } else if (jsBackgroundImage->IsObject()) {
-        if (!SystemProperties::ConfigChangePerform()) {
-            ParseJsMediaWithBundleName(jsBackgroundImage, src, bundle, module, resId);
+    } else if (ParseJsMediaWithBundleName(jsBackgroundImage, src, bundle, module, resId, backgroundImageResObj)) {
+        if (!SystemProperties::ConfigChangePerform() || !backgroundImageResObj) {
             ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo{src, bundle, module}, nullptr);
         } else {
-            RefPtr<ResourceObject> backgroundImageResObj;
-            ParseJsMediaWithBundleName(jsBackgroundImage, src, bundle, module, resId, backgroundImageResObj);
             ViewAbstractModel::GetInstance()->SetBackgroundImageWithResourceObj(backgroundImageResObj, bundle, module, nullptr);
         }
     } else {
