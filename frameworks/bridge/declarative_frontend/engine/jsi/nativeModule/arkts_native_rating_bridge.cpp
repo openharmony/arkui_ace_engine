@@ -123,7 +123,7 @@ ArkUINativeModuleValue RatingBridge::SetStarStyle(ArkUIRuntimeCallInfo* runtimeC
         ArkTSUtils::ParseJsString(vm, foregroundUriArg, foregroundUri);
     }
     std::string secondaryUri;
-    if (ArkTSUtils::ParseJsMedia(vm, secondaryUriArg, secondaryUri)) {
+    if (!ArkTSUtils::ParseJsMedia(vm, secondaryUriArg, secondaryUri)) {
         ArkTSUtils::ParseJsString(vm, secondaryUriArg, secondaryUri);
     }
 
