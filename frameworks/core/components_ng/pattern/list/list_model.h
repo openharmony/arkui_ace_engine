@@ -21,6 +21,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
@@ -89,6 +90,11 @@ public:
 
     virtual DisplayMode GetDisplayMode() const = 0;
     virtual void SetHeader(const RefPtr<NG::FrameNode>& headerNode) {}
+    virtual void ParseResObjDividerStrokeWidth(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ParseResObjDividerColor(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ParseResObjDividerStartMargin(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ParseResObjDividerEndMargin(const RefPtr<ResourceObject>& resObj) {};
+
 #ifdef SUPPORT_DIGITAL_CROWN
     virtual void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) {}
 #endif

@@ -74,6 +74,10 @@ public:
     void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) override;
     void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize() override;
+    void ParseResObjDividerStrokeWidth(const RefPtr<ResourceObject>& resObj) override;
+    void ParseResObjDividerColor(const RefPtr<ResourceObject>& resObj) override;
+    void ParseResObjDividerStartMargin(const RefPtr<ResourceObject>& resObj) override;
+    void ParseResObjDividerEndMargin(const RefPtr<ResourceObject>& resObj) override;
 
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth);

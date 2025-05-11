@@ -15,12 +15,13 @@
 
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/arc_list/arc_list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_ng/pattern/arc_list/arc_list_item_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -313,5 +314,37 @@ void ListItemModelNG::SetAutoScale(FrameNode* frameNode, bool autoScale)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ArcListItemLayoutProperty, AutoScale, autoScale, frameNode);
+}
+
+void ListItemModelNG::ParseResObjStartArea(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            return;
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, result, frameNode);
+    };
+    pattern->AddResObj("listItem.StartDeleteAreaDistance", resObj, std::move(updateFunc));
+}
+
+void ListItemModelNG::ParseResObjEndArea(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            return;
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, result, frameNode);
+    };
+    pattern->AddResObj("listItem.EndDeleteAreaDistance", resObj, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG

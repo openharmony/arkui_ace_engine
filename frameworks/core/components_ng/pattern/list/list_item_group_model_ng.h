@@ -40,6 +40,10 @@ public:
     void SetFooterComponent(const RefPtr<NG::UINode>& footerComponent) override;
     void RemoveHeader() override;
     void RemoveFooter() override;
+    void ParseResObjDividerStrokeWidth(const RefPtr<ResourceObject>& resObj) override;
+    void ParseResObjDividerColor(const RefPtr<ResourceObject>& resObj) override;
+    void ParseResObjDividerStartMargin(const RefPtr<ResourceObject>& resObj) override;
+    void ParseResObjDividerEndMargin(const RefPtr<ResourceObject>& resObj) override;
 
     static void SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);

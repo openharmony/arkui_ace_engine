@@ -425,12 +425,18 @@ void JSList::SetDivider(const JSCallbackInfo& args)
     V2::ItemDivider divider;
     if (args.Length() >= 1 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        RefPtr<ResourceObject> resObjStrokeWidth;
+        RefPtr<ResourceObject> resObjColor;
+        RefPtr<ResourceObject> resObjStartMargin;
+        RefPtr<ResourceObject> resObjEndMargin;
         bool needReset = obj->GetProperty("strokeWidth")->IsString() &&
-            !std::regex_match(obj->GetProperty("strokeWidth")->ToString(), DIMENSION_REGEX);
-        if (needReset || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth)) {
+                         !std::regex_match(obj->GetProperty("strokeWidth")->ToString(), DIMENSION_REGEX);
+        if (needReset ||
+            !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth, resObjStrokeWidth)) {
             divider.strokeWidth = 0.0_vp;
         }
-        if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+
+        if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color, resObjColor)) {
             // Failed to get color from param, using default color defined in theme
             RefPtr<ListTheme> listTheme = GetTheme<ListTheme>();
             if (listTheme) {
@@ -439,15 +445,23 @@ void JSList::SetDivider(const JSCallbackInfo& args)
         }
 
         needReset = obj->GetProperty("startMargin")->IsString() &&
-            !std::regex_match(obj->GetProperty("startMargin")->ToString(), DIMENSION_REGEX);
-        if (needReset || !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin)) {
+                    !std::regex_match(obj->GetProperty("startMargin")->ToString(), DIMENSION_REGEX);
+        if (needReset ||
+            !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin, resObjStartMargin)) {
             divider.startMargin = 0.0_vp;
         }
 
         needReset = obj->GetProperty("endMargin")->IsString() &&
-            !std::regex_match(obj->GetProperty("endMargin")->ToString(), DIMENSION_REGEX);
-        if (needReset || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin)) {
+                    !std::regex_match(obj->GetProperty("endMargin")->ToString(), DIMENSION_REGEX);
+        if (needReset || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin, resObjEndMargin)) {
             divider.endMargin = 0.0_vp;
+        }
+
+        if (SystemProperties::ConfigChangePerform()) {
+            ListModel::GetInstance()->ParseResObjDividerStrokeWidth(resObjStrokeWidth);
+            ListModel::GetInstance()->ParseResObjDividerColor(resObjColor);
+            ListModel::GetInstance()->ParseResObjDividerStartMargin(resObjStartMargin);
+            ListModel::GetInstance()->ParseResObjDividerEndMargin(resObjEndMargin);
         }
     }
     ListModel::GetInstance()->SetDivider(divider);

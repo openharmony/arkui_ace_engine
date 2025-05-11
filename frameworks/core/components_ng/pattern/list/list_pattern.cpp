@@ -3134,6 +3134,14 @@ SizeF ListPattern::GetChildrenExpandedSize()
     return SizeF();
 }
 
+void ListPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_NORMAL);
+}
+
 void ListPattern::OnMidIndexChanged()
 {
 #ifdef SUPPORT_DIGITAL_CROWN

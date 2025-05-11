@@ -18,6 +18,7 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
@@ -744,5 +745,20 @@ WaterFlowLayoutMode WaterFlowModelNG::GetLayoutMode(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_RETURN(pattern, WaterFlowLayoutMode::TOP_DOWN);
     return pattern->GetLayoutMode();
+}
+
+void WaterFlowModelNG::ParseResObjFriction(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    auto&& updateFunc = [pattern](const RefPtr<ResourceObject>& resObj) {
+        double result;
+        if (!ResourceParseUtils::ParseResourceToDouble(resObj, result)) {
+            return;
+        }
+        pattern->SetFriction(result);
+    };
+    pattern->AddResObj("waterflow.Friction", resObj, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG
