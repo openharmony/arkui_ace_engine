@@ -19,12 +19,17 @@
 #include <mutex>
 
 #include "base/geometry/dimension.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
 #include "core/components_ng/property/gradient_property.h"
 
 namespace OHOS::Ace {
-
+enum class DataPanelResourceType {
+    TRACK_BACKGROUND_COLOR,
+    VALUE_COLORS,
+    STROKE_WIDTH
+};
 class ACE_FORCE_EXPORT DataPanelModel {
 public:
     static DataPanelModel* GetInstance();
@@ -36,6 +41,7 @@ public:
     virtual void SetTrackBackground(const Color& trackBackgroundColor) = 0;
     virtual void SetStrokeWidth(const Dimension& strokeWidth) = 0;
     virtual void SetShadowOption(const OHOS::Ace::NG::DataPanelShadow& shadowOption) = 0;
+    virtual void CreateWithResourceObj(DataPanelResourceType colorType, const RefPtr<ResourceObject>& resObj) = 0;
 
 private:
     static std::unique_ptr<DataPanelModel> instance_;
