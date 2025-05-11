@@ -85,6 +85,8 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    void OnColorModeChange(uint32_t colorMode) override;
+
     Axis GetAxis() const override
     {
         return Axis::VERTICAL;
