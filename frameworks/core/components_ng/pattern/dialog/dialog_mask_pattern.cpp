@@ -105,9 +105,10 @@ void DialogMaskPattern::CloseMask()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
+    ContainerScope scope(pipeline->GetInstanceId());
 
     auto dialog = GetDialogNode();
-    auto dialogId = dialog ? dialog->GetId() : -1;
+    auto dialogId = dialog ? dialog->GetId() : dialogId_;
 
     AnimationOption option;
     option.SetCurve(Curves::SHARP);
