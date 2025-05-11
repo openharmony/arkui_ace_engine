@@ -74,6 +74,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     hitTestBehavior(value: HitTestMode): this;
     layoutWeight(value: number | string): this;
     padding(value: Padding | Length): this;
+    safeAreaPadding(value: Padding | LengthMetrics | LocalizedPadding): this;
     margin(value: Margin | Length): this;
     background(builder: CustomBuilder, options?: {
         align?: Alignment;
@@ -711,6 +712,11 @@ declare class ArkStackComponent extends ArkComponent implements StackAttribute {
     alignContent(value: Alignment): StackAttribute;
     align(value: Alignment): this;
 }
+declare class ArkFolderStackComponent extends ArkStackComponent implements FolderStackAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    onFolderStateChange(callback: (event: { foldStatus: FoldStatus }) => void): this;
+    onHoverStatusChange(handler: (param: HoverEventParam) => void): this;
+}
 declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     enableDataDetector(enable: boolean): this;
@@ -846,25 +852,20 @@ declare class ArkVideoComponent extends ArkComponent implements CommonMethod<Vid
     controls(value: boolean): VideoAttribute;
     loop(value: boolean): VideoAttribute;
     objectFit(value: ImageFit): VideoAttribute;
-    onStart(callback: () => void): VideoAttribute;
-    onPause(callback: () => void): VideoAttribute;
-    onFinish(event: () => void): VideoAttribute;
-    onFullscreenChange(callback: (event: {
-        fullscreen: boolean;
-    }) => void): VideoAttribute;
-    onPrepared(callback: (event: {
-        duration: number;
-    }) => void): VideoAttribute;
-    onSeeking(callback: (event: {
-        time: number;
-    }) => void): VideoAttribute;
-    onSeeked(callback: (event: {
-        time: number;
-    }) => void): VideoAttribute;
-    onUpdate(callback: (event: {
-        time: number;
-    }) => void): VideoAttribute;
-    onError(callback: () => void): VideoAttribute;
+    onStart(event: VoidCallback): VideoAttribute;
+    onPause(event: VoidCallback): VideoAttribute;
+    onFinish(event: VoidCallback): VideoAttribute;
+    onFullscreenChange(callback: Callback<FullscreenInfo>): VideoAttribute;
+    onPrepared(callback: Callback<PreparedInfo>): VideoAttribute;
+    onSeeking(callback: Callback<PlaybackInfo>): VideoAttribute;
+    onSeeked(callback: Callback<PlaybackInfo>): VideoAttribute;
+    onUpdate(callback: Callback<PlaybackInfo>): VideoAttribute;
+    onError(event: VoidCallback | ErrorCallback): VideoAttribute;
+    onStop(event: Callback<void>): VideoAttribute;
+    enableAnalyzer(enable: boolean): VideoAttribute;
+    analyzerConfig(config: ImageAnalyzerConfig): VideoAttribute;
+    surfaceBackgroundColor(color: ColorMetrics): VideoAttribute;
+    enableShortcutKey(enabled: boolean): VideoAttribute;
 }
 declare class ArkImageFrameInfoToArray {
     arrSrc: Array<string> | undefined;
@@ -2028,7 +2029,8 @@ declare class ArkShapeComponent extends ArkCommonShapeComponent implements Shape
 }
 declare class ArkCanvasComponent extends ArkComponent implements CanvasAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
-    onReady(event: () => void): this;
+    onReady(event: VoidCallback): this;
+    enableAnalyzer(value: boolean): this;
 }
 declare class ArkGridContainerComponent extends ArkComponent implements ColumnAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

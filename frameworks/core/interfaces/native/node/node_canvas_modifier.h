@@ -19,6 +19,10 @@
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
-    void SetCanvasOnReady(ArkUINodeHandle node, void* extraParam);
-}
+const ArkUICanvasModifier* GetCanvasModifier();
+void SetCanvasOnReady(ArkUINodeHandle node, void* callback);
+void ResetCanvasOnReady(ArkUINodeHandle node);
+void SetCanvasEnableAnalyzer(ArkUINodeHandle node, ArkUI_Bool value);
+void ResetCanvasEnableAnalyzer(ArkUINodeHandle node);
+} // namespace OHOS::Ace::NG::NodeModifier
 #endif
