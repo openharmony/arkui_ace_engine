@@ -48,9 +48,9 @@ public:
     }
 
     void SetToolBarStyle(const std::optional<BarStyle>& barStyle);
-    void SetMenuOptions(NavigationMenuOptions&& opt)
+    void SetMenuOptions(NavigationMenuOptions& opt)
     {
-        menuOptions_ = std::move(opt);
+        menuOptions_ = opt;
     }
 
     NavigationMenuOptions GetMenuOptions() const

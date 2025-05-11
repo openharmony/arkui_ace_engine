@@ -74,6 +74,7 @@ public:
     void OnWindowHide() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void BeforeSyncGeometryProperties(const DirtySwapConfig& /* config */) override;
+    void UpdateColorModeForNodes(const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
 
     void OnLanguageConfigurationUpdate() override;
 

@@ -21,7 +21,7 @@
 #include <optional>
 #include <regex>
 #include <vector>
-
+#include <functional>
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/json/json_util.h"
@@ -30,6 +30,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
 
@@ -476,11 +477,25 @@ public:
         linearGradientInfo_ = std::make_shared<LinearGradientInfo>(linearGradientInfo);
     }
 
+    template<class T>
+    static bool CmpSharedPtr(const std::shared_ptr<T>& a, const std::shared_ptr<T>& b)
+    {
+        if (a == b) {
+            return true;
+        }
+        if (a && b) {
+            return *a == *b;
+        }
+        return false;
+    }
+
     bool operator==(const Gradient& other) const
     {
         return (type_ == other.GetType() && repeat_ == other.GetRepeat() && colors_ == other.GetColors() &&
-                radialGradient_ == other.GetRadialGradient() && linearGradient_ == other.GetLinearGradient() &&
-                sweepGradient_ == other.GetSweepGradient() && beginOffset_ == other.GetBeginOffset() &&
+                CmpSharedPtr(radialGradient_, other.GetRadialGradient()) &&
+                CmpSharedPtr(linearGradient_, other.GetLinearGradient()) &&
+                CmpSharedPtr(sweepGradient_, other.GetSweepGradient()) &&
+                beginOffset_ == other.GetBeginOffset() &&
                 endOffset_ == other.GetEndOffset() && spreadMethod_ == other.GetSpreadMethod() &&
                 gradientTransform_ == other.GetGradientTransform() &&
                 linearGradientInfo_ == other.GetLinearGradientInfo() &&
@@ -495,6 +510,29 @@ public:
     std::unique_ptr<JsonValue> LinearGradientToJson() const;
     std::unique_ptr<JsonValue> SweepGradientToJson() const;
     std::unique_ptr<JsonValue> RadialGradientToJson() const;
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, NG::Gradient&)> updateFunc;
+    };
+    std::map<std::string, resourceUpdater> resMap_;
+        
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, NG::Gradient&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = {resObj, std::move(updateFunc)};
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
+    }
 
 private:
     GradientType type_ = GradientType::LINEAR;

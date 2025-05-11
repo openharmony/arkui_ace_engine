@@ -48,6 +48,26 @@ class ACE_FORCE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
 public:
     ~ViewAbstractModelNG() override = default;
 
+    void CreateWithForegroundColorResourceObj(const RefPtr<ResourceObject>& resObj) override
+    {
+        ViewAbstract::CreateWithForegroundColorResourceObj(resObj);
+    }
+    void CreateWithOuterBorderColorResourceObj(const RefPtr<ResourceObject>& resObj) override
+    {
+        ViewAbstract::CreateWithOuterBorderColorResourceObj(resObj);
+    }
+    void CreateWithOuterBorderRadiusResourceObj(const RefPtr<ResourceObject>& resObj) override
+    {
+        ViewAbstract::CreateWithOuterBorderRadiusResourceObj(resObj);
+    }
+    void CreateWithLightColorResourceObj(const RefPtr<ResourceObject>& resObj) override
+    {
+        ViewAbstract::CreateWithLightColorResourceObj(resObj);
+    }
+    void CreateWithOuterBorderWidthResourceObj(const RefPtr<ResourceObject>& resObj) override
+    {
+        ViewAbstract::CreateWithOuterBorderWidthResourceObj(resObj);
+    }
     void SetWidth(const CalcDimension& width) override
     {
         if (width.Unit() == DimensionUnit::CALC) {
@@ -496,6 +516,11 @@ public:
         ViewAbstract::SetOuterBorderWidth(value);
     }
 
+    void SetOuterBorderWidthNew(const NG::BorderWidthProperty& property) override
+    {
+        ViewAbstract::SetOuterBorderWidth(property);
+    }
+
     void SetOuterBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) override
     {
@@ -695,6 +720,11 @@ public:
         ViewAbstract::SetOpacity(opacity);
     }
 
+    void CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& resobj) override
+    {
+        ViewAbstract::CreateWithOpacityResourceObj(resobj);
+    }
+
     void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) override
     {
         ViewAbstract::SetTransition(transitionOptions);
@@ -832,6 +862,11 @@ public:
         ViewAbstract::SetProgressMask(progress);
     }
 
+    void CreateWithMaskResourceObj(const RefPtr<NG::ProgressMaskProperty>& progress) override
+    {
+        ViewAbstract::CreateWithMaskResourceObj(progress);
+    }
+
     void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
     {
         ViewAbstract::SetBackdropBlur(radius, blurOption, sysOptions);
@@ -896,6 +931,11 @@ public:
     void SetColorBlend(const Color& value) override
     {
         ViewAbstract::SetColorBlend(value);
+    }
+
+    void CreateWithColorBlendResourceObj(const RefPtr<ResourceObject>& resobj) override
+    {
+        ViewAbstract::CreateWithColorBlendResourceObj(resobj);
     }
 
     void SetWindowBlur(float progress, WindowBlurStyle blurStyle) override {}
@@ -1584,6 +1624,11 @@ public:
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) override
     {
         ViewAbstract::SetLightPosition(positionX, positionY, positionZ);
+    }
+
+    void SetLightPosition(const NG::TranslateOptions& options) override
+    {
+        ViewAbstract::SetLightPosition(options);
     }
 
     void SetLightIntensity(const float value) override

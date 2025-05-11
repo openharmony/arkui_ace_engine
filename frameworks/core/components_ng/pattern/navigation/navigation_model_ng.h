@@ -92,9 +92,13 @@ public:
     void SetUsrNavigationMode(NG::NavigationMode mode) override;
     void SetNavBarPosition(NG::NavBarPosition mode) override;
     void SetNavBarWidth(const Dimension& value, bool isDoubleBind = false) override;
+    void SetNavBarWidth(const RefPtr<ResourceObject>& navBarWidthResObj) override;
     void SetMinNavBarWidth(const Dimension& value) override;
     void SetMaxNavBarWidth(const Dimension& value) override;
+    void SetMinNavBarWidth(const RefPtr<ResourceObject>& minNavBarWidthResObj) override;
+    void SetMaxNavBarWidth(const RefPtr<ResourceObject>& maxNavBarWidthResObj) override;
     void SetMinContentWidth(const Dimension& value) override;
+    void SetMinContentWidth(const RefPtr<ResourceObject>& minContentWidthResObj) override;
     void SetOnNavBarStateChange(std::function<void(bool)>&& onNavBarStateChange) override;
     void SetNavigationMode(NG::NavigationMode mode) override;
     void SetNavDestination(std::function<void(std::string)>&& builder) override;

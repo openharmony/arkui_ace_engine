@@ -62,8 +62,8 @@ public:
 
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
-    void SetToolbarOptions(NavigationToolbarOptions&& opt);
-    void SetToolbarMoreButtonOptions(MoreButtonOptions&& opt);
+    void SetToolbarOptions(NavigationToolbarOptions& opt);
+    void SetToolbarMoreButtonOptions(MoreButtonOptions& opt);
 
     MoreButtonOptions GetToolbarMoreButtonOptions() const
     {

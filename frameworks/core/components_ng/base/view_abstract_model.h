@@ -66,6 +66,12 @@ public:
     static ViewAbstractModel* GetInstance();
     virtual ~ViewAbstractModel() = default;
 
+    virtual void CreateWithForegroundColorResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithOuterBorderColorResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithOuterBorderRadiusResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithLightColorResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithOuterBorderWidthResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    
     // basic size
     virtual void SetWidth(const CalcDimension& width) = 0;
     virtual void SetHeight(const CalcDimension& height) = 0;
@@ -158,6 +164,7 @@ public:
         const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) = 0;
     virtual void SetOuterBorderColor(const NG::BorderColorProperty& borderColors) = 0;
     virtual void SetOuterBorderWidth(const Dimension& value) = 0;
+    virtual void SetOuterBorderWidthNew(const NG::BorderWidthProperty& property) = 0;
     virtual void SetOuterBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) = 0;
     virtual void SetOuterBorderStyle(const BorderStyle& value) = 0;
@@ -204,6 +211,7 @@ public:
 
     // display props
     virtual void SetOpacity(double opacity, bool passThrough = false) = 0;
+    virtual void CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& resobj) {};
     virtual void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) = 0;
     virtual void CleanTransition() {};
     virtual void SetChainedTransition(
@@ -255,6 +263,7 @@ public:
     virtual void SetBlendMode(BlendMode blendMode) = 0;
     virtual void SetBlendApplyType(BlendApplyType blendApplyType) = 0;
     virtual void SetColorBlend(const Color& value) = 0;
+    virtual void CreateWithColorBlendResourceObj(const RefPtr<ResourceObject>& resobj) {};
     virtual void SetWindowBlur(float progress, WindowBlurStyle blurStyle) = 0;
     virtual void SetBrightness(const Dimension& value) = 0;
     virtual void SetGrayScale(const Dimension& value) = 0;
@@ -450,6 +459,7 @@ public:
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;
+    virtual void CreateWithMaskResourceObj(const RefPtr<NG::ProgressMaskProperty>& progress) {};
     // foregroundColor
     virtual void SetForegroundColor(const Color& color) = 0;
     virtual void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) = 0;
@@ -469,6 +479,7 @@ public:
     // global light
     virtual void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) = 0;
+    virtual void SetLightPosition(const NG::TranslateOptions& options) = 0;
     virtual void SetLightIntensity(const float value) = 0;
     virtual void SetLightColor(const Color& value) = 0;
     virtual void SetLightIlluminated(const uint32_t value) = 0;

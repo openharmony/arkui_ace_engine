@@ -1063,7 +1063,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPattern015, TestSize.Level1)
     auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
     EXPECT_NE(titleBarPattern, nullptr);
     NavigationTitlebarOptions opt;
-    titleBarPattern->SetTitlebarOptions(std::move(opt));
+    titleBarPattern->SetTitlebarOptions(opt);
 }
 
 /**
@@ -1080,7 +1080,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPattern016, TestSize.Level1)
     EXPECT_NE(titleBarPattern, nullptr);
     NavigationTitlebarOptions opt;
     opt.bgOptions.color = std::make_optional(FRONT_COLOR);
-    titleBarPattern->SetTitlebarOptions(std::move(opt));
+    titleBarPattern->SetTitlebarOptions(opt);
 }
 
 /**
@@ -1099,7 +1099,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPattern017, TestSize.Level1)
     BlurStyleOption blurStyleOption;
     blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
     opt.bgOptions.blurStyleOption = blurStyleOption;
-    titleBarPattern->SetTitlebarOptions(std::move(opt));
+    titleBarPattern->SetTitlebarOptions(opt);
 }
 
 /**
@@ -1352,7 +1352,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternTest039, TestSize.Level1)
     EXPECT_NE(titleBarPattern, nullptr);
     NavigationTitlebarOptions opt;
     opt.brOptions.barStyle = std::make_optional(BarStyle::STACK);
-    titleBarPattern->SetTitlebarOptions(std::move(opt));
+    titleBarPattern->SetTitlebarOptions(opt);
     auto options = titleBarPattern->GetTitleBarOptions();
     EXPECT_TRUE(options.brOptions.barStyle.has_value());
 }
@@ -1371,7 +1371,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternTest040, TestSize.Level1)
     EXPECT_NE(titleBarPattern, nullptr);
     NavigationTitlebarOptions opt;
     opt.brOptions.barStyle = std::make_optional(BarStyle::STANDARD);
-    titleBarPattern->SetTitlebarOptions(std::move(opt));
+    titleBarPattern->SetTitlebarOptions(opt);
     auto options = titleBarPattern->GetTitleBarOptions();
     EXPECT_TRUE(options.brOptions.barStyle.has_value());
 }
@@ -1391,7 +1391,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternTest041, TestSize.Level1)
     NavigationTitlebarOptions opt;
     opt.brOptions.paddingStart = std::make_optional(DEFAULT_PADDING);
     opt.brOptions.paddingEnd = std::make_optional(DEFAULT_PADDING);
-    titleBarPattern->SetTitlebarOptions(std::move(opt));
+    titleBarPattern->SetTitlebarOptions(opt);
     auto options = titleBarPattern->GetTitleBarOptions();
     EXPECT_TRUE(options.brOptions.paddingStart.has_value());
     EXPECT_TRUE(options.brOptions.paddingEnd.has_value());
@@ -1526,7 +1526,7 @@ HWTEST_F(TitleBarTestNg, TitleBarModifier001, TestSize.Level1)
     NavigationTitlebarOptions options1;
     options1.textOptions.mainTitleApplyFunc = [](WeakPtr<FrameNode> weakNode) {};
     options1.textOptions.subTitleApplyFunc = [](WeakPtr<FrameNode> weakNode) {};
-    titleBarPattern->SetTitlebarOptions(std::move(options1));
+    titleBarPattern->SetTitlebarOptions(options1);
     ASSERT_NE(titleBarPattern->options_.textOptions.mainTitleApplyFunc, nullptr);
     ASSERT_NE(titleBarPattern->options_.textOptions.subTitleApplyFunc, nullptr);
 
@@ -1537,7 +1537,7 @@ HWTEST_F(TitleBarTestNg, TitleBarModifier001, TestSize.Level1)
     NavigationTitlebarOptions options2;
     titleBarPattern->shouldResetMainTitleProperty_ = false;
     titleBarPattern->shouldResetSubTitleProperty_ = false;
-    titleBarPattern->SetTitlebarOptions(std::move(options2));
+    titleBarPattern->SetTitlebarOptions(options2);
     ASSERT_TRUE(titleBarPattern->shouldResetMainTitleProperty_);
     ASSERT_TRUE(titleBarPattern->shouldResetSubTitleProperty_);
     ASSERT_EQ(titleBarPattern->options_.textOptions.mainTitleApplyFunc, nullptr);
@@ -1647,7 +1647,7 @@ HWTEST_F(TitleBarTestNg, TitleBarModifier003, TestSize.Level1)
         ASSERT_NE(textNode, nullptr);
         subTextNode = textNode;
     };
-    titleBarPattern->SetTitlebarOptions(std::move(options));
+    titleBarPattern->SetTitlebarOptions(options);
     ASSERT_NE(titleBarPattern->options_.textOptions.mainTitleApplyFunc, nullptr);
     ASSERT_NE(titleBarPattern->options_.textOptions.subTitleApplyFunc, nullptr);
 
@@ -2392,12 +2392,12 @@ HWTEST_F(TitleBarTestNg, TitleBarHoverModeTest002, TestSize.Level1)
      */
     NavigationTitlebarOptions opt1;
     opt1.brOptions.barStyle = std::make_optional(BarStyle::STANDARD);
-    titleBarPattern_->SetTitlebarOptions(std::move(opt1));
+    titleBarPattern_->SetTitlebarOptions(opt1);
     bool hover1 = NavigationTitleUtil::IsNeedHoverModeAction(frameNode_);
     ASSERT_FALSE(hover1);
     NavigationTitlebarOptions opt2;
     opt2.enableHoverMode = false;
-    titleBarPattern_->SetTitlebarOptions(std::move(opt2));
+    titleBarPattern_->SetTitlebarOptions(opt2);
     bool hover2 = NavigationTitleUtil::IsNeedHoverModeAction(frameNode_);
     ASSERT_FALSE(hover2);
     auto offset = NavigationTitleUtil::CalculateTitlebarOffset(frameNode_);

@@ -18,6 +18,7 @@
 #include "frameworks/base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -93,6 +94,33 @@ void ParseSymbolAndIcon(const JSCallbackInfo& info, NG::BarItem& toolBarItem,
     }
 }
 
+void UpdateNavigationBackgroundColor(
+    const JSRef<JSObject>& optObj, Color& color, NG::NavigationBackgroundOptions& options)
+{
+    auto colorProperty = optObj->GetProperty(BACKGROUND_COLOR_PROPERTY);
+    if (!SystemProperties::ConfigChangePerform()) {
+        if (JSViewAbstract::ParseJsColor(colorProperty, color)) {
+            options.color = color;
+        }
+        return;
+    }
+    RefPtr<ResourceObject> backgroundColorResObj;
+    if (JSViewAbstract::ParseJsColor(colorProperty, color, backgroundColorResObj)) {
+        options.color = color;
+    }
+    if (backgroundColorResObj) {
+        auto&& updateBackgroundColorFunc = [](const RefPtr<ResourceObject>& resObj,
+                                               NG::NavigationBackgroundOptions& options) {
+            Color backgroundColor;
+            if (ResourceParseUtils::ParseResColor(resObj, backgroundColor)) {
+                options.color = backgroundColor;
+            }
+        };
+        options.AddResource(
+            "navigationTitleOptions.backgroundColor", backgroundColorResObj, std::move(updateBackgroundColorFunc));
+    }
+}
+
 void ParseBackgroundOptions(const JSRef<JSVal>& obj, NG::NavigationBackgroundOptions& options)
 {
     options.color.reset();
@@ -102,11 +130,8 @@ void ParseBackgroundOptions(const JSRef<JSVal>& obj, NG::NavigationBackgroundOpt
         return;
     }
     auto optObj = JSRef<JSObject>::Cast(obj);
-    auto colorProperty = optObj->GetProperty(BACKGROUND_COLOR_PROPERTY);
     Color color;
-    if (JSViewAbstract::ParseJsColor(colorProperty, color)) {
-        options.color = color;
-    }
+    UpdateNavigationBackgroundColor(optObj, color, options);
     BlurStyleOption styleOptions;
     auto blurProperty = optObj->GetProperty(BACKGROUND_BLUR_STYLE_PROPERTY);
     if (blurProperty->IsNumber()) {

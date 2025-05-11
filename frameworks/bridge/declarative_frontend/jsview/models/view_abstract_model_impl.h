@@ -88,6 +88,7 @@ public:
         const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) override {}
     void SetOuterBorderColor(const NG::BorderColorProperty& borderColors) override {}
     void SetOuterBorderWidth(const Dimension& value) override {}
+    void SetOuterBorderWidthNew(const NG::BorderWidthProperty& property) override {}
     void SetOuterBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) override {}
     void SetOuterBorderStyle(const BorderStyle& value) override {}
@@ -382,6 +383,7 @@ public:
     void SetDisableDataPrefetch(bool disableDataPrefetch) override {};
     void SetBackgroundImageResizableSlice(const ImageResizableSlice& Slice) override {};
     // global light
+    void SetLightPosition(const NG::TranslateOptions& option) override {};
     void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) override {};
     void SetLightIntensity(const float value) override {};

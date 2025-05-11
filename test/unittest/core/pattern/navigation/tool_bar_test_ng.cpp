@@ -376,7 +376,7 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest002, TestSize.Level1)
     auto navToolbarPattern = frameNode->GetPattern<NavToolbarPattern>();
     EXPECT_NE(navToolbarPattern, nullptr);
     NavigationToolbarOptions opt;
-    navToolbarPattern->SetToolbarOptions(std::move(opt));
+    navToolbarPattern->SetToolbarOptions(opt);
 }
 
 /**
@@ -396,7 +396,7 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest003, TestSize.Level1)
     BlurStyleOption blurStyleOption;
     blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
     opt.bgOptions.blurStyleOption = blurStyleOption;
-    navToolbarPattern->SetToolbarOptions(std::move(opt));
+    navToolbarPattern->SetToolbarOptions(opt);
 }
 
 /**
@@ -415,7 +415,7 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest004, TestSize.Level1)
     BlurStyleOption blurStyleOption;
     blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
     opt.bgOptions.blurStyleOption = blurStyleOption;
-    navToolbarPattern->SetToolbarOptions(std::move(opt));
+    navToolbarPattern->SetToolbarOptions(opt);
 }
 
 /**
@@ -432,7 +432,7 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest005, TestSize.Level1)
     EXPECT_NE(navToolbarPattern, nullptr);
     NavigationToolbarOptions opt;
     opt.bgOptions.color = std::make_optional(FRONT_COLOR);
-    navToolbarPattern->SetToolbarOptions(std::move(opt));
+    navToolbarPattern->SetToolbarOptions(opt);
 }
 
 /**
@@ -531,7 +531,7 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest009, TestSize.Level1)
     EXPECT_NE(navToolbarPattern, nullptr);
     NavigationToolbarOptions opt;
     opt.brOptions.textHideOptions = true;
-    navToolbarPattern->SetToolbarOptions(std::move(opt));
+    navToolbarPattern->SetToolbarOptions(opt);
 }
 
 /**
@@ -1183,7 +1183,7 @@ HWTEST_F(ToolBarTestNg, SetToolbarMoreButtonOptionsTest001, TestSize.Level1)
     BlurStyleOption blurStyleOption;
     blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
     opt.bgOptions.blurStyleOption = blurStyleOption;
-    navToolbarPattern->SetToolbarMoreButtonOptions(std::move(opt));
+    navToolbarPattern->SetToolbarMoreButtonOptions(opt);
     EXPECT_EQ(
         navToolbarPattern->GetToolbarMoreButtonOptions().bgOptions.blurStyleOption->blurStyle, BlurStyle::NO_MATERIAL);
 }
@@ -1203,7 +1203,7 @@ HWTEST_F(ToolBarTestNg, SetToolbarMoreButtonOptionsTest002, TestSize.Level1)
     EffectOption effectOption;
     effectOption.adaptiveColor = AdaptiveColor::DEFAULT;
     opt.bgOptions.effectOption = effectOption;
-    navToolbarPattern->SetToolbarMoreButtonOptions(std::move(opt));
+    navToolbarPattern->SetToolbarMoreButtonOptions(opt);
     EXPECT_EQ(
         navToolbarPattern->GetToolbarMoreButtonOptions().bgOptions.effectOption->adaptiveColor, AdaptiveColor::DEFAULT);
 }
