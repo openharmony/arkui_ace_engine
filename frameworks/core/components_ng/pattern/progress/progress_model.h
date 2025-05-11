@@ -26,7 +26,25 @@
 #include "core/components_ng/property/gradient_property.h"
 
 namespace OHOS::Ace {
-
+enum class JsProgressResourceType {
+    COLOR,
+    LSStrokeWidth,
+    LSSweepingEffect,
+    LSStrokeRadius,
+    SmoothEffect,
+    RingStrokeWidth,
+    RingShadow,
+    RingStatus,
+    RingSweepingEffect,
+    CapsuleBorderWidth,
+    CapsuleBorderColor,
+    CapsuleSweepingEffect,
+    ShowDefaultPercentage,
+    FontColor,
+    BackgroundColor,
+    FontSize,
+    FontWeight,
+};
 class ACE_FORCE_EXPORT ProgressModel {
 public:
     static ProgressModel* GetInstance();
@@ -64,6 +82,7 @@ public:
     virtual void ResetStrokeRadius() {}
     virtual void SetBorderRadius(const Dimension& value) {}
     virtual void ResetBorderRadius() {}
+    virtual void CreateWithResourceObj(JsProgressResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) = 0;
 
 private:
     static std::unique_ptr<ProgressModel> instance_;
