@@ -28,6 +28,8 @@
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -913,4 +915,88 @@ void TimePickerModelNG::UpdateUserSetSelectColor()
     timePickerPattern->UpdateUserSetSelectColor();
 }
 
+void TimePickerModelNG::ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
+    std::function<void(const PickerTextStyle&)> updateTextStyleFunc)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    auto&& updateFunc = [textStyleOpt, frameNode, updateTextStyleFunc](const RefPtr<ResourceObject> resObj) {
+        PickerTextStyle textStyle;
+        Color color;
+        CalcDimension fontSize;
+        std::vector<std::string> families;
+
+        if (textStyleOpt.textColorResObj &&
+            ResourceParseUtils::ParseResColor(textStyleOpt.textColorResObj, color)) {
+            textStyle.textColor = color;
+        }
+
+        if (textStyleOpt.fontSizeResObj &&
+            ResourceParseUtils::ParseResDimensionFp(textStyleOpt.fontSizeResObj, fontSize)) {
+            textStyle.fontSize = fontSize;
+        }
+
+        if (textStyleOpt.fontFamilyResObj &&
+            ResourceParseUtils::ParseResFontFamilies(textStyleOpt.fontFamilyResObj, families)) {
+            textStyle.fontFamily = families;
+        }
+
+        updateTextStyleFunc(textStyle);
+    };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    pickerPattern->AddResObj(textStyleType, resObj, std::move(updateFunc));
+}
+
+void TimePickerModelNG::ParseDisappearTextStyleResObj(const PickerTextStyle& textStyleOpt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    ParseResTextStyle(
+        textStyleOpt,
+        "TimePickerDisappearTextStyle",
+        [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateDisappearTextStyle(textStyle); }
+    );
+}
+
+void TimePickerModelNG::ParseSelectedTextStyleResObj(const PickerTextStyle& textStyleOpt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    ParseResTextStyle(
+        textStyleOpt,
+        "TimePickerSelectedTextStyle",
+        [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateSelectedTextStyle(textStyle); }
+    );
+}
+
+void TimePickerModelNG::ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    ParseResTextStyle(
+        textStyleOpt,
+        "TimePickerNormalTextStyle",
+        [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateNormalTextStyle(textStyle); }
+    );
+}
 } // namespace OHOS::Ace::NG

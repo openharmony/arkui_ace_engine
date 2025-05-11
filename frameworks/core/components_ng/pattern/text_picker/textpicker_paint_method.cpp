@@ -56,6 +56,7 @@ CanvasDrawFunction TextPickerPaintMethod::GetContentDrawFunction(PaintWrapper* p
 CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
     CHECK_EQUAL_RETURN(theme->IsCircleDial(), true, nullptr);

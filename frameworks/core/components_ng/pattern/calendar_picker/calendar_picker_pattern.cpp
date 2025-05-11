@@ -394,7 +394,7 @@ void CalendarPickerPattern::ResetTextStateByNode(const RefPtr<FrameNode>& textFr
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);
@@ -1461,5 +1461,31 @@ std::string CalendarPickerPattern::GetDisabledDateRange()
         disabledDateRangeStr.pop_back(); // remove the last comma.
     }
     return disabledDateRangeStr;
+}
+
+void CalendarPickerPattern::UpdateTextStyle(const PickerTextStyle& textStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(calendarTheme);
+    auto pickerProperty = host->GetPaintProperty<CalendarPickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        pickerProperty->UpdateColor(textStyle.textColor.value_or(calendarTheme->GetEntryFontColor()));
+
+        Dimension fontSize = calendarTheme->GetEntryFontSize();
+        if (textStyle.fontSize.has_value() && textStyle.fontSize->IsValid()) {
+            fontSize = textStyle.fontSize.value();
+        }
+        pickerProperty->UpdateFontSize(fontSize);
+    }
+
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 } // namespace OHOS::Ace::NG

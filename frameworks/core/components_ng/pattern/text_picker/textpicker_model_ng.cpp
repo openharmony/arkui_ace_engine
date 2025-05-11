@@ -32,6 +32,8 @@
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1502,5 +1504,206 @@ void TextPickerModelNG::UpdateUserSetSelectColor()
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
     textPickerPattern->UpdateUserSetSelectColor();
+}
+
+void TextPickerModelNG::ParseGradientHeight(const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(resObj);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        CalcDimension height;
+        if (!resObj || !ResourceParseUtils::ParseResDimensionFp(resObj, height)) {
+            return;
+        }
+        auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+        CHECK_NULL_VOID(textPickerPattern);
+        textPickerPattern->SetGradientHeight(height);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, GradientHeight, height, frameNode);
+    };
+    textPickerPattern->AddResObj("textPicker.gradientHeight", resObj, std::move(updateFunc));
+}
+
+void TextPickerModelNG::ParseDividerResObj()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+
+    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+        auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+        CHECK_NULL_VOID(textPickerPattern);
+        ItemDivider curDivider = textPickerPattern->GetDivider();
+
+        CalcDimension strokeWidth = 0.0_vp;
+        if (curDivider.strokeWidthResObj &&
+            ResourceParseUtils::ParseResDimensionFpNG(curDivider.strokeWidthResObj, strokeWidth)) {
+            curDivider.strokeWidth = strokeWidth;
+        }
+
+        Color color = Color::TRANSPARENT;
+        if (curDivider.colorResObj &&
+            ResourceParseUtils::ParseResColor(curDivider.colorResObj, color)) {
+            curDivider.color = color;
+        }
+
+        CalcDimension startMargin = 0.0_vp;
+        if (curDivider.startMarginResObj &&
+            ResourceParseUtils::ParseResDimensionFpNG(curDivider.startMarginResObj, startMargin)) {
+            curDivider.startMargin = startMargin;
+        }
+
+        CalcDimension endMargin = 0.0_vp;
+        if (curDivider.endMarginResObj &&
+            ResourceParseUtils::ParseResDimensionFpNG(curDivider.endMarginResObj, endMargin)) {
+            curDivider.endMargin = endMargin;
+        }
+
+        textPickerPattern->SetDivider(curDivider);
+        textPickerPattern->SetCustomDividerFlag(true);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Divider, curDivider, frameNode);
+    };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    textPickerPattern->AddResObj("textPicker.divider", resObj, std::move(updateFunc));
+}
+
+void TextPickerModelNG::ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
+    std::function<void(const PickerTextStyle&)> updateTextStyleFunc)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    auto&& updateFunc = [textStyleOpt, frameNode, updateTextStyleFunc](const RefPtr<ResourceObject> resObj) {
+        PickerTextStyle textStyle;
+        Color color;
+        CalcDimension fontSize;
+        std::vector<std::string> families;
+
+        if (textStyleOpt.textColorResObj &&
+            ResourceParseUtils::ParseResColor(textStyleOpt.textColorResObj, color)) {
+            textStyle.textColor = color;
+        }
+
+        if (textStyleOpt.fontSizeResObj &&
+            ResourceParseUtils::ParseResDimensionFp(textStyleOpt.fontSizeResObj, fontSize)) {
+            textStyle.fontSize = fontSize;
+        }
+
+        if (textStyleOpt.fontFamilyResObj &&
+            ResourceParseUtils::ParseResFontFamilies(textStyleOpt.fontFamilyResObj, families)) {
+            textStyle.fontFamily = families;
+        }
+
+        updateTextStyleFunc(textStyle);
+    };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    pickerPattern->AddResObj(textStyleType, resObj, std::move(updateFunc));
+}
+
+void TextPickerModelNG::ParseDisappearTextStyleResObj(const PickerTextStyle& textStyleOpt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    ParseResTextStyle(
+        textStyleOpt,
+        "TextPickerDisappearTextStyle",
+        [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateDisappearTextStyle(textStyle); }
+    );
+}
+
+void TextPickerModelNG::ParseSelectedTextStyleResObj(const PickerTextStyle& textStyleOpt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    ParseResTextStyle(
+        textStyleOpt,
+        "TextPickerSelectedTextStyle",
+        [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateSelectedTextStyle(textStyle); }
+    );
+}
+
+void TextPickerModelNG::ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    ParseResTextStyle(
+        textStyleOpt,
+        "TextPickerNormalTextStyle",
+        [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateNormalTextStyle(textStyle); }
+    );
+}
+
+void TextPickerModelNG::ParseDefaultTextStyleResObj(const PickerTextStyle& textStyleOpt)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    auto&& updateFunc = [this, textStyleOpt, frameNode](const RefPtr<ResourceObject> resObj) {
+        PickerTextStyle textStyle;
+        auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+        CHECK_NULL_VOID(pickerPattern);
+        Color color;
+        if (textStyleOpt.textColorResObj &&
+            ResourceParseUtils::ParseResColor(textStyleOpt.textColorResObj, color)) {
+            textStyle.textColor = color;
+        }
+
+        CalcDimension fontSize;
+        if (textStyleOpt.fontSizeResObj &&
+            ResourceParseUtils::ParseResDimensionFp(textStyleOpt.fontSizeResObj, fontSize)) {
+            textStyle.fontSize = fontSize;
+        }
+
+        std::vector<std::string> families;
+        if (textStyleOpt.fontFamilyResObj &&
+            ResourceParseUtils::ParseResFontFamilies(textStyleOpt.fontFamilyResObj, families)) {
+            textStyle.fontFamily = families;
+        }
+
+        CalcDimension minFontSize;
+        if (textStyleOpt.minFontSizeResObj &&
+            ResourceParseUtils::ParseResDimensionFp(textStyleOpt.minFontSizeResObj, minFontSize)) {
+            textStyle.minFontSize = minFontSize;
+        }
+
+        CalcDimension maxFontSize;
+        if (textStyleOpt.maxFontSizeResObj &&
+            ResourceParseUtils::ParseResDimensionFp(textStyleOpt.maxFontSizeResObj, maxFontSize)) {
+            textStyle.maxFontSize = maxFontSize;
+        }
+        pickerPattern->UpdateDefaultTextStyle(textStyle);
+    };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    pickerPattern->AddResObj("TextPickerDefaultTextStyle", resObj, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG

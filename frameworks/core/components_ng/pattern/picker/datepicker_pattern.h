@@ -51,6 +51,14 @@ public:
 
     ~DatePickerPattern() override = default;
 
+    void OnColorModeChange(uint32_t colorMode) override
+    {
+        LinearLayoutPattern::OnColorModeChange(colorMode);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkModifyDone();
+    }
+
     bool IsAtomicNode() const override
     {
         return true;
@@ -784,6 +792,10 @@ public:
 
     void SetDigitalCrownSensitivity(int32_t crownSensitivity);
     void UpdateUserSetSelectColor();
+    void UpdateDisappearTextStyle(const PickerTextStyle& textStyle);
+    void UpdateNormalTextStyle(const PickerTextStyle& textStyle);
+    void UpdateSelectedTextStyle(const PickerTextStyle& textStyle);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -833,6 +845,14 @@ private:
     void UpdateLunarSwitch();
     void UpdateDateOrder();
     void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext);
+    Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
+
+    void UpdateTextStyleCommon(
+        const PickerTextStyle& textStyle,
+        const TextStyle& defaultTextStyle,
+        std::function<void(const Color&)> updateTextColorFunc,
+        std::function<void(const Dimension&)> updateFontSizeFunc,
+        std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc);
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
