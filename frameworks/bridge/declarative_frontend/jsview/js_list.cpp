@@ -354,10 +354,14 @@ void JSList::SetLanes(const JSCallbackInfo& info)
 
     if (info.Length() >= 2 && !(info[1]->IsNull())) { /* 2: parameter count */
         CalcDimension laneGutter;
-        if (JSViewAbstract::ParseJsDimensionVp(info[1], laneGutter)) {
+        RefPtr<ResourceObject> resObjLaneGutter;
+        if (JSViewAbstract::ParseJsDimensionVp(info[1], laneGutter, resObjLaneGutter)) {
             if (laneGutter.IsNegative()) {
                 laneGutter.Reset();
             }
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            ListModel::GetInstance()->CreateWithResourceObjLaneGutter(resObjLaneGutter);
         }
         ListModel::GetInstance()->SetLaneGutter(laneGutter);
     }
@@ -379,11 +383,16 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         }
         CalcDimension minLengthValue;
         CalcDimension maxLengthValue;
-        if (!ParseJsDimensionVp(minLengthParam, minLengthValue)
-            || !ParseJsDimensionVp(maxLengthParam, maxLengthValue)) {
+        RefPtr<ResourceObject> resObjMinLengthValue;
+        RefPtr<ResourceObject> resObjMaxLengthValue;
+        if (!ParseJsDimensionVp(minLengthParam, minLengthValue, resObjMinLengthValue)
+            || !ParseJsDimensionVp(maxLengthParam, maxLengthValue, resObjMinLengthValue)) {
             ListModel::GetInstance()->SetLanes(1);
             ListModel::GetInstance()->SetLaneConstrain(-1.0_vp, -1.0_vp);
             return;
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            ListModel::GetInstance()->CreateWithResourceObjLaneConstrain(resObjMinLengthValue, resObjMaxLengthValue);
         }
         ListModel::GetInstance()->SetLaneConstrain(minLengthValue, maxLengthValue);
     }
@@ -505,8 +514,12 @@ void JSList::ScrollCallback(const JSCallbackInfo& args)
 void JSList::SetFriction(const JSCallbackInfo& info)
 {
     double friction = -1.0;
-    if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
+    RefPtr<ResourceObject> resObj;
+    if (!JSViewAbstract::ParseJsDouble(info[0], friction, resObj)) {
         friction = -1.0;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        ListModel::GetInstance()->CreateWithResourceObjFriction(resObj);
     }
     ListModel::GetInstance()->SetFriction(friction);
 }

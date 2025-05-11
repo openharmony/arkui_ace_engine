@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -576,5 +577,63 @@ void ScrollModelNG::SetScrollBarProxy(FrameNode* frameNode, const RefPtr<ScrollP
     auto scrollBarProxy = AceType::DynamicCast<ScrollBarProxy>(proxy);
     CHECK_NULL_VOID(scrollBarProxy);
     pattern->SetScrollBarProxy(scrollBarProxy);
+}
+
+void ScrollModelNG::CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(resObj);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        double friction = -1.0;
+        if (ResourceParseUtils::ParseResDouble(resObj, friction)) {
+            pattern->SetFriction(friction);
+        }
+    };
+    pattern->AddResObj("ScrollFriction", resObj, std::move(updateFunc));
+}
+
+void ScrollModelNG::CreateWithResourceObjIntervalSize(const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(resObj);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CalcDimension intervalSize;
+        if (ResourceParseUtils::ParseResDimensionVp(resObj, intervalSize)) {
+            pattern->SetIntervalSize(intervalSize);
+        }
+    };
+    pattern->AddResObj("ScrollIntervalSize", resObj, std::move(updateFunc));
+}
+
+void ScrollModelNG::CreateWithResourceObjSnapPaginations(std::vector<RefPtr<ResourceObject>>& resObjs)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    for (unsigned long i = 0; i < resObjs.size(); ++i) {
+        auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), i](
+                                const RefPtr<ResourceObject>& resObj) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            CalcDimension SnapPagination;
+            std::vector<Dimension> SnapPaginations = pattern->GetSnapPaginations();
+            if (ResourceParseUtils::ParseResDimensionVp(resObj, SnapPagination)) {
+                SnapPaginations[i] = SnapPagination;
+                pattern->SetSnapPaginations(SnapPaginations);
+            }
+        };
+        pattern->AddResObj("ScrollIntervalSize" + std::to_string(i), resObjs[i], std::move(updateFunc));
+    }
 }
 } // namespace OHOS::Ace::NG

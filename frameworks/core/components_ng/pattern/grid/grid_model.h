@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_v2/grid/grid_position_controller.h"
 #include "core/event/ace_events.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 
@@ -82,6 +83,7 @@ public:
     virtual void SetOnScrollIndex(std::function<void(int32_t, int32_t)>&& onScrollIndex) = 0;
     virtual void SetOnReachStart(std::function<void()>&& onReachStart) = 0;
     virtual void SetOnReachEnd(std::function<void()>&& onReachEnd) = 0;
+    virtual void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) {};
 
     virtual DisplayMode GetDisplayMode() const = 0;
 
