@@ -84,6 +84,12 @@ let FontWeight;
   FontWeight.Bolder = 'bolder';
 })(FontWeight || (FontWeight = {}));
 
+let MaxLinesMode;
+(function (MaxLinesMode) {
+    MaxLinesMode[MaxLinesMode.CLIP = 0] = 'clip';
+    MaxLinesMode[MaxLinesMode.SCROLL = 1] = 'scroll';
+})(MaxLinesMode || (MaxLinesMode = {}));
+
 let WordBreak;
 (function (WordBreak) {
   WordBreak[WordBreak.NORMAL = 0] = 'normal';
