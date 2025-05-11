@@ -3657,6 +3657,18 @@ struct ArkUIStepperItemModifier {
     void (*resetStatus)(ArkUINodeHandle node);
 };
 
+struct ArkUIStepperModifier {
+    void (*setStepperOnFinish)(ArkUINodeHandle node, void* callback);
+    void (*resetStepperOnFinish)(ArkUINodeHandle node);
+    void (*setStepperOnSkip)(ArkUINodeHandle node, void* callback);
+    void (*resetStepperOnSkip)(ArkUINodeHandle node);
+    void (*setStepperOnChange)(ArkUINodeHandle node, void* callback);
+    void (*resetStepperOnChange)(ArkUINodeHandle node);
+    void (*setStepperOnNext)(ArkUINodeHandle node, void* callback);
+    void (*resetStepperOnNext)(ArkUINodeHandle node);
+    void (*setStepperOnPrevious)(ArkUINodeHandle node, void* callback);
+    void (*resetStepperOnPrevious)(ArkUINodeHandle node);
+};
 struct ArkUITabContentModifier {
     void (*setTabContentBuilder)(ArkUINodeHandle node, ArkUI_Int32 methodId);
     void (*setTabContentLabel)(ArkUINodeHandle node, ArkUI_CharPtr label);
@@ -6319,6 +6331,7 @@ struct ArkUINodeModifiers {
     const ArkUILazyGridLayoutModifier* (*getLazyGridLayoutModifier)();
     const ArkUIEmbeddedComponentModifier* (*getEmbeddedComponentModifier)();
     const ArkUICanvasModifier* (*getCanvasModifier)();
+    const ArkUIStepperModifier* (*getStepperModifier)();
 };
 
 // same as inner defines in property.h
