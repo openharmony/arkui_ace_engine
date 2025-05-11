@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/jsview/models/refresh_model_impl.h"
 #include "core/components/refresh/refresh_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/refresh/refresh_model.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 
 namespace OHOS::Ace {
@@ -205,6 +206,16 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     }
 
     std::string loadingStr = "";
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (ParseJsString(promptText, loadingStr, resObj)) {
+            RefreshModel::GetInstance()->CreateWithResourceObj(resObj);
+            RefreshModel::GetInstance()->SetLoadingText(loadingStr);
+        } else {
+            RefreshModel::GetInstance()->ResetLoadingText();
+        }
+        return;
+    }
     if (ParseJsString(promptText, loadingStr)) {
         RefreshModel::GetInstance()->SetLoadingText(loadingStr);
     } else {
