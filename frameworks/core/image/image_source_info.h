@@ -136,6 +136,8 @@ public:
         imageDfxConfig_ = imageDfxConfig;
     }
 
+    void SetImageHdr(bool isHdr);
+    bool IsImageHdr() const;
     NG::ImageDfxConfig GetImageDfxConfig() const
     {
         return imageDfxConfig_;
@@ -164,6 +166,7 @@ private:
     std::optional<Color> fillColor_;
     const uint8_t* pixmapBuffer_ = nullptr;
     NG::ImageDfxConfig imageDfxConfig_;
+    bool isHdr_ = false;
 
     // image source type for example:FILE, ASSET, NETWORK, MEMORY, BASE64, INTERNAL, RESOURCE or DATA_ABILITY,
     SrcType srcType_ = SrcType::UNSUPPORTED;

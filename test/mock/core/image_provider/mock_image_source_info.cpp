@@ -287,6 +287,16 @@ int32_t ImageSourceInfo::GetContainerId() const
     return containerId_;
 }
 
+void ImageSourceInfo::SetImageHdr(bool isHdr)
+{
+    isHdr_ = isHdr;
+}
+
+bool ImageSourceInfo::IsImageHdr() const
+{
+    return isHdr_;
+}
+
 bool ImageSourceInfo::SupportObjCache() const
 {
     return false;
