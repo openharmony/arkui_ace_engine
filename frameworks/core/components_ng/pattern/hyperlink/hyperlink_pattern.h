@@ -48,6 +48,9 @@ public:
     {
         return false;
     }
+    
+    void UpdatePropertyImpl(
+        const std::string& key, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) override;
 private:
     void LinkToAddress();
     void OnAttachToFrameNode() override;
