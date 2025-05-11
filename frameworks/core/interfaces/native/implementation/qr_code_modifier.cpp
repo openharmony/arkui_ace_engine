@@ -18,6 +18,7 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
+#include "core/components_ng/pattern/qrcode/qrcode_model_static.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace QRCodeModifier {
@@ -48,7 +49,7 @@ void ColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<Color>(*value);
-    QRCodeModelNG::SetQRCodeColor(frameNode, convValue);
+    QRCodeModelStatic::SetQRCodeColor(frameNode, convValue);
 }
 void BackgroundColorImpl(Ark_NativePointer node,
                          const Opt_ResourceColor* value)
@@ -56,7 +57,7 @@ void BackgroundColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<Color>(*value);
-    QRCodeModelNG::SetQRBackgroundColor(frameNode, convValue);
+    QRCodeModelStatic::SetQRBackgroundColor(frameNode, convValue);
 }
 void ContentOpacityImpl(Ark_NativePointer node,
                         const Opt_Union_Number_Resource* value)
@@ -65,7 +66,7 @@ void ContentOpacityImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<float>(*value);
     Validator::ValidateOpacity(convValue);
-    QRCodeModelNG::SetContentOpacity(frameNode, convValue);
+    QRCodeModelStatic::SetContentOpacity(frameNode, convValue);
 }
 } // QRCodeAttributeModifier
 const GENERATED_ArkUIQRCodeModifier* GetQRCodeModifier()
