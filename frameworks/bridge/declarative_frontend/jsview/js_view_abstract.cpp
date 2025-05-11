@@ -78,6 +78,7 @@
 
 #include "core/common/card_scope.h"
 #include "core/common/resource/resource_configuration.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/inspector.h"

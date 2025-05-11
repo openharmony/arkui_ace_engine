@@ -18,6 +18,7 @@
 
 #include <functional>
 #include "base/json/json_util.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/common/resource/resource_object.h"

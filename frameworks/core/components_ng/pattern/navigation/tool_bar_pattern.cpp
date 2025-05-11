@@ -68,7 +68,7 @@ void SetBackgroundEffect(RefPtr<FrameNode>& host, const EffectOption &effectOpti
     }
 }
 }
-void NavToolbarPattern::SetToolbarOptions(NavigationToolbarOptions&& opt)
+void NavToolbarPattern::SetToolbarOptions(NavigationToolbarOptions& opt)
 {
     bool needUpdateBgOptions = options_ != opt;
     if (options_.bgOptions.blurStyleOption->blurOption != opt.bgOptions.blurStyleOption->blurOption) {
@@ -78,13 +78,13 @@ void NavToolbarPattern::SetToolbarOptions(NavigationToolbarOptions&& opt)
         return;
     }
 
-    options_ = std::move(opt);
+    options_ = opt;
     UpdateBackgroundStyle();
 }
 
-void NavToolbarPattern::SetToolbarMoreButtonOptions(MoreButtonOptions&& opt)
+void NavToolbarPattern::SetToolbarMoreButtonOptions(MoreButtonOptions& opt)
 {
-    moreButtonOptions_ = std::move(opt);
+    moreButtonOptions_ = opt;
 }
 
 void NavToolbarPattern::UpdateBackgroundStyle()

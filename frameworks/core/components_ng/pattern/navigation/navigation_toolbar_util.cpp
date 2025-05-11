@@ -685,7 +685,34 @@ void NavigationToolbarUtil::SetToolbarOptions(
     CHECK_NULL_VOID(toolBarNode);
     auto toolBarPattern = toolBarNode->GetPattern<NavToolbarPattern>();
     CHECK_NULL_VOID(toolBarPattern);
-    toolBarPattern->SetToolbarOptions(std::move(opt));
+    toolBarPattern->SetToolbarOptions(opt);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [weakNodeBase = AceType::WeakClaim(AceType::RawPtr(nodeBase)),
+                            weakToolBarPattern = AceType::WeakClaim(AceType::RawPtr(toolBarPattern)),
+                            opt](const RefPtr<ResourceObject>& resObj) mutable {
+        opt.bgOptions.ReloadResources();
+        if (opt.bgOptions.blurStyleOption.has_value()) {
+            opt.bgOptions.blurStyleOption->ReloadResources();
+        }
+        if (opt.bgOptions.effectOption.has_value()) {
+            opt.bgOptions.effectOption->ReloadResources();
+        }
+        auto toolBarPattern = weakToolBarPattern.Upgrade();
+        CHECK_NULL_VOID(toolBarPattern);
+
+        toolBarPattern->SetToolbarOptions(opt);
+        auto nodeBase = weakNodeBase.Upgrade();
+        CHECK_NULL_VOID(nodeBase);
+        nodeBase->MarkModifyDone();
+        nodeBase->MarkDirtyNode();
+    };
+    CHECK_NULL_VOID(nodeBase);
+    auto pattern = nodeBase->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj("navigation.navigationToolbarOptions", resObj, std::move(updateFunc));
 }
 
 void NavigationToolbarUtil::SetToolbarMoreButtonOptions(
@@ -696,7 +723,32 @@ void NavigationToolbarUtil::SetToolbarMoreButtonOptions(
     CHECK_NULL_VOID(toolBarNode);
     auto toolBarPattern = toolBarNode->GetPattern<NavToolbarPattern>();
     CHECK_NULL_VOID(toolBarPattern);
-    toolBarPattern->SetToolbarMoreButtonOptions(std::move(opt));
+    toolBarPattern->SetToolbarMoreButtonOptions(opt);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [weakNodeBase = AceType::WeakClaim(AceType::RawPtr(nodeBase)),
+                            weakToolBarPattern = AceType::WeakClaim(AceType::RawPtr(toolBarPattern)),
+                            opt](const RefPtr<ResourceObject>& resObj) mutable {
+        if (opt.bgOptions.blurStyleOption.has_value()) {
+            opt.bgOptions.blurStyleOption->ReloadResources();
+        }
+        if (opt.bgOptions.effectOption.has_value()) {
+            opt.bgOptions.effectOption->ReloadResources();
+        }
+        auto toolBarPattern = weakToolBarPattern.Upgrade();
+        CHECK_NULL_VOID(toolBarPattern);
+        toolBarPattern->SetToolbarMoreButtonOptions(opt);
+        auto nodeBase = weakNodeBase.Upgrade();
+        CHECK_NULL_VOID(nodeBase);
+        nodeBase->MarkModifyDone();
+        nodeBase->MarkDirtyNode();
+    };
+    CHECK_NULL_VOID(nodeBase);
+    auto pattern = nodeBase->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj("navigation.navigationToolbarOptions.moreButtonOptions", resObj, std::move(updateFunc));
 }
 
 void NavigationToolbarUtil::MountToolBar(

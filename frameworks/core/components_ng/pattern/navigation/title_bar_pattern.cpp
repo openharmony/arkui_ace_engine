@@ -1393,7 +1393,7 @@ float TitleBarPattern::CalculateHandledOffsetBetweenMinAndMaxTitle(float offset,
     return offset;
 }
 
-void TitleBarPattern::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
+void TitleBarPattern::SetTitlebarOptions(NavigationTitlebarOptions& opt)
 {
     bool needUpdateBgOptions = options_.bgOptions != opt.bgOptions;
     if (options_.textOptions.mainTitleApplyFunc && !opt.textOptions.mainTitleApplyFunc) {
@@ -1405,7 +1405,7 @@ void TitleBarPattern::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
     if (options_.bgOptions.blurStyleOption->blurOption != opt.bgOptions.blurStyleOption->blurOption) {
         needUpdateBgOptions = true;
     }
-    options_ = std::move(opt);
+    options_ = opt;
     if (!needUpdateBgOptions) {
         return;
     }

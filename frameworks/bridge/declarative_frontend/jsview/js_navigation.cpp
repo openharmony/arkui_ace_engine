@@ -681,7 +681,8 @@ void JSNavigation::SetNavBarWidth(const JSCallbackInfo& info)
     }
 
     CalcDimension navBarWidth;
-    if (!ParseJsDimensionVp(info[0], navBarWidth)) {
+    RefPtr<ResourceObject> navBarWidthResObj;
+    if (!ParseJsDimensionVp(info[0], navBarWidth, navBarWidthResObj)) {
         return;
     }
 
@@ -689,6 +690,10 @@ void JSNavigation::SetNavBarWidth(const JSCallbackInfo& info)
         navBarWidth.SetValue(DEFAULT_NAV_BAR_WIDTH);
     }
 
+    if (SystemProperties::ConfigChangePerform() && navBarWidthResObj) {
+        NavigationModel::GetInstance()->SetNavBarWidth(navBarWidthResObj);
+        return;
+    }
     NavigationModel::GetInstance()->SetNavBarWidth(navBarWidth);
 }
 
@@ -699,7 +704,8 @@ void JSNavigation::SetMinContentWidth(const JSCallbackInfo& info)
     }
 
     CalcDimension minContentWidth;
-    if (!ParseJsDimensionVp(info[0], minContentWidth)) {
+    RefPtr<ResourceObject> minContentWidthResObj;
+    if (!ParseJsDimensionVp(info[0], minContentWidth, minContentWidthResObj)) {
         NavigationModel::GetInstance()->SetMinContentWidth(DEFAULT_MIN_CONTENT_WIDTH);
         return;
     }
@@ -708,6 +714,10 @@ void JSNavigation::SetMinContentWidth(const JSCallbackInfo& info)
         minContentWidth = DEFAULT_MIN_CONTENT_WIDTH;
     }
 
+    if (SystemProperties::ConfigChangePerform() && minContentWidthResObj) {
+        NavigationModel::GetInstance()->SetMinContentWidth(minContentWidthResObj);
+        return;
+    }
     NavigationModel::GetInstance()->SetMinContentWidth(minContentWidth);
 }
 
@@ -730,17 +740,29 @@ void JSNavigation::SetNavBarWidthRange(const JSCallbackInfo& info)
 
     CalcDimension minNavBarWidth;
     CalcDimension maxNavBarWidth;
-    if (min->IsNull() || min->IsUndefined() || !ParseJsDimensionVp(min, minNavBarWidth)) {
+    RefPtr<ResourceObject> minNavBarWidthResObj;
+    if (min->IsNull() || min->IsUndefined() || !ParseJsDimensionVp(min, minNavBarWidth, minNavBarWidthResObj)) {
         minNavBarWidth = NG::DEFAULT_MIN_NAV_BAR_WIDTH;
     }
     if (LessNotEqual(minNavBarWidth.Value(), 0.0)) {
         minNavBarWidth.SetValue(0);
     }
-    NavigationModel::GetInstance()->SetMinNavBarWidth(minNavBarWidth);
+    if (SystemProperties::ConfigChangePerform() && minNavBarWidthResObj) {
+        NavigationModel::GetInstance()->SetMinNavBarWidth(minNavBarWidthResObj);
+    } else {
+        NavigationModel::GetInstance()->SetMinNavBarWidth(minNavBarWidth);
+    }
 
-    if (max->IsNull() || max->IsUndefined() || !ParseJsDimensionVp(max, maxNavBarWidth)) {
+    RefPtr<ResourceObject> maxNavBarWidthResObj;
+    if (max->IsNull() || max->IsUndefined() || !ParseJsDimensionVp(max, maxNavBarWidth, maxNavBarWidthResObj)) {
         maxNavBarWidth = NG::DEFAULT_MAX_NAV_BAR_WIDTH;
     }
+
+    if (SystemProperties::ConfigChangePerform() && maxNavBarWidthResObj) {
+        NavigationModel::GetInstance()->SetMaxNavBarWidth(maxNavBarWidthResObj);
+        return;
+    }
+
     if (LessNotEqual(maxNavBarWidth.Value(), 0.0)) {
         maxNavBarWidth.SetValue(0);
     }

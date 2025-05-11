@@ -135,6 +135,23 @@ void StageManager::PageChangeCloseKeyboard()
 #endif
 }
 
+void StageManager::UpdateColorModeForPage(const RefPtr<FrameNode>& page)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        CHECK_NULL_VOID(page);
+        auto pipelineContext = page->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+
+        auto colorMode = pipelineContext->GetColorMode() == ColorMode::DARK ? true : false;
+        if (page->CheckIsDarkMode() == colorMode) {
+            return;
+        }
+        pipelineContext->SetIsSystemColorChange(false);
+        page->SetRerenderable(true);
+        page->NotifyColorModeChange(colorMode);
+    }
+}
+
 bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition)
 {
     CHECK_NULL_RETURN(stageNode_, false);
@@ -182,6 +199,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         FirePageHide(hidePageNode, needTransition ? PageTransitionType::EXIT_PUSH : PageTransitionType::NONE);
     }
     stageNode_->RebuildRenderContextTree();
+    UpdateColorModeForPage(node);
     FirePageShow(node, needTransition ? PageTransitionType::ENTER_PUSH : PageTransitionType::NONE);
 
     auto pagePattern = node->GetPattern<PagePattern>();
@@ -298,7 +316,7 @@ bool StageManager::PopPage(const RefPtr<FrameNode>& inPage, bool needShowNext, b
     FireAutoSave(outPageNode, inPageNode);
     FirePageHide(pageNode, needTransition ? PageTransitionType::EXIT_POP : PageTransitionType::NONE);
     FirePageShow(inPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
-
+    UpdateColorModeForPage(inPageNode);
     // close keyboard
     PageChangeCloseKeyboard();
 
@@ -360,6 +378,7 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         inPageNode = AceType::DynamicCast<FrameNode>(newPageNode);
         pipeline->GetMemoryManager()->RebuildImageByPage(inPageNode);
     }
+    UpdateColorModeForPage(inPageNode);
     PageChangeCloseKeyboard();
     AddPageTransitionTrace(outPageNode, inPageNode);
 
@@ -438,6 +457,7 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
     if  (pattern) {
         pattern->ResetPageTransitionEffect();
     }
+    UpdateColorModeForPage(node);
     FirePageShow(node, needTransition ? PageTransitionType::ENTER_PUSH : PageTransitionType::NONE);
 
     stageNode_->RebuildRenderContextTree();
