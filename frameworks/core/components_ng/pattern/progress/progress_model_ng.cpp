@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 
 #include "base/geometry/dimension.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/progress/progress_component.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -25,7 +26,6 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-
 namespace OHOS::Ace::NG {
 void ProgressModelNG::Create(double min, double value, double cachedValue, double max, NG::ProgressType type)
 {
@@ -727,5 +727,58 @@ bool ProgressModelNG::isCapsule() const
     CHECK_NULL_RETURN(progressPaintProperty, result);
     const auto& progressType = progressPaintProperty->GetProgressType();
     return progressType == ProgressType::CAPSULE;
+}
+
+void ProgressModelNG::CreateWithResourceObj(JsProgressResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        std::string key = "progress.color";
+        auto&& updateFunc = [pattern, key, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            Color result;
+            NG::Gradient gradient;
+            Color endColor;
+            Color beginColor;
+            // 尝试解析资源对象中的颜色
+            if (!ResourceParseUtils::ParseResColor(resObj, result)) {
+                if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+                    auto pipeline = PipelineBase::GetCurrentContext();
+                    CHECK_NULL_VOID(pipeline);
+                    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+                    CHECK_NULL_VOID(progressTheme);
+                    endColor = progressTheme->GetRingProgressEndSideColor();
+                    beginColor = progressTheme->GetRingProgressBeginSideColor();
+                    result = progressTheme->GetTrackSelectedColor();
+
+                } else {
+                    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+                        ProgressPaintProperty, GradientColor, PROPERTY_UPDATE_RENDER, frameNode);
+                    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+                        ProgressPaintProperty, Color, PROPERTY_UPDATE_RENDER, frameNode);
+                    return;
+                }
+            } else {
+                endColor = result;
+                beginColor = result;
+            }
+            
+            NG::GradientColor endSideColor;
+            NG::GradientColor beginSideColor;
+            endSideColor.SetLinearColor(LinearColor(endColor));
+            endSideColor.SetDimension(Dimension(0.0f));
+            beginSideColor.SetLinearColor(LinearColor(beginColor));
+            beginSideColor.SetDimension(Dimension(1.0f));
+            gradient.AddColor(endSideColor);
+            gradient.AddColor(beginSideColor);
+            pattern->UpdateGradientColor(gradient, isFirstLoad);
+            pattern->UpdateColor(result, isFirstLoad);
+        };
+        updateFunc(resObj, true);
+        pattern->AddResObj(key, resObj, std::move(updateFunc));
+    }
 }
 } // namespace OHOS::Ace::NG
