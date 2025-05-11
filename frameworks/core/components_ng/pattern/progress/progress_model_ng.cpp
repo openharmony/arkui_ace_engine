@@ -743,7 +743,6 @@ void ProgressModelNG::CreateWithResourceObj(JsProgressResourceType jsResourceTyp
             NG::Gradient gradient;
             Color endColor;
             Color beginColor;
-            // 尝试解析资源对象中的颜色
             if (!ResourceParseUtils::ParseResColor(resObj, result)) {
                 if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY)) {
                     auto pipeline = PipelineBase::GetCurrentContext();
