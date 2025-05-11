@@ -1154,4 +1154,62 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressHandleBlurEventTest002, TestSize.
     loadingProgressPattern->HandleBlurEvent();
     EXPECT_FALSE(loadingProgressPattern->isFocusColorSet_);
 }
+
+/**
+ * @tc.name: LoadingProgressUpdateColorTest001
+ * @tc.desc: Test LoadingProgress color update property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressUpdateColorTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create loading progress and get pattern
+     */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. get related properties and objects
+     */
+    auto paintProperty = loadingProgressPattern->GetPaintProperty<LoadingProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+
+    /**
+     * @tc.steps: step3. test color update on first load
+     * @tc.expected: color properties updated correctly
+     */
+    Color testColor = Color::RED;
+    loadingProgressPattern->UpdateColor(testColor, true);
+    EXPECT_EQ(paintProperty->GetColor().value(), testColor);
+    EXPECT_EQ(renderContext->GetForegroundColor().value(), testColor);
+    EXPECT_TRUE(renderContext->GetForegroundColorFlag().value());
+
+    /**
+     * @tc.steps: step4. test color update when system color changes
+     * @tc.expected: color properties updated correctly
+     */
+    pipelineContext->SetIsSystemColorChange(true);
+    Color systemColor = Color::BLUE;
+    loadingProgressPattern->UpdateColor(systemColor, false);
+    EXPECT_EQ(paintProperty->GetColor().value(), systemColor);
+    EXPECT_EQ(renderContext->GetForegroundColor().value(), systemColor);
+
+    /**
+     * @tc.steps: step5. test no update when conditions not met
+     * @tc.expected: color properties remain unchanged
+     */
+    pipelineContext->SetIsSystemColorChange(false);
+    Color originalColor = paintProperty->GetColor().value();
+    loadingProgressPattern->UpdateColor(Color::GREEN, false);
+    EXPECT_EQ(paintProperty->GetColor().value(), originalColor);
+    EXPECT_EQ(renderContext->GetForegroundColor().value(), originalColor);
+}
 } // namespace OHOS::Ace::NG

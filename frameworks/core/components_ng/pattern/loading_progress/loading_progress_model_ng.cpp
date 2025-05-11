@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -152,5 +153,61 @@ void LoadingProgressModelNG::SetColorParseFailed(FrameNode* frameNode, bool isPa
     auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetColorLock(isParseFailed);
+}
+
+void LoadingProgressModelNG::CreateWithResourceObj(LoadingProgressResourceType LoadingProgressResourceType, const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    
+    if (!resObj) {
+        return;
+    }
+
+    auto createUpdateFunc = [pattern](const std::string& key) {
+        return [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+            std::string color = pattern->GetResCacheMapByKey(key);
+            Color result;
+            if (color.empty()) {
+                if (ResourceParseUtils::ParseResColor(resObj, result)) {
+                    pattern->AddResCache(key, result.ColorToString());
+                } else {
+                    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+                        return;
+                    } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+                        auto pipeline = PipelineBase::GetCurrentContext();
+                        CHECK_NULL_VOID(pipeline);
+                        auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+                        CHECK_NULL_VOID(progressTheme);
+                        result = progressTheme->GetLoadingColor();
+                    }
+                }
+            } else {
+                result = Color::ColorFromString(color);
+            }
+            pattern->UpdateColor(result, isFirstLoad);
+        };
+    };
+
+    switch (LoadingProgressResourceType) {
+        case LoadingProgressResourceType::COLOR: {
+            const std::string key = "loadingProgressColor";
+            auto updateFunc = createUpdateFunc(key);
+            updateFunc(resObj, true);
+            pattern->AddResObj(key, resObj, std::move(updateFunc));
+            break;
+        }
+        case LoadingProgressResourceType::FOREGROUNDCOLOR: {
+            const std::string key = "loadingProgressForegroundColor";
+            auto updateFunc = createUpdateFunc(key);
+            updateFunc(resObj, true);
+            pattern->AddResObj(key, resObj, std::move(updateFunc));
+            break;
+        }
+        default:
+            break;
+    }
 }
 } // namespace OHOS::Ace::NG
