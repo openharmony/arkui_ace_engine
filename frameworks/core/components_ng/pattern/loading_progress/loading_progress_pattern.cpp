@@ -306,4 +306,25 @@ bool LoadingProgressPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     CHECK_NULL_RETURN(paintProperty, result);
     return !paintProperty->HasColor();
 }
+
+void LoadingProgressPattern::UpdateColor(const Color& color, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+        paintProperty->UpdateColor(color);
+        renderContext->UpdateForegroundColor(color);
+        renderContext->ResetForegroundColorStrategy();
+        renderContext->UpdateForegroundColorFlag(true);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
 } // namespace OHOS::Ace::NG

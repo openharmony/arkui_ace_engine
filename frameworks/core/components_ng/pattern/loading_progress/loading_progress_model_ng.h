@@ -37,6 +37,7 @@ public:
     void SetColor(const Color& value) override;
     void SetEnableLoading(bool enable) override;
     void ResetColor() override;
+    void CreateWithResourceObj(LoadingProgressResourceType LoadingProgressResourceType, const RefPtr<ResourceObject>& resObj) override;
     
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static uint32_t GetColor(FrameNode* frameNode);
