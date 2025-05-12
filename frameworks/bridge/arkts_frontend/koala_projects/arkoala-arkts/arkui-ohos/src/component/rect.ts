@@ -23,9 +23,15 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, UICommonShapeMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod } from "./common"
+import { Length } from "./units"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+
+export type RadiusItem = [
+    Length,
+    Length
+]
 
 export class ArkRectPeer extends ArkCommonShapeMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -154,7 +160,7 @@ export class ArkRectPeer extends ArkCommonShapeMethodPeer {
 export interface RectOptions {
     width?: number | string;
     height?: number | string;
-    radius?: number | string | Array<number | string>;
+    radius?: Length | Array<RadiusItem>;
 }
 export interface RoundedRectOptions {
     width?: number | string;

@@ -566,6 +566,7 @@ namespace Converter {
     template<> ShadowColorStrategy Convert(const Ark_Resource& src);
     template<> ShadowColorStrategy Convert(const Ark_String& src);
     template<> ShapePoint Convert(const Ark_Point& src);
+    template<> ShapePoint Convert(const Ark_ShapePoint& src);
     template<> SheetHeight Convert(const Ark_Length& src);
     template<> SheetHeight Convert(const Ark_SheetSize& src);
     template<> StringArray Convert(const Ark_CustomObject& src);
@@ -781,6 +782,7 @@ namespace Converter {
         std::optional<RenderProcessNotRespondingReason>& dst, const Ark_RenderProcessNotRespondingReason& src);
     template<>
     void AssignCast(std::optional<SharedTransitionEffectType>& dst, const Ark_SharedTransitionEffectType& src);
+    template<> void AssignCast(std::optional<ShapePoint>& dst, const Opt_ShapePoint& src);
 
     template<typename From>
     std::optional<decltype(From().value)> GetOpt(const From& src)

@@ -160,7 +160,7 @@ import { PathOptions } from "./../path"
 import { PolygonOptions } from "./../polygon"
 import { PolylineOptions } from "./../polyline"
 import { RenderNode, RenderNodeInternal } from "./../arkui-rendernode"
-import { RoundedRectOptions, RectOptions } from "./../rect"
+import { RoundedRectOptions, RectOptions, RadiusItem } from "./../rect"
 import { RowOptions, RowOptionsV2 } from "./../row"
 import { StackOptions } from "./../stack"
 import { TransformationMatrix } from "./../arkui-common"
@@ -18009,42 +18009,30 @@ export class Deserializer extends DeserializerBase {
         }
         const height_result : number | string | undefined = height_buf
         const radius_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let radius_buf : number | string | Array<number | string> | undefined
+        let radius_buf : Length | Array<RadiusItem> | undefined
         if ((RuntimeType.UNDEFINED) != (radius_buf_runtimeType))
         {
             const radius_buf__selector : int32 = valueDeserializer.readInt8()
-            let radius_buf_ : number | string | Array<number | string> | undefined
+            let radius_buf_ : Length | Array<RadiusItem> | undefined
             if (radius_buf__selector == 0) {
-                radius_buf_ = (valueDeserializer.readNumber() as number)
+                radius_buf_ = (valueDeserializer.readLength() as Length)
             }
             else if (radius_buf__selector == 1) {
-                radius_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (radius_buf__selector == 2) {
                 const radius_buf__u_length : int32 = valueDeserializer.readInt32()
-                let radius_buf__u : Array<number | string> = new Array<number | string>(radius_buf__u_length)
+                let radius_buf__u : Array<RadiusItem> = new Array<RadiusItem>(radius_buf__u_length)
                 for (let radius_buf__u_i = 0; radius_buf__u_i < radius_buf__u_length; radius_buf__u_i++) {
-                    const radius_buf__u_buf_selector : int32 = valueDeserializer.readInt8()
-                    let radius_buf__u_buf : number | string | undefined
-                    if (radius_buf__u_buf_selector == 0) {
-                        radius_buf__u_buf = (valueDeserializer.readNumber() as number)
-                    }
-                    else if (radius_buf__u_buf_selector == 1) {
-                        radius_buf__u_buf = (valueDeserializer.readString() as string)
-                    }
-                    else {
-                        throw new Error("One of the branches for radius_buf__u_buf has to be chosen through deserialisation.")
-                    }
-                    radius_buf__u[radius_buf__u_i] = (radius_buf__u_buf as number | string)
+                    const radius_buf__u_buf_value0 : Length = (valueDeserializer.readLength() as Length)
+                    const radius_buf__u_buf_value1 : Length = (valueDeserializer.readLength() as Length)
+                    radius_buf__u[radius_buf__u_i] = ([radius_buf__u_buf_value0, radius_buf__u_buf_value1] as RadiusItem)
                 }
                 radius_buf_ = radius_buf__u
             }
             else {
                 throw new Error("One of the branches for radius_buf_ has to be chosen through deserialisation.")
             }
-            radius_buf = (radius_buf_ as number | string | Array<number | string>)
+            radius_buf = (radius_buf_ as Length | Array<RadiusItem>)
         }
-        const radius_result : number | string | Array<number | string> | undefined = radius_buf
+        const radius_result : Length | Array<RadiusItem> | undefined = radius_buf
         let value : RectOptions = ({width: width_result, height: height_result, radius: radius_result} as RectOptions)
         return value
     }
