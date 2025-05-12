@@ -1095,6 +1095,7 @@ void UIObserverListener::AddGestureEventInfoThree(napi_value objValueEvent, cons
     napi_set_named_property(env_, objValueEvent, "deviceId", napiDeviceId);
     napi_create_double(env_, gestureEventInfo.GetTargetDisplayId(), &napiTargetDisplayId);
     napi_set_named_property(env_, objValueEvent, "targetDisplayId", napiTargetDisplayId);
+    AddFingerInfosInfo(objValueEvent, gestureEventInfo);
     AddFingerListInfo(objValueEvent, gestureEventInfo);
     napi_close_handle_scope(env_, scope);
 }
@@ -1125,6 +1126,34 @@ void UIObserverListener::AddFingerListInfo(napi_value objValueClickEvent, const 
         }
     }
     napi_set_named_property(env_, objValueClickEvent, "fingerList", napiFingerList);
+    napi_close_handle_scope(env_, scope);
+}
+
+void UIObserverListener::AddFingerInfosInfo(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo)
+{
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+
+    napi_value napiFingerInfos = nullptr;
+    napi_create_array(env_, &napiFingerInfos);
+    bool isArray = false;
+    if (napi_is_array(env_, napiFingerInfos, &isArray) != napi_ok || !isArray) {
+        return;
+    }
+    
+    int32_t index = 0;
+
+    for (auto& finger : gestureEventInfo.GetFingerList()) {
+        napi_value napiFinger = nullptr;
+        napi_create_object(env_, &napiFinger);
+        AddFingerObjectInfo(napiFinger, finger);
+        napi_set_element(env_, napiFingerInfos, index++, napiFinger);
+    }
+    
+    napi_set_named_property(env_, objValueClickEvent, "fingerInfos", napiFingerInfos);
     napi_close_handle_scope(env_, scope);
 }
 

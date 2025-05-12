@@ -63,6 +63,7 @@ private:
     void AddGestureEventInfoThree(napi_value objValueEvent, const GestureEvent& gestureEventInfo);
     void AddGestureEventInfoFour(napi_value objValueEvent, const GestureEvent& gestureEventInfo);
     void AddFingerListInfo(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo);
+    void AddFingerInfosInfo(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo);
     void AddClickEventInfoOne(napi_value objValueClickEvent, const ClickInfo& clickInfo);
     void AddClickEventInfoTwo(napi_value objValueClickEvent, const ClickInfo& clickInfo);
     void AddFingerObjectInfo(napi_value napiFinger, const FingerInfo& finger);
