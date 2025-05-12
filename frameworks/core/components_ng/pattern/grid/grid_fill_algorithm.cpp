@@ -116,18 +116,23 @@ bool GridFillAlgorithm::CanFillMore(Axis axis, const SizeF& scrollWindowSize, in
         // always fill by full lines
         return true;
     }
+    const int32_t cacheLines = props_.GetCachedCountValue(info_.defCachedCount_);
     if (direction == FillDirection::START) {
-        if (row > range_.startLine) {
+        int32_t cachedStart = range_.startLine - cacheLines;
+        if (row > cachedStart) {
             return true;
         }
         range_.AdjustBackward(info_.lineHeightMap_, params_.mainGap, row);
         return GreatNotEqual(range_.offset, params_.mainGap);
     }
 
-    range_.endLine = row - 1;
     range_.AdjustForward(info_.lineHeightMap_, params_.mainGap);
-    float contentHeight = info_.GetHeightInRange(range_.startLine, range_.endLine + 1, params_.mainGap) + range_.offset;
-    return LessNotEqual(contentHeight, scrollWindowSize.MainSize(axis));
+    float contentHeightPre =
+        info_.GetHeightInRange(range_.startLine, range_.endLine + 1, params_.mainGap) + range_.offset;
+    if (LessNotEqual(contentHeightPre, scrollWindowSize.MainSize(axis))) {
+        range_.endLine = row;
+    }
+    return row <= range_.endLine + cacheLines;
 }
 
 void GridFillAlgorithm::LayoutRange::AdjustBackward(
