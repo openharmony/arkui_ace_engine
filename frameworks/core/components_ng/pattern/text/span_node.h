@@ -271,6 +271,7 @@ public:
     GestureEventFunc onLongPress;
     GestureEventFunc onDoubleClick;
     OnHoverFunc onHover;
+    bool isOnHover = false;
     [[deprecated]] std::list<RefPtr<SpanItem>> children;
     std::map<int32_t, AISpan> aiSpanMap;
     int32_t placeholderIndex = -1;
@@ -361,6 +362,11 @@ public:
     void SetHoverEvent(OnHoverFunc&& onHover_)
     {
         onHover = std::move(onHover_);
+    }
+
+    void ResetHoverEvent()
+    {
+        onHover = OnHoverFunc();
     }
 
     void SetIsParentText(bool isText)
