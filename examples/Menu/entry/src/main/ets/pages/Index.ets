@@ -19,6 +19,7 @@ struct Index {
     { title: "示例8：设置菜单和预览的动效", url: "pages/ContextMenuTransition" },
     { title: "示例9：设置symbol类型图标", url: "pages/MenuSymbolIcon" },
     { title: "示例10：设置一镜到底动效", url: "pages/MenuHoverScale" },
+    { title: "示例11：菜单基本功能_0_bM内容/自定义尺寸", url: "pages/MenuTestLevel0_0" },
   ]
 
   build() {
