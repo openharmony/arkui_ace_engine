@@ -1164,7 +1164,7 @@ typedef enum {
 /**
  * @brief Enumerates the activation policies for the background blur effect.
  *
- * @since 18
+ * @since 19
  */
 typedef enum {
     /** The blur effect changes according to the window's focus state;
