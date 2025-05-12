@@ -315,6 +315,14 @@ void CanvasPattern::AddRect(const Rect& rect)
     paintMethod_->PushTask(task);
 }
 
+void CanvasPattern::AddRoundRect(const Rect& rect, const std::vector<double>& radii)
+{
+    auto task = [rect, radii](CanvasPaintMethod& paintMethod) {
+        paintMethod.AddRoundRect(rect, radii);
+    };
+    paintMethod_->PushTask(task);
+}
+
 void CanvasPattern::Ellipse(const EllipseParam& param)
 {
     auto task = [param](CanvasPaintMethod& paintMethod) {
