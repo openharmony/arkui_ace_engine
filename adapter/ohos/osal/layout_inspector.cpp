@@ -29,12 +29,15 @@
 #include "base/websocket/websocket_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/common/connect_server_manager.h"
+#include "core/components_ng/render/adapter/component_snapshot.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector.h"
-
+#include "render_service_client/core/pipeline/rs_node_map.h"
 namespace OHOS::Ace {
 
 namespace {
-
+constexpr int32_t SNAP_PARTITION_SIZE = 100;
+constexpr int64_t FIND_RSNODE_ERROR = -1;
 sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap)
 {
     return SkColorSpace::MakeSRGB();
@@ -271,6 +274,37 @@ void LayoutInspector::CreateContainerLayoutInfo(RefPtr<Container>& container)
         std::move(getInspectorTask), TaskExecutor::TaskType::UI, "ArkUIGetInspectorTreeJson");
 }
 
+void LayoutInspector::CreateContainer3DLayoutInfo(RefPtr<Container>& container)
+{
+    CHECK_NULL_VOID(container);
+    if (container->IsDynamicRender()) {
+        container = Container::CurrentSafely();
+        CHECK_NULL_VOID(container);
+    }
+    int32_t containerId = container->GetInstanceId();
+    ContainerScope scope(containerId);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(ngPipeline);
+    auto getInspectorTask = [containerId, weakPipeline = AceType::WeakClaim(AceType::RawPtr(ngPipeline))]() {
+        std::string treeJson;
+        GetInspectorTreeJsonStr(treeJson, containerId);
+        auto sendJsonTreeTask = [treeJsonStr = std::move(treeJson)]() {
+            WebSocketManager::SendMessage(treeJsonStr);
+        };
+        BackgroundTaskExecutor::GetInstance().PostTask(std::move(sendJsonTreeTask));
+
+        auto pipeline = weakPipeline.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        auto root = pipeline->GetRootElement();
+        CHECK_NULL_VOID(root);
+        Get3DSnapshotJson(root);
+    };
+    pipelineContext->GetTaskExecutor()->PostTask(
+        std::move(getInspectorTask), TaskExecutor::TaskType::UI, "ArkUIGetInspector3DTreeJson");
+}
+
 void LayoutInspector::CreateLayoutInfo(int32_t containerId)
 {
     auto container = Container::GetFoucsed();
@@ -284,6 +318,15 @@ void LayoutInspector::CreateLayoutInfoByWinId(uint32_t windId)
         TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "start get container %{public}d info", container->GetInstanceId());
     }
     return CreateContainerLayoutInfo(container);
+}
+
+void LayoutInspector::Create3DLayoutInfoByWinId(uint32_t windId)
+{
+    auto container = Container::GetByWindowId(windId);
+    if (container) {
+        TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "start get container %{public}d info", container->GetInstanceId());
+    }
+    return CreateContainer3DLayoutInfo(container);
 }
 
 void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t containerId)
@@ -305,6 +348,84 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
         treeJsonStr = V2::Inspector::GetInspectorTree(pipelineContext, true);
     }
 #endif
+}
+
+void LayoutInspector::BuildInfoForIDE(uint64_t id, const std::shared_ptr<Media::PixelMap>& pixelMap,
+    std::unique_ptr<JsonValue>& message)
+{
+    CHECK_NULL_VOID(pixelMap);
+    auto acePixelMap = AceType::MakeRefPtr<PixelMapOhos>(pixelMap);
+    auto imageInfo = MakeSkImageInfoFromPixelMap(acePixelMap);
+    SkPixmap imagePixmap(
+        imageInfo, reinterpret_cast<const void*>(acePixelMap->GetPixels()), acePixelMap->GetRowBytes());
+    sk_sp<SkImage> image;
+    image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(acePixelMap));
+    CHECK_NULL_VOID(image);
+    auto data = image->encodeToData(SkEncodedImageFormat::kPNG, 100);
+    CHECK_NULL_VOID(data);
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    CHECK_NULL_VOID(defaultDisplay);
+    auto deviceDpi = defaultDisplay->GetDpi();
+    auto deviceWidth = defaultDisplay->GetWidth();
+    auto deviceHeight = defaultDisplay->GetHeight();
+    message->Put("$ID", RsNodeIdToFrameNodeId(id));
+    message->Put("format", PNG_TAG);
+    message->Put("width", (*pixelMap).GetWidth());
+    message->Put("height", (*pixelMap).GetHeight());
+    message->Put("deviceWidth", deviceWidth);
+    message->Put("deviceHeight", deviceHeight);
+    message->Put("deviceDpi", deviceDpi);
+    int32_t encodeLength = static_cast<int32_t>(SkBase64::Encode(data->data(), data->size(), nullptr));
+    message->Put("size", data->size());
+    SkString info(encodeLength);
+    SkBase64::Encode(data->data(), data->size(), info.writable_str());
+    message->Put("pixelMapBase64", info.c_str());
+}
+
+int64_t LayoutInspector::RsNodeIdToFrameNodeId(uint64_t rsNodeId)
+{
+    auto rsNode = Rosen::RSNodeMap::Instance().GetNode<Rosen::RSNode>(rsNodeId);
+    if (rsNode == nullptr) {
+        return FIND_RSNODE_ERROR;
+    }
+    return rsNode->GetFrameNodeId();
+}
+
+void LayoutInspector::Get3DSnapshotJson(const RefPtr<NG::FrameNode>& node)
+{
+    std::vector<PixelMapPair> snapInfos = NG::ComponentSnapshot::GetSoloNode(node);
+    if (snapInfos.size() == 0) {
+        return;
+    }
+
+    int totalParts = (snapInfos.size() + SNAP_PARTITION_SIZE - 1) / SNAP_PARTITION_SIZE;
+    int partNum = 1;
+    for (int32_t i = 0; i < snapInfos.size(); i += SNAP_PARTITION_SIZE) {
+        auto message = JsonUtil::Create(true);
+        CHECK_NULL_VOID(message);
+        auto contentMessage = JsonUtil::CreateArray(true);
+        CHECK_NULL_VOID(contentMessage);
+        message->Put("type", "3DLayers");
+        message->Put("totalParts", totalParts);
+        message->Put("partNum", partNum++);
+        message->Put("LayersCount", snapInfos.size());
+
+        for (int32_t j = i; j < i + SNAP_PARTITION_SIZE && j < snapInfos.size(); j++) {
+            auto snapInfo = snapInfos[j];
+            auto snapPixelMap = snapInfo.second;
+            if (snapPixelMap) {
+                auto snapInfoJson = JsonUtil::Create(true);
+                BuildInfoForIDE(snapInfo.first, snapPixelMap, snapInfoJson);
+                contentMessage->PutRef(std::move(snapInfoJson));
+            }
+        }
+
+        message->PutRef("content", std::move(contentMessage));
+        auto sendTask = [jsonSnapshotStr = message->ToString()]() {
+                WebSocketManager::SendMessage(jsonSnapshotStr);
+            };
+        BackgroundTaskExecutor::GetInstance().PostTask(std::move(sendTask));
+    }
 }
 
 void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonValue>& message)
@@ -379,12 +500,19 @@ void LayoutInspector::ProcessMessages(const std::string& message)
         TAG_LOGI(AceLogTag::ACE_LAYOUT_INSPECTOR, "performance check end");
         AceChecker::SetPerformanceCheckStatus(false, message);
     }
-    uint32_t windowId = NG::Inspector::ParseWindowIdFromMsg(message);
+    auto windowResult = NG::Inspector::ParseWindowIdFromMsg(message);
+    uint32_t windowId = windowResult.first;
     if (windowId == OHOS::Ace::NG::INVALID_WINDOW_ID) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "input message: %{public}s", message.c_str());
         return;
     }
-    CreateLayoutInfoByWinId(windowId);
+
+    int32_t methodIndex = windowResult.second;
+    if (methodIndex == 1) {
+        Create3DLayoutInfoByWinId(windowId);
+    } else {
+        CreateLayoutInfoByWinId(windowId);
+    }
 }
 
 void LayoutInspector::HandleStopRecord()
