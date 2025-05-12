@@ -29,8 +29,8 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
-#include "base/web/webview/ohos_nweb/include/nweb.h"
-#include "base/web/webview/ohos_nweb/include/nweb_handler.h"
+#include "nweb.h"
+#include "nweb_handler.h"
 #include "core/components/web/web_event.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"

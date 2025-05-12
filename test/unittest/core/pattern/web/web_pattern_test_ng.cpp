@@ -26,7 +26,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/log/dump_log.h"
-#include "base/web/webview/ohos_nweb/include/nweb_handler.h"
+#include "nweb_handler.h"
 #include "core/components_ng/base/view_stack_processor.h"
 
 using namespace testing;

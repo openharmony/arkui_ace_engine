@@ -26,19 +26,19 @@
 #include "base/memory/ace_type.h"
 #define protected public
 #define private public
-#include "foundation/arkui/ace_engine/test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/web/web_pattern.h"
 #undef private
 #undef protected
-#include "foundation/arkui/ace_engine/frameworks/base/json/json_util.h"
-#include "foundation/arkui/ace_engine/frameworks/core/common/ai/image_analyzer_manager.h"
-#include "foundation/arkui/ace_engine/frameworks/core/components_ng/base/ui_node.h"
-#include "foundation/arkui/ace_engine/interfaces/inner_api/ace/ai/image_analyzer.h"
+#include "base/json/json_util.h"
+#include "core/common/ai/image_analyzer_manager.h"
+#include "core/components_ng/base/ui_node.h"
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
 #include "test/mock/core/common/mock_container.h"
-#include "third_party/cJSON/cJSON.h"
+#include "cJSON.h"
 
 #include "nweb.h"
 #include "nweb_handler.h"
