@@ -15,10 +15,15 @@
 #include <memory>
 #include "common_ani_modifier.h"
 
+#include <vector>
+
 #include "base/log/log.h"
+#include "core/common/container_scope.h"
 #include "frameworks/bridge/arkts_frontend/ani_context_module.h"
 
 namespace OHOS::Ace::NG {
+
+static thread_local std::vector<int32_t> restoreInstanceIds_;
 
 ani_ref* GetHostContext()
 {
@@ -29,9 +34,29 @@ ani_ref* GetHostContext()
     return nullptr;
 }
 
+void SyncInstanceId(ArkUI_Int32 instanceId)
+{
+    restoreInstanceIds_.emplace_back(ContainerScope::CurrentId());
+    ContainerScope::UpdateCurrent(instanceId);
+}
+
+void RestoreInstanceId()
+{
+    if (restoreInstanceIds_.empty()) {
+        ContainerScope::UpdateCurrent(-1);
+        return;
+    }
+    ContainerScope::UpdateCurrent(restoreInstanceIds_.back());
+    restoreInstanceIds_.pop_back();
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
-    static const ArkUIAniCommonModifier impl = { .getHostContext = OHOS::Ace::NG::GetHostContext };
+    static const ArkUIAniCommonModifier impl = {
+        .getHostContext = OHOS::Ace::NG::GetHostContext,
+        .syncInstanceId = OHOS::Ace::NG::SyncInstanceId,
+        .restoreInstanceId = OHOS::Ace::NG::RestoreInstanceId
+    };
     return &impl;
 }
 

@@ -12180,6 +12180,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    void ResourceManagerResetImpl()
+    {
+    }
     } // SystemOpsAccessor
     namespace GestureOpsAccessor {
     Ark_NativePointer CreateTapGestureImpl(const Ark_Number* fingers,
@@ -20676,6 +20679,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SystemOpsAccessor::SyncInstanceIdImpl,
             SystemOpsAccessor::RestoreInstanceIdImpl,
             SystemOpsAccessor::GetResourceIdImpl,
+            SystemOpsAccessor::ResourceManagerResetImpl,
         };
         return &SystemOpsAccessorImpl;
     }

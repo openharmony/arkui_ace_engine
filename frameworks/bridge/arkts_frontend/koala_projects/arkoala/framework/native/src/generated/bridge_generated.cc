@@ -32012,6 +32012,17 @@ Ark_Int32 impl_SystemOps_getResourceId(const KStringPtr& bundleName, const KStri
         return GetAccessors()->getSystemOpsAccessor()->getResourceId((const Ark_String*) (&bundleName), (const Ark_String*) (&moduleName), (const Array_String*)&params_value);
 }
 KOALA_INTEROP_4(SystemOps_getResourceId, Ark_Int32, KStringPtr, KStringPtr, KSerializerBuffer, int32_t)
+void impl_SystemOps_resourceManagerReset() {
+        GetAccessors()->getSystemOpsAccessor()->resourceManagerReset();
+}
+KOALA_INTEROP_DIRECT_V0(SystemOps_resourceManagerReset)
+void impl_SystemOps_setFrameCallback(KSerializerBuffer thisArray, int32_t thisLength, KInteropNumber delayTime) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Callback_Number_Void onFrameCallback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Number_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Number_Void))))};;
+        Callback_Number_Void onIdleCallback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Number_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Number_Void))))};;
+        GetAccessors()->getSystemOpsAccessor()->setFrameCallback((const Callback_Number_Void*)&onFrameCallback_value, (const Callback_Number_Void*)&onIdleCallback_value, (const Ark_Number*) (&delayTime));
+}
+KOALA_INTEROP_DIRECT_V3(SystemOps_setFrameCallback, KSerializerBuffer, int32_t, KInteropNumber)
 Ark_NativePointer impl_GestureOps_createTapGesture(KInteropNumber fingers, KInteropNumber count, KInteropNumber distanceThreshold, Ark_Boolean isFingerCountLimited) {
         return GetAccessors()->getGestureOpsAccessor()->createTapGesture((const Ark_Number*) (&fingers), (const Ark_Number*) (&count), (const Ark_Number*) (&distanceThreshold), isFingerCountLimited);
 }
