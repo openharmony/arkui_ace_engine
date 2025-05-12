@@ -17,8 +17,8 @@
 /// <reference path="./ArkComponent.ts" />
 
 class ArkCommonComponent extends ArkComponent implements CommonAttribute {
-    constructor(nativePtr: KNode, classType?: ModifierType) {
-      super(nativePtr, classType);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   initialize(value: Object[]): this {
     return this;
