@@ -369,8 +369,7 @@ ArkUINativeModuleValue MenuBridge::SetFontSize(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> fontSizeArg = runtimeCallInfo->GetCallArgRef(ARG_INDEX_1);
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     CalcDimension fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSize) || fontSize.IsNegative() ||
-        fontSize.Unit() == DimensionUnit::PERCENT) {
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSize) || fontSize.IsNegative()) {
         GetArkUINodeModifiers()->getMenuModifier()->resetMenuFontSize(nativeNode);
     } else {
         GetArkUINodeModifiers()->getMenuModifier()->setMenuFontSize(
