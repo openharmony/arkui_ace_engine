@@ -1569,7 +1569,9 @@ HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithmIsGetExpandDisplayValidHeight,
      * @tc.steps: step2. test DialogLayoutAlgorithm functions.
      * @tc.expected: These properties are matched.
      */
-    EXPECT_TRUE(dialogLayoutAlgorithm.IsGetExpandDisplayValidHeight());
+    DialogProperties props;
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    EXPECT_TRUE(dialogLayoutAlgorithm.IsGetExpandDisplayValidHeight(dialog->GetLayoutProperty<DialogLayoutProperty>()));
 }
 
 /**
