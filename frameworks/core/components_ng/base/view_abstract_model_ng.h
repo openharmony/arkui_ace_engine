@@ -69,6 +69,16 @@ public:
         }
     }
 
+    void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isSetWidth) override
+    {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        if (layoutProperty) {
+            layoutProperty->UpdateLayoutPolicyProperty(layoutPolicy, isSetWidth);
+        }
+    }
+
     void ClearWidthOrHeight(bool isWidth) override
     {
         ViewAbstract::ClearWidthOrHeight(isWidth);

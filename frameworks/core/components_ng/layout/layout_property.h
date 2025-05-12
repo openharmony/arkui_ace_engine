@@ -34,6 +34,7 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/layout_constraint.h"
+#include "core/components_ng/property/layout_policy_property.h"
 #include "core/components_ng/property/magic_layout_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
@@ -199,6 +200,10 @@ public:
     void UpdateCalcLayoutProperty(const MeasureProperty& constraint);
 
     void UpdateUserDefinedIdealSize(const CalcSize& value);
+
+    void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isWidth);
+
+    std::optional<NG::LayoutPolicyProperty> GetLayoutPolicyProperty();
 
     void ClearUserDefinedIdealSize(bool clearWidth, bool clearHeight);
 
@@ -455,6 +460,7 @@ private:
     std::unique_ptr<PaddingProperty> padding_;
     std::unique_ptr<MarginProperty> margin_;
     std::optional<MarginPropertyF> marginResult_;
+    std::optional<NG::LayoutPolicyProperty> layoutPolicy_;
 
     std::unique_ptr<SafeAreaExpandOpts> safeAreaExpandOpts_;
     std::unique_ptr<SafeAreaInsets> safeAreaInsets_;

@@ -60,6 +60,11 @@ public:
         }
         return true;
     }
+    
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
 
 private:
     RefPtr<FrameNode> GetParentFrameNode(RefPtr<FrameNode> node);
