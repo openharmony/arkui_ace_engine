@@ -90,7 +90,7 @@ namespace {
 constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
 constexpr Dimension KEYBOARD_AVOID_OFFSET = 24.0_vp;
 #endif
-constexpr float CARET_WIDTH = 1.5f;
+constexpr Dimension CARET_WIDTH = 2.0_vp;
 constexpr int32_t IMAGE_SPAN_LENGTH = 1;
 constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
 constexpr uint32_t RICH_EDITOR_TWINKLING_INTERVAL_MS = 500;
@@ -5039,7 +5039,7 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
         positionY -= keyboardOffset;
     }
     OffsetF caretLeftTopPoint(caretOffset.GetX() + parentGlobalOffset.GetX(), caretTop);
-    OffsetF caretRightBottomPoint(caretLeftTopPoint.GetX() + CARET_WIDTH, caretLeftTopPoint.GetY() + caretHeight);
+    OffsetF caretRightBottomPoint(caretLeftTopPoint.GetX() + GetCaretWidth(), caretLeftTopPoint.GetY() + caretHeight);
     HandlePointWithTransform(caretLeftTopPoint);
     HandlePointWithTransform(caretRightBottomPoint);
     // window rect relative to screen
@@ -10069,7 +10069,7 @@ RectF RichEditorPattern::GetSelectArea(SelectRectsType pos)
         auto richEditorOverlay = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
         CHECK_NULL_RETURN(richEditorOverlay, rect);
         auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
-        auto caretWidth = Dimension(CARET_WIDTH, DimensionUnit::VP).ConvertToPx();
+        auto caretWidth = GetCaretWidth();
         auto selectRect = RectF(caretOffset + paintOffset, SizeF(caretWidth, caretHeight));
         return selectRect.IntersectRectT(contentRect);
     }
@@ -10119,7 +10119,7 @@ RectF RichEditorPattern::CreateNewLineRect(const int32_t position, const bool do
     auto& style = paragraphInfo.paragraphStyle;
     auto height = 0.0f;
     auto offset = paragraphs_.ComputeCursorOffset(position, height, downStreamFirst, true);
-    auto caretWidth = Dimension(CARET_WIDTH, DimensionUnit::VP).ConvertToPx();
+    auto caretWidth = GetCaretWidth();
     RectF rect = RectF(offset.GetX(), offset.GetY(), 0, height);
     auto textAlign = TextBase::CheckTextAlignByDirection(style.align, style.direction);
     TextBase::UpdateSelectedBlankLineRect(rect, caretWidth, textAlign, GetTextContentRect().Width());
@@ -12343,5 +12343,10 @@ void RichEditorPattern::OnReportRichEditorEvent(const std::string& event)
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(EVENT, value);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "nodeId:[%{public}d] RichEditor reportComponentChangeEvent %{public}s", frameId_,
         event.c_str());
+}
+
+float RichEditorPattern::GetCaretWidth()
+{
+    return static_cast<float>(CARET_WIDTH.ConvertToPx());
 }
 } // namespace OHOS::Ace::NG
