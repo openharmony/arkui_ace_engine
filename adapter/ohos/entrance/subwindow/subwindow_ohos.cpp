@@ -102,12 +102,7 @@ public:
             [subWindow, enable]() {
                 CHECK_NULL_VOID(subWindow);
                 subWindow->OnFreeMultiWindowSwitch(enable);
-                if (enable) {
-                    subWindow->SetFollowParentWindowLayoutEnabled(false);
-                    subWindow->ResizeWindow();
-                } else {
-                    subWindow->SetFollowParentWindowLayoutEnabled(true);
-                }
+                subWindow->SwitchFollowParentWindowLayout(enable);
             },
             TaskExecutor::TaskType::UI, "ArkUIFreeMultiWindowSwitch");
     }
@@ -2384,5 +2379,35 @@ void SubwindowOhos::CloseDialogMaskNG(const RefPtr<NG::FrameNode>& dialog)
     auto maskPattern = maskNode->GetPattern<NG::DialogMaskPattern>();
     CHECK_NULL_VOID(maskPattern);
     maskPattern->CloseMask();
+}
+
+void SubwindowOhos::SwitchFollowParentWindowLayout(bool freeMultiWindowEnable)
+{
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+        "subwindow switch followParentWindowLayout, enable: %{public}d", freeMultiWindowEnable);
+    if (NeedFollowParentWindowLayout() && !freeMultiWindowEnable) {
+        SetFollowParentWindowLayoutEnabled(true);
+    } else {
+        SetFollowParentWindowLayoutEnabled(false);
+        ResizeWindow();
+    }
+}
+
+void SubwindowOhos::AddFollowParentWindowLayoutNode(int32_t nodeId)
+{
+    followParentWindowLayoutNodeIds_.emplace_back(nodeId);
+    if (followParentWindowLayoutNodeIds_.size() == 1) {
+        bool freeMultiWindowEnable = IsFreeMultiWindow();
+        SwitchFollowParentWindowLayout(freeMultiWindowEnable);
+    }
+}
+
+void SubwindowOhos::RemoveFollowParentWindowLayoutNode(int32_t nodeId)
+{
+    followParentWindowLayoutNodeIds_.remove(nodeId);
+    if (followParentWindowLayoutNodeIds_.empty()) {
+        bool freeMultiWindowEnable = IsFreeMultiWindow();
+        SwitchFollowParentWindowLayout(freeMultiWindowEnable);
+    }
 }
 } // namespace OHOS::Ace
