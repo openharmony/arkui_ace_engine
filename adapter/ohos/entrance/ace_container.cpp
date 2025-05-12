@@ -348,7 +348,7 @@ void AceContainer::Destroy()
     LOGI("AceContainer Destroy begin");
     ContainerScope scope(instanceId_);
     RemoveWatchSystemParameter();
-    RemoveSaveGetCurrentInstanceId();
+    RemoveUISessionCallbacks();
     ReleaseResourceAdapter();
     if (pipelineContext_ && taskExecutor_) {
         // 1. Destroy Pipeline on UI thread.
@@ -3775,7 +3775,7 @@ void AceContainer::AddWatchSystemParameter()
     BackgroundTaskExecutor::GetInstance().PostTask(task);
 }
 
-void AceContainer::RemoveSaveGetCurrentInstanceId()
+void AceContainer::RemoveUISessionCallbacks()
 {
     UiSessionManager::GetInstance()->RemoveSaveGetCurrentInstanceId(instanceId_);
 }
