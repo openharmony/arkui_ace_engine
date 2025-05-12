@@ -921,6 +921,7 @@ public:
         if (handler_) {
             int32_t parentNWebId = handler_->GetParentNWebId();
             if (parentNWebId == -1) {
+                TAG_LOGE(AceLogTag::ACE_WEB, "SetWebController parent's web isn't inited");
                 return;
             }
             if (args.Length() < 1 || !args[0]->IsObject()) {
@@ -946,6 +947,8 @@ public:
             }
             controller_map_.insert(
                 std::pair<int32_t, ChildWindowInfo>(handler_->GetId(), { parentNWebId, controller }));
+        } else {
+            TAG_LOGE(AceLogTag::ACE_WEB, "SetWebController handler is empty");
         }
     }
 

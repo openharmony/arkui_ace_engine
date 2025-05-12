@@ -1859,9 +1859,6 @@ void WebDelegate::ShowWebView()
         window_->Show();
     }
 
-    if (!IsActivePolicyDisable()) {
-        OnActive();
-    }
     OnWebviewShow();
 }
 
@@ -1871,9 +1868,6 @@ void WebDelegate::HideWebView()
         window_->Hide();
     }
 
-    if (!IsActivePolicyDisable()) {
-        OnInactive();
-    }
     OnWebviewHide();
 }
 

@@ -1841,4 +1841,34 @@ HWTEST_F(WebPatternPartTwoTest, RunJavascriptAsync_001, TestSize.Level1)
     ASSERT_FALSE(ret);
 #endif
 }
+
+/**
+ * @tc.name: SetActiveStatusInner_001
+ * @tc.desc: Set ArkWeb active or inactive, and when is force
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartTwoTest, SetActiveStatusInner_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->isVisible_ = false;
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->SetActiveStatusInner(true);
+    EXPECT_TRUE(webPattern->isActive_);
+    webPattern->SetActiveStatusInner(false);
+    EXPECT_FALSE(webPattern->isActive_);
+    webPattern->SetActiveStatusInner(true, true);
+    EXPECT_TRUE(webPattern->isActive_);
+    webPattern->SetActiveStatusInner(false, true);
+    EXPECT_FALSE(webPattern->isActive_);
+#endif
+}
 }
