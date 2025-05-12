@@ -162,6 +162,8 @@ import { MenuCallback, OnHoverCallback } from "./../sdk-stubs"
 import { TerminationInfo } from "./../embeddedComponent"
 import { TextBackgroundStyle } from "./../span"
 import { Content } from "./../contentSlot"
+import { IObservedObject, IWatchTrigger } from "./../../stateManagement"
+
 export class TypeChecker {
     static typeInstanceOf<T>(value: Object, prop: string): boolean {
         return value.hasOwnProperty(prop)
@@ -21541,5 +21543,11 @@ export class TypeChecker {
     }
     static isArray_CustomObject(value: Object | string | number | undefined): boolean {
         return Array.isArray(value)
+    }
+    static isIObservedObject<T>(value: T): boolean {
+        return true;
+    }
+    static isIWatchTrigger<T>(value: T): boolean {
+        return true;
     }
 }
