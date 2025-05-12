@@ -97,14 +97,14 @@ public:
     static RefPtr<RepeatVirtualScroll2Node> GetOrCreateRepeatNode(int32_t nodeId, uint32_t arrLen, uint32_t totalCount,
         const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
         const std::function<void(IndexType, IndexType)>& onRecycleItems,
-        const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
+        const std::function<void(int32_t, int32_t, int32_t, int32_t, bool)>& onActiveRange,
         const std::function<void(IndexType, IndexType)>& onMoveFromTo,
         const std::function<void()>& onPurge);
 
     RepeatVirtualScroll2Node(int32_t nodeId, uint32_t arrLen, int32_t totalCount,
         const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
         const std::function<void(IndexType, IndexType)>& onRecycleItems,
-        const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
+        const std::function<void(int32_t, int32_t, int32_t, int32_t, bool)>& onActiveRange,
         const std::function<void(IndexType, IndexType)>& onMoveFromTo,
         const std::function<void()>& onPurge);
 
@@ -291,6 +291,8 @@ private:
     // to skip processing if params unchanged
     int32_t prevActiveRangeStart_ = 0;
     int32_t prevActiveRangeEnd_ = -1;
+    int32_t prevVisibleRangeStart_ = 0;
+    int32_t prevVisibleRangeEnd_ = -1;
 
     // remove from final version
     int32_t prevRecycleFrom_ = -1;
@@ -300,7 +302,7 @@ private:
     bool forceRunDoSetActiveRange_ = false;
 
     std::function<void(IndexType, IndexType)> onRecycleItems_;
-    std::function<void(int32_t, int32_t, bool)> onActiveRange_;
+    std::function<void(int32_t, int32_t, int32_t, int32_t, bool)> onActiveRange_;
     std::function<void(IndexType, IndexType)> onMoveFromTo_;
     std::function<void()> onPurge_;
 

@@ -78,7 +78,7 @@ const auto ON_RECYCLE_ITEMS = [](IndexType fromIndex, IndexType toIndex) -> void
     return;
 };
 
-const auto ON_ACTIVE_RANGE = [](int32_t fromIndex, int32_t toIndex, bool isLoop) -> void {
+const auto ON_ACTIVE_RANGE = [](int32_t fromIndex, int32_t toIndex, int32_t vStart, int32_t vEnd, bool isLoop) -> void {
     return;
 };
 
