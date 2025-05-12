@@ -47,6 +47,7 @@ LayoutSynchronizer::LayoutState LayoutSynchronizer::GetLayoutTruth(const RefPtr<
         return LayoutState { list->GetStartPos(), list->GetStartIndex(), list->GetEndIndex() };
     }
     if (auto swiper = host->GetPattern<SwiperPattern>(); swiper) {
+        return LayoutState { swiper->GetStartPos(), swiper->GetStartIndex(), swiper->GetEndIndex() };
     }
     return {};
 }
