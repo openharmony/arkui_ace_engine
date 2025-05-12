@@ -1018,6 +1018,8 @@ void MovingPhotoPattern::GetXmageHeight()
 
     float imageW = StringUtils::StringToFloat(imageWidth);
     float imageL = StringUtils::StringToFloat(imageLength);
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto imageW.%{public}f, imageL %{public}f",
+             imageW, imageL);
 
     std::string modeValue = imageSrc->GetProperty(HW_MNOTE_XMAGE_MODE);
     SizeF imageSize = SizeF(-1, -1);
@@ -1029,12 +1031,16 @@ void MovingPhotoPattern::GetXmageHeight()
             return;
         }
         float bottomV = StringUtils::StringToFloat(bottomValue);
+        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto bottomV.%{public}f", bottomV);
         imageSize = SizeF(imageW, bottomV);
         ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, XmageHeight, imageL - bottomV);
+        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto XmageHeight.%{public}f", imageL - bottomV);
     } else {
         imageSize = SizeF(imageW, imageL);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSize, imageSize);
+    AG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto imageSize imageW.%{public}f, imageL %{public}f",
+            imageSize.Width(), imageSize.Height());
 }
 
 SizeF MovingPhotoPattern::MeasureContentLayout(const SizeF& layoutSize,

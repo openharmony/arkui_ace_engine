@@ -46,6 +46,7 @@ void MovingPhotoLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void MovingPhotoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Measure xmageHeight start.");
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     auto contentSize = layoutWrapper->GetGeometryNode()->GetContentSize();
     auto layoutProperty = DynamicCast<MovingPhotoLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -65,7 +66,8 @@ void MovingPhotoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             auto columnSize = contentSize;
             float xmageHeight = 0;
             float ratio = 0;
-            if (layoutProperty->HasXmageHeight()) {
+            if (pattern->GetXmageModeStatus()) {
+                pattern->GetXmageHeight();
                 ratio = pattern->CalculateRatio(contentSize);
                 xmageHeight = layoutProperty->GetXmageHeight().value();
                 TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Measure xmageHeight.%{public}f, GetRatio.%{public}f",
