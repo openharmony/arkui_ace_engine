@@ -280,10 +280,11 @@ void JSCheckbox::SetCheckboxStyle(int32_t checkBoxStyle)
 void JSCheckbox::Mark(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<CheckboxTheme>();
+    auto defaultStroke = theme ? theme->GetCheckStroke() : Dimension();
     if (!info[0]->IsObject()) {
         CheckBoxModel::GetInstance()->ResetCheckMarkColor();
         CheckBoxModel::GetInstance()->SetCheckMarkSize(Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE));
-        CheckBoxModel::GetInstance()->SetCheckMarkWidth(theme->GetCheckStroke());
+        CheckBoxModel::GetInstance()->SetCheckMarkWidth(defaultStroke);
         return;
     }
 
@@ -309,7 +310,7 @@ void JSCheckbox::Mark(const JSCallbackInfo& info)
         (strokeWidth.ConvertToVp() >= 0)) {
         CheckBoxModel::GetInstance()->SetCheckMarkWidth(strokeWidth);
     } else {
-        CheckBoxModel::GetInstance()->SetCheckMarkWidth(theme->GetCheckStroke());
+        CheckBoxModel::GetInstance()->SetCheckMarkWidth(defaultStroke);
     }
 }
 
