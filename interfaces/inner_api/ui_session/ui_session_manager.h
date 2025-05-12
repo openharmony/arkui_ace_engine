@@ -68,14 +68,10 @@ public:
     virtual void ReportComponentChangeEvent(const std::string& key, const std::string& value) {};
 
     /**
-     * @description: remove instanceId when destroy
-     */
-    virtual void RemoveSaveGetCurrentInstanceId(int32_t instanceId) {};
-
-     /**
      * @description: execute click callback when page some component change occurs
      */
-    virtual void ReportComponentChangeEvent(const std::string& key, const std::string& value) {};
+    virtual void ReportComponentChangeEvent(
+        int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value) {};
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     /**
      * @description: save report communication stub side
@@ -129,6 +125,11 @@ public:
     virtual void SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager,
         int32_t instanceId) {};
     virtual void SaveGetCurrentInstanceIdCallback(std::function<int32_t()>&& callback) {};
+    virtual void RemoveSaveGetCurrentInstanceId(int32_t instanceId) {};
+    virtual std::shared_ptr<UiTranslateManager> GetCurrentTranslateManager() {
+        std::shared_ptr<UiTranslateManager> currentTranslateManager = nullptr;
+        return currentTranslateManager;
+    };
     virtual void GetWebViewLanguage() {};
     virtual void RegisterPipeLineGetCurrentPageName(std::function<std::string()>&& callback) {};
     virtual void GetCurrentPageName() {};

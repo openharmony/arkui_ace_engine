@@ -340,9 +340,9 @@ void UiSessionManagerOhos::RemoveSaveGetCurrentInstanceId(int32_t instanceId)
     translateManagerMap_.erase(instanceId);
 }
 
-void UiSessionManagerOhos::GetWebViewLanguage()
+std::shared_ptr<UiTranslateManager> UiSessionManagerOhos::GetCurrentTranslateManager()
 {
-    std::shared_lock<std::shared_mutex> reportLock(translateManagerMutex_);
+    std::shared_ptr<UiTranslateManager> currentTranslateManager = nullptr;
 
     if (getInstanceIdCallback_) {
         int32_t instanceId = getInstanceIdCallback_();
@@ -350,11 +350,22 @@ void UiSessionManagerOhos::GetWebViewLanguage()
         if (iter != translateManagerMap_.end()) {
             auto translateManager = iter->second;
             if (translateManager) {
-                translateManager->GetWebViewCurrentLanguage();
-            } else {
-                LOGE("translateManager is nullptr ,translate failed");
+                currentTranslateManager = translateManager;
             }
         }
+    }
+    return  currentTranslateManager;
+}
+
+void UiSessionManagerOhos::GetWebViewLanguage()
+{
+    std::shared_lock<std::shared_mutex> reportLock(translateManagerMutex_);
+
+    auto  currentTranslateManager = GetCurrentTranslateManager();
+    if (currentTranslateManager) {
+        currentTranslateManager->GetWebViewCurrentLanguage();
+    } else {
+        LOGE("translateManager is nullptr ,translate failed");
     }
 }
 
@@ -402,17 +413,11 @@ void UiSessionManagerOhos::GetWebTranslateText(std::string extraData, bool isCon
 {
     std::shared_lock<std::shared_mutex> reportLock(translateManagerMutex_);
 
-    if (getInstanceIdCallback_) {
-        int32_t instanceId = getInstanceIdCallback_();
-        auto iter = translateManagerMap_.find(instanceId);
-        if (iter != translateManagerMap_.end()) {
-            auto translateManager = iter->second;
-            if (translateManager) {
-                translateManager->GetTranslateText(extraData, isContinued);
-            } else {
-                LOGE("translateManager is nullptr ,translate failed");
-            }
-        }
+    auto  currentTranslateManager = GetCurrentTranslateManager();
+    if (currentTranslateManager) {
+        currentTranslateManager->GetTranslateText(extraData, isContinued);
+    } else {
+        LOGE("translateManager is nullptr ,translate failed");
     }
 }
 
@@ -432,17 +437,11 @@ void UiSessionManagerOhos::SendTranslateResult(
 {
     std::shared_lock<std::shared_mutex> reportLock(translateManagerMutex_);
 
-    if (getInstanceIdCallback_) {
-        int32_t instanceId = getInstanceIdCallback_();
-        auto iter = translateManagerMap_.find(instanceId);
-        if (iter != translateManagerMap_.end()) {
-            auto translateManager = iter->second;
-            if (translateManager) {
-                translateManager->SendTranslateResult(nodeId, results, ids);
-            } else {
-                LOGE("translateManager is nullptr ,translate failed");
-            }
-        }
+    auto  currentTranslateManager = GetCurrentTranslateManager();
+    if (currentTranslateManager) {
+        currentTranslateManager->SendTranslateResult(nodeId, results, ids);
+    } else {
+        LOGE("translateManager is nullptr ,translate failed");
     }
 }
 
@@ -450,17 +449,11 @@ void UiSessionManagerOhos::SendTranslateResult(int32_t nodeId, std::string res)
 {
     std::shared_lock<std::shared_mutex> reportLock(translateManagerMutex_);
 
-    if (getInstanceIdCallback_) {
-        int32_t instanceId = getInstanceIdCallback_();
-        auto iter = translateManagerMap_.find(instanceId);
-        if (iter != translateManagerMap_.end()) {
-            auto translateManager = iter->second;
-            if (translateManager) {
-                translateManager->SendTranslateResult(nodeId, res);
-            } else {
-                LOGE("translateManager is nullptr ,translate failed");
-            }
-        }
+    auto  currentTranslateManager = GetCurrentTranslateManager();
+    if (currentTranslateManager) {
+        currentTranslateManager->SendTranslateResult(nodeId, res);
+    } else {
+        LOGE("translateManager is nullptr ,translate failed");
     }
 }
 
@@ -468,17 +461,11 @@ void UiSessionManagerOhos::ResetTranslate(int32_t nodeId)
 {
     std::shared_lock<std::shared_mutex> reportLock(translateManagerMutex_);
 
-    if (getInstanceIdCallback_) {
-        int32_t instanceId = getInstanceIdCallback_();
-        auto iter = translateManagerMap_.find(instanceId);
-        if (iter != translateManagerMap_.end()) {
-            auto translateManager = iter->second;
-            if (translateManager) {
-                translateManager->ResetTranslate(nodeId);
-            } else {
-                LOGE("translateManager is nullptr ,translate failed");
-            }
-        }
+    auto  currentTranslateManager = GetCurrentTranslateManager();
+    if (currentTranslateManager) {
+        currentTranslateManager->ResetTranslate(nodeId);
+    } else {
+        LOGE("translateManager is nullptr ,translate failed");
     }
 }
 
@@ -496,22 +483,17 @@ void UiSessionManagerOhos::SendPixelMap(std::vector<std::pair<int32_t, std::shar
     std::shared_lock<std::shared_mutex> reportLock(translateManagerMutex_);
     std::shared_ptr<UiTranslateManager> translateManager = nullptr;
 
-    if (getInstanceIdCallback_) {
-        int32_t instanceId = getInstanceIdCallback_();
-        auto iter = translateManagerMap_.find(instanceId);
-        if (iter != translateManagerMap_.end()) {
-            translateManager = iter->second;
-        }
-    }
+    auto  currentTranslateManager = GetCurrentTranslateManager();
 
-
-    if (!translateManager) {
+    if (!currentTranslateManager) {
         LOGW("send pixelMap failed,translateManager is nullptr");
     }
     auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["pixel"]]);
     if (reportService != nullptr) {
         reportService->SendShowingImage(maps);
-        translateManager->ClearMap();
+        if (currentTranslateManager) {
+            currentTranslateManager->ClearMap();
+        }
     } else {
         LOGW("send pixel maps failed,process id:%{public}d", processMap_["pixel"]);
     }
