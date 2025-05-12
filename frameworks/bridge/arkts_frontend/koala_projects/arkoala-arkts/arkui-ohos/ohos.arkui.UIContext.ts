@@ -25,9 +25,9 @@ import { SizeOptions } from "./src/component/units"
 import { ArkUIGeneratedNativeModule } from "#components"
 import { int32 } from "@koalaui/common"
 import { nullptr } from "@koalaui/interop"
-import { _animateTo } from "./src/handwritten"
-// import { AnimateParam } from './src/component'
-import { AnimatorResult , AnimatorOptions, Animator} from "@ohos/animator"
+import { _animateTo } from "./src/handwritten/ArkAnimation"
+import { AnimateParam } from './src/component'
+import { AnimatorResult, AnimatorOptions, Animator} from "@ohos/animator"
 import { Context } from "#external"
 import { ArkUIAniModule } from "arkui.ani"
 
@@ -102,11 +102,13 @@ export class UIContext {
     getHostContext(): Context | undefined {
         return ArkUIAniModule._Common_GetHostContext();
     }
-    // public animateTo(param: AnimateParam, event: (() => void)): void {
-    //     ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
-    //     _animateTo(param, event);
-    //     ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
-    // }
+
+    public animateTo(param: AnimateParam, event: (() => void)): void {
+        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        _animateTo(param, event);
+        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+    }
+
     public createAnimator(options: AnimatorOptions): AnimatorResult {
         ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
         let animatorRet = Animator.create(options);

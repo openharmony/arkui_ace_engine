@@ -51,7 +51,7 @@ import { ButtonType, ButtonStyleMode, ButtonRole } from "./button"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { AnimationRange_Number } from "./type-replacements"
 import { ScrollState } from "./list"
-import { _animateTo } from "./../handwritten"
+import { _animateTo, _animationStart, _animationStop } from "./../handwritten/ArkAnimation"
 import { GlobalScope } from "./GlobalScope"
 import { ArkCommonAttributeSet, applyUIAttributes, applyUIAttributesUpdate } from "../handwritten/modifiers/ArkCommonModifier"
 import { CommonModifier } from "../CommonModifier"
@@ -8319,8 +8319,8 @@ export interface UICommonMethod {
     focusOnTouch(value: boolean | undefined): this
     /** @memo */
     focusBox(value: FocusBoxStyle | undefined): this
-    /** @memo */
-    animation(value: AnimateParam | undefined): this
+    animationStart(value: AnimateParam | undefined): this
+    animationStop(value: AnimateParam | undefined):this
     /** @memo */
     transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this
     /** @memo */
@@ -10438,11 +10438,19 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
-    public animation(value: AnimateParam | undefined): this {
-        if (this.checkPriority("animation")) {
+    public animationStart(value: AnimateParam | undefined): this {
+        if (this.checkPriority("animationStart")) {
             const value_casted = value as (AnimateParam | undefined)
-            this.getPeer()?.animationAttribute(value_casted)
+            _animationStart(value_casted, this.isFirstBuild);
+            return this
+        }
+        return this
+    }
+    public animationStop(value: AnimateParam | undefined): this {
+        if (this.checkPriority("animationStop")) {
+            _animationStop(value, this.isFirstBuild, () => {
+                this.isFirstBuild = false
+            });
             return this
         }
         return this
