@@ -148,26 +148,28 @@ private:
     RefPtr<DragEventActuator> GetDragEventActuator();
     OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
 
-    TouchEvent lastTouchEvent_;
-    WeakPtr<GestureEventHub> gestureHub_;
-    CancelableCallback<void()> thumbnailTimer_;
-    int32_t thumbnailDeadline = 150;
-    CancelableCallback<void()> deadlineTimer_;
-    CancelableCallback<void()> timer_;
-    std::function<void(Offset)> callback_;
     int32_t duration_ = 500;
     bool repeat_ = false;
-    TimeStamp time_;
-    bool useCatchMode_ = true;
     bool isForDrag_ = false;
     bool isDisableMouseLeft_ = false;
+
+    TouchEvent lastTouchEvent_;
+    WeakPtr<GestureEventHub> gestureHub_;
+    int32_t thumbnailDeadline = 150;
+    TimeStamp time_;
+    bool useCatchMode_ = true;
     Point globalPoint_;
-    DelayedTask task_;
-    OnAccessibilityEventFunc onAccessibilityEventFunc_ = nullptr;
-    std::unique_ptr<GestureEventFunc> longPressRecorder_;
     bool hasRepeated_ = false;
     int32_t longPressFingerCountForSequence_ = 0;
     bool isOnActionTriggered_ = false;
+
+    CancelableCallback<void()> thumbnailTimer_;
+    CancelableCallback<void()> deadlineTimer_;
+    CancelableCallback<void()> timer_;
+    std::function<void(Offset)> callback_;
+    DelayedTask task_;
+    OnAccessibilityEventFunc onAccessibilityEventFunc_ = nullptr;
+    std::unique_ptr<GestureEventFunc> longPressRecorder_;
 };
 
 } // namespace OHOS::Ace::NG

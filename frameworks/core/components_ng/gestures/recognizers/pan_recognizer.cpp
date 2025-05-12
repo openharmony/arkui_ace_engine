@@ -725,6 +725,13 @@ void PanRecognizer::OnResetStatus()
     panVelocity_.ResetAll();
     isStartTriggered_ = false;
     localMatrix_.clear();
+    delta_ = Offset();
+    globalPoint_ = Point();
+    mainDelta_ = 0.0;
+    isFlushTouchEventsEnd_ = false;
+    isForDrag_ = false;
+    isAllowMouse_ = true;
+    isStartTriggered_ = false;
 }
 
 void PanRecognizer::OnSucceedCancel()

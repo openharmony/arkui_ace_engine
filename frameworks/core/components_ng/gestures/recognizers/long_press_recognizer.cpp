@@ -435,6 +435,8 @@ void LongPressRecognizer::OnResetStatus()
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
+    globalPoint_ = Point();
+    hasRepeated_ = false;
     longPressFingerCountForSequence_ = 0;
     isOnActionTriggered_ = false;
 }
