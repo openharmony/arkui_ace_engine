@@ -161,8 +161,16 @@ void JSTextClock::SetTextColor(const JSCallbackInfo& info)
         return;
     }
     Color textColor;
+    RefPtr<ResourceObject> resObj;
+    bool colorParsed = SystemProperties::ConfigChangePerform() ? ParseJsColor(info[0], textColor, resObj)
+                                                               : ParseJsColor(info[0], textColor);
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        TextClockModel::GetInstance()->CreateWithTextColorResourceObj(resObj);
+        return;
+    }
+
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-        if (!ParseJsColor(info[0], textColor) && !JSTextClockTheme::ObtainTextColor(textColor)) {
+        if (!colorParsed && !JSTextClockTheme::ObtainTextColor(textColor)) {
             auto pipelineContext = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipelineContext);
             auto theme = pipelineContext->GetTheme<TextTheme>();
@@ -170,7 +178,7 @@ void JSTextClock::SetTextColor(const JSCallbackInfo& info)
             textColor = theme->GetTextStyle().GetTextColor();
         }
     } else {
-        if (!ParseJsColor(info[0], textColor)) {
+        if (!colorParsed) {
             TextClockModel::GetInstance()->ResetTextColor();
             return;
         }
@@ -191,22 +199,23 @@ void JSTextClock::SetFontSize(const JSCallbackInfo& info)
     CHECK_NULL_VOID(textClockTheme);
 
     CalcDimension fontSize;
-    if (!ParseJsDimensionFpNG(info[0], fontSize, false)) {
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-            fontSize = theme->GetTextStyle().GetFontSize();
-        } else {
-            fontSize = textClockTheme->GetTextStyleClock().GetFontSize();
-        }
+    RefPtr<ResourceObject> resObj;
+    bool parseSuccess = SystemProperties::ConfigChangePerform() ? ParseJsDimensionFpNG(info[0], fontSize, resObj, false)
+                                                                : ParseJsDimensionFpNG(info[0], fontSize, false);
+
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        TextClockModel::GetInstance()->CreateWithFontSizeResourceObj(resObj);
+        return;
     }
 
-    if (fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-            fontSize = theme->GetTextStyle().GetFontSize();
-        } else {
-            fontSize = textClockTheme->GetTextStyleClock().GetFontSize();
-        }
+    auto getDefaultFontSize = [&]() {
+        return Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                   ? theme->GetTextStyle().GetFontSize()
+                   : textClockTheme->GetTextStyleClock().GetFontSize();
+    };
+
+    if (!parseSuccess || fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
+        fontSize = getDefaultFontSize();
     }
 
     TextClockModel::GetInstance()->SetFontSize(fontSize);
@@ -262,10 +271,17 @@ void JSTextClock::SetFontFamily(const JSCallbackInfo& info)
         return;
     }
     std::vector<std::string> fontFamilies;
-    if (!ParseJsFontFamilies(info[0], fontFamilies)) {
+    RefPtr<ResourceObject> resObj;
+
+    bool parseSuccess = SystemProperties::ConfigChangePerform() ? ParseJsFontFamilies(info[0], fontFamilies, resObj)
+                                                                : ParseJsFontFamilies(info[0], fontFamilies);
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        TextClockModel::GetInstance()->CreateWithFontFamilyResourceObj(resObj);
         return;
     }
-    TextClockModel::GetInstance()->SetFontFamily(fontFamilies);
+    if (parseSuccess) {
+        TextClockModel::GetInstance()->SetFontFamily(fontFamilies);
+    }
 }
 
 void JSTextClock::SetFormat(const JSCallbackInfo& info)

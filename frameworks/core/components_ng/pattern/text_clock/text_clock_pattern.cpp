@@ -894,4 +894,52 @@ void TextClockPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("isInVisibleArea: ", isInVisibleArea_ ? "true" : "false");
     DumpLog::GetInstance().AddDesc("isStart: ", isStart_ ? "true" : "false");
 }
+
+void TextClockPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (host->GetRerenderable()) {
+        host->MarkModifyDone();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void TextClockPattern::UpdateTextClockColor(const Color& color)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextClockLayoutProperty>();
+    if (layoutProperty) {
+        layoutProperty->UpdateTextColor(color);
+    }
+    auto renderContext = host->GetRenderContext();
+    if (renderContext) {
+        renderContext->UpdateForegroundColor(color);
+        renderContext->ResetForegroundColorStrategy();
+        renderContext->UpdateForegroundColorFlag(true);
+    }
+
+}
+
+void TextClockPattern::UpdateTextClockFontSize(const CalcDimension& fontSize)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextClockLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateFontSize(fontSize);
+}
+
+void TextClockPattern::UpdateTextClockFontFamily(const std::vector<std::string>& fontFamilies) 
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextClockLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateFontFamily(fontFamilies);
+} 
 } // namespace OHOS::Ace::NG
