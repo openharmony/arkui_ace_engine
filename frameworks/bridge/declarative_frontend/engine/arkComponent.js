@@ -19104,6 +19104,25 @@ if (globalThis.Button !== undefined) {
   };
 }
 
+class ArkCommonComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    this._needDiff = false;
+  }
+  initialize(value) {
+    return this;
+  }
+}
+// @ts-ignore
+if (globalThis.__Common__ !== undefined) {
+  globalThis.__Common__.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkCommonComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.CommonModifier(nativePtr, classType);
+    });
+  };
+}
 /// <reference path='./import.ts' />
 class ArkLoadingProgressComponent extends ArkComponent {
   constructor(nativePtr, classType) {
