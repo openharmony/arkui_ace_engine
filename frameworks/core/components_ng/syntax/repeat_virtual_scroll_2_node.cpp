@@ -34,7 +34,7 @@ using CacheItem = RepeatVirtualScroll2Caches::CacheItem;
 RefPtr<RepeatVirtualScroll2Node> RepeatVirtualScroll2Node::GetOrCreateRepeatNode(int32_t nodeId, uint32_t arrLen,
     uint32_t totalCount, const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
     const std::function<void(IndexType, IndexType)>& onRecycleItems,
-    const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
+    const std::function<void(int32_t, int32_t, int32_t, int32_t, bool)>& onActiveRange,
     const std::function<void(IndexType, IndexType)>& onMoveFromTo, const std::function<void()>& onPurge)
 {
     auto node = ElementRegister::GetInstance()->GetSpecificItemById<RepeatVirtualScroll2Node>(nodeId);
@@ -55,7 +55,7 @@ RefPtr<RepeatVirtualScroll2Node> RepeatVirtualScroll2Node::GetOrCreateRepeatNode
 RepeatVirtualScroll2Node::RepeatVirtualScroll2Node(int32_t nodeId, uint32_t arrLen, int32_t totalCount,
     const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
     const std::function<void(IndexType, IndexType)>& onRecycleItems,
-    const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
+    const std::function<void(int32_t, int32_t, int32_t, int32_t, bool)>& onActiveRange,
     const std::function<void(IndexType, IndexType)>& onMoveFromTo,
     const std::function<void()>& onPurge)
     : ForEachBaseNode(V2::JS_REPEAT_ETS_TAG, nodeId), arrLen_(arrLen), totalCount_(totalCount), caches_(onGetRid4Index),
@@ -100,6 +100,8 @@ void RepeatVirtualScroll2Node::DoSetActiveChildRange(
     // memorize range
     prevActiveRangeStart_ = nStart;
     prevActiveRangeEnd_ = nEnd;
+    prevVisibleRangeStart_ = start;
+    prevVisibleRangeEnd_ = end;
     forceRunDoSetActiveRange_ = false;
 
     if (needSync) {
@@ -198,7 +200,8 @@ ActiveRangeType RepeatVirtualScroll2Node::CheckActiveRange(
     }
 
     // step 1: if range unchanged skip full run unless forced (rerender will force run once)
-    if (!forceRunDoSetActiveRange_ && (prevActiveRangeStart_ == nStart && prevActiveRangeEnd_ == nEnd)) {
+    if (!forceRunDoSetActiveRange_ && (prevActiveRangeStart_ == nStart && prevActiveRangeEnd_ == nEnd) &&
+        (prevVisibleRangeStart_ == start && prevVisibleRangeEnd_ == end)) {
         // skip executing if range has no changed
         TAG_LOGD(AceLogTag::ACE_REPEAT,
             "DoSetActiveChildRange: Repeat(nodeId): %{public}d: start: %{public}d - end: %{public}d; cacheStart: "
@@ -225,7 +228,7 @@ ActiveRangeType RepeatVirtualScroll2Node::CheckActiveRange(
         start, end, cacheStart, cacheEnd, nStart, nEnd);
 
     // step 2. call TS side
-    onActiveRange_(nStart, nEnd, isLoop_);
+    onActiveRange_(nStart, nEnd, start, end, isLoop_);
 
     return {nStart, nEnd};
 }

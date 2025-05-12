@@ -335,11 +335,17 @@ class __RepeatVirtualScroll2Impl<T> {
     // previously informed active range from - to
     private activeRange_: [number, number] = [Number.NaN, Number.NaN];
 
+    // previously informed visible range from - to
+    private visibleRange_: [number, number] = [Number.NaN, Number.NaN];
+
     // adjusted activeRange[0] based on accumulated array mutations
     private activeRangeAdjustedStart_ = Number.NaN;
 
     // adjusted activeRange[1] based on accumulated array mutations
     private activeRangeAdjustedEnd_ = Number.NaN;
+
+    // adjusted visibleRange[0] based on accumulated array mutations
+    private visibleRangeAdjustedStart_ = Number.NaN;
 
     // Map containing all rid: rid -> RepeatItem, ttype, key?
     // entires never change
@@ -627,6 +633,8 @@ class __RepeatVirtualScroll2Impl<T> {
             this.repeatElmtId_, arrLen, this.totalCount(), this.firstIndexChanged_, Array.from(newL1Rid4Index));
 
         this.rerenderOngoing_ = false;
+        this.activeRangeAdjustedStart_ = NaN;
+        this.activeRangeAdjustedEnd_ = NaN;
 
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) reRender() data array length: `,
             `${this.arr_.length}, totalCount: ${this.totalCount()} - done`);
@@ -668,7 +676,7 @@ class __RepeatVirtualScroll2Impl<T> {
                 stateMgmtConsole.debug(
                     `index ${activeIndex} ttype '${ttype}'${this.useKeys_ ? ', key ' + key : ''} `,
                     `and dataItem unchanged.`);
-                newActiveDataItems[activeIndex] = this.activeDataItems_[activeIndex]; 
+                newActiveDataItems[activeIndex] = this.activeDataItems_[activeIndex];
 
                 // add to index -> rid map to be sent to C++
                 newL1Rid4Index.set(activeIndex, this.activeDataItems_[activeIndex].rid);
@@ -706,6 +714,9 @@ class __RepeatVirtualScroll2Impl<T> {
             const changeIndex = Math.min(this.totalCount() - 1, this.activeRange_[1] + 1);
             this.requestContainerReLayout(changeIndex);
         }
+
+        this.activeRangeAdjustedStart_ = NaN;
+        this.activeRangeAdjustedEnd_ = NaN;
 
         return false;
     }
@@ -1300,13 +1311,21 @@ class __RepeatVirtualScroll2Impl<T> {
         return true;
     }
 
-    private onActiveRange(nStart: number, nEnd: number, isLoop: boolean): void {
+    private onActiveRange(nStart: number, nEnd: number, vStart: number, vEnd: number, isLoop: boolean): void {
         if (Number.isNaN(this.activeRange_[0])) {
             // first call to onActiveRange / no active node
             this.activeRange_ = [nStart, nEnd];
+            this.visibleRange_ = [vStart, vEnd];
             this.activeRangeAdjustedStart_ = nStart;
             this.activeRangeAdjustedEnd_ = nEnd;
+            this.visibleRangeAdjustedStart_ = vStart;
         } else if (this.activeRange_[0] === nStart && this.activeRange_[1] === nEnd) {
+            if(this.visibleRange_[0] === vStart || this.visibleRange_[1] === vEnd) {
+                stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) onActiveRange`,
+                    `visibleRange_ updated, (vStart: ${nStart}, vEnd: ${nEnd})`);
+                this.activeRange_ = [vStart, vEnd];
+                this.visibleRangeAdjustedStart_ = vStart;
+            }
             if (!isLoop) {
                 stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) onActiveRange`,
                     `(nStart: ${nStart}, nEnd: ${nEnd})`,
@@ -1352,8 +1371,10 @@ class __RepeatVirtualScroll2Impl<T> {
 
         // memorize
         this.activeRange_ = [nStart, nEnd];
+        this.visibleRange_ = [vStart, vEnd];
         this.activeRangeAdjustedStart_ = nStart;
         this.activeRangeAdjustedEnd_ = nEnd;
+        this.visibleRangeAdjustedStart_ = vStart;
 
         stateMgmtConsole.debug(`onActiveRange Result: number remaining activeItems ${numberOfActiveItems}.`,
             `\n${this.dumpDataItems()}\n${this.dumpSpareRid()}\n${this.dumpRepeatItem4Rid()}`);
@@ -1457,11 +1478,18 @@ class __RepeatVirtualScroll2Impl<T> {
             `adjustActiveRangeStart(${index}, ${deleteCount}, ${addCount})`);
 
         // If activeRange_ is not yet known, do nothing
-        if (isNaN(this.activeRangeAdjustedStart_)) {
+        if (isNaN(this.activeRangeAdjustedStart_) || isNaN(this.visibleRangeAdjustedStart_)) {
             this.activeRangeAdjustedStart_ = this.activeRange_[0];
+            this.visibleRangeAdjustedStart_ = this.visibleRange_[0];
         }
-        if (isNaN(this.activeRangeAdjustedStart_)) {
+        if (isNaN(this.activeRangeAdjustedStart_) || isNaN(this.visibleRangeAdjustedStart_)) {
             return;
+        }
+
+        // count changes before visible range
+        if (index <= this.visibleRangeAdjustedStart_) {
+            this.visibleRangeAdjustedStart_ -= Math.min(deleteCount, this.visibleRangeAdjustedStart_ - index);
+            this.visibleRangeAdjustedStart_ += addCount;
         }
 
         // count changes only before active range
@@ -1471,7 +1499,8 @@ class __RepeatVirtualScroll2Impl<T> {
         }
 
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_})`,
-            `activeRangeAdjustedStart_ = ${this.activeRangeAdjustedStart_}`);
+            `activeRangeAdjustedStart_ = ${this.activeRangeAdjustedStart_}`,
+            `visibleRangeAdjustedStart_ = ${this.visibleRangeAdjustedStart_}`);
     }
 
     // update this.activeRangeAdjustedEnd_
@@ -1511,8 +1540,7 @@ class __RepeatVirtualScroll2Impl<T> {
         }
 
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) tryFastRelayout for '${arrChange}'`,
-            `args: ${args}, activeRange: ${this.activeRange_}`
-        );
+            `args: ${args}, activeRange: ${this.activeRange_}, visibleRange: ${this.visibleRange_}`);
 
         // Note that the change in the array has already been done!
         // Now our activeRange reflects the array before the change
@@ -1627,20 +1655,19 @@ class __RepeatVirtualScroll2Impl<T> {
     }
 
     private notifyContainerLayoutChangeAcc(): boolean {
-        const changeCount = this.activeRangeAdjustedStart_ - this.activeRange_[0];
+        const changeCount = this.visibleRangeAdjustedStart_ - this.visibleRange_[0];
         if (isNaN(changeCount) || changeCount === 0) {
             return false;
         }
+
         // get changeIndex to notify container with accumulated changes
-        let changeIndex = this.activeRange_[0] - 1;
-        if (changeIndex < 0) {
-            changeIndex = 0;
-        }
+        let changeIndex = (changeCount < 0) ? 0 : this.visibleRange_[0];
+
         // tells the container to adjust the scroll position, exact behavior is determined by
         // List.maintainVisibleContentPosition(bool)
         this.notifyContainerLayoutChange(changeIndex, changeCount);
-        this.activeRangeAdjustedStart_ = NaN;
-        this.activeRangeAdjustedEnd_ = NaN;
+        this.visibleRangeAdjustedStart_ = NaN;
+
         return true;
     }
 
