@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/picker/toss_animation_controller.h"
+#include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
 
 #include <sys/time.h>
 
-#include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
+#include "core/components_ng/pattern/picker_utils/picker_column_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -38,7 +38,7 @@ void TossAnimationController::SetStart(double y)
     auto weak = AceType::WeakClaim(this);
     auto ref = weak.Upgrade();
     CHECK_NULL_VOID(ref);
-    auto column = AceType::DynamicCast<DatePickerColumnPattern>(ref->column_.Upgrade());
+    auto column = AceType::DynamicCast<PickerColumnPattern>(ref->column_.Upgrade());
     CHECK_NULL_VOID(column);
     auto isTouchBreak = column->GetTouchBreakStatus();
     if (isTouchBreak == false) {
@@ -66,7 +66,7 @@ bool TossAnimationController::Play()
     auto weak = AceType::WeakClaim(this);
     auto ref = weak.Upgrade();
     CHECK_NULL_RETURN(ref, false);
-    auto column = AceType::DynamicCast<DatePickerColumnPattern>(ref->column_.Upgrade());
+    auto column = AceType::DynamicCast<PickerColumnPattern>(ref->column_.Upgrade());
     CHECK_NULL_RETURN(column, false);
     auto timeDiff = timeEnd_ - timeStart_;
     if (timeDiff < MIN_TIME) {
@@ -85,7 +85,7 @@ void TossAnimationController::StartSpringMotion()
     auto weak = AceType::WeakClaim(this);
     auto ref = weak.Upgrade();
     CHECK_NULL_VOID(ref);
-    auto column = AceType::DynamicCast<DatePickerColumnPattern>(ref->column_.Upgrade());
+    auto column = AceType::DynamicCast<PickerColumnPattern>(ref->column_.Upgrade());
     CHECK_NULL_VOID(column);
     auto columnNode = column->GetHost();
     CHECK_NULL_VOID(columnNode);
@@ -116,6 +116,9 @@ void TossAnimationController::StartSpringMotion()
         if (isTouchBreak == false) {
             column->SetTossStatus(false);
             column->SetYOffset(0.0);
+            if (!NearZero(column->GetOffset()) && column->IsStartEndTimeDefined()) {
+                column->TossStoped();
+            }
         }
     };
     AnimationUtils::Animate(
@@ -133,7 +136,8 @@ void TossAnimationController::StopTossAnimation()
     auto weak = AceType::WeakClaim(this);
     auto ref = weak.Upgrade();
     CHECK_NULL_VOID(ref);
-    auto column = AceType::DynamicCast<DatePickerColumnPattern>(ref->column_.Upgrade());
+    CHECK_NULL_VOID(ref->property_);
+    auto column = AceType::DynamicCast<PickerColumnPattern>(ref->column_.Upgrade());
     CHECK_NULL_VOID(column);
     column->SetTossStatus(false);
     AnimationOption option;
@@ -178,7 +182,7 @@ void TossAnimationController::CreatePropertyCallback()
     auto weak = AceType::WeakClaim(this);
     auto ref = weak.Upgrade();
     CHECK_NULL_VOID(ref);
-    auto column = AceType::DynamicCast<DatePickerColumnPattern>(ref->column_.Upgrade());
+    auto column = AceType::DynamicCast<PickerColumnPattern>(ref->column_.Upgrade());
     CHECK_NULL_VOID(column);
     auto propertyCallback = [weak, column](float position) {
         auto isTouchBreak = column->GetTouchBreakStatus();
