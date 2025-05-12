@@ -1733,6 +1733,50 @@ HWTEST_F(TabsAttrTestNg, CachedMaxCount003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CachedMaxCount004
+ * @tc.desc: test tabContent property change flag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, CachedMaxCount004, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    bool deepRenderCalled = false;
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        auto deepRenderFunc = [&deepRenderCalled]() { deepRenderCalled = true; };
+        TabContentModelNG tabContentModel = CreateTabContentWithDeepRender(std::move(deepRenderFunc));
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    CreateTabsDone(model);
+    EXPECT_TRUE(deepRenderCalled);
+
+    /**
+     * @tc.steps: step2. first time layout, test property change flag.
+     */
+    auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 1);
+    auto tabContentLayoutProperty = tabContentPattern->GetLayoutProperty<TabContentLayoutProperty>();
+    deepRenderCalled = false;
+    EXPECT_TRUE(tabContentPattern->firstTimeLayout_);
+    EXPECT_EQ((tabContentLayoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE_SELF), 0);
+    tabContentPattern->BeforeCreateLayoutWrapper();
+    EXPECT_TRUE(deepRenderCalled);
+    EXPECT_FALSE(tabContentPattern->firstTimeLayout_);
+    EXPECT_EQ((tabContentLayoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE_SELF), 0);
+
+    /**
+     * @tc.steps: step3. second time layout, test property change flag.
+     */
+    deepRenderCalled = false;
+    tabContentPattern->secondTimeLayout_ = true;
+    tabContentPattern->shallowBuilder_->MarkIsExecuteDeepRenderDone(false);
+    tabContentPattern->BeforeCreateLayoutWrapper();
+    EXPECT_TRUE(deepRenderCalled);
+    EXPECT_FALSE(tabContentPattern->secondTimeLayout_);
+    EXPECT_EQ((tabContentLayoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE_SELF),
+        PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+/**
  * @tc.name: AnimationCurve001
  * @tc.desc: test animationCurve attribute.
  * @tc.type: FUNC
