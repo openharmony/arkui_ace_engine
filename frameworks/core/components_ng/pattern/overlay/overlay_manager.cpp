@@ -3874,6 +3874,7 @@ bool OverlayManager::RemoveDialogWithContent(
     const RefPtr<FrameNode>& overlay, const DialogProperties& props, bool isBackPressed, bool isPageRouter)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove dialog enter");
+    CHECK_NULL_RETURN(overlay, false);
     if (overlay->IsRemoving()) {
         return false;
     }

@@ -363,7 +363,7 @@ bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& inner
     }
 
     auto defaultMinHeight = DIALOG_MIN_HEIGHT.ConvertToPx();
-    auto defaultMaxHeight = IsGetExpandDisplayValidHeight() ? expandDisplayValidHeight_ : maxSize.Height();
+    auto defaultMaxHeight = IsGetExpandDisplayValidHeight(dialogProp) ? expandDisplayValidHeight_ : maxSize.Height();
     innerLayout.minSize = SizeF(width, defaultMinHeight);
     double ratioHeight = dialogTheme->GetDialogRatioHeight();
     innerLayout.maxSize = SizeF(width, defaultMaxHeight * ratioHeight);
@@ -393,12 +393,17 @@ bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& inner
     return true;
 }
 
-bool DialogLayoutAlgorithm::IsGetExpandDisplayValidHeight()
+bool DialogLayoutAlgorithm::IsGetExpandDisplayValidHeight(const RefPtr<DialogLayoutProperty>& dialogProp)
 {
     CHECK_NULL_RETURN(expandDisplay_ && isShowInSubWindow_, false);
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
-    auto expandDisplayValidHeight = pipelineContext->GetDisplayAvailableRect().Height();
+    auto dialog = dialogProp->GetHost();
+    CHECK_NULL_RETURN(dialog, false);
+    auto expandDisplayValidHeight =
+        isHoverMode_ ? pipelineContext->GetDisplayAvailableRect().Height()
+                     : OverlayManager::GetDisplayAvailableRect(dialog, static_cast<int32_t>(SubwindowType::TYPE_DIALOG))
+                           .Height();
     if (Positive(expandDisplayValidHeight)) {
         expandDisplayValidHeight_ = expandDisplayValidHeight;
         return true;
