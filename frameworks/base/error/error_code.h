@@ -124,6 +124,8 @@ constexpr int32_t ERROR_CODE_NON_EXIST = 150003;
 // ComponentSnapshot error code (160001 ~ 161000), 1610001 ~ 163000 reserved
 constexpr int32_t ERROR_CODE_COMPONENT_SNAPSHOT_IMAGE_LOAD_ERROR = 160001;
 constexpr int32_t ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT = 160002;
+// observer node render state error code
+constexpr int32_t NODE_RENDER_STATE_REGISTER_ERR_CODE = 161001;
 
 // FromHtml error code
 constexpr int32_t ERROR_CODE_FROM_HTML_CONVERT_ERROR = 170001;

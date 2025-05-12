@@ -50,6 +50,7 @@
 #include "core/common/stylus/stylus_detector_default.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/text_field_manager.h"
+#include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
@@ -675,6 +676,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     taskScheduler_->StartRecordFrameInfo(GetCurrentFrameInfo(recvTime_, nanoTimestamp));
     taskScheduler_->FlushTask();
     UIObserverHandler::GetInstance().HandleLayoutDoneCallBack();
+    if (nodeRenderStatusMonitor_) {
+        nodeRenderStatusMonitor_->WalkThroughAncestorForStateListener();
+    }
     // flush correct rect again
     taskScheduler_->FlushPersistAfterLayoutTask();
     taskScheduler_->FinishRecordFrameInfo();
@@ -6188,5 +6192,13 @@ std::shared_ptr<Rosen::RSUIDirector> PipelineContext::GetRSUIDirector()
     }
 #endif
     return nullptr;
+}
+
+const RefPtr<NodeRenderStatusMonitor>& PipelineContext::GetNodeRenderStatusMonitor()
+{
+    if (!nodeRenderStatusMonitor_) {
+        nodeRenderStatusMonitor_ = AceType::MakeRefPtr<NodeRenderStatusMonitor>();
+    }
+    return nodeRenderStatusMonitor_;
 }
 } // namespace OHOS::Ace::NG

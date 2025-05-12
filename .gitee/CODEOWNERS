@@ -2343,6 +2343,7 @@ frameworks/core/components_ng/base/linear_vector.h @arkuiframework
 frameworks/core/components_ng/base/modifier.cpp @arkuiframework
 frameworks/core/components_ng/base/modifier.h @arkuiframework
 frameworks/core/components_ng/base/node_flag.h @arkuiframework
+frameworks/core/components_ng/base/node_render_status_monitor.cpp @arkuievent
 frameworks/core/components_ng/base/observer_handler.cpp @arkuiframework
 frameworks/core/components_ng/base/observer_handler.h @arkuiframework
 frameworks/core/components_ng/base/symbol_modifier.h @arkuiframework

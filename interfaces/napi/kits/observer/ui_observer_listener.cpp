@@ -652,6 +652,48 @@ void UIObserverListener::OnDensityChange(double density)
     napi_close_handle_scope(env_, scope);
 }
 
+void UIObserverListener::OnNodeRenderStateChange(NG::FrameNode* frameNode, NG::NodeRenderState nodeRenderState)
+{
+    if (!env_ || !callback_) {
+        TAG_LOGW(
+            AceLogTag::ACE_OBSERVER, "Handle nodeRender state change failed, runtime or callback function invalid!");
+        return;
+    }
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+
+    napi_value objValueNodeRenderState = nullptr;
+    napi_create_int32(env_, static_cast<int32_t>(nodeRenderState), &objValueNodeRenderState);
+
+    if (frameNode) {
+        napi_value objValueFrameNode = nullptr;
+        napi_create_object(env_, &objValueFrameNode);
+        auto container = Container::Current();
+        if (!container) {
+            napi_close_handle_scope(env_, scope);
+            return;
+        }
+        auto frontEnd = container->GetFrontend();
+        if (!frontEnd) {
+            napi_close_handle_scope(env_, scope);
+            return;
+        }
+        objValueFrameNode = frontEnd->GetFrameNodeValueByNodeId(frameNode->GetId());
+        napi_value argv[] = { objValueNodeRenderState, objValueFrameNode };
+        napi_call_function(env_, nullptr, callback, PARAM_SIZE_TWO, argv, nullptr);
+    } else {
+        napi_value argv[] = { objValueNodeRenderState };
+        napi_call_function(env_, nullptr, callback, PARAM_SIZE_ONE, argv, nullptr);
+    }
+
+    napi_close_handle_scope(env_, scope);
+}
+
 void UIObserverListener::OnDrawOrLayout()
 {
     if (!env_ || !callback_) {

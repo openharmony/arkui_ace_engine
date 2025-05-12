@@ -79,6 +79,7 @@ using VsyncCallbackFun = std::function<void()>;
 using FrameCallbackFunc = std::function<void(uint64_t nanoTimestamp)>;
 using FrameCallbackFuncFromCAPI = std::function<void(uint64_t nanoTimestamp, uint32_t frameCount)>;
 using IdleCallbackFunc = std::function<void(uint64_t nanoTimestamp, uint32_t frameCount)>;
+class NodeRenderStatusMonitor;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -1213,6 +1214,7 @@ public:
     {
         keyOcclusionNodes_[frameNodeId] = enable;
     }
+    const RefPtr<NodeRenderStatusMonitor>& GetNodeRenderStatusMonitor();
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1539,6 +1541,7 @@ private:
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = nullptr;
     std::set<WeakPtr<NG::UINode>> needRenderForDrawChildrenNodes_;
     std::unordered_map<int32_t, bool> keyOcclusionNodes_;
+    RefPtr<NodeRenderStatusMonitor> nodeRenderStatusMonitor_;
 };
 
 /**
