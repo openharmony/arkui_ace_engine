@@ -31,6 +31,10 @@ void MultiTypeRecordImpl::SetPixelMap(RefPtr<PixelMap> pixelMap)
 {
     pixelMap_ = pixelMap;
 }
+void MultiTypeRecordImpl::SetHtmlText(const std::string& htmlText)
+{
+    htmlText_ = htmlText;
+}
 const RefPtr<PixelMap> MultiTypeRecordImpl::GetPixelMap()
 {
     return pixelMap_;
@@ -42,6 +46,10 @@ const std::string MultiTypeRecordImpl::GetPlainText()
 const std::string MultiTypeRecordImpl::GetUri()
 {
     return uri_;
+}
+const std::string MultiTypeRecordImpl::GetHtmlText()
+{
+    return htmlText_;
 }
 std::vector<uint8_t>& MultiTypeRecordImpl::GetSpanStringBuffer()
 {

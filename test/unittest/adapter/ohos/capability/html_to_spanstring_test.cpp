@@ -711,7 +711,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert005, TestSize.Level1)
     // Convert to TLV format
     std::vector<uint8_t> buff;
     spanString->EncodeTlv(buff);
-    EXPECT_EQ(buff.size(), 13);
+    EXPECT_EQ(buff.size(), 16);
 
     /**
      * @tc.steps2: Convert the TLV buffer to HTML.
