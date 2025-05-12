@@ -451,5 +451,31 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg141, TestSize.Level1)
         EXPECT_TRUE(context_->OnDumpInfo(params[turn]));
     }
 }
+
+/**
+ * @tc.name: PipelineContextTestNg142
+ * @tc.desc: Test PipelineContext::SyncWindowsFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg142, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: initialize pipeline, properties.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetRootSize(1.0f, 800, 1600);
+    context_->SetupRootElement();
+    EXPECT_NE(context_->rootNode_, nullptr);
+    SystemProperties::focusCanBeActive_.store(true);
+    context_->isFocusActive_= true;
+
+    /**
+     * @tc.steps2: Call the function SyncWindowsFocus.
+     * @tc.expected: Test the stability of this function.
+     */
+    context_->SyncWindowsFocus(false, FocusActiveReason::USE_API);
+    EXPECT_FALSE(context_->isFocusActive_);
+}
 } // namespace NG
 } // namespace OHOS::Ace
