@@ -530,23 +530,7 @@ void UINode::DoAddChild(
         }
     }
 
-    if (GetInspectorId().has_value()) {
-        auto pipeline = GetContextRefPtr();
-        CHECK_NULL_VOID(pipeline);
-        auto front = pipeline->GetFrontend();
-        if (front) {
-            auto hasDrawChildCallback = front->IsDrawChildrenCallbackFuncExist(GetInspectorId().value_or(""));
-            if (hasDrawChildCallback) {
-                child->SetObserverParentForDrawChildren(Claim(this));
-            }
-        }
-    }
-    if (IsObservedByDrawChildren()) {
-        auto parentForObserverDrawChildren = GetObserverParentForDrawChildren();
-        if (parentForObserverDrawChildren) {
-            child->SetObserverParentForDrawChildren(parentForObserverDrawChildren);
-        }
-    }
+    UpdateDrawChildObserver(child);
 
     child->SetParent(Claim(this), false);
     auto themeScopeId = GetThemeScopeId();
@@ -2100,6 +2084,27 @@ bool UINode::LessThanAPITargetVersion(PlatformVersion version) const
         return apiVersion_ < static_cast<int32_t>(version);
     }
     return context_->LessThanAPITargetVersion(version);
+}
+
+void UINode::UpdateDrawChildObserver(const RefPtr<UINode>& child)
+{
+    if (GetInspectorId().has_value()) {
+        auto pipeline = GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto front = pipeline->GetFrontend();
+        if (front) {
+            auto hasDrawChildCallback = front->IsDrawChildrenCallbackFuncExist(GetInspectorId().value_or(""));
+            if (hasDrawChildCallback) {
+                child->SetObserverParentForDrawChildren(Claim(this));
+            }
+        }
+    }
+    if (IsObservedByDrawChildren()) {
+        auto parentForObserverDrawChildren = GetObserverParentForDrawChildren();
+        if (parentForObserverDrawChildren) {
+            child->SetObserverParentForDrawChildren(parentForObserverDrawChildren);
+        }
+    }
 }
 
 void UINode::SetObserverParentForDrawChildren(const RefPtr<UINode>& parent)

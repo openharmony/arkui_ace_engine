@@ -1078,6 +1078,7 @@ private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
     bool CanAddChildWhenTopNodeIsModalUec(std::list<RefPtr<UINode>>::iterator& curIter);
+    void UpdateDrawChildObserver(const RefPtr<UINode>& child);
 
     void SetObserverParentForDrawChildren(const RefPtr<UINode>& parent);
     void ClearObserverParentForDrawChildren()

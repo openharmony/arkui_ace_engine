@@ -808,7 +808,6 @@ void PipelineContext::InspectDrew()
         }
     }
     if (!needRenderForDrawChildrenNodes_.empty()) {
-        std::unique_lock lock(needRenderForDrawChildrenNodesMutex_);
         auto needRenderNodes = std::move(needRenderForDrawChildrenNodes_);
         for (auto&& nodeWeak : needRenderNodes) {
             auto node = nodeWeak.Upgrade();
@@ -1037,7 +1036,6 @@ void PipelineContext::SetNeedRenderNode(const WeakPtr<FrameNode>& node)
 void PipelineContext::SetNeedRenderForDrawChildrenNode(const WeakPtr<NG::UINode>& node)
 {
     CHECK_NULL_VOID(node.Upgrade());
-    std::unique_lock lock(needRenderForDrawChildrenNodesMutex_);
     needRenderForDrawChildrenNodes_.emplace(node);
 }
 

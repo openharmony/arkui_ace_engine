@@ -1522,7 +1522,6 @@ private:
     friend class FormGestureManager;
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = nullptr;
     std::set<WeakPtr<NG::UINode>> needRenderForDrawChildrenNodes_;
-    std::mutex needRenderForDrawChildrenNodesMutex_;
 };
 
 /**
