@@ -43,7 +43,7 @@ std::string ANIUtils_ANIStringToStdString(ani_env* env, ani_string ani_str)
 static ani_object getSize([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangle rectangle)
 {
     ani_object obj = {};
-    static const char* className = "L@ohos/componentUtils/SizeInner;";
+    static const char* className = "L@ohos/arkui/componentUtils/componentUtils/SizeInner;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -67,7 +67,7 @@ static ani_object getSize([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangl
 static ani_object getLocalOffset([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangle rectangle)
 {
     ani_object obj = {};
-    static const char* className = "L@ohos/componentUtils/OffsetInner;";
+    static const char* className = "L@ohos/arkui/componentUtils/componentUtils/OffsetInner;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -91,7 +91,7 @@ static ani_object getLocalOffset([[maybe_unused]] ani_env* env, OHOS::Ace::NG::R
 static ani_object getWindowOffset([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangle rectangle)
 {
     ani_object obj = {};
-    static const char* className = "L@ohos/componentUtils/OffsetInner;";
+    static const char* className = "L@ohos/arkui/componentUtils/componentUtils/OffsetInner;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -115,7 +115,7 @@ static ani_object getWindowOffset([[maybe_unused]] ani_env* env, OHOS::Ace::NG::
 static ani_object getScreenOffset([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangle rectangle)
 {
     ani_object obj = {};
-    static const char* className = "L@ohos/componentUtils/OffsetInner;";
+    static const char* className = "L@ohos/arkui/componentUtils/componentUtils/OffsetInner;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -141,7 +141,7 @@ static ani_object getScreenOffset([[maybe_unused]] ani_env* env, OHOS::Ace::NG::
 static ani_object getTranslateResult([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangle rectangle)
 {
     ani_object obj = {};
-    static const char* className = "L@ohos/componentUtils/TranslateInner;";
+    static const char* className = "L@ohos/arkui/componentUtils/componentUtils/TranslateResultInner;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -168,7 +168,7 @@ static ani_object getTranslateResult([[maybe_unused]] ani_env* env, OHOS::Ace::N
 static ani_object getScaleResult([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangle rectangle)
 {
     ani_object obj = {};
-    static const char* className = "L@ohos/componentUtils/ScaleInner;";
+    static const char* className = "L@ohos/arkui/componentUtils/componentUtils/ScaleResultInner;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -201,7 +201,7 @@ static ani_object getScaleResult([[maybe_unused]] ani_env* env, OHOS::Ace::NG::R
 static ani_object getRotateResult([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangle rectangle)
 {
     ani_object obj = {};
-    static const char* className = "L@ohos/componentUtils/RotateInner;";
+    static const char* className = "L@ohos/arkui/componentUtils/componentUtils/RotateResultInner;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -259,7 +259,7 @@ static ani_object getRectangleById([[maybe_unused]] ani_env* env, ani_string id)
     delegate->GetRectangleById(key, rectangle);
 
     ani_object rectangleObj = {};
-    static const char* className = "L@ohos/componentUtils/ComponentInfoInner;";
+    static const char* className = "L@ohos/arkui/componentUtils/componentUtils/ComponentInfoInner;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -338,7 +338,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
     }
 
     ani_namespace ns;
-    if (ANI_OK != env->FindNamespace("L@ohos/componentUtils/componentUtils;", &ns)) {
+    if (ANI_OK != env->FindNamespace("L@ohos/arkui/componentUtils/componentUtils;", &ns)) {
         return ANI_ERROR;
     }
     std::array methods = {
