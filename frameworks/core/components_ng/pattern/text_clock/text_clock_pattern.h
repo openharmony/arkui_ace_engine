@@ -123,6 +123,13 @@ public:
     }
 
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void OnColorModeChange(uint32_t colorMode) override;
+    void UpdateTextColor(const Color& color);
+    void UpdateFontSize(const CalcDimension& fontSize);
+    void UpdateFontFamily(const std::vector<std::string>& fontFamilies);
+    void UpdateTextClockColor(const Color& color);
+    void UpdateTextClockFontSize(const CalcDimension& fontSize);
+    void UpdateTextClockFontFamily(const std::vector<std::string>& fontFamilies);
 
 private:
     void OnModifyDone() override;
