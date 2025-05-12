@@ -485,9 +485,18 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, fl
 {
     auto rootNode = node;
     if (!rootNode) {
-        auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto container = Container::Current();
+        CHECK_NULL_RETURN(container, nullptr);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
         CHECK_NULL_RETURN(pipeline, nullptr);
-        rootNode = pipeline->GetRootElement();
+        if (container->IsSceneBoardWindow() && draggedFrameNode_) {
+            auto overlayManager = pipeline->GetOverlayManager();
+            CHECK_NULL_RETURN(overlayManager, nullptr);
+            rootNode = AceType::DynamicCast<FrameNode>(overlayManager->FindWindowScene(draggedFrameNode_));
+        }
+        if (!rootNode) {
+            rootNode = pipeline->GetRootElement();
+        }
     }
 
     auto result = FindTargetDropNode(rootNode, {globalX, globalY});
