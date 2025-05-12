@@ -44,8 +44,7 @@ LayoutSynchronizer::LayoutState LayoutSynchronizer::GetLayoutTruth(const RefPtr<
             waterFlow->GetEndIndex() };
     }
     if (auto list = host->GetPattern<ListPattern>(); list) {
-        return LayoutState { list->GetContentStartOffset() - list->GetCurrentDelta(), list->GetStartIndex(),
-            list->GetEndIndex() };
+        return LayoutState { list->GetStartPos(), list->GetStartIndex(), list->GetEndIndex() };
     }
     if (auto swiper = host->GetPattern<SwiperPattern>(); swiper) {
     }
