@@ -115,11 +115,17 @@ ArkUINativeModuleValue RatingBridge::SetStarStyle(ArkUIRuntimeCallInfo* runtimeC
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     std::string backgroundUri;
-    ArkTSUtils::ParseJsMedia(vm, backgroundUriArg, backgroundUri);
+    if (!ArkTSUtils::ParseJsMedia(vm, backgroundUriArg, backgroundUri)) {
+        ArkTSUtils::ParseJsString(vm, backgroundUriArg, backgroundUri);
+    }
     std::string foregroundUri;
-    ArkTSUtils::ParseJsMedia(vm, foregroundUriArg, foregroundUri);
+    if (!ArkTSUtils::ParseJsMedia(vm, foregroundUriArg, foregroundUri)) {
+        ArkTSUtils::ParseJsString(vm, foregroundUriArg, foregroundUri);
+    }
     std::string secondaryUri;
-    ArkTSUtils::ParseJsMedia(vm, secondaryUriArg, secondaryUri);
+    if (!ArkTSUtils::ParseJsMedia(vm, secondaryUriArg, secondaryUri)) {
+        ArkTSUtils::ParseJsString(vm, secondaryUriArg, secondaryUri);
+    }
 
     if (secondaryUri.empty() && !backgroundUri.empty()) {
         secondaryUri = backgroundUri;
