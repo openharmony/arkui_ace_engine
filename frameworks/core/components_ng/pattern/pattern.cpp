@@ -100,7 +100,7 @@ void Pattern::UnRegisterResource(const std::string& key)
 template<typename T>
 void Pattern::RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
 {
-    auto&& updateFunc = [weakptr = AceType::WeakClaim(this), key, this](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weakptr = AceType::WeakClaim(this), key](const RefPtr<ResourceObject>& resObj) {
         auto pattern = weakptr.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->UpdateResource<T>(key, resObj);
@@ -127,9 +127,6 @@ void Pattern::UpdateResource(const std::string& key, const RefPtr<ResourceObject
     CHECK_NULL_VOID(frameNode);
     T value = ParseResObjToValue<T>(resObj);
     UpdateProperty<T>(key, value, frameNode);
-    if (frameNode->GetRerenderable()) {
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
 }
  
 template<typename T>
@@ -137,7 +134,7 @@ T Pattern::ParseResObjToValue(const RefPtr<ResourceObject>& resObj)
 {
     T value{};
     CHECK_NULL_RETURN(resObj, value);
-    if constexpr (std::is_same_v<T, std::string>) {
+    if constexpr (std::is_same_v<T, std::string> || std::is_same_v<T, std::u16string>) {
         ResourceParseUtils::ParseResString(resObj, value);
     } else if constexpr(std::is_same_v<T, Color>) {
         ResourceParseUtils::ParseResColor(resObj, value);
