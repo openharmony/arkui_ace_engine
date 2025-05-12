@@ -150,12 +150,6 @@ struct ToastExample01 {
               .onClick(()=>{
                 this.showMode = promptAction.ToastShowMode.TOP_MOST
               })
-            Button('system_top_most')
-              .myButtonStyle()
-              .backgroundColor(this.showMode == promptAction.ToastShowMode.SYSTEM_TOP_MOST ? Color.Brown : undefined)
-              .onClick(()=>{
-                this.showMode = promptAction.ToastShowMode.SYSTEM_TOP_MOST
-              })
           }
           .margin(5)
 
