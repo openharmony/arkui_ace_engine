@@ -20,29 +20,21 @@
 
 namespace OHOS::Ace {
 
-std::unique_ptr<ToolBarItemModel> ToolBarItemModel::instance_ = nullptr;
-std::mutex ToolBarItemModel::mutex_;
-
 ToolBarItemModel* ToolBarItemModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::ToolBarItemModelNG());
+    static NG::ToolBarItemModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::ToolBarItemModelNG());
-            } else {
-                instance_.reset(new NG::ToolBarItemModelNG());
-            }
-
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::ToolBarItemModelNG instance;
+        return &instance;
+    } else {
+        static NG::ToolBarItemModelNG instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
-
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
@@ -51,15 +43,18 @@ namespace {} // namespace
 
 void JSToolBarItem::Create(const JSCallbackInfo& info)
 {
-    JSRef<JSObject> toolbaritemObj = JSRef<JSObject>::Cast(info[0]);
-    int32_t value = static_cast<int32_t>(ToolBarItemPlacement::TOP_BAR_LEADING);
-    if (toolbaritemObj->GetProperty(JSToolBarItem::PLACEMENT)->IsNumber()) {
-        value = static_cast<int32_t>(toolbaritemObj->GetProperty(JSToolBarItem::PLACEMENT)->ToNumber<int32_t>());
+    ToolBarItemPlacement value = ToolBarItemPlacement::TOP_BAR_LEADING;
+    if (info.Length() == 1 && info[0]->IsObject()) {
+        JSRef<JSObject> toolbaritemObj = JSRef<JSObject>::Cast(info[0]);
+        if (toolbaritemObj->GetProperty(JSToolBarItem::PLACEMENT)->IsNumber()) {
+            value = static_cast<ToolBarItemPlacement>(
+                toolbaritemObj->GetProperty(JSToolBarItem::PLACEMENT)->ToNumber<int32_t>());
+        }
+        if (value != ToolBarItemPlacement::TOP_BAR_LEADING && value != ToolBarItemPlacement::TOP_BAR_TRAILING) {
+            value = ToolBarItemPlacement::TOP_BAR_LEADING;
+        }
     }
-    if ((ToolBarItemPlacement)value == ToolBarItemPlacement::TOP_BAR_LEADING ||
-        (ToolBarItemPlacement)value == ToolBarItemPlacement::TOP_BAR_TRAILING) {
-        ToolBarItemModel::GetInstance()->Create(value);
-    }
+    ToolBarItemModel::GetInstance()->Create(static_cast<int32_t>(value));
 }
 
 void JSToolBarItem::JSBind(BindingTarget globalObj)
@@ -68,5 +63,4 @@ void JSToolBarItem::JSBind(BindingTarget globalObj)
     JSClass<JSToolBarItem>::StaticMethod("create", &JSToolBarItem::Create);
     JSClass<JSToolBarItem>::InheritAndBind<JSContainerBase>(globalObj);
 }
-
 } // namespace OHOS::Ace::Framework

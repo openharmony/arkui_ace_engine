@@ -1360,9 +1360,10 @@ public:
     void AddVisibilityDumpInfo(const std::pair<uint64_t, std::pair<VisibleType, bool>>& dumpInfo);
 
     std::string PrintVisibilityDumpInfo() const;
-    void SetDetachRelatedNodeCallback(std::function<void()>&& callback)
+    
+    void SetRemoveToolbarItemCallback(uint32_t id, std::function<void()>&& callback)
     {
-        detachRelatedNodeCallback_ = std::move(callback);
+        removeToolbarItemCallbacks_[id] = callback;
     }
 
     int32_t OnRecvCommand(const std::string& command) override;
@@ -1682,7 +1683,9 @@ private:
     RefPtr<Kit::FrameNode> kitNode_;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
 
-    std::function<void()> detachRelatedNodeCallback_;
+    std::unordered_map<uint32_t, std::function<void()>> removeToolbarItemCallbacks_;
+
+    RefPtr<FrameNode> cornerMarkNode_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

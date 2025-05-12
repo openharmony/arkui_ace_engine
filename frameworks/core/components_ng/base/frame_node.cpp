@@ -1474,8 +1474,10 @@ void FrameNode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleT
 
 void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
 {
-    if (detachRelatedNodeCallback_) {
-        detachRelatedNodeCallback_();
+    for (auto [_, callback] : removeToolbarItemCallbacks_) {
+        if (callback) {
+            callback();
+        }
     }
     auto focusHub = GetFocusHub();
     if (focusHub) {

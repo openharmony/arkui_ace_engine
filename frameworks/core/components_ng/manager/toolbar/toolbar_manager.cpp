@@ -47,44 +47,43 @@ void ToolbarManager::SetNavDestInfo(const ToolbarInfo& info)
 
 void ToolbarManager::SetToolBarChangeCallback(const std::function<void()>&& callback)
 {
-    onChangeCallbackFunc_ = std::move(callback);
+    onChangeCallbackFuncs_.emplace_back(std::move(callback));
 }
 
 void ToolbarManager::OnChange()
 {
-    if (onChangeCallbackFunc_) {
-        onChangeCallbackFunc_();
+    for (auto onChangeCallbackFuncCopy : onChangeCallbackFuncs_) {
+        if (onChangeCallbackFuncCopy) {
+            onChangeCallbackFuncCopy();
+        }
     }
 }
 
 void ToolbarManager::SetModifyDoneCallback(const std::function<void()>&& callback)
 {
-    modifyDoneCallbackFunc_ = std::move(callback);
+    modifyDoneCallbackFuncs_.emplace_back(std::move(callback));
 }
 
-void ToolbarManager::OnNavigationModifyDone()
+void ToolbarManager::OnToolBarManagerModifyDone()
 {
-    if (modifyDoneCallbackFunc_) {
-        modifyDoneCallbackFunc_();
+    for (auto modifyDoneCallbackFuncCopy : modifyDoneCallbackFuncs_) {
+        if (modifyDoneCallbackFuncCopy) {
+            modifyDoneCallbackFuncCopy();
+        }
     }
 }
 
-void ToolbarManager::OnSideBarModifyDone()
-{
-    if (modifyDoneCallbackFunc_) {
-        modifyDoneCallbackFunc_();
-    }
-}
-
-void ToolbarManager::SetSideBarColorChangeCallback(const std::function<void()>&& callback)
+void ToolbarManager::SetSideBarColorChangeCallback(
+    const std::function<void(const Color&, const Color&, const BlurStyle&)>&& callback)
 {
     sideBarColorChangeCallbackFunc_ = std::move(callback);
 }
 
 void ToolbarManager::OnChangeSideBarColor()
 {
-    if (sideBarColorChangeCallbackFunc_) {
-        sideBarColorChangeCallbackFunc_();
+    auto sideBarColorChangeCallbackFuncCopy = sideBarColorChangeCallbackFunc_;
+    if (sideBarColorChangeCallbackFuncCopy) {
+        sideBarColorChangeCallbackFuncCopy(sideBarBgColor_, sideBarContainerBgColor_, sideBarBlurStyle_);
     }
 }
 } // namespace OHOS::Ace::NG

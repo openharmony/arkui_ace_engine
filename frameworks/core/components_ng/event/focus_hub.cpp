@@ -1152,62 +1152,12 @@ bool FocusHub::IsArrowKeyStepOut(FocusStep moveStep)
 
 bool FocusHub::FocusToHeadOrTailChild(bool isHead)
 {
-    if (!IsFocusableWholePath()) {
+    auto foundChild = GetHeadOrTailChild(isHead);
+    if (foundChild) {
+        return foundChild->RequestFocusImmediatelyInner(FocusReason::FOCUS_TRAVEL);
+    } else {
         return false;
     }
-    // focus moves within current scope
-    if (IsCurrentFocus() && !IsAllowedLoop()) {
-        return false;
-    }
-    if (GetIsFocusGroup() && !IsNestingFocusGroup()) {
-        return RequestFocusImmediatelyInner(FocusReason::FOCUS_TRAVEL);
-    }
-    if (focusType_ != FocusType::SCOPE || (focusType_ == FocusType::SCOPE && focusDepend_ == FocusDependence::SELF)) {
-        return RequestFocusImmediatelyInner(FocusReason::FOCUS_TRAVEL);
-    }
-
-    if (IsTabStop()) {
-        std::list<RefPtr<FocusHub>> focusNodes;
-        auto itLastFocusNode = FlushChildrenFocusHub(focusNodes);
-        // A(Tabstop)->B(TabStop)->C
-        //              `--------->D
-        // if D is the last leaf node, then press the Tab key to shift the focus to C.
-        if (!(IsCurrentFocus() && itLastFocusNode != focusNodes.end() && (*itLastFocusNode)->IsCurrentFocus())) {
-            return RequestFocusImmediatelyInner(FocusReason::FOCUS_TRAVEL);
-        }
-    }
-    auto curFrameNode = GetFrameNode();
-    auto curPattern = curFrameNode ? curFrameNode->GetPattern<ScrollablePattern>() : nullptr;
-    auto scrollIndexAbility = curPattern ? curPattern->GetScrollIndexAbility() : nullptr;
-    if (scrollIndexAbility) {
-        scrollIndexAbility(isHead ? FocusHub::SCROLL_TO_HEAD : FocusHub::SCROLL_TO_TAIL);
-        auto node = GetFrameNode();
-        CHECK_NULL_RETURN(node, false);
-        auto pipeline = node->GetContextRefPtr();
-        if (pipeline) {
-            pipeline->FlushUITasks();
-        }
-    }
-
-    bool canChildBeFocused = false;
-    canChildBeFocused = AnyChildFocusHub(
-        [isHead](const RefPtr<FocusHub>& node) {
-            auto nextFocusNode = GetNextFocusNodeCustom(node, FocusReason::FOCUS_TRAVEL);
-            if (nextFocusNode && nextFocusNode->FocusToHeadOrTailChild(isHead)) {
-                return true;
-            }
-            return node->FocusToHeadOrTailChild(isHead);
-        }, !isHead);
-    if (focusDepend_ == FocusDependence::CHILD) {
-        return canChildBeFocused;
-    }
-    if (focusDepend_ == FocusDependence::AUTO) {
-        if (!canChildBeFocused) {
-            return RequestFocusImmediatelyInner(FocusReason::FOCUS_TRAVEL);
-        }
-        return canChildBeFocused;
-    }
-    return false;
 }
 
 void FocusHub::SwitchFocus(const RefPtr<FocusHub>& focusNode, FocusReason focusReason)
@@ -2985,5 +2935,72 @@ bool FocusHub::IsLastWeakNodeFocused() const
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();
     CHECK_NULL_RETURN(lastFocusNode, false);
     return lastFocusNode->IsCurrentFocus();
+}
+
+RefPtr<FocusHub> FocusHub::GetHeadOrTailChild(bool isHead)
+{
+    auto curFrameNode = GetFrameNode();
+    auto curFocusHub = curFrameNode->GetFocusHub();
+    if (!IsFocusableWholePath()) {
+        return nullptr;
+    }
+    // focus moves within current scope
+    if (IsCurrentFocus() && !IsAllowedLoop()) {
+        return nullptr;
+    }
+    if (GetIsFocusGroup() && !IsNestingFocusGroup()) {
+        return curFocusHub;
+    }
+    if (focusType_ != FocusType::SCOPE || (focusType_ == FocusType::SCOPE && focusDepend_ == FocusDependence::SELF)) {
+        return curFocusHub;
+    }
+
+    if (IsTabStop()) {
+        std::list<RefPtr<FocusHub>> focusNodes;
+        auto itLastFocusNode = FlushChildrenFocusHub(focusNodes);
+        // A(Tabstop)->B(TabStop)->C
+        //              `--------->D
+        // if D is the last leaf node, then press the Tab key to shift the focus to C.
+        if (!(IsCurrentFocus() && itLastFocusNode != focusNodes.end() && (*itLastFocusNode)->IsCurrentFocus())) {
+            return curFocusHub;
+        }
+    }
+
+    auto curPattern = curFrameNode ? curFrameNode->GetPattern<ScrollablePattern>() : nullptr;
+    auto scrollIndexAbility = curPattern ? curPattern->GetScrollIndexAbility() : nullptr;
+    if (scrollIndexAbility) {
+        scrollIndexAbility(isHead ? FocusHub::SCROLL_TO_HEAD : FocusHub::SCROLL_TO_TAIL);
+        auto node = GetFrameNode();
+        CHECK_NULL_RETURN(node, nullptr);
+        auto pipeline = node->GetContextRefPtr();
+        if (pipeline) {
+            pipeline->FlushUITasks();
+        }
+    }
+
+    bool canChildBeFocused = false;
+    RefPtr<FocusHub> foundNode = nullptr;
+    canChildBeFocused = AnyChildFocusHub(
+        [isHead, &foundNode](const RefPtr<FocusHub>& node) {
+            auto nextFocusNode = GetNextFocusNodeCustom(node, FocusReason::FOCUS_TRAVEL);
+            if (nextFocusNode) {
+                foundNode = nextFocusNode->GetHeadOrTailChild(isHead);
+                if (foundNode) {
+                    return true;
+                }
+            }
+            foundNode = node->GetHeadOrTailChild(isHead);
+            return foundNode != nullptr;
+        }, !isHead);
+    if (focusDepend_ == FocusDependence::CHILD) {
+        return foundNode;
+    }
+    if (focusDepend_ == FocusDependence::AUTO) {
+        if (!canChildBeFocused) {
+            return curFocusHub;
+        }
+        return foundNode;
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG
