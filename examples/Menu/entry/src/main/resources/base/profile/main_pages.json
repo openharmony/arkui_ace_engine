@@ -10,6 +10,7 @@
     "pages/ContextMenuIsShown",
     "pages/ContextMenuTransition",
     "pages/MenuSymbolIcon",
-    "pages/MenuHoverScale"
+    "pages/MenuHoverScale",
+    "pages/MenuTestLevel0_0"
   ]
 }
