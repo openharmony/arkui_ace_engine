@@ -44,9 +44,7 @@ group("linux_unittest") {
 
 group("fake_linux_unittest") {
   testonly = true
-  deps = [
-    "capi:linux_capi_unittest",
-  ]
+  deps = [ "capi:linux_capi_unittest" ]
 }
 
 group("linux_unittest_capi") {
@@ -254,8 +252,8 @@ ohos_source_set("ace_components_base") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   sources = [
-    "$ace_root/frameworks/core/common/resource/resource_manager.cpp",
     "$ace_root/frameworks/core/common/multi_thread_build_manager.cpp",
+    "$ace_root/frameworks/core/common/resource/resource_manager.cpp",
     "$ace_root/frameworks/core/components/theme/shadow_theme.cpp",
     "$ace_root/frameworks/core/components_ng/base/distributed_ui.cpp",
     "$ace_root/frameworks/core/components_ng/base/extension_handler.cpp",
@@ -375,6 +373,7 @@ ohos_source_set("ace_components_layout") {
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
     "$ace_root/frameworks/core/components_ng/layout/section/item_measurer.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/section/layout_synchronizer.cpp",
     "$ace_root/frameworks/core/components_ng/layout/section/section_data_types.cpp",
     "$ace_root/frameworks/core/components_ng/layout/section/sections_initializer.cpp",
     "$ace_root/frameworks/core/components_ng/layout/section/staggered_fill_algorithm.cpp",

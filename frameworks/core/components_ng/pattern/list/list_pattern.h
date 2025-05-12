@@ -407,8 +407,6 @@ public:
     void CheckListItemRange(const std::pair<int32_t, int32_t>& range);
     void CheckScrollItemRange();
 
-    RefPtr<FrameNode> GetOrCreateChildByIndex(uint32_t index) override;
-
     void UpdateChildPosInfo(int32_t index, float delta, float sizeChange);
 
     SizeF GetChildrenExpandedSize() override;

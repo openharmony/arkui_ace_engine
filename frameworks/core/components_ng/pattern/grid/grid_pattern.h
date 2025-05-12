@@ -281,18 +281,6 @@ public:
         return adapter_;
     }
 
-    int32_t GetTotalChildCount() const override
-    {
-        return adapter_ ? adapter_->totalCount : -1;
-    }
-
-    RefPtr<FrameNode> GetOrCreateChildByIndex(uint32_t index) override
-    {
-        if (adapter_ && adapter_->getItemFunc) {
-            return adapter_->getItemFunc(index);
-        }
-        return nullptr;
-    }
     void HandleOnItemFocus(int32_t index);
 
     RefPtr<FillAlgorithm> CreateFillAlgorithm() final;

@@ -38,7 +38,7 @@ public:
         return true;
     }
 
-    void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) override {}
+    void Prepare(const SizeF& viewport, Axis axis, int32_t totalCnt) override {}
 
     int32_t GetMarkIndex() override
     {

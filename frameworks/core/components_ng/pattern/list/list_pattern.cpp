@@ -276,7 +276,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CheckRestartSpring(sizeDiminished);
 
     DrivenRender(dirty);
-    UpdateLayoutRange(GetAxis(), !isInitialized_);
+    OnLayoutFinished(GetAxis(), !isInitialized_);
 
     SetScrollSource(SCROLL_FROM_NONE);
     isInitialized_ = true;
@@ -346,14 +346,6 @@ void ListPattern::CheckScrollItemRange()
         }
         adapter_->requestFeature.second = true;
     }
-}
-
-RefPtr<FrameNode> ListPattern::GetOrCreateChildByIndex(uint32_t index)
-{
-    if (adapter_ && adapter_->getItemFunc) {
-        return adapter_->getItemFunc(index);
-    }
-    return nullptr;
 }
 
 void ListPattern::UpdateListDirectionInCardStyle()

@@ -82,9 +82,8 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
     }
     delta = -FireOnWillScroll(-delta);
     layoutInfo_->UpdateOffset(delta);
-    if (!UpdateOffset(delta)) {
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
+    UpdateOffset(delta);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     MarkScrollBarProxyDirty();
     return true;
 };
@@ -347,7 +346,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     layoutInfo_->jumpForRecompose_ = EMPTY_JUMP_INDEX;
     UpdateScrollBarOffset();
     CheckScrollable();
-    UpdateLayoutRange(layoutInfo_->axis_, !isInitialized_);
+    OnLayoutFinished(layoutInfo_->axis_, !isInitialized_);
 
     isInitialized_ = true;
 

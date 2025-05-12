@@ -46,11 +46,16 @@ public:
 
     bool CanFillMore(Axis axis, const SizeF& scrollWindowSize, int32_t idx, FillDirection direction) override;
 
-    void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) override;
+    void Prepare(const SizeF& viewport, Axis axis, int32_t totalCnt) override;
+    void OnLayoutFinished(const SizeF& viewport, Axis axis) override;
 
     int32_t GetMarkIndex() override;
 
     void MarkJump() override;
+
+    std::optional<int32_t> StartIdx() const;
+    std::optional<int32_t> EndIdx() const;
+    std::optional<float> StartPos() const;
 
 private:
     bool CanFillMoreAtEnd(float viewportBound, Axis axis);
@@ -60,13 +65,10 @@ private:
     void InitSections(int32_t totalCnt, Axis axis, const SizeF& frameSize);
 
     /**
-     * @brief update syncCacheCnt_ from LayoutProperty
+     * @brief update cacheCnt_ from LayoutProperty
      *
      */
-    void UpdateSyncCachedCnt();
-
-    std::optional<int32_t> StartIdx() const;
-    std::optional<int32_t> EndIdx() const;
+    void UpdateCachedCnt();
 
     Section& GetSection(int32_t item);
 
@@ -74,7 +76,7 @@ private:
     const RefPtr<LayoutProperty> props_;
     RefPtr<Measurer> measurer_;
 
-    int32_t syncCacheCnt_ = 0; // cache items to load synchronously
+    int32_t cacheCnt_ = 0; // cache items to load synchronously
 };
 } // namespace OHOS::Ace::NG
 

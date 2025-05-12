@@ -1262,7 +1262,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         indexsInAnimation_.clear();
     }
 
-    UpdateLayoutRange(GetAxis(), isInit);
+    OnLayoutFinished(GetAxis(), isInit);
 
     const auto& paddingProperty = props->GetPaddingProperty();
     jumpOnChange_ = false;

@@ -21,6 +21,7 @@
 #include "staggered_section_filler.h"
 
 #include "core/components_ng/base/fill_algorithm.h"
+#include "core/components_ng/layout/section/layout_synchronizer.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -82,7 +83,7 @@ bool StaggeredFillAlgorithm::CanFillMoreAtEnd(float viewportBound, Axis axis)
     return filler.CanFill();
 }
 
-void StaggeredFillAlgorithm::PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt)
+void StaggeredFillAlgorithm::Prepare(const SizeF& viewport, Axis axis, int32_t totalCnt)
 {
     InitSections(totalCnt, axis, viewport);
 
@@ -94,8 +95,12 @@ void StaggeredFillAlgorithm::PreFill(const SizeF& viewport, Axis axis, int32_t t
         },
         axis, viewport);
 
-    UpdateSyncCachedCnt();
+    UpdateCachedCnt();
+    LayoutSynchronizer::Sync(props_, *this);
+}
 
+void StaggeredFillAlgorithm::OnLayoutFinished(const SizeF& viewport, Axis axis)
+{
     for (auto& section : sections_) {
         section.PruneFront(0.0f);
         section.PruneBack(viewport.MainSize(axis));
@@ -117,7 +122,7 @@ bool StaggeredFillAlgorithm::CanFillMore(Axis axis, const SizeF& scrollWindowSiz
     if (!startIdx || !endIdx) {
         return true;
     }
-    return idx >= 0 && idx > *startIdx - syncCacheCnt_ && idx < *endIdx + syncCacheCnt_;
+    return idx >= 0 && idx > *startIdx - cacheCnt_ && idx < *endIdx + cacheCnt_;
 }
 
 void StaggeredFillAlgorithm::FillPrev(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)
@@ -194,17 +199,24 @@ void StaggeredFillAlgorithm::OnSlidingOffsetUpdate(float delta)
 
 int32_t StaggeredFillAlgorithm::GetMarkIndex()
 {
-    for (auto& section : sections_) {
-        section.PruneFront(0.0f);
-    }
-    return StartIdx().value_or(-1);
+    return StartIdx().value_or(0);
 }
 
-void StaggeredFillAlgorithm::UpdateSyncCachedCnt()
+void StaggeredFillAlgorithm::UpdateCachedCnt()
 {
     if (InstanceOf<SwiperLayoutProperty>(props_)) {
         // SwiperLayout always measures 1 extra item in the opposite direction. set syncCache to 1 to adapt
-        syncCacheCnt_ = 1;
+        cacheCnt_ = 1;
     }
+}
+
+std::optional<float> StaggeredFillAlgorithm::StartPos() const
+{
+    for (const auto& section : sections_) {
+        if (!section.IsEmpty()) {
+            return section.StartPos();
+        }
+    }
+    return std::nullopt;
 }
 } // namespace OHOS::Ace::NG
