@@ -1008,6 +1008,8 @@ void MovingPhotoPattern::GetXmageHeight()
     auto imageSrc = ImageSource::Create(fd);
     close(fd);
     CHECK_NULL_VOID(imageSrc);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
     auto imageLength = imageSrc->GetProperty(IMAGE_LENGTH);
     auto imageWidth = imageSrc->GetProperty(IMAGE_WIDTH);
     if (imageLength.empty() || imageWidth.empty() || imageLength == DEFAULT_EXIF_VALUE ||
@@ -1033,12 +1035,12 @@ void MovingPhotoPattern::GetXmageHeight()
         float bottomV = StringUtils::StringToFloat(bottomValue);
         TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto bottomV.%{public}f", bottomV);
         imageSize = SizeF(imageW, bottomV);
-        ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, XmageHeight, imageL - bottomV);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, XmageHeight, imageL - bottomV, host);
         TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto XmageHeight.%{public}f", imageL - bottomV);
     } else {
         imageSize = SizeF(imageW, imageL);
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSize, imageSize);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSize, imageSize, host);
     AG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto imageSize imageW.%{public}f, imageL %{public}f",
             imageSize.Width(), imageSize.Height());
 }
