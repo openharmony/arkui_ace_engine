@@ -713,8 +713,9 @@ ArkUINativeModuleValue TextAreaBridge::SetFontWeight(ArkUIRuntimeCallInfo *runti
     if (!secondArg->IsNull()) {
         if (secondArg->IsNumber()) {
             fontWeight = std::to_string(secondArg->Int32Value(vm));
-        } else if (secondArg->IsString(vm)) {
-            fontWeight = secondArg->ToString(vm)->ToString(vm);
+        } else if ((secondArg->IsString(vm) || secondArg->IsObject(vm)) &&
+            (!(ArkTSUtils::ParseJsString(vm, secondArg, fontWeight)))) {
+            return panda::JSValueRef::Undefined(vm);
         }
     }
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaFontWeightStr(nativeNode, fontWeight.c_str());

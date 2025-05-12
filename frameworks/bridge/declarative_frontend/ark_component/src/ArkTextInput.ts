@@ -737,8 +737,8 @@ class TextInputFontStyleModifier extends ModifierWithKey<number> {
   }
 }
 
-class TextInputFontWeightModifier extends ModifierWithKey<number | string> {
-  constructor(value: number | string) {
+class TextInputFontWeightModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
     super(value);
   }
   static identity: Symbol = Symbol('textInputFontWeight');
@@ -1600,7 +1600,7 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
       TextInputFontStyleModifier, value);
     return this;
   }
-  fontWeight(value: number | FontWeight | string): TextInputAttribute {
+  fontWeight(value: number | FontWeight | string | Resource): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputFontWeightModifier.identity,
       TextInputFontWeightModifier, value);
     return this;
