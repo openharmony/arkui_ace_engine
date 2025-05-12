@@ -1038,6 +1038,7 @@ void RosenRenderContext::UpdateBlurStyleForColorMode(
     auto&& updateFunc = [weak = AceType::WeakClaim(this), bgBlurStyle, sysOptions](
                             const RefPtr<ResourceObject>& resObj) {
         auto render = weak.Upgrade();
+        CHECK_NULL_VOID(render);
         CHECK_NULL_VOID(render->rsNode_);
         const auto& groupProperty = render->GetOrCreateBackground();
         if (groupProperty->CheckBlurStyleOption(bgBlurStyle) && groupProperty->CheckSystemAdaptationSame(sysOptions)) {

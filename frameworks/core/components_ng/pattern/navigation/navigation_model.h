@@ -67,7 +67,7 @@ public:
         const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
         const std::vector<std::string>& nameList, bool userDefinedAccessibilityText = false,
         const std::string& backButtonAccessibilityText = "");
-    virtual void SetBackButtonIconSrcRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+    virtual void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
         const RefPtr<ResourceObject>& resObj, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
         const std::vector<std::string>& nameList, bool userDefinedAccessibilityText = false,
         const std::string& backButtonAccessibilityText = "");
@@ -79,9 +79,10 @@ public:
         const RefPtr<ResourceObject>& backButtonResObj, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
         const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
         const RefPtr<ResourceObject>& backButtonTextResObj);
-    virtual void UpdateBackButtonIcon(const std::vector<std::string>& nameList, RefPtr<PixelMap>& pixMap,
-        const NG::ImageOption& imageOption, const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+    virtual void UpdateBackButtonIcon(const std::vector<std::string>& nameList,
         NG::FrameNode* frameNode, const RefPtr<ResourceObject>& backButtonIconResObj);
+    virtual void UpdateBackButtonIconText(bool userDefinedAccessibilityText,
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& backButtonTextResObj);
     virtual void SetHideBackButton(bool hideBackButton) = 0;
     virtual void SetHideToolBar(bool hideToolBar, bool animated = false) = 0;
     virtual void SetCustomToolBar(const RefPtr<AceType>& customNode) = 0;
@@ -90,6 +91,7 @@ public:
     virtual void SetHideItemText(bool isHideItemText) {};
     virtual void SetEnableToolBarAdaptation(bool disable) {};
     virtual void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) = 0;
+    virtual void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems, NG::MoreButtonOptions&& opt) {}
     virtual void GetToolBarItems(std::list<RefPtr<AceType>>& items) {};
     virtual void SetToolbarOptions(NG::NavigationToolbarOptions&& opt) {}
     virtual void SetToolbarMorebuttonOptions(NG::MoreButtonOptions&& opt) {}
@@ -122,15 +124,12 @@ public:
     virtual void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) {};
     virtual void SetRecoverable(bool recoverable) {}
     virtual void SetEnableDragBar(bool recoverable) {}
-    virtual bool ParseCommonMainTitle(bool hasSubTitle, bool hasMainTitle, const RefPtr<ResourceObject>& subResObj,
+    virtual bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const RefPtr<ResourceObject>& subResObj,
         const RefPtr<ResourceObject>& mainResObj, bool ignoreMainTitle = false) {return false;};
-    virtual void ParseCommonSubTitle(bool hasSubTitle, RefPtr<NG::FrameNode>& subTitle,
-        const RefPtr<NG::TitleBarPattern>& titleBarPattern, const RefPtr<NG::TitleBarNode>& titleBarNode,
-        NG::FrameNode* frameNode, const RefPtr<ResourceObject>& resObj) {};
-    virtual void UpdateMainTitle(const bool hasSubTitle, NG::FrameNode* frameNode,
-        const RefPtr<ResourceObject>& mainResObj) {};
-    virtual void UpdateTitleBarNode(const RefPtr<NG::NavBarNode>& navBarNode,
-        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<NG::TitleBarPattern>& titleBarPattern) {};
+    virtual void UpdateMainTitle(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj) {};
+    virtual void UpdateSubTitle(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& subResObj) {};
 
 private:
     static std::unique_ptr<NavigationModel> instance_;

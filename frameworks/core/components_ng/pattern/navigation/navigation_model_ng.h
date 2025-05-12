@@ -34,15 +34,12 @@ public:
     void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath) override;
     bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
         const std::string& title, bool ignoreMainTitle = false) override;
-    bool ParseCommonMainTitle(bool hasSubTitle, bool hasMainTitle, const RefPtr<ResourceObject>& subResObj,
+    bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const RefPtr<ResourceObject>& subResObj,
         const RefPtr<ResourceObject>& mainResObj, bool ignoreMainTitle = false) override;
-    void ParseCommonSubTitle(bool hasSubTitle, RefPtr<NG::FrameNode>& subTitle,
-        const RefPtr<NG::TitleBarPattern>& titleBarPattern, const RefPtr<NG::TitleBarNode>& titleBarNode,
-        NG::FrameNode* frameNode, const RefPtr<ResourceObject>& resObj) override;
-    void UpdateMainTitle(const bool hasSubTitle,  NG::FrameNode* frameNode,
-        const RefPtr<ResourceObject>& mainResObj) override;
-    void UpdateTitleBarNode(const RefPtr<NG::NavBarNode>& navBarNode,
-        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<NG::TitleBarPattern>& titleBarPattern) override;
+    void UpdateMainTitle(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj) override;
+    void UpdateSubTitle(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& subResObj) override;
 
     void SetTitle(const std::string& title, bool hasSubTitle = false) override;
     void SetTitlebarOptions(NavigationTitlebarOptions&& opt) override;
@@ -58,7 +55,7 @@ public:
     void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const std::string& src,
         const ImageOption& imageOption, RefPtr<PixelMap>& pixMap, const std::vector<std::string>& nameList,
         bool userDefinedAccessibilityText = false, const std::string& backButtonAccessibilityText = "") override;
-    void SetBackButtonIconSrcRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+    void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
         const RefPtr<ResourceObject>& resObj, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
         const std::vector<std::string>& nameList, bool userDefinedAccessibilityText = false,
         const std::string& backButtonAccessibilityText = "") override;
@@ -70,9 +67,10 @@ public:
         const RefPtr<ResourceObject>& backButtonResObj, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
         const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
         const RefPtr<ResourceObject>& backButtonTextResObj) override;
-    void UpdateBackButtonIcon(const std::vector<std::string>& nameList, RefPtr<PixelMap>& pixMap,
-        const ImageOption& imageOption, const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+    void UpdateBackButtonIcon(const std::vector<std::string>& nameList,
         NG::FrameNode* frameNode, const RefPtr<ResourceObject>& backButtonIconResObj) override;
+    void UpdateBackButtonIconText(bool userDefinedAccessibilityText,
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& backButtonTextResObj) override;
     void SetHideBackButton(bool hideBackButton) override;
     void SetHideToolBar(bool hideToolBar, bool animated = false) override;
     void SetCustomToolBar(const RefPtr<AceType>& customNode) override;
@@ -80,6 +78,7 @@ public:
 
     void SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems) override;
     void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) override;
+    void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems, MoreButtonOptions&& opt) override;
     void SetToolbarOptions(NavigationToolbarOptions&& opt) override;
     void SetHideItemText(bool isHideItemText) override;
     void SetEnableToolBarAdaptation(bool enable) override;
@@ -161,6 +160,7 @@ public:
     static void SetToolBarItems(FrameNode* frameNode, std::vector<NG::BarItem>&& toolBarItems);
     static RefPtr<NG::NavigationStack> GetNavigationStack(FrameNode* frameNode);
     static void SetOnNavBarStateChange(FrameNode* frameNode, std::function<void(bool)>&& onNavBarStateChange);
+    static CalcDimension ParseTitleHeight(const RefPtr<ResourceObject>& resObj);
 
 private:
     bool CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);

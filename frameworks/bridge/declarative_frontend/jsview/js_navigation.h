@@ -56,9 +56,9 @@ public:
     static void ParseToolBarItems(const JSCallbackInfo& info, std::list<RefPtr<AceType>>& items);
     static bool ParseCommonTitle(const JSRef<JSObject>& jsObj);
     static void ParseCommonAndCustomTitle(const JSRef<JSObject>& jsObj);
-    static void ParseBackButtonText(const JSCallbackInfo& info, bool configChange, RefPtr<PixelMap>& pixMap,
-        const NG::ImageOption& imageOption, const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol, std::string src,
-        const std::vector<std::string>& nameList, RefPtr<ResourceObject>& backButtonIconResObj);
+    static void ParseBackButtonText(const JSCallbackInfo& info, RefPtr<PixelMap>& pixMap,
+        const NG::ImageOption& imageOption, const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol,
+        std::string src, const std::vector<std::string>& nameList, RefPtr<ResourceObject>& backButtonIconResObj);
 
     static void SetCustomNavContentTransition(const JSCallbackInfo& info);
 
