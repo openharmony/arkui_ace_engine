@@ -86,6 +86,7 @@ public:
     void SetBarState(OHOS::Ace::DisplayMode value) override;
     void SetMaxViewLines(uint32_t value) override;
     void SetNormalMaxViewLines(uint32_t value) override;
+    void SetMinLines(uint32_t value) override;
 
     void SetShowUnderline(bool showUnderLine) override;
     void SetNormalUnderlineColor(const Color& normalColor) override;
@@ -165,6 +166,7 @@ public:
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetMaxViewLines(FrameNode* frameNode, uint32_t value);
     static void SetNormalMaxViewLines(FrameNode* frameNode, uint32_t value);
+    static void SetMinLines(FrameNode* frameNode, uint32_t value);
     static void SetType(FrameNode* frameNode, TextInputType value);
     static void SetContentType(const FrameNode* frameNode, const TextContentType& value);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions copyOption);
