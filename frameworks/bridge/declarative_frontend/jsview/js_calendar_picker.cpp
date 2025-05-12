@@ -29,6 +29,8 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<CalendarPickerModel> CalendarPickerModel::instance_ = nullptr;
@@ -260,13 +262,29 @@ void JSCalendarPicker::SetEdgeAlign(const JSCallbackInfo& info)
         return;
     }
     auto offsetObj = JSRef<JSObject>::Cast(info[1]);
-    CalcDimension dx;
     auto dxValue = offsetObj->GetProperty("dx");
-    ParseJsDimensionVp(dxValue, dx);
-    CalcDimension dy;
     auto dyValue = offsetObj->GetProperty("dy");
-    ParseJsDimensionVp(dyValue, dy);
-    offset = DimensionOffset(dx, dy);
+
+    CalcDimension dx;
+    CalcDimension dy;
+
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> dxResObj;
+        RefPtr<ResourceObject> dyResObj;
+        ParseJsDimensionVp(dxValue, dx, dxResObj);
+        ParseJsDimensionVp(dyValue, dy, dyResObj);
+        offset = DimensionOffset(dx, dy);
+
+        if (dxResObj || dyResObj) {
+            std::vector<RefPtr<ResourceObject>> resArray = { dxResObj, dyResObj };
+            CalendarPickerModel::GetInstance()->SetEdgeAlign(alignType, offset, resArray);
+            return;
+        }
+    } else {
+        ParseJsDimensionVp(dxValue, dx);
+        ParseJsDimensionVp(dyValue, dy);
+        offset = DimensionOffset(dx, dy);
+    }
 
     CalendarPickerModel::GetInstance()->SetEdgeAlign(alignType, offset);
 }
@@ -285,7 +303,13 @@ void JSCalendarPicker::SetTextStyle(const JSCallbackInfo& info)
         CalendarPickerModel::GetInstance()->SetTextStyle(textStyle);
         return;
     }
-    JSCalendarPicker::ParseTextStyle(info[0], textStyle);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        JSCalendarPicker::ParseTextStyleWithResObj(info[0], textStyle, "CalendarPickerTextStyle");
+    } else {
+        JSCalendarPicker::ParseTextStyle(info[0], textStyle);
+    }
+
     CalendarPickerModel::GetInstance()->SetTextStyle(textStyle);
 }
 
@@ -456,6 +480,27 @@ void JSCalendarPicker::ParseDisabledDateRange(
     }
 }
 
+void JSCalendarPicker::ParseHintRadius(JSRef<JSObject>& obj, NG::CalendarSettingData& settingData,
+    CalcDimension& dayRadius)
+{
+    RefPtr<CalendarTheme> calendarTheme = GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(calendarTheme);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> hintRadiusResObj;
+        if (!ParseJsDimensionVpNG(obj->GetProperty("hintRadius"), dayRadius, hintRadiusResObj)) {
+            dayRadius = calendarTheme->GetCalendarDayRadius();
+        }
+
+        if (hintRadiusResObj) {
+            settingData.dayRadiusResObj = hintRadiusResObj;
+        }
+    } else {
+        if (!ParseJsDimensionVpNG(obj->GetProperty("hintRadius"), dayRadius)) {
+            dayRadius = calendarTheme->GetCalendarDayRadius();
+        }
+    }
+}
+
 void JSCalendarPicker::Create(const JSCallbackInfo& info)
 {
     NG::CalendarSettingData settingData;
@@ -464,9 +509,8 @@ void JSCalendarPicker::Create(const JSCallbackInfo& info)
     CalcDimension dayRadius;
     if (info[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[0]);
-        if (!ParseJsDimensionVpNG(obj->GetProperty("hintRadius"), dayRadius)) {
-            dayRadius = calendarTheme->GetCalendarDayRadius();
-        }
+        ParseHintRadius(obj, settingData, dayRadius);
+
         auto selected = obj->GetProperty("selected");
         auto parseSelectedDate = ParseDate(selected);
         if (selected->IsObject() && parseSelectedDate.GetYear() != 0) {
@@ -497,6 +541,77 @@ void JSCalendarPicker::Create(const JSCallbackInfo& info)
     }
     settingData.dayRadius = dayRadius;
     CalendarPickerModel::GetInstance()->Create(settingData);
+}
+
+void JSCalendarPicker::ParseTextStyleFontSize(const JSRef<JSVal>& fontSize, NG::PickerTextStyle& textStyle,
+    const std::string& key)
+{
+    CalcDimension size;
+    RefPtr<ResourceObject> fontSizeResObj;
+    if (!ParseJsDimensionFpNG(fontSize, size, fontSizeResObj) || size.Unit() == DimensionUnit::PERCENT) {
+        textStyle.fontSize = Dimension(-1);
+    } else {
+        textStyle.fontSize = size;
+    }
+
+    if (fontSizeResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::PickerTextStyle& textStyle) {
+            CalcDimension size;
+            ResourceParseUtils::ParseResDimensionFp(resObj, size);
+            if (size.Unit() == DimensionUnit::PERCENT) {
+                textStyle.fontSize = Dimension(-1);
+            } else {
+                textStyle.fontSize = size;
+            }
+        };
+        std::string resKey = key + ".fontSize";
+        textStyle.PickerAddResource(resKey, fontSizeResObj, std::move(updateFunc));
+    }
+}
+
+void JSCalendarPicker::ParseTextStyleWithResObj(
+    const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle, const std::string& key)
+{
+    auto fontColor = paramObj->GetProperty("color");
+    auto fontStyle = paramObj->GetProperty("font");
+
+    Color color;
+    RefPtr<ResourceObject> colorResObj;
+    if (ParseJsColor(fontColor, color, colorResObj)) {
+        textStyle.textColor = color;
+    }
+
+    if (colorResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::PickerTextStyle& textStyle) {
+            Color textColor;
+            ResourceParseUtils::ParseResColor(resObj, textColor);
+            textStyle.textColor = textColor;
+        };
+        std::string resKey = key + ".color";
+        textStyle.PickerAddResource(resKey, colorResObj, std::move(updateFunc));
+    }
+
+    if (!fontStyle->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> fontObj = JSRef<JSObject>::Cast(fontStyle);
+    auto fontSize = fontObj->GetProperty("size");
+    auto fontWeight = fontObj->GetProperty("weight");
+    if (fontSize->IsNull() || fontSize->IsUndefined()) {
+        textStyle.fontSize = Dimension(-1);
+    } else {
+        ParseTextStyleFontSize(fontSize, textStyle, key);
+    }
+
+    if (!fontWeight->IsNull() && !fontWeight->IsUndefined()) {
+        std::string weight;
+        if (fontWeight->IsNumber()) {
+            weight = std::to_string(fontWeight->ToNumber<int32_t>());
+        } else {
+            ParseJsString(fontWeight, weight);
+        }
+        textStyle.fontWeight = ConvertStrToFontWeight(weight);
+    }
 }
 
 void JSCalendarPicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle)

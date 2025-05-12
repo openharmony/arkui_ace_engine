@@ -1132,4 +1132,23 @@ void CalendarMonthPattern::ModifyAccessibilityVirtualNode(const ObtainedMonth& c
         ChangeVirtualNodeContent(day);
     }
 }
+
+void CalendarMonthPattern::UpdateDayRadius(const CalcDimension& dayRadius)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<CalendarPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        paintProperty->UpdateDayRadius(dayRadius);
+    }
+
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
 } // namespace OHOS::Ace::NG

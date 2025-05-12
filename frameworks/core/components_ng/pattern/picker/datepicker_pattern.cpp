@@ -597,15 +597,20 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(pickerTheme);
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
-    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
-    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
-    auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
-    CHECK_NULL_VOID(pickerProperty);
-    pickerProperty->UpdateColor(GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
-    pickerProperty->UpdateDisappearColor(
-        GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+    if (!SystemProperties::ConfigChangePerform()) {
+        auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
+        auto normalStyle = pickerTheme->GetOptionStyle(false, false);
+        auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
+        CHECK_NULL_VOID(pickerProperty);
+        pickerProperty->UpdateColor(
+            GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+        pickerProperty->UpdateDisappearColor(
+            GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+    }
     if (isPicker_) {
-        OnModifyDone();
+        if (!SystemProperties::ConfigChangePerform()) {
+            OnModifyDone();
+        }
         return;
     }
     SetBackgroundColor(dialogTheme->GetBackgroundColor());
@@ -3007,6 +3012,96 @@ bool DatePickerPattern::CurrentIsLunar()
     auto rowLayoutProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_RETURN(rowLayoutProperty, true);
     return rowLayoutProperty->GetLunarValue(false);
+}
+
+void DatePickerPattern::UpdateDisappearTextStyle(const PickerTextStyle& textStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pickerProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        if (textStyle.textColor.has_value()) {
+            pickerProperty->UpdateDisappearColor(textStyle.textColor.value());
+        }
+
+        if (textStyle.fontSize.has_value()) {
+            Dimension fontSize = textStyle.fontSize.value();
+            pickerProperty->UpdateDisappearFontSize(fontSize);
+        }
+
+        if (textStyle.fontFamily.has_value()) {
+            pickerProperty->UpdateDisappearFontFamily(textStyle.fontFamily.value());
+        }
+    }
+
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void DatePickerPattern::UpdateNormalTextStyle(const PickerTextStyle& textStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pickerProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        if (textStyle.textColor.has_value()) {
+            pickerProperty->UpdateColor(textStyle.textColor.value());
+        }
+
+        if (textStyle.fontSize.has_value()) {
+            Dimension fontSize = textStyle.fontSize.value();
+            pickerProperty->UpdateFontSize(fontSize);
+        }
+
+        if (textStyle.fontFamily.has_value()) {
+            pickerProperty->UpdateFontFamily(textStyle.fontFamily.value());
+        }
+    }
+
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void DatePickerPattern::UpdateSelectedTextStyle(const PickerTextStyle& textStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pickerProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        if (textStyle.textColor.has_value()) {
+            pickerProperty->UpdateSelectedColor(textStyle.textColor.value());
+        }
+
+        if (textStyle.fontSize.has_value()) {
+            Dimension fontSize = textStyle.fontSize.value();
+            pickerProperty->UpdateSelectedFontSize(fontSize);
+        }
+
+        if (textStyle.fontFamily.has_value()) {
+            pickerProperty->UpdateSelectedFontFamily(textStyle.fontFamily.value());
+        }
+    }
+
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 
 } // namespace OHOS::Ace::NG

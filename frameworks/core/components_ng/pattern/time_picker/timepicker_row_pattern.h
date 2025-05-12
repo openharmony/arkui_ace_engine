@@ -56,6 +56,14 @@ public:
         return true;
     }
 
+    void OnColorModeChange(uint32_t colorMode) override
+    {
+        LinearLayoutPattern::OnColorModeChange(colorMode);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkModifyDone();
+    }
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<TimePickerEventHub>();
@@ -653,6 +661,10 @@ public:
     void SetDigitalCrownSensitivity(int32_t crownSensitivity);
     bool IsStartEndTimeDefined();
     void UpdateUserSetSelectColor();
+    void UpdateDisappearTextStyle(const PickerTextStyle& textStyle);
+    void UpdateNormalTextStyle(const PickerTextStyle& textStyle);
+    void UpdateSelectedTextStyle(const PickerTextStyle& textStyle);
+
 private:
     void SetDefaultColoumnFocus(std::unordered_map<std::string, WeakPtr<FrameNode>>::iterator& it,
         const std::string &id, bool& focus, const std::function<void(const std::string&)>& call);
