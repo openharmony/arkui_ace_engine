@@ -921,10 +921,10 @@ void RelativeContainerLayoutAlgorithm::MeasureChainWeight(LayoutWrapper* layoutW
         }
         auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
         auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
-        if (layoutPolicy.has_value() && layoutPolicy.value().isWidthMatch()) {
+        if (layoutPolicy.has_value() && layoutPolicy.value().IsWidthMatch()) {
             childConstraint.parentIdealSize.SetWidth(containerSizeWithoutPaddingBorder_.Width());
         }
-        if (layoutPolicy.has_value() && layoutPolicy.value().isHeightMatch()) {
+        if (layoutPolicy.has_value() && layoutPolicy.value().IsHeightMatch()) {
             childConstraint.parentIdealSize.SetHeight(containerSizeWithoutPaddingBorder_.Height());
         }
         const auto& flexItem = childLayoutProperty->GetFlexItemProperty();
@@ -1032,10 +1032,10 @@ void RelativeContainerLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper
         auto childLayoutProperty = childWrapper->GetLayoutProperty();
         if (childLayoutProperty) {
             auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
-            if (layoutPolicy.has_value() && layoutPolicy.value().isWidthMatch()) {
+            if (layoutPolicy.has_value() && layoutPolicy.value().IsWidthMatch()) {
                 childConstraint.parentIdealSize.SetWidth(containerSizeWithoutPaddingBorder_.Width());
             }
-            if (layoutPolicy.has_value() && layoutPolicy.value().isHeightMatch()) {
+            if (layoutPolicy.has_value() && layoutPolicy.value().IsHeightMatch()) {
                 childConstraint.parentIdealSize.SetHeight(containerSizeWithoutPaddingBorder_.Height());
             }
         }
@@ -1412,10 +1412,10 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
     CHECK_NULL_VOID(relativeContainerLayoutProperty);
     auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
     auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
-    if (layoutPolicy.has_value() && layoutPolicy.value().isWidthMatch()) {
+    if (layoutPolicy.has_value() && layoutPolicy.value().IsWidthMatch()) {
         childConstraint.parentIdealSize.SetWidth(containerSizeWithoutPaddingBorder_.Width());
     }
-    if (layoutPolicy.has_value() && layoutPolicy.value().isHeightMatch()) {
+    if (layoutPolicy.has_value() && layoutPolicy.value().IsHeightMatch()) {
         childConstraint.parentIdealSize.SetHeight(containerSizeWithoutPaddingBorder_.Height());
     }
     auto alignRules = childWrapper->GetLayoutProperty()->GetFlexItemProperty()->GetAlignRulesValue();
