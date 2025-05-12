@@ -21,10 +21,6 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-
-#include "base/geometry/ng/size_t.h"
-#include "base/geometry/size.h"
-
 #include "test/mock/base/mock_pixel_map.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_interaction_interface.h"
@@ -32,6 +28,8 @@
 #include "test/mock/core/image_provider/mock_image_loader.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "base/geometry/ng/size_t.h"
+#include "base/geometry/size.h"
 #include "base/image/pixel_map.h"
 #include "base/utils/system_properties.h"
 #include "core/components/common/layout/constants.h"
@@ -45,8 +43,8 @@
 #include "core/components_ng/image_provider/static_image_object.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/image_painter.h"
-#include "core/image/image_source_info.h"
 #include "core/image/image_cache.h"
+#include "core/image/image_source_info.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -348,6 +346,26 @@ HWTEST_F(ImageProviderTestNg, GetImageSize001, TestSize.Level1)
         AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_128, LENGTH_128), nullptr);
     size = ctx->GetImageSize();
     EXPECT_EQ(size, SizeF(LENGTH_128, LENGTH_128));
+}
+
+/**
+ * @tc.name: GetImageSize003
+ * @tc.desc: Test GetImageSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, GetImageSize003, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
+    auto size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(-1, -1));
+
+    ctx->imageObj_ =
+        AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_63, LENGTH_128), nullptr);
+    ctx->GetImageObject()->SetOrientation(ImageRotateOrientation::RIGHT_MIRROR);
+    size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(LENGTH_128, LENGTH_63));
 }
 
 /**
