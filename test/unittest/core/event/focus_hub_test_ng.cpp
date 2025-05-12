@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 #include "test/unittest/core/event/focus_hub_test_ng.h"
+#include "gtest/gtest.h"
+#include "core/components_ng/event/focus_event_handler.h"
 #include "core/event/focus_axis_event.h"
 
 using namespace testing;
@@ -2250,4 +2252,275 @@ HWTEST_F(FocusHubTestNg, FocusHubRemoveChild001, TestSize.Level1)
     buttonNode5->DetachFromMainTree();
     EXPECT_TRUE(buttonFocusHub4->IsCurrentFocus());
 }
-} // namespace OHOS::Ace::NG
+
+/**
+ * @tc.name: FocusHubHandleFocusNavigation001
+ * @tc.desc: FocusNavigation
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubHandleFocusNavigation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create FocusHub.
+     */
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(focusHub, nullptr);
+
+    focusHub->lastWeakFocusNode_ = nullptr;
+    KeyEvent keyEvent;
+    keyEvent.pressedCodes.emplace_back(KeyCode::KEY_HOME);
+    FocusEvent focusEvent(keyEvent);
+
+    /**
+     * @tc.steps: step3. Expect the result is false.
+     */
+    auto result = focusHub->HandleFocusNavigation(focusEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: HasCustomKeyEventDispatch001
+ * @tc.desc: Test the function when event.event.eventType is UIInputEventType::KEY
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, HasCustomKeyEventDispatch001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create focusEvent.
+     */
+    KeyEvent keyEvent;
+    keyEvent.eventType = UIInputEventType::KEY;
+    keyEvent.isPreIme = true;
+    FocusEvent focusEvent(keyEvent);
+
+    /**
+     * @tc.steps: step2. Create focusHub.
+     */
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(focusHub, nullptr);
+
+    /**
+     * @tc.steps: step3. Expect the result is false.
+     */
+    auto result = focusHub->HasCustomKeyEventDispatch(focusEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: HasCustomKeyEventDispatch002
+ * @tc.desc: Test the function when event.event.eventType is not UIInputEventType::KEY, keyEvent.isPreIme is false and
+ * GetOnKeyEventDispatchCallback is not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, HasCustomKeyEventDispatch002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create focusEvent.
+     */
+    KeyEvent keyEvent;
+    keyEvent.eventType = UIInputEventType::KEY;
+    keyEvent.isPreIme = false;
+    FocusEvent focusEvent(keyEvent);
+
+    /**
+     * @tc.steps: step2. Create focusHub.
+     */
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(focusHub, nullptr);
+
+    /**
+     * @tc.steps: step3. Set the SetOnKeyEventDispatchCallback.
+     */
+    auto onKeyEventDispatchCallback = [](KeyEventInfo& info) -> bool { return true; };
+    focusHub->SetOnKeyEventDispatchCallback(std::move(onKeyEventDispatchCallback));
+
+    /**
+     * @tc.steps: step4. Expect the result is true.
+     */
+    auto result = focusHub->HasCustomKeyEventDispatch(focusEvent);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: HasCustomKeyEventDispatch003
+ * @tc.desc: Test the function when event.event.eventType is not UIInputEventType::KEY, keyEvent.isPreIme is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, HasCustomKeyEventDispatch003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create focusEvent.
+     */
+    KeyEvent keyEvent;
+    keyEvent.eventType = UIInputEventType::KEY;
+    keyEvent.isPreIme = true;
+    FocusEvent focusEvent(keyEvent);
+
+    /**
+     * @tc.steps: step2. Create focusHub.
+     */
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(focusHub, nullptr);
+
+    /**
+     * @tc.steps: step3. Set the SetOnKeyEventDispatchCallback.
+     */
+    auto onKeyEventDispatchCallback = [](KeyEventInfo& info) -> bool { return true; };
+    focusHub->SetOnKeyEventDispatchCallback(std::move(onKeyEventDispatchCallback));
+
+    /**
+     * @tc.steps: step4. Expect the result is false.
+     */
+    auto result = focusHub->HasCustomKeyEventDispatch(focusEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: HandleCustomEventDispatch001
+ * @tc.desc: Test the function when onKeyEventDispatchCallback is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, HandleCustomEventDispatch001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create focusEvent.
+     */
+    KeyEvent keyEvent;
+    FocusEvent focusEvent(keyEvent);
+
+    /**
+     * @tc.steps: step2. Create focusHub.
+     */
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(focusHub, nullptr);
+
+    /**
+     * @tc.steps: step3. Set the SetOnKeyEventDispatchCallback.
+     */
+    auto onKeyEventDispatchCallback = [](KeyEventInfo& info) -> bool { return true; };
+    focusHub->SetOnKeyEventDispatchCallback(std::move(onKeyEventDispatchCallback));
+
+    /**
+     * @tc.steps: step4. Expect the result is true.
+     */
+    auto result = focusHub->HandleCustomEventDispatch(focusEvent);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: HandleCustomEventDispatch002
+ * @tc.desc: Test the function when onKeyEventDispatchCallback is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, HandleCustomEventDispatch002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create focusEvent.
+     */
+    KeyEvent keyEvent;
+    FocusEvent focusEvent(keyEvent);
+
+    /**
+     * @tc.steps: step2. Create focusHub.
+     */
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(focusHub, nullptr);
+
+    /**
+     * @tc.steps: step3. Set the SetOnKeyEventDispatchCallback.
+     */
+    auto onKeyEventDispatchCallback = [](KeyEventInfo& info) -> bool { return false; };
+    focusHub->SetOnKeyEventDispatchCallback(std::move(onKeyEventDispatchCallback));
+
+    /**
+     * @tc.steps: step4. Expect the result is true.
+     */
+    auto result = focusHub->HandleCustomEventDispatch(focusEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetKeyProcessingMode001
+ * @tc.desc: GetKeyProcessingMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, GetKeyProcessingMode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create focusHub.
+     */
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(focusHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Expect the result is static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION).
+     */
+    auto result = focusHub->GetKeyProcessingMode();
+    EXPECT_EQ(result, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
+}
+
+/**
+ * @tc.name: GetKeyProcessingMode002
+ * @tc.desc: GetKeyProcessingMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, GetKeyProcessingMode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create focusHub.
+     */
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(focusHub, nullptr);
+
+    /**
+     * @tc.steps: step1. Set keyProcessingMode_.
+     */
+    ASSERT_NE(focusHub->GetFrameNode(), nullptr);
+    ASSERT_NE(focusHub->GetFrameNode()->GetContextRefPtr(), nullptr);
+    ASSERT_NE(focusHub->GetFrameNode()->GetContextRefPtr()->GetOrCreateFocusManager(), nullptr);
+    focusHub->GetFrameNode()->GetContextRefPtr()->GetOrCreateFocusManager()->keyProcessingMode_ =
+        KeyProcessingMode::ANCESTOR_EVENT;
+
+    /**
+     * @tc.steps: step3. Expect the result is static_cast<int32_t>(KeyProcessingMode::ANCESTOR_EVENT).
+     */
+    auto result = focusHub->GetKeyProcessingMode();
+    EXPECT_EQ(result, static_cast<int32_t>(KeyProcessingMode::ANCESTOR_EVENT));
+}
+} // namespace OHOS::Ace::NG 

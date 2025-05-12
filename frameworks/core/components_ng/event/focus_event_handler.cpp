@@ -171,7 +171,7 @@ int32_t FocusEventHandler::GetKeyProcessingMode()
     auto context = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(context, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
     auto focusManager = context->GetOrCreateFocusManager();
-    CHECK_NULL_RETURN(context, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
+    CHECK_NULL_RETURN(focusManager, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
     return static_cast<int32_t>(focusManager->GetKeyProcessingMode());
 }
 
