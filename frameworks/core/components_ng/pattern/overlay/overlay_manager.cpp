@@ -7028,18 +7028,29 @@ void OverlayManager::RemoveFilterWithNode(const RefPtr<FrameNode>& filterNode)
 {
     CHECK_NULL_VOID(filterNode);
     auto rootNode = filterNode->GetParent();
-    CHECK_NULL_VOID(rootNode);
+    if (rootNode) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "remove filter sucessfully, filterId: %{public}d", filterNode->GetId());
+        rootNode->RemoveChild(filterNode);
+        rootNode->RebuildRenderContextTree();
+    } else {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "filter has no parent, skip remove filterId: %{public}d", filterNode->GetId());
+    }
 
     auto columnNode = filterColumnNodeWeak_.Upgrade();
     auto isRemoveCurrentFilter = columnNode && columnNode->GetId() == filterNode->GetId();
-    
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "remove filter sucessfully, filterId: %{public}d", filterNode->GetId());
-
-    rootNode->RemoveChild(filterNode);
-    rootNode->RebuildRenderContextTree();
-
     if (isRemoveCurrentFilter) {
         hasFilter_ = false;
+    }
+}
+
+bool OverlayManager::GetHasFilterWithCheck()
+{
+    auto columnNode = filterColumnNodeWeak_.Upgrade();
+    if (columnNode) {
+        return columnNode->IsOnMainTree();
+    } else {
+        hasFilter_ = false;
+        return hasFilter_;
     }
 }
 
