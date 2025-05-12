@@ -5309,6 +5309,15 @@ void RosenRenderContext::SetScreenId(uint64_t screenId)
     rsSurfaceNode->SetSourceVirtualDisplayId(screenId);
 }
 
+void RosenRenderContext::SetAlwaysSnapshot(bool enable)
+{
+    CHECK_NULL_VOID(rsNode_);
+    if (rsNode_->GetType() != Rosen::RSUINodeType::EFFECT_NODE) {
+        return;
+    }
+    rsNode_->SetAlwaysSnapshot(enable);
+}
+
 void RosenRenderContext::SetFrameGravity(OHOS::Rosen::Gravity gravity)
 {
     CHECK_NULL_VOID(rsNode_);

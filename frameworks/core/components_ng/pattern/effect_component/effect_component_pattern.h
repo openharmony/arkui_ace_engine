@@ -30,6 +30,8 @@ public:
     EffectComponentPattern() = default;
     ~EffectComponentPattern() override = default;
 
+    void AlwaysSnapshot(bool enable) const;
+
     bool IsAtomicNode() const override
     {
         return false;

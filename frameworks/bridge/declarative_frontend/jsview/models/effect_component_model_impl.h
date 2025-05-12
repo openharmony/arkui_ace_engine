@@ -24,6 +24,7 @@ namespace OHOS::Ace::Framework {
 class EffectComponentModelImpl : public EffectComponentModel {
 public:
     void Create() override;
+    void AlwaysSnapshot(bool enable) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_EFFECT_COMPONENT_MODEL_IMPL_H

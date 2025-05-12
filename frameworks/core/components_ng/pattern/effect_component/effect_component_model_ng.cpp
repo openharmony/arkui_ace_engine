@@ -27,4 +27,12 @@ void EffectComponentModelNG::Create()
         V2::EFFECT_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<EffectComponentPattern>(); });
     stack->Push(frameNode);
 }
+void EffectComponentModelNG::AlwaysSnapshot(bool enable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<EffectComponentPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AlwaysSnapshot(enable);
+}
 } // namespace OHOS::Ace::NG

@@ -20,4 +20,9 @@ void EffectComponentModelImpl::Create()
 {
     // empty implementation
 }
+
+void EffectComponentModelImpl::AlwaysSnapshot(bool enable)
+{
+    // empty implementation
+}
 } // namespace OHOS::Ace::Framework

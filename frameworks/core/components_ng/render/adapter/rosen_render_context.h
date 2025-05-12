@@ -289,6 +289,7 @@ public:
     void SetImageHDRPresent(bool hdrPresent) override;
     void SetTransparentLayer(bool isTransparentLayer) override;
     void SetScreenId(uint64_t screenId) override;
+    void SetAlwaysSnapshot(bool enable) override;
     void OnTransformTranslateUpdate(const TranslateOptions& value) override;
     Vector3F MarshallTranslate(const TranslateOptions& translate);
     bool DoTextureExport(uint64_t surfaceId) override;

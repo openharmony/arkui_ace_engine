@@ -23,6 +23,7 @@ class JSEffectComponent : public JSViewAbstract {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create();
+    static void AlwaysSnapshot(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_EFFECT_COMPONENT_H

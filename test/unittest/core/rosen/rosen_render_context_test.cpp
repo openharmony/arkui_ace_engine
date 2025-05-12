@@ -46,9 +46,15 @@ void RosenRenderContextTest::TearDown()
 
 RefPtr<RosenRenderContext> RosenRenderContextTest::InitRosenRenderContext(const RefPtr<FrameNode>& frameNode)
 {
+    return InitRosenRenderContext(frameNode, RenderContext::ContextType::CANVAS);
+}
+
+RefPtr<RosenRenderContext> RosenRenderContextTest::InitRosenRenderContext(const RefPtr<FrameNode>& frameNode,
+    const RenderContext::ContextType& type)
+{
     auto rosenRenderContext = AceType::MakeRefPtr<RosenRenderContext>();
     RenderContext::ContextParam contextParam;
-    contextParam.type = RenderContext::ContextType::CANVAS;
+    contextParam.type = type;
     contextParam.surfaceName.emplace("test");
     std::optional<RenderContext::ContextParam> contextParamValue = std::make_optional(contextParam);
     rosenRenderContext->InitContext(false, contextParamValue);
@@ -1263,5 +1269,44 @@ HWTEST_F(RosenRenderContextTest, UpdateTransformScale001, TestSize.Level1)
     rsScale = rsNode->GetStagingProperties().GetScale();
     EXPECT_TRUE(NearEqual(rsScale[0], scale2));
     EXPECT_TRUE(NearEqual(rsScale[1], scale2));
+}
+
+/**
+ * @tc.name: SetAlwaysSnapshot001
+ * @tc.desc: Test SetAlwaysSnapshot Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, SetAlwaysSnapshot001, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext =
+        InitRosenRenderContext(frameNode, RenderContext::ContextType::EFFECT);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+
+    /**
+     * @tc.steps: step1. Get default value.
+     * @tc.expected: step1. Default value is false.
+     */
+    EXPECT_EQ(rosenRenderContext->rsNode_->GetStagingProperties().GetAlwaysSnapshot(), false);
+
+    /**
+     * @tc.steps: step2. Set value to rsNode_ which context type is EFFECT.
+     * @tc.expected: step2. Value can be set correctly.
+     */
+    rosenRenderContext->SetAlwaysSnapshot(true);
+    EXPECT_EQ(rosenRenderContext->rsNode_->GetStagingProperties().GetAlwaysSnapshot(), true);
+
+    /**
+     * @tc.steps: step3. Set value to rsNode_ which context type is not EFFECT.
+     * @tc.expected: step3. Value is always false.
+     */
+    rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    rosenRenderContext->SetAlwaysSnapshot(true);
+    EXPECT_EQ(rosenRenderContext->rsNode_->GetStagingProperties().GetAlwaysSnapshot(), false);
 }
 } // namespace OHOS::Ace::NG

@@ -304,6 +304,7 @@ public:
     virtual void SetImageHDRPresent(bool hdrPresent) {}
     virtual void SetTransparentLayer(bool isTransparentLayer) {}
     virtual void SetScreenId(uint64_t screenId) {}
+    virtual void SetAlwaysSnapshot(bool enable) {}
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackBlurStyle(
         const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions = SysOptions())

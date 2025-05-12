@@ -13,16 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_COMPONENT_MODEL_NG_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_COMPONENT_MODEL_NG_H
+#include "core/components_ng/pattern/effect_component/effect_component_pattern.h"
 
-#include "core/components_ng/pattern/effect_component/effect_component_model.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT EffectComponentModelNG : public OHOS::Ace::EffectComponentModel {
-public:
-    void Create() override;
-    void AlwaysSnapshot(bool enable) override;
-};
+
+void EffectComponentPattern::AlwaysSnapshot(bool enable) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
+    CHECK_NULL_VOID(context);
+    context->SetAlwaysSnapshot(enable);
+}
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_COMPONENT_MODEL_NG_H

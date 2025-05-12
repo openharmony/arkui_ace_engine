@@ -50,11 +50,21 @@ void JSEffectComponent::Create()
     EffectComponentModel::GetInstance()->Create();
 }
 
+void JSEffectComponent::AlwaysSnapshot(const JSCallbackInfo& info)
+{
+    if (info[0]->IsBoolean()) {
+        EffectComponentModel::GetInstance()->AlwaysSnapshot(info[0]->ToBoolean());
+        return;
+    }
+    EffectComponentModel::GetInstance()->AlwaysSnapshot(false);
+}
+
 void JSEffectComponent::JSBind(BindingTarget globalObj)
 {
     JSClass<JSEffectComponent>::Declare("EffectComponent");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSEffectComponent>::StaticMethod("create", &JSEffectComponent::Create, opt);
+    JSClass<JSEffectComponent>::StaticMethod("alwaysSnapshot", &JSEffectComponent::AlwaysSnapshot, opt);
 
     JSClass<JSEffectComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
