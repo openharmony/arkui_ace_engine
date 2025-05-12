@@ -18,12 +18,20 @@
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "ui/base/utils/utils.h"
+#include "base/utils/utf_helper.h"
 
 namespace OHOS::Ace::Kit {
 
 RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     const std::string& message, const int32_t iconNodeId, const IconNodeType type)
 {
+    if (type == IconNodeType::TEXT) {
+        auto dialogNode = OHOS::Ace::NG::AgingAdapationDialogUtil::ShowLongPressDialog(UtfUtils::Str8ToStr16(message));
+        CHECK_NULL_RETURN(dialogNode, nullptr);
+        RefPtr<FrameNode> node = AceType::MakeRefPtr<FrameNodeImpl>(AceType::RawPtr(dialogNode));
+        dialogNode->SetKitNode(node);
+        return node;
+    }
     auto uiNode = ElementRegister::GetInstance()->GetUINodeById(iconNodeId);
     CHECK_NULL_RETURN(uiNode, nullptr);
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
