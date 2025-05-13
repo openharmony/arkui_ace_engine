@@ -1655,7 +1655,11 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
         if (frameNode) {
-            frameNode->MarkAndCheckNewOpIncNode();
+            if (pos.second.isGroup && layoutWrapper->GetHostNode()->GetSuggestOpIncActivatedOnce()) {
+                frameNode->SetSuggestOpIncActivatedOnce();
+            } else if (!pos.second.isGroup) {
+                frameNode->MarkAndCheckNewOpIncNode(axis_);
+            }
         }
     }
     auto cacheCount = listProps->GetCachedCountWithDefault();

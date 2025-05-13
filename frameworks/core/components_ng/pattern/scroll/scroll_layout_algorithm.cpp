@@ -148,6 +148,23 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset + alignmentPosition);
     childWrapper->Layout();
     UpdateOverlay(layoutWrapper);
+    if (scrollNode && scrollNode->GetSuggestOpIncActivatedOnce()) {
+        MarkAndCheckNewOpIncNode(childWrapper, axis);
+    }
+}
+
+void ScrollLayoutAlgorithm::MarkAndCheckNewOpIncNode(const RefPtr<LayoutWrapper>& layoutWrapper, Axis axis)
+{
+    auto childNode = AceType::DynamicCast<FrameNode>(layoutWrapper);
+    if (childNode->GetSuggestOpIncActivatedOnce()) {
+        childNode->SetSuggestOpIncActivatedOnce();
+        for (auto& child : childNode->GetChildren()) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(child);
+            if (frameNode) {
+                frameNode->MarkAndCheckNewOpIncNode(axis);
+            }
+        }
+    }
 }
 
 bool ScrollLayoutAlgorithm::UnableOverScroll(LayoutWrapper* layoutWrapper) const

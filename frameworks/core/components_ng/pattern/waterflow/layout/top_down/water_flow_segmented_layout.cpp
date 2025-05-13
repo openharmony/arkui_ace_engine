@@ -574,6 +574,10 @@ void WaterFlowSegmentedLayout::LayoutItem(int32_t idx, float crossPos, const Off
     } else {
         wrapper->GetHostNode()->ForceSyncGeometryNode();
     }
+    auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
+    if (frameNode) {
+        frameNode->MarkAndCheckNewOpIncNode(axis_);
+    }
 
     // recode restore info
     if (idx == info_->startIndex_) {

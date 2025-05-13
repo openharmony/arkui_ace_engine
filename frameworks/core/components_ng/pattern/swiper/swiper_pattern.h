@@ -824,6 +824,8 @@ protected:
     void SetLazyLoadFeature(bool useLazyLoad);
     void UpdateItemRenderGroup(bool itemRenderGroup);
 
+    void SuggestOpIncGroup() const;
+
     float GetCustomPropertyOffset() const;
     float GetCustomPropertyTargetOffset() const;
     float CalculateVisibleSize() const
