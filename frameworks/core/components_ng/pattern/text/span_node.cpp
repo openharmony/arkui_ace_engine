@@ -465,6 +465,8 @@ void SpanItem::UpdateReLayoutTextStyle(
 
     UPDATE_SPAN_TEXT_STYLE(fontStyle, VariableFontWeight, VariableFontWeight);
 
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, StrokeWidth, StrokeWidth);
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, StrokeColor, StrokeColor);
     if (isSymbol) {
         UPDATE_SPAN_TEXT_STYLE(fontStyle, SymbolColorList, SymbolColorList);
         UPDATE_SPAN_TEXT_STYLE(fontStyle, SymbolRenderingStrategy, RenderStrategy);
@@ -804,6 +806,8 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
     COPY_TEXT_STYLE(fontStyle, FontWeight, UpdateFontWeight);
     COPY_TEXT_STYLE(fontStyle, FontFamily, UpdateFontFamily);
     COPY_TEXT_STYLE(fontStyle, FontFeature, UpdateFontFeature);
+    COPY_TEXT_STYLE(fontStyle, StrokeWidth, UpdateStrokeWidth);
+    COPY_TEXT_STYLE(fontStyle, StrokeColor, UpdateStrokeColor);
     COPY_TEXT_STYLE(fontStyle, TextDecoration, UpdateTextDecoration);
     COPY_TEXT_STYLE(fontStyle, TextDecorationColor, UpdateTextDecorationColor);
     COPY_TEXT_STYLE(fontStyle, TextDecorationStyle, UpdateTextDecorationStyle);

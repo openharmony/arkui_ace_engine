@@ -20,6 +20,7 @@
 #include "rosen_text/typography_style.h"
 
 #include "base/i18n/localization.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::Constants {
 namespace {
@@ -31,6 +32,7 @@ constexpr float MAX_FONT_WEIGHT = 900.0f;
 constexpr int32_t SCALE_EFFECT = 2;
 constexpr int32_t NONE_EFFECT = 0;
 constexpr float ORIGINAL_LINE_HEIGHT_SCALE = 1.0f;
+constexpr float DEFAULT_STROKE_WIDTH = 0.0f;
 const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 } // namespace
 
@@ -406,6 +408,19 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     txtStyle.halfLeading = textStyle.GetHalfLeading();
 
+    if (textStyle.GetStrokeWidth().Value() != DEFAULT_STROKE_WIDTH) {
+        RSPen pen;
+        pen.SetWidth(std::abs(textStyle.GetStrokeWidth().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale())));
+        pen.SetColor(textStyle.GetStrokeColor().GetValue());
+        txtStyle.foregroundPen = pen;
+    }
+    if (textStyle.GetStrokeWidth().Value() < DEFAULT_STROKE_WIDTH) {
+        RSBrush brush;
+        brush.SetColor(textStyle.GetTextColor().GetValue());
+        txtStyle.foregroundBrush = brush;
+    }
+    
     for (auto& spanShadow : textStyle.GetTextShadows()) {
         Rosen::TextShadow txtShadow;
         txtShadow.color = spanShadow.GetColor().GetValue();
