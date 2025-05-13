@@ -18,6 +18,7 @@
 
 #include <chrono>
 #include <cstdint>
+#include <functional>
 #include <mutex>
 #include <set>
 #include <shared_mutex>
@@ -60,6 +61,11 @@ enum class TouchPassMode: int32_t {
     DEFAULT = 0,
     PASS_THROUGH,
     ACCELERATE,
+};
+
+struct TextMenuInfo {
+    uint32_t disableFlags = 0;
+    std::function<bool()> menuOnChangeCallback;
 };
 
 class ACE_FORCE_EXPORT AceApplicationInfo : public NonCopyable {
@@ -269,6 +275,26 @@ public:
         return mouseTransformEnable_;
     }
 
+    void AddTextMenuDisableFlag(uint32_t flag)
+    {
+        textMenuInfo_.disableFlags |= flag;
+    }
+
+    void SetTextMenuDisableFlags(uint32_t flag)
+    {
+        textMenuInfo_.disableFlags &= flag;
+    }
+
+    void SetTextMenuOnChangeCallback(std::function<bool()>&& callback)
+    {
+        textMenuInfo_.menuOnChangeCallback = std::move(callback);
+    }
+
+    const TextMenuInfo& GetTextMenuInfo()
+    {
+        return textMenuInfo_;
+    }
+
 protected:
     std::string countryOrRegion_;
     std::string language_;
@@ -303,6 +329,7 @@ protected:
     TouchPassMode touchPassMode_ = TouchPassMode::DEFAULT;
     bool reusedNodeSkipMeasure_ = false;
     bool mouseTransformEnable_ = false;
+    TextMenuInfo textMenuInfo_;
 };
 
 } // namespace OHOS::Ace

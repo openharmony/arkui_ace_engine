@@ -523,9 +523,19 @@ void SelectContentOverlayManager::CreateSelectOverlay(SelectOverlayInfo& info, b
 {
     if (!info.enableHandleLevel) {
         CreateNormalSelectOverlay(info, animation);
-        return;
+    } else {
+        CreateHandleLevelSelectOverlay(info, animation, info.handleLevelMode);
     }
-    CreateHandleLevelSelectOverlay(info, animation, info.handleLevelMode);
+    if (!info.menuInfo.menuBuilder) {
+        AceApplicationInfo::GetInstance().SetTextMenuOnChangeCallback([weak = WeakClaim(this)]() {
+            auto manager = weak.Upgrade();
+            CHECK_NULL_RETURN(manager, false);
+            auto menuNode = manager->menuNode_.Upgrade();
+            CHECK_NULL_RETURN(menuNode, false);
+            manager->NotifyUpdateToolBar(true);
+            return true;
+        });
+    }
 }
 
 void SelectContentOverlayManager::CreateNormalSelectOverlay(SelectOverlayInfo& info, bool animation)
@@ -779,6 +789,7 @@ bool SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
             reason, GetOwnerDebugInfo().c_str());
         callback->OnCloseOverlay(menuType, reason, info);
     }
+    AceApplicationInfo::GetInstance().SetTextMenuOnChangeCallback(nullptr);
     return true;
 }
 
