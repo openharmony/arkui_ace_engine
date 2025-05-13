@@ -36,7 +36,7 @@ constexpr uint32_t GRID_COUNTS_12 = 12;
 constexpr size_t ALIGNMENT_STEP_OFFSET = 2;
 constexpr float HEIGHT_CONSTRAINT_FACTOR = 0.8;
 constexpr float ARROW_WIDTH_FACTOR = 2.0;
-constexpr double HALF = 2.0;
+constexpr float HALF = 2.0;
 
 constexpr Dimension ARROW_RADIUS = 2.0_vp;
 constexpr Dimension ARROW_P1_OFFSET_X = 8.0_vp;
@@ -376,11 +376,17 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     dumpInfo_.offset = positionOffset_;
     InitializePadding(layoutWrapper);
     InitializeParam(layoutWrapper, menuPattern);
-    if (canExpandCurrentWindow_ && isExpandDisplay_ && !menuPattern->IsSelectMenu() &&
-        !menuPattern->IsSelectOverlayDefaultModeRightClickMenu()) {
-        position_ += NG::OffsetF { displayWindowRect_.Left(), displayWindowRect_.Top() };
-        TAG_LOGI(AceLogTag::ACE_MENU, "original postion after applying displayWindowRect : %{public}s",
-            position_.ToString().c_str());
+    auto needModify = !menuPattern->IsSelectMenu() && !menuPattern->IsSelectOverlayDefaultModeRightClickMenu();
+    if (needModify) {
+        if (canExpandCurrentWindow_ && isExpandDisplay_ && !isTargetNodeInSubwindow_) {
+            position_ += displayWindowRect_.GetOffset();
+            TAG_LOGI(AceLogTag::ACE_MENU, "original postion after applying displayWindowRect : %{public}s",
+                position_.ToString().c_str());
+        } else if (isUIExtensionSubWindow_ && !isExpandDisplay_) {
+            position_ += displayWindowRect_.GetOffset() - UIExtensionHostWindowRect_.GetOffset();
+            TAG_LOGI(AceLogTag::ACE_MENU, "original postion after applying UIExtensionHostWindowRect : %{public}s",
+                position_.ToString().c_str());
+        }
     }
     dumpInfo_.originPlacement =
         PlacementUtils::ConvertPlacementToString(props->GetMenuPlacement().value_or(Placement::NONE));
@@ -1261,7 +1267,7 @@ void MenuLayoutAlgorithm::LayoutNormalBottomPreviewTopMenuGreateThan(
     }
     previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
     OffsetF offset(center.GetX() - previewSize.Width() / 2,
-        param_.windowGlobalSizeF.Height() - param_.bottomSecurity - param_.bottom - previewSize.Height());
+        wrapperRect_.Bottom() - param_.bottomSecurity - previewSize.Height());
 
     auto x = std::clamp(offset.GetX(), static_cast<float>(wrapperRect_.Left()) + paddingStart_,
         static_cast<float>(wrapperRect_.Right()) - previewSize.Width() - paddingEnd_);
@@ -1399,7 +1405,7 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenuLessThan(
     CHECK_NULL_VOID(menuGeometryNode);
 
     OffsetF targetCenterOffset(
-        targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
+        targetOffset_.GetX() + targetSize_.Width() / HALF, targetOffset_.GetY() + targetSize_.Height() / HALF);
     targetCenterOffset_ = targetCenterOffset;
     auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
     auto heightLeftSpace = wrapperRect_.Height() - param_.topSecurity - param_.bottomSecurity;
@@ -1415,16 +1421,16 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenuLessThan(
     menuGeometryNode->SetFrameSize(
         SizeF(menuSize.Width(), std::min<float>(param_.menuItemTotalHeight, heightLeftSpace)));
     menuSize = menuGeometryNode->GetMarginFrameSize();
-    auto offsetX = targetCenterOffset.GetX() - previewSize.Width() / 2;
-    auto offsetY = std::min<float>(targetCenterOffset.GetY() - previewSize.Height() / 2,
-        param_.windowGlobalSizeF.Height() - param_.bottomSecurity - param_.bottom - menuSize.Height());
+    auto offsetX = targetCenterOffset.GetX() - previewSize.Width() / HALF;
+    auto offsetY = std::min<float>(targetCenterOffset.GetY() - previewSize.Height() / HALF,
+        wrapperRect_.Bottom() - param_.bottomSecurity - menuSize.Height());
     offsetX = CheckHorizontalLayoutPreviewOffsetX(previewGeometryNode, menuGeometryNode, offsetX);
     auto x = std::clamp(offsetX, static_cast<float>(wrapperRect_.Left()) + paddingStart_,
         static_cast<float>(wrapperRect_.Right()) - previewSize.Width() - paddingEnd_);
     auto y = std::clamp(offsetY, static_cast<float>(wrapperRect_.Top()) + param_.topSecurity,
         static_cast<float>(wrapperRect_.Bottom()) - param_.bottomSecurity - previewSize.Height());
-    x = x + (previewSize.Width() - previewSize.Width() / previewScale_) / 2;
-    y = y + (previewSize.Height() - previewSize.Height() / previewScale_) / 2;
+    x = x + (previewSize.Width() - previewSize.Width() / previewScale_) / HALF;
+    y = y + (previewSize.Height() - previewSize.Height() / previewScale_) / HALF;
     previewGeometryNode->SetMarginFrameOffset(OffsetF(x, y));
 }
 
@@ -1462,7 +1468,7 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenuGreateThan(
     menuSize = menuGeometryNode->GetMarginFrameSize();
     auto offsetX = 0.0f;
     auto offsetY = std::min<float>(targetCenterOffset.GetY() - previewSize.Height() / 2,
-        param_.windowGlobalSizeF.Height() - param_.bottomSecurity - param_.bottom - menuSize.Height());
+        wrapperRect_.Bottom() - param_.bottomSecurity - menuSize.Height());
     auto x = std::clamp(offsetX, static_cast<float>(wrapperRect_.Left()) + paddingStart_,
         static_cast<float>(wrapperRect_.Right()) - previewSize.Width() - paddingEnd_);
     auto y = std::clamp(offsetY, static_cast<float>(wrapperRect_.Top()) + param_.topSecurity,
@@ -2120,8 +2126,8 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<MenuLayoutPro
         x = childOffset.GetX();
         y = childOffset.GetY();
     } else {
-        x = HorizontalLayout(size, position_.GetX(), menuPattern->IsSelectMenu()) + positionOffset_.GetX();
-        y = VerticalLayout(size, position_.GetY(), menuPattern->IsContextMenu()) + positionOffset_.GetY();
+        x = HorizontalLayout(size, position_.GetX(), menuPattern->IsSelectMenu());
+        y = VerticalLayout(size, position_.GetY(), menuPattern->IsContextMenu());
     }
     x = std::clamp(static_cast<double>(x), static_cast<double>(paddingStart_),
         static_cast<double>(wrapperRect_.Right() - size.Width() - paddingEnd_));
