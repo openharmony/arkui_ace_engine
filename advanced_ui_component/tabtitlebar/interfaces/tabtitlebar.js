@@ -590,17 +590,11 @@ class CollapsibleMenuSection extends ViewPU {
         this.fontSize = this.decideFontScale();
     }
     decideFontScale() {
-        try {
             let w43 = this.getUIContext();
             this.systemFontScale = w43.getHostContext()?.config?.fontSizeScale ?? 1;
             if (!this.isFollowingSystemFontScale) {
                 return 1;
             }
-        } catch (z43) {
-            let a44 = z43?.code;
-            let b44 = z43?.message;
-            hilog.error(0x3900, 'tabTitleBar', `Faild to getSystemFontScale,cause, code: ${a44}, message: ${b44}`);
-        }
         return Math.min(this.systemFontScale, this.maxFontScale);
     }
     onFontSizeUpdated() {
@@ -1319,14 +1313,19 @@ class ImageMenuItem extends ViewPU {
             return c39;
         }
     }
+
     getAccessibilityReadText() {
         if (this.item.value === PUBLIC_MORE) {
-            return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
-        }
-        else if (this.item.accessibilityText) {
+            try {
+                return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
+            } catch (d39) {
+                let e39 = d39?.code;
+                let f39 = d39?.message;
+                hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${e39},message:${f39}`);
+            }
+        } else if (this.item.accessibilityText) {
             return this.item.accessibilityText;
-        }
-        else if (this.item.label) {
+        } else if (this.item.label) {
             return this.item.label;
         }
         return ' ';
