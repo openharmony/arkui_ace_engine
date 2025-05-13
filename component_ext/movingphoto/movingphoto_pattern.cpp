@@ -1009,7 +1009,7 @@ void MovingPhotoPattern::GetXmageHeight()
     close(fd);
     CHECK_NULL_VOID(imageSrc);
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, -1);
+    CHECK_NULL_VOID(host);
     auto imageLength = imageSrc->GetProperty(IMAGE_LENGTH);
     auto imageWidth = imageSrc->GetProperty(IMAGE_WIDTH);
     if (imageLength.empty() || imageWidth.empty() || imageLength == DEFAULT_EXIF_VALUE ||
