@@ -551,20 +551,20 @@ struct CJUIShapeModifier {
 };
 
 struct CJUITextModifier {
-    void (*setContent)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*setContent)(ArkUINodeHandle node, ArkUI_CharPtr value, void* contentRawPtr);
     void (*setFontWeight)(ArkUINodeHandle node, ArkUI_Int32 weight);
     void (*resetFontWeight)(ArkUINodeHandle node);
     void (*setFontStyle)(ArkUINodeHandle node, ArkUI_Uint32 fontStyle);
     void (*resetFontStyle)(ArkUINodeHandle node);
     void (*setTextAlign)(ArkUINodeHandle node, ArkUI_Uint32 testAlign);
     void (*resetTextAlign)(ArkUINodeHandle node);
-    void (*setFontColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setFontColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* fontColorRawPtr);
     void (*resetFontColor)(ArkUINodeHandle node);
     void (*setTextForegroundColor)(ArkUINodeHandle node, ArkUI_Bool isColor, ArkUI_Uint32 color);
     void (*resetTextForegroundColor)(ArkUINodeHandle node);
-    void (*setFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* fontSizeRawPtr);
     void (*resetFontSize)(ArkUINodeHandle node);
-    void (*setTextLineHeight)(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit);
+    void (*setTextLineHeight)(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* lineHeightRawPtr);
     void (*resetTextLineHeight)(ArkUINodeHandle node);
     void (*setTextOverflow)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextOverflow)(ArkUINodeHandle node);
@@ -575,15 +575,18 @@ struct CJUITextModifier {
     void (*resetTextCase)(ArkUINodeHandle node);
     void (*setTextMaxLines)(ArkUINodeHandle node, ArkUI_Uint32 maxLine);
     void (*resetTextMaxLines)(ArkUINodeHandle node);
-    void (*setTextMinFontSize)(ArkUINodeHandle node, const ArkUI_Float32 number, ArkUI_Int32 unit);
+    void (*setTextMinFontSize)(
+        ArkUINodeHandle node, const ArkUI_Float32 number, ArkUI_Int32 unit, void* minFontSizeRawPtr);
     void (*resetTextMinFontSize)(ArkUINodeHandle node);
     void (*setTextDraggable)(ArkUINodeHandle node, ArkUI_Uint32 draggable);
     void (*resetTextDraggable)(ArkUINodeHandle node);
     void (*setTextPrivacySensitive)(ArkUINodeHandle node, ArkUI_Uint32 sensitive);
     void (*resetTextPrivacySensitive)(ArkUINodeHandle node);
-    void (*setTextMaxFontSize)(ArkUINodeHandle node, const ArkUI_Float32 number, ArkUI_Int32 unit);
+    void (*setTextMaxFontSize)(
+        ArkUINodeHandle node, const ArkUI_Float32 number, ArkUI_Int32 unit, void* maxFontSizeRawPtr);
     void (*resetTextMaxFontSize)(ArkUINodeHandle node);
-    void (*setTextFontFamily)(ArkUINodeHandle node, ArkUI_CharPtr* fontFamilies, ArkUI_Uint32 length);
+    void (*setTextFontFamily)(
+        ArkUINodeHandle node, ArkUI_CharPtr* fontFamilies, ArkUI_Uint32 length, void* fontFamilyRawPtr);
     void (*resetTextFontFamily)(ArkUINodeHandle node);
     void (*setTextCopyOption)(ArkUINodeHandle node, ArkUI_Int32 copyOption);
     void (*resetTextCopyOption)(ArkUINodeHandle node);
@@ -591,9 +594,10 @@ struct CJUITextModifier {
     void (*resetTextShadow)(ArkUINodeHandle node);
     void (*setTextHeightAdaptivePolicy)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextHeightAdaptivePolicy)(ArkUINodeHandle node);
-    void (*setTextIndent)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setTextIndent)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* textIndentRawPtr);
     void (*resetTextIndent)(ArkUINodeHandle node);
-    void (*setTextBaselineOffset)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setTextBaselineOffset)(
+        ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* baseLineOffsetRawPtr);
     void (*resetTextBaselineOffset)(ArkUINodeHandle node);
     void (*setTextLetterSpacing)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetTextLetterSpacing)(ArkUINodeHandle node);
@@ -641,7 +645,8 @@ struct CJUITextModifier {
         ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_Bool isOnlyBetweenLines);
     ArkUI_Float32 (*getTextLineSpacing)(ArkUINodeHandle node);
     void (*resetTextLineSpacing)(ArkUINodeHandle node);
-    void (*setTextSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setTextSelectedBackgroundColor)(
+        ArkUINodeHandle node, ArkUI_Uint32 color, void* selectedBackgroundColorRawPtr);
     ArkUI_Uint32 (*getTextSelectedBackgroundColor)(ArkUINodeHandle node);
     void (*resetTextSelectedBackgroundColor)(ArkUINodeHandle node);
     void (*setLineBreakStrategy)(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy);
@@ -661,9 +666,9 @@ struct CJUITextModifier {
     void (*setTextOnTextSelectionChange)(ArkUINodeHandle node, void* callback);
     void (*resetTextOnTextSelectionChange)(ArkUINodeHandle node);
     void (*setFontWeightWithOption)(ArkUINodeHandle node, const struct ArkUIFontWeightWithOptionsStruct* weightInfo);
-    void (*setTextMinFontScale)(ArkUINodeHandle node, ArkUI_Float32 number);
+    void (*setTextMinFontScale)(ArkUINodeHandle node, ArkUI_Float32 number, void* minFontScaleRawPtr);
     void (*resetTextMinFontScale)(ArkUINodeHandle node);
-    void (*setTextMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 number);
+    void (*setTextMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 number, void* maxFontScaleRawPtr);
     void (*resetTextMaxFontScale)(ArkUINodeHandle node);
     void (*setTextSelectionMenuOptions)(
         ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
@@ -2241,7 +2246,7 @@ struct CJUIRefreshModifier {
 };
 
 struct CJUIHyperlinkModifier {
-    void (*setHyperlinkColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setHyperlinkColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr);
     void (*resetHyperlinkColor)(ArkUINodeHandle node);
     void (*setHyperlinkDraggable)(ArkUINodeHandle node, ArkUI_Bool draggable);
     void (*resetHyperlinkDraggable)(ArkUINodeHandle node);

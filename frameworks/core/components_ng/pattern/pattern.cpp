@@ -111,12 +111,16 @@ void Pattern::RegisterResource(const std::string& key, const RefPtr<ResourceObje
  
 template void Pattern::RegisterResource<CalcDimension>(
     const std::string&, const RefPtr<ResourceObject>&, CalcDimension);
+template void Pattern::RegisterResource<Dimension>(
+    const std::string&, const RefPtr<ResourceObject>&, Dimension);
 template void Pattern::RegisterResource<Color>(
     const std::string&, const RefPtr<ResourceObject>&, Color);
 template void Pattern::RegisterResource<float>(
     const std::string&, const RefPtr<ResourceObject>&, float);
 template void Pattern::RegisterResource<std::u16string>(
     const std::string&, const RefPtr<ResourceObject>&, std::u16string);
+template void Pattern::RegisterResource<std::string>(
+    const std::string&, const RefPtr<ResourceObject>&, std::string);
 template void Pattern::RegisterResource<std::vector<std::string>>(
     const std::string&, const RefPtr<ResourceObject>&, std::vector<std::string>);
 template<typename T>

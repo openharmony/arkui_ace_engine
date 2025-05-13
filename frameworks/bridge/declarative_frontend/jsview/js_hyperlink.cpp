@@ -77,14 +77,26 @@ void JSHyperlink::JSBind(BindingTarget globalObj)
 void JSHyperlink::Create(const JSCallbackInfo& args)
 {
     std::string address;
-    ParseJsString(args[0], address);
-
+    RefPtr<ResourceObject> addressResObj;
     std::string summary;
-    if (args.Length() == 2) {
-        ParseJsString(args[1], summary);
-    }
+    RefPtr<ResourceObject> contentResObj;
+    auto addressRet = ParseJsString(args[0], address, addressResObj);
+    bool contentRet = false;
 
+    if (args.Length() == 2) {
+        contentRet = ParseJsString(args[1], summary, contentResObj);
+    }
     HyperlinkModel::GetInstance()->Create(address, summary);
+    if (addressRet && SystemProperties::ConfigChangePerform() && addressResObj) {
+        RegisterResource<std::string>("Address", addressResObj, address);
+    } else {
+        UnRegisterResource("Address");
+    }
+    if (contentRet && SystemProperties::ConfigChangePerform() && contentResObj) {
+        RegisterResource<std::string>("Content", contentResObj, summary);
+    } else {
+        UnRegisterResource("Content");
+    }
 }
 
 void JSHyperlink::SetColor(const JSCallbackInfo& info)
@@ -98,7 +110,7 @@ void JSHyperlink::SetColor(const JSCallbackInfo& info)
         CHECK_NULL_VOID(theme);
         color = theme->GetTextColor();
     } else if (SystemProperties::ConfigChangePerform() && resObj) {
-        RegisterResource<Color>("TextColor", resObj, color);
+        RegisterResource<Color>("Color", resObj, color);
         return;
     }
     HyperlinkModel::GetInstance()->SetColor(color);
