@@ -395,9 +395,6 @@ void SpanString::ProcessMultiDecorationSpanForIntersection(
 {
     auto lastDecorationSpan = AceType::DynamicCast<DecorationSpan>(lastSpan);
     auto lastDecorations = lastDecorationSpan->GetTextDecorationTypes();
-    if (!CheckMultiTypeDecorationSpan(lastSpan)) {
-        return;
-    }
 
     int32_t lastSpanStart = lastSpan->GetStartIndex();
     int32_t lastSpanEnd = lastSpan->GetEndIndex();
@@ -422,8 +419,13 @@ void SpanString::ProcessMultiDecorationSpanForIntersection(
     auto intersectionSpan = span->GetSubSpan(newStart, newEnd);
     auto intersectionDecorationSpan = AceType::DynamicCast<DecorationSpan>(intersectionSpan);
     // apply new data to newSpan
-    for (TextDecoration value : lastDecorations) {
-        intersectionDecorationSpan->AddTextDecorationType(value);
+    if (CheckMultiTypeDecorationSpan(lastSpan) && CheckMultiTypeDecorationSpan(intersectionSpan)) {
+        for (TextDecoration value : lastDecorations) {
+            intersectionDecorationSpan->AddTextDecorationType(value);
+        }
+    } else {
+        TextDecorationOptions option { false };
+        intersectionDecorationSpan->SetTextDecorationOptions(option);
     }
     AddSpan(intersectionSpan, false);
     for (int32_t index = newStart; index < newEnd; index++) {
@@ -463,16 +465,6 @@ bool SpanString::ProcessMultiDecorationSpan(const RefPtr<SpanBase>& span, int32_
     }
     auto lastSpans = GetWholeSpans(start, end, SpanType::Decoration);
     if (lastSpans.size() <= 0) {
-        return false;
-    }
-    bool enableMultiType = false;
-    for (const RefPtr<SpanBase>& lastSpan : lastSpans) {
-        if (CheckMultiTypeDecorationSpan(lastSpan)) {
-            enableMultiType = true;
-            break;
-        }
-    }
-    if (!enableMultiType) {
         return false;
     }
     std::vector<int32_t> spanNoIntersection;
