@@ -1041,8 +1041,8 @@ void MovingPhotoPattern::GetXmageHeight()
         imageSize = SizeF(imageW, imageL);
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSize, imageSize, host);
-    AG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto imageSize imageW.%{public}f, imageL %{public}f",
-            imageSize.Width(), imageSize.Height());
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto imageSize imageW.%{public}f, imageL %{public}f",
+             imageSize.Width(), imageSize.Height());
 }
 
 SizeF MovingPhotoPattern::MeasureContentLayout(const SizeF& layoutSize,
