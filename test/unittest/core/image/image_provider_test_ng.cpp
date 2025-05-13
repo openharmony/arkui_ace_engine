@@ -1815,4 +1815,147 @@ HWTEST_F(ImageProviderTestNg, ImageProviderFailCallback003, TestSize.Level1)
     EXPECT_EQ(ctx3->errorMsg_, errorMsg);
     EXPECT_EQ(ctx4->errorMsg_, errorMsg);
 }
+
+/**
+ * @tc.name: ImageProviderCancelTask001
+ * @tc.desc: Test ImageProvider::CancelTask with multiple contexts; only one is removed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageProviderCancelTask001, TestSize.Level1)
+{
+    ImageProvider::tasks_.clear();
+    auto src = ImageSourceInfo();
+
+    // Create multiple ImageLoadingContext instances and register them under the same key
+    auto ctx1 = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx1, nullptr);
+    auto ctx2 = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx2, nullptr);
+
+    ImageProvider::RegisterTask(src.GetKey(), WeakPtr(ctx1));
+    ImageProvider::RegisterTask(src.GetKey(), WeakPtr(ctx2));
+
+    // CancelTask for ctx1 should return false since ctx2 is still waiting
+    bool result1 = ImageProvider::CancelTask(src.GetKey(), WeakPtr(ctx1));
+    EXPECT_FALSE(result1);
+
+    // CancelTask for ctx2 should return true as it's the last context
+    bool result2 = ImageProvider::CancelTask(src.GetKey(), WeakPtr(ctx2));
+    EXPECT_TRUE(result2);
+}
+
+/**
+ * @tc.name: ImageProviderCancelTask002
+ * @tc.desc: Test ImageProvider::CancelTask when context is not registered
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageProviderCancelTask002, TestSize.Level1)
+{
+    ImageProvider::tasks_.clear();
+    auto src = ImageSourceInfo();
+
+    // Register one context
+    auto ctx1 = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx1, nullptr);
+    ImageProvider::RegisterTask(src.GetKey(), WeakPtr(ctx1));
+
+    // Create a context that is not registered
+    auto ctxNotRegistered =
+        AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctxNotRegistered, nullptr);
+
+    // Attempting to cancel an unregistered context should return false
+    bool result = ImageProvider::CancelTask(src.GetKey(), WeakPtr(ctxNotRegistered));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ImageProviderCancelTask003
+ * @tc.desc: Test ImageProvider::CancelTask when key does not exist
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageProviderCancelTask003, TestSize.Level1)
+{
+    ImageProvider::tasks_.clear();
+    auto src = ImageSourceInfo();
+
+    // Create a context but do not register it
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx, nullptr);
+
+    // Attempting to cancel with a non-existent key should return false
+    bool result = ImageProvider::CancelTask("non_exist_key", WeakPtr(ctx));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ImageProviderCancelTask004
+ * @tc.desc: Test ImageProvider::CancelTask when only one context is registered
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageProviderCancelTask004, TestSize.Level1)
+{
+    ImageProvider::tasks_.clear();
+    auto src = ImageSourceInfo();
+
+    // Register a single context
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx, nullptr);
+    ImageProvider::RegisterTask(src.GetKey(), WeakPtr(ctx));
+
+    // CancelTask should return true and remove the entire task
+    bool result = ImageProvider::CancelTask(src.GetKey(), WeakPtr(ctx));
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ImageProviderTestNg_EndTaskKeyCorrectness
+ * @tc.desc: Verify that ImageProvider uses GetTaskKey() for registering and ending tasks.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageProviderTestNg_EndTaskKeyCorrectness, TestSize.Level1)
+{
+    // Expect LoadImageData to be called only once, since repeated tasks should be merged.
+    EXPECT_CALL(*g_loader, LoadImageData).Times(1);
+
+    auto src = ImageSourceInfo(SRC_JPG);
+
+    // Step 1: Create multiple ImageLoadingContext instances with the same image source.
+    std::vector<RefPtr<ImageLoadingContext>> contexts(10);
+    for (auto& ctx : contexts) {
+        ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), false);
+        ctx->LoadImageData(); // Triggers CreateImageObject and registers task.
+    }
+
+    // Step 2: Verify that task was registered using the correct key and merged properly.
+    {
+        if (!ImageProvider::taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
+            EXPECT_TRUE(false) << "Failed to acquire mutex.";
+            return;
+        }
+        std::scoped_lock lock(std::adopt_lock, ImageProvider::taskMtx_);
+
+        // Use GetTaskKey() instead of GetKey() to check the task map.
+        auto taskKey = src.GetTaskKey();
+        auto it = ImageProvider::tasks_.find(taskKey);
+        EXPECT_NE(it, ImageProvider::tasks_.end());     // Task should exist.
+        EXPECT_EQ(it->second.ctxs_.size(), (size_t)10); // All contexts should be merged under the same task.
+        auto errorKey = "non_exist_key";
+        auto tmpIt = ImageProvider::tasks_.find(errorKey);
+        EXPECT_EQ(tmpIt, ImageProvider::tasks_.end()); // errorTask shouldn't exist.
+    }
+
+    // Step 3: Wait for the background loading task to finish, which will trigger EndTask().
+    WaitForAsyncTasks();
+
+    // Step 4: Check that the task has been properly removed from the map after completion.
+    {
+        if (!ImageProvider::taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
+            EXPECT_TRUE(false) << "Failed to acquire mutex after WaitForAsyncTasks.";
+            return;
+        }
+        std::scoped_lock lock(std::adopt_lock, ImageProvider::taskMtx_);
+        EXPECT_EQ(ImageProvider::tasks_.size(), (size_t)0); // The task map should be empty after cleanup.
+    }
+}
 } // namespace OHOS::Ace::NG
