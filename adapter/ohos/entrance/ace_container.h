@@ -774,6 +774,7 @@ public:
     }
     void RenderLayoutBoundary(bool isDebugBoundary);
     void AddWatchSystemParameter();
+    void RemoveUISessionCallbacks();
     void RemoveWatchSystemParameter();
 
     const std::vector<std::string>& GetUieParams() const
