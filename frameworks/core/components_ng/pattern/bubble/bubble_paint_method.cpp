@@ -272,7 +272,7 @@ void BubblePaintMethod::PaintOuterBorderGradient(RSPen& paint)
 
 void BubblePaintMethod::PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWrapper)
 {
-    if (!IsPaintDoubleBorder(paintWrapper)) {
+    if (!IsPaintDoubleBorder(paintWrapper) && outlineLinearGradient_.gradientColors.empty()) {
         return;
     }
     auto paintProperty = DynamicCast<BubbleRenderProperty>(paintWrapper->GetPaintProperty());
@@ -294,8 +294,8 @@ void BubblePaintMethod::PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWr
         if (outerBorderWidthByUser_ == 0) {
             return;
         }
-        PaintOuterBorderGradient(paint);
         paint.SetWidth(outerBorderWidthByUser_);
+        PaintOuterBorderGradient(paint);
     } else if (isTips_) {
         paint.SetWidth(popupTheme->GetTipsOuterBorderWidth().ConvertToPx());
         paint.SetColor(popupTheme->GetTipsOuterBorderColor().GetValue());
@@ -332,7 +332,7 @@ void BubblePaintMethod::PaintInnerBorderGradient(RSPen& paint)
 
 void BubblePaintMethod::PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWrapper)
 {
-    if (!IsPaintDoubleBorder(paintWrapper)) {
+    if (!IsPaintDoubleBorder(paintWrapper) && innerBorderLinearGradient_.gradientColors.empty()) {
         return;
     }
     auto paintProperty = DynamicCast<BubbleRenderProperty>(paintWrapper->GetPaintProperty());
@@ -355,8 +355,8 @@ void BubblePaintMethod::PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWr
         if (innerBorderWidthByUser_ == 0) {
             return;
         }
-        PaintInnerBorderGradient(paint);
         paint.SetWidth(innerBorderWidthByUser_);
+        PaintInnerBorderGradient(paint);
     } else if (isTips_) {
         paint.SetWidth(popupTheme->GetTipsInnerBorderWidth().ConvertToPx());
         paint.SetColor(popupTheme->GetTipsInnerBorderColor().GetValue());
@@ -578,7 +578,11 @@ float BubblePaintMethod::GetInnerBorderOffset()
     CHECK_NULL_RETURN(pipeline, 0);
     auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_RETURN(popupTheme, 0);
-    if (popupTheme->GetPopupDoubleBorderEnable() && needPaintOuterBorder_) {
+    auto linearGradientFlag = false;
+    if (!outlineLinearGradient_.gradientColors.empty() || !innerBorderLinearGradient_.gradientColors.empty()) {
+        linearGradientFlag = true;
+    }
+    if ((popupTheme->GetPopupDoubleBorderEnable() || linearGradientFlag) && needPaintOuterBorder_) {
         borderOffset = outerBorderWidth_;
     }
     return borderOffset;
@@ -591,7 +595,11 @@ float BubblePaintMethod::GetBorderOffset()
     CHECK_NULL_RETURN(pipeline, 0);
     auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_RETURN(popupTheme, 0);
-    if (popupTheme->GetPopupDoubleBorderEnable()) {
+    auto linearGradientFlag = false;
+    if (!outlineLinearGradient_.gradientColors.empty() || !innerBorderLinearGradient_.gradientColors.empty()) {
+        linearGradientFlag = true;
+    }
+    if (popupTheme->GetPopupDoubleBorderEnable() || linearGradientFlag) {
         if (needPaintOuterBorder_) {
             borderOffset = -outerBorderWidth_;
         } else {
