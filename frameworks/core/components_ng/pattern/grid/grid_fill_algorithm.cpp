@@ -171,16 +171,6 @@ void GridFillAlgorithm::OnSlidingOffsetUpdate(float delta)
     }
 }
 
-int32_t GridFillAlgorithm::ConvertLargeDelta(float delta)
-{
-    GridLargeDeltaConverter converter(info_, props_.GetHost().GetRawPtr());
-    int jumpIndex = converter.Convert(delta);
-    if (jumpIndex == info_.childrenCount_ - 1) {
-        jumpIndex = jumpIndex - (info_.endIndex_ - info_.startIndex_); // estimate first item in the viewport
-    }
-    return jumpIndex;
-}
-
 bool GridFillAlgorithm::OnSlidingOffsetUpdate(const SizeF& viewport, Axis axis, float delta)
 {
     // update range

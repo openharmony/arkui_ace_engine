@@ -67,11 +67,6 @@ public:
      */
     virtual void OnSlidingOffsetUpdate(float delta) = 0;
 
-    virtual int32_t ConvertLargeDelta(float delta)
-    {
-        return -1;
-    }
-
     /**
      * @param idx index of the item just filled. Can pass in -1 if nothing was filled.
      * @return true if more items can be filled in the given @c direction

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
+#include "layout/sliding_window/water_flow_large_delta_converter.h"
 
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
@@ -824,6 +825,15 @@ std::function<bool(int32_t)> WaterFlowPattern::GetScrollIndexAbility()
         }
         return true;
     };
+}
+
+int32_t WaterFlowPattern::ConvertLargeDelta(float delta)
+{
+    if (layoutInfo_->Mode() != LayoutMode::SLIDING_WINDOW) {
+        return -1;
+    }
+    WaterFlowLargeDeltaConverter converter(*DynamicCast<WaterFlowLayoutInfoSW>(layoutInfo_));
+    return converter.Convert(delta);
 }
 
 void WaterFlowPattern::DumpAdvanceInfo()

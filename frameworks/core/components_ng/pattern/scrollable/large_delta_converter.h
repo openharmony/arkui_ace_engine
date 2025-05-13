@@ -27,6 +27,9 @@ public:
      *
      * @return item index to jump to. Return -1 if conversion fails.
      */
-    virtual int32_t Convert(float delta) = 0;
+    virtual int32_t Convert(float delta)
+    {
+        return -1;
+    }
 };
 } // namespace OHOS::Ace::NG

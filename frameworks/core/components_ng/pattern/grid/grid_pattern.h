@@ -285,6 +285,8 @@ public:
 
     RefPtr<FillAlgorithm> CreateFillAlgorithm() final;
 
+    int32_t ConvertLargeDelta(float delta) final;
+
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.
