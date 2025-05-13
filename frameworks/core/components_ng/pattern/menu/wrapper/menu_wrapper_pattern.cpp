@@ -169,6 +169,16 @@ void MenuWrapperPattern::OnAttachToFrameNode()
     RegisterOnTouch();
 }
 
+void MenuWrapperPattern::OnDetachFromMainTree()
+{
+    CHECK_NULL_VOID(filterColumnNode_);
+    auto pipeline = filterColumnNode_->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlay = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    overlay->RemoveMenuFilter(GetHost());
+}
+
 // close subMenu when mouse move outside
 void MenuWrapperPattern::HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItemPattern>& menuItemPattern)
 {
