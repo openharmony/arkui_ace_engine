@@ -121,6 +121,6 @@ build_component_ng("render_ng") {
 
   if (is_arkui_x) {
     sources += [ "adapter/render_texture_impl.cpp" ]
-    deps = [ "$ace_graphic_surface/surface:arkuix_surface" ]
+    deps = [ "$arkuix_graphic_surface/surface:arkuix_surface" ]
   }
 }

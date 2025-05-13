@@ -130,6 +130,7 @@ ace_flutter_engine_root = "$flutter_root/build"
 ark_toolchain_path = "//arkcompiler/toolchain"
 ace_drag = "//base/msdp/device_status"
 acd_input = "//foundation/multimodalinput/input"
+arkuix_graphic_surface = "//foundation/appframework/graphic_surface"
 
 # Config toolchain
 windows_buildtool = "//build/toolchain/mingw:mingw_x86_64"
