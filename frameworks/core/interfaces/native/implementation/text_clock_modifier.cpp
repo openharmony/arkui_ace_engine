@@ -17,6 +17,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
+#include "core/components_ng/pattern/text_clock/text_clock_model_static.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/interfaces/native/implementation/text_clock_controller_peer_impl.h"
@@ -66,7 +67,7 @@ void SetTextClockOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(options);
     auto textClockOptionsOpt = Converter::OptConvert<TextClockOptions>(*options);
     if (textClockOptionsOpt.has_value()) {
-        TextClockModelNG::SetHoursWest(frameNode, textClockOptionsOpt.value().timeZoneOffset);
+        TextClockModelStatic::SetHoursWest(frameNode, textClockOptionsOpt.value().timeZoneOffset);
 
         auto controller = TextClockModelNG::InitTextController(frameNode);
         CHECK_NULL_VOID(controller);
@@ -83,7 +84,7 @@ void FormatImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<std::string>(*value) : std::nullopt;
-    TextClockModelNG::SetFormat(frameNode, convValue);
+    TextClockModelStatic::SetFormat(frameNode, convValue);
 }
 void OnDateChangeImpl(Ark_NativePointer node,
                       const Opt_Callback_Number_Void* value)
@@ -106,7 +107,7 @@ void FontColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<Color>(*value) : std::nullopt;
-    TextClockModelNG::SetFontColor(frameNode, convValue);
+    TextClockModelStatic::SetFontColor(frameNode, convValue);
 }
 void FontSizeImpl(Ark_NativePointer node,
                   const Opt_Length* value)
@@ -116,7 +117,7 @@ void FontSizeImpl(Ark_NativePointer node,
     auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);
-    TextClockModelNG::SetFontSize(frameNode, convValue);
+    TextClockModelStatic::SetFontSize(frameNode, convValue);
 }
 void FontStyleImpl(Ark_NativePointer node,
                    const Opt_FontStyle* value)
@@ -124,7 +125,7 @@ void FontStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<Ace::FontStyle>(*value) : std::nullopt;
-    TextClockModelNG::SetFontStyle(frameNode, convValue);
+    TextClockModelStatic::SetFontStyle(frameNode, convValue);
 }
 void FontWeightImpl(Ark_NativePointer node,
                     const Opt_Union_Number_FontWeight_String* value)
@@ -132,7 +133,7 @@ void FontWeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<Ace::FontWeight>(*value) : std::nullopt;
-    TextClockModelNG::SetFontWeight(frameNode, convValue);
+    TextClockModelStatic::SetFontWeight(frameNode, convValue);
 }
 void FontFamilyImpl(Ark_NativePointer node,
                     const Opt_ResourceStr* value)
@@ -188,7 +189,7 @@ void DateTimeOptionsImpl(Ark_NativePointer node,
     if (dateTimeOptions) {
         hourType = dateTimeOptions->hourType;
     }
-    TextClockModelNG::SetDateTimeOptions(frameNode, hourType);
+    TextClockModelStatic::SetDateTimeOptions(frameNode, hourType);
 }
 } // TextClockAttributeModifier
 const GENERATED_ArkUITextClockModifier* GetTextClockModifier()

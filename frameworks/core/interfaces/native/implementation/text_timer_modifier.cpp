@@ -19,6 +19,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
+#include "core/components_ng/pattern/texttimer/text_timer_model_static.h"
 #include "core/interfaces/native/implementation/text_timer_controller_peer_impl.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
@@ -62,11 +63,11 @@ void SetTextTimerOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     auto opts = Converter::OptConvert<TextTimerOptions>(*options);
-    TextTimerModelNG::SetIsCountDown(frameNode, opts->isCountDown);
+    TextTimerModelStatic::SetIsCountDown(frameNode, opts->isCountDown);
     if (!opts->isCountDown.value_or(false)) {
         opts->count.reset();
     }
-    TextTimerModelNG::SetInputCount(frameNode, opts->count);
+    TextTimerModelStatic::SetInputCount(frameNode, opts->count);
 
     CHECK_NULL_VOID(opts->controller);
     auto textTimerController = TextTimerModelNG::InitTextController(frameNode);
@@ -105,7 +106,7 @@ void FormatImpl(Ark_NativePointer node,
             format->replace(pos, sizeof("hh") - 1, "HH");
         }
     }
-    TextTimerModelNG::SetFormat(frameNode, format);
+    TextTimerModelStatic::SetFormat(frameNode, format);
 }
 void FontColorImpl(Ark_NativePointer node,
                    const Opt_ResourceColor* value)
@@ -113,7 +114,7 @@ void FontColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto color = Converter::OptConvert<Color>(*value);
-    TextTimerModelNG::SetFontColor(frameNode, color);
+    TextTimerModelStatic::SetFontColor(frameNode, color);
 }
 void FontSizeImpl(Ark_NativePointer node,
                   const Opt_Length* value)
@@ -123,7 +124,7 @@ void FontSizeImpl(Ark_NativePointer node,
     auto size = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(size);
     Validator::ValidateNonPercent(size);
-    TextTimerModelNG::SetFontSize(frameNode, size);
+    TextTimerModelStatic::SetFontSize(frameNode, size);
 }
 void FontStyleImpl(Ark_NativePointer node,
                    const Opt_FontStyle* value)
@@ -131,7 +132,7 @@ void FontStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto style = Converter::OptConvert<Ace::FontStyle>(*value);
-    TextTimerModelNG::SetFontStyle(frameNode, style);
+    TextTimerModelStatic::SetFontStyle(frameNode, style);
 }
 void FontWeightImpl(Ark_NativePointer node,
                     const Opt_Union_Number_FontWeight_String* value)
@@ -139,7 +140,7 @@ void FontWeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto weight = Converter::OptConvert<Ace::FontWeight>(*value);
-    TextTimerModelNG::SetFontWeight(frameNode, weight);
+    TextTimerModelStatic::SetFontWeight(frameNode, weight);
 }
 void FontFamilyImpl(Ark_NativePointer node,
                     const Opt_ResourceStr* value)
@@ -150,7 +151,7 @@ void FontFamilyImpl(Ark_NativePointer node,
     if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(*value); fontfamiliesOpt) {
         families = fontfamiliesOpt->families;
     }
-    TextTimerModelNG::SetFontFamily(frameNode, families);
+    TextTimerModelStatic::SetFontFamily(frameNode, families);
 }
 void OnTimerImpl(Ark_NativePointer node,
                  const Opt_TextTimerAttribute_onTimer_event_type* value)
@@ -177,7 +178,7 @@ void TextShadowImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto shadowList = Converter::OptConvert<std::vector<Shadow>>(*value);
-    TextTimerModelNG::SetTextShadow(frameNode, shadowList);
+    TextTimerModelStatic::SetTextShadow(frameNode, shadowList);
 }
 void ContentModifierImpl(Ark_NativePointer node,
                          const Opt_ContentModifier* value)
