@@ -30,6 +30,8 @@ import { UniformDataType } from "../../component/arkui-uniformtypedescriptor"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "../../component/gesture"
 import { ComponentContent } from "../../component/arkui-custom"
 import { BlendMode } from "../../component/arkui-drawing"
+import { int32} from "@koalaui/common"
+import { PeerNode } from '../../PeerNode';
 
 enum ModifierType {
    ORIGIN = 0,
@@ -103,24 +105,39 @@ const UI_STATE_FOCUSED = 1 << 1;
 const UI_STATE_DISABLED = 1 << 2;
 const UI_STATE_SELECTED = 1 << 3;
 
-export function applyUIAttributes<T>(modifier: AttributeModifier<T>, nativeNode: ArkCommonMethodPeer): void {
-   //let status = ArkUIGeneratedNativeModule._UIStateGet(nativeNode.peer.ptr);
-   modifier.applyNormalAttribute(nativeNode._attributeSet! as T);
-   modifier.applyPressedAttribute(nativeNode._attributeSet! as T);
-   modifier.applyFocusedAttribute(nativeNode._attributeSet! as T);
-   modifier.applyDisabledAttribute(nativeNode._attributeSet! as T);
-   modifier.applySelectedAttribute(nativeNode._attributeSet! as T);
+export function applyUIAttributes<T>(modifier: AttributeModifier<T>, nativeNode: ArkCommonMethodPeer, state: int32 = 0): void {
+    modifier.applyNormalAttribute(nativeNode._attributeSet! as T);
+    if (state & UI_STATE_PRESSED) {
+        modifier.applyPressedAttribute(nativeNode._attributeSet! as T);
+    }
+    if (state & UI_STATE_FOCUSED) {
+        modifier.applyFocusedAttribute(nativeNode._attributeSet! as T);
+    }
+    if (state & UI_STATE_DISABLED) {
+        modifier.applyDisabledAttribute(nativeNode._attributeSet! as T);
+    }
+    if (state & UI_STATE_SELECTED) {
+        modifier.applySelectedAttribute(nativeNode._attributeSet! as T);
+    }
 }
 
-export function applyUIAttributesUpdate<T>(modifier: AttributeModifier<T>, nativeNode: ArkCommonMethodPeer): void {
-    //let status = ArkUIGeneratedNativeModule._UIStateGet(nativeNode.peer.ptr);
-    //applyNormalAttribute if status is normal
-    modifier.applyNormalAttribute(nativeNode._attributeSet! as T);
-    modifier.applyPressedAttribute(nativeNode._attributeSet! as T);
-    modifier.applyFocusedAttribute(nativeNode._attributeSet! as T);
-    modifier.applyDisabledAttribute(nativeNode._attributeSet! as T);
-    modifier.applySelectedAttribute(nativeNode._attributeSet! as T);
- }
+export function applyUIAttributesUpdate<T>(modifier: AttributeModifier<T>, nativeNode: ArkCommonMethodPeer, state: int32 = 0, isInit:boolean = true): void {
+    if (state == UI_STATE_NORMAL && !isInit) {
+        modifier.applyNormalAttribute(nativeNode._attributeSet! as T);
+    }
+    if (state & UI_STATE_PRESSED) {
+        modifier.applyPressedAttribute(nativeNode._attributeSet! as T);
+    }
+    if (state & UI_STATE_FOCUSED) {
+        modifier.applyFocusedAttribute(nativeNode._attributeSet! as T);
+    }
+    if (state & UI_STATE_DISABLED) {
+        modifier.applyDisabledAttribute(nativeNode._attributeSet! as T);
+    }
+    if (state & UI_STATE_SELECTED) {
+        modifier.applySelectedAttribute(nativeNode._attributeSet! as T);
+    }
+}
  
 
 export class ModifierWithKey<T> extends BaseModifier {
@@ -304,7 +321,10 @@ export function modifierNullWithKey(modifiers: ObservedMap, identity: string) {
 
 
 export class ArkCommonAttributeSet implements CommonAttribute {
-   accessibilityDescription(value: String | Resource | undefined): this {
+
+    peerNode_?: ArkCommonMethodPeer;
+
+    accessibilityDescription(value: String | Resource | undefined): this {
       return this;
    }
   
@@ -323,11 +343,8 @@ export class ArkCommonAttributeSet implements CommonAttribute {
       });
    }
    applyModifierPatch(peerNode: ArkCommonMethodPeer): void {
-      let expiringItemsWithKeys = new Array<string>;
       this._modifiersWithKeys.forEach((value, key) => {
-         if (value.applyStage(peerNode)) {
-            expiringItemsWithKeys.push(key);
-         }
+         value.applyStageImmediately(peerNode)
       });
    }
 
@@ -898,9 +915,9 @@ export class ArkCommonAttributeSet implements CommonAttribute {
    }
    backgroundColor(value: ResourceColor | undefined): this {
       if (value != null) {
-         modifierWithKey(this._modifiersWithKeys, HeightModifier.identity, BackgroundColorModifier.factory, value as ResourceColor);
+         modifierWithKey(this._modifiersWithKeys, BackgroundColorModifier.identity, BackgroundColorModifier.factory, value as ResourceColor);
       } else {
-         modifierNullWithKey(this._modifiersWithKeys, HeightModifier.identity)
+         modifierNullWithKey(this._modifiersWithKeys, BackgroundColorModifier.identity)
       }
       return this;
    }
