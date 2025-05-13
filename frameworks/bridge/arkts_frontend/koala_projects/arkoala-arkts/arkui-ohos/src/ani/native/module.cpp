@@ -75,7 +75,17 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Common_GetHostContext",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::GetHostContext)
-        }
+        },
+        ani_native_function {
+            "_Common_Sync_InstanceId",
+            "I:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SyncInstanceId)
+        },
+        ani_native_function {
+            "_Common_Restore_InstanceId",
+            ":V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RestoreInstanceId)
+        },
     };
 
     env->Class_BindNativeMethods(cls, methods.data(), methods.size());

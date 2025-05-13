@@ -1050,7 +1050,8 @@ ColorMode PipelineContext::GetColorMode() const
 {
     return MockContainer::mockColorMode_;
 }
-
+void PipelineContext::AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, FrameCallbackFunc&& idleCallbackFunc,
+    int64_t delayMillis) {}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 

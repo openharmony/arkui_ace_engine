@@ -42,6 +42,8 @@ struct ArkUIAniWebModifier {
 };
 struct ArkUIAniCommonModifier {
     ani_ref* (*getHostContext)();
+    void (*syncInstanceId)(ArkUI_Int32 id);
+    void (*restoreInstanceId)();
 };
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;

@@ -23174,6 +23174,10 @@ typedef struct GENERATED_ArkUISystemOpsAccessor {
     Ark_Int32 (*getResourceId)(const Ark_String* bundleName,
                                const Ark_String* moduleName,
                                const Array_String* params);
+    void (*resourceManagerReset)();
+    void (*setFrameCallback)(const Callback_Number_Void* onFrameCallback,
+                             const Callback_Number_Void* onIdleCallback,
+                             const Ark_Number* delayTime);
 } GENERATED_ArkUISystemOpsAccessor;
 
 typedef struct GENERATED_ArkUIGestureOpsAccessor {
