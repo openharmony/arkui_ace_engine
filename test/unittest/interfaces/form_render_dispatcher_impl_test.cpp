@@ -30,10 +30,9 @@ public:
 
     sptr<FormRendererDispatcherImpl> GetFormRendererDispatcherImpl()
     {
-        std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
+        std::shared_ptr<UIContent> uiContent = nullptr;
         std::shared_ptr<FormRenderer> formRenderer = nullptr;
-        auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("GetFormRendererDispatcherImpl");
-        auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+        std::weak_ptrOHOS::AppExecFwk::EventHandler eventHandler;
         sptr<FormRendererDispatcherImpl> renderDispatcher =
             new FormRendererDispatcherImpl(uiContent, formRenderer, eventHandler);
         return renderDispatcher;
@@ -49,13 +48,7 @@ public:
  */
 HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest002, TestSize.Level1)
 {
-    std::shared_ptr<UIContent> uiContent = nullptr;
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderDispatcherImplTest002");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
     bool flag = false;
     if (renderDispatcher != nullptr) {
         std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent = OHOS::MMI::PointerEvent::Create();
@@ -76,13 +69,7 @@ HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest002, TestSize
  */
 HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest003, TestSize.Level1)
 {
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderDispatcherImplTest003");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
     bool flag = false;
     if (renderDispatcher != nullptr) {
         std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent = OHOS::MMI::PointerEvent::Create();
@@ -103,13 +90,7 @@ HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest003, TestSize
  */
 HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest004, TestSize.Level1)
 {
-    std::shared_ptr<UIContent> uiContent = nullptr;
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderDispatcherImplTest004");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
     bool flag = false;
     if (renderDispatcher != nullptr) {
         std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent = OHOS::MMI::PointerEvent::Create();
@@ -130,13 +111,7 @@ HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest004, TestSize
  */
 HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest005, TestSize.Level1)
 {
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderDispatcherImplTest005");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
     bool flag = false;
     if (renderDispatcher != nullptr) {
         renderDispatcher->SetObscured(true);
@@ -154,13 +129,7 @@ HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest005, TestSize
  */
 HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest006, TestSize.Level1)
 {
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderDispatcherImplTest006");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
     bool flag = false;
     uint32_t windowId = 1;
     int32_t treeId = 11;
@@ -181,13 +150,7 @@ HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest006, TestSize
  */
 HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest007, TestSize.Level1)
 {
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderDispatcherImplTest007");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
     bool flag = false;
     if (renderDispatcher != nullptr) {
         renderDispatcher->OnAccessibilityChildTreeDeregister();
@@ -205,13 +168,7 @@ HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest007, TestSize
  */
 HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest008, TestSize.Level1)
 {
-    std::shared_ptr<UIContent> uiContent = nullptr;
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderDispatcherImplTest008");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
     bool flag = false;
     std::vector<std::string> params;
     std::vector<std::string> info;
@@ -231,13 +188,7 @@ HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest008, TestSize
  */
 HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest009, TestSize.Level1)
 {
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderDispatcherImplTest009");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
     bool flag = false;
     std::vector<std::string> params;
     std::vector<std::string> info;
@@ -257,13 +208,7 @@ HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest009, TestSize
  */
 HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest010, TestSize.Level1)
 {
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderDispatcherImplTest010");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
     bool flag = false;
     float pointX = 1.1;
     float pointY = 2.2;
@@ -286,13 +231,7 @@ HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest010, TestSize
  */
 HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest011, TestSize.Level1)
 {
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderDispatcherImplTest011");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
     bool flag = false;
     float width = 11;
     float height = 22;
@@ -312,15 +251,7 @@ HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest011, TestSize
  */
 HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest012, TestSize.Level1)
 {
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    // std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
-    // std::shared_ptr<FormRenderer> formRenderer = std::make_shared<FormRenderer>(context_, runtime_, eventHandler_);
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderDispatcherImplTest012");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    std::shared_ptr<FormRenderer> formRenderer = std::make_shared<FormRenderer>(nullptr, nullptr, eventHandler);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
     bool flag = false;
     float width = 11;
     float height = 22;
