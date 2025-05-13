@@ -350,8 +350,7 @@ HWTEST_F(LayoutPropertyTestNg, CheckAspectRatio001, TestSize.Level1)
      */
     layoutProperty->magicItemProperty_.UpdateAspectRatio(1.0);
     layoutProperty->CheckAspectRatio();
-    EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize.Width(), std::nullopt);
-    EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize.Height(), std::nullopt);
+    EXPECT_EQ(layoutProperty->layoutConstraint_, std::nullopt);
 
     /**
      * @tc.steps3: callback CheckAspectRatio.push layoutConstraint_ is not null.
@@ -362,6 +361,9 @@ HWTEST_F(LayoutPropertyTestNg, CheckAspectRatio001, TestSize.Level1)
     layoutConstraintF.selfIdealSize.SetWidth(WIDTH_OPT);
     layoutProperty->layoutConstraint_ = layoutConstraintF;
     layoutProperty->CheckAspectRatio();
+    EXPECT_TRUE(layoutProperty->layoutConstraint_.has_value());
+    EXPECT_TRUE(layoutProperty->layoutConstraint_->selfIdealSize.Width().has_value());
+    EXPECT_TRUE(layoutProperty->layoutConstraint_->selfIdealSize.Height().has_value());
     EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize.Width(), 2);
     EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize.Height(), 2);
 }
