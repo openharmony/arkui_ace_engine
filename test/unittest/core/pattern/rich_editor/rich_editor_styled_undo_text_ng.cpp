@@ -1,0 +1,289 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_undo_manager.h"
+
+using namespace testing;
+using namespace testing::ext;
+
+namespace OHOS::Ace::NG {
+namespace {
+    const int32_t STEP_TWO = 2;
+} // namespace
+
+class RichEditorStyledUndoTestNg : public RichEditorCommonTestNg {
+public:
+    void SetUp() override;
+    void TearDown() override;
+    static void TearDownTestSuite();
+};
+
+void RichEditorStyledUndoTestNg::SetUp()
+{
+    MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    richEditorNode_ = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    richEditorPattern->InitScrollablePattern();
+    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
+    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+    richEditorPattern->SetSupportStyledUndo(true);
+    richEditorPattern->CreateNodePaintMethod();
+    richEditorNode_->GetGeometryNode()->SetContentSize({});
+}
+
+void RichEditorStyledUndoTestNg::TearDown()
+{
+    richEditorNode_ = nullptr;
+}
+
+void RichEditorStyledUndoTestNg::TearDownTestSuite()
+{
+    TestNG::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: RecordOperation001
+ * @tc.desc: Test RecordOperation by insert or delete.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledUndoTestNg, RecordOperation001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto& undoRecords = richEditorPattern->undoManager_->undoRecords_;
+    // step1 insert value
+    struct UpdateSpanStyle typingStyle;
+    TextStyle textStyle(5);
+    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
+    richEditorPattern->SetCaretPosition(0);
+    richEditorPattern->InsertValue(INIT_VALUE_1);
+    EXPECT_EQ(richEditorPattern->undoManager_->undoRecords_.size(), 1);
+    auto undoRecord = undoRecords.back();
+    EXPECT_EQ(undoRecord.rangeBefore.start, 0);
+    EXPECT_EQ(undoRecord.rangeBefore.end, 0);
+    EXPECT_EQ(undoRecord.rangeAfter.start, 0);
+    EXPECT_EQ(undoRecord.rangeAfter.end, 6);
+
+    // step2 insert value with selection
+    richEditorPattern->textSelector_.Update(0, 2);
+    richEditorPattern->InsertValue(INIT_VALUE_2);
+    EXPECT_EQ(richEditorPattern->undoManager_->undoRecords_.size(), 2);
+    undoRecord = undoRecords.back();
+    EXPECT_EQ(undoRecord.rangeBefore.start, 0);
+    EXPECT_EQ(undoRecord.rangeBefore.end, 2);
+    EXPECT_EQ(undoRecord.rangeAfter.start, 0);
+    EXPECT_EQ(undoRecord.rangeAfter.end, 6);
+
+    // step3 delete forward
+    richEditorPattern->SetCaretPosition(0);
+    richEditorPattern->DeleteForward(1);
+    EXPECT_EQ(richEditorPattern->undoManager_->undoRecords_.size(), 3);
+    undoRecord = undoRecords.back();
+    EXPECT_EQ(undoRecord.rangeBefore.start, 0);
+    EXPECT_EQ(undoRecord.rangeBefore.end, 1);
+    EXPECT_EQ(undoRecord.rangeAfter.start, 0);
+    EXPECT_EQ(undoRecord.rangeAfter.end, 0);
+
+    // step4 delete backward
+    richEditorPattern->SetCaretPosition(8);
+    richEditorPattern->DeleteBackward(1);
+    EXPECT_EQ(richEditorPattern->undoManager_->undoRecords_.size(), 4);
+    undoRecord = undoRecords.back();
+    EXPECT_EQ(undoRecord.rangeBefore.start, 7);
+    EXPECT_EQ(undoRecord.rangeBefore.end, 8);
+    EXPECT_EQ(undoRecord.rangeAfter.start, 7);
+    EXPECT_EQ(undoRecord.rangeAfter.end, 7);
+
+    // step5 delete with selection
+    richEditorPattern->textSelector_.Update(2, 4);
+    richEditorPattern->DeleteBackward(1);
+    EXPECT_EQ(richEditorPattern->undoManager_->undoRecords_.size(), 5);
+    undoRecord = undoRecords.back();
+    EXPECT_EQ(undoRecord.rangeBefore.start, 2);
+    EXPECT_EQ(undoRecord.rangeBefore.end, 4);
+    EXPECT_EQ(undoRecord.rangeAfter.start, 2);
+    EXPECT_EQ(undoRecord.rangeAfter.end, 2);
+}
+
+/**
+ * @tc.name: RecordOperation002
+ * @tc.desc: Test RecordOperation by paste or drag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledUndoTestNg, RecordOperation002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto& undoRecords = richEditorPattern->undoManager_->undoRecords_;
+
+    // step1 paste string
+    richEditorPattern->SetCaretPosition(0);
+    richEditorPattern->InsertValueByPaste(INIT_VALUE_1);
+    EXPECT_EQ(richEditorPattern->undoManager_->undoRecords_.size(), 1);
+    auto undoRecord = undoRecords.back();
+    EXPECT_EQ(undoRecord.rangeBefore.start, 0);
+    EXPECT_EQ(undoRecord.rangeBefore.end, 0);
+    EXPECT_EQ(undoRecord.rangeAfter.start, 0);
+    EXPECT_EQ(undoRecord.rangeAfter.end, 6);
+
+    // step2 paste string with selection
+    richEditorPattern->textSelector_.Update(0, 2);
+    richEditorPattern->InsertValueByPaste(INIT_VALUE_2);
+    EXPECT_EQ(richEditorPattern->undoManager_->undoRecords_.size(), 2);
+    undoRecord = undoRecords.back();
+    EXPECT_EQ(undoRecord.rangeBefore.start, 0);
+    EXPECT_EQ(undoRecord.rangeBefore.end, 2);
+    EXPECT_EQ(undoRecord.rangeAfter.start, 0);
+    EXPECT_EQ(undoRecord.rangeAfter.end, 6);
+
+    // step3 internal drag
+    richEditorPattern->ResetSelection();
+    richEditorPattern->SetCaretPosition(8);
+    richEditorPattern->dragRange_ = std::make_pair(0, 6);
+    richEditorPattern->HandleOnDragDropTextOperation(INIT_VALUE_2, true, false);
+    EXPECT_EQ(richEditorPattern->undoManager_->undoRecords_.size(), 4);
+    undoRecord = undoRecords.back();
+    EXPECT_EQ(undoRecord.rangeBefore.start, 0);
+    EXPECT_EQ(undoRecord.rangeBefore.end, 6);
+    EXPECT_EQ(undoRecord.rangeAfter.start, 0);
+    EXPECT_EQ(undoRecord.rangeAfter.end, 0);
+    undoRecord = undoRecords.at(undoRecords.size() - STEP_TWO);
+    EXPECT_EQ(undoRecord.rangeBefore.start, 8);
+    EXPECT_EQ(undoRecord.rangeBefore.end, 8);
+    EXPECT_EQ(undoRecord.rangeAfter.start, 8);
+    EXPECT_EQ(undoRecord.rangeAfter.end, 14);
+
+    // step4 external drag
+    richEditorPattern->SetCaretPosition(5);
+    richEditorPattern->HandleOnDragDropTextOperation(INIT_VALUE_1, false, false);
+    EXPECT_EQ(richEditorPattern->undoManager_->undoRecords_.size(), 5);
+    undoRecord = undoRecords.back();
+    EXPECT_EQ(undoRecord.rangeBefore.start, 5);
+    EXPECT_EQ(undoRecord.rangeBefore.end, 5);
+    EXPECT_EQ(undoRecord.rangeAfter.start, 5);
+    EXPECT_EQ(undoRecord.rangeAfter.end, 11);
+}
+
+/**
+ * @tc.name: RecordOperation003
+ * @tc.desc: Test RecordOperation by add or delete span.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledUndoTestNg, RecordOperation003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto& undoRecords = richEditorPattern->undoManager_->undoRecords_;
+
+    // step1 AddTextSpan
+    auto textSpanOptions = TEXT_SPAN_OPTIONS_1;
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+    EXPECT_EQ(richEditorPattern->undoManager_->undoRecords_.size(), 1);
+    auto undoRecord = undoRecords.back();
+    EXPECT_EQ(undoRecord.rangeBefore.start, 0);
+    EXPECT_EQ(undoRecord.rangeBefore.end, 0);
+    EXPECT_EQ(undoRecord.rangeAfter.start, 0);
+    EXPECT_EQ(undoRecord.rangeAfter.end, 6);
+
+    // step2 AddImageSpan
+    richEditorPattern->AddImageSpan(IMAGE_SPAN_OPTIONS_1);
+    EXPECT_EQ(richEditorPattern->undoManager_->undoRecords_.size(), 2);
+    undoRecord = undoRecords.back();
+    EXPECT_EQ(undoRecord.rangeBefore.start, 6);
+    EXPECT_EQ(undoRecord.rangeBefore.end, 6);
+    EXPECT_EQ(undoRecord.rangeAfter.start, 6);
+    EXPECT_EQ(undoRecord.rangeAfter.end, 7);
+
+    // step3 AddSymbolSpan
+    richEditorPattern->AddSymbolSpan(SYMBOL_SPAN_OPTIONS_1);
+    EXPECT_EQ(richEditorPattern->undoManager_->undoRecords_.size(), 3);
+    undoRecord = undoRecords.back();
+    EXPECT_EQ(undoRecord.rangeBefore.start, 7);
+    EXPECT_EQ(undoRecord.rangeBefore.end, 7);
+    EXPECT_EQ(undoRecord.rangeAfter.start, 7);
+    EXPECT_EQ(undoRecord.rangeAfter.end, 9);
+
+    // step4 DeleteSpan
+    RangeOptions options;
+    options.start = 0;
+    options.end = 9;
+    richEditorPattern->DeleteSpans(options);
+    EXPECT_EQ(richEditorPattern->undoManager_->undoRecords_.size(), 4);
+    undoRecord = undoRecords.back();
+    EXPECT_EQ(undoRecord.rangeBefore.start, 0);
+    EXPECT_EQ(undoRecord.rangeBefore.end, 9);
+    EXPECT_EQ(undoRecord.rangeAfter.start, 0);
+    EXPECT_EQ(undoRecord.rangeAfter.end, 0);
+}
+
+/**
+ * @tc.name: RecordOperation004
+ * @tc.desc: Test RecordOperation by update style.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledUndoTestNg, RecordOperation004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto& undoRecords = richEditorPattern->undoManager_->undoRecords_;
+    richEditorPattern->SetCaretPosition(0);
+    richEditorPattern->InsertValueByPaste(INIT_VALUE_1);
+    richEditorPattern->ClearOperationRecords();
+
+    // step1 UpdateSpanStyle
+    TextStyle textStyle;
+    textStyle.SetFontSize(FONT_SIZE_VALUE_2);
+    struct UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateFontSize = FONT_SIZE_VALUE_2;
+    richEditorController->SetUpdateSpanStyle(updateSpanStyle);
+    ImageSpanAttribute imageStyle;
+    richEditorController->UpdateSpanStyle(0, 4, textStyle, imageStyle);
+    EXPECT_EQ(richEditorPattern->undoManager_->undoRecords_.size(), 1);
+    auto undoRecord = undoRecords.back();
+    EXPECT_EQ(undoRecord.rangeBefore.start, 0);
+    EXPECT_EQ(undoRecord.rangeBefore.end, 4);
+    EXPECT_EQ(undoRecord.rangeAfter.start, 0);
+    EXPECT_EQ(undoRecord.rangeAfter.end, 4);
+    EXPECT_TRUE(undoRecord.isOnlyStyleChange);
+
+    // step2 UpdateParagraphStyle
+    struct UpdateParagraphStyle style1;
+    style1.textAlign = TextAlign::END;
+    richEditorPattern->UpdateParagraphStyle(0, 6, style1);
+    EXPECT_EQ(richEditorPattern->undoManager_->undoRecords_.size(), 2);
+    undoRecord = undoRecords.back();
+    EXPECT_EQ(undoRecord.rangeBefore.start, 0);
+    EXPECT_EQ(undoRecord.rangeBefore.end, 6);
+    EXPECT_EQ(undoRecord.rangeAfter.start, 0);
+    EXPECT_EQ(undoRecord.rangeAfter.end, 6);
+    EXPECT_TRUE(undoRecord.isOnlyStyleChange);
+}
+}
