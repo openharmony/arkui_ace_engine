@@ -252,13 +252,17 @@ int32_t UIDisplaySyncManager::GetAnimatorRate()
         }
     }
 
-    if (existAnimatorNoExpectdRate) {
-        return 0;
-    }
     if (maxAnimatorRateHap_.empty()) {
         return INVALID_ANIMATOR_EXPECTED_RATE;
     }
     int32_t currMaxAnimatorExpectedRate = maxAnimatorRateHap_.top();
+    if (currMaxAnimatorExpectedRate < 0) {
+        return currMaxAnimatorExpectedRate;
+    }
+    // currMaxAnimatorExpectedRate int32_t  example: 0x003c0001
+    // [0, 16) is existAnimatorNoExpectdRate = 1
+    // [16, 32) is aceAnimatorExpectedFrameRate = 60
+    currMaxAnimatorExpectedRate = (currMaxAnimatorExpectedRate << ACE_ANIMATOR_OFFSET) + existAnimatorNoExpectdRate;
     return currMaxAnimatorExpectedRate;
 }
 
