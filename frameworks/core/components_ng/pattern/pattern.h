@@ -649,6 +649,7 @@ public:
         layoutProperty->CheckLocalizedBorderImageWidth(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageOutset(layoutDirection);
         // Reset for safeAreaExpand's Cache in GeometryNode
+        layoutProperty->CheckLocalizedAlignment(layoutDirection);
         host->ResetSafeAreaPadding();
         layoutProperty->CheckLocalizedSafeAreaPadding(layoutDirection);
         layoutProperty->CheckIgnoreLayoutSafeArea(layoutDirection);
