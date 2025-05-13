@@ -528,6 +528,11 @@ public:
         return false;
     }
 
+    virtual bool ShouldPreventChildPressedState() const
+    {
+        return false;
+    }
+
     virtual void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) {}
     virtual void FireAndCleanScrollingListener() {}
     virtual void CleanScrollingListener() {}
