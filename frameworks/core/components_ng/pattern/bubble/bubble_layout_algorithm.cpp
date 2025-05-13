@@ -1171,9 +1171,6 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
         case Placement::RIGHT_TOP:
         case Placement::RIGHT_BOTTOM:
         case Placement::RIGHT: {
-            if (showArrow_) {
-                space = space + BUBBLE_ARROW_HEIGHT.ConvertToPx();
-            }
             xMin = std::max(targetOffset_.GetX() + targetSize_.Width() + space, marginStart_);
             xMax = wrapperSize_.Width() - width - marginEnd_;
             yMin = marginTop_;
@@ -1202,9 +1199,6 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
         case Placement::BOTTOM_LEFT:
         case Placement::BOTTOM_RIGHT:
         case Placement::BOTTOM: {
-            if (showArrow_) {
-                space = space + BUBBLE_ARROW_HEIGHT.ConvertToPx();
-            }
             xMin = marginStart_;
             xMax = wrapperSize_.Width() - width - marginEnd_;
             yMin = std::max(targetOffset_.GetY() + targetSize_.Height() + space, marginTop_);
@@ -1232,7 +1226,8 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
             break;
     }
     if ((LessNotEqual(xMax, xMin) && !isGreatWrapperWidth_) || LessNotEqual(yMax, yMin)) {
-        if (!CheckIfNeedRemoveArrow(xMin, xMax, yMin, yMax)) {
+        needRemoveArrow_ = CheckIfNeedRemoveArrow(xMin, xMax, yMin, yMax);
+        if (!needRemoveArrow_) {
             return OffsetF(0.0f, 0.0f);
         }
         TAG_LOGD(AceLogTag::ACE_OVERLAY, "Popup need remove arrow");
@@ -1270,36 +1265,6 @@ bool BubbleLayoutAlgorithm::CheckIfNeedRemoveArrow(float& xMin, float& xMax, flo
     return false;
 }
 
-OffsetF BubbleLayoutAlgorithm::GetBubblePosition(const OffsetF& position, float xMin,
-    float xMax, float yMin, float yMax)
-{
-    auto x = std::clamp(position.GetX(), xMin, xMax);
-    auto y = std::clamp(position.GetY(), yMin, yMax);
-    if (!showArrow_ || !avoidKeyboard_) {
-        return OffsetF(x, y);
-    }
-    bool isHorizontal = false;
-    if (setHorizontal_.find(placement_) != setHorizontal_.end()) {
-        isHorizontal = true;
-    }
-    if (isHorizontal) {
-        if (GreatNotEqual(position.GetX(), xMax)) {
-            showArrow_ = false;
-            x += BUBBLE_ARROW_HEIGHT.ConvertToPx();
-        } else if (LessNotEqual(position.GetX(), xMin)) {
-            showArrow_ = false;
-        }
-    } else {
-        if (GreatNotEqual(position.GetY(), yMax)) {
-            showArrow_ = false;
-            y += BUBBLE_ARROW_HEIGHT.ConvertToPx();
-        } else if (LessNotEqual(position.GetY(), yMin)) {
-            showArrow_ = false;
-        }
-    }
-    return OffsetF(x, y);
-}
-
 Placement GetSimplePlacement(Placement& placement)
 {
     switch (placement) {
@@ -1326,6 +1291,49 @@ Placement GetSimplePlacement(Placement& placement)
         default:
             return Placement::NONE;
     }
+}
+
+OffsetF BubbleLayoutAlgorithm::GetBubblePosition(const OffsetF& position, float xMin,
+    float xMax, float yMin, float yMax)
+{
+    auto positionX = position.GetX();
+    auto positionY = position.GetY();
+    if (needRemoveArrow_) {
+        if (GetSimplePlacement(placement_) == Placement::TOP) {
+            positionY += BUBBLE_ARROW_HEIGHT.ConvertToPx();
+        } else if (GetSimplePlacement(placement_) == Placement::BOTTOM) {
+            positionY -= BUBBLE_ARROW_HEIGHT.ConvertToPx();
+        } else if (GetSimplePlacement(placement_) == Placement::LEFT) {
+            positionX += BUBBLE_ARROW_HEIGHT.ConvertToPx();
+        } else if (GetSimplePlacement(placement_) == Placement::RIGHT) {
+            positionX -= BUBBLE_ARROW_HEIGHT.ConvertToPx();
+        }
+    }
+    auto x = std::clamp(positionX, xMin, xMax);
+    auto y = std::clamp(positionY, yMin, yMax);
+    if (!showArrow_ || !avoidKeyboard_) {
+        return OffsetF(x, y);
+    }
+    bool isHorizontal = false;
+    if (setHorizontal_.find(placement_) != setHorizontal_.end()) {
+        isHorizontal = true;
+    }
+    if (isHorizontal) {
+        if (GreatNotEqual(positionX, xMax)) {
+            showArrow_ = false;
+            x += BUBBLE_ARROW_HEIGHT.ConvertToPx();
+        } else if (LessNotEqual(positionX, xMin)) {
+            showArrow_ = false;
+        }
+    } else {
+        if (GreatNotEqual(positionY, yMax)) {
+            showArrow_ = false;
+            y += BUBBLE_ARROW_HEIGHT.ConvertToPx();
+        } else if (LessNotEqual(position.GetY(), yMin)) {
+            showArrow_ = false;
+        }
+    }
+    return OffsetF(x, y);
 }
 
 void BubbleLayoutAlgorithm::CheckArrowPosition(OffsetF& position, float width, float height)
