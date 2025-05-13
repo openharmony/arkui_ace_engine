@@ -1560,7 +1560,9 @@ export class Serializer extends SerializerBase {
             const value_style_value  = (value_style as CancelButtonStyle)
             valueSerializer.writeInt32(TypeChecker.CancelButtonStyle_ToNumeric(value_style_value))
         }
-        const value_icon  = value.icon
+        // const value_icon  = value.icon
+        /* when symbol modifier implemented, please remove undefined */
+        const value_icon  = undefined
         let value_icon_type : int32 = RuntimeType.UNDEFINED
         value_icon_type = runtimeType(value_icon)
         valueSerializer.writeInt8(value_icon_type as int32)

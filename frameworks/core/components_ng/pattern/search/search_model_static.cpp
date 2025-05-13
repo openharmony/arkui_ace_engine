@@ -43,7 +43,17 @@ namespace {
 const auto DEFAULT_KEYBOARD_APPERANCE = KeyboardAppearance::NONE_IMMERSIVE;
 constexpr int32_t TEXTFIELD_INDEX = 0;
 constexpr int32_t BUTTON_INDEX = 4;
+constexpr double DEFAULT_OPACITY = 0.2;
+constexpr int32_t DEFAULT_ALPHA = 255;
 } // namespace
+
+RefPtr<SearchTheme> SearchModelStatic::GetTheme(const FrameNode *frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return pipeline->GetTheme<SearchTheme>();
+}
 
 void SearchModelStatic::SetTextIndent(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
@@ -114,18 +124,29 @@ void SearchModelStatic::SetPlaceholderFont(FrameNode* frameNode, const std::opti
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void SearchModelStatic::SetSearchImageIcon(FrameNode *frameNode, std::optional<IconOptions>& iconOptions)
+void SearchModelStatic::SetSearchDefaultIcon(FrameNode *frameNode)
 {
-    if (iconOptions.has_value()) {
-        SearchModelNG::SetSearchImageIcon(frameNode, iconOptions.value());
-        return;
-    }
-    CHECK_NULL_VOID(frameNode);
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    IconOptions options;
-    pattern->SetCancelImageIcon(options);
-    ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize, frameNode);
+    pattern->InitSearchIconColorSize();
+    pattern->CreateSearchIcon("");
+}
+
+void SearchModelStatic::SetSearchImageIcon(FrameNode *frameNode, std::optional<IconOptions>& iconOptions)
+{
+    auto theme = SearchModelStatic::GetTheme(frameNode);
+    CHECK_NULL_VOID(theme);
+    if (iconOptions.has_value()) {
+        if (!iconOptions.value().GetColor().has_value()) {
+            iconOptions.value().UpdateColor(theme->GetSearchIconColor());
+        }
+        if (!iconOptions.value().GetSize().has_value()) {
+            iconOptions.value().UpdateSize(theme->GetIconHeight());
+        }
+    } else {
+        iconOptions = IconOptions(theme->GetSearchIconColor(), theme->GetIconHeight(), "", "", "");
+    }
+    SearchModelNG::SetSearchImageIcon(frameNode, iconOptions.value());
 }
 
 void SearchModelStatic::SetSearchButtonFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
@@ -155,6 +176,11 @@ void SearchModelStatic::SetSearchButtonFontColor(FrameNode* frameNode, const std
     ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, buttonFrameNode);
     buttonFrameNode->MarkModifyDone();
     buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelStatic::SetSearchButtonAutoDisable(FrameNode* frameNode, const std::optional<bool>& needToDisable)
+{
+    SearchModelNG::SetSearchButtonAutoDisable(frameNode, needToDisable.value_or(false));
 }
 
 void SearchModelStatic::SetTextColor(FrameNode* frameNode, const std::optional<Color>& color)
@@ -228,11 +254,11 @@ void SearchModelStatic::SetTextFont(FrameNode* frameNode, const std::optional<Fo
 
 void SearchModelStatic::SetPlaceholderColor(FrameNode* frameNode, const std::optional<Color>& optColor)
 {
-    if (!optColor) {
-        TextFieldModelNG::ResetPlaceholderColor(frameNode);
+    if (optColor.has_value()) {
+        SearchModelNG::SetPlaceholderColor(frameNode, optColor.value());
         return;
     }
-    SearchModelNG::SetPlaceholderColor(frameNode, optColor.value());
+    TextFieldModelNG::ResetPlaceholderColor(frameNode);
 }
 
 void SearchModelStatic::SetCaretWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
@@ -248,13 +274,25 @@ void SearchModelStatic::SetCaretWidth(FrameNode* frameNode, const std::optional<
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void SearchModelStatic::ResetCaretColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFrameNode);
+    auto textPaintProperty = textFrameNode->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textPaintProperty);
+    textPaintProperty->ResetCursorColor();
+    textPaintProperty->ResetCaretColorFlagByUser();
+    textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void SearchModelStatic::SetCaretColor(FrameNode* frameNode, const std::optional<Color>& optColor)
 {
-    if (!optColor) {
-        TextFieldModelNG::ResetCaretColor(frameNode);
+    if (optColor.has_value()) {
+        SearchModelNG::SetCaretColor(frameNode, optColor.value());
         return;
     }
-    SearchModelNG::SetCaretColor(frameNode, optColor.value());
+    SearchModelStatic::ResetCaretColor(frameNode);
 }
 
 void SearchModelStatic::SetTextAlign(FrameNode* frameNode, const std::optional<TextAlign>& valueOpt)
@@ -273,30 +311,38 @@ void SearchModelStatic::SetTextAlign(FrameNode* frameNode, const std::optional<T
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void SearchModelStatic::SetCancelDefaultIcon(FrameNode* frameNode)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->InitCancelIconColorSize();
+    pattern->CreateCancelIcon();
+}
+
 void SearchModelStatic::SetCancelButtonStyle(FrameNode* frameNode, const std::optional<CancelButtonStyle>& style)
 {
     if (style.has_value()) {
         SearchModelNG::SetCancelButtonStyle(frameNode, style.value());
         return;
     }
-    CHECK_NULL_VOID(frameNode);
-    // auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
-    // CHECK_NULL_VOID(pattern);
     ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonStyle, frameNode);
 }
 
 void SearchModelStatic::SetCancelImageIcon(FrameNode *frameNode, std::optional<NG::IconOptions>& iconOptions)
 {
+    auto theme = SearchModelStatic::GetTheme(frameNode);
+    CHECK_NULL_VOID(theme);
     if (iconOptions.has_value()) {
-        SearchModelNG::SetCancelImageIcon(frameNode, iconOptions.value());
-        return;
+        if (!iconOptions.value().GetColor().has_value()) {
+            iconOptions.value().UpdateColor(theme->GetSearchIconColor());
+        }
+        if (!iconOptions.value().GetSize().has_value()) {
+            iconOptions.value().UpdateSize(theme->GetIconHeight());
+        }
+    } else {
+        iconOptions = IconOptions(theme->GetSearchIconColor(), theme->GetIconHeight(), "", "", "");
     }
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
-    CHECK_NULL_VOID(pattern);
-    IconOptions options;
-    pattern->SetCancelImageIcon(options);
-    ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonUDSize, frameNode);
+    SearchModelNG::SetCancelImageIcon(frameNode, iconOptions.value());
 }
 
 void SearchModelStatic::SetSearchEnterKeyType(FrameNode* frameNode, const std::optional<TextInputAction>& valueOpt)
@@ -443,7 +489,12 @@ void SearchModelStatic::SetTextDecorationColor(FrameNode* frameNode, const std::
 void SearchModelStatic::SetSelectedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
     if (value.has_value()) {
-        SearchModelNG::SetSelectedBackgroundColor(frameNode, value.value());
+        auto selectedColor = value.value();
+        if (selectedColor.GetAlpha() == DEFAULT_ALPHA) {
+            // Default setting of 20% opacity
+            selectedColor = selectedColor.ChangeOpacity(DEFAULT_OPACITY);
+        }
+        SearchModelNG::SetSelectedBackgroundColor(frameNode, selectedColor);
         return;
     }
     CHECK_NULL_VOID(frameNode);
