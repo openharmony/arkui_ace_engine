@@ -6831,7 +6831,7 @@ int32_t SetEmbeddedComponentOption(ArkUI_NodeHandle node, const ArkUI_AttributeI
     if (node == nullptr || item == nullptr || item->object == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    auto* EmbeddedComponentOption = reinterpret_cast<ArkUIEmbeddedComponentItemHandle>(item->object);
+    auto* EmbeddedComponentOption = reinterpret_cast<ArkUIEmbeddedComponentOptionHandle>(item->object);
     GetFullImpl()->getNodeModifiers()->getEmbeddedComponentModifier()->setEmbeddedComponentOption(
         node->uiNodeHandle, EmbeddedComponentOption);
     return ERROR_CODE_NO_ERROR;

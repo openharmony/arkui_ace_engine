@@ -6311,10 +6311,10 @@ typedef enum {
 
     /**
      * @brief Defines the want used to start EmbeddedAbility.
-     * This attribute can be set, reset, and obtained as required through APIs.
+     * This attribute can be set as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * value[0].i32: want. The default value is <b>nullptr</b>.\n
+     * .object: The want of EmbeddedComponent, with parameter type {@AbilityBase_Want}. The default value is <b>nullptr</b>.\n
      *
      * @since 20
      */
@@ -6322,10 +6322,10 @@ typedef enum {
 
     /**
      * @brief Set onError and onTerminated callbacks for EMBEDDED_COMPONENT.
+     * This attribute can be set as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .object: OH_ArkUI_EmbeddedComponentItem_SetOnError set onError callback.</b> \n
-     * OH_ArkUI_EmbeddedComponentItem_SetOnTerminated set onTerminated callback.\n
+     * .object: The option for EmbeddedComponent, with parameter type {@ArkUI_EmbeddedComponentOption}.\n
      *
      * @since 20
      */

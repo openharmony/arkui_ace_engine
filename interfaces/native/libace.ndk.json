@@ -3329,18 +3329,18 @@
     },
     {
         "first_introduced": "20",
-        "name": "OH_ArkUI_EmbeddedComponentItem_Create"
+        "name": "OH_ArkUI_EmbeddedComponentOption_Create"
     },
     {
         "first_introduced": "20",
-        "name": "OH_ArkUI_EmbeddedComponentItem_Dispose"
+        "name": "OH_ArkUI_EmbeddedComponentOption_Dispose"
     },
     {
         "first_introduced": "20",
-        "name": "OH_ArkUI_EmbeddedComponentItem_SetOnError"
+        "name": "OH_ArkUI_EmbeddedComponentOption_SetOnError"
     },
     {
         "first_introduced": "20",
-        "name": "OH_ArkUI_EmbeddedComponentItem_SetOnTerminated"
+        "name": "OH_ArkUI_EmbeddedComponentOption_SetOnTerminated"
     }
 ]

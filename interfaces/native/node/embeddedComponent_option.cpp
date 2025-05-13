@@ -24,32 +24,32 @@
 extern "C" {
 #endif
 
-ArkUI_EmbeddedComponentItem* OH_ArkUI_EmbeddedComponentItem_Create()
+ArkUI_EmbeddedComponentOption* OH_ArkUI_EmbeddedComponentOption_Create()
 {
-    ArkUI_EmbeddedComponentItem* item =
-        new ArkUI_EmbeddedComponentItem { nullptr, nullptr };
-    return item;
+    ArkUI_EmbeddedComponentOption* option =
+        new ArkUI_EmbeddedComponentOption { nullptr, nullptr };
+    return option;
 }
 
-void OH_ArkUI_EmbeddedComponentItem_Dispose(ArkUI_EmbeddedComponentItem* item)
+void OH_ArkUI_EmbeddedComponentOption_Dispose(ArkUI_EmbeddedComponentOption* option)
 {
-    delete item;
+    delete option;
 }
 
-void OH_ArkUI_EmbeddedComponentItem_SetOnError(
-    ArkUI_EmbeddedComponentItem* item, void (*callback)(int32_t code, const char* name, const char* message))
+void OH_ArkUI_EmbeddedComponentOption_SetOnError(
+    ArkUI_EmbeddedComponentOption* option, void (*callback)(int32_t code, const char* name, const char* message))
 {
-    CHECK_NULL_VOID(item);
+    CHECK_NULL_VOID(option);
     CHECK_NULL_VOID(callback);
-    item->onError = reinterpret_cast<void*>(callback);
+    option->onError = reinterpret_cast<void*>(callback);
 }
 
-void OH_ArkUI_EmbeddedComponentItem_SetOnTerminated(
-    ArkUI_EmbeddedComponentItem* item, void (*callback)(int32_t code, AbilityBase_Want* want))
+void OH_ArkUI_EmbeddedComponentOption_SetOnTerminated(
+    ArkUI_EmbeddedComponentOption* option, void (*callback)(int32_t code, AbilityBase_Want* want))
 {
-    CHECK_NULL_VOID(item);
+    CHECK_NULL_VOID(option);
     CHECK_NULL_VOID(callback);
-    item->onTerminated = reinterpret_cast<void*>(callback);
+    option->onTerminated = reinterpret_cast<void*>(callback);
 }
 
 #ifdef __cplusplus

@@ -243,18 +243,18 @@ typedef struct ArkUI_ProgressLinearStyleOption ArkUI_ProgressLinearStyleOption;
 typedef struct ArkUI_CrossLanguageOption ArkUI_CrossLanguageOption;
 
 /**
- * @brief Defines the Ability base want.
+ * @brief Declares the Ability base want.
  *
  * @since 20
  */
 typedef struct AbilityBase_Want AbilityBase_Want;
 
 /**
- * @brief Define the EmbeddedComponentItem for the EmbeddedComponent.
+ * @brief Define the EmbeddedComponentOption for the EmbeddedComponent.
  *
  * @since 20
  */
-typedef struct ArkUI_EmbeddedComponentItem ArkUI_EmbeddedComponentItem;
+typedef struct ArkUI_EmbeddedComponentOption ArkUI_EmbeddedComponentOption;
 
 /**
  * @brief Provides the number types of ArkUI in the native code.
@@ -4977,43 +4977,43 @@ void OH_ArkUI_TextCascadePickerRangeContentArray_SetChildAtIndex(
 void OH_ArkUI_TextCascadePickerRangeContentArray_Destroy(ArkUI_TextCascadePickerRangeContentArray* handle);
 
 /**
- * @brief Create a configuration item for the EmbeddedComponentItem interface settings.
+ * @brief Create an object for the EmbeddedComponent option.
  *
- * @return EmbeddedComponent Item configuration item instance.
+ * @return A pointer to the object of the EmbeddedComponent option.
  * @since 20
  */
-ArkUI_EmbeddedComponentItem *OH_ArkUI_EmbeddedComponentItem_Create();
+ArkUI_EmbeddedComponentOption* OH_ArkUI_EmbeddedComponentOption_Create();
 
 /**
- * @brief Destroy the EmbeddedComponentItem instance.
+ * @brief Destroy the object by EmbeddedComponent option.
  *
- * @param item EmbeddedComponent Item  instance to be destroyed.
+ * @param option Pointer to the object by the EmbeddeComponent to be destroyed.
  * @since 20
  */
-void OH_ArkUI_EmbeddedComponentItem_Dispose(ArkUI_EmbeddedComponentItem *item);
+void OH_ArkUI_EmbeddedComponentOption_Dispose(ArkUI_EmbeddedComponentOption* option);
 
 /**
- * @brief Set the onError of EmbeddedComponentItem.
+ * @brief Set the onError of EmbeddedComponent.
  *
- * @param item EmbeddedComponentItem instance.
+ * @param option Pointer to the object option by the EmbeddedComponent.
  * @param code Common error information about the API invoking failure.
  * @param name Common error name information about the API invoking failure.
  * @param message Common error message information about the API invoking failure.
  * @since 20
  */
-void OH_ArkUI_EmbeddedComponentItem_SetOnError(
-    ArkUI_EmbeddedComponentItem *item, void (*callback)(int32_t code, const char *name, const char *message));
+void OH_ArkUI_EmbeddedComponentOption_SetOnError(
+    ArkUI_EmbeddedComponentOption* option, void (*callback)(int32_t code, const char* name, const char* message));
 
 /**
- * @brief Set the onTerminated of EmbeddedComponentItem.
+ * @brief Set the onTerminated of EmbeddedComponent.
  *
- * @param item EmbeddedComponentItem instance.
+ * @param option Pointer to the object option by the EmbeddedComponent.
  * @param code Result code returned when the EmbeddedUIExtensionAbility exits.
  * @param want Data returned when the EmbeddedUIExtensionAbility exits.
  * @since 20
  */
-void OH_ArkUI_EmbeddedComponentItem_SetOnTerminated(
-    ArkUI_EmbeddedComponentItem *item, void (*callback)(int32_t code, AbilityBase_Want *want));
+void OH_ArkUI_EmbeddedComponentOption_SetOnTerminated(
+    ArkUI_EmbeddedComponentOption* option, void (*callback)(int32_t code, AbilityBase_Want* want));
 #ifdef __cplusplus
 };
 #endif

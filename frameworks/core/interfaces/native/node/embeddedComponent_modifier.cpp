@@ -76,7 +76,7 @@ void DestoryCWantElement(AbilityBase_Element& element)
     }
 }
 
-void SetEmbeddedComponentOnError(FrameNode* frameNode, ArkUIEmbeddedComponentItemHandle option)
+void SetEmbeddedComponentOnError(FrameNode* frameNode, ArkUIEmbeddedComponentOptionHandle option)
 {
     if (option->onError == nullptr) {
         return;
@@ -100,7 +100,7 @@ void SetEmbeddedComponentOnError(FrameNode* frameNode, ArkUIEmbeddedComponentIte
     UIExtensionAdapter::SetEmbeddedComponentOnError(frameNode, std::move(onError));
 }
 
-void SetEmbeddedComponentOnTerminated(FrameNode* frameNode, ArkUIEmbeddedComponentItemHandle option)
+void SetEmbeddedComponentOnTerminated(FrameNode* frameNode, ArkUIEmbeddedComponentOptionHandle option)
 {
     if (option->onTerminated == nullptr) {
         return;
@@ -140,7 +140,7 @@ void SetEmbeddedComponentOnTerminated(FrameNode* frameNode, ArkUIEmbeddedCompone
     UIExtensionAdapter::SetEmbeddedComponentOnTerminated(frameNode, std::move(onTerminated));
 }
 
-void SetEmbeddedComponentOption(ArkUINodeHandle node, ArkUIEmbeddedComponentItemHandle option)
+void SetEmbeddedComponentOption(ArkUINodeHandle node, ArkUIEmbeddedComponentOptionHandle option)
 {
     if (option == nullptr) {
         return;
