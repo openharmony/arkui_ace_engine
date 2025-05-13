@@ -69,7 +69,7 @@ public:
                 24.0_vp);
             theme->arcNormalStartAngle_ = pattern->GetAttr<double>("scroll_bar_normal_start_angle", NORMAL_START_ANGLE);
             theme->arcActiveStartAngle_ = pattern->GetAttr<double>("scroll_bar_active_start_angle", ACTIVE_START_ANGLE);
-            theme->arcNormaMaxOffsetAngle_ = pattern->GetAttr<double>("scroll_bar_normal_max_offset_angle",
+            theme->arcNormalMaxOffsetAngle_ = pattern->GetAttr<double>("scroll_bar_normal_max_offset_angle",
                 NORMAL_MAX_OFFSET_ANGLE);
             theme->arcActiveMaxOffsetAngle_ = pattern->GetAttr<double>("scroll_bar_active_max_offset_angle",
                 ACTIVE_MAX_OFFSET_ANGLE);
@@ -203,9 +203,9 @@ public:
     {
         return arcActiveStartAngle_;
     }
-    double GetArcNormaMaxOffsetAngle() const
+    double GetArcNormalMaxOffsetAngle() const
     {
-        return arcNormaMaxOffsetAngle_;
+        return arcNormalMaxOffsetAngle_;
     }
     double GetArcActiveMaxOffsetAngle() const
     {
@@ -251,7 +251,7 @@ private:
     Dimension arcActiveBackgroundWidth_;
     double arcNormalStartAngle_ = 0.0;
     double arcActiveStartAngle_ = 0.0;
-    double arcNormaMaxOffsetAngle_ = 0.0;
+    double arcNormalMaxOffsetAngle_ = 0.0;
     double arcActiveMaxOffsetAngle_ = 0.0;
     Dimension arcNormalScrollBarWidth_;
     Dimension arcActiveScrollBarWidth_;
