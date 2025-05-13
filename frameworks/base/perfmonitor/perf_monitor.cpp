@@ -65,7 +65,7 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
         apsMonitor_->SetApsScene(sceneId, true);
     }
     PerfInterfaces::Start(sceneId, type, note);
-	if (sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH) {
+    if (sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH) {
         ResSchedReport::GetInstance().ResSchedDataReport("ability_or_page_switch_start");
     }
 }
@@ -91,7 +91,7 @@ void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
     }
 
     PerfInterfaces::End(sceneId, isRsRender);
-	if (sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH) {
+    if (sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH) {
         ResSchedReport::GetInstance().ResSchedDataReport("ability_or_page_switch_end");
     }
 }
