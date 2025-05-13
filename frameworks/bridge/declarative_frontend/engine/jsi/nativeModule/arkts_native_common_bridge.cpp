@@ -1913,6 +1913,59 @@ ArkUINativeModuleValue CommonBridge::ResetTransform(ArkUIRuntimeCallInfo *runtim
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue CommonBridge::SetTransform3D(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    if (firstArg->IsNull()) {
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(NUM_1);
+
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::NativePointerRef::New(vm, nullptr));
+
+    if (!jsValue->IsArray(vm)) {
+        nodeModifiers->getCommonModifier()->resetTransform3D(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
+    float matrix[matrix4Len];
+    Local<panda::ArrayRef> transArray = static_cast<Local<panda::ArrayRef>>(jsValue);
+    if (transArray->Length(vm) != matrix4Len) {
+        TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT,
+            "Invalid matrix parameter: Expected %{public}d elements, but transArray has %{public}u elements",
+            matrix4Len, transArray->Length(vm));
+        nodeModifiers->getCommonModifier()->resetTransform3D(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    for (size_t i = 0; i < transArray->Length(vm); i++) {
+        Local<JSValueRef> value = transArray->GetValueAt(vm, jsValue, i);
+        matrix[i] = value->ToNumber(vm)->Value();
+    }
+    nodeModifiers->getCommonModifier()->setTransform3D(nativeNode, matrix, matrix4Len);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetTransform3D(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (firstArg->IsNull()) {
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::NativePointerRef::New(vm, nullptr));
+    nodeModifiers->getCommonModifier()->resetTransform3D(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue CommonBridge::SetBorderColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();

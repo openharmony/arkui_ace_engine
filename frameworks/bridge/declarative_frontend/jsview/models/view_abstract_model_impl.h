@@ -130,6 +130,7 @@ public:
     void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) override;
     void SetRotate(float x, float y, float z, float angle, float perspective = 0.0f) override;
     void SetTransformMatrix(const std::vector<float>& matrix) override;
+    void SetTransform3DMatrix(const std::vector<float>& matrix) override {};
 
     void SetOpacity(double opacity, bool passThrough = false) override;
     void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) override;
