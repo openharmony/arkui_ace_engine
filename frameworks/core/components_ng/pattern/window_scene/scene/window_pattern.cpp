@@ -526,7 +526,17 @@ void WindowPattern::UpdateSnapshotWindowProperty()
     }
     auto imageLayoutProperty = snapshotWindow_->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    imageLayoutProperty->UpdateImageFit(isExitSplitOnBackground ? ImageFit::CONTAIN : ImageFit::COVER_TOP_LEFT);
+    auto isPersistentImageFit = Rosen::ScenePersistentStorage::HasKey(
+        "SetImageForRecent_" + std::to_string(session_->GetPersistentId()),
+        Rosen::ScenePersistentStorageType::MAXIMIZE_STATE);
+    if (isPersistentImageFit) {
+        int32_t imageFit = 0;
+        Rosen::ScenePersistentStorage::Get("SetImageForRecent_" + std::to_string(session_->GetPersistentId()),
+            Rosen::ScenePersistentStorageType::MAXIMIZE_STATE);
+        imageLayoutProperty->UpdateImageFit(static_cast<ImageFit>(imageFit));
+    } else {
+        imageLayoutProperty->UpdateImageFit(isExitSplitOnBackground ? ImageFit::CONTAIN : ImageFit::COVER_TOP_LEFT);
+    }
     snapshotWindow_->MarkModifyDone();
 }
 
