@@ -143,8 +143,12 @@ void DragDropEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset
     panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     auto sequenceOnActionCancel = [weakHandler = WeakPtr<DragDropInitiatingHandler>(dragDropInitiatingHandler_)](
                                       GestureEvent& info) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Drag gesture has been canceled");
         auto handler = weakHandler.Upgrade();
-        CHECK_NULL_VOID(handler);
+        if (!handler) {
+            TAG_LOGW(AceLogTag::ACE_DRAG, "FrameNode has been destroyed, resetting");
+            DragEventActuator::ResetDragStatus();
+        }
         handler->NotifySequenceOnActionCancel(info);
     };
     if (touchRestrict.sourceType == SourceType::MOUSE) {
