@@ -47,6 +47,7 @@ constexpr uint32_t HALF = 2;
 const Dimension FOCUS_WIDTH = 2.0_vp;
 constexpr float DISABLE_ALPHA = 0.6f;
 constexpr float MAX_PERCENT = 100.0f;
+constexpr float PICKER_MAXFONTSCALE = 1.0f;
 } // namespace
 
 void TextPickerPattern::OnAttachToFrameNode()
@@ -1639,16 +1640,19 @@ void TextPickerPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(pickerTheme);
-    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
-    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
-    auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
-    auto pickerProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
-    CHECK_NULL_VOID(pickerProperty);
-    pickerProperty->UpdateColor(GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
-    pickerProperty->UpdateDisappearColor(
-        GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
-    pickerProperty->UpdateSelectedColor(
-        GetTextProperties().selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
+    if (!SystemProperties::ConfigChangePerform()) {
+        auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
+        auto normalStyle = pickerTheme->GetOptionStyle(false, false);
+        auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
+        auto pickerProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
+        CHECK_NULL_VOID(pickerProperty);
+        pickerProperty->UpdateColor(
+            GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+        pickerProperty->UpdateDisappearColor(
+            GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+        pickerProperty->UpdateSelectedColor(
+            GetTextProperties().selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
+    }
     if (isPicker_) {
         return;
     }
@@ -1883,5 +1887,157 @@ std::string TextPickerPattern::GetTextPickerRange() const
         }
     }
     return result;
+}
+
+Dimension TextPickerPattern::ConvertFontScaleValue(const Dimension& fontSizeValue)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, fontSizeValue);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, fontSizeValue);
+
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
+    auto follow = pipeline->IsFollowSystem();
+    float fontScale = pipeline->GetFontScale();
+    if (NearZero(fontScale) || (fontSizeValue.Unit() == DimensionUnit::VP)) {
+        return fontSizeValue;
+    }
+    if (GreatOrEqualCustomPrecision(fontScale, PICKER_MAXFONTSCALE) && follow) {
+        fontScale = std::clamp(fontScale, 0.0f, maxAppFontScale);
+        if (!NearZero(fontScale)) {
+            return Dimension(fontSizeValue / fontScale);
+        }
+    }
+    return fontSizeValue;
+}
+
+void TextPickerPattern::UpdateDisappearTextStyle(const PickerTextStyle& textStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        if (textStyle.textColor.has_value()) {
+            pickerProperty->UpdateDisappearColor(textStyle.textColor.value());
+        }
+
+        if (textStyle.fontSize.has_value() && textStyle.fontSize->IsValid()) {
+            Dimension fontSize = textStyle.fontSize.value();
+            pickerProperty->UpdateDisappearFontSize(ConvertFontScaleValue(fontSize));
+        }
+
+        if (textStyle.fontFamily.has_value()) {
+            pickerProperty->UpdateDisappearFontFamily(textStyle.fontFamily.value());
+        }
+    }
+
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void TextPickerPattern::UpdateNormalTextStyle(const PickerTextStyle& textStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        if (textStyle.textColor.has_value()) {
+            pickerProperty->UpdateColor(textStyle.textColor.value());
+        }
+
+        if (textStyle.fontSize.has_value() && textStyle.fontSize->IsValid()) {
+            Dimension fontSize = textStyle.fontSize.value();
+            pickerProperty->UpdateFontSize(ConvertFontScaleValue(fontSize));
+        }
+
+        if (textStyle.fontFamily.has_value()) {
+            pickerProperty->UpdateFontFamily(textStyle.fontFamily.value());
+        }
+    }
+
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void TextPickerPattern::UpdateSelectedTextStyle(const PickerTextStyle& textStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        if (textStyle.textColor.has_value()) {
+            pickerProperty->UpdateSelectedColor(textStyle.textColor.value());
+        }
+
+        if (textStyle.fontSize.has_value() && textStyle.fontSize->IsValid()) {
+            Dimension fontSize = textStyle.fontSize.value();
+            pickerProperty->UpdateSelectedFontSize(ConvertFontScaleValue(fontSize));
+        }
+
+        if (textStyle.fontFamily.has_value()) {
+            pickerProperty->UpdateSelectedFontFamily(textStyle.fontFamily.value());
+        }
+    }
+
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void TextPickerPattern::UpdateDefaultTextStyle(const PickerTextStyle& textStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        if (textStyle.textColor.has_value()) {
+            pickerProperty->UpdateDefaultColor(textStyle.textColor.value());
+        }
+
+        if (textStyle.fontSize.has_value() && textStyle.fontSize->IsValid()) {
+            Dimension fontSize = textStyle.fontSize.value();
+            pickerProperty->UpdateDefaultFontSize(ConvertFontScaleValue(fontSize));
+        }
+
+        if (textStyle.fontFamily.has_value()) {
+            pickerProperty->UpdateDefaultFontFamily(textStyle.fontFamily.value());
+        }
+
+        if (textStyle.minFontSize.has_value() && textStyle.minFontSize->IsValid()) {
+            Dimension minFontSize = textStyle.minFontSize.value();
+            pickerProperty->UpdateDefaultMinFontSize(ConvertFontScaleValue(minFontSize));
+        }
+
+        if (textStyle.maxFontSize.has_value() && textStyle.maxFontSize->IsValid()) {
+            Dimension maxFontSize = textStyle.maxFontSize.value();
+            pickerProperty->UpdateDefaultMaxFontSize(ConvertFontScaleValue(maxFontSize));
+        }
+    }
+
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 } // namespace OHOS::Ace::NG

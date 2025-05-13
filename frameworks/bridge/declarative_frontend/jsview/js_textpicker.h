@@ -48,6 +48,7 @@ public:
     static bool ParseIconTextArray(const JSRef<JSObject>& paramObject,  ParseTextArrayParam& param);
     static bool ParseTextArray(const JSRef<JSObject>& paramObject, ParseTextArrayParam& param);
     static void ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle, const std::string& pos);
+    static void ParseTextStyleFontSize(const JSRef<JSVal>& fontSize, NG::PickerTextStyle& textStyle);
     static bool ParseMultiTextArray(const JSRef<JSObject>& paramObj, ParseTextArrayParam& param);
     static bool ParseCascadeTextArray(const JSRef<JSObject>& paramObj, std::vector<uint32_t>& selecteds,
         std::vector<std::string>& values, NG::TextCascadePickerOptionsAttr& attr);
