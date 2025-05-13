@@ -932,7 +932,8 @@ void ArcIndexerPattern::UpdateChildNodeStyle(int32_t index)
     auto childRenderContext = childNode->GetRenderContext();
     CHECK_NULL_VOID(childRenderContext);
     childRenderContext->SetClipToBounds(true);
-    if (arcArrayValue_[index].second != ArcIndexerBarState::INVALID) {
+    index = std::clamp(index, 0, static_cast<int32_t>(arcArrayValue_.size()) - 1);
+    if (!arcArrayValue_.empty() && arcArrayValue_[index].second != ArcIndexerBarState::INVALID) {
         float itemAngle = CalcArcItemAngle(index) + STR_DOT_ROTATE_ANGLE;
         childRenderContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, itemAngle, 0.0f));
     } else {
