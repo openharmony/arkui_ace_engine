@@ -25,7 +25,7 @@ namespace OHOS::Ace::Framework {
 
 class JSQRCode : public JSViewAbstract, public JSInteractableView {
 public:
-    static void Create(const std::string& value);
+    static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
     static void SetQRCodeColor(const JSCallbackInfo& info);
     static void SetBackgroundColor(const JSCallbackInfo& info);
