@@ -11,6 +11,7 @@
     "pages/ContextMenuTransition",
     "pages/MenuSymbolIcon",
     "pages/MenuHoverScale",
-    "pages/MenuTestLevel0_0"
+    "pages/MenuTestLevel0_0",
+    "pages/MenuTestLevel0_1"
   ]
 }
