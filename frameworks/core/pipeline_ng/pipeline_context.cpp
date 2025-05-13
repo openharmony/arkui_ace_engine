@@ -3329,11 +3329,9 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-injection" && params.size() > PARAM_NUM) {
 #ifndef IS_RELEASE_VERSION
         OnDumpInjection(params);
-#endif
     } else if (params[0] == "-injectionkeycode" && params.size() > PARAM_NUM) {
-        #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
         UiSessionManager::GetInstance()->SendCommand(params[1]);
-        #endif
+#endif
     }
     return true;
 }
