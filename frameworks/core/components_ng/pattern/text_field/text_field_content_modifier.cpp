@@ -766,7 +766,7 @@ void TextFieldContentModifier::DoAutoFillDraw(DrawingContext& context)
     }
     RSRect clipInnerRect = RSRect(clipRectX0, contentRect.GetY(), clipRectX1, clipRectY1);
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
-    auto textRectX = textFieldPattern->GetTextRect().GetX();
+    auto textRectX = autoFillController->GetAnimationTextRect().GetX();
     if (paragraph) {
         auto autoFillTextRectOffsetX = autoFillTextScrollOffset_->Get();
         RSRect clipRect;

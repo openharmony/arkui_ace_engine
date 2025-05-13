@@ -76,6 +76,11 @@ public:
         return autofillTextUtf16Value_;
     }
 
+    const RectF& GetAnimationTextRect() const
+    {
+        return animationTextRect_;
+    }
+
 private:
     void PlayAutoFillIconShowAnimation(const AutoFillContentLengthMode& mode);
     void PlayAutoFillDefaultCharAnimation(const AutoFillContentLengthMode& mode);
@@ -89,6 +94,7 @@ private:
     AutoFillContentLengthMode GetAutoFillContentLengthMode();
     float GetSpringAnimationResponse(const AutoFillContentLengthMode& mode);
     float GetSpringAnimationDamping(const AutoFillContentLengthMode& mode);
+    void UpdateAnimationTextRect();
 
     WeakPtr<Pattern> pattern_;
     RefPtr<Paragraph> autoFillParagraph_;
@@ -97,6 +103,7 @@ private:
     std::u16string autofillTextUtf16Value_;
     float autoFillFirstCharOffset_ = 0.0f;
     Color autoFillOriginTextColor_;
+    RectF animationTextRect_;
 };
 } // namespace OHOS::Ace::NG
 
