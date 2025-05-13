@@ -414,6 +414,8 @@ public:
         repeatDifference_ = repeatDifference;
     }
 
+    bool IsOutOfBoundary(bool useCurrentDelta = true) override;
+
 protected:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -421,7 +423,6 @@ protected:
 
     void MarkDirtyNodeSelf();
 
-    bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     bool OnScrollCallback(float offset, int32_t source) override;
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void SetChainAnimationToPosMap();
