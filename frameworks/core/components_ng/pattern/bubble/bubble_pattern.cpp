@@ -395,10 +395,19 @@ void BubblePattern::PopBubble()
     auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
     auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+    auto isTips = layoutProp->GetIsTips().value_or(false);
     if (showInSubWindow) {
-        SubwindowManager::GetInstance()->HidePopupNG(targetNodeId_);
+        if (isTips) {
+            SubwindowManager::GetInstance()->HideTipsNG(targetNodeId_, 0);
+        } else {
+            SubwindowManager::GetInstance()->HidePopupNG(targetNodeId_);
+        }
     } else {
-        overlayManager->HidePopup(targetNodeId_, popupInfo);
+        if (isTips) {
+            overlayManager->HideTips(targetNodeId_, popupInfo, 0);
+        } else {
+            overlayManager->HidePopup(targetNodeId_, popupInfo);
+        }
     }
 }
 
@@ -419,10 +428,19 @@ void BubblePattern::PopTipsBubble()
     auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
     auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+    auto isTips = layoutProp->GetIsTips().value_or(false);
     if (showInSubWindow) {
-        SubwindowManager::GetInstance()->HidePopupNG(targetNodeId_);
+        if (isTips) {
+            SubwindowManager::GetInstance()->HideTipsNG(targetNodeId_, 0);
+        } else {
+            SubwindowManager::GetInstance()->HidePopupNG(targetNodeId_);
+        }
     } else {
-        overlayManager->HidePopup(targetNodeId_, popupInfo);
+        if (isTips) {
+            overlayManager->HideTips(targetNodeId_, popupInfo, 0);
+        } else {
+            overlayManager->HidePopup(targetNodeId_, popupInfo);
+        }
     }
 }
 
