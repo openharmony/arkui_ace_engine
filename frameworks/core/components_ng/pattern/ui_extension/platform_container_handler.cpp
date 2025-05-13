@@ -63,10 +63,7 @@ bool PlatformContainerHandler::GetAccessibilityParentRect(HandlerReply& reply)
     if (host->GetTag() == V2::ISOLATED_COMPONENT_ETS_TAG) {
         getAccessibilityParentRect();
     } else if (host->GetTag() == V2::DYNAMIC_COMPONENT_ETS_TAG) {
-        auto pipeline = host->GetContextRefPtr();
-        CHECK_NULL_RETURN(pipeline, false);
-        pipeline->GetTaskExecutor()->PostSyncTask(
-            getAccessibilityParentRect, TaskExecutor::TaskType::UI, "ArkUIDCGetAccessibilityParentRect");
+        GetDCAccessibilityParentRect(reply);
     }
 
     return true;
@@ -81,6 +78,22 @@ bool PlatformContainerHandler::OnReciveData(const HandlerData& data, HandlerRepl
             break;
     }
     return false;
+}
+
+void PlatformContainerHandler::UpdateAccessibilityParentRectInfo(
+    const AccessibilityParentRectInfo& info)
+{
+    std::unique_lock<std::shared_mutex> lock(rectInfoMutex_);
+    rectInfo_ = info;
+}
+
+void PlatformContainerHandler::GetDCAccessibilityParentRect(HandlerReply& reply)
+{
+    std::shared_lock<std::shared_mutex> lock(rectInfoMutex_);
+    reply.SetParam<int32_t>("left", rectInfo_.left);
+    reply.SetParam<int32_t>("top", rectInfo_.top);
+    reply.SetParam<float>("scaleX", rectInfo_.scaleX);
+    reply.SetParam<float>("scaleY", rectInfo_.scaleY);
 }
 
 } // namespace OHOS::Ace::NG

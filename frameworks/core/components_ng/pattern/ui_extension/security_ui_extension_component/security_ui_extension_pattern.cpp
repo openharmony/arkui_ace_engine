@@ -906,7 +906,7 @@ void SecurityUIExtensionPattern::OnAccessibilityChildTreeDeregister() const
     sessionWrapper_->TransferAccessibilityChildTreeDeregister();
 }
 
-void SecurityUIExtensionPattern::OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId) const
+void SecurityUIExtensionPattern::OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId)
 {
     auto frameNode = frameNode_.Upgrade();
     CHECK_NULL_VOID(frameNode);

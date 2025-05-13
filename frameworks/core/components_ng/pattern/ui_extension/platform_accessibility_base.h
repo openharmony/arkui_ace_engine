@@ -29,7 +29,7 @@ public:
     virtual void OnAccessibilityChildTreeRegister(
         uint32_t windowId, int32_t treeId, int64_t accessibilityId) const = 0;
     virtual void OnAccessibilityChildTreeDeregister() const = 0;
-    virtual void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId) const = 0;
+    virtual void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId) = 0;
     virtual void OnAccessibilityDumpChildInfo(
         const std::vector<std::string>& params, std::vector<std::string>& info) const = 0;
 };

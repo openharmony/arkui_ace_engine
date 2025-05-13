@@ -121,7 +121,7 @@ public:
 
     void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) const override;
     void OnAccessibilityChildTreeDeregister() const override;
-    void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId) const override;
+    void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId) override;
     void OnAccessibilityDumpChildInfo(
         const std::vector<std::string>& params, std::vector<std::string>& info) const override;
     
