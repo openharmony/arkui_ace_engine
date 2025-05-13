@@ -670,14 +670,14 @@ HWTEST_F(ImagePatternTestNg, CheckCallback001, TestSize.Level1)
     callback2(sourceInfo);
     auto callback3 = imagePattern->CreateLoadFailCallback();
     std::string errorMsg = "erormsg";
-    int32_t errorCode = -1;
-    callback3(sourceInfo, errorMsg, errorCode);
+    ImageErrorInfo errorInfo;
+    callback3(sourceInfo, errorMsg, errorInfo);
     auto callback4 = imagePattern->CreateCompleteCallBackInDataReady();
     callback4(sourceInfo);
     currentSourceInfo.SetIsFromReset(true);
     ImageSourceInfo value1("testmsg");
     imageLayoutProperty->UpdateImageSourceInfo(value1);
-    callback3(sourceInfo, errorMsg, errorCode);
+    callback3(sourceInfo, errorMsg, errorInfo);
     frameNode->draggable_ = true;
     SystemProperties::debugEnabled_ = true;
     const RefPtr<RenderContext>& renderContext = frameNode->GetRenderContext();

@@ -91,7 +91,7 @@ public:
     // callbacks that will be called by ImageProvider when load process finishes
     void DataReadyCallback(const RefPtr<ImageObject>& imageObj);
     void SuccessCallback(const RefPtr<CanvasImage>& canvasImage);
-    void FailCallback(const std::string& errorMsg, int32_t errorCode = -1);
+    void FailCallback(const std::string& errorMsg, const ImageErrorInfo& errorInfo = {});
     const std::string GetCurrentLoadingState();
     void ResizableCalcDstSize();
     bool Downloadable();
@@ -226,7 +226,7 @@ private:
     std::function<void()> updateParamsCallback_ = nullptr;
 
     std::string errorMsg_;
-    int32_t errorCode_ = -1;
+    ImageErrorInfo errorInfo_;
     // to cancel MakeCanvasImage task
     std::string canvasKey_;
 

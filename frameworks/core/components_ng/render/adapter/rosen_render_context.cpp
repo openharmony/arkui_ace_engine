@@ -1496,7 +1496,7 @@ void RosenRenderContext::LoadParticleImage(const std::string& src, Dimension& wi
         renderContent->OnParticleImageLoaded(imageSrc, imagePtr);
     };
     auto loadingErrorCallback = [weak = WeakClaim(this), imageSrc = src](const ImageSourceInfo& sourceInfo,
-                                    const std::string& errorMsg, int32_t /* errorCode */) {
+                                    const std::string& errorMsg, const ImageErrorInfo& /* errorInfo */) {
         auto renderContent = weak.Upgrade();
         CHECK_NULL_VOID(renderContent);
         renderContent->OnParticleImageLoaded(imageSrc, nullptr);

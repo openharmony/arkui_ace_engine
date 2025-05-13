@@ -154,7 +154,8 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
 
 LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
 {
-    return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo, const std::string& errorMsg, int32_t errorCode) {
+    return [weak = WeakClaim(this)](
+               const ImageSourceInfo& sourceInfo, const std::string& errorMsg, const ImageErrorInfo& errorInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->isOrientationChange_ = false;
@@ -170,7 +171,7 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
             return;
         }
         if (!currentSourceInfo.IsFromReset()) {
-            pattern->OnImageLoadFail(errorMsg, errorCode);
+            pattern->OnImageLoadFail(errorMsg, errorInfo);
         }
     };
 }
@@ -528,7 +529,7 @@ void ImagePattern::UpdateOrientation()
     imageObj->SetOrientation(joinOrientation_);
 }
 
-void ImagePattern::OnImageLoadFail(const std::string& errorMsg, int32_t errorCode)
+void ImagePattern::OnImageLoadFail(const std::string& errorMsg, const ImageErrorInfo& errorInfo)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -537,7 +538,7 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg, int32_t errorCod
     auto imageEventHub = GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
     LoadImageFailEvent event(
-        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), errorMsg, errorCode);
+        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), errorMsg, errorInfo);
     imageEventHub->FireErrorEvent(event);
 }
 

@@ -1627,10 +1627,10 @@ void ImageModelNGTest001_MixedProperties01(ImageModelNG &image)
     EXPECT_EQ(successEvent.GetComponentHeight(), loadImageSuccessEvent.GetComponentHeight());
     EXPECT_EQ(successEvent.GetLoadingStatus(), loadImageSuccessEvent.GetLoadingStatus());
 
-    LoadImageFailEvent failEvent(IMAGE_COMPONENTWIDTH_DEFAULT, IMAGE_COMPONENTHEIGHT_DEFAULT, "", -1);
+    LoadImageFailEvent failEvent(IMAGE_COMPONENTWIDTH_DEFAULT, IMAGE_COMPONENTHEIGHT_DEFAULT, "", {});
     auto onError = [&failEvent](const LoadImageFailEvent& info) { failEvent = info; };
     ImageModelNG::SetOnError(frameNode, std::move(onError));
-    LoadImageFailEvent loadImageFailEvent(WIDTH, HEIGHT, "image load error!", -1);
+    LoadImageFailEvent loadImageFailEvent(WIDTH, HEIGHT, "image load error!", {});
     eventHub->FireErrorEvent(loadImageFailEvent);
     EXPECT_EQ(failEvent.GetErrorMessage(), loadImageFailEvent.GetErrorMessage());
     EXPECT_EQ(failEvent.GetComponentWidth(), loadImageFailEvent.GetComponentWidth());
@@ -1841,7 +1841,7 @@ void ImageModelNGFailedTest001_Properties02(ImageModelNG &image)
     auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     auto onError = [&testData](const LoadImageFailEvent& info) { testData = 1; };
     image.SetOnError(std::move(onError));
-    eventHub->FireErrorEvent(LoadImageFailEvent(WIDTH, HEIGHT, "image load error!", -1));
+    eventHub->FireErrorEvent(LoadImageFailEvent(WIDTH, HEIGHT, "image load error!", {}));
     EXPECT_NE(testData, 1);
 
     auto onComplete = [&testData](const LoadImageSuccessEvent& info) { testData = 1; };
