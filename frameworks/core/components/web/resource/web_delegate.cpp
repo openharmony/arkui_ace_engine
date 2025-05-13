@@ -4814,6 +4814,7 @@ void WebDelegate::OnPageStarted(const std::string& param)
     auto pattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     pattern->DestroyAnalyzerOverlay();
+    pattern->OnTooltip("");
 }
 
 void WebDelegate::OnPageFinished(const std::string& param)
