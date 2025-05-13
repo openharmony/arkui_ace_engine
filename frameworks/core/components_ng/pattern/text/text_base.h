@@ -263,6 +263,8 @@ public:
     {
         return (sourceTool == SourceTool::MOUSE || sourceTool == SourceTool::TOUCHPAD);
     }
+    std::u16string TruncateText(const std::u16string& text, const size_t& length) const;
+    size_t CountUtf16Chars(const std::u16string& s);
 
 protected:
     TextSelector textSelector_;
