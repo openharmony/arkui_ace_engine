@@ -50,6 +50,7 @@ public:
     std::optional<RectF> GetAppBarRect();
     void OnMenuClick();
     void OnCloseClick();
+    void RequestAtomicServiceTerminate();
     void CreateServicePanel(const std::string& appGalleryBundleName, const std::string& abilityName,
         std::map<std::string, std::string>& params);
     static void BuildAppbar(RefPtr<PipelineBase> pipleline);

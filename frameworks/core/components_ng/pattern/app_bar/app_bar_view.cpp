@@ -518,4 +518,22 @@ void AppBarView::OnCloseClick()
         windowManager->WindowPerformBack();
     }
 }
+
+void AppBarView::RequestAtomicServiceTerminate()
+{
+    auto atom = atomicService_.Upgrade();
+    CHECK_NULL_VOID(atom);
+    auto pipeline = atom->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "AppBar RequestAtomicServiceTerminate");
+    if (container->IsUIExtensionWindow()) {
+        container->RequestAtomicServiceTerminate();
+    } else {
+        auto windowManager = pipeline->GetWindowManager();
+        CHECK_NULL_VOID(windowManager);
+        windowManager->WindowPerformBack();
+    }
+}
 } // namespace OHOS::Ace::NG
