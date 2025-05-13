@@ -3662,7 +3662,7 @@ bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, St
     dragPointerEvent.windowX = pointerItem.GetWindowX();
     dragPointerEvent.windowY = pointerItem.GetWindowY();
     dragPointerEvent.deviceId = pointerItem.GetDeviceId();
-    dragPointerEvent.sourceTool = static_cast<SourceTool>(GetSourceTool(pointerItem.GetToolType()));
+    dragPointerEvent.sourceTool = static_cast<SourceTool>(pointerItem.GetToolType());
     dragPointerEvent.displayId = currentPointerEvent->GetTargetDisplayId();
     dragPointerEvent.pointerEventId = currentPointerEvent->GetId();
     dragPointerEvent.originId = pointerItem.GetOriginPointerId();
