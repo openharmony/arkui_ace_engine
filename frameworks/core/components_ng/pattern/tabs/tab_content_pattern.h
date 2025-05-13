@@ -202,6 +202,16 @@ public:
         return tabBarParam_;
     }
 
+    void UpdateTabBarParamText(const std::string &text)
+    {
+        tabBarParam_.SetText(text);
+    }
+
+    void UpdateTabBarParamIcon(const std::string &icon)
+    {
+        tabBarParam_.SetIcon(icon);
+    }
+
     void SetCustomTabBar(FrameNode* node)
     {
         tabBarParam_.SetCustomNode(node);
@@ -383,6 +393,14 @@ public:
                 break;
             }
         }
+    }
+
+    void OnColorModeChange(uint32_t colorMode) override
+    {
+        Pattern::OnColorModeChange(colorMode);
+        auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetHost());
+        CHECK_NULL_VOID(tabContentNode);
+        tabContentNode->UpdataTabBarItem();
     }
 
 private:

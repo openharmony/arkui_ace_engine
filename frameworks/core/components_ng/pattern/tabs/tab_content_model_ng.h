@@ -36,6 +36,7 @@ public:
     void Create(std::function<void()>&& deepRenderFunc) override;
     void Create() override;
     void Pop() override;
+    void CreateWithResourceObj(TabContentJsType jsType, const RefPtr<ResourceObject>& resObj) override;
     void SetTabBar(const std::optional<std::string> &text, const std::optional<std::string> &icon,
         const std::optional<TabBarSymbol> &tabBarSymbol, TabBarBuilderFunc &&builder, bool useContentOnly) override;
     void SetTabBarWithContent(const RefPtr<NG::UINode>& content) override;

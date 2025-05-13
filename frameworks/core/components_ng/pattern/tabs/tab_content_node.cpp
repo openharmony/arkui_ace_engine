@@ -208,4 +208,9 @@ std::string TabContentNode::ConvertLayoutModeToString(LayoutMode layoutMode) con
     }
     return "LayoutMode.AUTO";
 }
+
+void TabContentNode::UpdataTabBarItem()
+{
+    TabContentModelNG::AddTabBarItem(Referenced::Claim(this), DEFAULT_NODE_SLOT, true);
+}
 } // namespace OHOS::Ace::NG
