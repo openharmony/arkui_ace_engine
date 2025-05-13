@@ -51,6 +51,8 @@ using TouchInterceptFunc = std::function<NG::HitTestMode(TouchEventInfo&)>;
 
 using ShouldBuiltInRecognizerParallelWithFunc = std::function<RefPtr<NGGestureRecognizer>(
     const RefPtr<NGGestureRecognizer>&, const std::vector<RefPtr<NGGestureRecognizer>>&)>;
+using TouchTestDoneCallback = std::function<void(
+    const std::shared_ptr<BaseGestureEvent>&, const std::list<RefPtr<NGGestureRecognizer>>&)>;
 
 struct TouchTestInfo {
     PointF windowPoint;
@@ -207,6 +209,9 @@ public:
     void SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
     GestureRecognizerJudgeFunc GetOnGestureRecognizerJudgeBegin() const;
     void SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& gestureJudgeFunc);
+    TouchTestDoneCallback GetOnTouchTestDoneCallbackForInner() const;
+    void SetOnTouchTestDoneCallbackForInner(TouchTestDoneCallback&& touchTestDoneFunc);
+    GetEventTargetImpl CreateGetEventTargetImpl() const;
     GestureJudgeFunc GetOnGestureJudgeBeginCallback() const;
     GestureJudgeFunc GetOnGestureJudgeNativeBeginCallback() const;
     // When the event param is undefined, it will clear the callback.
@@ -481,6 +486,8 @@ private:
 
     GestureJudgeFunc gestureJudgeFunc_;
     GestureJudgeFunc gestureJudgeNativeFunc_;
+
+    TouchTestDoneCallback touchTestDoneCallbackForInner_;
 
     TouchInterceptFunc touchInterceptFunc_;
 

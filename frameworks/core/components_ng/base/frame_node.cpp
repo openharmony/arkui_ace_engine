@@ -2840,6 +2840,18 @@ void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetCompone
     }
 }
 
+void FrameNode::AddNodeToRegisterTouchTest()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto eventMgr = context->GetEventManager();
+    CHECK_NULL_VOID(eventMgr);
+    auto gestureEventHub = GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    CHECK_NULL_VOID(gestureEventHub->GetOnTouchTestDoneCallbackForInner());
+    eventMgr->AddTouchDoneFrameNode(AceType::WeakClaim(this));
+}
+
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
     ResponseLinkResult& responseLinkResult, bool isDispatch)
@@ -3018,6 +3030,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
 
     AddJudgeToTargetComponent(targetComponent);
+    AddNodeToRegisterTouchTest();
 
     // first update HitTestResult by children status.
     if (consumed) {

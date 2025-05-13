@@ -518,9 +518,25 @@ void GestureEventHub::SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc
     gestureJudgeFunc_ = std::move(gestureJudgeFunc);
 }
 
+TouchTestDoneCallback GestureEventHub::GetOnTouchTestDoneCallbackForInner() const
+{
+    return touchTestDoneCallbackForInner_;
+}
+
+void GestureEventHub::SetOnTouchTestDoneCallbackForInner(TouchTestDoneCallback&& touchTestDoneFunc)
+{
+    touchTestDoneCallbackForInner_ = touchTestDoneFunc;
+}
+
 void GestureEventHub::SetOnTouchIntercept(TouchInterceptFunc&& touchInterceptFunc)
 {
     touchInterceptFunc_ = std::move(touchInterceptFunc);
+}
+
+GetEventTargetImpl GestureEventHub::CreateGetEventTargetImpl() const
+{
+    auto eventHub = eventHub_.Upgrade();
+    return eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
 }
 
 TouchInterceptFunc GestureEventHub::GetOnTouchIntercept() const

@@ -55,6 +55,16 @@ bool NGGestureRecognizer::ShouldResponse()
     return true;
 }
 
+bool NGGestureRecognizer::IsPreventDefault() const
+{
+    return preventDefault_;
+}
+
+void NGGestureRecognizer::SetPreventDefault(bool preventDefault)
+{
+    preventDefault_ = preventDefault;
+}
+
 bool NGGestureRecognizer::IsAllowedType(SourceTool type)
 {
     // allow all types by default
@@ -89,6 +99,9 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
         return true;
     }
     if (!ShouldResponse() || bridgeMode_) {
+        return true;
+    }
+    if (IsPreventDefault()) {
         return true;
     }
     auto multiFingerRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(Claim(this));
@@ -163,6 +176,9 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
         return true;
     }
     if (!ShouldResponse() || bridgeMode_) {
+        return true;
+    }
+    if (IsPreventDefault()) {
         return true;
     }
     switch (event.action) {
