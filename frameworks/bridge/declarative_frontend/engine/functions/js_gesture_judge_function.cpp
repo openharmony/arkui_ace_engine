@@ -175,6 +175,13 @@ void JsGestureJudgeFunction::SetUniqueAttributes(
             }
             break;
         }
+        case OHOS::Ace::GestureTypeName::TAP_GESTURE: {
+            auto tapGestureEvent = TypeInfoHelper::DynamicCast<TapGestureEvent>(info.get());
+            if (tapGestureEvent && !tapGestureEvent->GetFingerList().empty()) {
+                obj->SetPropertyObject("tapLocation", GetTapLocation(tapGestureEvent->GetFingerList().back()));
+            }
+            break;
+        }
         default:
             break;
     }

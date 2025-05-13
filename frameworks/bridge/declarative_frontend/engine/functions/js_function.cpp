@@ -45,6 +45,23 @@ JsWeakFunction::JsWeakFunction(const JSRef<JSObject>& jsObject, const JSRef<JSFu
     jsWeakFunction_ = jsFunction;
 }
 
+JSRef<JSObject> JsFunction::GetTapLocation(const FingerInfo& fingerInfo)
+{
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    JSRef<JSObject> tapLocation = objectTemplate->NewInstance();
+    const OHOS::Ace::Offset& localOffset = fingerInfo.localLocation_;
+    const OHOS::Ace::Offset& globalOffset = fingerInfo.globalLocation_;
+    const OHOS::Ace::Offset& screenOffset = fingerInfo.screenLocation_;
+    tapLocation->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+    tapLocation->SetProperty<double>("windowY", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+    tapLocation->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
+    tapLocation->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
+    tapLocation->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
+    tapLocation->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
+
+    return tapLocation;
+}
+
 JsFunction::~JsFunction() {}
 
 void JsFunctionBase::Execute(const JSRef<JSObject>& jsParamsObject)
