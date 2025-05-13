@@ -32,7 +32,7 @@ public:
     {
         std::shared_ptr<UIContent> uiContent = nullptr;
         std::shared_ptr<FormRenderer> formRenderer = nullptr;
-        std::weak_ptrOHOS::AppExecFwk::EventHandler eventHandler;
+        std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler;
         sptr<FormRendererDispatcherImpl> renderDispatcher =
             new FormRendererDispatcherImpl(uiContent, formRenderer, eventHandler);
         return renderDispatcher;
