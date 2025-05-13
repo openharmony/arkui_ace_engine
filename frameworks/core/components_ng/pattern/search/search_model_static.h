@@ -33,12 +33,14 @@ public:
     static void SetSearchImageIcon(FrameNode* frameNode, std::optional<IconOptions>& iconOptions);
     static void SetSearchButtonFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetSearchButtonFontColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetSearchButtonAutoDisable(FrameNode* frameNode, const std::optional<bool>& needToDisable);
     static void SetTextColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetCopyOption(FrameNode* frameNode, const std::optional<CopyOptions>& copyOptionOpt);
     static void SetTextFont(FrameNode* frameNode, const std::optional<Font>& font);
     static void SetPlaceholderColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetCaretWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetCaretColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void ResetCaretColor(FrameNode* frameNode);
     static void SetTextAlign(FrameNode* frameNode, const std::optional<TextAlign>& valueOpt);
     static void SetMinFontScale(FrameNode* frameNode, const std::optional<float>& value);
     static void SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value);
@@ -60,6 +62,9 @@ public:
     static void SetSelectionMenuHidden(FrameNode* frameNode, std::optional<bool>& selectionMenuHidden);
     static void SetEnablePreviewText(FrameNode* frameNode, std::optional<bool>& enablePreviewText);
     static void SetEnableHapticFeedback(FrameNode* frameNode, std::optional<bool>& state);
+    static RefPtr<SearchTheme> GetTheme(const FrameNode *frameNode);
+    static void SetSearchDefaultIcon(FrameNode *frameNode);
+    static void SetCancelDefaultIcon(FrameNode* frameNode);
 
 private:
 

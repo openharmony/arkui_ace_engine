@@ -1652,7 +1652,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
     public searchButton(value: string | undefined, option?: SearchButtonOptions): this {
         if (this.checkPriority("searchButton")) {
             const value_casted = value as (string | undefined)
-            const option_casted = option as (SearchButtonOptions)
+            const option_casted = option as (SearchButtonOptions | undefined);
             this.getPeer()?.searchButtonAttribute(value_casted, option_casted)
             return this
         }
@@ -1662,7 +1662,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
     public inputFilter(value: ResourceStr | undefined, error?: ((breakpoints: string) => void)): this {
         if (this.checkPriority("inputFilter")) {
             const value_casted = value as (ResourceStr | undefined)
-            const error_casted = error as (((breakpoints: string) => void))
+            const error_casted = error as (((breakpoints: string) => void) | undefined);
             this.getPeer()?.inputFilterAttribute(value_casted, error_casted)
             return this
         }

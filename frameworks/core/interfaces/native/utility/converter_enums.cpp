@@ -727,7 +727,7 @@ void AssignCast(std::optional<TextInputType>& dst, const Ark_SearchType& src)
         case ARK_SEARCH_TYPE_PHONE_NUMBER: dst = TextInputType::PHONE; break;
         case ARK_SEARCH_TYPE_EMAIL: dst = TextInputType::EMAIL_ADDRESS; break;
         case ARK_SEARCH_TYPE_NUMBER_DECIMAL: dst = TextInputType::NUMBER_DECIMAL; break;
-        case ARK_SEARCH_TYPE_URL: dst = TextInputType::JS_ENUM_URL; break;
+        case ARK_SEARCH_TYPE_URL: dst = TextInputType::URL; break;
         default: LOGE("Unexpected enum value in Ark_TextAreaType: %{public}d", src);
     }
 }
