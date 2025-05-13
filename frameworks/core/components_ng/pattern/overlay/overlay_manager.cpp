@@ -3810,7 +3810,7 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
         return;
     }
 
-    auto pipeline = PipelineContext::GetMainPipelineContext();
+    auto pipeline = GetMainPipelineContext(dialogNode);
     CHECK_NULL_VOID(pipeline);
     ContainerScope scope(pipeline->GetInstanceId());
     auto mainPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
@@ -3848,6 +3848,31 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
     CallOnHideDialogCallback();
     FocusNextOrderNode(topFocusableNode);
     SendAccessibilityEventToNextOrderNode(topOrderNode);
+}
+
+RefPtr<PipelineContext> OverlayManager::GetMainPipelineContext(int32_t containerId)
+{
+    if (containerId >= MIN_SUBCONTAINER_ID && containerId < MIN_PLUGIN_SUBCONTAINER_ID) {
+        containerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+    }
+    auto container = AceEngine::Get().GetContainer(containerId);
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return DynamicCast<PipelineContext>(pipeline);
+}
+
+RefPtr<PipelineContext> OverlayManager::GetMainPipelineContext(const RefPtr<FrameNode>& node)
+{
+    if (!node) {
+        auto containerId = Container::CurrentId();
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "Get main pipeline context. currentContainerId: %{public}d", containerId);
+        return GetMainPipelineContext(containerId);
+    }
+    auto context = node->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto containerId = context->GetInstanceId();
+    return GetMainPipelineContext(containerId);
 }
 
 bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter)
