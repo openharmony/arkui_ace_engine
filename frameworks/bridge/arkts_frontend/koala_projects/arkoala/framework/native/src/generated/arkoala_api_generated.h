@@ -18062,6 +18062,7 @@ typedef struct Opt_MenuOutlineOptions {
     Ark_MenuOutlineOptions value;
 } Opt_MenuOutlineOptions;
 typedef struct Ark_MoreButtonOptions {
+    Opt_ResourceColor backgroundColor;
     Opt_BlurStyle backgroundBlurStyle;
     Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
     Opt_BackgroundEffectOptions backgroundEffect;

@@ -39,6 +39,157 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
+{
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(text);
+    textLayoutProperty->UpdateFontSize(TEXT_FONT_SIZE);
+    textLayoutProperty->UpdateTextColor(TEXT_COLOR);
+    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    return textNode;
+}
+
+RefPtr<FrameNode> CreateBarItemIconNode(const std::string& src)
+{
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    ImageSourceInfo info(src);
+    auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_RETURN(iconNode, nullptr);
+    auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_RETURN(theme, nullptr);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_RETURN(navigationGroupNode, nullptr);
+    auto hub = navigationGroupNode->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(hub, nullptr);
+    if (!hub->IsEnabled()) {
+        info.SetFillColor(theme->GetMenuIconColor().BlendOpacity(theme->GetAlphaDisabled()));
+    } else {
+        info.SetFillColor(theme->GetMenuIconColor());
+    }
+    imageLayoutProperty->UpdateImageSourceInfo(info);
+
+    auto iconSize = theme->GetMenuIconSize();
+    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+    iconNode->MarkModifyDone();
+    return iconNode;
+}
+void UpdateBarItemNodeWithItem(const RefPtr<BarItemNode>& barItemNode, const BarItem& barItem)
+{
+    if (barItem.text.has_value() && !barItem.text.value().empty() && !barItemNode->IsHideText()) {
+        auto textNode = CreateBarItemTextNode(barItem.text.value());
+        CHECK_NULL_VOID(textNode);
+        barItemNode->SetTextNode(textNode);
+        barItemNode->AddChild(textNode);
+    }
+    if (barItem.icon.has_value() && !barItem.icon.value().empty()) {
+        auto iconNode = CreateBarItemIconNode(barItem.icon.value());
+        barItemNode->SetIconNode(iconNode);
+        barItemNode->AddChild(iconNode);
+    }
+    if (barItem.action) {
+        auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetItemAction(barItem.action);
+    }
+    auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
+    barItemNode->MarkModifyDone();
+}
+void UpdateOldBarItems(const RefPtr<UINode>& oldBarContainer, const std::vector<BarItem>& newBarItems)
+{
+    auto oldBarItems = oldBarContainer->GetChildren();
+    auto prevChildrenSize = static_cast<int32_t>(oldBarItems.size());
+    auto newChildrenSize = static_cast<int32_t>(newBarItems.size());
+    auto oldIter = oldBarItems.begin();
+    auto newIter = newBarItems.begin();
+    // if old container has m items and incoming array has n items
+    // we update first min(m, n) items in the old container
+    for (int32_t i = 0; i < std::min(prevChildrenSize, newChildrenSize); i++) {
+        do {
+            auto oldBarItem = AceType::DynamicCast<BarItemNode>(*oldIter);
+            BarItem newBarItem = *newIter;
+            if (!oldBarItem) {
+                break;
+            }
+            if (newBarItem.text.has_value()) {
+                oldBarItem->UpdateText(newBarItem.text.value());
+                if (oldBarItem->GetTextNode()) {
+                    auto textNode = AceType::DynamicCast<FrameNode>(oldBarItem->GetTextNode());
+                    CHECK_NULL_VOID(textNode);
+                    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+                    CHECK_NULL_VOID(textLayoutProperty);
+                    textLayoutProperty->UpdateContent(newBarItem.text.value());
+                    textNode->MarkModifyDone();
+                } else {
+                    auto textNode = CreateBarItemTextNode(newBarItem.text.value());
+                    oldBarItem->SetTextNode(textNode);
+                    oldBarItem->AddChild(textNode);
+                    oldBarItem->MarkModifyDone();
+                }
+            } else {
+                oldBarItem->ResetText();
+                if (oldBarItem->GetTextNode()) {
+                    auto textNode = AceType::DynamicCast<FrameNode>(oldBarItem->GetTextNode());
+                    CHECK_NULL_VOID(textNode);
+                    oldBarItem->RemoveChild(textNode);
+                }
+            }
+            if (newBarItem.icon.has_value()) {
+                oldBarItem->UpdateIconSrc(newBarItem.icon.value());
+                if (oldBarItem->GetIconNode()) {
+                    auto iconNode = AceType::DynamicCast<FrameNode>(oldBarItem->GetIconNode());
+                    CHECK_NULL_VOID(iconNode);
+                    auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+                    CHECK_NULL_VOID(imageLayoutProperty);
+                    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(newBarItem.icon.value()));
+                    iconNode->MarkModifyDone();
+                } else {
+                    auto iconNode = CreateBarItemIconNode(newBarItem.icon.value());
+                    oldBarItem->SetIconNode(iconNode);
+                    oldBarItem->AddChild(iconNode);
+                    oldBarItem->MarkModifyDone();
+                }
+            } else {
+                oldBarItem->ResetIconSrc();
+                if (oldBarItem->GetIconNode()) {
+                    auto iconNode = AceType::DynamicCast<FrameNode>(oldBarItem->GetIconNode());
+                    CHECK_NULL_VOID(iconNode);
+                    oldBarItem->RemoveChild(iconNode);
+                }
+            }
+        } while (false);
+        oldIter++;
+        newIter++;
+    }
+    // if m > n, we remove (m - n) children from the back of old container
+    if (prevChildrenSize > newChildrenSize) {
+        for (int32_t i = 0; i < prevChildrenSize - newChildrenSize; i++) {
+            oldBarContainer->RemoveChild(oldBarItems.back());
+            oldBarItems.pop_back();
+        }
+    } else if (prevChildrenSize < newChildrenSize) {
+        // if m < n, we add (n - m) children created by info in new item list
+        for (int32_t i = 0; i < newChildrenSize - prevChildrenSize; i++) {
+            auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+            auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+                V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
+            UpdateBarItemNodeWithItem(barItemNode, *newIter);
+            oldBarContainer->AddChild(barItemNode);
+            newIter++;
+        }
+    }
+    auto container = AceType::DynamicCast<TitleBarNode>(oldBarContainer);
+    CHECK_NULL_VOID(container);
+    container->MarkModifyDone();
+}
+
 void SetNeedResetTitleProperty(const RefPtr<FrameNode>& titleBarNode)
 {
     CHECK_NULL_VOID(titleBarNode);
@@ -426,6 +577,78 @@ void NavigationModelStatic::SetTitlebarOptions(FrameNode* frameNode, NavigationT
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titleBarPattern);
     titleBarPattern->SetTitlebarOptions(std::move(opt));
+}
+
+void NavigationModelStatic::SetToolBarItems(FrameNode* frameNode, std::vector<NG::BarItem>&& toolBarItems)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    if (navBarNode->GetPrevToolBarIsCustom().value_or(false)) {
+        navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
+    } else {
+        if (navBarNode->GetPreToolBarNode() &&
+            static_cast<int32_t>(navBarNode->GetPreToolBarNode()->GetChildren().size()) != 0) {
+            UpdateOldBarItems(navBarNode->GetPreToolBarNode(), toolBarItems);
+            navBarNode->SetToolBarNode(navBarNode->GetPreToolBarNode());
+            navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::NONE);
+            return;
+        }
+        navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
+    }
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
+    CHECK_NULL_VOID(toolBarNode);
+    auto rowProperty = toolBarNode->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(rowProperty);
+    rowProperty->UpdateMainAxisAlign(FlexAlign::SPACE_EVENLY);
+    for (const auto& toolBarItem : toolBarItems) {
+        int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
+        barItemNode->SetIsHideItemText(toolBarNode->IsHideItemText());
+        UpdateBarItemNodeWithItem(barItemNode, toolBarItem);
+        toolBarNode->AddChild(barItemNode);
+    }
+    bool hasValidContent = !toolBarNode->GetChildren().empty();
+    toolBarNode->SetHasValidContent(hasValidContent);
+    rowProperty->UpdateVisibility(hasValidContent ? VisibleType::VISIBLE : VisibleType::GONE);
+    navBarNode->SetToolBarNode(toolBarNode);
+    navBarNode->SetPreToolBarNode(toolBarNode);
+    navBarNode->UpdatePrevToolBarIsCustom(false);
+}
+
+void NavigationModelStatic::SetToolbarConfiguration(FrameNode* frameNode, std::vector<NG::BarItem>&& toolBarItems)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    bool enabled = false;
+    auto hub = navigationGroupNode->GetEventHub<EventHub>();
+    if (hub) {
+        enabled = hub->IsEnabled();
+    }
+    FieldProperty fieldProperty;
+    fieldProperty.parentId = navigationGroupNode->GetInspectorId().value_or("");
+    fieldProperty.field = NG::NAV_FIELD;
+    NavigationToolbarUtil::SetToolbarConfiguration(navBarNode, std::move(toolBarItems), enabled, fieldProperty);
+}
+
+void NavigationModelStatic::SetToolbarMorebuttonOptions(FrameNode* frameNode, MoreButtonOptions&& opt)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    NavigationToolbarUtil::SetToolbarMoreButtonOptions(navBarNode, std::move(opt));
+}
+
+void NavigationModelStatic::SetToolbarOptions(FrameNode* frameNode, NavigationToolbarOptions&& opt)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    NavigationToolbarUtil::SetToolbarOptions(navBarNode, std::move(opt));
 }
 
 void NavigationModelStatic::ParseCommonTitle(
