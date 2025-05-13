@@ -3544,6 +3544,90 @@ class NextFocusModifier extends ModifierWithKey<FocusMovement> {
   }
 }
 
+class VisualEffectModifier extends ModifierWithKey<VisualEffect> {
+  constructor(value: VisualEffect) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('visualEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetVisualEffect(node);
+    } else {
+      getUINativeModule().common.setVisualEffect(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !(this.value === this.stageValue);
+  }
+}
+
+class BackgroundFilterModifier extends ModifierWithKey<Filter> {
+  constructor(value: Filter) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('backgroundFilter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundFilter(node);
+    } else {
+      getUINativeModule().common.setBackgroundFilter(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !(this.value === this.stageValue);
+  }
+}
+
+class ForegroundFilterModifier extends ModifierWithKey<Filter> {
+  constructor(value: Filter) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('foregroundFilter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetForegroundFilter(node);
+    } else {
+      getUINativeModule().common.setForegroundFilter(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !(this.value === this.stageValue);
+  }
+}
+
+class CompositingFilterModifier extends ModifierWithKey<Filter> {
+  constructor(value: Filter) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('compositingFilter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetCompositingFilter(node);
+    } else {
+      getUINativeModule().common.setCompositingFilter(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !(this.value === this.stageValue);
+  }
+}
+
+class FreezeModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('freeze');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetFreeze(node);
+    } else {
+      getUINativeModule().common.setFreeze(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType): boolean => typeof val === 'string';
@@ -5189,6 +5273,38 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
   nextFocus(value:FocusMovement):this {
     modifierWithKey(this._modifiersWithKeys, NextFocusModifier.identity, NextFocusModifier, value);
+  }
+  visualEffect(effect: VisualEffect): this {
+    modifierWithKey(this._modifiersWithKeys, VisualEffectModifier.identity, VisualEffectModifier, effect);
+    return this;
+  }
+  backgroundFilter(filter: Filter): this {
+    modifierWithKey(this._modifiersWithKeys, BackgroundFilterModifier.identity, BackgroundFilterModifier, filter);
+    return this;
+  }
+  foregroundFilter(filter: Filter): this {
+    modifierWithKey(this._modifiersWithKeys, ForegroundFilterModifier.identity, ForegroundFilterModifier, filter);
+    return this;
+  }
+  compositingFilter(filter: Filter): this {
+    modifierWithKey(this._modifiersWithKeys, CompositingFilterModifier.identity, CompositingFilterModifier, filter);
+    return this;
+  }
+  foregroundEffect(options: ForegroundEffectOptions): this {
+    modifierWithKey(this._modifiersWithKeys, ForegroundEffectModifier.identity, ForegroundEffectModifier, options);
+    return this;
+  }
+  freeze(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, FreezeModifier.identity, FreezeModifier, value);
+    return this;
+  }
+  maskShape(value: CircleShape | EllipseShape | PathShape | RectShape): this {
+    modifierWithKey(this._modifiersWithKeys, MaskShapeModifier.identity, MaskShapeModifier, value);
+    return this;
+  }
+  clipShape(value: CircleShape | EllipseShape | PathShape | RectShape): this {
+    modifierWithKey(this._modifiersWithKeys, ClipShapeModifier.identity, ClipShapeModifier, value);
+    return this;
   }
 }
 

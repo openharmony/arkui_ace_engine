@@ -116,8 +116,16 @@ public:
     static void SetOnCoordScrollStartAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollStart);
     static void SetOnCoordScrollUpdateAction(FrameNode* frameNode, std::function<void(float)>&& onCoordScrollUpdate);
     static void SetOnCoordScrollEndAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollEnd);
-    static void SetSystemBarStyle(FrameNode* frameNode, const Color& contentColor);
+    static void SetSystemBarStyle(FrameNode* frameNode, const RefPtr<SystemBarStyle>& style);
     static bool IsDoubleBindBlock(const RefPtr<NavigationPattern>& navigationPattern);
+    static void SetOnNavigationModeChange(FrameNode* frameNode, std::function<void(NG::NavigationMode)>&& onModeChange);
+    static void SetOnTitleModeChange(FrameNode* frameNode,
+        std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
+        std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo);
+    static void SetIsCustomAnimation(FrameNode* frameNode, bool isCustom);
+    static void SetToolBarItems(FrameNode* frameNode, std::vector<NG::BarItem>&& toolBarItems);
+    static RefPtr<NG::NavigationStack> GetNavigationStack(FrameNode* frameNode);
+    static void SetOnNavBarStateChange(FrameNode* frameNode, std::function<void(bool)>&& onNavBarStateChange);
 
 private:
     bool CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);

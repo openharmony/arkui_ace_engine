@@ -3300,6 +3300,79 @@ class NextFocusModifier extends ModifierWithKey {
   }
 }
 NextFocusModifier.identity = Symbol('nextFocus');
+class VisualEffectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetVisualEffect(node);
+    }
+    else {
+      getUINativeModule().common.setVisualEffect(node, this.value);
+    }
+  }
+}
+VisualEffectModifier.identity = Symbol('visualEffect');
+class BackgroundFilterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundFilter(node);
+    }
+    else {
+      getUINativeModule().common.setBackgroundFilter(node, this.value);
+    }
+  }
+}
+BackgroundFilterModifier.identity = Symbol('backgroundFilter');
+class ForegroundFilterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetForegroundFilter(node);
+    }
+    else {
+      getUINativeModule().common.setForegroundFilter(node, this.value);
+    }
+  }
+}
+ForegroundFilterModifier.identity = Symbol('foregroundFilter');
+class CompositingFilterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetCompositingFilter(node);
+    }
+    else {
+      getUINativeModule().common.setCompositingFilter(node, this.value);
+    }
+  }
+}
+CompositingFilterModifier.identity = Symbol('compositingFilter');
+class FreezeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetFreeze(node);
+    }
+    else {
+      getUINativeModule().common.setFreeze(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+FreezeModifier.identity = Symbol('freeze');
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 const isString = (val) => typeof val === 'string';
 const isNumber = (val) => typeof val === 'number';
@@ -4848,6 +4921,26 @@ class ArkComponent {
   }
   nextFocus(value) {
     modifierWithKey(this._modifiersWithKeys, NextFocusModifier.identity, NextFocusModifier, value);
+    return this;
+  }
+  visualEffect(effect) {
+    modifierWithKey(this._modifiersWithKeys, VisualEffectModifier.identity, VisualEffectModifier, effect);
+    return this;
+  }
+  backgroundFilter(filter) {
+    modifierWithKey(this._modifiersWithKeys, BackgroundFilterModifier.identity, BackgroundFilterModifier, filter);
+    return this;
+  }
+  foregroundFilter(filter) {
+    modifierWithKey(this._modifiersWithKeys, ForegroundFilterModifier.identity, ForegroundFilterModifier, filter);
+    return this;
+  }
+  compositingFilter(filter) {
+    modifierWithKey(this._modifiersWithKeys, CompositingFilterModifier.identity, CompositingFilterModifier, filter);
+    return this;
+  }
+  freeze(value) {
+    modifierWithKey(this._modifiersWithKeys, FreezeModifier.identity, FreezeModifier, value);
     return this;
   }
 }
@@ -12013,6 +12106,19 @@ class SideBarContainerAutoHideModifier extends ModifierWithKey {
   }
 }
 SideBarContainerAutoHideModifier.identity = Symbol('sideBarContainerautoHide');
+class SideBarContainerOnChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().sideBarContainer.resetSideBarOnChange(node);
+    } else {
+      getUINativeModule().sideBarContainer.setSideBarOnChange(node, this.value);
+    }
+  }
+}
+SideBarContainerOnChangeModifier.identity = Symbol('sideBarContainerOnChange');
 class SideBarContainerShowSideBarModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -12181,7 +12287,9 @@ class ArkSideBarContainerComponent extends ArkComponent {
     super(nativePtr, classType);
   }
   onChange(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SideBarContainerOnChangeModifier.identity,
+      SideBarContainerOnChangeModifier, callback);
+    return this;
   }
   autoHide(value) {
     modifierWithKey(this._modifiersWithKeys, SideBarContainerAutoHideModifier.identity, SideBarContainerAutoHideModifier, value);
@@ -23388,7 +23496,9 @@ class ArkNavDestinationComponent extends ArkComponent {
     return this;
   }
   toolbarConfiguration(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, NavDestinationToolBarConfigurationModifier.identity,
+      NavDestinationToolBarConfigurationModifier, value);
+    return this;
   }
   hideBackButton(value) {
     modifierWithKey(this._modifiersWithKeys, NavDestinationHideBackButtonModifier.identity,
@@ -23411,13 +23521,44 @@ class ArkNavDestinationComponent extends ArkComponent {
     return this;
   }
   onShown(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnShownModifier.identity,
+      NavDestinationOnShownModifier, callback);
+    return this;
   }
   onHidden(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnHiddenModifier.identity,
+      NavDestinationOnHiddenModifier, callback);
+    return this;
+  }
+  onWillHide(callback) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnWillHideModifier.identity,
+      NavDestinationOnWillHideModifier, callback);
+    return this;
+  }
+  onWillAppear(callback) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnWillAppearModifier.identity,
+      NavDestinationOnWillAppearModifier, callback);
+    return this;
+  }
+  onWillShow(callback) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnWillShowModifier.identity,
+      NavDestinationOnWillShowModifier, callback);
+    return this;
+  }
+  onWillDisappear(callback) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnWillDisappearModifier.identity,
+      NavDestinationOnWillDisappearModifier, callback);
+    return this;
   }
   onBackPressed(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnBackPressedModifier.identity,
+      NavDestinationOnBackPressedModifier, callback);
+    return this;
+  }
+  onReady(callback) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnReadyModifier.identity,
+      NavDestinationOnReadyModifier, callback);
+    return this;
   }
   ignoreLayoutSafeArea(types, edges) {
     let opts = new ArkSafeAreaExpandOpts();
@@ -23482,6 +23623,10 @@ class ArkNavDestinationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, EnableNavigationIndicatorModifier.identity, EnableNavigationIndicatorModifier, enable);
     return this;
   }
+  systemBarStyle(style) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationSystemBarStyleModifier.identity, NavDestinationSystemBarStyleModifier, style);
+    return this;
+  }
 }
 
 class HideTitleBarModifier extends ModifierWithKey {
@@ -23513,6 +23658,23 @@ class NavDestinationHideToolBarModifier extends ModifierWithKey {
   }
 }
 NavDestinationHideToolBarModifier.identity = Symbol('hideToolBar');
+
+class NavDestinationToolBarConfigurationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetToolBarConfiguration(node);
+    } else {
+      getUINativeModule().navDestination.setToolBarConfiguration(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+NavDestinationToolBarConfigurationModifier.identity = Symbol('toolBarConfiguration');
 
 class NavDestinationHideBackButtonModifier extends ModifierWithKey {
   constructor(value) {
@@ -23661,6 +23823,136 @@ class EnableNavigationIndicatorModifier extends ModifierWithKey {
   }
 }
 EnableNavigationIndicatorModifier.identity = Symbol('enableNavigationIndicator');
+
+class NavDestinationSystemBarStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().navDestination.resetSystemBarStyle(node);
+    } else {
+      getUINativeModule().navDestination.setSystemBarStyle(node, this.value.statusBarContentColor);
+    }
+  }
+  checkObjectDiff() {
+    return !(this.stageValue.statusBarContentColor === this.value.statusBarContentColor);
+  }
+}
+NavDestinationSystemBarStyleModifier.identity = Symbol('systemBarStyle');
+
+class NavDestinationOnShownModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnShown(node);
+    } else {
+      getUINativeModule().navDestination.setOnShown(node, this.value);
+    }
+  }
+}
+NavDestinationOnShownModifier.identity = Symbol('onShown');
+
+class NavDestinationOnHiddenModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnHidden(node);
+    } else {
+      getUINativeModule().navDestination.setOnHidden(node, this.value);
+    }
+  }
+}
+NavDestinationOnHiddenModifier.identity = Symbol('onHidden');
+
+class NavDestinationOnWillHideModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnWillHide(node);
+    } else {
+      getUINativeModule().navDestination.setOnWillHide(node, this.value);
+    }
+  }
+}
+NavDestinationOnWillHideModifier.identity = Symbol('onWillHide');
+
+class NavDestinationOnWillAppearModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnWillAppear(node);
+    } else {
+      getUINativeModule().navDestination.setOnWillAppear(node, this.value);
+    }
+  }
+}
+NavDestinationOnWillAppearModifier.identity = Symbol('onWillAppear');
+
+class NavDestinationOnWillShowModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnWillShow(node);
+    } else {
+      getUINativeModule().navDestination.setOnWillShow(node, this.value);
+    }
+  }
+}
+NavDestinationOnWillShowModifier.identity = Symbol('onWillShow');
+
+class NavDestinationOnWillDisappearModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnWillDisappear(node);
+    } else {
+      getUINativeModule().navDestination.setOnWillDisappear(node, this.value);
+    }
+  }
+}
+NavDestinationOnWillDisappearModifier.identity = Symbol('onWillDisappear');
+
+class NavDestinationOnBackPressedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnBackPressed(node);
+    } else {
+      getUINativeModule().navDestination.setOnBackPressed(node, this.value);
+    }
+  }
+}
+NavDestinationOnBackPressedModifier.identity = Symbol('onBackPressed');
+
+class NavDestinationOnReadyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnReady(node);
+    } else {
+      getUINativeModule().navDestination.setOnReady(node, this.value);
+    }
+  }
+}
+NavDestinationOnReadyModifier.identity = Symbol('onReady');
 
 //@ts-ignore
 if (globalThis.NavDestination !== undefined) {
@@ -24424,10 +24716,13 @@ class ArkNavigationComponent extends ArkComponent {
     return this;
   }
   toolBar(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ToolBarModifier.identity, ToolBarModifier, value);
+    return this;
   }
   toolbarConfiguration(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ToolBarConfigurationModifier.identity,
+      ToolBarConfigurationModifier, value);
+    return this;
   }
   hideToolBar(isHide, animated) {
     let arkNavigationHideToolBar = new ArkNavHideTitleBarOrToolBar();
@@ -24445,13 +24740,22 @@ class ArkNavigationComponent extends ArkComponent {
     return this;
   }
   onTitleModeChange(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnTitleModeChangeModifier.identity, OnTitleModeChangeModifier, callback);
+    return this;
   }
   onNavBarStateChange(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnNavBarStateChangeModifier.identity,
+      OnNavBarStateChangeModifier, callback);
+    return this;
   }
   onNavigationModeChange(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnNavigationModeChange.identity, OnNavigationModeChange, callback);
+    return this;
+  }
+  customNavContentTransition(delegate) {
+      modifierWithKey(this._modifiersWithKeys, CustomNavContentTransition.identity,
+        CustomNavContentTransition, delegate);
+    return this;
   }
   navDestination(builder) {
     throw new Error('Method not implemented.');
@@ -24514,7 +24818,110 @@ class ArkNavigationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, NavigationEnableToolBarAdaptationModifier.identity, NavigationEnableToolBarAdaptationModifier, value);
     return this;
   }
+
+  systemBarStyle(style) {
+    modifierWithKey(this._modifiersWithKeys, NavigationSystemBarStyleModifier.identity, NavigationSystemBarStyleModifier, style);
+    return this;
+  }
 }
+
+class OnTitleModeChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navigation.resetOnTitleModeChange(node);
+    }
+    else {
+      getUINativeModule().navigation.setOnTitleModeChange(node, this.value);
+    }
+  }
+}
+OnTitleModeChangeModifier.identity = Symbol('onTitleModeChange');
+
+class OnNavigationModeChange extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navigation.resetOnNavigationModeChange(node);
+    }
+    else {
+      getUINativeModule().navigation.setOnNavigationModeChange(node, this.value);
+    }
+  }
+}
+OnNavigationModeChange.identity = Symbol('onNavigationModeChange');
+
+class CustomNavContentTransition extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navigation.resetCustomNavContentTransition(node);
+    }
+    else {
+      getUINativeModule().navigation.setCustomNavContentTransition(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+CustomNavContentTransition.identity = Symbol('customNavContentTransition');
+
+class ToolBarModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+}
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navigation.resetToolBar(node);
+    } else {
+      getUINativeModule().navigation.setToolBar(node, this.value.items);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+ToolBarModifier.identity = Symbol('toolBar');
+
+class ToolBarConfigurationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navigation.resetToolBarConfiguration(node);
+    } else {
+      getUINativeModule().navigation.setToolBarConfiguration(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+ToolBarConfigurationModifier.identitiy = Symbol('toolBarConfiguration');
+
+class OnNavBarStateChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navigation.resetOnNavBarStateChange(node);
+    }
+    else {
+      getUINativeModule().navigation.setOnNavBarStateChange(node, this.value);
+    }
+  }
+}
+OnNavBarStateChangeModifier.identity = Symbol('onNavBarStateChange');
+
 class BackButtonIconModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -24818,6 +25225,24 @@ class NavigationEnableToolBarAdaptationModifier extends ModifierWithKey {
 }
 NavigationEnableToolBarAdaptationModifier.identity = Symbol('enableToolBarAdaptation');
 
+class NavigationSystemBarStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().navigation.resetSystemBarStyle(node);
+    } else {
+      getUINativeModule().navigation.setSystemBarStyle(node, this.value.statusBarContentColor);
+    }
+  }
+  checkObjectDiff() {
+    return !(this.stageValue.statusBarContentColor === this.value.statusBarContentColor);
+  }
+}
+NavigationSystemBarStyleModifier.identity = Symbol('systemBarStyle');
+
 class MenusModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -24885,13 +25310,29 @@ class ArkNavRouterComponent extends ArkComponent {
     super(nativePtr, classType);
   }
   onStateChange(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnStateChangeModifier.identity, OnStateChangeModifier, callback);
+    return this;
   }
   mode(mode) {
     modifierWithKey(this._modifiersWithKeys, NavRouterModeModifier.identity, NavRouterModeModifier, mode);
     return this;
   }
 }
+
+class OnStateChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navRouter.resetOnStateChange(node);
+    } else {
+      getUINativeModule().navRouter.setOnStateChange(node, this.value);
+    }
+  }
+}
+OnStateChangeModifier.identity = Symbol('onStateChange');
+
 class NavRouterModeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -27802,28 +28243,108 @@ class ArkStepperComponent extends ArkComponent {
     super(nativePtr, classType);
   }
   onFinish(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, StepperOnFinishModifier.identity, StepperOnFinishModifier, callback);
+    return this;
   }
   onSkip(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, StepperOnSkipModifier.identity, StepperOnSkipModifier, callback);
+    return this;
   }
   onChange(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, StepperOnChangeModifier.identity, StepperOnChangeModifier, callback);
+    return this;
   }
   onNext(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, StepperOnNextModifier.identity, StepperOnNextModifier, callback);
+    return this;
   }
   onPrevious(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, StepperOnPreviousModifier.identity, StepperOnPreviousModifier, callback);
+    return this;
   }
 }
+
+class StepperOnFinishModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().stepper.resetOnFinish(node);
+    }
+    else {
+      getUINativeModule().stepper.setOnFinish(node, this.value);
+    }
+  }
+}
+StepperOnFinishModifier.identity = Symbol('onFinish');
+
+class StepperOnSkipModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().stepper.resetOnSkip(node);
+    }
+    else {
+      getUINativeModule().stepper.setOnSkip(node, this.value);
+    }
+  }
+}
+StepperOnSkipModifier.identity = Symbol('onSkip');
+
+class StepperOnChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().stepper.resetOnChange(node);
+    }
+    else {
+      getUINativeModule().stepper.setOnChange(node, this.value);
+    }
+  }
+}
+StepperOnChangeModifier.identity = Symbol('onChange');
+
+class StepperOnNextModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().stepper.resetOnNext(node);
+    }
+    else {
+      getUINativeModule().stepper.setOnNext(node, this.value);
+    }
+  }
+}
+StepperOnNextModifier.identity = Symbol('onNext');
+
+class StepperOnPreviousModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().stepper.resetOnPrevious(node);
+    }
+    else {
+      getUINativeModule().stepper.setOnPrevious(node, this.value);
+    }
+  }
+}
+StepperOnPreviousModifier.identity = Symbol('onPrevious');
 // @ts-ignore
 if (globalThis.Stepper !== undefined) {
   globalThis.Stepper.attributeModifier = function (modifier) {
     attributeModifierFunc.call(this, modifier, (nativePtr) => {
       return new ArkStepperComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.CommonModifier(nativePtr, classType);
+      return new modifierJS.StepperModifier(nativePtr, classType);
     });
   };
 }

@@ -1079,6 +1079,14 @@ declare class ArkNavDestinationComponent extends ArkComponent implements NavDest
     ignoreLayoutSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): this;
     recoverable(value: boolean | undefined): this;
 }
+declare class ArkStepperComponent extends ArkComponent implements StepperAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    onFinish(callback: () => void): this;
+    onSkip(callback: () => void): this;
+    onChange(callback: (prevIndex: number, index: number) => void): this;
+    onNext(callback: (index: number, pendingIndex: number) => void): this;
+    onPrevious(callback: (index: number, pendingIndex: number) => void): this;
+}
 declare class ArkCounterComponent extends ArkComponent implements CounterAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     onInc(event: () => void): this;

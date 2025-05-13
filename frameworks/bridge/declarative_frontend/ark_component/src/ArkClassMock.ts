@@ -105,6 +105,7 @@ declare class ModifierJS {
   LinearIndicatorModifier(nativePtr: KNode, classType: ModifierType): void;
   IndicatorComponentModifier(nativePtr: KNode, classType: ModifierType): void;
   LazyVGridLayoutModifier(nativePtr: KNode, classType: ModifierType): void;
+  StepperModifier(nativePtr: KNode, classType: ModifierType): void;
 }
 
 declare class aceConsole {
