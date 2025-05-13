@@ -5125,7 +5125,16 @@ void sendCommandCallbackInner(RefPtr<PipelineBase> pipeline)
         keyEvent.action = KeyAction::DOWN;
         keyEvent.code = static_cast<KeyCode>(value);
         keyEvent.pressedCodes = { keyEvent.code };
-        pipeline->OnNonPointerEvent(keyEvent);
+
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [weakContext = WeakPtr(pipeline), keyEvent]() {
+                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+                CHECK_NULL_VOID(pipeline);
+                pipeline->OnNonPointerEvent(keyEvent);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionSendCommandKeyCode");
     };
     UiSessionManager::GetInstance()->SaveSendCommandFunction(sendCommandCallback);
 }
@@ -5176,6 +5185,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
     RegisterGetCurrentPageName(pipeline);
     InitSendCommandFunctionsCallbacks(pipeline);
     sendCommandCallbackInner(pipeline);
+    SaveGetCurrentInstanceId();
 }
 
 void UIContentImpl::SetupGetPixelMapCallback(RefPtr<PipelineBase> pipeline)
@@ -5194,6 +5204,19 @@ void UIContentImpl::SetupGetPixelMapCallback(RefPtr<PipelineBase> pipeline)
             TaskExecutor::TaskType::UI, "UiSessionGetPixelMap");
     };
     UiSessionManager::GetInstance()->SaveGetPixelMapFunction(getPixelMapCallback);
+}
+
+void UIContentImpl::SaveGetCurrentInstanceId()
+{
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, []() {
+        auto saveInstanceIdCallback = []() -> int32_t {
+            auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+            CHECK_NULL_RETURN(pipeline, -1);
+            return pipeline->GetInstanceId();
+        };
+        UiSessionManager::GetInstance()->SaveGetCurrentInstanceIdCallback(saveInstanceIdCallback);
+    });
 }
 
 void UIContentImpl::RegisterGetCurrentPageName(const RefPtr<PipelineBase>& pipeline)

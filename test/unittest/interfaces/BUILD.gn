@@ -105,6 +105,7 @@ ohos_unittest("form_render_test") {
     "eventhandler:libeventhandler",
     "form_fwk:form_manager",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -182,6 +183,7 @@ ohos_unittest("form_render_group_test") {
     "eventhandler:libeventhandler",
     "form_fwk:form_manager",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -221,6 +223,7 @@ ohos_unittest("form_render_delegate_proxy_test") {
     "eventhandler:libeventhandler",
     "form_fwk:form_manager",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -254,6 +257,7 @@ ohos_unittest("form_render_delegate_stub_test") {
     "eventhandler:libeventhandler",
     "form_fwk:form_manager",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -312,6 +316,7 @@ ohos_unittest("form_render_dispatcher_stub_test") {
     "eventhandler:libeventhandler",
     "form_fwk:form_manager",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -346,6 +351,7 @@ ohos_unittest("form_render_delegate_impl_test") {
     "eventhandler:libeventhandler",
     "form_fwk:form_manager",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -380,6 +386,7 @@ ohos_unittest("form_render_dispatcher_impl_test") {
     "eventhandler:libeventhandler",
     "form_fwk:form_manager",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -614,15 +621,12 @@ ohos_unittest("native_node_napi_test") {
     "$ace_root/test/unittest:ace_core_extra",
   ]
 
-  public_deps = [
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  ]
-
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
     "graphic_2d:native_drawing_ndk",
     "hilog:libhilog",
     "image_framework:image",
@@ -807,15 +811,12 @@ ohos_unittest("drag_and_drop_test") {
     "$ace_root/test/unittest:ace_core_extra",
   ]
 
-  public_deps = [
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  ]
-
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",
@@ -863,17 +864,12 @@ ohos_unittest("node_transition_test") {
     "$ace_root/interfaces/inner_api/drawable_descriptor",
   ]
 
-  deps = []
-
-  public_deps = [
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  ]
-
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",
@@ -919,17 +915,12 @@ ohos_unittest("animate_impl_test") {
     "$ace_root/interfaces/inner_api/drawable_descriptor",
   ]
 
-  deps = []
-
-  public_deps = [
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  ]
-
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",
@@ -975,17 +966,12 @@ ohos_unittest("dialog_model_test") {
     "$ace_root/interfaces/inner_api/drawable_descriptor",
   ]
 
-  deps = []
-
-  public_deps = [
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  ]
-
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",
@@ -1032,17 +1018,12 @@ ohos_unittest("node_extened_test") {
     "$ace_root/interfaces/inner_api/drawable_descriptor",
   ]
 
-  deps = []
-
-  public_deps = [
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  ]
-
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",
@@ -1088,17 +1069,12 @@ ohos_unittest("node_animate_test") {
     "$ace_root",
   ]
 
-  deps = []
-
-  public_deps = [
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  ]
-
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",
@@ -1221,8 +1197,8 @@ group("interfaces_unittest") {
     ":ui_input_event_test",
     ":viewport_config_test",
     ":xcomponent_controller_test",
-    "ace_kit:ace_kit_test",
     "ace_gesture:ace_native_gesture_test",
+    "ace_kit:ace_kit_test",
     "napi:arkui_napi_test",
   ]
 }

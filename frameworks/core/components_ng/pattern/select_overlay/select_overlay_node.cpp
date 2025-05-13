@@ -80,17 +80,6 @@ constexpr Dimension ANIMATION_TEXT_OFFSET = 12.0_vp;
 constexpr Dimension OVERLAY_MAX_WIDTH = 280.0_vp;
 constexpr float AGING_MIN_SCALE = 1.75f;
 
-const std::string OH_DEFAULT_CUT = "OH_DEFAULT_CUT";
-const std::string OH_DEFAULT_COPY = "OH_DEFAULT_COPY";
-const std::string OH_DEFAULT_PASTE = "OH_DEFAULT_PASTE";
-const std::string OH_DEFAULT_SELECT_ALL = "OH_DEFAULT_SELECT_ALL";
-const std::string OH_DEFAULT_TRANSLATE = "OH_DEFAULT_TRANSLATE";
-const std::string OH_DEFAULT_SEARCH = "OH_DEFAULT_SEARCH";
-const std::string OH_DEFAULT_SHARE = "OH_DEFAULT_SHARE";
-const std::string OH_DEFAULT_CAMERA_INPUT = "OH_DEFAULT_CAMERA_INPUT";
-const std::string OH_DEFAULT_AI_WRITE = "OH_DEFAULT_AI_WRITE";
-const std::string OH_DEFAULT_COLLABORATION_SERVICE = "OH_DEFAULT_COLLABORATION_SERVICE";
-
 const std::unordered_map<std::string, std::function<bool(const SelectMenuInfo&)>> isMenuItemEnabledFuncMap = {
     { OH_DEFAULT_CUT, [](const SelectMenuInfo& info){ return info.showCut; } },
     { OH_DEFAULT_COPY, [](const SelectMenuInfo& info){ return info.showCopy; } },
@@ -644,15 +633,20 @@ std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInf
     params.emplace_back(theme->GetSelectAllLabel(),
         GetMenuCallbackWithContainerId(info->menuCallback.onSelectAll), theme->GetSelectAllLabelInfo(),
         info->menuInfo.showCopyAll);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN) &&
+        TextSystemMenu::IsShowTranslate()) {
         params.emplace_back(theme->GetTranslateLabel(),
             GetMenuCallbackWithContainerId(info->menuCallback.onTranslate), "", info->menuInfo.showTranslate);
     }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        params.emplace_back(theme->GetShareLabel(),
-            GetMenuCallbackWithContainerId(info->menuCallback.onShare), "", info->menuInfo.showShare);
-        params.emplace_back(theme->GetSearchLabel(),
-            GetMenuCallbackWithContainerId(info->menuCallback.onSearch), "", info->menuInfo.showSearch);
+        if (TextSystemMenu::IsShowShare()) {
+            params.emplace_back(theme->GetShareLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onShare), "",
+                info->menuInfo.showShare);
+        }
+        if (TextSystemMenu::IsShowSearch()) {
+            params.emplace_back(theme->GetSearchLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onSearch),
+                "", info->menuInfo.showSearch);
+        }
     }
     return params;
 }
@@ -2090,7 +2084,7 @@ void SelectOverlayNode::ShowCopyAll(
 void SelectOverlayNode::ShowTranslate(
     float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label)
 {
-    if (!IsShowTranslateOnTargetAPIVersion()) {
+    if (!IsShowTranslateOnTargetAPIVersion() || !TextSystemMenu::IsShowTranslate()) {
         isShowInDefaultMenu_[OPTION_INDEX_TRANSLATE] = true;
         return;
     }
@@ -2115,7 +2109,7 @@ void SelectOverlayNode::ShowTranslate(
 void SelectOverlayNode::ShowSearch(
     float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label)
 {
-    if (!IsShowOnTargetAPIVersion()) {
+    if (!IsShowOnTargetAPIVersion() || !TextSystemMenu::IsShowSearch()) {
         isShowInDefaultMenu_[OPTION_INDEX_SEARCH] = true;
         return;
     }
@@ -2140,7 +2134,7 @@ void SelectOverlayNode::ShowSearch(
 void SelectOverlayNode::ShowShare(
     float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label)
 {
-    if (!IsShowOnTargetAPIVersion()) {
+    if (!IsShowOnTargetAPIVersion() || !TextSystemMenu::IsShowShare()) {
         isShowInDefaultMenu_[OPTION_INDEX_SHARE] = true;
         return;
     }
@@ -2165,7 +2159,7 @@ void SelectOverlayNode::ShowShare(
 void SelectOverlayNode::ShowAIWrite(
     float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label)
 {
-    if (info->menuInfo.showAIWrite) {
+    if (info->menuInfo.showAIWrite && TextSystemMenu::IsShowAIWriter()) {
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         float buttonWidth = 0.0f;
         auto button = BuildButton(label, info->menuCallback.onAIWrite, GetId(), buttonWidth, true);
@@ -2186,7 +2180,7 @@ void SelectOverlayNode::ShowAIWrite(
 void SelectOverlayNode::ShowCamera(
     float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label)
 {
-    if (info->menuInfo.showCameraInput) {
+    if (info->menuInfo.showCameraInput && TextSystemMenu::IsShowCameraInput()) {
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         float buttonWidth = 0.0f;
         auto button = BuildButton(label, info->menuCallback.onCameraInput, GetId(), buttonWidth, false);
@@ -2318,69 +2312,44 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
     CHECK_NULL_RETURN(pipeline, systemItemParams);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, systemItemParams);
-    if (info->menuInfo.showCopy || info->isUsingMouse) {
-        MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_COPY, theme->GetCopyLabel());
-        systemItemParams.emplace_back(param);
-    }
-
-    if (info->menuInfo.showPaste || info->isUsingMouse) {
-        MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_PASTE, theme->GetPasteLabel());
-        systemItemParams.emplace_back(param);
-    }
-
-    if (info->menuInfo.showCut || info->isUsingMouse) {
-        MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_CUT, theme->GetCutLabel());
-        systemItemParams.emplace_back(param);
-    }
-
-    if (info->menuInfo.showCopyAll || info->isUsingMouse) {
-        MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_SELECT_ALL, theme->GetSelectAllLabel());
-        systemItemParams.emplace_back(param);
-    }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
-        if (info->menuInfo.showTranslate || info->isUsingMouse) {
-            MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_TRANSLATE, theme->GetTranslateLabel());
-            systemItemParams.emplace_back(param);
-        }
+    auto isUsingMouse = info->isUsingMouse;
+    auto menuInfo = info->menuInfo;
+    AddMenuItemParamIf(
+        menuInfo.showCopy || isUsingMouse, OH_DEFAULT_COPY, theme->GetCopyLabel(), systemItemParams);
+    AddMenuItemParamIf(
+        menuInfo.showPaste || isUsingMouse, OH_DEFAULT_PASTE, theme->GetPasteLabel(), systemItemParams);
+    AddMenuItemParamIf(menuInfo.showCut || isUsingMouse, OH_DEFAULT_CUT, theme->GetCutLabel(), systemItemParams);
+    AddMenuItemParamIf(menuInfo.showCopyAll || isUsingMouse, OH_DEFAULT_SELECT_ALL, theme->GetSelectAllLabel(),
+        systemItemParams);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN) &&
+        TextSystemMenu::IsShowTranslate()) {
+        AddMenuItemParamIf(menuInfo.showTranslate || isUsingMouse, OH_DEFAULT_TRANSLATE,
+            theme->GetTranslateLabel(), systemItemParams);
     }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        if (info->menuInfo.showShare || info->isUsingMouse) {
-            MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_SHARE, theme->GetShareLabel());
-            systemItemParams.emplace_back(param);
-        }
-        if (info->menuInfo.showSearch || info->isUsingMouse) {
-            MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_SEARCH, theme->GetSearchLabel());
-            systemItemParams.emplace_back(param);
-        }
+        AddMenuItemParamIf((menuInfo.showShare || isUsingMouse) && TextSystemMenu::IsShowShare(),
+            OH_DEFAULT_SHARE, theme->GetShareLabel(), systemItemParams);
+        AddMenuItemParamIf((menuInfo.showSearch || isUsingMouse) && TextSystemMenu::IsShowSearch(),
+            OH_DEFAULT_SEARCH, theme->GetSearchLabel(), systemItemParams);
     }
-
-    if (info->menuInfo.showCameraInput) {
-        MenuItemParam param;
-        MenuOptionsParam menuOptionsParam;
-        menuOptionsParam.id = OH_DEFAULT_CAMERA_INPUT;
-        menuOptionsParam.content = theme->GetCameraInput();
-        param.menuOptionsParam = menuOptionsParam;
-        systemItemParams.emplace_back(param);
-    }
-    if (info->menuInfo.showAIWrite) {
-        MenuItemParam param;
-        MenuOptionsParam menuOptionsParam;
-        menuOptionsParam.id = OH_DEFAULT_AI_WRITE;
-        menuOptionsParam.content = theme->GetAIWrite();
-        param.menuOptionsParam = menuOptionsParam;
-        systemItemParams.emplace_back(param);
-    }
+    AddMenuItemParamIf(menuInfo.showCameraInput && TextSystemMenu::IsShowCameraInput(),
+        OH_DEFAULT_CAMERA_INPUT, theme->GetCameraInput(), systemItemParams);
+    AddMenuItemParamIf(menuInfo.showAIWrite && TextSystemMenu::IsShowAIWriter(), OH_DEFAULT_AI_WRITE,
+        theme->GetAIWrite(), systemItemParams);
     return systemItemParams;
 }
 
-const MenuItemParam SelectOverlayNode::GetSystemMenuItemParam(const std::string& menuId, const std::string& menuButton)
+void SelectOverlayNode::AddMenuItemParamIf(
+    bool condition, const std::string& menuId, const std::string& menuButton, std::vector<MenuItemParam>& items)
 {
-    MenuItemParam param;
-    MenuOptionsParam menuOptionsParam;
-    menuOptionsParam.id = menuId;
-    menuOptionsParam.content = menuButton;
-    param.menuOptionsParam = menuOptionsParam;
-    return param;
+    if (condition) {
+        MenuOptionsParam menuOptionsParam;
+        menuOptionsParam.id = menuId;
+        menuOptionsParam.content = menuButton;
+        MenuItemParam param;
+        param.menuOptionsParam = menuOptionsParam;
+        items.emplace_back(param);
+    }
 }
 
 void SelectOverlayNode::MenuOnlyStatusChange(const std::shared_ptr<SelectOverlayInfo>& info, bool noAnimation)

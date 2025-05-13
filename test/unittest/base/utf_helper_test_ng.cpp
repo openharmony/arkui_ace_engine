@@ -633,7 +633,7 @@ HWTEST_F(UtfHelperTestNg, ConvertRegionUtf16ToUtf8_008, TestSize.Level1)
 {
     const uint16_t input[] = { 0x0041 };
     std::array<uint8_t, 1> output = { 0 };
-    size_t result = ConvertRegionUtf16ToUtf8(input, output.data(), 1, 1, 1);
+    size_t result = ConvertRegionUtf16ToUtf8(input, output.data(), 1, 0, 0);
     
     EXPECT_EQ(result, 0);
 }

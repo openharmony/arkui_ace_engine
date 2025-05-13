@@ -61,4 +61,19 @@ TextMenuShowMode CastToTextMenuShowMode(int32_t value)
     }
     return static_cast<TextMenuShowMode>(value);
 }
+
+namespace TextSystemMenu {
+bool IsDisableMenuItem(SystemServiceMenuDisableFlag flag)
+{
+    auto textMenuInfo = AceApplicationInfo::GetInstance().GetTextMenuInfo();
+    return (textMenuInfo.disableFlags & DISABLE_ALL_FLAG) == DISABLE_ALL_FLAG ||
+           (textMenuInfo.disableFlags & flag) == flag;
+}
+DEFINE_MENU_CHECK_METHOD_IMPL(Translate, DISABLE_TRANSLATE_FLAG)
+DEFINE_MENU_CHECK_METHOD_IMPL(Search, DISABLE_SEARCH_FLAG)
+DEFINE_MENU_CHECK_METHOD_IMPL(Share, DISABLE_SHARE_FLAG)
+DEFINE_MENU_CHECK_METHOD_IMPL(CameraInput, DISABLE_CAMERA_INPUT_FLAG)
+DEFINE_MENU_CHECK_METHOD_IMPL(AIWriter, DISABLE_AI_WRITER_FLAG)
+DEFINE_MENU_CHECK_METHOD_IMPL(CollaborationService, DISABLE_COLLABORATION_SERVICE_FLAG)
+} // namespace MenuController
 } // namespace OHOS::Ace::NG

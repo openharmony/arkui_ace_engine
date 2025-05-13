@@ -173,6 +173,12 @@ private:
     PanDirection direction_;
     double distance_ = 0.0;
     double mouseDistance_ = 0.0;
+    int32_t newFingers_ = 1;
+    double newDistance_ = 0.0;
+    PanDirection newDirection_;
+    PanDistanceMap distanceMap_;
+    PanDistanceMap newDistanceMap_;
+
     AxisEvent lastAxisEvent_;
     Offset averageDistance_;
     std::map<int32_t, Offset> touchPointsDistance_;
@@ -180,25 +186,19 @@ private:
     double mainDelta_ = 0.0;
     PanVelocity panVelocity_;
     TimeStamp time_;
-
-    Point globalPoint_;
-    TouchEvent lastTouchEvent_;
-    RefPtr<PanGestureOption> panGestureOption_;
-    OnPanFingersFunc onChangeFingers_;
-    OnPanDirectionFunc onChangeDirection_;
-    OnPanDistanceFunc onChangeDistance_;
-
-    int32_t newFingers_ = 1;
-    double newDistance_ = 0.0;
-    PanDirection newDirection_;
     bool isFlushTouchEventsEnd_ = false;
     bool isForDrag_ = false;
     bool isAllowMouse_ = true;
     bool isStartTriggered_ = false;
+    Point globalPoint_;
+    TouchEvent lastTouchEvent_;
+    RefPtr<PanGestureOption> panGestureOption_;
+
+    OnPanFingersFunc onChangeFingers_;
+    OnPanDirectionFunc onChangeDirection_;
+    OnPanDistanceFunc onChangeDistance_;
     // this callback will be triggered when pan end, but the enable state is false
     std::unique_ptr<GestureEventFunc> panEndOnDisableState_;
-    PanDistanceMap distanceMap_;
-    PanDistanceMap newDistanceMap_;
 };
 
 } // namespace OHOS::Ace::NG

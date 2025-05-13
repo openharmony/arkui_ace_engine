@@ -1859,9 +1859,6 @@ void WebDelegate::ShowWebView()
         window_->Show();
     }
 
-    if (!IsActivePolicyDisable()) {
-        OnActive();
-    }
     OnWebviewShow();
 }
 
@@ -1871,9 +1868,6 @@ void WebDelegate::HideWebView()
         window_->Hide();
     }
 
-    if (!IsActivePolicyDisable()) {
-        OnInactive();
-    }
     OnWebviewHide();
 }
 
@@ -4820,6 +4814,7 @@ void WebDelegate::OnPageStarted(const std::string& param)
     auto pattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     pattern->DestroyAnalyzerOverlay();
+    pattern->OnTooltip("");
 }
 
 void WebDelegate::OnPageFinished(const std::string& param)

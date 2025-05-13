@@ -864,13 +864,23 @@ void JSSwiper::SetIndicatorController(const JSCallbackInfo& info)
     SwiperModel::GetInstance()->SetBindIndicator(true);
     auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto resetFunc = jsIndicatorController->SetSwiperNodeBySwiper(targetNode);
+    SwiperModel::GetInstance()->SetIndicatorController(jsIndicatorController);
     if (resetFunc) {
         SwiperModel::GetInstance()->SetJSIndicatorController(resetFunc);
     }
 }
 
+void JSSwiper::ResetSwiperNode()
+{
+    auto* jsIndicatorController = SwiperModel::GetInstance()->GetIndicatorController();
+    if (jsIndicatorController) {
+        jsIndicatorController->ResetSwiperNode();
+    }
+}
+
 void JSSwiper::SetIndicator(const JSCallbackInfo& info)
 {
+    ResetSwiperNode();
     if (info.Length() < 1) {
         return;
     }

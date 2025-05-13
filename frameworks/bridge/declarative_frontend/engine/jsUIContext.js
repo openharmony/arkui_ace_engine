@@ -1643,6 +1643,16 @@ class TextMenuController {
         TextMenu.setMenuOptions(textMenuOptions);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    static disableSystemServiceMenuItems(disable) {
+        let controller = globalThis.requireNapi('arkui.textMenuController');
+        controller.disableSystemServiceMenuItems(disable);
+    }
+
+    static disableMenuItems(items) {
+        let controller = globalThis.requireNapi('arkui.textMenuController');
+        controller.disableMenuItems(items);
+    }
 }
 
 /**

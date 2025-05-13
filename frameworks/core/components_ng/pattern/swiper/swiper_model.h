@@ -32,6 +32,10 @@
 #include "core/event/crown_event.h"
 #endif
 
+namespace OHOS::Ace::Framework {
+class JSIndicatorController;
+}
+
 namespace OHOS::Ace {
 
 struct SwiperParameters {
@@ -182,6 +186,8 @@ public:
     virtual void SetBindIndicator(bool bind) {}
     virtual void SetJSIndicatorController(std::function<void()> resetFunc) {}
     virtual void SetOnSelected(std::function<void(const BaseEventInfo* info)>&& onSelected) {}
+    virtual void SetIndicatorController(Framework::JSIndicatorController* controller) {}
+    virtual Framework::JSIndicatorController* GetIndicatorController() { return nullptr; }
 
 private:
     static std::unique_ptr<SwiperModel> instance_;

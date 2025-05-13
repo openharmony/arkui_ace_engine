@@ -66,7 +66,7 @@ void ScrollBar::InitTheme()
     SetArcActiveBackgroundWidth(theme->GetArcActiveBackgroundWidth());
     SetArcNormalStartAngle(theme->GetArcNormalStartAngle());
     SetArcActiveStartAngle(theme->GetArcActiveStartAngle());
-    SetArcNormaMaxOffsetAngle(theme->GetArcNormaMaxOffsetAngle());
+    SetArcNormalMaxOffsetAngle(theme->GetArcNormalMaxOffsetAngle());
     SetArcActiveMaxOffsetAngle(theme->GetArcActiveMaxOffsetAngle());
     SetArcNormalScrollBarWidth(theme->GetArcNormalScrollBarWidth());
     SetArcActiveScrollBarWidth(theme->GetArcActiveScrollBarWidth());

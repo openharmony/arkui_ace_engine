@@ -139,11 +139,28 @@ void SelectContentOverlayPattern::UpdateHandleHotZone()
     if (!CheckIfNeedHandle()) {
         return;
     }
+    if (info_->isUsingMouse) {
+        UpdateMouseHotZone();
+        return;
+    }
     if (info_->handleLevelMode == HandleLevelMode::OVERLAY &&
         (info_->firstHandle.isPaintHandleWithPoints || info_->secondHandle.isPaintHandleWithPoints)) {
         UpdateHandleHotZoneWithPoint();
     } else {
         SelectOverlayPattern::UpdateHandleHotZone();
+    }
+}
+
+void SelectContentOverlayPattern::UpdateMouseHotZone()
+{
+    if (IsCustomMenu() && !info_->isSingleHandle) {
+        std::vector<DimensionRect> responseRegion;
+        AddMenuResponseRegion(responseRegion);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto gestureEventHub = host->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureEventHub);
+        gestureEventHub->SetResponseRegion(responseRegion);
     }
 }
 

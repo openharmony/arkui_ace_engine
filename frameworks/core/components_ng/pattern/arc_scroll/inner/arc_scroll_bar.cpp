@@ -50,8 +50,8 @@ void ArcScrollBar::SetBarRegion(const Offset& offset, const Size& size)
     double normalWidth = GetNormalWidthToPx();
     Point centerPoint(size.Width() * HALF, size.Height() * HALF);
     double startAngle = GetArcNormalStartAngle();
-    double sweepAngle = GetPositionMode() == PositionMode::LEFT ? -GetArcNormaMaxOffsetAngle() :
-        GetArcNormaMaxOffsetAngle();
+    double sweepAngle = GetPositionMode() == PositionMode::LEFT ? -GetArcNormalMaxOffsetAngle() :
+        GetArcNormalMaxOffsetAngle();
     double width = NormalizeToPx(GetArcNormalBackgroundWidth());
     centerDeviation_ = width * FACTOR_HALF;
     if (normalWidth == NormalizeToPx(GetActiveWidth())) {
@@ -71,7 +71,7 @@ void ArcScrollBar::SetRoundTrickRegion(double estimatedHeight, double barRegionS
     if (!NearEqual(estimatedHeight, size.Height())) {
         width_ = NormalizeToPx(GetArcNormalScrollBarWidth());
         centerDeviation_ = NormalizeToPx(GetArcNormalBackgroundWidth()) * FACTOR_HALF;
-        double maxAngle = GetArcNormaMaxOffsetAngle();
+        double maxAngle = GetArcNormalMaxOffsetAngle();
         if (normalWidth == NormalizeToPx(GetActiveWidth())) {
             width_ = NormalizeToPx(GetArcActiveScrollBarWidth());
             centerDeviation_ = NormalizeToPx(GetArcActiveBackgroundWidth()) * FACTOR_HALF;
@@ -127,7 +127,7 @@ void ArcScrollBar::SetRoundTrickRegion(
     } else {
         activeSize = barRegionSize * (mainSize / estimatedHeight) - GetOutBoundary() * HALF;
     }
-    auto minHeight = GetMinAngle() * barRegionSize / GetArcNormaMaxOffsetAngle();
+    auto minHeight = GetMinAngle() * barRegionSize / GetArcNormalMaxOffsetAngle();
     if (!NearZero(GetOutBoundary())) {
         activeSize = std::max(std::max(activeSize, minHeight - GetOutBoundary() * HALF),
             NormalizeToPx(GetMinDynamicHeight()));

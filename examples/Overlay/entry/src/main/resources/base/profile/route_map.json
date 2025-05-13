@@ -6,11 +6,6 @@
       "buildFunction": "NavIndexBuilder"
     },
     {
-      "name": "UIExtensionTest",
-      "pageSourceFile": "src/main/ets/pages/UIExtensionTestPage.ets",
-      "buildFunction": "NavIndexBuilder"
-    },
-    {
       "name": "DialogIndex",
       "pageSourceFile": "src/main/ets/pages/components/dialog/Index.ets",
       "buildFunction": "DialogIndexBuilder"

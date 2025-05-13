@@ -1785,6 +1785,345 @@ HWTEST_F(BaseUtilsTest, TimeUtilsTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TimeUtilsTest002
+ * @tc.desc: Test IsHoursWestValid Valid Lower Boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest002, TestSize.Level1)
+{
+    int32_t hoursWest = -14;
+    EXPECT_TRUE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, 10);
+}
+
+/**
+ * @tc.name: TimeUtilsTest003
+ * @tc.desc: Test IsHoursWestValid Valid Special Case
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest003, TestSize.Level1)
+{
+    int32_t hoursWest = -13;
+    EXPECT_TRUE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, 11);
+}
+
+/**
+ * @tc.name: TimeUtilsTest004
+ * @tc.desc: Test IsHoursWestValid Valid Geographical LowerBoundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest004, TestSize.Level1)
+{
+    int32_t hoursWest = -12;
+    EXPECT_TRUE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, -12);
+}
+
+/**
+ * @tc.name: TimeUtilsTest005
+ * @tc.desc: Test IsHoursWestValid Valid Upper Boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest005, TestSize.Level1)
+{
+    int32_t hoursWest = 12;
+    EXPECT_TRUE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, 12);
+}
+
+/**
+ * @tc.name: TimeUtilsTest006
+ * @tc.desc: Test IsHoursWestValid Invalid BelowLower Limit
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest006, TestSize.Level1)
+{
+    int32_t hoursWest = -15;
+    int32_t original = hoursWest;
+    EXPECT_FALSE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, original);
+}
+
+/**
+ * @tc.name: TimeUtilsTest007
+ * @tc.desc: Test IsHoursWestValid Invalid Above Upper Limit
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest007, TestSize.Level1)
+{
+    int32_t hoursWest = 13;
+    int32_t original = hoursWest;
+    EXPECT_FALSE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, original);
+}
+
+/**
+ * @tc.name: TimeUtilsTest008
+ * @tc.desc: Test IsHoursWestValid Normal Value Zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest008, TestSize.Level1)
+{
+    int32_t hoursWest = 0;
+    EXPECT_TRUE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, 0);
+}
+
+/**
+ * @tc.name: TimeUtilsTest009
+ * @tc.desc: Test IsHoursWestValid Normal Value Mid Range
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest009, TestSize.Level1)
+{
+    int32_t hoursWest = -5;
+    EXPECT_TRUE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, -5);
+}
+
+/**
+ * @tc.name: TimeUtilsTest010
+ * @tc.desc: Test IsHoursWestValid At Geographical Lower Limit
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest010, TestSize.Level1)
+{
+    int32_t hoursWest = -12;
+    EXPECT_TRUE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, -12);
+}
+
+/**
+ * @tc.name: TimeUtilsTest011
+ * @tc.desc: Test IsHoursWestValid Just Below Geographical Limit
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest011, TestSize.Level1)
+{
+    int32_t hoursWest = -14;
+    EXPECT_TRUE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, 10);
+}
+
+/**
+ * @tc.name: TimeUtilsTest012
+ * @tc.desc: Test IsHoursWestValid Valid Non Adjusting Value
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest012, TestSize.Level1)
+{
+    int32_t hoursWest = 5;
+    EXPECT_TRUE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, 5);
+}
+
+/**
+ * @tc.name: TimeUtilsTest013
+ * @tc.desc: Test IsDayTime Default
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest013, TestSize.Level1)
+{
+    TimeOfZone time;
+    EXPECT_FALSE(IsDayTime(time));
+}
+
+/**
+ * @tc.name: TimeUtilsTest014
+ * @tc.desc: Test IsDayTime Lower Boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest014, TestSize.Level1)
+{
+    TimeOfZone time;
+    time.hour24_ = 6;
+    EXPECT_TRUE(IsDayTime(time));
+}
+
+/**
+ * @tc.name: TimeUtilsTest016
+ * @tc.desc: Test IsDayTime Upper Boundary Edge
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest016, TestSize.Level1)
+{
+    TimeOfZone time;
+    time.hour24_ = 17;
+    EXPECT_TRUE(IsDayTime(time));
+}
+
+/**
+ * @tc.name: TimeUtilsTest017
+ * @tc.desc: Test IsDayTime Upper Boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest017, TestSize.Level1)
+{
+    TimeOfZone time;
+    time.hour24_ = 18;
+    EXPECT_FALSE(IsDayTime(time));
+}
+
+/**
+ * @tc.name: TimeUtilsTest018
+ * @tc.desc: Test IsDayTime Below Lower Boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest018, TestSize.Level1)
+{
+    TimeOfZone time;
+    time.hour24_ = 5;
+    EXPECT_FALSE(IsDayTime(time));
+}
+
+/**
+ * @tc.name: TimeUtilsTest019
+ * @tc.desc: Test IsDayTime Midday
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest019, TestSize.Level1)
+{
+    TimeOfZone time;
+    time.hour24_ = 12;
+    EXPECT_TRUE(IsDayTime(time));
+}
+
+/**
+ * @tc.name: TimeUtilsTest020
+ * @tc.desc: Test IsDayTime Midnight
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest020, TestSize.Level1)
+{
+    TimeOfZone time;
+    time.hour24_ = 0;
+    EXPECT_FALSE(IsDayTime(time));
+}
+
+/**
+ * @tc.name: TimeUtilsTest021
+ * @tc.desc: Test IsDayTime LateNight
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest021, TestSize.Level1)
+{
+    TimeOfZone time;
+    time.hour24_ = 23;
+    EXPECT_FALSE(IsDayTime(time));
+}
+
+/**
+ * @tc.name: TimeUtilsTest022
+ * @tc.desc: Test IsDayTime Negative
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest022, TestSize.Level1)
+{
+    TimeOfZone time;
+    time.hour24_ = -3;
+    EXPECT_FALSE(IsDayTime(time));
+}
+
+/**
+ * @tc.name: TimeUtilsTest023
+ * @tc.desc: Test IsDayTime Over24
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest023, TestSize.Level1)
+{
+    TimeOfZone time;
+    time.hour24_ = 25;
+    EXPECT_FALSE(IsDayTime(time));
+}
+
+/**
+ * @tc.name: TimeUtilsTest024
+ * @tc.desc: Test HoursWestIsValid Valid With Adjustment Lower Edge
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest024, TestSize.Level1)
+{
+    int32_t hoursWest = -14;
+    EXPECT_TRUE(HoursWestIsValid(hoursWest));
+    EXPECT_EQ(hoursWest, 10);
+}
+
+/**
+ * @tc.name: TimeUtilsTest025
+ * @tc.desc: Test HoursWestIsValid Valid With Adjustment
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest025, TestSize.Level1)
+{
+    int32_t hoursWest = -13;
+    EXPECT_TRUE(HoursWestIsValid(hoursWest));
+    EXPECT_EQ(hoursWest, 11);
+}
+
+/**
+ * @tc.name: TimeUtilsTest026
+ * @tc.desc: Test HoursWestIsValid Valid No Adjustment Lower Bound
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest026, TestSize.Level1)
+{
+    int32_t hoursWest = -12;
+    EXPECT_TRUE(HoursWestIsValid(hoursWest));
+    EXPECT_EQ(hoursWest, -12);
+}
+
+/**
+ * @tc.name: TimeUtilsTest027
+ * @tc.desc: Test HoursWestIsValid Valid No Adjustment Middle
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest027, TestSize.Level1)
+{
+    int32_t hoursWest = 0;
+    EXPECT_TRUE(HoursWestIsValid(hoursWest));
+    EXPECT_EQ(hoursWest, 0);
+}
+
+/**
+ * @tc.name: TimeUtilsTest028
+ * @tc.desc: Test HoursWestIsValid Valid No Adjustment Upper Bound
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest028, TestSize.Level1)
+{
+    int32_t hoursWest = 12;
+    EXPECT_TRUE(HoursWestIsValid(hoursWest));
+    EXPECT_EQ(hoursWest, 12);
+}
+
+/**
+ * @tc.name: TimeUtilsTest029
+ * @tc.desc: Test HoursWestIsValid Invalid Below Lower Limit
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest029, TestSize.Level1)
+{
+    int32_t hoursWest = -15;
+    const int32_t original = hoursWest;
+    EXPECT_FALSE(HoursWestIsValid(hoursWest));
+    EXPECT_EQ(hoursWest, original);
+}
+
+/**
+ * @tc.name: TimeUtilsTest030
+ * @tc.desc: Test HoursWestIsValid Invalid Above Upper Limit
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest030, TestSize.Level1)
+{
+    int32_t hoursWest = 13;
+    const int32_t original = hoursWest;
+    EXPECT_FALSE(HoursWestIsValid(hoursWest));
+    EXPECT_EQ(hoursWest, original);
+}
+
+/**
  * @tc.name: UtfConversionTest001
  * @tc.desc: Convert a simple ASCII string to UTF-16.
  * @tc.type: FUNC

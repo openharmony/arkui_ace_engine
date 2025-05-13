@@ -312,8 +312,29 @@ namespace {
 // [lane start/end position, lane index]
 using lanePos = std::pair<float, size_t>;
 
-using StartPosQ = std::priority_queue<lanePos>;
-using EndPosQ = std::priority_queue<lanePos, std::vector<lanePos>, std::greater<>>;
+struct LanePosLess {
+    bool operator()(const lanePos& a, const lanePos& b) const
+    {
+        if (!NearEqual(a.first, b.first)) {
+            return LessNotEqual(a.first, b.first);
+        } else {
+            return a.second < b.second;
+        }
+    }
+};
+struct LanePosGreater {
+    bool operator()(const lanePos& a, const lanePos& b) const
+    {
+        if (!NearEqual(a.first, b.first)) {
+            return GreatNotEqual(a.first, b.first);
+        } else {
+            return a.second > b.second;
+        }
+    }
+};
+
+using StartPosQ = std::priority_queue<lanePos, std::vector<lanePos>, LanePosLess>;
+using EndPosQ = std::priority_queue<lanePos, std::vector<lanePos>, LanePosGreater>;
 
 using Lanes = std::vector<WaterFlowLayoutInfoSW::Lane>;
 

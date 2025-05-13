@@ -30,7 +30,9 @@ public:
     DialogMaskPattern() = default;
     DialogMaskPattern(const DialogProperties& param, const RefPtr<FrameNode>& dialog)
         : dialogProperties_(param), dialogNode_(dialog)
-    {}
+    {
+        dialogId_ = dialog ? dialog->GetId() : -1;
+    }
     ~DialogMaskPattern() override = default;
 
     FocusPattern GetFocusPattern() const override
@@ -68,6 +70,7 @@ private:
     DialogProperties dialogProperties_;
     WeakPtr<FrameNode> dialogNode_;
     RefPtr<ClickEvent> onClick_;
+    int32_t dialogId_ = -1;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogMaskPattern);
 };

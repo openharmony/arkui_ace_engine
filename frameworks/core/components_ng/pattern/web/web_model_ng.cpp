@@ -1075,6 +1075,8 @@ void WebModelNG::NotifyPopupWindowResult(int32_t webId, bool result)
         std::shared_ptr<OHOS::NWeb::NWeb> nweb = OHOS::NWeb::NWebHelper::Instance().GetNWeb(webId);
         if (nweb) {
             nweb->NotifyPopupWindowResult(result);
+        } else {
+            TAG_LOGE(AceLogTag::ACE_WEB, "NotifyPopupWindowResult not found nweb %{public}d", webId);
         }
     }
 #endif

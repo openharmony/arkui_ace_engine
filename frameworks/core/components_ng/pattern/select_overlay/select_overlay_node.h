@@ -114,7 +114,8 @@ private:
     void SelectMenuAndInnerInitProperty();
     void AddMenuItemByCreateMenuCallback(const std::shared_ptr<SelectOverlayInfo>& info, float maxWidth);
     static const std::vector<MenuItemParam> GetSystemMenuItemParams(const std::shared_ptr<SelectOverlayInfo>& info);
-    static const MenuItemParam GetSystemMenuItemParam(const std::string& menuId, const std::string& menuButton);
+    static void AddMenuItemParamIf(
+        bool condition, const std::string& menuId, const std::string& menuButton, std::vector<MenuItemParam>& items);
     int32_t AddCreateMenuItems(const std::vector<NG::MenuOptionsParam>& menuItems,
         const std::shared_ptr<SelectOverlayInfo>& info, float maxWidth);
     bool AddSystemDefaultOptions(float maxWidth, float& allocatedSize);

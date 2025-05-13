@@ -367,6 +367,8 @@ public:
 
     RefPtr<FrameNode> GetDragPixelMapBadgeNode() const;
 
+    bool GetHasFilterWithCheck();
+
     bool GetHasFilter()
     {
         return hasFilter_;

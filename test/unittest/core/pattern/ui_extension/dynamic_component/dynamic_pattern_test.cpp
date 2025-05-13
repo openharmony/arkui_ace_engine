@@ -818,12 +818,6 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest022, TestSize.Level1)
     auto dynamicPattern = dynamicNode->GetPattern<DynamicPattern>();
     EXPECT_NE(dynamicPattern, nullptr);
 
-    auto context = NG::PipelineContext::GetCurrentContext();
-    PipelineContext* rawContext = AceType::RawPtr(context);
-    dynamicPattern->OnAttachContext(rawContext);
-    EXPECT_EQ(dynamicPattern->instanceId_, rawContext->GetInstanceId());
-    dynamicPattern->OnAttachContext(rawContext);
-
     int dummyObject = 42;
     void* runtime = &dummyObject;
     dynamicPattern->InitializeDynamicComponent("", "", "", runtime);

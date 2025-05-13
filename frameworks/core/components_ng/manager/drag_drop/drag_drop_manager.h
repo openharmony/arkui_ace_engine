@@ -650,6 +650,11 @@ public:
     {
         dragStartAnimationRate_ = rate;
     }
+
+    void SetDragStartPoint(double globalX, double globalY)
+    {
+        dragStartPoint_ = { globalX, globalY };
+    }
     
     bool CheckIsFolderSubwindowBoundary(float x, float y, int32_t instanceId);
 
@@ -716,6 +721,8 @@ private:
         const RefPtr<OverlayManager>& overlayManager, const RefPtr<NodeAnimatablePropertyFloat>& property, Point point);
     void StartDragTransitionAnimation(const Offset& newOffset, AnimationOption option,
         const RefPtr<OverlayManager>& overlayManager, const RefPtr<NodeAnimatablePropertyFloat>& property, Point point);
+    void ReportOnItemDropEvent(
+        DragType dragType, const RefPtr<FrameNode>& dragFrameNode, double dropPositionX, double dropPositionY);
 
     std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
@@ -789,6 +796,7 @@ private:
     WeakPtr<OverlayManager> subwindowOverlayManager_;
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
     bool grayedState_ = false;
+    Point dragStartPoint_ { 0, 0 };
 
     std::map<int32_t, Point> fingerPointInfo_;
     bool isStartAnimationFinished_{};

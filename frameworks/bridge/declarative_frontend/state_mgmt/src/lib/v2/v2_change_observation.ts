@@ -194,12 +194,6 @@ class ObserveV2 {
   // clear any previously created dependency view model object to elmtId
   // find these view model objects with the reverse map id2targets_
   public clearBinding(id: number): void {
-    // if there is no targets for current id, do not push it to idle task
-    // need to ensure the clearBinding is executed before addRef
-    // if there are exceptional cases, either fix them or remove this logic.
-    if (this.id2targets_[id] === undefined) {
-      return;
-    }
     if (this.idleTasks_) {
       this.idleTasks_[this.idleTasks_.end++] = [this.clearBindingInternal, id];
     } else {

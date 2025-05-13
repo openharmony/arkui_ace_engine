@@ -27,6 +27,7 @@ namespace OHOS::Ace::Kit {
 enum class IconNodeType {
     SYMBOL = 0,
     IMAGE,
+    TEXT
 };
 
 class ACE_FORCE_EXPORT AgingAdapationDialogUtil {

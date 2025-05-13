@@ -844,7 +844,7 @@ static void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNod
     CHECK_NULL_VOID(manager);
     auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
-    if (!manager->GetHasFilter() && !manager->GetIsOnAnimation()) {
+    if (!manager->GetHasFilterWithCheck() && !manager->GetIsOnAnimation()) {
         bool isBindOverlayValue = targetNode->GetLayoutProperty()->GetIsBindOverlayValue(false);
         CHECK_NULL_VOID(isBindOverlayValue && menuTheme->GetHasFilter());
         // insert columnNode to rootNode

@@ -410,6 +410,16 @@ void SwiperPattern::MarkDirtyBindIndicatorNode() const
     indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
+Framework::JSIndicatorController* SwiperPattern::GetIndicatorController()
+{
+    return indicatorController_;
+}
+
+void SwiperPattern::SetIndicatorController(Framework::JSIndicatorController* controller)
+{
+    indicatorController_ = controller;
+}
+
 void SwiperPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();

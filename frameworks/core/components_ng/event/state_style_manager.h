@@ -283,6 +283,7 @@ private:
     bool pressedCancelPendingState_ = false;
     bool hasScrollingParent_ = false;
     bool scrollingFeatureForbidden_ = false;
+    bool isFastScrolling_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(StateStyleManager);
 };

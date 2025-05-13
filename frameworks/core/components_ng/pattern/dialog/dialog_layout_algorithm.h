@@ -64,7 +64,7 @@ private:
     void AvoidScreen(OffsetF& topLeftPoint, const RefPtr<DialogLayoutProperty>& prop, SizeF childSize);
 
     bool ComputeInnerLayoutSizeParam(LayoutConstraintF& innerLayout, const RefPtr<DialogLayoutProperty>& dialogProp);
-    bool IsGetExpandDisplayValidHeight();
+    bool IsGetExpandDisplayValidHeight(const RefPtr<DialogLayoutProperty>& dialogProp);
     RefPtr<PipelineContext> GetCurrentPipelineContext();
     void ComputeInnerLayoutParam(LayoutConstraintF& innerLayout, const RefPtr<DialogLayoutProperty>& dialogProp);
     double GetMaxWidthBasedOnGridType(const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType);

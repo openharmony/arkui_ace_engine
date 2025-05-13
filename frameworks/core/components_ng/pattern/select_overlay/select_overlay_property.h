@@ -138,6 +138,27 @@ inline constexpr SelectOverlayDirtyFlag DIRTY_ALL =
 
 inline constexpr int32_t REQUEST_RECREATE = 1;
 
+using SystemServiceMenuDisableFlag = uint32_t;
+inline constexpr SystemServiceMenuDisableFlag DISABLE_NORMAL_FLAG = 0;
+inline constexpr SystemServiceMenuDisableFlag DISABLE_ALL_FLAG = 1;
+inline constexpr SystemServiceMenuDisableFlag DISABLE_TRANSLATE_FLAG = 1 << 1;
+inline constexpr SystemServiceMenuDisableFlag DISABLE_SEARCH_FLAG = 1 << 2;
+inline constexpr SystemServiceMenuDisableFlag DISABLE_SHARE_FLAG = 1 << 3;
+inline constexpr SystemServiceMenuDisableFlag DISABLE_CAMERA_INPUT_FLAG = 1 << 4;
+inline constexpr SystemServiceMenuDisableFlag DISABLE_AI_WRITER_FLAG = 1 << 5;
+inline constexpr SystemServiceMenuDisableFlag DISABLE_COLLABORATION_SERVICE_FLAG = 1 << 6;
+
+inline constexpr char OH_DEFAULT_CUT[] = "OH_DEFAULT_CUT";
+inline constexpr char OH_DEFAULT_COPY[] = "OH_DEFAULT_COPY";
+inline constexpr char OH_DEFAULT_PASTE[] = "OH_DEFAULT_PASTE";
+inline constexpr char OH_DEFAULT_SELECT_ALL[] = "OH_DEFAULT_SELECT_ALL";
+inline constexpr char OH_DEFAULT_TRANSLATE[] = "OH_DEFAULT_TRANSLATE";
+inline constexpr char OH_DEFAULT_SEARCH[] = "OH_DEFAULT_SEARCH";
+inline constexpr char OH_DEFAULT_SHARE[] = "OH_DEFAULT_SHARE";
+inline constexpr char OH_DEFAULT_CAMERA_INPUT[] = "OH_DEFAULT_CAMERA_INPUT";
+inline constexpr char OH_DEFAULT_AI_WRITE[] = "OH_DEFAULT_AI_WRITE";
+inline constexpr char OH_DEFAULT_COLLABORATION_SERVICE[] = "OH_DEFAULT_COLLABORATION_SERVICE";
+
 enum class OptionMenuType { NO_MENU, MOUSE_MENU, TOUCH_MENU };
 enum class OptionMenuActionId {
     COPY,
@@ -395,6 +416,23 @@ TextMenuShowMode CastToTextMenuShowMode(int32_t value);
 struct TextMenuOptions {
     std::optional<TextMenuShowMode> showMode;
 };
+
+#define DEFINE_MENU_CHECK_METHOD(name) bool IsShow##name()
+
+#define DEFINE_MENU_CHECK_METHOD_IMPL(name, flag) \
+bool IsShow##name() {                             \
+    return !IsDisableMenuItem(flag);              \
+}                                                 \
+
+namespace TextSystemMenu {
+bool IsDisableMenuItem(SystemServiceMenuDisableFlag flag);
+DEFINE_MENU_CHECK_METHOD(Translate);
+DEFINE_MENU_CHECK_METHOD(Search);
+DEFINE_MENU_CHECK_METHOD(Share);
+DEFINE_MENU_CHECK_METHOD(CameraInput);
+DEFINE_MENU_CHECK_METHOD(AIWriter);
+DEFINE_MENU_CHECK_METHOD(CollaborationService);
+} // namespace TextSystemMenu
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SELECT_OVERLAY_PROPERTY_H

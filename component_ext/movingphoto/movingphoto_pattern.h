@@ -119,6 +119,11 @@ public:
         return currentDateModified_;
     }
 
+    bool GetXmageModeStatus()
+    {
+        return isXmageMode_;
+    }
+
     void EnableAnalyzer(bool enabled);
 
     void SetImageAIOptions(void* options);

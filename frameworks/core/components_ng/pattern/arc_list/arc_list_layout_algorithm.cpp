@@ -135,8 +135,13 @@ void ArcListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         if (NearZero(currentOffset_) || (!overScrollFeature_ && NonNegative(currentOffset_)) ||
             (overScrollFeature_ && overScrollTop) ||
             LessOrEqual(itemTotalSize, contentMainSize_ - contentStartOffset_ - contentEndOffset_)) {
-            if (midIndex > 0 || GreatNotEqual(startPos, GetHeaderAreaSize())) {
-                startPos = midItemMidPos - midItemHeight / FLOAT_TWO;
+            float tmpStartPos = midItemMidPos - midItemHeight / FLOAT_TWO;
+            if (midIndex > 0) {
+                startPos = tmpStartPos;
+            } else if (GreatNotEqual(startPos, GetHeaderAreaSize())) {
+                startPos = std::max(tmpStartPos, GetHeaderAreaSize());
+            } else if (GreatNotEqual(tmpStartPos, GetHeaderAreaSize())) {
+                startPos = std::max(GetHeaderAreaSize(), (contentMainSize_ - midItemHeight) / FLOAT_TWO);
             }
             if (childrenSize_) {
                 posMap_->OptimizeBeforeMeasure(startIndex, startPos, currentOffset_, contentMainSize_);
@@ -499,7 +504,7 @@ bool ArcListLayoutAlgorithm::CheckNeedUpdateHeaderOffset(LayoutWrapper* layoutWr
     CHECK_NULL_RETURN(host, false);
     auto pattern = host->GetPattern<ArcListPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    if (!pattern->IsScrollableStopped()) {
+    if (!pattern->IsScrollableStopped() || pattern->IsOutOfBoundary()) {
         return false;
     }
 

@@ -94,7 +94,7 @@ void StateStyleManager::HandleTouchDown()
     if (!hasScrollingParent_ || scrollingFeatureForbidden_) {
         UpdateCurrentUIState(UI_STATE_PRESSED);
         PostListItemPressStyleTask(currentState_);
-    } else {
+    } else if (!isFastScrolling_){
         if (IsPressedCancelStatePending()) {
             ResetPressedCancelState();
         }
@@ -342,7 +342,10 @@ void StateStyleManager::HandleScrollingParent()
         CHECK_NULL_VOID(pattern);
         if (pattern->ShouldDelayChildPressedState()) {
             hasScrollingParent_ = true;
-            pattern->RegisterScrollingListener(scrollingListener);
+            isFastScrolling_ = pattern->ShouldPreventChildPressedState();
+            if (!isFastScrolling_) {
+                pattern->RegisterScrollingListener(scrollingListener);
+            }
         }
         parent = parent->GetAncestorNodeOfFrame(false);
     }
