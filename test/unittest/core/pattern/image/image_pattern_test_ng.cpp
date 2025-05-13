@@ -1715,4 +1715,100 @@ HWTEST_F(ImagePatternTestNg, AllowVisibleAreaCheck001, TestSize.Level1)
     */
     EXPECT_FALSE(imagePattern->AllowVisibleAreaCheck());
 }
+
+/**
+ * @tc.name: HasSceneChanged001
+ * @tc.desc: hasSceneChanged returns true when layout property is valid and source changes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, HasSceneChanged001, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    // Set a valid image source info
+    layoutProperty->UpdateImageSourceInfo(ImageSourceInfo("test_src"));
+
+    // Expect hasSceneChanged always returns true
+    EXPECT_TRUE(imagePattern->hasSceneChanged());
+}
+
+/**
+ * @tc.name: HasSceneChanged002
+ * @tc.desc: hasSceneChanged returns true even if loadingCtx_ is set and source is the same.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, HasSceneChanged002, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    ImageSourceInfo sourceInfo("test_src");
+    layoutProperty->UpdateImageSourceInfo(sourceInfo);
+
+    // Setup loading context to match the same source
+    auto loadingCtx =
+        AceType::MakeRefPtr<ImageLoadingContext>(sourceInfo, LoadNotifier(nullptr, nullptr, nullptr), true);
+    imagePattern->loadingCtx_ = loadingCtx;
+
+    // Set srcRect_ and dstRect_ to same value (won't affect result now)
+    imagePattern->srcRect_ = RectF(0, 0, 100, 100);
+    imagePattern->dstRect_ = RectF(0, 0, 100, 100);
+
+    // Still expect true because condition is removed
+    EXPECT_TRUE(imagePattern->hasSceneChanged());
+}
+
+/**
+ * @tc.name: HasSceneChanged003
+ * @tc.desc: hasSceneChanged returns true even if loadingCtx_ is set and source is not the same.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, HasSceneChanged003, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    ImageSourceInfo sourceInfo("test_src");
+    layoutProperty->UpdateImageSourceInfo(sourceInfo);
+
+    // Setup loading context to match the same source
+    auto loadingCtx =
+        AceType::MakeRefPtr<ImageLoadingContext>(sourceInfo, LoadNotifier(nullptr, nullptr, nullptr), true);
+    imagePattern->loadingCtx_ = loadingCtx;
+
+    // Set srcRect_ and dstRect_ to not same value (won't affect result now)
+    imagePattern->srcRect_ = RectF(0, 0, 200, 200);
+    imagePattern->dstRect_ = RectF(0, 0, 100, 100);
+
+    // Still expect true because condition is removed
+    EXPECT_TRUE(imagePattern->hasSceneChanged());
+}
 } // namespace OHOS::Ace::NG
