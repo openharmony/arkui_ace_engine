@@ -285,7 +285,7 @@ public:
 
     RefPtr<FillAlgorithm> CreateFillAlgorithm() final;
 
-    int32_t ConvertLargeDelta(float delta) final;
+    int32_t ArkoalaConvertLargeDelta(float delta) final;
 
 private:
     /**

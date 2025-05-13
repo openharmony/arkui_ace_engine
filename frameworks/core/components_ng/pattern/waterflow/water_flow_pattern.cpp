@@ -827,11 +827,12 @@ std::function<bool(int32_t)> WaterFlowPattern::GetScrollIndexAbility()
     };
 }
 
-int32_t WaterFlowPattern::ConvertLargeDelta(float delta)
+int32_t WaterFlowPattern::ArkoalaConvertLargeDelta(float delta)
 {
     if (layoutInfo_->Mode() != LayoutMode::SLIDING_WINDOW) {
         return -1;
     }
+    layoutInfo_->UpdateOffset(-layoutInfo_->GetPendingDelta()); // clears delta
     WaterFlowLargeDeltaConverter converter(*DynamicCast<WaterFlowLayoutInfoSW>(layoutInfo_));
     return converter.Convert(delta);
 }
