@@ -7027,6 +7027,26 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof IndicatorStyle")
         }
     }
+    static isSubTabBarIndicatorStyle(value: Object | string | number | undefined | boolean, duplicated_color: boolean, duplicated_height: boolean, duplicated_width: boolean, duplicated_borderRadius: boolean, duplicated_marginTop: boolean): boolean {
+        if ((!duplicated_color) && (value?.hasOwnProperty("color"))) {
+            return true
+        }
+        else if ((!duplicated_height) && (value?.hasOwnProperty("height"))) {
+            return true
+        }
+        else if ((!duplicated_width) && (value?.hasOwnProperty("width"))) {
+            return true
+        }
+        else if ((!duplicated_borderRadius) && (value?.hasOwnProperty("borderRadius"))) {
+            return true
+        }
+        else if ((!duplicated_marginTop) && (value?.hasOwnProperty("marginTop"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof SubTabBarIndicatorStyle")
+        }
+    }
     static isInputCounterOptions(value: Object | string | number | undefined | boolean, duplicated_thresholdPercentage: boolean, duplicated_highlightBorder: boolean): boolean {
         if ((!duplicated_thresholdPercentage) && (value?.hasOwnProperty("thresholdPercentage"))) {
             return true
@@ -7390,6 +7410,35 @@ export class TypeChecker {
         }
         else {
             throw new Error("Can not discriminate value typeof LabelStyle")
+        }
+    }
+    static isTabBarLabelStyle(value: Object | string | number | undefined | boolean, duplicated_overflow: boolean, duplicated_maxLines: boolean, duplicated_minFontSize: boolean, duplicated_maxFontSize: boolean, duplicated_heightAdaptivePolicy: boolean, duplicated_font: boolean, duplicated_selectedColor: boolean, duplicated_unselectedColor: boolean): boolean {
+        if ((!duplicated_overflow) && (value?.hasOwnProperty("overflow"))) {
+            return true
+        }
+        else if ((!duplicated_maxLines) && (value?.hasOwnProperty("maxLines"))) {
+            return true
+        }
+        else if ((!duplicated_minFontSize) && (value?.hasOwnProperty("minFontSize"))) {
+            return true
+        }
+        else if ((!duplicated_maxFontSize) && (value?.hasOwnProperty("maxFontSize"))) {
+            return true
+        }
+        else if ((!duplicated_heightAdaptivePolicy) && (value?.hasOwnProperty("heightAdaptivePolicy"))) {
+            return true
+        }
+        else if ((!duplicated_font) && (value?.hasOwnProperty("font"))) {
+            return true
+        }
+        else if ((!duplicated_selectedColor) && (value?.hasOwnProperty("selectedColor"))) {
+            return true
+        }
+        else if ((!duplicated_unselectedColor) && (value?.hasOwnProperty("unselectedColor"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof TabBarLabelStyle")
         }
     }
     static isLargestContentfulPaint(value: Object | string | number | undefined | boolean, duplicated_navigationStartTime: boolean, duplicated_largestImagePaintTime: boolean, duplicated_largestTextPaintTime: boolean, duplicated_imageBPP: boolean, duplicated_largestImageLoadStartTime: boolean, duplicated_largestImageLoadEndTime: boolean): boolean {

@@ -151,9 +151,7 @@ void SetTabsOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(options);
     auto tabsOptionsOpt = Converter::OptConvert<TabsOptions>(*options);
     CHECK_NULL_VOID(tabsOptionsOpt);
-
     TabsModelNG::SetTabBarPosition(frameNode, tabsOptionsOpt->barPosOpt);
-
     TabsModelNG::InitIndex(frameNode, tabsOptionsOpt->indexOpt);
 
     if (tabsOptionsOpt->controllerOpt) {
@@ -205,8 +203,7 @@ void BarMode0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto mode = Converter::ArkValue<Opt_BarMode>(ARK_BAR_MODE_FIXED);
-    BarMode1Impl(node, &mode, nullptr);
+    BarMode1Impl(node, value, nullptr);
 }
 void BarMode1Impl(Ark_NativePointer node,
                   const Opt_BarMode* value,

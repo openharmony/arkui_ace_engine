@@ -80,7 +80,7 @@ import { GridItemStyle, GridItemOptions } from "./../gridItem"
 import { ImageAnalyzerType, ImageAnalyzerController, ImageAnalyzerConfig, ImageAIOptions } from "./../imageCommon"
 import { IndicatorComponentController } from "./../indicatorcomponent"
 import { ItemState } from "./../stepperItem"
-import { LayoutMode, SelectedMode, BoardStyle, TabBarSymbol, TabBarIconStyle, TabBarOptions, BottomTabBarStyle, SubTabBarStyle } from "./../tabContent"
+import { LayoutMode, SelectedMode, BoardStyle, TabBarSymbol, TabBarIconStyle, TabBarOptions, BottomTabBarStyle, SubTabBarStyle, SubTabBarIndicatorStyle, TabBarLabelStyle } from "./../tabContent"
 import { LinearIndicatorController, LinearIndicatorStartOptions, LinearIndicatorStyle } from "./../linearindicator"
 import { ListItemGroupStyle, ListItemGroupOptions } from "./../listItemGroup"
 import { Scroller, ScrollAlign, OffsetResult, OnScrollFrameBeginHandlerResult, ScrollAttribute, ScrollDirection, ScrollOnWillScrollCallback, ScrollOnScrollCallback, OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollSnapOptions, OffsetOptions, ScrollOptions, ScrollEdgeOptions, ScrollPageOptions, Literal_Boolean_next_Axis_direction, ScrollToIndexOptions, ScrollAnimationOptions } from "./../scroll"
@@ -1310,6 +1310,9 @@ export class TypeChecker {
     static isIndicatorStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean): boolean {
         return value instanceof IndicatorStyle
     }
+    static isSubTabBarIndicatorStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof SubTabBarIndicatorStyle
+    }
     static isInputCounterOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof InputCounterOptions
     }
@@ -1372,6 +1375,9 @@ export class TypeChecker {
     }
     static isLabelStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
         return value instanceof LabelStyle
+    }
+    static isTabBarLabelStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
+        return value instanceof TabBarLabelStyle
     }
     static isLargestContentfulPaint(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
         return value instanceof LargestContentfulPaint
