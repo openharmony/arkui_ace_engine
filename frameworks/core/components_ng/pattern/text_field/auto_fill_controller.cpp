@@ -67,6 +67,7 @@ void AutoFillController::StartAutoFillAnimation(
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->StopTwinkling();
+    UpdateAnimationTextRect();
     if (mode == AutoFillContentLengthMode::EXTRA_LONG) {
         PlayAutoFillIconShowAnimation(mode);
         PlayAutoFillTextScrollAnimation();
@@ -399,5 +400,17 @@ float AutoFillController::GetSpringAnimationDamping(const AutoFillContentLengthM
 {
     return mode == AutoFillContentLengthMode::EXTRA_LONG ? AUTO_FILL_SPRING_DAMPING_FRACTION_EXTRA_LONG
                                                          : AUTO_FILL_SPRING_DAMPING_FRACTION;
+}
+
+void AutoFillController::UpdateAnimationTextRect()
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textFieldPattern);
+    auto textRect = textFieldPattern->GetTextRect();
+    auto contentRect = textFieldPattern->GetTextContentRect();
+    animationTextRect_ = textRect;
+    animationTextRect_.SetLeft(contentRect.GetX());
 }
 } // namespace OHOS::Ace::NG
