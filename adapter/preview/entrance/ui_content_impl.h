@@ -216,6 +216,7 @@ private:
     bool installationFree_ = false;
     uint32_t labelId_ = 0;
     bool useNewPipeline_ = true;
+    std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
 
     sptr<OHOS::Rosen::Window> rsWindow_;
     // ITouchOutsideListener is used for touching out of hot areas of window.

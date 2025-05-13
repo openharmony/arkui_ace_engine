@@ -41,6 +41,10 @@ namespace OHOS::Rosen {
     class Window;
 }
 
+namespace OHOS::AbilityRuntime {
+    class Context;
+}
+
 namespace OHOS::Ace::Platform {
 
 namespace {
@@ -313,6 +317,19 @@ public:
         crownEventCallback_ = std::move(callback);
     }
 
+    void SetLocalStorage(NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context);
+    std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContextByModule(
+        const std::string& bundle, const std::string& module);
+    void SetAbilityContext(const std::weak_ptr<OHOS::AbilityRuntime::Context>& context);
+    void RecordResAdapter(const std::string& key)
+    {
+        resAdapterRecord_.emplace(key);
+    }
+
+    const ResourceInfo& GetResourceInfo() const
+    {
+        return resourceInfo_;
+    }
 private:
     void InitializeFrontend();
     void InitializeCallback();
@@ -350,7 +367,8 @@ private:
     std::string bundleName_;
     std::string moduleName_;
     RefPtr<StagePkgContextInfo> PkgContextInfo_;
-
+    std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext_;
+    std::unordered_set<std::string> resAdapterRecord_;
     CrownEventCallback crownEventCallback_;
 
     // Support to execute the ets code mocked by developer
