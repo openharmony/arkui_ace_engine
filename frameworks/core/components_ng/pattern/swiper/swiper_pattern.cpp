@@ -346,7 +346,8 @@ void SwiperPattern::ResetOnForceMeasure()
     currentDelta_ = 0.0f;
     itemPosition_.clear();
     isVoluntarilyClear_ = true;
-    jumpIndex_ = jumpIndex_.value_or(currentIndex_);
+    jumpIndex_ = jumpIndex_.value_or(
+        GetLoopIndex(currentIndex_, oldChildrenSize_.has_value() ? oldChildrenSize_.value() : TotalCount()));
     SetLazyForEachFlag();
     ResetTabBar();
     MarkDirtyNodeSelf();
