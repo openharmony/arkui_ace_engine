@@ -8564,7 +8564,7 @@ export interface UICommonMethod {
     /** @memo */
     bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this
     /** @memo */
-    bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ModalTransition | ContentCoverOptions): this
+    bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ContentCoverOptions): this
     /** @memo */
     bindSheet(isShow: boolean | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this
     /** @memo */
@@ -12088,18 +12088,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         return this
     }
     /** @memo */
-    public bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ModalTransition | ContentCoverOptions): this {
+    public bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ContentCoverOptions): this {
         if (this.checkPriority("bindContentCover")) {
             const isShow_type = runtimeType(isShow)
             const builder_type = runtimeType(builder)
             const type_type = runtimeType(type)
-            if (((RuntimeType.BOOLEAN == isShow_type) || (RuntimeType.UNDEFINED == isShow_type)) && ((RuntimeType.FUNCTION == builder_type) || (RuntimeType.UNDEFINED == builder_type)) && ((RuntimeType.OBJECT == type_type) || (RuntimeType.OBJECT == type_type))) {
-                const isShow_casted = isShow as (boolean | undefined)
-                const builder_casted = builder as (CustomBuilder | undefined)
-                const type_casted = type as (ModalTransition)
-                this.getPeer()?.bindContentCover0Attribute(isShow_casted, builder_casted, type_casted)
-                return this
-            }
             if (((RuntimeType.BOOLEAN == isShow_type) || (RuntimeType.UNDEFINED == isShow_type)) && ((RuntimeType.FUNCTION == builder_type) || (RuntimeType.UNDEFINED == builder_type)) && ((RuntimeType.OBJECT == type_type) || (RuntimeType.UNDEFINED == type_type))) {
                 const isShow_casted = isShow as (boolean | undefined)
                 const builder_casted = builder as (CustomBuilder | undefined)
