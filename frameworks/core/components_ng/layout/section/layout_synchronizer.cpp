@@ -24,7 +24,6 @@ namespace OHOS::Ace::NG {
 void LayoutSynchronizer::Sync(const RefPtr<LayoutProperty>& props, StaggeredFillAlgorithm& fillAlgo)
 {
     const auto truth = GetLayoutTruth(props);
-
     if (truth.startIdx != fillAlgo.StartIdx() || truth.endIdx != fillAlgo.EndIdx()) {
         LOGW("Item ranges are out of sync: component range = %d - %d, fill range = %d - %d", truth.startIdx,
             truth.endIdx, fillAlgo.StartIdx().value_or(-1), fillAlgo.EndIdx().value_or(-1));
@@ -37,6 +36,7 @@ void LayoutSynchronizer::Sync(const RefPtr<LayoutProperty>& props, StaggeredFill
 
 LayoutSynchronizer::LayoutState LayoutSynchronizer::GetLayoutTruth(const RefPtr<LayoutProperty>& props)
 {
+    CHECK_NULL_RETURN(props, {});
     auto host = props->GetHost();
     CHECK_NULL_RETURN(host, {});
     if (auto waterFlow = host->GetPattern<WaterFlowPattern>(); waterFlow) {
