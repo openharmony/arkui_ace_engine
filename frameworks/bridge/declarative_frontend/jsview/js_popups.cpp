@@ -917,6 +917,21 @@ void JSViewPopups::ParseMenuArrowParam(const JSRef<JSObject>& menuOptions, NG::M
     }
 }
 
+void JSViewPopups::ParseMenuShowInSubWindowParam(
+    const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam, bool isCheckThemeValue)
+{
+    auto showInSubWindowValue = menuOptions->GetProperty("showInSubWindow");
+    if (isCheckThemeValue) {
+        JSViewPopups::GetMenuShowInSubwindow(menuParam);
+        if (!menuParam.isShowInSubWindow) {
+            return;
+        }
+    }
+    if (showInSubWindowValue->IsBoolean()) {
+        menuParam.isShowInSubWindow = showInSubWindowValue->ToBoolean();
+    }
+}
+
 void JSViewPopups::ParseLayoutRegionMargin(const JSRef<JSVal>& jsValue, std::optional<CalcDimension>& calcDimension)
 {
     CalcDimension dimension;
@@ -1102,14 +1117,7 @@ void JSViewPopups::ParseMenuParam(
         menuParam.hasTransitionEffect = true;
         menuParam.transition = JSViewAbstract::ParseChainedTransition(obj, info.GetExecutionContext());
     }
-
-    JSRef<JSVal> showInSubWindowValue = menuOptions->GetProperty("showInSubWindow");
-    JSViewPopups::GetMenuShowInSubwindow(menuParam);
-    if (menuParam.isShowInSubWindow) {
-        if (showInSubWindowValue->IsBoolean()) {
-            menuParam.isShowInSubWindow = showInSubWindowValue->ToBoolean();
-        }
-    }
+    JSViewPopups::ParseMenuShowInSubWindowParam(menuOptions, menuParam);
     JSViewPopups::ParseMenuArrowParam(menuOptions, menuParam);
     JSViewPopups::ParseMenuBorderRadius(menuOptions, menuParam);
     JSViewPopups::ParseMenuLayoutRegionMarginParam(menuOptions, menuParam);
@@ -2217,6 +2225,7 @@ void JSViewAbstract::ParseContentMenuCommonParam(
     }
     CHECK_EQUAL_VOID(menuObj->IsEmpty(), true);
     JSViewPopups::ParseMenuParam(info, menuObj, menuParam);
+    JSViewPopups::ParseMenuShowInSubWindowParam(menuObj, menuParam, false);
     auto preview = menuObj->GetProperty("preview");
     if (preview->IsNumber()) {
         auto previewMode = preview->ToNumber<int32_t>();
