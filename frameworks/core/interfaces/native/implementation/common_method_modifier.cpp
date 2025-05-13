@@ -481,7 +481,7 @@ auto g_bindSheetCallbacks2 = [](SheetCallbacks& callbacks, const Ark_SheetOption
     }
 };
 
-auto g_bindSheetParams = [](SheetStyle sheetStyle, const Ark_SheetOptions& sheetOptions) {
+auto g_bindSheetParams = [](SheetStyle& sheetStyle, const Ark_SheetOptions& sheetOptions) {
     sheetStyle.showInPage = OptConvert<SheetLevel>(sheetOptions.mode).value_or(SheetLevel::EMBEDDED);
     std::vector<SheetHeight> detents;
     auto detentsOpt = OptConvert<Ark_Type_SheetOptions_detents>(sheetOptions.detents);
