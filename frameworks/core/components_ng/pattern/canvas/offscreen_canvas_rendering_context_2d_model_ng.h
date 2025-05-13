@@ -83,6 +83,7 @@ public:
     void SetClipRuleForPath(const CanvasFillRule& fillRule) override;
     void SetClipRuleForPath2D(const CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path) override;
     void AddRect(const Rect& rect) override;
+    void AddRoundRect(const Rect& rect, const std::vector<double>& radii) override;
     void BeginPath() override;
     void ClosePath() override;
     void Restore() override;
