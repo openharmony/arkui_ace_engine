@@ -2114,4 +2114,29 @@ void JSTextField::SetOnWillChange(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetOnWillChangeEvent(std::move(onWillChange));
 }
 
+void JSTextField::SetStrokeWidth(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    CalcDimension value;
+    if (!ParseLengthMetricsToDimension(info[0], value)) {
+        value.Reset();
+    }
+    TextFieldModel::GetInstance()->SetStrokeWidth(value);
+}
+
+void JSTextField::SetStrokeColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color strokeColor;
+    if (!ParseJsColor(info[0], strokeColor)) {
+        TextFieldModel::GetInstance()->ResetStrokeColor();
+        return;
+    }
+    TextFieldModel::GetInstance()->SetStrokeColor(strokeColor);
+}
+
 } // namespace OHOS::Ace::Framework

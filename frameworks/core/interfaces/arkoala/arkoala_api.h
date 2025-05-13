@@ -4034,6 +4034,12 @@ struct ArkUITextAreaModifier {
     void (*resetStopBackPress)(ArkUINodeHandle node);
     void (*setTextAreaKeyboardAppearance)(ArkUINodeHandle node, ArkUI_Uint32 keyBoardAppearance);
     void (*resetTextAreaKeyboardAppearance)(ArkUINodeHandle node);
+    void (*setTextAreaStrokeWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTextAreaStrokeWidth)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getTextAreaStrokeWidth)(ArkUINodeHandle node);
+    void (*setTextAreaStrokeColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetTextAreaStrokeColor)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getTextAreaStrokeColor)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -4258,6 +4264,12 @@ struct ArkUITextInputModifier {
     void (*setTextInputEnableAutoFillAnimation)(ArkUINodeHandle node, ArkUI_Uint32 enableAutoFillAnimation);
     ArkUI_Int32 (*getTextInputEnableAutoFillAnimation)(ArkUINodeHandle node);
     void (*resetTextInputEnableAutoFillAnimation)(ArkUINodeHandle node);
+    void (*setTextInputStrokeWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTextInputStrokeWidth)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getTextInputStrokeWidth)(ArkUINodeHandle node);
+    void (*setTextInputStrokeColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetTextInputStrokeColor)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getTextInputStrokeColor)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -5002,6 +5014,10 @@ struct ArkUISearchModifier {
     void (*resetStopBackPress)(ArkUINodeHandle node);
     void (*setSearchKeyboardAppearance)(ArkUINodeHandle node, ArkUI_Uint32 keyBoardAppearance);
     void (*resetSearchKeyboardAppearance)(ArkUINodeHandle node);
+    void (*setSearchStrokeWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetSearchStrokeWidth)(ArkUINodeHandle node);
+    void (*setSearchStrokeColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetSearchStrokeColor)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {

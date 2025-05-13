@@ -13,15 +13,22 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include "search_base.h"
+#include "ui/base/geometry/dimension.h"
+#include "ui/properties/color.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/search/search_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const Color STROKE_COLOR_VALUE_0 = Color::FromRGB(255, 100, 100);
+const Color STORKE_COLOR_VALUE_1 = Color::FromRGB(255, 255, 100);
+} // namespace
 
 class SearchTestNg : public SearchBases {
 public:
@@ -2450,4 +2457,59 @@ HWTEST_F(SearchTestNg, SetSearchIcon001, TestSize.Level1)
     auto searchIconPath2 = imageLayoutProperty->GetImageSourceInfo()->GetSrc();
     EXPECT_NE(searchIconPath1.c_str(), searchIconPath2.c_str());
 }
+
+/**
+ * @tc.name: StrokeTest001
+ * @tc.desc: test search storkeWidth and strokeColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, StrokeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and pattern.
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+
+    /**
+     * @tc.step: step2.  set strokeWidth 2.0 px.
+     */
+    searchModelInstance.SetStrokeWidth(Dimension(2.0));
+    searchModelInstance.SetStrokeColor(STORKE_COLOR_VALUE_1);
+
+    /**
+     * @tc.step: step3. test strokeWidth
+     */
+    EXPECT_EQ(layoutProperty->GetStrokeWidth(), Dimension(2.0));
+    EXPECT_EQ(layoutProperty->GetStrokeColor(), STORKE_COLOR_VALUE_1);
+
+    searchModelInstance.ResetStrokeColor();
+    EXPECT_EQ(layoutProperty->GetStrokeColor().has_value(), false);
+}
+
+/**
+ * @tc.name: UpdateFontFeatureWithStroke001
+ * @tc.desc: test UpdateFontFeature
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, UpdateFontFeatureWithStroke001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    SearchModelNG searchModelInstance;
+    searchModelInstance.SetStrokeWidth(Dimension(2.0));
+    searchModelInstance.SetStrokeColor(STORKE_COLOR_VALUE_1);
+
+    layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 1"));
+    SearchModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_0);
+
+    EXPECT_EQ(layoutProperty->GetStrokeWidth(), Dimension(2.0));
+    EXPECT_EQ(layoutProperty->GetStrokeColor(), STORKE_COLOR_VALUE_1);
+}
+
 } // namespace OHOS::Ace::NG

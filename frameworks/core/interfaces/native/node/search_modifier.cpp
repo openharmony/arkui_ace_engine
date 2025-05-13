@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/search_modifier.h"
+#include "ui/base/geometry/calc_dimension.h"
+#include "ui/properties/color.h"
 
 #include "base/utils/utf_helper.h"
 #include "core/components/search/search_theme.h"
@@ -924,6 +926,35 @@ void ResetStopBackPress(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetStopBackPress(frameNode, true);
 }
+
+
+void SetSearchStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetStrokeWidth(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+}
+
+void ResetSearchStrokeWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetStrokeWidth(frameNode, 0.0_px);
+}
+
+void SetSearchStrokeColor(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetStrokeColor(frameNode, Color(value));
+}
+
+void ResetSearchStrokeColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::ResetStrokeColor(frameNode);
+}
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
 {
@@ -1034,6 +1065,10 @@ const ArkUISearchModifier* GetSearchModifier()
         .resetStopBackPress = ResetStopBackPress,
         .setSearchKeyboardAppearance = SetSearchKeyboardAppearance,
         .resetSearchKeyboardAppearance = ResetSearchKeyboardAppearance,
+        .setSearchStrokeWidth = SetSearchStrokeWidth,
+        .resetSearchStrokeWidth = ResetSearchStrokeWidth,
+        .setSearchStrokeColor = SetSearchStrokeColor,
+        .resetSearchStrokeColor = ResetSearchStrokeColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

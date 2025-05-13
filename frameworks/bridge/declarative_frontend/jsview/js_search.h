@@ -105,6 +105,8 @@ public:
     static void SetKeyboardAppearance(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJsOnWillChangeObj(const ChangeValueInfo& changeValueInfo);
     static void SetOnWillChange(const JSCallbackInfo& info);
+    static void SetStrokeWidth(const JSCallbackInfo& info);
+    static void SetStrokeColor(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {

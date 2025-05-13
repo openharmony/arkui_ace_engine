@@ -1825,6 +1825,48 @@ void ResetStopBackPress(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetStopBackPress(frameNode, true);
 }
+
+void SetTextAreaStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetStrokeWidth(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+
+void ResetTextAreaStrokeWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetStrokeWidth(frameNode, 0.0_px);
+}
+
+ArkUI_Float32 GetTextAreaStrokeWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetStrokeWidth(frameNode).Value();
+}
+
+void SetTextAreaStrokeColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetStrokeColor(frameNode, Color(color));
+}
+
+void ResetTextAreaStrokeColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::ResetStrokeColor(frameNode);
+}
+
+ArkUI_Uint32 GetTextAreaStrokeColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return TextFieldModelNG::GetStrokeColor(frameNode).GetValue();
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1998,6 +2040,12 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .resetStopBackPress = ResetStopBackPress,
         .setTextAreaKeyboardAppearance = SetTextAreaKeyboardAppearance,
         .resetTextAreaKeyboardAppearance = ResetTextAreaKeyboardAppearance,
+        .setTextAreaStrokeWidth = SetTextAreaStrokeWidth,
+        .resetTextAreaStrokeWidth = ResetTextAreaStrokeWidth,
+        .getTextAreaStrokeWidth = GetTextAreaStrokeWidth,
+        .setTextAreaStrokeColor = SetTextAreaStrokeColor,
+        .resetTextAreaStrokeColor = ResetTextAreaStrokeColor,
+        .getTextAreaStrokeColor = GetTextAreaStrokeColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

@@ -547,7 +547,12 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
     textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
     textStyle.SetLineBreakStrategy(layoutProperty->GetLineBreakStrategyValue(LineBreakStrategy::GREEDY));
     textStyle.SetFontWeight(layoutProperty->GetFontWeightValue(theme->GetFontWeight()));
+
     UpdateTextStyleSetTextColor(frameNode, layoutProperty, theme, textStyle, isDisabled, isTextColorByUser);
+    if (layoutProperty->HasStrokeWidth()) {
+        textStyle.SetStrokeWidth(layoutProperty->GetStrokeWidth().value());
+        textStyle.SetStrokeColor(layoutProperty->GetStrokeColor().value_or(textStyle.GetTextColor()));
+    }
     if (layoutProperty->GetMaxLines()) {
         textStyle.SetMaxLines(layoutProperty->GetMaxLines().value());
     }
