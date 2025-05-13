@@ -129,8 +129,14 @@ public:
 
     RefPtr<Theme> GetThemeKit(ThemeType type);
 
+    void RegisterCustomThemeKit(ThemeType type, Ace::Kit::BuildThemeWrapperFunc func) override;
+
+    RefPtr<Theme> GetThemeOrigin(ThemeType type, int32_t themeScopeId);
+
+    RefPtr<Theme> GetThemeKit(ThemeType type, int32_t themeScopeId);
+
 private:
-    using ThemeWrappers = std::unordered_map<ThemeType, RefPtr<NG::TokenThemeWrapper>>;
+    using ThemeWrappers = std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>>;
     std::unordered_map<ThemeType, RefPtr<Theme>> themes_;
     ThemeWrappers themeWrappersLight_;
     ThemeWrappers themeWrappersDark_;

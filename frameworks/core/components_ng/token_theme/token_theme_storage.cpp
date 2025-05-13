@@ -53,7 +53,7 @@ const RefPtr<TokenTheme>& TokenThemeStorage::GetTheme(TokenThemeScopeId themeSco
     return CacheGet(themeId);
 }
 
-void TokenThemeStorage::SetDefaultTheme(const RefPtr<NG::TokenTheme>& theme, ColorMode colorMode)
+void TokenThemeStorage::SetDefaultTheme(const RefPtr<TokenTheme>& theme, ColorMode colorMode)
 {
     (colorMode == ColorMode::DARK ? defaultDarkTheme_ : defaultLightTheme_) = theme;
 }
@@ -160,7 +160,7 @@ RefPtr<TokenTheme> TokenThemeStorage::CreateSystemTokenTheme(ColorMode colorMode
     auto themeId = colorMode == ColorMode::DARK ?
         TokenThemeStorage::SYSTEM_THEME_DARK_ID : TokenThemeStorage::SYSTEM_THEME_LIGHT_ID;
     auto tokenColors = AceType::MakeRefPtr<TokenColors>();
-    auto tokenTheme = AceType::MakeRefPtr<NG::TokenTheme>(themeId);
+    auto tokenTheme = AceType::MakeRefPtr<TokenTheme>(themeId);
     tokenTheme->SetColors(tokenColors);
 
     std::vector<Color> colors;

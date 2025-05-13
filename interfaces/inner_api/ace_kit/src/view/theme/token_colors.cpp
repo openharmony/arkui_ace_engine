@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/token_theme/token_colors.h"
+#include "ui/view/theme/token_colors.h"
 
 #include <vector>
 
-namespace OHOS::Ace::NG {
+namespace OHOS::Ace {
 
 static const std::vector<TokenColorData> colorData = {
     { "brand", 125830976 }, /* BRAND = 0 */
