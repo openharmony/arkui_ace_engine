@@ -25,7 +25,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { DrawContext, Edges } from "./arkui-graphics"
 import { LengthMetrics } from "../Graphics"
-import { UnifiedData, UnifiedDataInternal, ComponentContent, Context, PointerStyle, ContextInternal, GestureOps } from "./arkui-custom"
+import { UnifiedData, UnifiedDataInternal, ComponentContent, Context, PointerStyle, ContextInternal, GestureOps, StateStylesOps } from "./arkui-custom"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { Summary, IntentionCode, EdgeStyles, CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
 import { Callback_Void } from "./abilityComponent"
@@ -58,7 +58,7 @@ import { CommonModifier } from "../CommonModifier"
 import { AttributeUpdater } from "../ohos.arkui.modifier"
 import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
 import { hookStateStyleImpl } from "../handwritten/ArkStateStyle"
-import { CurrentStateEnum } from "../AttributeUpdater"
+import { rememberMutableState } from '@koalaui/runtime';
 export interface ICurve {
     interpolate(fraction: number): number
 }
@@ -9743,10 +9743,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         if (isCommonModifier) {
             let commonModifier = modifier as object as CommonModifier;
             this.getPeer()._attributeSet = commonModifier.attributeSet;
-        } else {
+        } else if (this.getPeer()._attributeSet == null) {
             this.getPeer()._attributeSet = new ArkCommonAttributeSet();
         }
-
     }
     getPeer(): ArkCommonMethodPeer {
         return (this.peer as ArkCommonMethodPeer)
@@ -12154,25 +12153,41 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         this.initAttributeSet(modifier);
         let isAttributeUpdater: boolean = (modifier instanceof AttributeUpdater);
         if (isAttributeUpdater) {
-            let attributeUpdater = modifier as object as AttributeUpdater<T, (...params:Object[]) => T>
-            if(attributeUpdater.currentState == CurrentStateEnum.INIT) {
-                attributeUpdater.currentState = CurrentStateEnum.UPDATE;
+            let attributeUpdater = modifier as object as AttributeUpdater<T, (...params: Object[]) => T>
+            if (this.getAttributeSet().peerNode_ == null) {
                 attributeUpdater.initializeModifier(peerNode._attributeSet as T);
-            } else {
+            } else if (this.getPeer() != this.getAttributeSet().peerNode_) {
                 attributeUpdater.onComponentChanged(peerNode._attributeSet as T);
             }
+            this.getAttributeSet().peerNode_ = this.getPeer();
             attributeUpdater.attribute = this.getModifierHost() as T
             attributeUpdater.updateConstructorParams = (...params: Object[]) => {
                 let attribute = this.getModifierHost()! as T;
                 this.getModifierHost()!.constructParam(...params);
                 return attribute;
             };
-            applyUIAttributesUpdate(modifier!, peerNode);
-        } else {
-            applyUIAttributes(modifier!, peerNode);
         }
-         this.getAttributeSet().applyModifierPatch(peerNode);
+        this.applyModifierByState(isAttributeUpdater, modifier);
         return this;
+    }
+
+    /** @memo */
+    public applyModifierByState<T>(isAttributeUpdater: boolean, modifier: AttributeModifier<T>): void {
+        let currentState = rememberMutableState<int32>(0);
+        let peerNode = this.getPeer()
+        let isInit =  rememberMutableState<boolean>(true);
+        remember(() => {
+            StateStylesOps.onStateStyleChange(peerNode.getPeerPtr(), (state: int32) => {
+                currentState.value = state;
+                isInit.value = false;
+            })
+        })
+        if (isAttributeUpdater) {
+            applyUIAttributesUpdate(modifier!, peerNode, currentState.value, isInit.value);
+        } else {
+            applyUIAttributes(modifier!, peerNode, currentState.value);
+        }
+        this.getAttributeSet().applyModifierPatch(peerNode);
     }
 
     public applyAttributesFinish(): void {
