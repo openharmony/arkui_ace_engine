@@ -6012,7 +6012,7 @@ void TextPattern::UpdatePropertyImpl(
         DEFINE_PROP_HANDLER(TextCaretColor, Color, UpdateCursorColor),
         DEFINE_PROP_HANDLER(SelectedBackgroundColor, Color, UpdateSelectedBackgroundColor),
         DEFINE_PROP_HANDLER(TextDecorationColor, Color, UpdateTextDecorationColor),
-        DEFINE_PROP_HANDLER(Content, std::string, UpdateContent),
+        DEFINE_PROP_HANDLER(Content, std::u16string, UpdateContent),
         DEFINE_PROP_HANDLER(FontFamily, std::vector<std::string>, UpdateFontFamily),
         { "TextColor",
             [node = WeakClaim(RawPtr((frameNode))), weak = WeakClaim(this)](
@@ -6033,6 +6033,9 @@ void TextPattern::UpdatePropertyImpl(
     auto it = handlers.find(key);
     if (it != handlers.end()) {
         it->second(property, value);
+    }
+    if (frameNode->GetRerenderable()) {
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
 } // namespace OHOS::Ace::NG

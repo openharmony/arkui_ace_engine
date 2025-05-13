@@ -850,11 +850,11 @@ void JSText::Create(const JSCallbackInfo& info)
         RefPtr<ResourceObject> resObj;
         auto ret = ParseJsString(info[0], data, resObj);
         UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(data.data()), data.length(), 0);
+        TextModel::GetInstance()->Create(data);
         if (ret && SystemProperties::ConfigChangePerform() && resObj) {
             RegisterResource<std::u16string>("Content", resObj, data);
         } else {
             UnRegisterResource("Content");
-            TextModel::GetInstance()->Create(data);
         }
     }
 

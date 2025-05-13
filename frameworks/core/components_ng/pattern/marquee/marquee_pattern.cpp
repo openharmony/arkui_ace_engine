@@ -752,5 +752,8 @@ void MarqueePattern::UpdatePropertyImpl(
     if (it != handlers.end()) {
         it->second(property, value);
     }
+    if (frameNode->GetRerenderable()) {
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 } // namespace OHOS::Ace::NG
