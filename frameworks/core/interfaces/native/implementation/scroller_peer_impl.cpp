@@ -275,12 +275,12 @@ void ScrollerPeerImpl::TriggerScrollToIndex(const Ark_Number* value, const Opt_B
     scrollController->ScrollToIndex(index, smooth, align, extraOffset);
 }
 
-void ScrollerPeerImpl::TriggerScrollBy(const Ark_Length* dx, const Ark_Length* dy)
+void ScrollerPeerImpl::TriggerScrollBy(const Opt_Length* dx, const Opt_Length* dy)
 {
     CHECK_NULL_VOID(dx);
     CHECK_NULL_VOID(dy);
-    Dimension xOffset = Converter::Convert<Dimension>(*dx);
-    Dimension yOffset = Converter::Convert<Dimension>(*dy);
+    Dimension xOffset = Converter::OptConvert<Dimension>(*dx).value_or(Dimension());
+    Dimension yOffset = Converter::OptConvert<Dimension>(*dy).value_or(Dimension());
 
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {

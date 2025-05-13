@@ -94,9 +94,9 @@ export class Scroller implements MaterializedBase {
         this.scrollToIndex_serialize(value_casted, smooth_casted, align_casted, options_casted)
         return
     }
-    public scrollBy(dx: Length, dy: Length): void {
-        const dx_casted = dx as (Length)
-        const dy_casted = dy as (Length)
+    public scrollBy(dx: Length | undefined, dy: Length | undefined): void {
+        const dx_casted = dx as (Length | undefined)
+        const dy_casted = dy as (Length | undefined)
         this.scrollBy_serialize(dx_casted, dy_casted)
         return
     }
@@ -198,8 +198,25 @@ export class Scroller implements MaterializedBase {
         thisSerializer.release()
         return retval
     }
-    private scrollBy_serialize(dx: Length, dy: Length): undefined {
-        const retval  = ArkUIGeneratedNativeModule._Scroller_scrollBy(this.peer!.ptr, dx, dy)
+    private scrollBy_serialize(dx: Length | undefined, dy: Length | undefined): undefined {
+        const thisSerializer : Serializer = Serializer.hold()
+        let dx_type : int32 = RuntimeType.UNDEFINED
+        dx_type = runtimeType(dx)
+        thisSerializer.writeInt8(dx_type as int32)
+        if ((RuntimeType.UNDEFINED) != (dx_type)) {
+            const dx_value  = dx!
+            thisSerializer.writeLength(dx_value)
+        }
+
+        let dy_type : int32 = RuntimeType.UNDEFINED
+        dy_type = runtimeType(dy)
+        thisSerializer.writeInt8(dy_type as int32)
+        if ((RuntimeType.UNDEFINED) != (dy_type)) {
+            const dy_value  = dy!
+            thisSerializer.writeLength(dy_value)
+        }
+        const retval  = ArkUIGeneratedNativeModule._Scroller_scrollBy(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
         return retval
     }
     private isAtEnd_serialize(): boolean {

@@ -18139,8 +18139,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void ScrollByImpl(Ark_Scroller peer,
-                      const Ark_Length* dx,
-                      const Ark_Length* dy)
+                      const Opt_Length* dx,
+                      const Opt_Length* dy)
     {
     }
     Ark_Boolean IsAtEndImpl(Ark_Scroller peer)

@@ -40698,11 +40698,28 @@ void impl_Scroller_scrollToIndex(Ark_NativePointer thisPtr, KInteropNumber value
         GetAccessors()->getScrollerAccessor()->scrollToIndex(self, (const Ark_Number*) (&value), (const Opt_Boolean*)&smooth_value, (const Opt_ScrollAlign*)&align_value, (const Opt_ScrollToIndexOptions*)&options_value);
 }
 KOALA_INTEROP_DIRECT_V4(Scroller_scrollToIndex, Ark_NativePointer, KInteropNumber, KSerializerBuffer, int32_t)
-void impl_Scroller_scrollBy(Ark_NativePointer thisPtr, const KLength& dx, const KLength& dy) {
+void impl_Scroller_scrollBy(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_Scroller self = reinterpret_cast<Ark_Scroller>(thisPtr);
-        GetAccessors()->getScrollerAccessor()->scrollBy(self, (const Ark_Length*)&dx, (const Ark_Length*)&dy);
+
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto dx_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Length dx_value_buf = {};
+        dx_value_buf.tag = dx_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (dx_value_buf_runtimeType)) {
+            dx_value_buf.value = thisDeserializer.readLength();
+        }
+        Opt_Length dx_value = dx_value_buf;;
+
+        const auto dy_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Length dy_value_buf = {};
+        dy_value_buf.tag = dy_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (dy_value_buf_runtimeType)) {
+            dy_value_buf.value = thisDeserializer.readLength();
+        }
+        Opt_Length dy_value = dy_value_buf;;
+        GetAccessors()->getScrollerAccessor()->scrollBy(self, (const Opt_Length*)&dx_value, (const Opt_Length*)&dy_value);
 }
-KOALA_INTEROP_V3(Scroller_scrollBy, Ark_NativePointer, KLength, KLength)
+KOALA_INTEROP_DIRECT_V3(Scroller_scrollBy, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_Boolean impl_Scroller_isAtEnd(Ark_NativePointer thisPtr) {
         Ark_Scroller self = reinterpret_cast<Ark_Scroller>(thisPtr);
         return GetAccessors()->getScrollerAccessor()->isAtEnd(self);
