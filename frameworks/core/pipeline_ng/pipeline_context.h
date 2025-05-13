@@ -1102,6 +1102,8 @@ public:
     void RegisterAttachedNode(UINode* uiNode);
     void RemoveAttachedNode(UINode* uiNode);
 
+    void NotifyColorModeChange(uint32_t colorMode) override;
+
     bool GetContainerFloatingTitleVisible() override;
 
     bool GetContainerCustomTitleVisible() override;

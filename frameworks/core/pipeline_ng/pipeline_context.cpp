@@ -5767,6 +5767,22 @@ void PipelineContext::NotifyAllWebPattern(bool isRegister)
     rootNode_->NotifyWebPattern(isRegister);
 }
 
+void PipelineContext::NotifyColorModeChange(uint32_t colorMode)
+{
+    AnimationOption option;
+    const int32_t duration = 400;
+    option.SetDuration(duration);
+    option.SetCurve(Curves::FRICTION);
+    AnimationUtils::Animate(
+        option,
+        [weak = AceType::WeakClaim(AceType::RawPtr(rootNode_)), colorMode, rootColorMode = GetColorMode()]() {
+            auto rootNode = weak.Upgrade();
+            CHECK_NULL_VOID(rootNode);
+            rootNode->SetDarkMode(rootColorMode == ColorMode::DARK);
+            rootNode->NotifyColorModeChange(colorMode);
+        });
+}
+
 void PipelineContext::UpdateHalfFoldHoverStatus(int32_t windowWidth, int32_t windowHeight)
 {
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {

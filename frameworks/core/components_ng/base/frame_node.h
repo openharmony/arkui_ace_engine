@@ -520,6 +520,8 @@ public:
     void OnRecycle() override;
     void OnReuse() override;
 
+    void NotifyColorModeChange(uint32_t colorMode) override;
+
     OffsetF GetOffsetRelativeToWindow() const;
 
     OffsetF GetPositionToScreen();
