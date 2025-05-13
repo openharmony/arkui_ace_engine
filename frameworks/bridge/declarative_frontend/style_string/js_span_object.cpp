@@ -527,7 +527,7 @@ void JSDecorationSpan::GetTextDecorationOptions(const JSCallbackInfo& info)
     JSRef<JSObject> retObj = objectTemplate->NewInstance();
     if (options.enableMultiType.has_value()) {
         bool enableMultiType = options.enableMultiType.value_or(false);
-        retObj->SetProperty<bool>("radius", enableMultiType);
+        retObj->SetProperty<bool>("enableMultiType", enableMultiType);
     }
     info.SetReturnValue(retObj);
 }
