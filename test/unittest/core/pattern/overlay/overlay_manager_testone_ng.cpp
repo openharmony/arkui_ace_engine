@@ -1361,11 +1361,20 @@ HWTEST_F(OverlayManagerTestOneNG, RemoveFilterAnimation001, TestSize.Level1)
 {
     SetUpTestCase();
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    EXPECT_NE(rootNode, nullptr);
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    EXPECT_NE(overlayManager, nullptr);
+
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    EXPECT_NE(columnNode, nullptr);
+    columnNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode();
+
     overlayManager->SetHasFilter(true);
-    overlayManager->SetFilterColumnNode(rootNode);
+    overlayManager->SetFilterColumnNode(columnNode);
     overlayManager->RemoveFilterAnimation();
-    EXPECT_FALSE(!overlayManager->hasFilter_);
+    EXPECT_FALSE(overlayManager->hasFilter_);
 }
 
 /**
