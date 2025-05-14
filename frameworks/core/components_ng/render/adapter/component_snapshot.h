@@ -52,6 +52,9 @@ public:
     static std::shared_ptr<Media::PixelMap> CreateSync(
         const RefPtr<AceType>& customNode, const SnapshotParam& param);
 
+    static std::vector<std::pair<uint64_t, std::shared_ptr<Media::PixelMap>>> GetSoloNode(
+        const RefPtr<FrameNode>& node);
+
 private:
     static std::shared_ptr<Rosen::RSNode> GetRsNode(const RefPtr<FrameNode>& node);
     static void PostDelayedTaskOfBuiler(const RefPtr<TaskExecutor>& executor, JsCallback&& callback,
