@@ -107,13 +107,14 @@ void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& page
 
 void UIObserverHandler::NotifyDensityChange(double density)
 {
-    CHECK_NULL_VOID(densityHandleFunc_);
-    AbilityContextInfo info = {
-        AceApplicationInfo::GetInstance().GetAbilityName(),
-        AceApplicationInfo::GetInstance().GetProcessName(),
-        Container::Current()->GetModuleName()
-    };
-    densityHandleFunc_(info, density);
+    AbilityContextInfo info = { AceApplicationInfo::GetInstance().GetAbilityName(),
+        AceApplicationInfo::GetInstance().GetProcessName(), Container::Current()->GetModuleName() };
+    if (densityHandleFunc_) {
+        densityHandleFunc_(info, density);
+    }
+    if (densityHandleFuncForAni_) {
+        densityHandleFuncForAni_();
+    }
 }
 
 void UIObserverHandler::NotifyWillClick(
@@ -344,6 +345,11 @@ void UIObserverHandler::SetHandleRouterPageChangeFunc(RouterPageHandleFunc func)
 void UIObserverHandler::SetHandleDensityChangeFunc(DensityHandleFunc func)
 {
     densityHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetHandleDensityChangeFuncForAni(DensityHandleFuncForAni func)
+{
+    densityHandleFuncForAni_ = func;
 }
 
 void UIObserverHandler::SetDrawCommandSendHandleFunc(DrawCommandSendHandleFunc func)

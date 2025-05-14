@@ -31,6 +31,7 @@ import { AnimatorResult, AnimatorOptions, Animator} from "@ohos/animator"
 import { Context } from "#external"
 import { ArkUIAniModule } from "arkui.ani"
 import { Serializer } from "./src/component/peers/Serializer"
+import {observer} from "@ohos/observer"
 import router from './ohos.router'
 
 export class Font {
@@ -94,6 +95,7 @@ export class Router {
 
 export class UIContext {
     instanceId_: int32 = 100000;
+    observer_ :UIObserver |null = null;
     router_: Router = new Router()
     constructor(instanceId: int32) {
         this.instanceId_ = instanceId;
@@ -183,10 +185,41 @@ export class UIContext {
         this.setFrameCallback(onFrameFunc, onIdleFunc, delayTime)
         ArkUIAniModule._Common_Restore_InstanceId()
     }
+    public getUIObserver(): UIObserver {
+        if (!this.observer_) {
+            this.observer_ = new UIObserver(this.instanceId_);
+        }
+        return this.observer_ as UIObserver;
+    }
 }
 export abstract class FrameCallback {
     onFrame(frameTimeInNano: number): void {}
     onIdle(timeLeftInNano: number): void {}
 }
+
 export class UIObserver {
+    private instanceId_: number = 100000;
+    private observerImpl: observer.UIObserver | null = null;
+
+    constructor(instanceId: number) {
+        this.instanceId_ = instanceId;
+        this.createUIObserver(this.instanceId_);
+    }
+
+    private createUIObserver(id: number): observer.UIObserver | null {
+        this.observerImpl = observer.createUIObserver(id);
+        return this.observerImpl;
+    }
+
+    public on(type: string, callback: () => void): void {
+        if (this.observerImpl) {
+            this.observerImpl!.on(type, callback);
+        }
+    }
+
+    public off(type: string, callback?: (() => void) | undefined): void {
+        if (this.observerImpl) {
+            this.observerImpl!.off(type, callback);
+        }
+    }
 }
