@@ -3447,8 +3447,8 @@ void UIContentImpl::SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
     ContainerScope scope(instanceId_);
     auto pipeline = container->GetPipelineContext();
     const static int32_t PLATFORM_VERSION_TEN = 10;
-    CHECK_NULL_VOID(
-        pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && pipeline->GetIsAppWindow());
+    CHECK_NULL_VOID(pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN &&
+                    (pipeline->GetIsAppWindow() || container->IsUIExtensionWindow()));
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostSyncTask(
