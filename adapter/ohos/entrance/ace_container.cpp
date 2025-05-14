@@ -3132,6 +3132,21 @@ void AceContainer::ProcessColorModeUpdate(
     }
 }
 
+void AceContainer::UpdateColorMode(uint32_t colorMode)
+{
+    ACE_SCOPED_TRACE("AceContainer::UpdateColorMode %u", colorMode);
+    CHECK_NULL_VOID(pipelineContext_);
+    auto themeManager = pipelineContext_->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    if (!IsUseCustomBg() && !IsTransparentBg()) {
+        Color color = themeManager->GetBackgroundColor();
+        pipelineContext_->SetAppBgColor(color);
+        ACE_SCOPED_TRACE("AceContainer::UpdateColorMode pipeline bgcolor %s", color.ColorToString().c_str());
+    }
+    pipelineContext_->SetIsSystemColorChange(true);
+    pipelineContext_->NotifyColorModeChange(colorMode);
+}
+
 void AceContainer::UpdateConfiguration(
     const ParsedConfig& parsedConfig, const std::string& configuration, bool abilityLevel)
 {
@@ -3166,6 +3181,10 @@ void AceContainer::UpdateConfiguration(
         }
     }
     themeManager->LoadResourceThemes();
+    if (SystemProperties::ConfigChangePerform() && configurationChange.OnlyColorModeChange()) {
+        UpdateColorMode(static_cast<uint32_t>(resConfig.GetColorMode()));
+        return;
+    }
     auto front = GetFrontend();
     CHECK_NULL_VOID(front);
     if (!configurationChange.directionUpdate && !configurationChange.dpiUpdate) {

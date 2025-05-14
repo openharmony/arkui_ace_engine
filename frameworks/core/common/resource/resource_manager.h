@@ -54,7 +54,7 @@ public:
 
     static ResourceManager& GetInstance();
 
-    RefPtr<ResourceAdapter> GetOrCreateResourceAdapter(RefPtr<ResourceObject>& resourceObject);
+    RefPtr<ResourceAdapter> GetOrCreateResourceAdapter(const RefPtr<ResourceObject>& resourceObject);
 
     std::string MakeCacheKey(const std::string& bundleName, const std::string& moduleName, int32_t instanceId)
     {

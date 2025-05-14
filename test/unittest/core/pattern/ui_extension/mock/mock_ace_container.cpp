@@ -301,4 +301,6 @@ void AceContainer::DispatchExtensionDataToHostWindow(
     uint32_t code, const AAFwk::Want& data, int32_t persistenId)
 {
 }
+
+void AceContainer::UpdateColorMode(uint32_t colorMode) {}
 } // namespace OHOS::Ace::NG
