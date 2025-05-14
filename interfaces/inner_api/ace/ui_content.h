@@ -545,6 +545,10 @@ public:
         void(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode,
             std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback) {};
     virtual void LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvasNode>&) {};
+
+    // intent framework
+    virtual void SetIntentParam(const std::string& intentInfoSerialized,
+        const std::function<void()>&& loadPageCallback, bool isColdStart) {}
 };
 
 } // namespace OHOS::Ace
