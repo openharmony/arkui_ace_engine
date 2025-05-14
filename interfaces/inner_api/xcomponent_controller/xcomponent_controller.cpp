@@ -26,8 +26,12 @@ namespace {
 const char* NODEPTR_OF_UINODE = "nodePtr_";
 constexpr char XCOMPONENT_GET_CONTROLLER_FUNC[] = "OHOS_ACE_GetXComponentController";
 constexpr char XCOMPONENT_CHANGE_SURFACE_CALLBACKMODE_FUNC[] = "OHOS_ACE_ChangeXComponentSurfaceCallbackMode";
+constexpr char XCOMPONENT_SET_RENDER_FIT_FUNC[] = "OHOS_ACE_SetRenderFitBySurfaceId";
+constexpr char XCOMPONENT_GET_RENDER_FIT_FUNC[] = "OHOS_ACE_GetRenderFitBySurfaceId";
 using GetControllerFunc = void (*)(void*, void*);
 using ChangeSurfaceCallbackModeFunc = XComponentControllerErrorCode (*)(void*, char);
+using SetRenderFitFunc = XComponentControllerErrorCode (*)(const std::string&, int32_t, bool);
+using GetRenderFitFunc = XComponentControllerErrorCode (*)(const std::string&, int32_t&, bool&);
 } // namespace
 void GetController(void* jsController, void* controller)
 {
@@ -99,5 +103,43 @@ XComponentControllerErrorCode XComponentController::SetSurfaceCallbackMode(
         return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
     }
     return ChangeSurfaceCallbackMode(nodePtr->ToNativePointer(vm)->Value(), static_cast<char>(mode));
+}
+
+XComponentControllerErrorCode XComponentController::SetRenderFitBySurfaceId(
+    const std::string& surfaceId, int32_t renderFitNumber, bool isRenderFitNewVersionEnabled)
+{
+    static SetRenderFitFunc setRenderFitMethod = nullptr;
+    if (setRenderFitMethod == nullptr) {
+        LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
+        if (handle == nullptr) {
+            return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_LOAD_LIB_FAILED;
+        }
+        setRenderFitMethod = reinterpret_cast<SetRenderFitFunc>(
+            LOADSYM(handle, XCOMPONENT_SET_RENDER_FIT_FUNC));
+        if (setRenderFitMethod == nullptr) {
+            FREELIB(handle);
+            return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_LOAD_LIB_FAILED;
+        }
+    }
+    return setRenderFitMethod(surfaceId, renderFitNumber, isRenderFitNewVersionEnabled);
+}
+
+XComponentControllerErrorCode XComponentController::GetRenderFitBySurfaceId(
+    const std::string& surfaceId, int32_t& renderFitNumber, bool& isRenderFitNewVersionEnabled)
+{
+    static GetRenderFitFunc getRenderFitMethod = nullptr;
+    if (getRenderFitMethod == nullptr) {
+        LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
+        if (handle == nullptr) {
+            return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_LOAD_LIB_FAILED;
+        }
+        getRenderFitMethod = reinterpret_cast<GetRenderFitFunc>(
+            LOADSYM(handle, XCOMPONENT_GET_RENDER_FIT_FUNC));
+        if (getRenderFitMethod == nullptr) {
+            FREELIB(handle);
+            return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_LOAD_LIB_FAILED;
+        }
+    }
+    return getRenderFitMethod(surfaceId, renderFitNumber, isRenderFitNewVersionEnabled);
 }
 } // namespace OHOS::Ace

@@ -445,6 +445,7 @@ private:
     void SetRotation(uint32_t rotation);
     void RegisterSurfaceCallbackModeEvent();
     void RegisterTransformHintCallback(PipelineContext* context);
+    void RegisterSurfaceRenderContext();
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);

@@ -32,6 +32,7 @@ enum XComponentControllerErrorCode {
     XCOMPONENT_CONTROLLER_TYPE_ERROR,
     XCOMPONENT_CONTROLLER_REPEAT_SET,
     XCOMPONENT_CONTROLLER_RESET_ERROR,
+    XCOMPONENT_CONTROLLER_LOAD_LIB_FAILED,
 };
 
 enum class SurfaceCallbackMode : char {
@@ -59,6 +60,24 @@ public:
      */
     static XComponentControllerErrorCode SetSurfaceCallbackMode(
         napi_env env, napi_value node, SurfaceCallbackMode mode);
+    
+    /**
+     * @brief set surface renderFit by surfaceId
+     * @param surfaceId index of the surface
+     * @param renderFitNumber numeric value of renderFit mode
+     * @param isRenderFitNewVersionEnabled enable render fit new version or not
+     */
+    static XComponentControllerErrorCode SetRenderFitBySurfaceId(
+        const std::string& surfaceId, int32_t renderFitNumber, bool isRenderFitNewVersionEnabled);
+
+    /**
+     * @brief get surface renderFit by surfaceId
+     * @param surfaceId index of the surface
+     * @param renderFitNumber numeric value of renderFit mode
+     * @param isRenderFitNewVersionEnabled enable render fit new version or not
+     */
+    static XComponentControllerErrorCode GetRenderFitBySurfaceId(
+        const std::string& surfaceId, int32_t& renderFitNumber, bool& isRenderFitNewVersionEnabled);
 
     XComponentController() = default;
     virtual ~XComponentController() = default;
