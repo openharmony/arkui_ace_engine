@@ -6442,6 +6442,62 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetWebSansSerifFont));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWebSansSerifFont"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetWebSansSerifFont));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setWebFixedFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetWebFixedFont));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWebFixedFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetWebFixedFont));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setWebFantasyFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetWebFantasyFont));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWebFantasyFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetWebFantasyFont));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setWebCursiveFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetWebCursiveFont));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWebCursiveFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetWebCursiveFont));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLayoutMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetLayoutMode));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLayoutMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetLayoutMode));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnNativeEmbedLifecycleChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnNativeEmbedLifecycleChange));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnNativeEmbedLifecycleChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnNativeEmbedLifecycleChange));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRegisterNativeEmbedRule"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetRegisterNativeEmbedRule));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRegisterNativeEmbedRule"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetRegisterNativeEmbedRule));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setNativeEmbedOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetNativeEmbedOptions));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetNativeEmbedOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetNativeEmbedOptions));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnFirstContentfulPaint"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnFirstContentfulPaint));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnFirstContentfulPaint"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnFirstContentfulPaint));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnAudioStateChanged"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnAudioStateChanged));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnAudioStateChanged"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnAudioStateChanged));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnFullScreenExit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnFullScreenExit));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnFullScreenExit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnFullScreenExit));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setImageAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetImageAccess));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetImageAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetImageAccess));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnlineImageAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnlineImageAccess));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnlineImageAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnlineImageAccess));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMediaPlayGestureAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetMediaPlayGestureAccess));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMediaPlayGestureAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetMediaPlayGestureAccess));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMediaOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetMediaOptions));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMediaOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetMediaOptions));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif

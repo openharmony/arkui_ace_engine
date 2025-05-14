@@ -1669,4 +1669,128 @@ void WebModelNG::SetWebSansSerifFont(FrameNode* frameNode, const std::string& sa
     webPattern->UpdateWebSansSerifFont(sansSerifFontFamily);
 }
 
+
+void WebModelNG::SetWebFixedFont(FrameNode* frameNode, const std::string& fixedFontFamily)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebFixedFont(fixedFontFamily);
+}
+
+void WebModelNG::SetWebFantasyFont(FrameNode* frameNode, const std::string& fixedFontFamily)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebFantasyFont(fixedFontFamily);
+}
+
+void WebModelNG::SetWebCursiveFont(FrameNode* frameNode, const std::string& cursiveFontFamily)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebCursiveFont(cursiveFontFamily);
+}
+
+void WebModelNG::SetLayoutMode(FrameNode* frameNode, WebLayoutMode mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetLayoutMode(mode);
+}
+
+void WebModelNG::SetNativeEmbedLifecycleChangeId(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnNativeEmbedLifecycleChangeEvent(std::move(uiCallback));
+}
+
+void WebModelNG::RegisterNativeEmbedRule(FrameNode* frameNode, const std::string& tag, const std::string& type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateNativeEmbedRuleTag(tag);
+    webPattern->UpdateNativeEmbedRuleType(type);
+}
+
+void WebModelNG::SetNativeEmbedOptions(FrameNode* frameNode, bool isIntrinsicSizeEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateIntrinsicSizeEnabled(isIntrinsicSizeEnabled);
+}
+
+void WebModelNG::SetFirstContentfulPaintId(
+    FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstContentfulPaintId)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnFirstContentfulPaintEvent(std::move(firstContentfulPaintId));
+}
+
+void WebModelNG::SetAudioStateChangedId(
+    FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& audioStateChanged)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnAudioStateChangedEvent(std::move(audioStateChanged));
+}
+
+void WebModelNG::SetOnFullScreenExit(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnFullScreenExitEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetImageAccessEnabled(FrameNode* frameNode, bool isImageAccessEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateImageAccessEnabled(isImageAccessEnabled);
+}
+
+void WebModelNG::SetOnLineImageAccessEnabled(FrameNode* frameNode, bool isOnLineImageAccessEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateOnLineImageAccessEnabled(isOnLineImageAccessEnabled);
+}
+
+void WebModelNG::SetMediaPlayGestureAccess(FrameNode* frameNode, bool isNeedGestureAccess)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateMediaPlayGestureAccess(isNeedGestureAccess);
+}
+
+void WebModelNG::SetAudioResumeInterval(FrameNode* frameNode, int32_t resumeInterval)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateAudioResumeInterval(resumeInterval);
+}
+
+void WebModelNG::SetAudioExclusive(FrameNode* frameNode, bool audioExclusive)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateAudioExclusive(audioExclusive);
+}
 } // namespace OHOS::Ace::NG

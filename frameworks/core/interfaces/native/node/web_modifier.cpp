@@ -48,6 +48,16 @@ constexpr int32_t DEFAULT_MINLOGICALFONT_SIZE = 8;
 constexpr char DEFAULT_WEBSTANDARD_FONT[] = "sans serif";
 constexpr char DEFAULT_WEBSERIF_FONT[] = "serif";
 constexpr char DEFAULT_WEBSANSSERIF_FONT[] = "sans-serif";
+constexpr char DEFAULT_WEBFIXED_FONT[] = "monospace";
+constexpr char DEFAULT_WEBFANTASY_FONT[] = "fantasy";
+constexpr char DEFAULT_WEBCURSIVE_FONT[] = "cursive";
+constexpr WebLayoutMode DEFAULT_LAYOUT_MODE = WebLayoutMode::NONE;
+constexpr bool DEFAULT_NATIVE_EMBED_OPTIONS = false;
+constexpr bool DEFAULT_IMAGE_ACCESS_ENABLED = true;
+constexpr bool DEFAULT_ONLINEIMAGE_ACCESS_ENABLED = true;
+constexpr bool MEDIA_PLAY_GESTURE_ACCESS_ENABLED = true;
+constexpr bool DEFAULT_MEDIA_OPTIONS_ENABLED = true;
+constexpr int32_t DEFAULT_RESUMEINTERVAL = 0;
 } // namespace
 
 void SetJavaScriptAccess(ArkUINodeHandle node, ArkUI_Bool value)
@@ -607,6 +617,247 @@ void ResetWebSansSerifFont(ArkUINodeHandle node)
     WebModelNG::SetWebSansSerifFont(frameNode, DEFAULT_WEBSANSSERIF_FONT);
 }
 
+void SetWebFixedFont(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetWebFixedFont(frameNode, std::string(value));
+}
+
+void ResetWebFixedFont(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetWebFixedFont(frameNode, DEFAULT_WEBFIXED_FONT);
+}
+
+void SetWebFantasyFont(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetWebFantasyFont(frameNode, std::string(value));
+}
+
+void ResetWebFantasyFont(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetWebFantasyFont(frameNode, DEFAULT_WEBFANTASY_FONT);
+}
+
+void SetWebCursiveFont(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetWebCursiveFont(frameNode, std::string(value));
+}
+
+void ResetWebCursiveFont(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetWebCursiveFont(frameNode, DEFAULT_WEBCURSIVE_FONT);
+}
+
+void SetLayoutMode(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetLayoutMode(frameNode, WebLayoutMode(value));
+}
+
+void ResetLayoutMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetLayoutMode(frameNode, DEFAULT_LAYOUT_MODE);
+}
+
+void SetOnNativeEmbedLifecycleChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* originalCallbackPtr = reinterpret_cast<std::function<void(NativeEmbedDataInfo&)>*>(extraParam);
+    CHECK_NULL_VOID(originalCallbackPtr);
+    if (extraParam) {
+        auto adaptedCallback = [originalCallback = *originalCallbackPtr](const BaseEventInfo* event) {
+            if (auto changeEvent = static_cast<const NativeEmbedDataInfo*>(event)) {
+                auto& onNativeEmbedLifecycleChange = const_cast<NativeEmbedDataInfo&>(*changeEvent);
+                originalCallback(onNativeEmbedLifecycleChange);
+            }
+        };
+        WebModelNG::SetNativeEmbedLifecycleChangeId(frameNode, std::move(adaptedCallback));
+    } else {
+        WebModelNG::SetNativeEmbedLifecycleChangeId(frameNode, nullptr);
+    }
+}
+
+void ResetOnNativeEmbedLifecycleChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetNativeEmbedLifecycleChangeId(frameNode, nullptr);
+}
+
+void SetRegisterNativeEmbedRule(ArkUINodeHandle node, ArkUI_CharPtr tag, ArkUI_CharPtr type)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::RegisterNativeEmbedRule(frameNode, tag, type);
+}
+
+void ResetRegisterNativeEmbedRule(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::RegisterNativeEmbedRule(frameNode, nullptr, nullptr);
+}
+
+void SetNativeEmbedOptions(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetNativeEmbedOptions(frameNode, value);
+}
+
+void ResetNativeEmbedOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetNativeEmbedOptions(frameNode, DEFAULT_NATIVE_EMBED_OPTIONS);
+}
+
+void SetOnFirstContentfulPaint(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* originalCallbackPtr = reinterpret_cast<std::function<void(AudioStateChangedEvent&)>*>(extraParam);
+    CHECK_NULL_VOID(originalCallbackPtr);
+    if (extraParam) {
+        auto adaptedCallback = [originalCallback = *originalCallbackPtr](const std::shared_ptr<BaseEventInfo>& event) {
+            auto* onFirstContentfulPaint = static_cast<AudioStateChangedEvent*>(event.get());
+            if (onFirstContentfulPaint != nullptr) {
+                originalCallback(*onFirstContentfulPaint);
+            }
+        };
+        WebModelNG::SetFirstContentfulPaintId(frameNode, std::move(adaptedCallback));
+    } else {
+        WebModelNG::SetFirstContentfulPaintId(frameNode, nullptr);
+    }
+}
+
+void ResetOnFirstContentfulPaint(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetFirstContentfulPaintId(frameNode, nullptr);
+}
+
+void SetOnAudioStateChanged(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* originalCallbackPtr = reinterpret_cast<std::function<void(AudioStateChangedEvent&)>*>(extraParam);
+    CHECK_NULL_VOID(originalCallbackPtr);
+    if (extraParam) {
+        auto adaptedCallback = [originalCallback = *originalCallbackPtr](const std::shared_ptr<BaseEventInfo>& event) {
+            auto* onAudioStateChanged = static_cast<AudioStateChangedEvent*>(event.get());
+            if (onAudioStateChanged != nullptr) {
+                originalCallback(*onAudioStateChanged);
+            }
+        };
+        WebModelNG::SetAudioStateChangedId(frameNode, std::move(adaptedCallback));
+    } else {
+        WebModelNG::SetAudioStateChangedId(frameNode, nullptr);
+    }
+}
+
+void ResetOnAudioStateChanged(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetAudioStateChangedId(frameNode, nullptr);
+}
+
+void SetOnFullScreenExit(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* originalCallbackPtr = reinterpret_cast<std::function<void()>*>(extraParam);
+        CHECK_NULL_VOID(originalCallbackPtr);
+        auto adaptedCallback = [originalCallback = *originalCallbackPtr](const BaseEventInfo*) { originalCallback(); };
+        WebModelNG::SetOnFullScreenExit(frameNode, std::move(adaptedCallback));
+    } else {
+        WebModelNG::SetOnFullScreenExit(frameNode, nullptr);
+    }
+}
+
+
+void ResetOnFullScreenExit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnFullScreenExit(frameNode, nullptr);
+}
+
+void SetImageAccess(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetImageAccessEnabled(frameNode, value);
+}
+
+void ResetImageAccess(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetImageAccessEnabled(frameNode, DEFAULT_IMAGE_ACCESS_ENABLED);
+}
+
+void SetOnlineImageAccess(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnLineImageAccessEnabled(frameNode, value);
+}
+
+void ResetOnlineImageAccess(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnLineImageAccessEnabled(frameNode, DEFAULT_ONLINEIMAGE_ACCESS_ENABLED);
+}
+
+void SetMediaPlayGestureAccess(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetMediaPlayGestureAccess(frameNode, value);
+}
+
+void ResetMediaPlayGestureAccess(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetMediaPlayGestureAccess(frameNode, MEDIA_PLAY_GESTURE_ACCESS_ENABLED);
+}
+
+void SetMediaOptions(ArkUINodeHandle node, ArkUI_Int32 resumeInterval, ArkUI_Bool audioExclusive)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetAudioResumeInterval(frameNode, resumeInterval);
+    WebModelNG::SetAudioExclusive(frameNode, audioExclusive);
+}
+
+void ResetMediaOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetAudioResumeInterval(frameNode, DEFAULT_RESUMEINTERVAL);
+    WebModelNG::SetAudioExclusive(frameNode, DEFAULT_MEDIA_OPTIONS_ENABLED);
+}
 namespace NodeModifier {
 const ArkUIWebModifier* GetWebModifier()
 {
@@ -686,6 +937,34 @@ const ArkUIWebModifier* GetWebModifier()
         .resetWebSerifFont = ResetWebSerifFont,
         .setWebSansSerifFont = SetWebSansSerifFont,
         .resetWebSansSerifFont = ResetWebSansSerifFont,
+        .setWebFixedFont = SetWebFixedFont,
+        .resetWebFixedFont = ResetWebFixedFont,
+        .setWebFantasyFont = SetWebFantasyFont,
+        .resetWebFantasyFont = ResetWebFantasyFont,
+        .setWebCursiveFont = SetWebCursiveFont,
+        .resetWebCursiveFont = ResetWebCursiveFont,
+        .setLayoutMode = SetLayoutMode,
+        .resetLayoutMode = ResetLayoutMode,
+        .setOnNativeEmbedLifecycleChange = SetOnNativeEmbedLifecycleChange,
+        .resetOnNativeEmbedLifecycleChange = ResetOnNativeEmbedLifecycleChange,
+        .setRegisterNativeEmbedRule = SetRegisterNativeEmbedRule,
+        .resetRegisterNativeEmbedRule = ResetRegisterNativeEmbedRule,
+        .setNativeEmbedOptions = SetNativeEmbedOptions,
+        .resetNativeEmbedOptions = ResetNativeEmbedOptions,
+        .setOnFirstContentfulPaint = SetOnFirstContentfulPaint,
+        .resetOnFirstContentfulPaint = ResetOnFirstContentfulPaint,
+        .setOnAudioStateChanged = SetOnAudioStateChanged,
+        .resetOnAudioStateChanged = ResetOnAudioStateChanged,
+        .setOnFullScreenExit = SetOnFullScreenExit,
+        .resetOnFullScreenExit = ResetOnFullScreenExit,
+        .setImageAccess = SetImageAccess,
+        .resetImageAccess = ResetImageAccess,
+        .setOnlineImageAccess = SetOnlineImageAccess,
+        .resetOnlineImageAccess = ResetOnlineImageAccess,
+        .setMediaPlayGestureAccess = SetMediaPlayGestureAccess,
+        .resetMediaPlayGestureAccess = ResetMediaPlayGestureAccess,
+        .setMediaOptions = SetMediaOptions,
+        .resetMediaOptions = ResetMediaOptions,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -769,6 +1048,34 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetWebSerifFont = ResetWebSerifFont,
         .setWebSansSerifFont = SetWebSansSerifFont,
         .resetWebSansSerifFont = ResetWebSansSerifFont,
+        .setWebFixedFont = SetWebFixedFont,
+        .resetWebFixedFont = ResetWebFixedFont,
+        .setWebFantasyFont = SetWebFantasyFont,
+        .resetWebFantasyFont = ResetWebFantasyFont,
+        .setWebCursiveFont = SetWebCursiveFont,
+        .resetWebCursiveFont = ResetWebCursiveFont,
+        .setLayoutMode = SetLayoutMode,
+        .resetLayoutMode = ResetLayoutMode,
+        .setOnNativeEmbedLifecycleChange = SetOnNativeEmbedLifecycleChange,
+        .resetOnNativeEmbedLifecycleChange = ResetOnNativeEmbedLifecycleChange,
+        .setRegisterNativeEmbedRule = SetRegisterNativeEmbedRule,
+        .resetRegisterNativeEmbedRule = ResetRegisterNativeEmbedRule,
+        .setNativeEmbedOptions = SetNativeEmbedOptions,
+        .resetNativeEmbedOptions = ResetNativeEmbedOptions,
+        .setOnFirstContentfulPaint = SetOnFirstContentfulPaint,
+        .resetOnFirstContentfulPaint = ResetOnFirstContentfulPaint,
+        .setOnAudioStateChanged = SetOnAudioStateChanged,
+        .resetOnAudioStateChanged = ResetOnAudioStateChanged,
+        .setOnFullScreenExit = SetOnFullScreenExit,
+        .resetOnFullScreenExit = ResetOnFullScreenExit,
+        .setImageAccess = SetImageAccess,
+        .resetImageAccess = ResetImageAccess,
+        .setOnlineImageAccess = SetOnlineImageAccess,
+        .resetOnlineImageAccess = ResetOnlineImageAccess,
+        .setMediaPlayGestureAccess = SetMediaPlayGestureAccess,
+        .resetMediaPlayGestureAccess = ResetMediaPlayGestureAccess,
+        .setMediaOptions = SetMediaOptions,
+        .resetMediaOptions = ResetMediaOptions,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

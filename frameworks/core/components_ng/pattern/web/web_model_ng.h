@@ -270,6 +270,24 @@ public:
     static void SetWebSerifFont(FrameNode* frameNode, const std::string& serifFontFamily);
     static void SetWebSansSerifFont(FrameNode* frameNode, const std::string& sansSerifFontFamily);
     
+    static void SetWebFixedFont(FrameNode* frameNode, const std::string& fixedFontFamily);
+    static void SetWebFantasyFont(FrameNode* frameNode, const std::string& fixedFontFamily);
+    static void SetWebCursiveFont(FrameNode* frameNode, const std::string& cursiveFontFamily);
+    static void SetLayoutMode(FrameNode* frameNode, WebLayoutMode mode);
+    static void SetNativeEmbedLifecycleChangeId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void RegisterNativeEmbedRule(FrameNode* frameNode, const std::string& tag, const std::string& type);
+    static void SetNativeEmbedOptions(FrameNode* frameNode, bool isIntrinsicSizeEnabled);
+    static void SetFirstContentfulPaintId(
+        FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstContentfulPaintId);
+    static void SetAudioStateChangedId(
+        FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& audioStateChanged);
+    static void SetOnFullScreenExit(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetImageAccessEnabled(FrameNode* frameNode, bool isImageAccessEnabled);
+    static void SetOnLineImageAccessEnabled(FrameNode* frameNode, bool isOnLineImageAccessEnabled);
+    static void SetMediaPlayGestureAccess(FrameNode* frameNode, bool isNeedGestureAccess);
+    static void SetAudioResumeInterval(FrameNode* frameNode, int32_t resumeInterval);
+    static void SetAudioExclusive(FrameNode* frameNode, bool audioExclusive);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

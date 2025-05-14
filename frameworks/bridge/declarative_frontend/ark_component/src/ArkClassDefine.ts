@@ -505,6 +505,21 @@ class ArkStarStyle {
   }
 }
 
+class ArkRegisterNativeEmbedRule {
+  tag: string | undefined;
+  type: string | undefined;
+
+  constructor () {
+    this.tag = undefined;
+    this.type = undefined;
+  }
+
+  isEqual (another: ArkRegisterNativeEmbedRule): boolean {
+    return (this.tag === another.tag &&
+           this.type === another.type);
+  }
+}
+
 class ArkBackgroundBlurStyle {
   blurStyle: number | undefined;
   colorMode: number | undefined;
