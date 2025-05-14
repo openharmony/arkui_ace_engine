@@ -339,7 +339,7 @@ const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
 const std::string BUFFER_USAGE_WEB = "web";
 const std::string DEFAULT_WEB_TEXT_ENCODING_FORMAT = "UTF-8";
 constexpr int32_t SYNC_SURFACE_QUEUE_SIZE = 8;
-constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE_FOR_PHONE = 5;
+constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE_FOR_PHONE_AND_PC = 5;
 constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE_FOR_OTHERS = 4;
 constexpr uint32_t DEBUG_DRAGMOVEID_TIMER = 30;
 // web feature params
@@ -7054,8 +7054,9 @@ bool WebPattern::GetActiveStatus() const
 
 int32_t WebPattern::GetBufferSizeByDeviceType()
 {
-    return (SystemProperties::GetDeviceType() == DeviceType::PHONE) ? ASYNC_SURFACE_QUEUE_SIZE_FOR_PHONE :
-        ASYNC_SURFACE_QUEUE_SIZE_FOR_OTHERS;
+    return (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
+        SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) ?
+        ASYNC_SURFACE_QUEUE_SIZE_FOR_PHONE_AND_PC : ASYNC_SURFACE_QUEUE_SIZE_FOR_OTHERS;
 }
 
 void WebPattern::StartVibraFeedback(const std::string& vibratorType)
