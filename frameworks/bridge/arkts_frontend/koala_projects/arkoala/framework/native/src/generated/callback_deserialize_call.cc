@@ -4130,7 +4130,8 @@ void deserializeAndCallDrawCallback(KSerializerBuffer thisArray, Ark_Int32 thisL
 {
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_DrawContext context)>(thisDeserializer.readPointer());
+    const auto _call = reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_DrawContext context)>(
+        thisDeserializer.readPointer());
     thisDeserializer.readPointer();
     Ark_DrawContext context = thisDeserializer.readDrawContext();
     _call(_resourceId, context);
@@ -4140,7 +4141,9 @@ void deserializeAndCallSyncDrawCallback(Ark_VMContext vmContext, KSerializerBuff
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
-    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_DrawContext context)>(thisDeserializer.readPointer());
+    const auto _callSync =
+        reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_DrawContext context)>(
+            thisDeserializer.readPointer());
     Ark_DrawContext context = thisDeserializer.readDrawContext();
     _callSync(vmContext, _resourceId, context);
 }

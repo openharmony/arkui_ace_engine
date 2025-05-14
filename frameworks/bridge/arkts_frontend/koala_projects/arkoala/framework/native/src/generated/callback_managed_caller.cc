@@ -45,9 +45,11 @@ void callManagedAccessibilityCallbackSync(Ark_VMContext vmContext, Ark_Int32 res
 void callManagedAccessibilityFocusCallback(Ark_Int32 resourceId, Ark_Boolean isFocus)
 {
     CallbackBuffer _buffer = {{}, {}};
-    const Ark_CallbackResource _callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    const Ark_CallbackResource _callbackResourceSelf = { resourceId, holdManagedCallbackResource,
+        releaseManagedCallbackResource };
     _buffer.resourceHolder.holdCallbackResource(&_callbackResourceSelf);
-    Serializer argsSerializer = Serializer((KSerializerBuffer)&(_buffer.buffer), sizeof(_buffer.buffer), &(_buffer.resourceHolder));
+    Serializer argsSerializer =
+        Serializer((KSerializerBuffer) & (_buffer.buffer), sizeof(_buffer.buffer), &(_buffer.resourceHolder));
     argsSerializer.writeInt32(Kind_AccessibilityFocusCallback);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeBoolean(isFocus);
