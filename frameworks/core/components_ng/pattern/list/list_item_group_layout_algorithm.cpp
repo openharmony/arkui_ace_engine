@@ -197,6 +197,7 @@ void ListItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         CheckUpdateGroupAndItemPos(layoutWrapper, paddingOffset, crossSize);
     } else {
         LayoutListItem(layoutWrapper, paddingOffset, crossSize);
+        ResetLayoutItem(layoutWrapper);
     }
     ReverseItemPosition(cachedItemPosition_, totalItemCount_, totalMainSize_);
     ReverseItemPosition(itemPosition_, totalItemCount_, totalMainSize_);
@@ -1611,5 +1612,16 @@ bool ListItemGroupLayoutAlgorithm::IsRoundingMode(LayoutWrapper* layoutWrapper)
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     return pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE;
+}
+
+void ListItemGroupLayoutAlgorithm::ResetLayoutItem(LayoutWrapper* layoutWrapper)
+{
+    for (auto& pos : cachedItemPosition_) {
+        auto wrapper = GetListItem(layoutWrapper, pos.first);
+        auto wrapperFrameNode = AceType::DynamicCast<FrameNode>(wrapper);
+        if (wrapperFrameNode) {
+            wrapperFrameNode->ClearSubtreeLayoutAlgorithm();
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
