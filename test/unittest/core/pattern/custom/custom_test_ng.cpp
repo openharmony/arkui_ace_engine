@@ -1821,4 +1821,111 @@ HWTEST_F(CustomTestNg, CustomTest045, TestSize.Level1)
     EXPECT_EQ(capturedPixelMap, testPixelMap);
     EXPECT_NE(customAppBarNode->appIconCallback_, nullptr);
 }
+
+/**
+ * @tc.name: CustomTest046
+ * @tc.desc: SetJSViewActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest046, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TabContent and push it to view stack processor.
+     * @tc.expected: Make TabContent as CustomNode parent.
+     */
+    auto frameNode = CreateNode(V2::TAB_CONTENT_ITEM_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Invoke CustomNode Create function.
+     * @tc.expected: Create CustomNode.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    EXPECT_TRUE(customNode != nullptr && customNode->GetTag() == V2::JS_VIEW_ETS_TAG);
+
+    /**
+     * @tc.steps: step3. Expect the prevJsActive_ is changed.
+     */
+    customNode->prevJsActive_ = true;
+    bool active = false;
+    customNode->SetJSViewActive(active, false, false);
+    EXPECT_FALSE(customNode->prevJsActive_);
+}
+
+/**
+ * @tc.name: CustomTest047
+ * @tc.desc: GetStateInspectorInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest047, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TabContent and push it to view stack processor.
+     * @tc.expected: Make TabContent as CustomNode parent.
+     */
+    auto frameNode = CreateNode(V2::TAB_CONTENT_ITEM_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Invoke CustomNode Create function.
+     * @tc.expected: Create CustomNode.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    EXPECT_TRUE(customNode != nullptr && customNode->GetTag() == V2::JS_VIEW_ETS_TAG);
+
+    /**
+     * @tc.steps: step3. Expect the json->GetString() is equal to result->GetString().
+     */
+    customNode->onDumpInspectorFunc_ = nullptr;
+    std::string res = customNode->FireOnDumpInspectorFunc();
+    auto result = JsonUtil::ParseJsonString(res);
+    auto json = customNode->GetStateInspectorInfo();
+    EXPECT_EQ(json->GetString(), result->GetString());
+}
+
+/**
+ * @tc.name: CustomTest048
+ * @tc.desc: SetJSViewName and GetJSViewName
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest048, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CustomNodeBase through customNode.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+
+    /**
+     * @tc.steps: step2. Expect the jsViewName_ is name.
+     */
+    std::string name = "name";
+    customNode->SetJSViewName(std::move(name));
+    EXPECT_EQ(customNode->jsViewName_, "name");
+    
+    /**
+     * @tc.steps: step3. Expect the jsViewName is name.
+     */
+    auto jsViewName = customNode->GetJSViewName();
+    EXPECT_EQ(jsViewName, "name");
+}
+
+/**
+ * @tc.name: CustomTest049
+ * @tc.desc: SetIsV2 and GetIsV2
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest049, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CustomNodeBase through customNode.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+
+    /**
+     * @tc.steps: step2. Expect the customNode->GetIsV2() is true.
+     */
+    EXPECT_EQ(customNode->GetIsV2(), false);
+    bool isV2 = true;
+    customNode->SetIsV2(isV2);
+    EXPECT_EQ(customNode->isV2_, isV2);
+    EXPECT_EQ(customNode->GetIsV2(), true);
+}
 } // namespace OHOS::Ace::NG
