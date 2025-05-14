@@ -3204,7 +3204,7 @@ std::vector<RectF> FrameNode::GetResponseRegionListForRecognizer(int32_t sourceT
     return responseRegionList;
 }
 
-std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& rect)
+std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& windowRect)
 {
     ACE_LAYOUT_TRACE_BEGIN("GetResponseRegionListForTouch");
     std::vector<RectF> responseRegionList;
@@ -3213,13 +3213,23 @@ std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& rect)
         ACE_LAYOUT_TRACE_END()
         return responseRegionList;
     }
-
+    if (!renderContext_) {
+        ACE_LAYOUT_TRACE_END()
+        return responseRegionList;
+    }
     bool isAccessibilityClickable = gestureHub->IsAccessibilityClickable();
     if (!isAccessibilityClickable) {
         ACE_LAYOUT_TRACE_END()
         return responseRegionList;
     }
     auto offset = GetPositionToScreenWithTransform();
+    auto rect = renderContext_->GetPaintRectWithoutTransform();
+    RectF rectToScreen{offset.GetX(), offset.GetY(), rect.Width(), rect.Height()};
+    if (rectToScreen.Left() >= windowRect.Right() || rectToScreen.Right() <= windowRect.Left() ||
+        rectToScreen.Top() >= windowRect.Bottom() || rectToScreen.Bottom() <= windowRect.Top()) {
+        ACE_LAYOUT_TRACE_END()
+        return responseRegionList;
+    }
     if (gestureHub->GetResponseRegion().empty()) {
         RectF rectToScreen{round(offset.GetX()), round(offset.GetY()), round(rect.Width()), round(rect.Height())};
         responseRegionList.emplace_back(rectToScreen);
@@ -3244,23 +3254,9 @@ std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& rect)
     return responseRegionList;
 }
 
-void FrameNode::GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList)
+void FrameNode::GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList, const RectF& windowRect)
 {
-    CHECK_NULL_VOID(renderContext_);
-    auto origRect = renderContext_->GetPaintRectWithoutTransform();
-    auto pipelineContext = GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto offset = GetPositionToScreenWithTransform();
-    RectF rectToScreen{offset.GetX(), offset.GetY(), origRect.Width(), origRect.Height()};
-    auto window = pipelineContext->GetCurrentWindowRect();
-    RectF windowRect{window.Left(), window.Top(), window.Width(), window.Height()};
-
-    if (rectToScreen.Left() >= windowRect.Right() || rectToScreen.Right() <= windowRect.Left() ||
-        rectToScreen.Top() >= windowRect.Bottom() || rectToScreen.Bottom() <= windowRect.Top()) {
-        return;
-    }
-
-    auto rootRegionList = GetResponseRegionListForTouch(origRect);
+    auto rootRegionList = GetResponseRegionListForTouch(windowRect);
     if (!rootRegionList.empty()) {
         for (auto rect : rootRegionList) {
             responseRegionList.push_back(rect.IntersectRectT(windowRect));
@@ -3272,7 +3268,7 @@ void FrameNode::GetResponseRegionListByTraversal(std::vector<RectF>& responseReg
         if (!child) {
             continue;
         }
-        child->GetResponseRegionListByTraversal(responseRegionList);
+        child->GetResponseRegionListByTraversal(responseRegionList, windowRect);
     }
 }
 

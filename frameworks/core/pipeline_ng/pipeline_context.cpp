@@ -5808,7 +5808,9 @@ std::string PipelineContext::GetResponseRegion(const RefPtr<FrameNode>& rootNode
 {
     CHECK_NULL_RETURN(rootNode, "");
     std::vector<RectF> responseRegionList;
-    rootNode->GetResponseRegionListByTraversal(responseRegionList);
+    auto window = GetCurrentWindowRect();
+    RectF windowRect{window.Left(), window.Top(), window.Width(), window.Height()};
+    rootNode->GetResponseRegionListByTraversal(responseRegionList, windowRect);
     std::string responseRegionStrOrigin;
     std::string responseRegionStrFilter;
     for (const auto& rect : responseRegionList) {
