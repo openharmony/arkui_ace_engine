@@ -37,6 +37,7 @@ struct Index {
     { title: "示例11：菜单基本功能_0_bM内容/自定义尺寸", url: "pages/MenuTestLevel0_0" },
     { title: "示例12：菜单基本功能_1_bCM内容/自定义尺寸", url: "pages/MenuTestLevel0_1" },
     { title: "示例13：菜单基本功能_2_标题/subwindow", url: "pages/MenuTestLevel0_2" },
+    { title: "示例14：菜单基本功能_3_位置", url: "pages/MenuTestLevel0_3" },
   ]
 
   build() {
