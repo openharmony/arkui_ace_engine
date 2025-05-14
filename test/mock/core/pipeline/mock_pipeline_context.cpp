@@ -934,7 +934,7 @@ bool PipelineContext::NeedSoftKeyboard()
 
 void PipelineContext::SetCursor(int32_t cursorValue) {}
 
-void PipelineContext::RestoreDefault(int32_t windowId) {}
+void PipelineContext::RestoreDefault(int32_t windowId, MouseStyleChangeReason reason) {}
 
 void PipelineContext::HandleSubwindow(bool isShow) {}
 

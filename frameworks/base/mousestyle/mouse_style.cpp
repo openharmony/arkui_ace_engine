@@ -33,10 +33,10 @@ bool MouseStyleManager::SetMouseFormat(int32_t windowId, int32_t nodeId, MouseFo
     if (isByPass) {
         return false;
     }
-    if (userSetCursor_ && reason != MouseStyleChangeReason::USER_SET_MOUSESTYLE) {
+    if (userSetCursor_ && reason == MouseStyleChangeReason::INNER_SET_MOUSESTYLE) {
         return false;
     }
-    if (!userSetCursor_ && (!mouseStyleNodeId_.has_value() ||
+    if (reason == MouseStyleChangeReason::INNER_SET_MOUSESTYLE && (!mouseStyleNodeId_.has_value() ||
         mouseStyleNodeId_.value() != nodeId)) {
         return false;
     }

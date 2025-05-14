@@ -64,7 +64,7 @@ HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager001, TestSize.Level1)
         {false, std::nullopt, 0, MouseFormat::EAST, false,
             MouseStyleChangeReason::INNER_SET_MOUSESTYLE, false, MouseFormat::DEFAULT},
         {false, std::nullopt, 0, MouseFormat::EAST, false,
-            MouseStyleChangeReason::USER_SET_MOUSESTYLE, false, MouseFormat::DEFAULT},
+            MouseStyleChangeReason::USER_SET_MOUSESTYLE, true, MouseFormat::EAST},
         {false, 0, 0, MouseFormat::EAST, false,
             MouseStyleChangeReason::INNER_SET_MOUSESTYLE, true, MouseFormat::EAST},
         {false, 0, 0, MouseFormat::EAST, false,
@@ -72,7 +72,7 @@ HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager001, TestSize.Level1)
         {false, 0, 1, MouseFormat::EAST, false,
             MouseStyleChangeReason::INNER_SET_MOUSESTYLE, false, MouseFormat::DEFAULT},
         {false, 0, 1, MouseFormat::EAST, false,
-            MouseStyleChangeReason::USER_SET_MOUSESTYLE, false, MouseFormat::DEFAULT}
+            MouseStyleChangeReason::USER_SET_MOUSESTYLE, true, MouseFormat::EAST}
     };
 
     /*
@@ -213,15 +213,15 @@ HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager004, TestSize.Level1)
         {false, std::nullopt, 0, MouseFormat::EAST, false,
             MouseStyleChangeReason::INNER_SET_MOUSESTYLE, false, MouseFormat::DEFAULT},
         {false, std::nullopt, 0, MouseFormat::EAST, false,
-            MouseStyleChangeReason::USER_SET_MOUSESTYLE, false, MouseFormat::DEFAULT},
+            MouseStyleChangeReason::USER_SET_MOUSESTYLE, true, MouseFormat::EAST},
         {false, 0, 0, MouseFormat::EAST, false,
-            MouseStyleChangeReason::INNER_SET_MOUSESTYLE, false, MouseFormat::DEFAULT},
+            MouseStyleChangeReason::INNER_SET_MOUSESTYLE, false, MouseFormat::EAST},
         {false, 0, 0, MouseFormat::EAST, false,
             MouseStyleChangeReason::USER_SET_MOUSESTYLE, true, MouseFormat::EAST},
         {false, 0, 1, MouseFormat::EAST, false,
             MouseStyleChangeReason::INNER_SET_MOUSESTYLE, false, MouseFormat::EAST},
         {false, 0, 1, MouseFormat::EAST, false,
-            MouseStyleChangeReason::USER_SET_MOUSESTYLE, false, MouseFormat::DEFAULT}
+            MouseStyleChangeReason::USER_SET_MOUSESTYLE, true, MouseFormat::EAST}
     };
 
     /*

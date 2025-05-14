@@ -368,6 +368,13 @@ public:
     void DelegateTouchEvent(const TouchEvent& point);
 
     void AddTouchDoneFrameNode(const WeakPtr<NG::FrameNode>& frameNode);
+
+    MouseFormat GetCurrentMouseStyle()
+    {
+        CHECK_NULL_RETURN(mouseStyleManager_, MouseFormat::DEFAULT);
+        return mouseStyleManager_->GetCurrentMouseStyle();
+    }
+
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
         TouchRestrict& touchRestrict, const Offset& offset = Offset(), float viewScale = 1.0f,
