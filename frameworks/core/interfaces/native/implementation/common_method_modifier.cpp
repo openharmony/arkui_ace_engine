@@ -3517,7 +3517,7 @@ void VisibilityImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<VisibleType>(*value);
-    if (convValue.has_value()) {
+    if (!convValue.has_value()) {
         // TODO: Reset value
         return;
     }

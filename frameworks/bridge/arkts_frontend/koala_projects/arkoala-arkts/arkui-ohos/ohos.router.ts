@@ -3,12 +3,12 @@ import { Router } from "./src/handwritten"
 import { PeerNode } from "./src/PeerNode"
 
 namespace router {
-    interface RouterOptions {
+    export interface RouterOptions {
         url: string
         params?: Object
     }
     
-    enum RouterMode {
+    export enum RouterMode {
         Standard,
         Single
     }
