@@ -145,6 +145,8 @@ protected:
         return std::find(activeFingers_.begin(), activeFingers_.end(), touchId) != activeFingers_.end();
     }
 
+    bool CheckFingerListInDownFingers(int32_t pointId) const;
+
     std::string DumpGestureInfo() const;
 
     std::map<int32_t, TouchEvent> touchPoints_;

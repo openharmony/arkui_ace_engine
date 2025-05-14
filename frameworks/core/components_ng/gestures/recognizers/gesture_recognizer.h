@@ -459,6 +459,7 @@ protected:
     virtual void RemoveUnsupportEvent(int32_t touchId) {}
     bool ShouldResponse() override;
     bool IsPreventDefault() const;
+    bool CheckoutDownFingers(int32_t fingerId) const;
 
     void HandleWillAccept();
     void HandleDidAccept();
