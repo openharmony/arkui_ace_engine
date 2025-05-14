@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,12 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 constexpr size_t MAX_NUMBER_BREAKPOINT = 6;
+constexpr size_t XS = 0;
+constexpr size_t SM = 1;
+constexpr size_t MD = 2;
+constexpr size_t LG = 3;
+constexpr size_t XL = 4;
+constexpr size_t XXL = 5;
 
 void InheritGridRowOption(const RefPtr<V2::GridContainerSize>& gridContainerSize,
     std::optional<int32_t> (&containerSizeArray)[MAX_NUMBER_BREAKPOINT])
@@ -65,6 +71,29 @@ void InheritGridRowOption(const RefPtr<V2::GridContainerSize>& gridContainerSize
     gridContainerSize->lg = containerSizeArray[3].value();
     gridContainerSize->xl = containerSizeArray[4].value();
     gridContainerSize->xxl = containerSizeArray[5].value();
+}
+
+void InheritGridColumns(const RefPtr<V2::GridContainerSize>& gridContainerSize,
+    std::optional<int32_t> (&containerSizeArray)[MAX_NUMBER_BREAKPOINT])
+{
+    for (size_t i = 0; i < MAX_NUMBER_BREAKPOINT; ++i) {
+        if (containerSizeArray[i].has_value()) {
+            containerSizeArray[0] = containerSizeArray[i].value();
+            break;
+        }
+    }
+    CHECK_NULL_VOID(containerSizeArray[0].has_value());
+    for (size_t i = 1; i < MAX_NUMBER_BREAKPOINT; ++i) {
+        if (!containerSizeArray[i].has_value()) {
+            containerSizeArray[i] = containerSizeArray[i - 1].value();
+        }
+    }
+    gridContainerSize->xs = containerSizeArray[XS].value();
+    gridContainerSize->sm = containerSizeArray[SM].value();
+    gridContainerSize->md = containerSizeArray[MD].value();
+    gridContainerSize->lg = containerSizeArray[LG].value();
+    gridContainerSize->xl = containerSizeArray[XL].value();
+    gridContainerSize->xxl = containerSizeArray[XXL].value();
 }
 
 void InheritGridRowGutterOption(const RefPtr<V2::Gutter>& gutter,
@@ -165,40 +194,81 @@ RefPtr<V2::GridContainerSize> ParserColumns(const JSRef<JSVal>& jsValue)
     if (jsValue->IsNumber()) {
         auto columnNumber = jsValue->ToNumber<int32_t>();
         return columnNumber > 0 ? AceType::MakeRefPtr<V2::GridContainerSize>(columnNumber)
-                                : AceType::MakeRefPtr<V2::GridContainerSize>();
+                                : AceType::MakeRefPtr<V2::GridContainerSize>(NG::DEFAULT_COLUMN_NUMBER);
     } else if (jsValue->IsObject()) {
-        auto gridContainerSize = AceType::MakeRefPtr<V2::GridContainerSize>(12);
+        auto gridContainerSize = AceType::MakeRefPtr<V2::GridContainerSize>(NG::DEFAULT_COLUMN_NUMBER);
         auto gridParam = JSRef<JSObject>::Cast(jsValue);
         std::optional<int32_t> containerSizeArray[MAX_NUMBER_BREAKPOINT];
         auto xs = gridParam->GetProperty("xs");
         if (xs->IsNumber() && xs->ToNumber<int32_t>() > 0) {
-            containerSizeArray[0] = xs->ToNumber<int32_t>();
+            containerSizeArray[XS] = xs->ToNumber<int32_t>();
         }
         auto sm = gridParam->GetProperty("sm");
         if (sm->IsNumber() && sm->ToNumber<int32_t>() > 0) {
-            containerSizeArray[1] = sm->ToNumber<int32_t>();
+            containerSizeArray[SM] = sm->ToNumber<int32_t>();
         }
         auto md = gridParam->GetProperty("md");
         if (md->IsNumber() && md->ToNumber<int32_t>() > 0) {
-            containerSizeArray[2] = md->ToNumber<int32_t>();
+            containerSizeArray[MD] = md->ToNumber<int32_t>();
         }
         auto lg = gridParam->GetProperty("lg");
         if (lg->IsNumber() && lg->ToNumber<int32_t>() > 0) {
-            containerSizeArray[3] = lg->ToNumber<int32_t>();
+            containerSizeArray[LG] = lg->ToNumber<int32_t>();
         }
         auto xl = gridParam->GetProperty("xl");
         if (xl->IsNumber() && xl->ToNumber<int32_t>() > 0) {
-            containerSizeArray[4] = xl->ToNumber<int32_t>();
+            containerSizeArray[XL] = xl->ToNumber<int32_t>();
         }
         auto xxl = gridParam->GetProperty("xxl");
         if (xxl->IsNumber() && xxl->ToNumber<int32_t>() > 0) {
-            containerSizeArray[5] = xxl->ToNumber<int32_t>();
+            containerSizeArray[XXL] = xxl->ToNumber<int32_t>();
         }
         InheritGridRowOption(gridContainerSize, containerSizeArray);
         return gridContainerSize;
     } else {
-        return AceType::MakeRefPtr<V2::GridContainerSize>();
+        return AceType::MakeRefPtr<V2::GridContainerSize>(NG::DEFAULT_COLUMN_NUMBER);
     }
+}
+
+RefPtr<V2::GridContainerSize> ParserColumnsNG(const JSRef<JSVal>& jsValue)
+{
+    if (jsValue->IsNumber()) {
+        auto columnNumber = jsValue->ToNumber<int32_t>();
+        return columnNumber > 0 ? AceType::MakeRefPtr<V2::GridContainerSize>(columnNumber)
+                                : AceType::MakeRefPtr<V2::GridContainerSize>();
+    }
+    if (jsValue->IsObject()) {
+        auto gridContainerSize = AceType::MakeRefPtr<V2::GridContainerSize>();
+        auto gridParam = JSRef<JSObject>::Cast(jsValue);
+        std::optional<int32_t> containerSizeArray[MAX_NUMBER_BREAKPOINT];
+        auto xs = gridParam->GetProperty("xs");
+        if (xs->IsNumber() && xs->ToNumber<int32_t>() > 0) {
+            containerSizeArray[XS] = xs->ToNumber<int32_t>();
+        }
+        auto sm = gridParam->GetProperty("sm");
+        if (sm->IsNumber() && sm->ToNumber<int32_t>() > 0) {
+            containerSizeArray[SM] = sm->ToNumber<int32_t>();
+        }
+        auto md = gridParam->GetProperty("md");
+        if (md->IsNumber() && md->ToNumber<int32_t>() > 0) {
+            containerSizeArray[MD] = md->ToNumber<int32_t>();
+        }
+        auto lg = gridParam->GetProperty("lg");
+        if (lg->IsNumber() && lg->ToNumber<int32_t>() > 0) {
+            containerSizeArray[LG] = lg->ToNumber<int32_t>();
+        }
+        auto xl = gridParam->GetProperty("xl");
+        if (xl->IsNumber() && xl->ToNumber<int32_t>() > 0) {
+            containerSizeArray[XL] = xl->ToNumber<int32_t>();
+        }
+        auto xxl = gridParam->GetProperty("xxl");
+        if (xxl->IsNumber() && xxl->ToNumber<int32_t>() > 0) {
+            containerSizeArray[XXL] = xxl->ToNumber<int32_t>();
+        }
+        InheritGridColumns(gridContainerSize, containerSizeArray);
+        return gridContainerSize;
+    }
+    return AceType::MakeRefPtr<V2::GridContainerSize>();
 }
 
 RefPtr<V2::BreakPoints> ParserBreakpoints(const JSRef<JSVal>& jsValue)
@@ -256,7 +326,12 @@ void JSGridRow::Create(const JSCallbackInfo& info)
         auto breakpoints = gridRow->GetProperty("breakpoints");
         auto direction = gridRow->GetProperty("direction");
 
-        auto parsedColumns = ParserColumns(columns);
+        RefPtr<V2::GridContainerSize> parsedColumns;
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+            parsedColumns = ParserColumns(columns);
+        } else {
+            parsedColumns = ParserColumnsNG(columns);
+        }
         auto parsedGutter = ParserGutter(gutter);
         auto parsedBreakpoints = ParserBreakpoints(breakpoints);
         auto parsedDirection = ParserDirection(direction);
