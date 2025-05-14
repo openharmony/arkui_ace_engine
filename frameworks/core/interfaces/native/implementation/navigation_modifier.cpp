@@ -420,9 +420,41 @@ void TitleImpl(Ark_NativePointer node, const Opt_Type_NavigationAttribute_title_
     }
 }
 void ToolbarConfigurationImpl(Ark_NativePointer node,
-                              const Opt_Union_Array_ToolbarItem_CustomBuilder* value,
+                              const Opt_Union_Array_ToolbarItem_CustomBuilder* items,
                               const Opt_NavigationToolbarOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(items);
+    NG::NavigationToolbarOptions toolbarOptions;
+    if (items->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto typeValue = items->value.selector;
+        if (typeValue == 0) {
+            NG::MoreButtonOptions toolbarMoreButtonOptions;
+            if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED &&
+                options->value.moreButtonOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+                NG::NavigationBackgroundOptions bgOptions =
+                    Converter::Convert<NG::NavigationBackgroundOptions>(options->value.moreButtonOptions.value);
+                toolbarMoreButtonOptions.bgOptions = bgOptions;
+            }
+            NavigationModelStatic::SetToolbarMorebuttonOptions(frameNode, std::move(toolbarMoreButtonOptions));
+            auto toolbarItemArray = Converter::Convert<std::vector<NG::BarItem>>(items->value.value0);
+            NavigationModelStatic::SetToolbarConfiguration(frameNode, std::move(toolbarItemArray));
+        } else if (typeValue == 1) {
+        }
+    }
+
+    if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        NG::NavigationBackgroundOptions bgOptions =
+            Converter::Convert<NG::NavigationBackgroundOptions>(options->value);
+        toolbarOptions.bgOptions = bgOptions;
+    }
+    if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        NG::NavigationBarOptions brOptions =
+            Converter::Convert<NG::NavigationBarOptions>(options->value);
+        toolbarOptions.brOptions = brOptions;
+    }
+    NavigationModelStatic::SetToolbarOptions(frameNode, std::move(toolbarOptions));
 }
 void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
                               const Opt_Array_LayoutSafeAreaType* types,

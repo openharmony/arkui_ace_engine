@@ -43,6 +43,11 @@ public:
     static void SetMenuOptions(FrameNode* frameNode, NG::NavigationMenuOptions&& opt);
     static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated = false);
     static void SetTitlebarOptions(FrameNode* frameNode, NavigationTitlebarOptions&& opt);
+
+    static void SetToolBarItems(FrameNode* frameNode, std::vector<NG::BarItem>&& toolBarItems);
+    static void SetToolbarConfiguration(FrameNode* frameNode, std::vector<NG::BarItem>&& toolBarItems);
+    static void SetToolbarOptions(FrameNode* frameNode, NavigationToolbarOptions&& opt);
+    static void SetToolbarMorebuttonOptions(FrameNode* frameNode, MoreButtonOptions&& opt);
     static void ParseCommonTitle(
         FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo, bool ignoreMainTitle = false);
     static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::SafeAreaExpandOpts& opts);

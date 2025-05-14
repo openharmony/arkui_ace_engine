@@ -581,6 +581,34 @@ std::vector<NG::BarItem> Convert(const Array_NavigationMenuItem& src)
 }
 
 template<>
+std::vector<NG::BarItem> Convert(const Array_ToolbarItem& src)
+{
+    std::vector<NG::BarItem> dst;
+    auto length = Converter::Convert<int>(src.length);
+    for (int i = 0; i < length; i++) {
+        auto toolbarItem = *(src.array + i);
+        NG::BarItem item;
+        item.text = Converter::OptConvert<std::string>(toolbarItem.value).value_or("");
+        item.icon = Converter::OptConvert<std::string>(toolbarItem.icon);
+        //item.iconSymbol = Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(toolbarItem.symbolIcon);
+        if (toolbarItem.action.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            auto actionCallback = [changeCallback = CallbackHelper(toolbarItem.action.value), node = targetNode]() {
+                PipelineContext::SetCallBackNode(node);
+                changeCallback.Invoke();
+            };
+            item.action = actionCallback;
+        }
+        item.status = Converter::Convert<NavToolbarItemStatus>(toolbarItem.status);
+        item.activeIcon = Converter::OptConvert<std::string>(toolbarItem.activeIcon);
+        //item.activeIconSymbol = Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(toolbarItem.activeSymbolIcon);
+        dst.push_back(item);
+    }
+    return dst;
+}
+
+
+template<>
 Dimension Convert(const Ark_String& src)
 {
     auto str = Convert<std::string>(src);
@@ -1284,6 +1312,12 @@ NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src)
     options.blurStyleOption.reset();
     options.effectOption.reset();
     BlurStyleOption styleOptions;
+    EffectOption effectOption;
+
+    if (src.backgroundColor.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        options.color = Converter::OptConvert<Color>(src.backgroundColor.value);
+    }
+
     if (src.backgroundBlurStyleOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         styleOptions = Converter::Convert<BlurStyleOption>(src.backgroundBlurStyleOptions.value);
     }
@@ -1297,8 +1331,74 @@ NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src)
     }
 
     if (src.backgroundEffect.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        effectOption = Converter::Convert<EffectOption>(src.backgroundEffect.value);
+    }
+    options.blurStyleOption = styleOptions;
+    options.effectOption = effectOption;
+    return options;
+}
+
+template<>
+NG::NavigationBackgroundOptions Convert(const Ark_NavigationToolbarOptions& src)
+{
+    NG::NavigationBackgroundOptions options;
+    options.color.reset();
+    options.blurStyleOption.reset();
+    options.effectOption.reset();
+    BlurStyleOption styleOptions;
+    EffectOption effectOption;
+
+    if (src.backgroundColor.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        options.color = Converter::OptConvert<Color>(src.backgroundColor.value);
+    }
+
+    if (src.backgroundBlurStyleOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        styleOptions = Converter::Convert<BlurStyleOption>(src.backgroundBlurStyleOptions.value);
+    }
+
+    if (src.backgroundBlurStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto blurStyle = static_cast<int32_t>(src.backgroundBlurStyle.value);
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            styleOptions.blurStyle = static_cast<BlurStyle>(blurStyle);
+        }
+    }
+
+    if (src.backgroundEffect.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        effectOption = Converter::Convert<EffectOption>(src.backgroundEffect.value);
+    }
+    options.blurStyleOption = styleOptions;
+    options.effectOption = effectOption;
+    return options;
+}
+
+template<>
+NG::NavigationBarOptions Convert(const Ark_NavigationToolbarOptions& src)
+{
+    NG::NavigationBarOptions options;
+    options.paddingStart.reset();
+    options.paddingEnd.reset();
+    options.barStyle.reset();
+    if (src.barStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto barStyle = static_cast<int32_t>(src.barStyle.value);
+        if (barStyle >= static_cast<int32_t>(NG::BarStyle::STANDARD) &&
+            barStyle <= static_cast<int32_t>(NG::BarStyle::SAFE_AREA_PADDING)) {
+            options.barStyle = static_cast<NG::BarStyle>(barStyle);
+        } else {
+            options.barStyle = NG::BarStyle::STANDARD;
+        }
     }
     return options;
+}
+
+template<>
+NavToolbarItemStatus Convert(const Opt_ToolbarItemStatus& src)
+{
+    NavToolbarItemStatus status = NavToolbarItemStatus::NORMAL;
+    if (src.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        status = static_cast<NavToolbarItemStatus>(src.value);
+    }
+    return status;
 }
 
 template<>

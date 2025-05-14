@@ -13765,6 +13765,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeResource(value_icon_value_1)
             }
         }
+        // TBD: Symbol cannot be realized at present.
         // const value_symbolIcon  = value.symbolIcon
         let value_symbolIcon_type : int32 = RuntimeType.UNDEFINED
         // value_symbolIcon_type = runtimeType(value_symbolIcon)
@@ -16619,14 +16620,15 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeResource(value_icon_value_1)
             }
         }
-        const value_symbolIcon  = value.symbolIcon
+        // TBD: Symbol cannot be realized at present.
+        // const value_symbolIcon  = value.symbolIcon
         let value_symbolIcon_type : int32 = RuntimeType.UNDEFINED
-        value_symbolIcon_type = runtimeType(value_symbolIcon)
+        // value_symbolIcon_type = runtimeType(value_symbolIcon)
         valueSerializer.writeInt8(value_symbolIcon_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_symbolIcon_type)) {
-            const value_symbolIcon_value  = value_symbolIcon!
-            valueSerializer.writeSymbolGlyphModifier(value_symbolIcon_value)
-        }
+        // if ((RuntimeType.UNDEFINED) != (value_symbolIcon_type)) {
+        //     const value_symbolIcon_value  = value_symbolIcon!
+        //     valueSerializer.writeSymbolGlyphModifier(value_symbolIcon_value)
+        // }
         const value_action  = value.action
         let value_action_type : int32 = RuntimeType.UNDEFINED
         value_action_type = runtimeType(value_action)
@@ -16662,14 +16664,14 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeResource(value_activeIcon_value_1)
             }
         }
-        const value_activeSymbolIcon  = value.activeSymbolIcon
+        // const value_activeSymbolIcon  = value.activeSymbolIcon
         let value_activeSymbolIcon_type : int32 = RuntimeType.UNDEFINED
-        value_activeSymbolIcon_type = runtimeType(value_activeSymbolIcon)
+        // value_activeSymbolIcon_type = runtimeType(value_activeSymbolIcon)
         valueSerializer.writeInt8(value_activeSymbolIcon_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_activeSymbolIcon_type)) {
-            const value_activeSymbolIcon_value  = value_activeSymbolIcon!
-            valueSerializer.writeSymbolGlyphModifier(value_activeSymbolIcon_value)
-        }
+        // if ((RuntimeType.UNDEFINED) != (value_activeSymbolIcon_type)) {
+        //     const value_activeSymbolIcon_value  = value_activeSymbolIcon!
+        //     valueSerializer.writeSymbolGlyphModifier(value_activeSymbolIcon_value)
+        // }
     }
     writeTouchEvent(value: TouchEvent): void {
         let valueSerializer : Serializer = this

@@ -1531,6 +1531,7 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
     titleMode_value?: NavigationTitleMode | undefined
     menus_value?: Array<NavigationMenuItem> | CustomBuilder | undefined
     toolBar_value?: CustomBuilder | undefined
+    toolbarConfiguration_value?: Array<ToolbarItem> | CustomBuilder | undefined
     hideToolBar_value?: boolean | undefined
     enableToolBarAdaptation_value?: boolean | undefined
     onTitleModeChange_value?: ((titleMode: NavigationTitleMode) => void) | undefined
@@ -1622,7 +1623,7 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
     }
     public ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
         return this
-        }
+    }
 }
 export type Callback_NavigationTransitionProxy_Void = (transitionProxy: NavigationTransitionProxy) => void;
 export interface NavigationAnimatedTransition {
@@ -1941,7 +1942,7 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
     public toolbarConfiguration(value: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): this {
         if (this.checkPriority("toolbarConfiguration")) {
             const value_casted = value as (Array<ToolbarItem> | CustomBuilder | undefined)
-            const options_casted = options as (NavigationToolbarOptions)
+            const options_casted = options as (NavigationToolbarOptions | undefined)
             this.getPeer()?.toolbarConfigurationAttribute(value_casted, options_casted)
             return this
         }
