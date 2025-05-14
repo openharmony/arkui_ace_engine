@@ -23,6 +23,7 @@
 
 namespace OHOS {
 namespace Ace {
+namespace {
 #ifdef ARKUI_WEARABLE
 constexpr int32_t PROCESS_WAIT_TIME = 50;
 #else
@@ -30,6 +31,8 @@ constexpr int32_t PROCESS_WAIT_TIME = 20;
 #endif
 constexpr float DOUBLE = 2.0;
 constexpr int32_t DEFAULT_FORM_ROTATION_ANIM_DURATION = 100;
+constexpr int32_t DUMP_WAIT_TIME = 65;
+}
 FormRendererDispatcherImpl::FormRendererDispatcherImpl(
     const std::shared_ptr<UIContent> uiContent,
     const std::shared_ptr<FormRenderer> formRenderer,
@@ -291,15 +294,31 @@ void FormRendererDispatcherImpl::OnNotifyDumpInfo(
         HILOG_ERROR("eventHandler is nullptr");
         return;
     }
-    handler->PostSyncTask([content = uiContent_, params, &info]() {
-        auto uiContent = content.lock();
-        if (!uiContent) {
-            HILOG_ERROR("uiContent is nullptr");
-            return;
-        }
-        HILOG_INFO("OnNotifyDumpInfo");
-        uiContent->DumpInfo(params, info);
-    });
+    struct DumpInfoCondition {
+        std::mutex mtx;
+        std::condition_variable cv;
+    };
+    std::shared_ptr<DumpInfoCondition> dumpCondition = std::make_shared<DumpInfoCondition>();
+    std::unique_lock<std::mutex> lock(dumpCondition->mtx);
+    handler->PostTask(
+        [content = uiContent_, params, &info, dumpCondition]() {
+            std::unique_lock<std::mutex> lock(dumpCondition->mtx);
+            auto uiContent = content.lock();
+            if (!uiContent) {
+                HILOG_ERROR("uiContent is nullptr");
+                dumpCondition->cv.notify_all();
+                return;
+            }
+            HILOG_INFO("OnNotifyDumpInfo");
+            uiContent->DumpInfo(params, info);
+            dumpCondition->cv.notify_all();
+        }, 
+        "OnNotifyDumpInfoTask");
+    if (dumpCondition->cv.wait_for(lock, std::chrono::milliseconds(DUMP_WAIT_TIME)) == std::cv_status::timeout) {
+        HILOG_ERROR("OnNotifyDumpInfo timeout");
+        info.push_back("dump timeout 65ms");
+        handler->RemoveTask("OnNotifyDumpInfoTask");
+    }
 }
 } // namespace Ace
 } // namespace OHOS
