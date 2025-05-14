@@ -60,7 +60,7 @@ import { Callback_Opt_Boolean_Void, OnCheckboxChangeCallback } from "./../checkb
 import { Resource } from "global/resource"
 import { StyledString, UserDataSpan, StyledStringMarshallCallback, StyledStringUnmarshallCallback } from "./../styledString"
 import { TabContentAnimatedTransition, Callback_TabContentTransitionProxy_Void, TabContentTransitionProxy, OnTabsAnimationEndCallback, TabsAnimationEvent, OnTabsAnimationStartCallback, OnTabsContentWillChangeCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback } from "./../tabs"
-import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents } from "./../arkui-custom"
+import { Callback_RangeUpdate, Callback_StateStylesChange, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents } from "./../arkui-custom"
 import { Callback_RefreshStatus_Void, RefreshStatus } from "./../refresh"
 import { Callback_String_Number_Void, Callback_TextPickerResult_Void, TextPickerResult, Callback_Union_Number_Array_Number_Void, Callback_Union_String_Array_String_Void, OnTextPickerChangeCallback, TextPickerEnterSelectedAreaCallback, TextPickerScrollStopCallback, Type_TextPickerAttribute_onChange_callback } from "./../textPicker"
 import { Callback_String_Void } from "./../gridRow"
@@ -74,7 +74,7 @@ import { WithThemeAttribute, WithThemeInterface, WithThemeOptions } from "./../w
 import { Callback_WrappedBuilder_Args_Void, CommonConfiguration } from "./../arkui-wrapper-builder"
 import { CustomNodeBuilder } from "./../customBuilder"
 import { ErrorCallback } from "./../ohos.base"
-import { BusinessError } from "./../base"
+import { BusinessError } from "#external"
 import { GetItemMainSizeByIndex } from "./../waterFlow"
 import { GridAttribute_onItemDragStart_event_type, ListAttribute_onItemDragStart_event_type, TextTimerAttribute_onTimer_event_type } from "./../type-replacements"
 import { ImageCompleteCallback, ImageLoadResult } from "./../imageSpan"
@@ -1269,6 +1269,12 @@ export function deserializeAndCallCallback_SheetType_Void(thisDeserializer: Dese
     let parameter : SheetType = TypeChecker.SheetType_FromNumeric(thisDeserializer.readInt32())
     _call(parameter)
 }
+export function deserializeAndCallCallback_StateStylesChange(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as Callback_StateStylesChange)
+    let currentState : int32 = thisDeserializer.readInt32()
+    _call(currentState)
+}
 export function deserializeAndCallCallback_SpringBackAction_Void(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((parameter: SpringBackAction) => void))
@@ -2088,12 +2094,7 @@ export function deserializeAndCallPasteButtonCallback(thisDeserializer: Deserial
     const _call  = (ResourceHolder.instance().get(_resourceId) as PasteButtonCallback)
     let event : ClickEvent = (thisDeserializer.readClickEvent() as ClickEvent)
     let result : PasteButtonOnClickResult = TypeChecker.PasteButtonOnClickResult_FromNumeric(thisDeserializer.readInt32())
-    const error_buf_runtimeType  = (thisDeserializer.readInt8() as int32)
     let error_buf : BusinessError<void> | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
-    {
-        error_buf = thisDeserializer.readBusinessError()
-    }
     let error : BusinessError<void> | undefined = error_buf
     _call(event, result, error)
 }
@@ -2165,12 +2166,7 @@ export function deserializeAndCallSaveButtonCallback(thisDeserializer: Deseriali
     const _call  = (ResourceHolder.instance().get(_resourceId) as SaveButtonCallback)
     let event : ClickEvent = (thisDeserializer.readClickEvent() as ClickEvent)
     let result : SaveButtonOnClickResult = TypeChecker.SaveButtonOnClickResult_FromNumeric(thisDeserializer.readInt32())
-    const error_buf_runtimeType  = (thisDeserializer.readInt8() as int32)
     let error_buf : BusinessError<void> | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
-    {
-        error_buf = thisDeserializer.readBusinessError()
-    }
     let error : BusinessError<void> | undefined = error_buf
     _call(event, result, error)
 }
@@ -2653,6 +2649,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case 22609082/*CallbackKind.Kind_Callback_SheetDismiss_Void*/: return deserializeAndCallCallback_SheetDismiss_Void(thisDeserializer);
         case -224451112/*CallbackKind.Kind_Callback_SheetType_Void*/: return deserializeAndCallCallback_SheetType_Void(thisDeserializer);
         case 1536231691/*CallbackKind.Kind_Callback_SpringBackAction_Void*/: return deserializeAndCallCallback_SpringBackAction_Void(thisDeserializer);
+        case -1872286415/*CallbackKind.Kind_Callback_StateStylesChange*/: return deserializeAndCallCallback_StateStylesChange(thisDeserializer);
         case -879490874/*CallbackKind.Kind_Callback_String_Number_Void*/: return deserializeAndCallCallback_String_Number_Void(thisDeserializer);
         case -716524508/*CallbackKind.Kind_Callback_String_Opt_Object_Void*/: return deserializeAndCallCallback_String_Opt_Object_Void(thisDeserializer);
         case -683652998/*CallbackKind.Kind_Callback_String_PasteEvent_Void*/: return deserializeAndCallCallback_String_PasteEvent_Void(thisDeserializer);

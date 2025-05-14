@@ -33,4 +33,22 @@ ani_object GetHostContext([[maybe_unused]] ani_env* env)
     }
     return nullptr;
 }
+
+void SyncInstanceId([[maybe_unused]] ani_env* env, ani_object obj, ani_int id)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->syncInstanceId(id);
+}
+
+void RestoreInstanceId([[maybe_unused]] ani_env* env)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->restoreInstanceId();
+}
 } // namespace OHOS::Ace::Ani

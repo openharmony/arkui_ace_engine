@@ -25,11 +25,12 @@ import { SizeOptions } from "./src/component/units"
 import { ArkUIGeneratedNativeModule } from "#components"
 import { int32 } from "@koalaui/common"
 import { nullptr } from "@koalaui/interop"
-import { _animateTo } from "./src/handwritten"
-// import { AnimateParam } from './src/component'
-import { AnimatorResult , AnimatorOptions, Animator} from "@ohos/animator"
+import { _animateTo } from "./src/handwritten/ArkAnimation"
+import { AnimateParam } from './src/component'
+import { AnimatorResult, AnimatorOptions, Animator} from "@ohos/animator"
 import { Context } from "#external"
 import { ArkUIAniModule } from "arkui.ani"
+import { Serializer } from "./src/component/peers/Serializer"
 
 export class Font {
     instanceId_: int32 = 10001;
@@ -102,21 +103,65 @@ export class UIContext {
     getHostContext(): Context | undefined {
         return ArkUIAniModule._Common_GetHostContext();
     }
-    // public animateTo(param: AnimateParam, event: (() => void)): void {
-    //     ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
-    //     _animateTo(param, event);
-    //     ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
-    // }
+
+    public animateTo(param: AnimateParam, event: (() => void)): void {
+        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        _animateTo(param, event);
+        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+    }
+
     public createAnimator(options: AnimatorOptions): AnimatorResult {
         ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
         let animatorRet = Animator.create(options);
         ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
         return animatorRet;
     }
+    public setFrameCallback(onFrameCallback: ((index: number) => void), onIdleCallback: ((index: number) => void),
+                                              delayTime: number): void {
+        const onFrameCallback_casted = onFrameCallback as (((index: number) => void))
+        const onIdleCallback_casted = onIdleCallback as (((index: number) => void))
+        const delayTime_casted = delayTime as (number)
+        this.setFrameCallback_serialize(onFrameCallback_casted, onIdleCallback_casted, delayTime_casted)
+        return
+    }
+    private setFrameCallback_serialize(onFrameCallback: ((index: number) => void),
+                                                         onIdleCallback: ((index: number) => void),
+                                                         delayTime: number): void {
+        const thisSerializer: Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(onFrameCallback)
+        thisSerializer.holdAndWriteCallback(onIdleCallback)
+        ArkUIGeneratedNativeModule._SystemOps_setFrameCallback(thisSerializer.asBuffer(),
+                                                               thisSerializer.length(), delayTime)
+        thisSerializer.release()
+    }
+    runScopedTask(callback: () => void): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
+        if (callback !== undefined) {
+            callback()
+        }
+        ArkUIAniModule._Common_Restore_InstanceId()
+    }
+    clearResourceCache(): void {
+        ArkUIGeneratedNativeModule._SystemOps_resourceManagerReset()
+    }
+    postFrameCallback(frameCallback: FrameCallback): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
+        const onFrameFunc = frameCallback.onFrame
+        const onIdleFunc = frameCallback.onIdle
+        this.setFrameCallback(onFrameFunc, onIdleFunc, 0)
+        ArkUIAniModule._Common_Restore_InstanceId()
+    }
+    postDelayedFrameCallback(frameCallback: FrameCallback, delayTime: number): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
+        const onFrameFunc = frameCallback.onFrame
+        const onIdleFunc = frameCallback.onIdle
+        this.setFrameCallback(onFrameFunc, onIdleFunc, delayTime)
+        ArkUIAniModule._Common_Restore_InstanceId()
+    }
 }
 export abstract class FrameCallback {
-    abstract onFrame(frameTimeInNano: number): void;
-    abstract onIdle(timeLeftInNano: number): void;
+    onFrame(frameTimeInNano: number): void {}
+    onIdle(timeLeftInNano: number): void {}
 }
 export class UIObserver {
 }

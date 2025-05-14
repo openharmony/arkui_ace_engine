@@ -76,7 +76,7 @@ import { GridAttribute, Callback_Number_Number_ComputedBarAttribute, ComputedBar
 import { GridAttribute_onItemDragStart_event_type, ListAttribute_onItemDragStart_event_type, AnimationRange_Number } from "./../type-replacements"
 import { Resource } from "global/resource"
 import { WebviewController as WebviewControllerAni } from "#external"
-import { GridItemStyle, GridItemOptions } from "./../griditem"
+import { GridItemStyle, GridItemOptions } from "./../gridItem"
 import { ImageAnalyzerType, ImageAnalyzerController, ImageAnalyzerConfig, ImageAIOptions } from "./../imageCommon"
 import { IndicatorComponentController } from "./../indicatorcomponent"
 import { ItemState } from "./../stepperItem"
@@ -128,7 +128,7 @@ import { WindowSceneAttribute } from "./../windowScene"
 import { WithThemeAttribute, WithThemeOptions } from "./../withTheme"
 import { XComponentController, Literal_Number_surfaceHeight_surfaceWidth, SurfaceRect, SurfaceRotationOptions, Type_XComponentInterface_callable0_value, Type_XComponentInterface_callable1_value, NativeXComponentParameters, XComponentOptions } from "./../xcomponent"
 import { ASTCResource } from "./../mediaCachedImage"
-import { BusinessError } from "./../base"
+import { BusinessError } from "#external"
 import { CheckboxOptions } from "./../checkbox"
 import { CircleOptions } from "./../circle"
 import { ColumnOptions, ColumnOptionsV2 } from "./../column"
@@ -164,6 +164,8 @@ import { MenuCallback, OnHoverCallback } from "./../sdk-stubs"
 import { TerminationInfo } from "./../embeddedComponent"
 import { TextBackgroundStyle } from "./../span"
 import { Content } from "./../contentSlot"
+import { IObservedObject, IWatchTrigger } from "./../../stateManagement"
+
 export class TypeChecker {
     static typeInstanceOf<T>(value: Object, prop: string): boolean {
         return value instanceof T
@@ -5642,5 +5644,11 @@ export class TypeChecker {
     }
     static isArray_CustomObject(value: Object | string | number | undefined): boolean {
         return value instanceof Array<number>
+    }
+    static isIObservedObject<T>(value: T): boolean {
+        return value instanceof IObservedObject;
+    }
+    static isIWatchTrigger<T>(value: T): boolean {
+        return value instanceof IWatchTrigger;
     }
 }

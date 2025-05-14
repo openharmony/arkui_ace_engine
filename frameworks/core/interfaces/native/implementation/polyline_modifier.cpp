@@ -69,11 +69,19 @@ void SetPolylineOptionsImpl(Ark_NativePointer node,
 } // PolylineInterfaceModifier
 namespace PolylineAttributeModifier {
 void PointsImpl(Ark_NativePointer node,
-                const Opt_Array_Point* value)
+                const Opt_Array_ShapePoint* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<ShapePoints> points = Converter::OptConvert<std::vector<ShapePoint>>(*value);
+    CHECK_NULL_VOID(value);
+    std::optional<ShapePoints> points;
+    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        std::vector<ShapePoint> shapePointArray;
+        for (int32_t i = 0; i < value->value.length; ++i) {
+            shapePointArray.emplace_back(Converter::Convert<ShapePoint>(value->value.array[i]));
+        }
+        points = std::make_optional<ShapePoints>(shapePointArray);
+    }
     if (points && points->size() < POINTS_NUMBER_MIN) {
         points.reset();
     }

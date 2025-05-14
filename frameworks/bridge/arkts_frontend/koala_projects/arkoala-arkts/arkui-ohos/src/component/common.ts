@@ -25,7 +25,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { DrawContext, Edges } from "./arkui-graphics"
 import { LengthMetrics } from "../Graphics"
-import { UnifiedData, UnifiedDataInternal, ComponentContent, Context, PointerStyle, ContextInternal, GestureOps } from "./arkui-custom"
+import { UnifiedData, UnifiedDataInternal, ComponentContent, Context, PointerStyle, ContextInternal, GestureOps, StateStylesOps } from "./arkui-custom"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { Summary, IntentionCode, EdgeStyles, CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
 import { Callback_Void } from "./abilityComponent"
@@ -45,19 +45,20 @@ import { PixelMap } from "./arkui-pixelmap"
 import { BlendMode } from "./arkui-drawing"
 import { StyledString } from "./styledString"
 import { Callback_Number_Number_Void } from "./grid"
-import { NodeAttach, remember } from "@koalaui/runtime"
+import { memo, NodeAttach, remember } from "@koalaui/runtime"
 import { Tuple_Number_Number } from "./arkui-synthetics"
 import { ButtonType, ButtonStyleMode, ButtonRole } from "./button"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { AnimationRange_Number } from "./type-replacements"
 import { ScrollState } from "./list"
-import { _animateTo } from "./../handwritten"
+import { _animateTo, _animationStart, _animationStop } from "./../handwritten/ArkAnimation"
 import { GlobalScope } from "./GlobalScope"
 import { ArkCommonAttributeSet, applyUIAttributes, applyUIAttributesUpdate } from "../handwritten/modifiers/ArkCommonModifier"
 import { CommonModifier } from "../CommonModifier"
 import { AttributeUpdater } from "../ohos.arkui.modifier"
 import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
-import { CurrentStateEnum } from "../AttributeUpdater"
+import { hookStateStyleImpl } from "../handwritten/ArkStateStyle"
+import { rememberMutableState } from '@koalaui/runtime';
 export interface ICurve {
     interpolate(fraction: number): number
 }
@@ -351,7 +352,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         return this.peer
     }
     get target(): EventTarget {
-        throw new Error("Not implemented")
+        return this.getTarget();
     }
     set target(target: EventTarget) {
         this.setTarget(target)
@@ -550,8 +551,15 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         return retval
     }
     private getTarget_serialize(): EventTarget {
-        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTarget(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTarget(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : EventTarget = retvalDeserializer.readEventTarget()
         return returnResult
     }
@@ -576,15 +584,43 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         ArkUIGeneratedNativeModule._BaseEvent_setSource(this.peer!.ptr, TypeChecker.SourceType_ToNumeric(source))
     }
     private getAxisHorizontal_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getAxisHorizontal(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getAxisHorizontal(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType))
+        {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setAxisHorizontal_serialize(axisHorizontal: number): void {
         ArkUIGeneratedNativeModule._BaseEvent_setAxisHorizontal(this.peer!.ptr, axisHorizontal)
     }
     private getAxisVertical_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getAxisVertical(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getAxisVertical(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType))
+        {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setAxisVertical_serialize(axisVertical: number): void {
         ArkUIGeneratedNativeModule._BaseEvent_setAxisVertical(this.peer!.ptr, axisVertical)
@@ -611,8 +647,22 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         ArkUIGeneratedNativeModule._BaseEvent_setTiltY(this.peer!.ptr, tiltY)
     }
     private getRollAngle_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getRollAngle(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getRollAngle(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType))
+        {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setRollAngle_serialize(rollAngle: number): void {
         ArkUIGeneratedNativeModule._BaseEvent_setRollAngle(this.peer!.ptr, rollAngle)
@@ -625,15 +675,43 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         ArkUIGeneratedNativeModule._BaseEvent_setSourceTool(this.peer!.ptr, TypeChecker.SourceTool_ToNumeric(sourceTool))
     }
     private getDeviceId_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getDeviceId(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getDeviceId(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType))
+        {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setDeviceId_serialize(deviceId: number): void {
         ArkUIGeneratedNativeModule._BaseEvent_setDeviceId(this.peer!.ptr, deviceId)
     }
     private getTargetDisplayId_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTargetDisplayId(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTargetDisplayId(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType))
+        {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setTargetDisplayId_serialize(targetDisplayId: number): void {
         ArkUIGeneratedNativeModule._BaseEvent_setTargetDisplayId(this.peer!.ptr, targetDisplayId)
@@ -910,6 +988,16 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         obj.peer = new Finalizable(ptr, DragEventInternal.getFinalizer())
         return obj
     }
+}
+
+export type CustomStyles =  (instance: CommonMethod) => void;
+export interface StateStyles {
+    normal?: CustomStyles;
+    pressed?: CustomStyles;
+    disabled?: CustomStyles;
+    focused?: CustomStyles;
+    clicked?: CustomStyles;
+    selected?: CustomStyles;
 }
 export interface KeyEvent {
     type: KeyType
@@ -7624,14 +7712,7 @@ export interface SheetOptions extends BindOptions {
     placement?: Placement;
     placementOnTarget?: boolean;
 }
-export interface StateStyles {
-    normal?: object;
-    pressed?: object;
-    disabled?: object;
-    focused?: object;
-    clicked?: object;
-    selected?: Object;
-}
+
 export interface PopupMessageOptions {
     textColor?: ResourceColor;
     font?: Font;
@@ -8105,8 +8186,8 @@ export interface CommonMethod {
     advancedBlendMode(effect: BlendMode | BrightnessBlender | undefined, type?: BlendApplyType): this
     bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this
     bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this
-    bindMenu(isShow: Array<MenuElement> | CustomBuilder | undefined | boolean | undefined, content?: MenuOptions | Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this
-    bindContextMenu(content: CustomBuilder | undefined | boolean | undefined, responseType: ResponseType | undefined | CustomBuilder | undefined, options?: ContextMenuOptions): this
+    bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this
+    bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this
     bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ModalTransition | ContentCoverOptions): this
     bindSheet(isShow: boolean | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this
     onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this
@@ -8238,8 +8319,8 @@ export interface UICommonMethod {
     focusOnTouch(value: boolean | undefined): this
     /** @memo */
     focusBox(value: FocusBoxStyle | undefined): this
-    /** @memo */
-    animation(value: AnimateParam | undefined): this
+    animationStart(value: AnimateParam | undefined): this
+    animationStop(value: AnimateParam | undefined):this
     /** @memo */
     transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this
     /** @memo */
@@ -8479,11 +8560,11 @@ export interface UICommonMethod {
     /** @memo */
     bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this
     /** @memo */
-    bindMenu(isShow: Array<MenuElement> | CustomBuilder | undefined | boolean | undefined, content?: MenuOptions | Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this
+    bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this
     /** @memo */
-    bindContextMenu(content: CustomBuilder | undefined | boolean | undefined, responseType: ResponseType | undefined | CustomBuilder | undefined, options?: ContextMenuOptions): this
+    bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this
     /** @memo */
-    bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ModalTransition | ContentCoverOptions): this
+    bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ContentCoverOptions): this
     /** @memo */
     bindSheet(isShow: boolean | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this
     /** @memo */
@@ -9201,10 +9282,10 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this {
         return this
     }
-    public bindMenu(isShow: Array<MenuElement> | CustomBuilder | undefined | boolean | undefined, content?: MenuOptions | Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+    public bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this {
         return this
     }
-    public bindContextMenu(content: CustomBuilder | undefined | boolean | undefined, responseType: ResponseType | undefined | CustomBuilder | undefined, options?: ContextMenuOptions): this {
+    public bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this {
         return this
     }
     public bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ModalTransition | ContentCoverOptions): this {
@@ -9588,7 +9669,6 @@ export class UIGestureEvent {
         this.peer = peer
     }
     addGesture(gesture: GestureHandler, priority?: GesturePriority, mask?: GestureMask): void {
-        InteropNativeModule._NativeLog("zcb UIGestureEvent addGesture");
         if (gesture instanceof GestureGroupHandler) {
             let gestureGroup = gesture as GestureGroupHandler;
             gestureGroup.addGestureGroupToNode(priority ?? GesturePriority.NORMAL, this.peer, mask)
@@ -9597,7 +9677,6 @@ export class UIGestureEvent {
         }
     }
     addParallelGesture(gesture: GestureHandler, mask?: GestureMask): void {
-        InteropNativeModule._NativeLog("zcb UIGestureEvent addParallelGesture");
         if (gesture instanceof GestureGroupHandler) {
             let gestureGroup = gesture as GestureGroupHandler;
             gestureGroup.addGestureGroupToNode(2, this.peer, mask)
@@ -9664,10 +9743,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         if (isCommonModifier) {
             let commonModifier = modifier as object as CommonModifier;
             this.getPeer()._attributeSet = commonModifier.attributeSet;
-        } else {
+        } else if (this.getPeer()._attributeSet == null) {
             this.getPeer()._attributeSet = new ArkCommonAttributeSet();
         }
-
     }
     getPeer(): ArkCommonMethodPeer {
         return (this.peer as ArkCommonMethodPeer)
@@ -10359,11 +10437,19 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
-    /** @memo */
-    public animation(value: AnimateParam | undefined): this {
-        if (this.checkPriority("animation")) {
+    public animationStart(value: AnimateParam | undefined): this {
+        if (this.checkPriority("animationStart")) {
             const value_casted = value as (AnimateParam | undefined)
-            this.getPeer()?.animationAttribute(value_casted)
+            _animationStart(value_casted, this.isFirstBuild);
+            return this
+        }
+        return this
+    }
+    public animationStop(value: AnimateParam | undefined): this {
+        if (this.checkPriority("animationStop")) {
+            _animationStop(value, this.isFirstBuild, () => {
+                this.isFirstBuild = false
+            });
             return this
         }
         return this
@@ -11253,7 +11339,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
     public stateStyles(value: StateStyles | undefined): this {
         if (this.checkPriority("stateStyles")) {
             const value_casted = value as (StateStyles | undefined)
-            this.getPeer()?.stateStylesAttribute(value_casted)
+            hookStateStyleImpl(this.getPeer(), value_casted)
             return this
         }
         return this
@@ -11525,7 +11611,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
     public gestureModifier(value: GestureModifier | undefined): this {
         if (this.checkPriority("gestureModifier")) {
             if (value === undefined) {
-                InteropNativeModule._NativeLog("zcb gestureModifier value undefined");
                 return this;
             }
             const value_casted = value as GestureModifier
@@ -11970,22 +12055,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         return this
     }
     /** @memo */
-    public bindMenu(isShow: Array<MenuElement> | CustomBuilder | undefined | boolean | undefined, content?: MenuOptions | Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+    public bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this {
         if (this.checkPriority("bindMenu")) {
-            const isShow_type = runtimeType(isShow)
             const content_type = runtimeType(content)
             const options_type = runtimeType(options)
-            if (((RuntimeType.OBJECT == isShow_type) || (RuntimeType.FUNCTION == isShow_type) || (RuntimeType.UNDEFINED == isShow_type)) && ((RuntimeType.OBJECT == content_type) || (RuntimeType.UNDEFINED == content_type))) {
-                const content_casted = isShow as (Array<MenuElement> | CustomBuilder | undefined)
-                const options_casted = content as (MenuOptions)
-                this.getPeer()?.bindMenu0Attribute(content_casted, options_casted)
-                return this
-            }
-            if (((RuntimeType.BOOLEAN == isShow_type) || (RuntimeType.UNDEFINED == isShow_type)) && ((RuntimeType.OBJECT == content_type) || (RuntimeType.FUNCTION == content_type) || (RuntimeType.UNDEFINED == content_type))) {
-                const isShow_casted = isShow as (boolean | undefined)
+            if (((RuntimeType.OBJECT == content_type) || (RuntimeType.FUNCTION == content_type)) || ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type))) {
                 const content_casted = content as (Array<MenuElement> | CustomBuilder | undefined)
-                const options_casted = options as (MenuOptions)
-                this.getPeer()?.bindMenu1Attribute(isShow_casted, content_casted, options_casted)
+                const options_casted = options as (MenuOptions | undefined)
+                this.getPeer()?.bindMenu0Attribute(content_casted, options_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -11993,23 +12070,16 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         return this
     }
     /** @memo */
-    public bindContextMenu(content: CustomBuilder | undefined | boolean | undefined, responseType: ResponseType | undefined | CustomBuilder | undefined, options?: ContextMenuOptions): this {
+    public bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this {
         if (this.checkPriority("bindContextMenu")) {
             const content_type = runtimeType(content)
             const responseType_type = runtimeType(responseType)
             const options_type = runtimeType(options)
-            if (((RuntimeType.FUNCTION == content_type) || (RuntimeType.UNDEFINED == content_type)) && ((RuntimeType.OBJECT == responseType_type) || (RuntimeType.OBJECT == responseType_type))) {
+            if ((RuntimeType.FUNCTION == content_type) && (TypeChecker.isResponseType(responseType)) && ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type))) {
                 const content_casted = content as (CustomBuilder | undefined)
                 const responseType_casted = responseType as (ResponseType | undefined)
-                const options_casted = options as (ContextMenuOptions)
+                const options_casted = options as (ContextMenuOptions | undefined)
                 this.getPeer()?.bindContextMenu0Attribute(content_casted, responseType_casted, options_casted)
-                return this
-            }
-            if (((RuntimeType.BOOLEAN == content_type) || (RuntimeType.UNDEFINED == content_type)) && ((RuntimeType.FUNCTION == responseType_type) || (RuntimeType.UNDEFINED == responseType_type))) {
-                const isShown_casted = content as (boolean | undefined)
-                const content_casted = responseType as (CustomBuilder | undefined)
-                const options_casted = options as (ContextMenuOptions)
-                this.getPeer()?.bindContextMenu1Attribute(isShown_casted, content_casted, options_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -12017,18 +12087,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         return this
     }
     /** @memo */
-    public bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ModalTransition | ContentCoverOptions): this {
+    public bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ContentCoverOptions): this {
         if (this.checkPriority("bindContentCover")) {
             const isShow_type = runtimeType(isShow)
             const builder_type = runtimeType(builder)
             const type_type = runtimeType(type)
-            if (((RuntimeType.BOOLEAN == isShow_type) || (RuntimeType.UNDEFINED == isShow_type)) && ((RuntimeType.FUNCTION == builder_type) || (RuntimeType.UNDEFINED == builder_type)) && ((RuntimeType.OBJECT == type_type) || (RuntimeType.OBJECT == type_type))) {
-                const isShow_casted = isShow as (boolean | undefined)
-                const builder_casted = builder as (CustomBuilder | undefined)
-                const type_casted = type as (ModalTransition)
-                this.getPeer()?.bindContentCover0Attribute(isShow_casted, builder_casted, type_casted)
-                return this
-            }
             if (((RuntimeType.BOOLEAN == isShow_type) || (RuntimeType.UNDEFINED == isShow_type)) && ((RuntimeType.FUNCTION == builder_type) || (RuntimeType.UNDEFINED == builder_type)) && ((RuntimeType.OBJECT == type_type) || (RuntimeType.UNDEFINED == type_type))) {
                 const isShow_casted = isShow as (boolean | undefined)
                 const builder_casted = builder as (CustomBuilder | undefined)
@@ -12090,25 +12153,41 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         this.initAttributeSet(modifier);
         let isAttributeUpdater: boolean = (modifier instanceof AttributeUpdater);
         if (isAttributeUpdater) {
-            let attributeUpdater = modifier as object as AttributeUpdater<T, (...params:Object[]) => T>
-            if(attributeUpdater.currentState == CurrentStateEnum.INIT) {
-                attributeUpdater.currentState = CurrentStateEnum.UPDATE;
+            let attributeUpdater = modifier as object as AttributeUpdater<T, (...params: Object[]) => T>
+            if (this.getAttributeSet().peerNode_ == null) {
                 attributeUpdater.initializeModifier(peerNode._attributeSet as T);
-            } else {
+            } else if (this.getPeer() != this.getAttributeSet().peerNode_) {
                 attributeUpdater.onComponentChanged(peerNode._attributeSet as T);
             }
+            this.getAttributeSet().peerNode_ = this.getPeer();
             attributeUpdater.attribute = this.getModifierHost() as T
             attributeUpdater.updateConstructorParams = (...params: Object[]) => {
                 let attribute = this.getModifierHost()! as T;
                 this.getModifierHost()!.constructParam(...params);
                 return attribute;
             };
-            applyUIAttributesUpdate(modifier!, peerNode);
-        } else {
-            applyUIAttributes(modifier!, peerNode);
         }
-         this.getAttributeSet().applyModifierPatch(peerNode);
+        this.applyModifierByState(isAttributeUpdater, modifier);
         return this;
+    }
+
+    /** @memo */
+    public applyModifierByState<T>(isAttributeUpdater: boolean, modifier: AttributeModifier<T>): void {
+        let currentState = rememberMutableState<int32>(0);
+        let peerNode = this.getPeer()
+        let isInit =  rememberMutableState<boolean>(true);
+        remember(() => {
+            StateStylesOps.onStateStyleChange(peerNode.getPeerPtr(), (state: int32) => {
+                currentState.value = state;
+                isInit.value = false;
+            })
+        })
+        if (isAttributeUpdater) {
+            applyUIAttributesUpdate(modifier!, peerNode, currentState.value, isInit.value);
+        } else {
+            applyUIAttributes(modifier!, peerNode, currentState.value);
+        }
+        this.getAttributeSet().applyModifierPatch(peerNode);
     }
 
     public applyAttributesFinish(): void {

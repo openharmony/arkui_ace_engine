@@ -28,7 +28,10 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-
+export type ShapePoint = [
+    Length,
+    Length
+]
 export class ArkLinePeer extends ArkCommonShapeMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -52,34 +55,32 @@ export class ArkLinePeer extends ArkCommonShapeMethodPeer {
         ArkUIGeneratedNativeModule._LineInterface_setLineOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    startPointAttribute(value: Array<Length> | undefined): void {
+    startPointAttribute(value: ShapePoint | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
-            thisSerializer.writeInt32(value_value.length as int32)
-            for (let i = 0; i < value_value.length; i++) {
-                const value_value_element : Length = value_value[i]
-                thisSerializer.writeLength(value_value_element)
-            }
+            const value_value_0  = value_value[0]
+            thisSerializer.writeLength(value_value_0)
+            const value_value_1  = value_value[1]
+            thisSerializer.writeLength(value_value_1)
         }
         ArkUIGeneratedNativeModule._LineAttribute_startPoint(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    endPointAttribute(value: Array<Length> | undefined): void {
+    endPointAttribute(value: ShapePoint | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
-            thisSerializer.writeInt32(value_value.length as int32)
-            for (let i = 0; i < value_value.length; i++) {
-                const value_value_element : Length = value_value[i]
-                thisSerializer.writeLength(value_value_element)
-            }
+            const value_value_0  = value_value[0]
+            thisSerializer.writeLength(value_value_0)
+            const value_value_1  = value_value[1]
+            thisSerializer.writeLength(value_value_1)
         }
         ArkUIGeneratedNativeModule._LineAttribute_endPoint(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -91,23 +92,23 @@ export interface LineOptions {
 }
 export type LineInterface = (options?: LineOptions) => LineAttribute;
 export interface LineAttribute extends CommonShapeMethod {
-    startPoint(value: Array<Length> | undefined): this
-    endPoint(value: Array<Length> | undefined): this
+    startPoint(value: ShapePoint | undefined): this
+    endPoint(value: ShapePoint | undefined): this
 }
 export interface UILineAttribute extends UICommonShapeMethod {
     /** @memo */
-    startPoint(value: Array<Length> | undefined): this
+    startPoint(value: ShapePoint | undefined): this
     /** @memo */
-    endPoint(value: Array<Length> | undefined): this
+    endPoint(value: ShapePoint | undefined): this
     /** @memo */
 }
 export class ArkLineStyle extends ArkCommonShapeMethodStyle implements LineAttribute {
-    startPoint_value?: Array<Length> | undefined
-    endPoint_value?: Array<Length> | undefined
-    public startPoint(value: Array<Length> | undefined): this {
+    startPoint_value?: ShapePoint | undefined
+    endPoint_value?: ShapePoint | undefined
+    public startPoint(value: ShapePoint | undefined): this {
         return this
     }
-    public endPoint(value: Array<Length> | undefined): this {
+    public endPoint(value: ShapePoint | undefined): this {
         return this
         }
 }
@@ -126,18 +127,18 @@ export class ArkLineComponent extends ArkCommonShapeMethodComponent implements U
         return this
     }
     /** @memo */
-    public startPoint(value: Array<Length> | undefined): this {
+    public startPoint(value: ShapePoint | undefined): this {
         if (this.checkPriority("startPoint")) {
-            const value_casted = value as (Array<Length> | undefined)
+            const value_casted = value as (ShapePoint | undefined)
             this.getPeer()?.startPointAttribute(value_casted)
             return this
         }
         return this
     }
     /** @memo */
-    public endPoint(value: Array<Length> | undefined): this {
+    public endPoint(value: ShapePoint | undefined): this {
         if (this.checkPriority("endPoint")) {
-            const value_casted = value as (Array<Length> | undefined)
+            const value_casted = value as (ShapePoint | undefined)
             this.getPeer()?.endPointAttribute(value_casted)
             return this
         }

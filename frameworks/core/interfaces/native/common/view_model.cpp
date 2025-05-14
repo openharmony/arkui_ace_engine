@@ -736,10 +736,11 @@ void* createFormComponentNode(ArkUI_Int32 nodeId)
 
 void* createFormLinkNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = FormLinkModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = FormLinkModelNG::CreateFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createGaugeNode(ArkUI_Int32 nodeId)

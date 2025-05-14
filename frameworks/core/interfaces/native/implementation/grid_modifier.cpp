@@ -16,6 +16,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_model_static.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -200,21 +201,21 @@ void ScrollBarWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    GridModelNG::SetScrollBarWidth(frameNode, Converter::OptConvert<Dimension>(*value));
+    GridModelStatic::SetScrollBarWidth(frameNode, Converter::OptConvert<Dimension>(*value));
 }
 void ScrollBarColorImpl(Ark_NativePointer node,
                         const Opt_Union_Color_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    GridModelNG::SetScrollBarColor(frameNode, Converter::OptConvert<Color>(*value));
+    GridModelStatic::SetScrollBarColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void ScrollBarImpl(Ark_NativePointer node,
                    const Opt_BarState* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    GridModelNG::SetScrollBarMode(frameNode, Converter::OptConvert<DisplayMode>(*value));
+    GridModelStatic::SetScrollBarMode(frameNode, Converter::OptConvert<DisplayMode>(*value));
 }
 void OnScrollBarUpdateImpl(Ark_NativePointer node,
                            const Opt_Callback_Number_Number_ComputedBarAttribute* value)
@@ -342,7 +343,7 @@ void LayoutDirectionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    GridModelNG::SetLayoutDirection(frameNode, Converter::OptConvert<FlexDirection>(*value));
+    GridModelStatic::SetLayoutDirection(frameNode, Converter::OptConvert<FlexDirection>(*value));
 }
 void SupportAnimationImpl(Ark_NativePointer node,
                           const Opt_Boolean* value)
@@ -487,14 +488,14 @@ void FrictionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    GridModelNG::SetFriction(frameNode, Converter::OptConvert<float>(*value));
+    GridModelStatic::SetFriction(frameNode, Converter::OptConvert<float>(*value));
 }
 void AlignItemsImpl(Ark_NativePointer node,
                     const Opt_GridItemAlignment* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    GridModelNG::SetAlignItems(frameNode,
+    GridModelStatic::SetAlignItems(frameNode,
         value ? Converter::OptConvert<GridItemAlignment>(*value) : std::nullopt);
 }
 void OnScrollImpl(Ark_NativePointer node,
@@ -528,7 +529,7 @@ void OnReachStartImpl(Ark_NativePointer node,
     auto onReachStart = [arkCallback = CallbackHelper(*optValue), frameNode]() {
         arkCallback.Invoke();
     };
-    GridModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
+    GridModelStatic::SetOnReachStart(frameNode, std::move(onReachStart));
 }
 void OnReachEndImpl(Ark_NativePointer node,
                     const Opt_Callback_Void* value)
@@ -543,7 +544,7 @@ void OnReachEndImpl(Ark_NativePointer node,
     auto onReachEnd = [arkCallback = CallbackHelper(*optValue), frameNode]() {
         arkCallback.Invoke();
     };
-    GridModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
+    GridModelStatic::SetOnReachEnd(frameNode, std::move(onReachEnd));
 }
 void OnScrollStartImpl(Ark_NativePointer node,
                        const Opt_Callback_Void* value)
@@ -558,7 +559,7 @@ void OnScrollStartImpl(Ark_NativePointer node,
     auto onScrollStart = [arkCallback = CallbackHelper(*optValue), frameNode]() {
         arkCallback.Invoke();
     };
-    GridModelNG::SetOnScrollStart(frameNode, std::move(onScrollStart));
+    GridModelStatic::SetOnScrollStart(frameNode, std::move(onScrollStart));
 }
 void OnScrollStopImpl(Ark_NativePointer node,
                       const Opt_Callback_Void* value)
@@ -573,7 +574,7 @@ void OnScrollStopImpl(Ark_NativePointer node,
     auto onScrollStop = [arkCallback = CallbackHelper(*optValue), frameNode]() {
         arkCallback.Invoke();
     };
-    GridModelNG::SetOnScrollStop(frameNode, std::move(onScrollStop));
+    GridModelStatic::SetOnScrollStop(frameNode, std::move(onScrollStop));
 }
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
                             const Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain* value)
@@ -596,7 +597,7 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
             .offset = Converter::Convert<Dimension>(arkResult.offsetRemain)
         };
     };
-    GridModelNG::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameBegin));
+    GridModelStatic::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameBegin));
 }
 void OnWillScrollImpl(Ark_NativePointer node,
                       const Opt_OnWillScrollCallback* value)

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
+#include "core/components_ng/pattern/hyperlink/hyperlink_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -51,7 +52,7 @@ void ColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<Color>(*value);
-    HyperlinkModelNG::SetColor(frameNode, convValue);
+    HyperlinkModelStatic::SetColor(frameNode, convValue);
 }
 } // HyperlinkAttributeModifier
 const GENERATED_ArkUIHyperlinkModifier* GetHyperlinkModifier()

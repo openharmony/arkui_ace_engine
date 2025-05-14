@@ -21,7 +21,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT MenuModelStatic {
 public:
-    static RefPtr<FrameNode>CreateFrameNode(int32_t nodeId);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize);
     static void SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& weight);

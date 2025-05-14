@@ -453,6 +453,7 @@ namespace Converter {
     template<> BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src);
     template<> BorderColorProperty Convert(const Ark_EdgeColors& src);
     template<> BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src);
+    template<> BorderColorProperty Convert(const Ark_ResourceColor& src);
     template<> BorderRadiusProperty Convert(const Ark_BorderRadiuses& src);
     template<> BorderRadiusProperty Convert(const Ark_Length& src);
     template<> BorderRadiusProperty Convert(const Ark_LengthMetrics& src);
@@ -487,6 +488,7 @@ namespace Converter {
     template<> DimensionRect Convert(const Ark_Rectangle &src);
     template<> DragPreviewOption Convert(const Ark_DragPreviewOptions &src);
     template<> EdgesParam Convert(const Ark_Edges& src);
+    template<> EdgesParam Convert(const Ark_LocalizedEdges& src);
     template<> EffectOption Convert(const Ark_BackgroundEffectOptions& src);
     template<> EventTarget Convert(const Ark_EventTarget& src);
     template<> FingerInfo Convert(const Ark_FingerInfo& src);
@@ -566,6 +568,7 @@ namespace Converter {
     template<> ShadowColorStrategy Convert(const Ark_Resource& src);
     template<> ShadowColorStrategy Convert(const Ark_String& src);
     template<> ShapePoint Convert(const Ark_Point& src);
+    template<> ShapePoint Convert(const Ark_ShapePoint& src);
     template<> SheetHeight Convert(const Ark_Length& src);
     template<> SheetHeight Convert(const Ark_SheetSize& src);
     template<> StringArray Convert(const Ark_CustomObject& src);
@@ -579,6 +582,9 @@ namespace Converter {
     template<> uint32_t Convert(const Ark_LayoutSafeAreaEdge& src);
     template<> uint32_t Convert(const Ark_LayoutSafeAreaType& src);
     template<> NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src);
+    template<> NG::NavigationBackgroundOptions Convert(const Ark_NavigationToolbarOptions& src);
+    template<> NG::NavigationBarOptions Convert(const Ark_NavigationToolbarOptions& src);
+    template<> NG::NavToolbarItemStatus Convert(const Opt_ToolbarItemStatus& src);
     template<> float Convert(const Ark_Float32& src);
     template<> std::map<std::string, std::string> Convert(const Map_String_String& src);
     template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src);
@@ -596,6 +602,7 @@ namespace Converter {
     template<> std::vector<uint32_t> Convert(const Array_LayoutSafeAreaType& src);
     template<> std::vector<uint32_t> Convert(const Array_LayoutSafeAreaEdge& src);
     template<> std::vector<NG::BarItem> Convert(const Array_NavigationMenuItem& src);
+    template<> std::vector<NG::BarItem> Convert(const Array_ToolbarItem& src);
 
     // SORTED_SECTION: No multiline declarations, please!
     template<> void AssignCast(std::optional<AIImageQuality>& dst, const Ark_ResolutionQuality& src);
@@ -781,6 +788,7 @@ namespace Converter {
         std::optional<RenderProcessNotRespondingReason>& dst, const Ark_RenderProcessNotRespondingReason& src);
     template<>
     void AssignCast(std::optional<SharedTransitionEffectType>& dst, const Ark_SharedTransitionEffectType& src);
+    template<> void AssignCast(std::optional<ShapePoint>& dst, const Opt_ShapePoint& src);
 
     template<typename From>
     std::optional<decltype(From().value)> GetOpt(const From& src)

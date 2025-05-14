@@ -41,6 +41,7 @@ public:
     bool PostAsyncUITask(int32_t contextId, std::function<void()>&& asyncUITask,
         std::function<void()>&& onFinishTask);
     bool PostUITask(int32_t contextId, std::function<void()>&& uiTask);
+    bool PostUITaskAndWait(int32_t contextId, std::function<void()>&& uiTask);
 private:
     MultiThreadBuildManager();
     void InitAysncUITaskQueue();

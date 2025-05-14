@@ -20,6 +20,8 @@
 
 namespace OHOS::Ace::Ani {
 ani_object GetHostContext([[maybe_unused]] ani_env* env);
+void SyncInstanceId(ani_env* env, ani_object obj, ani_int id);
+void RestoreInstanceId(ani_env* env);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMMON_MODULE

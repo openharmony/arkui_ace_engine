@@ -581,6 +581,34 @@ std::vector<NG::BarItem> Convert(const Array_NavigationMenuItem& src)
 }
 
 template<>
+std::vector<NG::BarItem> Convert(const Array_ToolbarItem& src)
+{
+    std::vector<NG::BarItem> dst;
+    auto length = Converter::Convert<int>(src.length);
+    for (int i = 0; i < length; i++) {
+        auto toolbarItem = *(src.array + i);
+        NG::BarItem item;
+        item.text = Converter::OptConvert<std::string>(toolbarItem.value).value_or("");
+        item.icon = Converter::OptConvert<std::string>(toolbarItem.icon);
+        //item.iconSymbol = Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(toolbarItem.symbolIcon);
+        if (toolbarItem.action.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            auto actionCallback = [changeCallback = CallbackHelper(toolbarItem.action.value), node = targetNode]() {
+                PipelineContext::SetCallBackNode(node);
+                changeCallback.Invoke();
+            };
+            item.action = actionCallback;
+        }
+        item.status = Converter::Convert<NavToolbarItemStatus>(toolbarItem.status);
+        item.activeIcon = Converter::OptConvert<std::string>(toolbarItem.activeIcon);
+        //item.activeIconSymbol = Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(toolbarItem.activeSymbolIcon);
+        dst.push_back(item);
+    }
+    return dst;
+}
+
+
+template<>
 Dimension Convert(const Ark_String& src)
 {
     auto str = Convert<std::string>(src);
@@ -693,6 +721,17 @@ EdgesParam Convert(const Ark_Edges& src)
     edges.left = OptConvert<Dimension>(src.left);
     edges.top = OptConvert<Dimension>(src.top);
     edges.right = OptConvert<Dimension>(src.right);
+    edges.bottom = OptConvert<Dimension>(src.bottom);
+    return edges;
+}
+
+template<>
+EdgesParam Convert(const Ark_LocalizedEdges& src)
+{
+    EdgesParam edges;
+    edges.start = OptConvert<Dimension>(src.start);
+    edges.top = OptConvert<Dimension>(src.top);
+    edges.end = OptConvert<Dimension>(src.end);
     edges.bottom = OptConvert<Dimension>(src.bottom);
     return edges;
 }
@@ -1284,6 +1323,12 @@ NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src)
     options.blurStyleOption.reset();
     options.effectOption.reset();
     BlurStyleOption styleOptions;
+    EffectOption effectOption;
+
+    if (src.backgroundColor.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        options.color = Converter::OptConvert<Color>(src.backgroundColor.value);
+    }
+
     if (src.backgroundBlurStyleOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         styleOptions = Converter::Convert<BlurStyleOption>(src.backgroundBlurStyleOptions.value);
     }
@@ -1297,8 +1342,74 @@ NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src)
     }
 
     if (src.backgroundEffect.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        effectOption = Converter::Convert<EffectOption>(src.backgroundEffect.value);
+    }
+    options.blurStyleOption = styleOptions;
+    options.effectOption = effectOption;
+    return options;
+}
+
+template<>
+NG::NavigationBackgroundOptions Convert(const Ark_NavigationToolbarOptions& src)
+{
+    NG::NavigationBackgroundOptions options;
+    options.color.reset();
+    options.blurStyleOption.reset();
+    options.effectOption.reset();
+    BlurStyleOption styleOptions;
+    EffectOption effectOption;
+
+    if (src.backgroundColor.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        options.color = Converter::OptConvert<Color>(src.backgroundColor.value);
+    }
+
+    if (src.backgroundBlurStyleOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        styleOptions = Converter::Convert<BlurStyleOption>(src.backgroundBlurStyleOptions.value);
+    }
+
+    if (src.backgroundBlurStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto blurStyle = static_cast<int32_t>(src.backgroundBlurStyle.value);
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            styleOptions.blurStyle = static_cast<BlurStyle>(blurStyle);
+        }
+    }
+
+    if (src.backgroundEffect.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        effectOption = Converter::Convert<EffectOption>(src.backgroundEffect.value);
+    }
+    options.blurStyleOption = styleOptions;
+    options.effectOption = effectOption;
+    return options;
+}
+
+template<>
+NG::NavigationBarOptions Convert(const Ark_NavigationToolbarOptions& src)
+{
+    NG::NavigationBarOptions options;
+    options.paddingStart.reset();
+    options.paddingEnd.reset();
+    options.barStyle.reset();
+    if (src.barStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto barStyle = static_cast<int32_t>(src.barStyle.value);
+        if (barStyle >= static_cast<int32_t>(NG::BarStyle::STANDARD) &&
+            barStyle <= static_cast<int32_t>(NG::BarStyle::SAFE_AREA_PADDING)) {
+            options.barStyle = static_cast<NG::BarStyle>(barStyle);
+        } else {
+            options.barStyle = NG::BarStyle::STANDARD;
+        }
     }
     return options;
+}
+
+template<>
+NavToolbarItemStatus Convert(const Opt_ToolbarItemStatus& src)
+{
+    NavToolbarItemStatus status = NavToolbarItemStatus::NORMAL;
+    if (src.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        status = static_cast<NavToolbarItemStatus>(src.value);
+    }
+    return status;
 }
 
 template<>
@@ -1346,6 +1457,17 @@ template<>
 ShapePoint Convert(const Ark_Point& src)
 {
     return ShapePoint(Converter::Convert<Dimension>(src.x), Converter::Convert<Dimension>(src.y));
+}
+
+template<>
+ShapePoint Convert(const Ark_ShapePoint& src)
+{
+    ShapePoint point = {0.0_vp, 0.0_vp};
+    auto x = Converter::OptConvert<Dimension>(src.value0);
+    auto y = Converter::OptConvert<Dimension>(src.value1);
+    point.first = x.value_or(0.0_vp);
+    point.second = y.value_or(0.0_vp);
+    return point;
 }
 
 template<>
@@ -1642,7 +1764,7 @@ void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src)
 template<>
 Dimension Convert(const Ark_Length& src)
 {
-    if (src.type == Ark_Tag::INTEROP_TAG_RESOURCE) {
+    if (src.type == Ark_Tag::INTEROP_TAG_RESOURCE || src.type == Ark_RuntimeType::INTEROP_RUNTIME_OBJECT) {
         auto resource = ArkValue<Ark_Resource>(src);
         ResourceConverter converter(resource);
         return converter.ToDimension().value_or(Dimension());
@@ -1741,9 +1863,9 @@ template<>
 PaddingProperty Convert(const Ark_LocalizedPadding& src)
 {
     PaddingProperty dst;
-    dst.left = OptConvert<CalcLength>(src.start);
+    dst.start = OptConvert<CalcLength>(src.start);
     dst.top = OptConvert<CalcLength>(src.top);
-    dst.right = OptConvert<CalcLength>(src.end);
+    dst.end = OptConvert<CalcLength>(src.end);
     dst.bottom = OptConvert<CalcLength>(src.bottom);
     return dst;
 }
@@ -1862,6 +1984,16 @@ BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src)
 }
 
 template<>
+BorderColorProperty Convert(const Ark_ResourceColor& src)
+{
+    BorderColorProperty dst;
+    if (auto borderColor = Converter::OptConvert<Color>(src); borderColor.has_value()) {
+        dst.SetColor(borderColor.value());
+    }
+    return dst;
+}
+
+template<>
 BorderRadiusProperty Convert(const Ark_BorderRadiuses& src)
 {
     BorderRadiusProperty borderRadius;
@@ -1930,16 +2062,27 @@ template<>
 BorderWidthProperty Convert(const Ark_LengthMetrics& src)
 {
     BorderWidthProperty dst;
-    LOGE("Convert [Ark_LengthMetrics] to [BorderWidthProperty] is not implemented yet");
+    if (auto width = Converter::Convert<Dimension>(src); !width.IsNegative()) {
+        dst.SetBorderWidth(width);
+        dst.multiValued = false;
+    }
     return dst;
 }
 
 template<>
 BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
 {
-    BorderWidthProperty dst;
-    LOGE("ARKOALA: Convert to [BorderWidthProperty] from [Ark_LocalizedEdgeWidths] is not supported\n");
-    return dst;
+    BorderWidthProperty widthProperty;
+    widthProperty.topDimen = Converter::OptConvert<Dimension>(src.top);
+    Validator::ValidateNonNegative(widthProperty.topDimen);
+    widthProperty.leftDimen = Converter::OptConvert<Dimension>(src.start);
+    Validator::ValidateNonNegative(widthProperty.leftDimen);
+    widthProperty.bottomDimen = Converter::OptConvert<Dimension>(src.bottom);
+    Validator::ValidateNonNegative(widthProperty.bottomDimen);
+    widthProperty.rightDimen = Converter::OptConvert<Dimension>(src.end);
+    Validator::ValidateNonNegative(widthProperty.rightDimen);
+    widthProperty.multiValued = true;
+    return widthProperty;
 }
 
 template<>
@@ -2348,7 +2491,8 @@ EventTarget Convert(const Ark_EventTarget& src)
         DimensionOffset(offsetX.value_or(Zero), offsetY.value_or(Zero)));
     auto globX = Converter::OptConvert<Dimension>(src.area.globalPosition.x);
     auto globY = Converter::OptConvert<Dimension>(src.area.globalPosition.y);
-    return EventTarget { "", "", area,
+    auto id = Converter::OptConvert<std::string>(src.id);
+    return EventTarget { id.value_or(""), "", area,
         DimensionOffset(globX.value_or(Zero), globY.value_or(Zero)) };
 }
 
@@ -2562,6 +2706,14 @@ void AssignCast(std::optional<NavigationTitlebarOptions>& dst, const Ark_Navigat
     }
     if (value.paddingStart.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         dst->brOptions.paddingStart = Converter::OptConvert<Dimension>(value.paddingStart);
+    }
+}
+
+template<>
+void AssignCast(std::optional<ShapePoint>& dst, const Opt_ShapePoint& src)
+{
+    if (src.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        dst = Converter::Convert<ShapePoint>(src.value);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

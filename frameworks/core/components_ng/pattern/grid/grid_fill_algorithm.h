@@ -44,7 +44,7 @@ public:
 
     bool CanFillMore(Axis axis, const SizeF& scrollWindowSize, int32_t idx, FillDirection direction) override;
 
-    void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) override;
+    void Prepare(const SizeF& viewport, Axis axis, int32_t totalCnt) override;
 
     void MarkJump() override
     {

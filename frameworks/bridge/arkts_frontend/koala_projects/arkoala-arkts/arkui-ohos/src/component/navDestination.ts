@@ -1302,7 +1302,7 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
     public title(value: string | CustomBuilder | NavDestinationCommonTitle | NavDestinationCustomTitle | Resource | undefined, options?: NavigationTitleOptions): this {
         if (this.checkPriority("title")) {
             const value_casted = value as (string | CustomBuilder | NavDestinationCommonTitle | NavDestinationCustomTitle | Resource | undefined)
-            const options_casted = options as (NavigationTitleOptions)
+            const options_casted = options as (NavigationTitleOptions | undefined)
             this.getPeer()?.titleAttribute(value_casted, options_casted)
             return this
         }

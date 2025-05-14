@@ -26,12 +26,12 @@ class LazyContainer : virtual public Pattern {
     DECLARE_ACE_TYPE(LazyContainer, Pattern);
 
 public:
-    int32_t GetTotalChildCount() const override
+    int32_t GetTotalChildCount() const final
     {
         return adapter_ ? adapter_->GetTotalCount() : -1;
     }
 
-    RefPtr<FrameNode> GetOrCreateChildByIndex(uint32_t index) override;
+    RefPtr<FrameNode> GetOrCreateChildByIndex(uint32_t index) final;
 
     ScrollWindowAdapter* GetScrollWindowAdapter() final;
 
@@ -51,7 +51,7 @@ protected:
     /**
      * @brief Pass latest layout viewport to adapter.
      */
-    void UpdateLayoutRange(Axis axis, bool firstLayout);
+    void OnLayoutFinished(Axis axis, bool firstLayout);
 
     /**
      * @brief Pass scroll offset to adapter.

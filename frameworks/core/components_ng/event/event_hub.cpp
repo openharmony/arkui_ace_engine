@@ -93,6 +93,22 @@ void EventHub::RemoveSupportedUIState(UIState state, bool isInner)
     stateStyleMgr_->RemoveSupportedUIState(state, isInner);
 }
 
+bool EventHub::GetUserSetStateStyle()
+{
+    if (!stateStyleMgr_) {
+        stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
+    }
+    return stateStyleMgr_->GetUserSetStateStyle();
+}
+
+void EventHub::SetScrollingFeatureForbidden(bool isSetStateStyle)
+{
+    if (!stateStyleMgr_) {
+        stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
+    }
+    stateStyleMgr_->SetScrollingFeatureForbidden(isSetStateStyle);
+}
+
 void EventHub::SetCurrentUIState(UIState state, bool flag)
 {
     if (!stateStyleMgr_) {

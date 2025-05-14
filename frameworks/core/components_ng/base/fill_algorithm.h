@@ -31,7 +31,12 @@ public:
     /**
      * @brief called before filling starts. A chance to prepare relevant data.
      */
-    virtual void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) {}
+    virtual void Prepare(const SizeF& viewport, Axis axis, int32_t totalCnt) {}
+
+    /**
+     * @brief Called when component finishes layout
+     */
+    virtual void OnLayoutFinished(const SizeF& viewport, Axis axis) {}
 
     /**
      * @brief Called before the adapter performs a jump

@@ -53,16 +53,23 @@ HWTEST_F(ListArkoalaTest, Basic001, TestSize.Level1)
     EXPECT_EQ(lazy_.GetRange(), std::pair(0, 4));
     EXPECT_EQ(GetChildRect(frameNode_, 3).ToString(), "RectT (0.00, 270.00) - [240.00 x 90.00]");
 
-    UpdateCurrentOffset(-200.0f);
+    pattern_->UpdateCurrentOffset(-200.0f, SCROLL_FROM_UPDATE);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(2, 6));
+    EXPECT_EQ(lazy_.GetRange(), std::pair(0, 6));
+    EXPECT_EQ(pattern_->GetStartIndex(), 2);
     EXPECT_EQ(pattern_->GetEndIndex(), 6);
     EXPECT_EQ(GetChildRect(frameNode_, 3).ToString(), "RectT (0.00, 70.00) - [240.00 x 90.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 6).ToString(), "RectT (0.00, 340.00) - [240.00 x 90.00]");
 
-    UpdateCurrentOffset(-350.0f);
+    pattern_->UpdateCurrentOffset(-350.0f, SCROLL_FROM_UPDATE);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(6, 10));
+    EXPECT_EQ(lazy_.GetRange(), std::pair(2, 10));
+    EXPECT_EQ(GetChildRect(frameNode_, 6).ToString(), "RectT (0.00, -10.00) - [240.00 x 90.00]");
     EXPECT_EQ(GetChildRect(frameNode_, 7).ToString(), "RectT (0.00, 80.00) - [240.00 x 90.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 8).ToString(), "RectT (0.00, 170.00) - [240.00 x 90.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 10).ToString(), "RectT (0.00, 350.00) - [240.00 x 90.00]");
+    EXPECT_EQ(pattern_->GetStartIndex(), 6);
+    EXPECT_EQ(pattern_->GetEndIndex(), 10);
 
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(480.0f), CalcLength(1200.0f)));
     FlushUITasks(frameNode_);
@@ -71,9 +78,9 @@ HWTEST_F(ListArkoalaTest, Basic001, TestSize.Level1)
     EXPECT_EQ(pattern_->GetEndIndex(), 19);
     EXPECT_EQ(GetChildRect(frameNode_, 10).ToString(), "RectT (0.00, 350.00) - [480.00 x 90.00]");
 
-    UpdateCurrentOffset(300.0f);
+    pattern_->UpdateCurrentOffset(300.0f, SCROLL_FROM_UPDATE);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(2, 16));
+    EXPECT_EQ(lazy_.GetRange(), std::pair(2, 19));
     EXPECT_EQ(GetChildRect(frameNode_, 10).ToString(), "RectT (0.00, 650.00) - [480.00 x 90.00]");
 
     UpdateCurrentOffset(-51.0f);
@@ -132,10 +139,12 @@ HWTEST_F(ListArkoalaTest, Reset001, TestSize.Level1)
     EXPECT_EQ(pattern_->GetStartIndex(), 50);
 
     UpdateCurrentOffset(-30.0f);
+    ASSERT_TRUE(GetChildFrameNode(frameNode_, 52));
     EXPECT_EQ(GetChildY(frameNode_, 52), 170.0f);
     pattern_->NotifyDataChange(52, -1);
-    UpdateCurrentOffset(-100.0f);
+    pattern_->UpdateCurrentOffset(-100.0f, SCROLL_FROM_UPDATE);
     IncrementAndLayout(__LINE__);
+    ASSERT_TRUE(GetChildFrameNode(frameNode_, 52));
     EXPECT_EQ(GetChildY(frameNode_, 52), 70.0f);
 }
 
@@ -158,13 +167,13 @@ HWTEST_F(ListArkoalaTest, TargetAnimation001, TestSize.Level1)
     EXPECT_EQ(lazy_.GetRange(), std::pair(0, 10));
     FlushUITasks(frameNode_);
     EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 690.f);
-    UpdateCurrentOffset(-400.0f);
+    pattern_->UpdateCurrentOffset(-400.0f, SCROLL_FROM_UPDATE);
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(pattern_->GetStartIndex(), 4);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(4, 8));
-    UpdateCurrentOffset(-290.0f);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(0, 8));
+    pattern_->UpdateCurrentOffset(-290.0f, SCROLL_FROM_UPDATE);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(7, 12));
+    EXPECT_EQ(lazy_.GetRange(), std::pair(4, 12));
     EXPECT_EQ(pattern_->GetStartIndex(), 7);
     ASSERT_TRUE(GetChildFrameNode(frameNode_, 9));
     EXPECT_EQ(GetChildY(frameNode_, 9), 210.0f);

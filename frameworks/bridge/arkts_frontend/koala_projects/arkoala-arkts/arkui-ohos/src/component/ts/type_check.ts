@@ -74,7 +74,7 @@ import { FullscreenInfo, PlaybackInfo, PlaybackSpeed, PreparedInfo, SeekMode, Vi
 import { GridAttribute, Callback_Number_Number_ComputedBarAttribute, ComputedBarAttribute, Callback_Number_Number_Void, GridDirection, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, GridItemAlignment, Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain, GridLayoutOptions, Callback_Number_Tuple_Number_Number, Callback_Number_Tuple_Number_Number_Number_Number, Tuple_Number_Number_Number_Number } from "./../grid"
 import { GridAttribute_onItemDragStart_event_type, ListAttribute_onItemDragStart_event_type, AnimationRange_Number } from "./../type-replacements"
 import { Resource } from "global/resource"
-import { GridItemStyle, GridItemOptions } from "./../griditem"
+import { GridItemStyle, GridItemOptions } from "./../gridItem"
 import { ImageAnalyzerType, ImageAnalyzerController, ImageAnalyzerConfig, ImageAIOptions } from "./../imageCommon"
 import { IndicatorComponentController } from "./../indicatorcomponent"
 import { ItemState } from "./../stepperItem"
@@ -126,7 +126,7 @@ import { WindowSceneAttribute } from "./../windowScene"
 import { WithThemeAttribute, WithThemeOptions } from "./../withTheme"
 import { XComponentController, Literal_Number_surfaceHeight_surfaceWidth, SurfaceRect, SurfaceRotationOptions, Type_XComponentInterface_callable0_value, Type_XComponentInterface_callable1_value, NativeXComponentParameters, XComponentOptions } from "./../xcomponent"
 import { ASTCResource } from "./../mediaCachedImage"
-import { BusinessError } from "./../base"
+import { BusinessError } from "#external"
 import { CheckboxOptions } from "./../checkbox"
 import { CircleOptions } from "./../circle"
 import { ColumnOptions, ColumnOptionsV2 } from "./../column"
@@ -139,7 +139,7 @@ import { FormLinkOptions } from "./../formLink"
 import { GaugeOptions, GaugeIndicatorOptions, GaugeShadowOptions, Tuple_Union_ResourceColor_LinearGradient_Number } from "./../gauge"
 import { GridColColumnOption, GridColOptions } from "./../gridCol"
 import { ImageLoadResult } from "./../imageSpan"
-import { LineOptions } from "./../line"
+import { LineOptions, ShapePoint } from "./../line"
 import { Literal_Number_index } from "./../stepper"
 import { MarqueeOptions } from "./../marquee"
 import { PathOptions } from "./../path"
@@ -148,7 +148,7 @@ import { PolygonOptions } from "./../polygon"
 import { PolylineOptions } from "./../polyline"
 import { RatingOptions, StarStyleOptions } from "./../rating"
 import { RenderNode } from "./../arkui-rendernode"
-import { RoundedRectOptions, RectOptions } from "./../rect"
+import { RoundedRectOptions, RectOptions, RadiusItem } from "./../rect"
 import { RowOptions, RowOptionsV2 } from "./../row"
 import { StackOptions } from "./../stack"
 import { TransformationMatrix } from "./../arkui-common"
@@ -162,6 +162,8 @@ import { MenuCallback, OnHoverCallback } from "./../sdk-stubs"
 import { TerminationInfo } from "./../embeddedComponent"
 import { TextBackgroundStyle } from "./../span"
 import { Content } from "./../contentSlot"
+import { IObservedObject, IWatchTrigger } from "./../../stateManagement"
+
 export class TypeChecker {
     static typeInstanceOf<T>(value: Object, prop: string): boolean {
         return value.hasOwnProperty(prop)
@@ -21541,5 +21543,11 @@ export class TypeChecker {
     }
     static isArray_CustomObject(value: Object | string | number | undefined): boolean {
         return Array.isArray(value)
+    }
+    static isIObservedObject<T>(value: T): boolean {
+        return true;
+    }
+    static isIWatchTrigger<T>(value: T): boolean {
+        return true;
     }
 }

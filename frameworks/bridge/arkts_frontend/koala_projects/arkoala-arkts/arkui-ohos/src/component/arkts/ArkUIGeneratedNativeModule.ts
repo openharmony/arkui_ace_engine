@@ -3791,6 +3791,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SystemOps_syncInstanceId(instanceId: KInt): void
     @ani.unsafe.Direct
+    native static _SystemOps_resourceManagerReset(): void
+    @ani.unsafe.Direct
+    native static _SystemOps_setFrameCallback(thisArray: KSerializerBuffer, thisLength: int32, delayTime: number): void
+    @ani.unsafe.Direct
     native static _SystemOps_restoreInstanceId(): void
     @ani.unsafe.Quick
     native static _SystemOps_getResourceId(bundleName: KStringPtr, moduleName: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): int32
@@ -3943,6 +3947,8 @@ export class ArkUIGeneratedNativeModule {
     native static _UIContext_isFollowingSystemFontScale(ptr: KPointer): boolean
     @ani.unsafe.Direct
     native static _UIContext_getMaxFontScale(ptr: KPointer): number
+    @ani.unsafe.Direct
+    native static _StateStylesOps_onStateStyleChange(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _DrawableDescriptor_ctor(): KPointer
     @ani.unsafe.Direct

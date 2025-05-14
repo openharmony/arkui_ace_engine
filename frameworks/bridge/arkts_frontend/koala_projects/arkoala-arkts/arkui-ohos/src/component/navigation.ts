@@ -26,7 +26,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, LayoutSafeAreaType, LayoutSafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, LayoutSafeAreaType, LayoutSafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod, Callback } from "./common"
 import { Length, Dimension, ResourceStr, PX, VP, FP, LPX, Percentage, ResourceColor } from "./units"
 import { PixelMap } from "./arkui-pixelmap"
 import { Resource } from "global/resource"
@@ -41,6 +41,7 @@ import { NavExtender } from "./navigationExtender"
 import { addPartialUpdate } from "../ArkUIEntry"
 import { PathStackUtils } from "../handwritten/ArkNavPathStack"
 import { setNeedCreate } from "../ArkComponentRoot"
+import { ArkStackComponent, ArkStackPeer } from "./stack"
 
 export class NavPathInfoInternal {
     public static fromPtr(ptr: KPointer): NavPathInfo {
@@ -174,7 +175,7 @@ export class NavPathStack implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._NavPathStack_getFinalizer()
     }
-    public pushPath(info: NavPathInfo, animated?: boolean | undefined | NavigationOptions | undefined): void {
+    public pushPath(info: NavPathInfo, animated?: boolean | undefined): void {
         PathStackUtils.pushPath(this, info, animated)
     }
     public pushDestination(info: NavPathInfo, animated?: boolean | undefined | NavigationOptions | undefined): Promise<void> {
@@ -192,7 +193,7 @@ export class NavPathStack implements MaterializedBase {
         }
         throw new Error("Can not select appropriate overload")
     }
-    public pushPathByName(name: string, param: Object | Object | undefined, onPop?: ((parameter: PopInfo) => void) | boolean | undefined, animated?: boolean): void {
+    public pushPathByName(name: string, param: Object, onPop: Callback<PopInfo>, animated?: boolean): void {
         PathStackUtils.pushPathByName(this, name, param, onPop, animated)
     }
     public pushDestinationByName(name: string, param: Object, onPop?: boolean | undefined | ((parameter: PopInfo) => void), animated?: boolean): Promise<void> {
@@ -215,7 +216,7 @@ export class NavPathStack implements MaterializedBase {
         }
         throw new Error("Can not select appropriate overload")
     }
-    public replacePath(info: NavPathInfo, animated?: boolean | undefined | NavigationOptions | undefined): void {
+    public replacePath(info: NavPathInfo, animated?: boolean | undefined): void {
         PathStackUtils.replacePath(this, info, animated)
     }
     public replaceDestination(info: NavPathInfo, options?: NavigationOptions): Promise<void> {
@@ -1530,6 +1531,7 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
     titleMode_value?: NavigationTitleMode | undefined
     menus_value?: Array<NavigationMenuItem> | CustomBuilder | undefined
     toolBar_value?: CustomBuilder | undefined
+    toolbarConfiguration_value?: Array<ToolbarItem> | CustomBuilder | undefined
     hideToolBar_value?: boolean | undefined
     enableToolBarAdaptation_value?: boolean | undefined
     onTitleModeChange_value?: ((titleMode: NavigationTitleMode) => void) | undefined
@@ -1621,7 +1623,7 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
     }
     public ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
         return this
-        }
+    }
 }
 export type Callback_NavigationTransitionProxy_Void = (transitionProxy: NavigationTransitionProxy) => void;
 export interface NavigationAnimatedTransition {
@@ -1940,7 +1942,7 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
     public toolbarConfiguration(value: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): this {
         if (this.checkPriority("toolbarConfiguration")) {
             const value_casted = value as (Array<ToolbarItem> | CustomBuilder | undefined)
-            const options_casted = options as (NavigationToolbarOptions)
+            const options_casted = options as (NavigationToolbarOptions | undefined)
             this.getPeer()?.toolbarConfigurationAttribute(value_casted, options_casted)
             return this
         }
@@ -1990,7 +1992,7 @@ export function Navigation(
                 const updater: (name: string, param: object|undefined)=>PeerNode =
                 (name: string, param: object|undefined) => {
                     let manager = GlobalStateManager.instance
-                    let node = PeerNode.generateRootPeer()
+                    let node = ArkStackPeer.create(new ArkStackComponent())
                     let nodeState = manager.updatableNode<PeerNode>(node, (context: StateContext) => {
                         const frozen = manager.frozen
                         manager.frozen = true
@@ -2001,11 +2003,6 @@ export function Navigation(
                         })
                         manager.frozen = frozen
                     })
-                    let curNode = nodeState.value
-                    let child = curNode.firstChild
-                    while (child) {
-                        child = child.firstChild
-                    }
                     return nodeState.value
                 }
                 const value_casted = updater as ((name: string, param: object|undefined) => PeerNode)
@@ -2014,11 +2011,14 @@ export function Navigation(
                         if (!receiver.isNeedSync()) {
                             return
                         }
+                        InteropNativeModule._NativeLog("AceNavigation: sync navigation stack")
                         receiver.updateNeedSync(false)
                         let size: int32 = pathInfos!.size() as int32
+                        InteropNativeModule._NativeLog("AceNavigation: path stack size: " + size)
                         let names: Array<string> = pathInfos!.getAllPathName()
                         for (let index: int32 = 0; index < size; index++) {
                             if (NavExtender.checkNeedCreate(receiver.getPeer().peer.ptr, index)) {
+                                InteropNativeModule._NativeLog("AceNavigation: create new node: " + index + ", name: " + names[index])
                                 let param = pathInfos!.getParamByIndex(index)
                                 let node = value_casted(names[index], param)
                                 NavExtender.setNavDestinationNode(pathInfos!, index, node.peer.ptr)

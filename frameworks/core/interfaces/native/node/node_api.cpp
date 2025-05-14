@@ -1851,6 +1851,20 @@ int32_t PostUITask(ArkUI_Int32 contextId, void* taskData, void(*task)(void* task
     return ERROR_CODE_NO_ERROR;
 }
 
+int32_t PostUITaskAndWait(ArkUI_Int32 contextId, void* taskData, void(*task)(void* taskData))
+{
+    auto taskFunc = [taskData, task]() {
+        if (!taskData) {
+            return;
+        }
+        task(taskData);
+    };
+    if (!MultiThreadBuildManager::GetInstance().PostUITaskAndWait(contextId, std::move(taskFunc))) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
 const ArkUIBasicAPI* GetBasicAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -1894,6 +1908,7 @@ const ArkUIMultiThreadManagerAPI* GetMultiThreadManagerAPI()
         .isMultiThreadNode = IsMultiThreadNode,
         .postAsyncUITask = PostAsyncUITask,
         .postUITask = PostUITask,
+        .postUITaskAndWait = PostUITaskAndWait,
     };
     return &multiThreadImpl;
 }

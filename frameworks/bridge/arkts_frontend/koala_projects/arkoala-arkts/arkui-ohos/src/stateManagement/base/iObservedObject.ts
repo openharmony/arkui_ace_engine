@@ -30,10 +30,9 @@ export interface IObservedObject extends IWatchTrigger {
 * if value is instance of class that implements IO
 */
 export function castToIObservedObject<T>(obj: T): IObservedObject | undefined {
-    // return (obj && typeof obj === 'object' && TypeChecker.isIObservedObject(obj))
-    //     ? (obj as Object as  IObservedObject)
-    //     : undefined;
-    return undefined;
+    return (obj && typeof obj === 'object' && TypeChecker.isIObservedObject(obj))
+        ? (obj as Object as  IObservedObject)
+        : undefined;
 }
 
 

@@ -1342,6 +1342,8 @@ typedef struct Callback_SheetType_Void Callback_SheetType_Void;
 typedef struct Opt_Callback_SheetType_Void Opt_Callback_SheetType_Void;
 typedef struct Callback_SpringBackAction_Void Callback_SpringBackAction_Void;
 typedef struct Opt_Callback_SpringBackAction_Void Opt_Callback_SpringBackAction_Void;
+typedef struct Callback_StateStylesChange Callback_StateStylesChange;
+typedef struct Opt_Callback_StateStylesChange Opt_Callback_StateStylesChange;
 typedef struct Callback_String_Number_Void Callback_String_Number_Void;
 typedef struct Opt_Callback_String_Number_Void Opt_Callback_String_Number_Void;
 typedef struct Callback_String_Opt_Object_Void Callback_String_Opt_Object_Void;
@@ -1501,6 +1503,10 @@ typedef struct Opt_OnPasteCallback Opt_OnPasteCallback;
 typedef struct OnRadioChangeCallback OnRadioChangeCallback;
 typedef struct Opt_OnRadioChangeCallback Opt_OnRadioChangeCallback;
 typedef struct OnRatingChangeCallback OnRatingChangeCallback;
+typedef struct Array_RadiusItem Array_RadiusItem;
+typedef struct Opt_Array_RadiusItem Opt_Array_RadiusItem;
+typedef struct Ark_RadiusItem Ark_RadiusItem;
+typedef struct Opt_RadiusItem Opt_RadiusItem;
 typedef struct Opt_OnRatingChangeCallback Opt_OnRatingChangeCallback;
 typedef struct OnRenderProcessNotRespondingCallback OnRenderProcessNotRespondingCallback;
 typedef struct Opt_OnRenderProcessNotRespondingCallback Opt_OnRenderProcessNotRespondingCallback;
@@ -1874,6 +1880,8 @@ typedef struct Ark_ImageError Ark_ImageError;
 typedef struct Opt_ImageError Opt_ImageError;
 typedef struct Ark_ImageLoadResult Ark_ImageLoadResult;
 typedef struct Opt_ImageLoadResult Opt_ImageLoadResult;
+typedef struct Ark_ShapePoint Ark_ShapePoint;
+typedef struct Opt_ShapePoint Opt_ShapePoint;
 typedef struct Ark_ImageSourceSize Ark_ImageSourceSize;
 typedef struct Opt_ImageSourceSize Opt_ImageSourceSize;
 typedef struct Ark_ImmersiveMode Ark_ImmersiveMode;
@@ -2117,6 +2125,8 @@ typedef struct Ark_PixelStretchEffectOptions Ark_PixelStretchEffectOptions;
 typedef struct Opt_PixelStretchEffectOptions Opt_PixelStretchEffectOptions;
 typedef struct Ark_PluginComponentTemplate Ark_PluginComponentTemplate;
 typedef struct Opt_PluginComponentTemplate Opt_PluginComponentTemplate;
+typedef struct Array_ShapePoint Array_ShapePoint;
+typedef struct Opt_Array_ShapePoint Opt_Array_ShapePoint;
 typedef struct Ark_PluginErrorData Ark_PluginErrorData;
 typedef struct Opt_PluginErrorData Opt_PluginErrorData;
 typedef struct Ark_PolygonOptions Ark_PolygonOptions;
@@ -2247,6 +2257,8 @@ typedef struct Ark_StackOptions Ark_StackOptions;
 typedef struct Opt_StackOptions Opt_StackOptions;
 typedef struct Ark_StarStyleOptions Ark_StarStyleOptions;
 typedef struct Opt_StarStyleOptions Opt_StarStyleOptions;
+typedef struct Ark_Union_Length_Array_RadiusItem Ark_Union_Length_Array_RadiusItem;
+typedef struct Opt_Union_Length_Array_RadiusItem Opt_Union_Length_Array_RadiusItem;
 typedef struct Ark_StateStyles Ark_StateStyles;
 typedef struct Opt_StateStyles Opt_StateStyles;
 typedef struct Ark_StyledStringChangedListener Ark_StyledStringChangedListener;
@@ -10248,6 +10260,15 @@ typedef struct Opt_Callback_SpringBackAction_Void {
     Ark_Tag tag;
     Callback_SpringBackAction_Void value;
 } Opt_Callback_SpringBackAction_Void;
+typedef struct Callback_StateStylesChange {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 currentState);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 currentState);
+} Callback_StateStylesChange;
+typedef struct Opt_Callback_StateStylesChange {
+    Ark_Tag tag;
+    Callback_StateStylesChange value;
+} Opt_Callback_StateStylesChange;
 typedef struct Callback_String_Number_Void {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_String value, const Ark_Number index);
@@ -10968,6 +10989,22 @@ typedef struct Opt_OnRatingChangeCallback {
     Ark_Tag tag;
     OnRatingChangeCallback value;
 } Opt_OnRatingChangeCallback;
+typedef struct Array_RadiusItem {
+    Ark_RadiusItem* array;
+    Ark_Int32 length;
+} Array_RadiusItem;
+typedef struct Opt_Array_RadiusItem {
+    Ark_Tag tag;
+    Array_RadiusItem value;
+} Opt_Array_RadiusItem;
+typedef struct Ark_RadiusItem {
+    Ark_Length value0;
+    Ark_Length value1;
+} Ark_RadiusItem;
+typedef struct Opt_RadiusItem {
+    Ark_Tag tag;
+    Ark_RadiusItem value;
+} Opt_RadiusItem;
 typedef struct OnRenderProcessNotRespondingCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_RenderProcessNotRespondingData data);
@@ -12562,6 +12599,14 @@ typedef struct Opt_ImageLoadResult {
     Ark_Tag tag;
     Ark_ImageLoadResult value;
 } Opt_ImageLoadResult;
+typedef struct Ark_ShapePoint {
+    Ark_Length value0;
+    Ark_Length value1;
+} Ark_ShapePoint;
+typedef struct Opt_ShapePoint {
+    Ark_Tag tag;
+    Ark_ShapePoint value;
+} Opt_ShapePoint;
 typedef struct Ark_ImageSourceSize {
     Ark_Number width;
     Ark_Number height;
@@ -13552,6 +13597,14 @@ typedef struct Opt_PluginComponentTemplate {
     Ark_Tag tag;
     Ark_PluginComponentTemplate value;
 } Opt_PluginComponentTemplate;
+typedef struct Array_ShapePoint {
+    Ark_ShapePoint* array;
+    Ark_Int32 length;
+} Array_ShapePoint;
+typedef struct Opt_Array_ShapePoint {
+    Ark_Tag tag;
+    Array_ShapePoint value;
+} Opt_Array_ShapePoint;
 typedef struct Ark_PluginErrorData {
     Ark_Number errcode;
     Ark_String msg;
@@ -14096,6 +14149,17 @@ typedef struct Opt_StarStyleOptions {
     Ark_Tag tag;
     Ark_StarStyleOptions value;
 } Opt_StarStyleOptions;
+typedef struct Ark_Union_Length_Array_RadiusItem {
+    Ark_Int32 selector;
+    union {
+        Ark_Length value0;
+        Array_RadiusItem value1;
+    };
+} Ark_Union_Length_Array_RadiusItem;
+typedef struct Opt_Union_Length_Array_RadiusItem {
+    Ark_Tag tag;
+    Ark_Union_Length_Array_RadiusItem value;
+} Opt_Union_Length_Array_RadiusItem;
 typedef struct Ark_StateStyles {
     Opt_Object normal;
     Opt_Object pressed;
@@ -16614,7 +16678,7 @@ typedef struct Opt_RadioStyle {
 typedef struct Ark_RectOptions {
     Opt_Union_Number_String width;
     Opt_Union_Number_String height;
-    Opt_Union_Number_String_Array_Union_Number_String radius;
+    Opt_Union_Length_Array_RadiusItem radius;
 } Ark_RectOptions;
 typedef struct Opt_RectOptions {
     Ark_Tag tag;
@@ -18062,6 +18126,7 @@ typedef struct Opt_MenuOutlineOptions {
     Ark_MenuOutlineOptions value;
 } Opt_MenuOutlineOptions;
 typedef struct Ark_MoreButtonOptions {
+    Opt_ResourceColor backgroundColor;
     Opt_BlurStyle backgroundBlurStyle;
     Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
     Opt_BackgroundEffectOptions backgroundEffect;
@@ -20454,9 +20519,9 @@ typedef struct GENERATED_ArkUILineModifier {
     void (*setLineOptions)(Ark_NativePointer node,
                            const Opt_LineOptions* options);
     void (*setStartPoint)(Ark_NativePointer node,
-                          const Opt_Array_Length* value);
+                          const Opt_ShapePoint* value);
     void (*setEndPoint)(Ark_NativePointer node,
-                        const Opt_Array_Length* value);
+                        const Opt_ShapePoint* value);
 } GENERATED_ArkUILineModifier;
 
 typedef struct GENERATED_ArkUIListModifier {
@@ -20909,7 +20974,7 @@ typedef struct GENERATED_ArkUIPolygonModifier {
     void (*setPolygonOptions)(Ark_NativePointer node,
                               const Opt_PolygonOptions* options);
     void (*setPoints)(Ark_NativePointer node,
-                      const Opt_Array_Point* value);
+                      const Opt_Array_ShapePoint* value);
 } GENERATED_ArkUIPolygonModifier;
 
 typedef struct GENERATED_ArkUIPolylineModifier {
@@ -20918,7 +20983,7 @@ typedef struct GENERATED_ArkUIPolylineModifier {
     void (*setPolylineOptions)(Ark_NativePointer node,
                                const Opt_PolylineOptions* options);
     void (*setPoints)(Ark_NativePointer node,
-                      const Opt_Array_Point* value);
+                      const Opt_Array_ShapePoint* value);
 } GENERATED_ArkUIPolylineModifier;
 
 typedef struct GENERATED_ArkUIProgressModifier {
@@ -23109,6 +23174,10 @@ typedef struct GENERATED_ArkUISystemOpsAccessor {
     Ark_Int32 (*getResourceId)(const Ark_String* bundleName,
                                const Ark_String* moduleName,
                                const Array_String* params);
+    void (*resourceManagerReset)();
+    void (*setFrameCallback)(const Callback_Number_Void* onFrameCallback,
+                             const Callback_Number_Void* onIdleCallback,
+                             const Ark_Number* delayTime);
 } GENERATED_ArkUISystemOpsAccessor;
 
 typedef struct GENERATED_ArkUIGestureOpsAccessor {
@@ -23325,6 +23394,11 @@ typedef struct GENERATED_ArkUIUIContextAccessor {
     Ark_Boolean (*isFollowingSystemFontScale)(Ark_UIContext peer);
     Ark_Number (*getMaxFontScale)(Ark_UIContext peer);
 } GENERATED_ArkUIUIContextAccessor;
+
+typedef struct GENERATED_ArkUIStateStylesOpsAccessor {
+    void (*onStateStyleChange)(Ark_NativePointer node,
+                               const Callback_StateStylesChange* stateStyleChange);
+} GENERATED_ArkUIStateStylesOpsAccessor;
 
 typedef struct GENERATED_ArkUIDrawableDescriptorAccessor {
     void (*destroyPeer)(Ark_DrawableDescriptor peer);
@@ -26574,6 +26648,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIWorkerEventListenerAccessor* (*getWorkerEventListenerAccessor)();
     const GENERATED_ArkUIRestrictedWorkerAccessor* (*getRestrictedWorkerAccessor)();
     const GENERATED_ArkUIUIContextAccessor* (*getUIContextAccessor)();
+    const GENERATED_ArkUIStateStylesOpsAccessor* (*getStateStylesOpsAccessor)();
     const GENERATED_ArkUIDrawableDescriptorAccessor* (*getDrawableDescriptorAccessor)();
     const GENERATED_ArkUILayeredDrawableDescriptorAccessor* (*getLayeredDrawableDescriptorAccessor)();
     const GENERATED_ArkUIPixelMapDrawableDescriptorAccessor* (*getPixelMapDrawableDescriptorAccessor)();

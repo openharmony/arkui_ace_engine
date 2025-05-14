@@ -107,7 +107,7 @@ import { FrictionMotion, FrictionMotionInternal, ScrollMotion, ScrollMotionInter
 import { FullscreenInfo, PlaybackInfo, PlaybackSpeed, PreparedInfo, SeekMode, VideoController, VideoControllerInternal, Callback_FullscreenInfo_Void, Callback_PlaybackInfo_Void, Callback_PreparedInfo_Void, PosterOptions, VideoOptions } from "./../video"
 import { GridAttribute, Callback_Number_Number_ComputedBarAttribute, ComputedBarAttribute, Callback_Number_Number_Void, GridDirection, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, GridItemAlignment, Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain, Callback_Number_Tuple_Number_Number, Callback_Number_Tuple_Number_Number_Number_Number, Tuple_Number_Number_Number_Number, GridLayoutOptions } from "./../grid"
 import { GridAttribute_onItemDragStart_event_type, ListAttribute_onItemDragStart_event_type, TextTimerAttribute_onTimer_event_type, AnimationRange_Number } from "./../type-replacements"
-import { GridItemStyle, GridItemOptions } from "./../griditem"
+import { GridItemStyle, GridItemOptions } from "./../gridItem"
 import { ImageAnalyzerController, ImageAnalyzerControllerInternal, ImageAnalyzerType, ImageAnalyzerConfig, ImageAIOptions } from "./../imageCommon"
 import { IndicatorComponentController, IndicatorComponentControllerInternal } from "./../indicatorcomponent"
 import { ItemState } from "./../stepperItem"
@@ -143,7 +143,7 @@ import { Callback_Array_String_Void, Callback_Array_TextMenuItem_Void, Callback_
 import { Callback_DismissDialogAction_Void, DismissDialogAction, ImmersiveMode, LevelMode, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo, ActionSheetOptions } from "./../actionSheet"
 import { Want } from "./../ohos.app.ability"
 import { Callback_TerminationInfo_Void, TerminationInfo } from "./../embeddedComponent"
-import { BusinessError } from "./../base"
+import { BusinessError } from "#external"
 import { Profiler } from "./../inspector"
 import { ASTCResource } from "./../mediaCachedImage"
 import { CircleOptions } from "./../circle"
@@ -160,11 +160,10 @@ import { PathOptions } from "./../path"
 import { PolygonOptions } from "./../polygon"
 import { PolylineOptions } from "./../polyline"
 import { RenderNode, RenderNodeInternal } from "./../arkui-rendernode"
-import { RoundedRectOptions, RectOptions } from "./../rect"
+import { RoundedRectOptions, RectOptions, RadiusItem } from "./../rect"
 import { RowOptions, RowOptionsV2 } from "./../row"
 import { StackOptions } from "./../stack"
 import { TransformationMatrix } from "./../arkui-common"
-import { VirtualScrollOptions, VirtualScrollOptionsInternal } from "./../repeat"
 import { FlexSpaceOptions, FlexOptions } from "./../flex"
 import { ImageFrameInfo } from "./../imageAnimator"
 import { MenuItemGroupOptions } from "./../menuItemGroup"
@@ -11013,53 +11012,7 @@ export class Deserializer extends DeserializerBase {
         let value : StarStyleOptions = ({backgroundUri: backgroundUri_result, foregroundUri: foregroundUri_result, secondaryUri: secondaryUri_result} as StarStyleOptions)
         return value
     }
-    readStateStyles(): StateStyles {
-        let valueDeserializer : Deserializer = this
-        const normal_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let normal_buf : object | undefined
-        if ((RuntimeType.UNDEFINED) != (normal_buf_runtimeType))
-        {
-            normal_buf = (valueDeserializer.readObject() as object)
-        }
-        const normal_result : object | undefined = normal_buf
-        const pressed_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let pressed_buf : object | undefined
-        if ((RuntimeType.UNDEFINED) != (pressed_buf_runtimeType))
-        {
-            pressed_buf = (valueDeserializer.readObject() as object)
-        }
-        const pressed_result : object | undefined = pressed_buf
-        const disabled_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let disabled_buf : object | undefined
-        if ((RuntimeType.UNDEFINED) != (disabled_buf_runtimeType))
-        {
-            disabled_buf = (valueDeserializer.readObject() as object)
-        }
-        const disabled_result : object | undefined = disabled_buf
-        const focused_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let focused_buf : object | undefined
-        if ((RuntimeType.UNDEFINED) != (focused_buf_runtimeType))
-        {
-            focused_buf = (valueDeserializer.readObject() as object)
-        }
-        const focused_result : object | undefined = focused_buf
-        const clicked_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let clicked_buf : object | undefined
-        if ((RuntimeType.UNDEFINED) != (clicked_buf_runtimeType))
-        {
-            clicked_buf = (valueDeserializer.readObject() as object)
-        }
-        const clicked_result : object | undefined = clicked_buf
-        const selected_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let selected_buf : Object | undefined
-        if ((RuntimeType.UNDEFINED) != (selected_buf_runtimeType))
-        {
-            selected_buf = (valueDeserializer.readObject() as Object)
-        }
-        const selected_result : Object | undefined = selected_buf
-        let value : StateStyles = ({normal: normal_result, pressed: pressed_result, disabled: disabled_result, focused: focused_result, clicked: clicked_result, selected: selected_result} as StateStyles)
-        return value
-    }
+    
     readStyledStringChangedListener(): StyledStringChangedListener {
         let valueDeserializer : Deserializer = this
         const onWillChange_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -11959,11 +11912,6 @@ export class Deserializer extends DeserializerBase {
         const height_result : number | string | undefined = height_buf
         let value : ViewportRect = ({x: x_result, y: y_result, width: width_result, height: height_result} as ViewportRect)
         return value
-    }
-    readVirtualScrollOptions(): VirtualScrollOptions {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return VirtualScrollOptionsInternal.fromPtr(ptr)
     }
     readVisibleAreaEventOptions(): VisibleAreaEventOptions {
         let valueDeserializer : Deserializer = this
@@ -18055,42 +18003,30 @@ export class Deserializer extends DeserializerBase {
         }
         const height_result : number | string | undefined = height_buf
         const radius_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let radius_buf : number | string | Array<number | string> | undefined
+        let radius_buf : Length | Array<RadiusItem> | undefined
         if ((RuntimeType.UNDEFINED) != (radius_buf_runtimeType))
         {
             const radius_buf__selector : int32 = valueDeserializer.readInt8()
-            let radius_buf_ : number | string | Array<number | string> | undefined
+            let radius_buf_ : Length | Array<RadiusItem> | undefined
             if (radius_buf__selector == 0) {
-                radius_buf_ = (valueDeserializer.readNumber() as number)
+                radius_buf_ = (valueDeserializer.readLength() as Length)
             }
             else if (radius_buf__selector == 1) {
-                radius_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (radius_buf__selector == 2) {
                 const radius_buf__u_length : int32 = valueDeserializer.readInt32()
-                let radius_buf__u : Array<number | string> = new Array<number | string>(radius_buf__u_length)
+                let radius_buf__u : Array<RadiusItem> = new Array<RadiusItem>(radius_buf__u_length)
                 for (let radius_buf__u_i = 0; radius_buf__u_i < radius_buf__u_length; radius_buf__u_i++) {
-                    const radius_buf__u_buf_selector : int32 = valueDeserializer.readInt8()
-                    let radius_buf__u_buf : number | string | undefined
-                    if (radius_buf__u_buf_selector == 0) {
-                        radius_buf__u_buf = (valueDeserializer.readNumber() as number)
-                    }
-                    else if (radius_buf__u_buf_selector == 1) {
-                        radius_buf__u_buf = (valueDeserializer.readString() as string)
-                    }
-                    else {
-                        throw new Error("One of the branches for radius_buf__u_buf has to be chosen through deserialisation.")
-                    }
-                    radius_buf__u[radius_buf__u_i] = (radius_buf__u_buf as number | string)
+                    const radius_buf__u_buf_value0 : Length = (valueDeserializer.readLength() as Length)
+                    const radius_buf__u_buf_value1 : Length = (valueDeserializer.readLength() as Length)
+                    radius_buf__u[radius_buf__u_i] = ([radius_buf__u_buf_value0, radius_buf__u_buf_value1] as RadiusItem)
                 }
                 radius_buf_ = radius_buf__u
             }
             else {
                 throw new Error("One of the branches for radius_buf_ has to be chosen through deserialisation.")
             }
-            radius_buf = (radius_buf_ as number | string | Array<number | string>)
+            radius_buf = (radius_buf_ as Length | Array<RadiusItem>)
         }
-        const radius_result : number | string | Array<number | string> | undefined = radius_buf
+        const radius_result : Length | Array<RadiusItem> | undefined = radius_buf
         let value : RectOptions = ({width: width_result, height: height_result, radius: radius_result} as RectOptions)
         return value
     }
