@@ -274,9 +274,13 @@ void CachedCount1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(count);
-    //auto convValue = Converter::OptConvert<type>(count); // for enums
-    //GridModelNG::SetCachedCount1(frameNode, convValue);
+    auto convValue = Converter::OptConvert<int32_t>(*count).value_or(1);
+    if (convValue < 0) {
+        convValue = 1;
+    }
+    GridModelNG::SetCachedCount(frameNode, convValue);
+    auto showValue = Converter::OptConvert<bool>(*show).value_or(false);
+    GridModelNG::SetShowCached(frameNode, showValue);
 }
 void EditModeImpl(Ark_NativePointer node,
                   const Opt_Boolean* value)

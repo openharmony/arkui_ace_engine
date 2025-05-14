@@ -60,6 +60,7 @@ HWTEST_F(GridArkoalaTest, Basic001, TestSize.Level1)
     ViewAbstract::SetWidth(CalcLength(480));
     ViewAbstract::SetHeight(CalcLength(800));
     model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(0);
     InitMockLazy(100);
     CreateDone();
     ASSERT_TRUE(frameNode_->GetContext());
@@ -115,6 +116,7 @@ HWTEST_F(GridArkoalaTest, Basic002, TestSize.Level1)
     ViewAbstract::SetHeight(CalcLength(1280));
     model.SetColumnsTemplate("1fr 1fr");
     model.SetRowsGap(Dimension(8.0f));
+    model.SetCachedCount(0);
     InitMockLazy(100);
     CreateDone();
     EXPECT_EQ(pattern_->info_.gridMatrix_.size(), 1);
@@ -155,6 +157,34 @@ HWTEST_F(GridArkoalaTest, Basic002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CachedCount001
+ * @tc.desc: Test cachedCount with MockKoala
+ * @tc.type: FUNC
+ */
+ HWTEST_F(GridArkoalaTest, CachedCount001, TestSize.Level1)
+ {
+     GridModelNG model = CreateGrid();
+     ViewAbstract::SetHeight(CalcLength(1280));
+     model.SetColumnsTemplate("1fr 1fr");
+     model.SetRowsGap(Dimension(8.0f));
+     model.SetCachedCount(2);
+     InitMockLazy(100);
+     CreateDone();
+     EXPECT_EQ(pattern_->info_.gridMatrix_.size(), 2);
+     IncrementAndLayout(__LINE__);
+     EXPECT_EQ(lazy_.GetRange(), std::pair(0, 10));
+ 
+     pattern_->UpdateCurrentOffset(-450.0f, SCROLL_FROM_BAR);
+     IncrementAndLayout(__LINE__);
+     EXPECT_EQ(lazy_.GetRange(), std::pair(0, 12));
+     EXPECT_EQ(pattern_->info_.startMainLineIndex_, 1);
+     EXPECT_EQ(pattern_->info_.currentOffset_, 8.0f);
+     EXPECT_TRUE(GetChildFrameNode(frameNode_, 11));
+     EXPECT_FALSE(GetChildFrameNode(frameNode_, 13));
+     EXPECT_FALSE(lazy_.NeedRecompose());
+ }
+
+/**
  * @tc.name: ScrollBackward001
  * @tc.desc: Test scrolling backward when lineHeights are empty and items don't exist
  * @tc.type: FUNC
@@ -165,6 +195,7 @@ HWTEST_F(GridArkoalaTest, ScrollBackward001, TestSize.Level1)
     ViewAbstract::SetHeight(CalcLength(1280));
     model.SetColumnsTemplate("1fr 1fr");
     model.SetRowsGap(Dimension(8.0f));
+    model.SetCachedCount(0);
     InitMockLazy(100);
     CreateDone();
     EXPECT_EQ(pattern_->info_.gridMatrix_.size(), 1);
@@ -198,6 +229,7 @@ HWTEST_F(GridArkoalaTest, LargeOffset001, TestSize.Level1)
     ViewAbstract::SetHeight(CalcLength(1280));
     model.SetColumnsTemplate("1fr 1fr");
     model.SetRowsGap(Dimension(8.0f));
+    model.SetCachedCount(0);
     InitMockLazy(100);
     CreateDone();
 
@@ -234,6 +266,7 @@ HWTEST_F(GridArkoalaTest, LargeOffset002, TestSize.Level1)
     ViewAbstract::SetHeight(CalcLength(1280));
     model.SetColumnsTemplate("1fr 1fr");
     model.SetRowsGap(Dimension(8.0f));
+    model.SetCachedCount(0);
     InitMockLazy(100);
     CreateDone();
 
@@ -263,6 +296,7 @@ HWTEST_F(GridArkoalaTest, LargeOffset003, TestSize.Level1)
     ViewAbstract::SetHeight(CalcLength(1280));
     model.SetColumnsTemplate("1fr 1fr");
     model.SetRowsGap(Dimension(8.0f));
+    model.SetCachedCount(0);
     InitMockLazy(100);
     CreateDone();
 
@@ -290,6 +324,7 @@ HWTEST_F(GridArkoalaTest, Jump001, TestSize.Level1)
     ViewAbstract::SetHeight(CalcLength(1280));
     model.SetColumnsTemplate("1fr 1fr");
     model.SetRowsGap(Dimension(8.0f));
+    model.SetCachedCount(0);
     InitMockLazy(100);
     CreateDone();
     IncrementAndLayout(__LINE__);
@@ -315,6 +350,7 @@ HWTEST_F(GridArkoalaTest, TargetAnimation001, TestSize.Level1)
     ViewAbstract::SetHeight(CalcLength(1280));
     model.SetColumnsTemplate("1fr 1fr");
     model.SetRowsGap(Dimension(8.0f));
+    model.SetCachedCount(0);
     InitMockLazy(100);
     CreateDone();
     IncrementAndLayout(__LINE__);
@@ -348,6 +384,7 @@ HWTEST_F(GridArkoalaTest, Reset001, TestSize.Level1)
     ViewAbstract::SetHeight(CalcLength(1280));
     model.SetColumnsTemplate("1fr 1fr");
     model.SetRowsGap(Dimension(8.0f));
+    model.SetCachedCount(0);
     InitMockLazy(100);
     CreateDone();
     IncrementAndLayout(__LINE__);

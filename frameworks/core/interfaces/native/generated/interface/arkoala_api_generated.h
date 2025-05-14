@@ -25581,8 +25581,8 @@ typedef struct GENERATED_ArkUIScrollerAccessor {
                           const Opt_ScrollAlign* align,
                           const Opt_ScrollToIndexOptions* options);
     void (*scrollBy)(Ark_Scroller peer,
-                     const Ark_Length* dx,
-                     const Ark_Length* dy);
+                     const Opt_Length* dx,
+                     const Opt_Length* dy);
     Ark_Boolean (*isAtEnd)(Ark_Scroller peer);
     Ark_RectResult (*getItemRect)(Ark_VMContext vmContext,
                                   Ark_Scroller peer,

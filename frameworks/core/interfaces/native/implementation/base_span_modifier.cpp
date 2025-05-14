@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/text/span_model_static.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
@@ -38,6 +39,8 @@ void TextBackgroundStyleImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<TextBackgroundStyle>(*value);
     if (!convValue) {
         // TODO: Reset value
+        TextBackgroundStyle textBackgroundStyle;
+        SpanModelNG::SetTextBackgroundStyleByBaseSpan(frameNode, textBackgroundStyle);
         return;
     }
     if (AceType::TypeId(frameNode) == SpanNode::TypeId()) {
@@ -54,7 +57,7 @@ void BaselineOffsetImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonPercent(convValue);
     if (AceType::TypeId(frameNode) == SpanNode::TypeId()) {
-        SpanModelNG::SetBaselineOffset(frameNode, convValue);
+        SpanModelStatic::SetBaselineOffset(frameNode, convValue);
     } else {
         ImageSpanView::SetBaselineOffset(frameNode, convValue);
     }

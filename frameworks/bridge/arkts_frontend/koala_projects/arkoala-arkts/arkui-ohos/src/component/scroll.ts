@@ -58,46 +58,47 @@ export class Scroller implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._Scroller_getFinalizer()
     }
-    public scrollTo(options: ScrollOptions): undefined {
+    public scrollTo(options: ScrollOptions): void {
         const options_casted = options as (ScrollOptions)
-        return this.scrollTo_serialize(options_casted)
+        this.scrollTo_serialize(options_casted)
+        return
     }
-    public scrollEdge(value: Edge, options?: ScrollEdgeOptions): undefined {
+    public scrollEdge(value: Edge, options?: ScrollEdgeOptions): void {
         const value_casted = value as (Edge)
         const options_casted = options as (ScrollEdgeOptions | undefined)
-        return this.scrollEdge_serialize(value_casted, options_casted)
+        this.scrollEdge_serialize(value_casted, options_casted)
+        return
     }
     public fling(velocity: number): void {
         const velocity_casted = velocity as (number)
         this.fling_serialize(velocity_casted)
         return
     }
-    public scrollPage(value: ScrollPageOptions | Literal_Boolean_next_Axis_direction): undefined {
+    public scrollPage(value: ScrollPageOptions): void {
         const value_type = runtimeType(value)
         if (TypeChecker.isScrollPageOptions(value, true, false)) {
             const value_casted = value as (ScrollPageOptions)
-            return this.scrollPage0_serialize(value_casted)
-        }
-        if (((RuntimeType.OBJECT) == (value_type)) && (TypeChecker.isLiteral_Boolean_next_Axis_direction(value, true, false))) {
-            const value_casted = value as (Literal_Boolean_next_Axis_direction)
-            return this.scrollPage1_serialize(value_casted)
+            this.scrollPage0_serialize(value_casted)
+            return
         }
         throw new Error("Can not select appropriate overload")
     }
     public currentOffset(): OffsetResult {
         return this.currentOffset_serialize()
     }
-    public scrollToIndex(value: number, smooth?: boolean, align?: ScrollAlign, options?: ScrollToIndexOptions): undefined {
+    public scrollToIndex(value: number, smooth?: boolean, align?: ScrollAlign, options?: ScrollToIndexOptions): void {
         const value_casted = value as (number)
         const smooth_casted = smooth as (boolean | undefined)
         const align_casted = align as (ScrollAlign | undefined)
         const options_casted = options as (ScrollToIndexOptions | undefined)
-        return this.scrollToIndex_serialize(value_casted, smooth_casted, align_casted, options_casted)
+        this.scrollToIndex_serialize(value_casted, smooth_casted, align_casted, options_casted)
+        return
     }
-    public scrollBy(dx: Length, dy: Length): undefined {
-        const dx_casted = dx as (Length)
-        const dy_casted = dy as (Length)
-        return this.scrollBy_serialize(dx_casted, dy_casted)
+    public scrollBy(dx: Length | undefined, dy: Length | undefined): void {
+        const dx_casted = dx as (Length | undefined)
+        const dy_casted = dy as (Length | undefined)
+        this.scrollBy_serialize(dx_casted, dy_casted)
+        return
     }
     public isAtEnd(): boolean {
         return this.isAtEnd_serialize()
@@ -158,8 +159,15 @@ export class Scroller implements MaterializedBase {
         return retval
     }
     private currentOffset_serialize(): OffsetResult {
-        const retval  = ArkUIGeneratedNativeModule._Scroller_currentOffset(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._Scroller_currentOffset(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : OffsetResult = retvalDeserializer.readOffsetResult()
         return returnResult
     }
@@ -190,8 +198,25 @@ export class Scroller implements MaterializedBase {
         thisSerializer.release()
         return retval
     }
-    private scrollBy_serialize(dx: Length, dy: Length): undefined {
-        const retval  = ArkUIGeneratedNativeModule._Scroller_scrollBy(this.peer!.ptr, dx, dy)
+    private scrollBy_serialize(dx: Length | undefined, dy: Length | undefined): undefined {
+        const thisSerializer : Serializer = Serializer.hold()
+        let dx_type : int32 = RuntimeType.UNDEFINED
+        dx_type = runtimeType(dx)
+        thisSerializer.writeInt8(dx_type as int32)
+        if ((RuntimeType.UNDEFINED) != (dx_type)) {
+            const dx_value  = dx!
+            thisSerializer.writeLength(dx_value)
+        }
+
+        let dy_type : int32 = RuntimeType.UNDEFINED
+        dy_type = runtimeType(dy)
+        thisSerializer.writeInt8(dy_type as int32)
+        if ((RuntimeType.UNDEFINED) != (dy_type)) {
+            const dy_value  = dy!
+            thisSerializer.writeLength(dy_value)
+        }
+        const retval  = ArkUIGeneratedNativeModule._Scroller_scrollBy(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
         return retval
     }
     private isAtEnd_serialize(): boolean {
@@ -199,8 +224,15 @@ export class Scroller implements MaterializedBase {
         return retval
     }
     private getItemRect_serialize(index: number): RectResult {
-        const retval  = ArkUIGeneratedNativeModule._Scroller_getItemRect(this.peer!.ptr, index)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._Scroller_getItemRect(this.peer!.ptr, index) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : RectResult = retvalDeserializer.readRectResult()
         return returnResult
     }

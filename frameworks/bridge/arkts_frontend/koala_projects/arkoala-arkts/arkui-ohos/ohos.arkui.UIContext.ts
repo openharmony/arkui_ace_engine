@@ -32,6 +32,7 @@ import { Context } from "#external"
 import { ArkUIAniModule } from "arkui.ani"
 import { Serializer } from "./src/component/peers/Serializer"
 import {observer} from "@ohos/observer"
+import router from './ohos.router'
 
 export class Font {
     instanceId_: int32 = 10001;
@@ -76,9 +77,26 @@ export class MeasureUtils {
     }
 }
 
+export class Router {
+    public pushUrl(options: router.RouterOptions): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            router.pushUrl(options)
+        })
+    }
+
+    public back(options?:router.RouterOptions): void {
+        router.back(options)
+    }
+
+    public clear(): void {
+        router.clear()
+    }
+}
+
 export class UIContext {
     instanceId_: int32 = 100000;
     observer_ :UIObserver |null = null;
+    router_: Router = new Router()
     constructor(instanceId: int32) {
         this.instanceId_ = instanceId;
     }
@@ -104,6 +122,13 @@ export class UIContext {
     }
     getHostContext(): Context | undefined {
         return ArkUIAniModule._Common_GetHostContext();
+    }
+
+    public getRouter(): Router {
+        if (this.router_ === undefined) {
+            this.router_ = new Router()
+        }
+        return this.router_
     }
 
     public animateTo(param: AnimateParam, event: (() => void)): void {

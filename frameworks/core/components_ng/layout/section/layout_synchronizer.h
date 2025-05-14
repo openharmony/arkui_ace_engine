@@ -18,15 +18,24 @@
 #include "base/memory/ace_type.h"
 namespace OHOS::Ace::NG {
 class LayoutProperty;
-class WaterFlowLayoutProperty;
-class ListLayoutProperty;
-class SwiperLayoutProperty;
 class StaggeredFillAlgorithm;
+
+/**
+ * @brief In certain situations (overScrolls, resets), layout data in FillAlgorithm can deviate from the ground
+ * truth in component. This module synchronizes current layout from the component to StaggeredFill.
+ *
+ */
 class LayoutSynchronizer {
 public:
     static void Sync(const RefPtr<LayoutProperty>& props, StaggeredFillAlgorithm& fillAlgo);
+
 private:
-    static void SyncWaterFlow(const RefPtr<WaterFlowLayoutProperty>& props, StaggeredFillAlgorithm& fillAlgo);
+    struct LayoutState {
+        float startPos = 0.0f;
+        int32_t startIdx = -1;
+        int32_t endIdx = -1;
+    };
+    static LayoutState GetLayoutTruth(const RefPtr<LayoutProperty>& props);
 };
 } // namespace OHOS::Ace::NG
 #endif

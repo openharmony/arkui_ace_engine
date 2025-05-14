@@ -5963,8 +5963,8 @@ export class ArkUIGeneratedNativeModule {
     native static _Scroller_currentOffset(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _Scroller_scrollToIndex(ptr: KPointer, value: number, thisArray: KSerializerBuffer, thisLength: int32): undefined
-    @ani.unsafe.Quick
-    native static _Scroller_scrollBy(ptr: KPointer, dx: Length, dy: Length): undefined
+    @ani.unsafe.Direct
+    native static _Scroller_scrollBy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): undefined
     @ani.unsafe.Direct
     native static _Scroller_isAtEnd(ptr: KPointer): boolean
     native static _Scroller_getItemRect(ptr: KPointer, index: number): KInteropReturnBuffer

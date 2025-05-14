@@ -63,6 +63,7 @@
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/text/span_model_static.h"
 #include "core/components_ng/pattern/symbol/symbol_model_ng.h"
 #include "core/components_ng/pattern/text/symbol_span_model_ng.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
@@ -664,7 +665,7 @@ void* createComponent3DNode(ArkUI_Int32 nodeId)
 
 void* createContainerSpanNode(ArkUI_Int32 nodeId)
 {
-    auto spanNode = SpanModelNG::CreateContainerSpanNode(nodeId);
+    auto spanNode = SpanModelStatic::CreateContainerSpanNode(nodeId);
     CHECK_NULL_RETURN(spanNode, nullptr);
     spanNode->IncRefCount();
     return AceType::RawPtr(spanNode);

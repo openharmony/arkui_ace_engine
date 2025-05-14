@@ -37363,8 +37363,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void ScrollByImpl(Ark_Scroller peer,
-                      const Ark_Length* dx,
-                      const Ark_Length* dy)
+                      const Opt_Length* dx,
+                      const Opt_Length* dy)
     {
         if (!needGroupedLog(1))
             return;
