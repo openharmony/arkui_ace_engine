@@ -48,8 +48,6 @@ public:
     void SetAlignContent(int32_t value) override;
     void SetMainSpace(const std::optional<Dimension>& space) override {};
     void SetCrossSpace(const std::optional<Dimension>& space) override {};
-    void SetWidthLayoutPolicy(uint8_t widthLayoutPolicy) override {};
-    void SetHeightLayoutPolicy(uint8_t heightLayoutPolicy) override {};
 };
 
 } // namespace OHOS::Ace::Framework

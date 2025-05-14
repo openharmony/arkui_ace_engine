@@ -269,10 +269,7 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper)
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     for (const auto& child : children) {
-        bool checkNeedSkip = false;
-        if (child->GetHostTag() == V2::COLUMN_ETS_TAG || child->GetHostTag() == V2::ROW_ETS_TAG) {
-            checkNeedSkip = AddElementIntoLayoutPolicyChildren(layoutWrapper, child);
-        }
+        bool checkNeedSkip = AddElementIntoLayoutPolicyChildren(layoutWrapper, child);
         if (child->IsOutOfLayout()) {
             outOfLayoutChildren_.emplace_back(child);
             checkNeedSkip = true;
@@ -312,14 +309,11 @@ bool FlexLayoutAlgorithm::AddElementIntoLayoutPolicyChildren(LayoutWrapper* layo
 {
     CHECK_NULL_RETURN(layoutWrapper, false);
     CHECK_NULL_RETURN(child, false);
-    auto childLayoutProperty = AceType::DynamicCast<FlexLayoutProperty>(child->GetLayoutProperty());
+    auto childLayoutProperty = child->GetLayoutProperty();
     CHECK_NULL_RETURN(childLayoutProperty, false);
-    auto widthLayoutPolicy = childLayoutProperty->GetWidthLayoutPolicy();
-    auto heightLayoutPolicy = childLayoutProperty->GetHeightLayoutPolicy();
-    if (widthLayoutPolicy.value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) ==
-        static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH) &&
-        heightLayoutPolicy.value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) ==
-        static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) {
+    auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_RETURN(layoutPolicy, false);
+    if (!layoutPolicy.value().IsMatch()) {
         return false;
     }
     layoutPolicyChildren_.emplace_back(child);
@@ -345,26 +339,18 @@ void FlexLayoutAlgorithm::MeasureOutOfLayoutChildren(LayoutWrapper* layoutWrappe
     }
 }
 
-void FlexLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, const SizeF& realSize)
+void FlexLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, SizeF& realSize)
 {
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY) || host->GetTag() == V2::FLEX_ETS_TAG) {
+        auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+        MinusPaddingToNonNegativeSize(padding, realSize);
+    }
     layoutConstraint.parentIdealSize.SetSize(realSize);
     for (const auto& child : layoutPolicyChildren_) {
         child->Measure(layoutConstraint);
-        auto geometryNode = child->GetGeometryNode();
-        CHECK_NULL_CONTINUE(geometryNode);
-        auto childLayoutProperty = AceType::DynamicCast<FlexLayoutProperty>(child->GetLayoutProperty());
-        CHECK_NULL_CONTINUE(childLayoutProperty);
-        auto widthLayoutPolicy = childLayoutProperty->GetWidthLayoutPolicy();
-        auto heightLayoutPolicy = childLayoutProperty->GetHeightLayoutPolicy();
-        if (widthLayoutPolicy.value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) ==
-            static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT)) {
-            geometryNode->SetFrameWidth(realSize.Width());
-        }
-        if (heightLayoutPolicy.value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) ==
-            static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT)) {
-            geometryNode->SetFrameHeight(realSize.Height());
-        }
     }
 }
 
@@ -1002,14 +988,13 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto realSize =
         CreateIdealSizeByPercentRef(layoutConstraint.value(), axis, measureType, needToConstraint, calcConstraint)
             .ConvertToSizeT();
-    if (layoutWrapper->GetHostTag() == V2::COLUMN_ETS_TAG || layoutWrapper->GetHostTag() == V2::ROW_ETS_TAG) {
-        auto widthLayoutPolicy =
-            AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty())->GetWidthLayoutPolicy();
-        auto heightLayoutPolicy =
-            AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty())->GetHeightLayoutPolicy();
+    auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_;
+        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_;
         auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(layoutConstraint.value(),
-            widthLayoutPolicy.value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)),
-            heightLayoutPolicy.value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)), axis)
+            widthLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH),
+            heightLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH), axis)
                                     .ConvertToSizeT();
         realSize.UpdateIllegalSizeWithCheck(layoutPolicySize);
     }
@@ -1057,9 +1042,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
 
-    if (layoutWrapper->GetHostTag() == V2::COLUMN_ETS_TAG || layoutWrapper->GetHostTag() == V2::ROW_ETS_TAG) {
-        MeasureAdaptiveLayoutChildren(layoutWrapper, realSize);
-    }
+    MeasureAdaptiveLayoutChildren(layoutWrapper, realSize);
 
     ApplyPatternOperation(layoutWrapper, FlexOperatorType::UPDATE_MEASURE_RESULT, reinterpret_cast<uintptr_t>(this));
 }

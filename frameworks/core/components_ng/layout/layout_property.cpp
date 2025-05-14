@@ -1163,6 +1163,24 @@ void LayoutProperty::UpdateUserDefinedIdealSize(const CalcSize& value)
     }
 }
 
+void LayoutProperty::UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isWidth)
+{
+    if (!layoutPolicy_) {
+        layoutPolicy_ = NG::LayoutPolicyProperty();
+    }
+    if (isWidth) {
+        layoutPolicy_->widthLayoutPolicy_ = layoutPolicy;
+    } else {
+        layoutPolicy_->heightLayoutPolicy_ = layoutPolicy;
+    }
+    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+}
+
+std::optional<NG::LayoutPolicyProperty> LayoutProperty::GetLayoutPolicyProperty()
+{
+    return layoutPolicy_;
+}
+
 void LayoutProperty::ClearUserDefinedIdealSize(bool clearWidth, bool clearHeight)
 {
     if (!calcLayoutConstraint_) {

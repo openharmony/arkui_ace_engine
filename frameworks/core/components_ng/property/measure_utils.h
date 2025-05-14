@@ -149,7 +149,7 @@ OptionalSizeF CreateIdealSizeByPercentRef(const LayoutConstraintF& layoutConstra
  * @return SizeF the node size info.
  */
 OptionalSizeF ConstrainIdealSizeByLayoutPolicy(const LayoutConstraintF& layoutConstraint,
-    uint8_t widthLayoutPolicy, uint8_t heightLayoutPolicy, Axis axis);
+    LayoutCalPolicy widthLayoutPolicy, LayoutCalPolicy heightLayoutPolicy, Axis axis);
 
 /**
  * @brief Create max size for children which is parent's max size minus margin and padding.

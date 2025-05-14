@@ -1579,18 +1579,31 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
 {
     CalcDimension value;
     if (jsValue->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         return true;
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         if (!ParseJsDimensionVpNG(jsValue, value)) {
+            // JsWidth return false, check if set LayoutPolicy before return.
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
-            return false;
+            if (!jsValue->IsObject()) {
+                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+                return false;
+            }
+            JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
+            JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
+            if (layoutPolicy->IsString()) {
+                auto policy = ParseLayoutPolicy(layoutPolicy->ToString());
+                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, true);
+                return true;
+            }
         }
     } else if (!ParseJsDimensionVp(jsValue, value)) {
         return false;
     }
 
+    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
     if (LessNotEqual(value.Value(), 0.0)) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
@@ -1635,18 +1648,31 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
 {
     CalcDimension value;
     if (jsValue->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
         return true;
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         if (!ParseJsDimensionVpNG(jsValue, value)) {
+            // JsHeight return false, check if set LayoutPolicy before return.
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
-            return false;
+            if (!jsValue->IsObject()) {
+                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+                return false;
+            }
+            JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
+            JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
+            if (layoutPolicy->IsString()) {
+                auto policy = ParseLayoutPolicy(layoutPolicy->ToString());
+                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, false);
+                return true;
+            }
         }
     } else if (!ParseJsDimensionVp(jsValue, value)) {
         return false;
     }
 
+    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
     if (LessNotEqual(value.Value(), 0.0)) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
@@ -2118,6 +2144,20 @@ Alignment JSViewAbstract::ParseAlignment(int32_t align)
             break;
     }
     return alignment;
+}
+
+LayoutCalPolicy JSViewAbstract::ParseLayoutPolicy(const std::string& layoutPolicy)
+{
+    if (layoutPolicy == "matchParent") {
+        return LayoutCalPolicy::MATCH_PARENT;
+    }
+    if (layoutPolicy == "wrapContent") {
+        return LayoutCalPolicy::WRAP_CONTENT;
+    }
+    if (layoutPolicy == "fixAtIdealSize") {
+        return LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    }
+    return LayoutCalPolicy::NO_MATCH;
 }
 
 void JSViewAbstract::SetVisibility(const JSCallbackInfo& info)
