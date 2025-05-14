@@ -2686,9 +2686,6 @@ declare class ContainerSpanAttribute {
     textBackgroundStyle(value: TextBackgroundStyle): ContainerSpanAttribute;
     attributeModifier(value: AttributeModifier<ContainerSpanAttribute>): ContainerSpanAttribute;
 }
-declare interface Content {
-    _ContentStub: string;
-}
 declare class ContentSlotAttribute {
 }
 declare interface ContentSlotInterface {

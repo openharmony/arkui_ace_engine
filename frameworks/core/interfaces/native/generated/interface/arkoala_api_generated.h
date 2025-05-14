@@ -459,6 +459,9 @@ typedef struct NavPathStackPeer* Ark_NavPathStack;
 typedef struct Opt_NavPathStack Opt_NavPathStack;
 typedef struct Ark_NestedScrollOptions Ark_NestedScrollOptions;
 typedef struct Opt_NestedScrollOptions Opt_NestedScrollOptions;
+typedef struct NodeContentPeer NodeContentPeer;
+typedef struct NodeContentPeer* Ark_NodeContent;
+typedef struct Opt_NodeContent Opt_NodeContent;
 typedef struct Ark_NodeController Ark_NodeController;
 typedef struct Opt_NodeController Opt_NodeController;
 typedef struct Opt_Number Opt_Number;
@@ -7041,6 +7044,10 @@ typedef struct Opt_NestedScrollOptions {
     Ark_Tag tag;
     Ark_NestedScrollOptions value;
 } Opt_NestedScrollOptions;
+typedef struct Opt_NodeContent {
+    Ark_Tag tag;
+    Ark_NodeContent value;
+} Opt_NodeContent;
 typedef struct Ark_NodeController {
     void *handle;
 } Ark_NodeController;
@@ -23763,6 +23770,15 @@ typedef struct GENERATED_ArkUIMatrix4TransitAccessor {
                                         const Ark_PolyToPolyOptions* options);
 } GENERATED_ArkUIMatrix4TransitAccessor;
 
+typedef struct GENERATED_ArkUINodeContentAccessor {
+    void (*destroyPeer)(Ark_NodeContent peer);
+    Ark_NodeContent (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    Ark_Boolean (*addFrameNode)(Ark_NodeContent peer,
+                         Ark_FrameNode node);
+    Ark_Boolean (*removeFrameNode)(Ark_NodeContent peer,
+                            Ark_FrameNode node);
+} GENERATED_ArkUINodeContentAccessor;
 typedef struct GENERATED_ArkUIPixelMapAccessor {
     void (*destroyPeer)(Ark_PixelMap peer);
     Ark_PixelMap (*ctor)();
@@ -26676,6 +26692,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIShapeMaskAccessor* (*getShapeMaskAccessor)();
     const GENERATED_ArkUIShapeClipAccessor* (*getShapeClipAccessor)();
     const GENERATED_ArkUIMatrix4TransitAccessor* (*getMatrix4TransitAccessor)();
+    const GENERATED_ArkUINodeContentAccessor* (*getNodeContentAccessor)();
     const GENERATED_ArkUIPixelMapAccessor* (*getPixelMapAccessor)();
     const GENERATED_ArkUIRenderNodeAccessor* (*getRenderNodeAccessor)();
     const GENERATED_ArkUIGridItemOpsAccessor* (*getGridItemOpsAccessor)();
