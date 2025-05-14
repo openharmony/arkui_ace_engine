@@ -59,6 +59,23 @@ const Dimension LIFT_HEIGHT = 28.0_vp;
 const std::string PNG_FILE_EXTENSION = "png";
 constexpr int32_t MEDIA_TYPE_AUD = 0;
 constexpr float VOLUME_STEP = 0.05f;
+const std::unordered_set<ImageFit> EXPORT_IMAGEFIT_SUPPORT_TYPES = {
+    ImageFit::FILL,
+    ImageFit::CONTAIN,
+    ImageFit::COVER,
+    ImageFit::FITWIDTH, //FITWIDTH is used instead of AUTO
+    ImageFit::NONE,
+    ImageFit::SCALE_DOWN,
+    ImageFit::TOP_LEFT,
+    ImageFit::TOP,
+    ImageFit::TOP_END,
+    ImageFit::START,
+    ImageFit::CENTER,
+    ImageFit::END,
+    ImageFit::BOTTOM_START,
+    ImageFit::BOTTOM,
+    ImageFit::BOTTOM_END
+};
 
 enum SliderChangeMode {
     BEGIN = 0,
@@ -134,7 +151,7 @@ RectF MeasureVideoContentLayout(const SizeF& layoutSize, const RefPtr<VideoLayou
     auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
     auto rect = RectF();
     switch (imageFit) {
-        case ImageFit::CONTAIN:
+        case ImageFit::CONTAIN: case ImageFit::FITWIDTH: //FITWIDTH is used instead of AUTO
             videoFrameSize = CalculateFitContain(videoSize, layoutSize);
             rect = RectF{(layoutSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
                 (layoutSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
@@ -198,7 +215,7 @@ RectF MeasureVideoContentLayout(const SizeF& layoutSize, const RefPtr<VideoLayou
                 videoSize.Width(), videoSize.Height()};
             break;
         default:
-            videoFrameSize = CalculateFitContain(videoSize, layoutSize);
+            videoFrameSize = CalculateFitCover(videoSize, layoutSize);
             rect = RectF{(layoutSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
                 (layoutSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
                 videoFrameSize.Width(), videoFrameSize.Height()};
@@ -1186,6 +1203,9 @@ void VideoPattern::UpdatePreviewImage()
         CHECK_NULL_VOID(posterLayoutProperty);
         posterLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         posterLayoutProperty->UpdateImageSourceInfo(posterSourceInfo);
+        if (EXPORT_IMAGEFIT_SUPPORT_TYPES.find(imageFit) == EXPORT_IMAGEFIT_SUPPORT_TYPES.end()) {
+            imageFit = ImageFit::COVER;
+        }
         posterLayoutProperty->UpdateImageFit(imageFit);
         image->MarkModifyDone();
     }
