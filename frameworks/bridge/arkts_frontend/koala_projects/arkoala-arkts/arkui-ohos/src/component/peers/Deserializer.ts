@@ -9816,13 +9816,6 @@ export class Deserializer extends DeserializerBase {
             total_buf = (valueDeserializer.readNumber() as number)
         }
         const total_result : number | undefined = total_buf
-        const style_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let style_buf : ProgressStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (style_buf_runtimeType))
-        {
-            style_buf = TypeChecker.ProgressStyle_FromNumeric(valueDeserializer.readInt32())
-        }
-        const style_result : ProgressStyle | undefined = style_buf
         const type_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let type_buf : ProgressType | undefined
         if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))
@@ -9830,7 +9823,7 @@ export class Deserializer extends DeserializerBase {
             type_buf = TypeChecker.ProgressType_FromNumeric(valueDeserializer.readInt32())
         }
         const type_result : ProgressType | undefined = type_buf
-        let value : ProgressOptions = ({value: value_result, total: total_result, style: style_result, type: type_result} as ProgressOptions)
+        let value : ProgressOptions = ({value: value_result, total: total_result, type: type_result} as ProgressOptions)
         return value
     }
     readProgressStyleOptions(): ProgressStyleOptions {

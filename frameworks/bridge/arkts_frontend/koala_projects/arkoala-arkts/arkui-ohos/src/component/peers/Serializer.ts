@@ -5152,14 +5152,6 @@ export class Serializer extends SerializerBase {
             const value_total_value  = value_total!
             valueSerializer.writeNumber(value_total_value)
         }
-        const value_style  = value.style
-        let value_style_type : int32 = RuntimeType.UNDEFINED
-        value_style_type = runtimeType(value_style)
-        valueSerializer.writeInt8(value_style_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_style_type)) {
-            const value_style_value  = (value_style as ProgressStyle)
-            valueSerializer.writeInt32(TypeChecker.ProgressStyle_ToNumeric(value_style_value))
-        }
         const value_type  = value.type
         let value_type_type : int32 = RuntimeType.UNDEFINED
         value_type_type = runtimeType(value_type)
