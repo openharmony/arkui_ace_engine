@@ -7,29 +7,29 @@
                 "transform": "@koalaui/compiler-plugin/build/lib/src/koala-transformer.js",
                 "trace": false,
                 "only_unmemoize": true,
-                "unmemoizeDir": "./build/unmemoized"
+                "unmemoizeDir": "../unmemoized"
             }
         ],
-        "outDir": "./build/junk",
+        "outDir": "../junk",
         "baseUrl": ".",
         "paths": {
             "@koalaui/common": [
-                "../../incremental/common/src"
+                "../../../../incremental/common/src"
             ],
             "@koalaui/interop": [
-                "../../interop/src/interop"
+                "../../../../interop/src/interop"
             ],
             "@koalaui/runtime": [
-                "../../incremental/runtime/src"
+                "../../../../incremental/runtime/src"
             ],
             "@koalaui/compat": [
-                "../../incremental/compat/src"
+                "../../../../incremental/compat/src"
             ],
             "@koalaui/arkui-common": [
-                "../../arkoala/arkui-common/src/arkts"
+                "../../../../arkoala/arkui-common/src/arkts"
             ],
             "#arkcompat/*": [
-                "../../arkoala/arkui-common/src/arkts/*"
+                "../../../../arkoala/arkui-common/src/arkts/*"
             ],
             "@ohos/arkui": [
                 "./src/component"
@@ -86,17 +86,17 @@
         "./src/ani/arkts",
     ],
     "files": [
-        "../../incremental/tools/panda/arkts/std-lib/global.d.ts"
+        "../../../../incremental/tools/panda/arkts/std-lib/global.d.ts"
     ],
     "references": [
         {
-            "path": "../../arkoala/arkui-common"
+            "path": "../../../../arkoala/arkui-common"
         },
         {
-            "path": "../../arkoala/arkui-common/tsconfig-unmemoize.json"
+            "path": "../../../../arkoala/arkui-common/tsconfig-unmemoize.json"
         },
         {
-            "path": "../../interop"
+            "path": "../../../../interop"
         }
     ]
 }
