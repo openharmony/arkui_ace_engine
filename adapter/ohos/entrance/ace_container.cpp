@@ -27,6 +27,7 @@
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
+#include "adapter/ohos/entrance/high_contrast_observer.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "adapter/ohos/entrance/utils.h"
@@ -304,32 +305,6 @@ void ParseLanguage(ConfigurationChange& configurationChange, const std::string& 
     }
 }
 
-#ifdef ACE_ENABLE_VK
-class HighContrastObserver : public AccessibilityConfig::AccessibilityConfigObserver {
-public:
-    HighContrastObserver(AceContainer* aceContainer) : aceContainer_(aceContainer) {}
-
-    void OnConfigChanged(const AccessibilityConfig::CONFIG_ID id, const AccessibilityConfig::ConfigValue& value)
-    {
-        if (first_) {
-            first_ = false;
-            return;
-        }
-        if (aceContainer_ == nullptr) {
-            return;
-        }
-        auto pipelineContext = aceContainer_->GetPipelineContext();
-        auto fontManager = pipelineContext == nullptr ? nullptr : pipelineContext->GetFontManager();
-        if (fontManager != nullptr) {
-            fontManager->UpdateHybridRenderNodes();
-        }
-    }
-
-private:
-    AceContainer* aceContainer_ = nullptr;
-    bool first_ = true;
-};
-#endif
 } // namespace
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
@@ -4495,7 +4470,7 @@ void AceContainer::SubscribeHighContrastChange()
     if (!config.InitializeContext()) {
         return;
     }
-    highContrastObserver_ = std::make_shared<HighContrastObserver>(this);
+    highContrastObserver_ = std::make_shared<HighContrastObserver>(WeakClaim(this));
     config.SubscribeConfigObserver(AccessibilityConfig::CONFIG_ID::CONFIG_HIGH_CONTRAST_TEXT, highContrastObserver_);
 }
 

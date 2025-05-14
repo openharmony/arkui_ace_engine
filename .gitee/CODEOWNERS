@@ -63,6 +63,8 @@ adapter/ohos/entrance/form_utils_impl.cpp @arondave
 adapter/ohos/entrance/form_utils_impl.h @arondave
 adapter/ohos/entrance/hap_asset_provider_impl.cpp @arkuiframework
 adapter/ohos/entrance/hap_asset_provider_impl.h @arkuiframework
+adapter/ohos/entrance/high_contrast_observer.cpp @arkuiframework
+adapter/ohos/entrance/high_contrast_observer.h @arkuiframework
 adapter/ohos/entrance/mmi_event_convertor.cpp @arkuievent
 adapter/ohos/entrance/mmi_event_convertor.h @arkuievent
 adapter/ohos/entrance/navigation_controller_helper.cpp @arkui_superman
