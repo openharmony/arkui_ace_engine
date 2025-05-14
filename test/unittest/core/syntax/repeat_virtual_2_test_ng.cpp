@@ -53,7 +53,7 @@ RefPtr<RepeatVirtualScroll2Node> RepeatVirtual2TestNg::CreateRepeatVirtualNode(u
     onRecycleItems_ = [](IndexType fromIndex, IndexType toIndex) -> void {
         return;
     };
-    onActiveRange_ = [](int32_t fromIndex, int32_t toIndex, bool isLoop) -> void {
+    onActiveRange_ = [](int32_t fromIndex, int32_t toIndex, int32_t vStart, int32_t vEnd, bool isLoop) -> void {
         return;
     };
     onMoveFromTo_ = [](IndexType, IndexType) -> void {
