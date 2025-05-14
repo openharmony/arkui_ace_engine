@@ -793,8 +793,8 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest018, TestSize.Level1)
 
     videoLayoutProperty->UpdateObjectFit(ImageFit::FITHEIGHT);
     videoPattern->OnAreaChangedInner();
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_WIDTH_SMALL / 2);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL * 4);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_HEIGHT_SMALL);
 }
 
 /**
