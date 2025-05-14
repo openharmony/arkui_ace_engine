@@ -391,6 +391,7 @@ void LongPressRecognizer::SendCallbackMsg(
     }
     if (callback && *callback) {
         GestureEvent info;
+        info.SetGestureTypeName(GestureTypeName::LONG_PRESS_GESTURE);
         info.SetTimeStamp(time_);
         info.SetRepeat(isRepeat);
         info.SetFingerList(fingerList_);

@@ -93,6 +93,7 @@ public:
     JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv, bool isAnimation = false) override;
 
 protected:
+    JSRef<JSObject> GetTapLocation(const FingerInfo& fingerInfo);
     JSRef<JSFunc> jsFunction_;
 };
 

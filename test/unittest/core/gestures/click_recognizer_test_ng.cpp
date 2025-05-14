@@ -1910,4 +1910,24 @@ HWTEST_F(ClickRecognizerTestNg, UpdateInfoWithDownEventTest001, TestSize.Level1)
         EXPECT_EQ(clickRecognizer->refereeState_, mockClickRecognizerCases[i].expectedRefereeState);
     }
 }
+
+
+/**
+ * @tc.name: ClickRecognizerTypeTest001
+ * @tc.desc: Test ClickRecognizer Type function: ClickRecognizerTypeTest001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTypeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create clickRecognizer.
+     */
+    GestureEvent info = GestureEvent();
+    /**
+     * @tc.steps: step2. call SetGestureTypeName
+     * @tc.expected: result equals.
+     */
+    info.SetGestureTypeName(GestureTypeName::TAP_GESTURE);
+    EXPECT_EQ(info.GetGestureTypeName(), GestureTypeName::TAP_GESTURE);
+}
 } // namespace OHOS::Ace::NG
