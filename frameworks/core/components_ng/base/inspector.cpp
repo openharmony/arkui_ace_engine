@@ -599,7 +599,9 @@ std::string Inspector::GetInspectorOfNode(RefPtr<NG::UINode> node)
     CHECK_NULL_RETURN(context, jsonRoot->ToString());
     GetContextInfo(context, jsonRoot);
     CHECK_NULL_RETURN(node, jsonRoot->ToString());
-    auto pageId = context->GetStageManager()->GetLastPage()->GetPageId();
+    RefPtr<UINode> lastPage = context->GetStageManager()->GetLastPage();
+    CHECK_NULL_RETURN(lastPage, jsonRoot->ToString());
+    auto pageId = lastPage->GetPageId();
     auto jsonNodeArray = JsonUtil::CreateArray(true);
     InspectorChildrenParameters inspectorParameters;
     GenerateParameters(inspectorParameters, pageId, true);
