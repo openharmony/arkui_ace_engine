@@ -62,7 +62,7 @@ void ParseSymbolAndIcon(const JSCallbackInfo& info, NG::BarItem& toolBarItem,
             toolBarItem.AddResource("navigation.toolbarItem.iconResObj", iconResObj, std::move(updateFunc));
         }
     } else {
-        if (JSViewAbstract::ParseJsString(itemIconObject, icon)) {
+        if (JSViewAbstract::ParseJsMedia(itemIconObject, icon)) {
             toolBarItem.icon = icon;
         }
     }
