@@ -1103,8 +1103,6 @@ public:
         return pixelRoundMode_;
     }
 
-    virtual void RequireSummary() {}
-
     void SetPluginOffset(const Offset& offset)
     {
         pluginOffset_ = offset;

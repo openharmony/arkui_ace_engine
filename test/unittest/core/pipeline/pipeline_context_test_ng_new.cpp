@@ -2075,7 +2075,7 @@ HWTEST_F(PipelineContextTestNg, PipelineCancelDragIfRightBtnPressedTest001, Test
      * @tc.expected: dragDropManager's dragCancel flag is false.
      */
     manager->SetIsDragCancel(true);
-    context_->CancelDragIfRightBtnPressed(event);
+    context_->NotifyDragMouseEvent(event);
     EXPECT_FALSE(manager->isDragCancel_);
 
     /**
@@ -2084,7 +2084,7 @@ HWTEST_F(PipelineContextTestNg, PipelineCancelDragIfRightBtnPressedTest001, Test
      */
     event.button = MouseButton::RIGHT_BUTTON;
     event.action = MouseAction::PRESS;
-    context_->CancelDragIfRightBtnPressed(event);
+    context_->NotifyDragMouseEvent(event);
     EXPECT_TRUE(manager->isDragCancel_);
 
     /**
@@ -2092,7 +2092,7 @@ HWTEST_F(PipelineContextTestNg, PipelineCancelDragIfRightBtnPressedTest001, Test
      * @tc.expected: dragDropManager's dragCancel flag is true.
      */
     context_->dragDropManager_ = nullptr;
-    context_->CancelDragIfRightBtnPressed(event);
+    context_->NotifyDragMouseEvent(event);
     EXPECT_TRUE(manager->isDragCancel_);
 }
 

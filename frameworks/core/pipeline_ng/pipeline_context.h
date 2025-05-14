@@ -444,8 +444,6 @@ public:
 
     bool IsEnableKeyBoardAvoidMode() override;
 
-    void RequireSummary() override;
-
     const RefPtr<SafeAreaManager>& GetSafeAreaManager() const
     {
         return safeAreaManager_;
@@ -1198,6 +1196,9 @@ public:
     }
 
     void SetNeedRenderForDrawChildrenNode(const WeakPtr<NG::UINode>& node);
+    void NotifyDragTouchEvent(const TouchEvent& event);
+    void NotifyDragMouseEvent(const MouseEvent& event);
+    void NotifyDragOnHide();
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1283,10 +1284,6 @@ private:
 
     void RegisterRootEvent();
 
-    void ResetDraggingStatus(const TouchEvent& touchPoint, const RefPtr<FrameNode>& node = nullptr);
-
-    void CancelDragIfRightBtnPressed(const MouseEvent& event);
-
     void UpdateLastMoveEvent(const MouseEvent& event);
 
     void CompensateTouchMoveEvent(const TouchEvent& event);
@@ -1312,6 +1309,7 @@ private:
     void UpdateFormLinkInfos();
 
     void FlushFrameRate();
+    void FlushDragWindowVisibleCallback();
 
     void RegisterFocusCallback();
     void DumpFocus(bool hasJson) const;
