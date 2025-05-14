@@ -28793,13 +28793,15 @@ class ArkWebComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   textZoomRatio(textZoomRatio) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebTextZoomRatioModifier.identity, WebTextZoomRatioModifier, textZoomRatio);
+    return this;
   }
   databaseAccess(databaseAccess) {
     throw new Error('Method not implemented.');
   }
   initialScale(percent) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebInitialScaleModifier.identity, WebInitialScaleModifier, percent);
+    return this;
   }
   userAgent(userAgent) {
     throw new Error('Method not implemented.');
@@ -28823,7 +28825,8 @@ class ArkWebComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   onRequestSelected(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnRequestSelectedModifier.identity, WebOnRequestSelectedModifier, callback);
+    return this;
   }
   onAlert(callback) {
     throw new Error('Method not implemented.');
@@ -28877,7 +28880,8 @@ class ArkWebComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   onScaleChange(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnScaleChangeModifier.identity, WebOnScaleChangeModifier, callback);
+    return this;
   }
   onHttpAuthRequest(callback) {
     throw new Error('Method not implemented.');
@@ -28901,7 +28905,8 @@ class ArkWebComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   onScroll(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnScrollModifier.identity, WebOnScrollModifier, callback);
+    return this;
   }
   onSslErrorEventReceive(callback) {
     throw new Error('Method not implemented.');
@@ -28959,10 +28964,12 @@ class ArkWebComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   horizontalScrollBarAccess(horizontalScrollBar) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebHorizontalScrollBarAccessModifier.identity, WebHorizontalScrollBarAccessModifier, horizontalScrollBar);
+    return this;
   }
   verticalScrollBarAccess(verticalScrollBar) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebVerticalScrollBarAccessModifier.identity, WebVerticalScrollBarAccessModifier, verticalScrollBar);
+    return this;
   }
   onTouchIconUrlReceived(callback) {
     throw new Error('Method not implemented.');
@@ -28993,10 +29000,12 @@ class ArkWebComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   onControllerAttached(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnControllerAttachedModifier.identity, WebOnControllerAttachedModifier, callback);
+    return this;
   }
   onOverScroll(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnOverScrollModifier.identity, WebOnOverScrollModifier, callback);
+    return this;
   }
   javaScriptOnDocumentStart(scripts) {
     throw new Error('Method not implemented.');
@@ -29024,6 +29033,14 @@ class ArkWebComponent extends ArkComponent {
   }
   onAdsBlocked(callback) {
     throw new Error('Method not implemented.');
+  }
+  onContextMenuHide(callback) {
+    modifierWithKey(this._modifiersWithKeys, WebOnContextMenuHideModifier.identity, WebOnContextMenuHideModifier, callback);
+    return this;
+  }
+  keyboardAvoidMode(mode) {
+    modifierWithKey(this._modifiersWithKeys, WebKeyboardAvoidModeModifier.identity, WebKeyboardAvoidModeModifier, mode);
+    return this;
   }
 }
 
@@ -29161,6 +29178,171 @@ class WebAllowWindowOpenMethodModifier extends ModifierWithKey {
   }
 }
 WebAllowWindowOpenMethodModifier.identity = Symbol('webAllowWindowOpenMethodModifier');
+
+class WebKeyboardAvoidModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetKeyboardAvoidMode(node);
+    }
+    else {
+      getUINativeModule().web.setKeyboardAvoidMode(node, this.value);
+    }
+  }
+}
+WebKeyboardAvoidModeModifier.identity = Symbol('webKeyboardAvoidModeModifier');
+
+class WebOnControllerAttachedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnControllerAttached(node);
+    }
+    else {
+      getUINativeModule().web.setOnControllerAttached(node, this.value);
+    }
+  }
+}
+WebOnControllerAttachedModifier.identity = Symbol('webOnControllerAttachedModifier');
+
+class WebVerticalScrollBarAccessModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetVerticalScrollBarAccess(node);
+    }
+    else {
+      getUINativeModule().web.setVerticalScrollBarAccess(node, this.value);
+    }
+  }
+}
+WebVerticalScrollBarAccessModifier.identity = Symbol('webVerticalScrollBarAccessModifier');
+
+class WebHorizontalScrollBarAccessModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetHorizontalScrollBarAccess(node);
+    }
+    else {
+      getUINativeModule().web.setHorizontalScrollBarAccess(node, this.value);
+    }
+  }
+}
+WebHorizontalScrollBarAccessModifier.identity = Symbol('webHorizontalScrollBarAccessModifier');
+
+class WebTextZoomRatioModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetTextZoomRatio(node);
+    }
+    else {
+      getUINativeModule().web.setTextZoomRatio(node, this.value);
+    }
+  }
+}
+WebTextZoomRatioModifier.identity = Symbol('webTextZoomRatioModifier');
+
+class WebInitialScaleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetInitialScale(node);
+    }
+    else {
+      getUINativeModule().web.setInitialScale(node, this.value);
+    }
+  }
+}
+WebInitialScaleModifier.identity = Symbol('webInitialScaleModifier');
+
+class WebOnScaleChangeModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().web.resetOnScaleChange(node);
+      }
+      else {
+        getUINativeModule().web.setOnScaleChange(node, this.value);
+      }
+  }
+}
+WebOnScaleChangeModifier.identity = Symbol('webOnScaleChangeModifier');
+
+class WebOnRequestSelectedModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().web.resetOnRequestSelected(node);
+      }
+      else {
+        getUINativeModule().web.setOnRequestSelected(node, this.value);
+      }
+  }
+}
+WebOnRequestSelectedModifier.identity = Symbol('webOnRequestSelectedModifier');
+
+class WebOnOverScrollModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().web.resetOnOverScroll(node);
+      }
+      else {
+        getUINativeModule().web.setOnOverScroll(node, this.value);
+      }
+  }
+}
+WebOnOverScrollModifier.identity = Symbol('webOnOverScrollModifier');
+
+class WebOnScrollModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().web.resetOnScroll(node);
+      }
+      else {
+        getUINativeModule().web.setOnScroll(node, this.value);
+      }
+  }
+}
+WebOnScrollModifier.identity = Symbol('webOnScrollModifier');
+
+class WebOnContextMenuHideModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().web.resetOnContextMenuHide(node);
+      }
+      else {
+        getUINativeModule().web.setOnContextMenuHide(node, this.value);
+      }
+  }
+}
+WebOnContextMenuHideModifier.identity = Symbol('webOnContextMenuHideModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {

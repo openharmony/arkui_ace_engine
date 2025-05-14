@@ -139,6 +139,160 @@ class WebAllowWindowOpenMethodModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class WebOnScrollModifier extends ModifierWithKey<(event: { xOffset: number; yOffset: number }) => void> {
+  constructor (value: (event: { xOffset: number; yOffset: number }) => void) {
+    super(value)
+  }
+  static identity: Symbol = Symbol('webOnScrollModifier')
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnScroll(node);
+    } else {
+      getUINativeModule().web.setOnScroll(node, this.value);
+    }
+  }
+}
+
+class WebOnOverScrollModifier extends ModifierWithKey<(result: { xOffset: number; yOffset: number }) => void> {
+  constructor (value: (event: { xOffset: number; yOffset: number }) => void) {
+    super(value)
+  }
+  static identity: Symbol = Symbol('webOnOverScrollModifier')
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnOverScroll(node);
+    } else {
+      getUINativeModule().web.setOnOverScroll(node, this.value);
+    }
+  }
+}
+
+class WebOnScaleChangeModifier extends ModifierWithKey<(result: { oldScale: number; newScale: number }) => void> {
+  constructor (value: (event: { oldScale: number; newScale: number }) => void) {
+    super(value)
+  }
+  static identity: Symbol = Symbol('webOnScaleChangeModifier')
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnScaleChange(node);
+    } else {
+      getUINativeModule().web.setOnScaleChange(node, this.value);
+    }
+  }
+}
+
+class WebOnRequestSelectedModifier extends ModifierWithKey<() => void> {
+  constructor (value: () => void) {
+    super(value)
+  }
+  static identity: Symbol = Symbol('webOnRequestSelectedModifier')
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnRequestSelected(node);
+    } else {
+      getUINativeModule().web.setOnRequestSelected(node, this.value);
+    }
+  }
+}
+
+class WebOnContextMenuHideModifier extends ModifierWithKey<OnContextMenuHideCallback> {
+  constructor (value: OnContextMenuHideCallback) {
+    super(value)
+  }
+  static identity: Symbol = Symbol('webOnContextMenuHideModifier')
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnContextMenuHide(node);
+    } else {
+      getUINativeModule().web.setOnContextMenuHide(node, this.value);
+    }
+  }
+}
+
+class WebKeyboardAvoidModeModifier extends ModifierWithKey<WebKeyboardAvoidMode> {
+  constructor(value: WebKeyboardAvoidMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('WebKeyboardAvoidModeModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetKeyboardAvoidMode(node);
+    } else {
+      getUINativeModule().web.setKeyboardAvoidMode(node, this.value);
+    }
+  }
+}
+
+class WebOnControllerAttachedModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnControllerAttachedModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnControllerAttached(node);
+    } else {
+      getUINativeModule().web.setOnControllerAttached(node, this.value);
+    }
+  }
+}
+
+class WebVerticalScrollBarAccessModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webVerticalScrollBarAccessModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetVerticalScrollBarAccess(node);
+    } else {
+      getUINativeModule().web.setVerticalScrollBarAccess(node, this.value);
+    }
+  }
+}
+
+class WebHorizontalScrollBarAccessModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webHorizontalScrollBarAccessModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetHorizontalScrollBarAccess(node);
+    } else {
+      getUINativeModule().web.setHorizontalScrollBarAccess(node, this.value);
+    }
+  }
+}
+
+class WebTextZoomRatioModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webTextZoomRatioModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetTextZoomRatio(node);
+    } else {
+      getUINativeModule().web.setTextZoomRatio(node, this.value);
+    }
+  }
+}
+
+class WebInitialScaleModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webInitialScaleModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetInitialScale(node);
+    } else {
+      getUINativeModule().web.setInitialScale(node, this.value);
+    }
+  }
+}
+
 class ArkWebComponent extends ArkComponent implements WebAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -208,13 +362,15 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     throw new Error('Method not implemented.');
   }
   textZoomRatio(textZoomRatio: number): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebTextZoomRatioModifier.identity, WebTextZoomRatioModifier, textZoomRatio);
+    return this;
   }
   databaseAccess(databaseAccess: boolean): this {
     throw new Error('Method not implemented.');
   }
   initialScale(percent: number): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebInitialScaleModifier.identity, WebInitialScaleModifier, percent);
+    return this;
   }
   userAgent(userAgent: string): this {
     throw new Error('Method not implemented.');
@@ -238,7 +394,8 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     throw new Error('Method not implemented.');
   }
   onRequestSelected(callback: () => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnRequestSelectedModifier.identity, WebOnRequestSelectedModifier, callback);
+    return this;
   }
   onAlert(callback: (event?: { url: string; message: string; result: JsResult; } | undefined) => boolean): this {
     throw new Error('Method not implemented.');
@@ -298,7 +455,8 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     throw new Error('Method not implemented.');
   }
   onScaleChange(callback: (event: { oldScale: number; newScale: number; }) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnScaleChangeModifier.identity, WebOnScaleChangeModifier, callback);
+    return this;
   }
   onHttpAuthRequest(callback: (event?: { handler: HttpAuthHandler; host: string; realm: string; } | undefined) => boolean): this {
     throw new Error('Method not implemented.');
@@ -322,7 +480,8 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     throw new Error('Method not implemented.');
   }
   onScroll(callback: (event: { xOffset: number; yOffset: number; }) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnScrollModifier.identity, WebOnScrollModifier, callback);
+    return this;
   }
   onSslErrorEventReceive(callback: (event: { handler: SslErrorHandler; error: SslError; }) => void): this {
     throw new Error('Method not implemented.');
@@ -384,10 +543,12 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     throw new Error('Method not implemented.');
   }
   horizontalScrollBarAccess(horizontalScrollBar: boolean): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebHorizontalScrollBarAccessModifier.identity, WebHorizontalScrollBarAccessModifier, horizontalScrollBar);
+    return this;
   }
   verticalScrollBarAccess(verticalScrollBar: boolean): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebVerticalScrollBarAccessModifier.identity, WebVerticalScrollBarAccessModifier, verticalScrollBar);
+    return this;
   }
   onTouchIconUrlReceived(callback: (event: { url: string; precomposed: boolean; }) => void): this {
     throw new Error('Method not implemented.');
@@ -418,10 +579,12 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     throw new Error('Method not implemented.');
   }
   onControllerAttached(callback: () => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnControllerAttachedModifier.identity, WebOnControllerAttachedModifier, callback);
+    return this;
   }
   onOverScroll(callback: (event: { xOffset: number; yOffset: number; }) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnOverScrollModifier.identity, WebOnOverScrollModifier, callback);
+    return this;
   }
   javaScriptOnDocumentStart(scripts: ScriptItem[]): this {
     throw new Error('Method not implemented.');
@@ -449,6 +612,14 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   onAdsBlockedBlock(callback: (details: { url: string; adsBlocked: string[]; } | undefined) => void): this {
     throw new Error('Method not implemented.');
+  }
+  keyboardAvoidMode(mode: WebKeyboardAvoidMode): this {
+    modifierWithKey(this._modifiersWithKeys, WebKeyboardAvoidModeModifier.identity, WebKeyboardAvoidModeModifier, mode);
+    return this;
+  }
+  onContextMenuHide(callback: OnContextMenuHideCallback): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnContextMenuHideModifier.identity, WebOnContextMenuHideModifier, callback);
+    return this;
   }
 }
 

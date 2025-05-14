@@ -6152,6 +6152,50 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetAllowWindowOpenMethod));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAllowWindowOpenMethod"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetAllowWindowOpenMethod));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setKeyboardAvoidMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetKeyboardAvoidMode));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetKeyboardAvoidMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetKeyboardAvoidMode));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnControllerAttached"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnControllerAttached));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnControllerAttached"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnControllerAttached));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setVerticalScrollBarAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetVerticalScrollBarAccessEnabled));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetVerticalScrollBarAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetVerticalScrollBarAccessEnabled));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHorizontalScrollBarAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetHorizontalScrollBarAccessEnabled));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHorizontalScrollBarAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetHorizontalScrollBarAccessEnabled));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextZoomRatio"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetTextZoomRatio));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextZoomRatio"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetTextZoomRatio));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setInitialScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetInitialScale));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetInitialScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetInitialScale));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnScroll));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnScroll));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnOverScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnOverScroll));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnOverScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnOverScroll));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnRequestSelected"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnRequestSelected));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnRequestSelected"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::RetsetOnRequestSelected));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnScaleChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnScaleChange));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnScaleChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnScaleChange));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnContextMenuHide"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnContextMenuHide));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnContextMenuHide"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnContextMenuHide));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif

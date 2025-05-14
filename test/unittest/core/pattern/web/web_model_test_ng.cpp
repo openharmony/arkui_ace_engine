@@ -2457,4 +2457,188 @@ HWTEST_F(WebModelTestNg, SetMultiWindowAccessEnabled001, TestSize.Level1)
 #endif
 }
 
+/**
+ * @tc.name: SetKeyboardAvoidMode012
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetKeyboardAvoidMode012, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetKeyboardAvoidMode(AccessibilityManager::RawPtr(frameNode), WebKeyboardAvoidMode::RESIZE_CONTENT);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckKeyboardAvoidMode(WebKeyboardAvoidMode::RESIZE_CONTENT), true);
+#endif
+}
+
+/**
+ * @tc.name: SetOnControllerAttached010
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnControllerAttached010, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount]() {
+        callCount++;
+        return;
+    };
+    WebModelNG webModelNG;
+    webModelNG.SetOnControllerAttached(AccessibilityManager::RawPtr(frameNode), callback);
+    AceType::DynamicCast<WebPattern>(ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>())
+        ->onControllerAttachedCallback_();
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetVerticalScrollBarAccessEnabled001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetVerticalScrollBarAccessEnabled001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetVerticalScrollBarAccessEnabled(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckVerticalScrollBarAccessEnabled(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetHorizontalScrollBarAccessEnabled001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetHorizontalScrollBarAccessEnabled001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetHorizontalScrollBarAccessEnabled(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckHorizontalScrollBarAccessEnabled(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetTextZoomRatio002
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetTextZoomRatio002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetTextZoomRatio(AccessibilityManager::RawPtr(frameNode), 100);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckTextZoomRatio(100), true);
+#endif
+}
+
+/**
+ * @tc.name: InitialScale001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, InitialScale001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.InitialScale(AccessibilityManager::RawPtr(frameNode), 100.0f);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckInitialScale(100.0f), true);
+#endif
+}
+/**
+ * @tc.name: SetOnScroll001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnScroll001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    WebModelNG webModelNG;
+    bool callbackCalled = false;
+    auto jsCallback = [&callbackCalled](const BaseEventInfo* info) { callbackCalled = true; };
+    webModelNG.SetOnScroll(AccessibilityManager::RawPtr(frameNode), jsCallback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnScrollEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+
+    callbackCalled = false;
+    webModelNG.SetOnOverScroll(AccessibilityManager::RawPtr(frameNode), jsCallback);
+    webEventHub->FireOnOverScrollEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+
+    callbackCalled = false;
+    webModelNG.SetOnScaleChange(AccessibilityManager::RawPtr(frameNode), jsCallback);
+    webEventHub->FireOnScaleChangeEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+
+    callbackCalled = false;
+    webModelNG.SetOnRequestFocus(AccessibilityManager::RawPtr(frameNode), jsCallback);
+    webEventHub->FireOnRequestFocusEvent(mockEventInfo);
+
+    callbackCalled = false;
+    webModelNG.SetOnContextMenuHide(AccessibilityManager::RawPtr(frameNode), jsCallback);
+    webEventHub->FireOnContextMenuHideEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
 } // namespace OHOS::Ace::NG
