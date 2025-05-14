@@ -219,6 +219,13 @@ public:
 
     void ShowDialogMaskNG(const RefPtr<NG::FrameNode>& dialog) override;
     void CloseDialogMaskNG(const RefPtr<NG::FrameNode>& dialog) override;
+    void SwitchFollowParentWindowLayout(bool freeMultiWindowEnable) override;
+    bool NeedFollowParentWindowLayout() override
+    {
+        return !followParentWindowLayoutNodeIds_.empty();
+    }
+    void AddFollowParentWindowLayoutNode(int32_t nodeId) override;
+    void RemoveFollowParentWindowLayoutNode(int32_t nodeId) override;
 
 private:
     RefPtr<StackElement> GetStack();
@@ -293,6 +300,7 @@ private:
     std::mutex eventRunnerMutex_;
     MenuWindowState attachState_ = MenuWindowState::DEFAULT;
     MenuWindowState detachState_ = MenuWindowState::DEFAULT;
+    std::list<int32_t> followParentWindowLayoutNodeIds_;
 };
 
 class MenuWindowSceneListener : public OHOS::Rosen::IWindowAttachStateChangeListner {
