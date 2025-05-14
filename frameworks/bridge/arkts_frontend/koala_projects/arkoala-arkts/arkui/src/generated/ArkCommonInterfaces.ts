@@ -23,7 +23,7 @@ import { TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransit
 import { ResourceColor, Length, Bias, Area, Font, BorderRadiuses, EdgeWidths, LocalizedEdgeWidths, SizeOptions, ResourceStr, Dimension, EdgeColors, LocalizedEdgeColors, EdgeStyles, Position, LocalizedBorderRadiuses, Margin, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, LocalizedMargin, BorderOptions, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions, EdgeWidth } from "./ArkUnitsInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
 import { ICurve } from "./ArkICurveMaterialized"
-import { Callback_Void, Literal_String_anchor_HorizontalAlign_align, Literal_String_anchor_VerticalAlign_align, Literal_TransitionEffect_appear_disappear, Tuple_Number_Number, Callback_DismissContentCoverAction_Void, Type_SheetOptions_detents, Callback_SheetDismiss_Void, Callback_DismissSheetAction_Void, Callback_SpringBackAction_Void, Callback_Number_Void, Callback_SheetType_Void, Literal_String_value_Callback_Void_action, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Literal_ResourceColor_color, Callback_DismissPopupAction_Void, AnimationRange_Number, Callback_Array_TouchTestInfo_TouchResult, Callback_ClickEvent_Void, Callback_Boolean_HoverEvent_Void, Callback_MouseEvent_Void, Callback_TouchEvent_Void, Callback_KeyEvent_Void, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, Callback_DragEvent_String_Void, Callback_PreDragStatus_Void, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, Literal_Alignment_align, Callback_Number_Number_Void } from "./SyntheticDeclarations"
+import { Callback_Void, HorizontalAlignOptions, VerticalAlignOptions, Literal_TransitionEffect_appear_disappear, Tuple_Number_Number, Callback_DismissContentCoverAction_Void, Type_SheetOptions_detents, Callback_SheetDismiss_Void, Callback_DismissSheetAction_Void, Callback_SpringBackAction_Void, Callback_Number_Void, Callback_SheetType_Void, Literal_String_value_Callback_Void_action, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Literal_ResourceColor_color, Callback_DismissPopupAction_Void, AnimationRange_Number, Callback_Array_TouchTestInfo_TouchResult, Callback_ClickEvent_Void, Callback_Boolean_HoverEvent_Void, Callback_MouseEvent_Void, Callback_TouchEvent_Void, Callback_KeyEvent_Void, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, Callback_DragEvent_String_Void, Callback_PreDragStatus_Void, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, Literal_Alignment_align, Callback_Number_Number_Void } from "./SyntheticDeclarations"
 import { TransitionEffect } from "./ArkTransitionEffectMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
 import { ButtonType, ButtonStyleMode, ButtonRole } from "./ArkButtonInterfaces"
@@ -145,12 +145,12 @@ export interface ScaleOptions {
     centerY?: number | string;
 }
 export interface AlignRuleOption {
-    left?: Literal_String_anchor_HorizontalAlign_align;
-    right?: Literal_String_anchor_HorizontalAlign_align;
-    middle?: Literal_String_anchor_HorizontalAlign_align;
-    top?: Literal_String_anchor_VerticalAlign_align;
-    bottom?: Literal_String_anchor_VerticalAlign_align;
-    center?: Literal_String_anchor_VerticalAlign_align;
+    left?: HorizontalAlignOptions;
+    right?: HorizontalAlignOptions;
+    middle?: HorizontalAlignOptions;
+    top?: VerticalAlignOptions;
+    bottom?: VerticalAlignOptions;
+    center?: VerticalAlignOptions;
     bias?: Bias;
 }
 export interface LocalizedHorizontalAlignParam {

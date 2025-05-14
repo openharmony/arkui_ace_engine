@@ -25,12 +25,11 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource } from "global/resource"
-import { VoidCallback, ResourceStr, ResourceColor, Dimension, BorderRadiuses, LocalizedBorderRadiuses, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors } from "./units"
+import { VoidCallback, ResourceStr, ResourceColor, Dimension, BorderRadiuses, LocalizedBorderRadiuses, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, EdgeStyles } from "./units"
 import { Callback_Void } from "./abilityComponent"
 import { DismissReason, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, TransitionEffect, ShadowOptions, ShadowStyle, HoverModeAreaType } from "./common"
 import { DialogButtonStyle, BorderStyle } from "./enums"
 import { DialogAlignment, LevelOrder } from "./alertDialog"
-import { EdgeStyles } from "./arkui-external"
 export class ActionSheet {
     public static show(value: ActionSheetOptions): undefined {
         const value_casted = value as (ActionSheetOptions)

@@ -1964,10 +1964,10 @@ typedef struct Ark_Literal_Number_surfaceHeight_surfaceWidth Ark_Literal_Number_
 typedef struct Opt_Literal_Number_surfaceHeight_surfaceWidth Opt_Literal_Number_surfaceHeight_surfaceWidth;
 typedef struct Ark_Literal_Object_object__String_name_Array_String_methodList Ark_Literal_Object_object__String_name_Array_String_methodList;
 typedef struct Opt_Literal_Object_object__String_name_Array_String_methodList Opt_Literal_Object_object__String_name_Array_String_methodList;
-typedef struct Ark_Literal_String_anchor_HorizontalAlign_align Ark_Literal_String_anchor_HorizontalAlign_align;
-typedef struct Opt_Literal_String_anchor_HorizontalAlign_align Opt_Literal_String_anchor_HorizontalAlign_align;
-typedef struct Ark_Literal_String_anchor_VerticalAlign_align Ark_Literal_String_anchor_VerticalAlign_align;
-typedef struct Opt_Literal_String_anchor_VerticalAlign_align Opt_Literal_String_anchor_VerticalAlign_align;
+typedef struct Ark_HorizontalAlignOptions Ark_HorizontalAlignOptions;
+typedef struct Opt_HorizontalAlignOptions Opt_HorizontalAlignOptions;
+typedef struct Ark_VerticalAlignOptions Ark_VerticalAlignOptions;
+typedef struct Opt_VerticalAlignOptions Opt_VerticalAlignOptions;
 typedef struct Ark_Literal_String_baseUrl_data_encoding_historyUrl_mimeType Ark_Literal_String_baseUrl_data_encoding_historyUrl_mimeType;
 typedef struct Opt_Literal_String_baseUrl_data_encoding_historyUrl_mimeType Opt_Literal_String_baseUrl_data_encoding_historyUrl_mimeType;
 typedef struct Ark_Literal_String_plainText Ark_Literal_String_plainText;
@@ -12924,22 +12924,22 @@ typedef struct Opt_Literal_Object_object__String_name_Array_String_methodList {
     Ark_Tag tag;
     Ark_Literal_Object_object__String_name_Array_String_methodList value;
 } Opt_Literal_Object_object__String_name_Array_String_methodList;
-typedef struct Ark_Literal_String_anchor_HorizontalAlign_align {
+typedef struct Ark_HorizontalAlignOptions {
     Ark_String anchor;
     Ark_HorizontalAlign align;
-} Ark_Literal_String_anchor_HorizontalAlign_align;
-typedef struct Opt_Literal_String_anchor_HorizontalAlign_align {
+} Ark_HorizontalAlignOptions;
+typedef struct Opt_HorizontalAlignOptions {
     Ark_Tag tag;
-    Ark_Literal_String_anchor_HorizontalAlign_align value;
-} Opt_Literal_String_anchor_HorizontalAlign_align;
-typedef struct Ark_Literal_String_anchor_VerticalAlign_align {
+    Ark_HorizontalAlignOptions value;
+} Opt_HorizontalAlignOptions;
+typedef struct Ark_VerticalAlignOptions {
     Ark_String anchor;
     Ark_VerticalAlign align;
-} Ark_Literal_String_anchor_VerticalAlign_align;
-typedef struct Opt_Literal_String_anchor_VerticalAlign_align {
+} Ark_VerticalAlignOptions;
+typedef struct Opt_VerticalAlignOptions {
     Ark_Tag tag;
-    Ark_Literal_String_anchor_VerticalAlign_align value;
-} Opt_Literal_String_anchor_VerticalAlign_align;
+    Ark_VerticalAlignOptions value;
+} Opt_VerticalAlignOptions;
 typedef struct Ark_Literal_String_baseUrl_data_encoding_historyUrl_mimeType {
     Ark_String data;
     Ark_String mimeType;
@@ -15720,12 +15720,12 @@ typedef struct Opt_AlertDialogButtonOptions {
     Ark_AlertDialogButtonOptions value;
 } Opt_AlertDialogButtonOptions;
 typedef struct Ark_AlignRuleOption {
-    Opt_Literal_String_anchor_HorizontalAlign_align left;
-    Opt_Literal_String_anchor_HorizontalAlign_align right;
-    Opt_Literal_String_anchor_HorizontalAlign_align middle;
-    Opt_Literal_String_anchor_VerticalAlign_align top;
-    Opt_Literal_String_anchor_VerticalAlign_align bottom;
-    Opt_Literal_String_anchor_VerticalAlign_align center;
+    Opt_HorizontalAlignOptions left;
+    Opt_HorizontalAlignOptions right;
+    Opt_HorizontalAlignOptions middle;
+    Opt_VerticalAlignOptions top;
+    Opt_VerticalAlignOptions bottom;
+    Opt_VerticalAlignOptions center;
     Opt_Bias bias;
 } Ark_AlignRuleOption;
 typedef struct Opt_AlignRuleOption {

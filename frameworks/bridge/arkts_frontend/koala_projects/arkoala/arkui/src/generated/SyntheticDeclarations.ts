@@ -124,11 +124,11 @@ export type Callback_CalendarSelectedDate_Void = (event: CalendarSelectedDate) =
 export type Callback_CalendarRequestedData_Void = (event: CalendarRequestedData) => void;
 export type Callback_Date_Void = (parameter: Date) => void;
 export type Callback_Boolean_Void = (parameter: boolean) => void;
-export interface Literal_String_anchor_HorizontalAlign_align {
+export interface HorizontalAlignOptions {
     anchor: string;
     align: HorizontalAlign;
 }
-export interface Literal_String_anchor_VerticalAlign_align {
+export interface VerticalAlignOptions {
     anchor: string;
     align: VerticalAlign;
 }

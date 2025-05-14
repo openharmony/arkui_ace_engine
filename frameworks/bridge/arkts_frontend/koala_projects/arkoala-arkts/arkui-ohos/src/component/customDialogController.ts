@@ -27,10 +27,9 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { CustomBuilder, Rectangle, AnimateParam, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType } from "./common"
 import { Callback_Void } from "./abilityComponent"
 import { DialogAlignment, LevelOrder } from "./alertDialog"
-import { Offset, ResourceColor, Dimension, BorderRadiuses, EdgeWidths, EdgeColors } from "./units"
+import { Offset, ResourceColor, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles } from "./units"
 import { Callback_DismissDialogAction_Void, DismissDialogAction, LevelMode, ImmersiveMode } from "./actionSheet"
 import { BorderStyle } from "./enums"
-import { EdgeStyles } from "./arkui-external"
 import { LengthMetrics } from "../Graphics"
 export class CustomDialogControllerInternal {
     public static fromPtr(ptr: KPointer): CustomDialogController {

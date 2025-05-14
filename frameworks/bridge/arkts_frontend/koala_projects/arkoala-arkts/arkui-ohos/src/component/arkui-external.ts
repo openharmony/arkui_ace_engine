@@ -1152,12 +1152,6 @@ export enum WindowStatusType {
     FLOATING = 4,
     SPLIT_SCREEN = 5
 }
-export interface EdgeStyles {
-    top?: BorderStyle;
-    right?: BorderStyle;
-    bottom?: BorderStyle;
-    left?: BorderStyle;
-}
 export interface ImageModifier {
 }
 export interface SymbolGlyphModifier {

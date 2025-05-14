@@ -3051,14 +3051,14 @@ void AssignLiteralTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignLiteralTo(std::optional<T>& dst,
-                     const Ark_Literal_String_anchor_HorizontalAlign_align& src)
+                     const Ark_HorizontalAlignOptions& src)
 {
     AssignTo(dst, src.anchor);
 }
 
 template<typename T>
 void AssignLiteralTo(std::optional<T>& dst,
-                     const Ark_Literal_String_anchor_VerticalAlign_align& src)
+                     const Ark_VerticalAlignOptions& src)
 {
     AssignTo(dst, src.anchor);
 }
@@ -4294,8 +4294,8 @@ ASSIGN_OPT(Opt_Literal_Number_offset_span)
 ASSIGN_OPT(Opt_Literal_Number_offsetRemain)
 ASSIGN_OPT(Opt_Literal_Number_surfaceHeight_surfaceWidth)
 ASSIGN_OPT(Opt_Literal_Object_object__String_name_Array_String_methodList)
-ASSIGN_OPT(Opt_Literal_String_anchor_HorizontalAlign_align)
-ASSIGN_OPT(Opt_Literal_String_anchor_VerticalAlign_align)
+ASSIGN_OPT(Opt_HorizontalAlignOptions)
+ASSIGN_OPT(Opt_VerticalAlignOptions)
 ASSIGN_OPT(Opt_Literal_String_baseUrl_data_encoding_historyUrl_mimeType)
 ASSIGN_OPT(Opt_Literal_String_plainText)
 ASSIGN_OPT(Opt_Literal_String_script_Callback_String_Void_callback_)
