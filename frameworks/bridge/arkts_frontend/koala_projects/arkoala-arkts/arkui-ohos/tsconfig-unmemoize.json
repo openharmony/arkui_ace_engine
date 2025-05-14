@@ -60,6 +60,9 @@
             ],
             "@ohos.router": [ 
                 "./ohos.router.ts"
+            ],
+            "@ohos/graphics/common2D": [
+                "./ohos.graphics.common2D.ts"
             ]
         },
         "rootDir": "."
@@ -71,7 +74,8 @@
         "./ohos.arkui.UIContext.ts",
         "./ohos.animator.ts",
         "./global/**/*.ts",
-        "./ohos.router.ts"
+        "./ohos.router.ts",
+        "./ohos.graphics.common2D.ts"
     ],
     "exclude": [
         "./src/component/arkts",

@@ -44,24 +44,24 @@ export class GlobalScope {
         const returnResult : ComponentInfo = retvalDeserializer.readComponentInfo()
         return returnResult
     }
-    public static edgeColors(all: number): Edges {
+    public static edgeColors(all: number): Edges<number> {
         const all_casted = all as (number)
         return GlobalScope.edgeColors_serialize(all_casted)
     }
-    static edgeColors_serialize(all: number): Edges {
+    static edgeColors_serialize(all: number): Edges<number> {
         const retval  = ArkUIGeneratedNativeModule._GlobalScope_edgeColors(all)
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : Edges = retvalDeserializer.readEdges()
+        const returnResult : Edges<number> = retvalDeserializer.readEdgesNumber()
         return returnResult
     }
-    public static edgeWidths(all: number): Edges {
+    public static edgeWidths(all: number): Edges<number> {
         const all_casted = all as (number)
         return GlobalScope.edgeWidths_serialize(all_casted)
     }
-    static edgeWidths_serialize(all: number): Edges {
+    static edgeWidths_serialize(all: number): Edges<number> {
         const retval  = ArkUIGeneratedNativeModule._GlobalScope_edgeWidths(all)
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : Edges = retvalDeserializer.readEdges()
+        const returnResult : Edges<number> = retvalDeserializer.readEdgesNumber()
         return returnResult
     }
     public static borderRadiuses(all: number): BorderRadiuses {

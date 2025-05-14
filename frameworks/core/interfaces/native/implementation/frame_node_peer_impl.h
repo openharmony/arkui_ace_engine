@@ -15,31 +15,41 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H
 
-#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
-#include "core/components_ng/base/frame_node.h"
 #include "base/memory/referenced.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/render_node_peer_impl.h"
 
 struct FrameNodePeer {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> node;
 
-    static FrameNodePeer *Create(Ark_UIContext uiContext)
+    FrameNodePeer() : node(nullptr) {}
+
+    FrameNodePeer(const OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>& src) : node(src) {}
+
+    static FrameNodePeer* Create(Ark_UIContext uiContext)
     {
         return new FrameNodePeer;
     }
 
-    static FrameNodePeer *Create(const OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>& src)
+    static FrameNodePeer* Create(const OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>& src)
     {
-        return new FrameNodePeer{src};
+        return new FrameNodePeer(src);
     }
 
-    static FrameNodePeer *Create(OHOS::Ace::NG::FrameNode* src)
+    static FrameNodePeer* Create(OHOS::Ace::NG::FrameNode* src)
     {
-        return new FrameNodePeer{OHOS::Ace::Referenced::Claim<OHOS::Ace::NG::FrameNode>(src)};
+        return new FrameNodePeer { OHOS::Ace::Referenced::Claim<OHOS::Ace::NG::FrameNode>(src) };
     }
 
-    static void Destroy(FrameNodePeer *peer)
+    static void Destroy(FrameNodePeer* peer)
     {
         delete peer;
+    }
+
+    RenderNodePeer* GetRenderNodePeer()
+    {
+        return RenderNodePeer::Create(node);
     }
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H

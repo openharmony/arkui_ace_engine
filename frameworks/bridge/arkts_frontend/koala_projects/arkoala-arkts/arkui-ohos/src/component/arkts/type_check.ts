@@ -54,7 +54,7 @@ import { ContentModifier, WrappedBuilder, CommonConfiguration, Callback_WrappedB
 import { ContentType, EnterKeyType, InputType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback, TextInputAttribute, OnSubmitCallback, TextInputStyle, PasswordIcon, UnderlineColor, TextInputController, TextInputOptions } from "./../textInput"
 import { CustomDialogController, CustomDialogControllerOptions } from "./../customDialogController"
 import { CustomSpan, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, GestureStyle, GestureStyleInterface, StyledString, MutableStyledString, StyleOptions, SpanStyle, ImageAttachment, StyledStringKey, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback, DecorationStyleInterface, UrlStyle, BaselineOffsetStyle, LetterSpacingStyle, LineHeightStyle, TextShadowStyle, DecorationStyle, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInterface, TextStyle_styled_string, TextStyleInterface, BackgroundColorStyle, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../styledString"
-import { DrawContext, Rect, LengthUnit, ShapeClip, RoundRect, Circle, CommandPath, ShapeMask, Size, Vector2, Vector3, BorderRadiuses_graphics, CornerRadius, Edges, Frame, Matrix4 } from "./../../Graphics"
+import { DrawContext, Rect, LengthUnit, ShapeClip, RoundRect, Circle, CommandPath, ShapeMask, Size, Vector2, Vector3, CornerRadius, Edges, Frame, Matrix4, Corners } from "./../../Graphics"
 import { LengthMetrics, LengthMetricsUnit } from "../../Graphics"
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, ColorStop, LinearGradient, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
@@ -390,7 +390,7 @@ export class TypeChecker {
         return value instanceof BorderRadiuses
     }
     static isBorderRadiuses_graphics(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
-        return value instanceof BorderRadiuses_graphics
+        return value instanceof Corners<number>
     }
     static isBorderStyle(value: Object | string | number | undefined): boolean {
         return value instanceof BorderStyle

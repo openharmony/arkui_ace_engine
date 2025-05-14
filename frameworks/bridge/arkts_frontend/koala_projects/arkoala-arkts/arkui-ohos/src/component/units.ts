@@ -171,6 +171,12 @@ export interface LocalizedPosition {
     start?: LengthMetrics;
     top?: LengthMetrics;
 }
+export interface Edges {
+    top?: Dimension;
+    left?: Dimension;
+    bottom?: Dimension;
+    right?: Dimension;
+}
 export interface LocalizedEdges {
     top?: LengthMetrics;
     start?: LengthMetrics;

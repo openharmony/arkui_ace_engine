@@ -24,6 +24,7 @@ import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./component"
 import { DrawingCanvas } from "./component/arkui-drawing"
 import { Dimension } from "./component/units"
+import { common2D } from "@ohos/graphics/common2D"
 export interface Size {
     width: number;
     height: number;
@@ -196,147 +197,50 @@ export class LengthMetrics implements MaterializedBase {
         ArkUIGeneratedNativeModule._LengthMetrics_setValue(this.peer!.ptr, value)
     }
 }
-export class ShapeMaskInternal {
-    public static fromPtr(ptr: KPointer): ShapeMask {
-        const obj : ShapeMask = new ShapeMask()
-        obj.peer = new Finalizable(ptr, ShapeMask.getFinalizer())
-        return obj
+export class ShapeMask {
+    public rect: Rect | null = null;
+    public roundRect: RoundRect | null = null;
+    public circle: Circle | null = null;
+    public oval: Rect | null = null;
+    public path: CommandPath | null = null;
+    setRectShape(rect: Rect) {
+        this.rect = rect;
+        this.roundRect = null;
+        this.circle = null;
+        this.oval = null;
+        this.path = null;
     }
-}
-export class ShapeMask implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
+    setRoundRectShape(roundRect: RoundRect) {
+        this.roundRect = roundRect;
+        this.rect = null;
+        this.circle = null;
+        this.oval = null;
+        this.path = null;
     }
-    get fillColor(): number {
-        return this.getFillColor()
+    setCircleShape(circle: Circle) {
+        this.circle = circle;
+        this.rect = null;
+        this.roundRect = null;
+        this.oval = null;
+        this.path = null;
     }
-    set fillColor(fillColor: number) {
-        this.setFillColor(fillColor)
+    setOvalShape(oval: Rect) {
+        this.oval = oval;
+        this.rect = null;
+        this.circle = null;
+        this.roundRect = null;
+        this.path = null;
     }
-    get strokeColor(): number {
-        return this.getStrokeColor()
+    setCommandPath(path: CommandPath) {
+        this.path = path;
+        this.oval = null;
+        this.rect = null;
+        this.circle = null;
+        this.roundRect = null;
     }
-    set strokeColor(strokeColor: number) {
-        this.setStrokeColor(strokeColor)
-    }
-    get strokeWidth(): number {
-        return this.getStrokeWidth()
-    }
-    set strokeWidth(strokeWidth: number) {
-        this.setStrokeWidth(strokeWidth)
-    }
-    static ctor_shapemask(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._ShapeMask_ctor()
-        return retval
-    }
-    constructor() {
-        const ctorPtr : KPointer = ShapeMask.ctor_shapemask()
-        this.peer = new Finalizable(ctorPtr, ShapeMask.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._ShapeMask_getFinalizer()
-    }
-    public setRectShape(rect: Rect): void {
-        const rect_casted = rect as (Rect)
-        this.setRectShape_serialize(rect_casted)
-        return
-    }
-    public setRoundRectShape(roundRect: RoundRect): void {
-        const roundRect_casted = roundRect as (RoundRect)
-        this.setRoundRectShape_serialize(roundRect_casted)
-        return
-    }
-    public setCircleShape(circle: Circle): void {
-        const circle_casted = circle as (Circle)
-        this.setCircleShape_serialize(circle_casted)
-        return
-    }
-    public setOvalShape(oval: Rect): void {
-        const oval_casted = oval as (Rect)
-        this.setOvalShape_serialize(oval_casted)
-        return
-    }
-    public setCommandPath(path: CommandPath): void {
-        const path_casted = path as (CommandPath)
-        this.setCommandPath_serialize(path_casted)
-        return
-    }
-    private getFillColor(): number {
-        return this.getFillColor_serialize()
-    }
-    private setFillColor(fillColor: number): void {
-        const fillColor_casted = fillColor as (number)
-        this.setFillColor_serialize(fillColor_casted)
-        return
-    }
-    private getStrokeColor(): number {
-        return this.getStrokeColor_serialize()
-    }
-    private setStrokeColor(strokeColor: number): void {
-        const strokeColor_casted = strokeColor as (number)
-        this.setStrokeColor_serialize(strokeColor_casted)
-        return
-    }
-    private getStrokeWidth(): number {
-        return this.getStrokeWidth_serialize()
-    }
-    private setStrokeWidth(strokeWidth: number): void {
-        const strokeWidth_casted = strokeWidth as (number)
-        this.setStrokeWidth_serialize(strokeWidth_casted)
-        return
-    }
-    private setRectShape_serialize(rect: Rect): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeRect(rect)
-        ArkUIGeneratedNativeModule._ShapeMask_setRectShape(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private setRoundRectShape_serialize(roundRect: RoundRect): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeRoundRect(roundRect)
-        ArkUIGeneratedNativeModule._ShapeMask_setRoundRectShape(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private setCircleShape_serialize(circle: Circle): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeCircle(circle)
-        ArkUIGeneratedNativeModule._ShapeMask_setCircleShape(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private setOvalShape_serialize(oval: Rect): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeRect(oval)
-        ArkUIGeneratedNativeModule._ShapeMask_setOvalShape(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private setCommandPath_serialize(path: CommandPath): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeCommandPath(path)
-        ArkUIGeneratedNativeModule._ShapeMask_setCommandPath(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private getFillColor_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._ShapeMask_getFillColor(this.peer!.ptr)
-        return retval
-    }
-    private setFillColor_serialize(fillColor: number): void {
-        ArkUIGeneratedNativeModule._ShapeMask_setFillColor(this.peer!.ptr, fillColor)
-    }
-    private getStrokeColor_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._ShapeMask_getStrokeColor(this.peer!.ptr)
-        return retval
-    }
-    private setStrokeColor_serialize(strokeColor: number): void {
-        ArkUIGeneratedNativeModule._ShapeMask_setStrokeColor(this.peer!.ptr, strokeColor)
-    }
-    private getStrokeWidth_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._ShapeMask_getStrokeWidth(this.peer!.ptr)
-        return retval
-    }
-    private setStrokeWidth_serialize(strokeWidth: number): void {
-        ArkUIGeneratedNativeModule._ShapeMask_setStrokeWidth(this.peer!.ptr, strokeWidth)
-    }
+    public fillColor: number = 0XFF000000;
+    public strokeColor: number = 0XFF000000;
+    public strokeWidth: number = 0;
 }
 export class ShapeClipInternal {
     public static fromPtr(ptr: KPointer): ShapeClip {
@@ -454,11 +358,11 @@ export interface Frame {
     width: number;
     height: number;
 }
-export interface Edges {
-    top?: Dimension;
-    left?: Dimension;
-    bottom?: Dimension;
-    right?: Dimension;
+export interface Edges<T> {
+    top?: T;
+    left?: T;
+    bottom?: T;
+    right?: T;
 }
 export interface CornerRadius {
     topLeft: Vector2;
@@ -466,18 +370,13 @@ export interface CornerRadius {
     bottomLeft: Vector2;
     bottomRight: Vector2;
 }
-export interface BorderRadiuses_graphics {
-    topLeft: number;
-    topRight: number;
-    bottomLeft: number;
-    bottomRight: number;
+export interface Corners<T> {
+    topLeft: T;
+    topRight: T;
+    bottomLeft: T;
+    bottomRight: T;
 }
-export interface Rect {
-    left: number;
-    top: number;
-    right: number;
-    bottom: number;
-}
+export type Rect = common2D.Rect;
 export interface RoundRect {
     rect: Rect;
     corners: CornerRadius;

@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H
-#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H
+#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_RENDER_NODE_PEER_IMPL_H
+#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_RENDER_NODE_PEER_IMPL_H
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
@@ -32,7 +32,7 @@ public:
 
     static RenderNodePeer* Create(const OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>& src)
     {
-        return new RenderNodePeer();
+        return new RenderNodePeer(src);
     }
 
     static RenderNodePeer* Create(OHOS::Ace::NG::FrameNode* src)
@@ -53,4 +53,4 @@ public:
 private:
     OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> node;
 };
-#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H
+#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_RENDER_NODE_PEER_IMPL_H

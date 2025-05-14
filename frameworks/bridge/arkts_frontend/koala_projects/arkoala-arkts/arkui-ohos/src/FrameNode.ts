@@ -19,9 +19,10 @@
 import { UIContext } from "@ohos/arkui/UIContext"
 import { Position as Position } from "./Graphics"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, InteropNativeModule } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./component"
+import { RenderNode, RenderNodeInternal } from "./RenderNode"
 export class FrameNodeInternal {
     public static fromPtr(ptr: KPointer): FrameNode {
         const obj : FrameNode = new FrameNode(undefined)
@@ -32,6 +33,9 @@ export class FrameNodeInternal {
 export class FrameNode implements MaterializedBase {
     peer?: Finalizable | undefined = undefined
     uiContext: UIContext | undefined = undefined
+    renderNode_: RenderNode | undefined = undefined
+    instanceId_: int32
+    frameNode_: FrameNode | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -42,12 +46,26 @@ export class FrameNode implements MaterializedBase {
         return retval
     }
     constructor(uiContext?: UIContext) {
-        if ((uiContext) !== (undefined))
-        {
+        if ((uiContext) !== (undefined)) {
+            this.instanceId_ = uiContext.instanceId_
             this.uiContext = uiContext
-            const ctorPtr : KPointer = FrameNode.ctor_framenode()
+        }
+        if (this.getType() === 'BuilderRootFrameNode') {
+            this.renderNode_ = new RenderNode(this.getType());
+            this.renderNode_!.setFrameNode(new WeakRef<FrameNode>(this));
+            return;
+        }
+        if (this.getType() === 'ProxyFrameNode') {
+            return;
+        }
+        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_)
+        if (this.getType() === undefined || this.getType() === "CustomFrameNode") {
+            this.renderNode_ = new RenderNode('CustomFrameNode')
+            const ctorPtr: KPointer = FrameNode.ctor_framenode()
             this.peer = new Finalizable(ctorPtr, FrameNode.getFinalizer())
         }
+        this.renderNode_?.setFrameNode(new WeakRef<FrameNode>(this))
+        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId()
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._FrameNode_getFinalizer()
@@ -79,7 +97,7 @@ export class FrameNode implements MaterializedBase {
         const index_casted = index as (number)
         return this.getChild_serialize(index_casted)
     }
-    public getFirstChild(): FrameNode {
+    public getFirstChild(): FrameNode | null {
         return this.getFirstChild_serialize()
     }
     public getNextSibling(): FrameNode {
@@ -170,5 +188,12 @@ export class FrameNode implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeByKey(name)
         const obj : FrameNode = FrameNodeInternal.fromPtr(retval)
         return obj
+    }
+    private getType(): string {
+        return "CustomFrameNode"
+    }
+    public getRenderNode(): RenderNode | null {
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getRenderNode(this.peer!.ptr)
+        return RenderNodeInternal.fromPtr(retval)
     }
 }
