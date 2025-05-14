@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-struct ArkUI_EmbeddedComponentItem {
+struct ArkUI_EmbeddedComponentOption {
     void* onError;
     void* onTerminated;
 };
