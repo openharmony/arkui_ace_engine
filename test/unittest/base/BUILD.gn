@@ -19,6 +19,7 @@ ace_unittest("geometry_test") {
   sources = [
     "animatable_dimension_test.cpp",
     "animatable_matrix4_test.cpp",
+    "container_test.cpp",
     "dimension_test.cpp",
     "least_square_impl_test.cpp",
     "matrix3_test.cpp",
