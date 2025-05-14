@@ -803,6 +803,11 @@ public:
 
     bool HasRepeatTotalCountDifference(RefPtr<UINode> node) const;
 
+    float GetStartPos() const
+    {
+        return startMainPos_ - currentDelta_;
+    }
+
 protected:
     void MarkDirtyNodeSelf();
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);

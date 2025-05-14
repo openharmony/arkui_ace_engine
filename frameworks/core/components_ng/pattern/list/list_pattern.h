@@ -205,6 +205,11 @@ public:
         return contentStartOffset_;
     }
 
+    float GetStartPos() const
+    {
+        return startMainPos_ - currentDelta_;
+    }
+
     RefPtr<ScrollControllerBase> GetPositionController() const
     {
         return positionController_;
@@ -466,7 +471,7 @@ protected:
     float endMainPos_ = 0.0f;
     float spaceWidth_ = 0.0f;
     float contentMainSize_ = 0.0f;
-    float contentStartOffset_ = 0.0f;
+    float contentStartOffset_ = 0.0f; // inner padding of list content
     float contentEndOffset_ = 0.0f;
 
     float currentDelta_ = 0.0f;
