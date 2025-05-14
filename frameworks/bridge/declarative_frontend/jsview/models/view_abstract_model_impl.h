@@ -349,6 +349,7 @@ public:
     void ResetOnAccessibilityFocus() override;
     void SetOnAccessibilityActionIntercept(
         NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept) override;
+    void SetOnAccessibilityHoverTransparent(TouchEventFunc&& touchEventFunc) override;
     void SetAccessibilityDefaultFocus(bool isFocus) override;
     void SetAccessibilityUseSamePage(const std::string& pageMode) override;
     void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) override;

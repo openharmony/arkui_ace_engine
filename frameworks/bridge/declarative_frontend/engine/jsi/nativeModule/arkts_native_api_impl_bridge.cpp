@@ -757,6 +757,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnAccessibilityActionIntercept));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnAccessibilityActionIntercept"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnAccessibilityActionIntercept));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAccessibilityHoverTransparent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityHoverTransparent));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityHoverTransparent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityHoverTransparent));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDirection"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetDirection));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDirection"),

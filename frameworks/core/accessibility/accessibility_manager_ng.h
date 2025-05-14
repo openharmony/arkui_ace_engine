@@ -28,6 +28,7 @@
 namespace OHOS::Ace {
 struct MouseEvent;
 struct TouchEvent;
+class TouchEventInfo;
 
 namespace NG {
 class FrameNode;
@@ -63,6 +64,12 @@ public:
         const PointF& pointAncestor, PointF& pointNode);
 
 private:
+    struct HandleHoverEventInnerParam {
+        SourceType sourceType = SourceType::NONE;
+        AccessibilityHoverEventType eventType = AccessibilityHoverEventType::MOVE;
+        TimeStamp time;
+    };
+
     /*
     * Compute components which are hovered in accessibility mode.
     * And send hover enter/exit events to accessibility framework;
@@ -71,13 +78,12 @@ private:
     void HandleAccessibilityHoverEventInner(
         const RefPtr<FrameNode>& root,
         const PointF& point,
-        SourceType sourceType,
-        AccessibilityHoverEventType eventType,
-        TimeStamp time);
+        HandleHoverEventInnerParam param,
+        const TouchEvent& event);
 
     void ResetHoverState();
     bool IgnoreCurrentHoveringNode(const RefPtr<FrameNode> &node);
-    static void NotifyHoverEventToNodeSession(
+    static bool NotifyHoverEventToNodeSession(
         const RefPtr<FrameNode>& node,
         const RefPtr<FrameNode>& rootNode, const PointF& pointRoot,
         SourceType sourceType, AccessibilityHoverEventType eventType, TimeStamp time);
@@ -88,6 +94,13 @@ private:
         const RefPtr<NG::FrameNode>& root,
         TouchEvent& event,
         int32_t eventType);
+
+    bool HandleAccessibilityHoverTransparentCallback(bool transform,
+        const RefPtr<FrameNode>& root,
+        const int32_t& currentHoveringId,
+        const int32_t& lastHoveringId,
+        const TouchEvent& event);
+    bool ExecuteChildNodeHoverTransparentCallback(const RefPtr<FrameNode>& root, const TouchEvent& event);
 
     AccessibilityHoverState hoverState_;
 };

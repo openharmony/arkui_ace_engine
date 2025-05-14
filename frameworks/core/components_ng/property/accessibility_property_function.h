@@ -22,7 +22,10 @@
 namespace OHOS::Accessibility {
 }
 
-namespace OHOS::Ace::NG {
+namespace OHOS::Ace {
+class TouchEventInfo;
+
+namespace NG {
 
 #define DEFINE_ACTION_FUNCTIONS(TYPE) \
 public: \
@@ -45,6 +48,8 @@ using ActionNotifyChildAction = std::function<AccessibilityActionResult(NotifyCh
 
 using ActionAccessibilityActionIntercept =
     std::function<AccessibilityActionInterceptResult(AccessibilityInterfaceAction action)>;
+
+using ActionAccessibilityTransparentCallback = std::function<void(TouchEventInfo& eventInfo)>;
 
 /**
  * @brief maintaining the callbacks for components
@@ -105,11 +110,25 @@ class ACE_FORCE_EXPORT AccessibilityPropertyInterfaceFunction {
      * @attention it will be executed on the UI thread, so be aware of thread safety.
      */
     DEFINE_ACTION_FUNCTIONS(AccessibilityActionIntercept)
+
+    /**
+     * @brief when register interface of onAccessibilityHoverTransparent,
+     *        saving the callback and processing after hover
+     *
+     * @details callback function prototype: ActionAccessibilityTransparentCallback
+     *          register function:
+     *              SetAccessibilityTransparentCallback(
+     *                  const ActionAccessibilityTransparentCallback& actionAccessibilityTransparentCallback)
+     *          use register function to register callback.
+     * @param [in] TouchEventInfo the original touch event needed return to developer
+     */
+    DEFINE_ACTION_FUNCTIONS(AccessibilityTransparentCallback)
 public:
     AccessibilityPropertyInterfaceFunction() = default;
 
     virtual ~AccessibilityPropertyInterfaceFunction() = default;
 };
+} // namespace NG
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_ACCESSIBILITY_PROPERTY_FUNCTION_H

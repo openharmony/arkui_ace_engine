@@ -538,6 +538,10 @@ let TouchType;
   TouchType[TouchType.Up = 1] = 'Up';
   TouchType[TouchType.Move = 2] = 'Move';
   TouchType[TouchType.Cancel = 3] = 'Cancel';
+  TouchType[TouchType.HOVER_ENTER = 9] = 'HOVER_ENTER';
+  TouchType[TouchType.HOVER_MOVE = 10] = 'HOVER_MOVE';
+  TouchType[TouchType.HOVER_EXIT = 11] = 'HOVER_EXIT';
+  TouchType[TouchType.HOVER_CANCEL = 12] = 'HOVER_CANCEL';
 })(TouchType || (TouchType = {}));
 
 let MouseButton;

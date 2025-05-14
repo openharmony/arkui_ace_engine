@@ -3533,6 +3533,16 @@ void JsAccessibilityManager::EraseDefaultFocusNode(const RefPtr<NG::FrameNode>& 
     }
 }
 
+void JsAccessibilityManager::AddHoverTransparentCallback(const RefPtr<NG::FrameNode>& node)
+{
+    hoverTransparentCallbackController_.AddToHoverTransparentCallbackList(node);
+}
+
+bool JsAccessibilityManager::IsInHoverTransparentCallbackList(const RefPtr<NG::FrameNode>& node)
+{
+    return hoverTransparentCallbackController_.IsInHoverTransparentCallbackList(node);
+}
+
 void JsAccessibilityManager::RegisterUIExtGetPageModeCallback(RefPtr<NG::UIExtensionManager>& uiExtManager)
 {
     CHECK_NULL_VOID(uiExtManager);

@@ -356,4 +356,30 @@ HWTEST_F(AccessibilityManagerUtilsTest, AccessibilityManagerUtilsTest010, TestSi
     EXPECT_TRUE(controller.CheckNode(frameNode1, true));
     EXPECT_TRUE(controller.CheckNode(frameNode2, false));
 }
+
+/**
+ * @tc.name: AddToHoverTransparentCallbackList010
+ * @tc.desc: AddToHoverTransparentCallbackList
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerUtilsTest, AddToHoverTransparentCallbackList010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    HoverTransparentCallbackController controller;
+    auto frameNode1 = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    auto context1 = AceType::MakeRefPtr<NG::PipelineContext>();
+    CHECK_NULL_VOID(frameNode1);
+    CHECK_NULL_VOID(context1);
+    context1->instanceId_ = 1;
+    frameNode1->AttachContext(AceType::RawPtr(context1), false);
+
+    /**
+    * @tc.steps: step2. add controller with instanceId 1.
+    * @tc.expected: check controller_ is not empty.
+    */
+    controller.AddToHoverTransparentCallbackList(frameNode1);
+    EXPECT_TRUE(controller.IsInHoverTransparentCallbackList(frameNode1));
+}
 } // namespace OHOS::Ace::NG
