@@ -15,13 +15,20 @@ import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
+config("ani_config") {
+  include_dirs = [
+    "${ace_root}/frameworks",
+    "${ace_root}/interfaces",
+    "${ace_root}",
+  ]
+}
+
 #构建ANI库
-ohos_shared_library("componentSnapshot_ani") {
+ohos_shared_library("observer_ani") {
   deps = [ "$ace_root/build:libace_compatible" ]
   include_dirs = [ "./include" ]
-  sources = [ "./src/componentSnapshot.cpp" ]
+  sources = [ "./src/observer.cpp" ]
   external_deps = [
-    "image_framework:image_ani",
     "napi:ace_napi",
     "runtime_core:ani",
   ]
@@ -32,17 +39,21 @@ ohos_shared_library("componentSnapshot_ani") {
 }
 
 #构建abc
-generate_static_abc("componentSnapshot") {
+generate_static_abc("observer") {
+  paths_keys = [ "@ohos.observer" ]
   base_url = "./ets"
-  files = [ "./ets/@ohos.componentSnapshot.ets" ]
+  files = [ "./ets/@ohos.observer.ets" ]
+  paths_values = [ "./ets/@ohos.observer.ets" ]
+  dst_file = target_out_dir + "/observer.abc"
+  out_puts = [ target_out_dir + "/observer.abc" ]
   is_boot_abc = "True"
-  device_dst_file = "/system/framework/componentSnapshot.abc"
+  device_dst_file = "/system/framework/observer.abc"
 }
 
-ohos_prebuilt_etc("componentSnapshot_etc") {
-  source = "$target_out_dir/componentSnapshot.abc"
+ohos_prebuilt_etc("observer_etc") {
+  source = "$target_out_dir/observer.abc"
   module_install_dir = "framework"
   part_name = "ace_engine"
   subsystem_name = "arkui"
-  deps = [ ":componentSnapshot" ]
+  deps = [ ":observer" ]
 }

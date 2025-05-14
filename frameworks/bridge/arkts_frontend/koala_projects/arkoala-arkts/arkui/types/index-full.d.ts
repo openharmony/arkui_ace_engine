@@ -8896,6 +8896,13 @@ declare class ComponentObserver {
 declare class UIInspector {
     createComponentObserver(id: string): ComponentObserver;
 }
+declare class UIObserver {
+    on(type: string, callback: () => void): void;
+    off(type: string, callback?: () => void): void;
+}
+declare class Observer {
+    createUIObserver(id: number): UIObserver;
+}
 declare const AbilityComponent: AbilityComponentInterface
 declare const AbilityComponentInstance: AbilityComponentAttribute
 declare const AlphabetIndexer: AlphabetIndexerInterface
