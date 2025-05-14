@@ -16,8 +16,8 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { LengthMetricsUnit, Frame, Size, Vector2, Vector3, Matrix4, Edges, BorderRadiuses_graphics, ShapeMask, ShapeMaskInternal, ShapeClip, ShapeClipInternal, DrawContext } from "../Graphics"
-import { Position, EdgeStyles } from "./units"
+import { Position, Rect, Circle, RoundRect, CommandPath, Size, Frame, Vector2, Vector3, Matrix4, Edges, Corners, ShapeMask, ShapeClip, ShapeClipInternal, LengthMetricsUnit, DrawContext } from "./Graphics"
+import { BorderStyle } from "./component/enums"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, InteropNativeModule } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
@@ -26,6 +26,7 @@ import { CallbackKind } from "./component/peers/CallbackKind"
 import { Deserializer } from "./component/peers/Deserializer"
 import { CallbackTransformer } from "./component/peers/CallbackTransformer"
 import { PeerNode } from "./PeerNode"
+import { FrameNode } from "./FrameNode"
 export type DrawCallback = (context: DrawContext) => void;
 export class RenderNodeInternal {
     public static fromPtr(ptr: KPointer): RenderNode {
@@ -36,134 +37,266 @@ export class RenderNodeInternal {
 }
 export class RenderNode implements MaterializedBase {
     peer?: Finalizable | undefined = undefined
+    private childrenList: RenderNode[] = []
+    private parentRenderNode: WeakRef<RenderNode> | null = null
+    private lengthMetricsUnitValue: LengthMetricsUnit = LengthMetricsUnit.DEFAULT
+    private borderStyleValue: Edges<BorderStyle> | null = null
+    private borderWidthValue: Edges<number> = { left: 0, top: 0, right: 0, bottom: 0 }
+    private borderColorValue: Edges<number> = { left: 0XFF000000, top: 0XFF000000, right: 0XFF000000, bottom: 0XFF000000 }
+    private borderRadiusValue: Corners<number> = { topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 }
+    private shapeMaskValue: ShapeMask | null = null
+    private backgroundColorValue: number = 0
+    private clipToFrameValue: boolean = true
+    private frameValue: Frame = { x: 0, y: 0, width: 0, height: 0 }
+    private opacityValue: number = 1.0
+    private pivotValue: Vector2 = { x: 0.5, y: 0.5 }
+    private rotationValue: Vector3 = { x: 0, y: 0, z: 0 }
+    private scaleValue: Vector2 = { x: 1.0, y: 1.0 }
+    private shadowColorValue: number = 0
+    private shadowOffsetValue: Vector2 = { x: 0, y: 0 }
+    private labelValue: string = ""
+    private shadowAlphaValue: number = 0
+    private shadowElevationValue: number = 0
+    private shadowRadiusValue: number = 0
+    private transformValue: Matrix4 = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    private translationValue: Vector2 = { x: 0, y: 0 }
+    private markNodeGroupValue: boolean = false
+    private frameNode_: WeakRef<FrameNode> | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
+    checkUndefinedOrNullWithDefaultValue<T>(arg: T | undefined, defaultValue: T): T {
+        if (arg === undefined || arg === null) {
+            return defaultValue
+        }
+        return arg as T
+    }
     get backgroundColor(): number {
-        return this.getBackgroundColor()
+        return this.backgroundColorValue
     }
     set backgroundColor(backgroundColor: number) {
-        this.setBackgroundColor(backgroundColor)
+        this.backgroundColorValue = this.checkUndefinedOrNullWithDefaultValue<number>(backgroundColor, 0)
+        this.setBackgroundColor(this.backgroundColorValue)
     }
     get clipToFrame(): boolean {
-        return this.getClipToFrame()
+        return this.clipToFrameValue
     }
     set clipToFrame(clipToFrame: boolean) {
-        this.setClipToFrame(clipToFrame)
+        this.clipToFrameValue = this.checkUndefinedOrNullWithDefaultValue<boolean>(clipToFrame, true)
+        this.setClipToFrame(this.clipToFrameValue)
     }
     get opacity(): number {
-        return this.getOpacity()
+        return this.opacityValue
     }
     set opacity(opacity: number) {
-        this.setOpacity(opacity)
+        this.opacityValue = this.checkUndefinedOrNullWithDefaultValue<number>(opacity, 1.0)
+        this.setOpacity(this.opacityValue)
     }
     get size(): Size {
-        return this.getSize()
+        return { width: this.frameValue.width, height: this.frameValue.height }
     }
     set size(size: Size) {
-        this.setSize(size)
+        if (size === undefined || size === null) {
+            this.frameValue.width = 0
+            this.frameValue.height = 0
+        } else {
+            this.frameValue.width = this.checkUndefinedOrNullWithDefaultValue<number>(size.width, 0)
+            this.frameValue.height = this.checkUndefinedOrNullWithDefaultValue<number>(size.height, 0)
+        }
+        const size_casted: Size = { width: this.frameValue.width, height: this.frameValue.height }
+        this.setSize(size_casted)
     }
     get position(): Position {
-        return this.getPosition()
+        return { x: this.frameValue.x, y: this.frameValue.y }
     }
     set position(position: Position) {
-        this.setPosition(position)
+        if (position === undefined || position === null) {
+            this.frameValue.x = 0;
+            this.frameValue.y = 0;
+        } else {
+            this.frameValue.x = this.checkUndefinedOrNullWithDefaultValue<number>(position.x, 0) as number
+            this.frameValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(position.y, 0) as number
+        }
+        const position_casted: Position = { x: this.frameValue.x, y: this.frameValue.y }
+        this.setPosition(position_casted)
     }
     get frame(): Frame {
-        return this.getFrame()
+        return this.frameValue
     }
     set frame(frame: Frame) {
-        this.setFrame(frame)
+        if (frame === undefined || frame === null) {
+            this.frameValue = { x: 0, y: 0, width: 0, height: 0 }
+        } else {
+            this.size = { width: frame.width, height: frame.height }
+            this.position = { x: frame.x, y: frame.y };
+        }
     }
     get pivot(): Vector2 {
         return this.getPivot()
     }
     set pivot(pivot: Vector2) {
+        if (pivot === undefined || pivot === null) {
+            this.pivotValue = { x: 0.5, y: 0.5 };
+          } else {
+            this.pivotValue.x = this.checkUndefinedOrNullWithDefaultValue<number>(pivot.x, 0.5);
+            this.pivotValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(pivot.y, 0.5);
+          }
         this.setPivot(pivot)
     }
     get scale(): Vector2 {
-        return this.getScale()
+        return this.scaleValue
     }
     set scale(scale: Vector2) {
-        this.setScale(scale)
+        if (scale === undefined || scale === null) {
+            this.scaleValue = { x: 1.0, y: 1.0 };
+        } else {
+            this.scaleValue.x = this.checkUndefinedOrNullWithDefaultValue<number>(scale.x, 1.0);
+            this.scaleValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(scale.y, 1.0);
+        }
+        const scale_casted: Vector2 = { x: this.scaleValue.x, y: this.scaleValue.y }
+        this.setScale(scale_casted)
     }
     get translation(): Vector2 {
-        return this.getTranslation()
+        return this.translationValue
     }
     set translation(translation: Vector2) {
-        this.setTranslation(translation)
+        if (translation === undefined || translation === null) {
+            this.translationValue = { x: 0, y: 0 };
+        } else {
+            this.translationValue.x = this.checkUndefinedOrNullWithDefaultValue<number>(translation.x, 0);
+            this.translationValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(translation.y, 0);
+        }
+        const translation_casted: Vector2 = { x: this.translationValue.x, y: this.translationValue.y }
+        this.setTranslation(translation_casted)
     }
     get rotation(): Vector3 {
-        return this.getRotation()
+        return this.rotationValue
     }
     set rotation(rotation: Vector3) {
-        this.setRotation(rotation)
+        if (rotation === undefined || rotation === null) {
+            this.rotationValue = { x: 0, y: 0, z: 0 };
+        } else {
+            this.rotationValue.x = this.checkUndefinedOrNullWithDefaultValue<number>(rotation.x, 0);
+            this.rotationValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(rotation.y, 0);
+            this.rotationValue.z = this.checkUndefinedOrNullWithDefaultValue<number>(rotation.z, 0);
+        }
+        const rotation_casted: Vector3 = { x: this.rotationValue.x, y: this.rotationValue.y, z: this.rotationValue.z }
+        this.setRotation(rotation_casted)
     }
     get transform(): Matrix4 {
-        return this.getTransform()
+        return this.transformValue
     }
     set transform(transform: Matrix4) {
-        this.setTransform(transform)
+        if (transform === undefined || transform === null) {
+            this.transformValue = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+        } else {
+            let transformArray = [...this.transformValue]
+            Object.values(transform).forEach((value, index) => {
+                if (index % 5 === 0) {
+                    transformArray[index] = this.checkUndefinedOrNullWithDefaultValue<number>(value as number, 1)
+                }
+                else {
+                    transformArray[index] = this.checkUndefinedOrNullWithDefaultValue<number>(value as number, 0)
+                }
+            })
+            this.transformValue = transformArray as Matrix4
+        }
+        this.setTransform(this.transformValue);
     }
     get shadowColor(): number {
-        return this.getShadowColor()
+        return this.shadowColorValue
     }
     set shadowColor(shadowColor: number) {
-        this.setShadowColor(shadowColor)
+        this.shadowColorValue = this.checkUndefinedOrNullWithDefaultValue<number>(shadowColor, 0)
+        this.setShadowColor(this.shadowColorValue)
     }
     get shadowOffset(): Vector2 {
-        return this.getShadowOffset()
+        return { x: this.shadowOffsetValue.x, y: this.shadowOffsetValue.y }
     }
     set shadowOffset(shadowOffset: Vector2) {
-        this.setShadowOffset(shadowOffset)
+        if (shadowOffset === undefined || shadowOffset === null) {
+            this.shadowOffsetValue = { x: 0, y: 0 };
+        } else {
+            this.shadowOffsetValue.x = this.checkUndefinedOrNullWithDefaultValue<number>(shadowOffset.x, 0);
+            this.shadowOffsetValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(shadowOffset.y, 0);
+        }
+        const shadowOffset_casted: Vector2 = { x: this.shadowOffsetValue.x, y: this.shadowOffsetValue.y }
+        this.setShadowOffset(shadowOffset_casted)
     }
     get label(): string {
-        return this.getLabel()
+        return this.labelValue
     }
     set label(label: string) {
-        this.setLabel(label)
+        this.labelValue = this.checkUndefinedOrNullWithDefaultValue<string>(label, '')
+        this.setLabel(this.labelValue)
     }
     get shadowAlpha(): number {
-        return this.getShadowAlpha()
+        return this.shadowAlphaValue
     }
     set shadowAlpha(shadowAlpha: number) {
-        this.setShadowAlpha(shadowAlpha)
+        this.shadowAlphaValue = this.checkUndefinedOrNullWithDefaultValue<number>(shadowAlpha, 0)
+        this.setShadowAlpha(this.shadowAlphaValue)
     }
     get shadowElevation(): number {
-        return this.getShadowElevation()
+        return this.shadowElevationValue
     }
     set shadowElevation(shadowElevation: number) {
-        this.setShadowElevation(shadowElevation)
+        this.shadowElevationValue = this.checkUndefinedOrNullWithDefaultValue<number>(shadowElevation, 0)
+        this.setShadowElevation(this.shadowElevationValue)
     }
     get shadowRadius(): number {
-        return this.getShadowRadius()
+        return this.shadowRadiusValue
     }
     set shadowRadius(shadowRadius: number) {
-        this.setShadowRadius(shadowRadius)
+        this.shadowRadiusValue = this.checkUndefinedOrNullWithDefaultValue<number>(shadowRadius, 0)
+        this.setShadowRadius(this.shadowRadiusValue)
     }
-    get borderStyle(): EdgeStyles {
-        return this.getBorderStyle()
+    get borderStyle(): Edges<BorderStyle> {
+        return this.borderStyleValue!
     }
-    set borderStyle(borderStyle: EdgeStyles) {
-        this.setBorderStyle(borderStyle)
+    set borderStyle(borderStyle: Edges<BorderStyle>) {
+        if (borderStyle === undefined || borderStyle === null) {
+            this.borderStyleValue = null;
+        } else {
+            this.borderStyleValue = borderStyle;
+        }
+        this.setBorderStyle(borderStyle!)
     }
-    get borderWidth(): Edges {
+    get borderWidth(): Edges<number> {
         return this.getBorderWidth()
     }
-    set borderWidth(borderWidth: Edges) {
-        this.setBorderWidth(borderWidth)
+    set borderWidth(borderWidth: Edges<number>) {
+        if (borderWidth === undefined || borderWidth === null) {
+            this.borderWidthValue = { left: 0, top: 0, right: 0, bottom: 0 } as Edges<number>
+        } else {
+            this.borderWidthValue = borderWidth;
+        }
+        const borderWidth_casted = this.borderWidthValue as Edges<number>
+        this.setBorderWidth(borderWidth_casted)
     }
-    get borderColor(): Edges {
-        return this.getBorderColor()
+    get borderColor(): Edges<number> {
+        return this.borderColorValue
     }
-    set borderColor(borderColor: Edges) {
-        this.setBorderColor(borderColor)
+    set borderColor(borderColor: Edges<number>) {
+        if (borderColor === undefined || borderColor === null) {
+            this.borderColorValue = { left: 0XFF000000, top: 0XFF000000, right: 0XFF000000, bottom: 0XFF000000 };
+        } else {
+            this.borderColorValue = borderColor;
+        }
+        const borderColor_casted = this.borderColorValue as Edges<number>
+        this.setBorderColor(borderColor_casted)
     }
-    get borderRadius(): BorderRadiuses_graphics {
-        return this.getBorderRadius()
+    get borderRadius(): Corners<number> {
+        return this.borderRadiusValue
     }
-    set borderRadius(borderRadius: BorderRadiuses_graphics) {
-        this.setBorderRadius(borderRadius)
+    set borderRadius(borderRadius: Corners<number>) {
+        if (borderRadius === undefined || borderRadius === null) {
+            this.borderRadiusValue = { topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 };
+          } else {
+            this.borderRadiusValue = borderRadius;
+          }
+          const borderRadius_casted = this.borderRadiusValue as Corners<number>
+        this.setBorderRadius(borderRadius_casted)
     }
     get shapeMask(): ShapeMask {
         return this.getShapeMask()
@@ -189,60 +322,121 @@ export class RenderNode implements MaterializedBase {
     set lengthMetricsUnit(lengthMetricsUnit: LengthMetricsUnit) {
         this.setLengthMetricsUnit(lengthMetricsUnit)
     }
-    static ctor_rendernode(id: int32, drawFunc: ((context: DrawContext) => void)): KPointer {
+    static ctor_rendernode(id: int32, callback: DrawCallback): KPointer {
         const thisSerializer : Serializer = Serializer.hold()
-        let draw_func_type : int32 = runtimeType(drawFunc)
-        thisSerializer.writeInt8(draw_func_type as int32)
-        if ((RuntimeType.UNDEFINED) != (draw_func_type)) {
-            const draw_func_value = drawFunc
-            thisSerializer.holdAndWriteCallback(draw_func_value)
-        }
+        thisSerializer.holdAndWriteCallback(callback)
         const retval  = ArkUIGeneratedNativeModule._RenderNode_ctor(id, thisSerializer.asBuffer(), thisSerializer.length())
         return retval
     }
-    constructor() {
-        const peerId  = PeerNode.nextId()
-        const ctorPtr : KPointer = RenderNode.ctor_rendernode(peerId, this.draw)
+    constructor(type?: string) {
+        if (type === 'BuilderRootFrameNode' || type === 'CustomFrameNode') {
+            return
+        }
+        const peerId = PeerNode.nextId()
+        const ctorPtr: KPointer = RenderNode.ctor_rendernode(peerId, this.draw)
         this.peer = new Finalizable(ctorPtr, RenderNode.getFinalizer())
+        this.setClipToFrame(true)
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._RenderNode_getFinalizer()
     }
     public appendChild(node: RenderNode): void {
         const node_casted = node as (RenderNode)
+        if (this.childrenList.findIndex(element => element === node_casted) !== -1) {
+            return
+        }
+        this.childrenList.push(node)
+        node.parentRenderNode = new WeakRef<RenderNode>(this)
         this.appendChild_serialize(node_casted)
         return
     }
-    public insertChildAfter(child: RenderNode, sibling: RenderNode | undefined): void {
+    public insertChildAfter(child: RenderNode, sibling: RenderNode | null): void {
         const child_casted = child as (RenderNode)
+        InteropNativeModule._NativeLog("FFZZYY insertChildAfter 111")
+        let indexOfNode = this.childrenList.findIndex(element => element === child_casted)
+        if (indexOfNode !== -1) {
+            return
+        }
+        InteropNativeModule._NativeLog("FFZZYY insertChildAfter 222")
+        child.parentRenderNode = new WeakRef<RenderNode>(this);
+        InteropNativeModule._NativeLog("FFZZYY insertChildAfter 333")
+        let indexOfSibling = this.childrenList.findIndex(element => element === sibling)
+        if (indexOfSibling === -1) {
+            return
+        }
+        InteropNativeModule._NativeLog("FFZZYY insertChildAfter 444")
+        if (sibling === undefined || sibling === null) {
+            this.childrenList.splice(0, 0, child)
+        } else {
+            this.childrenList.splice(indexOfSibling + 1, 0, child)
+        }
+        InteropNativeModule._NativeLog("FFZZYY insertChildAfter 555")
         const sibling_casted = sibling as (RenderNode | undefined)
         this.insertChildAfter_serialize(child_casted, sibling_casted)
+        InteropNativeModule._NativeLog("FFZZYY insertChildAfter 666")
         return
     }
     public removeChild(node: RenderNode): void {
         const node_casted = node as (RenderNode)
+        const index = this.childrenList.findIndex(element => element === node_casted);
+        if (index === -1) {
+            return
+        }
+        const child = this.childrenList[index]
+        child.parentRenderNode = null
+        this.childrenList.splice(index, 1)
         this.removeChild_serialize(node_casted)
         return
     }
     public clearChildren(): void {
+        this.childrenList = []
         this.clearChildren_serialize()
         return
     }
-    public getChild(index: number): RenderNode | undefined {
-        const index_casted = index as (number)
-        return this.getChild_serialize(index_casted)
+    public getChild(index: number): RenderNode | null {
+        if (this.childrenList.length > index && index >= 0) {
+            return this.childrenList[index]
+        }
+        return null
     }
-    public getFirstChild(): RenderNode | undefined {
-        return this.getFirstChild_serialize()
+    public getFirstChild(): RenderNode | null {
+        if (this.childrenList.length > 0) {
+            return this.childrenList[0]
+        }
+        return null
     }
-    public getNextSibling(): RenderNode | undefined {
-        return this.getNextSibling_serialize()
+    public getNextSibling(): RenderNode | null {
+        if (this.parentRenderNode === undefined || this.parentRenderNode === null) {
+            return null
+        }
+        let parent = this.parentRenderNode!.deref()
+        if (parent === undefined || parent === null) {
+            return null
+        }
+        let siblingList = parent!.childrenList
+        const index = siblingList.findIndex(element => element === this)
+        if (index === -1) {
+            return null
+        }
+        return parent!.getChild(index + 1)
     }
-    public getPreviousSibling(): RenderNode | undefined {
-        return this.getPreviousSibling_serialize()
+    public getPreviousSibling(): RenderNode | null {
+        if (this.parentRenderNode === undefined || this.parentRenderNode === null) {
+            return null
+        }
+        let parent = this.parentRenderNode!.deref()
+        if (parent === undefined || parent === null) {
+            return null
+        }
+        let siblingList = parent!.childrenList
+        const index = siblingList.findIndex(element => element === this)
+        if (index === -1) {
+            return null
+        }
+        return parent!.getChild(index - 1)
     }
     public draw(context: DrawContext): void {
-        InteropNativeModule._NativeLog("FZY RenderNode Draw")
+        InteropNativeModule._NativeLog("RenderNode Draw")
     }
     public invalidate(): void {
         this.invalidate_serialize()
@@ -285,15 +479,12 @@ export class RenderNode implements MaterializedBase {
         return
     }
     private getPosition(): Position {
-        return this.getPosition_serialize()
+        return { x: this.frameValue.x, y: this.frameValue.y }
     }
     private setPosition(position: Position): void {
         const position_casted = position as (Position)
         this.setPosition_serialize(position_casted)
         return
-    }
-    private getFrame(): Frame {
-        return this.getFrame_serialize()
     }
     private setFrame(frame: Frame): void {
         const frame_casted = frame as (Frame)
@@ -388,45 +579,59 @@ export class RenderNode implements MaterializedBase {
         this.setShadowRadius_serialize(shadowRadius_casted)
         return
     }
-    private getBorderStyle(): EdgeStyles {
-        return this.getBorderStyle_serialize()
-    }
-    private setBorderStyle(borderStyle: EdgeStyles): void {
-        const borderStyle_casted = borderStyle as (EdgeStyles)
+    // private getBorderStyle(): EdgeStyles {
+    //     return this.getBorderStyle_serialize()
+    // }
+    private setBorderStyle(borderStyle: Edges<BorderStyle>): void {
+        const borderStyle_casted = borderStyle as (Edges<BorderStyle>)
         this.setBorderStyle_serialize(borderStyle_casted)
         return
     }
-    private getBorderWidth(): Edges {
+    private getBorderWidth(): Edges<number> {
         return this.getBorderWidth_serialize()
     }
-    private setBorderWidth(borderWidth: Edges): void {
-        const borderWidth_casted = borderWidth as (Edges)
+    private setBorderWidth(borderWidth: Edges<number>): void {
+        const borderWidth_casted = borderWidth as (Edges<number>)
         this.setBorderWidth_serialize(borderWidth_casted)
         return
     }
-    private getBorderColor(): Edges {
+    private getBorderColor(): Edges<number> {
         return this.getBorderColor_serialize()
     }
-    private setBorderColor(borderColor: Edges): void {
-        const borderColor_casted = borderColor as (Edges)
+    private setBorderColor(borderColor: Edges<number>): void {
+        const borderColor_casted = borderColor as (Edges<number>)
         this.setBorderColor_serialize(borderColor_casted)
         return
     }
-    private getBorderRadius(): BorderRadiuses_graphics {
-        return this.getBorderRadius_serialize()
-    }
-    private setBorderRadius(borderRadius: BorderRadiuses_graphics): void {
-        const borderRadius_casted = borderRadius as (BorderRadiuses_graphics)
+    // private getBorderRadius(): Corners<number> {
+    //     return this.getBorderRadius_serialize()
+    // }
+    private setBorderRadius(borderRadius: Corners<number>): void {
+        const borderRadius_casted = borderRadius as (Corners<number>)
         this.setBorderRadius_serialize(borderRadius_casted)
         return
     }
     private getShapeMask(): ShapeMask {
-        return this.getShapeMask_serialize()
+        return this.shapeMaskValue!
     }
     private setShapeMask(shapeMask: ShapeMask): void {
         const shapeMask_casted = shapeMask as (ShapeMask)
-        this.setShapeMask_serialize(shapeMask_casted)
-        return
+        if (shapeMask_casted === undefined || shapeMask_casted === null) {
+            this.shapeMaskValue = new ShapeMask();
+        } else {
+            this.shapeMaskValue = shapeMask_casted;
+        }
+        if (this.shapeMaskValue!.rect !== null) {
+            this.setRectMask_serialize(this.shapeMaskValue!.rect!, this.shapeMaskValue!.fillColor, this.shapeMaskValue!.strokeColor, this.shapeMaskValue!.strokeWidth)
+        } else if (this.shapeMaskValue!.circle !== null) {
+            this.setCircleMask_serialize(this.shapeMaskValue!.circle!, this.shapeMaskValue!.fillColor, this.shapeMaskValue!.strokeColor, this.shapeMaskValue!.strokeWidth);
+        } else if (this.shapeMaskValue!.roundRect !== null) {
+            this.setRoundRectMask_serialize(this.shapeMask!.roundRect!, this.shapeMaskValue!.fillColor, this.shapeMaskValue!.strokeColor, this.shapeMaskValue!.strokeWidth);
+        } else if (this.shapeMaskValue!.oval !== null) {
+            this.setOvalMask_serialize(this.shapeMaskValue!.oval!, this.shapeMaskValue!.fillColor, this.shapeMaskValue!.strokeColor, this.shapeMaskValue!.strokeWidth);
+        } else if (this.shapeMaskValue!.path !== null) {
+            this.setPath_serialize(this.shapeMaskValue!.path!, this.shapeMaskValue!.fillColor, this.shapeMaskValue!.strokeColor, this.shapeMaskValue!.strokeWidth);
+        }
     }
     private getShapeClip(): ShapeClip {
         return this.getShapeClip_serialize()
@@ -550,18 +755,14 @@ export class RenderNode implements MaterializedBase {
     private setSize_serialize(size: Size): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeSize(size)
+        thisSerializer.writeInt32(this.lengthMetricsUnitValue)
         ArkUIGeneratedNativeModule._RenderNode_setSize(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getPosition_serialize(): Position {
-        const retval  = ArkUIGeneratedNativeModule._RenderNode_getPosition(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : Position = retvalDeserializer.readPosition()
-        return returnResult
-    }
     private setPosition_serialize(position: Position): void {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writePosition(position)
+        thisSerializer.writeGraphicsPosition(position)
+        thisSerializer.writeInt32(this.lengthMetricsUnitValue)
         ArkUIGeneratedNativeModule._RenderNode_setPosition(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
@@ -574,6 +775,7 @@ export class RenderNode implements MaterializedBase {
     private setFrame_serialize(frame: Frame): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeFrame(frame)
+        thisSerializer.writeInt32(this.lengthMetricsUnitValue)
         ArkUIGeneratedNativeModule._RenderNode_setFrame(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
@@ -622,6 +824,7 @@ export class RenderNode implements MaterializedBase {
     private setRotation_serialize(rotation: Vector3): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeVector3(rotation)
+        thisSerializer.writeInt32(this.lengthMetricsUnitValue)
         ArkUIGeneratedNativeModule._RenderNode_setRotation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
@@ -700,6 +903,7 @@ export class RenderNode implements MaterializedBase {
     private setShadowOffset_serialize(shadowOffset: Vector2): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeVector2(shadowOffset)
+        thisSerializer.writeInt32(this.lengthMetricsUnitValue)
         ArkUIGeneratedNativeModule._RenderNode_setShadowOffset(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
@@ -731,60 +935,58 @@ export class RenderNode implements MaterializedBase {
     private setShadowRadius_serialize(shadowRadius: number): void {
         ArkUIGeneratedNativeModule._RenderNode_setShadowRadius(this.peer!.ptr, shadowRadius)
     }
-    private getBorderStyle_serialize(): EdgeStyles {
-        const retval  = ArkUIGeneratedNativeModule._RenderNode_getBorderStyle(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : EdgeStyles = retvalDeserializer.readEdgeStyles()
-        return returnResult
-    }
-    private setBorderStyle_serialize(borderStyle: EdgeStyles): void {
+    // private getBorderStyle_serialize(): EdgeStyles {
+    //     const retval  = ArkUIGeneratedNativeModule._RenderNode_getBorderStyle(this.peer!.ptr)
+    //     let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+    //     const returnResult : EdgeStyles = retvalDeserializer.readEdgeStyles()
+    //     return returnResult
+    // }
+    private setBorderStyle_serialize(borderStyle: Edges<BorderStyle>): void {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeEdgeStyles(borderStyle)
+        thisSerializer.writeGraphicsEdgeStyles(borderStyle)
         ArkUIGeneratedNativeModule._RenderNode_setBorderStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getBorderWidth_serialize(): Edges {
+    private getBorderWidth_serialize(): Edges<number> {
         const retval  = ArkUIGeneratedNativeModule._RenderNode_getBorderWidth(this.peer!.ptr)
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : Edges = retvalDeserializer.readEdges()
+        const returnResult : Edges<number> = retvalDeserializer.readEdgesNumber()
         return returnResult
     }
-    private setBorderWidth_serialize(borderWidth: Edges): void {
+    private setBorderWidth_serialize(borderWidth: Edges<number>): void {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeEdges(borderWidth)
+        thisSerializer.writeEdgesNumber(borderWidth)
+        thisSerializer.writeInt32(this.lengthMetricsUnitValue)
         ArkUIGeneratedNativeModule._RenderNode_setBorderWidth(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getBorderColor_serialize(): Edges {
+    private getBorderColor_serialize(): Edges<number> {
         const retval  = ArkUIGeneratedNativeModule._RenderNode_getBorderColor(this.peer!.ptr)
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : Edges = retvalDeserializer.readEdges()
+        const returnResult : Edges<number> = retvalDeserializer.readEdgesNumber()
         return returnResult
     }
-    private setBorderColor_serialize(borderColor: Edges): void {
+    private setBorderColor_serialize(borderColor: Edges<number>): void {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeEdges(borderColor)
+        thisSerializer.writeEdgesNumber(borderColor)
         ArkUIGeneratedNativeModule._RenderNode_setBorderColor(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getBorderRadius_serialize(): BorderRadiuses_graphics {
-        const retval  = ArkUIGeneratedNativeModule._RenderNode_getBorderRadius(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : BorderRadiuses_graphics = retvalDeserializer.readBorderRadiuses_graphics()
-        return returnResult
-    }
-    private setBorderRadius_serialize(borderRadius: BorderRadiuses_graphics): void {
+    // private getBorderRadius_serialize(): BorderRadiuses_graphics {
+    //     const retval  = ArkUIGeneratedNativeModule._RenderNode_getBorderRadius(this.peer!.ptr)
+    //     let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+    //     const returnResult : BorderRadiuses_graphics = retvalDeserializer.readBorderRadiuses_graphics()
+    //     return returnResult
+    // }
+    private setBorderRadius_serialize(borderRadius: Corners<number>): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeBorderRadiuses_graphics(borderRadius)
+        thisSerializer.writeInt32(this.lengthMetricsUnitValue)
         ArkUIGeneratedNativeModule._RenderNode_setBorderRadius(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getShapeMask_serialize(): ShapeMask {
-        const retval  = ArkUIGeneratedNativeModule._RenderNode_getShapeMask(this.peer!.ptr)
-        const obj : ShapeMask = ShapeMaskInternal.fromPtr(retval)
-        return obj
-    }
     private setShapeMask_serialize(shapeMask: ShapeMask): void {
+
         ArkUIGeneratedNativeModule._RenderNode_setShapeMask(this.peer!.ptr, toPeerPtr(shapeMask))
     }
     private getShapeClip_serialize(): ShapeClip {
@@ -808,5 +1010,38 @@ export class RenderNode implements MaterializedBase {
     }
     private setLengthMetricsUnit_serialize(lengthMetricsUnit: LengthMetricsUnit): void {
         ArkUIGeneratedNativeModule._RenderNode_setLengthMetricsUnit(this.peer!.ptr, TypeChecker.LengthMetricsUnit_ToNumeric(lengthMetricsUnit))
+    }
+    private setRectMask_serialize(rect: Rect, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeRect(rect)
+        ArkUIGeneratedNativeModule._RenderNode_setRectMask(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), fillColor, strokeColor, strokeWidth)
+        thisSerializer.release()
+    }
+    private setCircleMask_serialize(circle: Circle, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeCircle(circle)
+        ArkUIGeneratedNativeModule._RenderNode_setCircleMask(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), fillColor, strokeColor, strokeWidth)
+        thisSerializer.release()
+    }
+    private setRoundRectMask_serialize(roundRect: RoundRect, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeRoundRect(roundRect)
+        ArkUIGeneratedNativeModule._RenderNode_setRoundRectMask(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), fillColor, strokeColor, strokeWidth)
+        thisSerializer.release()
+    }
+    private setOvalMask_serialize(rect: Rect, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeRect(rect)
+        ArkUIGeneratedNativeModule._RenderNode_setOvalMask(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), fillColor, strokeColor, strokeWidth)
+        thisSerializer.release()
+    }
+    private setPath_serialize(path: CommandPath, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeCommandPath(path)
+        ArkUIGeneratedNativeModule._RenderNode_setPath(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), fillColor, strokeColor, strokeWidth)
+        thisSerializer.release()
+    }
+    setFrameNode(frameNode: WeakRef<FrameNode>) {
+        this.frameNode_ = frameNode;
     }
 }

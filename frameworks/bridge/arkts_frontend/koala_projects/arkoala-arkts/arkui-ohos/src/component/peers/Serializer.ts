@@ -67,7 +67,7 @@ import { SearchSubmitCallback, CancelButtonStyle, SearchAttribute, IconOptions, 
 import { SliderTriggerChangeCallback, SliderAttribute, Callback_Number_SliderChangeMode_Void, SliderChangeMode, SliderBlockStyle, SliderInteraction, SlideRange, SliderBlockType, SliderStyle, SliderOptions } from "./../slider"
 import { StyledStringMarshallCallback, StyledStringUnmarshallCallback, CustomSpan, CustomSpanInternal, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, GestureStyle, GestureStyleInternal, GestureStyleInterface, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, ImageAttachment, ImageAttachmentInternal, StyleOptions, StyledStringKey, SpanStyle, UserDataSpan, DecorationStyleInterface, UrlStyle, UrlStyleInternal, BaselineOffsetStyle, BaselineOffsetStyleInternal, LetterSpacingStyle, LetterSpacingStyleInternal, LineHeightStyle, LineHeightStyleInternal, TextShadowStyle, TextShadowStyleInternal, DecorationStyle, DecorationStyleInternal, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInternal, ParagraphStyleInterface, TextStyle_styled_string, TextStyle_styled_stringInternal, TextStyleInterface, BackgroundColorStyle, BackgroundColorStyleInternal, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../styledString"
 import { TextAreaSubmitCallback, TextAreaAttribute, Callback_EnterKeyType_Void, Callback_String_PasteEvent_Void, TextAreaType, Callback_ResourceStr_Void, TextAreaController, TextAreaControllerInternal, TextAreaOptions } from "./../textArea"
-import { VoidCallback, ResourceColor, Font, Position, Length, SizeOptions, Offset, ColorFilter, ColorFilterInternal, ResourceStr, Dimension, PX, VP, FP, LPX, Percentage, LengthConstrain, DividerStyleOptions, ConstraintSizeOptions, Area, AccessibilityOptions, Bias, BorderRadiuses, ChainWeightOptions, DirectionalEdgesT, EdgeOutlineStyles, EdgeOutlineWidths, EdgeWidths, OutlineRadiuses, Padding, EdgeColors, LocalizedBorderRadiuses, LocalizedEdgeColors, LocalizedEdges, LocalizedEdgeWidths, LocalizedPadding, LocalizedPosition, MarkStyle, BorderOptions, OutlineOptions, EdgeStyles } from "./../units"
+import { VoidCallback, ResourceColor, Font, Position, Length, SizeOptions, Offset, ColorFilter, ColorFilterInternal, ResourceStr, Dimension, PX, VP, FP, LPX, Percentage, LengthConstrain, DividerStyleOptions, ConstraintSizeOptions, Area, AccessibilityOptions, Bias, BorderRadiuses, ChainWeightOptions, DirectionalEdgesT, EdgeOutlineStyles, EdgeOutlineWidths, EdgeWidths, OutlineRadiuses, Padding, EdgeColors, LocalizedBorderRadiuses, LocalizedEdgeColors, LocalizedEdges, LocalizedEdgeWidths, LocalizedPadding, LocalizedPosition, MarkStyle, BorderOptions, OutlineOptions, EdgeStyles, Edges } from "./../units"
 import { WithThemeInterface, WithThemeAttribute, WithThemeOptions } from "./../withTheme"
 import { AccessibilityHoverType, Alignment, Color, AnimationStatus, AppRotation, ArrowPointPosition, Axis, AxisAction, AxisModel, BarState, BorderStyle, CheckBoxShape, ClickEffectLevel, ColoringStrategy, CopyOptions, CrownAction, CrownSensitivity, Curve, DialogButtonStyle, Direction, DividerMode, Edge, EdgeEffect, EllipsisMode, EmbeddedType, FillMode, FlexAlign, FlexDirection, FlexWrap, FocusDrawLevel, FoldStatus, FontStyle, FontWeight, FunctionKey, GradientDirection, HeightBreakpoint, HitTestMode, HorizontalAlign, HoverEffect, IlluminatedType, ImageFit, ImageRepeat, ImageSize, ImageSpanAlignment, InteractionHand, ItemAlign, KeySource, KeyType, LineBreakStrategy, LineCapStyle, LineJoinStyle, MarqueeUpdateStrategy, ModifierKey, MouseAction, MouseButton, NestedScrollMode, ObscuredReasons, OptionWidthMode, PageFlipMode, PixelRoundCalcPolicy, PixelRoundMode, Placement, PlayMode, RelateType, RenderFit, ResponseType, ScrollSource, TextAlign, SharedTransitionEffectType, TextOverflow, TextContentStyle, TextHeightAdaptivePolicy, WordBreak, TextCase, TextSelectableMode, TextDecorationStyle, TextDecorationType, TitleHeight, TouchType, TransitionType, VerticalAlign, Visibility, Week, WidthBreakpoint, XComponentType } from "./../enums"
 import { Affinity, LineMetrics, TextBox, RunMetrics, TextDirection } from "./../arkui-graphics-text"
@@ -85,7 +85,7 @@ import { Matrix2D, Matrix2DInternal } from "./../matrix2d"
 import { ColorMode, LayoutDirection } from "./../stateManagement"
 import { Component3DAttribute, ModelType, SceneOptions } from "./../component3d"
 import { CustomDialogController, CustomDialogControllerInternal, CustomDialogControllerOptions } from "./../customDialogController"
-import { LengthMetrics, ColorMetrics, ColorMetricsInternal, Frame, Size, DrawContext, Rect, LengthMetricsUnit, LengthUnit, ShapeClip, ShapeClipInternal, RoundRect, Circle, CommandPath, ShapeMask, ShapeMaskInternal, Vector2, Vector3, BorderRadiuses_graphics, CornerRadius, Edges, Matrix4 } from "../../Graphics"
+import { DrawContext, Rect, LengthMetricsUnit, LengthUnit, ShapeClip, ShapeClipInternal, RoundRect, Circle, CommandPath, ShapeMask, Size, Vector2, Vector3, Corners, CornerRadius, Edges as EdgesT, Frame, Matrix4, LengthMetrics, Position as GraphicsPosition, ColorMetrics } from "./../../Graphics"
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, LinearGradient, LinearGradientInternal, ColorStop, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
 import { DatePickerMode, Callback_DatePickerResult_Void, DatePickerResult, DatePickerOptions, LunarSwitchStyle, DatePickerDialogOptions } from "./../datePicker"
@@ -1376,7 +1376,7 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeLength(value_bottomRight_value)
         }
     }
-    writeBorderRadiuses_graphics(value: BorderRadiuses_graphics): void {
+    writeBorderRadiuses_graphics(value: Corners<number>): void {
         let valueSerializer : Serializer = this
         const value_topLeft  = value.topLeft
         valueSerializer.writeNumber(value_topLeft)
@@ -2538,7 +2538,77 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeLength(value_right_value)
         }
     }
+    writeEdgesNumber(value: EdgesT<number>): void {
+        let valueSerializer : Serializer = this
+        const value_top  = value.top
+        let value_top_type : int32 = RuntimeType.UNDEFINED
+        value_top_type = runtimeType(value_top)
+        valueSerializer.writeInt8(value_top_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_top_type)) {
+            const value_top_value  = value_top!
+            valueSerializer.writeNumber(value_top_value)
+        }
+        const value_left  = value.left
+        let value_left_type : int32 = RuntimeType.UNDEFINED
+        value_left_type = runtimeType(value_left)
+        valueSerializer.writeInt8(value_left_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_left_type)) {
+            const value_left_value  = value_left!
+            valueSerializer.writeNumber(value_left_value)
+        }
+        const value_bottom  = value.bottom
+        let value_bottom_type : int32 = RuntimeType.UNDEFINED
+        value_bottom_type = runtimeType(value_bottom)
+        valueSerializer.writeInt8(value_bottom_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_bottom_type)) {
+            const value_bottom_value  = value_bottom!
+            valueSerializer.writeNumber(value_bottom_value)
+        }
+        const value_right  = value.right
+        let value_right_type : int32 = RuntimeType.UNDEFINED
+        value_right_type = runtimeType(value_right)
+        valueSerializer.writeInt8(value_right_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_right_type)) {
+            const value_right_value  = value_right!
+            valueSerializer.writeNumber(value_right_value)
+        }
+    }
     writeEdgeStyles(value: EdgeStyles): void {
+        let valueSerializer : Serializer = this
+        const value_top  = value.top
+        let value_top_type : int32 = RuntimeType.UNDEFINED
+        value_top_type = runtimeType(value_top)
+        valueSerializer.writeInt8(value_top_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_top_type)) {
+            const value_top_value  = (value_top as BorderStyle)
+            valueSerializer.writeInt32(TypeChecker.BorderStyle_ToNumeric(value_top_value))
+        }
+        const value_right  = value.right
+        let value_right_type : int32 = RuntimeType.UNDEFINED
+        value_right_type = runtimeType(value_right)
+        valueSerializer.writeInt8(value_right_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_right_type)) {
+            const value_right_value  = (value_right as BorderStyle)
+            valueSerializer.writeInt32(TypeChecker.BorderStyle_ToNumeric(value_right_value))
+        }
+        const value_bottom  = value.bottom
+        let value_bottom_type : int32 = RuntimeType.UNDEFINED
+        value_bottom_type = runtimeType(value_bottom)
+        valueSerializer.writeInt8(value_bottom_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_bottom_type)) {
+            const value_bottom_value  = (value_bottom as BorderStyle)
+            valueSerializer.writeInt32(TypeChecker.BorderStyle_ToNumeric(value_bottom_value))
+        }
+        const value_left  = value.left
+        let value_left_type : int32 = RuntimeType.UNDEFINED
+        value_left_type = runtimeType(value_left)
+        valueSerializer.writeInt8(value_left_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_left_type)) {
+            const value_left_value  = (value_left as BorderStyle)
+            valueSerializer.writeInt32(TypeChecker.BorderStyle_ToNumeric(value_left_value))
+        }
+    }
+    writeGraphicsEdgeStyles(value: EdgesT<BorderStyle>): void {
         let valueSerializer : Serializer = this
         const value_top  = value.top
         let value_top_type : int32 = RuntimeType.UNDEFINED
@@ -5061,6 +5131,25 @@ export class Serializer extends SerializerBase {
         valueSerializer.holdAndWriteObject(value_result)
     }
     writePosition(value: Position): void {
+        let valueSerializer : Serializer = this
+        const value_x  = value.x
+        let value_x_type : int32 = RuntimeType.UNDEFINED
+        value_x_type = runtimeType(value_x)
+        valueSerializer.writeInt8(value_x_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_x_type)) {
+            const value_x_value  = value_x!
+            valueSerializer.writeLength(value_x_value)
+        }
+        const value_y  = value.y
+        let value_y_type : int32 = RuntimeType.UNDEFINED
+        value_y_type = runtimeType(value_y)
+        valueSerializer.writeInt8(value_y_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_y_type)) {
+            const value_y_value  = value_y!
+            valueSerializer.writeLength(value_y_value)
+        }
+    }
+    writeGraphicsPosition(value: GraphicsPosition): void {
         let valueSerializer : Serializer = this
         const value_x  = value.x
         let value_x_type : int32 = RuntimeType.UNDEFINED

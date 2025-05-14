@@ -1798,6 +1798,8 @@ typedef struct Ark_EdgeOutlineWidths Ark_EdgeOutlineWidths;
 typedef struct Opt_EdgeOutlineWidths Opt_EdgeOutlineWidths;
 typedef struct Ark_Edges Ark_Edges;
 typedef struct Opt_Edges Opt_Edges;
+typedef struct Ark_EdgesNumber Ark_EdgesNumber;
+typedef struct Opt_EdgesNumber Opt_EdgesNumber;
 typedef struct Ark_EdgeStyles Ark_EdgeStyles;
 typedef struct Opt_EdgeStyles Opt_EdgeStyles;
 typedef struct Ark_EdgeWidths Ark_EdgeWidths;
@@ -12242,6 +12244,16 @@ typedef struct Opt_Edges {
     Ark_Tag tag;
     Ark_Edges value;
 } Opt_Edges;
+typedef struct Ark_EdgesNumber {
+    Opt_Number top;
+    Opt_Number left;
+    Opt_Number bottom;
+    Opt_Number right;
+} Ark_EdgesNumber;
+typedef struct Opt_EdgesNumber {
+    Ark_Tag tag;
+    Ark_EdgesNumber value;
+} Opt_EdgesNumber;
 typedef struct Ark_EdgeStyles {
     Opt_BorderStyle top;
     Opt_BorderStyle right;
@@ -23758,6 +23770,7 @@ typedef struct GENERATED_ArkUIFrameNodeAccessor {
     Ark_FrameNode (*getAttachedFrameNodeById)(const Ark_String* id);
     Ark_FrameNode (*getFrameNodeById)(const Ark_Number* id);
     Ark_FrameNode (*getFrameNodeByUniqueId)(const Ark_Number* id);
+    Ark_RenderNode (*getRenderNode)(Ark_FrameNode peer);
 } GENERATED_ArkUIFrameNodeAccessor;
 
 typedef struct GENERATED_ArkUILengthMetricsAccessor {
@@ -23884,6 +23897,31 @@ typedef struct GENERATED_ArkUIRenderNodeAccessor {
                  const Ark_DrawContext* context);
     void (*invalidate)(Ark_RenderNode peer);
     void (*dispose)(Ark_RenderNode peer);
+    void (*setRectMask)(Ark_RenderNode peer,
+                        const Ark_Rect* rect,
+                        const Ark_Number* fillColor,
+                        const Ark_Number* strokeColor,
+                        const Ark_Number* strokeWidth);
+    void (*setCircleMask)(Ark_RenderNode peer,
+                          const Ark_Circle* circle,
+                          const Ark_Number* fillColor,
+                          const Ark_Number* strokeColor,
+                          const Ark_Number* strokeWidth);
+    void (*setRoundRectMask)(Ark_RenderNode peer,
+                             const Ark_RoundRect* roundRect,
+                             const Ark_Number* fillColor,
+                             const Ark_Number* strokeColor,
+                             const Ark_Number* strokeWidth);
+    void (*setOvalMask)(Ark_RenderNode peer,
+                        const Ark_Rect* rect,
+                        const Ark_Number* fillColor,
+                        const Ark_Number* strokeColor,
+                        const Ark_Number* strokeWidth);
+    void (*setPath)(Ark_RenderNode peer,
+                    const Ark_CommandPath* path,
+                    const Ark_Number* fillColor,
+                    const Ark_Number* strokeColor,
+                    const Ark_Number* strokeWidth);
     Ark_Number (*getBackgroundColor)(Ark_RenderNode peer);
     void (*setBackgroundColor)(Ark_RenderNode peer,
                                const Ark_Number* backgroundColor);
@@ -23895,10 +23933,12 @@ typedef struct GENERATED_ArkUIRenderNodeAccessor {
                        const Ark_Number* opacity);
     Ark_Size (*getSize)(Ark_RenderNode peer);
     void (*setSize)(Ark_RenderNode peer,
-                    const Ark_Size* size);
+                    const Ark_Size* size,
+                    const Ark_Int32 unit);
     Ark_Position (*getPosition)(Ark_RenderNode peer);
     void (*setPosition)(Ark_RenderNode peer,
-                        const Ark_Position* position);
+                        const Ark_Position* position,
+                        const Ark_Int32 unit);
     Ark_Frame (*getFrame)(Ark_RenderNode peer);
     void (*setFrame)(Ark_RenderNode peer,
                      const Ark_Frame* frame);
@@ -23913,7 +23953,8 @@ typedef struct GENERATED_ArkUIRenderNodeAccessor {
                            const Ark_Vector2* translation);
     Ark_Vector3 (*getRotation)(Ark_RenderNode peer);
     void (*setRotation)(Ark_RenderNode peer,
-                        const Ark_Vector3* rotation);
+                        const Ark_Vector3* rotation,
+                        const Ark_Int32 unit);
     Ark_Matrix4 (*getTransform)(Ark_RenderNode peer);
     void (*setTransform)(Ark_RenderNode peer,
                          const Ark_Matrix4* transform);
@@ -23922,7 +23963,8 @@ typedef struct GENERATED_ArkUIRenderNodeAccessor {
                            const Ark_Number* shadowColor);
     Ark_Vector2 (*getShadowOffset)(Ark_RenderNode peer);
     void (*setShadowOffset)(Ark_RenderNode peer,
-                            const Ark_Vector2* shadowOffset);
+                            const Ark_Vector2* shadowOffset,
+                            const Ark_Int32 unit);
     Ark_String (*getLabel)(Ark_RenderNode peer);
     void (*setLabel)(Ark_RenderNode peer,
                      const Ark_String* label);
@@ -23938,15 +23980,17 @@ typedef struct GENERATED_ArkUIRenderNodeAccessor {
     Ark_EdgeStyles (*getBorderStyle)(Ark_RenderNode peer);
     void (*setBorderStyle)(Ark_RenderNode peer,
                            const Ark_EdgeStyles* borderStyle);
-    Ark_Edges (*getBorderWidth)(Ark_RenderNode peer);
+    Ark_EdgesNumber (*getBorderWidth)(Ark_RenderNode peer);
     void (*setBorderWidth)(Ark_RenderNode peer,
-                           const Ark_Edges* borderWidth);
-    Ark_Edges (*getBorderColor)(Ark_RenderNode peer);
+                           const Ark_EdgesNumber* borderWidth,
+                           const Ark_Int32 unit);
+    Ark_EdgesNumber (*getBorderColor)(Ark_RenderNode peer);
     void (*setBorderColor)(Ark_RenderNode peer,
-                           const Ark_Edges* borderColor);
+                           const Ark_EdgesNumber* borderColor);
     Ark_BorderRadiuses_graphics (*getBorderRadius)(Ark_RenderNode peer);
     void (*setBorderRadius)(Ark_RenderNode peer,
-                            const Ark_BorderRadiuses_graphics* borderRadius);
+                            const Ark_BorderRadiuses_graphics* borderRadius,
+                            const Ark_Int32 unit);
     Ark_ShapeMask (*getShapeMask)(Ark_RenderNode peer);
     void (*setShapeMask)(Ark_RenderNode peer,
                          Ark_ShapeMask shapeMask);

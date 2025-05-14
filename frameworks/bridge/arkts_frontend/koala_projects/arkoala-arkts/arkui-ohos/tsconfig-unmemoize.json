@@ -69,6 +69,9 @@
             ],
             "@ohos/observer": [
                 "./ohos.observer.ts"
+            ],
+            "@ohos/graphics/common2D": [
+                "./ohos.graphics.common2D.ts"
             ]
         },
         "rootDir": "."
@@ -84,6 +87,7 @@
         "./global/**/*.ts",
         "./ohos.router.ts",
         "./ohos.observer.ts",
+        "./ohos.graphics.common2D.ts"
     ],
     "exclude": [
         "./src/component/arkts",

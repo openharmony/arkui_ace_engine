@@ -4216,6 +4216,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _FrameNode_getFrameNodeByUniqueId(id: number): KPointer
     @ani.unsafe.Direct
+    native static _FrameNode_getRenderNode(ptr: KPointer): KPointer
+    @ani.unsafe.Direct
     native static _LengthMetrics_ctor(): KPointer
     @ani.unsafe.Direct
     native static _LengthMetrics_getFinalizer(): KPointer
@@ -4347,6 +4349,16 @@ export class ArkUIGeneratedNativeModule {
     native static _RenderNode_invalidate(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _RenderNode_dispose(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _RenderNode_setRectMask(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32, fillColor: number, strokeColor: number, strokeWidth: number): void
+    @ani.unsafe.Direct
+    native static _RenderNode_setCircleMask(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32, fillColor: number, strokeColor: number, strokeWidth: number): void
+    @ani.unsafe.Direct
+    native static _RenderNode_setRoundRectMask(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32, fillColor: number, strokeColor: number, strokeWidth: number): void
+    @ani.unsafe.Direct
+    native static _RenderNode_setOvalMask(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32, fillColor: number, strokeColor: number, strokeWidth: number): void
+    @ani.unsafe.Direct
+    native static _RenderNode_setPath(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32, fillColor: number, strokeColor: number, strokeWidth: number): void
     @ani.unsafe.Direct
     native static _RenderNode_getBackgroundColor(ptr: KPointer): number
     @ani.unsafe.Direct

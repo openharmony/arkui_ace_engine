@@ -40,9 +40,9 @@ void DestroyPeerImpl(Ark_FrameNode peer)
 }
 Ark_FrameNode CtorImpl(Ark_UIContext uiContext)
 {
-    auto peer = FrameNodePeer::Create(uiContext);
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    peer->node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
+    auto frameNode = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
+    auto peer = FrameNodePeer::Create(frameNode);
     peer->node->SetExclusiveEventForChild(true);
     peer->node->SetIsArkTsFrameNode(true);
     FrameNodePeer::peerMap_.emplace(nodeId, *peer);
@@ -365,6 +365,11 @@ Ark_FrameNode GetFrameNodeByUniqueIdImpl(const Ark_Number* id)
     auto nodeRef = AceType::DynamicCast<NG::FrameNode>(node);
     return FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(nodeRef));
 }
+Ark_RenderNode GetRenderNodeImpl(Ark_FrameNode peer)
+{
+    CHECK_NULL_RETURN(peer && peer->node, nullptr);
+    return peer->GetRenderNodePeer();
+}
 } // FrameNodeAccessor
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
 {
@@ -395,6 +400,7 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
         FrameNodeAccessor::GetAttachedFrameNodeByIdImpl,
         FrameNodeAccessor::GetFrameNodeByIdImpl,
         FrameNodeAccessor::GetFrameNodeByUniqueIdImpl,
+        FrameNodeAccessor::GetRenderNodeImpl,
     };
     return &FrameNodeAccessorImpl;
 }
