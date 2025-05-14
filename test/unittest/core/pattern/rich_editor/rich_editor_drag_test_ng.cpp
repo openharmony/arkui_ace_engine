@@ -397,7 +397,7 @@ HWTEST_F(RichEditorDragTestNg, HandleCursorOnDragEnded001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto focusHub = richEditorPattern->GetFocusHub();
     EXPECT_NE(focusHub, nullptr);
@@ -486,32 +486,6 @@ HWTEST_F(RichEditorDragTestNg, HandleDraggableFlag002, TestSize.Level1)
     EXPECT_TRUE(gestureHub->GetIsTextDraggable());
 }
 
-
-/**
- * @tc.name: HandleOnDragInsertValueOperation001
- * @tc.desc: test HandleOnDragInsertValueOperation
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorDragTestNg, HandleOnDragInsertValueOperation001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-    */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-
-    struct UpdateSpanStyle typingStyle;
-    TextStyle textStyle(5);
-    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
-    std::u16string insertValue = u"test123";
-    richEditorPattern->HandleOnDragInsertValueOperation(insertValue);
-    EXPECT_TRUE(richEditorPattern->typingStyle_.has_value());
-}
-
 /**
  * @tc.name: JudgeContentDraggable
  * @tc.desc: test JudgeContentDraggable
@@ -549,7 +523,7 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragDropTextOperation001, TestSize.Level1
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
 
     auto temp = richEditorPattern->caretPosition_;
@@ -605,7 +579,7 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragDrop001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
@@ -816,42 +790,6 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragInsertStyledString003, TestSize.Level
     richEditorPattern->HandleOnDragInsertStyledString(spanStringRef);
     EXPECT_TRUE(richEditorPattern->caretPosition_ < richEditorPattern->dragRange_.first);
 }
-
-
-/**
- * @tc.name: HandleOnDragInsertValue001
- * @tc.desc: test HandleOnDragInsertValue
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorDragTestNg, HandleOnDragInsertValue001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    std::u16string insertValue;
-    richEditorPattern->textSelector_.baseOffset = -2;
-    richEditorPattern->textSelector_.destinationOffset = -2;
-    richEditorPattern->HandleOnDragInsertValue(insertValue);
-    EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
-}
-
-/**
- * @tc.name: HandleOnDragInsertValue002
- * @tc.desc: test HandleOnDragInsertValue
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorDragTestNg, HandleOnDragInsertValue002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    std::u16string insertValue;
-    richEditorPattern->textSelector_.baseOffset = 1;
-    richEditorPattern->textSelector_.destinationOffset = 1;
-    richEditorPattern->HandleOnDragInsertValue(insertValue);
-    EXPECT_EQ(richEditorPattern->operationRecords_.size(), 2);
-}
-
 
 /**
  * @tc.name: JudgeContentDraggable001
@@ -1087,7 +1025,7 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragDropStyledString005, TestSize.Level1)
     event->SetData(unifiedData);
     richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->HandleOnDragDropStyledString(event);
-    auto host = richEditorPattern->GetHost();
+    auto host = richEditorPattern->GetContentHost();
     EXPECT_TRUE(host->isRestoreInfoUsed_);
 }
 
@@ -1142,7 +1080,7 @@ HWTEST_F(RichEditorDragTestNg, ResetDragOption001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto gestureEventHub = richEditorPattern->GetGestureEventHub();
     EXPECT_NE(gestureEventHub, nullptr);
@@ -1169,7 +1107,7 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragStatusCallback001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     RefPtr<NotifyDragEvent> notifyDragEvent = AceType::MakeRefPtr<NotifyDragEvent>();
     /**
@@ -1196,7 +1134,7 @@ HWTEST_F(RichEditorDragTestNg, HandleCursorOnDragLeaved001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     RefPtr<NotifyDragEvent> notifyDragEvent = AceType::MakeRefPtr<NotifyDragEvent>();
     EXPECT_NE(notifyDragEvent, nullptr);
@@ -1222,7 +1160,7 @@ HWTEST_F(RichEditorDragTestNg, HandleCursorOnDragMoved001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     RefPtr<NotifyDragEvent> notifyDragEvent = AceType::MakeRefPtr<NotifyDragEvent>();
     EXPECT_NE(notifyDragEvent, nullptr);
@@ -1254,7 +1192,7 @@ HWTEST_F(RichEditorDragTestNg, BeforeDrag001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     struct UpdateSpanStyle typingStyle;
     TextStyle textStyle(5);

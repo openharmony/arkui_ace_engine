@@ -146,6 +146,7 @@ protected:
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph) override;
     void AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph) override;
+    ChildrenListWithGuard GetAllChildrenWithBuild(LayoutWrapper* layoutWrapper) override;
 
 private:
     OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) override;

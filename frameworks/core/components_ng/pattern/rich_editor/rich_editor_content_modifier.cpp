@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_content_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/render/drawing.h"
 #include "base/log/ace_trace.h"
@@ -23,11 +24,11 @@ RichEditorContentModifier::RichEditorContentModifier(const std::optional<TextSty
     RichEditorParagraphManager* const pManager, const WeakPtr<OHOS::Ace::NG::Pattern>& pattern)
     : TextContentModifier(textStyle, pattern), pManager_(pManager), pattern_(pattern)
 {
-    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(richEditorPattern);
-    richTextRectX_ = AceType::MakeRefPtr<PropertyFloat>(richEditorPattern->GetTextRect().GetX());
+    auto contentPattern = AceType::DynamicCast<RichEditorContentPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(contentPattern);
+    richTextRectX_ = AceType::MakeRefPtr<PropertyFloat>(contentPattern->GetTextRect().GetX());
     AttachProperty(richTextRectX_);
-    richTextRectY_ = AceType::MakeRefPtr<PropertyFloat>(richEditorPattern->GetTextRect().GetY());
+    richTextRectY_ = AceType::MakeRefPtr<PropertyFloat>(contentPattern->GetTextRect().GetY());
     AttachProperty(richTextRectY_);
     clipOffset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
     AttachProperty(clipOffset_);
@@ -39,25 +40,23 @@ void RichEditorContentModifier::onDraw(DrawingContext& drawingContext)
 {
     ACE_SCOPED_TRACE("RichEditorContentOnDraw");
     CHECK_NULL_VOID(pManager_);
-    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(richEditorPattern);
+    auto contentPattern = AceType::DynamicCast<RichEditorContentPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(contentPattern);
     auto& canvas = drawingContext.canvas;
     canvas.Save();
-    auto contentRect = richEditorPattern->GetTextContentRect();
+    auto contentRect = contentPattern->GetTextContentRect();
     RSRect clipInnerRect = RSRect(contentRect.GetX(), contentRect.GetY(), contentRect.GetX() + contentRect.Width(),
         contentRect.GetY() + contentRect.Height());
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     auto&& paragraphs = pManager_->GetParagraphs();
     pManager_->CalPosyRange();
-    auto offset = richEditorPattern->GetTextRect().GetOffset(); // relative to component
+    auto offset = contentPattern->GetTextRect().GetOffset(); // relative to component
 
     auto clipOffset = clipOffset_->Get();
     auto size = clipSize_->Get();
 
     auto clipTop = clipOffset.GetY();
     auto clipBottom = clipTop + size.Height();
-    auto clipLeft = clipOffset.GetX();
-    auto clipRight = clipLeft + size.Width();
 
     // Find the first paragraph whose bottom is within the content rect.
     auto findFirstPara = [](const ParagraphManager::ParagraphInfo& info, float pos) { return info.bottomPos < pos; };
@@ -74,21 +73,18 @@ void RichEditorContentModifier::onDraw(DrawingContext& drawingContext)
         auto& info = *iter;
         info.paragraph->Paint(drawingContext.canvas, offset.GetX(), info.topPos + offset.GetY());
     }
-    canvas.Restore();
 
-    auto clipRect = RSRect(clipLeft, clipTop, clipRight, clipBottom);
-    drawingContext.canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
     PaintCustomSpan(drawingContext);
 }
 
 void RichEditorContentModifier::PaintCustomSpan(DrawingContext& drawingContext)
 {
     CHECK_NULL_VOID(pManager_);
-    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(richEditorPattern);
-    auto offset = richEditorPattern->GetTextRect().GetOffset();
-    const auto& rectsForPlaceholders = richEditorPattern->GetRectsForPlaceholders();
-    auto customSpanPlaceholderInfo = richEditorPattern->GetCustomSpanPlaceholderInfo();
+    auto contentPattern = AceType::DynamicCast<RichEditorContentPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(contentPattern);
+    auto offset = contentPattern->GetTextRect().GetOffset();
+    const auto& rectsForPlaceholders = contentPattern->GetRectsForPlaceholders();
+    auto customSpanPlaceholderInfo = contentPattern->GetCustomSpanPlaceholderInfo();
     auto rectsForPlaceholderSize = rectsForPlaceholders.size();
     for (auto& customSpanPlaceholder : customSpanPlaceholderInfo) {
         if (!customSpanPlaceholder.onDraw || pManager_->GetParagraphs().empty()) {

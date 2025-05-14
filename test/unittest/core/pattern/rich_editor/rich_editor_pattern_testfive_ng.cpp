@@ -415,43 +415,6 @@ HWTEST_F(RichEditorPatternTestFiveNg, GetThumbnailCallback001, TestSize.Level1)
 }
 
 /**
- * @tc.name: InsertValueToBeforeSpan001
- * @tc.desc: test InsertValueToBeforeSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, InsertValueToBeforeSpan001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto spanNodeBefore = SpanNode::GetOrCreateSpanNode(V2::RICH_EDITOR_ETS_TAG, nodeId);
-    std::u16string insertValue = PREVIEW_TEXT_VALUE3;
-    spanNodeBefore->GetSpanItem()->content = PREVIEW_TEXT_VALUE2;
-    richEditorPattern->InsertValueToBeforeSpan(spanNodeBefore, insertValue);
-    EXPECT_EQ(spanNodeBefore->GetSpanItem()->position, 4);
-}
-
-/**
- * @tc.name: InsertValueToBeforeSpan002
- * @tc.desc: test InsertValueToBeforeSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, InsertValueToBeforeSpan002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto spanNodeBefore = SpanNode::GetOrCreateSpanNode(V2::RICH_EDITOR_ETS_TAG, nodeId);
-    spanNodeBefore->GetSpanItem()->content = EXCEPT_VALUE;
-    richEditorPattern->InsertValueToBeforeSpan(spanNodeBefore, EXCEPT_VALUE);
-    EXPECT_EQ(spanNodeBefore->GetSpanItem()->position, -1);
-}
-
-/**
  * @tc.name: HandlePointWithTransform001
  * @tc.desc: test HandlePointWithTransform
  * @tc.type: FUNC

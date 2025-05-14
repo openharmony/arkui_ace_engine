@@ -185,16 +185,18 @@ HWTEST_F(RichEditorPatternTestSixNg, RemoveEmptySpanNodes002, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto newFrameNode = SpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG, nodeId);
     auto newAddFrameNode = SpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG, nodeId);
     newAddFrameNode->GetSpanItem()->content = INIT_VALUE_3;
-    richEditorNode_->children_.push_back(newFrameNode);
-    richEditorNode_->children_.push_back(newAddFrameNode);
+    contentNode->children_.push_back(newFrameNode);
+    contentNode->children_.push_back(newAddFrameNode);
     richEditorPattern->RemoveEmptySpanNodes();
     bool emptySpanNodeRemoved = true;
-    for (const auto& child : richEditorNode_->children_) {
+    for (const auto& child : contentNode->children_) {
         auto spanNode = AceType::DynamicCast<SpanNode>(child);
         if (spanNode && spanNode->GetSpanItem()->content.empty()) {
             emptySpanNodeRemoved = false;
@@ -422,7 +424,7 @@ HWTEST_F(RichEditorPatternTestSixNg, UpdateChildrenOffset004, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
 
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto host = richEditorPattern->GetHost();
     ASSERT_NE(host, nullptr);
@@ -454,7 +456,7 @@ HWTEST_F(RichEditorPatternTestSixNg, UpdateChildrenOffset005, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
 
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto host = richEditorPattern->GetHost();
     ASSERT_NE(host, nullptr);
@@ -600,11 +602,13 @@ HWTEST_F(RichEditorPatternTestSixNg, GetSameSpanItem001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
     auto spanItem = AceType::MakeRefPtr<ImageSpanItem>();
     spanItem->spanItemType = SpanItemType::IMAGE;
     auto childNode = AceType::MakeRefPtr<ImageSpanNode>(V2::IMAGE_ETS_TAG, 2);
     childNode->imageSpanItem_ = spanItem;
-    richEditorNode_->children_.emplace_back(childNode);
+    contentNode->children_.emplace_back(childNode);
     auto image = AceType::MakeRefPtr<MockCanvasImage>();
     auto imageNode = richEditorPattern->GetImageSpanNodeBySpanItem(spanItem);
     auto pattern = imageNode->GetPattern<ImagePattern>();
@@ -624,11 +628,13 @@ HWTEST_F(RichEditorPatternTestSixNg, GetSameSpanItem002, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
     auto spanItem = AceType::MakeRefPtr<ImageSpanItem>();
     spanItem->spanItemType = SpanItemType::IMAGE;
     auto childNode = AceType::MakeRefPtr<ImageSpanNode>(V2::IMAGE_ETS_TAG, 2);
     childNode->imageSpanItem_ = spanItem;
-    richEditorNode_->children_.emplace_back(childNode);
+    contentNode->children_.emplace_back(childNode);
     auto image = AceType::MakeRefPtr<MockCanvasImage>();
     image->needPixelMap = true;
     auto imageNode = richEditorPattern->GetImageSpanNodeBySpanItem(spanItem);

@@ -51,6 +51,8 @@ constexpr float OBSCURED_ALPHA = 0.2f;
 TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textStyle, const WeakPtr<Pattern>& pattern)
     : pattern_(pattern)
 {
+    contentChange_ = MakeRefPtr<PropertyInt>(0);
+    AttachProperty(contentChange_);
     auto patternUpgrade = pattern_.Upgrade();
     CHECK_NULL_VOID(patternUpgrade);
     auto textPattern = DynamicCast<TextPattern>(patternUpgrade);
@@ -59,9 +61,6 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-
-    contentChange_ = MakeRefPtr<PropertyInt>(0);
-    AttachProperty(contentChange_);
 
     auto contentRect = geometryNode->GetContentRect();
     contentOffset_ = MakeRefPtr<PropertyOffsetF>(contentRect.GetOffset());

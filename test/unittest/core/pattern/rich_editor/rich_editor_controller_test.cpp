@@ -389,6 +389,8 @@ HWTEST_F(RichEditorControllerTest, RichEditorController005, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
     AddSpan(INIT_VALUE_1);
     AddImageSpan();
     AddSpan(INIT_VALUE_2);
@@ -413,8 +415,8 @@ HWTEST_F(RichEditorControllerTest, RichEditorController005, TestSize.Level1)
     updateSpanStyle.updateTextDecorationColor = TEXT_DECORATION_COLOR_VALUE;
     richEditorController->SetUpdateSpanStyle(updateSpanStyle);
     richEditorController->UpdateSpanStyle(5, 10, textStyle, imageStyle);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
-    auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(1));
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
+    auto newSpan1 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(1));
     ASSERT_NE(newSpan1, nullptr);
     EXPECT_EQ(newSpan1->GetFontSize(), FONT_SIZE_VALUE);
     EXPECT_EQ(newSpan1->GetTextColor(), TEXT_COLOR_VALUE);
@@ -468,6 +470,8 @@ HWTEST_F(RichEditorControllerTest, RichEditorController007, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
     AddSpan(INIT_VALUE_1);
     AddImageSpan();
     AddSpan(INIT_VALUE_2);
@@ -475,7 +479,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController007, TestSize.Level1)
     option1.start = 5;
     option1.end = 10;
     richEditorController->DeleteSpans(option1);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
     ClearSpan();
     AddSpan(INIT_VALUE_1);
     AddImageSpan();
@@ -484,7 +488,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController007, TestSize.Level1)
     option2.start = 10;
     option2.end = 5;
     richEditorController->DeleteSpans(option2);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
     ClearSpan();
     AddSpan(INIT_VALUE_1);
     AddImageSpan();
@@ -493,7 +497,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController007, TestSize.Level1)
     option3.start = -5;
     option3.end = 10;
     richEditorController->DeleteSpans(option3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
+    EXPECT_EQ(contentNode->GetChildren().size(), 1);
 }
 
 /**
@@ -509,6 +513,8 @@ HWTEST_F(RichEditorControllerTest, RichEditorController010, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
     richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
@@ -517,7 +523,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController010, TestSize.Level1)
     RefPtr<FrameNode> builderNode1 = nullptr;
     auto index1 = richEditorController->AddPlaceholderSpan(builderNode1, {});
     EXPECT_EQ(index1, 0);
-    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 1);
+    EXPECT_EQ(static_cast<int32_t>(contentNode->GetChildren().size()), 1);
     ClearSpan();
 }
 
@@ -582,7 +588,8 @@ HWTEST_F(RichEditorControllerTest, RichEditorController012, TestSize.Level1)
     /**
      * @tc.steps: step5. test symbol span style
      */
-    auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    auto newSpan1 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
     ASSERT_NE(newSpan1, nullptr);
     EXPECT_EQ(newSpan1->GetFontSize(), FONT_SIZE_VALUE_2);
     EXPECT_EQ(newSpan1->GetFontWeight(), FONT_WEIGHT_BOLD);
@@ -590,7 +597,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController012, TestSize.Level1)
     EXPECT_EQ(newSpan1->GetSymbolRenderingStrategy(), RENDER_STRATEGY_MULTI_COLOR);
     EXPECT_EQ(newSpan1->GetSymbolEffectStrategy(), EFFECT_STRATEGY_SCALE);
 
-    auto newSpan2 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(1));
+    auto newSpan2 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(1));
     ASSERT_NE(newSpan2, nullptr);
     EXPECT_EQ(newSpan2->GetFontSize(), FONT_SIZE_VALUE);
     EXPECT_EQ(newSpan2->GetFontWeight(), FONT_WEIGHT_VALUE);
@@ -683,6 +690,8 @@ HWTEST_F(RichEditorControllerTest, RichEditorController014, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     /**
      * @tc.steps: step2. initalize symbol span properties
@@ -704,7 +713,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController014, TestSize.Level1)
     EXPECT_EQ(index3, 2);
     auto index4 = richEditorController->AddSymbolSpan(options);
     EXPECT_EQ(index4, 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     /**
      * @tc.steps: step4. delete single symbol span
@@ -713,22 +722,22 @@ HWTEST_F(RichEditorControllerTest, RichEditorController014, TestSize.Level1)
     option2.start = 0;
     option2.end = 2;
     richEditorController->DeleteSpans(option2);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     option2.start = 2;
     option2.end = 0;
     richEditorController->DeleteSpans(option2);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
 
     option2.start = -1;
     option2.end = 2;
     richEditorController->DeleteSpans(option2);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
+    EXPECT_EQ(contentNode->GetChildren().size(), 1);
 
     option2.start = 2;
     option2.end = -1;
     richEditorController->DeleteSpans(option2);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
+    EXPECT_EQ(contentNode->GetChildren().size(), 0);
 
     /**
      * @tc.steps: step5. add symbol span
@@ -742,7 +751,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController014, TestSize.Level1)
     option2.start = 0;
     option2.end = 1;
     richEditorController->DeleteSpans(option2); // delete half symbol span, will fail
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
+    EXPECT_EQ(contentNode->GetChildren().size(), 0);
 
     ClearSpan();
 }
@@ -787,6 +796,8 @@ HWTEST_F(RichEditorControllerTest, RichEditorController017, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     /**
      * @tc.steps: step2. test add span
@@ -794,7 +805,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController017, TestSize.Level1)
     AddSpan(INIT_VALUE_1);
     AddImageSpan();
     AddSpan(INIT_VALUE_2);
-    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 3);
+    EXPECT_EQ(static_cast<int32_t>(contentNode->GetChildren().size()), 3);
 
     /**
      * @tc.steps: step3. test update span
@@ -813,7 +824,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController017, TestSize.Level1)
      * @tc.expected: expect GetFontSize() is equal to FONT_SIZE_VALUE
      */
     richEditorController->UpdateSpanStyle(0, -1, textStyle, imageStyle);
-    auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    auto newSpan1 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
     ASSERT_NE(newSpan1, nullptr);
     EXPECT_EQ(newSpan1->GetFontSize(), FONT_SIZE_VALUE);
 
@@ -857,6 +868,8 @@ HWTEST_F(RichEditorControllerTest, RichEditorController018, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
     AddSpan(INIT_VALUE_1);
@@ -866,14 +879,14 @@ HWTEST_F(RichEditorControllerTest, RichEditorController018, TestSize.Level1)
     option4.start = 5;
     option4.end = -10;
     richEditorController->DeleteSpans(option4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
     ClearSpan();
     AddSpan(INIT_VALUE_1);
     AddImageSpan();
     AddSpan(INIT_VALUE_2);
     RangeOptions option5;
     richEditorController->DeleteSpans(option5);
-    EXPECT_TRUE(richEditorNode_->GetChildren().empty());
+    EXPECT_TRUE(contentNode->GetChildren().empty());
     ClearSpan();
     AddSpan(INIT_VALUE_1);
     AddImageSpan();
@@ -881,7 +894,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController018, TestSize.Level1)
     option5.start = 100;
     option5.end = 10;
     richEditorController->DeleteSpans(option5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
     ClearSpan();
     AddSpan(INIT_VALUE_1);
     AddImageSpan();
@@ -889,7 +902,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController018, TestSize.Level1)
     option5.start = 3;
     option5.end = 3;
     richEditorController->DeleteSpans(option5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
     ClearSpan();
     richEditorController->DeleteSpans(option5);
 }
@@ -909,13 +922,15 @@ HWTEST_F(RichEditorControllerTest, RichEditorController019, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     /**
      * @tc.steps: step2. initalize span properties and add image span
      */
     AddImageSpan();
     AddSpan(INIT_VALUE_1);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
 
     /**
      * @tc.steps: step3. test UpdateImageStyle
@@ -945,7 +960,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController019, TestSize.Level1)
     /**
      * @tc.steps: step4. test image span style
      */
-    auto host = richEditorPattern->GetHost();
+    auto host = richEditorPattern->GetContentHost();
     ASSERT_NE(host, nullptr);
     auto child = host->GetChildren().begin();
     auto imageNode = AceType::DynamicCast<FrameNode>(*child);
@@ -1027,6 +1042,8 @@ HWTEST_F(RichEditorControllerTest, RichEditorController22, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
     AddSpan(INIT_VALUE_1);
     AddImageSpan();
     AddSpan(INIT_VALUE_2);
@@ -1051,8 +1068,8 @@ HWTEST_F(RichEditorControllerTest, RichEditorController22, TestSize.Level1)
     updateSpanStyle.updateTextDecorationColor = TEXT_DECORATION_COLOR_VALUE;
     richEditorController->SetUpdateSpanStyle(updateSpanStyle);
     richEditorController->UpdateSpanStyle(5, 10, textStyle, imageStyle);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
-    auto newSpan2 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(3));
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
+    auto newSpan2 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(3));
     ASSERT_NE(newSpan2, nullptr);
     EXPECT_EQ(newSpan2->GetFontSize(), FONT_SIZE_VALUE);
     EXPECT_EQ(newSpan2->GetTextColor(), TEXT_COLOR_VALUE);

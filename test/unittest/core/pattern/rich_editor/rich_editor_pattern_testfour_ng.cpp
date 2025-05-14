@@ -280,7 +280,7 @@ HWTEST_F(RichEditorPatternTestFourNg, RemoveEmptySpanNodes001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto host = richEditorPattern->GetHost();
+    auto host = richEditorPattern->GetContentHost();
     EXPECT_NE(host, nullptr);
 
     richEditorPattern->spans_.clear();
@@ -405,7 +405,7 @@ HWTEST_F(RichEditorPatternTestFourNg, InsertValueOperation001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
 
     struct UpdateSpanStyle typingStyle;
@@ -571,6 +571,8 @@ HWTEST_F(RichEditorPatternTestFourNg, ResetFirstNodeStyle001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     /**
      * @tc.steps: step2. initalize symbol span properties
@@ -592,7 +594,7 @@ HWTEST_F(RichEditorPatternTestFourNg, ResetFirstNodeStyle001, TestSize.Level1)
     EXPECT_EQ(index3, 2);
     auto index4 = richEditorController->AddSymbolSpan(options);
     EXPECT_EQ(index4, 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 }
 
 /**
@@ -694,7 +696,7 @@ HWTEST_F(RichEditorPatternTestFourNg, SetSelection007, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    ASSERT_NE(richEditorPattern->contentMod_, nullptr);
+    ASSERT_EQ(richEditorPattern->contentMod_, nullptr);
     ASSERT_NE(richEditorPattern->overlayMod_, nullptr);
     auto focusHub = richEditorPattern->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -726,7 +728,7 @@ HWTEST_F(RichEditorPatternTestFourNg, SetSelection008, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    ASSERT_NE(richEditorPattern->contentMod_, nullptr);
+    ASSERT_EQ(richEditorPattern->contentMod_, nullptr);
     ASSERT_NE(richEditorPattern->overlayMod_, nullptr);
     auto focusHub = richEditorPattern->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);

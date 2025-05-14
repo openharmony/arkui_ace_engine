@@ -181,7 +181,7 @@ void MultipleParagraphLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     size_t index = 0;
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = GetAllChildrenWithBuild(layoutWrapper);
     // children only contains the image span.
     for (const auto& child : children) {
         if (!child) {
@@ -666,7 +666,7 @@ void MultipleParagraphLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrap
     auto placeHolderLayoutConstrain = layoutConstrain;
     placeHolderLayoutConstrain.maxSize.SetHeight(Infinity<float>());
     placeHolderLayoutConstrain.percentReference.SetHeight(0);
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = GetAllChildrenWithBuild(layoutWrapper);
     auto iterItems = children.begin();
     bool needReCreateParagraph = false;
     int32_t itemIndex = -1;
@@ -726,6 +726,11 @@ void MultipleParagraphLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrap
     layoutProperty->OnPropertyChangeMeasure();
 }
 
+ChildrenListWithGuard MultipleParagraphLayoutAlgorithm::GetAllChildrenWithBuild(LayoutWrapper* layoutWrapper)
+{
+    return layoutWrapper->GetAllChildrenWithBuild();
+}
+
 bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(
     LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle, double maxWidth, const TextStyle& textStyle)
 {
@@ -735,7 +740,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, false);
     InheritParentTextStyle(textStyle);
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = GetAllChildrenWithBuild(layoutWrapper);
     auto iterItems = children.begin();
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, false);

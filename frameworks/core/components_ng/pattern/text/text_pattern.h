@@ -92,6 +92,11 @@ public:
 
     ~TextPattern() override;
 
+    virtual RefPtr<FrameNode> GetContentHost() const
+    {
+        return GetHost();
+    }
+
     SelectionInfo GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
     std::list<ResultObject> GetSpansInfoInStyledString(int32_t start, int32_t end);
 
