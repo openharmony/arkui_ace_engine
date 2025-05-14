@@ -444,6 +444,7 @@
       OHOS::Ace::Kit::OverlayManager::*;
       OHOS::Ace::Kit::UIContext::*;
       OHOS::Ace::Theme::*;
+      OHOS::Ace::TokenColors::*;
       OHOS::Ace::NG::ListModelNG::*;
       OHOS::Ace::NG::ListItemModelNG::*;
       OHOS::Ace::NG::ScrollBarModelNG::*;

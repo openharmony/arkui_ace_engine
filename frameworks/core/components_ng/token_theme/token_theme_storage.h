@@ -37,7 +37,7 @@ public:
     const RefPtr<TokenTheme>& GetTheme(TokenThemeScopeId themeScopeId);
 
     // default theme
-    void SetDefaultTheme(const RefPtr<NG::TokenTheme>& theme, ColorMode colorMode);
+    void SetDefaultTheme(const RefPtr<TokenTheme>& theme, ColorMode colorMode);
     const RefPtr<TokenTheme>& GetDefaultTheme();
     void UpdateDefaultThemeBySystemTheme(ColorMode colorMode);
 

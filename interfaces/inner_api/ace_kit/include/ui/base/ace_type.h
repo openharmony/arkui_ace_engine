@@ -39,6 +39,12 @@
 friend class Referenced;
 
 namespace OHOS::Ace {
+    
+enum class ColorMode : int32_t {
+    LIGHT = 0,
+    DARK,
+    COLOR_MODE_UNDEFINED,
+};
 
 // Inherit 'AceType' to manager pointers using 'RefPtr', 'WeakPtr' and 'AceType::DynamicCast'.
 class AceType : public virtual TypeInfoBase, public virtual Referenced {

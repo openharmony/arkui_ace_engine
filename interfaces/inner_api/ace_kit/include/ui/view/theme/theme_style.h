@@ -24,10 +24,12 @@
 #include "ui/base/geometry/dimension.h"
 #include "ui/base/referenced.h"
 #include "ui/view/theme/theme.h"
+#include "ui/view/theme/token_theme_wrapper.h"
 
 namespace OHOS::Ace::Kit {
 
 using BuildFunc = std::function<RefPtr<Ace::Theme>()>;
+using BuildThemeWrapperFunc = std::function<RefPtr<Ace::TokenThemeWrapper>()>;
 class ACE_FORCE_EXPORT ThemeStyle : public virtual AceType {
     DECLARE_ACE_TYPE(ThemeStyle, AceType);
 

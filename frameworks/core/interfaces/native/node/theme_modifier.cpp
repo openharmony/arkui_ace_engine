@@ -126,6 +126,13 @@ void SetOnThemeScopeDestroy(ArkUINodeHandle node, void* callback)
         withThemeNode->SetOnThemeScopeDestroy(std::move(*cb));
     }
 }
+
+ArkUI_Int32 GetThemeScopeId(ArkUINodeHandle node)
+{
+    auto ui_node = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(ui_node, 0);
+    return ui_node->GetThemeScopeId();
+}
 } // namespace ThemeModifier
 namespace NodeModifier {
 const ArkUIThemeModifier* GetThemeModifier()
@@ -139,6 +146,7 @@ const ArkUIThemeModifier* GetThemeModifier()
         .setDefaultTheme = ThemeModifier::SetDefaultTheme,
         .removeFromCache = ThemeModifier::RemoveFromCache,
         .setOnThemeScopeDestroy = ThemeModifier::SetOnThemeScopeDestroy,
+        .getThemeScopeId = ThemeModifier::GetThemeScopeId,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
