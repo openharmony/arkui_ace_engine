@@ -311,6 +311,7 @@ void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
         if (info[0]->IsString() && info[0]->ToString() == "auto") {
             SwiperModel::GetInstance()->SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
             SwiperModel::GetInstance()->ResetDisplayCount();
+            SwiperModel::GetInstance()->ResetMinSize();
         } else if (info[0]->IsNumber() && info[0]->ToNumber<int32_t>() > 0) {
             SwiperModel::GetInstance()->SetDisplayCount(info[0]->ToNumber<int32_t>());
         } else if (info[0]->IsObject()) {
@@ -325,6 +326,8 @@ void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
                 return;
             }
             SwiperModel::GetInstance()->SetMinSize(minSizeValue);
+            SwiperModel::GetInstance()->ResetDisplayCount();
+            SwiperModel::GetInstance()->ResetDisplayMode();
         } else {
             SwiperModel::GetInstance()->SetDisplayCount(DEFAULT_DISPLAY_COUNT);
         }

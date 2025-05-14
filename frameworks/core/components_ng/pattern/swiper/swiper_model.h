@@ -141,9 +141,11 @@ public:
     virtual void SetDisableSwipe(bool disableSwipe);
     virtual void SetEdgeEffect(EdgeEffect EdgeEffect);
     virtual void SetDisplayMode(SwiperDisplayMode displayMode);
+    virtual void ResetDisplayMode() {}
     virtual void SetDisplayCount(int32_t displayCount);
     virtual void ResetDisplayCount() {}
     virtual void SetMinSize(const Dimension& minSize);
+    virtual void ResetMinSize() {}
     virtual void SetShowIndicator(bool showIndicator);
     virtual void SetItemSpace(const Dimension& itemSpace);
     virtual void SetCachedCount(int32_t cachedCount);
