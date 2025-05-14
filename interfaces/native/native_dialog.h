@@ -311,18 +311,6 @@ typedef struct {
     */
     int32_t (*registerOnWillDismissWithUserData)(
         ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event));
-    
-    /**
-     * @brief Get state of dialog.
-     *
-     * @param handle Indicates the pointer to the custom dialog box controller.
-     * @param state Dialog state object.
-     * @return Returns the error code.
-     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
-     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
-     * @since 20
-     */
-    int32_t (*getState)(ArkUI_NativeDialogHandle handle, ArkUI_DialogState* state);
 } ArkUI_NativeDialogAPI_1;
 
 /**
@@ -1095,6 +1083,18 @@ int32_t OH_ArkUI_CustomDialog_RegisterOnWillDisappearCallback(
  */
 int32_t OH_ArkUI_CustomDialog_RegisterOnDidDisappearCallback(
     ArkUI_CustomDialogOptions* options, void* userData, void (*callback)(void* userData));
+
+/**
+ * @brief Get state of dialog.
+ *
+ * @param handle Indicates the pointer to the custom dialog box controller.
+ * @param state Dialog state object.
+ * @return Returns the error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ */
+int32_t OH_ArkUI_CustomDialog_GetState(ArkUI_NativeDialogHandle handle, ArkUI_DialogState* state);
 
 #ifdef __cplusplus
 };

@@ -112,7 +112,6 @@ ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
     OHOS::Ace::DialogModel::Show,
     OHOS::Ace::DialogModel::Close,
     OHOS::Ace::DialogModel::RegisterOnWillDismissWithUserData,
-    OHOS::Ace::DialogModel::GetState,
 };
 
 ArkUI_NativeDialogAPI_2 dialogImpl_2 = {
