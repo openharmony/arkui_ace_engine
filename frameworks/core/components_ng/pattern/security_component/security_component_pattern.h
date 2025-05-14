@@ -119,6 +119,7 @@ protected:
 private:
     void HandleClickEventFromTouch(const TouchEventInfo& info);
     void UpdateIconProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& iconNode);
+    void UpdateSymbolProperty(const RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& symbolNode);
     void UpdateTextProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& textNode);
     void UpdateButtonProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& buttonNode);
     void HandleEnabled();

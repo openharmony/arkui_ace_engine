@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "ui/base/utils/utils.h"
 
 #define protected public
 #define private public
@@ -61,6 +62,8 @@ namespace OHOS::Ace::NG {
 namespace {
 const InspectorFilter filter;
 constexpr float DEFAULT_ICON_SIZE = 16.0f;
+constexpr float DEFAULT_SYMBOL_FONT_SIZE = 24.0f;
+constexpr uint32_t DEFAULT_SYMBOL_ICON_COLOR = 0xFF000000;
 constexpr float DEFAULT_FONT_SIZE = 16.0f;
 constexpr float DEFAULT_ICON_MIN_SIZE = 12.0f;
 constexpr float DEFAULT_FONT_MIN_SIZE = 12.0f;
@@ -290,6 +293,61 @@ void SecurityComponentModelTestNg::CheckSecurityComponentDefaultProp(RefPtr<Fram
         static_cast<int32_t>(ButtonType::CAPSULE));
     EXPECT_EQ(property->GetTextIconLayoutDirection().value_or(SecurityComponentLayoutDirection::VERTICAL),
         SecurityComponentLayoutDirection::HORIZONTAL);
+}
+
+/**
+ * @tc.name: SecurityComponentPasteButtonSymbolTest001
+ * @tc.desc: Test symbol of paste component.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPasteButtonSymbolTest001, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = PasteButtonModelNG::GetInstance()->CreateNode(
+        0, -1, static_cast<int32_t>(ButtonType::CAPSULE), true, 1);
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    auto textIconSpace = property->GetTextIconSpace();
+    ASSERT_EQ(textIconSpace.has_value(), false);
+
+    frameNode = PasteButtonModelNG::GetInstance()->CreateNode(
+        0, 0, static_cast<int32_t>(ButtonType::CAPSULE), true, -1);
+    ASSERT_NE(frameNode, nullptr);
+    property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    textIconSpace = property->GetTextIconSpace();
+    ASSERT_EQ(textIconSpace.has_value(), false);
+
+    frameNode = PasteButtonModelNG::GetInstance()->CreateNode(
+        0, 0, static_cast<int32_t>(ButtonType::CAPSULE), true, 1);
+    ASSERT_EQ(frameNode, nullptr);
+
+    frameNode = PasteButtonModelNG::GetInstance()->CreateNode(
+        0, -1, static_cast<int32_t>(ButtonType::CAPSULE), true, -1);
+    ASSERT_NE(frameNode, nullptr);
+    property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    textIconSpace = property->GetTextIconSpace();
+    ASSERT_EQ(textIconSpace.has_value(), true);
+    ASSERT_EQ(NearEqual(textIconSpace->Value(), 0.0f), true);
+}
+
+/**
+ * @tc.name: SecurityComponentPasteButtonSymbolTest002
+ * @tc.desc: Test symbol of paste component.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPasteButtonSymbolTest002, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = PasteButtonModelNG::GetInstance()->CreateNode(
+        0, -1, static_cast<int32_t>(ButtonType::CAPSULE), true, 1);
+    ASSERT_NE(frameNode, nullptr);
+
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
+    std::string message;
+    SecurityComponentHandler::InitChildInfo(buttonInfo, frameNode);
+    ASSERT_EQ(NearEqual(buttonInfo.iconSize_, DEFAULT_SYMBOL_FONT_SIZE), true);
+    ASSERT_EQ(buttonInfo.iconColor_.value, DEFAULT_SYMBOL_ICON_COLOR);
+
 }
 
 /**
