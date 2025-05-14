@@ -14,9 +14,11 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_video_bridge.h"
 
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
@@ -275,6 +277,505 @@ ArkUINativeModuleValue VideoBridge::ResetShortcutKeyEnabled(ArkUIRuntimeCallInfo
     }
     auto* nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getVideoModifier()->resetVideoShortcutKeyEnabled(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::SetOnStart(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getVideoModifier()->resetOnStart(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    std::function<void(std::string&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                     std::string& value) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        const char* keys[] = { "start" };
+        std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(value);
+        CHECK_NULL_VOID(argsPtr);
+        Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf8(vm, argsPtr->GetString(keys[0]).c_str()) };
+        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        eventObject->SetNativePointerFieldCount(vm, 1);
+        eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&value));
+        panda::Local<panda::JSValueRef> params[1] = { eventObject };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    GetArkUINodeModifiers()->getVideoModifier()->setOnStart(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::ResetOnStart(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getVideoModifier()->resetOnStart(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::SetOnPause(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getVideoModifier()->resetOnPause(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    std::function<void(std::string&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                     std::string& value) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        const char* keys[] = { "pause" };
+        std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(value);
+        CHECK_NULL_VOID(argsPtr);
+        Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf8(vm, argsPtr->GetString(keys[0]).c_str()) };
+        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        eventObject->SetNativePointerFieldCount(vm, 1);
+        eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&value));
+        panda::Local<panda::JSValueRef> params[1] = { eventObject };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    GetArkUINodeModifiers()->getVideoModifier()->setOnPause(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::ResetOnPause(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getVideoModifier()->resetOnPause(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::SetOnFinish(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getVideoModifier()->resetOnFinish(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    std::function<void(std::string&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                     std::string& value) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        const char* keys[] = { "finish" };
+        std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(value);
+        CHECK_NULL_VOID(argsPtr);
+        Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf8(vm, argsPtr->GetString(keys[0]).c_str()) };
+        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        eventObject->SetNativePointerFieldCount(vm, 1);
+        eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&value));
+        panda::Local<panda::JSValueRef> params[1] = { eventObject };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    GetArkUINodeModifiers()->getVideoModifier()->setOnFinish(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::ResetOnFinish(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getVideoModifier()->resetOnFinish(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::SetOnFullscreenChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getVideoModifier()->resetOnFullscreenChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    std::function<void(std::string&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                     std::string& value) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        const char* keys[] = { "fullscreen" };
+        std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(value);
+        CHECK_NULL_VOID(argsPtr);
+        Local<JSValueRef> values[] = { panda::BooleanRef::New(vm, argsPtr->GetBool(keys[0])) };
+        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        eventObject->SetNativePointerFieldCount(vm, 1);
+        eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&value));
+        panda::Local<panda::JSValueRef> params[1] = { eventObject };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    GetArkUINodeModifiers()->getVideoModifier()->setOnFullscreenChange(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::ResetOnFullscreenChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getVideoModifier()->resetOnFullscreenChange(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::SetOnPrepared(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getVideoModifier()->resetOnPrepared(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    std::function<void(std::string&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                     std::string& value) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        const char* keys[] = { "duration" };
+        std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(value);
+        CHECK_NULL_VOID(argsPtr);
+        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, argsPtr->GetInt(keys[0])) };
+        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        eventObject->SetNativePointerFieldCount(vm, 1);
+        eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&value));
+        panda::Local<panda::JSValueRef> params[1] = { eventObject };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    GetArkUINodeModifiers()->getVideoModifier()->setOnPrepared(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::ResetOnPrepared(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getVideoModifier()->resetOnPrepared(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::SetOnSeeking(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getVideoModifier()->resetOnSeeking(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    std::function<void(std::string&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                     std::string& value) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        const char* keys[] = { "time" };
+        std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(value);
+        CHECK_NULL_VOID(argsPtr);
+        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, argsPtr->GetInt(keys[0])) };
+        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        eventObject->SetNativePointerFieldCount(vm, 1);
+        eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&value));
+        panda::Local<panda::JSValueRef> params[1] = { eventObject };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    GetArkUINodeModifiers()->getVideoModifier()->setOnSeeking(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::ResetOnSeeking(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getVideoModifier()->resetOnSeeking(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::SetOnSeeked(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getVideoModifier()->resetOnSeeked(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    std::function<void(std::string&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                     std::string& value) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        const char* keys[] = { "time" };
+        std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(value);
+        CHECK_NULL_VOID(argsPtr);
+        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, argsPtr->GetInt(keys[0])) };
+        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        eventObject->SetNativePointerFieldCount(vm, 1);
+        eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&value));
+        panda::Local<panda::JSValueRef> params[1] = { eventObject };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    GetArkUINodeModifiers()->getVideoModifier()->setOnSeeked(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::ResetOnSeeked(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getVideoModifier()->resetOnSeeked(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::SetOnUpdate(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getVideoModifier()->resetOnUpdate(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    std::function<void(std::string&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                     std::string& value) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        const char* keys[] = { "time" };
+        std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(value);
+        CHECK_NULL_VOID(argsPtr);
+        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, argsPtr->GetInt(keys[0])) };
+        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        eventObject->SetNativePointerFieldCount(vm, 1);
+        eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&value));
+        panda::Local<panda::JSValueRef> params[1] = { eventObject };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    GetArkUINodeModifiers()->getVideoModifier()->setOnUpdate(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::ResetOnUpdate(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getVideoModifier()->resetOnUpdate(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::SetOnError(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getVideoModifier()->resetOnError(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    std::function<void(std::string&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                     std::string& value) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        const char* keys[] = { "code", "name", "message" };
+        std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(value);
+        CHECK_NULL_VOID(argsPtr);
+        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, argsPtr->GetInt(keys[0])),
+            panda::StringRef::NewFromUtf8(vm, argsPtr->GetString(keys[1]).c_str()),
+            panda::StringRef::NewFromUtf8(vm, argsPtr->GetString(keys[2]).c_str()) };
+        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        eventObject->SetNativePointerFieldCount(vm, 1);
+        eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&value));
+        panda::Local<panda::JSValueRef> params[1] = { eventObject };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    GetArkUINodeModifiers()->getVideoModifier()->setOnError(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::ResetOnError(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getVideoModifier()->resetOnError(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::SetOnStop(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getVideoModifier()->resetOnStop(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    std::function<void(std::string&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                     std::string& value) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        const char* keys[] = { "stop" };
+        std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(value);
+        CHECK_NULL_VOID(argsPtr);
+        Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf8(vm, argsPtr->GetString(keys[0]).c_str()) };
+        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        eventObject->SetNativePointerFieldCount(vm, 1);
+        eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&value));
+        panda::Local<panda::JSValueRef> params[1] = { eventObject };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    GetArkUINodeModifiers()->getVideoModifier()->setOnStop(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::ResetOnStop(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getVideoModifier()->resetOnStop(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::SetEnableAnalyzer(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> flagArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    if (flagArg->IsUndefined() || !flagArg->IsBoolean()) {
+        GetArkUINodeModifiers()->getVideoModifier()->resetEnableAnalyzer(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    bool flag = flagArg->ToBoolean(vm)->Value();
+    GetArkUINodeModifiers()->getVideoModifier()->setEnableAnalyzer(nativeNode, flag);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::ResetEnableAnalyzer(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getVideoModifier()->resetEnableAnalyzer(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::SetAnalyzerConfig(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> configValue = runtimeCallInfo->GetCallArgRef(1);
+    JSValueWrapper valueWrapper = configValue;
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, panda::NativePointerRef::New(vm, nullptr));
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    Framework::ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    GetArkUINodeModifiers()->getVideoModifier()->setAnalyzerConfig(nativeNode, nativeValue);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::ResetAnalyzerConfig(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getVideoModifier()->resetAnalyzerConfig(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

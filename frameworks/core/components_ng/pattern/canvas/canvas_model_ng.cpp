@@ -85,9 +85,15 @@ void CanvasModelNG::SetOnReady(FrameNode* frameNode, std::function<void()>&& onR
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateEventHub<CanvasEventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto func = onReady;
-    auto onReadyEvent = [func]() { func(); };
-    eventHub->SetOnReady(std::move(onReadyEvent));
+    eventHub->SetOnReady(std::move(onReady));
+}
+
+void CanvasModelNG::EnableAnalyzer(FrameNode* frameNode, bool enable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->EnableAnalyzer(enable);
 }
 
 RefPtr<AceType> CanvasModelNG::GetCanvasPattern(FrameNode* node)
