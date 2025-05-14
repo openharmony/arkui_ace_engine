@@ -74,6 +74,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     hitTestBehavior(value: HitTestMode): this;
     layoutWeight(value: number | string): this;
     padding(value: Padding | Length): this;
+    safeAreaPadding(value: Padding | LengthMetrics | LocalizedPadding): this;
     margin(value: Margin | Length): this;
     background(builder: CustomBuilder, options?: {
         align?: Alignment;
@@ -708,6 +709,11 @@ declare class ArkStackComponent extends ArkComponent implements StackAttribute {
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this;
     alignContent(value: Alignment): StackAttribute;
     align(value: Alignment): this;
+}
+declare class ArkFolderStackComponent extends ArkStackComponent implements FolderStackAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    onFolderStateChange(callback: (event: { foldStatus: FoldStatus }) => void): this;
+    onHoverStatusChange(handler: (param: HoverEventParam) => void): this;
 }
 declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

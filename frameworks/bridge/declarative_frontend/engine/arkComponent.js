@@ -12325,6 +12325,16 @@ class ArkFolderStackComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, FolderStackAutoHalfFoldModifier.identity, FolderStackAutoHalfFoldModifier, value);
     return this;
   }
+  onFolderStateChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, FolderStackOnFolderStateChangeModifier.identity,
+      FolderStackOnFolderStateChangeModifier, callback);
+    return this;
+  }
+  onHoverStatusChange(handler) {
+    modifierWithKey(this._modifiersWithKeys, FolderStackOnHoverStatusChangeModifier.identity,
+      FolderStackOnHoverStatusChangeModifier, handler);
+    return this;
+  }
 }
 
 class FolderStackAlignContentModifier extends ModifierWithKey {
@@ -12368,6 +12378,34 @@ class FolderStackAutoHalfFoldModifier extends ModifierWithKey {
   }
 }
 FolderStackAutoHalfFoldModifier.identity = Symbol('folderStackAutoHalfFold');
+
+class FolderStackOnFolderStateChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().folderStack.resetOnFolderStateChange(node);
+    } else {
+      getUINativeModule().folderStack.setOnFolderStateChange(node, this.value);
+    }
+  }
+}
+FolderStackOnFolderStateChangeModifier.identity = Symbol('folderStackOnFolderStateChange');
+
+class FolderStackOnHoverStatusChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().folderStack.resetOnHoverStatusChange(node);
+    } else {
+      getUINativeModule().folderStack.setOnHoverStatusChange(node, this.value);
+    }
+  }
+}
+FolderStackOnHoverStatusChangeModifier.identity = Symbol('folderStackOnHoverStatusChange');
 
 // @ts-ignore
 if (globalThis.FolderStack !== undefined) {

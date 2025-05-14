@@ -25,11 +25,15 @@ class ACE_EXPORT FolderStackModelNG : public FolderStackModel {
 public:
     void Create(const std::vector<std::string>& itemId) override;
     void SetAlignment(Alignment alignment) override;
+    static void SetOnFolderStateChange(
+        FrameNode* frameNode, std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange);
     void SetOnFolderStateChange(std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange) override;
     static void SetEnableAnimation(FrameNode* frameNode, bool isEnableAnimation);
     void SetEnableAnimation(bool IsEnableAnimation) override;
     static void SetAutoHalfFold(FrameNode* frameNode, bool isAutoHalfFold);
     void SetAutoHalfFold(bool IsAutoHalfFold) override;
+    static void SetOnHoverStatusChange(
+        FrameNode* frameNode, std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange);
     void SetOnHoverStatusChange(std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange) override;
 
 private:
