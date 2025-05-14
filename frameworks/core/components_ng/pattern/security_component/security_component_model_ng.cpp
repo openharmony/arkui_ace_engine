@@ -110,6 +110,10 @@ RefPtr<FrameNode> SecurityComponentModelNG::InitChild(const std::string& tag, in
         }
         frameNode->AddChild(buttonNode);
         if (style.symbolIcon && style.symbolIcon != static_cast<uint32_t>(SecurityComponentIconStyle::ICON_NULL)) {
+            if (style.icon != static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) {
+                SC_LOG_ERROR("Image icon and symbol icon cannot be set at same time.");
+                return nullptr;
+            }
             auto symbolIcon = FrameNode::CreateFrameNode(
                 V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             SetDefaultSymbolIconStyle(symbolIcon, style.symbolIcon, isButtonVisible);
