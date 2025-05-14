@@ -3547,9 +3547,6 @@ void PipelineContext::AccelerateConsumeTouchEvents(
             lastDispatchTime[idIter.first] = curVsyncArrivalTime;
             touchEvents.emplace_back(newTouchEvent);
         }
-        auto idToTouchPoint = eventManager_->GetIdToTouchPoint();
-        idToTouchPoint = std::move(idToTouchPoints);
-        eventManager_->SetIdToTouchPoint(std::move(idToTouchPoint));
     } else {
         for (const auto& idIter : idToTouchPoints) {
             lastDispatchTime[idIter.first] = curVsyncArrivalTime;

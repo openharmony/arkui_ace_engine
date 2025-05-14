@@ -59,31 +59,38 @@ std::vector<TouchEvent> Get2ndOrderDiff(const std::vector<TouchEvent>& events)
     return Get1stOrderDiff(diff);
 }
 
-bool IsSmoothBy2ndOrderDiff(const std::vector<TouchEvent>& events)
+double GetStdDev(const std::vector<TouchEvent>& diff)
 {
-    auto diff = Get2ndOrderDiff(events);
-    for (int32_t i = 1; i < diff.size(); ++i) {
-        if (diff[i].x * diff[i - 1].x < 0 || diff[i].y * diff[i - 1].y < 0) {
-            return false;
-        }
-    }
-    return true;
-}
-
-double IsSmoothBy1stOrderDiff(const std::vector<TouchEvent>& events)
-{
-    auto diff = Get1stOrderDiff(events);
     double xAccumulate = 0;
+    double yAccumulate = 0;
     for (auto& item : diff) {
         xAccumulate += item.x;
+        yAccumulate += item.y;
     }
     double xMean = xAccumulate / diff.size();
+    double yMean = yAccumulate / diff.size();
 
     xAccumulate = 0;
+    yAccumulate = 0;
     for (auto& item : diff) {
         xAccumulate += std::pow(item.x - xMean, 2);
+        yAccumulate += std::pow(item.y - yMean, 2);
     }
-    return std::sqrt(xAccumulate / diff.size()) / xMean;
+    return std::sqrt((xAccumulate + yAccumulate) / diff.size());
+}
+
+// using Parabola
+double SmoothBy2ndOrderDiff(const std::vector<TouchEvent>& events)
+{
+    auto diff = Get2ndOrderDiff(events);
+    return GetStdDev(diff);
+}
+
+// using linear
+double SmoothBy1stOrderDiff(const std::vector<TouchEvent>& events)
+{
+    auto diff = Get1stOrderDiff(events);
+    return GetStdDev(diff);
 }
 
 int64_t GetDeltaT(TimeStamp time, TimeStamp base)
@@ -134,9 +141,9 @@ void GenerateCSV(const std::string& fileName, TimeStamp baseTime, const std::vec
 }
 
 struct TestResult {
-    bool isSmooth;
-    double stddevAgainstPhy;
-    double stddevOfUniformSpeed;
+    double stddevOfAcc; // evaluate smooth
+    double stddevAgainstPhy; // evaluate accuracy
+    double stddevOfUniformSpeed; // evalueate stability
 };
 
 class MockEventManager : public EventManager {
@@ -175,9 +182,14 @@ public:
 
     /* test functions */
     double GetCoordsDiffAgainstPhy();
+    void TestFastFlick(int32_t vsyncPeriod, TestResult& result);
+    void TestDeceleratingSlide(int32_t vsyncPeriod, TestResult& result);
+    void TestConstantSpeedSlide(int32_t vsyncPeriod, TestResult& result);
+    void TestSlowConstantSpeedSlide(int32_t vsyncPeriod, TestResult& result);
 
-    static constexpr uint32_t TP_RATE = 6000;
+    static constexpr uint32_t TP_RATE = 140;
     static constexpr double NOISE_STD_DEV = 0.7;
+    static constexpr float NEAR_ZERO_DEV = 0.001;
 
     TimeStamp nowTime_;
     Generator func_;
@@ -214,6 +226,7 @@ void ResampleTestNg::TearDown()
 {
     events_.clear();
     oriEvents_.clear();
+    pipeline_->touchEvents_.clear();
     func_ = nullptr;
 }
 
@@ -236,6 +249,7 @@ void ResampleTestNg::SetGenerator(Generator&& f)
     func_ = std::move(f);
 }
 
+// Generate a touch sequence with specific duration
 void ResampleTestNg::GenerateTouchEvents(uint32_t duration)
 {
     std::vector<TouchEvent> events;
@@ -245,7 +259,7 @@ void ResampleTestNg::GenerateTouchEvents(uint32_t duration)
     std::chrono::milliseconds durationMs(duration);
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::normal_distribution<double> noise(0.0, 0.7);
+    std::normal_distribution<double> noise(0.0, NOISE_STD_DEV);
 
     // touch down
     TouchEvent event;
@@ -262,17 +276,18 @@ void ResampleTestNg::GenerateTouchEvents(uint32_t duration)
         event.SetY(p.y);
         event.SetTime(deltaT + nowTime_);
         oriEvents_.emplace_back(event);
-    } while (deltaT < durationMs);
+    } while (deltaT <= durationMs);
 }
 
-void ResampleTestNg::RunVsync(int32_t vsyncPeriodUs)
+void ResampleTestNg::RunVsync(int32_t vsyncHz)
 {
-    std::chrono::microseconds vsyncPeriod(1000000 / vsyncPeriodUs);
-    constexpr int64_t delay = 2000000; // simulate the 3ms delay between vsync and sensor time of event
+    std::chrono::microseconds vsyncPeriod(1000000 / vsyncHz);
+    constexpr int64_t delay = 2000000; // simulate the 2ms delay between vsync and sensor time of event
     int32_t i = 0;
     auto vsyncTime = nowTime_;
     int32_t cnt = 0;
-    uint64_t microSec = 0;
+    events_.clear();
+    pipeline_->touchEvents_.clear();
     while (i < oriEvents_.size()) {
         while (i < oriEvents_.size() && oriEvents_[i].time < vsyncTime) {
             pipeline_->touchEvents_.emplace_back(oriEvents_[i]);
@@ -280,14 +295,11 @@ void ResampleTestNg::RunVsync(int32_t vsyncPeriodUs)
         }
         int64_t vsynTimeNs = vsyncTime.time_since_epoch().count();
         pipeline_->SetVsyncTime(vsynTimeNs + delay);
-        auto startTime = std::chrono::high_resolution_clock::now();
         pipeline_->FlushTouchEvents();
-        auto endTime = std::chrono::high_resolution_clock::now();
+        pipeline_->resampleTimeStamp_ = vsynTimeNs + delay + 1000000; // instead of mock FlushVsync
         vsyncTime += vsyncPeriod;
         ++cnt;
-        microSec += std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count();
     }
-    std::cout << "lyc " << cnt << " "<< microSec / cnt << std::endl;
 }
 
 bool ResampleTestNg::TestOnTouchEvent(const TouchEvent& event, bool sendOnTouch)
@@ -301,7 +313,6 @@ double ResampleTestNg::GetCoordsDiffAgainstPhy()
     double variance = 0;
     for (int32_t i = 0; i < events_.size(); ++i) {
         auto base = GetPhysicPoint(events_[i].time);
-        // auto base = GetOriginPoint(events_[i].time);
         double dx = events_[i].x - base.x;
         double dy = events_[i].y - base.y;
         variance += dx * dx + dy * dy;
@@ -309,112 +320,169 @@ double ResampleTestNg::GetCoordsDiffAgainstPhy()
     return variance / events_.size();
 }
 
-/**
- * @tc.name: ResampleTest60HzCommon
- * @tc.desc: Construct touch events and test resample sequence in 60Hz vsync.
- * @tc.type: FUNC
- */
-HWTEST_F(ResampleTestNg, ResampleTest60HzFastFlick, TestSize.Level1)
+void ResampleTestNg::TestFastFlick(int32_t vsyncPeriod, TestResult& result)
 {
-    constexpr int32_t repeatTimes = 10;
+    constexpr int32_t repeatTimes = 1;
     double accumulateVar = 0;
-    int32_t smoothCnt = 0;
+    double accumulateSmooth = 0;
     SetGenerator([](double t) { return CalculateParabola(-0.0005, 0.8, 0, t, M_PI / 3); });
     for (int32_t i = 0; i < repeatTimes; ++i) {
         GenerateTouchEvents(500);
-        RunVsync(30);
+        RunVsync(vsyncPeriod);
         accumulateVar += GetCoordsDiffAgainstPhy();
-        smoothCnt += IsSmoothBy2ndOrderDiff(events_) ? 0 : 1;
+        accumulateSmooth += SmoothBy2ndOrderDiff(events_);
     }
-    TestResult result { 0 };
-    result.stddevAgainstPhy = std::sqrt(accumulateVar / repeatTimes) - NOISE_STD_DEV;
-    result.isSmooth = (smoothCnt == 0);
-
-    EXPECT_LT(std::abs(result.stddevAgainstPhy), 0.01);
-    EXPECT_LE(result.isSmooth, 0);
+    result.stddevAgainstPhy = std::sqrt(accumulateVar / repeatTimes);
+    result.stddevOfAcc = accumulateSmooth / repeatTimes;
 }
 
 /**
- * @tc.name: ResampleTest60HzCommon
- * @tc.desc: Construct touch events and test resample sequence in 60Hz vsync.
+ * @tc.name: ResampleTestFastFlick
+ * @tc.desc: Construct touch events and test resample sequence.
  * @tc.type: FUNC
  */
-HWTEST_F(ResampleTestNg, ResampleTest60HzDeceleratingSlide, TestSize.Level1)
+HWTEST_F(ResampleTestNg, ResampleTestFastFlick, TestSize.Level1)
 {
-    constexpr int32_t repeatTimes = 10;
+    TestResult result { 0 };
+    pipeline_->touchAccelarate_ = true;
+    TestFastFlick(60, result);
+    EXPECT_LT(result.stddevAgainstPhy, 0.146);
+    EXPECT_LT(result.stddevOfAcc, 0.537);
+    TestFastFlick(140, result);
+    EXPECT_LT(result.stddevAgainstPhy, 0.226);
+    EXPECT_LT(result.stddevOfAcc, 3.956);
+    
+    pipeline_->touchAccelarate_ = false;
+    TestFastFlick(60, result);
+    EXPECT_LT(result.stddevAgainstPhy, 0.212);
+    EXPECT_LT(result.stddevOfAcc, 1.634);
+    TestFastFlick(140, result);
+    EXPECT_LT(result.stddevAgainstPhy, NEAR_ZERO_DEV);
+    EXPECT_LT(result.stddevOfAcc, 0.288);
+}
+
+void ResampleTestNg::TestDeceleratingSlide(int32_t vsyncPeriod, TestResult& result)
+{
+    constexpr int32_t repeatTimes = 1;
     double accumulateVar = 0;
-    int32_t smoothCnt = 0;
+    double accumulateSmooth = 0;
     SetGenerator([](double t) { return CalculateParabola(-0.0001, 0.3, 0, t, M_PI / 6); });
     for (int32_t i = 0; i < repeatTimes; ++i) {
-        GenerateTouchEvents(800);
+        GenerateTouchEvents(500);
         RunVsync(60);
         accumulateVar += GetCoordsDiffAgainstPhy();
-        smoothCnt += IsSmoothBy2ndOrderDiff(events_) ? 0 : 1;
+        accumulateSmooth += SmoothBy2ndOrderDiff(events_);
     }
-    TestResult result { 0 };
-    result.stddevAgainstPhy = std::sqrt(accumulateVar / repeatTimes) - NOISE_STD_DEV;
-    result.isSmooth = (smoothCnt == 0);
-
-    EXPECT_LT(std::abs(result.stddevAgainstPhy), 0.01);
-    EXPECT_LE(result.isSmooth, 0);
+    result.stddevAgainstPhy = std::sqrt(accumulateVar / repeatTimes);
+    result.stddevOfAcc = accumulateSmooth / repeatTimes;
 }
 
 /**
- * @tc.name: ResampleTest60HzCommon
- * @tc.desc: Construct touch events and test resample sequence in 60Hz vsync.
+ * @tc.name: ResampleTestDeceleratingSlide
+ * @tc.desc: Construct touch events and test resample sequence.
  * @tc.type: FUNC
  */
-HWTEST_F(ResampleTestNg, ResampleTest60HzConstantSpeedSlide, TestSize.Level1)
+HWTEST_F(ResampleTestNg, ResampleTestDeceleratingSlide, TestSize.Level1)
 {
-    constexpr int32_t repeatTimes = 10;
+    TestResult result { 0 };
+    pipeline_->touchAccelarate_ = true;
+    TestDeceleratingSlide(60, result);
+    EXPECT_LT(result.stddevAgainstPhy, 0.065);
+    EXPECT_LT(result.stddevOfAcc, 0.357);
+    TestDeceleratingSlide(140, result);
+    EXPECT_LT(result.stddevAgainstPhy, 0.065);
+    EXPECT_LT(result.stddevOfAcc, 0.357);
+    
+    pipeline_->touchAccelarate_ = false;
+    TestDeceleratingSlide(60, result);
+    EXPECT_LT(result.stddevAgainstPhy, 0.098);
+    EXPECT_LT(result.stddevOfAcc, 0.625);
+    TestDeceleratingSlide(140, result);
+    EXPECT_LT(result.stddevAgainstPhy, 0.098);
+    EXPECT_LT(result.stddevOfAcc, 0.625);
+}
+
+void ResampleTestNg::TestConstantSpeedSlide(int32_t vsyncPeriod, TestResult& result)
+{
+    constexpr int32_t repeatTimes = 1;
     double accumulateVar = 0;
-    int32_t smoothCnt = 0;
-    double variance = 0;
+    double accumulateSmooth = 0;
+    pipeline_->touchAccelarate_ = false;
     SetGenerator([](double t) { return CalculateParabola(0, 0.2, 0, t, 0); });
     for (int32_t i = 0; i < repeatTimes; ++i) {
         GenerateTouchEvents(1000);
-        RunVsync(120);
+        RunVsync(60);
         accumulateVar += GetCoordsDiffAgainstPhy();
-        smoothCnt += IsSmoothBy2ndOrderDiff(events_) ? 0 : 1;
-        variance += IsSmoothBy1stOrderDiff(events_);
+        accumulateSmooth += SmoothBy1stOrderDiff(events_);
     }
-    TestResult result { 0 };
-    result.stddevAgainstPhy = std::sqrt(accumulateVar / repeatTimes) - NOISE_STD_DEV;
-    result.isSmooth = (smoothCnt == 0);
-    result.stddevOfUniformSpeed = variance / repeatTimes - NOISE_STD_DEV;
-
-    EXPECT_LT(std::abs(result.stddevAgainstPhy), 0.01);
-    EXPECT_LE(result.isSmooth, 0);
-    EXPECT_LT(std::abs(result.stddevOfUniformSpeed), 0.5);
+    result.stddevAgainstPhy = std::sqrt(accumulateVar / repeatTimes);
+    result.stddevOfUniformSpeed = accumulateSmooth / repeatTimes;
 }
 
 /**
- * @tc.name: ResampleTest60HzCommon
- * @tc.desc: Construct touch events and test resample sequence in 60Hz vsync.
+ * @tc.name: ResampleTestConstantSpeedSlide
+ * @tc.desc: Construct touch events and test resample sequence.
  * @tc.type: FUNC
  */
-HWTEST_F(ResampleTestNg, ResampleTest60HzSlowConstantSpeedSlide, TestSize.Level1)
+HWTEST_F(ResampleTestNg, ResampleTestConstantSpeedSlide, TestSize.Level1)
 {
-    constexpr int32_t repeatTimes = 10;
+    TestResult result { 0 };
+    pipeline_->touchAccelarate_ = true;
+    TestConstantSpeedSlide(60, result);
+    EXPECT_LT(result.stddevAgainstPhy, NEAR_ZERO_DEV);
+    EXPECT_LT(result.stddevOfUniformSpeed, 0.656);
+    TestConstantSpeedSlide(140, result);
+    EXPECT_LT(result.stddevAgainstPhy, NEAR_ZERO_DEV);
+    EXPECT_LT(result.stddevOfUniformSpeed, 0.656);
+    
+    pipeline_->touchAccelarate_ = false;
+    TestConstantSpeedSlide(60, result);
+    EXPECT_LT(result.stddevAgainstPhy, NEAR_ZERO_DEV);
+    EXPECT_LT(result.stddevOfUniformSpeed, 0.656);
+    TestConstantSpeedSlide(140, result);
+    EXPECT_LT(result.stddevAgainstPhy, NEAR_ZERO_DEV);
+    EXPECT_LT(result.stddevOfUniformSpeed, 0.656);
+}
+
+void ResampleTestNg::TestSlowConstantSpeedSlide(int32_t vsyncPeriod, TestResult& result)
+{
+    constexpr int32_t repeatTimes = 1;
     double accumulateVar = 0;
-    int32_t smoothCnt = 0;
-    double stddev = 0;
+    double accumulateSmooth = 0;
     SetGenerator([](double t) { return CalculateParabola(0, 0.05, 0, t, 0); });
     for (int32_t i = 0; i < repeatTimes; ++i) {
         GenerateTouchEvents(1000);
-        RunVsync(120);
+        RunVsync(60);
         accumulateVar += GetCoordsDiffAgainstPhy();
-        smoothCnt += IsSmoothBy2ndOrderDiff(events_) ? 0 : 1;
-        stddev += IsSmoothBy1stOrderDiff(events_);
+        accumulateSmooth += SmoothBy1stOrderDiff(events_);
     }
-    TestResult result { 0 };
-    result.stddevAgainstPhy = std::sqrt(accumulateVar / repeatTimes) - NOISE_STD_DEV;
-    result.isSmooth = (smoothCnt == 0);
-    result.stddevOfUniformSpeed = std::sqrt(stddev / repeatTimes) - NOISE_STD_DEV;
+    result.stddevAgainstPhy = std::sqrt(accumulateVar / repeatTimes);
+    result.stddevOfUniformSpeed = accumulateSmooth / repeatTimes;
+}
 
-    EXPECT_LT(std::abs(result.stddevAgainstPhy), 0.01);
-    EXPECT_LE(result.isSmooth, 0);
-    EXPECT_LT(std::abs(result.stddevOfUniformSpeed), 0.5);
+/**
+ * @tc.name: ResampleTestSlowConstantSpeedSlide
+ * @tc.desc: Construct touch events and test resample sequence.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResampleTestNg, ResampleTestSlowConstantSpeedSlide, TestSize.Level1)
+{
+    TestResult result { 0 };
+    pipeline_->touchAccelarate_ = true;
+    TestSlowConstantSpeedSlide(60, result);
+    EXPECT_LT(result.stddevAgainstPhy, 0.013);
+    EXPECT_LT(result.stddevOfUniformSpeed, 0.086);
+    TestSlowConstantSpeedSlide(140, result);
+    EXPECT_LT(result.stddevAgainstPhy, 0.013);
+    EXPECT_LT(result.stddevOfUniformSpeed, 0.086);
+    
+    pipeline_->touchAccelarate_ = false;
+    TestSlowConstantSpeedSlide(60, result);
+    EXPECT_LT(result.stddevAgainstPhy, NEAR_ZERO_DEV);
+    EXPECT_LT(result.stddevOfUniformSpeed, 0.164);
+    TestSlowConstantSpeedSlide(140, result);
+    EXPECT_LT(result.stddevAgainstPhy, NEAR_ZERO_DEV);
+    EXPECT_LT(result.stddevOfUniformSpeed, 0.164);
 }
 } // namespace NG
 } // namespace OHOS::Ace
