@@ -73,6 +73,15 @@ void RecognizerGroup::AddChildren(const std::list<RefPtr<NGGestureRecognizer>>& 
     }
 }
 
+void RecognizerGroup::RemoveRecognizerInGroup(const RefPtr<NGGestureRecognizer>& recognizer)
+{
+    auto iter = std::find(recognizers_.begin(), recognizers_.end(), recognizer);
+    if (iter == recognizers_.end()) {
+        return;
+    }
+    recognizers_.erase(iter);
+}
+
 RefereeState RecognizerGroup::CheckStates(size_t touchId)
 {
     int count = 0;

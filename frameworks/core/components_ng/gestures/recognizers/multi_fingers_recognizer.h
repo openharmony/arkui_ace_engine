@@ -40,6 +40,11 @@ public:
         return touchPoints_.find(touchId) != touchPoints_.end();
     }
 
+    std::map<int32_t, TouchEvent> GetTouchPoints() override
+    {
+        return touchPoints_;
+    }
+
     int GetFingers()
     {
         return fingers_;

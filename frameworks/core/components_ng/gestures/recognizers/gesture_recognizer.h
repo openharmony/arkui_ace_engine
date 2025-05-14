@@ -269,6 +269,8 @@ public:
     }
     virtual bool CheckTouchId(int32_t touchId) = 0;
 
+    virtual std::map<int32_t, TouchEvent> GetTouchPoints() = 0;
+
     SourceType getDeviceType()
     {
         return deviceType_;
