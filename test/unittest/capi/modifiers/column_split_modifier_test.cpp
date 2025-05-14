@@ -103,7 +103,8 @@ HWTEST_F(ColumnSplitModifierTest, setResizeableTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     for (auto [passed, checkVal, expected]: resizeableValidValues) {
-        modifier_->setResizeable(node_, checkVal);
+        auto checkValue = Converter::ArkValue<Opt_Boolean>(checkVal);
+        modifier_->setResizeable(node_, &checkValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RESIZEABLE_NAME);
         EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;

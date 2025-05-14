@@ -162,7 +162,7 @@ const std::vector<Ark_CalendarDay> nextDayArray {
 };
 Converter::ArkArrayHolder<Array_CalendarDay> nextDays(nextDayArray);
 
-const Ark_Type_CalendarInterface_value calendarOptions {
+const Ark_Type_CalendarInterface_callable0_value calendarOptions {
     .date {
         .year = Converter::ArkValue<Ark_Number>(2024),
         .month = Converter::ArkValue<Ark_Number>(2),
@@ -270,10 +270,8 @@ HWTEST_F(CalendarModifierTest, setNeedSlideTestNeedSlideValidValues, TestSize.Le
 
     auto checkValue = [this, &initValueNeedSlide](
                           const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
-        Ark_Boolean inputValueNeedSlide = initValueNeedSlide;
-
-        inputValueNeedSlide = value;
-        modifier_->setNeedSlide(node_, inputValueNeedSlide);
+        auto inputValueNeedSlide = Converter::ArkValue<Opt_Boolean>(value);
+        modifier_->setNeedSlide(node_, &inputValueNeedSlide);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NEED_SLIDE_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -324,13 +322,12 @@ HWTEST_F(CalendarModifierTest, showLunarTestNeedSlideValidValues, TestSize.Level
     initValueShowLunar = std::get<1>(testFixtureBooleanValidValues[0]);
     auto checkValue = [this, &initValueShowLunar](
                           const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
-        Ark_Boolean inputValueShowLunar = initValueShowLunar;
-        inputValueShowLunar = value;
+        auto inputValueShowLunar = Converter::ArkValue<Opt_Boolean>(value);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_FALSE(frameNode->GetChildren().empty());
         auto swiperNode = frameNode->GetChildren().front();
         ASSERT_NE(swiperNode, nullptr);
-        modifier_->setShowLunar(node_, inputValueShowLunar);
+        modifier_->setShowLunar(node_, &inputValueShowLunar);
         ASSERT_FALSE(swiperNode->GetChildren().empty());
         for (const auto& calendarNode : swiperNode->GetChildren()) {
             auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
@@ -387,13 +384,12 @@ HWTEST_F(CalendarModifierTest, showHolidayTestNeedSlideValidValues, TestSize.Lev
     initValueShowHoliday = std::get<1>(testFixtureBooleanValidValues[0]);
     auto checkValue = [this, &initValueShowHoliday](
                           const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
-        Ark_Boolean inputValueShowHoliday = initValueShowHoliday;
-        inputValueShowHoliday = value;
+        auto inputValueShowHoliday = Converter::ArkValue<Opt_Boolean>(value);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_FALSE(frameNode->GetChildren().empty());
         auto swiperNode = frameNode->GetChildren().front();
         ASSERT_NE(swiperNode, nullptr);
-        modifier_->setShowHoliday(node_, inputValueShowHoliday);
+        modifier_->setShowHoliday(node_, &inputValueShowHoliday);
         ASSERT_FALSE(swiperNode->GetChildren().empty());
         for (const auto& calendarNode : swiperNode->GetChildren()) {
             auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
@@ -450,8 +446,7 @@ HWTEST_F(CalendarModifierTest, startOfWeekTestValidValues, TestSize.Level1)
     initValuestartOfWeek = std::get<1>(testFixtureStartOfWeekValidValues[0]);
     auto checkValue = [this, &initValuestartOfWeek](
                           const std::string& input, const  Ark_Number& value, const std::string& expectedStr) {
-        Ark_Number inputValueStartOfWeek = initValuestartOfWeek;
-        inputValueStartOfWeek = value;
+        auto inputValueStartOfWeek = Converter::ArkValue<Opt_Number>(value);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_FALSE(frameNode->GetChildren().empty());
         auto swiperNode = frameNode->GetChildren().front();
@@ -513,8 +508,7 @@ HWTEST_F(CalendarModifierTest, offDaysTestValidValues, TestSize.Level1)
     initValueOffDays = std::get<1>(testFixtureOffDaysValidValues[0]);
     auto checkValue = [this, &initValueOffDays](
                           const std::string& input, const  Ark_Number& value, const std::string& expectedStr) {
-        Ark_Number inputValueOffDays = initValueOffDays;
-        inputValueOffDays = value;
+        auto inputValueOffDays = Converter::ArkValue<Opt_Number>(value);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_FALSE(frameNode->GetChildren().empty());
         auto swiperNode = frameNode->GetChildren().front();
@@ -567,10 +561,8 @@ HWTEST_F(CalendarModifierTest, setDirectionTestDirectionValidValues, TestSize.Le
 
     auto checkValue = [this, &initValueDirection](
                           const std::string& input, const Ark_Axis& value, const std::string& expectedStr) {
-        Ark_Axis inputValueDirection = initValueDirection;
-
-        inputValueDirection = value;
-        modifier_->setDirection(node_, inputValueDirection);
+        auto inputValueDirection = Converter::ArkValue<Opt_Axis>(value);
+        modifier_->setDirection(node_, &inputValueDirection);
         auto jsonValue = GetPatternJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIRECTION_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -595,11 +587,8 @@ HWTEST_F(CalendarModifierTest, setDirectionTestDirectionInvalidValues, TestSize.
     initValueDirection = std::get<1>(testFixtureIntAxisValidValues[0]);
 
     auto checkValue = [this, &initValueDirection](const std::string& input, const Ark_Axis& value) {
-        Ark_Axis inputValueDirection = initValueDirection;
-
-        modifier_->setDirection(node_, inputValueDirection);
-        inputValueDirection = value;
-        modifier_->setDirection(node_, inputValueDirection);
+        auto inputValueDirection = Converter::ArkValue<Opt_Axis>(value);
+        modifier_->setDirection(node_, &inputValueDirection);
         auto jsonValue = GetPatternJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIRECTION_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_DIRECTION_DEFAULT_VALUE)
@@ -629,11 +618,12 @@ HWTEST_F(CalendarModifierTest, currentDayStyleTest, TestSize.Level1)
     initValue.gregorianCalendarHeight = Converter::ArkValue<Opt_Number>(4);
     initValue.dayYAxisOffset = Converter::ArkValue<Opt_Number>(5);
     initValue.lunarDayYAxisOffset = Converter::ArkValue<Opt_Number>(6);
+    auto optInitValue = Converter::ArkValue<Opt_CurrentDayStyle>(initValue);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_FALSE(frameNode->GetChildren().empty());
     auto swiperNode = frameNode->GetChildren().front();
     ASSERT_NE(swiperNode, nullptr);
-    modifier_->setCurrentDayStyle(node_, &initValue);
+    modifier_->setCurrentDayStyle(node_, &optInitValue);
     ASSERT_FALSE(swiperNode->GetChildren().empty());
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
@@ -680,11 +670,12 @@ HWTEST_F(CalendarModifierTest, currentDayStyleTest2, TestSize.Level1)
     initValue.scheduleMarkerYAxisOffset = Converter::ArkValue<Opt_Number>(10);
     initValue.colSpace = Converter::ArkValue<Opt_Number>(11);
     initValue.dailyFiveRowSpace = Converter::ArkValue<Opt_Number>(12);
+    auto optInitValue = Converter::ArkValue<Opt_CurrentDayStyle>(initValue);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_FALSE(frameNode->GetChildren().empty());
     auto swiperNode = frameNode->GetChildren().front();
     ASSERT_NE(swiperNode, nullptr);
-    modifier_->setCurrentDayStyle(node_, &initValue);
+    modifier_->setCurrentDayStyle(node_, &optInitValue);
     ASSERT_FALSE(swiperNode->GetChildren().empty());
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
@@ -724,11 +715,12 @@ HWTEST_F(CalendarModifierTest, currentDayStyleTest3, TestSize.Level1)
     initValue.scheduleMarkerRadius = Converter::ArkValue<Opt_Number>(17);
     initValue.boundaryRowOffset = Converter::ArkValue<Opt_Number>(18);
     initValue.boundaryColOffset = Converter::ArkValue<Opt_Number>(19);
+    auto optInitValue = Converter::ArkValue<Opt_CurrentDayStyle>(initValue);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_FALSE(frameNode->GetChildren().empty());
     auto swiperNode = frameNode->GetChildren().front();
     ASSERT_NE(swiperNode, nullptr);
-    modifier_->setCurrentDayStyle(node_, &initValue);
+    modifier_->setCurrentDayStyle(node_, &optInitValue);
     ASSERT_FALSE(swiperNode->GetChildren().empty());
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
@@ -767,11 +759,12 @@ HWTEST_F(CalendarModifierTest, nonCurrentDayStyleTest, TestSize.Level1)
     initValue.nonCurrentMonthLunarColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLACK);
     initValue.nonCurrentMonthWorkDayMarkColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLUE);
     initValue.nonCurrentMonthOffDayMarkColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BROWN);
+    auto optInitValue = Converter::ArkValue<Opt_NonCurrentDayStyle>(initValue);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_FALSE(frameNode->GetChildren().empty());
     auto swiperNode = frameNode->GetChildren().front();
     ASSERT_NE(swiperNode, nullptr);
-    modifier_->setNonCurrentDayStyle(node_, &initValue);
+    modifier_->setNonCurrentDayStyle(node_, &optInitValue);
     ASSERT_FALSE(swiperNode->GetChildren().empty());
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
@@ -804,12 +797,13 @@ HWTEST_F(CalendarModifierTest, todayStyleTest, TestSize.Level1)
     initValue.focusedLunarColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLACK);
     initValue.focusedAreaBackgroundColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLUE);
     initValue.focusedAreaRadius = Converter::ArkValue<Opt_Number>(0);
+    auto optInitValue = Converter::ArkValue<Opt_TodayStyle>(initValue);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_FALSE(frameNode->GetChildren().empty());
     auto swiperNode = frameNode->GetChildren().front();
     ASSERT_NE(swiperNode, nullptr);
 
-    modifier_->setTodayStyle(node_, &initValue);
+    modifier_->setTodayStyle(node_, &optInitValue);
     ASSERT_FALSE(swiperNode->GetChildren().empty());
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
@@ -845,12 +839,13 @@ HWTEST_F(CalendarModifierTest, weekStyleTest, TestSize.Level1)
     initValue.weekHeight = Converter::ArkValue<Opt_Number>(1);
     initValue.weekWidth = Converter::ArkValue<Opt_Number>(2);
     initValue.weekAndDayRowSpace = Converter::ArkValue<Opt_Number>(3);
+    auto optInitValue = Converter::ArkValue<Opt_WeekStyle>(initValue);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_FALSE(frameNode->GetChildren().empty());
     auto swiperNode = frameNode->GetChildren().front();
     ASSERT_NE(swiperNode, nullptr);
 
-    modifier_->setWeekStyle(node_, &initValue);
+    modifier_->setWeekStyle(node_, &optInitValue);
     ASSERT_FALSE(swiperNode->GetChildren().empty());
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
@@ -892,12 +887,13 @@ HWTEST_F(CalendarModifierTest, workStateStyleTest, TestSize.Level1)
     initValue.workStateWidth = Converter::ArkValue<Opt_Number>(2);
     initValue.workStateHorizontalMovingDistance = Converter::ArkValue<Opt_Number>(3);
     initValue.workStateVerticalMovingDistance = Converter::ArkValue<Opt_Number>(4);
+    auto optInitValue = Converter::ArkValue<Opt_WorkStateStyle>(initValue);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_FALSE(frameNode->GetChildren().empty());
     auto swiperNode = frameNode->GetChildren().front();
     ASSERT_NE(swiperNode, nullptr);
 
-    modifier_->setWorkStateStyle(node_, &initValue);
+    modifier_->setWorkStateStyle(node_, &optInitValue);
     ASSERT_FALSE(swiperNode->GetChildren().empty());
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
@@ -957,7 +953,8 @@ HWTEST_F(CalendarModifierTest, setOnSelectChangeTest, TestSize.Level1)
         checkInvoke.emplace_back(std::move(event));
     };
     auto arkCallback = Converter::ArkValue<Callback_CalendarSelectedDate_Void>(callback, contextId);
-    modifier_->setOnSelectChange(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_CalendarSelectedDate_Void>(arkCallback);
+    modifier_->setOnSelectChange(node_, &optCallback);
     auto json = JsonUtil::Create(true);
     json->Put("day", 31);
     json->Put("month", 12);
@@ -997,7 +994,8 @@ HWTEST_F(CalendarModifierTest, setOnRequestDataTest, TestSize.Level1)
         checkInvoke.emplace_back(std::move(event));
     };
     auto arkCallback = Converter::ArkValue<Callback_CalendarRequestedData_Void>(callback, contextId);
-    modifier_->setOnRequestData(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_CalendarRequestedData_Void>(arkCallback);
+    modifier_->setOnRequestData(node_, &optCallback);
     auto json = JsonUtil::Create(true);
     json->Put("currentYear", 2000);
     json->Put("currentMonth", 1);

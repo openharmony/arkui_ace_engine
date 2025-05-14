@@ -137,7 +137,8 @@ HWTEST_F(CalendarPickerModifierTest, setEdgeAlignTest, TestSize.Level1)
 
     for (const auto& data: CALENDAR_ALIGN_TEST_PLAN) {
         auto optOffset = ArkValue<Opt_Offset>(data.offset);
-        modifier_->setEdgeAlign0(node_, data.calendarAlignType, &optOffset);
+        auto align = Converter::ArkValue<Opt_CalendarAlign>(data.calendarAlignType);
+        modifier_->setEdgeAlign0(node_, &align, &optOffset);
 
         auto fullJson = GetJsonValue(node_);
 
@@ -208,7 +209,8 @@ HWTEST_F(CalendarPickerModifierTest, setTextStyleColorTest, TestSize.Level1)
 
     for (auto color : COLOR_TEST_PLAN) {
         pickerStyle.color = color.first;
-        modifier_->setTextStyle0(node_, &pickerStyle);
+        auto optPickerStyle = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
+        modifier_->setTextStyle0(node_, &optPickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto checkColor = GetAttrValue<std::string>(styleObject, ATTRIBUTE_TEXT_STYLE_COLOR_NAME);
@@ -237,7 +239,8 @@ HWTEST_F(CalendarPickerModifierTest, setTextStyleFontWeightTest, TestSize.Level1
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
         font.weight = weight.first;
         pickerStyle.font.value = font;
-        modifier_->setTextStyle0(node_, &pickerStyle);
+        auto optPickerStyle = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
+        modifier_->setTextStyle0(node_, &optPickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_TEXT_STYLE_FONT_NAME);
@@ -269,7 +272,8 @@ HWTEST_F(CalendarPickerModifierTest, setTextStyleFontSizeTest, TestSize.Level1)
     for (auto size : FONT_SIZE_TEST_PLAN) {
         font.size = size.first;
         pickerStyle.font.value = font;
-        modifier_->setTextStyle0(node_, &pickerStyle);
+        auto optPickerStyle = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
+        modifier_->setTextStyle0(node_, &optPickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_TEXT_STYLE_FONT_NAME);
@@ -346,7 +350,8 @@ HWTEST_F(CalendarPickerModifierTest, setOnChangeTest, TestSize.Level1)
         },
         .call = onChange
     };
-    modifier_->setOnChange0(node_, &func);
+    auto optFunk = Converter::ArkValue<Opt_Callback_Date_Void>(func);
+    modifier_->setOnChange0(node_, &optFunk);
 
     for (const auto& testValue : CHANGE_EVENT_TEST_PLAN) {
         std::string testStr = testValue.first.ToString(true);
