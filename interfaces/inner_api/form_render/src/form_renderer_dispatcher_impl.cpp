@@ -316,7 +316,7 @@ void FormRendererDispatcherImpl::OnNotifyDumpInfo(
         "OnNotifyDumpInfoTask");
     if (dumpCondition->cv.wait_for(lock, std::chrono::milliseconds(DUMP_WAIT_TIME)) == std::cv_status::timeout) {
         HILOG_ERROR("OnNotifyDumpInfo timeout");
-        info.push_back("dump timeout 65ms");
+        info.push_back("dump timeout " + std::to_string(DUMP_WAIT_TIME) + "ms");
         handler->RemoveTask("OnNotifyDumpInfoTask");
     }
 }
