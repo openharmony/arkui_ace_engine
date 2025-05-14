@@ -841,7 +841,7 @@ HWTEST_F(ImageTestNg, ImageEventTest002, TestSize.Level1)
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     image.Create(imageInfoConfig, pixMap);
-    LoadImageFailEvent curEvent(IMAGE_COMPONENTWIDTH_DEFAULT, IMAGE_COMPONENTHEIGHT_DEFAULT, "");
+    LoadImageFailEvent curEvent(IMAGE_COMPONENTWIDTH_DEFAULT, IMAGE_COMPONENTHEIGHT_DEFAULT, "", {});
     auto onError = [&curEvent](const LoadImageFailEvent& info) { curEvent = info; };
     image.SetOnError(std::move(onError));
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -849,7 +849,7 @@ HWTEST_F(ImageTestNg, ImageEventTest002, TestSize.Level1)
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
     auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    LoadImageFailEvent loadImageFailEvent(WIDTH, HEIGHT, "image load error!");
+    LoadImageFailEvent loadImageFailEvent(WIDTH, HEIGHT, "image load error!", {});
     eventHub->FireErrorEvent(loadImageFailEvent);
     EXPECT_EQ(curEvent.GetErrorMessage(), loadImageFailEvent.GetErrorMessage());
     EXPECT_EQ(curEvent.GetComponentWidth(), loadImageFailEvent.GetComponentWidth());
