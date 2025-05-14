@@ -162,11 +162,17 @@ void JSMarquee::SetFontSize(const JSCallbackInfo& info)
     }
     std::optional<Dimension> fontSizeOpt;
     CalcDimension fontSize;
-    if (ParseJsDimensionFp(info[0], fontSize)) {
+    RefPtr<ResourceObject> resObj;
+    if (ParseJsDimensionFp(info[0], fontSize, resObj)) {
         if (!fontSize.IsNegative() && fontSize.Unit() != DimensionUnit::PERCENT) {
+            if (SystemProperties::ConfigChangePerform() && resObj) {
+                RegisterResource<CalcDimension>("FontSize", resObj, fontSize);
+                return;
+            }
             fontSizeOpt = fontSize;
         }
     }
+    UnRegisterResource("FontSize");
     MarqueeModel::GetInstance()->SetFontSize(fontSizeOpt);
 }
 
