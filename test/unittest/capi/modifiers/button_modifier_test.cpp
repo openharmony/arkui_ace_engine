@@ -1142,21 +1142,19 @@ HWTEST_F(ButtonModifierTest, setFontSizeTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string result;
 
-    typedef std::pair<Ark_Length, std::string> OneTestStep;
+    typedef std::pair<Opt_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { ArkValue<Ark_Length>(1.0f),  "1.00vp" },
-        { ArkValue<Ark_Length>(2.45f), "2.45vp" },
-        { ArkValue<Ark_Length>(5.0_px), "5.00px" },
-        { ArkValue<Ark_Length>(22.35_px), "22.35px" },
-        { ArkValue<Ark_Length>(7.0_vp), "7.00vp" },
-        { ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
-        { ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
-        { ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
+        { ArkValue<Opt_Length>(1.0f),  "1.00vp" },
+        { ArkValue<Opt_Length>(2.45f), "2.45vp" },
+        { ArkValue<Opt_Length>(5.0_px), "5.00px" },
+        { ArkValue<Opt_Length>(22.35_px), "22.35px" },
+        { ArkValue<Opt_Length>(7.0_vp), "7.00vp" },
+        { ArkValue<Opt_Length>(1.65_vp), "1.65vp" },
+        { ArkValue<Opt_Length>(65.0_fp), "65.00fp" },
+        { ArkValue<Opt_Length>(4.3_fp), "4.30fp" },
     };
 
-    for (const auto &[arkLength, expected]: testPlan) {
-        Opt_Length optLength;
-        optLength.value = arkLength;
+    for (const auto &[optLength, expected]: testPlan) {
         modifier_->setFontSize(node_, &optLength);
         jsonValue = GetJsonValue(node_);
         result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
@@ -1174,16 +1172,14 @@ HWTEST_F(ButtonModifierTest, setFontSizeTestInvalidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string result;
 
-    typedef std::pair<Ark_Length, std::string> OneTestStep;
+    typedef std::pair<Opt_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { ArkValue<Ark_Length>("23.00%"), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
-        { ArkValue<Ark_Length>(-0.1f), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
-        { ArkValue<Ark_Length>(-5.0_px), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
+        { ArkValue<Opt_Length>("23.00%"), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
+        { ArkValue<Opt_Length>(-0.1f), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
+        { ArkValue<Opt_Length>(-5.0_px), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
     };
 
-    for (const auto &[arkLength, expected]: testPlan) {
-        Opt_Length optLength;
-        optLength.value = arkLength;
+    for (const auto &[optLength, expected]: testPlan) {
         modifier_->setFontSize(node_, &optLength);
         jsonValue = GetJsonValue(node_);
         result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);

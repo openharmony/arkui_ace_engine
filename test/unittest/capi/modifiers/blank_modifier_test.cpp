@@ -39,52 +39,38 @@ HWTEST_F(BlankModifierTest, BlankModifierTest001, TestSize.Level1)
 
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, "#00000000");
-    Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
-    Opt_ResourceColor optColor;
-    optColor.value = color;
+    Opt_ResourceColor optColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
     modifier_->setColor(node_, &optColor);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
 
-    Ark_ResourceColor numberInt = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456);
-    Opt_ResourceColor optNumberInt;
-    optNumberInt.value = numberInt;
+    Opt_ResourceColor optNumberInt = Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x123456);
     modifier_->setColor(node_, &optNumberInt);
     auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal3, "#FF123456");
 
-    Ark_ResourceColor numberFlt = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f);
-    Opt_ResourceColor optNumberFlt;
-    optNumberFlt.value = numberFlt;
+    Opt_ResourceColor optNumberFlt = Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f);
     modifier_->setColor(node_, &optNumberFlt);
     auto checkVal4 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal4, "#00000000");
 
-    Ark_ResourceColor strColor = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344");
-    Opt_ResourceColor optStrColor;
-    optStrColor.value = strColor;
+    Opt_ResourceColor optStrColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#11223344");
     modifier_->setColor(node_, &optStrColor);
     auto checkVal5 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal5, "#11223344");
 
-    Ark_ResourceColor strNumber = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("65535");
-    Opt_ResourceColor optStrNumber;
-    optStrNumber.value = strNumber;
+    Opt_ResourceColor optStrNumber = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535");
     modifier_->setColor(node_, &optStrNumber);
     auto checkVal6 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
-    auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
+    auto optResNameColor = CreateResourceUnion<Opt_ResourceColor>(
         NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR});
-    Opt_ResourceColor optResNameColor;
-    optResNameColor.value = resNameColor;
     modifier_->setColor(node_, &optResNameColor);
     auto checkVal7 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
-    Opt_ResourceColor optResIdColor;
-    optResIdColor.value = resIdColor;
+    auto optResIdColor = CreateResourceUnion<Opt_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
     modifier_->setColor(node_, &optResIdColor);
     auto checkVal8 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)

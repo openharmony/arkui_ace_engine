@@ -161,19 +161,17 @@ HWTEST_F(ButtonModifierResourcesTest, setFontColorTestResourceColorValues, TestS
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
 
-    typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
+    typedef std::pair<Opt_ResourceColor, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_NAME)),
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_NAME)),
             COLOR_BY_STRING.ColorToString() },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_ID)),
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_ID)),
             COLOR_BY_NUMBER.ColorToString() },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(INVALID_ID_COLOR)),
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResource(INVALID_ID_COLOR)),
             "#FFFF0000" }
     };
 
-    for (const auto &[arkResColor, expected]: testPlan) {
-        Opt_ResourceColor optResColor;
-        optResColor.value = arkResColor;
+    for (const auto &[optResColor, expected]: testPlan) {
         modifier_->setFontColor(node_, &optResColor);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
@@ -191,14 +189,12 @@ HWTEST_F(ButtonModifierResourcesTest, setFontSizeTestResourcesValidResources, Te
     std::unique_ptr<JsonValue> jsonValue;
     std::string result;
 
-    using OneTestStep = std::pair<Ark_Length, std::string>;
+    using OneTestStep = std::pair<Opt_Length, std::string>;
     const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Ark_Length>(RES_DIMENSION_ID), "5.00vp" },
+        { Converter::ArkValue<Opt_Length>(RES_DIMENSION_ID), "5.00vp" },
     };
 
-    for (const auto &[arkLength, expected]: testPlan) {
-        Opt_Length optLength;
-        optLength.value = arkLength;
+    for (const auto &[optLength, expected]: testPlan) {
         modifier_->setFontSize(node_, &optLength);
         jsonValue = GetJsonValue(node_);
         result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
@@ -216,14 +212,12 @@ HWTEST_F(ButtonModifierResourcesTest, setFontSizeTestResourcesInvalidResources, 
     std::unique_ptr<JsonValue> jsonValue;
     std::string result;
 
-    using OneTestStep = std::pair<Ark_Length, std::string>;
+    using OneTestStep = std::pair<Opt_Length, std::string>;
     const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Ark_Length>(-1), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE }
+        { Converter::ArkValue<Opt_Length>(-1), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE }
     };
 
-    for (const auto &[arkLength, expected]: testPlan) {
-        Opt_Length optLength;
-        optLength.value = arkLength;
+    for (const auto &[optLength, expected]: testPlan) {
         modifier_->setFontSize(node_, &optLength);
         jsonValue = GetJsonValue(node_);
         result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
@@ -241,17 +235,15 @@ HWTEST_F(ButtonModifierResourcesTest, setFontFamilyTestResources, TestSize.Level
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
 
-    using ResourceTest = std::tuple<Ark_Union_String_Resource, std::string>;
+    using ResourceTest = std::tuple<Opt_Union_String_Resource, std::string>;
     const std::vector<ResourceTest> testPlan = {
-        { Converter::ArkUnion<Ark_Union_String_Resource, Ark_Resource>(CreateResource(RES_FAMILY_NAME)),
+        { Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(CreateResource(RES_FAMILY_NAME)),
             FAMILY_BY_STRING },
-        { Converter::ArkUnion<Ark_Union_String_Resource, Ark_Resource>(CreateResource(RES_FAMILY_ID)),
+        { Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(CreateResource(RES_FAMILY_ID)),
             FAMILY_BY_NUMBER },
     };
 
-    for (const auto& [family, expectValue] : testPlan) {
-        Opt_Union_String_Resource optFamily;
-        optFamily.value = family;
+    for (const auto& [optFamily, expectValue] : testPlan) {
         modifier_->setFontFamily(node_, &optFamily);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FAMILY_NAME);
