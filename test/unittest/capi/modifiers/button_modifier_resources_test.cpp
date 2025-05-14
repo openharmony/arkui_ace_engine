@@ -172,7 +172,9 @@ HWTEST_F(ButtonModifierResourcesTest, setFontColorTestResourceColorValues, TestS
     };
 
     for (const auto &[arkResColor, expected]: testPlan) {
-        modifier_->setFontColor(node_, &arkResColor);
+        Opt_ResourceColor optResColor;
+        optResColor.value = arkResColor;
+        modifier_->setFontColor(node_, &optResColor);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
         EXPECT_EQ(resultStr, expected);
@@ -195,7 +197,9 @@ HWTEST_F(ButtonModifierResourcesTest, setFontSizeTestResourcesValidResources, Te
     };
 
     for (const auto &[arkLength, expected]: testPlan) {
-        modifier_->setFontSize(node_, &arkLength);
+        Opt_Length optLength;
+        optLength.value = arkLength;
+        modifier_->setFontSize(node_, &optLength);
         jsonValue = GetJsonValue(node_);
         result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
         EXPECT_EQ(result, expected);
@@ -218,7 +222,9 @@ HWTEST_F(ButtonModifierResourcesTest, setFontSizeTestResourcesInvalidResources, 
     };
 
     for (const auto &[arkLength, expected]: testPlan) {
-        modifier_->setFontSize(node_, &arkLength);
+        Opt_Length optLength;
+        optLength.value = arkLength;
+        modifier_->setFontSize(node_, &optLength);
         jsonValue = GetJsonValue(node_);
         result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
         EXPECT_EQ(result, expected);
@@ -244,7 +250,9 @@ HWTEST_F(ButtonModifierResourcesTest, setFontFamilyTestResources, TestSize.Level
     };
 
     for (const auto& [family, expectValue] : testPlan) {
-        modifier_->setFontFamily(node_, &family);
+        Opt_Union_String_Resource optFamily;
+        optFamily.value = family;
+        modifier_->setFontFamily(node_, &optFamily);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FAMILY_NAME);
         EXPECT_EQ(resultStr, expectValue);
@@ -276,7 +284,9 @@ HWTEST_F(ButtonModifierResourcesTest, setLabelStyleTestResources, TestSize.Level
     for (const auto& [family, expectValue] : testPlan) {
         fontLabel.family = family;
         inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
-        modifier_->setLabelStyle(node_, &inputValueLabelStyle);
+        Opt_LabelStyle optInputValueLabelStyle;
+        optInputValueLabelStyle.value = inputValueLabelStyle;
+        modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         auto font = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
