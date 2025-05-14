@@ -26,7 +26,7 @@ using TokenThemeScopeId = int32_t;
 class ACE_FORCE_EXPORT TokenTheme : public virtual AceType {
     DECLARE_ACE_TYPE(TokenTheme, AceType);
 public:
-    TokenTheme(int32_t id)
+    explicit TokenTheme(int32_t id)
     {
         id_ = id;
     }
@@ -57,10 +57,10 @@ public:
         return id_;
     }
 private:
-    int32_t id_;
+    int32_t id_ { 0 };
     RefPtr<TokenColors> colors_;
     ColorMode colorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
 };
 
-} // namespace OHOS::Ace::NG
-#endif // FRAMEWORKS_CORE_COMPONENTS_NG_TOKEN_THEME_TOKEN_THEME_H
+} // namespace OHOS::Ace
+#endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_THEME_TOKEN_THEME_H

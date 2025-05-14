@@ -22,8 +22,8 @@
 namespace OHOS::Ace {
 
 struct TokenColorData {
-    const char* colorName;
-    const int32_t systemResourceId;
+    const char* colorName { nullptr };
+    const int32_t systemResourceId {0};
 };
 class ACE_FORCE_EXPORT TokenColors : public virtual AceType {
     DECLARE_ACE_TYPE(TokenColors, AceType);
