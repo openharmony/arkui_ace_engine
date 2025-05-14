@@ -13496,13 +13496,13 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         this.setType(type)
     }
     get touches(): Array<TouchObject> {
-        throw new Error("Not implemented")
+        return this.getTouches();
     }
     set touches(touches: Array<TouchObject>) {
         this.setTouches(touches)
     }
     get changedTouches(): Array<TouchObject> {
-        throw new Error("Not implemented")
+        return this.getChangedTouches()
     }
     set changedTouches(changedTouches: Array<TouchObject>) {
         this.setChangedTouches(changedTouches)
@@ -13575,8 +13575,15 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         return
     }
     private getHistoricalPoints_serialize(): Array<HistoricalPoint> {
-        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getHistoricalPoints(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getHistoricalPoints(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<HistoricalPoint> = new Array<HistoricalPoint>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -13593,8 +13600,15 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._TouchEvent_setType(this.peer!.ptr, TypeChecker.TouchType_ToNumeric(type))
     }
     private getTouches_serialize(): Array<TouchObject> {
-        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getTouches(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getTouches(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<TouchObject> = new Array<TouchObject>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -13614,8 +13628,15 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         thisSerializer.release()
     }
     private getChangedTouches_serialize(): Array<TouchObject> {
-        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getChangedTouches(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getChangedTouches(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<TouchObject> = new Array<TouchObject>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
