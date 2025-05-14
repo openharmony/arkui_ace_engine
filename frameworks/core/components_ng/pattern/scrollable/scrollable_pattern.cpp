@@ -560,6 +560,51 @@ void ScrollablePattern::AddScrollEvent()
     if (useDefaultBackToTop_) {
         ResetBackToTop();
     }
+    gestureHub->SetOnTouchTestDoneCallbackForInner(
+        [weak = WeakClaim(this)](const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,
+            const std::list<RefPtr<NGGestureRecognizer>>& activeRecognizers) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnTouchTestDoneCallback(baseGestureEvent, activeRecognizers);
+        });
+}
+
+void ScrollablePattern::OnTouchTestDoneCallback(const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,
+    const std::list<RefPtr<NGGestureRecognizer>>& activeRecognizers)
+{
+    CHECK_NULL_VOID(scrollableEvent_);
+    std::list<FingerInfo> fingerInfos = baseGestureEvent->GetFingerList();
+    if (fingerInfos.empty()) {
+        return;
+    }
+    Offset localLocation = fingerInfos.front().localLocation_;
+    PointF point(localLocation.GetX(), localLocation.GetY());
+    bool isHitTestBlock = scrollableEvent_->IsHitTestBlock(point, baseGestureEvent->GetSourceDevice());
+    bool clickJudge = scrollableEvent_->ClickJudge(point);
+    isHitTestBlock_ = isHitTestBlock || clickJudge;
+    if (!isHitTestBlock_) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scrollable TouchTestDone: isHitTestBlock %{public}d, clickJudge %{public}d",
+        isHitTestBlock, clickJudge);
+    auto scrollableNode = GetHost();
+    CHECK_NULL_VOID(scrollableNode);
+    for (auto iter = activeRecognizers.begin(); iter != activeRecognizers.end(); ++iter) {
+        auto recognizer = *iter;
+        CHECK_NULL_CONTINUE(recognizer);
+        auto frameNode = recognizer->GetAttachedNode().Upgrade();
+        CHECK_NULL_CONTINUE(frameNode);
+        if (frameNode == scrollableNode) {
+            break;
+        }
+        auto gestureInfo = recognizer->GetGestureInfo();
+        CHECK_NULL_CONTINUE(gestureInfo);
+        GestureTypeName type = gestureInfo->GetRecognizerType();
+        if (type == GestureTypeName::CLICK || type == GestureTypeName::LONG_PRESS_GESTURE ||
+            type == GestureTypeName::TAP_GESTURE) {
+            recognizer->SetPreventDefault(true);
+        }
+    }
 }
 
 void ScrollablePattern::SetHandleScrollCallback(const RefPtr<Scrollable>& scrollable)
