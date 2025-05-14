@@ -482,6 +482,13 @@ MouseEvent JSBaseNode::InitMouseEvent(const JSCallbackInfo& info)
     if (actionJsVal->IsNumber()) {
         mouseEvent.action = static_cast<MouseAction>(actionJsVal->ToNumber<int32_t>());
     }
+    ParamMouseEvent(info, mouseEvent);
+    return mouseEvent;
+}
+
+void JSBaseNode::ParamMouseEvent(const JSCallbackInfo& info, MouseEvent& mouseEvent)
+{
+    auto obj = JSRef<JSObject>::Cast(info[0]);
     auto screenXJsVal = obj->GetProperty("displayX");
     if (screenXJsVal->IsNumber()) {
         mouseEvent.screenX = screenXJsVal->ToNumber<float>();
@@ -510,7 +517,6 @@ MouseEvent JSBaseNode::InitMouseEvent(const JSCallbackInfo& info)
             mouseEvent.pressedButtonsArray.push_back(pressedButton);
         }
     }
-    return mouseEvent;
 }
 
 AxisEvent JSBaseNode::InitAxisEvent(const JSCallbackInfo& info)
@@ -559,6 +565,13 @@ AxisEvent JSBaseNode::InitAxisEvent(const JSCallbackInfo& info)
     if (screenYJsVal->IsNumber()) {
         axisEvent.screenY = screenYJsVal->ToNumber<float>();
     }
+    ParamAxisEvent(info, axisEvent);
+    return axisEvent;
+}
+
+void JSBaseNode::ParamAxisEvent(const JSCallbackInfo& info, AxisEvent& axisEvent)
+{
+    auto obj = JSRef<JSObject>::Cast(info[0]);
     auto scrollStepJsVal = obj->GetProperty("scrollStep");
     if (scrollStepJsVal->IsNumber()) {
         axisEvent.scrollStep = scrollStepJsVal->ToNumber<int32_t>();
@@ -571,7 +584,6 @@ AxisEvent JSBaseNode::InitAxisEvent(const JSCallbackInfo& info)
     if (verticalAxisJsVal->IsNumber()) {
         axisEvent.verticalAxis = verticalAxisJsVal->ToNumber<float>();
     }
-    return axisEvent;
 }
 
 void JSBaseNode::UpdateStart(const JSCallbackInfo& info)

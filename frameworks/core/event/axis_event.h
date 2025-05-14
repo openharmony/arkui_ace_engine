@@ -172,6 +172,7 @@ class AxisEventTarget : public virtual AceType {
 public:
     AxisEventTarget() = default;
     AxisEventTarget(std::string frameName) : frameName_(std::move(frameName)) {}
+    AxisEventTarget(std::string frameName, int32_t frameId) : frameName_(std::move(frameName)), frameId_(frameId) {}
     ~AxisEventTarget() override = default;
     void SetOnAxisCallback(const OnAxisEventFunc& onAxisCallback);
     void SetCoordinateOffset(const NG::OffsetF& coordinateOffset);
@@ -181,12 +182,16 @@ public:
     std::string GetFrameName() const;
     bool HandleAxisEvent(const AxisEvent& event);
     virtual void HandleEvent(const AxisEvent& event) {}
+    int32_t GetFrameId() {
+        return frameId_;
+    }
 
 private:
     OnAxisEventFunc onAxisCallback_;
     NG::OffsetF coordinateOffset_;
     GetEventTargetImpl getEventTargetImpl_;
     std::string frameName_ = "Unknown";
+    int32_t frameId_ = 0;
 };
 
 class AxisEventChecker final {

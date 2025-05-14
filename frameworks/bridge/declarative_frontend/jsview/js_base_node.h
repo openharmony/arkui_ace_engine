@@ -61,6 +61,8 @@ private:
     AxisEvent InitAxisEvent(const JSCallbackInfo& info);
     void GetTouches(const JSCallbackInfo& info, TouchEvent& touchEvent);
     void GetInputTouches(const JSCallbackInfo& info, TouchEvent& touchEvent);
+    void ParamMouseEvent(const JSCallbackInfo& info, MouseEvent& mouseEvent);
+    void ParamAxisEvent(const JSCallbackInfo& info, AxisEvent& axisEvent);
     RefPtr<NG::FrameNode> viewNode_;
     RefPtr<NG::UINode> realNode_;
     NG::OptionalSizeF size_;

@@ -782,7 +782,7 @@ HWTEST_F(EventManagerTestNg, MouseEventTest013, TestSize.Level1)
 
 /**
  * @tc.name: DispatchAxisEventIssueTest1
- * @tc.desc: Test DispatchAxisEventNG, axisTestResults_ is deleted each time it is dispatched.
+ * @tc.desc: Test DispatchAxisEventNG, axisTestResultsMap_[event.id] is deleted each time it is dispatched.
  * @tc.type: FUNC
  */
 HWTEST_F(EventManagerTestNg, DispatchAxisEventIssueTest1, TestSize.Level1)
@@ -795,8 +795,8 @@ HWTEST_F(EventManagerTestNg, DispatchAxisEventIssueTest1, TestSize.Level1)
     ASSERT_NE(eventManager, nullptr);
 
     /**
-     * @tc.steps: step4. Call DispatchAxisEventNG with axisTestResults_ not empty
-     * @tc.expected: eventManager->axisTestResults_ is empty
+     * @tc.steps: step4. Call DispatchAxisEventNG with axisTestResultsMap_[event.id] not empty
+     * @tc.expected: eventManager->axisTestResultsMap_[event.id] is empty
      */
     auto axisEventTarget = AceType::MakeRefPtr<AxisEventTarget>();
     auto onAxisCallback = [](AxisInfo&) -> void {};
@@ -805,9 +805,9 @@ HWTEST_F(EventManagerTestNg, DispatchAxisEventIssueTest1, TestSize.Level1)
     event.horizontalAxis = 0;
     event.verticalAxis = 0;
     event.pinchAxisScale = 0;
-    eventManager->axisTestResults_.push_back(axisEventTarget);
+    eventManager->axisTestResultsMap_[event.id].push_back(axisEventTarget);
     eventManager->DispatchAxisEventNG(event);
-    EXPECT_TRUE(eventManager->axisTestResults_.empty());
+    EXPECT_TRUE(eventManager->axisTestResultsMap_[event.id].empty());
 }
 
 /**
@@ -1540,7 +1540,6 @@ HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGT
         eventManager->currMouseTestResults_.emplace_back(testCases[2]);
 
         eventManager->DispatchMouseEventNG(event);
-
         PressMouseInfo key { 0, event.button };
         EXPECT_EQ(eventManager->pressMouseTestResultsMap_[key] == eventManager->currMouseTestResults_,
             mockMouseEvent.expectedResult);

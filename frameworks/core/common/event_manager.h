@@ -38,46 +38,6 @@
 #include "core/event/resample_algo.h"
 
 namespace OHOS::Ace {
-struct PressMouseInfo {
-    int32_t id;
-    MouseButton mouseButton;
-
-    bool operator==(const PressMouseInfo& other) const noexcept
-    {
-        return id == other.id && mouseButton == other.mouseButton;
-    }
-
-    bool operator<(const PressMouseInfo& other) const noexcept
-    {
-        return id < other.id && mouseButton < other.mouseButton;
-    }
-};
-} // namespace OHOS::Ace
-
-namespace std {
-template<>
-struct hash<OHOS::Ace::PressMouseInfo> {
-    size_t operator()(OHOS::Ace::PressMouseInfo const& info) const noexcept
-    {
-#if SIZE_MAX > 0xFFFFFFFFUL
-        // Use a 64-bit golden ratio constant if the platform supports 64-bit size_t.
-        constexpr size_t kMagic = 0x9e3779b97f4a7c15ULL;
-#else
-        // Use a 32-bit golden ratio constant for 32-bit platforms.
-        constexpr size_t kMagic = 0x9e3779b9u;
-#endif
-
-        size_t seed = std::hash<int32_t>()(info.id);
-        size_t buttonHash = static_cast<size_t>(info.mouseButton);
-        // Combine the two hash values using a variation of boost::hash_combine.
-        // This improves hash distribution and reduces collisions.
-        seed ^= buttonHash + kMagic + (seed << 6) + (seed >> 2);
-        return seed;
-    }
-};
-} // namespace std
-
-namespace OHOS::Ace {
 namespace NG {
 class FrameNode;
 class SelectOverlayManager;
@@ -378,6 +338,14 @@ public:
 
     void AddToMousePendingRecognizers(const WeakPtr<NG::NGGestureRecognizer>& recognizer);
 
+    bool GetIsStopPropagationRecored() {
+        return isStopPropagationRecored_;
+    }
+
+    bool GetIsStopTouchEventRecored() {
+        return isStopTouchEventRecored_;
+    }
+
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
         TouchRestrict& touchRestrict, const Offset& offset = Offset(), float viewScale = 1.0f,
@@ -415,7 +383,7 @@ private:
     void DispatchMouseEventToPressResults(const MouseEvent& event, const MouseTestResult& targetResults,
         MouseTestResult& handledResults, bool& isStopPropagation);
     bool DispatchMouseEventToCurResults(
-        const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation);
+        const MouseEvent& event, const MouseTestResult& handledResults, bool& isStopPropagation);
     bool DispatchMouseEventToCurResultsInLessAPI13(
         const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation);
     void CheckMousePendingRecognizersState(const TouchEvent& event);
@@ -425,7 +393,7 @@ private:
     // used less than API13
     MouseTestResult pressMouseTestResults_;
     // used great or equal API13
-    std::unordered_map<PressMouseInfo, MouseTestResult> pressMouseTestResultsMap_;
+    std::unordered_map<PressMouseInfo, MouseTestResult, PressMouseInfoHashFunc> pressMouseTestResultsMap_;
     HoverTestResult currHoverTestResults_;
     HoverTestResult lastHoverTestResults_;
     HoverTestResult curAccessibilityHoverResults_;
@@ -433,7 +401,7 @@ private:
     HoverTestResult curPenHoverResults_;
     HoverTestResult curPenHoverMoveResults_;
     HoverTestResult lastPenHoverResults_;
-    AxisTestResult axisTestResults_;
+    std::unordered_map<int32_t, AxisTestResult> axisTestResultsMap_;
     WeakPtr<NG::FrameNode> lastHoverNode_;
     WeakPtr<NG::FrameNode> currHoverNode_;
     std::unordered_map<size_t, TouchTestResult> axisTouchTestResults_;
@@ -477,6 +445,8 @@ private:
     std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
     std::vector<WeakPtr<NG::NGGestureRecognizer>> mousePendingRecognizers_;
+    bool isStopPropagationRecored_ = true;
+    bool isStopTouchEventRecored_ = true;
 };
 
 } // namespace OHOS::Ace

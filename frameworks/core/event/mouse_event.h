@@ -182,6 +182,7 @@ struct MouseEvent final : public PointerEvent {
         mouseEvent.rawDeltaX = rawDeltaX;
         mouseEvent.rawDeltaY = rawDeltaY;
         mouseEvent.pressedButtonsArray = pressedButtonsArray;
+        mouseEvent.passThrough = passThrough;
         return mouseEvent;
     }
 
@@ -636,5 +637,40 @@ private:
 using MouseTestResult = std::list<RefPtr<MouseEventTarget>>;
 using HoverTestResult = std::list<RefPtr<HoverEventTarget>>;
 
+struct PressMouseInfo {
+    int32_t id;
+    MouseButton mouseButton;
+
+    bool operator==(const PressMouseInfo& other) const noexcept
+    {
+        return id == other.id && mouseButton == other.mouseButton;
+    }
+
+    bool operator<(const PressMouseInfo& other) const noexcept
+    {
+        return id < other.id && mouseButton < other.mouseButton;
+    }
+};
+
+struct PressMouseInfoHashFunc {
+    size_t operator()(OHOS::Ace::PressMouseInfo const& info) const noexcept
+    {
+#if SIZE_MAX > 0xFFFFFFFFUL
+        // Use a 64-bit golden ratio constant if the platform supports 64-bit size_t.
+        constexpr size_t kMagic = 0x9e3779b97f4a7c15ULL;
+#else
+        // Use a 32-bit golden ratio constant for 32-bit platforms.
+        constexpr size_t kMagic = 0x9e3779b9u;
+#endif
+        static constexpr int32_t kLeftShift = 6;
+        static constexpr int32_t kRightShift = 2;
+        size_t seed = std::hash<int32_t>()(info.id);
+        size_t buttonHash = static_cast<size_t>(info.mouseButton);
+        // Combine the two hash values using a variation of boost::hash_combine.
+        // This improves hash distribution and reduces collisions.
+        seed ^= buttonHash + kMagic + (seed << kLeftShift) + (seed >> kRightShift);
+        return seed;
+    }
+};
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_MOUSE_EVENT_H

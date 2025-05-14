@@ -1181,6 +1181,10 @@ public:
     const RefPtr<NodeRenderStatusMonitor>& GetNodeRenderStatusMonitor();
     void SetNeedRenderForDrawChildrenNode(const WeakPtr<NG::UINode>& node);
 
+    bool GetPassThroughResult() {
+        return passThroughResult_;
+    }
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1505,6 +1509,7 @@ private:
     RefPtr<NodeRenderStatusMonitor> nodeRenderStatusMonitor_;
     std::set<WeakPtr<NG::UINode>> needRenderForDrawChildrenNodes_;
     std::mutex needRenderForDrawChildrenNodesMutex_;
+    bool passThroughResult_ = true;
 };
 
 /**

@@ -31,7 +31,7 @@ InputEventActuator::InputEventActuator(const WeakPtr<InputEventHub>& inputEventH
     accessibilityHoverEventTarget_ = MakeRefPtr<HoverEventTarget>(frameNode->GetTag(), frameNode->GetId());
     penHoverEventTarget_ = MakeRefPtr<HoverEventTarget>(frameNode->GetTag(), frameNode->GetId());
     penHoverMoveEventTarget_ = MakeRefPtr<HoverEventTarget>(frameNode->GetTag(), frameNode->GetId());
-    axisEventTarget_ = MakeRefPtr<AxisEventTarget>(frameNode->GetTag());
+    axisEventTarget_ = MakeRefPtr<AxisEventTarget>(frameNode->GetTag(), frameNode->GetId());
 }
 
 void InputEventActuator::OnCollectMouseEvent(
