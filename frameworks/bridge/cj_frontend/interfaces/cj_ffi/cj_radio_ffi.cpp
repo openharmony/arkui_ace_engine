@@ -58,6 +58,17 @@ void FfiOHOSAceFrameworkRadioSetSize(double width, int32_t widthUnit, double hei
     ViewAbstractModel::GetInstance()->SetHeight(heightValue);
 }
 
+void FfiOHOSAceFrameworkRadioSetPaddings(CJEdge params)
+{
+    NG::PaddingPropertyF oldPaddings({ 0.0f, 0.0f, 0.0f, 0.0f });
+    NG::PaddingProperty paddings;
+    paddings.top = NG::CalcLength(Dimension(params.top, static_cast<DimensionUnit>(params.topUnit)));
+    paddings.right = NG::CalcLength(Dimension(params.right, static_cast<DimensionUnit>(params.rightUnit)));
+    paddings.bottom = NG::CalcLength(Dimension(params.bottom, static_cast<DimensionUnit>(params.bottomUnit)));
+    paddings.left = NG::CalcLength(Dimension(params.left, static_cast<DimensionUnit>(params.leftUnit)));
+    RadioModel::GetInstance()->SetPadding(oldPaddings, paddings);
+}
+
 void FfiOHOSAceFrameworkRadioSetPadding(double padding, uint32_t unit)
 {
     Dimension value(padding, static_cast<DimensionUnit>(unit));
