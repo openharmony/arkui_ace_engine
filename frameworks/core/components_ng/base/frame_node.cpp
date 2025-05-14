@@ -2852,6 +2852,14 @@ void FrameNode::AddNodeToRegisterTouchTest()
     eventMgr->AddTouchDoneFrameNode(AceType::WeakClaim(this));
 }
 
+RectF FrameNode::CheckResponseRegionForStylus(RectF& rect, const TouchEvent& touchEvent)
+{
+    if (!pattern_ || !pattern_->IsResponseRegionExpandingNeededForStylus(touchEvent)) {
+        return rect;
+    }
+    return pattern_->ExpandDefaultResponseRegion(rect);
+}
+
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
     ResponseLinkResult& responseLinkResult, bool isDispatch)
@@ -2892,13 +2900,9 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     if (parent) {
         parentId = parent->GetId();
     }
-
-    auto defaultResponseRegion = origRect;
-    if (pattern_->IsResponseRegionExpandingNeededForStylus(touchRestrict.touchEvent)) {
-        defaultResponseRegion = pattern_->ExpandDefaultResponseRegion(origRect);
-    }
+    auto checkedResponseRegionForStylus = CheckResponseRegionForStylus(origRect, touchRestrict.touchEvent);
     auto responseRegionList =
-        GetResponseRegionList(defaultResponseRegion, static_cast<int32_t>(touchRestrict.sourceType));
+        GetResponseRegionList(checkedResponseRegionForStylus, static_cast<int32_t>(touchRestrict.sourceType));
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT, "TouchTest: point is " SEC_PLD(%{public}s) " in %{public}s, depth: %{public}d",
             SEC_PARAM(parentRevertPoint.ToString().c_str()), GetTag().c_str(), GetDepth());
