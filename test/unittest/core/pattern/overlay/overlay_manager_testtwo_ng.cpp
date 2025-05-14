@@ -277,15 +277,23 @@ HWTEST_F(OverlayManagerTwoTestNg, ContextMenuSwitchDragPreviewAnimation, TestSiz
 HWTEST_F(OverlayManagerTwoTestNg, RemoveFilter001, TestSize.Level1)
 {
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    EXPECT_NE(rootNode, nullptr);
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    EXPECT_NE(overlayManager, nullptr);
     overlayManager->SetHasFilter(true);
     overlayManager->RemoveFilter();
 
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    EXPECT_NE(columnNode, nullptr);
+    columnNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode();
+
     overlayManager->SetHasFilter(true);
-    overlayManager->SetFilterColumnNode(rootNode);
+    overlayManager->SetFilterColumnNode(columnNode);
     overlayManager->RemoveFilter();
 
-    EXPECT_TRUE(overlayManager->GetHasFilter());
+    EXPECT_FALSE(overlayManager->GetHasFilter());
 }
 
 /**
