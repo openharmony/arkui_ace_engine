@@ -40,6 +40,8 @@ enum EventQueryType {
   ON_CLICK = 0,
 }
 
+declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) => void;
+
 class FrameNode {
   public _nodeId: number;
   protected _commonAttribute: ArkComponent;
@@ -671,6 +673,18 @@ class FrameNode {
   }
   recycle(): void {
     this.triggerOnRecycle();
+  }
+  addSupportedUIStates(uistates: number, statesChangeHandler: UIStatesChangeHandler, excludeInner?: boolean): void {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    getUINativeModule().frameNode.addSupportedStates(this.getNodePtr(), uistates, (currentUIStates: number)=>{
+      statesChangeHandler(this, currentUIStates);
+    }, excludeInner);
+    __JSScopeUtil__.restoreInstanceId();
+  }
+  removeSupportedUIStates(uiStates: number): void {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    getUINativeModule().frameNode.removeSupportedStates(this.getNodePtr(), uiStates);
+    __JSScopeUtil__.restoreInstanceId();
   }
 }
 

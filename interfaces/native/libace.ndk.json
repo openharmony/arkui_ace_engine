@@ -3342,5 +3342,13 @@
     {
         "first_introduced": "20",
         "name": "OH_ArkUI_EmbeddedComponentOption_SetOnTerminated"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_AddSupportedUIStates"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RemoveSupportedUIStates"
     }
 ]
