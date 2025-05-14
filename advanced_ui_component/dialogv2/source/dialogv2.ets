@@ -1048,43 +1048,67 @@ struct CustomDialogContentComponent {
   private primaryTitleMinFontSize: Length = `${BODY_L}fp`;
   private secondaryTitleMaxFontSize: Length = `${SUBTITLE_S}fp`;
   private secondaryTitleMinFontSize: Length = `${BODY_S}fp`;
+  private scroller: Scroller = new Scroller();
   @Param@Once isHasDefaultFocus: boolean = false;
   @Param@Once isAllFocusFalse: boolean = false;
 
   build() {
-    Scroll() {
-      Column() {
-        CustomDialogLayout({
-          buttonHeight: this.buttonHeight!!,
-          titleHeight: this.titleHeight!!,
-          titleMinHeight: this.getTitleAreaMinHeight(),
-        }) {
-          ForEach([this.titleIndex, this.contentIndex, this.buttonIndex], (index: number) => {
-            if (index === this.titleIndex) {
-              this.titleBuilder();
-            } else if (index === this.contentIndex) {
-              Column() {
-                this.contentBuilder();
-              }.padding(this.getContentPadding())
-            } else {
-              this.ButtonBuilder();
-            }
-          });
+    RelativeContainer() {
+      Scroll(this.scroller) {
+        Column() {
+          CustomDialogLayout({
+            buttonHeight: this.buttonHeight!!,
+            titleHeight: this.titleHeight!!,
+            titleMinHeight: this.getTitleAreaMinHeight(),
+          }) {
+            ForEach([this.titleIndex, this.contentIndex, this.buttonIndex], (index: number) => {
+              if (index === this.titleIndex) {
+                this.titleBuilder();
+              } else if (index === this.contentIndex) {
+                Column() {
+                  this.contentBuilder();
+                }.padding(this.getContentPadding())
+              } else {
+                this.ButtonBuilder();
+              }
+            });
+          }
         }
-      }
-      .constraintSize({ maxHeight: this.contentMaxHeight })
-      .backgroundBlurStyle(this.customStyle ?
+        .constraintSize({ maxHeight: this.contentMaxHeight })
+        .backgroundBlurStyle(this.customStyle ?
         BlurStyle.Thick : BlurStyle.NONE, undefined, { disableSystemAdaptation: true })
-      .borderRadius(this.customStyle ? $r('sys.float.ohos_id_corner_radius_dialog') : 0)
-      .margin(this.customStyle ? {
-        start: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_start')),
-        end: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_end')),
-        bottom: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_bottom')),
-      } : { left: 0, right: 0, bottom: 0 })
-      .backgroundColor(this.customStyle ? $r('sys.color.ohos_id_color_dialog_bg') : Color.Transparent)
-    }
-    .edgeEffect(EdgeEffect.None, { alwaysEnabled: false })
-    .backgroundColor(Color.Transparent)
+        .borderRadius(this.customStyle ? $r('sys.float.ohos_id_corner_radius_dialog') : 0)
+        .margin(this.customStyle ? {
+          start: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_start')),
+          end: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_end')),
+          bottom: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_bottom')),
+        } : { left: 0, right: 0, bottom: 0 })
+        .backgroundColor(this.customStyle ? $r('sys.color.ohos_id_color_dialog_bg') : Color.Transparent)
+      }
+      .scrollBar(BarState.Off)
+      .id('CustomDialogContentComponent')
+      .edgeEffect(EdgeEffect.None, { alwaysEnabled: false })
+      .backgroundColor(Color.Transparent)
+
+      ScrollBar({scroller: this.scroller})
+        .alignRules({
+          top: { anchor: 'CustomDialogContentComponent', align: VerticalAlign.Top },
+          bottom: { anchor: 'CustomDialogContentComponent', align: VerticalAlign.Bottom },
+          end: { anchor: 'CustomDialogContentComponent', align: HorizontalAlign.End }
+        })
+        .margin({ top: $r('sys.float.alert_container_shape'), bottom: $r('sys.float.alert_container_shape')})
+        .enableNestedScroll(true)
+        .hitTestBehavior(HitTestMode.Transparent)
+        .onGestureRecognizerJudgeBegin((event: BaseGestureEvent, current: GestureRecognizer,
+          others: Array<GestureRecognizer>) => {
+          if (current) {
+            if (current.getType() == GestureControl.GestureType.LONG_PRESS_GESTURE) {
+              return GestureJudgeResult.REJECT;
+            }
+          }
+          return GestureJudgeResult.CONTINUE;
+        })
+    }.height('auto')
   }
 
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>,

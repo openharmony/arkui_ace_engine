@@ -1841,6 +1841,7 @@ class CustomDialogContentComponent extends ViewV2 {
     this.primaryTitleMinFontSize = `${BODY_L}fp`;
     this.secondaryTitleMaxFontSize = `${SUBTITLE_S}fp`;
     this.secondaryTitleMinFontSize = `${BODY_S}fp`;
+    this.scroller = new Scroller();
     this.initParam('isHasDefaultFocus', (params && 'isHasDefaultFocus' in params) ? params.isHasDefaultFocus : false);
     this.initParam('isAllFocusFalse', (params && 'isAllFocusFalse' in params) ? params.isAllFocusFalse : false);
     this.finalizeConstruction();
@@ -1849,9 +1850,15 @@ class CustomDialogContentComponent extends ViewV2 {
   }
   initialRender() {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
-      Scroll.create();
+      RelativeContainer.create();
+      RelativeContainer.height('auto');
+    } , RelativeContainer);
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
+      Scroll.create(this.scroller);
       Scroll.edgeEffect(EdgeEffect.None, { alwaysEnabled: false });
       Scroll.backgroundColor(Color.Transparent);
+      Scroll.scrollBar(BarState.Off);
+      Scroll.id('CustomDialogContentComponent');
     }, Scroll);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Column.create();
@@ -1965,6 +1972,42 @@ class CustomDialogContentComponent extends ViewV2 {
     }
     Column.pop();
     Scroll.pop();
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
+      ScrollBar.create({ scroller: this.scroller });
+      ScrollBar.alignRules({
+        top: { anchor: 'CustomDialogContentComponent', align: VerticalAlign.Top },
+        bottom: { anchor: 'CustomDialogContentComponent', align: VerticalAlign.Bottom },
+        end: { anchor: 'CustomDialogContentComponent', align: HorizontalAlign.End }
+      });
+      ScrollBar.margin({
+        top: {
+          'id': -1,
+          'type': 10002,
+          params: ['sys.float.alert_container_shape'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__'
+        },
+        bottom: {
+          'id': -1,
+          'type': 10002,
+          params: ['sys.float.alert_container_shape'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__'
+        }
+      });
+      ScrollBar.enableNestedScroll(true);
+      ScrollBar.hitTestBehavior(HitTestMode.Transparent);
+      ScrollBar.onGestureRecognizerJudgeBegin((event, current, others) => {
+        if (current) {
+          if (current.getType() == GestureControl.GestureType.LONG_PRESS_GESTURE) {
+            return GestureJudgeResult.REJECT;
+          }
+        }
+        return GestureJudgeResult.CONTINUE;
+      });
+    }, ScrollBar);
+    ScrollBar.pop();
+    RelativeContainer.pop();
   }
   onMeasureSize(selfLayoutInfo, children, constraint) {
     let sizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
