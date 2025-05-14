@@ -557,8 +557,7 @@ class __RepeatVirtualScroll2Impl<T> {
     }
 
     // update Repeat, see overview documentation at the top of this file.
-    private 
-    reRender(): void {
+    private reRender(): void {
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) reRender() data array length: `,
             `${this.arr_.length}, totalCount: ${this.totalCount()} - start`);
 
@@ -1265,7 +1264,7 @@ class __RepeatVirtualScroll2Impl<T> {
             this.activeRangeAdjustedStart_ = nStart;
             this.visibleRangeAdjustedStart_ = vStart;
         } else if (this.activeRange_[0] === nStart && this.activeRange_[1] === nEnd) {
-            if(this.visibleRange_[0] === vStart || this.visibleRange_[1] === vEnd) {
+            if (this.visibleRange_[0] === vStart || this.visibleRange_[1] === vEnd) {
                 stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) onActiveRange`,
                     `visibleRange_ updated, (vStart: ${nStart}, vEnd: ${nEnd})`);
                 this.activeRange_ = [vStart, vEnd];
@@ -1558,7 +1557,7 @@ class __RepeatVirtualScroll2Impl<T> {
                 stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}), nextTickTask()`);
                 this.notifyContainerLayoutChangeAcc();
                 this.requestContainerReLayout();
-            }
+            };
         }
 
         return true;
