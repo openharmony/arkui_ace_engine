@@ -745,29 +745,41 @@ HWTEST_F(InspectorTestNg, InspectorTestNg020, TestSize.Level1)
 HWTEST_F(InspectorTestNg, InspectorTestNg021, TestSize.Level1)
 {
     std::string inspectorMsg = "";
-    auto windowId = Inspector::ParseWindowIdFromMsg(inspectorMsg);
-    EXPECT_EQ(windowId, 0);
-    
+    auto result = Inspector::ParseWindowIdFromMsg(inspectorMsg);
+    EXPECT_EQ(result.first, 0);
+    EXPECT_EQ(result.second, -1);
+
     inspectorMsg = "invalid message";
-    windowId = Inspector::ParseWindowIdFromMsg(inspectorMsg);
-    EXPECT_EQ(windowId, 0);
-    
+    result = Inspector::ParseWindowIdFromMsg(inspectorMsg);
+    EXPECT_EQ(result.first, 0);
+    EXPECT_EQ(result.second, -1);
+
     inspectorMsg = "{\"method\":\"ArkUI.xxx\", \"params\":{\"windowId\":\"10\"}}";
-    windowId = Inspector::ParseWindowIdFromMsg(inspectorMsg);
-    EXPECT_EQ(windowId, 0);
-    
+    result = Inspector::ParseWindowIdFromMsg(inspectorMsg);
+    EXPECT_EQ(result.first, 0);
+    EXPECT_EQ(result.second, -1);
+
     inspectorMsg = "{\"method\":\"ArkUI.tree\", \"params\":{\"windowIds\":\"10\"}}";
-    windowId = Inspector::ParseWindowIdFromMsg(inspectorMsg);
-    EXPECT_EQ(windowId, 0);
-    
+    result = Inspector::ParseWindowIdFromMsg(inspectorMsg);
+    EXPECT_EQ(result.first, 0);
+    EXPECT_EQ(result.second, 0);
+
     inspectorMsg = "{\"method\":\"ArkUI.tree\", \"paramss\":{\"windowId\":\"10\"}}";
-    windowId = Inspector::ParseWindowIdFromMsg(inspectorMsg);
-    EXPECT_EQ(windowId, 0);
-    
+    result = Inspector::ParseWindowIdFromMsg(inspectorMsg);
+    EXPECT_EQ(result.first, 0);
+    EXPECT_EQ(result.second, 0);
+
     inspectorMsg = "{\"method\":\"ArkUI.tree\", \"params\":{\"windowId\":\"10\"}}";
-    windowId = Inspector::ParseWindowIdFromMsg(inspectorMsg);
-    EXPECT_EQ(windowId, 10);
+    result = Inspector::ParseWindowIdFromMsg(inspectorMsg);
+    EXPECT_EQ(result.first, 10);
+    EXPECT_EQ(result.second, 0);
+
+    inspectorMsg = "{\"method\":\"ArkUI.tree.3D\", \"params\":{\"windowId\":\"10\"}}";
+    result = Inspector::ParseWindowIdFromMsg(inspectorMsg);
+    EXPECT_EQ(result.first, 10);
+    EXPECT_EQ(result.second, 1);
 }
+
 
 /**
  * @tc.name: AddOffscreenNode_001
