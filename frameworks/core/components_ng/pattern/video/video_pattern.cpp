@@ -506,7 +506,7 @@ void VideoPattern::PrepareMediaPlayer()
 
     if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid()) {
         // It need post on ui thread.
-        FireError(ERROR_CODE_VIDEO_CREATE_PLAYER_FAILED, "MediaPlayer create failed");
+        FireError(ERROR_CODE_VIDEO_CREATE_PLAYER_FAILED, "Failed to create the media player");
         return;
     }
 
