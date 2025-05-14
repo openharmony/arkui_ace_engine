@@ -3324,6 +3324,7 @@ let ParticleEmitterShape;
   ParticleEmitterShape[ParticleEmitterShape.RECTANGLE = 0] = 'RECTANGLE';
   ParticleEmitterShape[ParticleEmitterShape.CIRCLE = 1] = 'CIRCLE';
   ParticleEmitterShape[ParticleEmitterShape.ELLIPSE = 2] = 'ELLIPSE';
+  ParticleEmitterShape[ParticleEmitterShape.ANNULUS = 3] = 'ANNULUS';
 })(ParticleEmitterShape || (ParticleEmitterShape = {}));
 
 let DistributionType;

@@ -18472,6 +18472,36 @@ class ArkNavHideTitleBarOrToolBar {
   }
 }
 
+class ArkEmitterPropertyOptions {
+  constructor() {
+    this.index = undefined;
+    this.isSetEmitRate = 0;
+    this.emitRate = undefined;
+    this.isSetPosition = 0;
+    this.positionX = undefined;
+    this.positionY = undefined;
+    this.isSetSize = 0;
+    this.sizeWidth = undefined;
+    this.sizeHeight = undefined;
+    this.isSetAnnulusRegion = 0;
+    this.isSetCenter = 0;
+    this.centerXValue = undefined;
+    this.centerXUnit = undefined;
+    this.centerYValue = undefined;
+    this.centerYUnit = undefined;
+    this.isSetInnerRadius = 0;
+    this.innerRadiusValue = undefined;
+    this.innerRadiusUnit = undefined;
+    this.isSetOuterRadius = 0;
+    this.outerRadiusValue = undefined;
+    this.outerRadiusUnit = undefined;
+    this.isSetStartAngle = 0;
+    this.startAngle = undefined;
+    this.isSetEndAngle = 0;
+    this.endAngle = undefined;
+  }
+}
+
 class ArkButtonComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -34229,7 +34259,6 @@ class ParticleEmitterModifier extends ModifierWithKey {
   }
 
   applyPeer(node, reset) {
-    let _a, _b, _c, _d, _e;
     if (reset) {
       getUINativeModule().particle.resetEmitter(node);
     }
@@ -34239,57 +34268,68 @@ class ParticleEmitterModifier extends ModifierWithKey {
         return;
       }
       for (let i = 0; i < this.value.length; i++) {
+        let arkEmitterPropertyOptions = new ArkEmitterPropertyOptions();
         let data = this.value[i];
-        let indexValue = 0;
+        arkEmitterPropertyOptions.index = 0;
         if (data.index > 0) {
-          indexValue = data.index;
+          arkEmitterPropertyOptions.index = data.index;
         }
-        dataArray.push(indexValue);
 
-        let emitRateValue = 5;
         if (isNumber(data.emitRate)) {
-          dataArray.push(1);
+          arkEmitterPropertyOptions.isSetEmitRate = 1;
           if (data.emitRate >= 0) {
-            emitRateValue = data.emitRate;
+            arkEmitterPropertyOptions.emitRate = data.emitRate;
+          } else {
+            arkEmitterPropertyOptions.emitRate = 5;
           }
-          dataArray.push(emitRateValue);
-        } else {
-          dataArray.push(0);
-          dataArray.push(_a);
         }
 
         if (isObject(data.position)) {
           if (isNumber(data.position.x) && isNumber(data.position.y)) {
-            dataArray.push(1);
-            dataArray.push(data.position.x);
-            dataArray.push(data.position.y);
-          } else {
-            dataArray.push(0);
-            dataArray.push(_b);
-            dataArray.push(_c);
+            arkEmitterPropertyOptions.isSetPosition = 1;
+            arkEmitterPropertyOptions.positionX = data.position.x;
+            arkEmitterPropertyOptions.positionY = data.position.y;
           }
-        } else {
-          dataArray.push(0);
-          dataArray.push(_b);
-          dataArray.push(_c);
         }
 
         if (isObject(data.size)) {
           if (data.size.width > 0 && data.size.height > 0) {
-            dataArray.push(1);
-            dataArray.push(data.size.width);
-            dataArray.push(data.size.height);
-          } else {
-            dataArray.push(0);
-            dataArray.push(_d);
-            dataArray.push(_e);
+            arkEmitterPropertyOptions.isSetSize = 1;
+            arkEmitterPropertyOptions.sizeWidth = data.size.width;
+            arkEmitterPropertyOptions.sizeHeight = data.size.height;
           }
         }
-        else {
-          dataArray.push(0);
-          dataArray.push(_d);
-          dataArray.push(_e);
+
+        if (isObject(data.annulusRegion)) {
+          arkEmitterPropertyOptions.isSetAnnulusRegion = 1;
+          if (isObject(data.annulusRegion.center) &&
+            isObject(data.annulusRegion.center.x) && isObject(data.annulusRegion.center.y)) {
+            arkEmitterPropertyOptions.isSetCenter = 1;
+            arkEmitterPropertyOptions.centerXValue = data.annulusRegion.center.x.value;
+            arkEmitterPropertyOptions.centerXUnit = data.annulusRegion.center.x.unit;
+            arkEmitterPropertyOptions.centerYValue = data.annulusRegion.center.y.value;
+            arkEmitterPropertyOptions.centerYUnit = data.annulusRegion.center.y.unit;
+          }
+          if (isObject(data.annulusRegion.innerRadius)) {
+            arkEmitterPropertyOptions.isSetInnerRadius = 1;
+            arkEmitterPropertyOptions.innerRadiusValue = data.annulusRegion.innerRadius.value;
+            arkEmitterPropertyOptions.innerRadiusUnit = data.annulusRegion.innerRadius.unit;
+          }
+          if (isObject(data.annulusRegion.outerRadius)) {
+            arkEmitterPropertyOptions.isSetOuterRadius = 1;
+            arkEmitterPropertyOptions.outerRadiusValue = data.annulusRegion.outerRadius.value;
+            arkEmitterPropertyOptions.outerRadiusUnit = data.annulusRegion.outerRadius.unit;
+          }
+          if (isNumber(data.annulusRegion.startAngle)) {
+            arkEmitterPropertyOptions.isSetStartAngle = 1;
+            arkEmitterPropertyOptions.startAngle = data.annulusRegion.startAngle;
+          }
+          if (isNumber(data.annulusRegion.endAngle)) {
+            arkEmitterPropertyOptions.isSetEndAngle = 1;
+            arkEmitterPropertyOptions.endAngle = data.annulusRegion.endAngle;
+          }
         }
+        dataArray.push(arkEmitterPropertyOptions);
       }
       getUINativeModule().particle.setEmitter(node, dataArray);
     }

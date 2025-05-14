@@ -18,7 +18,6 @@
 
 namespace OHOS::Ace::NG {
 constexpr int32_t DISTURBANCE_FIELD_SIZE = 10;
-constexpr int32_t EMITTER_SIZE = 9;
 constexpr int32_t STEP_0 = 0;
 constexpr int32_t STEP_1 = 1;
 constexpr int32_t STEP_2 = 2;
@@ -29,6 +28,162 @@ constexpr int32_t STEP_6 = 6;
 constexpr int32_t STEP_7 = 7;
 constexpr int32_t STEP_8 = 8;
 constexpr int32_t STEP_9 = 9;
+constexpr double DEFAULT_CENTER_VALUE = 0.5;
+constexpr int32_t DEFAULT_ANNULUS_UNIT = static_cast<int32_t>(DimensionUnit::PERCENT);
+constexpr double DEFAULT_START_ANGLE_VALUE = 0.0;
+constexpr double DEFAULT_END_ANGLE_VALUE = 360.0;
+
+namespace {
+void ParseAnnulusRegionCenter(EcmaVM* vm, panda::Local<panda::FunctionRef> emitterPropertyObj,
+    ArkEmitterPropertyOptions& emitterProperty)
+{
+    //parse annulusRegion center
+    auto isSetCenter = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetCenter"));
+    int32_t hasCenterValue = 0;
+    ArkTSUtils::ParseJsInteger(vm, isSetCenter, hasCenterValue);
+    emitterProperty.isSetCenter = hasCenterValue;
+    if (hasCenterValue == 1) {
+        auto centerXValueJs = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "centerXValue"));
+        auto centerXUnitJs = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "centerXUnit"));
+        double centerXValue = DEFAULT_CENTER_VALUE;
+        int32_t centerXUnit = DEFAULT_ANNULUS_UNIT;
+        ArkTSUtils::ParseJsDouble(vm, centerXValueJs, centerXValue);
+        ArkTSUtils::ParseJsInteger(vm, centerXUnitJs, centerXUnit);
+        ArkUIDimensionType centerX;
+        centerX.value = centerXValue;
+        centerX.units = centerXUnit;
+        emitterProperty.centerX = centerX;
+
+        auto centerYValueJs = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "centerYValue"));
+        auto centerYUnitJs = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "centerYUnit"));
+        double centerYValue = DEFAULT_CENTER_VALUE;
+        int32_t centerYUnit = DEFAULT_ANNULUS_UNIT;
+        ArkTSUtils::ParseJsDouble(vm, centerYValueJs, centerYValue);
+        ArkTSUtils::ParseJsInteger(vm, centerYUnitJs, centerYUnit);
+        ArkUIDimensionType centerY;
+        centerY.value = centerYValue;
+        centerY.units = centerYUnit;
+        emitterProperty.centerY = centerY;
+    }
+}
+
+void ParseAnnulusRegionRadius(EcmaVM* vm, panda::Local<panda::FunctionRef> emitterPropertyObj,
+    ArkEmitterPropertyOptions& emitterProperty)
+{
+    //parse annulusRegion radius
+    auto isSetInnerRadius = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetInnerRadius"));
+    int32_t hasInnerRadiusValue = 0;
+    ArkTSUtils::ParseJsInteger(vm, isSetInnerRadius, hasInnerRadiusValue);
+    emitterProperty.isSetInnerRadius = hasInnerRadiusValue;
+    if (hasInnerRadiusValue == 1) {
+        auto innerRadiusValueJs = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "innerRadiusValue"));
+        auto innerRadiusXUnitJs = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "innerRadiusUnit"));
+        double innerRadiusValue = 0.0;
+        int32_t innerRadiusXUnit = 0;
+        ArkTSUtils::ParseJsDouble(vm, innerRadiusValueJs, innerRadiusValue);
+        ArkTSUtils::ParseJsInteger(vm, innerRadiusXUnitJs, innerRadiusXUnit);
+        ArkUIDimensionType innerRadius;
+        innerRadius.value = innerRadiusValue;
+        innerRadius.units = innerRadiusXUnit;
+        emitterProperty.innerRadius = innerRadius;
+    }
+
+    auto isSetOuterRadius = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetOuterRadius"));
+    int32_t hasOuterRadiusValue = 0;
+    ArkTSUtils::ParseJsInteger(vm, isSetOuterRadius, hasOuterRadiusValue);
+    emitterProperty.isSetOuterRadius = hasOuterRadiusValue;
+    if (hasOuterRadiusValue == 1) {
+        auto outerRadiusValueJs = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "outerRadiusValue"));
+        auto outerRadiusXUnitJs = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "outerRadiusUnit"));
+        double outerRadiusValue = 0.0;
+        int32_t outerRadiusXUnit = 0;
+        ArkTSUtils::ParseJsDouble(vm, outerRadiusValueJs, outerRadiusValue);
+        ArkTSUtils::ParseJsInteger(vm, outerRadiusXUnitJs, outerRadiusXUnit);
+        ArkUIDimensionType outerRadius;
+        outerRadius.value = outerRadiusValue;
+        outerRadius.units = outerRadiusXUnit;
+        emitterProperty.outerRadius = outerRadius;
+    }
+}
+
+void ParseAnnulusRegionAngle(EcmaVM* vm, panda::Local<panda::FunctionRef> emitterPropertyObj,
+    ArkEmitterPropertyOptions& emitterProperty)
+{
+    //parse annulusRegion angle
+    auto isSetStartAngle = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetStartAngle"));
+    int32_t hasStartAngleValue = 0;
+    ArkTSUtils::ParseJsInteger(vm, isSetStartAngle, hasStartAngleValue);
+    emitterProperty.isSetStartAngle = hasStartAngleValue;
+    if (hasStartAngleValue == 1) {
+        auto startAngle = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "startAngle"));
+        double startAngleValue = DEFAULT_START_ANGLE_VALUE;
+        ArkTSUtils::ParseJsDouble(vm, startAngle, startAngleValue);
+        emitterProperty.startAngle = startAngleValue;
+    }
+
+    auto isSetEndAngle = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetEndAngle"));
+    int32_t hasEndAngleValue = 0;
+    ArkTSUtils::ParseJsInteger(vm, isSetEndAngle, hasEndAngleValue);
+    emitterProperty.isSetEndAngle = hasEndAngleValue;
+    if (hasEndAngleValue == 1) {
+        auto endAngle = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "endAngle"));
+        double endAngleValue = DEFAULT_END_ANGLE_VALUE;
+        ArkTSUtils::ParseJsDouble(vm, endAngle, endAngleValue);
+        emitterProperty.endAngle = endAngleValue;
+    }
+}
+
+void ParseEmitterAnnulusRegion(EcmaVM* vm, panda::Local<panda::FunctionRef> emitterPropertyObj,
+    ArkEmitterPropertyOptions& emitterProperty)
+{
+    //parse annulusRegion
+    auto isSetAnnulusRegion = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetAnnulusRegion"));
+    int32_t hasAnnulusRegionValue = 0;
+    ArkTSUtils::ParseJsInteger(vm, isSetAnnulusRegion, hasAnnulusRegionValue);
+    emitterProperty.isSetAnnulusRegion = hasAnnulusRegionValue;
+    if (hasAnnulusRegionValue == 1) {
+        ParseAnnulusRegionCenter(vm, emitterPropertyObj, emitterProperty);
+        ParseAnnulusRegionRadius(vm, emitterPropertyObj, emitterProperty);
+        ParseAnnulusRegionAngle(vm, emitterPropertyObj, emitterProperty);
+    }
+}
+
+void ParseEmitterPositionAndSize(EcmaVM* vm, panda::Local<panda::FunctionRef> emitterPropertyObj,
+    ArkEmitterPropertyOptions& emitterProperty)
+{
+    //parse position
+    auto isSetPosition = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetPosition"));
+    int32_t hasPositionValue = 0;
+    ArkTSUtils::ParseJsInteger(vm, isSetPosition, hasPositionValue);
+    emitterProperty.isSetPosition = hasPositionValue;
+    if (hasPositionValue == 1) {
+        auto positionX = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "positionX"));
+        double positionXValue = 0.0;
+        ArkTSUtils::ParseJsDouble(vm, positionX, positionXValue);
+        emitterProperty.positionX = positionXValue;
+        auto positionY = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "positionY"));
+        double positionYValue = 0.0;
+        ArkTSUtils::ParseJsDouble(vm, positionY, positionYValue);
+        emitterProperty.positionY = positionYValue;
+    }
+
+    //parse size
+    auto isSetSize = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetSize"));
+    int32_t hasSizeValue = 0;
+    ArkTSUtils::ParseJsInteger(vm, isSetSize, hasSizeValue);
+    emitterProperty.isSetSize = hasSizeValue;
+    if (hasSizeValue == 1) {
+        auto sizeWidth = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "sizeWidth"));
+        double sizeWidthValue = 0.0;
+        ArkTSUtils::ParseJsDouble(vm, sizeWidth, sizeWidthValue);
+        emitterProperty.sizeWidth = sizeWidthValue;
+        auto sizeHeight = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "sizeHeight"));
+        double sizeHeightValue = 0.0;
+        ArkTSUtils::ParseJsDouble(vm, sizeHeight, sizeHeightValue);
+        emitterProperty.sizeHeight = sizeHeightValue;
+    }
+}
+}
 
 ArkUINativeModuleValue ParticleBridge::SetDisturbanceField(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -116,58 +271,36 @@ ArkUINativeModuleValue ParticleBridge::SetEmitter(ArkUIRuntimeCallInfo* runtimeC
     }
     auto array = panda::Local<panda::ArrayRef>(jsValueRef);
     auto length = array->Length(vm);
-    std::vector<ArkUIInt32orFloat32> dataVector;
+    std::vector<ArkEmitterPropertyOptions> dataVector;
     dataVector.resize(length);
 
-    for (uint32_t i = 0; i < length / EMITTER_SIZE; i++) {
-        Local<JSValueRef> index = panda::ArrayRef::GetValueAt(vm, array, i * EMITTER_SIZE + STEP_0);
-        int32_t indexValue = 0;
-        ArkTSUtils::ParseJsInteger(vm, index, indexValue);
-        dataVector[i * EMITTER_SIZE + STEP_0].i32 = indexValue;
+    for (uint32_t i = 0; i < length; i++) {
+        ArkEmitterPropertyOptions emitterProperty;
+        Local<JSValueRef> emitterPropertyValue = panda::ArrayRef::GetValueAt(vm, array, i);
+        if (emitterPropertyValue->IsObject(vm)) {
+            auto emitterPropertyObj = emitterPropertyValue->ToObject(vm);
 
-        Local<JSValueRef> hasEmitRate = panda::ArrayRef::GetValueAt(vm, array, i * EMITTER_SIZE + STEP_1);
-        int32_t hasEmitRateValue = 0;
-        ArkTSUtils::ParseJsInteger(vm, hasEmitRate, hasEmitRateValue);
-        dataVector[i * EMITTER_SIZE + STEP_1].i32 = hasEmitRateValue;
+            //parse index
+            auto index = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "index"));
+            int32_t indexValue = 0;
+            ArkTSUtils::ParseJsInteger(vm, index, indexValue);
+            emitterProperty.index = indexValue;
 
-        if (hasEmitRateValue == 1) { // has emitRate
-            Local<JSValueRef> emitRate = panda::ArrayRef::GetValueAt(vm, array, i * EMITTER_SIZE + STEP_2);
-            int32_t emitRateValue = 0;
-            ArkTSUtils::ParseJsInteger(vm, emitRate, emitRateValue);
-            dataVector[i * EMITTER_SIZE + STEP_2].i32 = emitRateValue;
+            //parse emitRate
+            auto isSetEmitRate = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetEmitRate"));
+            int32_t hasEmitRateValue = 0;
+            ArkTSUtils::ParseJsInteger(vm, isSetEmitRate, hasEmitRateValue);
+            emitterProperty.isSetEmitRate = hasEmitRateValue;
+            if (hasEmitRateValue == 1) {
+                auto emitRate = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "emitRate"));
+                int32_t emitRateValue = 0;
+                ArkTSUtils::ParseJsInteger(vm, emitRate, emitRateValue);
+                emitterProperty.emitRate = emitRateValue;
+            }
+            ParseEmitterPositionAndSize(vm, emitterPropertyObj, emitterProperty);
+            ParseEmitterAnnulusRegion(vm, emitterPropertyObj, emitterProperty);
         }
-
-        Local<JSValueRef> hasPosition = panda::ArrayRef::GetValueAt(vm, array, i * EMITTER_SIZE + STEP_3);
-        int32_t hasPositionValue = 0;
-        ArkTSUtils::ParseJsInteger(vm, hasPosition, hasPositionValue);
-        dataVector[i * EMITTER_SIZE + STEP_3].i32 = hasPositionValue;
-
-        if (hasPositionValue == 1) { // has position
-            Local<JSValueRef> positionX = panda::ArrayRef::GetValueAt(vm, array, i * EMITTER_SIZE + STEP_4);
-            double positionXValue = 0.0;
-            ArkTSUtils::ParseJsDouble(vm, positionX, positionXValue);
-            dataVector[i * EMITTER_SIZE + STEP_4].f32 = static_cast<float>(positionXValue);
-            Local<JSValueRef> positionY = panda::ArrayRef::GetValueAt(vm, array, i * EMITTER_SIZE + STEP_5);
-            double positionYValue = 0.0;
-            ArkTSUtils::ParseJsDouble(vm, positionY, positionYValue);
-            dataVector[i * EMITTER_SIZE + STEP_5].f32 = static_cast<float>(positionYValue);
-        }
-
-        Local<JSValueRef> hasSize = panda::ArrayRef::GetValueAt(vm, array, i * EMITTER_SIZE + STEP_6);
-        int32_t hasSizeValue = 0;
-        ArkTSUtils::ParseJsInteger(vm, hasSize, hasSizeValue);
-        dataVector[i * EMITTER_SIZE + STEP_6].i32 = hasSizeValue;
-
-        if (hasSizeValue == 1) { // has size
-            Local<JSValueRef> sizeWidth = panda::ArrayRef::GetValueAt(vm, array, i * EMITTER_SIZE + STEP_7);
-            double sizeWidthValue = 0.0;
-            ArkTSUtils::ParseJsDouble(vm, sizeWidth, sizeWidthValue);
-            dataVector[i * EMITTER_SIZE + STEP_7].f32 = static_cast<float>(sizeWidthValue);
-            Local<JSValueRef> sizeHeight = panda::ArrayRef::GetValueAt(vm, array, i * EMITTER_SIZE + STEP_8);
-            double sizeHeightValue = 0.0;
-            ArkTSUtils::ParseJsDouble(vm, sizeHeight, sizeHeightValue);
-            dataVector[i * EMITTER_SIZE + STEP_8].f32 = static_cast<float>(sizeHeightValue);
-        }
+        dataVector.emplace_back(emitterProperty);
     }
     GetArkUINodeModifiers()->getParticleModifier()->SetEmitter(
         nativeNode, dataVector.data(), static_cast<ArkUI_Int32>(dataVector.size()));

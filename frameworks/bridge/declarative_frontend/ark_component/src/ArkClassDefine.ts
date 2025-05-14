@@ -1699,6 +1699,62 @@ class ArkNavHideTitleBarOrToolBar {
   }
 }
 
+class ArkEmitterPropertyOptions {
+  index: number | undefined;
+  isSetEmitRate: number;
+  emitRate: number | undefined;
+  isSetPosition: number;
+  positionX: number | undefined;
+  positionY: number | undefined;
+  isSetSize: number;
+  sizeWidth: number | undefined;
+  sizeHeight: number | undefined;
+  isSetAnnulusRegion: number;
+  isSetCenter: number;
+  centerXValue: number | undefined;
+  centerXUnit: number | undefined;
+  centerYValue: number | undefined;
+  centerYUnit: number | undefined;
+  isSetInnerRadius: number;
+  innerRadiusValue: number | undefined;
+  innerRadiusUnit: number | undefined;
+  isSetOuterRadius: number;
+  outerRadiusValue: number | undefined;
+  outerRadiusUnit: number | undefined;
+  isSetStartAngle: number;
+  startAngle: number | undefined;
+  isSetEndAngle: number;
+  endAngle: number | undefined;
+
+  constructor() {
+    this.index = undefined;
+    this.isSetEmitRate = 0;
+    this.emitRate = undefined;
+    this.isSetPosition = 0;
+    this.positionX = undefined;
+    this.positionY = undefined;
+    this.isSetSize = 0;
+    this.sizeWidth = undefined;
+    this.sizeHeight = undefined;
+    this.isSetAnnulusRegion = 0;
+    this.isSetCenter = 0;
+    this.centerXValue = undefined;
+    this.centerXUnit = undefined;
+    this.centerYValue = undefined;
+    this.centerYUnit = undefined;
+    this.isSetInnerRadius = 0;
+    this.innerRadiusValue = undefined;
+    this.innerRadiusUnit = undefined;
+    this.isSetOuterRadius = 0;
+    this.outerRadiusValue = undefined;
+    this.outerRadiusUnit = undefined;
+    this.isSetStartAngle = 0;
+    this.startAngle = undefined;
+    this.isSetEndAngle = 0;
+    this.endAngle = undefined;
+  }
+}
+
 class ArkAutoPlay {
   autoPlay: boolean;
   needStopWhenTouched: boolean;

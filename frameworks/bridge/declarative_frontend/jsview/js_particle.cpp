@@ -317,6 +317,75 @@ void ParseFloatOption(JSRef<JSObject>& floatJsObject, OHOS::Ace::NG::ParticleFlo
     floatOption.SetUpdater(updater);
 }
 
+void ParseEmitterPropertyAnnulus(const JSRef<JSObject>& paramObj, EmitterProperty& emitterProperty)
+{
+    auto annulusRegionProperty = paramObj->GetProperty("annulusRegion");
+    if (annulusRegionProperty->IsObject()) {
+        auto annulusRegion = Framework::JSRef<Framework::JSObject>::Cast(annulusRegionProperty);
+        auto centerProperty = annulusRegion->GetProperty("center");
+        std::pair<CalcDimension, CalcDimension> center = {
+            DEFAULT_CENTER_VALUE, DEFAULT_CENTER_VALUE
+        };
+        if (centerProperty->IsObject()) {
+            auto centerJson = JSRef<JSObject>::Cast(centerProperty);
+            CalcDimension centerXValue;
+            CalcDimension centerYValue;
+            if (JSViewAbstract::ParseLengthMetricsToDimension(centerJson->GetProperty("x"), centerXValue)) {
+                center.first = centerXValue;
+            }
+            if (JSViewAbstract::ParseLengthMetricsToDimension(centerJson->GetProperty("y"), centerYValue)) {
+                center.second = centerYValue;
+            }
+        }
+        CalcDimension innerRadiusValue;
+        CalcDimension outerRadiusValue;
+        JSViewAbstract::ParseLengthMetricsToDimension(annulusRegion->GetProperty("innerRadius"), innerRadiusValue);
+        JSViewAbstract::ParseLengthMetricsToDimension(annulusRegion->GetProperty("outerRadius"), outerRadiusValue);
+        auto startAngle = annulusRegion->GetProperty("startAngle");
+        auto startAngleValue = startAngle->IsNumber() ? startAngle->ToNumber<float>() : DEFAULT_START_ANGLE_VALUE;
+        auto endAngle = annulusRegion->GetProperty("endAngle");
+        auto endAngleValue = endAngle->IsNumber() ? endAngle->ToNumber<float>() : DEFAULT_END_ANGLE_VALUE;
+        emitterProperty.annulusRegion = {
+            center, innerRadiusValue, outerRadiusValue, startAngleValue, endAngleValue
+        };
+    }
+}
+
+void ParseEmitterOptionAnnulus(JSRef<JSObject>& emitterJsObject, OHOS::Ace::NG::EmitterOption& emitterOption)
+{
+    auto annulusRegionProperty = emitterJsObject->GetProperty("annulusRegion");
+    if (annulusRegionProperty->IsObject() &&
+        emitterOption.GetShape() == OHOS::Ace::NG::ParticleEmitterShape::ANNULUS) {
+        auto annulusRegion = JSRef<JSObject>::Cast(annulusRegionProperty);
+        auto centerProperty = annulusRegion->GetProperty("center");
+        std::pair<CalcDimension, CalcDimension> center = {
+            DEFAULT_CENTER_VALUE, DEFAULT_CENTER_VALUE
+            };
+        if (centerProperty->IsObject()) {
+            auto centerJson = JSRef<JSObject>::Cast(centerProperty);
+            CalcDimension centerXValue;
+            CalcDimension centerYValue;
+            if (JSViewAbstract::ParseLengthMetricsToDimension(centerJson->GetProperty("x"), centerXValue)) {
+                center.first = centerXValue;
+            }
+            if (JSViewAbstract::ParseLengthMetricsToDimension(centerJson->GetProperty("y"), centerYValue)) {
+                center.second = centerYValue;
+            }
+        }
+        CalcDimension innerRadiusValue;
+        CalcDimension outerRadiusValue;
+        JSViewAbstract::ParseLengthMetricsToDimension(annulusRegion->GetProperty("innerRadius"), innerRadiusValue);
+        JSViewAbstract::ParseLengthMetricsToDimension(annulusRegion->GetProperty("outerRadius"), outerRadiusValue);
+        auto startAngle = annulusRegion->GetProperty("startAngle");
+        auto startAngleValue = startAngle->IsNumber() ? startAngle->ToNumber<float>() : DEFAULT_START_ANGLE_VALUE;
+        auto endAngle = annulusRegion->GetProperty("endAngle");
+        auto endAngleValue = endAngle->IsNumber() ? endAngle->ToNumber<float>() : DEFAULT_END_ANGLE_VALUE;
+        auto annulusRegionValue =
+            NG::ParticleAnnulusRegion(center, innerRadiusValue, outerRadiusValue, startAngleValue, endAngleValue);
+        emitterOption.SetAnnulusRegion(annulusRegionValue);
+    }
+}
+
 bool ParseParticleObject(JSRef<JSObject>& particleJsObject, OHOS::Ace::NG::Particle& particle)
 {
     auto typeJsValue = particleJsObject->GetProperty("type");
@@ -430,7 +499,7 @@ bool ParseEmitterOption(JSRef<JSObject>& emitterJsObject, OHOS::Ace::NG::Emitter
     if (emitShapeJsValue->IsNumber()) {
         auto emitShapeInt = emitShapeJsValue->ToNumber<int32_t>();
         if (emitShapeInt >= static_cast<int32_t>(OHOS::Ace::NG::ParticleEmitterShape::RECTANGLE) &&
-            emitShapeInt <= static_cast<int32_t>(OHOS::Ace::NG::ParticleEmitterShape::ELLIPSE)) {
+            emitShapeInt <= static_cast<int32_t>(OHOS::Ace::NG::ParticleEmitterShape::ANNULUS)) {
             emitShape = static_cast<OHOS::Ace::NG::ParticleEmitterShape>(emitShapeInt);
         }
     }
@@ -454,6 +523,7 @@ bool ParseEmitterOption(JSRef<JSObject>& emitterJsObject, OHOS::Ace::NG::Emitter
     auto sizeJsValue = emitterJsObject->GetProperty("size");
     ParsSize(sizeValue, sizeJsValue);
     emitterOption.SetSize(sizeValue);
+    ParseEmitterOptionAnnulus(emitterJsObject, emitterOption);
     return true;
 }
 
@@ -869,6 +939,8 @@ void JSParticle::ParseEmitterProperty(
             emitterProperty.size = { sizeXValue, sizeYValue };
         }
     }
+
+    ParseEmitterPropertyAnnulus(paramObj, emitterProperty);
     data.push_back(emitterProperty);
 }
 

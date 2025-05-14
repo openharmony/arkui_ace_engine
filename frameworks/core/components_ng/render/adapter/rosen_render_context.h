@@ -717,6 +717,8 @@ protected:
 #endif
     void DetachModifiers();
 
+    void OnEmitterPropertyUpdate();
+
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
     RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
