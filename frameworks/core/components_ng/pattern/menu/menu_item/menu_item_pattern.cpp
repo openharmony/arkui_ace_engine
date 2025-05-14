@@ -193,6 +193,7 @@ void MenuItemPattern::OnAttachToFrameNode()
     RegisterOnPress();
     RegisterOnHover();
     CreateBottomDivider();
+    RegisterAccessibilityChildActionNotify();
 }
 
 void CustomMenuItemPattern::OnAttachToFrameNode()
@@ -631,7 +632,6 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    RegisterParentAccessibilityCallback();
     auto customNode = BuildSubMenuCustomNode();
     CHECK_NULL_VOID(customNode);
     UpdateSubmenuExpandingMode(customNode);
@@ -644,7 +644,6 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
         OnExpandChanged(frameNode);
         return;
     }
-
     menuPattern->FocusViewHide();
     HideSubMenu();
     isSubMenuShowed_ = true;
@@ -3350,12 +3349,33 @@ bool MenuItemPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     return result;
 }
 
-void MenuItemPattern::RegisterParentAccessibilityCallback()
+void MenuItemPattern::RegisterAccessibilityChildActionNotify()
 {
-    auto menuNode = GetMenu(false);
-    CHECK_NULL_VOID(menuNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    menuPattern->RegisterAccessibilityChildActionNotify();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetNotifyChildAction(
+        [menu = WeakPtr<FrameNode>(host)] (NotifyChildActionType childActionType) {
+            auto result = AccessibilityActionResult::ACTION_ERROR;
+            auto frameNode = menu.Upgrade();
+            CHECK_NULL_RETURN(frameNode, result);
+            auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+            CHECK_NULL_RETURN(eventHub, result);
+            auto gesture = eventHub->GetGestureEventHub();
+            CHECK_NULL_RETURN(gesture, result);
+            TouchEvent event;
+            event.id = frameNode->GetId();
+            event.postEventNodeId = frameNode->GetId();
+            event.type = TouchType::DOWN;
+            event.isInterpolated = true;
+            std::chrono::microseconds microseconds(GetMicroTickCount());
+            TimeStamp time(microseconds);
+            event.time = time;
+            result = gesture->TriggerTouchEvent(event) ?
+                AccessibilityActionResult::ACTION_OK : AccessibilityActionResult::ACTION_ERROR;
+            TAG_LOGI(AceLogTag::ACE_MENU, "trigger notify child action, node id :%{public}d.", frameNode->GetId());
+            return result;
+    });
 }
 } // namespace OHOS::Ace::NG

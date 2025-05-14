@@ -620,7 +620,6 @@ public:
     void UpdateMenuItemDivider();
     void UpdateDividerProperty(const RefPtr<FrameNode>& dividerNode, const std::optional<V2::ItemDivider>& divider);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
-    void RegisterAccessibilityChildActionNotify();
 protected:
     void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -719,6 +718,7 @@ private:
     RefPtr<FrameNode> BuildContentModifierNode(int index);
     bool IsMenuScrollable() const;
     void UpdateClipPath(const RefPtr<LayoutWrapper>& dirty);
+    void RegisterAccessibilityChildActionNotify();
 
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
