@@ -99,6 +99,7 @@ const PointF POINTF_START_DIFFX { 20.0f, 10.0f };
 const PointF POINTF_END_DIFFX { 10.0f, 20.0f };
 const PointF POINTF_START_DIFFY { 10.0f, 20.0f };
 const PointF POINTF_END_DIFFY { 20.0f, 10.0f };
+const uint32_t STEP_INDEX = 0;
 const PointF SELECT_START { 10.0f, 10.0f };
 const PointF SELECT_END { 20.0f, 20.0f };
 const PointF POINTF_CENTER { 15.0f, 15.0f };
@@ -1355,7 +1356,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest003, TestSize.Level1
         ASSERT_NE(textNode, nullptr);
         bool click = i % 2 == 0;
         bool reverse = i % 3 == 0;
-        sliderPattern->SetStepPointsAccessibilityVirtualNodeEvent(textNode, i, click, reverse);
+        sliderPattern->SetStepPointsAccessibilityVirtualNodeEvent(textNode, i, click, reverse, false);
         auto evetFunc = sliderPattern->pointAccessibilityNodeEventVec_[i];
         if (click) {
             EXPECT_NE(evetFunc, nullptr);
@@ -1482,7 +1483,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest006, TestSize.Level1
      * @tc.steps: step2. Set step points virtual node property.
      */
     sliderPattern->SetStepPointAccessibilityVirtualNode(
-        frameNode, CONTAINER_SIZE, POINTF_START, SLIDER_MODEL_NG_BLOCK_IMAGE);
+        frameNode, CONTAINER_SIZE, POINTF_START, SLIDER_MODEL_NG_BLOCK_IMAGE, STEP_INDEX);
     auto pointNodeProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(pointNodeProperty, nullptr);
     auto expectSize = CalcSize(CalcLength(CONTAINER_SIZE.Width()), CalcLength(CONTAINER_SIZE.Height()));
@@ -1853,6 +1854,244 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest025, TestSize.Level1)
     sliderPattern->HandleTouchUp(localLocation, SourceType::TOUCH);
     EXPECT_EQ(sliderPattern->mousePressedFlag_, false);
     EXPECT_EQ(sliderPattern->sliderContentModifier_->isPressed_->Get(), false);
+}
+
+/**
+ * @tc.name: SliderPatternTest026
+ * @tc.desc: SliderPattern::SetPrefix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Slider node.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+
+    RefPtr<NG::UINode> prefix;
+    SliderPrefixOptions options;
+
+    sliderPattern->SetPrefix(prefix, options);
+
+    EXPECT_FALSE(sliderPattern->prefixNodeStack_);
+    EXPECT_EQ(sliderPattern->prefix_.Upgrade(), prefix);
+}
+
+/**
+ * @tc.name: SliderPatternTest027
+ * @tc.desc: SliderPattern::SetPrefix,SliderPattern::SetPrefix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest027, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    sliderPattern->AttachToFrameNode(frameNode);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+
+    /**
+     * @tc.steps: step2. set attribute and call function.
+     */
+    RefPtr<NG::UINode> prefix;
+    prefix = NG::ViewStackProcessor::GetInstance()->Finish();
+    SliderPrefixOptions options;
+    sliderPattern->SetPrefix(prefix, options);
+
+    ASSERT_TRUE(sliderPattern->prefixNodeStack_);
+
+    RefPtr<NG::UINode> suffix;
+    suffix = NG::ViewStackProcessor::GetInstance()->Finish();
+    SliderSuffixOptions SuffixOptions;
+    sliderPattern->SetSuffix(suffix, SuffixOptions);
+
+    ASSERT_TRUE(sliderPattern->suffixNodeStack_);
+
+    /**
+     * @tc.steps: step3. Check the param value.
+     */
+    EXPECT_EQ(sliderPattern->prefixNodeStack_->GetChildren().size(), 1);
+    EXPECT_EQ(sliderPattern->prefixNodeStack_->GetChildren().front(), prefix);
+    EXPECT_EQ(sliderPattern->suffixNodeStack_->GetChildren().size(), 1);
+    EXPECT_EQ(sliderPattern->suffixNodeStack_->GetChildren().front(), suffix);
+
+    auto host = sliderPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    EXPECT_EQ(host->GetChildren().size(), 2);
+}
+
+/**
+ * @tc.name: SliderPatternTest028
+ * @tc.desc: SliderPattern::UpdateEndsNotShowStepsPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    sliderPattern->AttachToFrameNode(frameNode);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+
+    /**
+     * @tc.steps: step2. set attribute and call function.
+     */
+    PointF testPosition;
+    PointF block(100, 50);
+    SizeF prefixSize(20, 20);
+    float noneOffset = 50;
+    float outsetOffset = 40;
+    sliderPattern->GetLayoutProperty<SliderLayoutProperty>()->UpdateDirection(Axis::HORIZONTAL);
+    sliderPattern->GetLayoutProperty<SliderLayoutProperty>()->UpdateSliderMode(SliderModel::SliderMode::OUTSET);
+    sliderPattern->UpdateEndsNotShowStepsPosition(testPosition, block, prefixSize, noneOffset, outsetOffset);
+
+    /**
+     * @tc.steps: step3. Check the param value.
+     */
+    EXPECT_FLOAT_EQ(testPosition.GetX(), 100 - 10 - 40); // block.X - size/2 - outsetOffset
+    EXPECT_FLOAT_EQ(testPosition.GetY(), 50 - 10);       // block.Y - size/2
+}
+
+/**
+ * @tc.name: SliderPatternTest029
+ * @tc.desc: SliderPattern::UpdateEndsNotShowStepsPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    sliderPattern->AttachToFrameNode(frameNode);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+
+    /**
+     * @tc.steps: step2. set attribute and call function.
+     */
+    sliderPattern->GetLayoutProperty<SliderLayoutProperty>()->UpdateDirection(Axis::VERTICAL);
+    sliderPattern->GetLayoutProperty<SliderLayoutProperty>()->UpdateReverse(true);
+
+    PointF testPosition;
+    PointF block(80, 120);
+    SizeF suffixSize(30, 30);
+    float noneOffset = -50;
+    float outsetOffset = -40;
+
+    sliderPattern->UpdateEndsNotShowStepsPosition(testPosition, block, suffixSize, noneOffset, outsetOffset);
+
+    /**
+     * @tc.steps: step3. Check the param value.
+     */
+    EXPECT_FLOAT_EQ(testPosition.GetX(), 80 - 15);          // block.X - size/2
+    EXPECT_FLOAT_EQ(testPosition.GetY(), 120 - 15 - (-40)); // block.Y - size/2 - outsetOffset
+}
+
+/**
+ * @tc.name: SliderPatternTest030
+ * @tc.desc: SliderPattern::UpdateEndsIsShowStepsPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    sliderPattern->AttachToFrameNode(frameNode);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+
+    /**
+     * @tc.steps: step2. set attribute and call function.
+     */
+    sliderPattern->stepPoints_.emplace_back(PointF(10, 20));
+    sliderPattern->stepPoints_.emplace_back(PointF(30, 40));
+    sliderPattern->stepPoints_.emplace_back(PointF(50, 60));
+
+    sliderPattern->GetPaintProperty<SliderPaintProperty>()->UpdateShowSteps(true);
+    sliderPattern->side_ = false;
+
+    PointF testPosition;
+    PointF block(0, 0);
+    SizeF endsSize(20, 20);
+    float outsetOffset = 40;
+
+    sliderPattern->GetLayoutProperty<SliderLayoutProperty>()->UpdateSliderMode(SliderModel::SliderMode::NONE);
+    sliderPattern->UpdateEndsIsShowStepsPosition(testPosition, block, endsSize, outsetOffset, false);
+
+    /**
+     * @tc.steps: step3. Check the param value.
+     */
+    EXPECT_FLOAT_EQ(testPosition.GetX(), 30 - 10); // stepPoints_[1].x - size/2
+    EXPECT_FLOAT_EQ(testPosition.GetY(), 40 - 10); // stepPoints_[1].y - size/2
+}
+
+/**
+ * @tc.name: SliderPatternTest031
+ * @tc.desc: SliderPattern::UpdateEndsIsShowStepsPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    sliderPattern->AttachToFrameNode(frameNode);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+
+    /**
+     * @tc.steps: step2. set attribute and call function.
+     */
+    sliderPattern->stepPoints_.clear();
+    sliderPattern->GetPaintProperty<SliderPaintProperty>()->UpdateShowSteps(true);
+
+    PointF testPosition;
+    PointF block(0, 0);
+    SizeF endsSize(20, 20);
+
+    /**
+     * @tc.steps: step3. Check the param value.
+     */
+    EXPECT_NO_FATAL_FAILURE(sliderPattern->UpdateEndsIsShowStepsPosition(testPosition, block, endsSize, 40, true));
 }
 
 /**

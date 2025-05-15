@@ -21,6 +21,7 @@
 #include "core/components/slider/render_slider.h"
 #include "core/components/slider/slider_element.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
+#include "core/components_ng/pattern/slider/slider_custom_content_options.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 
@@ -88,6 +89,8 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSlider>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSlider>::StaticMethod("enableHapticFeedback", &JSSlider::SetEnableHapticFeedback);
+    JSClass<JSSlider>::StaticMethod("prefix", &JSSlider::SetPrefix);
+    JSClass<JSSlider>::StaticMethod("suffix", &JSSlider::SetSuffix);
     JSClass<JSSlider>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -639,6 +642,113 @@ void JSSlider::SetEnableHapticFeedback(const JSCallbackInfo& info)
         isEnableHapticFeedback = info[0]->ToBoolean();
     }
     SliderModel::GetInstance()->SetEnableHapticFeedback(isEnableHapticFeedback);
+}
+
+RefPtr<NG::UINode> SetPrefix_SuffixWithFrameNode(const JSRef<JSObject>& sliderJsObject)
+{
+    JSRef<JSVal> builderNodeParam = sliderJsObject->GetProperty("builderNode_");
+    if (!builderNodeParam->IsEmpty()) {
+        auto builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
+        JSRef<JSVal> nodePtr = builderNodeObject->GetProperty("nodePtr_");
+        if (!nodePtr.IsEmpty()) {
+            const auto* vm = nodePtr->GetEcmaVM();
+            CHECK_NULL_RETURN(vm, nullptr);
+            auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
+            auto* myUINode = reinterpret_cast<NG::UINode*>(node);
+            if (!myUINode) {
+                return nullptr;
+            }
+            auto refPtrUINode = AceType::Claim(myUINode);
+            return refPtrUINode;
+        }
+    }
+    return nullptr;
+}
+
+void JSSlider::SetPrefix(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsObject()) {
+        return;
+    }
+
+    RefPtr<NG::UINode> refPtrUINode = nullptr;
+    auto sliderContentObject = JSRef<JSObject>::Cast(args[0]);
+    if (!sliderContentObject->IsEmpty()) {
+        refPtrUINode = SetPrefix_SuffixWithFrameNode(sliderContentObject);
+    }
+
+    NG::SliderPrefixOptions prefixOption;
+    if (args.Length() > 1) {
+        auto prefixOptions = JSRef<JSObject>::Cast(args[1]);
+        if (!prefixOptions->IsEmpty() && !prefixOptions->IsUndefined()) {
+            auto accessibilityTextProperty = prefixOptions->GetProperty("accessibilityText");
+            if (!accessibilityTextProperty->IsEmpty()) {
+                prefixOption.accessibilityText = accessibilityTextProperty->ToString();
+            }
+
+            auto accessibilityDescriptionProperty = prefixOptions->GetProperty("accessibilityDescription");
+            if (!accessibilityDescriptionProperty->IsEmpty()) {
+                prefixOption.accessibilityDescription = accessibilityDescriptionProperty->ToString();
+            }
+
+            auto accessibilityLevelProperty = prefixOptions->GetProperty("accessibilityLevel");
+            if (!accessibilityLevelProperty->IsEmpty()) {
+                prefixOption.accessibilityLevel = accessibilityLevelProperty->ToString();
+            }
+
+            auto accessibilityGroupProperty = prefixOptions->GetProperty("accessibilityGroup");
+            if (!accessibilityGroupProperty->IsEmpty()) {
+                prefixOption.accessibilityGroup = accessibilityGroupProperty->ToBoolean();
+            }
+        }
+    }
+
+    SliderModel::GetInstance()->SetPrefix(refPtrUINode, prefixOption);
+
+    args.ReturnSelf();
+}
+
+void JSSlider::SetSuffix(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsObject()) {
+        return;
+    }
+
+    RefPtr<NG::UINode> refPtrUINode = nullptr;
+    auto sliderContentObject = JSRef<JSObject>::Cast(args[0]);
+    if (!sliderContentObject->IsEmpty()) {
+        refPtrUINode = SetPrefix_SuffixWithFrameNode(sliderContentObject);
+    }
+
+    NG::SliderSuffixOptions suffixOption;
+    if (args.Length() > 1) {
+        JSRef<JSObject> suffixOptions = JSRef<JSObject>::Cast(args[1]);
+        if (!suffixOptions->IsEmpty() && !suffixOptions->IsUndefined()) {
+            auto accessibilityTextProperty = suffixOptions->GetProperty("accessibilityText");
+            if (!accessibilityTextProperty->IsEmpty()) {
+                suffixOption.accessibilityText = accessibilityTextProperty->ToString();
+            }
+
+            auto accessibilityDescriptionProperty = suffixOptions->GetProperty("accessibilityDescription");
+            if (!accessibilityDescriptionProperty->IsEmpty()) {
+                suffixOption.accessibilityDescription = accessibilityDescriptionProperty->ToString();
+            }
+
+            auto accessibilityLevelProperty = suffixOptions->GetProperty("accessibilityLevel");
+            if (!accessibilityLevelProperty->IsEmpty()) {
+                suffixOption.accessibilityLevel = accessibilityLevelProperty->ToString();
+            }
+
+            auto accessibilityGroupProperty = suffixOptions->GetProperty("accessibilityGroup");
+            if (!accessibilityGroupProperty->IsEmpty()) {
+                suffixOption.accessibilityGroup = accessibilityGroupProperty->ToBoolean();
+            }
+        }
+    }
+
+    SliderModel::GetInstance()->SetSuffix(refPtrUINode, suffixOption);
+
+    args.ReturnSelf();
 }
 
 void JSSlider::ResetBlockStyle()

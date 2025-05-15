@@ -451,6 +451,20 @@ class ArkMenuAlignType {
   }
 }
 
+class ArkPrefixOrSuffix {
+  value: CustomBuilder;
+  options: SliderCustomContentOptions;
+
+  constructor(value: CustomBuilder, options?:SliderCustomContentOptions) {
+    this.value = value;
+    this.options = options;
+  }
+
+  isEqual(another: ArkPrefixOrSuffix): boolean {
+    return this.value === another.value && this.options === another.options;
+  }
+}
+
 class ArkSliderTips {
   showTip: boolean;
   tipText: string | ResourceStr;

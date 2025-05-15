@@ -1025,6 +1025,8 @@ declare class ArkSliderComponent extends ArkComponent implements SliderAttribute
     blockSize(value: SizeOptions): this;
     blockStyle(value: SliderBlockStyle): this;
     stepSize(value: Length): this;
+    prefix(value: CustomBuilder, options?: SliderCustomContentOptions): this;
+    suffix(value: CustomBuilder, options?: SliderCustomContentOptions): this;
 }
 declare class ArkRatingComponent extends ArkComponent implements RatingAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

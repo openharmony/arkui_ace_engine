@@ -17621,6 +17621,15 @@ class ArkSliderTips {
     return this.showTip === another.showTip && this.tipText === another.tipText;
   }
 }
+class ArkPrefixOrSuffix {
+  constructor(value, options) {
+    this.value = value;
+    this.options = options;
+  }
+  isEqual(another) {
+    return this.value === another.value && this.options === another.options;
+  }
+}
 class ArkStarStyle {
   constructor() {
     this.backgroundUri = undefined;
@@ -22119,6 +22128,16 @@ class ArkSliderComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SliderEnableHapticFeedbackModifier.identity, SliderEnableHapticFeedbackModifier, value);
     return this;
   }
+  prefix(value, options) {
+    let prefix = new ArkPrefixOrSuffix(value, options);
+    modifierWithKey(this._modifiersWithKeys, PrefixModifier.identity, PrefixModifier, prefix);
+    return this;
+  }
+  suffix(value, options) {
+    let suffix = new ArkPrefixOrSuffix(value, options);
+    modifierWithKey(this._modifiersWithKeys, SuffixModifier.identity, SuffixModifier, suffix);
+    return this;
+  }
 }
 class SliderOptionsModifier extends ModifierWithKey {
   constructor(value) {
@@ -22453,6 +22472,32 @@ class SliderContentModifier extends ModifierWithKey {
   applyPeer(nodenode, reset, component) {
     let sliderComponent = component;
     sliderComponent.setContentModifier(this.value);
+  }
+}
+class PrefixModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().slider.resetPrefix(node);
+    }
+    else {
+      getUINativeModule().slider.setPrefix(node, this.value.options);
+    }
+  }
+}
+class SuffixModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().slider.resetSuffix(node);
+    }
+    else {
+      getUINativeModule().slider.setSuffix(node, this.value.options);
+    }
   }
 }
 class SliderEnableHapticFeedbackModifier extends ModifierWithKey {

@@ -21,6 +21,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float HALF = 0.5f;
+const Dimension shrinkWidth = 16.0_vp;
+const Dimension thresholdWidth = 34.5_vp; //The slider shortens the width of the threshold
 bool JudgeTrackness(Axis direction, float blockDiameter, float trackThickness, float width, float height)
 {
     if (direction == Axis::HORIZONTAL) {
@@ -109,8 +111,20 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
     blockHotSize_ = CalculateHotSize(layoutWrapper, blockSize_, static_cast<float>(themeBlockHotSize.ConvertToPx()));
     auto mode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
     auto sliderWidth = CalculateSliderWidth(width, height, direction, hotBlockShadowWidth, mode);
-    float sliderLength = direction == Axis::HORIZONTAL ? width : height;
+    float sliderLength =
+        CalculateSliderLength(width, height, direction, mode, (pattern->HasPrefix() || pattern->HasSuffix()));
     return direction == Axis::HORIZONTAL ? SizeF(sliderLength, sliderWidth) : SizeF(sliderWidth, sliderLength);
+}
+
+float SliderLayoutAlgorithm::CalculateSliderLength(
+    float width, float height, Axis direction, SliderModel::SliderMode mode, bool Ends)
+{
+    auto sliderLength = direction == Axis::HORIZONTAL ? width : height;
+    if (mode == SliderModel::SliderMode::OUTSET && Ends) {
+        sliderLength = sliderLength - static_cast<float>(shrinkWidth.ConvertToPx()) / HALF -
+                       static_cast<float>(thresholdWidth.ConvertToPx());
+    }
+    return sliderLength;
 }
 
 float SliderLayoutAlgorithm::CalculateSliderWidth(
@@ -166,6 +180,8 @@ void SliderLayoutAlgorithm::GetStyleThemeValue(LayoutWrapper* layoutWrapper, Dim
 void SliderLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto sliderLayoutProperty = DynamicCast<SliderLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(sliderLayoutProperty);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<SliderPattern>();
@@ -173,11 +189,49 @@ void SliderLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!pattern->UseContentModifier()) {
         layoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(blockSize_.Width(), blockSize_.Height()));
     }
-    if (layoutWrapper->GetTotalChildCount() != 0) {
-        auto child = layoutWrapper->GetOrCreateChildByIndex(0);
-        child->Measure(layoutConstraint);
+    if (pattern->HasPrefix() || pattern->HasSuffix()) {
+        const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+        auto contentRect = layoutWrapper->GetGeometryNode()->GetContentRect();
+        auto axis = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
+        if (axis == Axis::HORIZONTAL) {
+            maxWidth = contentRect.Width() * langRatio;
+            maxHeight = maxWidth * shortRatio;
+        } else {
+            maxHeight = contentRect.Height() * langRatio;
+            maxWidth = maxHeight * shortRatio;
+        }
+        if (pattern->HasPrefix()) {
+            auto prefixChild = layoutWrapper->GetOrCreateChildByIndex(0);
+            CHECK_NULL_VOID(prefixChild);
+            SetChildConstraint(prefixChild, maxWidth, maxHeight);
+        }
+
+        if (pattern->HasSuffix()) {
+            auto suffixChild = layoutWrapper->GetOrCreateChildByIndex(0);
+            if (pattern->HasPrefix()) {
+                suffixChild = layoutWrapper->GetOrCreateChildByIndex(1);
+            }
+            CHECK_NULL_VOID(suffixChild);
+            SetChildConstraint(suffixChild, maxWidth, maxHeight);
+        }
+    } else {
+        if (layoutWrapper->GetTotalChildCount() != 0) {
+            auto child = layoutWrapper->GetOrCreateChildByIndex(0);
+            CHECK_NULL_VOID(child);
+            child->Measure(layoutConstraint);
+        }
     }
     PerformMeasureSelf(layoutWrapper);
+}
+
+void SliderLayoutAlgorithm::SetChildConstraint(RefPtr<LayoutWrapper> child, float maxWidth, float maxHeight)
+{
+    auto childLayoutProperty = child->GetLayoutProperty();
+    CHECK_NULL_VOID(childLayoutProperty);
+    LayoutConstraintF childConstraint = childLayoutProperty->CreateChildConstraint();
+    childConstraint.maxSize.SetWidth(maxWidth);
+    childConstraint.maxSize.SetHeight(maxHeight);
+    child->Measure(childConstraint);
 }
 
 void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -222,8 +276,52 @@ void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto sliderLength = length >= borderBlank ? length - borderBlank : 1;
     borderBlank = (length - sliderLength) * HALF;
     auto selectOffset = borderBlank + pattern->GetValueRatio() * sliderLength;
+    auto insetModeOffset = borderBlank + blockSize * HALF;
 
     CalculateBlockOffset(layoutWrapper, contentRect, selectOffset, axis, paintReverse);
+    if (pattern->HasPrefix()) {
+        CalculatePrefixOffset(layoutWrapper, contentRect, insetModeOffset, axis, paintReverse);
+    }
+    if (pattern->HasSuffix()) {
+        CalculateSuffixOffset(layoutWrapper, contentRect, insetModeOffset, axis, paintReverse);
+    }
+}
+
+void SliderLayoutAlgorithm::CalculatePrefixOffset(
+    LayoutWrapper* layoutWrapper, const RectF& contentRect, float borderBlank, Axis axis, bool reverse)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = DynamicCast<SliderPattern>(host->GetPattern());
+    CHECK_NULL_VOID(pattern);
+
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    if (children.size() < 1) {
+        return;
+    }
+    auto prefixIter = std::next(children.begin(), 0);
+    auto prefixChild = *prefixIter;
+    prefixChild->Layout();
+}
+
+void SliderLayoutAlgorithm::CalculateSuffixOffset(
+    LayoutWrapper* layoutWrapper, const RectF& contentRect, float borderBlank, Axis axis, bool reverse)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = DynamicCast<SliderPattern>(host->GetPattern());
+    CHECK_NULL_VOID(pattern);
+
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    if (children.size() < 1) {
+        return;
+    }
+    auto suffixIter = std::next(children.begin(), 0);
+    if (children.size() > 1) {
+        suffixIter = std::next(children.begin(), 1);
+    }
+    auto suffixChild = *suffixIter;
+    suffixChild->Layout();
 }
 
 void SliderLayoutAlgorithm::CalculateBlockOffset(
