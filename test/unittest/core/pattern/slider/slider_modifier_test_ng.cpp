@@ -1935,7 +1935,8 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest033, TestSize.Level1)
     /**
      * @tc.steps: step2. create frameNode and sliderContentModifier.
      */
-    sliderContentModifier.SetHasEnds(true);
+    sliderContentModifier.SetHasPrefix(true);
+    sliderContentModifier.SetHasSuffix(true);
     sliderContentModifier.reverse_ = false;
     sliderContentModifier.SetSliderMode(SliderModel::SliderMode::NONE);
     sliderContentModifier.SetStepRatio(.0f);
@@ -1979,7 +1980,8 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest034, TestSize.Level1)
     /**
      * @tc.steps: step2. create frameNode and sliderContentModifier.
      */
-    sliderContentModifier.SetHasEnds(false);
+    sliderContentModifier.SetHasPrefix(false);
+    sliderContentModifier.SetHasSuffix(false);
     sliderContentModifier.reverse_ = false;
     sliderContentModifier.SetSliderMode(SliderModel::SliderMode::INSET);
     sliderContentModifier.SetStepRatio(0.5f);
@@ -2024,7 +2026,8 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest035, TestSize.Level1)
      * @tc.steps: step2. create frameNode and sliderContentModifier.
      */
     sliderContentModifier.reverse_ = true;
-    sliderContentModifier.SetHasEnds(true);
+    sliderContentModifier.SetHasPrefix(true);
+    sliderContentModifier.SetHasSuffix(true);
     sliderContentModifier.SetStepRatio(0.3f);
     sliderContentModifier.AddStepPoint(0, 0, 100, 0, canvas);
     auto& points = sliderContentModifier.GetStepPointVec();
@@ -2227,7 +2230,8 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest040, TestSize.Level1)
     /**
      * @tc.steps: step2. create frameNode and sliderContentModifier.
      */
-    sliderContentModifier.SetHasEnds(false);
+    sliderContentModifier.SetHasPrefix(false);
+    sliderContentModifier.SetHasSuffix(false);
     sliderContentModifier.SetSliderMode(SliderModel::SliderMode::NONE);
     sliderContentModifier.DrawStepPoint(10.0f, 20.0f, 1, canvas, 5);
 

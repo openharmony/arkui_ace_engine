@@ -69,7 +69,7 @@ public:
         if (layoutProperty) {
             textDirection = layoutProperty->GetLayoutDirection();
         }
-        if (HasPrefix() && HasSuffix() && !contentModifierNode_) {
+        if ((HasPrefix() || HasSuffix()) && !contentModifierNode_) {
             endsInitFlag_ = true;
             InitSliderEndsState();
         }
@@ -80,11 +80,16 @@ public:
     void InitSliderEndsState()
     {
         CHECK_NULL_VOID(sliderContentModifier_);
-        CHECK_NULL_VOID(suffixNodeStack_);
-        CHECK_NULL_VOID(prefixNodeStack_);
-        sliderContentModifier_->SetHasEnds(true);
-        prefixSize_ = suffixNodeStack_->GetGeometryNode()->GetFrameSize();
-        suffixSize_ = suffixNodeStack_->GetGeometryNode()->GetFrameSize();
+        if (HasPrefix()) {
+            CHECK_NULL_VOID(prefixNodeStack_);
+            prefixSize_ = prefixNodeStack_->GetGeometryNode()->GetFrameSize();
+            sliderContentModifier_->SetHasPrefix(true);
+        }
+        if (HasSuffix()) {
+            CHECK_NULL_VOID(suffixNodeStack_);
+            suffixSize_ = suffixNodeStack_->GetGeometryNode()->GetFrameSize();
+            sliderContentModifier_->SetHasSuffix(true);
+        }
         InitSliderEnds();
     }
 
@@ -399,6 +404,8 @@ private:
     void SetStepPointAccessibilityVirtualNode(const RefPtr<FrameNode>& pointNode, const SizeF& size,
         const PointF& point, const std::string& txt, uint32_t index);
     void SendAccessibilityValueEvent(int32_t mode);
+    void UpdateEndsAccessibilityVirtualNode(const RefPtr<FrameNode>& pointNode, uint32_t index,
+        uint32_t rangeFromPointIndex, uint32_t rangeToPointIndex, bool reverse);
     void ClearSliderVirtualNode();
     void InitOrRefreshSlipFactor();
     RefPtr<PanEvent> CreatePanEvent();
@@ -478,6 +485,7 @@ private:
     bool isShowSteps_ = false;
     bool side_ = true;
     bool endsInitFlag_ = false;
+    float outsetOffset_ = 0.0f;
 
     NG::SliderPrefixOptions prefixAccessibilityoptions_;
     NG::SliderSuffixOptions suffixAccessibilityoptions_;
