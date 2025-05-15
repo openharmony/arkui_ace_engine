@@ -1,0 +1,120 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+
+koala_root = "../.."
+libarkts_path = "."
+ui2abc_path = ".."
+interop_root = "$koala_root/interop"
+build_root = "//build"
+toolchain_linux = "$build_root/toolchain/linux:clang_x64"
+
+node_modules_dir = "../node_modules"
+
+node_version = "v16.20.2"
+host_arch = "${host_os}-${host_cpu}"
+
+
+os_define = "KOALA_LINUX"
+
+shared_library("es2panda_lib") {
+    sources = [
+        "$libarkts_path/native/src/common.cc",
+        "$libarkts_path/native/src/bridges.cc",
+        "$libarkts_path/native/src/generated/bridges.cc",
+
+        "$interop_root/src/cpp/napi/convertors-napi.cc",
+        "$interop_root/src/cpp/callback-resource.cc",
+        "$interop_root/src/cpp/interop-logging.cc",
+        "$interop_root/src/cpp/common-interop.cc"
+    ]
+
+    include_dirs = [
+        "$ui2abc_path/build/sdk/linux_host_tools/include/tools/es2panda/public",
+        "$ui2abc_path/build/sdk/linux_host_tools/include/tools/es2panda",
+
+        "$libarkts_path/native/src",
+
+        "$koala_root/interop/src/cpp",
+        "$koala_root/interop/src/cpp/napi",
+        "$koala_root/interop/src/cpp/types",
+
+        "$node_modules_dir/node-api-headers/include",
+        "$node_modules_dir/node-addon-api",
+        
+    ]
+
+    defines = [
+        "$os_define",
+        "KOALA_INTEROP_MODULE=NativeModule",
+        "INTEROP_LIBRARY_NAME=es2panda",
+        "KOALA_USE_NODE_VM",
+        "KOALA_NAPI"
+    ]
+
+    deps = [
+        "$ui2abc_path:install"
+    ]
+
+    configs -= [ "//build/config/compiler:compiler" ]
+
+    cflags_cc = [
+        "-std=c++17",
+        "-fPIC",
+    ]
+
+    ldflags = [
+        "-Wl,--allow-shlib-undefined",
+
+    ]
+
+    output_extension = "node"
+}
+
+action("es2panda_copy_lib") {
+    script = "gn/command/copy.py"
+    outputs = [
+        "$target_out_dir/es2panda.node"
+    ]
+    deps = [
+        ":es2panda_lib(${toolchain_linux})"
+    ]
+    args = [
+        "--from-path", rebase_path(root_out_dir),
+        "--to-path", rebase_path(".")
+    ]
+}
+
+action("es2panda.js") {
+    script = "gn/command/npm.py"
+    outputs = [
+        "$target_out_dir/es2panda.js"
+    ]
+    deps = [
+        ":es2panda_copy_lib",
+        "$ui2abc_path:panda_sdk"
+    ]
+    args = [
+        "--root-path", rebase_path(".."),
+        "--project-path", rebase_path("."),
+        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+        "--npm-args", "run", "compile:gn"
+    ]
+}
+
+group("es2panda") {
+    deps = [
+      ":es2panda.js"
+    ]
+}

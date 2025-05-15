@@ -4,7 +4,8 @@
         "outDir": "build",
         "baseUrl": ".",
         "rootDir": "./src",
-        "module": "esnext"
+        "module": "esnext",
+        "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo"
     },
     "include": [
         "./src/**/*.ts"
