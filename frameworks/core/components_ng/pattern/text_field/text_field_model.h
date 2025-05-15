@@ -48,11 +48,14 @@ struct Font {
     std::optional<Color> fontColor;
     std::optional<std::vector<std::string>> fontFamiliesNG;
     std::optional<bool> enableVariableFontWeight;
+    std::optional<Dimension> strokeWidth;
+    std::optional<Color> strokeColor;
 
     bool IsEqual(const Font& other) const
     {
         bool flag = fontWeight == other.fontWeight && fontSize == other.fontSize && fontStyle == other.fontStyle &&
-                    fontColor == other.fontColor && enableVariableFontWeight == other.enableVariableFontWeight;
+                    fontColor == other.fontColor && enableVariableFontWeight == other.enableVariableFontWeight &&
+                    strokeWidth == other.strokeWidth && strokeColor == other.strokeColor;
         if (!flag) {
             return false;
         }
@@ -89,6 +92,16 @@ struct Font {
             ss << "," << fontFamily[index];
         }
         return ss.str();
+    }
+    
+    std::optional<Color> GetStrokeColor() const
+    {
+        return strokeColor;
+    }
+    
+    std::optional<Dimension> GetStrokeWidth() const
+    {
+        return strokeWidth;
     }
 
     std::optional<FontWeight> GetFontWeight() const

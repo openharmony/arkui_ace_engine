@@ -80,6 +80,8 @@ void JSFontSpan::JSBind(BindingTarget globalObj)
     JSClass<JSFontSpan>::CustomProperty("fontStyle", &JSFontSpan::GetFontStyle, &JSFontSpan::SetFontStyle);
     JSClass<JSFontSpan>::CustomProperty("fontWeight", &JSFontSpan::GetFontWeight, &JSFontSpan::SetFontWeight);
     JSClass<JSFontSpan>::CustomProperty("fontFamily", &JSFontSpan::GetFontFamily, &JSFontSpan::SetFontFamily);
+    JSClass<JSFontSpan>::CustomProperty("strokeWidth", &JSFontSpan::GetStrokeWidth, &JSFontSpan::SetStrokeWidth);
+    JSClass<JSFontSpan>::CustomProperty("strokeColor", &JSFontSpan::GetStrokeColor, &JSFontSpan::SetStrokeColor);
     JSClass<JSFontSpan>::Bind(globalObj, JSFontSpan::Constructor, JSFontSpan::Destructor);
 }
 
@@ -117,6 +119,8 @@ RefPtr<FontSpan> JSFontSpan::ParseJsFontSpan(const JSRef<JSObject>& obj)
     ParseJsFontWeight(obj, font);
     ParseJsFontFamily(obj, font);
     ParseJsFontStyle(obj, font);
+    ParseJsStrokeWidth(obj, font);
+    ParseJsStrokeColor(obj, font);
     return AceType::MakeRefPtr<FontSpan>(font);
 }
 
@@ -209,6 +213,61 @@ void JSFontSpan::ParseJsFontStyle(const JSRef<JSObject>& obj, Font& font)
     }
 }
 
+void JSFontSpan::ParseJsStrokeWidth(const JSRef<JSObject>& obj, Font& font)
+{
+    if (obj->HasProperty("strokeWidth")) {
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        auto strokeWidth = obj->GetProperty("strokeWidth");
+        CalcDimension width = theme->GetTextStyle().GetStrokeWidth();
+        if (!strokeWidth->IsNull() && strokeWidth->IsObject()) {
+            auto strokeWidthTmp = ParseLengthMetrics(strokeWidth, false);
+            if (strokeWidthTmp.Unit() != DimensionUnit::PERCENT) {
+                width = strokeWidthTmp;
+            }
+        }
+        font.strokeWidth = width;
+    }
+}
+
+void JSFontSpan::GetStrokeColorFallback(const JSRef<JSObject>& obj, const RefPtr<TextTheme>& theme, Color& color)
+{
+    if (obj->HasProperty("fontColor")) {
+        JSRef<JSVal> colorObj = JSRef<JSVal>::Cast(obj->GetProperty("fontColor"));
+        if (!colorObj->IsNull() && !JSViewAbstract::ParseJsColor(colorObj, color)) {
+            color = theme->GetTextStyle().GetTextColor();
+        }
+    } else {
+        color = theme->GetTextStyle().GetTextColor();
+    }
+}
+
+void JSFontSpan::ParseJsStrokeColor(const JSRef<JSObject>& obj, Font& font)
+{
+    Color color;
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    if (obj->HasProperty("strokeColor")) {
+        JSRef<JSVal> strokeColorObj = JSRef<JSVal>::Cast(obj->GetProperty("strokeColor"));
+        if (!strokeColorObj->IsNull() && !JSViewAbstract::ParseJsColor(strokeColorObj, color)) {
+            GetStrokeColorFallback(obj, theme, color);
+        }
+        font.strokeColor = color;
+    } else if (obj->HasProperty("fontColor")) {
+        JSRef<JSVal> colorObj = JSRef<JSVal>::Cast(obj->GetProperty("fontColor"));
+        if (!colorObj->IsNull() && !JSViewAbstract::ParseJsColor(colorObj, color)) {
+            color = theme->GetTextStyle().GetTextColor();
+        }
+        font.strokeColor = color;
+    } else {
+        font.strokeColor = theme->GetTextStyle().GetTextColor();
+    }
+}
+
 void JSFontSpan::GetFontColor(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(fontSpan_);
@@ -272,6 +331,30 @@ void JSFontSpan::GetFontFamily(const JSCallbackInfo& info)
 }
 
 void JSFontSpan::SetFontFamily(const JSCallbackInfo& info) {}
+
+void JSFontSpan::GetStrokeWidth(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(fontSpan_);
+    if (!fontSpan_->GetFont().strokeWidth.has_value()) {
+        return;
+    }
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(fontSpan_->GetFont().strokeWidth.value().ConvertToVp())));
+    info.SetReturnValue(ret);
+}
+
+void JSFontSpan::SetStrokeWidth(const JSCallbackInfo& info) {}
+
+void JSFontSpan::GetStrokeColor(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(fontSpan_);
+    if (!fontSpan_->GetFont().strokeColor.has_value()) {
+        return;
+    }
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(fontSpan_->GetFont().strokeColor.value().ColorToString())));
+    info.SetReturnValue(ret);
+}
+
+void JSFontSpan::SetStrokeColor(const JSCallbackInfo& info) {}
 
 const RefPtr<FontSpan>& JSFontSpan::GetFontSpan()
 {
