@@ -179,10 +179,13 @@ void ColumnsGapImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<Dimension>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        GridModelStatic::SetColumnsGap(frameNode, std::optional<Dimension>(0));
         return;
     }
-    GridModelNG::SetColumnsGap(frameNode, *convValue);
+    if (convValue.value().Value() < 0) {
+        convValue = std::optional<Dimension>(0);
+    }
+    GridModelStatic::SetColumnsGap(frameNode, *convValue);
 }
 void RowsGapImpl(Ark_NativePointer node,
                  const Opt_Length* value)
@@ -191,10 +194,13 @@ void RowsGapImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<Dimension>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        GridModelStatic::SetRowsGap(frameNode, std::optional<Dimension>(0));
         return;
     }
-    GridModelNG::SetRowsGap(frameNode, *convValue);
+    if (convValue.value().Value() < 0) {
+        convValue = std::optional<Dimension>(0);
+    }
+    GridModelStatic::SetRowsGap(frameNode, *convValue);
 }
 void ScrollBarWidthImpl(Ark_NativePointer node,
                         const Opt_Union_Number_String* value)
