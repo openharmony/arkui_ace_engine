@@ -304,4 +304,6 @@ bool AceContainer::IsCrossAxisWindow()
 {
     return false;
 }
+
+void AceContainer::UpdateColorMode(uint32_t colorMode) {}
 } // namespace OHOS::Ace::Platform
