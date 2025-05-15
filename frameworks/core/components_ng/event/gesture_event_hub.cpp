@@ -360,8 +360,8 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         } else {
             checkCurrentRecognizer = (recognizer == userRecognizers.front()) &&
                 CheckLastInnerRecognizerCollected(priority, exclusiveIndex);
-            ProcessExternalExclusiveRecognizer(
-                offset, touchId, targetComponent, host, priority, current, recognizers, exclusiveIndex, checkCurrentRecognizer);
+            ProcessExternalExclusiveRecognizer(offset, touchId, targetComponent,
+                host, priority, current, recognizers, exclusiveIndex, checkCurrentRecognizer);
         }
         auto parentGroupRecognizer = AceType::DynamicCast<RecognizerGroup>(parentRecognizer);
         if (checkCurrentRecognizer && parentGroupRecognizer) {
