@@ -145,10 +145,10 @@ int32_t CalculateRotateDegree(ImageRotateOrientation orientation)
 {
     switch (orientation) {
         case ImageRotateOrientation::LEFT:
-        case ImageRotateOrientation::LEFT_MIRROR:
+        case ImageRotateOrientation::RIGHT_MIRROR:
             return -DEGREE_NINETY;
         case ImageRotateOrientation::RIGHT:
-        case ImageRotateOrientation::RIGHT_MIRROR:
+        case ImageRotateOrientation::LEFT_MIRROR:
             return DEGREE_NINETY;
         case ImageRotateOrientation::DOWN:
             return DEGREE_HUNDRED_EIGHTY;
