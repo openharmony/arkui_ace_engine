@@ -357,7 +357,7 @@ def pre_processing(path: Paths):
     original_path = os.path.join(
         path.project_path, "arkoala-arkts", "arkui-ohos")
     target_path = os.path.join(
-        path.project_path, "arkoala-arkts", "arkui-ohos", "build", "preprocessed")
+        path.project_path, "arkoala-arkts", "arkui-ohos-preprocess")
 
     if os.path.exists(target_path):
         shutil.rmtree(target_path)
