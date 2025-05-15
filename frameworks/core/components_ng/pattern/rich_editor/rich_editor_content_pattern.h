@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 
+
 namespace OHOS::Ace::NG {
 
 class RichEditorContentLayoutAlgorithm : public BoxLayoutAlgorithm {
@@ -25,14 +26,22 @@ class RichEditorContentLayoutAlgorithm : public BoxLayoutAlgorithm {
     void Measure(LayoutWrapper* layoutWrapper) override {
         ACE_SCOPED_TRACE("RichEditorContentLayoutAlgorithm::Measure");
         BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
-        const auto& layoutConstraintOpt = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
-        const auto& layoutConstraint = layoutConstraintOpt.value();
-        const auto& maxSize = layoutConstraint.maxSize;
-        const auto& selfIdealSize = layoutConstraint.selfIdealSize;
-        auto width = selfIdealSize.Width().value_or(maxSize.Width());
-        auto height = selfIdealSize.Height().value_or(maxSize.Height());
-        auto frameSize = SizeF(width, height);
-        layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
+        auto contentNode = layoutWrapper->GetHostNode();
+        if (!contentNode || contentNode->GetTag() != V2::RICH_EDITOR_CONTENT_ETS_TAG) {
+            TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Measure, GetContentHost error, node=%{public}s",
+                contentNode ? contentNode->GetTag().c_str() : "nullptr");
+                return;
+        }
+        auto richEditorNode = DynamicCast<FrameNode>(contentNode->GetParent());
+        if (!richEditorNode || richEditorNode->GetTag() != V2::RICH_EDITOR_ETS_TAG) {
+            TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Measure, GetHost error, node=%{public}s",
+                richEditorNode ? richEditorNode->GetTag().c_str() : "nullptr");
+                return;
+        }
+        auto geometryNode = layoutWrapper->GetGeometryNode();
+        auto parentGeometryNode = richEditorNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode && parentGeometryNode);
+        geometryNode->SetFrameSize(parentGeometryNode->GetFrameSize());
     }
 
     void Layout(LayoutWrapper* layoutWrapper) override 
@@ -59,21 +68,20 @@ public:
         auto richEditorPattern = weakPattern_.Upgrade();
         CHECK_NULL_RETURN(richEditorPattern, nullptr);
         if (!contentMod_) {
-            contentMod_ = MakeRefPtr<RichEditorContentModifier>(richEditorPattern->textStyle_, &(richEditorPattern->paragraphs_), WeakClaim(this));
+            contentMod_ = MakeRefPtr<RichEditorContentModifier>(richEditorPattern->textStyle_,
+                &(richEditorPattern->paragraphs_),WeakClaim(this));
         }
 
         if (richEditorPattern->GetIsCustomFont()) {
             contentMod_->SetIsCustomFont(true);
         }
-        return MakeRefPtr<RichEditorPaintMethod>(WeakClaim(this), &(richEditorPattern->paragraphs_), richEditorPattern->baselineOffset_, contentMod_, nullptr);
+        return MakeRefPtr<RichEditorPaintMethod>(WeakClaim(this), &(richEditorPattern->paragraphs_),
+            richEditorPattern->baselineOffset_, contentMod_, nullptr);
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         ACE_SCOPED_TRACE("RichEditorContentPattern::CreateLayoutAlgorithm");
-        GetLayoutProperty<LayoutProperty>()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
-        GetLayoutProperty<LayoutProperty>()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
-        GetLayoutProperty<LayoutProperty>()->UpdateMeasureType(MeasureType::MATCH_PARENT);
         return MakeRefPtr<RichEditorContentLayoutAlgorithm>();
     }
 
@@ -124,6 +132,9 @@ public:
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateClipEdge(true);
         renderContext->SetClipToFrame(true);
+        auto layoutProperty = GetLayoutProperty<LayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     }
     
     RefPtr<RichEditorPattern> GetParentPattern()
@@ -139,4 +150,3 @@ public:
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_CONTENT_PATTERN_H
- 
