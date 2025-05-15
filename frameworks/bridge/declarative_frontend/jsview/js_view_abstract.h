@@ -100,6 +100,7 @@ RefPtr<ResourceWrapper> CreateResourceWrapper();
 using PopupOnWillDismiss = std::function<void(int32_t)>;
 class JSViewAbstract {
 public:
+    static RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj);
     static void SetPixelRoundMode(const JSCallbackInfo& info);
     static uint8_t GetPixelRoundMode();
     static void GetAngle(
@@ -325,26 +326,48 @@ public:
 
     // for number and string with no unit, use default dimension unit.
     static bool ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit);
+    static bool ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit,
+        RefPtr<ResourceObject>& resObj);
     static bool ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result,
+        RefPtr<ResourceObject>& resObj);
     static bool ParseJsDimensionFp(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseJsDimensionFp(const JSRef<JSVal>& jsValue, CalcDimension& result,
+        RefPtr<ResourceObject>& resObj);
     static bool ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result,
+        RefPtr<ResourceObject>& resObj);
     static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseLengthMetricsToPositiveDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result);
+    static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result);
-    static bool ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color& result);
-    static bool ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result);
+    static bool ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
+    static bool ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result,
+        RefPtr<ResourceObject>& resObj);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result);
+    static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result,
+        RefPtr<ResourceObject>& resObj);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result, const Color& defaultColor);
+    static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result,
+        const Color& defaultColor, RefPtr<ResourceObject>& resObj);
     static bool ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy);
     static bool ParseJsShadowColorStrategy(const JSRef<JSVal>& jsValue, ShadowColorStrategy& strategy);
     static bool ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
+    static bool ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result,
+        RefPtr<ResourceObject>& resObj);
 
     static bool ParseJsDimensionNG(
         const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent = true);
+    static bool ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimension& result,
+        DimensionUnit defaultUnit, RefPtr<ResourceObject>& resObj, bool isSupportPercent = true);
     static bool ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent = true);
+    static bool ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimension& result,
+        RefPtr<ResourceObject>& resObj, bool isSupportPercent = true);
     static bool ParseJsDimensionFpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent = true);
+    static bool ParseJsDimensionFpNG(const JSRef<JSVal>& jsValue, CalcDimension& result,
+        RefPtr<ResourceObject>& resObj, bool isSupportPercent = true);
     static bool ParseJsLengthMetricsVp(const JSRef<JSObject>& jsObj, CalcDimension& result);
     static bool ParseJsonDimension(const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result,
         DimensionUnit defaultUnit, bool checkIllegal = false);
@@ -353,16 +376,31 @@ public:
     static bool ParseJsonDouble(const std::unique_ptr<JsonValue>& jsonValue, double& result);
     static bool ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue, Color& result);
     static bool ParseJsString(const JSRef<JSVal>& jsValue, std::string& result);
+    static bool ParseJsString(const JSRef<JSVal>& jsValue, std::string& result,
+        RefPtr<ResourceObject>& resObj);
     static bool ParseJsString(const JSRef<JSVal>& jsValue, std::u16string& result);
+    static bool ParseJsString(const JSRef<JSVal>& jsValue, std::u16string& result,
+        RefPtr<ResourceObject>& resObj);
     static bool ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& result);
+    static bool ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& result,
+        RefPtr<ResourceObject>& resObj);
     static bool ParseJsMediaWithBundleName(const JSRef<JSVal>& jsValue, std::string& result, std::string& bundleName,
         std::string& moduleName, int32_t& resId);
-    static bool ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& result);
+    static bool ParseJsMediaWithBundleName(const JSRef<JSVal>& jsValue, std::string& result,
+        std::string& bundleName, std::string& moduleName, int32_t& resId, RefPtr<ResourceObject>& resObj);
+    static bool ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& result,
+        RefPtr<ResourceObject>& resObj);
     static bool ParseJsBool(const JSRef<JSVal>& jsValue, bool& result);
+    static bool ParseJsBool(const JSRef<JSVal>& jsValue, bool& result,
+        RefPtr<ResourceObject>& resObj);
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, uint32_t& result);
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result);
+    static bool ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result,
+        RefPtr<ResourceObject>& resObj);
     static bool ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
+    static bool ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<std::string>& result,
+        RefPtr<ResourceObject>& resObj);
     static bool ParseJsLengthMetricsArray(const JSRef<JSVal>& jsValue, std::vector<Dimension>& result);
     static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
     static bool GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
@@ -370,6 +408,8 @@ public:
     static void ParseShadowOffsetXY(const JSRef<JSObject>& jsObj, Shadow& shadow);
     static bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
     static bool ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension& result,
+        RefPtr<ResourceObject>& resObj);
     static bool ParseDataDetectorConfig(const JSCallbackInfo& info, TextDetectConfig& textDetectConfig);
     static bool ParseAIEntityColor(const JSRef<JSObject>& obj, TextDetectConfig& textDetectConfig);
     static bool ParseInvertProps(const JSRef<JSVal>& jsValue, InvertVariant& invert);
@@ -592,6 +632,13 @@ public:
     template<typename T>
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, T& result)
     {
+        RefPtr<ResourceObject> resObj;
+        return ParseJsInteger(jsValue, result, resObj);
+    }
+
+    template<typename T>
+    static bool ParseJsInteger(const JSRef<JSVal>& jsValue, T& result, RefPtr<ResourceObject>& resObj)
+    {
         if (jsValue->IsNumber()) {
             result = jsValue->ToNumber<T>();
             return true;
@@ -612,8 +659,9 @@ public:
             return false;
         }
 
-        auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
-        auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+        resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
+            GetResourceObjectByBundleAndModule(jsObj);
+        auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
         auto resIdNum = resId->ToNumber<int32_t>();
         if (resIdNum == -1) {
             if (!IsGetResourceByName(jsObj)) {
@@ -665,8 +713,14 @@ public:
     }
 
     static bool CheckColor(const JSRef<JSVal>& jsValue, Color& result, const char* componentName, const char* propName);
+    static bool CheckColor(
+        const JSRef<JSVal>& jsValue, Color& result, const char* componentName, const char* propName,
+        RefPtr<ResourceObject>& resourceObject);
     static bool CheckLength(
         const JSRef<JSVal>& jsValue, CalcDimension& result, const char* componentName, const char* propName);
+    static bool CheckLength(
+        const JSRef<JSVal>& jsValue, CalcDimension& result, const char* componentName, const char* propName,
+        RefPtr<ResourceObject>& resourceObject);
     static bool CheckResource(RefPtr<ResourceObject> resourceObject,
         RefPtr<ResourceWrapper> resourceWrapper);
     static bool CheckCustomSymbolId(RefPtr<ResourceWrapper> resourceWrapper, JSRef<JSVal>& resId,
@@ -713,12 +767,17 @@ public:
     static void ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
 
 private:
-    static bool ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& result);
-    static bool ParseJSMediaInternal(const JSRef<JSObject>& jsValue, std::string& result);
+    static bool ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& result, RefPtr<ResourceObject>& resObj);
+    static bool ParseJSMediaWithRawFile(const JSRef<JSObject>& jsObj, std::string& result,
+        RefPtr<ResourceWrapper>& resourceWrapper);
+    static bool ParseJSMediaInternal(const JSRef<JSObject>& jsValue, std::string& result,
+        RefPtr<ResourceObject>& resObj);
     static bool ParseResourceToDoubleByName(
         const JSRef<JSObject>& jsObj, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);
     static bool ParseResourceToDoubleById(
         int32_t resId, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);
+    static bool ParseJsDimensionByNameInternal(const JSRef<JSObject>& jsObj, CalcDimension& result,
+        DimensionUnit defaultUnit, RefPtr<ResourceWrapper>& resourceWrapper, int32_t resType);
 
     static std::vector<NG::MenuOptionsParam> ParseMenuItems(const JSRef<JSArray>& menuItemsArray);
     static void ParseOnCreateMenu(
