@@ -237,7 +237,7 @@ public:
         return isHaveToolBar_;
     }
 
-    bool IsContainerModalTransparent();
+    bool IsContainerModalTransparent() const;
 
     Dimension titleHeight_ = CONTAINER_TITLE_HEIGHT;
     RefPtr<ContainerModalToolBar> GetTitleManager()
@@ -245,9 +245,9 @@ public:
         return titleMgr_;
     }
 
-    bool GetIsShowTitle() const
+    bool IsExpandStackNode() const
     {
-        return isTitleShow_;
+        return isTitleShow_ && customTitleSettedShow_ && IsContainerModalTransparent();
     }
 
 protected:
