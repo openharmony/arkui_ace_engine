@@ -32734,6 +32734,33 @@ void impl_StateStylesOps_onStateStyleChange(Ark_NativePointer node, KSerializerB
     GetAccessors()->getStateStylesOpsAccessor()->onStateStyleChange(node, (const Callback_StateStylesChange*)&stateStyleChange_value);
 }
 KOALA_INTEROP_DIRECT_V3(StateStylesOps_onStateStyleChange, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_UIContextAtomicServiceBar_getBarRect() {
+        const auto &retValue = GetAccessors()->getUIContextAtomicServiceBarAccessor()->getBarRect();
+        Serializer _retSerializer {};
+        _retSerializer.writeFrame(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_0(UIContextAtomicServiceBar_getBarRect, KInteropReturnBuffer)
+Ark_Boolean impl_UIContextDispatchKeyEvent_dispatchKeyEvent(KSerializerBuffer thisArray, int32_t thisLength, Ark_NativePointer event) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const Ark_Int8 node_value_buf_selector = thisDeserializer.readInt8();
+        Ark_Union_Number_String node_value_buf = {};
+        node_value_buf.selector = node_value_buf_selector;
+        if (node_value_buf_selector == 0) {
+            node_value_buf.selector = 0;
+            node_value_buf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        }
+        else if (node_value_buf_selector == 1) {
+            node_value_buf.selector = 1;
+            node_value_buf.value1 = static_cast<Ark_String>(thisDeserializer.readString());
+        }
+        else {
+            INTEROP_FATAL("One of the branches for node_value_buf has to be chosen through deserialisation.");
+        }
+        Ark_Union_Number_String node_value = static_cast<Ark_Union_Number_String>(node_value_buf);;
+        return GetAccessors()->getUIContextDispatchKeyEventAccessor()->dispatchKeyEvent((const Ark_Union_Number_String*)&node_value, static_cast<Ark_KeyEvent>(event));
+}
+KOALA_INTEROP_DIRECT_3(UIContextDispatchKeyEvent_dispatchKeyEvent, Ark_Boolean, KSerializerBuffer, int32_t, Ark_NativePointer)
 Ark_NativePointer impl_DrawableDescriptor_ctor() {
         return GetAccessors()->getDrawableDescriptorAccessor()->ctor();
 }

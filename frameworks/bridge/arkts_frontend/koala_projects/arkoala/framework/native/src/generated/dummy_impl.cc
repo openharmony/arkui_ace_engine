@@ -25107,6 +25107,34 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // StateStylesOpsAccessor
+    namespace UIContextAtomicServiceBarAccessor {
+    Ark_Frame GetBarRectImpl()
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getBarRect(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    } // UIContextAtomicServiceBarAccessor
+    namespace UIContextDispatchKeyEventAccessor {
+    Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Number_String* node,
+                                     Ark_KeyEvent event)
+    {
+        if (!needGroupedLog(1))
+            return 0;
+        string out("dispatchKeyEvent(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, event);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    } // UIContextDispatchKeyEventAccessor
     namespace DrawableDescriptorAccessor {
     void DestroyPeerImpl(Ark_DrawableDescriptor peer)
     {
@@ -42992,6 +43020,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &StateStylesOpsAccessorImpl;
     }
 
+    const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* GetUIContextAtomicServiceBarAccessor()
+    {
+        static const GENERATED_ArkUIUIContextAtomicServiceBarAccessor UIContextAtomicServiceBarAccessorImpl {
+            UIContextAtomicServiceBarAccessor::GetBarRectImpl,
+        };
+        return &UIContextAtomicServiceBarAccessorImpl;
+    }
+
+    const GENERATED_ArkUIUIContextDispatchKeyEventAccessor* GetUIContextDispatchKeyEventAccessor()
+    {
+        static const GENERATED_ArkUIUIContextDispatchKeyEventAccessor UIContextDispatchKeyEventAccessorImpl {
+            UIContextDispatchKeyEventAccessor::DispatchKeyEventImpl,
+        };
+        return &UIContextDispatchKeyEventAccessorImpl;
+    }
+
     const GENERATED_ArkUIDrawableDescriptorAccessor* GetDrawableDescriptorAccessor()
     {
         static const GENERATED_ArkUIDrawableDescriptorAccessor DrawableDescriptorAccessorImpl {
@@ -46464,6 +46508,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetRestrictedWorkerAccessor,
             GetUIContextAccessor,
             GetStateStylesOpsAccessor,
+            GetUIContextAtomicServiceBarAccessor,
+            GetUIContextDispatchKeyEventAccessor,
             GetDrawableDescriptorAccessor,
             GetLayeredDrawableDescriptorAccessor,
             GetPixelMapDrawableDescriptorAccessor,
