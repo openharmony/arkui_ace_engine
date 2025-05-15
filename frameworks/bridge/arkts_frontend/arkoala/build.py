@@ -83,7 +83,7 @@ def parse_argv(argv) -> Paths:
     path.check_fast_arktsc = os.path.join(path.check_bin_path, "fast-arktsc")
     path.dist_path = os.path.join(path.build_path, "dist")
     path.logfile = os.path.join(path.dist_path, "koala_build.log")
-    path.arkui_ohos_path = os.path.join(path.project_path, "arkoala-arkts" ,"arkui-ohos")
+    path.arkui_ohos_path = os.path.join(path.project_path, "arkoala-arkts" ,"arkui-ohos-preprocess")
     return path
 
 
