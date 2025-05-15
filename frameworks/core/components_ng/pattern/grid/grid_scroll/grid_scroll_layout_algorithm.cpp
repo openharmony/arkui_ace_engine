@@ -1472,8 +1472,6 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
             break;
         }
         if (currentIndex >= info_.GetChildrenCount()) {
-            TAG_LOGW(ACE_GRID, "can not get item at:%{public}d, total items:%{public}d", currentIndex,
-                info_.GetChildrenCount());
             break;
         }
         // Step1. Get wrapper of [GridItem]
