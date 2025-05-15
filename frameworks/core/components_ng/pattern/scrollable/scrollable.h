@@ -57,12 +57,12 @@ struct ScrollResult {
 };
 
 struct SlidInfo {
-    double gestureVelocity {0};
-    double velocityScale {0};
-    double gain {0};
-    double maxFlingVelocity {0};
-    double slipFactor {0};
-    double friction {0};
+    double gestureVelocity {0.0};
+    double velocityScale {0.0};
+    double gain {0.0};
+    double maxFlingVelocity {0.0};
+    double slipFactor {0.0};
+    double friction {0.0};
 };
 
 using ScrollEventCallback = std::function<void()>;
