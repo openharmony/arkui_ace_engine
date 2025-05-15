@@ -1004,8 +1004,7 @@ void ContainerModalToolBar::UpdateTargetNodesBarMargin(bool reset)
         }
         toolbarManager_->SetTitleHeight(Dimension(0.0f));
     } else {
-        if (!isUpdateTargetNode_ && pattern->GetIsHaveToolBar() && pattern->IsContainerModalTransparent() &&
-            pattern->GetIsShowTitle()) {
+        if (!isUpdateTargetNode_ && pattern->GetIsHaveToolBar() && pattern->IsExpandStackNode()) {
             ExpandStackNodeLayout();
             BlurStyle blurStyle = BlurStyle::THIN;
             SetcustomTitleRowBlurStyle(blurStyle);
