@@ -1426,6 +1426,8 @@ HWTEST_F(OverlayManagerTestOneNG, PlayBubbleStyleSheetTransition001, TestSize.Le
     bool isShow = true;
     CreateSheetBuilder();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    pipelineContext->overlayManager_ = overlayManager;
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());

@@ -625,6 +625,11 @@ public:
         sheetHeight_ = height;
     }
 
+    float GetSheetHeight()
+    {
+        return sheetHeight_;
+    }
+
     const WeakPtr<UINode>& GetRootNode() const;
     const RefPtr<GroupManager>& GetGroupManager() const;
 
@@ -779,7 +784,7 @@ private:
         int32_t targetId, bool isStartByUIContext = false, bool isPartialUpdate = false,
         std::function<void()>&& onAppear = nullptr, std::function<void()>&& onDisappear = nullptr,
         std::function<void()>&& shouldDismiss = nullptr, std::function<void(const int32_t)>&& onWillDismiss = nullptr,
-        std::function<void()>&& onWillDisappear = nullptr,
+        std::function<void()>&& onWillAppear = nullptr, std::function<void()>&& onWillDisappear = nullptr,
         std::function<void(const float)>&& onHeightDidChange = nullptr,
         std::function<void(const float)>&& onDetentsDidChange = nullptr,
         std::function<void(const float)>&& onWidthDidChange = nullptr,

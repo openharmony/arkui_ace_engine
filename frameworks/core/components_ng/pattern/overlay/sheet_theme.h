@@ -92,6 +92,7 @@ public:
             }
 
             theme->sheetRadius_ = sheetPattern->GetAttr<Dimension>("sheet_radius", 32.0_vp);
+            theme->sheetSideRadius_ = sheetPattern->GetAttr<Dimension>("corner_radius_none", 0.0_vp);
             theme->titleTextFontSize_ = sheetPattern->GetAttr<Dimension>("title_text_font_size", 20.0_vp);
             theme->titleTextMargin_ = sheetPattern->GetAttr<Dimension>("title_text_margin", 16.0_vp);
             theme->subtitleTextFontSize_ = sheetPattern->GetAttr<Dimension>("subtitle_text_font_size", 14.0_fp);
@@ -163,6 +164,11 @@ public:
     const Dimension& GetSheetRadius() const
     {
         return sheetRadius_;
+    }
+
+    const Dimension& GetSheetSideRadius() const
+    {
+        return sheetSideRadius_;
     }
 
     const Dimension& GetTitleTextFontSize() const
@@ -391,6 +397,7 @@ protected:
 
 private:
     Dimension sheetRadius_;
+    Dimension sheetSideRadius_;
     Dimension titleTextFontSize_;
     Dimension titleTextMargin_;
     Dimension subtitleTextFontSize_;

@@ -1654,7 +1654,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea2, TestSize.Level1)
     MockPipelineContext::GetCurrent()->safeAreaManager_ = safeAreaManager;
     MockPipelineContext::GetCurrent()->SetRootSize(800, 2000);
     sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 2000;
+    sheetPattern->GetSheetObject()->SetSheetHeight(2000);
     sheetPattern->height_ = 500;
     auto sheetLayoutAlgorithm = sheetPattern->CreateLayoutAlgorithm();
     AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetLayoutAlgorithm)->sheetMaxHeight_ = 500;
@@ -1715,7 +1715,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea3, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
     SafeAreaInsets::Inset upKeyboard { 0, 200 };
     sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 1800;
+    sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     EXPECT_FALSE(sheetLayoutProperty == nullptr);
     SheetStyle sheetStyle;
@@ -1818,7 +1818,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea4, TestSize.Level1)
     SafeAreaInsets::Inset upKeyboard { 0, 600 };
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 1800;
+    sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->height_ = 1800;
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     EXPECT_FALSE(sheetLayoutProperty == nullptr);
@@ -1958,7 +1958,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea5, TestSize.Level1)
     SafeAreaInsets::Inset upKeyboard { 0, 600 };
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 1800;
+    sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->centerHeight_ = 1800;
     sheetPattern->height_ = 1900;
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
@@ -2100,7 +2100,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea6, TestSize.Level1)
     SafeAreaInsets::Inset upKeyboard { 0, 600 };
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 1800;
+    sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->height_ = 1800;
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     EXPECT_FALSE(sheetLayoutProperty == nullptr);
@@ -2284,7 +2284,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea7, TestSize.Level1)
     SafeAreaInsets::Inset upKeyboard { 0, 600 };
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 1800;
+    sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->centerHeight_ = 1800;
     sheetPattern->height_ = 1900;
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
@@ -2470,7 +2470,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea8, TestSize.Level1)
     SafeAreaInsets::Inset upKeyboard { 0, 600 };
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 1800;
+    sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->height_ = 1800;
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     EXPECT_FALSE(sheetLayoutProperty == nullptr);
@@ -2632,7 +2632,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea9, TestSize.Level1)
     SafeAreaInsets::Inset upKeyboard { 0, 600 };
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 1800;
+    sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->centerHeight_ = 1800;
     sheetPattern->height_ = 1900;
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
@@ -2795,7 +2795,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea10, TestSize.Level1)
     SafeAreaInsets::Inset upKeyboard { 0, 600 };
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 1800;
+    sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->height_ = 1800;
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     EXPECT_FALSE(sheetLayoutProperty == nullptr);
@@ -2975,7 +2975,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea11, TestSize.Level1)
     SafeAreaInsets::Inset upKeyboard { 0, 600 };
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 1800;
+    sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->centerHeight_ = 1800;
     sheetPattern->height_ = 1900;
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
@@ -4111,7 +4111,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern14, TestSize.Level1)
     auto widthVal = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize.Width(), Referenced::RawPtr(layoutWrapper));
     auto onWidthDidChangeFunc = [&widthVal](float width) { widthVal = width; };
     topSheetPattern->UpdateOnWidthDidChange(onWidthDidChangeFunc);
-    topSheetPattern->FireOnWidthDidChange(topSheetNode);
+    topSheetPattern->FireOnWidthDidChange();
     EXPECT_EQ(widthVal, SHEET_LANDSCAPE_WIDTH.ConvertToPx());
 }
 

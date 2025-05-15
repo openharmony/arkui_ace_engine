@@ -1268,7 +1268,7 @@ HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition004, TestSize.Level1)
     layoutProperty->UpdateSheetStyle(style);
     sheetPattern->IsNeedPlayTransition(style);
     EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
-    EXPECT_EQ(sheetPattern->GetDetentsIndex(), 0);
+    EXPECT_EQ(sheetPattern->GetDetentsFinalIndex(), 0);
 }
 
 /**
@@ -1296,7 +1296,7 @@ HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition005, TestSize.Level1)
     style.detentSelection = sheetHeight;
     sheetPattern->IsNeedPlayTransition(style);
     EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
-    EXPECT_EQ(sheetPattern->GetDetentsIndex(), 0);
+    EXPECT_EQ(sheetPattern->GetDetentsFinalIndex(), 0);
 }
 
 /**
@@ -1325,7 +1325,7 @@ HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition006, TestSize.Level1)
     style.detentSelection = sheetHeight;
     sheetPattern->IsNeedPlayTransition(style);
     EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
-    EXPECT_EQ(sheetPattern->GetDetentsIndex(), 0);
+    EXPECT_EQ(sheetPattern->GetDetentsFinalIndex(), 0);
 }
 
 /**
@@ -1359,7 +1359,7 @@ HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition007, TestSize.Level1)
     style.detentSelection = detent1;
     sheetPattern->IsNeedPlayTransition(style);
     EXPECT_TRUE(sheetPattern->GetIsPlayTransition());
-    EXPECT_EQ(sheetPattern->GetDetentsIndex(), 1);
+    EXPECT_EQ(sheetPattern->GetDetentsFinalIndex(), 1);
 
     layoutProperty->UpdateSheetStyle(style);
     SheetHeight selection1;
@@ -1367,7 +1367,7 @@ HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition007, TestSize.Level1)
     style.detentSelection = selection1;
     sheetPattern->IsNeedPlayTransition(style);
     EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
-    EXPECT_EQ(sheetPattern->GetDetentsIndex(), 1);
+    EXPECT_EQ(sheetPattern->GetDetentsFinalIndex(), 1);
     SheetPresentationTestTwoNg::TearDownTestCase();
 }
 
@@ -1400,14 +1400,14 @@ HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition008, TestSize.Level1)
     style.detentSelection = height2;
     sheetPattern->IsNeedPlayTransition(style);
     EXPECT_TRUE(sheetPattern->GetIsPlayTransition());
-    EXPECT_EQ(sheetPattern->GetDetentsIndex(), 1);
+    EXPECT_EQ(sheetPattern->GetDetentsFinalIndex(), 1);
 
     layoutProperty->UpdateSheetStyle(style);
     style.detentSelection = height2;
     style.showDragBar = true;
     sheetPattern->IsNeedPlayTransition(style);
     EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
-    EXPECT_EQ(sheetPattern->GetDetentsIndex(), 1);
+    EXPECT_EQ(sheetPattern->GetDetentsFinalIndex(), 1);
 }
 
 /**
@@ -1453,6 +1453,8 @@ HWTEST_F(SheetPresentationTestTwoNg, FireOnHeightDidChange001, TestSize.Level1)
     sheetStyle.sheetHeight.height = Dimension(100.0f, DimensionUnit::AUTO);
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    pipelineContext->overlayManager_ = overlayManager;
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());

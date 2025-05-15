@@ -1178,6 +1178,7 @@ let DismissReason;
   DismissReason[DismissReason.TOUCH_OUTSIDE = 1] = 'TOUCH_OUTSIDE';
   DismissReason[DismissReason.CLOSE_BUTTON = 2] = 'CLOSE_BUTTON';
   DismissReason[DismissReason.SLIDE_DOWN = 3] = 'SLIDE_DOWN';
+  DismissReason[DismissReason.SLIDE = 4] = 'SLIDE';
 })(DismissReason || (DismissReason = {}));
 
 let HoverEffect;
@@ -1735,6 +1736,7 @@ let SheetType;
   SheetType[SheetType.BOTTOM = 0] = 'BOTTOM';
   SheetType[SheetType.CENTER = 1] = 'CENTER';
   SheetType[SheetType.POPUP = 2] = 'POPUP';
+  SheetType[SheetType.SIDE = 3] = 'SIDE';
 })(SheetType || (SheetType = {}));
 
 let SheetMode;
