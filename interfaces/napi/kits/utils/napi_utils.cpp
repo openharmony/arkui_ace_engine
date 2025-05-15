@@ -51,7 +51,7 @@ void NapiThrow(napi_env env, const std::string& message, int32_t errCode)
     napi_value msg = nullptr;
     auto iter = ERROR_CODE_TO_MSG.find(errCode);
     std::string strMsg = (iter != ERROR_CODE_TO_MSG.end() ? iter->second : "") + message;
-    LOGE("napi throw errCode %d strMsg %s", errCode, strMsg.c_str());
+    LOGE("napi throw errCode %{public}d strMsg %{public}s", errCode, strMsg.c_str());
     napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
 
     napi_value error = nullptr;
