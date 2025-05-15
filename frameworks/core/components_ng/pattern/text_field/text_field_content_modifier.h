@@ -63,6 +63,11 @@ public:
     void SetTextDecoration(const TextDecoration& value, const Color& color, const TextDecorationStyle& style);
     void ContentChange();
     void SetTextFadeoutEnabled(bool enabled);
+    void SetAutoFillTextScrollOffset(const float value);
+    void SetAutoFillTranslationOffset(const float value);
+    void SetAutoFillOriginTextColor(const Color& value);
+    void SetAutoFillEmphasizeCharIndex(const float value);
+    void SetAutoFillDefaultCharIndex(const float value);
 
 private:
     void SetDefaultFontSize(const TextStyle& textStyle);
@@ -83,6 +88,10 @@ private:
     void UpdateTextFadeout(
         RSCanvas& canvas, const RectF& textRect, float gradientPercent, bool leftFade, bool rightFade);
     void AdjustTextFadeRect(RectF& textFadeRect);
+    void DoAutoFillDraw(DrawingContext& context);
+    void SetDefaultAutoFillTranslationOffset();
+    void SetDefaultAutoFillTextScrollOffset();
+    void SetDefaultAutoFillCharIndex();
 
     WeakPtr<Pattern> pattern_;
     RefPtr<PropertyString> fontFamilyString_;
@@ -128,6 +137,13 @@ private:
 
     // 是否需要开启渐隐
     bool textFadeoutEnabled_ { false };
+    RefPtr<AnimatablePropertyFloat> autoFillTranslationOffset_;
+    RefPtr<AnimatablePropertyFloat> autoFillTextScrollOffset_;
+    RefPtr<AnimatablePropertyFloat> autoFillEmphasizeCharIndex_;
+    RefPtr<AnimatablePropertyFloat> autoFillDefaultCharIndex_;
+    std::optional<Color> autoFillOriginTextColor_;
+    Color autoFillEmphasizeCharTextColor_;
+    Color autoFillDefaultCharInitTextColor_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldContentModifier);
 };

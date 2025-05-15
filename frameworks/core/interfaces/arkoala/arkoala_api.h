@@ -4253,6 +4253,9 @@ struct ArkUITextInputModifier {
     void (*setTextInputKeyboardAppearance)(ArkUINodeHandle node, ArkUI_Uint32 keyBoardAppearance);
     ArkUI_Int32 (*getTextInputKeyboardAppearance)(ArkUINodeHandle node);
     void (*resetTextInputKeyboardAppearance)(ArkUINodeHandle node);
+    void (*setTextInputEnableAutoFillAnimation)(ArkUINodeHandle node, ArkUI_Uint32 enableAutoFillAnimation);
+    ArkUI_Int32 (*getTextInputEnableAutoFillAnimation)(ArkUINodeHandle node);
+    void (*resetTextInputEnableAutoFillAnimation)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {

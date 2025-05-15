@@ -57,6 +57,7 @@
 #include "core/components_ng/pattern/text_field/text_component_decorator.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
 #include "core/components_ng/pattern/text_field/text_content_type.h"
+#include "core/components_ng/pattern/text_field/auto_fill_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
@@ -425,6 +426,11 @@ public:
     const std::u16string& GetTextUtf16Value() const
     {
         return contentController_->GetTextUtf16Value();
+    }
+
+    const RefPtr<AutoFillController>& GetAutoFillController()
+    {
+        return autoFillController_;
     }
 
 #if defined(IOS_PLATFORM)
@@ -1645,6 +1651,7 @@ protected:
 
     // 是否独立控制键盘
     bool independentControlKeyboard_ = false;
+    RefPtr<AutoFillController> autoFillController_;
 
 private:
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
@@ -1912,6 +1919,7 @@ private:
     void SetIsEnableSubWindowMenu();
     void OnReportPasteEvent(const RefPtr<FrameNode>& frameNode);
     void OnReportSubmitEvent(const RefPtr<FrameNode>& frameNode);
+    void BeforeAutoFillAnimation(const std::u16string& content, const AceAutoFillType& type);
 
     RectF frameRect_;
     RectF textRect_;

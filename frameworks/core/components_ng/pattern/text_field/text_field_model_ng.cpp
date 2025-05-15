@@ -885,6 +885,11 @@ void TextFieldModelNG::SetEnableAutoFill(bool enableAutoFill)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EnableAutoFill, enableAutoFill);
 }
 
+void TextFieldModelNG::SetEnableAutoFillAnimation(bool enableAutoFillAnimation)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EnableAutoFillAnimation, enableAutoFillAnimation);
+}
+
 void TextFieldModelNG::SetAdaptMinFontSize(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMinFontSize, value);
@@ -1408,6 +1413,12 @@ void TextFieldModelNG::SetPasswordRules(FrameNode* frameNode, const std::string&
 void TextFieldModelNG::SetEnableAutoFill(FrameNode* frameNode, bool enableAutoFill)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EnableAutoFill, enableAutoFill, frameNode);
+}
+
+void TextFieldModelNG::SetEnableAutoFillAnimation(FrameNode* frameNode, bool enableAutoFillAnimation)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextFieldLayoutProperty, EnableAutoFillAnimation, enableAutoFillAnimation, frameNode);
 }
 
 void TextFieldModelNG::SetShowCounter(FrameNode* frameNode, bool value)
@@ -1964,6 +1975,14 @@ bool TextFieldModelNG::GetEnableAutoFill(FrameNode* frameNode)
 {
     bool value = true;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, EnableAutoFill, value, frameNode, value);
+    return value;
+}
+
+bool TextFieldModelNG::GetEnableAutoFillAnimation(FrameNode* frameNode)
+{
+    bool value = true;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, EnableAutoFillAnimation, value, frameNode, value);
     return value;
 }
 

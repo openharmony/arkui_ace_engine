@@ -116,6 +116,7 @@ public:
 
     static void SetPasswordRules(const JSCallbackInfo& info);
     static void SetEnableAutoFill(const JSCallbackInfo& info);
+    static void SetEnableAutoFillAnimation(const JSCallbackInfo& info);
     static void ShowPasswordText(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static void CreateJsTextFieldCommonEvent(const JSCallbackInfo& info);

@@ -346,6 +346,7 @@ public:
     virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false) = 0;
     virtual void SetPasswordRules(const std::string& passwordRules) = 0;
     virtual void SetEnableAutoFill(bool enableAutoFill) = 0;
+    virtual void SetEnableAutoFillAnimation(bool enableAutoFillAnimation) = 0;
     virtual void SetCounterType(int32_t value) {};
     virtual void SetShowCounterBorder(bool value) {};
     virtual void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle) = 0;
