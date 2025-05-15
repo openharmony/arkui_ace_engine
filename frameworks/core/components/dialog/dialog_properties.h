@@ -221,6 +221,7 @@ struct ButtonInfo {
 
 struct DialogProperties {
     DialogType type = DialogType::COMMON; // type of dialog, current support common dialog and alert dialog.
+    bool isAlertDialog = false;
     std::string title;                    // title of dialog.
     std::string subtitle;                 // subtitle of dialog.
     std::string content;                  // message of dialog.
