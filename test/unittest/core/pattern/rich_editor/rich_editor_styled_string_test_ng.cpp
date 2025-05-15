@@ -1231,4 +1231,27 @@ HWTEST_F(RichEditorStyledStringTestNg, DeleteValueInStyledString002, TestSize.Le
     richEditorPattern->DeleteValueInStyledString(0, 10, true, false);
     EXPECT_FALSE(richEditorPattern->previewLongPress_);
 }
+
+/**
+ * @tc.name: HandleOnPaste001
+ * @tc.desc: test HandleOnPaste
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, HandleOnPaste001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto styledString = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_3);
+    richEditorPattern->SetStyledString(styledString);
+    richEditorPattern->textSelector_.Update(0, 1);
+    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    std::vector<uint8_t> tlvData;
+    styledString->EncodeTlv(tlvData);
+    std::vector<std::vector<uint8_t>> tlvDatas = { tlvData };
+    richEditorPattern->ProcessSpanStringData(tlvDatas, styledString->GetString(), false);
+    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
+}
 } // namespace OHOS::Ace::NG
