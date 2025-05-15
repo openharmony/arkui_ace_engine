@@ -142,6 +142,8 @@ public:
     void AttachToMainTree(bool recursive, PipelineContext* context);
     void DetachFromMainTree(bool recursive = false);
     virtual void FireCustomDisappear();
+    // Traverse downwards to update system environment variables.
+    void UpdateConfigurationUpdate();
     void UpdateConfigurationUpdate(const ConfigurationChange& configurationChange);
 
     // Return value: 0 indicates successful execution, non - zero indicates failed execution.

@@ -2656,4 +2656,16 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnWaterFlowScrollIndex(ArkUIRuntimeCa
     NG::ViewAbstract::SetJSFrameNodeOnWaterFlowScrollIndex(frameNode, std::move(callback));
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue FrameNodeBridge::UpdateConfiguration(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    auto defaultReturnValue = panda::JSValueRef::Undefined(vm);
+    CHECK_NULL_RETURN(vm, defaultReturnValue);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), defaultReturnValue);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getFrameNodeModifier()->updateConfiguration(nativeNode);
+    return defaultReturnValue;
+}
 } // namespace OHOS::Ace::NG

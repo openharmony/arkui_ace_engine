@@ -936,6 +936,13 @@ void SetKeyProcessingMode(ArkUI_Int32 instanceId, ArkUI_Int32 mode)
     delegate->SetKeyProcessingMode(mode);
 }
 
+void UpdateConfiguration(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    uiNode->UpdateConfigurationUpdate();
+}
+
 void AddSupportedUIStates(
     ArkUINodeHandle node, int32_t state, void* statesChangeHandler, bool isExcludeInner, void* userData)
 {
@@ -1038,6 +1045,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .setKeyProcessingMode = SetKeyProcessingMode,
         .getInteractionEventBindingInfo = GetInteractionEventBindingInfo,
         .runScopedTask = RunScopedTask,
+        .updateConfiguration = UpdateConfiguration,
         .addSupportedUIStates = AddSupportedUIStates,
         .removeSupportedUIStates = RemoveSupportedUIStates,
     };
