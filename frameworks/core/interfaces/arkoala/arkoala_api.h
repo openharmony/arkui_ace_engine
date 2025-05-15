@@ -5867,6 +5867,7 @@ struct ArkUIFrameNodeModifier {
     void (*setKeyProcessingMode)(ArkUI_Int32 instanceId, ArkUI_Int32 mode);
     EventBindingInfo (*getInteractionEventBindingInfo)(ArkUINodeHandle node, int type);
     void (*runScopedTask)(ArkUI_Int32 instanceId, void* userData, void (*callback)(void* userData));
+    void (*updateConfiguration)(ArkUINodeHandle node);
     void (*addSupportedUIStates)(
         ArkUINodeHandle node, int32_t state, void* statesChangeHandler, bool isExcludeInner, void* userData);
     void (*removeSupportedUIStates)(ArkUINodeHandle node, int32_t state);

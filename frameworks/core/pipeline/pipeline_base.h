@@ -1575,6 +1575,16 @@ public:
         return apiTargetVersion_ < static_cast<int32_t>(version);
     }
 
+    void SaveConfigurationConfig(const ConfigurationChange& configurationChange)
+    {
+        configurationChange_ = configurationChange;
+    }
+
+    const ConfigurationChange& GetConfigurationChange() const
+    {
+        return configurationChange_;
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1776,6 +1786,7 @@ private:
     std::function<void(uint32_t, int64_t)> accessibilityCallback_;
     std::set<AccessibilityCallbackEvent> accessibilityEvents_;
     std::shared_ptr<ArkUIPerfMonitor> perfMonitor_;
+    ConfigurationChange configurationChange_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

@@ -4309,6 +4309,8 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
 
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInteractionEventBindingInfo"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetInteractionEventBindingInfo));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "updateConfiguration"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::UpdateConfiguration));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "frameNode"), frameNode);
 }
 
