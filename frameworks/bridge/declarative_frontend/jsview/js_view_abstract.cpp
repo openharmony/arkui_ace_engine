@@ -1681,6 +1681,126 @@ void JSViewAbstract::JsMouseResponseRegion(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetMouseResponseRegion(result);
 }
 
+void JSViewAbstract::ParseMaskRectOffset(
+    const JSRef<JSVal>& offsetX, const JSRef<JSVal>& offsetY, DimensionOffset& options)
+{
+    CalcDimension xDimen;
+    CalcDimension yDimen;
+    if (!SystemProperties::ConfigChangePerform()) {
+        if (ParseJsDimensionNG(offsetX, xDimen, DimensionUnit::VP)) {
+            options.SetX(xDimen);
+        }
+        if (ParseJsDimensionNG(offsetY, yDimen, DimensionUnit::VP)) {
+            options.SetY(yDimen);
+        }
+        return;
+    }
+    RefPtr<ResourceObject> xResObj = nullptr;
+    RefPtr<ResourceObject> yResObj = nullptr;
+    if (ParseJsDimensionVp(offsetX, xDimen, xResObj)) {
+        options.SetX(xDimen);
+    }
+    if (xResObj) {
+        auto&& xUpdateFunc = [](const RefPtr<ResourceObject>& xResObj, DimensionOffset& options) {
+            CalcDimension x;
+            if (ResourceParseUtils::ParseResDimensionVp(xResObj, x)) {
+                options.SetX(x);
+            }
+        };
+        options.AddResource("dialog.dimensionOffset.x", xResObj, std::move(xUpdateFunc));
+    }
+    if (ParseJsDimensionVp(offsetY, yDimen, yResObj)) {
+        options.SetY(yDimen);
+    }
+    if (yResObj) {
+        auto&& yUpdateFunc = [](const RefPtr<ResourceObject>& yResObj, DimensionOffset& options) {
+            CalcDimension y;
+            if (ResourceParseUtils::ParseResDimensionVp(yResObj, y)) {
+                options.SetY(y);
+            }
+        };
+        options.AddResource("dialog.dimensionOffset.y", yResObj, std::move(yUpdateFunc));
+    }
+}
+
+void JSViewAbstract::ParseMarkRectWidthWithResourceObj(const JSRef<JSVal>& width, DimensionRect& options)
+{
+    CalcDimension rectDimen;
+    RefPtr<ResourceObject> resObj = nullptr;
+    if (ParseJsDimensionNG(width, rectDimen, DimensionUnit::VP, resObj)) {
+        if (rectDimen.Unit() == DimensionUnit::PERCENT && rectDimen.Value() < 0) {
+            return;
+        }
+        options.SetWidth(rectDimen);
+    }
+    if (resObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, DimensionRect& options) {
+            CalcDimension rectDimenVal;
+            if (ResourceParseUtils::ParseResDimensionVpNG(resObj, rectDimenVal)) {
+                if (rectDimenVal.Unit() == DimensionUnit::PERCENT && rectDimenVal.Value() < 0) {
+                    return;
+                }
+                options.SetWidth(rectDimenVal);
+            }
+        };
+        options.AddResource("dialog.maskRect.width", resObj, std::move(updateFunc));
+    }
+}
+
+void JSViewAbstract::ParseMarkRectWidth(const JSRef<JSVal>& width, DimensionRect& options)
+{
+    CalcDimension rectDimen;
+    if (!SystemProperties::ConfigChangePerform()) {
+        if (ParseJsDimensionNG(width, rectDimen, DimensionUnit::VP)) {
+            if (rectDimen.Unit() == DimensionUnit::PERCENT && rectDimen.Value() < 0) {
+                return;
+            }
+            options.SetWidth(rectDimen);
+        }
+        return;
+    }
+    ParseMarkRectWidthWithResourceObj(width, options);
+}
+
+void JSViewAbstract::ParseMaskRectHeightWithResourceObj(const JSRef<JSVal>& height, DimensionRect& options)
+{
+    RefPtr<ResourceObject> resObj = nullptr;
+    CalcDimension rectDimen;
+    if (ParseJsDimensionNG(height, rectDimen, DimensionUnit::VP, resObj)) {
+        if (rectDimen.Unit() == DimensionUnit::PERCENT && rectDimen.Value() < 0) {
+            return;
+        }
+        options.SetHeight(rectDimen);
+    }
+    if (resObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, DimensionRect& options) {
+            CalcDimension rectDimenVal;
+            if (ResourceParseUtils::ParseResDimensionVpNG(resObj, rectDimenVal)) {
+                if (rectDimenVal.Unit() == DimensionUnit::PERCENT && rectDimenVal.Value() < 0) {
+                    return;
+                }
+                options.SetHeight(rectDimenVal);
+            }
+        };
+        options.AddResource("dialog.maskRect.height", resObj, std::move(updateFunc));
+    }
+}
+
+void JSViewAbstract::ParseMarkRectHeight(const JSRef<JSVal>& height, DimensionRect& options)
+{
+    CalcDimension rectDimen;
+    if (!SystemProperties::ConfigChangePerform()) {
+        if (ParseJsDimensionNG(height, rectDimen, DimensionUnit::VP)) {
+            if (rectDimen.Unit() == DimensionUnit::PERCENT && rectDimen.Value() < 0) {
+                return;
+            }
+            options.SetHeight(rectDimen);
+        }
+        return;
+    }
+    ParseMaskRectHeightWithResourceObj(height, options);
+}
+
 bool JSViewAbstract::ParseJsDimensionRect(const JSRef<JSVal>& jsValue, DimensionRect& result)
 {
     result.SetOffset(DimensionOffset(CalcDimension(0, DimensionUnit::VP), CalcDimension(0, DimensionUnit::VP)));
@@ -1688,7 +1808,6 @@ bool JSViewAbstract::ParseJsDimensionRect(const JSRef<JSVal>& jsValue, Dimension
     if (!jsValue->IsObject()) {
         return true;
     }
-
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> x = obj->GetProperty("x");
     JSRef<JSVal> y = obj->GetProperty("y");
@@ -1706,28 +1825,14 @@ bool JSViewAbstract::ParseJsDimensionRect(const JSRef<JSVal>& jsValue, Dimension
     if (s2.find('-') != std::string::npos) {
         height = JSRef<JSVal>::Make(ToJSValue("100%"));
     }
-    if (ParseJsDimensionNG(x, xDimen, DimensionUnit::VP)) {
-        auto offset = result.GetOffset();
-        offset.SetX(xDimen);
-        result.SetOffset(offset);
-    }
-    if (ParseJsDimensionNG(y, yDimen, DimensionUnit::VP)) {
-        auto offset = result.GetOffset();
-        offset.SetY(yDimen);
-        result.SetOffset(offset);
-    }
-    if (ParseJsDimensionNG(width, widthDimen, DimensionUnit::VP)) {
-        if (widthDimen.Unit() == DimensionUnit::PERCENT && widthDimen.Value() < 0) {
-            return true;
-        }
-        result.SetWidth(widthDimen);
-    }
-    if (ParseJsDimensionNG(height, heightDimen, DimensionUnit::VP)) {
-        if (heightDimen.Unit() == DimensionUnit::PERCENT && heightDimen.Value() < 0) {
-            return true;
-        }
-        result.SetHeight(heightDimen);
-    }
+    DimensionOffset offset;
+    ParseMaskRectOffset(x, y, offset);
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    Dimension offsetX = isRtl ? offset.GetX() * (-1) : offset.GetX();
+    offset.SetX(offsetX);
+    result.SetOffset(offset);
+    ParseMarkRectWidth(width, result);
+    ParseMarkRectHeight(height, result);
     return true;
 }
 
@@ -9019,6 +9124,31 @@ void JSViewAbstract::SetDragNumberBadge(const JSCallbackInfo& info, NG::DragPrev
     }
 }
 
+void JSViewAbstract::ParseDialogWidthAndHeight(DialogProperties& properties, const JSRef<JSObject>& obj)
+{
+    CalcDimension width;
+    CalcDimension height;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resWidthObj = nullptr;
+        RefPtr<ResourceObject> resHeightObj = nullptr;
+        if (ParseJsDimensionVpNG(obj->GetProperty("width"), width, resWidthObj)) {
+            properties.width = width;
+        }
+        properties.resourceWidthObj = resWidthObj;
+        if (ParseJsDimensionVpNG(obj->GetProperty("height"), height, resHeightObj)) {
+            properties.height = height;
+        }
+        properties.resourceHeightObj = resHeightObj;
+        return;
+    }
+    if (ParseJsDimensionVpNG(obj->GetProperty("width"), width, true)) {
+        properties.width = width;
+    }
+    if (ParseJsDimensionVpNG(obj->GetProperty("height"), height, true)) {
+        properties.height = height;
+    }
+}
+
 void JSViewAbstract::SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties)
 {
     // Parse cornerRadius.
@@ -9055,16 +9185,7 @@ void JSViewAbstract::SetDialogProperties(const JSRef<JSObject>& obj, DialogPrope
     if ((shadowValue->IsObject() || shadowValue->IsNumber()) && ParseShadowProps(shadowValue, shadow)) {
         properties.shadow = shadow;
     }
-    auto widthValue = obj->GetProperty("width");
-    CalcDimension width;
-    if (ParseJsDimensionVpNG(widthValue, width, true)) {
-        properties.width = width;
-    }
-    auto heightValue = obj->GetProperty("height");
-    CalcDimension height;
-    if (ParseJsDimensionVpNG(heightValue, height, true)) {
-        properties.height = height;
-    }
+    ParseDialogWidthAndHeight(properties, obj);
 }
 
 std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback(

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_DIALOG_FORM_FORM_MODEL_NG_H
 
 #include "core/components_ng/pattern/dialog/alert_dialog_model.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT AlertDialogModelNG : public OHOS::Ace::AlertDialogModel {
@@ -27,6 +28,9 @@ public:
     void SetShowDialog(const DialogProperties& arg) override;
     void SetOnWillDismiss(std::function<void(const int32_t& info, const int32_t& instanceId)>&& onWillDismissFunc,
         DialogProperties& arg) override;
+    static void CreateWithResourceObj(const RefPtr<DialogPattern>& pattern, const DialogProperties& arg);
+    static void ProcessContentResourceObj(
+        const RefPtr<DialogPattern>& pattern, const RefPtr<ResourceObject>& object, const DialogResourceType type);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_DIALOG_FORM_FORM_MODEL_NG_H

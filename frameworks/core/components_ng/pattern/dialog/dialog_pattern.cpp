@@ -2325,4 +2325,166 @@ void DialogPattern::OverlayDismissDialog(const RefPtr<FrameNode>& dialogNode)
         overlayManager->PopModalDialog(GetHost()->GetId());
     }
 }
+
+void DialogPattern::UpdateContentValue(std::string& text, const DialogResourceType type)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (type) {
+            case DialogResourceType::TITLE: {
+                title_ = text;
+                UpdateNodeContent(contentNodeMap_[DialogContentNode::TITLE], text);
+                break;
+            }
+            case DialogResourceType::SUBTITLE: {
+                subtitle_ = text;
+                UpdateNodeContent(contentNodeMap_[DialogContentNode::SUBTITLE], text);
+                break;
+            }
+            case DialogResourceType::MESSAGE: {
+                message_ = text;
+                UpdateNodeContent(contentNodeMap_[DialogContentNode::MESSAGE], text);
+                break;
+            }
+            default:
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void DialogPattern::UpdateDialogColor(const Color& color, const DialogResourceType type)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (type) {
+            case DialogResourceType::MASK_COLOR: {
+                dialogProperties_.maskColor = color;
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+                break;
+            }
+            case DialogResourceType::BACKGROUND_COLOR: {
+                dialogProperties_.backgroundColor = color;
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+                break;
+            }
+            default:
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void DialogPattern::UpdateBackShadow(const Shadow& shadow)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (pipelineContext->IsSystmColorChange()) {
+        CHECK_NULL_VOID(contentRenderContext_);
+        contentRenderContext_->UpdateBackShadow(shadow);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void DialogPattern::UpdateEffect(const EffectOption& option)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (pipelineContext->IsSystmColorChange()) {
+        CHECK_NULL_VOID(contentRenderContext_);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+            contentRenderContext_->IsUniRenderEnabled() && dialogProperties_.isSysBlurStyle) {
+            contentRenderContext_->UpdateBackgroundEffect(option);
+            if (dialogProperties_.blurStyleOption.has_value() &&
+                contentRenderContext_->GetBackgroundEffect().has_value()) {
+                contentRenderContext_->UpdateBackgroundEffect(std::nullopt);
+            }
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void DialogPattern::UpdateBlurStyle(const BlurStyleOption& option)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (pipelineContext->IsSystmColorChange()) {
+        CHECK_NULL_VOID(contentRenderContext_);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+            contentRenderContext_->IsUniRenderEnabled() && dialogProperties_.isSysBlurStyle) {
+            contentRenderContext_->UpdateBackBlurStyle(option);
+            if (dialogProperties_.effectOption.has_value() && contentRenderContext_->GetBackBlurStyle().has_value()) {
+                contentRenderContext_->UpdateBackBlurStyle(std::nullopt);
+            }
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void DialogPattern::UpdateMaskRect(const DimensionRect& rect)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (pipelineContext->IsSystmColorChange()) {
+        dialogProperties_.maskRect = rect;
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void DialogPattern::UpdateLayoutContent(const CalcDimension& value, const DialogResourceType type)
+{
+    if (NonPositive(value.Value())) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto dialogLayoutProp = host->GetLayoutProperty<DialogLayoutProperty>();
+    CHECK_NULL_VOID(dialogLayoutProp);
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (type) {
+            case DialogResourceType::WIDTH: {
+                dialogLayoutProp->UpdateWidth(value);
+                break;
+            }
+            case DialogResourceType::HEIGHT: {
+                dialogLayoutProp->UpdateHeight(value);
+                break;
+            }
+            default:
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
 } // namespace OHOS::Ace::NG

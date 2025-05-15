@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/models/alert_dialog_model_impl.h"
 #include "core/common/container.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dialog/alert_dialog_model_ng.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
@@ -214,23 +215,36 @@ void ParseButtons(const JsiExecutionContext& execContext, DialogProperties& prop
 
 void ParseDialogTitleAndMessage(DialogProperties& properties, JSRef<JSObject> obj)
 {
-    // Parse title.
     auto titleValue = obj->GetProperty("title");
+    auto subtitleValue = obj->GetProperty("subtitle");
+    auto messageValue = obj->GetProperty("message");
     std::string title;
+    std::string subtitle;
+    std::string message;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resTitleObj = nullptr;
+        RefPtr<ResourceObject> resSubTitleObj = nullptr;
+        RefPtr<ResourceObject> resContentObj = nullptr;
+        if (JSViewAbstract::ParseJsString(titleValue, title, resTitleObj)) {
+            properties.title = title;
+        }
+        properties.resourceTitleObj = resTitleObj;
+        if (JSViewAbstract::ParseJsString(subtitleValue, subtitle, resSubTitleObj)) {
+            properties.subtitle = subtitle;
+        }
+        properties.resourceSubTitleObj = resSubTitleObj;
+        if (JSViewAbstract::ParseJsString(messageValue, message, resContentObj)) {
+            properties.content = message;
+        }
+        properties.resourceContentObj = resContentObj;
+        return;
+    }
     if (JSAlertDialog::ParseJsString(titleValue, title)) {
         properties.title = title;
     }
-
-    // Parse subtitle.
-    auto subtitleValue = obj->GetProperty("subtitle");
-    std::string subtitle;
     if (JSAlertDialog::ParseJsString(subtitleValue, subtitle)) {
         properties.subtitle = subtitle;
     }
-
-    // Parses message.
-    auto messageValue = obj->GetProperty("message");
-    std::string message;
     if (JSAlertDialog::ParseJsString(messageValue, message)) {
         properties.content = message;
     }
@@ -317,20 +331,53 @@ void ParseAlertAlignment(DialogProperties& properties, JSRef<JSObject> obj)
 
 void ParseAlertOffset(DialogProperties& properties, JSRef<JSObject> obj)
 {
-    // Parse offset
     auto offsetValue = obj->GetProperty("offset");
-    if (offsetValue->IsObject()) {
-        auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
-        CalcDimension dx;
-        auto dxValue = offsetObj->GetProperty("dx");
-        JSAlertDialog::ParseJsDimensionVp(dxValue, dx);
-        CalcDimension dy;
-        auto dyValue = offsetObj->GetProperty("dy");
-        JSAlertDialog::ParseJsDimensionVp(dyValue, dy);
+    if (!offsetValue->IsObject()) {
+        return;
+    }
+    auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
+    CalcDimension dx;
+    CalcDimension dy;
+    if (!SystemProperties::ConfigChangePerform()) {
+        JSAlertDialog::ParseJsDimensionVp(offsetObj->GetProperty("dx"), dx);
+        JSAlertDialog::ParseJsDimensionVp(offsetObj->GetProperty("dy"), dy);
         properties.offset = DimensionOffset(dx, dy);
         bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
         Dimension offsetX = isRtl ? properties.offset.GetX() * (-1) : properties.offset.GetX();
         properties.offset.SetX(offsetX);
+        return;
+    }
+    RefPtr<ResourceObject> xResObj = nullptr;
+    RefPtr<ResourceObject> yResObj = nullptr;
+    if (JSAlertDialog::ParseJsDimensionVp(offsetObj->GetProperty("dx"), dx, xResObj)) {
+        properties.offset.SetX(dx);
+    }
+    if (JSAlertDialog::ParseJsDimensionVp(offsetObj->GetProperty("dy"), dy, yResObj)) {
+        properties.offset.SetY(dy);
+    }
+    DimensionOffset offsetOption;
+    if (xResObj) {
+        auto&& offsetXUpdateFunc = [](const RefPtr<ResourceObject>& xResObj, DimensionOffset& options) {
+            CalcDimension offsetX;
+            if (ResourceParseUtils::ParseResDimensionVp(xResObj, offsetX)) {
+                Dimension xVal = offsetX;
+                options.SetX(xVal);
+            }
+            bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+            Dimension value = isRtl ? options.GetX() * (-1) : options.GetX();
+            options.SetX(value);
+        };
+        offsetOption.AddResource("dialog.offset.x", xResObj, std::move(offsetXUpdateFunc));
+    }
+    if (yResObj) {
+        auto&& offsetYUpdateFunc = [](const RefPtr<ResourceObject>& yResObj, DimensionOffset& options) {
+            CalcDimension offsetY;
+            if (ResourceParseUtils::ParseResDimensionVp(yResObj, offsetY)) {
+                Dimension yVal = offsetY;
+                options.SetY(yVal);
+            }
+        };
+        offsetOption.AddResource("dialog.offset.y", yResObj, std::move(offsetYUpdateFunc));
     }
 }
 
@@ -420,6 +467,22 @@ void ParseAlertLevelOrder(DialogProperties& properties, JSRef<JSObject> obj)
 
     double order = levelOrder->GetOrder();
     properties.levelOrder = std::make_optional(order);
+}
+
+void ParseBackgroundColor(const JSRef<JSVal>& jsValue, DialogProperties& properties)
+{
+    Color textColor;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (JSViewAbstract::ParseJsColor(jsValue, textColor, resObj)) {
+            properties.backgroundColor = textColor;
+        }
+        properties.resourceBgColorObj = resObj;
+        return;
+    }
+    if (JSViewAbstract::ParseJsColor(jsValue, textColor)) {
+        properties.backgroundColor = textColor;
+    }
 }
 
 void JSAlertDialog::Show(const JSCallbackInfo& args)
@@ -523,12 +586,7 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
             properties.isModal = isModalValue->ToBoolean();
         }
 
-        auto backgroundColorValue = obj->GetProperty("backgroundColor");
-        Color backgroundColor;
-        if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor)) {
-            properties.backgroundColor = backgroundColor;
-        }
-
+        ParseBackgroundColor(obj->GetProperty("backgroundColor"), properties);
         auto backgroundBlurStyle = obj->GetProperty("backgroundBlurStyle");
         if (backgroundBlurStyle->IsNumber()) {
             auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
