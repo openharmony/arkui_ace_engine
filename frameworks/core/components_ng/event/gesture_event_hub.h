@@ -426,12 +426,14 @@ private:
     void ProcessParallelPriorityGesture(const Offset& offset, int32_t touchId,
         const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host,
         RefPtr<NGGestureRecognizer>& current, std::list<RefPtr<NGGestureRecognizer>>& recognizers,
-        int32_t& parallelIndex);
+        int32_t& parallelIndex, bool needRebuildForCurrent = false);
 
     void ProcessExternalExclusiveRecognizer(const Offset& offset, int32_t touchId,
         const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host, GesturePriority priority,
         RefPtr<NGGestureRecognizer>& current, std::list<RefPtr<NGGestureRecognizer>>& recognizers,
-        int32_t& exclusiveIndex);
+        int32_t& exclusiveIndex, bool needRebuildForCurrent = false);
+
+    bool CheckLastInnerRecognizerCollected(GesturePriority priority, int32_t gestureGroupIndex = 0);
 
     void UpdateNodePositionBeforeStartAnimation(const RefPtr<FrameNode>& frameNode,
         PreparedInfoForDrag& data);

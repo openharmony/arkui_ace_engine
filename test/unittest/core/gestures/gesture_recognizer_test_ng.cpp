@@ -41,6 +41,11 @@ public:
     {
         return false;
     }
+    std::map<int32_t, TouchEvent> GetTouchPoints()
+    {
+        std::map<int32_t, TouchEvent> emptyTouchPoints;
+        return emptyTouchPoints;
+    }
 };
 class GestureRecognizerTestNg : public GesturesCommonTestNg {
 public:
