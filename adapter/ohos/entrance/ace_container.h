@@ -61,7 +61,9 @@ class FontManager;
 
 namespace OHOS::Ace::Platform {
 #ifdef ACE_ENABLE_VK
+namespace {
 class HighContrastObserver;
+}
 #endif
 
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
