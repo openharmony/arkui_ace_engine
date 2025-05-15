@@ -456,6 +456,7 @@ public:
     virtual void UpdateAnimatableArithmeticProperty(
         const std::string& propertyName, RefPtr<NG::CustomAnimatableArithmetic>& value) = 0;
     virtual void UpdateSafeAreaExpandOpts(const NG::SafeAreaExpandOpts& opts) = 0;
+    virtual void UpdateIgnoreLayoutSafeAreaOpts(const NG::IgnoreLayoutSafeAreaOpts& opts) = 0;
 
     // global light
     virtual void SetLightPosition(

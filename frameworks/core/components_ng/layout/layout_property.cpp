@@ -178,6 +178,8 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
         VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str(), filter);
     json->PutExtAttr("direction", TextDirectionToString(GetLayoutDirection()).c_str(), filter);
     json->PutExtAttr("pixelRound", PixelRoundToJsonValue().c_str(), filter);
+    SafeAreaExpandToJsonValue(json, filter);
+    IgnoreLayoutSafeAreaToJsonValue(json, filter);
 }
 
 void LayoutProperty::PaddingToJsonValue(std::unique_ptr<JsonValue>& json,
@@ -226,6 +228,26 @@ void LayoutProperty::MarginToJsonValue(std::unique_ptr<JsonValue>& json,
     } else {
         json->PutExtAttr("margin", "0.00vp", filter);
     }
+}
+
+void LayoutProperty::IgnoreLayoutSafeAreaToJsonValue(
+    std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    if (!ignoreLayoutSafeAreaOpts_) {
+        json->PutExtAttr("ignoreLayoutSafeAreaOpts", "NA", filter);
+        return;
+    }
+    json->PutExtAttr("ignoreLayoutSafeAreaOpts", ignoreLayoutSafeAreaOpts_->ToString().c_str(), filter);
+}
+
+void LayoutProperty::SafeAreaExpandToJsonValue(
+    std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    if (!safeAreaExpandOpts_) {
+        json->PutExtAttr("safeAreaExpandOpts", "NA", filter);
+        return;
+    }
+    json->PutExtAttr("safeAreaExpandOpts", safeAreaExpandOpts_->ToString().c_str(), filter);
 }
 
 void LayoutProperty::SafeAreaPaddingToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -360,6 +382,10 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     if (layoutProperty->safeAreaExpandOpts_) {
         safeAreaExpandOpts_ = std::make_unique<SafeAreaExpandOpts>(*layoutProperty->safeAreaExpandOpts_);
     }
+    if (layoutProperty->ignoreLayoutSafeAreaOpts_) {
+        ignoreLayoutSafeAreaOpts_ =
+            std::make_unique<IgnoreLayoutSafeAreaOpts>(*layoutProperty->ignoreLayoutSafeAreaOpts_);
+    }
     geometryTransition_ = layoutProperty->geometryTransition_;
     propVisibility_ = layoutProperty->GetVisibility();
     measureType_ = layoutProperty->measureType_;
@@ -400,12 +426,35 @@ std::pair<std::vector<std::string>, std::vector<std::string>> LayoutProperty::Ca
     return std::pair<std::vector<std::string>, std::vector<std::string>>(widthString, heightString);
 }
 
+void LayoutProperty::ExpandConstraintWithSafeArea()
+{
+    auto host = GetHost();
+    if (!host || !host->GetIgnoreLayoutProcess()) {
+        return;
+    }
+    RefPtr<FrameNode> parent = host->GetAncestorNodeOfFrame(false);
+    if (parent) {
+        IgnoreLayoutSafeAreaOpts options = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+            .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+        if (ignoreLayoutSafeAreaOpts_) {
+            options = *ignoreLayoutSafeAreaOpts_;
+        }
+        ExpandEdges sae = parent->GetAccumulatedSafeAreaExpand(true, options);
+        auto contentSize = host->GetGeometryNode()->GetParentLayoutConstraint()->parentIdealSize;
+        layoutConstraint_->parentIdealSize.SetWidth(
+            contentSize.Width().value_or(0) + sae.left.value_or(0) + sae.right.value_or(0));
+        layoutConstraint_->parentIdealSize.SetHeight(
+            contentSize.Height().value_or(0) + sae.top.value_or(0) + sae.bottom.value_or(0));
+    }
+}
+
 void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint)
 {
     layoutConstraint_ = parentConstraint;
     if (!needLazyLayout_) {
         layoutConstraint_->viewPosRef.reset();
     }
+    ExpandConstraintWithSafeArea();
     if (margin_) {
         marginResult_.reset();
         auto margin = CreateMargin();
@@ -941,6 +990,35 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     parent->MarkNeedSyncRenderTree();
     parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void LayoutProperty::UpdateIgnoreLayoutSafeAreaOpts(const IgnoreLayoutSafeAreaOpts& opts)
+{
+    if (!ignoreLayoutSafeAreaOpts_) {
+        ignoreLayoutSafeAreaOpts_ = std::make_unique<IgnoreLayoutSafeAreaOpts>();
+    }
+    if (*ignoreLayoutSafeAreaOpts_ != opts) {
+        *ignoreLayoutSafeAreaOpts_ = opts;
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+bool LayoutProperty::IsExpandConstraintNeeded()
+{
+    if (!layoutPolicy_ || !ignoreLayoutSafeAreaOpts_ || ignoreLayoutSafeAreaOpts_->type == LAYOUT_SAFE_AREA_TYPE_NONE ||
+        ignoreLayoutSafeAreaOpts_->edges == LAYOUT_SAFE_AREA_EDGE_NONE) {
+        return false;
+    }
+    auto edges = ignoreLayoutSafeAreaOpts_->edges;
+    bool res = false;
+    if ((edges | LAYOUT_SAFE_AREA_EDGE_TOP) || (edges | LAYOUT_SAFE_AREA_EDGE_BOTTOM)) {
+        res |=
+            (layoutPolicy_->heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH) == LayoutCalPolicy::MATCH_PARENT);
+    }
+    if ((edges | LAYOUT_SAFE_AREA_EDGE_START) || (edges | LAYOUT_SAFE_AREA_EDGE_END)) {
+        res |= (layoutPolicy_->widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH) == LayoutCalPolicy::MATCH_PARENT);
+    }
+    return res;
 }
 
 void LayoutProperty::UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts)

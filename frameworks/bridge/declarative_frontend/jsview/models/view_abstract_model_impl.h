@@ -373,6 +373,7 @@ public:
     void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
         RefPtr<NG::CustomAnimatableArithmetic>& value) override {};
     void UpdateSafeAreaExpandOpts(const NG::SafeAreaExpandOpts& opts) override {};
+    void UpdateIgnoreLayoutSafeAreaOpts(const NG::IgnoreLayoutSafeAreaOpts& opts) override {};
     void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) override {};
     int32_t CancelDataLoading(const std::string& key) override { return 0; };
     void SetDisableDataPrefetch(bool disableDataPrefetch) override {};

@@ -805,6 +805,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetExpandSafeArea));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetExpandSafeArea"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetExpandSafeArea));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setIgnoreLayoutSafeArea"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetIgnoreLayoutSafeArea));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIgnoreLayoutSafeArea"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetIgnoreLayoutSafeArea));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlignRules"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAlignRules));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlignRules"),

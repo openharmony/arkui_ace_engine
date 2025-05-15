@@ -534,6 +534,7 @@ public:
     static void UpdateAnimatableArithmeticProperty(
         const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value);
     static void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts);
+    static void UpdateIgnoreLayoutSafeAreaOpts(const IgnoreLayoutSafeAreaOpts& opts);
 
     // global light
     static void SetLightPosition(
@@ -657,6 +658,7 @@ public:
     static void SetPadding(FrameNode* frameNode, const PaddingProperty& value);
     static void SetLayoutDirection(FrameNode* frameNode, TextDirection value);
     static void UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
+    static void UpdateIgnoreLayoutSafeAreaOpts(FrameNode* frameNode, const IgnoreLayoutSafeAreaOpts& opts);
     static void SetAspectRatio(FrameNode* frameNode, float ratio);
     static void SetAlignSelf(FrameNode* frameNode, FlexAlign value);
     static void SetFlexBasis(FrameNode* frameNode, const Dimension& value);

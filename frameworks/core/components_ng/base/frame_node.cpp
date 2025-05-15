@@ -720,6 +720,10 @@ void FrameNode::DumpSafeAreaInfo()
         DumpLog::GetInstance().AddDesc(
             opts->ToString().append(",hostPageId: ").append(std::to_string(GetPageId()).c_str()));
     }
+    auto&& ignoreLayoutSafeAreaOpts = layoutProperty_->GetIgnoreLayoutSafeAreaOpts();
+    if (ignoreLayoutSafeAreaOpts) {
+        DumpLog::GetInstance().AddDesc(ignoreLayoutSafeAreaOpts->ToString());
+    }
     if (layoutProperty_->GetSafeAreaInsets()) {
         DumpLog::GetInstance().AddDesc(layoutProperty_->GetSafeAreaInsets()->ToString());
     }
@@ -2127,9 +2131,9 @@ void FrameNode::SetNodeFreeze(bool isFreeze)
     }
 }
 
-void FrameNode::CreateLayoutTask(bool forceUseMainThread)
+void FrameNode::CreateLayoutTask(bool forceUseMainThread, LayoutType layoutTaskType)
 {
-    if (!isLayoutDirtyMarked_) {
+    if (!isLayoutDirtyMarked_ && (layoutTaskType == LayoutType::NONE)) {
         return;
     }
     SetRootMeasureNode(true);
@@ -2140,20 +2144,29 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread)
         Measure(std::nullopt);
         Layout();
     } else {
-        {
+        if (layoutTaskType != LayoutType::LAYOUT_FOR_IGNORE) {
             auto layoutConstraint = GetLayoutConstraint();
             ACE_SCOPED_TRACE_COMMERCIAL("CreateTaskMeasure[%s][self:%d][parent:%d][layoutConstraint:%s]"
                              "[layoutPriority:%d][pageId:%d][depth:%d]",
                 GetTag().c_str(), GetId(), GetAncestorNodeOfFrame(false) ? GetAncestorNodeOfFrame(false)->GetId() : 0,
                 layoutConstraint.ToString().c_str(), GetLayoutPriority(), GetPageId(), GetDepth());
+            SetIgnoreLayoutProcess(layoutTaskType == LayoutType::MEASURE_FOR_IGNORE);
             Measure(layoutConstraint);
+            ResetIgnoreLayoutProcess();
+        } else {
+            TAG_LOGI(ACE_LAYOUT,
+                "LayoutTask for postponed layouting on ignoreLayoutSafeArea-container [%s][self:%d], should skip "
+                "measuring.",
+                GetTag().c_str(), GetId());
         }
         {
             ACE_SCOPED_TRACE_COMMERCIAL("CreateTaskLayout[%s][self:%d][parent:%d][layoutPriority:%d]"
                              "[pageId:%d][depth:%d]",
                 GetTag().c_str(), GetId(), GetAncestorNodeOfFrame(false) ? GetAncestorNodeOfFrame(false)->GetId() : 0,
                 GetLayoutPriority(), GetPageId(), GetDepth());
+            SetIgnoreLayoutProcess(layoutTaskType == LayoutType::LAYOUT_FOR_IGNORE);
             Layout();
+            ResetIgnoreLayoutProcess();
         }
     }
     SetRootMeasureNode(false);
@@ -4564,7 +4577,7 @@ void FrameNode::Layout()
             }
         }
     }
-    if (CheckNeedLayout(layoutProperty_->GetPropertyChangeFlag())) {
+    if (CheckNeedLayout(layoutProperty_->GetPropertyChangeFlag()) || GetIgnoreLayoutProcess()) {
         if (!layoutProperty_->GetLayoutConstraint()) {
             const auto& parentLayoutConstraint = geometryNode_->GetParentLayoutConstraint();
             if (layoutProperty_->GetLayoutRect()) {

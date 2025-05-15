@@ -203,6 +203,8 @@ public:
     static ArkUINativeModuleValue ResetGridSpan(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetExpandSafeArea(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetExpandSafeArea(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetIgnoreLayoutSafeArea(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetIgnoreLayoutSafeArea(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetAlignRules(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetAlignRules(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetFlexBasis(ArkUIRuntimeCallInfo* runtimeCallInfo);

@@ -3549,6 +3549,14 @@ void ViewAbstract::UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaExpandOpts, opts);
 }
 
+void ViewAbstract::UpdateIgnoreLayoutSafeAreaOpts(const IgnoreLayoutSafeAreaOpts& opts)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IgnoreLayoutSafeAreaOpts, opts);
+}
+
 void ViewAbstract::SetRenderGroup(bool isRenderGroup)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -4111,6 +4119,12 @@ void ViewAbstract::UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeArea
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaExpandOpts, opts, frameNode);
+}
+
+void ViewAbstract::UpdateIgnoreLayoutSafeAreaOpts(FrameNode* frameNode, const IgnoreLayoutSafeAreaOpts& opts)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IgnoreLayoutSafeAreaOpts, opts, frameNode);
 }
 
 void ViewAbstract::SetAspectRatio(FrameNode* frameNode, float ratio)

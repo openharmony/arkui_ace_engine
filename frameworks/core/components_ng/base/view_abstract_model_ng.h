@@ -1688,6 +1688,11 @@ private:
         ViewAbstract::UpdateSafeAreaExpandOpts(opts);
     }
 
+    void UpdateIgnoreLayoutSafeAreaOpts(const IgnoreLayoutSafeAreaOpts& opts) override
+    {
+        ViewAbstract::UpdateIgnoreLayoutSafeAreaOpts(opts);
+    }
+
     void SetPositionLocalizedEdges(bool needLocalized) override
     {
         ViewAbstract::SetPositionLocalizedEdges(needLocalized);
