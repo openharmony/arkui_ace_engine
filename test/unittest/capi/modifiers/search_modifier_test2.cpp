@@ -146,4 +146,56 @@ HWTEST_F(SearchModifierTest2, setKeyboardAppearanceValuesTest, TestSize.Level1)
         checkValue(input, expected, value);
     }
 }
+
+/*
+ * @tc.name: setOnWillChangeTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest2, setOnWillChangeTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnWillChange, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    struct CheckEvent {
+        int32_t resourceId;
+        ChangeValueInfo info;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    int32_t expectedResourceId = 123321;
+    auto expectedChangeValueInfo = ChangeValueInfo {
+        .value = u"test content", .previewText.offset = 2, .previewText.value = u"previewText",
+        .oldPreviewText.offset = 1, .oldPreviewText.value = u"oldPreviewText", .oldContent = u"oldContent",
+        .rangeBefore.start = 1, .rangeBefore.end = 6, .rangeAfter.start = 2, .rangeAfter.end = 5};
+
+    auto inputCallback = [] (Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_EditableTextChangeValue parameter, const Callback_Boolean_Void continuation) {
+        auto value = Converter::Convert<ChangeValueInfo>(parameter);
+        checkEvent = CheckEvent {resourceId, value};
+        CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(true));
+    };
+
+    auto func = Converter::ArkValue<Callback_EditableTextChangeValue_Boolean>(nullptr,
+        inputCallback, expectedResourceId);
+    modifier_->setOnWillChange(node_, &func);
+
+    auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto result = eventHub->FireOnWillChangeEvent(expectedChangeValueInfo);
+    EXPECT_TRUE(result);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, expectedResourceId);
+    EXPECT_EQ(checkEvent->info.value, expectedChangeValueInfo.value);
+    EXPECT_EQ(checkEvent->info.previewText.offset, expectedChangeValueInfo.previewText.offset);
+    EXPECT_EQ(checkEvent->info.previewText.value, expectedChangeValueInfo.previewText.value);
+    EXPECT_EQ(checkEvent->info.oldPreviewText.offset, expectedChangeValueInfo.oldPreviewText.offset);
+    EXPECT_EQ(checkEvent->info.oldPreviewText.value, expectedChangeValueInfo.oldPreviewText.value);
+    EXPECT_EQ(checkEvent->info.oldContent, expectedChangeValueInfo.oldContent);
+    EXPECT_EQ(checkEvent->info.rangeBefore.start, expectedChangeValueInfo.rangeBefore.start);
+    EXPECT_EQ(checkEvent->info.rangeBefore.end, expectedChangeValueInfo.rangeBefore.end);
+    EXPECT_EQ(checkEvent->info.rangeAfter.start, expectedChangeValueInfo.rangeAfter.start);
+    EXPECT_EQ(checkEvent->info.rangeAfter.end, expectedChangeValueInfo.rangeAfter.end);
+}
 } // namespace OHOS::Ace::NG

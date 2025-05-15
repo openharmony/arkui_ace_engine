@@ -660,8 +660,12 @@ void OnWillChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetOnWillChange(frameNode, convValue);
+    auto onCallback = [arkCallback = CallbackHelper(*value)](const ChangeValueInfo& param) -> bool {
+        auto data = Converter::ArkValue<Ark_EditableTextChangeValue>(param, Converter::FC);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
+        return Converter::Convert<bool>(result);
+    };
+    SearchModelNG::SetOnWillChangeEvent(frameNode, std::move(onCallback));
 }
 void KeyboardAppearanceImpl(Ark_NativePointer node,
                             const Opt_KeyboardAppearance* value)
