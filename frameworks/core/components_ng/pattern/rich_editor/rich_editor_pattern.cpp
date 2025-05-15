@@ -8204,21 +8204,28 @@ void RichEditorPattern::HandleOnPaste()
             isMulitiTypeRecord, isSpanStringMode);
         auto richEditor = weak.Upgrade();
         CHECK_NULL_VOID(richEditor);
-        std::list<RefPtr<SpanString>> spanStrings;
-        for (auto arr : arrs) {
-            spanStrings.push_back(SpanString::DecodeTlv(arr));
-        }
-        if (!spanStrings.empty() && !isMulitiTypeRecord) {
-            for (auto spanString : spanStrings) {
-                richEditor->AddSpanByPasteData(spanString);
-                richEditor->RequestKeyboardToEdit();
-            }
-            return;
-        }
-        richEditor->PasteStr(text);
+        richEditor->ProcessSpanStringData(arrs, text, isMulitiTypeRecord);
     };
     clipboard_->GetSpanStringData(pasteCallback);
 #endif
+}
+
+void RichEditorPattern::ProcessSpanStringData(std::vector<std::vector<uint8_t>>& arrs, const std::string& text,
+    bool isMulitiTypeRecord)
+{
+    std::list<RefPtr<SpanString>> spanStrings;
+    for (auto&& arr : arrs) {
+        spanStrings.push_back(SpanString::DecodeTlv(arr));
+    }
+    if (!spanStrings.empty() && !isMulitiTypeRecord) {
+        CloseSelectOverlay();
+        for (auto&& spanString : spanStrings) {
+            AddSpanByPasteData(spanString);
+            RequestKeyboardToEdit();
+        }
+        return;
+    }
+    PasteStr(text);
 }
 
 void RichEditorPattern::PasteStr(const std::string& text)
