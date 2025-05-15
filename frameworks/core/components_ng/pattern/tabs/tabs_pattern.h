@@ -157,6 +157,17 @@ public:
     int32_t OnInjectionEvent(const std::string& command) override;
     void ReportComponentChangeEvent(int32_t currentIndex);
 
+    void UpdateDividerStrokeWidth()
+    {
+        OnUpdateShowDivider();
+    }
+    void UpdateDividerColor()
+    {
+        OnUpdateShowDivider();
+    }
+
+    void OnColorModeChange(uint32_t colorMode) override;
+
 private:
     void OnAttachToFrameNode() override;
     void OnAfterModifyDone() override;
