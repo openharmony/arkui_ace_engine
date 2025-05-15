@@ -1047,7 +1047,7 @@ HWTEST_F(ButtonModifierTest, setFontColorTestValidStringValues, TestSize.Level1)
 
     for (const auto &[arkResColor, expected]: testPlan) {
         auto optResColor = Converter::ArkValue<Opt_ResourceColor>(arkResColor);
-        modifier_->setFontColor(node_, &optResColor);        
+        modifier_->setFontColor(node_, &optResColor);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
         EXPECT_EQ(resultStr, expected);
