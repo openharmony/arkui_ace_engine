@@ -110,8 +110,8 @@ const char* GetEngineSharedLibrary()
 inline void SetSystemBarPropertyEnableFlag(Rosen::SystemBarProperty& property)
 {
     property.settingFlag_ = static_cast<Rosen::SystemBarSettingFlag>(
-        static_cast<int32_t>(property.settingFlag_) |
-        static_cast<int32_t>(Rosen::SystemBarSettingFlag::ENABLE_SETTING));
+        static_cast<uint32_t>(property.settingFlag_) |
+        static_cast<uint32_t>(Rosen::SystemBarSettingFlag::ENABLE_SETTING));
 }
 
 std::string StringifyAvoidAreas(const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
