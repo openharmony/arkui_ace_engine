@@ -404,8 +404,17 @@ void RichEditorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Measure, children size error, size=%{public}zu", children.size());
         return;
     }
-    auto contentLayoutWrapper = *(children.begin());
-    CHECK_NULL_VOID(contentLayoutWrapper);
+    auto contentLayoutWrapper = children.front();
+    if (!contentLayoutWrapper) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Measure, contentLayoutWrapper is null");
+        return;
+    }
+    auto contentNode = contentLayoutWrapper->GetHostNode();
+    if (!contentNode || contentNode->GetTag() != V2::RICH_EDITOR_CONTENT_ETS_TAG) {
+    TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Measure, contentNode is %{public}s",
+        contentNode ? contentNode->GetTag().c_str() : "null");
+        return;
+    }
     contentLayoutWrapper->Measure(layoutConstraint);
 }
 
@@ -421,10 +430,19 @@ void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Layout, children size error, size=%{public}zu", children.size());
         return;
     }
-    auto& contentLayoutWrapper = *(children.begin());
-    CHECK_NULL_VOID(contentLayoutWrapper);
-    contentLayoutWrapper->Layout();
+    auto contentLayoutWrapper = children.front();
+    if (!contentLayoutWrapper) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Measure, contentLayoutWrapper is null");
+        return;
+    }
+    auto contentNode = contentLayoutWrapper->GetHostNode();
+    if (!contentNode || contentNode->GetTag() != V2::RICH_EDITOR_CONTENT_ETS_TAG) {
+    TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Layout, contentNode is %{public}s",
+        contentNode ? contentNode->GetTag().c_str() : "null");
+        return;
+    }
     contentLayoutWrapper->SetActive(true);
+    contentLayoutWrapper->Layout();
 }
 
 ChildrenListWithGuard RichEditorLayoutAlgorithm::GetAllChildrenWithBuild(LayoutWrapper* layoutWrapper)
