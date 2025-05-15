@@ -746,7 +746,7 @@ void BubblePattern::ResetToInvisible()
 
 void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "Popup OnWindowSizeChanged, reason: %d", type);
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "Popup OnWindowSizeChanged, reason: %d", type);
     switch (type) {
         case WindowSizeChangeReason::UNDEFINED:
         case WindowSizeChangeReason::MOVE:
@@ -779,7 +779,7 @@ void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
 
 void BubblePattern::OnWindowHide()
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "Popup OnWindowHide start");
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "Popup OnWindowHide start");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineNg = host->GetContextRefPtr();
