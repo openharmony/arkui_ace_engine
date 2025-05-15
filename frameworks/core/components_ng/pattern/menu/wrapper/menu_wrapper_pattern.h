@@ -577,6 +577,14 @@ public:
     {
         hasCustomOutlineColor_ = hasCustomOutlineColor;
     }
+
+    bool GetMenuMaskEnable();
+    Color GetMenuMaskColor();
+    BlurStyle GetMenuMaskblurStyle();
+    void SetMenuMaskEnable(bool maskEnable);
+    void SetMenuMaskColor(Color maskColor);
+    void SetMenuMaskblurStyle(BlurStyle maskBlurStyle);
+    void UpdateFilterMaskType();
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -613,6 +621,7 @@ private:
     void SetExitAnimation(const RefPtr<FrameNode>& host);
     void SendToAccessibility(const RefPtr<UINode>& subMenu, bool isShow);
     bool CheckPointInMenuZone(const RefPtr<FrameNode>& node, const PointF& point);
+    void EnsureMenuMaskTypeInitialized();
     std::function<void()> onAppearCallback_ = nullptr;
     std::function<void()> onDisappearCallback_ = nullptr;
     std::function<void()> aboutToAppearCallback_ = nullptr;

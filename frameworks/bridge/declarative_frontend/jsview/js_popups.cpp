@@ -993,6 +993,33 @@ void JSViewPopups::GetMenuShowInSubwindow(NG::MenuParam& menuParam)
     menuParam.isShowInSubWindow = theme->GetExpandDisplay();
 }
 
+void JSViewPopups::ParseMenuMaskType(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto maskValue = menuOptions->GetProperty("mask");
+    if (maskValue->IsBoolean()) {
+        menuParam.maskEnable = maskValue->ToBoolean();
+    } else if (maskValue->IsObject()) {
+        menuParam.maskEnable = true;
+        if (!menuParam.maskType.has_value()) {
+            menuParam.maskType.emplace();
+        }
+        auto maskObj = JSRef<JSObject>::Cast(maskValue);
+        auto colorValue = maskObj->GetProperty("color");
+        Color maskColor;
+        if (JSViewAbstract::ParseJsColor(colorValue, maskColor)) {
+            menuParam.maskType->maskColor = maskColor;
+        }
+        auto backgroundBlurStyleValue = maskObj->GetProperty("backgroundBlurStyle");
+        if (backgroundBlurStyleValue->IsNumber()) {
+            auto blurStyle = backgroundBlurStyleValue->ToNumber<int32_t>();
+            if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+                blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+                menuParam.maskType->maskBackGroundBlueStyle = static_cast<BlurStyle>(blurStyle);
+            }
+        }
+    }
+}
+
 void JSViewPopups::ParseMenuParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
@@ -1118,6 +1145,7 @@ void JSViewPopups::ParseMenuParam(
     JSViewPopups::ParseMenuOutlineWidth(outlineWidthValue, menuParam);
     auto outlineColorValue = menuOptions->GetProperty("outlineColor");
     JSViewPopups::ParseMenuOutlineColor(outlineColorValue, menuParam);
+    JSViewPopups::ParseMenuMaskType(menuOptions, menuParam);
 }
 
 void JSViewPopups::ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)
