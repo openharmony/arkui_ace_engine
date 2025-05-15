@@ -1351,36 +1351,6 @@ bool FrameNode::RenderCustomChild(int64_t deadline)
     return UINode::RenderCustomChild(deadline);
 }
 
-void FrameNode::NotifyColorModeChange(uint32_t colorMode)
-{
-    FireColorNDKCallback();
-
-    if (GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED) {
-        return;
-    }
-
-    auto parentNode = AceType::DynamicCast<FrameNode>(GetParent());
-    bool parentRerender = parentNode ? parentNode->GetRerenderable() : GetRerenderable();
-    // bool parentActive = parentNode ? parentNode->IsActive() : true;
-    SetRerenderable(parentRerender && ((IsVisible() && IsActive()) || CheckMeasureAnyway()));
-    
-    if (GetRerenderable()) {
-        SetDarkMode(GetContext()->GetColorMode() == ColorMode::DARK);
-    }
-
-    if (pattern_) {
-        pattern_->OnColorConfigurationUpdate();
-        pattern_->OnColorModeChange(colorMode);
-    }
-
-    auto frameNode = AceType::DynamicCast<FrameNode>(this);
-    if (frameNode && frameNode->GetOverlayNode()) {
-        frameNode->GetOverlayNode()->NotifyColorModeChange(colorMode);
-    }
-
-    UINode::NotifyColorModeChange(colorMode);
-}
-
 void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
     if (configurationUpdateCallback_) {

@@ -270,11 +270,6 @@ bool SystemProperties::GetResourceDecoupling()
     return true;
 }
 
-bool SystemProperties::ConfigChangePerform()
-{
-    return false;
-}
-
 bool SystemProperties::GetTitleStyleEnabled()
 {
     return false;

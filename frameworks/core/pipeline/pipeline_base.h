@@ -1047,8 +1047,6 @@ public:
         }
     }
 
-    virtual void NotifyColorModeChange(uint32_t colorMode) {}
-
     using PostRTTaskCallback = std::function<void(std::function<void()>&&)>;
     void SetPostRTTaskCallBack(PostRTTaskCallback&& callback)
     {
@@ -1521,16 +1519,6 @@ public:
     virtual void SetTouchPassThrough(bool isEnable) {}
     virtual void SetEnableSwipeBack(bool isEnable) {}
 
-    bool IsSystmColorChange()
-    {
-        return isSystemColorChange_;
-    }
-
-    void SetIsSystemColorChange(bool isSystemColorChange)
-    {
-        isSystemColorChange_ = isSystemColorChange;
-    }
-
     std::shared_ptr<ArkUIPerfMonitor> GetPerfMonitor();
 
     /**
@@ -1629,8 +1617,6 @@ protected:
     bool installationFree_ = false;
     bool isSubPipeline_ = false;
     bool isReloading_ = false;
-
-    bool isSystemColorChange_ = false;
 
     bool isJsPlugin_ = false;
     bool isOpenInvisibleFreeze_ = false;
