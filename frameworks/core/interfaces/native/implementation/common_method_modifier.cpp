@@ -1793,7 +1793,7 @@ void Width0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto result = Converter::OptConvert<CalcDimension>(*value);
+    auto result = value ? Converter::OptConvert<CalcDimension>(*value) : std::nullopt;
     Validator::ValidateNonNegative(result);
     if (AceType::TypeId(frameNode) == CounterNode::TypeId()) {
         if (!result) {
@@ -1822,7 +1822,7 @@ void Height0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto result = Converter::OptConvert<CalcDimension>(*value);
+    auto result = value ? Converter::OptConvert<CalcDimension>(*value) : std::nullopt;
     Validator::ValidateNonNegative(result);
     if (AceType::TypeId(frameNode) == CounterNode::TypeId()) {
         if (!result) {
@@ -4279,11 +4279,8 @@ void IdImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto id = Converter::OptConvert<std::string>(*value);
-    if ((!id) || id->empty()) {
-        // TODO: Reset value
-        return;
-    }
+    auto id = value ? Converter::OptConvert<std::string>(*value) : std::nullopt;
+    CHECK_EQUAL_VOID(id.has_value(), false);
     ViewAbstract::SetInspectorId(frameNode, *id);
 }
 void GeometryTransition0Impl(Ark_NativePointer node,
