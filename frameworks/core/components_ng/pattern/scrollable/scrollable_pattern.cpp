@@ -4203,7 +4203,7 @@ void ScrollablePattern::GetRepeatCountInfo(
             auto repeatRealCount = repeat2->FrameCount();
             auto repeatVirtualCount =
                 (repeat2->GetTotalCount() <= INT_MAX) ? static_cast<int32_t>(repeat2->GetTotalCount()) : INT_MAX;
-            if (repeatVirtualCount > static_cast<uint32_t>(repeatRealCount) && firstRepeatCount == 0) {
+            if (repeatVirtualCount > repeatRealCount && firstRepeatCount == 0) {
                 firstRepeatCount = totalChildCount + repeatRealCount;
             }
             repeatDifference += repeatVirtualCount - repeatRealCount;
