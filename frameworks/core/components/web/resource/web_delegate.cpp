@@ -6378,6 +6378,13 @@ void WebDelegate::ChangeVisibilityOfQuickMenu()
     webPattern->ChangeVisibilityOfQuickMenu();
 }
 
+bool WebDelegate::ChangeVisibilityOfQuickMenuV2()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    return webPattern->ChangeVisibilityOfQuickMenuV2();
+}
+
 void WebDelegate::OnQuickMenuDismissed()
 {
 #ifdef NG_BUILD

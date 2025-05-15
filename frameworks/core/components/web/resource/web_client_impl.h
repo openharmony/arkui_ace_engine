@@ -184,6 +184,7 @@ public:
     void OnQuickMenuDismissed() override;
     void HideHandleAndQuickMenuIfNecessary(bool hide) override;
     void ChangeVisibilityOfQuickMenu() override;
+    bool ChangeVisibilityOfQuickMenuV2() override;
     void OnTouchSelectionChanged(
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,

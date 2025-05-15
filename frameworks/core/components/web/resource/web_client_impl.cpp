@@ -743,6 +743,14 @@ void WebClientImpl::ChangeVisibilityOfQuickMenu()
     delegate->ChangeVisibilityOfQuickMenu();
 }
 
+bool WebClientImpl::ChangeVisibilityOfQuickMenuV2()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+    return delegate->ChangeVisibilityOfQuickMenuV2();
+}
+
 void WebClientImpl::OnQuickMenuDismissed()
 {
     auto delegate = webDelegate_.Upgrade();

@@ -518,6 +518,7 @@ public:
     void OnQuickMenuDismissed();
     void HideHandleAndQuickMenuIfNecessary(bool hide, bool isScroll = false);
     void ChangeVisibilityOfQuickMenu();
+    bool ChangeVisibilityOfQuickMenuV2();
     bool IsQuickMenuShow();
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,

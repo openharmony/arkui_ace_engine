@@ -4088,6 +4088,15 @@ void WebPattern::ChangeVisibilityOfQuickMenu()
     webSelectOverlay_->ChangeVisibilityOfQuickMenu();
 }
 
+bool WebPattern::ChangeVisibilityOfQuickMenuV2()
+{
+    if (webSelectOverlay_ && webSelectOverlay_->IsShowHandle()) {
+        webSelectOverlay_->ChangeVisibilityOfQuickMenu();
+        return true;
+    }
+    return false;
+}
+
 bool WebPattern::IsQuickMenuShow()
 {
     CHECK_NULL_RETURN(webSelectOverlay_, false);
