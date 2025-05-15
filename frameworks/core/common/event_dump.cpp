@@ -291,6 +291,25 @@ void EventTreeRecord::AddGestureProcedure(uint64_t id, const TouchEvent& point, 
     iter->second->AddProcedure(procedure, extraInfo, state, disposal, timestamp);
 }
 
+void EventTreeRecord::AddGestureProcedure(uint64_t id, const AxisEvent& event, const std::string& extraInfo,
+    const std::string& state, const std::string& disposal, int64_t timestamp)
+{
+    if (eventTreeList.empty()) {
+        return;
+    }
+    auto& gestureMap = eventTreeList.back().gestureMap;
+    auto iter = gestureMap.find(id);
+    if (iter == gestureMap.end()) {
+        return;
+    }
+
+    if (event.action == AxisAction::UPDATE && !iter->second->CheckNeedAddMove(state, disposal)) {
+        return;
+    }
+    std::string procedure = std::string("Handle").append(GestureSnapshot::TransAxisType(event.action));
+    iter->second->AddProcedure(procedure, extraInfo, state, disposal, timestamp);
+}
+
 void EventTreeRecord::Dump(std::list<std::pair<int32_t, std::string>>& dumpList,
     int32_t depth, int32_t startNumber) const
 {
@@ -333,6 +352,9 @@ void EventTreeRecord::Dump(std::list<std::pair<int32_t, std::string>>& dumpList,
             }
         }
         ++index;
+    }
+    for (auto& item : dumpList) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
     }
 }
 

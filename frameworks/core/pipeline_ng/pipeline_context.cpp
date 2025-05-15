@@ -4020,6 +4020,9 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
             axisEventChecker_.GetPreAction());
     }
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
+    if (event.action == AxisAction::BEGIN || event.action == AxisAction::CANCEL || event.action == AxisAction::END) {
+        eventManager_->GetEventTreeRecord(EventTreeType::TOUCH).AddAxis(scaleEvent);
+    }
     auto formEventMgr = this->GetFormEventManager();
     SerializedGesture etsSerializedGesture;
     if (event.action != AxisAction::BEGIN && formEventMgr) {
@@ -4051,9 +4054,6 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
     } else {
         TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis Update");
         ResSchedReport::GetInstance().OnAxisEvent(scaleEvent);
-    }
-    if (event.action == AxisAction::BEGIN || event.action == AxisAction::CANCEL || event.action == AxisAction::END) {
-        eventManager_->GetEventTreeRecord(EventTreeType::TOUCH).AddAxis(scaleEvent);
     }
     auto mouseEvent = ConvertAxisToMouse(event);
     OnMouseMoveEventForAxisEvent(mouseEvent, node);

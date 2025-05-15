@@ -507,6 +507,22 @@ void NGGestureRecognizer::AddGestureProcedure(const TouchEvent& point,
         TransGestureDisposal(recognizer->GetGestureDisposal()));
 }
 
+void NGGestureRecognizer::AddGestureProcedure(const AxisEvent& event,
+    const RefPtr<NGGestureRecognizer>& recognizer) const
+{
+    if (!recognizer) {
+        return;
+    }
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    auto eventMgr = context->GetEventManager();
+    CHECK_NULL_VOID(eventMgr);
+    eventMgr->GetEventTreeRecord(isPostEventResult_ ? EventTreeType::POST_EVENT : EventTreeType::TOUCH)
+        .AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)),
+        event, recognizer->GetExtraInfo(), TransRefereeState(recognizer->GetRefereeState()),
+        TransGestureDisposal(recognizer->GetGestureDisposal()));
+}
+
 bool NGGestureRecognizer::SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)
 {
     if (!gestureGroup_.Invalid() && !gestureGroup.Invalid()) {
