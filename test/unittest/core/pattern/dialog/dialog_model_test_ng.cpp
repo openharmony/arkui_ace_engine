@@ -1607,12 +1607,15 @@ HWTEST_F(DialogModelTestNg, ComputeInnerLayoutSizeParam001, TestSize.Level1)
 HWTEST_F(DialogModelTestNg, IsGetExpandDisplayValidHeight001, TestSize.Level1)
 {
     auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    ASSERT_NE(dialogLayoutAlgorithm, nullptr);
     dialogLayoutAlgorithm->expandDisplay_ = true;
     dialogLayoutAlgorithm->isShowInSubWindow_ = true;
     DialogProperties props;
     auto dialog = DialogView::CreateDialogNode(props, nullptr);
-    EXPECT_FALSE(
-        dialogLayoutAlgorithm->IsGetExpandDisplayValidHeight(dialog->GetLayoutProperty<DialogLayoutProperty>()));
+    ASSERT_NE(dialog, nullptr);
+    auto dialogProp = dialog->GetLayoutProperty<DialogLayoutProperty>();
+    ASSERT_NE(dialogProp, nullptr);
+    EXPECT_FALSE(dialogLayoutAlgorithm->IsGetExpandDisplayValidHeight(dialogProp));
 }
 
 /**
