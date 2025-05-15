@@ -4296,6 +4296,14 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
     CHECK_NULL_VOID(containerPattern);
     containerPattern->ShowTitle(isShow, hasDeco, needUpdate);
     isShowTitle_ = isShow && hasDeco;
+    auto titleMgr = containerPattern->GetTitleManager();
+    if (titleMgr) {
+        if (isShowTitle_) {
+            titleMgr->UpdateTargetNodesBarMargin();
+        } else {
+            titleMgr->ResetExpandStackNode();
+        }
+    }
 }
 
 void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height)
