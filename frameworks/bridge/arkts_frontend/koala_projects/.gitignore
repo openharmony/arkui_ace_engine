@@ -20,3 +20,4 @@ interface_sdk-js
 cachegrind.out.*
 perf.data*
 **/arktsconfig-unmemoized-merged.json
+arkoala-arkts/arkui-ohos-preprocess/

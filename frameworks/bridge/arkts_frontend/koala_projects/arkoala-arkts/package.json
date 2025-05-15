@@ -107,9 +107,10 @@
         "shopping:har-arm32": "npm run user:har:arm32 --prefix shopping",
         "shopping:har-arm64": "npm run user:har:arm64 --prefix shopping",
         "shopping:har-universal": "npm run user:har:universal --prefix shopping",
-        "clean": "rimraf build",
+        "clean": "rimraf build && rimraf arkui-ohos-preprocess",
         "clean:native": "npm run clean --prefix ../arkoala/framework",
-        "clean:all": "npm run clean && npm run clean:common && npm run clean:incremental && npm run clean:interop && npm run clean:arkui-common && npm run clean:arkui-no-common && npm run clean:native && npm run clean --prefix har && npm run clean --prefix trivial/user && npm run clean:shopping",
+        "clean:arkui-ohos": "npm run clean --prefix arkui-ohos",
+        "clean:all": "npm run clean && npm run clean:common && npm run clean:incremental && npm run clean:interop && npm run clean:arkui-common && npm run clean:arkui-no-common && npm run clean:native && npm run clean --prefix har && npm run clean --prefix trivial/user && npm run clean:shopping && npm run clean:arkui-ohos",
         "perf:trivial": "npm run build:user && ACE_LIBRARY_PATH=build PANDA_HOME=../incremental/tools/panda/node_modules/@panda/sdk valgrind --tool=cachegrind --valgrind-stacksize=8000000 --main-stacksize=100000000 node build/index.js panda:TrivialApp 2>/dev/null && ls -lh cachegrind.out.* && echo 'Use cg_annotate to inspect'",
         "libarkts:clean:all": "npm run clean --prefix libarkts && npm run clean:plugins --prefix libarkts && npm run clean --prefix memo-plugin && npm run runtime:clean --prefix memo-plugin",
         "libarkts:build:all": "npm run compile --prefix libarkts && npm run compile:plugins --prefix libarkts && npm run runtime:prepare --prefix memo-plugin && npm run compile --prefix memo-plugin",
@@ -122,7 +123,7 @@
         "list-previewers": "node scripts/list-previewers.mjs",
         "build:arkoala:ohos": "npm run build:arkoala:components:ohos && npm run link:arkoala:ohos",
         "build:arkoala:components:ohos": "npm run build:incremental:inc && npm run build:interop:inc && npm run build:arkui-common:inc && npm run build:arkui-components",
-        "build:arkui-components": "npm run build:arkui-components --prefix arkui-ohos",
-        "link:arkoala:ohos": "mkdir -p build && ../incremental/tools/panda/arkts/arklink --output build/arkoala.abc -- ./arkui-ohos/build/arkui-components.abc ../arkoala/arkui-common/build/arkui-common.abc  ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc"
+        "build:arkui-components": "npm run build:arkui-components --prefix arkui-ohos-preprocess",
+        "link:arkoala:ohos": "mkdir -p build && ../incremental/tools/panda/arkts/arklink --output build/arkoala.abc -- ./arkui-ohos-preprocess/build/arkui-components.abc ../arkoala/arkui-common/build/arkui-common.abc  ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc"
     }
 }
