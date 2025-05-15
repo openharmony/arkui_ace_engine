@@ -8169,6 +8169,7 @@ void SetOnKeyEvent(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.isNumLockOn = info.GetNumLock();
         event.keyEvent.isCapsLockOn = info.GetCapsLock();
         event.keyEvent.isScrollLockOn = info.GetScrollLock();
+        event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUISyncEvent(&event);
@@ -8235,6 +8236,7 @@ void SetOnKeyEventDispatch(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.deviceId = info.GetDeviceId();
         event.keyEvent.unicode = info.GetUnicode();
         event.keyEvent.timestamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+        event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
 
         std::vector<int32_t> pressKeyCodeList;
         auto pressedKeyCodes = info.GetPressedKeyCodes();
@@ -8299,6 +8301,7 @@ void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam)
         }
         event.focusAxisEvent.pressedKeyCodes = pressKeyCodeList.data();
         event.focusAxisEvent.targetDisplayId = info.GetTargetDisplayId();
+        event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUISyncEvent(&event);
@@ -8562,6 +8565,8 @@ void SetOnTouchIntercept(ArkUINodeHandle node, void* extraParam)
         touchEvent.touchEvent.historySize = 0;
         touchEvent.touchEvent.subKind = ON_TOUCH_INTERCEPT;
         touchEvent.touchEvent.interceptResult = 0;
+        touchEvent.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+        touchEvent.touchEvent.deviceId = eventInfo.GetDeviceId();
         SendArkUISyncEvent(&touchEvent);
         return static_cast<NG::HitTestMode>(touchEvent.touchEvent.interceptResult);
     };
@@ -8651,6 +8656,7 @@ void SetOnHoverMove(ArkUINodeHandle node, void* extraParam)
         event.touchEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX();
         event.touchEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY();
         event.touchEvent.actionTouchPoint.rollAngle = info.GetRollAngle().value_or(0.0f);
+        event.touchEvent.deviceId = info.GetDeviceId();
         SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnHoverMove(frameNode, onEvent);
@@ -8757,6 +8763,8 @@ void SetOnAxisEvent(ArkUINodeHandle node, void* extraParam)
         event.axisEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX() / density;
         event.axisEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
         event.axisEvent.targetDisplayId = info.GetTargetDisplayId();
+        event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+        event.axisEvent.deviceId = info.GetDeviceId();
 
         SendArkUISyncEvent(&event);
         info.SetStopPropagation(!event.axisEvent.propagation);

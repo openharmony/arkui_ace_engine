@@ -312,6 +312,7 @@ bool FocusEventHandler::OnClick(const KeyEvent& event)
         info.SetLocalLocation(centerToNode);
         info.SetSourceDevice(event.sourceType);
         info.SetDeviceId(event.deviceId);
+        info.SetInputEventType(InputEventType::KEYBOARD);
         auto node = GetFrameNode();
         CHECK_NULL_RETURN(node, false);
         auto pipelineContext = node->GetContextRefPtr();
