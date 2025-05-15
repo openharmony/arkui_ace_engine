@@ -45,6 +45,7 @@ public:
     }
 
     static void SetUp();
+    static void SetUp(RefPtr<PipelineBase> pipelineContext);
     static void TearDown();
     static RefPtr<MockContainer> Current();
     static RefPtr<MockContainer> GetContainer(int32_t containerId);

@@ -48,7 +48,7 @@ void HandleExtraDragMoveReporting(const RefPtr<FrameNode>& frameNode, const std:
     auto touchDownPoint = actuator->GetTouchDownPoint();
     auto pointerEvent = DragPointerEvent(touchDownPoint.x, touchDownPoint.y,
         touchDownPoint.screenX, touchDownPoint.screenY);
-    dragDropManager->OnDragMove(pointerEvent, extraInfo, pipeline->GetRootElement());
+    dragDropManager->OnDragMove(pointerEvent, extraInfo);
 }
 
 void DragDropProxy::OnDragStart(
