@@ -17,6 +17,7 @@
 #include "core/components_ng/layout/layout_property.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/property/grid_property.h"
 #include "core/components_ng/property/measure_utils.h"
 
@@ -422,8 +423,19 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         MinusPaddingToSize(margin, layoutConstraint_->selfIdealSize);
         MinusPaddingToSize(margin, layoutConstraint_->parentIdealSize);
     }
+    auto host = GetHost();
+    if (host && host->GetParent() && InstanceOf<CustomMeasureLayoutNode>(host->GetParent()) &&
+        GetLayoutPolicyProperty().has_value()) {
+        if (GetLayoutPolicyProperty().value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH) ==
+            LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+            layoutConstraint_->maxSize.SetWidth(std::numeric_limits<float>::infinity());
+        }
+        if (GetLayoutPolicyProperty().value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH) ==
+            LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+            layoutConstraint_->maxSize.SetHeight(std::numeric_limits<float>::infinity());
+        }
+    }
     auto originMax = layoutConstraint_->maxSize;
-    
     CheckCalcLayoutConstraint(parentConstraint);
     CheckSelfIdealSize(originMax);
     CheckBorderAndPadding();
