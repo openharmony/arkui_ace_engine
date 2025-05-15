@@ -381,8 +381,7 @@ HWTEST_F(IndexerModifierTest, setOnSelected, TestSize.Level1)
             selectedIndex = Converter::Convert<int32_t>(param);
         };
     auto func = Converter::ArkValue<Callback_Number_Void>(checkCallback, CONTEXT_ID);
-    Opt_Callback_Number_Void optFunc;
-    optFunc.value = func;
+    auto optFunc = Converter::ArkValue<Opt_Callback_Number_Void, Callback_Number_Void>(func);
     modifier_->setOnSelected(node_, &optFunc);
     EXPECT_EQ(selectedIndex, ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE);
 
@@ -1308,9 +1307,10 @@ HWTEST_F(IndexerModifierTest, setOnSelect, TestSize.Level1)
         [](const Ark_Int32 resourceId, const Ark_Number param) {
             selectedIndex = Converter::Convert<int32_t>(param);
         };
+
     auto func = Converter::ArkValue<OnAlphabetIndexerSelectCallback>(checkCallback, CONTEXT_ID);
-    Opt_OnAlphabetIndexerSelectCallback optFunc;
-    optFunc.value = func;
+    auto optFunc = Converter::ArkValue<Opt_OnAlphabetIndexerSelectCallback,
+                                        OnAlphabetIndexerSelectCallback>(func);
     modifier_->setOnSelect(node_, &optFunc);
     EXPECT_EQ(selectedIndex, ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE);
 
@@ -1350,12 +1350,10 @@ HWTEST_F(IndexerModifierTest, setOnRequestPopupData, TestSize.Level1)
         Converter::ArkArrayHolder<Array_String> arkArrStr(expectedResults);
         CallbackHelper(cbReturn).InvokeSync(arkArrStr.ArkValue());
     };
-
-    auto arkCallback = Converter::ArkValue<OnAlphabetIndexerRequestPopupDataCallback>(nullptr, callback,
-        expectedResourceId);
-    Opt_OnAlphabetIndexerRequestPopupDataCallback optCallback;
-    optCallback.value = arkCallback;
-    modifier_->setOnRequestPopupData(node_, &optCallback);
+    auto func = Converter::ArkValue<OnAlphabetIndexerRequestPopupDataCallback>(callback, CONTEXT_ID);
+    auto optFunc = Converter::ArkValue<Opt_OnAlphabetIndexerRequestPopupDataCallback,
+                                        OnAlphabetIndexerRequestPopupDataCallback>(func);
+    modifier_->setOnRequestPopupData(node_, &optFunc);
 
     auto onRequestPopupData = eventHub->GetOnRequestPopupData();
     ASSERT_NE(onRequestPopupData, nullptr);
@@ -1380,9 +1378,10 @@ HWTEST_F(IndexerModifierTest, setOnPopupSelect, TestSize.Level1)
         [](const Ark_Int32 resourceId, const Ark_Number param) {
             selectedIndex = Converter::Convert<int32_t>(param);
         };
+
     auto func = Converter::ArkValue<OnAlphabetIndexerPopupSelectCallback>(checkCallback, CONTEXT_ID);
-    Opt_OnAlphabetIndexerPopupSelectCallback optFunc;
-    optFunc.value = func;
+    auto optFunc = Converter::ArkValue<Opt_OnAlphabetIndexerPopupSelectCallback,
+                                        OnAlphabetIndexerPopupSelectCallback>(func);
     modifier_->setOnPopupSelect(node_, &optFunc);
     EXPECT_EQ(selectedIndex, ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE);
 
