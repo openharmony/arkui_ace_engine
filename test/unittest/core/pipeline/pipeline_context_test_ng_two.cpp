@@ -1931,7 +1931,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg190, TestSize.Level1)
     ASSERT_NE(context_, nullptr);
     int64_t delayMillis = 0;
     FrameCallbackFunc frameCallbackFunc2 = nullptr;
-    FrameCallbackFunc idleCallbackFunc2 = nullptr;
+    IdleCallbackFunc idleCallbackFunc2 = nullptr;
 
     /**
      * @tc.steps2:
@@ -1943,7 +1943,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg190, TestSize.Level1)
     FrameCallbackFunc frameCallbackFunc = [](uint64_t nanoTimestamp) {
         return;
     };
-    FrameCallbackFunc idleCallbackFunc = [](uint64_t nanoTimestamp) {
+    IdleCallbackFunc idleCallbackFunc = [](uint64_t nanoTimestamp, uint32_t frameCount) {
         return;
     };
 
@@ -2011,7 +2011,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg192, TestSize.Level1)
      * @tc.steps1: initialize parameters.
      */
     ASSERT_NE(context_, nullptr);
-    FrameCallbackFunc callback = [](uint64_t nanoTimestamp) {
+    IdleCallbackFunc callback = [](uint64_t nanoTimestamp, uint32_t frameCount) {
         return;
     };
     /**

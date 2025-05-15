@@ -4804,7 +4804,7 @@ void PipelineContext::AddPredictTask(PredictTask&& task)
     RequestFrame();
 }
 
-void PipelineContext::AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, FrameCallbackFunc&& idleCallbackFunc,
+void PipelineContext::AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, IdleCallbackFunc&& idleCallbackFunc,
     int64_t delayMillis)
 {
     if (delayMillis <= 0) {
@@ -4835,7 +4835,7 @@ void PipelineContext::AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, Fr
             [weak = WeakClaim(this), callbackFunc = std::move(idleCallbackFunc)]() -> void {
                 auto pipeline = weak.Upgrade();
                 CHECK_NULL_VOID(pipeline);
-                auto callback = const_cast<FrameCallbackFunc&>(callbackFunc);
+                auto callback = const_cast<IdleCallbackFunc&>(callbackFunc);
                 pipeline->idleCallbackFuncs_.emplace_back(std::move(callback));
                 pipeline->RequestFrame();
             },
@@ -4861,8 +4861,8 @@ void PipelineContext::TriggerIdleCallback(int64_t deadline)
         return;
     }
     decltype(idleCallbackFuncs_) tasks(std::move(idleCallbackFuncs_));
-    for (const auto& idleCallbackFunc : tasks) {
-        idleCallbackFunc(deadline - currentTime);
+    for (const auto& IdleCallbackFunc : tasks) {
+        IdleCallbackFunc(deadline - currentTime, GetFrameCount());
         currentTime = GetSysTimestamp();
     }
 }

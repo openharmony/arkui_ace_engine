@@ -9032,7 +9032,7 @@ ArkUINativeModuleValue CommonBridge::PostFrameCallback(ArkUIRuntimeCallInfo* run
     }
 
     FrameCallbackFunc onFrameCallbackFunc = nullptr;
-    FrameCallbackFunc onIdleCallbackFunc = nullptr;
+    FrameCallbackFuncFromCAPI onIdleCallbackFunc = nullptr;
 
     if (frameCallback->Get(vm, "onFrame")->IsFunction(vm)) {
         onFrameCallbackFunc = [vm, frameCallbackObj =
@@ -9048,7 +9048,7 @@ ArkUINativeModuleValue CommonBridge::PostFrameCallback(ArkUIRuntimeCallInfo* run
 
     if (frameCallback->Get(vm, "onIdle")->IsFunction(vm)) {
         onIdleCallbackFunc = [vm, frameCallbackObj =
-            panda::CopyableGlobal(vm, frameCallback)](int64_t nanoTimestamp) -> void {
+            panda::CopyableGlobal(vm, frameCallback)](int64_t nanoTimestamp, int32_t frameCount) -> void {
             LocalScope scope(vm);
             Local<FunctionRef> onIdleFunc = frameCallbackObj->Get(vm, "onIdle");
 

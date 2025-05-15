@@ -1822,6 +1822,25 @@ ArkUI_Int32 PostFrameCallback(ArkUI_Int32 instanceId, void* userData,
     return ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_Int32 PostIdleCallback(ArkUI_Int32 instanceId, void* userData,
+    void (*callback)(uint64_t nanoTimeLeft, uint32_t frameCount, void* userData))
+{
+    auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
+    if (pipeline == nullptr) {
+        LOGW("Cannot find pipeline context by contextHandle ID");
+        return ARKUI_ERROR_CODE_UI_CONTEXT_INVALID;
+    }
+    if (!pipeline->CheckThreadSafe()) {
+        return ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD;
+    }
+    auto onidleCallbackFuncFromCAPI = [userData, callback](uint64_t nanoTimeLeft, uint32_t frameCount) -> void {
+        callback(nanoTimeLeft, frameCount, userData);
+    };
+
+    pipeline->AddFrameCallback(nullptr, std::move(onidleCallbackFuncFromCAPI), 0);
+    return ERROR_CODE_NO_ERROR;
+}
+
 const ArkUIBasicAPI* GetBasicAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -1851,6 +1870,7 @@ const ArkUIBasicAPI* GetBasicAPI()
         .convertLengthMetricsUnit = ConvertLengthMetricsUnit,
         .getContextByNode = GetContextByNode,
         .postFrameCallback = PostFrameCallback,
+        .postIdleCallback = PostIdleCallback,
     };
     CHECK_INITIALIZED_FIELDS_END(basicImpl, 0, 0, 0); // don't move this line
     return &basicImpl;

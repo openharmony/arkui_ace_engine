@@ -6208,6 +6208,9 @@ struct ArkUIBasicAPI {
 
     ArkUI_Int32 (*postFrameCallback)(ArkUI_Int32 instanceId, void* userData,
         void (*callback)(uint64_t nanoTimestamp, uint32_t frameCount, void* userData));
+
+    ArkUI_Int32 (*postIdleCallback)(ArkUI_Int32 instanceId, void* userData,
+    void (*callback)(uint64_t nanoTimeLeft, uint32_t frameCount, void* userData));
 };
 
 struct ArkUIDialogAPI {
