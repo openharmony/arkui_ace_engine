@@ -6172,6 +6172,14 @@ void ViewAbstract::SetDisableDataPrefetch(FrameNode* frameNode, bool disableData
     eventHub->SetDisableDataPrefetch(disableDataPrefetch);
 }
 
+void ViewAbstract::SetOnTouchTestFunc(FrameNode* frameNode, NG::OnChildTouchTestFunc&& onChildTouchTest)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnTouchTestFunc(std::move(onChildTouchTest));
+}
+
 void ViewAbstract::SetJSFrameNodeOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart)
 {
     CHECK_NULL_VOID(frameNode);
