@@ -69,7 +69,7 @@ struct MenuParam {
     bool hasPreviewTransitionEffect = false;
     RefPtr<NG::ChainedTransitionEffect> previewTransition;
     MenuType type = MenuType::MENU;
-    std::optional<MenuPreviewMode> previewMode;
+    MenuPreviewMode previewMode = MenuPreviewMode::NONE;
     MenuPreviewAnimationOptions previewAnimationOptions;
     bool isShowHoverImage = false;
     MenuPreviewAnimationOptions hoverImageAnimationOptions;
