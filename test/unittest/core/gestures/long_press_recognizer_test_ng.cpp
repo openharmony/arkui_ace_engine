@@ -321,7 +321,7 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerTest005, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     std::unique_ptr<GestureEventFunc> onAction;
-    longPressRecognizer->SendCallbackMsg(onAction, isRepeat);
+    longPressRecognizer->SendCallbackMsg(onAction, isRepeat, GestureCallbackType::START);
     EXPECT_EQ(longPressRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -330,7 +330,7 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerTest005, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>();
-    longPressRecognizer->SendCallbackMsg(onAction, isRepeat);
+    longPressRecognizer->SendCallbackMsg(onAction, isRepeat, GestureCallbackType::START);
     EXPECT_EQ(longPressRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -339,7 +339,7 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerTest005, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
-    longPressRecognizer->SendCallbackMsg(onAction, isRepeat);
+    longPressRecognizer->SendCallbackMsg(onAction, isRepeat, GestureCallbackType::START);
     EXPECT_EQ(longPressRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -349,7 +349,7 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerTest005, TestSize.Level1)
      */
     TouchEvent touchEvent;
     longPressRecognizer->touchPoints_[touchEvent.id] = touchEvent;
-    longPressRecognizer->SendCallbackMsg(onAction, isRepeat);
+    longPressRecognizer->SendCallbackMsg(onAction, isRepeat, GestureCallbackType::START);
     EXPECT_EQ(longPressRecognizer->touchPoints_.size(), 1);
 
     /**
@@ -360,7 +360,7 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerTest005, TestSize.Level1)
     touchEvent.tiltX = 0.0f;
     touchEvent.tiltY = 0.0f;
     longPressRecognizer->touchPoints_[touchEvent.id] = touchEvent;
-    longPressRecognizer->SendCallbackMsg(onAction, isRepeat);
+    longPressRecognizer->SendCallbackMsg(onAction, isRepeat, GestureCallbackType::START);
     EXPECT_EQ(longPressRecognizer->touchPoints_.size(), 1);
 }
 
@@ -651,7 +651,7 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerSendCallbackMsgTest001, T
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
-    longPressRecognizer->SendCallbackMsg(onAction, true);
+    longPressRecognizer->SendCallbackMsg(onAction, true, GestureCallbackType::START);
     EXPECT_EQ(longPressRecognizer->touchPoints_.size(), 0);
 }
 
@@ -1319,7 +1319,7 @@ HWTEST_F(LongPressRecognizerTestNg, SetOnActionCancelTest001, TestSize.Level1)
     longPressRecognizer->touchPoints_[touchEvent.id] = touchEvent;
     longPressRecognizer->refereeState_ = RefereeState::SUCCEED;
     longPressRecognizer->HandleTouchCancelEvent(touchEvent);
-    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    EXPECT_EQ(unknownPropertyValue, 0);
     EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::READY);
 }
 
@@ -1360,7 +1360,7 @@ HWTEST_F(LongPressRecognizerTestNg, SetOnActionCancelTest002, TestSize.Level1)
     longPressRecognizer->duration_ = 0;
     longPressRecognizer->refereeState_ = RefereeState::SUCCEED;
     auto result = longPressRecognizer->ReconcileFrom(longPressRecognizerPtr);
-    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    EXPECT_EQ(unknownPropertyValue, 0);
     EXPECT_EQ(result, false);
 }
 
