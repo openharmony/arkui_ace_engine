@@ -326,6 +326,8 @@ public:
 
     virtual void NotifyMenuShow(bool isMenuShow) {}
 
+    void CallTimerCallback(const RefPtr<FrameNode>& frameNode);
+    void SetExecTimerCallback(bool isExecCallback);
 private:
     void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);
     void UpdatePreviewOptionDefaultAttr(const RefPtr<FrameNode>& frameNode);
@@ -378,6 +380,7 @@ private:
     bool isNewFwk_ = false;
     bool isRestartDrag_ = false;
     bool isForDragDrop_ = false;
+    bool isExecCallback_ = false;
 };
 
 } // namespace OHOS::Ace::NG

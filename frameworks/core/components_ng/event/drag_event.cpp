@@ -205,10 +205,30 @@ void DragEventActuator::HandleOnPanActionCancel()
     }
 }
 
+void DragEventActuator::SetExecTimerCallback(bool isExecCallback)
+{
+    isExecCallback_ = isExecCallback;
+}
+
 void DragEventActuator::InitDragDropStatusToIdle()
 {
+    isExecCallback_ = false;
     isDragUserReject_ = false;
     isThumbnailCallbackTriggered_ = false;
+}
+
+void DragEventActuator::CallTimerCallback(const RefPtr<FrameNode>& frameNode)
+{
+    if (!isExecCallback_) {
+        CHECK_NULL_VOID(frameNode);
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        RefPtr<TaskExecutor> taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIPreDragLongPressTimer");
+        DragEventActuator::ExecutePreDragAction(PreDragStatus::PREPARING_FOR_DRAG_DETECTION, frameNode);
+        isExecCallback_ = true;
+    }
 }
 
 void DragEventActuator::GetThumbnailPixelMap(bool isSync)
@@ -607,6 +627,11 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 500ms.");
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
+        auto gestureHub = actuator->gestureEventHub_.Upgrade();
+        CHECK_NULL_VOID(gestureHub);
+        auto frameNode = gestureHub->GetFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        actuator->CallTimerCallback(frameNode);
         actuator->SetIsNotInPreviewState(true);
         actuator->TryTriggerThumbnailCallback();
         if (actuator->userCallback_ && !actuator->isDragPrepareFinish_) {
@@ -621,10 +646,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto dragDropManager = pipelineContext->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
         dragDropManager->SetIsShowBadgeAnimation(true);
-        auto gestureHub = actuator->gestureEventHub_.Upgrade();
-        CHECK_NULL_VOID(gestureHub);
-        auto frameNode = gestureHub->GetFrameNode();
-        CHECK_NULL_VOID(frameNode);
         DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(frameNode);
         if (!gestureHub->GetTextDraggable()) {
             // For the drag initiacating from long press gesture, the preview option set by the modifier
@@ -644,6 +665,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(gestureHub);
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
+        actuator->SetExecTimerCallback(true);
         if (!gestureHub->GetTextDraggable()) {
             DragEventActuator::ExecutePreDragAction(PreDragStatus::PREPARING_FOR_DRAG_DETECTION, frameNode);
         }
