@@ -2407,7 +2407,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionListForTouch03, TestSize.Lev
 
     auto paintRect = frameNode->renderContext_->GetPaintRectWithoutTransform();
     auto responseRegionList = frameNode->GetResponseRegionListForTouch(paintRect);
-    EXPECT_FALSE(responseRegionList.empty());
+    EXPECT_TRUE(responseRegionList.empty());
 }
 
 /**
@@ -2481,6 +2481,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionListByTraversal01, TestSize.
     std::vector<RectF> responseRegionList;
     responseRegionList.emplace_back(responseRect);
     auto context = MockPipelineContext::GetCurrentContext();
-    frameNode->GetResponseRegionListByTraversal(responseRegionList);
+    frameNode->GetResponseRegionListByTraversal(responseRegionList, responseRect);
 }
 } // namespace OHOS::Ace::NG
