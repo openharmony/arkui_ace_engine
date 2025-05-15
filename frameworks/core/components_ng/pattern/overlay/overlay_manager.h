@@ -826,6 +826,8 @@ private:
     void OnDialogCloseEvent(const RefPtr<FrameNode>& node);
 
     void CloseDialogInner(const RefPtr<FrameNode>& dialogNode);
+    RefPtr<PipelineContext> GetMainPipelineContext(int32_t containerId);
+    RefPtr<PipelineContext> GetMainPipelineContext(const RefPtr<FrameNode>& node);
 
     void SetPreviewFirstShow(const RefPtr<FrameNode>& menu);
     void ShowMenuAnimation(const RefPtr<FrameNode>& menu);
