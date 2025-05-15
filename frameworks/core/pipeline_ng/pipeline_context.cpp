@@ -582,7 +582,7 @@ void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
     std::unordered_map<int, DragPointerEvent> &idToPoints,
     const RefPtr<FrameNode>& node)
 {
-    std::map<RefPtr<FrameNode>, std::vector<DragPointerEvent>> nodeToPointEvent;
+    std::map<WeakPtr<FrameNode>, std::vector<DragPointerEvent>> nodeToPointEvent;
     std::list<DragPointerEvent> dragPoint;
     for (const auto& iter : idToPoints) {
         auto lastDispatchTime = eventManager_->GetLastDispatchTime();
@@ -3776,7 +3776,7 @@ void PipelineContext::OnFlushMouseEvent(
     std::unordered_map<int, MouseEvent> idToMousePoints;
     bool needInterpolation = true;
     std::unordered_map<int32_t, MouseEvent> newIdMousePoints;
-    std::map<RefPtr<FrameNode>, std::vector<MouseEvent>> nodeToMousePoints;
+    std::map<WeakPtr<FrameNode>, std::vector<MouseEvent>> nodeToMousePoints;
     for (auto iter = mouseEvents.rbegin(); iter != mouseEvents.rend(); ++iter) {
         auto scaleEvent = (*iter).CreateScaleEvent(GetViewScale());
         idToMousePoints.emplace(scaleEvent.id, scaleEvent);
