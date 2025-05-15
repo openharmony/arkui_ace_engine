@@ -1090,8 +1090,7 @@ HWTEST_F(IndexerModifierTest, setItemSize, TestSize.Level1)
     EXPECT_EQ(checkVal, ATTRIBUTE_ITEM_SIZE_INITIAL_VALUE);
 
     for (const auto& [size, expectVal] : ITEM_SIZE_TEST_PLAN) {
-        Opt_Union_String_Number optSize;
-        optSize.value = size;
+        auto optSize = ArkValue<Opt_Union_String_Number>(size);
         modifier_->setItemSize(node_, &optSize);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_ITEM_SIZE);
         EXPECT_EQ(checkVal, expectVal);
@@ -1267,8 +1266,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setAlignStyle, TestSize.Level1)
 
     const auto& arkOffset = Converter::ArkValue<Opt_Length>(Ark_Empty());
     for (const auto& [value, expectVal] : ALIGN_TEST_PLAN) {
-        Opt_IndexerAlign optValue;
-        optValue.value = value;
+        auto optValue = ArkValue<Opt_IndexerAlign>(value);
         modifier_->setAlignStyle(node_, &optValue, &arkOffset);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_ALIGN_STYLE);
         EXPECT_EQ(checkVal, expectVal);
@@ -1287,8 +1285,7 @@ HWTEST_F(IndexerModifierTest, setAlignStyleOffset, TestSize.Level1)
     EXPECT_EQ(checkVal, ATTRIBUTE_POPUP_HORIZONTAL_SPACE_DEFAULT_VALUE);
 
     for (const auto& [value, expectVal] : POPUP_HORIZONTAL_OFFSET_TEST_PLAN) {
-        Opt_IndexerAlign optValue;
-        optValue.value = ARK_INDEXER_ALIGN_START;
+        auto optValue = ArkValue<Opt_IndexerAlign>(ARK_INDEXER_ALIGN_START);
         modifier_->setAlignStyle(node_, &optValue, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_HORIZONTAL_SPACE);
         EXPECT_EQ(checkVal, expectVal);
@@ -1409,8 +1406,7 @@ HWTEST_F(IndexerModifierTest, setSelected, TestSize.Level1)
     EXPECT_EQ(checkVal, ATTRIBUTE_SELECTED_DEFAULT_VALUE);
 
     for (const auto& [value, expectVal] : SELECTED_TEST_PLAN) {
-        Opt_Number optValue;
-        optValue.value = value;
+        auto optValue = Converter::ArkValue<Opt_Number>(value);
         modifier_->setSelected(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_SELECTED);
         EXPECT_EQ(checkVal, expectVal);
@@ -1435,8 +1431,7 @@ HWTEST_F(IndexerModifierTest, setPopupPositionX, TestSize.Level1)
             Converter::ArkValue<Opt_Length>(value),
             Converter::ArkValue<Opt_Length>(Ark_Empty())
         };
-        Opt_Position optPosition;
-        optPosition.value = position;
+        auto optPosition = Converter::ArkValue<Opt_Position>(position);
         modifier_->setPopupPosition(node_, &optPosition);
 
         fullJson = GetJsonValue(node_);
@@ -1464,8 +1459,7 @@ HWTEST_F(IndexerModifierTest, setPopupPositionY, TestSize.Level1)
             Converter::ArkValue<Opt_Length>(Ark_Empty()),
             Converter::ArkValue<Opt_Length>(value)
         };
-        Opt_Position optPosition;
-        optPosition.value = position;
+        auto optPosition = Converter::ArkValue<Opt_Position>(position);
         modifier_->setPopupPosition(node_, &optPosition);
 
         fullJson = GetJsonValue(node_);
@@ -1511,8 +1505,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setPopupItemBorderRadius, TestSize.Level1
     EXPECT_EQ(checkVal, ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_VALUE);
 
     for (const auto& [value, expectVal] : BORDER_RADIUS_TEST_PLAN) {
-        Opt_Number optValue;
-        optValue.value = value;
+        auto optValue = Converter::ArkValue<Opt_Number>(value);
         modifier_->setPopupItemBorderRadius(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_ITEM_BORDER_RADIUS);
         EXPECT_EQ(checkVal, expectVal);
@@ -1533,8 +1526,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setItemBorderRadius, TestSize.Level1)
     EXPECT_EQ(checkVal, ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_VALUE);
 
     for (const auto& [value, expectVal] : BORDER_RADIUS_TEST_PLAN) {
-        Opt_Number optValue;
-        optValue.value = value;
+        auto optValue = Converter::ArkValue<Opt_Number>(value);
         modifier_->setItemBorderRadius(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_ITEM_BORDER_RADIUS);
         EXPECT_EQ(checkVal, expectVal);
@@ -1555,8 +1547,7 @@ HWTEST_F(IndexerModifierTest, setPopupBackgroundBlurStyle, TestSize.Level1)
     EXPECT_EQ(checkVal, ATTRIBUTE_POPUP_BACKGROUND_BLUR_STYLE_DEFAULT_VALUE);
 
     for (const auto& [value, expectVal] : BLUR_STYLE_TEST_PLAN) {
-        Opt_BlurStyle optValue;
-        optValue.value = value;
+        auto optValue = Converter::ArkValue<Opt_BlurStyle>(value);
         modifier_->setPopupBackgroundBlurStyle(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_BACKGROUND_BLUR_STYLE);
         EXPECT_EQ(checkVal, expectVal);
@@ -1612,13 +1603,12 @@ HWTEST_F(IndexerModifierTest, setEnableHapticFeedback, TestSize.Level1)
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME_HAPTIC_FEEDBACK);
     EXPECT_EQ(checkInitial, DEFAULT_VALUE);
 
-    Opt_Boolean optValue;
-    optValue.value = false;
+    auto optValue = Converter::ArkValue<Opt_Boolean>(false);
     modifier_->setEnableHapticFeedback(node_, &optValue);
     auto checkVal2 = GetAttrValue<std::string>(node_, PROP_NAME_HAPTIC_FEEDBACK);
     EXPECT_EQ(checkVal2, EXPECTED_FALSE);
 
-    optValue.value = true;
+    optValue = Converter::ArkValue<Opt_Boolean>(true);
     modifier_->setEnableHapticFeedback(node_, &optValue);
 
     auto checkVal3 = GetAttrValue<std::string>(node_, PROP_NAME_HAPTIC_FEEDBACK);
