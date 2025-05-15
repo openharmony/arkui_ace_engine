@@ -77,9 +77,9 @@ HWTEST_F(CanvasModifierTest, setOnReadyTest, TestSize.Level1)
             };
         };
     auto func = Converter::ArkValue<VoidCallback>(checkCallback, contextId);
-
+    auto optFunk = Converter::ArkValue<Opt_VoidCallback>(func);
     EXPECT_FALSE(checkEvent.has_value());
-    modifier_->setOnReady(node_, &func);
+    modifier_->setOnReady(node_, &optFunk);
     eventHub->FireReadyEvent();
     EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, contextId);
@@ -99,8 +99,8 @@ HWTEST_F(CanvasModifierTest, setEnableAnalyzerTestValidValues, TestSize.Level1)
     EXPECT_EQ(initialValue, ATTRIBUTE_ENABLE_ANALYZER_DEFAULT_VALUE);
 
     for (auto testValue : BOOL_TEST_PLAN) {
-        Ark_Boolean inputValue = Converter::ArkValue<Ark_Boolean>(testValue.first);
-        modifier_->setEnableAnalyzer(node_, inputValue);
+        auto inputValue = Converter::ArkValue<Opt_Boolean>(testValue.first);
+        modifier_->setEnableAnalyzer(node_, &inputValue);
 
         auto fullJson = GetJsonValue(node_);
         auto canvasObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_CANVAS_NAME);
