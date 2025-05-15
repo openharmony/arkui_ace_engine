@@ -22,7 +22,6 @@
 #include "base/log/log.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace::Framework {
@@ -73,13 +72,6 @@ std::vector<JSRef<JSVal>> ConvertToJSValues(Args... args)
 template<class T>
 bool ConvertFromJSValueNG(const JSRef<JSVal>& jsValue, T& result)
 {
-    RefPtr<ResourceObject> resObj;
-    return ConvertFromJSValueNG(jsValue, result, resObj);
-}
-
-template<class T>
-bool ConvertFromJSValueNG(const JSRef<JSVal>& jsValue, T& result, RefPtr<ResourceObject>& resObj)
-{
     if constexpr (std::is_same_v<T, bool>) {
         if (jsValue->IsBoolean()) {
             result = jsValue->ToBoolean();
@@ -88,7 +80,7 @@ bool ConvertFromJSValueNG(const JSRef<JSVal>& jsValue, T& result, RefPtr<Resourc
         result = false;
     } else if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
         double value;
-        if (JSViewAbstract::ParseJsDouble(jsValue, value, resObj)) {
+        if (JSViewAbstract::ParseJsDouble(jsValue, value)) {
             result = static_cast<T>(value);
             return true;
         }
@@ -100,15 +92,15 @@ bool ConvertFromJSValueNG(const JSRef<JSVal>& jsValue, T& result, RefPtr<Resourc
         }
     } else if constexpr (std::is_same_v<T, Dimension>) {
         CalcDimension calc;
-        bool ret = JSViewAbstract::ParseJsDimensionVpNG(jsValue, calc, resObj);
+        bool ret = JSViewAbstract::ParseJsDimensionVpNG(jsValue, calc);
         result = calc;
         return ret;
     } else if constexpr (std::is_same_v<T, CalcDimension>) {
-        return JSViewAbstract::ParseJsDimensionVpNG(jsValue, result, resObj);
+        return JSViewAbstract::ParseJsDimensionVpNG(jsValue, result);
     } else if constexpr (std::is_same_v<T, NG::CalcLength>) {
         return JSViewAbstract::ParseJsLengthVpNG(jsValue, result);
     } else if constexpr (std::is_same_v<T, Color>) {
-        return JSViewAbstract::ParseJsColor(jsValue, result, resObj);
+        return JSViewAbstract::ParseJsColor(jsValue, result);
     }
     return false;
 }
@@ -116,13 +108,6 @@ bool ConvertFromJSValueNG(const JSRef<JSVal>& jsValue, T& result, RefPtr<Resourc
 template<class T>
 bool ConvertFromJSValue(const JSRef<JSVal>& jsValue, T& result)
 {
-    RefPtr<ResourceObject> resObj;
-    return ConvertFromJSValue(jsValue, result, resObj);
-}
-
-template<class T>
-bool ConvertFromJSValue(const JSRef<JSVal>& jsValue, T& result, RefPtr<ResourceObject>& resObj)
-{
     if constexpr (std::is_same_v<T, bool>) {
         if (jsValue->IsBoolean()) {
             result = jsValue->ToBoolean();
@@ -131,7 +116,7 @@ bool ConvertFromJSValue(const JSRef<JSVal>& jsValue, T& result, RefPtr<ResourceO
         result = false;
     } else if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
         double value;
-        if (JSViewAbstract::ParseJsDouble(jsValue, value, resObj)) {
+        if (JSViewAbstract::ParseJsDouble(jsValue, value)) {
             result = static_cast<T>(value);
             return true;
         }
@@ -143,13 +128,13 @@ bool ConvertFromJSValue(const JSRef<JSVal>& jsValue, T& result, RefPtr<ResourceO
         }
     } else if constexpr (std::is_same_v<T, Dimension>) {
         CalcDimension calc;
-        bool ret = JSViewAbstract::ParseJsDimensionVp(jsValue, calc, resObj);
+        bool ret = JSViewAbstract::ParseJsDimensionVp(jsValue, calc);
         result = calc;
         return ret;
     } else if constexpr (std::is_same_v<T, CalcDimension>) {
-        return JSViewAbstract::ParseJsDimensionVp(jsValue, result, resObj);
+        return JSViewAbstract::ParseJsDimensionVp(jsValue, result);
     } else if constexpr (std::is_same_v<T, Color>) {
-        return JSViewAbstract::ParseJsColor(jsValue, result, resObj);
+        return JSViewAbstract::ParseJsColor(jsValue, result);
     }
     return false;
 }

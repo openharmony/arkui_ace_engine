@@ -361,7 +361,6 @@
       vtable?for?OHOS::Ace::NG::OffscreenCanvasPattern;
       vtable?for?OHOS::Ace::NG::DatePickerDialogModelNG;
       vtable?for?OHOS::Ace::NG::TimePickerModelNG;
-      vtable?for?OHOS::Ace::NG::Pattern;
 
       VTT?for?OHOS::Ace::Animator;
       VTT?for?OHOS::Ace::Container;
@@ -390,7 +389,6 @@
       VTT?for?OHOS::Ace::NG::ParallelPagePattern;
       VTT?for?OHOS::Ace::NG::ViewAdvancedRegister;
       VTT?for?OHOS::Ace::NG::ContainerModalView;
-      VTT?for?OHOS::Ace::NG::Pattern;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;

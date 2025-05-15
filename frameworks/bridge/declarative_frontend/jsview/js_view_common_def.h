@@ -45,9 +45,6 @@ std::vector<JSRef<JSVal>> ConvertToJSValues(Args... args);
 template<class T>
 bool ConvertFromJSValue(const JSRef<JSVal>& jsValue, T& result);
 
-template<class T>
-bool ConvertFromJSValue(const JSRef<JSVal>& jsValue, T& result, RefPtr<ResourceObject>& resObj);
-
 template<class T, size_t N>
 bool ConvertFromJSValue(const JSRef<JSVal>& jsValue, const T (&enumValues)[N], T& result);
 
