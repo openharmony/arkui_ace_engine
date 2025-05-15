@@ -276,8 +276,8 @@ void DisposeNode(ArkUI_NodeHandle nativePtr)
     // already check in entry point.
     const auto* impl = GetFullImpl();
     impl->getBasicAPI()->disposeNode(nativePtr->uiNodeHandle);
-    DisposeNativeSource(nativePtr);
     RemoveNodeSafely(nativePtr);
+    DisposeNativeSource(nativePtr);
     delete nativePtr;
     nativePtr = nullptr;
 }
