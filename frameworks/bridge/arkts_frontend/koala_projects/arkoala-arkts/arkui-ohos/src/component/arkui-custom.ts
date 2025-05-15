@@ -26,11 +26,13 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { PanDirection, SwipeDirection, GestureMode, Callback_GestureEvent_Void, GestureEvent, GestureEventInternal, GestureMask } from "./gesture"
 import { ResourceStr, Font, ResourceColor } from "./units"
 import { Resource } from "global/resource"
-import { SourceTool, AnimateParam, SheetOptions } from "./common"
+import { SourceTool, AnimateParam, SheetOptions, KeyEvent } from "./common"
 import { Callback_Void } from "./abilityComponent"
 import { TextPickerDialogOptions } from "./textPicker"
 import { FrameNode, FrameNodeInternal } from "./arkui-framenode"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { Frame } from "./arkui-graphics"
+
 export class BaseContextInternal {
     public static fromPtr(ptr: KPointer): BaseContext {
         const obj : BaseContext = new BaseContext()
@@ -435,16 +437,7 @@ export class GestureOps {
         ArkUIGeneratedNativeModule._GestureOps_clearGestures(node)
     }
 }
-export class FocusController {
-    public static requestFocus(key: string): void {
-        const key_casted = key as (string)
-        FocusController.requestFocus_serialize(key_casted)
-        return
-    }
-    private static requestFocus_serialize(key: string): void {
-        ArkUIGeneratedNativeModule._FocusController_requestFocus(key)
-    }
-}
+
 export class ComponentContentInternal {
     public static fromPtr(ptr: KPointer): ComponentContent {
         const obj : ComponentContent = new ComponentContent()
@@ -947,6 +940,44 @@ export class StateStylesOps {
         thisSerializer.holdAndWriteCallback(stateStyleChange)
         ArkUIGeneratedNativeModule._StateStylesOps_onStateStyleChange(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+}
+
+export class UIContextAtomicServiceBar {
+    public static getBarRect(): Frame {
+        return UIContextAtomicServiceBar.getBarRect_serialize()
+    }
+    private static getBarRect_serialize(): Frame {
+        const retval  = ArkUIGeneratedNativeModule._UIContextAtomicServiceBar_getBarRect()
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        const returnResult : Frame = retvalDeserializer.readFrame()
+        return returnResult
+    }
+}
+
+export class UIContextDispatchKeyEvent {
+    public static dispatchKeyEvent(node: number | string, event: KeyEvent): boolean {
+        const node_casted = node as (number | string)
+        const event_casted = event as (KeyEvent)
+        return UIContextDispatchKeyEvent.dispatchKeyEvent_serialize(node_casted, event_casted)
+    }
+    private static dispatchKeyEvent_serialize(node: number | string, event: KeyEvent): boolean {
+        const thisSerializer : Serializer = Serializer.hold()
+        let node_type : int32 = RuntimeType.UNDEFINED
+        node_type = runtimeType(node)
+        if (RuntimeType.NUMBER == node_type) {
+            thisSerializer.writeInt8(0 as int32)
+            const node_0  = node as number
+            thisSerializer.writeNumber(node_0)
+        }
+        else if (RuntimeType.STRING == node_type) {
+            thisSerializer.writeInt8(1 as int32)
+            const node_1  = node as string
+            thisSerializer.writeString(node_1)
+        }
+        const retval  = ArkUIGeneratedNativeModule._UIContextDispatchKeyEvent_dispatchKeyEvent(thisSerializer.asBuffer(), thisSerializer.length(), toPeerPtr(event))
+        thisSerializer.release()
+        return retval
     }
 }
 

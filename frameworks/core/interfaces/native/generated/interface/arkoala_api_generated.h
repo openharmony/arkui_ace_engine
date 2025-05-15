@@ -23407,6 +23407,15 @@ typedef struct GENERATED_ArkUIStateStylesOpsAccessor {
                                const Callback_StateStylesChange* stateStyleChange);
 } GENERATED_ArkUIStateStylesOpsAccessor;
 
+typedef struct GENERATED_ArkUIUIContextAtomicServiceBarAccessor {
+    Ark_Frame (*getBarRect)();
+} GENERATED_ArkUIUIContextAtomicServiceBarAccessor;
+
+typedef struct GENERATED_ArkUIUIContextDispatchKeyEventAccessor {
+    Ark_Boolean (*dispatchKeyEvent)(const Ark_Union_Number_String* node,
+                                    Ark_KeyEvent event);
+} GENERATED_ArkUIUIContextDispatchKeyEventAccessor;
+
 typedef struct GENERATED_ArkUIDrawableDescriptorAccessor {
     void (*destroyPeer)(Ark_DrawableDescriptor peer);
     Ark_DrawableDescriptor (*ctor)();
@@ -26665,6 +26674,8 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIRestrictedWorkerAccessor* (*getRestrictedWorkerAccessor)();
     const GENERATED_ArkUIUIContextAccessor* (*getUIContextAccessor)();
     const GENERATED_ArkUIStateStylesOpsAccessor* (*getStateStylesOpsAccessor)();
+    const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* (*getUIContextAtomicServiceBarAccessor)();
+    const GENERATED_ArkUIUIContextDispatchKeyEventAccessor* (*getUIContextDispatchKeyEventAccessor)();
     const GENERATED_ArkUIDrawableDescriptorAccessor* (*getDrawableDescriptorAccessor)();
     const GENERATED_ArkUILayeredDrawableDescriptorAccessor* (*getLayeredDrawableDescriptorAccessor)();
     const GENERATED_ArkUIPixelMapDrawableDescriptorAccessor* (*getPixelMapDrawableDescriptorAccessor)();

@@ -46,6 +46,12 @@
             "@ohos/animator": [
                 "../ohos.animator.ts"
             ],
+            "@ohos/arkui/componentUtils": [
+                "../ohos.arkui.componentUtils.ts"
+            ],
+            "@ohos/arkui/focusController": [
+                "../ohos.arkui.focusController.ts"
+            ],
             "@ohos/arkui/UIContext": [
                 "../ohos.arkui.UIContext.ts"
             ],
@@ -82,6 +88,8 @@
         "build/unmemoized/ohos.measure.ts",
         "build/unmemoized/ohos.font.ts",
         "build/unmemoized/ohos.animator.ts",
+        "build/unmemoized/ohos.arkui.componentUtils.ts",
+        "build/unmemoized/ohos.arkui.focusController.ts",
         "src/ani/arkts/*.ts",
         "build/unmemoized/ohos.router.ts",
         "build/unmemoized/ohos.observer.ts"

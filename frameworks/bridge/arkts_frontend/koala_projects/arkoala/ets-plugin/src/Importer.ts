@@ -119,6 +119,7 @@ function implementedPackages(kind: ArkUIImplementation): string[] {
         'ohos.arkui.UIContext',
         'ohos.arkui.modifier',
         'ohos.animator',
+        'ohos.arkui.componentUtils',
         'ohos.observer'
     ]
 

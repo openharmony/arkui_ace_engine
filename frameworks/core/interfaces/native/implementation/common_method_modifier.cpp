@@ -2866,8 +2866,41 @@ void NextFocusImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetNextFocus(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    auto arkFocusMovement = Converter::OptConvert<Ark_FocusMovement>(*value);
+    if (!arkFocusMovement) {
+        ViewAbstract::ResetNextFocus(frameNode);
+        return;
+    }
+    auto forward = Converter::OptConvert<std::string>(arkFocusMovement->forward);
+    if (forward.has_value()) {
+        ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::TAB, forward.value());
+    }
+
+    auto backward = Converter::OptConvert<std::string>(arkFocusMovement->backward);
+    if (backward.has_value()) {
+        ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::SHIFT_TAB, backward.value());
+    }
+
+    auto up = Converter::OptConvert<std::string>(arkFocusMovement->up);
+    if (up.has_value()) {
+        ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::UP, up.value());
+    }
+
+    auto down = Converter::OptConvert<std::string>(arkFocusMovement->down);
+    if (down.has_value()) {
+        ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::DOWN, down.value());
+    }
+
+    auto left = Converter::OptConvert<std::string>(arkFocusMovement->left);
+    if (left.has_value()) {
+        ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::LEFT, left.value());
+    }
+
+    auto right = Converter::OptConvert<std::string>(arkFocusMovement->right);
+    if (right.has_value()) {
+        ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::RIGHT, right.value());
+    }
 }
 void TabStopImpl(Ark_NativePointer node,
                  const Opt_Boolean* value)
@@ -2888,7 +2921,7 @@ void OnFocusImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        ViewAbstract::DisableOnFocus(frameNode);
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
@@ -2903,7 +2936,7 @@ void OnBlurImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        ViewAbstract::DisableOnBlur(frameNode);
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
@@ -5670,11 +5703,48 @@ void OnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
                                         const Opt_VisibleAreaEventOptions* options,
                                         const Opt_VisibleAreaChangeCallback* event)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(options);
-    //auto convValue = Converter::OptConvert<type>(options); // for enums
-    //CommonMethodModelNG::SetOnVisibleAreaApproximateChange(frameNode, convValue);
+    CHECK_NULL_VOID(options);
+    CHECK_NULL_VOID(event);
+    auto rawRatioVec = Converter::OptConvert<std::vector<float>>(options->value.ratios);
+    if (!rawRatioVec.has_value()) {
+        return;
+    }
+    std::vector<float> floatArray = rawRatioVec.value();
+    size_t size = floatArray.size();
+    std::vector<double> ratioVec;
+    for (size_t i = 0; i < size; i++) {
+        double ratio = static_cast<double>(floatArray[i]);
+        if (LessOrEqual(ratio, VISIBLE_RATIO_MIN)) {
+            ratio = VISIBLE_RATIO_MIN;
+        }
+
+        if (GreatOrEqual(ratio, VISIBLE_RATIO_MAX)) {
+            ratio = VISIBLE_RATIO_MAX;
+        }
+        ratioVec.push_back(ratio);
+    }
+    auto expectedUpdateInterval =
+        Converter::OptConvert<int32_t>(options->value.expectedUpdateInterval).value_or(DEFAULT_DURATION);
+    if (expectedUpdateInterval < 0) {
+        expectedUpdateInterval = DEFAULT_DURATION;
+    }
+    auto optEvent = Converter::GetOptPtr(event);
+    if (!optEvent) {
+        // TODO: Reset value
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onVisibleAreaChange = [arkCallback = CallbackHelper(*optEvent), node = weakNode](
+                                   bool visible, double ratio) {
+        Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
+        Ark_Number currentRatio = Converter::ArkValue<Ark_Number>(static_cast<float>(ratio));
+        PipelineContext::SetCallBackNode(node);
+        arkCallback.Invoke(isExpanding, currentRatio);
+    };
+    ViewAbstract::SetOnVisibleAreaApproximateChange(
+        frameNode, std::move(onVisibleAreaChange), ratioVec, expectedUpdateInterval);
 }
 void KeyboardShortcutImpl(Ark_NativePointer node,
                           const Opt_Union_String_FunctionKey* value,

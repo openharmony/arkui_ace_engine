@@ -218,6 +218,8 @@ const GENERATED_ArkUIWorkerEventListenerAccessor* GetWorkerEventListenerAccessor
 const GENERATED_ArkUIRestrictedWorkerAccessor* GetRestrictedWorkerAccessor();
 const GENERATED_ArkUIUIContextAccessor* GetUIContextAccessor();
 const GENERATED_ArkUIStateStylesOpsAccessor* GetStateStylesOpsAccessor();
+const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* GetUIContextAtomicServiceBarAccessor();
+const GENERATED_ArkUIUIContextDispatchKeyEventAccessor* GetUIContextDispatchKeyEventAccessor();
 const GENERATED_ArkUIDrawableDescriptorAccessor* GetDrawableDescriptorAccessor();
 const GENERATED_ArkUILayeredDrawableDescriptorAccessor* GetLayeredDrawableDescriptorAccessor();
 const GENERATED_ArkUIPixelMapDrawableDescriptorAccessor* GetPixelMapDrawableDescriptorAccessor();
@@ -547,6 +549,8 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetRestrictedWorkerAccessor,
         GetUIContextAccessor,
         GetStateStylesOpsAccessor,
+        GetUIContextAtomicServiceBarAccessor,
+        GetUIContextDispatchKeyEventAccessor,
         GetDrawableDescriptorAccessor,
         GetLayeredDrawableDescriptorAccessor,
         GetPixelMapDrawableDescriptorAccessor,

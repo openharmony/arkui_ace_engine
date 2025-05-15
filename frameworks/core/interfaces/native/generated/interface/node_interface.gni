@@ -71,6 +71,7 @@ generated_sources = [
   "implementation/container_span_modifier.cpp",
   "implementation/context_accessor.cpp",
   "implementation/state_style_accessor.cpp",
+  "implementation/context_common_accessor.cpp",
   "implementation/context_menu_accessor.cpp",
   "implementation/controller_handler_accessor.cpp",
   "implementation/counter_modifier.cpp",
