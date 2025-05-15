@@ -787,13 +787,13 @@ void NavigationPattern::UpdateNavPathList()
         }
         auto pathIndex = indexes[index];
         if (navigationStack_->NeedBuildNewInstance(arrayIndex)) {
+            navigationStack_->SetNeedBuildNewInstance(arrayIndex, false);
             // if marked NEW_INSTANCE when push/replace in frontend, build a new instance anyway
             if (!GenerateUINodeByIndex(arrayIndex, uiNode)) {
                 removeSize++;
                 continue;
             }
             navPathList.emplace_back(std::make_pair(pathName, uiNode));
-            navigationStack_->SetNeedBuildNewInstance(arrayIndex, false);
             if (index == pathListSize - 1) {
                 isCurTopNewInstance_ = true;
             }
