@@ -30,6 +30,7 @@ constexpr uint32_t RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST = 504;
 #ifdef FFRT_EXISTS
 constexpr uint32_t RES_TYPE_LONG_FRAME     = 71;
 #endif
+constexpr uint32_t RES_TYPE_OVERLAY        = 151;
 constexpr int32_t TOUCH_DOWN_EVENT          = 1;
 constexpr int32_t CLICK_EVENT               = 2;
 constexpr int32_t TOUCH_UP_EVENT            = 3;
@@ -52,6 +53,8 @@ constexpr int64_t TIME_INTERVAL = 300;
 constexpr int32_t LONG_FRAME_START_EVENT = 0;
 constexpr int32_t LONG_FRAME_END_EVENT = 1;
 #endif
+constexpr int32_t OVERLAY_ADD_EVENT = 0;
+constexpr int32_t OVERLAY_REMOVE_EVENT = 1;
 constexpr char NAME[] = "name";
 constexpr char PID[] = "pid";
 constexpr char UID[] = "uid";
@@ -65,6 +68,8 @@ constexpr char PAGE_END_FLUSH[] = "page_end_flush";
 constexpr char AUTO_PLAY_ON[] = "auto_play_on";
 constexpr char AUTO_PLAY_OFF[] = "auto_play_off";
 constexpr char SLIDE_OFF[] = "slide_off";
+constexpr char OVERLAY_ADD[] = "overlay_add";
+constexpr char OVERLAY_REMOVE[] = "overlay_remove";
 constexpr char TOUCH[] = "touch";
 constexpr char WEB_GESTURE[] = "web_gesture";
 constexpr char LOAD_PAGE[] = "load_page";
@@ -172,6 +177,18 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
                 }
             },
 #endif
+            { OVERLAY_ADD,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    LoadAceApplicationContext(payload);
+                    reportDataFunc_(RES_TYPE_OVERLAY, OVERLAY_ADD_EVENT, payload);
+                }
+            },
+            { OVERLAY_REMOVE,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    LoadAceApplicationContext(payload);
+                    reportDataFunc_(RES_TYPE_OVERLAY, OVERLAY_REMOVE_EVENT, payload);
+                }
+            },
         };
     auto it = functionMap.find(name);
     if (it == functionMap.end()) {

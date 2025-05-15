@@ -1481,8 +1481,10 @@ void FrameNode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleT
 
 void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
 {
-    if (detachRelatedNodeCallback_) {
-        detachRelatedNodeCallback_();
+    for (auto [_, callback] : removeToolbarItemCallbacks_) {
+        if (callback) {
+            callback();
+        }
     }
     auto focusHub = GetFocusHub();
     if (focusHub) {
@@ -2859,6 +2861,14 @@ void FrameNode::AddNodeToRegisterTouchTest()
     eventMgr->AddTouchDoneFrameNode(AceType::WeakClaim(this));
 }
 
+RectF FrameNode::CheckResponseRegionForStylus(RectF& rect, const TouchEvent& touchEvent)
+{
+    if (!pattern_ || !pattern_->IsResponseRegionExpandingNeededForStylus(touchEvent)) {
+        return rect;
+    }
+    return pattern_->ExpandDefaultResponseRegion(rect);
+}
+
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
     ResponseLinkResult& responseLinkResult, bool isDispatch)
@@ -2899,13 +2909,9 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     if (parent) {
         parentId = parent->GetId();
     }
-
-    auto defaultResponseRegion = origRect;
-    if (pattern_->IsResponseRegionExpandingNeededForStylus(touchRestrict.touchEvent)) {
-        defaultResponseRegion = pattern_->ExpandDefaultResponseRegion(origRect);
-    }
+    auto checkedResponseRegionForStylus = CheckResponseRegionForStylus(origRect, touchRestrict.touchEvent);
     auto responseRegionList =
-        GetResponseRegionList(defaultResponseRegion, static_cast<int32_t>(touchRestrict.sourceType));
+        GetResponseRegionList(checkedResponseRegionForStylus, static_cast<int32_t>(touchRestrict.sourceType));
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT, "TouchTest: point is " SEC_PLD(%{public}s) " in %{public}s, depth: %{public}d",
             SEC_PARAM(parentRevertPoint.ToString().c_str()), GetTag().c_str(), GetDepth());
@@ -3211,7 +3217,7 @@ std::vector<RectF> FrameNode::GetResponseRegionListForRecognizer(int32_t sourceT
     return responseRegionList;
 }
 
-std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& rect)
+std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& windowRect)
 {
     ACE_LAYOUT_TRACE_BEGIN("GetResponseRegionListForTouch");
     std::vector<RectF> responseRegionList;
@@ -3220,13 +3226,23 @@ std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& rect)
         ACE_LAYOUT_TRACE_END()
         return responseRegionList;
     }
-
+    if (!renderContext_) {
+        ACE_LAYOUT_TRACE_END()
+        return responseRegionList;
+    }
     bool isAccessibilityClickable = gestureHub->IsAccessibilityClickable();
     if (!isAccessibilityClickable) {
         ACE_LAYOUT_TRACE_END()
         return responseRegionList;
     }
     auto offset = GetPositionToScreenWithTransform();
+    auto rect = renderContext_->GetPaintRectWithoutTransform();
+    RectF rectToScreen{offset.GetX(), offset.GetY(), rect.Width(), rect.Height()};
+    if (rectToScreen.Left() >= windowRect.Right() || rectToScreen.Right() <= windowRect.Left() ||
+        rectToScreen.Top() >= windowRect.Bottom() || rectToScreen.Bottom() <= windowRect.Top()) {
+        ACE_LAYOUT_TRACE_END()
+        return responseRegionList;
+    }
     if (gestureHub->GetResponseRegion().empty()) {
         RectF rectToScreen{round(offset.GetX()), round(offset.GetY()), round(rect.Width()), round(rect.Height())};
         responseRegionList.emplace_back(rectToScreen);
@@ -3251,23 +3267,9 @@ std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& rect)
     return responseRegionList;
 }
 
-void FrameNode::GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList)
+void FrameNode::GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList, const RectF& windowRect)
 {
-    CHECK_NULL_VOID(renderContext_);
-    auto origRect = renderContext_->GetPaintRectWithoutTransform();
-    auto pipelineContext = GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto offset = GetPositionToScreenWithTransform();
-    RectF rectToScreen{offset.GetX(), offset.GetY(), origRect.Width(), origRect.Height()};
-    auto window = pipelineContext->GetCurrentWindowRect();
-    RectF windowRect{window.Left(), window.Top(), window.Width(), window.Height()};
-
-    if (rectToScreen.Left() >= windowRect.Right() || rectToScreen.Right() <= windowRect.Left() ||
-        rectToScreen.Top() >= windowRect.Bottom() || rectToScreen.Bottom() <= windowRect.Top()) {
-        return;
-    }
-
-    auto rootRegionList = GetResponseRegionListForTouch(origRect);
+    auto rootRegionList = GetResponseRegionListForTouch(windowRect);
     if (!rootRegionList.empty()) {
         for (auto rect : rootRegionList) {
             responseRegionList.push_back(rect.IntersectRectT(windowRect));
@@ -3279,7 +3281,7 @@ void FrameNode::GetResponseRegionListByTraversal(std::vector<RectF>& responseReg
         if (!child) {
             continue;
         }
-        child->GetResponseRegionListByTraversal(responseRegionList);
+        child->GetResponseRegionListByTraversal(responseRegionList, windowRect);
     }
 }
 
@@ -5519,6 +5521,25 @@ void FrameNode::PaintDebugBoundary(bool flag)
     }
 }
 
+void SetChangeInfo(const TouchEvent& touchEvent, TouchLocationInfo &changedInfo)
+{
+    changedInfo.SetGlobalLocation(Offset(touchEvent.x, touchEvent.y));
+    changedInfo.SetScreenLocation(Offset(touchEvent.screenX, touchEvent.screenY));
+    changedInfo.SetTouchType(touchEvent.type);
+    changedInfo.SetForce(touchEvent.force);
+    changedInfo.SetPressedTime(touchEvent.pressedTime);
+    changedInfo.SetWidth(touchEvent.width);
+    changedInfo.SetHeight(touchEvent.height);
+    if (touchEvent.tiltX.has_value()) {
+        changedInfo.SetTiltX(touchEvent.tiltX.value());
+    }
+    if (touchEvent.tiltY.has_value()) {
+        changedInfo.SetTiltY(touchEvent.tiltY.value());
+    }
+    changedInfo.SetSourceTool(touchEvent.sourceTool);
+    changedInfo.SetDeviceId(touchEvent.deviceId);
+}
+
 HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
 {
     auto gestureHub = eventHub_ ? eventHub_->GetGestureEventHub() : nullptr;
@@ -5535,20 +5556,7 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
     auto localX = static_cast<float>(lastLocalPoint.GetX());
     auto localY = static_cast<float>(lastLocalPoint.GetY());
     changedInfo.SetLocalLocation(Offset(localX, localY));
-    changedInfo.SetGlobalLocation(Offset(touchEvent.x, touchEvent.y));
-    changedInfo.SetScreenLocation(Offset(touchEvent.screenX, touchEvent.screenY));
-    changedInfo.SetTouchType(touchEvent.type);
-    changedInfo.SetForce(touchEvent.force);
-    changedInfo.SetPressedTime(touchEvent.pressedTime);
-    changedInfo.SetWidth(touchEvent.width);
-    changedInfo.SetHeight(touchEvent.height);
-    if (touchEvent.tiltX.has_value()) {
-        changedInfo.SetTiltX(touchEvent.tiltX.value());
-    }
-    if (touchEvent.tiltY.has_value()) {
-        changedInfo.SetTiltY(touchEvent.tiltY.value());
-    }
-    changedInfo.SetSourceTool(touchEvent.sourceTool);
+    SetChangeInfo(touchEvent, changedInfo);
     event.AddChangedTouchLocationInfo(std::move(changedInfo));
 
     AddTouchEventAllFingersInfo(event, touchEvent);

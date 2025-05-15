@@ -322,17 +322,11 @@ struct CollapsibleMenuSection {
   }
 
   decideFontScale(): number {
-    try {
       let uiContent: UIContext = this.getUIContext();
       this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
       if (!this.isFollowingSystemFontScale) {
         return 1;
       }
-    } catch (exception) {
-      let code: number = (exception as BusinessError)?.code;
-      let message: string = (exception as BusinessError)?.message;
-      hilog.error(0x3900, 'tabTitleBar', `Faild to getSystemFontScale,cause, code: ${code}, message: ${message}`);
-    }
     return Math.min(this.systemFontScale, this.maxFontScale);
   }
 
@@ -762,7 +756,13 @@ struct ImageMenuItem {
 
   private getAccessibilityReadText(): string | undefined {
     if (this.item.value === PUBLIC_MORE) {
-      return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
+      try {
+        return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
+      } catch (err) {
+        let code: number = (err as BusinessError)?.code;
+        let message: string = (err as BusinessError)?.message;
+        hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
+      }
     } else if (this.item.accessibilityText) {
       return this.item.accessibilityText as string;
     } else if (this.item.label) {

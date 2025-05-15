@@ -116,6 +116,7 @@ protected:
     void MeasureChildren(LayoutWrapper* layoutWrapper, const TextStyle& textStyle);
     bool ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper, ParagraphStyle& paraStyle, const TextStyle& textStyle,
         std::vector<TextStyle>& textStyles);
+    virtual ChildrenListWithGuard GetAllChildrenWithBuild(LayoutWrapper* layoutWrapper);
 
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
     RefPtr<ParagraphManager> paragraphManager_;

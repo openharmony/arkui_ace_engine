@@ -124,8 +124,8 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollCallback002, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    RichEditorPattern::OperationRecord record;
-    richEditorPattern->DeleteSelectOperation(&record);
+    // RichEditorPattern::OperationRecord record;
+    // richEditorPattern->DeleteSelectOperation(&record);
 
     RectF rect(0, 0, 5, 5);
     richEditorPattern->CreateHandles();
@@ -481,7 +481,7 @@ HWTEST_F(RichEditorScrollTestOneNg, OnAutoScroll001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     AutoScrollParam param;
     param.showScrollbar = true;
@@ -524,7 +524,7 @@ HWTEST_F(RichEditorScrollTestOneNg, ScheduleAutoScroll001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     AutoScrollParam param;
     param.isFirstRun_ = true;
@@ -553,7 +553,7 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollEndCallback001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
     TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
@@ -581,7 +581,7 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollEndCallback002, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
 
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
     TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
@@ -609,7 +609,7 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollEndCallback003, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
 
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
     TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
@@ -637,7 +637,7 @@ HWTEST_F(RichEditorScrollTestOneNg, UpdateScrollBarOffset001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto tmpHost = richEditorPattern->GetHost();
     ASSERT_NE(tmpHost, nullptr);

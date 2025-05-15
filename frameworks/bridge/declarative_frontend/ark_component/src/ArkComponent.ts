@@ -2518,6 +2518,20 @@ class AccessibilityActionInterceptCallbackModifier extends ModifierWithKey<Acces
   }
 }
 
+class AccessibilityHoverTransparentModifier extends ModifierWithKey<AccessibilityTransparentCallback> {
+  constructor(value: AccessibilityTransparentCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onAccessibilityHoverTransparent');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityHoverTransparent(node);
+    } else {
+      getUINativeModule().common.setAccessibilityHoverTransparent(node, this.value);
+    }
+  }
+}
+
 class AllowDropModifier extends ModifierWithKey<Array<UniformDataType>> {
   constructor(value: Array<UniformDataType>) {
     super(value);
@@ -5063,6 +5077,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   onAccessibilityActionIntercept(value: AccessibilityActionInterceptCallback): this {
     modifierWithKey(this._modifiersWithKeys,
       AccessibilityActionInterceptCallbackModifier.identity, AccessibilityActionInterceptCallbackModifier, value);
+    return this;
+  }
+
+  onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback): this {
+    modifierWithKey(this._modifiersWithKeys,
+      AccessibilityHoverTransparentModifier.identity, AccessibilityHoverTransparentModifier, value);
     return this;
   }
 

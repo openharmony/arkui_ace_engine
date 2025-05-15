@@ -97,7 +97,8 @@ HWTEST_F(RichEditorStyleTestNg, TextbackgroundStyle001, TestSize.Level1)
     options.value = INIT_VALUE_1;
     options.style = style;
     richEditorController->AddTextSpan(options);
-    auto newSpan = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    auto newSpan = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
     ASSERT_NE(newSpan, nullptr);
     EXPECT_TRUE(newSpan->GetTextBackgroundStyle().has_value());
     EXPECT_EQ(newSpan->GetTextBackgroundStyle().value(), textBackgroundStyle);
@@ -123,6 +124,8 @@ HWTEST_F(RichEditorStyleTestNg, TextbackgroundStyle002, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     /**
      * @tc.steps: step1. set typing style
@@ -160,13 +163,13 @@ HWTEST_F(RichEditorStyleTestNg, TextbackgroundStyle002, TestSize.Level1)
      */
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->InsertValue(INIT_VALUE_1);
-    auto newSpan = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    auto newSpan = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
     ASSERT_NE(newSpan, nullptr);
     EXPECT_TRUE(newSpan->GetTextBackgroundStyle().has_value());
     EXPECT_EQ(newSpan->GetTextBackgroundStyle().value(), textBackgroundStyle);
     richEditorPattern->caretPosition_ = 6;
     richEditorPattern->InsertValue(INIT_VALUE_2);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
+    EXPECT_EQ(contentNode->GetChildren().size(), 1);
 }
 
 /**
@@ -181,6 +184,8 @@ HWTEST_F(RichEditorStyleTestNg, TextbackgroundStyle003, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     /**
      * @tc.steps: step1. add span
@@ -210,14 +215,14 @@ HWTEST_F(RichEditorStyleTestNg, TextbackgroundStyle003, TestSize.Level1)
     richEditorController->SetUpdateSpanStyle(updateSpanStyle);
     ImageSpanAttribute imageStyle;
     richEditorController->UpdateSpanStyle(0, 2, style, imageStyle);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
-    auto newSpan = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
+    auto newSpan = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
     ASSERT_NE(newSpan, nullptr);
     EXPECT_TRUE(newSpan->GetTextBackgroundStyle().has_value());
     EXPECT_EQ(newSpan->GetTextBackgroundStyle().value(), textBackgroundStyle);
 
     richEditorController->UpdateSpanStyle(0, 2, style, imageStyle);
-    newSpan = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    newSpan = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
     ASSERT_NE(newSpan, nullptr);
     EXPECT_TRUE(newSpan->GetTextBackgroundStyle().has_value());
     EXPECT_EQ(newSpan->GetTextBackgroundStyle().value().groupId, newSpan->groupId_);
@@ -328,7 +333,8 @@ HWTEST_F(RichEditorStyleTestNg, UpdateTextStyle001, TestSize.Level1)
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
     AddSpan(INIT_VALUE_1);
-    auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    auto newSpan1 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
     TextStyle textStyle;
     ImageSpanAttribute imageStyle;
     textStyle.SetFontFeatures(TEXT_FONTFEATURE);
@@ -364,7 +370,8 @@ HWTEST_F(RichEditorStyleTestNg, UpdateTextStyle002, TestSize.Level1)
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
     AddSpan(INIT_VALUE_1);
-    auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    auto newSpan1 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
     TextStyle textStyle;
     ImageSpanAttribute imageStyle;
     textStyle.SetFontFeatures(TEXT_FONTFEATURE_2);
@@ -433,9 +440,12 @@ HWTEST_F(RichEditorStyleTestNg, HasSameTypingStyle001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->InsertValue(TEST_INSERT_VALUE);
-    auto it = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
+    auto it = AceType::DynamicCast<SpanNode>(contentNode->GetLastChild());
+    ASSERT_NE(it, nullptr);
     auto spanItem = it->GetSpanItem();
 
     spanItem->textStyle_ = std::nullopt;

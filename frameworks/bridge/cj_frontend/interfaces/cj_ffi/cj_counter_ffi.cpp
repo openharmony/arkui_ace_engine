@@ -95,14 +95,22 @@ void FfiOHOSAceFrameworkCounterSetBackgroundColor(uint32_t color)
     }
 }
 
-void FfiOHOSAceFrameworkCounterEnableInc(bool enable)
-{
-    CounterModel::GetInstance()->SetEnableInc(enable);
-}
-
 void FfiOHOSAceFrameworkCounterEnableDec(bool enable)
 {
-    CounterModel::GetInstance()->SetEnableDec(enable);
+    if (CounterModel::GetInstance() != nullptr) {
+        CounterModel::GetInstance()->SetEnableDec(enable);
+    } else {
+        LOGE("Counter Instance is null");
+    }
+}
+
+void FfiOHOSAceFrameworkCounterEnableInc(bool enable)
+{
+    if (CounterModel::GetInstance() != nullptr) {
+        CounterModel::GetInstance()->SetEnableInc(enable);
+    } else {
+        LOGE("Counter Instance is null");
+    }
 }
 
 void FfiOHOSAceFrameworkCounterSetOnInc(void (*callback)())

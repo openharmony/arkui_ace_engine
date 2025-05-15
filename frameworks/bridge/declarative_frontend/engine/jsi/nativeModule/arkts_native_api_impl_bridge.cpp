@@ -757,6 +757,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnAccessibilityActionIntercept));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnAccessibilityActionIntercept"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnAccessibilityActionIntercept));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAccessibilityHoverTransparent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityHoverTransparent));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityHoverTransparent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityHoverTransparent));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDirection"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetDirection));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDirection"),
@@ -2495,6 +2499,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetEnableAutoFill));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableAutoFill"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetEnableAutoFill));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableAutoFillAnimation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetEnableAutoFillAnimation));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableAutoFillAnimation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetEnableAutoFillAnimation));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCaretStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetCaretStyle));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCaretStyle"),

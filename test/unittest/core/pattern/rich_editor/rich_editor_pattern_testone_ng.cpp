@@ -525,7 +525,7 @@ HWTEST_F(RichEditorPatternTestOneNg, CalcCursorOffsetByPosition001, TestSize.Lev
     AddSpan("hello1");
     ASSERT_NE(richEditorPattern->GetTextContentLength(), 0);
     richEditorPattern->CalcCursorOffsetByPosition(0, selectLineHeight, true, true);
-    ASSERT_EQ(richEditorPattern->GetHost()->GetChildren().empty(), false);
+    ASSERT_EQ(richEditorPattern->GetContentHost()->GetChildren().empty(), false);
 }
 
 } // namespace OHOS::Ace::NG

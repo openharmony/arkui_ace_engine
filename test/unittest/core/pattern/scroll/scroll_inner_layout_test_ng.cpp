@@ -179,7 +179,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarRect001, TestSize.Level1)
     float activeBarHeight = HEIGHT * ratio;
     EXPECT_TRUE(IsEqual(scrollBar_->touchRegion_, Rect(208, 0, DEFAULT_TOUCH_WIDTH, activeBarHeight)));
     EXPECT_TRUE(IsEqual(scrollBar_->hoverRegion_, Rect(232, 0, DEFAULT_ACTIVE_WIDTH, activeBarHeight)));
-    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(236, 0, NORMAL_WIDTH, HEIGHT)));
+    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(232, 0, DEFAULT_ACTIVE_WIDTH, HEIGHT)));
     EXPECT_TRUE(IsEqual(scrollBar_->activeRect_, Rect(236, 0, NORMAL_WIDTH, activeBarHeight)));
 
     /**
@@ -231,7 +231,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarRect003, TestSize.Level1)
         IsEqual(scrollBar_->touchRegion_, Rect(0, 0, DEFAULT_TOUCH_WIDTH + DEFAULT_INACTIVE_WIDTH, activeBarHeight)));
     EXPECT_TRUE(
         IsEqual(scrollBar_->hoverRegion_, Rect(0, 0, DEFAULT_ACTIVE_WIDTH + DEFAULT_INACTIVE_WIDTH, activeBarHeight)));
-    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(0, 0, NORMAL_WIDTH, HEIGHT)));
+    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(0, 0, DEFAULT_ACTIVE_WIDTH, HEIGHT)));
     EXPECT_TRUE(IsEqual(scrollBar_->activeRect_, Rect(0, 0, NORMAL_WIDTH, activeBarHeight)));
 
     /**
@@ -282,7 +282,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarRect005, TestSize.Level1)
     float activeBarWidth = WIDTH * ratio;
     EXPECT_TRUE(IsEqual(scrollBar_->touchRegion_, Rect(0, 368, activeBarWidth, DEFAULT_TOUCH_WIDTH)));
     EXPECT_TRUE(IsEqual(scrollBar_->hoverRegion_, Rect(0, 392, activeBarWidth, DEFAULT_ACTIVE_WIDTH)));
-    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(0, 396, WIDTH, NORMAL_WIDTH)));
+    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(0, 392, WIDTH, DEFAULT_ACTIVE_WIDTH)));
     EXPECT_TRUE(IsEqual(scrollBar_->activeRect_, Rect(0, 396, activeBarWidth, NORMAL_WIDTH)));
 
     /**

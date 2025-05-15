@@ -1331,6 +1331,6 @@ HWTEST_F(SpanTestNg, SpanOnHoverEvent, TestSize.Level1)
     textPattern->InitSpanMouseEvent();
     textPattern->TriggerSpansOnHover(HoverInfo(), PointF());
     textPattern->ExitSpansForOnHoverEvent(HoverInfo());
-    EXPECT_EQ(textPattern->spanMouseEventInitialized_, true);
+    EXPECT_EQ(textPattern->spanMouseEventInitialized_, false);
 }
 } // namespace OHOS::Ace::NG

@@ -2539,6 +2539,7 @@ class CustomDialogContentComponent extends ViewPU {
         this.buttonIndex = 2;
         this.isHasDefaultFocus = false;
         this.isAllFocusFalse = false;
+        this.scroller = new Scroller();
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
@@ -2638,6 +2639,9 @@ class CustomDialogContentComponent extends ViewPU {
         }
         if (params.isAllFocusFalse !== undefined) {
             this.isAllFocusFalse = params.isAllFocusFalse;
+        }
+        if (params.scroller !== undefined) {
+            this.scroller = params.scroller;
         }
     }
     updateStateVars(params) {
@@ -2791,14 +2795,11 @@ class CustomDialogContentComponent extends ViewPU {
             WithTheme.create({ theme: this.theme, colorMode: this.themeColorMode });
         }, WithTheme);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Scroll.create();
-            Scroll.borderRadius({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.alert_container_shape'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            })
+            RelativeContainer.create();
+            RelativeContainer.height('auto');
+        } , RelativeContainer);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Scroll.create(this.scroller);
             Scroll.edgeEffect(EdgeEffect.None, { alwaysEnabled: false });
             Scroll.backgroundColor(this.themeColorMode === ThemeColorMode.SYSTEM || undefined ?
             Color.Transparent : {
@@ -2808,6 +2809,8 @@ class CustomDialogContentComponent extends ViewPU {
                     'bundleName': '__harDefaultBundleName__',
                     'moduleName': '__harDefaultModuleName__'
                 });
+            Scroll.scrollBar(BarState.Off);
+            Scroll.id('CustomDialogContentComponent');
         }, Scroll);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
@@ -2971,6 +2974,42 @@ class CustomDialogContentComponent extends ViewPU {
         }
         Column.pop();
         Scroll.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            ScrollBar.create({ scroller: this.scroller });
+            ScrollBar.alignRules({
+                top: { anchor: 'CustomDialogContentComponent', align: VerticalAlign.Top },
+                bottom: { anchor: 'CustomDialogContentComponent', align: VerticalAlign.Bottom },
+                end: { anchor: 'CustomDialogContentComponent', align: HorizontalAlign.End }
+            });
+            ScrollBar.margin({
+                top: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_container_shape'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                bottom: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_container_shape'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                }
+            });
+            ScrollBar.enableNestedScroll(true);
+            ScrollBar.hitTestBehavior(HitTestMode.Transparent);
+            ScrollBar.onGestureRecognizerJudgeBegin((event, current, others) => {
+                if (current) {
+                    if (current.getType() == GestureControl.GestureType.LONG_PRESS_GESTURE) {
+                        return GestureJudgeResult.REJECT;
+                    }
+                }
+                return GestureJudgeResult.CONTINUE;
+            });
+        }, ScrollBar);
+        ScrollBar.pop();
+        RelativeContainer.pop();
         WithTheme.pop();
     }
     onMeasureSize(selfLayoutInfo, children, constraint) {

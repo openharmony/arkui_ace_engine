@@ -95,6 +95,7 @@ class InspectorFilter;
 class OneStepDragController;
 class RichEditorUndoManager;
 struct UndoRedoRecord;
+class RichEditorContentPattern;
 
 // TextPattern is the base class for text render node to perform paint text.
 enum class MoveDirection { FORWARD, BACKWARD };
@@ -540,7 +541,7 @@ public:
         OperationType operationType = OperationType::DEFAULT);
     void InsertValueOperation(const std::u16string& insertValue, OperationRecord* const record = nullptr,
         OperationType operationType = OperationType::IME);
-    void DeleteSelectOperation(OperationRecord* const record);
+    // void DeleteSelectOperation(OperationRecord* const record);
     void DeleteByRange(OperationRecord* const record, int32_t start, int32_t end);
     void InsertDiffStyleValueInSpan(RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info,
         const std::u16string& insertValue, bool isIME = true);
@@ -1274,6 +1275,10 @@ public:
         CHECK_NULL_VOID(enable && !currentEnable && CanStartAITask());
         IF_TRUE(!dataDetectorAdapter_->aiDetectInitialized_, dataDetectorAdapter_->StartAITask());
     }
+    void SetContentPattern(const RefPtr<RichEditorContentPattern>& contentPattern);
+    RefPtr<FrameNode> GetContentHost() const override;
+
+    float GetCaretWidth();
 
 protected:
     bool CanStartAITask() override;
@@ -1285,6 +1290,7 @@ private:
     friend class RichEditorSelectOverlay;
     friend class OneStepDragController;
     friend class RichEditorUndoManager;
+    friend class RichEditorContentPattern;
     bool HandleUrlSpanClickEvent(const GestureEvent& info);
     void HandleUrlSpanForegroundClear();
     bool HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color);
@@ -1462,7 +1468,6 @@ private:
     void AfterInsertValue(
         const RefPtr<SpanNode>& spanNode, int32_t insertValueLength, bool isCreate, bool isIme = true);
     bool AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, int32_t moveLength, bool isCreate);
-    RefPtr<SpanNode> InsertValueToBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, const std::u16string& insertValue);
     void SetCaretSpanIndex(int32_t index);
     bool HasSameTypingStyle(const RefPtr<SpanNode>& spanNode);
 
@@ -1552,8 +1557,6 @@ private:
     void HandleOnDragDropTextOperation(const std::u16string& insertValue, bool isDeleteSelect, bool isCopy = false);
     void UndoDrag(const OperationRecord& record);
     void RedoDrag(const OperationRecord& record);
-    void HandleOnDragInsertValueOperation(const std::u16string& insertValue);
-    void HandleOnDragInsertValue(const std::u16string& str);
     void HandleOnEditChanged(bool isEditing);
     void OnTextInputActionUpdate(TextInputAction value);
     void CloseSystemMenu();
@@ -1774,6 +1777,7 @@ private:
     // Used to avoid show single handle by first click after window focus
     bool firstClickAfterWindowFocus_ = false;
     CancelableCallback<void()> firstClickResetTask_;
+    RefPtr<RichEditorContentPattern> contentPattern_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -27,6 +27,7 @@
 #include "core/common/font_manager.h"
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/pattern/text_field/auto_fill_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -71,18 +72,28 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
     auto isInlineStyle = pattern->IsNormalInlineState();
     auto isTextArea = pattern->IsTextArea();
     UpdateTextStyleFontScale(textFieldLayoutProperty, textStyle, pattern);
-    if (!pattern->GetTextUtf16Value().empty()) {
+    auto autofillController = pattern->GetAutoFillController();
+    CHECK_NULL_VOID(autofillController);
+    auto autoFillAnimationStatus = autofillController->GetAutoFillAnimationStatus();
+    if (autoFillAnimationStatus != AutoFillAnimationStatus::INIT) {
         UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled(),
             textFieldPaintProperty->HasTextColorFlagByUser());
-        textContent = pattern->GetTextUtf16Value();
-        UpdateTextStyleTextOverflowAndWordBreak(textStyle, isTextArea, isInlineStyle, textFieldLayoutProperty,
-            textFieldTheme->TextFadeoutEnabled());
+        textContent = autofillController->GetAutoFillTextUtf16Value();
+        UpdateTextStyleTextOverflowAndWordBreak(
+            textStyle, isTextArea, isInlineStyle, textFieldLayoutProperty, textFieldTheme->TextFadeoutEnabled());
     } else {
-        UpdatePlaceholderTextStyle(
-            frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled(),
-            textFieldPaintProperty->GetPlaceholderColorFlagByUserValue(false));
-        textContent = textFieldLayoutProperty->GetPlaceholderValue(u"");
-        showPlaceHolder = true;
+        if (!pattern->GetTextUtf16Value().empty()) {
+            UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled(),
+                textFieldPaintProperty->HasTextColorFlagByUser());
+            textContent = pattern->GetTextUtf16Value();
+            UpdateTextStyleTextOverflowAndWordBreak(
+                textStyle, isTextArea, isInlineStyle, textFieldLayoutProperty, textFieldTheme->TextFadeoutEnabled());
+        } else {
+            UpdatePlaceholderTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle,
+                pattern->IsDisabled(), textFieldPaintProperty->GetPlaceholderColorFlagByUserValue(false));
+            textContent = textFieldLayoutProperty->GetPlaceholderValue(u"");
+            showPlaceHolder = true;
+        }
     }
 
     textIndent_ = textStyle.GetTextIndent();
@@ -801,6 +812,32 @@ void TextFieldLayoutAlgorithm::CreateInlineParagraph(const TextStyle& textStyle,
     UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(displayText.data()), displayText.length(), 0);
     inlineParagraph_->AddText(displayText);
     inlineParagraph_->Build();
+}
+
+void TextFieldLayoutAlgorithm::CreateAutoFillParagraph(const TextStyle& textStyle, std::u16string content,
+    bool needObscureText, int32_t nakedCharPosition, CreateParagraphData paragraphData)
+{
+    auto paraStyle = GetParagraphStyle(textStyle, content, paragraphData.fontSize);
+    if (!paragraphData.disableTextAlign) {
+        paraStyle.align = textStyle.GetTextAlign();
+    }
+    paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
+    CHECK_NULL_VOID(paragraph_);
+    StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    auto displayText = TextFieldPattern::CreateDisplayText(
+        content, nakedCharPosition, needObscureText, theme->IsShowPasswordDirectly());
+    UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(displayText.data()), displayText.length(), 0);
+    for (size_t i = 0; i < displayText.length(); i++) {
+        paragraph_->PushStyle(textStyle);
+        std::u16string tempStr(1, displayText[i]);
+        paragraph_->AddText(tempStr);
+        paragraph_->PopStyle();
+    }
+    paragraph_->Build();
 }
 
 TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::u16string& content, TextDirection direction)

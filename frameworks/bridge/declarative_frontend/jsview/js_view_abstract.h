@@ -477,6 +477,7 @@ public:
     static void JsAccessibilityRole(const JSCallbackInfo& info);
     static void JsOnAccessibilityFocus(const JSCallbackInfo& info);
     static void JsOnAccessibilityActionIntercept(const JSCallbackInfo& info);
+    static void JsOnAccessibilityHoverTransparent(const JSCallbackInfo& info);
     static void JsAccessibilityDefaultFocus(const JSCallbackInfo& info);
     static void JsAccessibilityUseSamePage(const JSCallbackInfo& info);
     static void JsAccessibilityScrollTriggerable(const JSCallbackInfo& info);

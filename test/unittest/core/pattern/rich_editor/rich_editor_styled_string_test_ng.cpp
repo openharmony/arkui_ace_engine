@@ -151,12 +151,14 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController002, TestSize.Level
     ASSERT_NE(richEditorPattern, nullptr);
     auto styledStringController = richEditorPattern->GetRichEditorStyledStringController();
     ASSERT_NE(styledStringController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     /**
      * @tc.steps: step3. set styledString
      */
     styledStringController->SetStyledString(mutableStr);
-    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 1);
+    EXPECT_EQ(static_cast<int32_t>(contentNode->GetChildren().size()), 1);
     auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(richEditorPattern->spans_.front());
     ASSERT_NE(imageSpanItem, nullptr);
     auto imageSpanoptions = imageSpanItem->options;
@@ -229,13 +231,15 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController004, TestSize.Level
     ASSERT_NE(richEditorPattern, nullptr);
     auto styledStringController = richEditorPattern->GetRichEditorStyledStringController();
     ASSERT_NE(styledStringController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     /**
      * @tc.steps: step3. set styledString
      */
     styledStringController->SetStyledString(mutableStr);
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 9);
-    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 1);
+    EXPECT_EQ(static_cast<int32_t>(contentNode->GetChildren().size()), 1);
     auto customSpanItem = AceType::DynamicCast<CustomSpanItem>(richEditorPattern->spans_.front());
     EXPECT_NE(customSpanItem, nullptr);
 }

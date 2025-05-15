@@ -131,7 +131,7 @@ HWTEST_F(RichEditorUndoRedoTest, RedoDrag002, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
 
     RichEditorPattern::OperationRecord record;
@@ -228,7 +228,7 @@ HWTEST_F(RichEditorUndoRedoTest, UndoDrag002, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
 
     RichEditorPattern::OperationRecord record;

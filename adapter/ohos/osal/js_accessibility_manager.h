@@ -389,6 +389,9 @@ public:
 
     bool CheckAccessibilityVisible(const RefPtr<NG::FrameNode>& node) override;
 
+    void AddHoverTransparentCallback(const RefPtr<NG::FrameNode>& node) override;
+    bool IsInHoverTransparentCallbackList(const RefPtr<NG::FrameNode>& node) override;
+
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
     void DumpHandleEvent(const std::vector<std::string>& params) override;
@@ -747,6 +750,7 @@ private:
 
     AccessibilityParentRectInfo uecRectInfo_;
     NG::PageEventController pageController_;
+    NG::HoverTransparentCallbackController hoverTransparentCallbackController_;
 };
 
 } // namespace OHOS::Ace::Framework

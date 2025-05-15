@@ -367,6 +367,10 @@ public:
     virtual void AddToPageEventController(const RefPtr<NG::FrameNode>& node) {}
     virtual bool CheckPageEventCached(const RefPtr<NG::FrameNode>& node, bool onlyCurrentPage) {return false;}
     virtual bool CheckAccessibilityVisible(const RefPtr<NG::FrameNode>& node) {return true;}
+
+    virtual void AddHoverTransparentCallback(const RefPtr<NG::FrameNode>& node) {};
+    virtual bool IsInHoverTransparentCallbackList(const RefPtr<NG::FrameNode>& node) { return false; };
+
 protected:
     int32_t treeId_ = 0;
 

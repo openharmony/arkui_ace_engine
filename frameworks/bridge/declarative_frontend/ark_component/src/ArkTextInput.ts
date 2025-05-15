@@ -527,6 +527,24 @@ class TextInputEnableAutoFillModifier extends ModifierWithKey<boolean> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+
+class TextInputEnableAutoFillAnimationModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputEnableAutoFillAnimation');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetEnableAutoFillAnimation(node);
+    } else {
+      getUINativeModule().textInput.setEnableAutoFillAnimation(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextInputShowErrorModifier extends ModifierWithKey<ResourceStr | undefined> {
   constructor(value: ResourceStr | undefined) {
     super(value);
@@ -1509,6 +1527,11 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   passwordRules(value: string): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputPasswordRulesModifier.identity,
       TextInputPasswordRulesModifier, value);
+    return this;
+  }
+  enableAutoFillAnimation(value: boolean): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoFillAnimationModifier.identity,
+      TextInputEnableAutoFillAnimationModifier, value);
     return this;
   }
   showCounter(value: boolean, options?: InputCounterOptions): TextInputAttribute {

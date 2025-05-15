@@ -2375,6 +2375,19 @@ class AccessibilityActionInterceptCallbackModifier extends ModifierWithKey {
   }
 }
 AccessibilityActionInterceptCallbackModifier.identity = Symbol('onAccessibilityActionIntercept');
+class AccessibilityHoverTransparentModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityHoverTransparent(node);
+    } else {
+      getUINativeModule().common.setAccessibilityHoverTransparent(node, this.value);
+    }
+  }
+}
+AccessibilityHoverTransparentModifier.identity = Symbol('onAccessibilityHoverTransparent');
 class AllowDropModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -4714,6 +4727,11 @@ class ArkComponent {
 
   onAccessibilityActionIntercept(value) {
     modifierWithKey(this._modifiersWithKeys, AccessibilityActionInterceptCallbackModifier.identity, AccessibilityActionInterceptCallbackModifier, value);
+    return this;
+  }
+
+  onAccessibilityHoverTransparent(value) {
+    modifierWithKey(this._modifiersWithKeys, AccessibilityHoverTransparentModifier.identity, AccessibilityHoverTransparentModifier, value);
     return this;
   }
 
@@ -15656,6 +15674,22 @@ class TextInputEnableAutoFillModifier extends ModifierWithKey {
   }
 }
 TextInputEnableAutoFillModifier.identity = Symbol('textInputEnableAutoFill');
+class TextInputEnableAutoFillAnimationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetEnableAutoFillAnimation(node);
+    } else {
+      getUINativeModule().textInput.setEnableAutoFillAnimation(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputEnableAutoFillAnimationModifier.identity = Symbol('textInputEnableAutoFillAnimation');
 class TextInputFontFeatureModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -16651,6 +16685,10 @@ class ArkTextInputComponent extends ArkComponent {
   }
   enableAutoFill(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoFillModifier.identity, TextInputEnableAutoFillModifier, value);
+    return this;
+  }
+  enableAutoFillAnimation(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoFillAnimationModifier.identity, TextInputEnableAutoFillAnimationModifier, value);
     return this;
   }
   passwordRules(value) {
@@ -33946,12 +33984,7 @@ class CommandsModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    if (isString(this.stageValue) && isString(this.value)) {
-      return this.stageValue !== this.value;
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 CommandsModifier.identity = Symbol('commands');
@@ -34009,7 +34042,7 @@ class RectRadiusModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    return !(this.stageValue === this.value);
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 RectRadiusModifier.identity = Symbol('rectRadius');
@@ -34056,8 +34089,10 @@ class ShapeViewPortModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    return !(this.stageValue.x === this.value.x && this.stageValue.y === this.value.y &&
-      this.stageValue.width === this.value.width && this.stageValue.height === this.value.height);
+    return !(isBaseOrResourceEqual(this.stageValue.x, this.value.x) &&
+    isBaseOrResourceEqual(this.stageValue.y, this.value.y) &&
+    isBaseOrResourceEqual(this.stageValue.width, this.value.width) &&
+    isBaseOrResourceEqual(this.stageValue.height, this.value.height));
   }
 }
 ShapeViewPortModifier.identity = Symbol('shapeViewPort');

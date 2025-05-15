@@ -424,6 +424,9 @@ public:
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas);
 
+    // intent framework
+    void SetIntentParam(const std::string& intentInfoSerialized,
+        const std::function<void()>&& loadPageCallback, bool isColdStart) override {}
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);

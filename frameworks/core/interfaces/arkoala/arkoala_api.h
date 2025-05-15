@@ -29,10 +29,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 141
+#define ARKUI_FULL_API_VERSION 140
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 141
+#define ARKUI_NODE_API_VERSION 140
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -95,7 +95,7 @@ struct _ArkUIRSNode;
 struct _ArkUI_OEMVisualEffectFunc;
 struct ArkUI_TextPickerRangeContentArray;
 struct ArkUI_TextCascadePickerRangeContentArray;
-struct ArkUI_EmbeddedComponentItem;
+struct ArkUI_EmbeddedComponentOption;
 struct AbilityBase_Want;
 
 typedef _ArkUINode* ArkUINodeHandle;
@@ -140,7 +140,7 @@ typedef ArkUI_ListChildrenMainSize* ArkUIListChildrenMainSize;
 
 typedef ArkUI_TextPickerRangeContentArray* ArkUITextPickerRangeContentArray;
 typedef ArkUI_TextCascadePickerRangeContentArray* ArkUITextCascadePickerRangeContentArray;
-typedef ArkUI_EmbeddedComponentItem* ArkUIEmbeddedComponentItemHandle;
+typedef ArkUI_EmbeddedComponentOption* ArkUIEmbeddedComponentOptionHandle;
 struct _ArkUICurve;
 typedef _ArkUICurve* ArkUICurveHandle;
 
@@ -1320,6 +1320,7 @@ struct ArkUIAPIEventGestureAsyncEvent {
     ArkUI_Float32 velocity;
     ArkUI_Int32 inputEventType;
     ArkUI_Int32 targetDisplayId;
+    ArkUI_Int64 deviceId;
     void* rawPointerEvent;
 };
 
@@ -1410,6 +1411,7 @@ struct ArkUINodeEvent {
     ArkUI_Int32 kind; // Actually ArkUIEventCategory.
     ArkUI_Int32 nodeId;
     ArkUI_Int64 extraParam;
+    ArkUI_Int32 apiVersion = 0;
     union {
         ArkUIAPIEventSinglePointer singlePointer;
         ArkUIAPIEventMultiPointer multiPointer;
@@ -3170,7 +3172,7 @@ struct ArkUILazyGridLayoutModifier {
 
 struct ArkUIEmbeddedComponentModifier {
     void (*setEmbeddedComponentWant)(ArkUINodeHandle node, AbilityBase_Want* want);
-    void (*setEmbeddedComponentOption)(ArkUINodeHandle node, ArkUIEmbeddedComponentItemHandle option);
+    void (*setEmbeddedComponentOption)(ArkUINodeHandle node, ArkUIEmbeddedComponentOptionHandle option);
 };
 
 struct ArkUITimepickerModifier {
@@ -4253,6 +4255,9 @@ struct ArkUITextInputModifier {
     void (*setTextInputKeyboardAppearance)(ArkUINodeHandle node, ArkUI_Uint32 keyBoardAppearance);
     ArkUI_Int32 (*getTextInputKeyboardAppearance)(ArkUINodeHandle node);
     void (*resetTextInputKeyboardAppearance)(ArkUINodeHandle node);
+    void (*setTextInputEnableAutoFillAnimation)(ArkUINodeHandle node, ArkUI_Uint32 enableAutoFillAnimation);
+    ArkUI_Int32 (*getTextInputEnableAutoFillAnimation)(ArkUINodeHandle node);
+    void (*resetTextInputEnableAutoFillAnimation)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -5724,7 +5729,7 @@ struct ArkUIXComponentModifier {
 struct ArkUIStateModifier {
     ArkUI_Int64 (*getUIState)(ArkUINodeHandle node);
     void (*setSupportedUIState)(ArkUINodeHandle node, ArkUI_Int64 state);
-    void (*addSupportedUIState)(ArkUINodeHandle node, ArkUI_Int64 state, void* callback);
+    void (*addSupportedUIState)(ArkUINodeHandle node, ArkUI_Int64 state, void* callback, ArkUI_Bool isExcludeInner);
     void (*removeSupportedUIState)(ArkUINodeHandle node, ArkUI_Int64 state);
 };
 
@@ -5862,6 +5867,9 @@ struct ArkUIFrameNodeModifier {
     void (*setKeyProcessingMode)(ArkUI_Int32 instanceId, ArkUI_Int32 mode);
     EventBindingInfo (*getInteractionEventBindingInfo)(ArkUINodeHandle node, int type);
     void (*runScopedTask)(ArkUI_Int32 instanceId, void* userData, void (*callback)(void* userData));
+    void (*addSupportedUIStates)(
+        ArkUINodeHandle node, int32_t state, void* statesChangeHandler, bool isExcludeInner, void* userData);
+    void (*removeSupportedUIStates)(ArkUINodeHandle node, int32_t state);
 };
 
 struct ArkUINodeContentEvent {
@@ -6033,6 +6041,7 @@ struct ArkUIThemeModifier {
     void (*setDefaultTheme)(const ArkUI_Uint32* colors, ArkUI_Bool isDark);
     void (*removeFromCache)(ArkUI_Int32 themeId);
     void (*setOnThemeScopeDestroy)(ArkUINodeHandle node, void* callback);
+    ArkUI_Int32 (*getThemeScopeId)(ArkUINodeHandle node);
 };
 
 /**

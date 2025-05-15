@@ -466,6 +466,7 @@ TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
     selectController_->InitContentController(contentController_);
     magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
     selectOverlay_ = MakeRefPtr<TextFieldSelectOverlay>(WeakClaim(this));
+    autoFillController_ = MakeRefPtr<AutoFillController>(WeakClaim(this));
     if (SystemProperties::GetDebugEnabled()) {
         twinklingInterval_ = 3000; // 3000 : for AtuoUITest
     }
@@ -3074,7 +3075,10 @@ void TextFieldPattern::ScheduleCursorTwinkling()
 
 void TextFieldPattern::StartTwinkling()
 {
-    if (isTransparent_ || !HasFocus() || focusIndex_ == FocuseIndex::CANCEL || focusIndex_ == FocuseIndex::UNIT) {
+    auto autoFillAnimationStatus =
+        autoFillController_ ? autoFillController_->GetAutoFillAnimationStatus() : AutoFillAnimationStatus::INIT;
+    if (isTransparent_ || !HasFocus() || focusIndex_ == FocuseIndex::CANCEL || focusIndex_ == FocuseIndex::UNIT ||
+        autoFillAnimationStatus != AutoFillAnimationStatus::INIT) {
         return;
     }
     // Ignore the result because all ops are called on this same thread (ACE UI).
@@ -3431,12 +3435,29 @@ void TextFieldPattern::TriggerAvoidWhenCaretGoesDown()
             CHECK_NULL_VOID(textFieldManager);
             auto caretPos = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
             auto lastCaretPos = textField->GetLastCaretPos();
-            if (!lastCaretPos.has_value() || caretPos > lastCaretPos.value()) {
+            if (!lastCaretPos.has_value() ||
+                (caretPos > lastCaretPos.value() && textField->CheckIfNeedAvoidOnCaretChange(caretPos))) {
                 TAG_LOGI(ACE_KEYBOARD, "Caret Position Goes Down, Retrigger Avoid");
                 textField->TriggerAvoidOnCaretChange();
             }
         });
     }
+}
+
+bool TextFieldPattern::CheckIfNeedAvoidOnCaretChange(float caretPos)
+{
+#if defined(ENABLE_STANDARD_INPUT)
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, true);
+    auto safeAreaMgr = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaMgr, true);
+    auto keyboard = safeAreaMgr->GetKeyboardInset();
+    return keyboard.Length() > 0 && GreatNotEqual(caretPos, keyboard.start - AVOID_OFFSET.ConvertToPx());
+#else
+    return true;
+#endif
 }
 
 void TextFieldPattern::ApplyNormalTheme()
@@ -8098,14 +8119,8 @@ void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWra
     if (!contentController_ || contentController_->GetTextValue() == nodeWrap->GetValue()) {
         return;
     }
-    bool isWillChange = OnWillChangePreSetValue(UtfUtils::Str8DebugToStr16(nodeWrap->GetValue()));
-    if (!isWillChange) {
-        return;
-    }
-    contentController_->SetTextValue(UtfUtils::Str8DebugToStr16(nodeWrap->GetValue()));
-    auto textLength = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
-    selectController_->UpdateCaretIndex(textLength);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    BeforeAutoFillAnimation(UtfUtils::Str8DebugToStr16(nodeWrap->GetValue()), type);
 }
 
 bool TextFieldPattern::ParseFillContentJsonValue(const std::unique_ptr<JsonValue>& jsonObject,
@@ -11048,4 +11063,55 @@ void TextFieldPattern::OnReportSubmitEvent(const RefPtr<FrameNode>& frameNode)
     }
 }
 
+void TextFieldPattern::BeforeAutoFillAnimation(const std::u16string& content, const AceAutoFillType& type)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto enableAutoFillAnimation = layoutProperty->GetEnableAutoFillAnimationValue(true);
+    auto textValue = content;
+    contentController_->FilterValue(textValue);
+    CHECK_NULL_VOID(autoFillController_);
+    autoFillController_->SetAutoFillTextUtf16Value(textValue);
+    auto onFinishCallback = [weak = AceType::WeakClaim(this), textValue, unFilteredValue = content]() {
+        auto textFieldPattern = weak.Upgrade();
+        CHECK_NULL_VOID(textFieldPattern);
+        auto autoFillController = textFieldPattern->GetAutoFillController();
+        CHECK_NULL_VOID(autoFillController);
+        autoFillController->ResetAutoFillAnimationStatus();
+        auto hostNode = textFieldPattern->GetHost();
+        CHECK_NULL_VOID(hostNode);
+        if (!textFieldPattern->OnWillChangePreSetValue(unFilteredValue)) {
+            hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            return;
+        }
+        auto contentController = textFieldPattern->GetTextContentController();
+        CHECK_NULL_VOID(contentController);
+        contentController->SetTextValue(unFilteredValue);
+        auto textLength = static_cast<int32_t>(contentController->GetTextUtf16Value().length());
+        auto selectController = textFieldPattern->GetTextSelectController();
+        CHECK_NULL_VOID(selectController);
+        selectController->UpdateCaretIndex(textLength);
+        hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto needsAnimation = pipeline && enableAutoFillAnimation &&
+                          (type == AceAutoFillType::ACE_NEW_PASSWORD || type == AceAutoFillType::ACE_PASSWORD) &&
+                          textValue.length() > 0;
+    if (needsAnimation) {
+        autoFillController_->SetAutoFillAnimationStatus(AutoFillAnimationStatus::SHOW_ICON);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        pipeline->AddAfterLayoutTask(
+            [weak = AceType::WeakClaim(this), onFinish = std::move(onFinishCallback), textValue]() {
+                auto textFieldPattern = weak.Upgrade();
+                CHECK_NULL_VOID(textFieldPattern);
+                auto autoFillController = textFieldPattern->GetAutoFillController();
+                CHECK_NULL_VOID(autoFillController);
+                autoFillController->StartAutoFillAnimation(onFinish, textValue);
+            });
+    } else {
+        onFinishCallback();
+    }
+}
 } // namespace OHOS::Ace::NG

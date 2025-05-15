@@ -27,6 +27,7 @@
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
+#include "adapter/ohos/entrance/high_contrast_observer.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "adapter/ohos/entrance/utils.h"
@@ -109,8 +110,8 @@ const char* GetEngineSharedLibrary()
 inline void SetSystemBarPropertyEnableFlag(Rosen::SystemBarProperty& property)
 {
     property.settingFlag_ = static_cast<Rosen::SystemBarSettingFlag>(
-        static_cast<int32_t>(property.settingFlag_) |
-        static_cast<int32_t>(Rosen::SystemBarSettingFlag::ENABLE_SETTING));
+        static_cast<uint32_t>(property.settingFlag_) |
+        static_cast<uint32_t>(Rosen::SystemBarSettingFlag::ENABLE_SETTING));
 }
 
 std::string StringifyAvoidAreas(const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
@@ -304,32 +305,6 @@ void ParseLanguage(ConfigurationChange& configurationChange, const std::string& 
     }
 }
 
-#ifdef ACE_ENABLE_VK
-class HighContrastObserver : public AccessibilityConfig::AccessibilityConfigObserver {
-public:
-    HighContrastObserver(AceContainer* aceContainer) : aceContainer_(aceContainer) {}
-
-    void OnConfigChanged(const AccessibilityConfig::CONFIG_ID id, const AccessibilityConfig::ConfigValue& value)
-    {
-        if (first_) {
-            first_ = false;
-            return;
-        }
-        if (aceContainer_ == nullptr) {
-            return;
-        }
-        auto pipelineContext = aceContainer_->GetPipelineContext();
-        auto fontManager = pipelineContext == nullptr ? nullptr : pipelineContext->GetFontManager();
-        if (fontManager != nullptr) {
-            fontManager->UpdateHybridRenderNodes();
-        }
-    }
-
-private:
-    AceContainer* aceContainer_ = nullptr;
-    bool first_ = true;
-};
-#endif
 } // namespace
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
@@ -3662,7 +3637,7 @@ bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, St
     dragPointerEvent.windowX = pointerItem.GetWindowX();
     dragPointerEvent.windowY = pointerItem.GetWindowY();
     dragPointerEvent.deviceId = pointerItem.GetDeviceId();
-    dragPointerEvent.sourceTool = static_cast<SourceTool>(GetSourceTool(pointerItem.GetToolType()));
+    dragPointerEvent.sourceTool = static_cast<SourceTool>(pointerItem.GetToolType());
     dragPointerEvent.displayId = currentPointerEvent->GetTargetDisplayId();
     dragPointerEvent.pointerEventId = currentPointerEvent->GetId();
     dragPointerEvent.originId = pointerItem.GetOriginPointerId();
@@ -4495,7 +4470,7 @@ void AceContainer::SubscribeHighContrastChange()
     if (!config.InitializeContext()) {
         return;
     }
-    highContrastObserver_ = std::make_shared<HighContrastObserver>(this);
+    highContrastObserver_ = std::make_shared<HighContrastObserver>(WeakClaim(this));
     config.SubscribeConfigObserver(AccessibilityConfig::CONFIG_ID::CONFIG_HIGH_CONTRAST_TEXT, highContrastObserver_);
 }
 

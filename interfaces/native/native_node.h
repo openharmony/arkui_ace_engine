@@ -3162,6 +3162,19 @@ typedef enum {
     NODE_TEXT_INPUT_KEYBOARD_APPEARANCE = 7035,
 
     /**
+     * @brief Set whether to enable the auto fill animation or not.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Whether to enable the auto fill animation.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: Get the flag of whether the auto fill animation is enabled.\n
+     *
+     * @since 20
+     */
+     NODE_TEXT_INPUT_ENABLE_FILL_ANIMATION = 7036,
+
+    /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -3535,12 +3548,10 @@ typedef enum {
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].i32: button type. The parameter type is {@link ArkUI_ButtonType}.
      * The default value is <b>ARKUI_BUTTON_TYPE_CAPSULE</b>. \n
-     * After api 18 the default value change to  <b>ARKUI_BUTTON_ROUNDED_RECTANGLE</b>.
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: button type. The parameter type is {@link ArkUI_ButtonType}.
      * The default value is <b>ARKUI_BUTTON_TYPE_CAPSULE</b>. \n
-     * After api 18 the default value change to  <b>ARKUI_BUTTON_ROUNDED_RECTANGLE</b>.
      *
      */
     NODE_BUTTON_TYPE,
@@ -6311,10 +6322,10 @@ typedef enum {
 
     /**
      * @brief Defines the want used to start EmbeddedAbility.
-     * This attribute can be set, reset, and obtained as required through APIs.
+     * This attribute can be set as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * value[0].i32: want. The default value is <b>nullptr</b>.\n
+     * .object: The want of EmbeddedComponent, with parameter type {@AbilityBase_Want}. The default value is <b>nullptr</b>.\n
      *
      * @since 20
      */
@@ -6322,10 +6333,10 @@ typedef enum {
 
     /**
      * @brief Set onError and onTerminated callbacks for EMBEDDED_COMPONENT.
+     * This attribute can be set as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .object: OH_ArkUI_EmbeddedComponentItem_SetOnError set onError callback.</b> \n
-     * OH_ArkUI_EmbeddedComponentItem_SetOnTerminated set onTerminated callback.\n
+     * .object: The option for EmbeddedComponent, with parameter type {@ArkUI_EmbeddedComponentOption}.\n
      *
      * @since 20
      */
@@ -9254,8 +9265,55 @@ int32_t OH_ArkUI_NodeUtils_GetPositionToParent(ArkUI_NodeHandle node, ArkUI_IntO
  */
 int32_t OH_ArkUI_RunTaskInScope(ArkUI_ContextHandle uiContext, void* userData, void(*callback)(void* userData));
 
+
+/**
+ * @brief Adds the polymorphic style states supported by the component. To handle states efficiently, specify the
+ * states of interest and the corresponding handler. When a state of interest occurs, the handler will be executed.
+ *  - You can adjust the UI style based on the current state within the callback. If this API is called multiple
+ * times on the same node, the last set of states and handler will take precedence.
+ *  - Some component types have default system handling for certain states. For example, the <b>Button</b>
+ * component has a default style effect for the PRESSED state. When custom state handling is implemented on such
+ * components, the default style effect will be applied first, followed by the custom style changes, resulting in
+ * a combined effect. To disable the default style effects, set <b>excludeInner</b> to <b>true</b>, if this is allowed
+ * by the system implementation.
+ *  - And when this API is called, the provided handler function will be executed immediately.
+ *  - There is no need to explicitly register a listener for the NORMAL state. Once a non-NORMAL state is registered,
+ * the system will automatically notify your application when the state changes back to NORMAL.
+ *
+ * @param node Target node.
+ * @param uiStates Target UI states to be handled on the node.
+ *        The combined result of all target UI states can be calculated using the <b>|</b> operator.
+ *        Example: <b>targetUIStates = ArkUI_UIState::PRESSED | ArkUI_UIState::FOCUSED</b>.
+ * @param statesChangeHandler Handler for UI state changes.
+ *        It returns the current UI status. The value is the result of combining all current state enum values using the
+ *        <b>|</b> operator. You can determine the state using the <b>&</b> operator.
+ *        Example: <b>if (currentStates & ArkUI_UIState::PRESSED == ArkUI_UIState::PRESSED)</b>
+ *        However, for checking the normal state, use the equality operator directly.
+ *        Example: <b>if (currentStates == ArkUI_UIState::NORMAL)</b>.
+ * @param excludeInner Whether to disable the default state styles.
+ * @param userData Custom data used in the <b>onDrawCompleted</b> callback.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs. * @since 20
+ */
+ArkUI_ErrorCode OH_ArkUI_AddSupportedUIStates(ArkUI_NodeHandle node, int32_t uiStates,
+    void (statesChangeHandler)(int32_t currentStates, void* userData), bool excludeInner, void* userData);
+
+/**
+ * @brief Removes registered UI states. When all states registered using <b>OH_ArkUI_AddSupportedUIStates</b>
+ * are removed, the registered <b>stateChangeHandler</b> will no longer be executed.
+ * 
+ * @param node Target node.
+ * @param uiStates Target UI states to be removed.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ */
+ArkUI_ErrorCode OH_ArkUI_RemoveSupportedUIStates(ArkUI_NodeHandle node, int32_t uiStates);
+
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif // ARKUI_NATIVE_NODE_H

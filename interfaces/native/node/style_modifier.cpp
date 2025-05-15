@@ -4850,6 +4850,33 @@ void ResetTextInputEnableAutoFill(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getTextInputModifier()->resetTextInputEnableAutoFill(node->uiNodeHandle);
 }
 
+int32_t SetTextInputEnableAutoFillAnimation(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputEnableAutoFillAnimation(
+        node->uiNodeHandle, static_cast<uint32_t>(item->value[0].i32));
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetTextInputEnableAutoFillAnimation(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getTextInputModifier()->getTextInputEnableAutoFillAnimation(
+        node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
+void ResetTextInputEnableAutoFillAnimation(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextInputModifier()->resetTextInputEnableAutoFillAnimation(node->uiNodeHandle);
+}
+
 int32_t SetEnablePreviewText(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
@@ -6831,7 +6858,7 @@ int32_t SetEmbeddedComponentOption(ArkUI_NodeHandle node, const ArkUI_AttributeI
     if (node == nullptr || item == nullptr || item->object == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    auto* EmbeddedComponentOption = reinterpret_cast<ArkUIEmbeddedComponentItemHandle>(item->object);
+    auto* EmbeddedComponentOption = reinterpret_cast<ArkUIEmbeddedComponentOptionHandle>(item->object);
     GetFullImpl()->getNodeModifiers()->getEmbeddedComponentModifier()->setEmbeddedComponentOption(
         node->uiNodeHandle, EmbeddedComponentOption);
     return ERROR_CODE_NO_ERROR;
@@ -15209,7 +15236,7 @@ int32_t SetTextInputAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
         SetInputFilter, SetTextInputStyle, SetTextInputCaretOffset, nullptr, nullptr,
         SetTextInputSelectionMenuHidden, SetBlurOnSubmit, SetInputCustomKeyboard, SetTextInputWordBreak,
         SetTextInputShowKeyBoardOnFocus, SetTextInputNumberOfLines, SetLetterSpacing, SetEnablePreviewText,
-        SetTextInputHalfLeading, SetTextInputKeyboardAppearance };
+        SetTextInputHalfLeading, SetTextInputKeyboardAppearance, SetTextInputEnableAutoFillAnimation };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -15227,7 +15254,7 @@ const ArkUI_AttributeItem* GetTextInputAttribute(ArkUI_NodeHandle node, int32_t 
         GetTextInputStyle, GetTextInputCaretOffset, GetTextInputContentRect, GetTextInputContentLineCount,
         GetTextInputSelectionMenuHidden, GetBlurOnSubmit, GetInputCustomKeyboard, GetTextInputWordBreak,
         GetTextInputShowKeyBoardOnFocus, GetTextInputNumberOfLines, GetLetterSpacing, GetEnablePreviewText,
-        nullptr, GetTextInputKeyboardAppearance };
+        nullptr, GetTextInputKeyboardAppearance, GetTextInputEnableAutoFillAnimation };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -15245,7 +15272,7 @@ void ResetTextInputAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetInputFilter, ResetTextInputStyle, ResetTextInputCaretOffset, nullptr, nullptr,
         ResetTextInputSelectionMenuHidden, ResetBlurOnSubmit, ResetInputCustomKeyboard, ResetTextInputWordBreak,
         ResetTextInputShowKeyBoardOnFocus, ResetTextInputNumberOfLines, ResetLetterSpacing, ResetEnablePreviewText,
-        ResetTextInputHalfLeading, ResetTextInputKeyboardAppearance };
+        ResetTextInputHalfLeading, ResetTextInputKeyboardAppearance, ResetTextInputEnableAutoFillAnimation };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

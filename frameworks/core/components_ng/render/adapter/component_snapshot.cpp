@@ -694,4 +694,26 @@ std::shared_ptr<Media::PixelMap> ComponentSnapshot::CreateSync(
         node->GetTag().c_str(), pair.first, imageIds.c_str());
     return pair.second;
 }
+
+std::vector<std::pair<uint64_t, std::shared_ptr<Media::PixelMap>>> ComponentSnapshot::GetSoloNode(
+    const RefPtr<FrameNode>& node)
+{
+    if (!node) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "GetSoloNode Internal error! node is nullptr");
+        return {{ERROR_CODE_INTERNAL_ERROR, nullptr}};
+    }
+    auto rsNode = GetRsNode(node);
+    if (!rsNode) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "Can't get RsNode! rootId=" SEC_PLD(%{public}d) " depth=%{public}d rootNode=%{public}s",
+            SEC_PARAM(node->GetId()), node->GetDepth(), node->GetTag().c_str());
+        return {{ERROR_CODE_INTERNAL_ERROR, nullptr}};
+    }
+    ACE_SCOPED_TRACE("ComponentSnapshot::GetSoloNode_Id=%d_RsId=%" PRIu64 "", node->GetId(), rsNode->GetId());
+    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+    TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+        "Begin to get solo node snapshot, rootId=" SEC_PLD(%{public}d) " depth=%{public}d size=%{public}s",
+        SEC_PARAM(node->GetId()), node->GetDepth(), node->GetGeometryNode()->GetFrameSize().ToString().c_str());
+    return rsInterface.TakeSurfaceCaptureSoloNodeList(rsNode);
+}
 } // namespace OHOS::Ace::NG

@@ -1027,9 +1027,9 @@ public:
         int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset);
     std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
 
-    std::vector<RectF> GetResponseRegionListForTouch(const RectF& rect);
+    std::vector<RectF> GetResponseRegionListForTouch(const RectF& windowRect);
 
-    void GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList);
+    void GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList, const RectF& windowRect);
 
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList);
 
@@ -1360,9 +1360,10 @@ public:
     void AddVisibilityDumpInfo(const std::pair<uint64_t, std::pair<VisibleType, bool>>& dumpInfo);
 
     std::string PrintVisibilityDumpInfo() const;
-    void SetDetachRelatedNodeCallback(std::function<void()>&& callback)
+    
+    void SetRemoveToolbarItemCallback(uint32_t id, std::function<void()>&& callback)
     {
-        detachRelatedNodeCallback_ = std::move(callback);
+        removeToolbarItemCallbacks_[id] = callback;
     }
 
     int32_t OnRecvCommand(const std::string& command) override;
@@ -1519,6 +1520,8 @@ private:
 
     void TipsTouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
         TouchRestrict& touchRestrict, TouchTestResult& result, ResponseLinkResult& responseLinkResult, bool isDispatch);
+
+    RectF CheckResponseRegionForStylus(RectF& rect, const TouchEvent& touchEvent);
 
     void ResetPredictNodes();
     void HandleAreaChangeDestruct();
@@ -1683,7 +1686,9 @@ private:
     RefPtr<Kit::FrameNode> kitNode_;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
 
-    std::function<void()> detachRelatedNodeCallback_;
+    std::unordered_map<uint32_t, std::function<void()>> removeToolbarItemCallbacks_;
+
+    RefPtr<FrameNode> cornerMarkNode_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

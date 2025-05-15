@@ -1862,13 +1862,14 @@ void TextPattern::RecoverCopyOption()
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    auto contentHost = GetContentHost();
+    CHECK_NULL_VOID(host && contentHost);
 
     copyOption_ = textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE
                       ? CopyOptions::None
                       : textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
 
-    const auto& children = host->GetChildren();
+    const auto& children = contentHost->GetChildren();
     if (children.empty()) {
         if (IsSetObscured() && !isSpanStringMode_) {
             copyOption_ = CopyOptions::None;
@@ -3155,7 +3156,8 @@ void TextPattern::OnModifyDone()
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    auto contentHost = GetContentHost();
+    CHECK_NULL_VOID(host && contentHost);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto nowTime = static_cast<unsigned long long>(GetSystemTimestamp());
@@ -3173,7 +3175,7 @@ void TextPattern::OnModifyDone()
         }
         UpdateMarqueeStartPolicy();
     }
-    const auto& children = host->GetChildren();
+    const auto& children = contentHost->GetChildren();
     if (children.empty()) {
         std::u16string textCache = textForDisplay_;
         if (!isSpanStringMode_) {
@@ -3621,7 +3623,7 @@ void TextPattern::ProcessOverlayAfterLayout()
 
 void TextPattern::PreCreateLayoutWrapper()
 {
-    auto host = GetHost();
+    auto host = GetContentHost();
     CHECK_NULL_VOID(host);
 
     auto paintProperty = GetPaintProperty<PaintProperty>();
@@ -5012,7 +5014,7 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSel
 
 void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
 {
-    auto host = GetHost();
+    auto host = GetContentHost();
     CHECK_NULL_VOID(host);
     auto imageNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });

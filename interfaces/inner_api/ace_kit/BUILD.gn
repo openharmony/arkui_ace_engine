@@ -56,6 +56,7 @@ ohos_source_set("ace_kit") {
     "src/view/scroller_impl.cpp",
     "src/view/theme/theme_factory.cpp",
     "src/view/theme/theme_style_impl.cpp",
+    "src/view/theme/token_colors.cpp",
     "src/view/ui_context_impl.cpp",
     "src/view/view.cpp",
     "src/view_factory/abstract_view_factory.cpp",

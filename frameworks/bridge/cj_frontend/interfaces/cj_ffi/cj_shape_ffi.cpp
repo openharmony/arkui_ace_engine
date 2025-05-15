@@ -98,6 +98,12 @@ void FfiOHOSAceFrameworkShapeSetFillOpacity(double fillOpacity)
     ShapeModel::GetInstance()->SetFillOpacity(fillOpacity);
 }
 
+CJ_EXPORT void FfiOHOSAceFrameworkShapeSetForegroundColor(uint32_t color)
+{
+    ShapeModel::GetInstance()->SetFill(Color(color));
+    ViewAbstractModel::GetInstance()->SetForegroundColor(Color(color));
+}
+
 void FfiOHOSAceFrameworkShapeSetStroke(uint32_t color)
 {
     ShapeModel::GetInstance()->SetStroke(Color(color));
@@ -179,7 +185,6 @@ void FfiOHOSAceFrameworkShapeSetMesh(VectorFloat64Handle vecValue, uint32_t colu
         return;
     }
     auto meshValue = reinterpret_cast<std::vector<double>*>(vecValue);
-    LOGI("FfiOHOSAceFrameworkShapeSetMesh mesh meshValue szie: %{public}d", meshValue->size());
     auto tempMeshSize = static_cast<uint64_t>(column + 1) * (row + 1) * 2;
     if (tempMeshSize != meshValue->size()) {
         ShapeModel::GetInstance()->SetBitmapMesh(std::vector<float>(), 0, 0);

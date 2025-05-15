@@ -81,6 +81,8 @@ public:
     }
 
     virtual void RegisterThemeKit(ThemeType type, Ace::Kit::BuildFunc func) = 0;
+
+    virtual void RegisterCustomThemeKit(ThemeType type, Ace::Kit::BuildThemeWrapperFunc func) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_MANAGER_H

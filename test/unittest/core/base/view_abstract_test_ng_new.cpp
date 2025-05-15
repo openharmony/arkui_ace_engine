@@ -17,6 +17,7 @@
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/event/key_event.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1923,6 +1924,31 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableOnKeyEventDispatchTest, TestSize
     ViewAbstract::SetOnKeyEventDispatch(std::move(onKeyCallback2));
     EXPECT_TRUE(callback);
     ViewStackProcessor::GetInstance()->instance = nullptr;
+}
+
+/**
+ * @tc.name: DispatchKeyEvent001
+ * @tc.desc: Test DispatchKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, DispatchKeyEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    std::string tag = "uiNode1";
+    int32_t nodeId = 1;
+    FrameNode frameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
+    int32_t repeatTime = 0;
+    int64_t timeStamp = 0;
+    int64_t deviceId = 0;
+
+    /**
+     * @tc.steps: step2. Create keyEvent.
+     */
+    KeyEvent keyEvent(KeyCode::KEY_UNKNOWN, KeyAction::UNKNOWN, repeatTime, timeStamp, deviceId, SourceType::KEYBOARD);
+    ViewAbstract::DispatchKeyEvent(&frameNode, keyEvent);
+    EXPECT_NE(&frameNode, nullptr);
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN

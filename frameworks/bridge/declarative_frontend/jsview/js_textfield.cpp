@@ -1595,6 +1595,16 @@ void JSTextField::SetEnableAutoFill(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetEnableAutoFill(jsValue->ToBoolean());
 }
 
+void JSTextField::SetEnableAutoFillAnimation(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    if (!jsValue->IsBoolean()) {
+        TextFieldModel::GetInstance()->SetEnableAutoFillAnimation(true);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetEnableAutoFillAnimation(jsValue->ToBoolean());
+}
+
 static CleanNodeStyle ConvertStrToCleanNodeStyle(const std::string& value)
 {
     if (value == "CONSTANT") {

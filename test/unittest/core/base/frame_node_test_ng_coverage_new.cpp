@@ -15,6 +15,7 @@
 #include "test/unittest/core/base/frame_node_test_ng.h"
 
 #include "core/event/touch_event.h"
+#include "frameworks/core/components_ng/pattern/text_field/text_field_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -788,5 +789,24 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest007, TestSize.Level1)
     gestureHub->hitTestMode_ = HitTestMode::HTMNONE;
     auto result = frameNode->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
     EXPECT_EQ(result, HitTestResult::BUBBLING);
+}
+/**
+ * @tc.name: FrameNodeTestNg_CheckResponseRegionForStylus001
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, CheckResponseRegionForStylus001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<TextFieldPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    TouchEvent touchEvent;
+    RectF paintRect = { 100.0f, 100.0f, 100.0f, 100.0f };
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.type = TouchType::MOVE;
+    EXPECT_EQ(frameNode->CheckResponseRegionForStylus(paintRect, touchEvent), paintRect);
+    RectF expectPaintRect = { 100.0f, 80.0f, 100.0f, 140.0f };
+    touchEvent.sourceTool = SourceTool::PEN;
+    touchEvent.type = TouchType::DOWN;
+    EXPECT_EQ(frameNode->CheckResponseRegionForStylus(paintRect, touchEvent), expectPaintRect);
 }
 } // namespace OHOS::Ace::NG

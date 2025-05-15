@@ -426,19 +426,6 @@ void NativeCanvasRenderer::SaveLayer()
     renderingContext2DModel_->SaveLayer();
 }
 
-void NativeCanvasRenderer::SetFilter(const std::string& value)
-{
-    renderingContext2DModel_->SetFilterParam(value);
-}
-
-double NativeCanvasRenderer::GetHeight()
-{
-    double width = 0.0;
-    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
-    canvasRenderingContext2DModel->GetWidth(width);
-    return width;
-}
-
 void NativeCanvasRenderer::NormalRect(const Rect& rect)
 {
     renderingContext2DModel_->AddRect(rect * GetDensity());
@@ -692,6 +679,11 @@ int64_t NativeCanvasRenderer::GetPixelMap(double left, double top, double width,
     }
 }
 
+void NativeCanvasRenderer::SetFilter(const std::string& filterStr)
+{
+    renderingContext2DModel_->SetFilterParam(filterStr);
+}
+
 void NativeCanvasRenderer::SetDirection(const std::string& directionStr)
 {
     auto direction = ConvertStrToTextDirection(directionStr);
@@ -792,6 +784,17 @@ double NativeCanvasRenderer::GetWidth()
     double density = !NearZero(GetDensity()) ? GetDensity() : 1.0;
     width /= density;
     return width;
+}
+
+double NativeCanvasRenderer::GetHeight()
+{
+    double height = 0.0;
+    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+    CHECK_NULL_RETURN(canvasRenderingContext2DModel, -1);
+    canvasRenderingContext2DModel->GetHeight(height);
+    double density = !NearZero(GetDensity()) ? GetDensity() : 1.0;
+    height /= density;
+    return height;
 }
 
 void NativeCanvasRenderer::TransferFromImageBitmap(const sptr<CJRenderImage> cjImage)

@@ -7159,4 +7159,20 @@ HWTEST_F(NativeNodeTest, NativeNodeTest_BackgroundImageResizable_001, TestSize.L
     EXPECT_EQ(sliceVal->value[2].f32, right);
     EXPECT_EQ(sliceVal->value[3].f32, bottom);
 }
+
+/**
+ * @tc.name: NativeNodeTest142
+ * @tc.desc: Test ArkUI_SupportedUIStates.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest142, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ArkUI_NodeHandle styleButton = nodeAPI->createNode(ARKUI_NODE_BUTTON);
+    int32_t settingUIStatus = 1;
+    EXPECT_EQ(OH_ArkUI_AddSupportedUIStates(
+        styleButton, settingUIStatus, nullptr, false, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_RemoveSupportedUIStates(styleButton, settingUIStatus), ARKUI_ERROR_CODE_PARAM_INVALID);
+}
 } // namespace OHOS::Ace

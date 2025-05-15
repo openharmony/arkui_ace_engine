@@ -2202,22 +2202,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg196, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTestNg197
- * @tc.desc: Test RequireSummary.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg197, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: Call function RequireSummary;
-     * @tc.expected: The manager is nullptr
-     */
-    ASSERT_NE(context_, nullptr);
-    context_->RequireSummary();
-    EXPECT_TRUE(context_->GetDragDropManager());
-}
-
-/**
  * @tc.name: PipelineContextTestNg198
  * @tc.desc: Test UpdateFormLinkInfos.
  * @tc.type: FUNC

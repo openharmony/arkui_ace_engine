@@ -35,6 +35,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "base/window/foldable_window.h"
+#include "base/ressched/ressched_report.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/ace_application_info.h"
@@ -1842,7 +1843,7 @@ void OverlayManager::HidePopupAnimation(const RefPtr<FrameNode>& popupNode, cons
 void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
     const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show popup enter, targetId: %{public}d", targetId);
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "show popup enter, targetId: %{public}d", targetId);
     if (!UpdatePopupMap(targetId, popupInfo)) {
         TAG_LOGE(AceLogTag::ACE_OVERLAY, "failed to update popup map, tag:%{public}s",
             popupInfo.target.Upgrade()->GetTag().c_str());
@@ -2256,7 +2257,7 @@ void OverlayManager::SetPopupHotAreas(RefPtr<FrameNode> popupNode)
 
 void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, bool isEraseFromMap)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide popup enter, %{public}d", targetId);
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "hide popup enter, targetId: %{public}d", targetId);
     if (isEraseFromMap) {
         ErasePopupInfo(targetId);
     } else {
@@ -2493,7 +2494,7 @@ void OverlayManager::HideAllPopups()
 
 void OverlayManager::ErasePopup(int32_t targetId)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "erase popup enter, targetId: %{public}d", targetId);
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "erase popup enter, targetId: %{public}d", targetId);
     auto it = popupMap_.find(targetId);
     if (it != popupMap_.end()) {
         auto rootNode = rootNodeWeak_.Upgrade();
@@ -3811,7 +3812,7 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
         return;
     }
 
-    auto pipeline = PipelineContext::GetMainPipelineContext();
+    auto pipeline = GetMainPipelineContext(dialogNode);
     CHECK_NULL_VOID(pipeline);
     ContainerScope scope(pipeline->GetInstanceId());
     auto mainPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
@@ -3849,6 +3850,31 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
     CallOnHideDialogCallback();
     FocusNextOrderNode(topFocusableNode);
     SendAccessibilityEventToNextOrderNode(topOrderNode);
+}
+
+RefPtr<PipelineContext> OverlayManager::GetMainPipelineContext(int32_t containerId)
+{
+    if (containerId >= MIN_SUBCONTAINER_ID && containerId < MIN_PLUGIN_SUBCONTAINER_ID) {
+        containerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+    }
+    auto container = AceEngine::Get().GetContainer(containerId);
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return DynamicCast<PipelineContext>(pipeline);
+}
+
+RefPtr<PipelineContext> OverlayManager::GetMainPipelineContext(const RefPtr<FrameNode>& node)
+{
+    if (!node) {
+        auto containerId = Container::CurrentId();
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "Get main pipeline context. currentContainerId: %{public}d", containerId);
+        return GetMainPipelineContext(containerId);
+    }
+    auto context = node->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto containerId = context->GetInstanceId();
+    return GetMainPipelineContext(containerId);
 }
 
 bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter)
@@ -3918,7 +3944,7 @@ bool OverlayManager::PopupCallBackOnWillDismiss(const RefPtr<FrameNode>& overlay
 
 bool OverlayManager::RemoveBubble(const RefPtr<FrameNode>& overlay)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove bubble enter");
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "remove bubble enter");
     if (PopupInteractiveDismiss(overlay)) {
         return true;
     }
@@ -7470,6 +7496,7 @@ void OverlayManager::CreateOverlayNode()
 
 void OverlayManager::AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index)
 {
+    OHOS::Ace::ResSchedReport::GetInstance().ResSchedDataReport("overlay_add");
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "add FrameNode to the overlay node enter");
     CHECK_NULL_VOID(node);
     int32_t level = -1;
@@ -7566,6 +7593,7 @@ void OverlayManager::AddFrameNodeWithOrder(const RefPtr<FrameNode>& node, std::o
 
 void OverlayManager::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
 {
+    OHOS::Ace::ResSchedReport::GetInstance().ResSchedDataReport("overlay_remove");
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "delete the FrameNode on the overlay node enter");
     RemoveFrameNodeWithOrder(node);
     CHECK_NULL_VOID(node);
@@ -8361,7 +8389,7 @@ void OverlayManager::MountToParentWithOrder(const RefPtr<UINode>& rootNode, cons
 {
     CHECK_NULL_VOID(node);
     CHECK_NULL_VOID(rootNode);
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "%{public}s node mount to root node", node->GetTag().c_str());
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "%{public}s node mount to root node", node->GetTag().c_str());
     if (auto prevNode = GetPrevNodeWithOrder(levelOrder); prevNode) {
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "Get prev FrameNode with order. nodeId: %{public}d", prevNode->GetId());
         node->MountToParentAfter(rootNode, prevNode);
@@ -8383,7 +8411,7 @@ void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, cons
     PopLevelOrder(node->GetId());
     auto parent = node->GetParent();
     CHECK_NULL_VOID(parent);
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "%{public}s node remove from parent node", node->GetTag().c_str());
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "%{public}s node remove from parent node", node->GetTag().c_str());
     parent->RemoveChild(node);
     auto pipelineContext = rootNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);

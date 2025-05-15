@@ -104,6 +104,7 @@ public:
     void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false) override;
     void SetPasswordRules(const std::string& passwordRules) override;
     void SetEnableAutoFill(bool enableAutoFill) override;
+    void SetEnableAutoFillAnimation(bool enableAutoFillAnimation) override;
     void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle) override;
     void SetCancelIconSize(const CalcDimension& iconSize) override;
     void SetCanacelIconSrc(
@@ -159,6 +160,7 @@ public:
     static bool GetSelectionMenuHidden(FrameNode* frameNode);
     static void SetPasswordRules(FrameNode* frameNode, const std::string& passwordRules);
     static void SetEnableAutoFill(FrameNode* frameNode, bool enableAutoFill);
+    static void SetEnableAutoFillAnimation(FrameNode* frameNode, bool enableAutoFillAnimation);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
     static void SetBarState(FrameNode* frameNode, OHOS::Ace::DisplayMode value);
     static void SetPasswordIcon(FrameNode* frameNode, const PasswordIcon& passwordIcon);
@@ -268,6 +270,7 @@ public:
     static void SetInputFilterError(FrameNode* frameNode, const std::function<void(const std::u16string&)>& onError);
     static Ace::WordBreak GetWordBreak(FrameNode* frameNode);
     static bool GetEnableAutoFill(FrameNode* frameNode);
+    static bool GetEnableAutoFillAnimation(FrameNode* frameNode);
     static TextContentType GetContentType(FrameNode* frameNode);
     static UserUnderlineColor GetUnderLineColor(FrameNode* frameNode);
     static std::string GetPasswordRules(FrameNode* frameNode);

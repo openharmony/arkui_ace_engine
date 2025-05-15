@@ -16,6 +16,7 @@
 #include "core/components_ng/base/inspector.h"
 
 #include <unistd.h>
+#include <vector>
 
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
@@ -42,6 +43,7 @@ const char INSPECTOR_COMPONENT_TYPE[] = "type";
 const char INSPECTOR_STATE_VAR[] = "state";
 #endif
 
+const std::vector SUPPORT_METHOD = {"ArkUI.tree", "ArkUI.tree.3D"};
 
 const uint32_t LONG_PRESS_DELAY = 1000;
 RectF deviceRect;
@@ -599,7 +601,9 @@ std::string Inspector::GetInspectorOfNode(RefPtr<NG::UINode> node)
     CHECK_NULL_RETURN(context, jsonRoot->ToString());
     GetContextInfo(context, jsonRoot);
     CHECK_NULL_RETURN(node, jsonRoot->ToString());
-    auto pageId = context->GetStageManager()->GetLastPage()->GetPageId();
+    RefPtr<UINode> lastPage = context->GetStageManager()->GetLastPage();
+    CHECK_NULL_RETURN(lastPage, jsonRoot->ToString());
+    auto pageId = lastPage->GetPageId();
     auto jsonNodeArray = JsonUtil::CreateArray(true);
     InspectorChildrenParameters inspectorParameters;
     GenerateParameters(inspectorParameters, pageId, true);
@@ -854,26 +858,29 @@ void Inspector::GetOffScreenTreeNodes(InspectorTreeMap& nodes)
     }
 }
 
-uint32_t Inspector::ParseWindowIdFromMsg(const std::string& message)
+std::pair<uint32_t, int32_t> Inspector::ParseWindowIdFromMsg(const std::string& message)
 {
     TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "start process inspector get window msg");
     uint32_t windowId = INVALID_WINDOW_ID;
+    int32_t methodIndex = INVALID_METHOD_ID;
     auto json = JsonUtil::ParseJsonString(message);
     if (json == nullptr || !json->IsValid() || !json->IsObject()) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "input message is invalid");
-        return windowId;
+        return {windowId, methodIndex};
     }
     auto methodVal = json->GetString(KEY_METHOD);
-    if (methodVal != SUPPORT_METHOD) {
+    auto it = std::find(SUPPORT_METHOD.begin(), SUPPORT_METHOD.end(), methodVal);
+    if (it == SUPPORT_METHOD.end()) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "method is not supported");
-        return windowId;
+        return {windowId, methodIndex};
     }
+    methodIndex = std::distance(SUPPORT_METHOD.begin(), it);
     auto paramObj = json->GetObject(KEY_PARAMS);
     if (paramObj == nullptr || !paramObj->IsValid() || !paramObj->IsObject()) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "input message params is invalid");
-        return windowId;
+        return {windowId, methodIndex};
     }
     windowId = StringUtils::StringToUint(paramObj->GetString("windowId"));
-    return windowId;
+    return {windowId, methodIndex};
 }
 } // namespace OHOS::Ace::NG

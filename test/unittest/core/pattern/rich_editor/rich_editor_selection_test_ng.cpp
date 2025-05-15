@@ -777,7 +777,7 @@ HWTEST_F(RichEditorSelectionTestNg, AdjustPlaceholderSelection001, TestSize.Leve
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     AddSpan(INIT_VALUE_1);
     OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem1 = AceType::MakeRefPtr<ImageSpanItem>();
@@ -808,7 +808,7 @@ HWTEST_F(RichEditorSelectionTestNg, AdjustPlaceholderSelection002, TestSize.Leve
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     AddSpan(INIT_VALUE_1);
     OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem1 = AceType::MakeRefPtr<ImageSpanItem>();
@@ -861,7 +861,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection013, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto focusHub = richEditorPattern->GetFocusHub();
     EXPECT_NE(focusHub, nullptr);
@@ -891,7 +891,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection014, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto focusHub = richEditorPattern->GetFocusHub();
     EXPECT_NE(focusHub, nullptr);
@@ -918,7 +918,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection015, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto focusHub = richEditorPattern->GetFocusHub();
     EXPECT_NE(focusHub, nullptr);
@@ -947,7 +947,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection016, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto focusHub = richEditorPattern->GetFocusHub();
     EXPECT_NE(focusHub, nullptr);
@@ -986,7 +986,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection017, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto focusHub = richEditorPattern->GetFocusHub();
     EXPECT_NE(focusHub, nullptr);
@@ -1027,7 +1027,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection018, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto focusHub = richEditorPattern->GetFocusHub();
     EXPECT_NE(focusHub, nullptr);
@@ -1305,7 +1305,7 @@ HWTEST_F(RichEditorSelectionTestNg, InitSelection003, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     AddSpan("ab\n\nab");
 
@@ -1462,12 +1462,14 @@ HWTEST_F(RichEditorSelectionTestNg, GetSelectSpanSplit003, TestSize.Level1)
 HWTEST_F(RichEditorSelectionTestNg, GetSelectSpanSplit004, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
     auto spanNodeNew = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
-    richEditorNode_->children_.push_back(spanNode);
-    richEditorNode_->children_.push_back(spanNodeNew);
+    contentNode->children_.push_back(spanNode);
+    contentNode->children_.push_back(spanNodeNew);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     SpanPositionInfo startPositionSpanInfo;
@@ -1485,14 +1487,16 @@ HWTEST_F(RichEditorSelectionTestNg, GetSelectSpanSplit004, TestSize.Level1)
 HWTEST_F(RichEditorSelectionTestNg, GetSelectSpanSplit005, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
     auto spanNodeNew = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
     auto spanNodeAnother = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
-    richEditorNode_->children_.push_back(spanNode);
-    richEditorNode_->children_.push_back(spanNodeNew);
-    richEditorNode_->children_.push_back(spanNodeAnother);
+    contentNode->children_.push_back(spanNode);
+    contentNode->children_.push_back(spanNodeNew);
+    contentNode->children_.push_back(spanNodeAnother);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     SpanPositionInfo startPositionSpanInfo;
@@ -1510,14 +1514,16 @@ HWTEST_F(RichEditorSelectionTestNg, GetSelectSpanSplit005, TestSize.Level1)
 HWTEST_F(RichEditorSelectionTestNg, GetSelectSpanSplit006, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
     auto spanNodeNew = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
     auto spanNodeAnother = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
-    richEditorNode_->children_.push_back(spanNode);
-    richEditorNode_->children_.push_back(spanNodeNew);
-    richEditorNode_->children_.push_back(spanNodeAnother);
+    contentNode->children_.push_back(spanNode);
+    contentNode->children_.push_back(spanNodeNew);
+    contentNode->children_.push_back(spanNodeAnother);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     SpanPositionInfo startPositionSpanInfo;
@@ -1536,14 +1542,16 @@ HWTEST_F(RichEditorSelectionTestNg, GetSelectSpanSplit006, TestSize.Level1)
 HWTEST_F(RichEditorSelectionTestNg, GetSelectSpanSplit007, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
     auto spanNodeNew = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
     auto spanNodeAnother = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
-    richEditorNode_->children_.push_back(spanNode);
-    richEditorNode_->children_.push_back(spanNodeNew);
-    richEditorNode_->children_.push_back(spanNodeAnother);
+    contentNode->children_.push_back(spanNode);
+    contentNode->children_.push_back(spanNodeNew);
+    contentNode->children_.push_back(spanNodeAnother);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     SpanPositionInfo startPositionSpanInfo;

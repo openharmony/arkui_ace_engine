@@ -1105,48 +1105,71 @@ struct CustomDialogContentComponent {
   buttonIndex: number = 2;
   isHasDefaultFocus: boolean = false;
   isAllFocusFalse: boolean = false;
+  scroller: Scroller = new Scroller();
 
   build() {
     WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
-      Scroll() {
-        Column() {
-          CustomDialogLayout({
-            buttonHeight: this.buttonHeight,
-            titleHeight: this.titleHeight,
-            titleMinHeight: this.titleMinHeight
-          }) {
-            ForEach([this.titleIndex, this.contentIndex, this.buttonIndex], (index: number) => {
-              if (index === this.titleIndex) {
-                WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
-                  this.titleBuilder();
-                }
-              } else if (index === this.contentIndex) {
-                Column() {
+      RelativeContainer() {
+        Scroll(this.scroller) {
+          Column() {
+            CustomDialogLayout({
+              buttonHeight: this.buttonHeight,
+              titleHeight: this.titleHeight,
+              titleMinHeight: this.titleMinHeight
+            }) {
+              ForEach([this.titleIndex, this.contentIndex, this.buttonIndex], (index: number) => {
+                if (index === this.titleIndex) {
                   WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
-                    this.contentBuilder();
+                    this.titleBuilder();
                   }
-                }.padding(this.getContentPadding())
-              } else {
-                this.buildButton();
-              }
-            });
+                } else if (index === this.contentIndex) {
+                  Column() {
+                    WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+                      this.contentBuilder();
+                    }
+                  }.padding(this.getContentPadding())
+                } else {
+                  this.buildButton();
+                }
+              });
+            }
           }
+          .constraintSize({ maxHeight: this.contentMaxHeight })
+          .backgroundBlurStyle(this.customStyle ?
+          BlurStyle.Thick : BlurStyle.NONE, undefined, { disableSystemAdaptation: true })
+          .borderRadius(this.customStyle ? $r('sys.float.ohos_id_corner_radius_dialog') : 0)
+          .margin(this.customStyle ? {
+            start: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_start')),
+            end: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_end')),
+            bottom: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_bottom')),
+          } : { left: 0, right: 0, bottom: 0 })
+          .backgroundColor(this.customStyle ? $r('sys.color.ohos_id_color_dialog_bg') : Color.Transparent)
         }
-        .constraintSize({ maxHeight: this.contentMaxHeight })
-        .backgroundBlurStyle(this.customStyle ?
-        BlurStyle.Thick : BlurStyle.NONE, undefined, { disableSystemAdaptation: true })
-        .borderRadius(this.customStyle ? $r('sys.float.ohos_id_corner_radius_dialog') : 0)
-        .margin(this.customStyle ? {
-          start: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_start')),
-          end: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_end')),
-          bottom: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_bottom')),
-        } : { left: 0, right: 0, bottom: 0 })
-        .backgroundColor(this.customStyle ? $r('sys.color.ohos_id_color_dialog_bg') : Color.Transparent)
-      }
-      .borderRadius($r('sys.float.alert_container_shape'))
-      .edgeEffect(EdgeEffect.None, { alwaysEnabled: false })
-      .backgroundColor(this.themeColorMode === ThemeColorMode.SYSTEM || undefined ?
-      Color.Transparent : $r('sys.color.comp_background_primary'))
+        .scrollBar(BarState.Off)
+        .id('CustomDialogContentComponent')
+        .edgeEffect(EdgeEffect.None, { alwaysEnabled: false })
+        .backgroundColor(this.themeColorMode === ThemeColorMode.SYSTEM || undefined ?
+        Color.Transparent : $r('sys.color.comp_background_primary'))
+
+        ScrollBar({scroller: this.scroller})
+          .alignRules({
+            top: { anchor: 'CustomDialogContentComponent', align: VerticalAlign.Top },
+            bottom: { anchor: 'CustomDialogContentComponent', align: VerticalAlign.Bottom },
+            end: { anchor: 'CustomDialogContentComponent', align: HorizontalAlign.End }
+          })
+          .margin({ top: $r('sys.float.alert_container_shape'), bottom: $r('sys.float.alert_container_shape')})
+          .enableNestedScroll(true)
+          .hitTestBehavior(HitTestMode.Transparent)
+          .onGestureRecognizerJudgeBegin((event: BaseGestureEvent, current: GestureRecognizer,
+            others: Array<GestureRecognizer>) => {
+            if (current) {
+              if (current.getType() == GestureControl.GestureType.LONG_PRESS_GESTURE) {
+                return GestureJudgeResult.REJECT;
+              }
+            }
+            return GestureJudgeResult.CONTINUE;
+          })
+      }.height('auto')
     }
   }
 

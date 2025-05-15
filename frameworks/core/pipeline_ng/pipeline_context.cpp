@@ -685,10 +685,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     }
     window_->FlushModifier();
     FlushFrameRate();
-    if (dragWindowVisibleCallback_) {
-        dragWindowVisibleCallback_();
-        dragWindowVisibleCallback_ = nullptr;
-    }
+    FlushDragWindowVisibleCallback();
     if (isFirstFlushMessages_) {
         isFirstFlushMessages_ = false;
         LOGI("ArkUi flush first frame messages.");
@@ -1209,6 +1206,14 @@ void PipelineContext::FlushFrameRate()
         window_->FlushFrameRate(rate, currAnimatorExpectedFrameRate, rateType);
         frameRateManager_->SetIsRateChanged(false);
         lastAnimatorExpectedFrameRate_ = currAnimatorExpectedFrameRate;
+    }
+}
+
+void PipelineContext::FlushDragWindowVisibleCallback()
+{
+    if (dragWindowVisibleCallback_) {
+        dragWindowVisibleCallback_();
+        dragWindowVisibleCallback_ = nullptr;
     }
 }
 
@@ -2923,10 +2928,7 @@ void PipelineContext::OnTouchEvent(
             formEventMgr->HandleEtsCardTouchEvent(mockPoint, etsSerializedGesture);
             formEventMgr->RemoveEtsCardTouchEventCallback(mockPoint.id);
         }
-        if (dragDropManager_ && dragDropManager_->IsDragging() && dragDropManager_->IsSameDraggingPointer(point.id)) {
-            auto pointerEvent = DragPointerEvent(scalePoint.x, scalePoint.y, scalePoint.screenX, scalePoint.screenY);
-            dragDropManager_->SetDragAnimationPointerEvent(pointerEvent);
-        }
+        NotifyDragTouchEvent(scalePoint);
         touchEvents_.emplace_back(point);
         hasIdleTasks_ = true;
         RequestFrame();
@@ -2962,7 +2964,7 @@ void PipelineContext::OnTouchEvent(
         if (scalePoint.type == TouchType::CANCEL) {
             dragEvents_.clear();
         }
-        ResetDraggingStatus(scalePoint, node);
+        NotifyDragTouchEvent(scalePoint);
     }
     if (scalePoint.type != TouchType::MOVE) {
         auto lastDispatchTime = eventManager_->GetLastDispatchTime();
@@ -3041,13 +3043,6 @@ void PipelineContext::CompensateTouchMoveEvent(const TouchEvent& event)
         ACE_SCOPED_TRACE("Finger id: %d process last move event eventId: %d", lastEventIter->first,
             lastEventIter->second.touchEventId);
     }
-}
-
-void PipelineContext::ResetDraggingStatus(const TouchEvent& touchPoint, const RefPtr<FrameNode>& node)
-{
-    auto manager = GetDragDropManager();
-    CHECK_NULL_VOID(manager);
-    manager->ResetDraggingStatus(touchPoint);
 }
 
 void PipelineContext::OnSurfaceDensityChanged(double density)
@@ -3547,9 +3542,6 @@ void PipelineContext::AccelerateConsumeTouchEvents(
             lastDispatchTime[idIter.first] = curVsyncArrivalTime;
             touchEvents.emplace_back(newTouchEvent);
         }
-        auto idToTouchPoint = eventManager_->GetIdToTouchPoint();
-        idToTouchPoint = std::move(idToTouchPoints);
-        eventManager_->SetIdToTouchPoint(std::move(idToTouchPoint));
     } else {
         for (const auto& idIter : idToTouchPoints) {
             lastDispatchTime[idIter.first] = curVsyncArrivalTime;
@@ -3637,22 +3629,6 @@ void PipelineContext::HandlePenHoverOut(const TouchEvent& point)
     eventManager_->DispatchPenHoverEventNG(oriPoint);
 }
 
-void PipelineContext::CancelDragIfRightBtnPressed(const MouseEvent& event)
-{
-    auto manager = GetDragDropManager();
-    if (!manager) {
-        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "InputTracking id:%{public}d, OnMouseEvent GetDragDropManager is null",
-            event.touchEventId);
-        return;
-    }
-    if (event.button == MouseButton::RIGHT_BUTTON &&
-        (event.action == MouseAction::PRESS || event.action == MouseAction::PULL_UP)) {
-        manager->SetIsDragCancel(true);
-        return;
-    }
-    manager->SetIsDragCancel(false);
-}
-
 void PipelineContext::UpdateLastMoveEvent(const MouseEvent& event)
 {
     if (!lastMouseEvent_) {
@@ -3700,19 +3676,15 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         // Mouse left button press event will set focus inactive in touch process.
         SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT);
     }
-    CancelDragIfRightBtnPressed(event);
 
     if (event.action == MouseAction::RELEASE || event.action == MouseAction::CANCEL ||
         event.action == MouseAction::WINDOW_LEAVE) {
         lastMouseTime_ = GetTimeFromExternalTimer();
         CompensateMouseMoveEvent(event, node);
     }
+    NotifyDragMouseEvent(event);
     DispatchMouseToTouchEvent(event, node);
     if (event.action == MouseAction::MOVE) {
-        if (dragDropManager_ && dragDropManager_->IsDragging() && event.pullAction != MouseAction::PULL_MOVE) {
-            auto pointerEvent = DragPointerEvent(event.x, event.y, event.screenX, event.screenY);
-            dragDropManager_->SetDragAnimationPointerEvent(pointerEvent);
-        }
         mouseEvents_[node].emplace_back(event);
         hasIdleTasks_ = true;
         RequestFrame();
@@ -4260,10 +4232,7 @@ void PipelineContext::OnShow()
 void PipelineContext::OnHide()
 {
     CHECK_RUN_ON(UI);
-    auto dragDropManager = GetDragDropManager();
-    if (dragDropManager && dragDropManager->IsItemDragging()) {
-        dragDropManager->CancelItemDrag();
-    }
+    NotifyDragOnHide();
     onShow_ = false;
     window_->OnHide();
     PerfMonitor::GetPerfMonitor()->SetAppForeground(false);
@@ -4327,6 +4296,14 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
     CHECK_NULL_VOID(containerPattern);
     containerPattern->ShowTitle(isShow, hasDeco, needUpdate);
     isShowTitle_ = isShow && hasDeco;
+    auto titleMgr = containerPattern->GetTitleManager();
+    if (titleMgr) {
+        if (isShowTitle_) {
+            titleMgr->UpdateTargetNodesBarMargin();
+        } else {
+            titleMgr->ResetExpandStackNode();
+        }
+    }
 }
 
 void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height)
@@ -4697,16 +4674,6 @@ void PipelineContext::FlushWindowSizeChangeCallback(int32_t width, int32_t heigh
     std::swap(callbacks, onWindowSizeChangeCallbacks_);
 }
 
-void PipelineContext::RequireSummary()
-{
-    auto manager = GetDragDropManager();
-    if (!manager) {
-        TAG_LOGW(AceLogTag::ACE_DRAG, "require summary, dragDropManager is null");
-        return;
-    }
-    manager->RequireSummary();
-}
-
 void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
     const RefPtr<NG::FrameNode>& node)
 {
@@ -4737,6 +4704,27 @@ void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEven
         historyPointsEventById_.find(pointerEvent.pointerId) != historyPointsEventById_.end()) {
         historyPointsEventById_.erase(pointerEvent.pointerId);
     }
+}
+
+void PipelineContext::NotifyDragTouchEvent(const TouchEvent& event)
+{
+    auto manager = GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+    manager->HandleTouchEvent(event);
+}
+
+void PipelineContext::NotifyDragMouseEvent(const MouseEvent& event)
+{
+    auto manager = GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+    manager->HandleMouseEvent(event);
+}
+
+void PipelineContext::NotifyDragOnHide()
+{
+    auto manager = GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+    manager->HandlePipelineOnHide();
 }
 
 void PipelineContext::CompensatePointerMoveEvent(const DragPointerEvent& event, const RefPtr<FrameNode>& node)
@@ -5828,7 +5816,9 @@ std::string PipelineContext::GetResponseRegion(const RefPtr<FrameNode>& rootNode
 {
     CHECK_NULL_RETURN(rootNode, "");
     std::vector<RectF> responseRegionList;
-    rootNode->GetResponseRegionListByTraversal(responseRegionList);
+    auto window = GetCurrentWindowRect();
+    RectF windowRect{window.Left(), window.Top(), window.Width(), window.Height()};
+    rootNode->GetResponseRegionListByTraversal(responseRegionList, windowRect);
     std::string responseRegionStrOrigin;
     std::string responseRegionStrFilter;
     for (const auto& rect : responseRegionList) {

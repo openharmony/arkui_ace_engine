@@ -22,6 +22,7 @@
 #include "base/error/error_code.h"
 #include "core/event/touch_event.h"
 #include "interfaces/native/drag_and_drop.h"
+#include "interfaces/native/native_key_event.h"
 
 namespace OHOS::Ace::NodeModel {
 namespace {
@@ -825,6 +826,23 @@ int32_t ConvertToCAxisActionType(int32_t originActionType)
     return static_cast<int32_t>(UI_AXIS_EVENT_ACTION_NONE);
 }
 
+int32_t ConvertToCKeyActionType(int32_t originActionType)
+{
+    switch (originActionType) {
+        case ORIGIN_TOUCH_ACTION_DOWN:
+            return static_cast<int32_t>(ARKUI_KEY_EVENT_DOWN);
+        case ORIGIN_TOUCH_ACTION_UP:
+            return static_cast<int32_t>(ARKUI_KEY_EVENT_UP);
+        case ORIGIN_TOUCH_ACTION_MOVE:
+            return static_cast<int32_t>(ARKUI_KEY_EVENT_UNKNOWN);
+        case ORIGIN_TOUCH_ACTION_CANCEL:
+            return static_cast<int32_t>(ARKUI_KEY_EVENT_UNKNOWN);
+        default:
+            break;
+    }
+    return -1;
+}
+
 bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_CompatibleNodeEvent* event)
 {
     ArkUIEventCategory eventCategory = static_cast<ArkUIEventCategory>(origin->kind);
@@ -1003,15 +1021,15 @@ int32_t OH_ArkUI_NodeEvent_GetStringValue(
     if (size <= 0) {
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
     }
-    bool copyResult = false;
     if (strLen >= size) {
-        copyResult = strncpy_s(string[index], size, str, size - 1);
+        if (!strncpy_s(string[index], size, str, size - 1)) {
+            return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
+        }
         string[index][size - 1] = '\0';
     } else {
-        copyResult = strcpy_s(string[index], size, str);
-    }
-    if (!copyResult) {
-        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
+        if (!strcpy_s(string[index], size, str)) {
+            return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
+        }
     }
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }

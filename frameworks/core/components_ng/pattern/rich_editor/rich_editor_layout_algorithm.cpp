@@ -20,6 +20,10 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
 
+namespace {
+constexpr int32_t CHILDREN_SIZE = 1;
+}
+
 namespace OHOS::Ace::NG {
 
 RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans,
@@ -394,6 +398,24 @@ void RichEditorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     frameSize.SetWidth(idealSize.ConvertToSizeT().Width());
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
+
+    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    if (children.size() != CHILDREN_SIZE) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Measure, children size error, size=%{public}zu", children.size());
+        return;
+    }
+    auto contentLayoutWrapper = children.front();
+    if (!contentLayoutWrapper) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Measure, contentLayoutWrapper is null");
+        return;
+    }
+    auto contentNode = contentLayoutWrapper->GetHostNode();
+    if (!contentNode || contentNode->GetTag() != V2::RICH_EDITOR_CONTENT_ETS_TAG) {
+    TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Measure, contentNode is %{public}s",
+        contentNode ? contentNode->GetTag().c_str() : "null");
+        return;
+    }
+    contentLayoutWrapper->Measure(layoutConstraint);
 }
 
 void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -402,6 +424,37 @@ void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(context);
     parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffsetNG() - context->GetRootRect().GetOffset();
     MultipleParagraphLayoutAlgorithm::Layout(layoutWrapper);
+
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    if (children.size() != CHILDREN_SIZE) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Layout, children size error, size=%{public}zu", children.size());
+        return;
+    }
+    auto contentLayoutWrapper = children.front();
+    if (!contentLayoutWrapper) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Measure, contentLayoutWrapper is null");
+        return;
+    }
+    auto contentNode = contentLayoutWrapper->GetHostNode();
+    if (!contentNode || contentNode->GetTag() != V2::RICH_EDITOR_CONTENT_ETS_TAG) {
+    TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Layout, contentNode is %{public}s",
+        contentNode ? contentNode->GetTag().c_str() : "null");
+        return;
+    }
+    contentLayoutWrapper->SetActive(true);
+    contentLayoutWrapper->Layout();
+}
+
+ChildrenListWithGuard RichEditorLayoutAlgorithm::GetAllChildrenWithBuild(LayoutWrapper* layoutWrapper)
+{
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    if (children.size() != CHILDREN_SIZE) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "GetAllChildrenWithBuild, children size=%{public}zu", children.size());
+        return children;
+    }
+    auto& contentLayoutWrapper = *(children.begin());
+    CHECK_NULL_RETURN(contentLayoutWrapper, children);
+    return contentLayoutWrapper->GetAllChildrenWithBuild();
 }
 
 OffsetF RichEditorLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)

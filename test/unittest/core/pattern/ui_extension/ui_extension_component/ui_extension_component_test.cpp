@@ -1905,4 +1905,47 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest016, TestSize.Level
     pattern->UnRegisterPipelineEvent(instanceId);
 #endif
 }
+
+/**
+ * @tc.name: UIExtensionComponentOnDrawReadyTestNg
+ * @tc.desc: Test pattern OnDrawReady
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentOnDrawReadyTestNg, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. get UIExtensionPattern.
+     */
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnAttachToMainTree();
+    ValidSessionWrapper(pattern);
+    ValidSession(pattern);
+    /**
+     * @tc.steps: step2. set placeholder.
+     */
+    SetPlaceholder(pattern);
+    /**
+     * @tc.steps: step3. test UnRegisterPipelineEvent.
+     */
+    pattern->MountPlaceholderNode(PlaceholderType::INITIAL);
+    EXPECT_TRUE(pattern->IsShowPlaceholder());
+    EXPECT_EQ(pattern->curPlaceholderType_, PlaceholderType::INITIAL);
+    /**
+     * @tc.steps: step4. fire OnConnect.
+     */
+    pattern->OnConnect();
+    EXPECT_TRUE(pattern->IsShowPlaceholder());
+    EXPECT_EQ(pattern->curPlaceholderType_, PlaceholderType::INITIAL);
+    /**
+     * @tc.steps: step4. fire OnDrawReadyCallback.
+     */
+    pattern->FireOnDrawReadyCallback();
+    EXPECT_FALSE(pattern->IsShowPlaceholder());
+    EXPECT_EQ(pattern->curPlaceholderType_, PlaceholderType::NONE);
+#endif
+}
 } // namespace OHOS::Ace::NG

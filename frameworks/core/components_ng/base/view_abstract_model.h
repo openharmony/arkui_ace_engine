@@ -434,6 +434,7 @@ public:
     virtual void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) = 0;
     virtual void SetOnAccessibilityActionIntercept(
         NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept) = 0;
+    virtual void SetOnAccessibilityHoverTransparent(TouchEventFunc&& touchEventFunc) = 0;
     virtual void ResetOnAccessibilityFocus() = 0;
     virtual void SetAccessibilityDefaultFocus(bool isFocus) = 0;
     virtual void SetAccessibilityUseSamePage(const std::string& pageMode) = 0;

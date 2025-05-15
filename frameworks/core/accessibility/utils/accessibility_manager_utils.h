@@ -112,6 +112,70 @@ private:
     std::map<int32_t, std::map<WeakPtr<FrameNode>, bool>> controller_;
 };
 
+class HoverTransparentCallbackController {
+public:
+    bool AddToHoverTransparentCallbackList(const RefPtr<FrameNode>& frameNode)
+    {
+        CHECK_NULL_RETURN(frameNode, false);
+        auto pipeline = frameNode->GetContextRefPtr();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto containerId = pipeline->GetInstanceId();
+        auto it = controller_.find(containerId);
+        if (it != controller_.end()) {
+            auto& controllerList = it->second;
+            for (const auto& nodeWptr : controllerList) {
+                auto node = nodeWptr.Upgrade();
+                if (node == nullptr) {
+                    continue;
+                }
+                if (node->GetAccessibilityId() == frameNode->GetAccessibilityId()) {
+                    return false;
+                }
+            }
+            it->second.emplace_back(WeakPtr(frameNode));
+        } else {
+            controller_.emplace(
+                containerId, std::list<WeakPtr<FrameNode>> { WeakPtr(frameNode) });
+        }
+        return true;
+    }
+
+    bool IsInHoverTransparentCallbackList(const RefPtr<FrameNode>& frameNode)
+    {
+        CHECK_NULL_RETURN(frameNode, false);
+        auto pipeline = frameNode->GetContextRefPtr();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto containerId = pipeline->GetInstanceId();
+        auto it = controller_.find(containerId);
+        if (it == controller_.end()) {
+            return false;
+        }
+        auto& controllerList = it->second;
+        for (const auto& nodeWptr : controllerList) {
+            auto node = nodeWptr.Upgrade();
+            if (!node) {
+                continue;
+            }
+            if (node->GetAccessibilityId() == frameNode->GetAccessibilityId()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool CheckHoverTransparentCallbackListEmpty(int32_t containerId)
+    {
+        auto it = controller_.find(containerId);
+        if (it != controller_.end()) {
+            return it->second.empty();
+        }
+        return true;
+    }
+
+private:
+    std::map<int32_t, std::list<WeakPtr<FrameNode>>> controller_;
+};
+
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_ACCESSIBILITY_UTILS_ACCESSIBILITY_MANAGER_UTILS_H

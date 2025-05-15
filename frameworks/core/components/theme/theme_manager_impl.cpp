@@ -178,12 +178,12 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
 };
 
 template<class T>
-RefPtr<NG::TokenThemeWrapper> ThemeWrapperBuildFunc(const RefPtr<ThemeConstants>& themeConstants)
+RefPtr<TokenThemeWrapper> ThemeWrapperBuildFunc(const RefPtr<ThemeConstants>& themeConstants)
 {
     return T().BuildWrapper(themeConstants);
 }
 
-const std::unordered_map<ThemeType, RefPtr<NG::TokenThemeWrapper>(*)(const RefPtr<ThemeConstants>&)>
+const std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>(*)(const RefPtr<ThemeConstants>&)>
     TOKEN_THEME_WRAPPER_BUILDERS = {
         { CheckboxTheme::TypeId(), &ThemeWrapperBuildFunc<NG::CheckboxThemeWrapper::WrapperBuilder> },
         { SwitchTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SwitchThemeWrapper::WrapperBuilder> },
@@ -206,6 +206,7 @@ const std::unordered_map<ThemeType, RefPtr<NG::TokenThemeWrapper>(*)(const RefPt
     };
 
 std::unordered_map<ThemeType, Ace::Kit::BuildFunc> THEME_BUILDERS_KIT;
+std::unordered_map<ThemeType, Ace::Kit::BuildThemeWrapperFunc> TOKEN_THEME_WRAPPER_BUILDERS_KIT;
 } // namespace
 
 ThemeManagerImpl::ThemeManagerImpl()
@@ -302,7 +303,24 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeKit(ThemeType type)
     return theme;
 }
 
-RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type, NG::TokenThemeScopeId themeScopeId)
+
+void ThemeManagerImpl::RegisterCustomThemeKit(ThemeType type, Ace::Kit::BuildThemeWrapperFunc func)
+{
+    auto findIter = TOKEN_THEME_WRAPPER_BUILDERS_KIT.find(type);
+    if (findIter != TOKEN_THEME_WRAPPER_BUILDERS_KIT.end()) {
+        return;
+    }
+    TOKEN_THEME_WRAPPER_BUILDERS_KIT.insert({ type, func });
+}
+
+RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type, TokenThemeScopeId themeScopeId)
+{
+    auto theme = GetThemeKit(type, themeScopeId);
+    CHECK_NULL_RETURN(theme, GetThemeOrigin(type, themeScopeId));
+    return theme;
+}
+
+RefPtr<Theme> ThemeManagerImpl::GetThemeOrigin(ThemeType type, int32_t themeScopeId)
 {
     auto tokenTheme = NG::TokenThemeStorage::GetInstance()->GetTheme(themeScopeId);
     if (!tokenTheme) {
@@ -335,6 +353,49 @@ RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type, NG::TokenThemeScopeId t
         needRestore = true;
     }
     auto wrapper = builderIter->second(themeConstants_);
+    if (needRestore) {
+        // Switching resource manager back into system color mode
+        pipelineContext->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+        ResourceManager::GetInstance().UpdateColorMode(currentMode);
+    }
+    wrapper->ApplyTokenTheme(*tokenTheme);
+    themeWrappers.emplace(type, wrapper);
+    return AceType::DynamicCast<Theme>(wrapper);
+}
+
+RefPtr<Theme> ThemeManagerImpl::GetThemeKit(ThemeType type, int32_t themeScopeId)
+{
+    auto tokenTheme = NG::TokenThemeStorage::GetInstance()->GetTheme(themeScopeId);
+    if (!tokenTheme) {
+        return GetTheme(type);
+    }
+
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, GetTheme(type));
+    ColorMode currentMode = GetCurrentColorMode();
+    ColorMode themeMode = tokenTheme->GetColorMode();
+    auto& themeWrappers = GetThemeWrappers(themeMode == ColorMode::COLOR_MODE_UNDEFINED ? currentMode : themeMode);
+    auto findIter = themeWrappers.find(type);
+    if (findIter != themeWrappers.end()) {
+        auto wrapper = findIter->second;
+        wrapper->ApplyTokenTheme(*tokenTheme);
+        return AceType::DynamicCast<Theme>(wrapper);
+    }
+
+    auto builderIter = TOKEN_THEME_WRAPPER_BUILDERS_KIT.find(type);
+    if (builderIter == TOKEN_THEME_WRAPPER_BUILDERS_KIT.end()) {
+        return nullptr;
+    }
+
+    bool needRestore = false;
+    if (themeMode != ColorMode::COLOR_MODE_UNDEFINED && themeMode != currentMode) {
+        // Local color mode of the current theme does not match actual color scheme.
+        // Current color mode is system. Need to switch to local color mode temporarily.
+        ResourceManager::GetInstance().UpdateColorMode(themeMode);
+        pipelineContext->SetLocalColorMode(themeMode);
+        needRestore = true;
+    }
+    auto wrapper = builderIter->second();
     if (needRestore) {
         // Switching resource manager back into system color mode
         pipelineContext->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);

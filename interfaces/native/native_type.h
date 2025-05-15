@@ -243,18 +243,18 @@ typedef struct ArkUI_ProgressLinearStyleOption ArkUI_ProgressLinearStyleOption;
 typedef struct ArkUI_CrossLanguageOption ArkUI_CrossLanguageOption;
 
 /**
- * @brief Defines the Ability base want.
+ * @brief Declares the Ability base want.
  *
  * @since 20
  */
 typedef struct AbilityBase_Want AbilityBase_Want;
 
 /**
- * @brief Define the EmbeddedComponentItem for the EmbeddedComponent.
+ * @brief Define the EmbeddedComponentOption for the EmbeddedComponent.
  *
  * @since 20
  */
-typedef struct ArkUI_EmbeddedComponentItem ArkUI_EmbeddedComponentItem;
+typedef struct ArkUI_EmbeddedComponentOption ArkUI_EmbeddedComponentOption;
 
 /**
  * @brief Provides the number types of ArkUI in the native code.
@@ -2132,7 +2132,7 @@ typedef enum {
     ARKUI_BUTTON_TYPE_CIRCLE,
     /**
      * Rounded rectangle button.
-     * @since 18
+     * @since 19
      */
     ARKUI_BUTTON_ROUNDED_RECTANGLE = 8
 } ArkUI_ButtonType;
@@ -2394,6 +2394,28 @@ typedef enum {
     /** Lazy expand. Expand the children of node if needed. */
     ARKUI_LAZY_EXPAND = 2,
 } ArkUI_ExpandMode;
+
+/**
+ * @brief Defines the navigation point indicator style of the <b><Swiper></b> component.
+ * @brief Enumerates the UI states of a component, used for handling state-specific styles.
+ *
+ * @since 20
+ */
+typedef enum {
+    /** Normal state. */
+    UI_STATE_NORMAL = 0,
+    /** Pressed state. */
+    UI_STATE_PRESSED = 1 << 0,
+    /** Focused state. */
+    UI_STATE_FOCUSED = 1 << 1,
+    /** Disabled state. */
+    UI_STATE_DISABLED = 1 << 2,
+    /**
+     * Selected state. This state is supported only by specific component types:
+     * <b>Checkbox</b>, <b>Radio</b>, <b>Toggle</b>, <b>List</b>, <b>Grid</b>, and <b>MenuItem</b>.
+     */
+    UI_STATE_SELECTED = 1 << 3,
+} ArkUI_UIState;
 
 /**
  * @brief Define an enum for the focus movement directions.
@@ -4977,43 +4999,43 @@ void OH_ArkUI_TextCascadePickerRangeContentArray_SetChildAtIndex(
 void OH_ArkUI_TextCascadePickerRangeContentArray_Destroy(ArkUI_TextCascadePickerRangeContentArray* handle);
 
 /**
- * @brief Create a configuration item for the EmbeddedComponentItem interface settings.
+ * @brief Create an object for the EmbeddedComponent option.
  *
- * @return EmbeddedComponent Item configuration item instance.
+ * @return A pointer to the object of the EmbeddedComponent option.
  * @since 20
  */
-ArkUI_EmbeddedComponentItem *OH_ArkUI_EmbeddedComponentItem_Create();
+ArkUI_EmbeddedComponentOption* OH_ArkUI_EmbeddedComponentOption_Create();
 
 /**
- * @brief Destroy the EmbeddedComponentItem instance.
+ * @brief Destroy the object by EmbeddedComponent option.
  *
- * @param item EmbeddedComponent Item  instance to be destroyed.
+ * @param option Pointer to the object by the EmbeddeComponent to be destroyed.
  * @since 20
  */
-void OH_ArkUI_EmbeddedComponentItem_Dispose(ArkUI_EmbeddedComponentItem *item);
+void OH_ArkUI_EmbeddedComponentOption_Dispose(ArkUI_EmbeddedComponentOption* option);
 
 /**
- * @brief Set the onError of EmbeddedComponentItem.
+ * @brief Set the onError of EmbeddedComponent.
  *
- * @param item EmbeddedComponentItem instance.
+ * @param option Pointer to the object option by the EmbeddedComponent.
  * @param code Common error information about the API invoking failure.
  * @param name Common error name information about the API invoking failure.
  * @param message Common error message information about the API invoking failure.
  * @since 20
  */
-void OH_ArkUI_EmbeddedComponentItem_SetOnError(
-    ArkUI_EmbeddedComponentItem *item, void (*callback)(int32_t code, const char *name, const char *message));
+void OH_ArkUI_EmbeddedComponentOption_SetOnError(
+    ArkUI_EmbeddedComponentOption* option, void (*callback)(int32_t code, const char* name, const char* message));
 
 /**
- * @brief Set the onTerminated of EmbeddedComponentItem.
+ * @brief Set the onTerminated of EmbeddedComponent.
  *
- * @param item EmbeddedComponentItem instance.
+ * @param option Pointer to the object option by the EmbeddedComponent.
  * @param code Result code returned when the EmbeddedUIExtensionAbility exits.
  * @param want Data returned when the EmbeddedUIExtensionAbility exits.
  * @since 20
  */
-void OH_ArkUI_EmbeddedComponentItem_SetOnTerminated(
-    ArkUI_EmbeddedComponentItem *item, void (*callback)(int32_t code, AbilityBase_Want *want));
+void OH_ArkUI_EmbeddedComponentOption_SetOnTerminated(
+    ArkUI_EmbeddedComponentOption* option, void (*callback)(int32_t code, AbilityBase_Want* want));
 #ifdef __cplusplus
 };
 #endif

@@ -202,16 +202,17 @@ void ScrollBar::SetBarRegion(const Offset& offset, const Size& size)
     if (shapeMode_ == ShapeMode::RECT) {
         double height =
             std::max(size.Height() - NormalizeToPx(startReservedHeight_) - NormalizeToPx(endReservedHeight_), 0.0);
+        auto hoverWidth = isUserNormalWidth_ ? barWidth_ : NormalizeToPx(hoverWidth_);
         if (positionMode_ == PositionMode::LEFT) {
-            barRect_ = Rect(NormalizeToPx(padding_.Left()), 0.0, barWidth_, height) + offset;
+            barRect_ = Rect(NormalizeToPx(padding_.Left()), 0.0, hoverWidth, height) + offset;
         } else if (positionMode_ == PositionMode::RIGHT) {
             barRect_ =
-                Rect(size.Width() - barWidth_ - NormalizeToPx(padding_.Right()), 0.0, barWidth_, height) + offset;
+                Rect(size.Width() - hoverWidth - NormalizeToPx(padding_.Right()), 0.0, hoverWidth, height) + offset;
         } else if (positionMode_ == PositionMode::BOTTOM) {
             auto trackWidth =
                 std::max(size.Width() - NormalizeToPx(startReservedHeight_) - NormalizeToPx(endReservedHeight_), 0.0);
             barRect_ =
-                Rect(0.0, size.Height() - barWidth_ - NormalizeToPx(padding_.Bottom()), trackWidth, barWidth_) +
+                Rect(0.0, size.Height() - hoverWidth - NormalizeToPx(padding_.Bottom()), trackWidth, hoverWidth) +
                 offset;
         }
     }

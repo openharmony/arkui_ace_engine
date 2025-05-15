@@ -724,7 +724,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, CalcLineEndPosition001, TestSize.Leve
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     /**
      * @tc.steps: step2. change parameter and call function.
@@ -749,7 +749,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDeletedSpan001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
 
     RichEditorChangeValue changeValue;
@@ -903,7 +903,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDeletedSpan002, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     richEditorPattern->spans_.clear();
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
@@ -933,7 +933,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetSelectArea101, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     /**
      * @tc.steps: step1. add text and paragraph
@@ -1011,6 +1011,8 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts205, TestS
 
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     /**
      * @tc.steps: step2. initialize style and add text span
@@ -1024,13 +1026,13 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts205, TestS
     textOptions.value = INIT_VALUE_1;
     textOptions.style = style;
     richEditorController->AddTextSpan(textOptions);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
+    EXPECT_EQ(contentNode->GetChildren().size(), 1);
 
     /**
      * @tc.steps: step3. test HandleSelectFontStyle when select nothing
      */
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
-    auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    auto newSpan1 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
     ASSERT_NE(newSpan1, nullptr);
     EXPECT_EQ(newSpan1->GetTextDecoration(), TextDecoration::UNDERLINE);
 
@@ -1045,7 +1047,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts205, TestS
     richEditorPattern->textSelector_.Update(0, 6);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
-    auto newSpan2 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    auto newSpan2 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
     ASSERT_NE(newSpan2, nullptr);
     EXPECT_EQ(newSpan2->GetTextDecoration(), TextDecoration::NONE);
 
@@ -1109,6 +1111,8 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts207, TestS
 
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     /**
      * @tc.steps: step2. add different type span and select
@@ -1116,7 +1120,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts207, TestS
     AddSpan(INIT_VALUE_1);
     AddImageSpan();
     AddSpan(INIT_VALUE_2);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     richEditorPattern->textSelector_.Update(4, 10);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 10);
@@ -1125,17 +1129,17 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts207, TestS
      * @tc.steps: step3. test HandleSelectFontStyle
      */
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
-    auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(1));
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
+    auto newSpan1 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(1));
     ASSERT_NE(newSpan1, nullptr);
     EXPECT_EQ(newSpan1->GetTextDecoration(), TextDecoration::UNDERLINE);
 
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
     EXPECT_EQ(newSpan1->GetItalicFontStyle(), OHOS::Ace::FontStyle::ITALIC);
 
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_B);
-    auto newSpan2 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(3));
+    auto newSpan2 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(3));
     ASSERT_NE(newSpan2, nullptr);
     EXPECT_EQ(newSpan2->GetFontWeight(), Ace::FontWeight::BOLD);
 

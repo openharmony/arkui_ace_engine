@@ -233,6 +233,10 @@ void FfiOHOSAceFrameworkSelectSetPadding(double padding, uint32_t unit)
 
 void FfiOHOSAceFrameworkSelectSetDirection(int32_t value)
 {
+    TextDirection direction = TextDirection::AUTO;
+    if (value >= static_cast<int32_t>(TextDirection::LTR) && value <= static_cast<int32_t>(TextDirection::AUTO)) {
+        direction = static_cast<TextDirection>(value);
+    }
     SelectModel::GetInstance()->SetLayoutDirection(static_cast<TextDirection>(value));
 }
 

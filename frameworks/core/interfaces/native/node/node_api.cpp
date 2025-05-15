@@ -112,6 +112,21 @@ RefPtr<NavigationStack> GetNavigationStackByNode(ArkUINodeHandle node)
     CHECK_NULL_RETURN(result, nullptr);
     return result->pathStack.Upgrade();
 }
+
+void SetDebugBoundary(ArkUINodeHandle node)
+{
+    UINode* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    RefPtr<UINode> refNode = Ace::AceType::Claim<UINode>(uiNode);
+    CHECK_NULL_VOID(refNode);
+    auto frameNode = Ace::AceType::DynamicCast<FrameNode>(refNode);
+    if (frameNode) {
+        auto renderContext = frameNode->GetRenderContext();
+        if (renderContext) {
+            renderContext->SetNeedDebugBoundary(true);
+        }
+    }
+}
 } // namespace
 
 ArkUI_Int64 GetUIState(ArkUINodeHandle node)
@@ -132,14 +147,14 @@ void SetSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
     eventHub->AddSupportedState(static_cast<uint64_t>(state));
 }
 
-void AddSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state, void* callback)
+void AddSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state, void* callback, ArkUI_Bool isExcludeInner)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     std::function<void(uint64_t)>* func = reinterpret_cast<std::function<void(uint64_t)>*>(callback);
-    eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), *func, false);
+    eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), *func, isExcludeInner);
     func = nullptr;
 }
 
@@ -218,6 +233,7 @@ ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 flags)
         if (uiNode) {
             uiNode->setIsCNode(true);
         }
+        SetDebugBoundary(node);
     } else {
         node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
     }

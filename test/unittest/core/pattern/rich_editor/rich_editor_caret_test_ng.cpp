@@ -77,7 +77,7 @@ HWTEST_F(RichEditorCaretTestNg, GetCaretColor001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
@@ -215,7 +215,7 @@ HWTEST_F(RichEditorCaretTestNg, GetCaretMetrics001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
 
     CaretMetricsF caretCaretMetric;
@@ -440,7 +440,7 @@ HWTEST_F(RichEditorCaretTestNg, IsCaretInContentArea001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     /**
      * @tc.steps: step2. change parameter and call function.
@@ -726,6 +726,8 @@ HWTEST_F(RichEditorCaretTestNg, SetCaretWidth001, TestSize.Level1)
     auto richEditorOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
     richEditorOverlay->SetCaretWidth(-1);
     EXPECT_NE(richEditorOverlay->caretWidth_, -1);
+    float tagertCaretWidth = static_cast<float>(Dimension(2.0f, DimensionUnit::VP).ConvertToPx());
+    EXPECT_EQ(tagertCaretWidth, richEditorPattern->GetCaretWidth());
 }
 
 /**

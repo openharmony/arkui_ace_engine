@@ -14,7 +14,12 @@
  */
 
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/security_component/security_component_layout_property.h"
+#include "core/components_ng/pattern/security_component/security_component_paint_property.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #ifdef SECURITY_COMPONENT_ENABLE
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 #endif
@@ -475,6 +480,26 @@ void SecurityComponentPattern::UpdateIconProperty(RefPtr<FrameNode>& scNode, Ref
     }
 }
 
+void SecurityComponentPattern::UpdateSymbolProperty(const RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& symbolNode)
+{
+    auto iconProp = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(iconProp);
+    auto scLayoutProp = scNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_VOID(scLayoutProp);
+    if (scLayoutProp->GetIconSize().has_value()) {
+        auto iconSize = scLayoutProp->GetIconSize().value();
+        iconProp->UpdateFontSize(iconSize);
+    }
+
+    auto scPaintProp = scNode->GetPaintProperty<SecurityComponentPaintProperty>();
+    CHECK_NULL_VOID(scPaintProp);
+    if (scPaintProp->GetIconColor().has_value() && iconProp->GetSymbolSourceInfo().has_value()) {
+        iconProp->UpdateSymbolColorList({scPaintProp->GetIconColor().value()});
+        auto iconSrcInfo = iconProp->GetSymbolSourceInfo().value();
+        iconProp->UpdateSymbolSourceInfo(iconSrcInfo);
+    }
+}
+
 void SecurityComponentPattern::UpdateTextProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& textNode)
 {
     auto scLayoutProp = scNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -586,6 +611,12 @@ void SecurityComponentPattern::OnModifyDone()
     if (iconNode != nullptr) {
         UpdateIconProperty(frameNode, iconNode);
         iconNode->MarkModifyDone();
+    }
+
+    RefPtr<FrameNode> symbolNode = GetSecCompChildNode(frameNode, V2::SYMBOL_ETS_TAG);
+    if (symbolNode != nullptr) {
+        UpdateSymbolProperty(frameNode, symbolNode);
+        symbolNode->MarkModifyDone();
     }
 
     RefPtr<FrameNode> textNode = GetSecCompChildNode(frameNode, V2::TEXT_ETS_TAG);
