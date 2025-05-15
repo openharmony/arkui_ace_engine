@@ -726,6 +726,12 @@ private:
     static JSRef<JSObject> CreateJsTextMenuId(const std::string& id);
     static JSRef<JSArray> CreateJsOnMenuItemClick(const NG::MenuItemParam& menuItemParam);
     static JSRef<JSVal> CreateJsSystemMenuItems(const std::vector<NG::MenuItemParam>& systemMenuItems);
+    static void ParseDialogWidthAndHeight(DialogProperties& properties, const JSRef<JSObject>& obj);
+    static void ParseMaskRectOffset(const JSRef<JSVal>& offsetX, const JSRef<JSVal>& offsetY, DimensionOffset& options);
+    static void ParseMarkRectWidth(const JSRef<JSVal>& width, DimensionRect& options);
+    static void ParseMarkRectHeight(const JSRef<JSVal>& height, DimensionRect& options);
+    static void ParseMarkRectWidthWithResourceObj(const JSRef<JSVal>& width, DimensionRect& options);
+    static void ParseMaskRectHeightWithResourceObj(const JSRef<JSVal>& width, DimensionRect& options);
     static void CompleteResourceObjectInner(
         JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resIdValue);
 };

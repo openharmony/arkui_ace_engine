@@ -78,21 +78,35 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     } else {
         dialogLayoutProp->UpdateDialogAlignment(param.alignment);
     }
-    dialogLayoutProp->UpdateDialogOffset(param.offset);
+
     dialogLayoutProp->UpdateUseCustomStyle(param.customStyle);
     dialogLayoutProp->UpdateAutoCancel(param.autoCancel);
     dialogLayoutProp->UpdateShowInSubWindow(param.isShowInSubWindow);
     dialogLayoutProp->UpdateDialogButtonDirection(param.buttonDirection);
     dialogLayoutProp->UpdateIsModal(param.isModal);
     dialogLayoutProp->UpdateIsSceneBoardDialog(param.isSceneBoardDialog);
-    if (param.width.has_value() && NonNegative(param.width.value().Value())) {
-        dialogLayoutProp->UpdateWidth(param.width.value());
+    if (!SystemProperties::ConfigChangePerform()) {
+        dialogLayoutProp->UpdateDialogOffset(param.offset);
+        if (param.width.has_value() && NonNegative(param.width.value().Value())) {
+            dialogLayoutProp->UpdateWidth(param.width.value());
+        } else {
+            dialogLayoutProp->UpdateGridCount(param.gridCount);
+        }
+        if (param.height.has_value() && NonNegative(param.height.value().Value())) {
+            dialogLayoutProp->UpdateHeight(param.height.value());
+        }
+        if (dialogLayoutProp->GetShowInSubWindowValue(false) || !dialogLayoutProp->GetIsModal().value_or(true)) {
+            dialogContext->UpdateBackgroundColor(Color(0x00000000));
+        } else {
+            dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
+        }
+        if (dialogLayoutProp->GetIsScenceBoardDialog().value_or(false)) {
+            dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
+        }
     } else {
-        dialogLayoutProp->UpdateGridCount(param.gridCount);
+        CreateWithResourceObj(dialog, param);
     }
-    if (param.height.has_value() && NonNegative(param.height.value().Value())) {
-        dialogLayoutProp->UpdateHeight(param.height.value());
-    }
+
     if (param.enableHoverMode.has_value()) {
         dialogLayoutProp->UpdateEnableHoverMode(param.enableHoverMode.value());
     }
@@ -170,4 +184,262 @@ void DialogView::SetDialogAccessibilityHoverConsume(const RefPtr<FrameNode>& dia
         });
 }
 
+void DialogView::ParseMaskColor(
+    const RefPtr<DialogPattern>& pattern, const RefPtr<ResourceObject>& object, const std::string key, Color& result)
+{
+    CHECK_NULL_VOID(pattern);
+    std::string maskColorValue = pattern->GetResCacheMapByKey(key);
+    if (maskColorValue.empty()) {
+        if (ResourceParseUtils::ParseResColor(object, result)) {
+            pattern->AddResCache(key, result.ColorToString());
+        } else {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+            CHECK_NULL_VOID(dialogTheme);
+            result = dialogTheme->GetMaskColorEnd();
+        }
+    } else {
+        result = Color::ColorFromString(maskColorValue);
+    }
+}
+
+void DialogView::SetMaskColorWithResourceObj(
+    const RefPtr<FrameNode>& frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode && resObj);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "dialog.maskColor";
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(frameNode)), key](
+                          const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<DialogPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto layoutProp = AceType::DynamicCast<DialogLayoutProperty>(frameNode->GetLayoutProperty());
+        CHECK_NULL_VOID(layoutProp);
+        Color result;
+        if (layoutProp->GetShowInSubWindowValue(false) || !layoutProp->GetIsModal().value_or(true)) {
+            result = Color(0x00000000);
+        } else {
+            ParseMaskColor(pattern, resObj, key, result);
+        }
+        if (layoutProp->GetIsScenceBoardDialog().value_or(false)) {
+            ParseMaskColor(pattern, resObj, key, result);
+        }
+        pattern->UpdateDialogColor(result, DialogResourceType::MASK_COLOR);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void DialogView::SetWidthWithResourceObj(
+    const RefPtr<FrameNode>& node, const RefPtr<ResourceObject>& resObj, int32_t gridCount)
+{
+    CHECK_NULL_VOID(node && resObj);
+    auto pattern = node->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "dialog.width";
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(node)), key, gridCount](
+                          const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto dialogContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(dialogContext);
+        auto pattern = frameNode->GetPattern<DialogPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto layoutProp = AceType::DynamicCast<DialogLayoutProperty>(frameNode->GetLayoutProperty());
+        CHECK_NULL_VOID(layoutProp);
+        CalcDimension result;
+        std::string widthValue = pattern->GetResCacheMapByKey(key);
+        if (widthValue.empty()) {
+            if (ResourceParseUtils::ParseResDimensionVpNG(resObj, result)) {
+                pattern->AddResCache(key, result.ToString());
+            } else {
+                layoutProp->UpdateGridCount(gridCount);
+                return;
+            }
+        } else {
+            result = CalcDimension::FromString(widthValue);
+        }
+        pattern->UpdateLayoutContent(result, DialogResourceType::WIDTH);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void DialogView::SetHeightWithResourceObj(const RefPtr<FrameNode>& node, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(node && resObj);
+    auto pattern = node->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "dialog.height";
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(node)), key](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<DialogPattern>();
+        CHECK_NULL_VOID(pattern);
+        CalcDimension result;
+        std::string heightValue = pattern->GetResCacheMapByKey(key);
+        if (heightValue.empty()) {
+            if (ResourceParseUtils::ParseResDimensionVpNG(resObj, result)) {
+                pattern->AddResCache(key, result.ToString());
+            }
+        } else {
+            result = CalcDimension::FromString(heightValue);
+        }
+        pattern->UpdateLayoutContent(result, DialogResourceType::HEIGHT);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void DialogView::SetOffsetWithResourceObj(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    DimensionOffset offset;
+    auto pattern = node->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(node)), offset](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<DialogPattern>();
+        CHECK_NULL_VOID(pattern);
+        DimensionOffset& offsetValue = const_cast<DimensionOffset&>(offset);
+        offsetValue.ReloadResources();
+        auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(frameNode->GetLayoutProperty());
+        CHECK_NULL_VOID(dialogLayoutProp);
+        dialogLayoutProp->UpdateDialogOffset(offsetValue);
+    };
+    pattern->AddResObj("dialog.offset", resObj, std::move(updateFunc));
+}
+
+void DialogView::SetShadowWithResourceObj(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    Shadow shadow;
+    auto pattern = node->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(node)), shadow](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        Shadow& shadowValue = const_cast<Shadow&>(shadow);
+        shadowValue.ReloadResources();
+        auto pattern = frameNode->GetPattern<DialogPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateBackShadow(shadowValue);
+    };
+    pattern->AddResObj("dialog.shadow", resObj, std::move(updateFunc));
+}
+
+void DialogView::SetEffectWithResourceObj(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    EffectOption option;
+    auto pattern = node->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(node)), option](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<DialogPattern>();
+        CHECK_NULL_VOID(pattern);
+        EffectOption& optionValue = const_cast<EffectOption&>(option);
+        optionValue.ReloadResources();
+        pattern->UpdateEffect(optionValue);
+    };
+    pattern->AddResObj("dialog.effectOption", resObj, std::move(updateFunc));
+}
+
+void DialogView::SetBackgroundColorWithResourceObj(const RefPtr<FrameNode>& node, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(node && resObj);
+    std::string key = "dialog.backgroundColor";
+    auto pattern = node->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(node)), key](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<DialogPattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string colorVal = pattern->GetResCacheMapByKey(key);
+        Color result;
+        if (colorVal.empty()) {
+            if (ResourceParseUtils::ParseResColor(resObj, result)) {
+                pattern->AddResCache(key, result.ColorToString());
+            } else {
+                auto pipeline = PipelineBase::GetCurrentContext();
+                CHECK_NULL_VOID(pipeline);
+                auto theme = pipeline->GetTheme<DialogTheme>();
+                CHECK_NULL_VOID(theme);
+                result = theme->GetBackgroundColor();
+            }
+        } else {
+            result = Color::ColorFromString(colorVal);
+        }
+        pattern->UpdateDialogColor(result, DialogResourceType::BACKGROUND_COLOR);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void DialogView::SetBlurStyleWithResourceObj(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    BlurStyleOption option;
+    auto pattern = node->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(node)), option](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<DialogPattern>();
+        CHECK_NULL_VOID(pattern);
+        BlurStyleOption& optionValue = const_cast<BlurStyleOption&>(option);
+        optionValue.ReloadResources();
+        pattern->UpdateBlurStyle(optionValue);
+    };
+    pattern->AddResObj("dialog.blurStyle", resObj, std::move(updateFunc));
+}
+
+void DialogView::SetMaskRectWithResouceObj(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    DimensionRect maskRect;
+    auto pattern = node->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(node)), maskRect](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<DialogPattern>();
+        CHECK_NULL_VOID(pattern);
+        DimensionRect& maskRectValue = const_cast<DimensionRect&>(maskRect);
+        maskRectValue.ReloadResources();
+        pattern->UpdateMaskRect(maskRectValue);
+    };
+    pattern->AddResObj("dialog.maskrect", resObj, std::move(updateFunc));
+}
+
+void DialogView::CreateWithResourceObj(const RefPtr<FrameNode>& node, const DialogProperties& param)
+{
+    CHECK_NULL_VOID(node);
+    SetBackgroundColorWithResourceObj(node, param.resourceBgColorObj);
+    SetMaskColorWithResourceObj(node, param.resourceMaskColorObj);
+    SetWidthWithResourceObj(node, param.resourceWidthObj, param.gridCount);
+    SetHeightWithResourceObj(node, param.resourceHeightObj);
+    SetOffsetWithResourceObj(node);
+    SetShadowWithResourceObj(node);
+    SetEffectWithResourceObj(node);
+    SetBlurStyleWithResourceObj(node);
+    SetMaskRectWithResouceObj(node);
+}
 } // namespace OHOS::Ace::NG

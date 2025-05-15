@@ -17,6 +17,7 @@
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
@@ -97,7 +98,39 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
             auto pattern = dialog->GetPattern<DialogPattern>();
             CHECK_NULL_VOID(pattern);
             pattern->SetOnWillDismiss(arg.onWillDismiss);
+            if (SystemProperties::ConfigChangePerform()) {
+                CreateWithResourceObj(pattern, arg);
+            }
         },
         TaskExecutor::TaskType::UI, "ArkUIDialogShowAlertDialog");
+}
+
+void AlertDialogModelNG::CreateWithResourceObj(const RefPtr<DialogPattern>& pattern, const DialogProperties& arg)
+{
+    if (arg.resourceTitleObj) {
+        ProcessContentResourceObj(pattern, arg.resourceTitleObj, DialogResourceType::TITLE);
+    }
+    if (arg.resourceSubTitleObj) {
+        ProcessContentResourceObj(pattern, arg.resourceSubTitleObj, DialogResourceType::SUBTITLE);
+    }
+    if (arg.resourceContentObj) {
+        ProcessContentResourceObj(pattern, arg.resourceContentObj, DialogResourceType::MESSAGE);
+    }
+}
+
+void AlertDialogModelNG::ProcessContentResourceObj(
+    const RefPtr<DialogPattern>& pattern, const RefPtr<ResourceObject>& object, const DialogResourceType type)
+{
+    std::string key = "dialog." + DialogTypeUtils::ConvertDialogTypeToString(type);
+    auto&& updateFunc = [pattern, key, type](const RefPtr<ResourceObject>& resObj) {
+        std::string result = pattern->GetResCacheMapByKey(key);
+        if (result.empty()) {
+            ResourceParseUtils::ParseResString(resObj, result);
+            pattern->AddResCache(key, result);
+        }
+        pattern->UpdateContentValue(result, type);
+    };
+    updateFunc(object);
+    pattern->AddResObj(key, object, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG

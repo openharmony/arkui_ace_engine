@@ -355,6 +355,13 @@ public:
     {
         return uecMaskNode_.Upgrade();
     }
+    void UpdateDialogColor(const Color& color, const DialogResourceType type);
+    void UpdateContentValue(std::string& text, const DialogResourceType type);
+    void UpdateLayoutContent(const CalcDimension& value, const DialogResourceType type);
+    void UpdateBackShadow(const Shadow& shadow);
+    void UpdateEffect(const EffectOption& option);
+    void UpdateBlurStyle(const BlurStyleOption& option);
+    void UpdateMaskRect(const DimensionRect& rect);
 
 private:
     bool AvoidKeyboard() const override
