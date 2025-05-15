@@ -7042,6 +7042,7 @@ bool WebPattern::OnAccessibilityChildTreeDeregister()
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_RETURN(accessibilityManager, false);
     if (treeId_ == 0) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "OnAccessibilityChildTreeDeregister: treeId is 0.");
         return false;
     }
     return accessibilityManager->DeregisterWebInteractionOperationAsChildTree(treeId_);
