@@ -21,6 +21,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_data_url_analyzer_mgr.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_undo_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -111,6 +112,8 @@ HWTEST_F(RichEditorPatternTestSixNg, InsertValueInStyledString001, TestSize.Leve
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_3);
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->undoManager_ =
+        std::make_unique<StyledStringUndoManager>(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->InsertValueInStyledString(PREVIEW_TEXT_VALUE1);
     EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
 }

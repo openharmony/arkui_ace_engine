@@ -18,6 +18,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/base/mock_task_executor.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_undo_manager.h"
  
 using namespace testing;
 using namespace testing::ext;
@@ -36,6 +37,8 @@ void RichEditorStyledStringCommonTestNg::SetUp()
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     richEditorPattern->InitScrollablePattern();
     richEditorPattern->SetSpanStringMode(true);
+    richEditorPattern->undoManager_ =
+        std::make_unique<StyledStringUndoManager>(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->SetRichEditorStyledStringController(AceType::MakeRefPtr<RichEditorStyledStringController>());
     richEditorPattern->GetRichEditorStyledStringController()->SetPattern(WeakPtr(richEditorPattern));
     richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());

@@ -20,6 +20,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_undo_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1023,6 +1024,8 @@ HWTEST_F(RichEditorMouseTest, MouseDoubleClickParagraphEnd001, TestSize.Level1)
     std::u16string content = u"TEST123";
     richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(content);
+    richEditorPattern->undoManager_ =
+        std::make_unique<StyledStringUndoManager>(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
 
     richEditorPattern->typingStyle_ = std::nullopt;
     richEditorPattern->typingTextStyle_ = std::nullopt;
