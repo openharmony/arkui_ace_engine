@@ -604,6 +604,13 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     buttonsRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
     UpdateGestureRowVisible();
     UpdateContainerBgColor();
+    InitColumnTouchTestFunc();
+    CHECK_NULL_VOID(titleMgr_);
+    if (customTitleSettedShow) {
+        titleMgr_->UpdateTargetNodesBarMargin();
+    } else {
+        titleMgr_->ResetExpandStackNode();
+    }
 }
 
 bool ContainerModalPattern::GetContainerModalTitleVisible(bool isImmersive)
@@ -893,6 +900,10 @@ void ContainerModalPattern::InitColumnTouchTestFunc()
     auto column = GetColumnNode();
     CHECK_NULL_VOID(column);
     auto eventHub = column->GetOrCreateGestureEventHub();
+    if (customTitleSettedShow_) {
+        eventHub->SetOnTouchTestFunc(nullptr);
+        return;
+    }
     bool defaultResEnable = enableContainerModalCustomGesture_;
     auto func = [defaultResEnable](const std::vector<TouchTestInfo>& touchInfo) -> TouchResult {
         TouchResult touchRes;
@@ -965,7 +976,7 @@ bool ContainerModalPattern::CanShowCustomTitle()
     return visibility == VisibleType::VISIBLE;
 }
 
-bool ContainerModalPattern::IsContainerModalTransparent()
+bool ContainerModalPattern::IsContainerModalTransparent() const
 {
     if (!isCustomColor_) {
         return false;

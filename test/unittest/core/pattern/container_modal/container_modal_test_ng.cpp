@@ -786,6 +786,7 @@ HWTEST_F(ContainerModelTestNg, InitColumnTouchTestFunc, TestSize.Level1)
 {
     bool result = true;
     CreateContainerModal();
+    pattern_->customTitleSettedShow_ = false;
     pattern_->InitColumnTouchTestFunc();
     auto column = pattern_->GetColumnNode();
     auto eventHub = column->GetOrCreateGestureEventHub();
@@ -807,6 +808,7 @@ HWTEST_F(ContainerModelTestNg, InitColumnTouchTestFunc2, TestSize.Level1)
 {
     bool result = true;
     CreateContainerModal();
+    pattern_->customTitleSettedShow_ = false;
     pattern_->InitColumnTouchTestFunc();
     auto column = pattern_->GetColumnNode();
     auto eventHub = column->GetOrCreateGestureEventHub();
@@ -827,6 +829,7 @@ HWTEST_F(ContainerModelTestNg, AddButtonHoverEvent, TestSize.Level1)
 {
     bool result = true;
     CreateContainerModal();
+    pattern_->customTitleSettedShow_ = false;
     pattern_->InitColumnTouchTestFunc();
     RefPtr<FrameNode> content = CreateContent();
     ContainerModalView view;
@@ -858,6 +861,7 @@ HWTEST_F(ContainerModelTestNg, AddButtonHoverEvent2, TestSize.Level1)
 {
     bool result = true;
     CreateContainerModal();
+    pattern_->customTitleSettedShow_ = false;
     pattern_->InitColumnTouchTestFunc();
     RefPtr<FrameNode> content = CreateContent();
     ContainerModalView view;
@@ -889,6 +893,7 @@ HWTEST_F(ContainerModelTestNg, AddButtonOnEvent, TestSize.Level1)
 {
     bool result = true;
     CreateContainerModal();
+    pattern_->customTitleSettedShow_ = false;
     pattern_->InitColumnTouchTestFunc();
     RefPtr<FrameNode> content = CreateContent();
     ContainerModalView view;
