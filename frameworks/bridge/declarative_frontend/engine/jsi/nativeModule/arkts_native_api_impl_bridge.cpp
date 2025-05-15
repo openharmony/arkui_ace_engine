@@ -4225,6 +4225,12 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::AddSupportedStates));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "removeSupportedStates"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::RemoveSupportedStates));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createAnimation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::CreateAnimation));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "cancelAnimations"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::CancelAnimations));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNodePropertyValue"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetNodePropertyValue));
 
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnReachStart"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::SetOnReachStart));

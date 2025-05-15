@@ -17,6 +17,7 @@
 #include <cstdint>
 #include <functional>
 #include <unordered_map>
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -48,6 +49,23 @@
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+
+std::string PropertyVectorToString(const std::vector<AnimationPropertyType>& vec)
+{
+    std::string res = "[";
+    if (vec.size()) {
+        res.append(std::to_string(static_cast<int32_t>(vec[0])));
+    }
+    for (size_t i = 1; i != vec.size(); ++i) {
+        res.append(",").append(std::to_string(static_cast<int32_t>(vec[i])));
+    }
+    res.append("]");
+    return res;
+}
+
+} // namespace
 
 void ViewAbstract::SetWidth(const CalcLength& width)
 {
@@ -6321,5 +6339,74 @@ void ViewAbstract::ClearJSFrameNodeOnWaterFlowScrollIndex(FrameNode* frameNode)
     CHECK_NULL_VOID(eventHub);
 
     eventHub->ClearJSFrameNodeOnWaterFlowScrollIndex();
+}
+
+bool ViewAbstract::CreatePropertyAnimation(FrameNode* frameNode, AnimationPropertyType property,
+    const std::vector<float>& startValue, const std::vector<float>& endValue, const AnimationOption& option)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    if (startValue.size()) {
+        AnimationUtils::ExecuteWithoutAnimation([renderContext, property, &startValue]() {
+            renderContext->SetAnimationPropertyValue(property, startValue);
+        });
+    }
+    std::shared_ptr<bool> hasAnimation;
+    std::function<void()> finishCallback;
+    if (option.GetOnFinishEvent()) {
+        hasAnimation = std::make_shared<bool>(true);
+        finishCallback = [finish = option.GetOnFinishEvent(), hasAnimation]() {
+            // wrap animation callback, if no animation is generated, skip frontend finish callback.
+            if (*hasAnimation) {
+                finish();
+            }
+        };
+    }
+    AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), finishCallback);
+    renderContext->SetAnimationPropertyValue(property, endValue);
+    auto result = AnimationUtils::CloseImplicitAnimation();
+    if (!result) {
+        if (hasAnimation) {
+            *hasAnimation = false;
+        }
+        TAG_LOGI(AceLogTag::ACE_ANIMATION,
+            "no animation generated because the value is same or first set, property:%{public}d",
+            static_cast<int32_t>(property));
+    }
+    return result;
+}
+
+bool ViewAbstract::CancelPropertyAnimations(
+    FrameNode* frameNode, const std::vector<AnimationPropertyType>& properties)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    if (properties.empty()) {
+        // no need to cancel
+        return true;
+    }
+    ACE_SCOPED_TRACE("CancelPropertyAnimations");
+    // use duration 0 animation param to cancel animation.
+    AnimationOption option { Curves::LINEAR, 0 };
+    AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), nullptr);
+    for (auto AnimationPropertyType : properties) {
+        renderContext->CancelPropertyAnimation(AnimationPropertyType);
+    }
+    bool result = AnimationUtils::CloseImplicitCancelAnimation();
+    if (!result) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "cancel animation error, property:%{public}s, node tag:%{public}s",
+            PropertyVectorToString(properties).c_str(), frameNode->GetTag().c_str());
+    }
+    return result;
+}
+
+std::vector<float> ViewAbstract::GetRenderNodePropertyValue(FrameNode* frameNode, AnimationPropertyType property)
+{
+    CHECK_NULL_RETURN(frameNode, {});
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, {});
+    return renderContext->GetRenderNodePropertyValue(property);
 }
 } // namespace OHOS::Ace::NG

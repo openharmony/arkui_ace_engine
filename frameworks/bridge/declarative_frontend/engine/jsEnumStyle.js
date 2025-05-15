@@ -3958,3 +3958,11 @@ let InteractionHand;
   InteractionHand[InteractionHand.LEFT = 1] = 'LEFT';
   InteractionHand[InteractionHand.RIGHT = 2] = 'RIGHT';
 })(InteractionHand || (InteractionHand = {}));
+
+let AnimationPropertyType;
+(function (AnimationPropertyType) {
+    AnimationPropertyType[AnimationPropertyType["ROTATION"] = 0] = "ROTATION";
+    AnimationPropertyType[AnimationPropertyType["TRANSLATION"] = 1] = "TRANSLATION";
+    AnimationPropertyType[AnimationPropertyType["SCALE"] = 2] = "SCALE";
+    AnimationPropertyType[AnimationPropertyType["OPACITY"] = 3] = "OPACITY";
+})(AnimationPropertyType || (AnimationPropertyType = {}));

@@ -662,6 +662,21 @@ class FrameNode {
     this.uiContext_ = uiContext;
     this.instanceId_ = uiContext.instanceId_;
   }
+  createAnimation(property, startValue, endValue, param): boolean {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    let result = getUINativeModule().frameNode.createAnimation(this.getNodePtr(), property, startValue, endValue, param);
+    __JSScopeUtil__.restoreInstanceId();
+    return result;
+  }
+  cancelAnimations(properties): boolean {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    let result = getUINativeModule().frameNode.cancelAnimations(this.getNodePtr(), properties);
+    __JSScopeUtil__.restoreInstanceId();
+    return result;
+  }
+  getNodePropertyValue(property): number[] {
+    return getUINativeModule().frameNode.getNodePropertyValue(this.getNodePtr(), property);
+  }
   triggerOnReuse(): void {
     getUINativeModule().frameNode.triggerOnReuse(this.getNodePtr());
   }
@@ -713,6 +728,12 @@ class ImmutableFrameNode extends FrameNode {
     }
     this._commonAttribute.setNodePtr(undefined);
     return this._commonAttribute;
+  }
+  createAnimation(property, startValue, endValue, param): boolean {
+    return false;
+  }
+  cancelAnimations(properties): boolean {
+    return false;
   }
 }
 

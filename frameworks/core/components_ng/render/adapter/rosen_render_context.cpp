@@ -227,12 +227,22 @@ RSBrush GetRsBrush(uint32_t fillColor)
 }
 
 template<typename ModifierName, typename T>
-T GetAnimatablePropertyStagingValue(std::shared_ptr<ModifierName>& modifier)
+T GetAnimatablePropertyStagingValue(std::shared_ptr<ModifierName>& modifier, const T& defaultValue = {})
 {
-    CHECK_NULL_RETURN(modifier, {});
+    CHECK_NULL_RETURN(modifier, defaultValue);
     auto property = std::static_pointer_cast<Rosen::RSAnimatableProperty<T>>(modifier->GetProperty());
-    CHECK_NULL_RETURN(property, {});
+    CHECK_NULL_RETURN(property, defaultValue);
     return property->GetStagingValue();
+}
+
+template<typename ModifierName, typename T>
+void CancelModifierAnimation(std::shared_ptr<ModifierName>& modifier)
+{
+    // request cancel all the animations on rs modifier.
+    CHECK_NULL_VOID(modifier);
+    auto property = std::static_pointer_cast<Rosen::RSAnimatableProperty<T>>(modifier->GetProperty());
+    CHECK_NULL_VOID(property);
+    property->RequestCancelAnimation();
 }
 } // namespace
 
@@ -265,32 +275,13 @@ void RosenRenderContext::DetachModifiers()
     if (transitionEffect_) {
         transitionEffect_->Detach(this);
     }
-    if (translateXYUserModifier_) {
-        rsNode_->RemoveModifier(translateXYUserModifier_);
-    }
-    if (translateZUserModifier_) {
-        rsNode_->RemoveModifier(translateZUserModifier_);
-    }
-    if (scaleXYUserModifier_) {
-        rsNode_->RemoveModifier(scaleXYUserModifier_);
-    }
-    if (rotationXUserModifier_) {
-        rsNode_->RemoveModifier(rotationXUserModifier_);
-    }
-    if (rotationYUserModifier_) {
-        rsNode_->RemoveModifier(rotationYUserModifier_);
-    }
-    if (rotationZUserModifier_) {
-        rsNode_->RemoveModifier(rotationZUserModifier_);
-    }
-    if (cameraDistanceUserModifier_) {
-        rsNode_->RemoveModifier(cameraDistanceUserModifier_);
-    }
-    if (baseTranslateInXY_) {
-        rsNode_->RemoveModifier(baseTranslateInXY_);
-    }
-    if (baseRotateInZ_) {
-        rsNode_->RemoveModifier(baseRotateInZ_);
+    std::shared_ptr<Rosen::RSModifier> modifiers[] = { translateXYUserModifier_, translateZUserModifier_,
+        scaleXYUserModifier_, rotationXUserModifier_, rotationYUserModifier_, rotationZUserModifier_,
+        cameraDistanceUserModifier_, baseTranslateInXY_, baseRotateInZ_, alphaUserModifier_ };
+    for (auto& modifier : modifiers) {
+        if (modifier) {
+            rsNode_->RemoveModifier(modifier);
+        }
     }
     if (pipeline) {
         pipeline->RequestFrame();
@@ -1643,15 +1634,15 @@ Rosen::ParticleParaType<float> RosenRenderContext::ConvertParticleDefaultFloatOp
 void RosenRenderContext::OnOpacityUpdate(double opacity)
 {
     CHECK_NULL_VOID(rsNode_);
-    if (AnimationUtils::IsImplicitAnimationOpen() && GetHost()) {
-        auto preOpacity = rsNode_->GetStagingProperties().GetAlpha();
+    if (AnimationUtils::IsImplicitAnimationOpen() && alphaUserModifier_ && GetHost()) {
+        auto preOpacity = GetAnimatablePropertyStagingValue<Rosen::RSAlphaModifier, float>(alphaUserModifier_);
         if (!NearEqual(preOpacity, opacity)) {
             auto host = GetHost();
-            ACE_SCOPED_TRACE("opacity from %f to %f, id:%d, tag:%s", rsNode_->GetStagingProperties().GetAlpha(),
-                opacity, host->GetId(), host->GetTag().c_str());
+            ACE_SCOPED_TRACE(
+                "opacity from %f to %f, id:%d, tag:%s", preOpacity, opacity, host->GetId(), host->GetTag().c_str());
         }
     }
-    rsNode_->SetAlpha(opacity);
+    SetAnimatableProperty<Rosen::RSAlphaModifier, float>(alphaUserModifier_, opacity);
     RequestNextFrame();
 }
 
@@ -2458,12 +2449,11 @@ void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTr
 void RosenRenderContext::OpacityAnimation(const AnimationOption& option, double begin, double end)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetAlpha(begin);
+    SetAnimatableProperty<Rosen::RSAlphaModifier, float>(alphaUserModifier_, begin);
     AnimationUtils::Animate(
         option,
-        [rsNode = rsNode_, endAlpha = end]() {
-            CHECK_NULL_VOID(rsNode);
-            rsNode->SetAlpha(endAlpha);
+        [this, end]() {
+            SetAnimatableProperty<Rosen::RSAlphaModifier, float>(alphaUserModifier_, end);
         },
         option.GetOnFinishEvent());
 }
@@ -6449,7 +6439,7 @@ void RosenRenderContext::SetFrame(float positionX, float positionY, float width,
 void RosenRenderContext::SetOpacity(float opacity)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetAlpha(opacity);
+    SetAnimatableProperty<Rosen::RSAlphaModifier, float>(alphaUserModifier_, opacity);
 }
 
 void RosenRenderContext::SetOpacityMultiplier(float opacity)
@@ -7263,5 +7253,118 @@ void RosenRenderContext::SetIsWideColorGamut(bool isWideColorGamut)
         rsCanvasNode->SetIsWideColorGamut(isWideColorGamut_);
         return;
     }
+}
+
+void RosenRenderContext::SetAnimationPropertyValue(AnimationPropertyType property, const std::vector<float>& value)
+{
+    CHECK_NULL_VOID(rsNode_);
+    switch (property) {
+        case AnimationPropertyType::ROTATION: {
+            if (value.size() == 3) {
+                // rotationX and rotationY are opposite between arkui and rs.
+                SetAnimatableProperty<Rosen::RSRotationXModifier, float>(rotationXUserModifier_, -value[0]);
+                SetAnimatableProperty<Rosen::RSRotationYModifier, float>(rotationYUserModifier_, -value[1]);
+                SetAnimatableProperty<Rosen::RSRotationModifier, float>(rotationZUserModifier_, value[2]);
+                NotifyHostTransformUpdated();
+            }
+            break;
+        }
+        case AnimationPropertyType::TRANSLATION: {
+            if (value.size() == 2) {
+                SetAnimatableProperty<Rosen::RSTranslateModifier, Rosen::Vector2f>(
+                    translateXYUserModifier_, { value[0], value[1] });
+                NotifyHostTransformUpdated();
+            }
+            break;
+        }
+        case AnimationPropertyType::SCALE: {
+            if (value.size() == 2) {
+                SetAnimatableProperty<Rosen::RSScaleModifier, Rosen::Vector2f>(
+                    scaleXYUserModifier_, { value[0], value[1] });
+                NotifyHostTransformUpdated();
+            }
+            break;
+        }
+        case AnimationPropertyType::OPACITY: {
+            if (value.size() == 1) {
+                SetAnimatableProperty<Rosen::RSAlphaModifier, float>(alphaUserModifier_, value[0]);
+            }
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void RosenRenderContext::CancelPropertyAnimation(AnimationPropertyType property)
+{
+    CHECK_NULL_VOID(rsNode_);
+    switch (property) {
+        case AnimationPropertyType::ROTATION: {
+            CancelModifierAnimation<Rosen::RSRotationXModifier, float>(rotationXUserModifier_);
+            CancelModifierAnimation<Rosen::RSRotationYModifier, float>(rotationYUserModifier_);
+            CancelModifierAnimation<Rosen::RSRotationModifier, float>(rotationZUserModifier_);
+            NotifyHostTransformUpdated();
+            break;
+        }
+        case AnimationPropertyType::TRANSLATION: {
+            CancelModifierAnimation<Rosen::RSTranslateModifier, Rosen::Vector2f>(translateXYUserModifier_);
+            NotifyHostTransformUpdated();
+            break;
+        }
+        case AnimationPropertyType::SCALE: {
+            CancelModifierAnimation<Rosen::RSScaleModifier, Rosen::Vector2f>(scaleXYUserModifier_);
+            NotifyHostTransformUpdated();
+            break;
+        }
+        case AnimationPropertyType::OPACITY: {
+            CancelModifierAnimation<Rosen::RSAlphaModifier, float>(alphaUserModifier_);
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+std::vector<float> RosenRenderContext::GetRenderNodePropertyValue(AnimationPropertyType property)
+{
+    std::vector<float> result;
+    CHECK_NULL_RETURN(rsNode_, result);
+    switch (property) {
+        case AnimationPropertyType::ROTATION: {
+            auto angleX =
+                GetAnimatablePropertyStagingValue<Rosen::RSRotationXModifier, float>(rotationXUserModifier_, 0.0f);
+            auto angleY =
+                GetAnimatablePropertyStagingValue<Rosen::RSRotationYModifier, float>(rotationYUserModifier_, 0.0f);
+            auto angleZ =
+                GetAnimatablePropertyStagingValue<Rosen::RSRotationModifier, float>(rotationZUserModifier_, 0.0f);
+            // reverse angleX and angleY, because the angle direction is inconsistent with the RS.
+            result = { -angleX, -angleY, angleZ };
+            break;
+        }
+        case AnimationPropertyType::TRANSLATION: {
+            auto value = GetAnimatablePropertyStagingValue<Rosen::RSTranslateModifier, Rosen::Vector2f>(
+                translateXYUserModifier_);
+            result = { value[0], value[1] };
+            break;
+        }
+        case AnimationPropertyType::SCALE: {
+            auto value = GetAnimatablePropertyStagingValue<Rosen::RSScaleModifier, Rosen::Vector2f>(
+                scaleXYUserModifier_, { 1.0f, 1.0f });
+            result = { value[0], value[1] };
+            break;
+        }
+        case AnimationPropertyType::OPACITY: {
+            auto opacity = GetAnimatablePropertyStagingValue<Rosen::RSAlphaModifier, float>(alphaUserModifier_, 1.0f);
+            result = { opacity };
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+    return result;
 }
 } // namespace OHOS::Ace::NG

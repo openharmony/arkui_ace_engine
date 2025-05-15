@@ -122,6 +122,9 @@ public:
     static ArkUINativeModuleValue CheckIfCanCrossLanguageAttributeSetting(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue AddSupportedStates(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue RemoveSupportedStates(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue CreateAnimation(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue CancelAnimations(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetNodePropertyValue(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static Local<panda::ObjectRef> SetListItemIndex(const EcmaVM* vm, const ListItemIndex indexInfo);
     static ArkUINativeModuleValue SetOnReachStart(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnReachEnd(ArkUIRuntimeCallInfo* runtimeCallInfo);

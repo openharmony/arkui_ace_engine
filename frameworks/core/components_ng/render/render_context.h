@@ -804,6 +804,16 @@ public:
     virtual void SetDrawNode() {}
 
     virtual void UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode) {}
+
+    virtual void SetAnimationPropertyValue(AnimationPropertyType property, const std::vector<float>& value) {}
+
+    virtual void CancelPropertyAnimation(AnimationPropertyType property) {}
+
+    virtual std::vector<float> GetRenderNodePropertyValue(AnimationPropertyType property)
+    {
+        return {};
+    }
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
