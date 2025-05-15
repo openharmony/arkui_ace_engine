@@ -533,7 +533,7 @@ void WindowPattern::UpdateSnapshotWindowProperty()
     if (isPersistentImageFit) {
         int32_t imageFit = 0;
         Rosen::ScenePersistentStorage::Get("SetImageForRecent_" + std::to_string(session_->GetPersistentId()),
-            Rosen::ScenePersistentStorageType::MAXIMIZE_STATE);
+            &imageFit, Rosen::ScenePersistentStorageType::MAXIMIZE_STATE);
         imageLayoutProperty->UpdateImageFit(static_cast<ImageFit>(imageFit));
     } else {
         imageLayoutProperty->UpdateImageFit(isExitSplitOnBackground ? ImageFit::CONTAIN : ImageFit::COVER_TOP_LEFT);
