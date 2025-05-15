@@ -53,6 +53,14 @@ public:
         return true;
     }
 
+    void OnColorModeChange(uint32_t colorMode) override
+    {
+        LinearLayoutPattern::OnColorModeChange(colorMode);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkModifyDone();
+    }
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<TextPickerEventHub>();
@@ -527,6 +535,11 @@ public:
         isSingleRange_ = isSingleRange;
     }
 
+    void UpdateDisappearTextStyle(const PickerTextStyle& textStyle);
+    void UpdateNormalTextStyle(const PickerTextStyle& textStyle);
+    void UpdateSelectedTextStyle(const PickerTextStyle& textStyle);
+    void UpdateDefaultTextStyle(const PickerTextStyle& textStyle);
+
 private:
     void OnModifyDone() override;
     void InitCrownAndKeyEvent();
@@ -591,6 +604,7 @@ private:
     void AdjustFocusBoxOffset(float& centerX, float& centerY);
     float CalculateColumnSize(int32_t index, float childCount, const SizeF& pickerContentSize);
     int32_t CalculateIndex(RefPtr<FrameNode>& frameNode);
+    Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
 
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;

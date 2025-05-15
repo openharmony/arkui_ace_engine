@@ -21,6 +21,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/color.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
 struct ItemDivider final {
@@ -28,6 +29,12 @@ struct ItemDivider final {
     Dimension startMargin = 0.0_vp;
     Dimension endMargin = 0.0_vp;
     Color color = Color::TRANSPARENT;
+
+    RefPtr<ResourceObject> strokeWidthResObj;
+    RefPtr<ResourceObject> startMarginResObj;
+    RefPtr<ResourceObject> endMarginResObj;
+    RefPtr<ResourceObject> colorResObj;
+
     bool isRtl = false;
     bool operator==(const ItemDivider& itemDivider) const
     {

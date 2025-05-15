@@ -70,6 +70,12 @@ struct PickerTextStyle {
     std::optional<Ace::TextOverflow> textOverflow;
     std::unordered_map<std::string, NG::PickerTextStyleResourceUpdate> textStyleResMap_;
 
+    RefPtr<ResourceObject> textColorResObj;
+    RefPtr<ResourceObject> fontSizeResObj;
+    RefPtr<ResourceObject> fontFamilyResObj;
+    RefPtr<ResourceObject> minFontSizeResObj;
+    RefPtr<ResourceObject> maxFontSizeResObj;
+
     void PickerAddResource(const std::string& key, const RefPtr<ResourceObject>& resObj,
         std::function<void(const RefPtr<ResourceObject>&, NG::PickerTextStyle&)>&& updateFunc);
 
