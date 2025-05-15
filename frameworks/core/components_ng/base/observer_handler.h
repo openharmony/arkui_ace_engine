@@ -83,9 +83,10 @@ struct ScrollEventInfo {
     int32_t uniqueId;
     ScrollEventType scrollEvent;
     float offset;
+    Ace::Axis axis;
 
-    ScrollEventInfo(std::string id, int32_t uniqueId, ScrollEventType scrollEvent, float offset)
-        : id(std::move(id)), uniqueId(uniqueId), scrollEvent(scrollEvent), offset(offset)
+    ScrollEventInfo(std::string id, int32_t uniqueId, ScrollEventType scrollEvent, float offset, Ace::Axis axis)
+        : id(std::move(id)), uniqueId(uniqueId), scrollEvent(scrollEvent), offset(offset), axis(axis)
     {}
 };
 
@@ -185,7 +186,7 @@ public:
     void NotifyNavDestinationSwitch(std::optional<NavDestinationInfo>&& from,
         std::optional<NavDestinationInfo>&& to, NavigationOperation operation);
     using NavigationHandleFunc = void (*)(const NavDestinationInfo& info);
-    using ScrollEventHandleFunc = void (*)(const std::string&, int32_t, ScrollEventType, float);
+    using ScrollEventHandleFunc = void (*)(const std::string&, int32_t, ScrollEventType, float, Ace::Axis);
     using RouterPageHandleFunc = void (*)(AbilityContextInfo&, const RouterPageInfoNG&);
     using DrawCommandSendHandleFunc = void (*)();
     using LayoutDoneHandleFunc = void (*)();

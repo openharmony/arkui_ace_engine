@@ -84,7 +84,7 @@ void CJObserverListener::CallCJMethod(const std::string& methodName, void* argv)
 }
 
 void CJObserverListener::OnScrollEventStateChange(
-    const std::string& id, int32_t uniqueId, Ace::NG::ScrollEventType eventType, float offset)
+    const std::string& id, int32_t uniqueId, Ace::NG::ScrollEventType eventType, float offset, Ace::Axis axis)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     LOGI("CJObserverListener::OnScrollEventStateChange is called");
@@ -102,7 +102,8 @@ void CJObserverListener::OnScrollEventStateChange(
         int32_t uniqueId;
         uint32_t eventType;
         float offset;
-    } info = { const_cast<char*>(id.c_str()), uniqueId, static_cast<uint32_t>(eventType), offset };
+        Ace::Axis axis;
+    } info = { const_cast<char*>(id.c_str()), uniqueId, static_cast<uint32_t>(eventType), offset, axis};
 
     CallCJMethod(EVENT_SCROLL, &info);
 }
