@@ -559,6 +559,9 @@ bool FocusManager::NeedChangeFocusAvtive(bool isFocusActive, FocusActiveReason r
     if (isFocusActive_ == isFocusActive) {
         return false;
     }
+    if (reason == FocusActiveReason::ACTIVE_MARK) {
+        return true;
+    }
     if (isFocusActive) {
         if (!SystemProperties::GetFocusCanBeActive()) {
             TAG_LOGI(AceLogTag::ACE_FOCUS, "FocusActive false");
@@ -580,6 +583,13 @@ bool FocusManager::NeedChangeFocusAvtive(bool isFocusActive, FocusActiveReason r
 bool FocusManager::HandleKeyForExtendOrActivateFocus(const KeyEvent& event, const RefPtr<FocusView>& curFocusView)
 {
     if (event.action == KeyAction::DOWN) {
+        if (event.activeMark.has_value()) {
+            if (event.activeMark.value()) {
+                return ExtendOrActivateFocus(curFocusView, FocusActiveReason::ACTIVE_MARK);
+            } else {
+                return SetIsFocusActive(false, FocusActiveReason::ACTIVE_MARK);
+            }
+        }
         if (event.IsKey({ KeyCode::KEY_TAB })) {
             return ExtendOrActivateFocus(curFocusView, FocusActiveReason::KEY_TAB);
         }
