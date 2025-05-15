@@ -6676,6 +6676,10 @@ int32_t RichEditorPattern::CaretPositionSelectEmoji(CaretMoveIntent direction)
 
 void RichEditorPattern::HandleSelect(CaretMoveIntent direction)
 {
+    if (IsPreviewTextInputting()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleSelect blocked during preview text input");
+        return;
+    }
     CloseSelectOverlay();
     auto host = GetHost();
     CHECK_NULL_VOID(host);

@@ -1732,6 +1732,15 @@ HWTEST_F(RichEditorSelectionTestNg, HandleSelect003, TestSize.Level1)
     richEditorPattern->HandleSelect(CaretMoveIntent::ParagraghEnd);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 13);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 14);
+
+    // during preview text input
+    richEditorPattern->previewTextRecord_.previewContent = u"123";
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
+    richEditorPattern->previewTextRecord_.startOffset = 0;
+    richEditorPattern->previewTextRecord_.endOffset = 0;
+    richEditorPattern->HandleSelect(CaretMoveIntent::ParagraghBegin);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 13);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 14);
 }
 
 } // namespace OHOS::Ace::NG
