@@ -2294,6 +2294,10 @@ void BorderRadiusImpl(Ark_NativePointer node,
     auto radiuses = Converter::OptConvert<BorderRadiusProperty>(*value);
     if (radiuses) {
         // TODO: Reset value
+        if (frameNode->GetTag() == V2::BUTTON_ETS_TAG) {
+            ButtonModelNG::SetBorderRadius(frameNode, radiuses.value().radiusTopLeft, radiuses.value().radiusTopRight,
+                radiuses.value().radiusBottomLeft, radiuses.value().radiusBottomRight);
+        }
         ViewAbstractModelStatic::SetBorderRadius(frameNode, radiuses.value());
     }
 }
