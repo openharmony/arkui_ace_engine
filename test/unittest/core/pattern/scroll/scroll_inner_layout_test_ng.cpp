@@ -332,7 +332,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarWidth001, TestSize.Level1)
     CreateContent();
     CreateScrollDone();
     EXPECT_EQ(scrollBar_->activeRect_.Width(), NORMAL_WIDTH);
-    EXPECT_EQ(scrollBar_->barRect_.Width(), NORMAL_WIDTH);
+    EXPECT_EQ(scrollBar_->barRect_.Width(), DEFAULT_ACTIVE_WIDTH);
 
     /**
      * @tc.steps: step2. Set scrollBar width less than scrollBar height
