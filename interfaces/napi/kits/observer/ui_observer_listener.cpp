@@ -554,7 +554,7 @@ void UIObserverListener::OnNavigationStateChange(const NG::NavDestinationInfo& i
 }
 
 void UIObserverListener::OnScrollEventStateChange(
-    const std::string& id, int32_t uniqueId, NG::ScrollEventType eventType, float offset)
+    const std::string& id, int32_t uniqueId, NG::ScrollEventType eventType, float offset, Ace::Axis axis)
 {
     if (!env_ || !callback_) {
         TAG_LOGW(AceLogTag::ACE_OBSERVER,
@@ -574,14 +574,17 @@ void UIObserverListener::OnScrollEventStateChange(
     napi_value frameNodeId = nullptr;
     napi_value scrollEventType = nullptr;
     napi_value scrollOffset = nullptr;
+    napi_value scrollAxis = nullptr;
     napi_create_string_utf8(env_, id.c_str(), id.length(), &scrollId);
     napi_create_int32(env_, uniqueId, &frameNodeId);
     napi_create_int32(env_, static_cast<int32_t>(eventType), &scrollEventType);
     napi_create_double(env_, offset, &scrollOffset);
+    napi_create_int32(env_, static_cast<int32_t>(axis), &scrollAxis);
     napi_set_named_property(env_, objValue, "id", scrollId);
     napi_set_named_property(env_, objValue, "uniqueId", frameNodeId);
     napi_set_named_property(env_, objValue, "scrollEvent", scrollEventType);
     napi_set_named_property(env_, objValue, "offset", scrollOffset);
+    napi_set_named_property(env_, objValue, "axis", scrollAxis);
     napi_value argv[] = { objValue };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
     napi_close_handle_scope(env_, scope);

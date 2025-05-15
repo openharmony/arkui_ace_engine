@@ -150,6 +150,7 @@ HWTEST_F(ObserverTestNg, ObserverTestNg004, TestSize.Level1)
     ASSERT_EQ(info->uniqueId, frameNode->GetId());
     ASSERT_EQ(info->scrollEvent, ScrollEventType::SCROLL_START);
     ASSERT_EQ(info->offset, offset);
+    ASSERT_EQ(info->axis, pattern->GetAxis());
 }
 
 /**

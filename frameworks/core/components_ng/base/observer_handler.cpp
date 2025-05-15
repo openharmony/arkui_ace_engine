@@ -85,8 +85,9 @@ void UIObserverHandler::NotifyScrollEventStateChange(const WeakPtr<AceType>& wea
     std::string id = host->GetInspectorId().value_or("");
     int32_t uniqueId = host->GetId();
     float offset = pattern->GetTotalOffset();
+    Ace::Axis axis = pattern->GetAxis();
     CHECK_NULL_VOID(scrollEventHandleFunc_);
-    scrollEventHandleFunc_(id, uniqueId, eventType, offset);
+    scrollEventHandleFunc_(id, uniqueId, eventType, offset, axis);
 }
 
 void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& pageInfo, RouterPageState state)
@@ -275,7 +276,8 @@ std::shared_ptr<ScrollEventInfo> UIObserverHandler::GetScrollEventState(const Re
         id,
         uniqueId,
         ScrollEventType::SCROLL_START,
-        pattern->GetTotalOffset());
+        pattern->GetTotalOffset(),
+        pattern->GetAxis());
 }
 
 std::shared_ptr<RouterPageInfoNG> UIObserverHandler::GetRouterPageState(const RefPtr<AceType>& node)
