@@ -56,9 +56,9 @@ static bool GetBooleanValue(ani_env* env, ani_object object, bool& value)
     return true;
 }
 
-static void clearFocus([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object)
+static void clearFocus(ani_env* env, [[maybe_unused]] ani_object object)
 {
-    // NG::FocusHub::LostFocusToViewRoot();
+    OHOS::Ace::NG::FocusHub::LostFocusToViewRoot();
 }
 
 static void requestFocus([[maybe_unused]] ani_env* env, ani_string key)
@@ -67,16 +67,20 @@ static void requestFocus([[maybe_unused]] ani_env* env, ani_string key)
     auto focusCallback = [env](OHOS::Ace::NG::RequestFocusResult result) {
         switch (result) {
             case OHOS::Ace::NG::RequestFocusResult::NON_FOCUSABLE:
+                LOGI("This component is not focusable");
                 break;
             case OHOS::Ace::NG::RequestFocusResult::NON_FOCUSABLE_ANCESTOR:
+                LOGI("This component has unfocusable ancestor.");
                 break;
             case OHOS::Ace::NG::RequestFocusResult::NON_EXIST:
+                LOGI("The component doesn't exist, is currently invisible, or has been disabled.");
                 break;
             default:
+                LOGI("An internal error occurred.");
                 break;
         }
     };
-    LOGE("focuscontroller requestFocus key %{public}s", keyStr.c_str());
+    LOGI("focuscontroller requestFocus key %{public}s", keyStr.c_str());
     auto pipeline = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto focusManager = pipeline->GetOrCreateFocusManager();
@@ -86,7 +90,7 @@ static void requestFocus([[maybe_unused]] ani_env* env, ani_string key)
     focusManager->ResetRequestFocusCallback();
 }
 
-static void activate([[maybe_unused]] ani_env* env, ani_object isActive, ani_object autoInactive)
+static void activate(ani_env* env, ani_object isActive, ani_object autoInactive)
 {
     bool isActiveValue = false;
     bool autoInactiveValue = true;
@@ -99,7 +103,7 @@ static void activate([[maybe_unused]] ani_env* env, ani_object isActive, ani_obj
     pipeline->SetIsFocusActive(isActiveValue, OHOS::Ace::NG::FocusActiveReason::USE_API, autoInactiveValue);
 }
 
-static void setAutoFocusTransfer([[maybe_unused]] ani_env* env, ani_object isAutoFocusTransfer)
+static void setAutoFocusTransfer(ani_env* env, ani_object isAutoFocusTransfer)
 {
     bool isAutoFocusTransferValue = true;
     if (!GetBooleanValue(env, isAutoFocusTransfer, isAutoFocusTransferValue)) {
@@ -112,7 +116,7 @@ static void setAutoFocusTransfer([[maybe_unused]] ani_env* env, ani_object isAut
     focusManager->SetIsAutoFocusTransfer(isAutoFocusTransferValue);
 }
 
-static void setKeyProcessingMode([[maybe_unused]] ani_env* env, ani_enum_item mode)
+static void setKeyProcessingMode(ani_env* env, ani_enum_item mode)
 {
     ani_int keyProcessingMode;
     if (ANI_OK != env->EnumItem_GetValue_Int(mode, &keyProcessingMode)) {
@@ -128,6 +132,9 @@ static void setKeyProcessingMode([[maybe_unused]] ani_env* env, ani_enum_item mo
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
+    if (vm == nullptr) {
+        return ANI_ERROR;
+    }
     ani_env* env;
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
         return ANI_ERROR;
@@ -135,7 +142,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 
     ani_namespace ns;
     if (ANI_OK != env->FindNamespace("L@ohos/arkui/focusController/focusController;", &ns)) {
-        std::cout << "Failed componentUtils to create namespace" << std::endl;
         return ANI_ERROR;
     }
     std::array methods = {
