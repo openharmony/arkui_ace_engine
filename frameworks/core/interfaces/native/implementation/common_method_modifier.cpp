@@ -3851,7 +3851,7 @@ void OnDragEnterImpl(Ark_NativePointer node,
                                                            const std::string& extraParams) {
         CHECK_NULL_VOID(dragEvent);
         Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
-        callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
+        callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
     ViewAbstract::SetOnDragEnter(frameNode, std::move(onDragEnter));
 }
@@ -3869,7 +3869,7 @@ void OnDragMoveImpl(Ark_NativePointer node,
                                                           const std::string& extraParams) {
         CHECK_NULL_VOID(dragEvent);
         Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
-        callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
+        callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
     ViewAbstract::SetOnDragMove(frameNode, std::move(onDragMove));
 }
@@ -3887,7 +3887,7 @@ void OnDragLeaveImpl(Ark_NativePointer node,
                                                            const std::string& extraParams) {
         CHECK_NULL_VOID(dragEvent);
         Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
-        callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
+        callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
     ViewAbstract::SetOnDragLeave(frameNode, std::move(onDragLeave));
 }
@@ -3905,7 +3905,7 @@ void OnDrop0Impl(Ark_NativePointer node,
                                                       const std::string& extraParams) {
         CHECK_NULL_VOID(dragEvent);
         Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
-        callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
+        callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
     ViewAbstract::SetOnDrop(frameNode, std::move(onDrop));
 }
