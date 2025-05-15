@@ -700,6 +700,8 @@ public:
 
     static bool IsNeedSymbol();
 
+    static bool GetMultiInstanceEnabled();
+
     static bool GetTaskPriorityAdjustmentEnable()
     {
         return taskPriorityAdjustmentEnable_;
@@ -799,6 +801,7 @@ private:
     static FoldScreenType foldScreenType_;
     static double scrollableDistance_;
     static bool taskPriorityAdjustmentEnable_;
+    static bool multiInstanceEnabled_;
     static int32_t dragDropFrameworkStatus_;
     static int32_t touchAccelarate_;
     static bool pageTransitionFrzEnabled_;

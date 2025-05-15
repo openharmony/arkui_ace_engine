@@ -337,7 +337,7 @@ RefPtr<FrameNode> WindowPattern::BuildAnimateNode(const std::string& base64Resou
     animateContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
     protocol.SetDuration(ANIMATION_DURATION);
     protocol.SetRepeatCount(-1);
-    Rosen::RSNode::Animate(protocol, NODE_ANIMATION_TIMING_CURVE, [animateContext] {
+    Rosen::RSNode::Animate(animateRSNode->GetRSUIContext(), protocol, NODE_ANIMATION_TIMING_CURVE, [animateContext] {
         animateContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, ROTATION_ANGLE, 0.0f));
     });
     animateNode->MarkModifyDone();

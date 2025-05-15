@@ -21,6 +21,7 @@
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_surface_node.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 
 #include "base/log/dump_log.h"
@@ -167,7 +168,19 @@ void RosenRenderTexture::DumpTree(int32_t depth)
 std::shared_ptr<RSNode> RosenRenderTexture::CreateRSNode() const
 {
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = "RosenRenderTexture"};
-    return OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+    if (!SystemProperties::GetMultiInstanceEnabled()) {
+        return OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+    } else {
+        auto pipelineContext = GetContext().Upgrade();
+        if (pipelineContext) {
+            auto rsUIDirector = pipelineContext->GetRSUIDirector();
+            if (rsUIDirector) {
+                auto rsContext = rsUIDirector->GetRSUIContext();
+                return OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false, rsContext);
+            }
+        }
+        return OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+    }
 }
 
 #ifdef OHOS_STANDARD_SYSTEM

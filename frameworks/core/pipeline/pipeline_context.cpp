@@ -20,6 +20,7 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_base/include/platform/common/rs_system_properties.h"
 #include "render_service_client/core/ui/rs_node.h"
+#include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #include "render_service_client/core/transaction/rs_transaction.h"
@@ -838,7 +839,8 @@ void PipelineContext::SetupRootElement()
     }
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_ && renderRoot) {
-        rsUIDirector_->SetRoot(rootRenderNode->GetRSNode()->GetId());
+        rsUIDirector_->SetRSRootNode(
+            Rosen::RSNode::ReinterpretCast<Rosen::RSRootNode>(rootRenderNode->GetRSNode()));
         if (windowModal_ == WindowModal::CONTAINER_MODAL) {
             rsUIDirector_->SetAbilityBGAlpha(appBgColor_.GetAlpha());
         } else {
@@ -891,7 +893,8 @@ RefPtr<Element> PipelineContext::SetupSubRootElement()
     window_->SetRootRenderNode(rootRenderNode);
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
-        rsUIDirector_->SetRoot(rootRenderNode->GetRSNode()->GetId());
+        rsUIDirector_->SetRSRootNode(
+            Rosen::RSNode::ReinterpretCast<Rosen::RSRootNode>(rootRenderNode->GetRSNode()));
         auto renderRoot = AceType::DynamicCast<RenderRoot>(rootRenderNode);
         if (renderRoot) {
             rsUIDirector_->SetAbilityBGAlpha(renderRoot->GetBgColor().GetAlpha());
@@ -3277,7 +3280,8 @@ void PipelineContext::AddKeyFrame(
     pendingImplicitLayout_.pop();
 
 #ifdef ENABLE_ROSEN_BACKEND
-    RSNode::AddKeyFrame(fraction, NativeCurveHelper::ToNativeCurve(curve), propertyChangeCallback);
+    auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;
+    RSNode::AddKeyFrame(rsUIContext, fraction, NativeCurveHelper::ToNativeCurve(curve), propertyChangeCallback);
 #endif
 }
 
@@ -3306,7 +3310,8 @@ void PipelineContext::AddKeyFrame(float fraction, const std::function<void()>& p
     pendingImplicitLayout_.pop();
 
 #ifdef ENABLE_ROSEN_BACKEND
-    RSNode::AddKeyFrame(fraction, propertyChangeCallback);
+    auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;
+    RSNode::AddKeyFrame(rsUIContext, fraction, propertyChangeCallback);
 #endif
 }
 

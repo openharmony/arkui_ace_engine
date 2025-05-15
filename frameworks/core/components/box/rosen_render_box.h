@@ -29,6 +29,10 @@
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
+namespace OHOS::Rosen {
+    class RSUIContext;
+}
+
 namespace OHOS::Ace {
 
 class RosenRenderBox : public RenderBox {
@@ -157,6 +161,7 @@ private:
     void SyncDecorationToRSNode();
 
     bool CheckBorderEdgeForRRect(const Border& border);
+    std::shared_ptr<Rosen::RSUIContext> GetUIContext(const RefPtr<PipelineContext>& context);
 #ifndef USE_ROSEN_DRAWING
     SkVector GetSkRadii(const Radius& radius, double shrinkFactor, double borderWidth);
     void UpdateBackgroundImage(const RefPtr<BackgroundImage>& image);

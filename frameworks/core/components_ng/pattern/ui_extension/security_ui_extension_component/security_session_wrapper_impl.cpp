@@ -39,6 +39,8 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
+#include "render_service_client/core/ui/rs_ui_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -708,20 +710,52 @@ void SecuritySessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     ACE_SCOPED_TRACE("NotifyDisplayArea id: %d, reason [%d]", persistentId, reason);
     PLATFORM_LOGI("DisplayArea: %{public}s, persistentId: %{public}d, reason: %{public}d",
         displayArea_.ToString().c_str(), persistentId, reason);
-    if (reason == Rosen::SizeChangeReason::ROTATION) {
-        if (auto temp = transaction_.lock()) {
-            transaction = temp;
-            transaction_.reset();
-        } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
-            transaction = transactionController->GetRSTransaction();
-        }
-        if (transaction && parentSession) {
-            transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
-        }
+
+    std::shared_ptr<Rosen::RSUIDirector> rsUIDirector;
+    auto window = pipeline->GetWindow();
+    if (window) {
+        rsUIDirector = window->GetRSUIDirector();
     }
-    session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
-        std::round(displayArea_.Width()), std::round(displayArea_.Height()) },
-        reason, "NotifyDisplayArea", transaction);
+    if (!rsUIDirector) {
+        if (reason == Rosen::SizeChangeReason::ROTATION) {
+            if (auto temp = transaction_.lock()) {
+                transaction = temp;
+                transaction_.reset();
+            } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
+                transaction = transactionController->GetRSTransaction();
+            }
+            if (transaction && parentSession) {
+                transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
+            }
+        }
+        session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
+            std::round(displayArea_.Width()), std::round(displayArea_.Height()) },
+            reason, "NotifyDisplayArea", transaction);
+    } else {
+        auto rsUIContext = rsUIDirector->GetRSUIContext();
+        if (reason == Rosen::SizeChangeReason::ROTATION) {
+            if (auto temp = transaction_.lock()) {
+                transaction = temp;
+                transaction_.reset();
+            } else if (pipeline && rsUIContext) {
+                auto transactionController = rsUIContext->GetSyncTransactionHandler();
+                if (transactionController) {
+                    transaction = transactionController->GetRSTransaction();
+                }
+            } else {
+                auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
+                if (transactionController) {
+                    transaction = transactionController->GetRSTransaction();
+                }
+            }
+            if (transaction && parentSession) {
+                transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
+            }
+        }
+        session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
+            std::round(displayArea_.Width()), std::round(displayArea_.Height()) },
+            reason, "NotifyDisplayArea", transaction);
+    }
 }
 
 void SecuritySessionWrapperImpl::NotifySizeChangeReason(

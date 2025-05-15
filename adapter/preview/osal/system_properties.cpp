@@ -415,4 +415,9 @@ bool SystemProperties::IsFormSkeletonBlurEnabled()
     return formSkeletonBlurEnabled_;
 }
 
+bool SystemProperties::GetMultiInstanceEnabled()
+{
+    return false;
+}
+
 } // namespace OHOS::Ace

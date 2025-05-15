@@ -137,7 +137,8 @@ void AnimateToInner(ArkUIContext* context, AnimationOption& option, const std::f
     }
     NG::ScopedViewStackProcessor scopedProcessor;
     auto triggerId = context->id;
-    AceEngine::Get().NotifyContainersOrderly([triggerId, option](const RefPtr<Container>& container) {
+    AceEngine::Get().NotifyContainersOrderly([triggerId, &option,
+        multiInstanceEnabled = SystemProperties::GetMultiInstanceEnabled()](const RefPtr<Container>& container) {
         auto context = container->GetPipelineContext();
         if (!context) {
             // pa container do not have pipeline context.
@@ -155,6 +156,9 @@ void AnimateToInner(ArkUIContext* context, AnimationOption& option, const std::f
             return;
         }
         context->PrepareOpenImplicitAnimation();
+        if (multiInstanceEnabled) {
+            AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), nullptr, context);
+        }
     });
     pipelineContext->PrepareOpenImplicitAnimation();
     FlushDirtyNodesWhenExist(pipelineContext, option,
@@ -165,7 +169,8 @@ void AnimateToInner(ArkUIContext* context, AnimationOption& option, const std::f
     // Execute the function.
     animateToFunc();
     pipelineContext->FlushOnceVsyncTask();
-    AceEngine::Get().NotifyContainersOrderly([triggerId](const RefPtr<Container>& container) {
+    AceEngine::Get().NotifyContainersOrderly([triggerId,
+        multiInstanceEnabled = SystemProperties::GetMultiInstanceEnabled()](const RefPtr<Container>& container) {
         auto context = container->GetPipelineContext();
         if (!context) {
             // pa container do not have pipeline context.
@@ -183,6 +188,9 @@ void AnimateToInner(ArkUIContext* context, AnimationOption& option, const std::f
             return;
         }
         context->PrepareCloseImplicitAnimation();
+        if (multiInstanceEnabled) {
+            AnimationUtils::CloseImplicitAnimation(context);
+        }
     });
     pipelineContext->CloseImplicitAnimation();
     pipelineContext->SetSyncAnimationOption(previousOption);

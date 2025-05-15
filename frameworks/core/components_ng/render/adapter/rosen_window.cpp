@@ -22,6 +22,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "render_service_client/core/ui/rs_root_node.h"
 
 namespace {
 constexpr int32_t IDLE_TASK_DELAY_MILLISECOND = 51;
@@ -84,12 +85,23 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
         }
         uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); }, "ArkUIRosenWindowVsync");
     };
-    rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
-    if (window && window->GetSurfaceNode()) {
-        rsUIDirector_->SetRSSurfaceNode(window->GetSurfaceNode());
+    if (!SystemProperties::GetMultiInstanceEnabled()) {
+        rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
+        if (window && window->GetSurfaceNode()) {
+            rsUIDirector_->SetRSSurfaceNode(window->GetSurfaceNode());
+        }
+        rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
+        rsUIDirector_->Init();
+    } else {
+        auto rsUIDirector = window->GetRSUIDirector();
+        rsUIDirector_ = rsUIDirector;
+        if (window && window->GetSurfaceNode()) {
+            rsUIDirector_->SetRSSurfaceNode(window->GetSurfaceNode());
+        }
+        rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
+        rsUIDirector_->Init(true, true);
     }
-    rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
-    rsUIDirector_->Init();
+
     rsUIDirector_->SetUITaskRunner(
         [taskExecutor, id](const std::function<void()>& task, uint32_t delay) {
             ContainerScope scope(id);
@@ -230,7 +242,8 @@ void RosenWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
     CHECK_NULL_VOID(rosenRenderContext);
     if (rosenRenderContext->GetRSNode()) {
         CHECK_NULL_VOID(rsUIDirector_);
-        rsUIDirector_->SetRoot(rosenRenderContext->GetRSNode()->GetId());
+        rsUIDirector_->SetRSRootNode(
+            Rosen::RSNode::ReinterpretCast<Rosen::RSRootNode>(rosenRenderContext->GetRSNode()));
     }
 }
 

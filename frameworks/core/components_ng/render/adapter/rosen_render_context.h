@@ -27,6 +27,7 @@
 #include "render_service_client/core/animation/rs_particle_params.h"
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/ui/rs_texture_export.h"
+#include "render_service_client/core/ui/rs_ui_context.h"
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/offset_t.h"
@@ -264,7 +265,7 @@ public:
     void ResetSharedTranslate() override;
 
     static std::vector<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
-        const std::list<RefPtr<FrameNode>>& frameChildren, std::unordered_map<Rosen::NodeId, bool>& nodeIdMap);
+        const std::list<RefPtr<FrameNode>>& frameChildren, std::unordered_map<Rosen::RSNode::SharedPtr, bool>& nodeMap);
 
     // if translate params use percent dimension, frameSize should be given correctly
     static std::shared_ptr<Rosen::RSTransitionEffect> GetRSTransitionWithoutType(
@@ -609,6 +610,7 @@ protected:
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot, float zPivot = 0.0f);
     void SetPositionToRSNode();
+    std::shared_ptr<Rosen::RSUIContext> GetRSUIContext();
 
     // Convert BorderRadiusProperty to Rosen::Vector4f
     static inline void ConvertRadius(const BorderRadiusProperty& value, Rosen::Vector4f& cornerRadius);
@@ -709,8 +711,8 @@ protected:
     void InitFocusStateModidifer(const RoundRect&, const Color&, float);
     void InitFocusAnimationModidifer(const RoundRect&, const Color&, float);
 
-    std::shared_ptr<Rosen::RSNode> CreateHardwareSurface(
-        const std::optional<ContextParam>& param, bool isTextureExportNode);
+    std::shared_ptr<Rosen::RSNode> CreateHardwareSurface(const std::optional<ContextParam>& param,
+        bool isTextureExportNode, std::shared_ptr<Rosen::RSUIContext>& rsUIContext);
 #ifdef RENDER_EXTRACT_SUPPORTED
     std::shared_ptr<Rosen::RSNode> CreateHardwareTexture(
         const std::optional<ContextParam>& param, bool isTextureExportNode);

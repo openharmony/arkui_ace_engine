@@ -69,6 +69,10 @@ class UIContext;
 class UIContextImpl;
 }
 
+namespace OHOS::Rosen {
+  class RSUIDirector;
+}
+
 namespace OHOS::Ace::NG {
 
 using VsyncCallbackFun = std::function<void()>;
@@ -1170,6 +1174,7 @@ public:
 
     void SetIsWindowSizeDragging(bool isDragging);
     void GetAllPixelMap();
+    std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector();
     void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap)
     {
         uiTranslateManager_->AddPixelMap(nodeId, pixelMap);
@@ -1340,6 +1345,8 @@ private:
 
     void FlushNodeChangeFlag();
     void CleanNodeChangeFlag();
+
+    void FlushImplicitTransaction(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector);
 
     uint64_t AdjustVsyncTimeStamp(uint64_t nanoTimestamp);
     bool FlushModifierAnimation(uint64_t nanoTimestamp);

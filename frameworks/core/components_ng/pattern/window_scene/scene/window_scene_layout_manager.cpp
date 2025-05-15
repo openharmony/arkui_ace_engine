@@ -780,7 +780,7 @@ void WindowSceneLayoutManager::GetRSNodeTreeInfo(const std::shared_ptr<RSNode>& 
     GetRSNodeInfo(rsNode, oss);
     auto children = rsNode->GetChildren();
     for (auto child : children) {
-        if (auto childPtr = Rosen::RSNodeMap::Instance().GetNode(child)) {
+        if (auto childPtr = child.lock()) {
             GetRSNodeTreeInfo(childPtr, depth + 1, oss);
         }
     }
