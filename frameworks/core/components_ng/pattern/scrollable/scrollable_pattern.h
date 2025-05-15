@@ -124,6 +124,11 @@ public:
         return true;
     }
 
+    virtual bool ShouldPreventChildPressedState() const override
+    {
+        return isHitTestBlock_;
+    }
+
     void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) override;
     void FireAndCleanScrollingListener() override;
     void CleanScrollingListener() override;
@@ -961,6 +966,8 @@ private:
     void OnAttachToFrameNode() override;
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void RegisterWindowStateChangedCallback();
+    void OnTouchTestDoneCallback(const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,
+        const std::list<RefPtr<NGGestureRecognizer>>& activeRecognizers);
 
     // select with mouse
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
@@ -1166,6 +1173,7 @@ private:
 
     bool backToTop_ = false;
     bool useDefaultBackToTop_ = true;
+    bool isHitTestBlock_ = false;
 };
 } // namespace OHOS::Ace::NG
 
