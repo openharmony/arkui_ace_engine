@@ -66,7 +66,8 @@ void RichEditorUrlStyleTest::TearDownTestSuite()
 RefPtr<SpanNode> RichEditorUrlStyleTest::GetSpanNodeAtIndex(int32_t index)
 {
     CHECK_NULL_RETURN(richEditorNode_, {});
-    return AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(index));
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    return AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(index));
 }
 
 RefPtr<SpanItem> RichEditorUrlStyleTest::GetSpanItemAtIndex(int32_t index)

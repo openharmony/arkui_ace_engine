@@ -129,10 +129,12 @@ HWTEST_F(RichEditorEditTestOneNg, GetChildByIndex002, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
     richEditorPattern->GetChildByIndex(-1);
     AddSpan(INIT_VALUE_1);
     auto ret = richEditorPattern->GetChildByIndex(0);
-    EXPECT_EQ(*(richEditorNode_->GetChildren().begin()), ret);
+    EXPECT_EQ(*(contentNode->GetChildren().begin()), ret);
 }
 
 /**
@@ -166,25 +168,7 @@ HWTEST_F(RichEditorEditTestOneNg, CreateNodePaintMethod001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-}
-
-/**
- * @tc.name: CreateNodePaintMethod002
- * @tc.desc: test CreateNodePaintMethod
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestOneNg, CreateNodePaintMethod002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->contentMod_ = AceType::MakeRefPtr<RichEditorContentModifier>(
-        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, richEditorPattern);
-    richEditorPattern->isCustomFont_ = true;
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
 }
 
@@ -415,7 +399,7 @@ HWTEST_F(RichEditorEditTestOneNg, VirtualKeyboardAreaChanged002, TestSize.Level1
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
 
     richEditorPattern->OnModifyDone();
@@ -441,7 +425,7 @@ HWTEST_F(RichEditorEditTestOneNg, GetSelectedBackgroundColor001, TestSize.Level1
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
@@ -466,7 +450,7 @@ HWTEST_F(RichEditorEditTestOneNg, ResetKeyboardIfNeed001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto focusHub = richEditorPattern->GetFocusHub();
     EXPECT_NE(focusHub, nullptr);
@@ -572,7 +556,8 @@ HWTEST_F(RichEditorEditTestOneNg, RichEditorHalfLeading001, TestSize.Level1)
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
     AddSpan(INIT_VALUE_1);
-    auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    auto newSpan1 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
     TextStyle textStyle;
     textStyle.SetHalfLeading(true);
     struct UpdateSpanStyle updateSpanStyle;

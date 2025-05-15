@@ -240,7 +240,7 @@ HWTEST_F(RichEditorPatternTestNg, VirtualKeyboardAreaChanged001, TestSize.Level1
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     float height = 0.0f;
     auto x = richEditorPattern->CalcCursorOffsetByPosition(richEditorPattern->textSelector_.GetStart(), height).GetX();
@@ -262,7 +262,7 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorToJsonValue001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
 
     auto jsonObject = JsonUtil::Create(true);
@@ -294,7 +294,7 @@ HWTEST_F(RichEditorPatternTestNg, IsClickBoundary001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     /**
      * @tc.steps: step2. change parameter and call function.
@@ -319,7 +319,7 @@ HWTEST_F(RichEditorPatternTestNg, UpdateChildrenOffset001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto host = richEditorPattern->GetHost();
     ASSERT_NE(host, nullptr);
@@ -366,7 +366,7 @@ HWTEST_F(RichEditorPatternTestNg, NeedAiAnalysis001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     /**
      * @tc.steps: step2. change parameter and call function.
@@ -401,7 +401,7 @@ HWTEST_F(RichEditorPatternTestNg, AdjustCursorPosition001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     /**
      * @tc.steps: step2. change parameter and call function.
@@ -588,7 +588,7 @@ HWTEST_F(RichEditorPatternTestNg, TestRichEditorBeforeChangeText002, TestSize.Le
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     RichEditorChangeValue changeValue;
     TextSpanOptions options;
@@ -618,7 +618,7 @@ HWTEST_F(RichEditorPatternTestNg, FixMoveDownChange001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     RichEditorChangeValue changeValue;
     RichEditorAbstractSpanResult span1;
@@ -649,7 +649,7 @@ HWTEST_F(RichEditorPatternTestNg, BeforeUndo001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     RichEditorChangeValue changeValue;
     int32_t innerPosition = 0;
@@ -685,7 +685,7 @@ HWTEST_F(RichEditorPatternTestNg, BeforeRedo001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     RichEditorChangeValue changeValue;
     int32_t innerPosition = 0;
@@ -827,8 +827,8 @@ HWTEST_F(RichEditorPatternTestNg, FinishTextPreview001, TestSize.Level1)
     ASSERT_NE(childSpanNode, nullptr);
 
     do {
-        auto newHost1 = richEditorPattern->GetHost();
-        auto newHost2 = richEditorPattern->GetHost();
+        auto newHost1 = richEditorPattern->GetContentHost();
+        auto newHost2 = richEditorPattern->GetContentHost();
         ASSERT_EQ(newHost1, newHost2);
 
         newHost1->children_.emplace_back(childFrameNode);

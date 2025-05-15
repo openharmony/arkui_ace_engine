@@ -1342,7 +1342,10 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete, TestSize.Level1)
     TextStyleResult textStyle;
     auto func = [&textStyle](const RichEditorAbstractSpanResult& info) { textStyle = info.GetTextStyle(); };
     eventHub->SetOnIMEInputComplete(std::move(func));
-    auto it1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+    auto it1 = AceType::DynamicCast<SpanNode>(contentNode->GetLastChild());
+    ASSERT_NE(it1, nullptr);
     richEditorPattern->AfterIMEInsertValue(it1, 1, false);
     EXPECT_EQ(textStyle.textAlign, int(TextAlign::END));
     EXPECT_EQ(textStyle.leadingMarginSize[0], "5.00px");
@@ -1398,7 +1401,10 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete002, TestSize.Level1)
     TextStyleResult textStyle;
     auto func = [&textStyle](const RichEditorAbstractSpanResult& info) { textStyle = info.GetTextStyle(); };
     eventHub->SetOnIMEInputComplete(std::move(func));
-    auto it1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+    auto it1 = AceType::DynamicCast<SpanNode>(contentNode->GetLastChild());
+    ASSERT_NE(it1, nullptr);
     richEditorPattern->AfterIMEInsertValue(it1, 1, false);
     EXPECT_EQ(textStyle.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
     EXPECT_EQ(textStyle.letterSpacing, LETTER_SPACING.ConvertToVp());
@@ -1451,7 +1457,10 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete003, TestSize.Level1)
     TextStyleResult textStyle;
     auto func = [&textStyle](const RichEditorAbstractSpanResult& info) { textStyle = info.GetTextStyle(); };
     eventHub->SetOnIMEInputComplete(std::move(func));
-    auto it1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+    auto it1 = AceType::DynamicCast<SpanNode>(contentNode->GetLastChild());
+    ASSERT_NE(it1, nullptr);
     richEditorPattern->AfterIMEInsertValue(it1, 1, false);
     for (const auto& pair : textStyle1.fontFeature) {
         EXPECT_EQ(pair.first, "subs");
@@ -1622,7 +1631,8 @@ HWTEST_F(RichEditorChangeCallbackTestNg, SetOnSelect003, TestSize.Level1)
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
-    auto spanNode = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    auto spanNode = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
     auto func = [](const BaseEventInfo* info) { testOnSelect = 1; };
     richEditorModel.SetOnSelect(std::move(func));
     EXPECT_EQ(textStyle1.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
@@ -1660,7 +1670,8 @@ HWTEST_F(RichEditorChangeCallbackTestNg, SetOnSelect004, TestSize.Level1)
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
-    auto spanNode = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    auto spanNode = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
     auto func = [](const BaseEventInfo* info) { testOnSelect = 1; };
     richEditorModel.SetOnSelect(std::move(func));
     for (const auto& pair : textStyle1.fontFeature) {

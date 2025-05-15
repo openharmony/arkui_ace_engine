@@ -123,6 +123,8 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextText001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 6;
@@ -136,42 +138,42 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextText001, TestSize.Level1)
     // 0: 哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[0]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 2);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
 
     // 1: \n哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[1]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 2: 哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[2]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 3: 哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[3]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 2);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
 
     // 4: \n哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[4]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 5: \n哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[5]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 6: 哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[6]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 7: \n哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[7]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 }
 
 /**
@@ -184,6 +186,8 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextImage001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 6;
@@ -197,42 +201,42 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextImage001, TestSize.Level1)
     // 0: 哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[0]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 2);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
 
     // 1: \n哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[1]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 2: 哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[2]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 3: 哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[3]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 2);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
 
     // 4: \n哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[4]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 5: \n哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[5]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 6: 哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[6]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 7: \n哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[7]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 }
 
 /**
@@ -245,6 +249,8 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextBuilder001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
     
     auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 6;
@@ -258,42 +264,42 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextBuilder001, TestSize.Level1)
     // 0: 哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[0]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 2);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
 
     // 1: \n哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[1]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 2: 哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[2]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 3: 哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[3]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 2);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
 
     // 4: \n哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[4]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 5: \n哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[5]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 6: 哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[6]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 7: \n哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[7]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 }
 
 /**
@@ -306,6 +312,8 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextSymbol001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 6;
@@ -319,42 +327,42 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextSymbol001, TestSize.Level1)
     // 0: 哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[0]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 2);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
 
     // 1: \n哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[1]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 2: 哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[2]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 3: 哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[3]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 2);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
 
     // 4: \n哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[4]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 5: \n哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[5]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 6: 哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[6]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 7: \n哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[7]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 }
 
 /**
@@ -367,6 +375,8 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageText001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 1;
@@ -380,42 +390,42 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageText001, TestSize.Level1)
     // 0: 哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[0]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 2);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
 
     // 1: \n哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[1]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3); // fail
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 2: 哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[2]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 3: 哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[3]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 4: \n哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[4]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 5: \n哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[5]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 6: 哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[6]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 7: \n哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[7]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
 }
 
 /**
@@ -428,6 +438,8 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageImage001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 1;
@@ -441,42 +453,42 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageImage001, TestSize.Level1)
     // 0: 哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[0]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 1: \n哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[1]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 2: 哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[2]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 3: 哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[3]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 4: \n哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[4]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
 
     // 5: \n哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[5]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 6: 哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[6]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 7: \n哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[7]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
 }
 
 /**
@@ -489,6 +501,8 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageBuilder001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 1;
@@ -502,42 +516,42 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageBuilder001, TestSize.Level1)
     // 0: 哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[0]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 1: \n哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[1]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 2: 哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[2]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 3: 哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[3]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 4: \n哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[4]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
 
     // 5: \n哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[5]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 6: 哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[6]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 7: \n哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[7]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
 }
 
 /**
@@ -550,6 +564,8 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageSymbol001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 1;
@@ -563,42 +579,42 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageSymbol001, TestSize.Level1)
     // 0: 哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[0]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 1: \n哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[1]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 2: 哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[2]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 3: 哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[3]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 4: \n哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[4]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
 
     // 5: \n哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[5]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 6: 哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[6]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 7: \n哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[7]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
 }
 
 /**
@@ -611,6 +627,8 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderText001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 1;
@@ -624,42 +642,42 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderText001, TestSize.Level1)
     // 0: 哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[0]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 2);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
 
     // 1: \n哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[1]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3); // fail
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 2: 哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[2]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 3: 哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[3]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 4: \n哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[4]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 5: \n哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[5]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 6: 哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[6]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 7: \n哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[7]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
 }
 
 /**
@@ -672,6 +690,8 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderImage001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 1;
@@ -685,42 +705,42 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderImage001, TestSize.Level1)
     // 0: 哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[0]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 1: \n哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[1]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 2: 哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[2]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 3: 哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[3]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 4: \n哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[4]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
 
     // 5: \n哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[5]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 6: 哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[6]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 7: \n哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[7]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
 }
 
 /**
@@ -733,6 +753,8 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderBuilder001, TestSize.Level
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 1;
@@ -746,42 +768,42 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderBuilder001, TestSize.Level
     // 0: 哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[0]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 1: \n哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[1]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 2: 哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[2]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 3: 哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[3]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 4: \n哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[4]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
 
     // 5: \n哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[5]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 6: 哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[6]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 7: \n哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[7]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
 }
 
 /**
@@ -794,6 +816,8 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderSymbol001, TestSize.Level1
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 1;
@@ -807,42 +831,42 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderSymbol001, TestSize.Level1
     // 0: 哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[0]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 1: \n哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[1]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 2: 哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[2]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 3: 哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[3]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 4: \n哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[4]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
 
     // 5: \n哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[5]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 6: 哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[6]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 7: \n哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[7]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
 }
 
 /**
@@ -855,6 +879,8 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolText001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 2;
@@ -868,42 +894,42 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolText001, TestSize.Level1)
     // 0: 哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[0]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 2);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
 
     // 1: \n哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[1]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3); // fail
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 2: 哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[2]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 3: 哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[3]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 4: \n哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[4]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 5: \n哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[5]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 6: 哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[6]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 7: \n哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[7]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
 }
 
 /**
@@ -916,6 +942,8 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolImage001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 2;
@@ -929,42 +957,42 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolImage001, TestSize.Level1)
     // 0: 哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[0]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 1: \n哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[1]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 2: 哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[2]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 3: 哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[3]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 4: \n哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[4]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
 
     // 5: \n哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[5]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 6: 哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[6]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 7: \n哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[7]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
 }
 
 /**
@@ -977,6 +1005,8 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolBuilder001, TestSize.Level1
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 2;
@@ -990,42 +1020,42 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolBuilder001, TestSize.Level1
     // 0: 哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[0]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 1: \n哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[1]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 2: 哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[2]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 3: 哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[3]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 4: \n哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[4]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
 
     // 5: \n哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[5]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 6: 哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[6]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 7: \n哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[7]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
 }
 
 /**
@@ -1038,6 +1068,8 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolSymbol001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 2;
@@ -1051,42 +1083,42 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolSymbol001, TestSize.Level1)
     // 0: 哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[0]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 1: \n哈哈哈haha123
     insertFunc(INSERT_VALUE_LIST[1]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 2: 哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[2]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 3: 哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[3]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     // 4: \n哈哈哈\nhaha123
     insertFunc(INSERT_VALUE_LIST[4]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
 
     // 5: \n哈哈哈haha123\n
     insertFunc(INSERT_VALUE_LIST[5]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 6: 哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[6]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 4);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 
     // 7: \n哈哈哈\nhaha123\n
     insertFunc(INSERT_VALUE_LIST[7]);
     EXPECT_EQ(richEditorPattern->spans_.size(), 5);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
 }
 
 } // namespace OHOS::Ace::NG

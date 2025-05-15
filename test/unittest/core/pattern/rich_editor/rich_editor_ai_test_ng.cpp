@@ -314,6 +314,8 @@ HWTEST_F(RichEditorAITestOneNg, HandleAIWrite003, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     /**
      * @tc.steps: step2. add span
@@ -333,7 +335,7 @@ HWTEST_F(RichEditorAITestOneNg, HandleAIWrite003, TestSize.Level1)
     richEditorController->AddSymbolSpan(options1);
     richEditorController->AddTextSpan(options2);
     richEditorController->AddImageSpan(options3);
-    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 5);
+    EXPECT_EQ(static_cast<int32_t>(contentNode->GetChildren().size()), 5);
 
     /**
      * @tc.steps: step3. replace and recover placeholder for non-text.

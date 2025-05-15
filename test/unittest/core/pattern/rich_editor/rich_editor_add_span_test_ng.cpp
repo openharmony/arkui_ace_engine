@@ -239,7 +239,8 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSymbolSpan001, TestSize.Level1)
     EXPECT_EQ(index1, 0);
     auto index2 = richEditorController->AddSymbolSpan(options);
     EXPECT_EQ(index2, 1);
-    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 2);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    EXPECT_EQ(static_cast<int32_t>(contentNode->GetChildren().size()), 2);
     ClearSpan();
 }
 
@@ -284,7 +285,8 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSymbolSpan002, TestSize.Level1)
     EXPECT_EQ(index1, 0);
     auto index2 = richEditorController->AddSymbolSpan(options);
     EXPECT_EQ(index2, 1);
-    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 2);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    EXPECT_EQ(static_cast<int32_t>(contentNode->GetChildren().size()), 2);
     ClearSpan();
 }
 
@@ -322,7 +324,8 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSpans001, TestSize.Level1)
     richEditorController->AddImageSpan(options3);
     richEditorController->AddTextSpan(options2);
     richEditorController->AddSymbolSpan(options1);
-    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 5);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    EXPECT_EQ(static_cast<int32_t>(contentNode->GetChildren().size()), 5);
 
     /**
      * @tc.steps: step4. test get span
@@ -343,7 +346,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSpans001, TestSize.Level1)
     ImageSpanAttribute imageStyle;
     richEditorController->UpdateSpanStyle(2, 8, textStyle, imageStyle);
 
-    auto newSpan2 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(1));
+    auto newSpan2 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(1));
     ASSERT_NE(newSpan2, nullptr);
     EXPECT_EQ(newSpan2->GetFontSize(), FONT_SIZE_VALUE_2);
 
@@ -354,12 +357,12 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSpans001, TestSize.Level1)
     option.start = 8;
     option.end = 15;
     richEditorController->DeleteSpans(option);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
 
     option.start = 0;
     option.end = 2;
     richEditorController->DeleteSpans(option);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
 
     ClearSpan();
 }
@@ -400,7 +403,8 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSpans002, TestSize.Level1)
         richEditorController->AddTextSpan(options2);
         richEditorController->AddSymbolSpan(options1);
     }
-    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 500);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    EXPECT_EQ(static_cast<int32_t>(contentNode->GetChildren().size()), 500);
 
     ClearSpan();
 }

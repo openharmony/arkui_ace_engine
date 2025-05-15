@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_content_pattern.h"
 
 namespace OHOS::Ace::NG {
 RichEditorPaintMethod::RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, const ParagraphManager* pManager,
@@ -145,9 +146,11 @@ void RichEditorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto contentMod = DynamicCast<RichEditorContentModifier>(GetContentModifier(paintWrapper));
     CHECK_NULL_VOID(contentMod);
     TextPaintMethod::UpdateContentModifier(paintWrapper);
-    auto richEditorPattern = DynamicCast<RichEditorPattern>(GetPattern().Upgrade());
+    auto contentPattern = DynamicCast<RichEditorContentPattern>(GetPattern().Upgrade());
+    CHECK_NULL_VOID(contentPattern);
+    auto richEditorPattern = contentPattern->GetParentPattern();
     CHECK_NULL_VOID(richEditorPattern);
-    auto richtTextOffset = richEditorPattern->GetTextRect().GetOffset();
+    auto richtTextOffset = contentPattern->GetTextRect().GetOffset();
     contentMod->SetRichTextRectX(richtTextOffset.GetX());
     contentMod->SetRichTextRectY(richtTextOffset.GetY());
 
@@ -156,5 +159,6 @@ void RichEditorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
     contentMod->SetClipOffset(paddingOffset);
     contentMod->SetClipSize(frameSize);
+    contentMod->ContentChange();
 }
 } // namespace OHOS::Ace::NG

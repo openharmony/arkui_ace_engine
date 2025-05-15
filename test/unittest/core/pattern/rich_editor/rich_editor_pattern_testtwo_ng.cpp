@@ -217,7 +217,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, ResetKeyboardIfNeed001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto focusHub = richEditorPattern->GetFocusHub();
     EXPECT_NE(focusHub, nullptr);
@@ -239,7 +239,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, ResetKeyboardIfNeed002, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto focusHub = richEditorPattern->GetFocusHub();
     EXPECT_NE(focusHub, nullptr);
@@ -263,7 +263,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, ResetKeyboardIfNeed003, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto focusHub = richEditorPattern->GetFocusHub();
     EXPECT_NE(focusHub, nullptr);
@@ -291,7 +291,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, DumpInfo001, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto richEditorOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
     richEditorOverlay->caretHeight_->Set(0.0f);
