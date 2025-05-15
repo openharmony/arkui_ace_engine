@@ -40,7 +40,6 @@ public:
     MOCK_CONST_METHOD0(GetSelectOverlayManager, SafeAreaInsets());
     MOCK_METHOD(float, GetFontScale, ());
     MOCK_METHOD(SafeAreaInsets, GetSafeArea, (), (const));
-    MOCK_METHOD(RefPtr<FrameNode>, GetRootElement, (), (const));
 
     bool GetIsDeclarative() const override
     {
