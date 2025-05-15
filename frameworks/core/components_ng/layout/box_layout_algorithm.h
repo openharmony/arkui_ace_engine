@@ -48,8 +48,11 @@ public:
     static std::optional<SizeF> PerformMeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
 
+    void MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, SizeF& frameSize);
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(BoxLayoutAlgorithm);
+    std::list<RefPtr<LayoutWrapper>> layoutPolicyChildren_;
 };
 } // namespace OHOS::Ace::NG
 

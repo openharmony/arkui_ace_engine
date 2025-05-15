@@ -16,18 +16,40 @@
 #include "core/components_ng/layout/box_layout_algorithm.h"
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/pipeline/pipeline_base.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
 void BoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    bool isEnableChildrenMatchParent = pattern->IsEnableChildrenMatchParent();
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        auto childLayoutProperty = child->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(childLayoutProperty);
+        auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
+        if (isEnableChildrenMatchParent && layoutPolicy.has_value()) {
+            auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_;
+            auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_;
+            if (widthLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH) != LayoutCalPolicy::NO_MATCH ||
+                heightLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH) != LayoutCalPolicy::NO_MATCH) {
+                layoutPolicyChildren_.emplace_back(child);
+                continue;
+            }
+        }
         child->Measure(layoutConstraint);
     }
     PerformMeasureSelf(layoutWrapper);
+    if (isEnableChildrenMatchParent) {
+        auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+        MeasureAdaptiveLayoutChildren(layoutWrapper, frameSize);
+    }
 }
 
 void BoxLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -110,6 +132,21 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
         }
         frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
     } while (false);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    bool isEnableMatchParent = pattern->IsEnableMatchParent();
+    auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
+    if (isEnableMatchParent && layoutPolicy.has_value()) {
+        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_;
+        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_;
+        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(layoutConstraint.value(),
+            widthLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH),
+            heightLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH), Axis::HORIZONTAL)
+                                    .ConvertToSizeT();
+        frameSize.UpdateSizeWithCheck(layoutPolicySize);
+    }
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
 }
 
@@ -118,6 +155,17 @@ void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     PerformMeasureSelfWithChildList(layoutWrapper, layoutWrapper->GetAllChildrenWithBuild());
+}
+
+void BoxLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, SizeF& frameSize)
+{
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    MinusPaddingToNonNegativeSize(padding, frameSize);
+    layoutConstraint.parentIdealSize.SetSize(frameSize);
+    for (const auto& child : layoutPolicyChildren_) {
+        child->Measure(layoutConstraint);
+    }
 }
 
 // Called to perform layout render node and child.

@@ -693,6 +693,8 @@ enum class PixelRoundMode {
 enum class LayoutCalPolicy {
     NO_MATCH = 0,
     MATCH_PARENT = 1,
+    WRAP_CONTENT = 2,
+    FIX_AT_IDEAL_SIZE = 3,
 };
 
 const ImageRepeat IMAGE_REPEATS[] = {

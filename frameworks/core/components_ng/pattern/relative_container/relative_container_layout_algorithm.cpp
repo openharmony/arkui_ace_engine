@@ -118,6 +118,16 @@ void RelativeContainerLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
         idealSize.SetHeight(std::max(idealSize.Height().value_or(0.0f), layoutConstraint.value().minSize.Height()));
     }
     containerSizeWithoutPaddingBorder_ = idealSize.ConvertToSizeT();
+    auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_;
+        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_;
+        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(layoutConstraint.value(),
+            widthLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH),
+            heightLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH), Axis::HORIZONTAL)
+                                    .ConvertToSizeT();
+        containerSizeWithoutPaddingBorder_.UpdateSizeWithCheck(layoutPolicySize);
+    }
     layoutWrapper->GetGeometryNode()->SetFrameSize(containerSizeWithoutPaddingBorder_);
     if (relativeContainerLayoutProperty->GetPaddingProperty() ||
         relativeContainerLayoutProperty->GetBorderWidthProperty()) {
@@ -904,12 +914,20 @@ void RelativeContainerLayoutAlgorithm::MeasureChainWeight(LayoutWrapper* layoutW
             continue;
         }
         auto childWrapper = it->second.layoutWrapper;
-        auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
-        if (!childWrapper->IsActive() || !childWrapper->GetLayoutProperty() ||
-            !childWrapper->GetLayoutProperty()->GetFlexItemProperty()) {
+
+        auto childLayoutProperty = childWrapper->GetLayoutProperty();
+        if (!childWrapper->IsActive() || !childLayoutProperty || !childLayoutProperty->GetFlexItemProperty()) {
             continue;
         }
-        const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
+        auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
+        if (layoutPolicy.has_value() && layoutPolicy.value().isWidthMatch()) {
+            childConstraint.parentIdealSize.SetWidth(containerSizeWithoutPaddingBorder_.Width());
+        }
+        if (layoutPolicy.has_value() && layoutPolicy.value().isHeightMatch()) {
+            childConstraint.parentIdealSize.SetHeight(containerSizeWithoutPaddingBorder_.Height());
+        }
+        const auto& flexItem = childLayoutProperty->GetFlexItemProperty();
         std::string chainName;
         if (!flexItem->HasAlignRules()) {
             continue;
@@ -1011,16 +1029,26 @@ void RelativeContainerLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper
         }
         auto childWrapper = it->second.layoutWrapper;
         auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
+        auto childLayoutProperty = childWrapper->GetLayoutProperty();
+        if (childLayoutProperty) {
+            auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
+            if (layoutPolicy.has_value() && layoutPolicy.value().isWidthMatch()) {
+                childConstraint.parentIdealSize.SetWidth(containerSizeWithoutPaddingBorder_.Width());
+            }
+            if (layoutPolicy.has_value() && layoutPolicy.value().isHeightMatch()) {
+                childConstraint.parentIdealSize.SetHeight(containerSizeWithoutPaddingBorder_.Height());
+            }
+        }
         if (!childWrapper->IsActive()) {
             childWrapper->Measure(childConstraint);
             continue;
         }
-        if (!childWrapper->GetLayoutProperty() || !childWrapper->GetLayoutProperty()->GetFlexItemProperty()) {
+        if (!childLayoutProperty || !childLayoutProperty->GetFlexItemProperty()) {
             childWrapper->Measure(childConstraint);
             recordOffsetMap_[nodeName] = OffsetF(0.0f, 0.0f);
             continue;
         }
-        const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        const auto& flexItem = childLayoutProperty->GetFlexItemProperty();
         if (!flexItem->HasAlignRules()) {
             childWrapper->Measure(childConstraint);
             recordOffsetMap_[nodeName] = OffsetF(0.0f, 0.0f);
@@ -1383,6 +1411,13 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
     auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(relativeContainerLayoutProperty);
     auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
+    auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value() && layoutPolicy.value().isWidthMatch()) {
+        childConstraint.parentIdealSize.SetWidth(containerSizeWithoutPaddingBorder_.Width());
+    }
+    if (layoutPolicy.has_value() && layoutPolicy.value().isHeightMatch()) {
+        childConstraint.parentIdealSize.SetHeight(containerSizeWithoutPaddingBorder_.Height());
+    }
     auto alignRules = childWrapper->GetLayoutProperty()->GetFlexItemProperty()->GetAlignRulesValue();
     const auto& calcConstraint = childLayoutProperty->GetCalcLayoutConstraint();
     bool horizontalHasIdealSize = false;
