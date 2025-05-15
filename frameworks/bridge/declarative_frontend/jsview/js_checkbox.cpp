@@ -36,7 +36,7 @@
 namespace OHOS::Ace {
 namespace {
 constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
-const float CHECK_BOX_MARK_WIDTH_DEFAULT_VALUE = 2.0_vp;
+const Dimension CHECK_BOX_MARK_WIDTH_DEFAULT_VALUE = 2.0_vp;
 }
 std::unique_ptr<CheckBoxModel> CheckBoxModel::instance_ = nullptr;
 std::mutex CheckBoxModel::mutex_;
