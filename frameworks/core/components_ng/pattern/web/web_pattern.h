@@ -661,6 +661,7 @@ public:
     void AttachCustomKeyboard();
     void CloseCustomKeyboard();
     void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
+    void EnableSecurityLayer(bool isNeedSecurityLayer);
     void OnCursorUpdate(double x, double y, double width, double height)
     {
         cursorInfo_ = RectF(x, y, width, height);

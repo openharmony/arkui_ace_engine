@@ -1023,6 +1023,7 @@ public:
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
     void OnScrollStart(const float x, const float y);
+    void EnableSecurityLayer(bool isNeedSecurityLayer);
     void OnRootLayerChanged(int width, int height);
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
     void OnNativeEmbedAllDestory();

@@ -1008,6 +1008,15 @@ void WebClientImpl::OnScrollState(bool scrollState)
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnScrollState(scrollState);
 }
+
+void WebClientImpl::EnableSecurityLayer(bool isNeedSecurityLayer)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->EnableSecurityLayer(isNeedSecurityLayer);
+}
+
 void WebClientImpl::OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo)
 {
     auto delegate = webDelegate_.Upgrade();
