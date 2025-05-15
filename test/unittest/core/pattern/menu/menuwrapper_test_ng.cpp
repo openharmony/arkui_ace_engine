@@ -1846,6 +1846,69 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg040, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsTouchWithinParentMenuZoneTest01
+ * @tc.desc: test IsTouchWithinParentMenuZone
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, IsTouchWithinParentMenuZoneTest01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menuWrapper、menu、image
+     * @tc.expected: node is not null
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    auto children = wrapperNode->GetChildren();
+    auto child = children.rbegin();
+    EXPECT_FALSE(wrapperPattern->IsTouchWithinParentMenuZone(child, children, PointF(0.0f, 0.0f)));
+
+    auto menuItemNode1 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 11, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode1, nullptr);
+    auto menuNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MENU); });
+    ASSERT_NE(menuNode1, nullptr);
+    menuItemNode1->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
+    menuNode1->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
+    menuItemNode1->MountToParent(menuNode1);
+    menuNode1->MountToParent(wrapperNode);
+    auto imageNode =
+        FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, 2, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+    imageNode->MountToParent(wrapperNode);
+    auto menuItemNode2 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 3, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode2, nullptr);
+    auto menuNode2 = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MENU); });
+    ASSERT_NE(menuNode2, nullptr);
+    menuItemNode2->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
+    menuNode2->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
+    menuItemNode2->MountToParent(menuNode2);
+    menuNode2->MountToParent(wrapperNode);
+    auto mockMenuContext1 = AceType::DynamicCast<MockRenderContext>(menuNode1->GetRenderContext());
+    mockMenuContext1->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 30.0f, 30.0f));
+    auto mockMenuContext2 = AceType::DynamicCast<MockRenderContext>(menuNode2->GetRenderContext());
+    mockMenuContext2->SetPaintRectWithTransform(RectF(30.0f, 30.0f, 60.0f, 60.0f));
+
+    children = wrapperNode->GetChildren();
+    child = children.rbegin();
+
+    /**
+     * @tc.steps: step2. test PointF(1.0f, 1.0f)
+     * @tc.expected: return true
+     */
+    EXPECT_TRUE(wrapperPattern->IsTouchWithinParentMenuZone(child, children, PointF(1.0f, 1.0f)));
+
+    /**
+     * @tc.steps: step3. test PointF(31.0f, 31.0f)
+     * @tc.expected: return false
+     */
+    EXPECT_FALSE(wrapperPattern->IsTouchWithinParentMenuZone(child, children, PointF(31.0f, 31.0f)));
+}
+
+/**
  * @tc.name: MenuWrapperPaintMethodTestNg001
  * @tc.desc: test overlay draw function
  * @tc.type: FUNC
