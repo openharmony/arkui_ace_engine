@@ -276,8 +276,7 @@ HWTEST_F(ButtonModifierResourcesTest, setLabelStyleTestResources, TestSize.Level
     for (const auto& [family, expectValue] : testPlan) {
         fontLabel.family = family;
         inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
-        Opt_LabelStyle optInputValueLabelStyle;
-        optInputValueLabelStyle.value = inputValueLabelStyle;
+        auto optInputValueLabelStyle = ArkValue<Opt_LabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);

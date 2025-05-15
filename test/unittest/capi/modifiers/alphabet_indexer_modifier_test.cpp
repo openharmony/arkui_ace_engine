@@ -725,8 +725,7 @@ HWTEST_F(IndexerModifierTest, setSelectedFontTest1, TestSize.Level1)
 
     for (auto style : FONT_STYLE_TEST_PLAN) {
         font.style = style.first;
-        Opt_Font optFont;
-        optFont.value = font;
+        auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setSelectedFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_FONT);
@@ -761,8 +760,7 @@ HWTEST_F(IndexerModifierTest, setSelectedFontTest2, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
         font.weight = weight.first;
-        Opt_Font optFont;
-        optFont.value = font;
+        auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setSelectedFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_FONT);
@@ -778,8 +776,7 @@ HWTEST_F(IndexerModifierTest, setSelectedFontTest2, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
         font.weight = weight.first;
-        Opt_Font optFont;
-        optFont.value = font;
+        auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setSelectedFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_FONT);
@@ -814,8 +811,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setSelectedFontTest3, TestSize.Level1)
 
     for (auto family : UNION_RESOURCE_STRING_PLAN) {
         font.family = family.first;
-        Opt_Font optFont;
-        optFont.value = font;
+        auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setSelectedFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_FONT);
@@ -850,8 +846,7 @@ HWTEST_F(IndexerModifierTest, setSelectedFontTest4, TestSize.Level1)
 
     for (auto size : FONT_SIZE_TEST_PLAN) {
         font.size = size.first;
-        Opt_Font optFont;
-        optFont.value = font;
+        auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setSelectedFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_FONT);
@@ -886,8 +881,7 @@ HWTEST_F(IndexerModifierTest, setPopupFontTest1, TestSize.Level1)
 
     for (auto style : FONT_STYLE_TEST_PLAN) {
         font.style = style.first;
-        Opt_Font optFont;
-        optFont.value = font;
+        auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setPopupFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_POPUP_FONT);
@@ -922,8 +916,7 @@ HWTEST_F(IndexerModifierTest, setPopupFontTest2, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
         font.weight = weight.first;
-        Opt_Font optFont;
-        optFont.value = font;
+        auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setPopupFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_POPUP_FONT);
@@ -939,8 +932,7 @@ HWTEST_F(IndexerModifierTest, setPopupFontTest2, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
         font.weight = weight.first;
-        Opt_Font optFont;
-        optFont.value = font;
+        auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setPopupFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_POPUP_FONT);
@@ -975,8 +967,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setPopupFontTest3, TestSize.Level1)
 
     for (auto family : UNION_RESOURCE_STRING_PLAN) {
         font.family = family.first;
-        Opt_Font optFont;
-        optFont.value = font;
+        auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setPopupFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_POPUP_FONT);
@@ -1011,8 +1002,7 @@ HWTEST_F(IndexerModifierTest, setPopupFontTest4, TestSize.Level1)
 
     for (auto size : FONT_SIZE_TEST_PLAN) {
         font.size = size.first;
-        Opt_Font optFont;
-        optFont.value = font;
+        auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setPopupFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_POPUP_FONT);
@@ -1044,8 +1034,7 @@ HWTEST_F(IndexerModifierTest, setPopupItemFont1, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
         font.weight = weight.first;
-        Opt_Font optFont;
-        optFont.value = font;
+        auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setPopupItemFont(node_, &optFont);
         auto checkSize = GetStringAttribute(node_, PROP_NAME_POPUP_ITEM_FONT_SIZE);
         auto checkWeight = GetStringAttribute(node_, PROP_NAME_POPUP_ITEM_FONT_WEIGHT);
@@ -1055,8 +1044,7 @@ HWTEST_F(IndexerModifierTest, setPopupItemFont1, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
         font.weight = weight.first;
-        Opt_Font optFont;
-        optFont.value = font;
+        auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setPopupItemFont(node_, &optFont);
         auto checkSize = GetStringAttribute(node_, PROP_NAME_POPUP_ITEM_FONT_SIZE);
         auto checkWeight = GetStringAttribute(node_, PROP_NAME_POPUP_ITEM_FONT_WEIGHT);
@@ -1081,8 +1069,7 @@ HWTEST_F(IndexerModifierTest, setPopupItemFont2, TestSize.Level1)
 
     for (auto size : FONT_SIZE_TEST_PLAN) {
         font.size = size.first;
-        Opt_Font optFont;
-        optFont.value = font;
+        auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setPopupItemFont(node_, &optFont);
         auto checkSize = GetStringAttribute(node_, PROP_NAME_POPUP_ITEM_FONT_SIZE);
         auto checkWeight = GetStringAttribute(node_, PROP_NAME_POPUP_ITEM_FONT_WEIGHT);
@@ -1131,8 +1118,7 @@ HWTEST_F(IndexerModifierTest, setFontTest1, TestSize.Level1)
 
     for (auto style : FONT_STYLE_TEST_PLAN) {
         font.style = style.first;
-        Opt_Font optFont;
-        optFont.value = font;
+        auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_FONT);
@@ -1167,8 +1153,7 @@ HWTEST_F(IndexerModifierTest, setFontTest2, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
         font.weight = weight.first;
-        Opt_Font optFont;
-        optFont.value = font;
+        auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_FONT);
@@ -1184,8 +1169,7 @@ HWTEST_F(IndexerModifierTest, setFontTest2, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
         font.weight = weight.first;
-        Opt_Font optFont;
-        optFont.value = font;
+        auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_FONT);
@@ -1220,8 +1204,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setFontTest3, TestSize.Level1)
 
     for (auto family : UNION_RESOURCE_STRING_PLAN) {
         font.family = family.first;
-        Opt_Font optFont;
-        optFont.value = font;
+        auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_FONT);
@@ -1256,8 +1239,7 @@ HWTEST_F(IndexerModifierTest, setFontTest4, TestSize.Level1)
 
     for (auto size : FONT_SIZE_TEST_PLAN) {
         font.size = size.first;
-        Opt_Font optFont;
-        optFont.value = font;
+        auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_FONT);
@@ -1506,13 +1488,12 @@ HWTEST_F(IndexerModifierTest, setAutoCollapse, TestSize.Level1)
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME_AUTO_COLLAPSE);
     EXPECT_EQ(checkInitial, DEFAULT_VALUE);
 
-    Opt_Boolean optValue;
-    optValue.value = true;
+    auto optValue = Converter::ArkValue<Opt_Boolean>(true);
     modifier_->setAutoCollapse(node_, &optValue);
     auto checkVal2 = GetAttrValue<std::string>(node_, PROP_NAME_AUTO_COLLAPSE);
     EXPECT_EQ(checkVal2, EXPECTED_TRUE);
 
-    optValue.value = false;
+    optValue = Converter::ArkValue<Opt_Boolean>(false);
     modifier_->setAutoCollapse(node_, &optValue);
     auto checkVal3 = GetAttrValue<std::string>(node_, PROP_NAME_AUTO_COLLAPSE);
     EXPECT_EQ(checkVal3, EXPECTED_FALSE);

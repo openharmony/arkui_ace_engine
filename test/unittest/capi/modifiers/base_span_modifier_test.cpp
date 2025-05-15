@@ -66,10 +66,11 @@ HWTEST_F(BaseSpanModifierTest, setBaselineOffsetTestValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Opt_LengthMetrics optInputBaselineOffset;
+    Ark_LengthMetrics inputBaselineOffset;
 
     for (auto&& value: LENGTH_METRICS_ANY_TEST_PLAN) {
-        optInputBaselineOffset.value = std::get<0>(value);
+        inputBaselineOffset = std::get<0>(value);
+        auto optInputBaselineOffset = Converter::ArkValue<Opt_LengthMetrics>(inputBaselineOffset);
         modifier_->setBaselineOffset(node_, &optInputBaselineOffset);
 
         jsonValue = GetJsonValue(node_);
