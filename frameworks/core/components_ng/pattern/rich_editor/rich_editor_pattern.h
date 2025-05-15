@@ -1275,6 +1275,8 @@ public:
         IF_TRUE(!dataDetectorAdapter_->aiDetectInitialized_, dataDetectorAdapter_->StartAITask());
     }
 
+    float GetCaretWidth();
+
 protected:
     bool CanStartAITask() override;
     std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;

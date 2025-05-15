@@ -726,6 +726,8 @@ HWTEST_F(RichEditorCaretTestNg, SetCaretWidth001, TestSize.Level1)
     auto richEditorOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
     richEditorOverlay->SetCaretWidth(-1);
     EXPECT_NE(richEditorOverlay->caretWidth_, -1);
+    float tagertCaretWidth = static_cast<float>(Dimension(2.0f, DimensionUnit::VP).ConvertToPx());
+    EXPECT_EQ(tagertCaretWidth, richEditorPattern->GetCaretWidth());
 }
 
 /**

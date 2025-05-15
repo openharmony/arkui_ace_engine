@@ -80,8 +80,7 @@ void RichEditorPaintMethod::SetCaretState(PaintWrapper* paintWrapper)
     overlayMod->SetFloatingCaretVisible(floatingCaretState.isFloatingCaretVisible);
     overlayMod->SetOriginCaretColor(floatingCaretState.originCaretColor.GetValue());
     overlayMod->SetCaretColor(richEditorPattern->GetCaretColor().GetValue());
-    constexpr float CARET_WIDTH = 2.0f;
-    overlayMod->SetCaretWidth(static_cast<float>(Dimension(CARET_WIDTH, DimensionUnit::VP).ConvertToPx()));
+    overlayMod->SetCaretWidth(richEditorPattern->GetCaretWidth());
     SetCaretOffsetAndHeight(paintWrapper);
 }
 
