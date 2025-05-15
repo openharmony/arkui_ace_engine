@@ -694,13 +694,12 @@ HWTEST_F(IndexerModifierTest, setUsingPopup, TestSize.Level1)
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME_USING_POPUP);
     EXPECT_EQ(checkInitial, DEFAULT_VALUE);
 
-    Opt_Boolean optValue;
-    optValue.value = true;
+    auto optValue = Converter::ArkValue<Opt_Boolean>(true);
     modifier_->setUsingPopup(node_, &optValue);
     auto checkVal2 = GetAttrValue<std::string>(node_, PROP_NAME_USING_POPUP);
     EXPECT_EQ(checkVal2, EXPECTED_TRUE);
 
-    optValue.value = false;
+    optValue = Converter::ArkValue<Opt_Boolean>(false);
     modifier_->setUsingPopup(node_, &optValue);
     auto checkVal3 = GetAttrValue<std::string>(node_, PROP_NAME_USING_POPUP);
     EXPECT_EQ(checkVal3, EXPECTED_FALSE);
@@ -1650,7 +1649,7 @@ HWTEST_F(IndexerModifierTest, setEnableHapticFeedback, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-/*HWTEST_F(IndexerModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
@@ -1663,14 +1662,14 @@ HWTEST_F(IndexerModifierTest, setEnableHapticFeedback, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
 
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Number parameter) {
+    auto checkCallback = [](const Ark_Int32 resourceId, const Opt_Number parameter) {
         checkEvent = {
             .nodeId = resourceId,
-            .value = Converter::Convert<int32_t>(parameter)
+            .value = Converter::Convert<int32_t>(parameter.value)
         };
     };
 
-    Callback_Number_Void arkCallback = Converter::ArkValue<Callback_Number_Void>(checkCallback, contextId);
+    Callback_Opt_Number_Void arkCallback = Converter::ArkValue<Callback_Opt_Number_Void>(checkCallback, contextId);
 
     modifier_->set_onChangeEvent_selected(node_, &arkCallback);
 
@@ -1684,5 +1683,5 @@ HWTEST_F(IndexerModifierTest, setEnableHapticFeedback, TestSize.Level1)
     ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, 10);
-}*/
+}
 } // namespace OHOS::Ace::NG
