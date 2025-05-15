@@ -201,7 +201,7 @@ HWTEST_F(CheckboxGroupModifierTest, setOnChangeEventSelectAllImpl, TestSize.Leve
 
     struct CheckEvent {
         int32_t nodeId;
-        bool value;
+        std::optional<bool> value;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
@@ -209,7 +209,7 @@ HWTEST_F(CheckboxGroupModifierTest, setOnChangeEventSelectAllImpl, TestSize.Leve
         auto param = Converter::OptConvert<bool>(parameter);
         checkEvent = {
             .nodeId = resourceId,
-            .value = param.value()
+            .value = param
         };
     };
 
