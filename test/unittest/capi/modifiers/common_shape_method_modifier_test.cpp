@@ -87,7 +87,8 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeTest, TestSize.Level1)
     EXPECT_EQ(checkInitial, Color::BLACK.ToString());
 
     for (const auto &[arkResColor, expected]: TEST_COLOR_PLAN) {
-        modifier_->setStroke(node_, &arkResColor);
+        auto optResColor = Converter::ArkValue<Opt_ResourceColor>(arkResColor);
+        modifier_->setStroke(node_, &optResColor);
         auto checkColor = GetAttrValue<std::string>(node_, PROP_NAME);
         EXPECT_EQ(checkColor, expected);
     }
@@ -107,7 +108,8 @@ HWTEST_F(CommonShapeMethodModifierTest, setFillTest, TestSize.Level1)
     EXPECT_EQ(checkInitial, Color::BLACK.ToString());
 
     for (const auto &[arkResColor, expected]: TEST_COLOR_PLAN) {
-        modifier_->setFill(node_, &arkResColor);
+        auto optResColor = Converter::ArkValue<Opt_ResourceColor>(arkResColor);
+        modifier_->setFill(node_, &optResColor);
         auto checkColor = GetAttrValue<std::string>(node_, PROP_NAME);
         EXPECT_EQ(checkColor, expected);
     }
@@ -140,9 +142,10 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeLineCapTestValidValues, TestSiz
 
     // Initial setup
     inputValueStrokeLineCap = ARK_LINE_CAP_STYLE_BUTT;
+    auto optInputValueStrokeLineCap = Converter::ArkValue<Opt_LineCapStyle>(inputValueStrokeLineCap);
 
     // Test
-    modifier_->setStrokeLineCap(node_, inputValueStrokeLineCap);
+    modifier_->setStrokeLineCap(node_, &optInputValueStrokeLineCap);
 
     // Initial verification
     jsonValue = GetJsonValue(node_);
@@ -151,13 +154,16 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeLineCapTestValidValues, TestSiz
 
     // Verifying attribute's other values
     inputValueStrokeLineCap = ARK_LINE_CAP_STYLE_ROUND;
-    modifier_->setStrokeLineCap(node_, inputValueStrokeLineCap);
+    optInputValueStrokeLineCap = Converter::ArkValue<Opt_LineCapStyle>(inputValueStrokeLineCap);
+    modifier_->setStrokeLineCap(node_, &optInputValueStrokeLineCap);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_LINE_CAP_NAME);
     EXPECT_EQ(resultStr, "LineCapStyle.Round");
 
     inputValueStrokeLineCap = ARK_LINE_CAP_STYLE_SQUARE;
-    modifier_->setStrokeLineCap(node_, inputValueStrokeLineCap);
+    optInputValueStrokeLineCap = Converter::ArkValue<Opt_LineCapStyle>(inputValueStrokeLineCap);
+    modifier_->setStrokeLineCap(node_, &optInputValueStrokeLineCap);
+
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_LINE_CAP_NAME);
     EXPECT_EQ(resultStr, "LineCapStyle.Square");
@@ -176,9 +182,10 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeLineCapTestInvalidValues, TestS
 
     // Initial setup
     inputValueStrokeLineCap = static_cast<Ark_LineCapStyle>(-1);
+    auto optInputValueStrokeLineCap = Converter::ArkValue<Opt_LineCapStyle>(inputValueStrokeLineCap);
 
     // Test
-    modifier_->setStrokeLineCap(node_, inputValueStrokeLineCap);
+    modifier_->setStrokeLineCap(node_, &optInputValueStrokeLineCap);
 
     // Initial verification
     jsonValue = GetJsonValue(node_);
@@ -213,9 +220,10 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeLineJoinTestValidValues, TestSi
 
     // Initial setup
     inputValueStrokeLineJoin = ARK_LINE_JOIN_STYLE_MITER;
+    auto optInputValueStrokeLineJoin = Converter::ArkValue<Opt_LineJoinStyle>(inputValueStrokeLineJoin);
 
     // Test
-    modifier_->setStrokeLineJoin(node_, inputValueStrokeLineJoin);
+    modifier_->setStrokeLineJoin(node_, &optInputValueStrokeLineJoin);
 
     // Initial verification
     jsonValue = GetJsonValue(node_);
@@ -224,13 +232,15 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeLineJoinTestValidValues, TestSi
 
     // Verifying attribute's other values
     inputValueStrokeLineJoin = ARK_LINE_JOIN_STYLE_ROUND;
-    modifier_->setStrokeLineJoin(node_, inputValueStrokeLineJoin);
+    optInputValueStrokeLineJoin = Converter::ArkValue<Opt_LineJoinStyle>(inputValueStrokeLineJoin);
+    modifier_->setStrokeLineJoin(node_, &optInputValueStrokeLineJoin);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_LINE_JOIN_NAME);
     EXPECT_EQ(resultStr, "LineJoinStyle.Round");
 
     inputValueStrokeLineJoin = ARK_LINE_JOIN_STYLE_BEVEL;
-    modifier_->setStrokeLineJoin(node_, inputValueStrokeLineJoin);
+    optInputValueStrokeLineJoin = Converter::ArkValue<Opt_LineJoinStyle>(inputValueStrokeLineJoin);
+    modifier_->setStrokeLineJoin(node_, &optInputValueStrokeLineJoin);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_LINE_JOIN_NAME);
     EXPECT_EQ(resultStr, "LineJoinStyle.Bevel");
@@ -249,9 +259,10 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeLineJoinTestInvalidValues, Test
 
     // Initial setup
     inputValueStrokeLineJoin = static_cast<Ark_LineJoinStyle>(-1);
+    auto optInputValueStrokeLineJoin = Converter::ArkValue<Opt_LineJoinStyle>(inputValueStrokeLineJoin);
 
     // Test
-    modifier_->setStrokeLineJoin(node_, inputValueStrokeLineJoin);
+    modifier_->setStrokeLineJoin(node_, &optInputValueStrokeLineJoin);
 
     // Initial verification
     jsonValue = GetJsonValue(node_);
@@ -296,7 +307,8 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeOpacityTest, TestSize.Level1)
     };
 
     for (const auto &[value, expectVal]: UNION_NUM_STR_RES_TEST_PLAN) {
-        modifier_->setStrokeOpacity(node_, &value);
+        auto optValue = Converter::ArkValue<Opt_Union_Number_String_Resource>(value);
+        modifier_->setStrokeOpacity(node_, &optValue);
         auto checkVal = GetStringAttribute(node_, ATTRIBUTE_STROKE_OPACITY_NAME);
         EXPECT_EQ(checkVal, expectVal);
     }
@@ -339,7 +351,8 @@ HWTEST_F(CommonShapeMethodModifierTest, setFillOpacityTest, TestSize.Level1)
     };
 
     for (const auto &[value, expectVal]: UNION_NUM_STR_RES_TEST_PLAN) {
-        modifier_->setFillOpacity(node_, &value);
+        auto optValue = Converter::ArkValue<Opt_Union_Number_String_Resource>(value);
+        modifier_->setFillOpacity(node_, &optValue);
         auto checkVal = GetStringAttribute(node_, ATTRIBUTE_FILL_OPACITY_NAME);
         EXPECT_EQ(checkVal, expectVal);
     }
@@ -385,7 +398,8 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeWidthTestValidValues, TestSize.
     };
 
     for (const auto &[arkLength, expected]: testPlan) {
-        modifier_->setStrokeWidth(node_, &arkLength);
+        auto optLength = Converter::ArkValue<Opt_Length>(arkLength);
+        modifier_->setStrokeWidth(node_, &optLength);
         jsonValue = GetJsonValue(node_);
         result = GetAttrValue<double>(jsonValue, ATTRIBUTE_STROKE_WIDTH_NAME);
         EXPECT_NEAR(result, expected, FLT_EPSILON);
@@ -438,7 +452,8 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeDashOffsetTest, TestSize.Level1
     std::string resultStr;
 
     for (const auto &[arkValue, expected]: testPlan) {
-        modifier_->setStrokeDashOffset(node_, &arkValue);
+        auto optValue = Converter::ArkValue<Opt_Union_Number_String>(arkValue);
+        modifier_->setStrokeDashOffset(node_, &optValue);
 
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_DASH_OFFSET_NAME);
@@ -492,7 +507,8 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeMiterLimitTest, TestSize.Level1
     std::string resultStr;
 
     for (const auto &[arkValue, expected]: testPlan) {
-        modifier_->setStrokeMiterLimit(node_, &arkValue);
+        auto optValue = Converter::ArkValue<Opt_Union_Number_String>(arkValue);
+        modifier_->setStrokeMiterLimit(node_, &optValue);
 
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_MITER_LIMIT_NAME);
@@ -524,7 +540,8 @@ HWTEST_F(CommonShapeMethodModifierTest, setAntiAliasTest, TestSize.Level1)
     EXPECT_EQ(checkVal, "true");
 
     for (const auto& [value, expectVal] : BOOL_TEST_PLAN) {
-        modifier_->setAntiAlias(node_, value);
+        auto optValue = Converter::ArkValue<Opt_Boolean>(value);
+        modifier_->setAntiAlias(node_, &optValue);
         auto fullJson = GetJsonValue(node_);
         checkVal = GetAttrValue<std::string>(fullJson, PROP_NAME);
         EXPECT_EQ(checkVal, expectVal);
@@ -557,7 +574,8 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeDashArrayTest, TestSize.Level1)
     EXPECT_EQ(checkVal->GetArraySize(), 0);
 
     for (const auto& [value, expectVal] : TEST_PLAN) {
-        modifier_->setStrokeDashArray(node_, &value);
+        auto optValue = Converter::ArkValue<Opt_Array_Length>(value);
+        modifier_->setStrokeDashArray(node_, &optValue);
         auto fullJson = GetJsonValue(node_);
         checkVal = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
         ASSERT_TRUE(checkVal->IsArray());

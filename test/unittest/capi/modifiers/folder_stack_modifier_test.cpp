@@ -103,7 +103,8 @@ HWTEST_F(FolderStackModifierTest, setAlignContentTestValidValues, TestSize.Level
     inputValueAlignContent = initValueAlignContent;
     for (auto&& value: alignContentAlignContentValidValues) {
         inputValueAlignContent = std::get<1>(value);
-        modifier_->setAlignContent(node_, inputValueAlignContent);
+        auto optValue = Converter::ArkValue<Opt_Alignment>(inputValueAlignContent);
+        modifier_->setAlignContent(node_, &optValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALIGN_CONTENT_NAME);
         expectedStr = std::get<2>(value);
@@ -135,9 +136,11 @@ HWTEST_F(FolderStackModifierTest, setAlignContentTestInvalidValues, TestSize.Lev
 
     // Verifying attribute's  values
     inputValueAlignContent = initValueAlignContent;
-    modifier_->setAlignContent(node_, inputValueAlignContent);
+    auto optValue = Converter::ArkValue<Opt_Alignment>(inputValueAlignContent);
+    modifier_->setAlignContent(node_, &optValue);
     inputValueAlignContent = std::get<1>(alignContentAlignContentInvalidValue);
-    modifier_->setAlignContent(node_, inputValueAlignContent);
+    optValue = Converter::ArkValue<Opt_Alignment>(inputValueAlignContent);
+    modifier_->setAlignContent(node_, &optValue);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALIGN_CONTENT_NAME);
     expectedStr = ATTRIBUTE_ALIGN_CONTENT_DEFAULT_VALUE;
@@ -163,7 +166,8 @@ HWTEST_F(FolderStackModifierTest, setOnFolderStateChangeTest, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto context = MockPipelineContext::GetCurrent();
     frameNode->AttachToMainTree(true, Referenced::RawPtr(context));
-    modifier_->setOnFolderStateChange(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_OnFoldStatusChangeCallback>(func);
+    modifier_->setOnFolderStateChange(node_, &optFunc);
 
     auto folderStackNode = AceType::DynamicCast<FolderStackGroupNode>(frameNode);
     ASSERT_NE(folderStackNode, nullptr);
@@ -194,7 +198,8 @@ HWTEST_F(FolderStackModifierTest, setOnHoverStatusChangeTest, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto context = MockPipelineContext::GetCurrent();
     frameNode->AttachToMainTree(true, Referenced::RawPtr(context));
-    modifier_->setOnHoverStatusChange(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_OnHoverStatusChangeCallback>(func);
+    modifier_->setOnHoverStatusChange(node_, &optFunc);
 
     auto folderStackNode = AceType::DynamicCast<FolderStackGroupNode>(frameNode);
     ASSERT_NE(folderStackNode, nullptr);
@@ -246,7 +251,8 @@ HWTEST_F(FolderStackModifierTest, setEnableAnimationTestValidValues, TestSize.Le
     inputValueEnableAnimation = initValueEnableAnimation;
     for (auto&& value: enableAnimationEnableAnimationValidValues) {
         inputValueEnableAnimation = std::get<1>(value);
-        modifier_->setEnableAnimation(node_, inputValueEnableAnimation);
+        auto optValue = Converter::ArkValue<Opt_Boolean>(inputValueEnableAnimation);
+        modifier_->setEnableAnimation(node_, &optValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_ANIMATION_NAME);
         expectedStr = std::get<2>(value);
@@ -294,7 +300,8 @@ HWTEST_F(FolderStackModifierTest, setAutoHalfFoldTestValidValues, TestSize.Level
     inputValueAutoHalfFold = initValueAutoHalfFold;
     for (auto&& value: autoHalfFoldAutoHalfFoldValidValues) {
         inputValueAutoHalfFold = std::get<1>(value);
-        modifier_->setAutoHalfFold(node_, inputValueAutoHalfFold);
+        auto optValue = Converter::ArkValue<Opt_Boolean>(inputValueAutoHalfFold);
+        modifier_->setAutoHalfFold(node_, &optValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTO_HALF_FOLD_NAME);
         expectedStr = std::get<2>(value);

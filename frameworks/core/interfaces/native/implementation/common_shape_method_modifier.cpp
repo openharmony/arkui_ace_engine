@@ -132,6 +132,7 @@ void StrokeDashArrayImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto dashArray = Converter::OptConvert<std::vector<Dimension>>(*value);
     if (!dashArray) {
         // TODO: Reset value

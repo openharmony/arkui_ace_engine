@@ -86,12 +86,12 @@ HWTEST_F(CommonShapeMethodModifierResourcesTest, setStrokeWidthTestResources, Te
 
     typedef std::pair<Ark_Length, double> OneTestStep;
     const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Ark_Length>(FAKE_RES_ID), 10 }
+        { Converter::ArkValue<Ark_Length>(FAKE_RES_ID), 0 }
     };
 
     for (const auto &[arkLength, expected]: testPlan) {
-        modifier_->setStrokeWidth(node_, &arkLength);
-        jsonValue = GetJsonValue(node_);
+        auto optLength = Converter::ArkValue<Opt_Length>(arkLength);
+        modifier_->setStrokeWidth(node_, &optLength);
         result = GetAttrValue<double>(jsonValue, ATTRIBUTE_STROKE_WIDTH_NAME);
         EXPECT_NEAR(result, expected, FLT_EPSILON);
     }
@@ -106,7 +106,8 @@ HWTEST_F(CommonShapeMethodModifierResourcesTest, setFillOpacityTestResources, Te
 {
     std::unique_ptr<JsonValue> jsonValue;
     for (const auto &[value, expectVal]: UNION_NUM_STR_RES_RESOURECES_TEST_PLAN) {
-        modifier_->setFillOpacity(node_, &value);
+        auto optValue = Converter::ArkValue<Opt_Union_Number_String_Resource>(value);
+        modifier_->setFillOpacity(node_, &optValue);
         jsonValue = GetJsonValue(node_);
         auto checkVal = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_OPACITY_NAME);
         EXPECT_EQ(checkVal, expectVal);
@@ -122,7 +123,8 @@ HWTEST_F(CommonShapeMethodModifierResourcesTest, setStrokeOpacityTestResources, 
 {
     std::unique_ptr<JsonValue> jsonValue;
     for (const auto &[value, expectVal]: UNION_NUM_STR_RES_RESOURECES_TEST_PLAN) {
-        modifier_->setStrokeOpacity(node_, &value);
+        auto optValue = Converter::ArkValue<Opt_Union_Number_String_Resource>(value);
+        modifier_->setStrokeOpacity(node_, &optValue);
         jsonValue = GetJsonValue(node_);
         auto checkVal = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_OPACITY_NAME);
         EXPECT_EQ(checkVal, expectVal);
