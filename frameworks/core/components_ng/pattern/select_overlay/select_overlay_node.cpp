@@ -623,16 +623,26 @@ std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInf
     CHECK_NULL_RETURN(pipeline, params);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, params);
-    params.emplace_back(theme->GetCutLabel(),
-        GetMenuCallbackWithContainerId(info->menuCallback.onCut), theme->GetCutLabelInfo(), info->menuInfo.showCut);
-    params.emplace_back(theme->GetCopyLabel(),
-        GetMenuCallbackWithContainerId(info->menuCallback.onCopy), theme->GetCopyLabelInfo(), info->menuInfo.showCopy);
-    params.emplace_back(theme->GetPasteLabel(),
-        GetMenuCallbackWithContainerId(info->menuCallback.onPaste), theme->GetPasteLabelInfo(),
-        info->menuInfo.showPaste);
-    params.emplace_back(theme->GetSelectAllLabel(),
-        GetMenuCallbackWithContainerId(info->menuCallback.onSelectAll), theme->GetSelectAllLabelInfo(),
-        info->menuInfo.showCopyAll);
+    if (theme->GetShowShortcut()) {
+        params.emplace_back(theme->GetCutLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onCut),
+            theme->GetCutLabelInfo(), info->menuInfo.showCut, theme->GetCutSymbolId());
+        params.emplace_back(theme->GetCopyLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onCopy),
+            theme->GetCopyLabelInfo(), info->menuInfo.showCopy, theme->GetCopySymbolId());
+        params.emplace_back(theme->GetPasteLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onPaste),
+            theme->GetPasteLabelInfo(), info->menuInfo.showPaste, theme->GetPasteSymbolId());
+        params.emplace_back(theme->GetSelectAllLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onSelectAll),
+            theme->GetSelectAllLabelInfo(), info->menuInfo.showCopyAll, theme->GetCopyAllSymbolId());
+    } else {
+        params.emplace_back(theme->GetCutLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onCut),
+            theme->GetCutLabelInfo(), info->menuInfo.showCut);
+        params.emplace_back(theme->GetCopyLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onCopy),
+            theme->GetCopyLabelInfo(), info->menuInfo.showCopy);
+        params.emplace_back(theme->GetPasteLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onPaste),
+            theme->GetPasteLabelInfo(), info->menuInfo.showPaste);
+        params.emplace_back(theme->GetSelectAllLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onSelectAll),
+            theme->GetSelectAllLabelInfo(), info->menuInfo.showCopyAll);
+    }
+
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN) &&
         TextSystemMenu::IsShowTranslate()) {
         params.emplace_back(theme->GetTranslateLabel(),
@@ -794,8 +804,13 @@ std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOption
                 CloseOverlayIfNecessary(overlayManager);
             }
         };
-        params.emplace_back(
-            GetItemContent(item.id, item.content.value_or("")), "", item.labelInfo.value_or(""), callback);
+        if (item.symbolId.has_value()) {
+            params.emplace_back(
+                GetItemContent(item.id, item.content.value_or("")), "", item.labelInfo.value_or(""), callback, item.symbolId.value_or(0));
+        } else {
+            params.emplace_back(
+                GetItemContent(item.id, item.content.value_or("")), "", item.labelInfo.value_or(""), callback);
+        }
         params.back().enabled = IsSystemMenuItemEnabled(info, item.id);
         params.back().disableSystemClick = true;
         itemNum++;
@@ -848,18 +863,20 @@ void SetPasteNodeProperties(const RefPtr<FrameNode>& pasteNode, const RefPtr<Sel
     auto pasteButtonRenderContext = pasteNode->GetRenderContext();
     CHECK_NULL_VOID(pasteButtonRenderContext);
     pasteLayoutProperty->UpdateBackgroundLeftPadding(Dimension(horInterval));
+    pasteLayoutProperty->UpdateTextIconSpace(Dimension(theme->GetIconContentPadding().ConvertToPx() * 2));
     pasteButtonRenderContext->UpdateOpacity(1.0);
 }
 
-void UpdatePasteOpacityFont(bool isPaste, RefPtr<FrameNode>& leftTextNode, const OptionParam& param,
+void UpdatePasteOpacityFont(bool isPaste, RefPtr<FrameNode>& leftRowNode, const OptionParam& param,
     const RefPtr<SelectTheme>& theme, const RefPtr<FrameNode>& menuItem)
 {
-    auto leftTextRenderContext = leftTextNode->GetRenderContext();
-    CHECK_NULL_VOID(leftTextRenderContext);
+    CHECK_NULL_VOID(leftRowNode);
+    auto leftRowRenderContext = leftRowNode->GetRenderContext();
+    CHECK_NULL_VOID(leftRowRenderContext);
     if (isPaste) {
         if (!param.enabled) {
-            leftTextRenderContext->UpdateOpacity(theme->GetDisabledFontColorAlpha());
-            leftTextNode->MarkModifyDone();
+            leftRowRenderContext->UpdateOpacity(theme->GetDisabledFontColorAlpha());
+            leftRowNode->MarkModifyDone();
         }
     }
     auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
@@ -876,10 +893,31 @@ void UpdatePasteOpacityFont(bool isPaste, RefPtr<FrameNode>& leftTextNode, const
     CHECK_NULL_VOID(focusHub);
     focusHub->SetEnabled(param.enabled);
     if (menuItemPattern->IsDisabled()) {
-        leftTextRenderContext->UpdateOpacity(theme->GetDisabledFontColorAlpha());
-        leftTextNode->MarkModifyDone();
+        leftRowRenderContext->UpdateOpacity(theme->GetDisabledFontColorAlpha());
+        leftRowNode->MarkModifyDone();
     }
     menuItemPattern->SetBlockClick(param.disableSystemClick);
+}
+
+void SetMenuItemIcon(const RefPtr<FrameNode>& menuItem, const OptionParam& param, RefPtr<FrameNode>& leftRow)
+{
+    auto symbol = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_VOID(symbol);
+    auto layoutProperty = symbol->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    layoutProperty->UpdateFontSize(theme->GetEndIconWidth());
+    layoutProperty->UpdateSymbolColorList({ theme->GetMenuIconColor() });
+    layoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
+    layoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(param.symbolId));
+    MarginProperty margin;
+    margin.right = CalcLength(theme->GetIconContentPadding());
+    layoutProperty->UpdateMargin(margin);
+    symbol->MountToParent(leftRow);
 }
 
 void SetupMenuItemChildrenAndFocus(const RefPtr<FrameNode>& menuItem, const std::string& content,
@@ -893,9 +931,13 @@ void SetupMenuItemChildrenAndFocus(const RefPtr<FrameNode>& menuItem, const std:
     leftRowLayoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     leftRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
     leftRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
+    if (!isPaste && param.symbolId != 0) {
+        SetMenuItemIcon(menuItem, param, leftRow);
+    }
     auto leftTextNode = CreateMenuTextNode(content, leftRow);
     CHECK_NULL_VOID(leftTextNode);
     leftRow->MountToParent(menuItem);
+    leftRow->MarkModifyDone();
     auto rightRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_VOID(rightRow);
@@ -907,13 +949,11 @@ void SetupMenuItemChildrenAndFocus(const RefPtr<FrameNode>& menuItem, const std:
     auto rightTextNode = CreateMenuTextNode(labelInfo, rightRow);
     CHECK_NULL_VOID(rightTextNode);
     rightRow->MountToParent(menuItem);
-    auto leftTextRenderContext = leftTextNode->GetRenderContext();
-    CHECK_NULL_VOID(leftTextRenderContext);
     auto rightTextRenderContext = rightTextNode->GetRenderContext();
     CHECK_NULL_VOID(rightTextRenderContext);
     auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(menuItemPattern);
-    UpdatePasteOpacityFont(isPaste, leftTextNode, param, theme, menuItem);
+    UpdatePasteOpacityFont(isPaste, leftRow, param, theme, menuItem);
     rightTextRenderContext->UpdateOpacity(theme->GetDisabledFontColorAlpha());
     rightTextNode->MarkModifyDone();
 }
@@ -991,9 +1031,9 @@ RefPtr<FrameNode> CreateMenuItemPaste(
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
-    auto pasteNode =
-        PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
-            static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::NORMAL), true);
+    auto pasteNode = PasteButtonModelNG::GetInstance()->CreateNode(
+        static_cast<int32_t>(PasteButtonPasteDescription::PASTE), static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL),
+        static_cast<int32_t>(ButtonType::NORMAL), true, param.symbolId);
     CHECK_NULL_RETURN(pasteNode, nullptr);
     SetPasteNodeProperties(pasteNode, theme, param.enabled);
     auto menuItem =
