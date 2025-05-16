@@ -942,6 +942,12 @@ public:
     static void ClearJSFrameNodeOnGridScrollIndex(FrameNode* frameNode);
     static void SetJSFrameNodeOnWaterFlowScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex);
     static void ClearJSFrameNodeOnWaterFlowScrollIndex(FrameNode* frameNode);
+    static bool CreatePropertyAnimation(FrameNode* frameNode, AnimationPropertyType property,
+        const std::vector<float>& startValue, const std::vector<float>& endValue, const AnimationOption& option);
+    static bool CancelPropertyAnimations(
+        FrameNode* frameNode, const std::vector<AnimationPropertyType>& properties);
+    // Get property value from rsNode
+    static std::vector<float> GetRenderNodePropertyValue(FrameNode* frameNode, AnimationPropertyType property);
 
 private:
     static void AddDragFrameNodeToManager();

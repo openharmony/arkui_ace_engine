@@ -30,6 +30,19 @@ namespace OHOS::Ace::NG {
 namespace {
     const char* SRC_JPG = "file://data/data/com.example.test/res/exampleAlt.jpg";
 
+template <typename T>
+bool CompareVector(const std::vector<T>& vec1, const std::vector<T>& vec2)
+{
+    if (vec1.size() != vec2.size()) {
+        return false;
+    }
+    for (size_t i = 0; i != vec1.size(); ++i) {
+        if (!NearEqual(vec1[i], vec2[i])) {
+            return false;
+        }
+    }
+    return true;
+}
 } // namespace
 
 void RosenRenderContextTest::SetUp()
@@ -1133,6 +1146,78 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest046, TestSize.Level1)
     auto renderFit = rosenRenderContext->GetRenderFit();
     ASSERT_NE(renderFit, std::nullopt);
     EXPECT_EQ(renderFit.value(), RenderFit::CENTER);
+}
+
+/**
+ * @tc.name: AnimationPropertyTest001
+ * @tc.desc: Test GetRenderNodePropertyValue func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, AnimationPropertyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node and check basic infomation.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    auto rsNode = rosenRenderContext->rsNode_;
+    ASSERT_NE(rsNode, nullptr);
+    /**
+     * @tc.steps: step2. Test GetRenderNodePropertyValue function without setting value.
+     * @tc.expected: step2. property value on node is default value.
+     */
+    auto rotationValue = rosenRenderContext->GetRenderNodePropertyValue(AnimationPropertyType::ROTATION);
+    std::vector<float> expectedRotationValue = { 0.0f, 0.0f, 0.0f };
+    EXPECT_TRUE(CompareVector(rotationValue, expectedRotationValue));
+    auto scaleValue = rosenRenderContext->GetRenderNodePropertyValue(AnimationPropertyType::SCALE);
+    std::vector<float> expectedScaleValue = { 1.0f, 1.0f };
+    EXPECT_TRUE(CompareVector(scaleValue, expectedScaleValue));
+    auto translateValue = rosenRenderContext->GetRenderNodePropertyValue(AnimationPropertyType::TRANSLATION);
+    std::vector<float> expectedTranslateValue = { 0.0f, 0.0f };
+    EXPECT_TRUE(CompareVector(translateValue, expectedTranslateValue));
+    auto opacityValue = rosenRenderContext->GetRenderNodePropertyValue(AnimationPropertyType::OPACITY);
+    std::vector<float> expectedOpacityValue = { 1.0f };
+    EXPECT_TRUE(CompareVector(opacityValue, expectedOpacityValue));
+}
+
+/**
+ * @tc.name: AnimationPropertyTest002
+ * @tc.desc: Test SetAnimationPropertyValue and GetRenderNodePropertyValue func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, AnimationPropertyTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node and check basic infomation.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    auto rsNode = rosenRenderContext->rsNode_;
+    ASSERT_NE(rsNode, nullptr);
+    /**
+     * @tc.steps: step2. call SetAnimationPropertyValue function.
+     * @tc.expected: step2. The value on rsNode is same with set value.
+     */
+    std::vector<float> rotationValue { 45.0f, -30.0f, 180.0f };
+    rosenRenderContext->SetAnimationPropertyValue(AnimationPropertyType::ROTATION, rotationValue);
+    std::vector<float> scaleValue { 2.0f, 1.2f };
+    rosenRenderContext->SetAnimationPropertyValue(AnimationPropertyType::SCALE, scaleValue);
+    std::vector<float> translateValue { 100.0f, -20.0f };
+    rosenRenderContext->SetAnimationPropertyValue(AnimationPropertyType::TRANSLATION, translateValue);
+    std::vector<float> opacityValue { 0.5f };
+    rosenRenderContext->SetAnimationPropertyValue(AnimationPropertyType::OPACITY, opacityValue);
+    auto nodeRotateValue = rosenRenderContext->GetRenderNodePropertyValue(AnimationPropertyType::ROTATION);
+    auto nodeScaleValue = rosenRenderContext->GetRenderNodePropertyValue(AnimationPropertyType::SCALE);
+    auto nodeTranslateValue = rosenRenderContext->GetRenderNodePropertyValue(AnimationPropertyType::TRANSLATION);
+    auto nodeOpacityValue = rosenRenderContext->GetRenderNodePropertyValue(AnimationPropertyType::OPACITY);
+    EXPECT_TRUE(CompareVector(nodeRotateValue, rotationValue));
+    EXPECT_TRUE(CompareVector(nodeScaleValue, scaleValue));
+    EXPECT_TRUE(CompareVector(nodeTranslateValue, translateValue));
+    EXPECT_TRUE(CompareVector(nodeOpacityValue, opacityValue));
 }
 
 /**

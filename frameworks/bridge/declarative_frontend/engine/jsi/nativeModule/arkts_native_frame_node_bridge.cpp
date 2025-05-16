@@ -17,6 +17,7 @@
 
 #include "jsnapi_expo.h"
 
+#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -26,6 +27,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.h"
+#include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
@@ -44,6 +46,96 @@ constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t INDEX_OF_INTERVAL = 4;
 constexpr int32_t INDEX_OF_OPTION_OF_VISIBLE = 3;
 constexpr int DEFAULT_EXPECTED_UPDATE_INTERVAL = 1000;
+
+bool ParseFloatArray(const EcmaVM* vm, const panda::Local<panda::ArrayRef>& array, std::vector<float>& outArray)
+{
+    uint32_t length = array->Length(vm);
+    for (uint32_t i = 0; i < length; ++i) {
+        auto jsValue = panda::ArrayRef::GetValueAt(vm, array, i);
+        bool isNumber = false;
+        double value = jsValue->GetValueDouble(isNumber);
+        if (!isNumber) {
+            return false;
+        }
+        outArray.emplace_back(value);
+    }
+    return true;
+}
+
+bool CheckAnimationPropertyLength(AnimationPropertyType type, size_t size, bool allowEmpty)
+{
+    if (allowEmpty && size == 0) {
+        return true;
+    }
+    const static std::unordered_map<AnimationPropertyType, std::pair<size_t, const char*>> requiredLength = {
+        { AnimationPropertyType::ROTATION, { 3, "rotation" } },
+        { AnimationPropertyType::TRANSLATION, { 2, "translation" } },
+        { AnimationPropertyType::SCALE, { 2, "scale" } },
+        { AnimationPropertyType::OPACITY, { 1, "opacity" } },
+    };
+    auto iter = requiredLength.find(type);
+    if (iter == requiredLength.end()) {
+        return false;
+    }
+    if (iter->second.first == size) {
+        return true;
+    }
+    TAG_LOGW(AceLogTag::ACE_ANIMATION,
+        "animationProperty of %{public}s needs %{public}zu params while input size is %{public}zu", iter->second.second,
+        iter->second.first, size);
+    return false;
+}
+
+void AdjustPropertyValue(AnimationPropertyType type, std::vector<float>& startValue, std::vector<float>& endValue)
+{
+    if (type == AnimationPropertyType::OPACITY) {
+        for (auto& opacityItem : startValue) {
+            opacityItem = std::clamp(opacityItem, 0.0f, 1.0f);
+        }
+        for (auto& opacityItem : endValue) {
+            opacityItem = std::clamp(opacityItem, 0.0f, 1.0f);
+        }
+    }
+}
+
+std::function<void()> ParseFinishCallback(const panda::Local<panda::ObjectRef>& obj, FrameNode* frameNode,
+    const EcmaVM* vm, std::optional<int32_t>& finishCount)
+{
+    panda::Local<panda::JSValueRef> onFinishValue = obj->Get(vm, "onFinish");
+    if (onFinishValue->IsFunction(vm)) {
+        panda::Local<panda::FunctionRef> onFinish = onFinishValue->ToObject(vm);
+        finishCount = GetAnimationFinshCount();
+        return [func = panda::CopyableGlobal(vm, onFinish), id = Container::CurrentIdSafely(),
+                   node = AceType::WeakClaim(frameNode), count = finishCount.value(), vm]() mutable {
+            if (func.IsEmpty()) {
+                return;
+            }
+            ContainerScope scope(id);
+            ACE_SCOPED_TRACE("frameNode onFinish[cnt:%d]", count);
+            auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
+            panda::LocalScope pandaScope(vm);
+            TAG_LOGI(AceLogTag::ACE_ANIMATION, "FrameNode animation finish, cnt:%{public}d", count);
+            func->Call(vm, func.ToLocal(), nullptr, 0);
+            func.Reset();
+        };
+    }
+    return nullptr;
+}
+
+bool ParseAnimationProperty(
+    const EcmaVM* vm, const panda::Local<panda::JSValueRef>& propertyArg, AnimationPropertyType& result)
+{
+    CHECK_NULL_RETURN(propertyArg->IsNumber(), false);
+    int32_t propertyInt = propertyArg->Int32Value(vm);
+    if (propertyInt < static_cast<int32_t>(AnimationPropertyType::ROTATION) ||
+        propertyInt > static_cast<int32_t>(AnimationPropertyType::OPACITY)) {
+        return false;
+    }
+    result = static_cast<AnimationPropertyType>(propertyInt);
+    return true;
+}
 
 ArkUI_Bool GetIsExpanded(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32 index)
 {
@@ -2094,6 +2186,122 @@ ArkUINativeModuleValue FrameNodeBridge::RemoveSupportedStates(ArkUIRuntimeCallIn
     auto state = secondArg->ToNumber(vm)->Value();
     GetArkUINodeModifiers()->getUIStateModifier()->removeSupportedUIState(nativeNode, state);
     return defaultReturnValue;
+}
+
+ArkUINativeModuleValue FrameNodeBridge::CreateAnimation(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    panda::Local<panda::JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    if (nodeArg.IsNull()) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "FrameNode::createAnimation, node is null");
+        return panda::BooleanRef::New(vm, false);
+    }
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::BooleanRef::New(vm, false));
+    auto containerId = Container::CurrentIdSafelyWithCheck();
+    ContainerScope scope(containerId);
+    panda::Local<panda::JSValueRef> propertyArg = runtimeCallInfo->GetCallArgRef(1);
+    AnimationPropertyType propertyType = AnimationPropertyType::ROTATION;
+    if (!ParseAnimationProperty(vm, propertyArg, propertyType)) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "FrameNode::createAnimation, property is invalid");
+        return panda::BooleanRef::New(vm, false);
+    }
+    panda::Local<panda::JSValueRef> startValueArg = runtimeCallInfo->GetCallArgRef(2);
+    std::vector<float> startValue;
+    if (startValueArg->IsArray(vm)) {
+        if (!ParseFloatArray(vm, panda::Local<panda::ArrayRef>(startValueArg), startValue)) {
+            TAG_LOGW(AceLogTag::ACE_ANIMATION, "FrameNode::createAnimation, start value parse failed");
+            return panda::BooleanRef::New(vm, false);
+        }
+    }
+    std::vector<float> endValue;
+    panda::Local<panda::JSValueRef> endValueArg = runtimeCallInfo->GetCallArgRef(3);
+    if (!(endValueArg->IsArray(vm) && ParseFloatArray(vm, panda::Local<panda::ArrayRef>(endValueArg), endValue))) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "FrameNode::createAnimation, end value parse failed");
+        return panda::BooleanRef::New(vm, false);
+    }
+    if (!(CheckAnimationPropertyLength(propertyType, startValue.size(), true) &&
+            CheckAnimationPropertyLength(propertyType, endValue.size(), false))) {
+        return panda::BooleanRef::New(vm, false);
+    }
+    AdjustPropertyValue(propertyType, startValue, endValue);
+    panda::Local<panda::JSValueRef> localParamArg = runtimeCallInfo->GetCallArgRef(4);
+    if (!localParamArg->IsObject(vm)) {
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "FrameNode::createAnimation, animate param is not object");
+        return panda::BooleanRef::New(vm, false);
+    }
+    panda::Local<panda::ObjectRef> localParamObj = localParamArg->ToObject(vm);
+    Framework::JSRef<Framework::JSObject> paramObj { Framework::JSObject(vm, localParamObj) };
+    // not support form now, the second param is false
+    AnimationOption option = Framework::JSViewContext::CreateAnimation(paramObj, false);
+    std::optional<int32_t> finishCount;
+    option.SetOnFinishEvent(ParseFinishCallback(localParamObj, frameNode, vm, finishCount));
+    auto result = ViewAbstract::CreatePropertyAnimation(frameNode, propertyType, startValue, endValue, option);
+    if (result && finishCount.has_value()) {
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "FrameNode::createAnimation starts, property:%{public}d, cnt:%{public}d",
+            static_cast<int32_t>(propertyType), finishCount.value());
+    }
+    return panda::BooleanRef::New(vm, result);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::CancelAnimations(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    panda::Local<panda::JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    if (nodeArg.IsNull()) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "FrameNode::cancelAnimations, node is null");
+        return panda::BooleanRef::New(vm, false);
+    }
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::BooleanRef::New(vm, false));
+    auto containerId = Container::CurrentIdSafelyWithCheck();
+    ContainerScope scope(containerId);
+    panda::Local<panda::JSValueRef> propertiesArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(propertiesArg->IsArray(vm), panda::BooleanRef::New(vm, false));
+    panda::Local<panda::ArrayRef> propertiesArrArg = panda::Local<panda::ArrayRef>(propertiesArg);
+    std::vector<AnimationPropertyType> properties;
+    auto length = propertiesArrArg->Length(vm);
+    for (uint32_t i = 0; i != length; ++i) {
+        panda::Local<panda::JSValueRef> propertyArg = panda::ArrayRef::GetValueAt(vm, propertiesArrArg, i);
+        AnimationPropertyType propertyType = AnimationPropertyType::ROTATION;
+        if (!ParseAnimationProperty(vm, propertyArg, propertyType)) {
+            TAG_LOGW(AceLogTag::ACE_ANIMATION, "FrameNode::cancelAnimations, property is invalid");
+            return panda::BooleanRef::New(vm, false);
+        }
+        if (std::find(properties.begin(), properties.end(), propertyType) == properties.end()) {
+            properties.emplace_back(propertyType);
+        }
+    }
+    auto result = ViewAbstract::CancelPropertyAnimations(frameNode, properties);
+    return panda::BooleanRef::New(vm, result);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::GetNodePropertyValue(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    panda::Local<panda::JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    if (nodeArg.IsNull()) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "FrameNode::getNodePropertyValue, node is null");
+        return panda::BooleanRef::New(vm, false);
+    }
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::ArrayRef::New(vm, 0));
+    panda::Local<panda::JSValueRef> propertyArg = runtimeCallInfo->GetCallArgRef(1);
+    AnimationPropertyType propertyType = AnimationPropertyType::ROTATION;
+    if (!ParseAnimationProperty(vm, propertyArg, propertyType)) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "FrameNode::getNodePropertyValue, property is invalid");
+        return panda::ArrayRef::New(vm, 0);
+    }
+    auto resultVector = ViewAbstract::GetRenderNodePropertyValue(frameNode, propertyType);
+    uint32_t resultLength = resultVector.size();
+    panda::Local<panda::ArrayRef> result = panda::ArrayRef::New(vm, static_cast<uint32_t>(resultVector.size()));
+    for (uint32_t index = 0; index != resultLength; ++index) {
+        result->SetValueAt(vm, result, index, panda::NumberRef::New(vm, resultVector[index]));
+    }
+    return result;
 }
 
 ArkUINativeModuleValue FrameNodeBridge::SetOnReachStart(ArkUIRuntimeCallInfo* runtimeCallInfo)

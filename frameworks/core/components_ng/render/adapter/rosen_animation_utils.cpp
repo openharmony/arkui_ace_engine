@@ -55,10 +55,41 @@ Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& o
 }
 std::function<void()> GetWrappedCallback(const std::function<void()>& callback)
 {
-    if (!callback) {
-        return nullptr;
-    }
-    auto wrappedOnFinish = [onFinish = callback, instanceId = Container::CurrentIdSafelyWithCheck()]() {
+    CHECK_NULL_RETURN(callback, nullptr);
+    auto instanceId = Container::CurrentIdSafelyWithCheck();
+    ContainerScope scope(instanceId);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, callback);
+    struct ArkUIAnimationCallbackWrapper {
+        ArkUIAnimationCallbackWrapper(const RefPtr<TaskExecutor>& taskExecutor, const std::function<void()>& callback)
+            : taskExecutor_(taskExecutor), callback_(callback)
+        {}
+        ~ArkUIAnimationCallbackWrapper()
+        {
+            if (callback_ && taskExecutor_ && !taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+                auto mutex = std::make_shared<std::mutex>();
+                std::lock_guard lock(*mutex);
+                taskExecutor_->PostTask(
+                    [callback = callback_, mutex]() mutable {
+                        std::lock_guard lock(*mutex);
+                        callback = nullptr;
+                    },
+                    TaskExecutor::TaskType::UI, "ArkUIAnimationCallbackWrapper", PriorityType::HIGH);
+                callback_ = nullptr;
+            }
+        }
+        void operator()()
+        {
+            if (callback_) {
+                callback_();
+                callback_ = nullptr;
+            }
+        }
+        RefPtr<TaskExecutor> taskExecutor_;
+        std::function<void()> callback_;
+    };
+    ArkUIAnimationCallbackWrapper onFinish { taskExecutor, callback };
+    auto wrappedOnFinish = [onFinish, instanceId]() mutable {
         ContainerScope scope(instanceId);
         auto taskExecutor = Container::CurrentTaskExecutor();
         if (!taskExecutor) {
@@ -69,7 +100,7 @@ std::function<void()> GetWrappedCallback(const std::function<void()>& callback)
             onFinish();
             return;
         }
-        taskExecutor->PostTask([onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI,
+        taskExecutor->PostTask([onFinish] () mutable { onFinish(); }, TaskExecutor::TaskType::UI,
             "ArkUIAnimationGetWrappedCallback", PriorityType::HIGH);
     };
     return wrappedOnFinish;

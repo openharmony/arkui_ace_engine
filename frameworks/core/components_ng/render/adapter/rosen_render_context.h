@@ -502,6 +502,10 @@ public:
         reDraggingFlag_ = reDraggingFlag;
     }
 
+    void SetAnimationPropertyValue(AnimationPropertyType property, const std::vector<float>& value) override;
+    void CancelPropertyAnimation(AnimationPropertyType property) override;
+    std::vector<float> GetRenderNodePropertyValue(AnimationPropertyType property) override;
+
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
@@ -771,7 +775,7 @@ protected:
     std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
     std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
     std::optional<WindowBlurModifier> windowBlurModifier_;
-    // translate and scale modifier for developer
+    // translate, rotation, scale, alpha modifier for developer
     std::shared_ptr<Rosen::RSTranslateModifier> translateXYUserModifier_;
     std::shared_ptr<Rosen::RSTranslateZModifier> translateZUserModifier_;
     std::shared_ptr<Rosen::RSRotationXModifier> rotationXUserModifier_;
@@ -779,6 +783,8 @@ protected:
     std::shared_ptr<Rosen::RSRotationModifier> rotationZUserModifier_;
     std::shared_ptr<Rosen::RSCameraDistanceModifier> cameraDistanceUserModifier_;
     std::shared_ptr<Rosen::RSScaleModifier> scaleXYUserModifier_;
+    std::shared_ptr<Rosen::RSAlphaModifier> alphaUserModifier_;
+
     std::shared_ptr<Rosen::RectF> drawRegionRects_[DRAW_REGION_RECT_COUNT] = { nullptr };
     std::shared_ptr<Rosen::RSAlphaModifier> alphaModifier_;
     RefPtr<FocusAnimationModifier> focusAnimationModifier_;

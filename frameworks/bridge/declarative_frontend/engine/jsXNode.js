@@ -1299,6 +1299,21 @@ class FrameNode {
         this.uiContext_ = uiContext;
         this.instanceId_ = uiContext.instanceId_;
     }
+    createAnimation(property, startValue, endValue, param) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result = getUINativeModule().frameNode.createAnimation(this.getNodePtr(), property, startValue, endValue, param);
+        __JSScopeUtil__.restoreInstanceId();
+        return result;
+    }
+    cancelAnimations(properties) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result = getUINativeModule().frameNode.cancelAnimations(this.getNodePtr(), properties);
+        __JSScopeUtil__.restoreInstanceId();
+        return result;
+    }
+    getNodePropertyValue(property) {
+        return getUINativeModule().frameNode.getNodePropertyValue(this.getNodePtr(), property);
+    }
     triggerOnReuse() {
         getUINativeModule().frameNode.triggerOnReuse(this.getNodePtr());
     }
@@ -1349,6 +1364,14 @@ class ImmutableFrameNode extends FrameNode {
         }
         this._commonAttribute.setNodePtr(undefined);
         return this._commonAttribute;
+    }
+    createAnimation(property, startValue, endValue, param) {
+        console.warn("can't create animation on unmodifiable frameNode");
+        return false;
+    }
+    cancelAnimations(properties) {
+        console.warn("can't cancel animation on unmodifiable frameNode");
+        return false;
     }
 }
 class BuilderRootFrameNode extends ImmutableFrameNode {

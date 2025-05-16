@@ -102,6 +102,13 @@ enum class AnimationInterface : int32_t {
     KEYFRAME_ANIMATE_TO,
 };
 
+enum class AnimationPropertyType : int32_t {
+    ROTATION = 0,
+    TRANSLATION,
+    SCALE,
+    OPACITY,
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_ANIMATION_ANIMATION_CONSTANTS_H
