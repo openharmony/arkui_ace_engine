@@ -4273,7 +4273,7 @@ void PipelineContext::WindowFocus(bool isFocus)
     onFocus_ = isFocus;
     if (!isFocus) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window: %{public}d lost focus.", windowId_);
-        RestoreDefault();
+        RestoreDefault(0, MouseStyleChangeReason::WINDOW_LOST_FOCUS_RESET_MOUSESTYLE);
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
     } else {
@@ -5246,10 +5246,10 @@ void PipelineContext::SetCursor(int32_t cursorValue)
     }
 }
 
-void PipelineContext::RestoreDefault(int32_t windowId)
+void PipelineContext::RestoreDefault(int32_t windowId, MouseStyleChangeReason reason)
 {
     ChangeMouseStyle(-1, MouseFormat::DEFAULT, windowId > 0 ? windowId : GetFocusWindowId(),
-        false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
+        false, reason);
     auto mouseStyleManager = eventManager_->GetMouseStyleManager();
     CHECK_NULL_VOID(mouseStyleManager);
     mouseStyleManager->SetUserSetCursor(false);

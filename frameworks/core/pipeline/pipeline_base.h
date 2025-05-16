@@ -1335,7 +1335,7 @@ public:
 
     virtual void SetCursor(int32_t cursorValue) {}
 
-    virtual void RestoreDefault(int32_t windowId = 0) {}
+    virtual void RestoreDefault(int32_t windowId, MouseStyleChangeReason reason) {}
 
     void SetOnFormRecycleCallback(std::function<std::string()>&& onFormRecycle)
     {

@@ -3111,7 +3111,8 @@ void FFIOHOSAceFrameworkRestoreDefault()
         LOGE("TaskExecutor is non-valid");
         return;
     }
-    pipelineContext->GetTaskExecutor()->PostSyncTask([pipelineContext]() { pipelineContext->RestoreDefault(); },
+    pipelineContext->GetTaskExecutor()->PostSyncTask(
+        [pipelineContext]() { pipelineContext->RestoreDefault(0, MouseStyleChangeReason::USER_SET_MOUSESTYLE); },
         TaskExecutor::TaskType::UI, "ArkUICjRestoreDefault");
 }
 

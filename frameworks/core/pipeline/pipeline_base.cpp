@@ -1044,6 +1044,9 @@ void PipelineBase::Destroy()
     ClearImageCache();
     platformResRegister_.Reset();
     drawDelegate_.reset();
+    if (eventManager_->GetCurrentMouseStyle() != MouseFormat::DEFAULT) {
+        RestoreDefault(GetFocusWindowId(), MouseStyleChangeReason::CONTAINER_DESTROY_RESET_MOUSESTYLE);
+    }
     eventManager_->ClearResults();
     {
         std::unique_lock<std::shared_mutex> lock(imageMtx_);

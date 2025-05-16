@@ -91,7 +91,9 @@ public:
 enum class MouseStyleChangeReason {
     INNER_SET_MOUSESTYLE = 0, // inner frameNode call mouseStyle change
     USER_SET_MOUSESTYLE = 1, // user call setCursor change mouseStyle
-    WINDOW_DESTROY_RESET_MOUSESTYLE = 2, // window is destroyed, reset mouse style
+    CONTAINER_DESTROY_RESET_MOUSESTYLE = 2, // container is destroyed, reset mouse style
+    WINDOW_LOST_FOCUS_RESET_MOUSESTYLE = 3, // window lost focus, reset mouse style
+    WINDOW_SCENE_LOST_FOCUS_RESET_MOUSESTYLE = 4, // window_scene lost focus, reset mouse style
 };
 
 struct MouseStyleChangeLog {
@@ -144,6 +146,11 @@ public:
     void SetUserSetCursor(bool userSetCursor)
     {
         userSetCursor_ = userSetCursor;
+    }
+
+    MouseFormat GetCurrentMouseStyle() const
+    {
+        return mouseFormat_;
     }
 
 private:

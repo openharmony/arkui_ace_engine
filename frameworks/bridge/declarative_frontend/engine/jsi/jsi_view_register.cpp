@@ -1256,7 +1256,7 @@ panda::Local<panda::JSValueRef> RestoreDefault(panda::JsiRuntimeCallInfo* runtim
         return panda::JSValueRef::Undefined(vm);
     }
     pipelineContext->GetTaskExecutor()->PostSyncTask(
-        [pipelineContext]() { pipelineContext->RestoreDefault(); },
+        [pipelineContext]() { pipelineContext->RestoreDefault(0, MouseStyleChangeReason::USER_SET_MOUSESTYLE); },
         TaskExecutor::TaskType::UI, "ArkUIJsRestoreDefault");
     return panda::JSValueRef::Undefined(vm);
 }
