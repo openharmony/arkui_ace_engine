@@ -84,6 +84,15 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
         std::make_shared<StartDragListenerImpl>(callbackCore));
 }
 
+int32_t InteractionImpl::GetDragBundleInfo(DragBundleInfo& dragBundleInfo)
+{
+    Msdp::DeviceStatus::DragBundleInfo msdpDragBundleInfo;
+    auto ret = InteractionManager::GetInstance()->GetDragBundleInfo(msdpDragBundleInfo);
+    dragBundleInfo.bundleName = msdpDragBundleInfo.bundleName;
+    dragBundleInfo.isRemoteDev = msdpDragBundleInfo.isCrossDevice;
+    return ret;
+}
+
 int32_t InteractionImpl::UpdateDragStyle(OHOS::Ace::DragCursorStyleCore style, const int32_t eventId)
 {
     return InteractionManager::GetInstance()->UpdateDragStyle(TranslateDragCursorStyle(style), eventId);

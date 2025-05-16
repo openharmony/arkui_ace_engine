@@ -35,6 +35,8 @@ public:
     int32_t StartDrag(const DragDataCore& dragData,
         std::function<void(const OHOS::Ace::DragNotifyMsg&)> callback) override;
 
+    int32_t GetDragBundleInfo(DragBundleInfo& dragBundleInfo) override;
+
     int32_t UpdateDragStyle(DragCursorStyleCore style, const int32_t eventId = -1) override;
 
     int32_t UpdatePreviewStyle(const PreviewStyle& previewStyle) override;

@@ -349,6 +349,27 @@ public:
         return requestId_;
     }
 
+    void SetDragSource(std::string& bundleName)
+    {
+        bundleName_ = bundleName;
+    }
+
+    std::string GetDragSource() const
+    {
+        return bundleName_;
+    }
+
+
+    void SetRemoteDev(bool isRemoteDev)
+    {
+        isRemoteDev_ = isRemoteDev;
+    }
+
+    bool isRemoteDev() const
+    {
+        return isRemoteDev_;
+    }
+    
 private:
     RefPtr<PasteData> pasteData_;
     double screenX_ = 0.0;
@@ -376,6 +397,8 @@ private:
     std::function<void()> executeDropAnimation_;
     int32_t requestId_ = -1;
     bool isDragEndPending_ = false;
+    std::string bundleName_;
+    bool isRemoteDev_ { false };
 };
 
 class NotifyDragEvent : public DragEvent {

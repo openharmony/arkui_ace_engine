@@ -2051,23 +2051,23 @@ HWTEST_F(DragDropManagerTestNg, IsAnyDraggableHit003, TestSize.Level1)
 }
 
 /**
- * @tc.name: RequireSummaryIfNecessary001
+ * @tc.name: RequireSummaryAndDragBundleInfoIfNecessary001
  * @tc.desc: ResetPreTargetFrameNode
  * @tc.type: FUNC
  */
-HWTEST_F(DragDropManagerTestNg, RequireSummaryIfNecessary001, TestSize.Level1)
+HWTEST_F(DragDropManagerTestNg, RequireSummaryAndDragBundleInfoIfNecessary001, TestSize.Level1)
 {
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
     ASSERT_NE(dragDropManager, nullptr);
 
     DragPointerEvent pointerEvent;
     pointerEvent.pullId = 1;
-    dragDropManager->RequireSummaryIfNecessary(pointerEvent);
+    dragDropManager->RequireSummaryAndDragBundleInfoIfNecessary(pointerEvent);
     EXPECT_EQ(dragDropManager->currentPullId_, 1);
 
     DragPointerEvent pointerEvent1;
     pointerEvent1.pullId = -1;
-    dragDropManager->RequireSummaryIfNecessary(pointerEvent);
+    dragDropManager->RequireSummaryAndDragBundleInfoIfNecessary(pointerEvent);
     EXPECT_EQ(dragDropManager->currentPullId_, 1);
 }
 

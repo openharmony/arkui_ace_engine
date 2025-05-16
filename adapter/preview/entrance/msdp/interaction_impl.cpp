@@ -121,4 +121,9 @@ int32_t InteractionImpl::GetAppDragSwitchState(bool& state)
 }
 
 void InteractionImpl::SetDraggableStateAsync(bool state, int64_t downTime) {}
+
+int32_t  InteractionImpl::GetDragBundleInfo(DragBundleInfo& dragBundleInfo)
+{
+    return -1;
+}
 } // namespace OHOS::Ace

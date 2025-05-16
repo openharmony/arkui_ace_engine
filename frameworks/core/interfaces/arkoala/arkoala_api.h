@@ -386,6 +386,8 @@ struct ArkUIDragEvent {
     ArkUI_CharPtr key;
     ArkUI_Int32 requestId;
     bool isDragEndPending;
+    char* bundleName;
+    bool* isRemoteDev;
 };
 
 struct ArkUIFocusAxisEvent {

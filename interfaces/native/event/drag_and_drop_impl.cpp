@@ -55,6 +55,30 @@ int32_t OH_ArkUI_DragEvent_SetData(ArkUI_DragEvent* event, OH_UdmfData* data)
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_ErrorCode OH_ArkUI_DragEvent_GetDragSource(ArkUI_DragEvent* event, char* bundleName, int32_t length)
+{
+    auto dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+
+    if (!event || !bundleName || !dragEvent || length >= 128) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    bundleName = dragEvent->bundleName;
+
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_DragEvent_IsRemote(ArkUI_DragEvent* event, bool* inRemote)
+{
+    auto dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+
+    if (!event || !inRemote || !dragEvent) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    inRemote = dragEvent->isRemoteDev;
+
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 int32_t OH_ArkUI_DragEvent_GetUdmfData(ArkUI_DragEvent* event, OH_UdmfData* data)
 {
     auto dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
