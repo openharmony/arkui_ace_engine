@@ -137,7 +137,9 @@ bool RepeatVirtualScroll2Node::CheckNode4IndexInL1(int32_t index, int32_t nStart
             (nEnd >= totalCount && index <= nEnd - totalCount); // cover scenario 3.3
     }
     cacheItem->isL1_ = remainInL1;
-    cacheItem->isOnRenderTree_ = remainInL1;
+    if (!remainInL1) {
+        cacheItem->isOnRenderTree_ = false;
+    }
     return remainInL1;
 }
 
