@@ -775,4 +775,15 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor024, TestSize.Level1)
     frameNode->MarkModifyDone();
     EXPECT_EQ(paintProperty->GetSelectedBackgroundColor(), Color::GRAY);
 }
+
+HWTEST_F(SearchUpdateTestNg, SearchTypeToString005, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    searchModelInstance.SetType(TextInputType::ONE_TIME_CODE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    EXPECT_EQ(pattern->SearchTypeToString(), "SearchType.ONE_TIME_CODE");
+}
 } // namespace OHOS::Ace::NG
