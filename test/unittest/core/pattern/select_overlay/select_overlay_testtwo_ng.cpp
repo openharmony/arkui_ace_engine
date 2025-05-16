@@ -907,7 +907,7 @@ HWTEST_F(SelectOverlayTestTwoNg, BuildButtonPasteButton, TestSize.Level1)
     selectInfo.menuInfo.showPaste = true;
     selectInfo.menuInfo.showCopyAll = false;
     selectInfo.menuInfo.showCameraInput = false;
-    float maxWidth = 3.0f;
+    float maxWidth = 20.0f;
     float allocatedSize = 2.0f;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     int32_t pasteCount = 0;
@@ -977,7 +977,7 @@ HWTEST_F(SelectOverlayTestTwoNg, AddCreateMenuItems, TestSize.Level1)
     };
     selectInfo.onCreateCallback.textRangeCallback = [](int32_t& start, int32_t& end) {
     };
-    float maxWidth = 3.0f;
+    float maxWidth = 20.0f;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     int32_t pasteCount = 0;
     infoPtr->menuCallback.onPaste = [&]() { pasteCount++; };

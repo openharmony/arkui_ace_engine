@@ -116,6 +116,31 @@ enum class FontStyle {
     NONE
 };
 
+struct FontForegroudGradiantColor {
+    std::vector<NG::PointF> points;
+    std::vector<float> scalars;
+    std::vector<Color> colors;
+
+    bool IsValid() const
+    {
+        // 2 points including begin and end
+        return points.size() == 2 && scalars.size() == colors.size();
+    }
+
+    bool operator==(const FontForegroudGradiantColor& fontForegroudGradiantColor) const
+    {
+        auto isScalarEq = true;
+        if (scalars.size() != fontForegroudGradiantColor.scalars.size()) {
+            isScalarEq = false;
+        }
+        for (size_t i = 0; i < scalars.size() && isScalarEq; i++) {
+            isScalarEq = NearEqual(scalars[i], fontForegroudGradiantColor.scalars[i]);
+        }
+        return isScalarEq && (points == fontForegroudGradiantColor.points) &&
+               (colors == fontForegroudGradiantColor.colors);
+    }
+};
+
 namespace StringUtils {
 inline std::string ToString(const FontStyle& fontStyle)
 {
@@ -670,6 +695,11 @@ public:
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         StrokeWidth, Dimension, Dimension(0.0f, DimensionUnit::PX), TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE(StrokeColor, Color, TextStyleAttribute::RE_CREATE);
+
+    // used for gradiant color
+    ACE_DEFINE_PARAGRAPH_STYLE(FontForegroudGradiantColor, FontForegroudGradiantColor,
+        TextStyleAttribute::RE_CREATE);
+
     // for Symbol
     ACE_DEFINE_SYMBOL_STYLE(RenderColors, std::vector<Color>, SymbolStyleAttribute::COLOR_LIST);
     ACE_DEFINE_SYMBOL_STYLE_WITH_DEFAULT_VALUE(RenderStrategy, int32_t, 0, SymbolStyleAttribute::RENDER_MODE);

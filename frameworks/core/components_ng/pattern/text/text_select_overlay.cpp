@@ -230,8 +230,9 @@ void TextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     if (!textPattern->IsSelectedTypeChange()) {
         overlayManager->ShowOptionMenu();
     }
+    textPattern->UpdateAIMenuOptions();
     overlayManager->MarkInfoChange((isFirst ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE) | DIRTY_SELECT_AREA |
-                                   DIRTY_SELECT_TEXT | DIRTY_COPY_ALL_ITEM);
+                                   DIRTY_SELECT_TEXT | DIRTY_COPY_ALL_ITEM | DIRTY_AI_MENU_ITEM);
     if (textPattern->CheckSelectedTypeChange()) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
         ProcessOverlay({ .animation = true });
@@ -328,8 +329,12 @@ void TextSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlay
     menuInfo.showTranslate = menuInfo.showCopy && textPattern->IsShowTranslate() && IsNeedMenuTranslate();
     menuInfo.showSearch = menuInfo.showCopy && textPattern->IsShowSearch() && IsNeedMenuSearch();
     menuInfo.showShare = menuInfo.showCopy && IsSupportMenuShare() && IsNeedMenuShare();
-    if (dirtyFlag == DIRTY_COPY_ALL_ITEM) {
-        return;
+    if (textPattern->IsShowAIMenuOption()) {
+        // do not support two selected ai entity, hence it's enough to pick first item to determine type
+        auto firstSpanItem = textPattern->GetAIItemOption().begin()->second;
+        menuInfo.aiMenuOptionType = firstSpanItem.type;
+    } else {
+        menuInfo.aiMenuOptionType = TextDataDetectType::INVALID;
     }
     menuInfo.menuIsShow = IsShowMenu();
     menuInfo.showCut = false;
@@ -397,6 +402,24 @@ void TextSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType t
             break;
         case OptionMenuActionId::SHARE:
             HandleOnShare();
+            break;
+        default:
+            TAG_LOGI(AceLogTag::ACE_TEXT, "Unsupported menu option id %{public}d", id);
+            break;
+    }
+}
+
+void TextSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType type, const std::string& labelInfo)
+{
+    auto textPattern = GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    if (labelInfo == "") {
+        OnMenuItemAction(id, type);
+        return;
+    }
+    switch (id) {
+        case OptionMenuActionId::AI_MENU_OPTION:
+            textPattern->HandleAIMenuOption(labelInfo);
             break;
         default:
             TAG_LOGI(AceLogTag::ACE_TEXT, "Unsupported menu option id %{public}d", id);

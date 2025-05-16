@@ -43,6 +43,7 @@
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components/button/button_theme.h"
+#include "frameworks/base/utils/measure_util.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1597,7 +1598,7 @@ void MenuView::CreateOption(bool optionsHasIcon, std::vector<OptionParam>& param
         auto iconNode = CreateSymbol(params[index].symbol, row, nullptr, params[index].symbolUserDefinedIdealFontSize);
         pattern->SetIconNode(iconNode);
     }
-    auto textNode = CreateText(params[index].value, row);
+    auto textNode = CreateText(params[index].value, row, false, params[index].isAIMenuOption);
     row->MountToParent(option);
     row->MarkModifyDone();
     pattern->SetTextNode(textNode);
@@ -1608,17 +1609,17 @@ void MenuView::CreateOption(bool optionsHasIcon, std::vector<OptionParam>& param
     eventHub->SetMenuOnClick(params[index].action);
 }
 
-void MenuView::CreateOption(bool optionsHasIcon, const std::string& value, const std::string& icon,
+void MenuView::CreateOption(const OptionValueInfo& value, const std::string& icon,
     const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option, const std::function<void()>& onClickFunc)
 {
     auto pattern = option->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
-    if (optionsHasIcon) {
+    if (value.optionsHasIcon) {
         auto iconNode = CreateIcon(icon, row);
         pattern->SetIconNode(iconNode);
         pattern->SetIcon(icon);
     }
-    auto textNode = CreateText(value, row);
+    auto textNode = CreateText(value.content, row, false, value.isAIMenuOption);
     row->MountToParent(option);
     row->MarkModifyDone();
     pattern->SetTextNode(textNode);
@@ -1655,7 +1656,7 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, std::vector<Op
     return option;
 }
 
-RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, const OptionValueInfo& value,
+RefPtr<FrameNode> MenuView::CreateMenuOption(const OptionValueInfo& value,
     const std::function<void()>& onClickFunc, int32_t index, const std::string& icon)
 {
     auto option = Create(index);
@@ -1672,13 +1673,16 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, const OptionVa
             buttonPasteText = theme->GetPasteText();
         }
     }
-    if (value.value == buttonPasteText) {
-        CreatePasteButton(optionsHasIcon, option, row, onClickFunc, icon);
+    if (value.content == buttonPasteText) {
+        CreatePasteButton(value.optionsHasIcon, option, row, onClickFunc, icon);
     } else {
-        CreateOption(optionsHasIcon, value.value, icon, row, option, onClickFunc);
+        CreateOption({ .optionsHasIcon = value.optionsHasIcon,
+                       .content = value.content, .isAIMenuOption = value.isAIMenuOption },
+                     icon, row, option, onClickFunc);
     }
 #else
-    CreateOption(optionsHasIcon, value.value, icon, row, option, onClickFunc);
+    CreateOption({ .optionsHasIcon = value.optionsHasIcon,
+        .content = value.content, .isAIMenuOption = value.isAIMenuOption }, icon, row, option, onClickFunc);
 #endif
     return option;
 }
@@ -1695,7 +1699,9 @@ void MenuView::MountOptionToColumn(std::vector<OptionParam>& params, const RefPt
             optionNode = CreateMenuOption(optionsHasSymbol, params, i);
         } else {
             optionNode = CreateMenuOption(
-                optionsHasIcon, { params[i].value, params[i].isPasteOption }, params[i].action, i, params[i].icon);
+                { .optionsHasIcon = optionsHasIcon, .content = params[i].value,
+                  .isPasteOption = params[i].isPasteOption, .isAIMenuOption = params[i].isAIMenuOption },
+                params[i].action, i, params[i].icon);
             if (optionNode) {
                 auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
                 optionPattern->SetBlockClick(params[i].disableSystemClick);
@@ -1816,7 +1822,8 @@ RefPtr<FrameNode> MenuView::CreateSymbol(const std::function<void(WeakPtr<NG::Fr
     return iconNode;
 }
 
-RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<FrameNode>& parent, bool autoWrapFlag)
+RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<FrameNode>& parent,
+                                       bool autoWrapFlag, bool isAIMenuOption)
 {
     // create child text node
     auto textId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -1856,6 +1863,17 @@ RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<Fr
     auto convertValue = ConvertTxtTextAlign(IsRightToLeft, textAlign);
     textProperty->UpdateAlignment(convertValue);
     textProperty->UpdateWordBreak(theme->GetWordBreak());
+    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    if (isAIMenuOption && textOverlayTheme) {
+        auto textStyle = theme->GetOptionTextStyle();
+        auto textSize = MeasureUtil::MeasureTextSize(textStyle, value);
+        FontForegroudGradiantColor colorInfo;
+        colorInfo.points = { NG::PointF(0, 0),
+            NG::PointF(static_cast<float>(textSize.Width()), static_cast<float>(textSize.Height())) };
+        colorInfo.colors = textOverlayTheme->GetAiMenuFontGradientColors();
+        colorInfo.scalars = textOverlayTheme->GetAiMenuFontGradientScalars();
+        textProperty->UpdateFontForegroudGradiantColor(colorInfo);
+    }
     textNode->MountToParent(parent);
     textNode->MarkModifyDone();
 

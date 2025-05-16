@@ -26,4 +26,16 @@ Size MeasureUtil::MeasureTextSize(const MeasureContext& context)
 {
     return Size(TEXT_SIZE_WIDTH, TEXT_SIZE_HEIGHT);
 }
+double MeasureUtil::MeasureText(const MeasureContext& context)
+{
+    return TEXT_SIZE_WIDTH;
+}
+double MeasureUtil::MeasureTextWidth(const TextStyle& textStyle, const std::string& text)
+{
+    return TEXT_SIZE_WIDTH;
+}
+Size MeasureUtil::MeasureTextSize(const TextStyle& textStyle, const std::string& text)
+{
+    return Size(TEXT_SIZE_WIDTH, TEXT_SIZE_HEIGHT);
+}
 } // namespace OHOS::Ace

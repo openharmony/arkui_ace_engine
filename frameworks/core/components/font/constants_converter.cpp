@@ -34,6 +34,12 @@ constexpr int32_t NONE_EFFECT = 0;
 constexpr float ORIGINAL_LINE_HEIGHT_SCALE = 1.0f;
 constexpr float DEFAULT_STROKE_WIDTH = 0.0f;
 const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
+struct LineSpaceAndHeightInfo {
+    double lineHeightScale = 0.0;
+    double lineSpacingScale = 0.0;
+    bool lineHeightOnly = false;
+    bool lineSpacingOnly = false;
+};
 } // namespace
 
 Rosen::FontWeight ConvertTxtFontWeight(FontWeight fontWeight)
@@ -357,6 +363,82 @@ void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
     txtStyle.backgroundRect.rightBottomRadius = radiusConverter(radius->radiusBottomRight);
 }
 
+// ConvertTxtStyle helper for LineSpacing and LineHeight etc
+void ConvertSpacingAndHeigh(
+    const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, Rosen::TextStyle& txtStyle,
+    LineSpaceAndHeightInfo& info)
+{
+    auto pipelineContext = context.Upgrade();
+    if (textStyle.GetLineHeight().Unit() == DimensionUnit::PERCENT) {
+        info.lineHeightOnly = true;
+        info.lineHeightScale = textStyle.GetLineHeight().Value();
+    } else {
+        double fontSize = txtStyle.fontSize;
+        double lineHeight = textStyle.GetLineHeight().Value();
+        if (pipelineContext) {
+            lineHeight = textStyle.GetLineHeight().ConvertToPxDistribute(
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        }
+        info.lineHeightOnly = textStyle.HasHeightOverride();
+        if (!NearEqual(lineHeight, fontSize) && (lineHeight > 0.0) && (!NearZero(fontSize))) {
+            info.lineHeightScale = lineHeight / fontSize;
+        } else {
+            info.lineHeightScale = 1;
+            static const int32_t BEGIN_VERSION = 6;
+            auto isBeginVersion = pipelineContext && pipelineContext->GetMinPlatformVersion() >= BEGIN_VERSION;
+            if (NearZero(lineHeight) || (!isBeginVersion && NearEqual(lineHeight, fontSize))) {
+                info.lineHeightOnly = false;
+            }
+        }
+    }
+    if (textStyle.GetLineSpacing().Unit() == DimensionUnit::PERCENT) {
+        info.lineSpacingOnly = true;
+        info.lineSpacingScale = textStyle.GetLineSpacing().Value();
+    } else {
+        double fontSize = txtStyle.fontSize;
+        double lineSpacing = textStyle.GetLineSpacing().Value();
+        if (pipelineContext) {
+            lineSpacing = textStyle.GetLineSpacing().ConvertToPxDistribute(
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        }
+        info.lineSpacingOnly = true;
+        if (!NearEqual(lineSpacing, fontSize) && (lineSpacing > 0.0) && (!NearZero(fontSize))) {
+            info.lineSpacingScale = lineSpacing / fontSize;
+        } else {
+            info.lineSpacingScale = 1;
+            if (NearZero(lineSpacing)) {
+                info.lineSpacingOnly = false;
+            }
+        }
+    }
+}
+
+void ConvertGradiantColor(
+    const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, Rosen::TextStyle& txtStyle,
+    OHOS::Ace::FontForegroudGradiantColor & gradiantColor)
+{
+    RSBrush brush;
+    std::vector<Rosen::Drawing::PointF> points = {
+        Rosen::Drawing::PointF(gradiantColor.points[0].GetX(), gradiantColor.points[0].GetY()),
+        Rosen::Drawing::PointF(gradiantColor.points[1].GetX(), gradiantColor.points[1].GetY())
+    };
+    std::vector<RSColorQuad> colors;
+    std::vector<RSScalar> pos;
+    for (size_t i = 0; i < gradiantColor.colors.size(); i++) {
+        colors.push_back(ConvertSkColor(gradiantColor.colors[i]));
+        // IsValid ensures colors and scalars are same size
+        pos.push_back(gradiantColor.scalars[i]);
+    }
+    brush.SetShaderEffect(
+        RSShaderEffect::CreateLinearGradient(points.at(0), points.at(1), colors, pos, RSTileMode::CLAMP));
+    if (txtStyle.foregroundBrush) {
+        txtStyle.foregroundBrush->SetShaderEffect(
+            RSShaderEffect::CreateLinearGradient(points.at(0), points.at(1), colors, pos, RSTileMode::CLAMP));
+    } else {
+        txtStyle.foregroundBrush = brush;
+    }
+}
+
 void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, Rosen::TextStyle& txtStyle)
 {
     txtStyle.relayoutChangeBitmap = textStyle.GetReLayoutTextStyleBitmap();
@@ -430,60 +512,15 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         txtStyle.shadows.emplace_back(txtShadow);
     }
 
-    double lineHeightScale = 0.0;
-    double lineSpacingScale = 0.0;
-    bool lineHeightOnly = false;
-    bool lineSpacingOnly = false;
-    if (textStyle.GetLineHeight().Unit() == DimensionUnit::PERCENT) {
-        lineHeightOnly = true;
-        lineHeightScale = textStyle.GetLineHeight().Value();
-    } else {
-        double fontSize = txtStyle.fontSize;
-        double lineHeight = textStyle.GetLineHeight().Value();
-        if (pipelineContext) {
-            lineHeight = textStyle.GetLineHeight().ConvertToPxDistribute(
-                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
-        }
-        lineHeightOnly = textStyle.HasHeightOverride();
-        if (!NearEqual(lineHeight, fontSize) && (lineHeight > 0.0) && (!NearZero(fontSize))) {
-            lineHeightScale = lineHeight / fontSize;
-        } else {
-            lineHeightScale = 1;
-            static const int32_t BEGIN_VERSION = 6;
-            auto isBeginVersion = pipelineContext && pipelineContext->GetMinPlatformVersion() >= BEGIN_VERSION;
-            if (NearZero(lineHeight) || (!isBeginVersion && NearEqual(lineHeight, fontSize))) {
-                lineHeightOnly = false;
-            }
-        }
-    }
-    if (textStyle.GetLineSpacing().Unit() == DimensionUnit::PERCENT) {
-        lineSpacingOnly = true;
-        lineSpacingScale = textStyle.GetLineSpacing().Value();
-    } else {
-        double fontSize = txtStyle.fontSize;
-        double lineSpacing = textStyle.GetLineSpacing().Value();
-        if (pipelineContext) {
-            lineSpacing = textStyle.GetLineSpacing().ConvertToPxDistribute(
-                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
-        }
-        lineSpacingOnly = true;
-        if (!NearEqual(lineSpacing, fontSize) && (lineSpacing > 0.0) && (!NearZero(fontSize))) {
-            lineSpacingScale = lineSpacing / fontSize;
-        } else {
-            lineSpacingScale = 1;
-            if (NearZero(lineSpacing)) {
-                lineSpacingOnly = false;
-            }
-        }
-    }
-
-    txtStyle.heightOnly = lineHeightOnly || lineSpacingOnly;
-    if (lineHeightOnly && lineSpacingOnly) {
-        txtStyle.heightScale = lineHeightScale + lineSpacingScale;
-    } else if (lineHeightOnly && !lineSpacingOnly) {
-        txtStyle.heightScale = lineHeightScale;
-    } else if (!lineHeightOnly && lineSpacingOnly) {
-        txtStyle.heightScale = ORIGINAL_LINE_HEIGHT_SCALE + lineSpacingScale;
+    LineSpaceAndHeightInfo info;
+    ConvertSpacingAndHeigh(textStyle, context, txtStyle, info);
+    txtStyle.heightOnly = info.lineHeightOnly || info.lineSpacingOnly;
+    if (info.lineHeightOnly && info.lineSpacingOnly) {
+        txtStyle.heightScale = info.lineHeightScale + info.lineSpacingScale;
+    } else if (info.lineHeightOnly && !info.lineSpacingOnly) {
+        txtStyle.heightScale = info.lineHeightScale;
+    } else if (!info.lineHeightOnly && info.lineSpacingOnly) {
+        txtStyle.heightScale = ORIGINAL_LINE_HEIGHT_SCALE + info.lineSpacingScale;
     } else {
         txtStyle.heightScale = 1;
     }
@@ -497,6 +534,12 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         }
         txtStyle.fontFeatures = features;
     }
+
+    auto gradiantColor = textStyle.GetFontForegroudGradiantColor();
+    if (gradiantColor.IsValid()) {
+        ConvertGradiantColor(textStyle, context, txtStyle, gradiantColor);
+    }
+
     auto textBackgroundStyle = textStyle.GetTextBackgroundStyle();
     CHECK_NULL_VOID(textBackgroundStyle.has_value());
     txtStyle.styleId = textBackgroundStyle->groupId;

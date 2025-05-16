@@ -596,6 +596,7 @@ public:
     void ResetSelection();
     bool IsSelectAll();
     void HandleOnCopy();
+    virtual void HandleAIMenuOption(const std::string& labelInfo = "");
     void HandleOnCopySpanString();
     virtual void HandleOnSelectAll();
     bool IsShowTranslate();
@@ -633,7 +634,7 @@ public:
 
     void OnSensitiveStyleChange(bool isSensitive) override;
 
-    bool IsSetObscured();
+    bool IsSetObscured() const;
     bool IsSensitiveEnable();
 
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo)
@@ -805,6 +806,28 @@ public:
     bool RecordOriginCaretPosition(const OffsetF& offset);
     TextDragInfo CreateTextDragInfo();
 
+    void SetIsShowAIMenuOption(bool isShowAIMenuOption)
+    {
+        isShowAIMenuOption_ = isShowAIMenuOption;
+    }
+
+    bool IsShowAIMenuOption() const
+    {
+        return isShowAIMenuOption_;
+    }
+
+    void SetAIItemOption(const std::unordered_map<TextDataDetectType, AISpan>& aiMenuOptions)
+    {
+        aiMenuOptions_ = aiMenuOptions;
+    }
+
+    const std::unordered_map<TextDataDetectType, AISpan>& GetAIItemOption() const
+    {
+        return aiMenuOptions_;
+    }
+    virtual void UpdateAIMenuOptions();
+    bool PrepareAIMenuOptions(std::unordered_map<TextDataDetectType, AISpan>& aiMenuOptions);
+
 protected:
     int32_t GetClickedSpanPosition()
     {
@@ -880,7 +903,7 @@ protected:
     bool IsSelectableAndCopy();
     void SetResponseRegion(const SizeF& frameSize, const SizeF& boundsSize);
 
-    virtual bool CanStartAITask();
+    virtual bool CanStartAITask() const;
 
     void MarkDirtySelf();
     void OnAttachToMainTree() override
@@ -1120,6 +1143,8 @@ private:
     // left mouse click(lastLeftMouseClickStyle_ = true) ==> dragging(isTryEntityDragging_ = true)
     MouseFormat lastLeftMouseClickStyle_ = MouseFormat::DEFAULT;
     bool isTryEntityDragging_ = false;
+    bool isShowAIMenuOption_ = false;
+    std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -27,6 +27,7 @@
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
+class SelectContentOverlayPattern;
 
 struct LegacyManagerCallbacks {
     std::function<void(bool, bool)> closeCallback;
@@ -141,6 +142,9 @@ private:
     void MountMenuNodeToSubWindow(const RefPtr<FrameNode>& overlayNode, bool animation, NodeType nodeType);
     bool IsEnableSubWindowMenu();
     void UpdateRightClickSubWindowMenuProps(const RefPtr<FrameNode>& overlayNode);
+    std::function<void(std::string)> MakeMenuCallbackWithInfo
+        (OptionMenuActionId actionId, const SelectOverlayInfo& info);
+    void HandleDirtyViewPort(RefPtr<SelectContentOverlayPattern>& menuPattern);
 
     RefPtr<SelectOverlayHolder> selectOverlayHolder_;
     WeakPtr<FrameNode> selectOverlayNode_;

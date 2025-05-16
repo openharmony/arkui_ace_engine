@@ -56,6 +56,20 @@
         }                                   \
     } while (0)
 
+#define CHECK_NE_VOID(var, value) \
+    do {                             \
+        if ((var) != (value)) {      \
+            return;                  \
+        }                            \
+    } while (0)
+
+#define CHECK_NE_RETURN(var, value, ret) \
+    do {                                    \
+        if ((var) != (value)) {             \
+            return ret;                     \
+        }                                   \
+    } while (0)
+
 #define CHECK_NULL_CONTINUE(ptr) \
     if (!(ptr)) {                \
         continue;                \

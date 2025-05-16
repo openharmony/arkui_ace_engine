@@ -84,6 +84,8 @@ struct OptionParam {
     // Used for security controls.
     bool isPasteOption = false;
 
+    bool isAIMenuOption = false;
+
     OptionParam() = default;
     OptionParam(const std::string &valueParam, const std::string &iconParam, const std::function<void()> &actionParam)
         : value(valueParam), icon(iconParam), enabled(true), action(actionParam)

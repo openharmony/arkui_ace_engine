@@ -56,6 +56,7 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/custom_paint/rosen_render_custom_paint.h"
 #endif
+#include "frameworks/base/utils/measure_util.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -68,6 +69,7 @@ constexpr int32_t OPTION_INDEX_SEARCH = 5;
 constexpr int32_t OPTION_INDEX_SHARE = 6;
 constexpr int32_t OPTION_INDEX_CAMERA_INPUT = 7;
 constexpr int32_t OPTION_INDEX_AI_WRITE = 8;
+constexpr int32_t OPTION_INDEX_AI_MENU = 9;
 constexpr int32_t ANIMATION_DURATION1 = 350;
 constexpr int32_t ANIMATION_DURATION2 = 150;
 constexpr int32_t SYMBOL_ANIMATION_DELAY = 50;
@@ -79,6 +81,20 @@ constexpr Dimension MIN_ARROWHEAD_DIAMETER = 2.0_vp;
 constexpr Dimension ANIMATION_TEXT_OFFSET = 12.0_vp;
 constexpr Dimension OVERLAY_MAX_WIDTH = 280.0_vp;
 constexpr float AGING_MIN_SCALE = 1.75f;
+
+std::unordered_map<TextDataDetectType, std::string> AI_TYPE_ID_MAP = {
+    { TextDataDetectType::PHONE_NUMBER, OH_DEFAULT_AI_MENU_PHONE },
+    { TextDataDetectType::URL, OH_DEFAULT_AI_MENU_URL },
+    { TextDataDetectType::EMAIL, OH_DEFAULT_AI_MENU_EMAIL },
+    { TextDataDetectType::ADDRESS, OH_DEFAULT_AI_MENU_ADDRESS },
+    { TextDataDetectType::DATE_TIME, OH_DEFAULT_AI_MENU_DATETIME }
+};
+
+bool IsAIMenuOption(const std::string& id)
+{
+    return id == OH_DEFAULT_AI_MENU_PHONE || id == OH_DEFAULT_AI_MENU_URL || id == OH_DEFAULT_AI_MENU_EMAIL ||
+            id == OH_DEFAULT_AI_MENU_ADDRESS || id == OH_DEFAULT_AI_MENU_DATETIME;
+}
 
 const std::unordered_map<std::string, std::function<bool(const SelectMenuInfo&)>> isMenuItemEnabledFuncMap = {
     { OH_DEFAULT_CUT, [](const SelectMenuInfo& info){ return info.showCut; } },
@@ -115,7 +131,27 @@ const std::unordered_map<std::string, std::function<uint32_t(RefPtr<OHOS::Ace::T
     },
     { OH_DEFAULT_TRANSLATE, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
         { return textOverlayTheme->GetTranslateSymbolId();}
+    },
+    { OH_DEFAULT_AI_MENU_PHONE, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetAIMenuSymbolId();}
+    },
+    { OH_DEFAULT_AI_MENU_URL, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetAIMenuSymbolId();}
+    },
+    { OH_DEFAULT_AI_MENU_EMAIL, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetAIMenuSymbolId();}
+    },
+    { OH_DEFAULT_AI_MENU_ADDRESS, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetAIMenuSymbolId();}
+    },
+    { OH_DEFAULT_AI_MENU_DATETIME, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetAIMenuSymbolId();}
     }
+};
+
+enum class SelectOverlayMenuButtonType {
+    NORMAL,
+    AIBUTTON
 };
 
 void SetResponseRegion(RefPtr<FrameNode>& node)
@@ -137,22 +173,6 @@ void SetResponseRegion(RefPtr<FrameNode>& node)
         DimensionRect(Dimension(1, DimensionUnit::PERCENT), Dimension(responseHeight, DimensionUnit::VP),
             DimensionOffset(Dimension(0), Dimension(-top.Value(), top.Unit()))));
     gestureHub->SetResponseRegion(vector);
-}
-
-float MeasureTextWidth(const TextStyle& textStyle, const std::string& text)
-{
-#ifdef ENABLE_ROSEN_BACKEND
-    MeasureContext content;
-    content.textContent = text;
-    content.fontSize = textStyle.GetFontSize();
-    auto fontweight = StringUtils::FontWeightToString(textStyle.GetFontWeight());
-    content.fontWeight = fontweight;
-    content.isReturnActualWidth = true;
-    content.maxlines = 1;
-    return std::max(static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(content).Width()), 0.0f);
-#else
-    return 0.0f;
-#endif
 }
 
 #ifdef OHOS_PLATFORM
@@ -180,7 +200,7 @@ RefPtr<FrameNode> BuildPasteButton(
     buttonLayoutProperty->UpdateBackgroundRightPadding(padding.Right());
     std::string buttonContent;
     PasteButtonModelNG::GetInstance()->GetTextResource(descriptionId, buttonContent);
-    buttonWidth = MeasureTextWidth(textStyle, buttonContent);
+    buttonWidth = MeasureUtil::MeasureTextWidth(textStyle, buttonContent);
     buttonWidth = buttonWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
     if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
         buttonLayoutProperty->UpdateUserDefinedIdealSize({ CalcLength(buttonWidth), std::nullopt });
@@ -242,36 +262,45 @@ RefPtr<FrameNode> CreatePasteButtonForCreateMenu(
 }
 #endif
 
-RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void()>& callback, int32_t overlayId,
-    float& buttonWidth, bool isSelectAll = false)
+bool PrepareButtonTextProp(RefPtr<OHOS::Ace::NG::TextLayoutProperty>& textLayoutProperty,
+                           bool hasCallback, float& buttonWidth, const std::string& data,
+                           SelectOverlayMenuButtonType buttonType = SelectOverlayMenuButtonType::NORMAL)
 {
-    auto button = FrameNode::GetOrCreateFrameNode("SelectMenuButton", ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    auto text = FrameNode::GetOrCreateFrameNode("SelectMenuButtonText", ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<TextPattern>(); });
-    auto textLayoutProperty = text->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProperty, button);
-    textLayoutProperty->UpdateContent(data);
-    text->MountToParent(button);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipeline, button);
+    CHECK_NULL_RETURN(pipeline, false);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
-    CHECK_NULL_RETURN(textOverlayTheme, button);
+    CHECK_NULL_RETURN(textOverlayTheme, false);
     auto textStyle = textOverlayTheme->GetMenuButtonTextStyle();
     textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
     textLayoutProperty->UpdateMaxLines(1);
-    if (callback) {
+    if (hasCallback) {
         textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());
     } else {
         textLayoutProperty->UpdateTextColor(
             textStyle.GetTextColor().BlendOpacity(textOverlayTheme->GetAlphaDisabled()));
     }
-    text->MarkModifyDone();
+    auto textSize = MeasureUtil::MeasureTextSize(textStyle, data);
+    buttonWidth = std::max(static_cast<float>(textSize.Width()), 0.0f);
+    if (buttonType == SelectOverlayMenuButtonType::AIBUTTON) {
+        FontForegroudGradiantColor colorInfo;
+        colorInfo.points = { NG::PointF(0, 0),
+            NG::PointF(static_cast<float>(textSize.Width()), static_cast<float>(textSize.Height())) };
+        colorInfo.colors = textOverlayTheme->GetAiMenuFontGradientColors();
+        colorInfo.scalars = textOverlayTheme->GetAiMenuFontGradientScalars();
+        textLayoutProperty->UpdateFontForegroudGradiantColor(colorInfo);
+    }
+    return true;
+}
 
-    auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(buttonLayoutProperty, button);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+bool PrepareButtonProp(RefPtr<OHOS::Ace::NG::ButtonLayoutProperty>& buttonLayoutProperty,
+                       float& buttonWidth, const RefPtr<OHOS::Ace::NG::FrameNode>& buttonNode)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(textOverlayTheme, false);
+    if (buttonNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -282,7 +311,6 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
     auto top = CalcLength(padding.Top().ConvertToPx());
     auto bottom = CalcLength(padding.Bottom().ConvertToPx());
     buttonLayoutProperty->UpdatePadding({ left, right, top, bottom, std::nullopt, std::nullopt });
-    buttonWidth = MeasureTextWidth(textStyle, data);
     // Calculate the width of default option include button padding.
     buttonWidth = buttonWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
     if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
@@ -292,11 +320,45 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
             { CalcLength(buttonWidth), CalcLength(textOverlayTheme->GetMenuButtonHeight()) });
     }
     buttonLayoutProperty->UpdateFlexShrink(0);
+    return true;
+}
+
+RefPtr<FrameNode> BuildButton(const std::string& data, std::variant<const std::function<void()>,
+    const std::function<void(std::string)>> callbackVariant, int32_t overlayId, float& buttonWidth,
+    SelectOverlayMenuButtonType buttonType = SelectOverlayMenuButtonType::NORMAL)
+{
+    auto button = FrameNode::GetOrCreateFrameNode("SelectMenuButton", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto text = FrameNode::GetOrCreateFrameNode("SelectMenuButtonText", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto textLayoutProperty = text->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, button);
+    textLayoutProperty->UpdateContent(data);
+    text->MountToParent(button);
+    auto hasCallback = false;
+    if ((std::holds_alternative<const std::function<void()>>(callbackVariant) &&
+         std::get<const std::function<void()>>(callbackVariant)) ||
+        (std::holds_alternative<const std::function<void(std::string)>>(callbackVariant) &&
+         std::get<const std::function<void(std::string)>>(callbackVariant))) {
+        hasCallback = true;
+    }
+
+    auto retPrepare = PrepareButtonTextProp(textLayoutProperty, hasCallback, buttonWidth, data, buttonType);
+    CHECK_NE_RETURN(retPrepare, true, button);
+    text->MarkModifyDone();
+
+    auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(buttonLayoutProperty, button);
+    retPrepare = PrepareButtonProp(buttonLayoutProperty, buttonWidth, button);
+    CHECK_NE_RETURN(retPrepare, true, button);
+
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
 
-    if (callback) {
+    if (hasCallback) {
         button->GetOrCreateGestureEventHub()->SetUserOnClick(
-            [callback, overlayId, id = Container::CurrentIdSafelyWithCheck()](GestureEvent& /*info*/) {
+            [lableInfo = data, callbackVariant, overlayId,
+             id = Container::CurrentIdSafelyWithCheck(), buttonType = buttonType]
+                (GestureEvent& /* info */) {
                 ContainerScope scope(id);
                 auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
                 CHECK_NULL_VOID(pipeline);
@@ -308,8 +370,12 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
                 CHECK_NULL_VOID(!isDoingAnimation);
                 auto isExtensionMenu = selectOverlay->GetIsExtensionMenu();
                 CHECK_NULL_VOID(!isExtensionMenu);
-                if (callback) {
-                    callback();
+                if (std::holds_alternative<const std::function<void()>>(callbackVariant) &&
+                    std::get<const std::function<void()>>(callbackVariant)) {
+                    std::get<const std::function<void()>>(callbackVariant)();
+                } else if (std::holds_alternative<const std::function<void(std::string)>>(callbackVariant) &&
+                    std::get<const std::function<void(std::string)>>(callbackVariant)) {
+                    std::get<const std::function<void(std::string)>>(callbackVariant)(lableInfo);
                 }
             });
     } else {
@@ -366,7 +432,7 @@ RefPtr<FrameNode> BuildButton(const MenuOptionsParam& menuOption, int32_t overla
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
     text->MarkModifyDone();
     // Calculate the width of entension option include button padding.
-    contentWidth = MeasureTextWidth(textStyle, data);
+    contentWidth = static_cast<float>(MeasureUtil::MeasureTextWidth(textStyle, data));
     const auto& padding = textOverlayTheme->GetMenuButtonPadding();
     auto left = CalcLength(padding.Left().ConvertToPx());
     auto right = CalcLength(padding.Right().ConvertToPx());
@@ -427,15 +493,6 @@ void BindCreateMenuItemClickEvent(const RefPtr<FrameNode>& button, const MenuOpt
         });
 }
 
-void UpdateTextProperty(const TextStyle& textStyle, const RefPtr<TextLayoutProperty>& textLayoutProperty)
-{
-    textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
-    textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());
-    textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
-    textLayoutProperty->UpdateMaxLines(1);
-    textLayoutProperty->UpdateWordBreak(WordBreak::BREAK_ALL);
-}
-
 RefPtr<FrameNode> BuildCreateMenuItemButton(const MenuOptionsParam& menuOptionsParam,
     const std::function<void()>& systemCallback, const OnMenuItemCallback& menuItemCallback, int32_t overlayId,
     float& remainderWidth)
@@ -446,7 +503,22 @@ RefPtr<FrameNode> BuildCreateMenuItemButton(const MenuOptionsParam& menuOptionsP
     CHECK_NULL_RETURN(textOverlayTheme, nullptr);
     auto textStyle = textOverlayTheme->GetMenuButtonTextStyle();
     auto data = menuOptionsParam.content.value_or("");
-    auto contentWidth = MeasureTextWidth(textStyle, data);
+    auto contentWidth = 0.0f;
+
+    auto button = FrameNode::GetOrCreateFrameNode("SelectMenuButton", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto text = FrameNode::GetOrCreateFrameNode("SelectMenuButtonText", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    // Update text property and mount to button.
+    auto textLayoutProperty = text->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, button);
+    textLayoutProperty->UpdateContent(data);
+    auto buttonType = IsAIMenuOption(menuOptionsParam.id) ?
+                      SelectOverlayMenuButtonType::AIBUTTON : SelectOverlayMenuButtonType::NORMAL;
+    PrepareButtonTextProp(textLayoutProperty, true, contentWidth, data, buttonType);
+    textLayoutProperty->UpdateWordBreak(WordBreak::BREAK_ALL);
+    text->MountToParent(button);
+
     // Calculate the width of entension option include button padding.
     const auto& padding = textOverlayTheme->GetMenuButtonPadding();
     auto left = CalcLength(padding.Left().ConvertToPx());
@@ -457,17 +529,6 @@ RefPtr<FrameNode> BuildCreateMenuItemButton(const MenuOptionsParam& menuOptionsP
     auto isOverWidth = GreatOrEqual(remainderWidth, contentWidth);
     CHECK_NULL_RETURN(isOverWidth || menuOptionsParam.isFirstOption, nullptr);
     contentWidth = std::min(contentWidth, remainderWidth);
-
-    auto button = FrameNode::GetOrCreateFrameNode("SelectMenuButton", ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    auto text = FrameNode::GetOrCreateFrameNode("SelectMenuButtonText", ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<TextPattern>(); });
-    // Update text property and mount to button.
-    auto textLayoutProperty = text->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProperty, button);
-    textLayoutProperty->UpdateContent(data);
-    UpdateTextProperty(textStyle, textLayoutProperty);
-    text->MountToParent(button);
 
     if (!isOverWidth && menuOptionsParam.isFirstOption) {
         textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -616,6 +677,23 @@ std::function<void()> GetMenuCallbackWithContainerId(std::function<void()> callb
     return optionCallback;
 }
 
+std::function<void()> GetMenuCallbackWithContainerId(
+    std::function<void(std::string)> callback, const std::string& info)
+{
+    auto optionCallback = [func = std::move(callback), mainId = Container::CurrentIdSafelyWithCheck(), info]() {
+        ContainerScope scope(mainId);
+        func(info);
+    };
+    return optionCallback;
+}
+
+std::function<void()> ConvertToVoidFunction(std::function<void(std::string)> funcWithArg, const std::string& arg)
+{
+    return [funcWithArg, arg]() {
+        funcWithArg(arg);
+    };
+}
+
 std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInfo>& info)
 {
     std::vector<OptionParam> params;
@@ -658,10 +736,18 @@ std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInf
                 "", info->menuInfo.showSearch);
         }
     }
+    if (info->menuInfo.aiMenuOptionType != TextDataDetectType::INVALID) {
+        auto inheritFunc = ConvertToVoidFunction(info->menuCallback.onAIMenuOption, "From_Right_Click");
+        params.emplace_back(theme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType),
+            GetMenuCallbackWithContainerId(inheritFunc), "", true);
+        params.back().isAIMenuOption = true;
+    }
+
     return params;
 }
 
-std::unordered_map<std::string, std::function<void()>> GetSystemCallback(const std::shared_ptr<SelectOverlayInfo>& info)
+std::unordered_map<std::string, std::function<void()>> GetSystemCallback(
+    const std::shared_ptr<SelectOverlayInfo>& info, bool isCallbackWithParam = false)
 {
     CHECK_NULL_RETURN(info, {});
     std::unordered_map<std::string, std::function<void()>> systemCallback = {
@@ -671,7 +757,17 @@ std::unordered_map<std::string, std::function<void()>> GetSystemCallback(const s
         { OH_DEFAULT_SEARCH, info->menuCallback.onSearch },
         { OH_DEFAULT_SHARE, info->menuCallback.onShare },
         { OH_DEFAULT_CAMERA_INPUT, info->menuCallback.onCameraInput },
-        { OH_DEFAULT_AI_WRITE, info->menuCallback.onAIWrite }
+        { OH_DEFAULT_AI_WRITE, info->menuCallback.onAIWrite },
+        { OH_DEFAULT_AI_MENU_PHONE, ConvertToVoidFunction(
+            info->menuCallback.onAIMenuOption, OH_DEFAULT_AI_MENU_PHONE) },
+        { OH_DEFAULT_AI_MENU_URL, ConvertToVoidFunction(
+            info->menuCallback.onAIMenuOption, OH_DEFAULT_AI_MENU_URL) },
+        { OH_DEFAULT_AI_MENU_EMAIL, ConvertToVoidFunction(
+            info->menuCallback.onAIMenuOption, OH_DEFAULT_AI_MENU_EMAIL) },
+        { OH_DEFAULT_AI_MENU_ADDRESS, ConvertToVoidFunction(
+            info->menuCallback.onAIMenuOption, OH_DEFAULT_AI_MENU_ADDRESS) },
+        { OH_DEFAULT_AI_MENU_DATETIME, ConvertToVoidFunction(
+            info->menuCallback.onAIMenuOption, OH_DEFAULT_AI_MENU_DATETIME) },
     };
     return systemCallback;
 }
@@ -716,7 +812,8 @@ std::string GetSystemIconPath(const std::string& id, const std::string& iconPath
     return iconPath;
 }
 
-std::string GetItemContent(const std::string& id, const std::string& content)
+std::string GetItemContent(const std::string& id, const std::string& content,
+                           const std::shared_ptr<SelectOverlayInfo>& info = nullptr)
 {
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, content);
@@ -748,6 +845,10 @@ std::string GetItemContent(const std::string& id, const std::string& content)
     }
     if (id == OH_DEFAULT_CAMERA_INPUT) {
         return textOverlayTheme->GetCameraInput();
+    }
+    if (IsAIMenuOption(id)) {
+        CHECK_NULL_RETURN(info, content);
+        return textOverlayTheme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType);
     }
     return content;
 }
@@ -813,13 +914,15 @@ std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOption
         }
         params.back().enabled = IsSystemMenuItemEnabled(info, item.id);
         params.back().disableSystemClick = true;
+        params.back().isAIMenuOption = IsAIMenuOption(item.id);
         itemNum++;
     }
     return params;
 }
 
 #ifdef OHOS_PLATFORM
-RefPtr<FrameNode> CreateMenuTextNode(const std::string& value, const RefPtr<FrameNode>& parent)
+RefPtr<FrameNode> CreateMenuTextNode(const std::string& value, const RefPtr<FrameNode>& parent,
+    bool isAIMenuEnabled = false)
 {
     auto textId = ElementRegister::GetInstance()->MakeUniqueId();
     auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
@@ -835,6 +938,19 @@ RefPtr<FrameNode> CreateMenuTextNode(const std::string& value, const RefPtr<Fram
     textProperty->UpdateFontSize(theme->GetMenuFontSize());
     textProperty->UpdateFontWeight(FontWeight::REGULAR);
     textProperty->UpdateTextColor(Color::TRANSPARENT);
+    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    if (isAIMenuEnabled == true && textOverlayTheme) {
+        TextStyle textStyle;
+        textStyle.SetFontSize(theme->GetMenuFontSize());
+        textStyle.SetFontWeight(FontWeight::REGULAR);
+        auto textSize = MeasureUtil::MeasureTextSize(textStyle, value);
+        FontForegroudGradiantColor colorInfo;
+        colorInfo.points = { NG::PointF(0, 0),
+            NG::PointF(static_cast<float>(textSize.Width()), static_cast<float>(textSize.Height())) };
+        colorInfo.colors = textOverlayTheme->GetAiMenuFontGradientColors();
+        colorInfo.scalars = textOverlayTheme->GetAiMenuFontGradientScalars();
+        textProperty->UpdateFontForegroudGradiantColor(colorInfo);
+    }
     auto textRenderContext = textNode->GetRenderContext();
     CHECK_NULL_RETURN(textRenderContext, nullptr);
     textRenderContext->UpdateForegroundColor(theme->GetMenuFontColor());
@@ -934,7 +1050,7 @@ void SetupMenuItemChildrenAndFocus(const RefPtr<FrameNode>& menuItem, const std:
     if (!isPaste && param.symbolId != 0) {
         SetMenuItemIcon(menuItem, param, leftRow);
     }
-    auto leftTextNode = CreateMenuTextNode(content, leftRow);
+    auto leftTextNode = CreateMenuTextNode(content, leftRow, param.isAIMenuOption);
     CHECK_NULL_VOID(leftTextNode);
     leftRow->MountToParent(menuItem);
     leftRow->MarkModifyDone();
@@ -946,7 +1062,7 @@ void SetupMenuItemChildrenAndFocus(const RefPtr<FrameNode>& menuItem, const std:
     rightRowLayoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     rightRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
     rightRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
-    auto rightTextNode = CreateMenuTextNode(labelInfo, rightRow);
+    auto rightTextNode = CreateMenuTextNode(labelInfo, rightRow, param.isAIMenuOption);
     CHECK_NULL_VOID(rightTextNode);
     rightRow->MountToParent(menuItem);
     auto rightTextRenderContext = rightTextNode->GetRenderContext();
@@ -1714,6 +1830,16 @@ void SelectOverlayNode::GetFlexibleOptionsParams(
         params.emplace_back(iconName, iconPath, GetMenuCallbackWithContainerId(info->menuCallback.onAIWrite),
             GetSymbolFunc(OH_DEFAULT_AI_WRITE));
     }
+    if (!isShowInDefaultMenu_[OPTION_INDEX_AI_MENU]) {
+        // use AI write, replace correct icon and symbolFunc according to needed
+        auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_AI_WRITE_SVG) : "";
+        std::function<void(WeakPtr<NG::FrameNode>)> symbolFunc = GetSymbolFunc(OH_DEFAULT_AI_MENU_PHONE);
+        auto iconName = textOverlayTheme ?
+            textOverlayTheme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType) : "";
+        params.emplace_back(iconName, iconPath, GetMenuCallbackWithContainerId(
+            info->menuCallback.onAIMenuOption, iconName), symbolFunc);
+        params.back().isAIMenuOption = true;
+    }
 }
 
 void SelectOverlayNode::addMenuOptionItemsParams(
@@ -1877,6 +2003,8 @@ void SelectOverlayNode::AddCreateMenuExtensionMenuParams(const std::vector<MenuO
         auto param = OptionParam(content, GetSystemIconPath(item.id, item.icon.value_or(" ")), callback, symbol);
         if (item.id == OH_DEFAULT_PASTE) {
             param.isPasteOption = true;
+        } else if (IsAIMenuOption(item.id)) {
+            param.isAIMenuOption = true;
         }
         params.emplace_back(param);
         itemNum++;
@@ -2025,6 +2153,7 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
     ShowSearch(maxWidth, allocatedSize, info, theme->GetSearchLabel());
     ShowCamera(maxWidth, allocatedSize, info, theme->GetCameraInput());
     ShowAIWrite(maxWidth, allocatedSize, info, theme->GetAIWrite());
+    ShowAIMenuOptions(maxWidth, allocatedSize, info, theme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType));
     if (isDefaultBtnOverMaxWidth_) {
         isDefaultBtnOverMaxWidth_ = false;
         return true;
@@ -2105,7 +2234,7 @@ void SelectOverlayNode::ShowCopyAll(
     if (info->menuInfo.showCopyAll) {
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         float buttonWidth = 0.0f;
-        auto button = BuildButton(label, info->menuCallback.onSelectAll, GetId(), buttonWidth, true);
+        auto button = BuildButton(label, info->menuCallback.onSelectAll, GetId(), buttonWidth);
         CHECK_NULL_VOID(button);
         if (GreatOrEqual(maxWidth - allocatedSize, buttonWidth)) {
             button->MountToParent(selectMenuInner_);
@@ -2201,7 +2330,7 @@ void SelectOverlayNode::ShowAIWrite(
     if (info->menuInfo.showAIWrite && TextSystemMenu::IsShowAIWriter()) {
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         float buttonWidth = 0.0f;
-        auto button = BuildButton(label, info->menuCallback.onAIWrite, GetId(), buttonWidth, true);
+        auto button = BuildButton(label, info->menuCallback.onAIWrite, GetId(), buttonWidth);
         CHECK_NULL_VOID(button);
         if (GreatOrEqual(maxWidth - allocatedSize, buttonWidth)) {
             button->MountToParent(selectMenuInner_);
@@ -2222,7 +2351,7 @@ void SelectOverlayNode::ShowCamera(
     if (info->menuInfo.showCameraInput && TextSystemMenu::IsShowCameraInput()) {
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         float buttonWidth = 0.0f;
-        auto button = BuildButton(label, info->menuCallback.onCameraInput, GetId(), buttonWidth, false);
+        auto button = BuildButton(label, info->menuCallback.onCameraInput, GetId(), buttonWidth);
         CHECK_NULL_VOID(button);
         if (GreatOrEqual(maxWidth - allocatedSize, buttonWidth)) {
             button->MountToParent(selectMenuInner_);
@@ -2234,6 +2363,28 @@ void SelectOverlayNode::ShowCamera(
         }
     } else {
         isShowInDefaultMenu_[OPTION_INDEX_CAMERA_INPUT] = true;
+    }
+}
+
+void SelectOverlayNode::ShowAIMenuOptions(
+    float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label)
+{
+    if (info->menuInfo.aiMenuOptionType != TextDataDetectType::INVALID) {
+        CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
+        float buttonWidth = 0.0f;
+        auto button = BuildButton(label, info->menuCallback.onAIMenuOption, GetId(), buttonWidth,
+            SelectOverlayMenuButtonType::AIBUTTON);
+        CHECK_NULL_VOID(button);
+        if (GreatOrEqual(maxWidth - allocatedSize, buttonWidth)) {
+            button->MountToParent(selectMenuInner_);
+            allocatedSize += buttonWidth;
+            isShowInDefaultMenu_[OPTION_INDEX_AI_MENU] = true;
+        } else {
+            button.Reset();
+            isDefaultBtnOverMaxWidth_ = true;
+        }
+    } else {
+        isShowInDefaultMenu_[OPTION_INDEX_AI_MENU] = true;
     }
 }
 
@@ -2329,7 +2480,8 @@ int32_t SelectOverlayNode::AddCreateMenuItems(
 #endif
         } else {
             item.isFirstOption = index == -1;
-            item.content = GetItemContent(item.id, item.content.value_or(""));
+            item.content = GetItemContent(item.id, item.content.value_or(""), info);
+
             button = BuildCreateMenuItemButton(item, callback != systemCallback.end() ? callback->second : nullptr,
                 info->onCreateCallback, id, remainderWidth);
             if (button) {
@@ -2375,6 +2527,16 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
         OH_DEFAULT_CAMERA_INPUT, theme->GetCameraInput(), systemItemParams);
     AddMenuItemParamIf(menuInfo.showAIWrite && TextSystemMenu::IsShowAIWriter(), OH_DEFAULT_AI_WRITE,
         theme->GetAIWrite(), systemItemParams);
+    if (info->menuInfo.aiMenuOptionType != TextDataDetectType::INVALID) { // editMenuOptions route
+        MenuItemParam param;
+        MenuOptionsParam menuOptionsParam;
+        auto findIter = AI_TYPE_ID_MAP.find(info->menuInfo.aiMenuOptionType);
+        CHECK_EQUAL_RETURN(findIter, AI_TYPE_ID_MAP.end(), systemItemParams);
+        menuOptionsParam.id = findIter->second;
+        menuOptionsParam.content = theme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType);
+        param.menuOptionsParam = menuOptionsParam;
+        systemItemParams.emplace_back(param);
+    }
     return systemItemParams;
 }
 
@@ -2554,12 +2716,12 @@ void SelectOverlayNode::SetSelectMenuInnerSize()
 void SelectOverlayNode::LandscapeMenuAddMenuOptions(const std::vector<MenuOptionsParam>& menuOptionItems,
     bool isDefaultOverMaxWidth, float maxWidth, float allocatedSize, int32_t& extensionOptionStartIndex)
 {
+    if (isDefaultOverMaxWidth) {
+        return;
+    }
     auto itemNum = -1;
     for (auto item : menuOptionItems) {
         itemNum++;
-        if (isDefaultOverMaxWidth) {
-            break;
-        }
         float extensionOptionWidth = 0.0f;
         auto button = BuildButton(item, GetId(), extensionOptionWidth);
         CHECK_NULL_VOID(button);

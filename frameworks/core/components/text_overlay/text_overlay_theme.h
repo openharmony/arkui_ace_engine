@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_OVERLAY_TEXT_OVERLAY_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_OVERLAY_TEXT_OVERLAY_THEME_H
 
+#include <unordered_map>
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/border_edge.h"
@@ -60,8 +61,10 @@ public:
             theme->aiWriteSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.edit_badge_star");
             theme->searchSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.magnifyingglass");
             theme->translateSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.translate_c2e");
+            theme->aiMenuSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.AI_retouch");
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             ParseMenuPattern(themeConstants->GetThemeStyle(), theme);
+            ParseAIMenu(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
 
@@ -141,6 +144,36 @@ public:
                 "text_overlay_menu_more_accessibility_text", "more");
             theme->backAccessibilityText_ = pattern->GetAttr<std::string>(
                 "text_overlay_menu_back_accessibility_text", "back");
+        }
+
+        void ParseAIMenu(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<TextOverlayTheme>& theme) const
+        {
+            CHECK_NULL_VOID(themeStyle && theme);
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("text_overlay_pattern", nullptr);
+            CHECK_NULL_VOID(pattern);
+
+            // Get value from global resource after value exists in resource
+            theme->aiMenuTypeOptionNames_[OHOS::Ace::TextDataDetectType::ADDRESS] =
+                pattern->GetAttr<std::string>("general_ai_menu_address", "Get Directions");
+            theme->aiMenuTypeOptionNames_[OHOS::Ace::TextDataDetectType::DATE_TIME] =
+                pattern->GetAttr<std::string>("general_ai_menu_date", "Create calendar reminder");
+            theme->aiMenuTypeOptionNames_[OHOS::Ace::TextDataDetectType::EMAIL] =
+                pattern->GetAttr<std::string>("general_ai_menu_email", "Compose email");
+            theme->aiMenuTypeOptionNames_[OHOS::Ace::TextDataDetectType::PHONE_NUMBER] =
+                pattern->GetAttr<std::string>("general_ai_menu_phone_number", "Call now");
+            theme->aiMenuTypeOptionNames_[OHOS::Ace::TextDataDetectType::URL] =
+                pattern->GetAttr<std::string>("general_ai_menu_url", "Open");
+
+            theme->aiMenuFontGradientColors_ = {
+                pattern->GetAttr<Color>("ai_intelligent_gradient_color1", Color()),
+                pattern->GetAttr<Color>("ai_intelligent_gradient_color2", Color()),
+                pattern->GetAttr<Color>("ai_intelligent_gradient_color3", Color()),
+                pattern->GetAttr<Color>("ai_intelligent_gradient_color4", Color()) };
+            theme->aiMenuFontGradientScalars_ = {
+                pattern->GetAttr<double>("ai_intelligent_gradient_scalar1", 0.0),
+                pattern->GetAttr<double>("ai_intelligent_gradient_scalar2", 0.0),
+                pattern->GetAttr<double>("ai_intelligent_gradient_scalar3", 0.0),
+                pattern->GetAttr<double>("ai_intelligent_gradient_scalar4", 0.0) };
         }
     };
 
@@ -421,6 +454,34 @@ public:
         return backAccessibilityText_;
     }
 
+    const std::string GetAiMenuOptionName(OHOS::Ace::TextDataDetectType type) const
+    {
+        if (type == TextDataDetectType::INVALID) {
+            return "invalid";
+        }
+        auto findIter = aiMenuTypeOptionNames_.find(type);
+        if (findIter != aiMenuTypeOptionNames_.end()) {
+            return findIter->second;
+        } else {
+            return "No such type";
+        }
+    }
+
+    const std::vector<Color>& GetAiMenuFontGradientColors() const
+    {
+        return aiMenuFontGradientColors_;
+    }
+
+    const std::vector<float>& GetAiMenuFontGradientScalars() const
+    {
+        return aiMenuFontGradientScalars_;
+    }
+
+    const uint32_t& GetAIMenuSymbolId() const
+    {
+        return aiMenuSymbolId_;
+    }
+
 protected:
     TextOverlayTheme() = default;
 
@@ -477,6 +538,11 @@ private:
     uint32_t aiWriteSymbolId_ = 0;
     uint32_t searchSymbolId_ = 0;
     uint32_t translateSymbolId_ = 0;
+    uint32_t aiMenuSymbolId_ = 0;
+
+    std::unordered_map<OHOS::Ace::TextDataDetectType, std::string> aiMenuTypeOptionNames_;
+    std::vector<Color> aiMenuFontGradientColors_;
+    std::vector<float> aiMenuFontGradientScalars_;
 };
 
 } // namespace OHOS::Ace

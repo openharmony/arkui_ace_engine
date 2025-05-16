@@ -3447,7 +3447,7 @@ HWTEST_F(TextTestNg, TextSelectOverlayTestOnUpdateMenuInfo001, TestSize.Level1)
     SelectMenuInfo menuInfo;
 
     textSelectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_COPY_ALL_ITEM);
-    ASSERT_EQ(menuInfo.showCut, true);
+    ASSERT_EQ(menuInfo.showCut, false);
 
     textSelectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_FIRST_HANDLE);
     ASSERT_EQ(menuInfo.showCut, false);

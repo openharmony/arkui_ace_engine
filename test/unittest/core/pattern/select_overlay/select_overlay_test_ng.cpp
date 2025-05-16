@@ -3874,7 +3874,7 @@ HWTEST_F(SelectOverlayTestNg, AddSystemDefaultOptions006, TestSize.Level1)
     selectInfo.menuInfo.showSearch = false;
     selectInfo.menuInfo.showShare = false;
     selectInfo.menuInfo.showCameraInput = false;
-    float maxWidth = 3.0f;
+    float maxWidth = 50.0f;
     float allocatedSize = 2.0f;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto themeManagerBase = MockPipelineContext::GetCurrent()->GetThemeManager();
@@ -3917,7 +3917,7 @@ HWTEST_F(SelectOverlayTestNg, BuildButton001, TestSize.Level1)
     selectInfo.menuInfo.showPaste = false;
     selectInfo.menuInfo.showCopyAll = false;
     selectInfo.menuInfo.showCameraInput = false;
-    float maxWidth = 3.0f;
+    float maxWidth = 50.0f;
     float allocatedSize = 2.0f;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     infoPtr->menuCallback.onCut = []() {

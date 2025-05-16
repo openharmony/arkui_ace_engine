@@ -2224,6 +2224,26 @@ class TextMenuItemId {
   static get AI_WRITER() {
     return new TextMenuItemId('OH_DEFAULT_AI_WRITE');
   }
+
+  static get phoneNumber() {
+    return new TextMenuItemId('OH_DEFAULT_AI_MENU_PHONE');
+  }
+
+  static get url() {
+    return new TextMenuItemId('OH_DEFAULT_AI_MENU_URL');
+  }
+
+  static get email() {
+    return new TextMenuItemId('OH_DEFAULT_AI_MENU_EMAIL');
+  }
+
+  static get address() {
+    return new TextMenuItemId('OH_DEFAULT_AI_MENU_ADDRESS');
+  }
+
+  static get dateTime() {
+    return new TextMenuItemId('OH_DEFAULT_AI_MENU_DATETIME');
+  }
 }
 
 globalThis.TextMenuItemId = TextMenuItemId;

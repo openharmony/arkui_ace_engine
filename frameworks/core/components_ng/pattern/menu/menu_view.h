@@ -29,8 +29,11 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT MenuView {
 struct OptionValueInfo {
-    std::string value;
+    bool optionsHasIcon = false;
+
+    std::string content;
     bool isPasteOption = false;
+    bool isAIMenuOption = false;
 };
 
 public:
@@ -61,8 +64,8 @@ public:
     static void CalcHoverScaleInfo(const RefPtr<FrameNode>& menuNode);
     static RefPtr<FrameNode> CreateIcon(const std::string& icon, const RefPtr<FrameNode>& parent,
         const RefPtr<FrameNode>& child = nullptr);
-    static RefPtr<FrameNode> CreateText(
-        const std::string& value, const RefPtr<FrameNode>& parent, bool autoWrapFlag = false);
+    static RefPtr<FrameNode> CreateText(const std::string& value, const RefPtr<FrameNode>& parent,
+        bool autoWrapFlag = false, bool isAIMenuOption = false);
     static void CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row,
         const std::function<void()>& onClickFunc, const std::string& icon = "");
     static RefPtr<FrameNode> CreateSelectOption(const SelectParam& param, int32_t index, bool autoWrapFlag = false);
@@ -87,10 +90,10 @@ private:
     static void CustomPreviewParentNodeCreate(const RefPtr<FrameNode>& stackNode, const RefPtr<FrameNode>& posNode,
         const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& previewNode);
     static RefPtr<FrameNode> Create(int32_t index);
-    static RefPtr<FrameNode> CreateMenuOption(bool optionsHasIcon, const OptionValueInfo& value,
+    static RefPtr<FrameNode> CreateMenuOption(const OptionValueInfo& value,
         const std::function<void()>& onClickFunc, int32_t index, const std::string& icon = "");
     static RefPtr<FrameNode> CreateMenuOption(bool optionsHasIcon, std::vector<OptionParam>& params, int32_t index);
-    static void CreateOption(bool optionsHasIcon, const std::string& value, const std::string& icon,
+    static void CreateOption(const OptionValueInfo& value, const std::string& icon,
         const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option, const std::function<void()>& onClickFunc);
     static void CreateOption(bool optionsHasIcon, std::vector<OptionParam>& params, int32_t index,
         const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option);

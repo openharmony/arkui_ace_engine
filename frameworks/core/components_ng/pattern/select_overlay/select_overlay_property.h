@@ -132,6 +132,7 @@ inline constexpr SelectOverlayDirtyFlag DIRTY_COPY_ALL_ITEM = 1 << 4;
 inline constexpr SelectOverlayDirtyFlag DIRTY_SELECT_TEXT = 1 << 5;
 inline constexpr SelectOverlayDirtyFlag DIRTY_VIEWPORT = 1 << 6;
 inline constexpr SelectOverlayDirtyFlag DIRTY_HANDLE_COLOR_FLAG = 1 << 7;
+inline constexpr SelectOverlayDirtyFlag DIRTY_AI_MENU_ITEM = 1 << 8;
 inline constexpr SelectOverlayDirtyFlag DIRTY_DOUBLE_HANDLE = DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE;
 inline constexpr SelectOverlayDirtyFlag DIRTY_ALL =
     DIRTY_DOUBLE_HANDLE | DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AREA | DIRTY_SELECT_TEXT | DIRTY_VIEWPORT;
@@ -157,6 +158,12 @@ inline constexpr char OH_DEFAULT_SEARCH[] = "OH_DEFAULT_SEARCH";
 inline constexpr char OH_DEFAULT_SHARE[] = "OH_DEFAULT_SHARE";
 inline constexpr char OH_DEFAULT_CAMERA_INPUT[] = "OH_DEFAULT_CAMERA_INPUT";
 inline constexpr char OH_DEFAULT_AI_WRITE[] = "OH_DEFAULT_AI_WRITE";
+inline constexpr char OH_DEFAULT_AI_MENU_PHONE[] = "OH_DEFAULT_AI_MENU_PHONE";
+inline constexpr char OH_DEFAULT_AI_MENU_URL[] = "OH_DEFAULT_AI_MENU_URL";
+inline constexpr char OH_DEFAULT_AI_MENU_EMAIL[] = "OH_DEFAULT_AI_MENU_EMAIL";
+inline constexpr char OH_DEFAULT_AI_MENU_ADDRESS[] = "OH_DEFAULT_AI_MENU_ADDRESS";
+inline constexpr char OH_DEFAULT_AI_MENU_DATETIME[] = "OH_DEFAULT_AI_MENU_DATETIME";
+
 inline constexpr char OH_DEFAULT_COLLABORATION_SERVICE[] = "OH_DEFAULT_COLLABORATION_SERVICE";
 
 enum class OptionMenuType { NO_MENU, MOUSE_MENU, TOUCH_MENU };
@@ -171,7 +178,8 @@ enum class OptionMenuActionId {
     CAMERA_INPUT,
     AI_WRITE,
     APPEAR,
-    DISAPPEAR
+    DISAPPEAR,
+    AI_MENU_OPTION
 };
 enum class CloseReason {
     CLOSE_REASON_NORMAL = 1,
@@ -214,6 +222,7 @@ struct SelectMenuInfo {
     bool showSearch = false;
     bool showCameraInput = false;
     bool showAIWrite = false;
+    OHOS::Ace::TextDataDetectType aiMenuOptionType = TextDataDetectType::INVALID;
     std::optional<OffsetF> menuOffset;
     OptionMenuType menuType = OptionMenuType::TOUCH_MENU;
 
@@ -228,10 +237,10 @@ struct SelectMenuInfo {
             return true;
         }
         return !((showCopy == info.showCopy) && (showPaste == info.showPaste) && (showCopyAll == info.showCopyAll) &&
-                 (showTranslate == info.showTranslate) &&
-                 (showCut == info.showCut) && (showSearch == info.showSearch) && (showShare == info.showShare) &&
-                 (showCameraInput == info.showCameraInput) &&
-                 (showAIWrite == info.showAIWrite));
+                 (showCut == info.showCut) && (showTranslate == info.showTranslate) &&
+                 (showSearch == info.showSearch) && (showShare == info.showShare) &&
+                 (showCameraInput == info.showCameraInput) && (showAIWrite == info.showAIWrite) &&
+                 (aiMenuOptionType == info.aiMenuOptionType));
     }
 
     std::string ToString() const
@@ -248,6 +257,7 @@ struct SelectMenuInfo {
         JSON_STRING_PUT_BOOL(jsonValue, showSearch);
         JSON_STRING_PUT_BOOL(jsonValue, showShare);
         JSON_STRING_PUT_BOOL(jsonValue, showCameraInput);
+        JSON_STRING_PUT_INT(jsonValue, aiMenuOptionType);
         return jsonValue->ToString();
     }
 };
@@ -262,6 +272,7 @@ struct SelectMenuCallback {
     std::function<void()> onShare;
     std::function<void()> onCameraInput;
     std::function<void()> onAIWrite;
+    std::function<void(std::string)> onAIMenuOption;
 
     std::function<void()> onAppear;
     std::function<void()> onDisappear;

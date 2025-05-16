@@ -362,6 +362,7 @@ enum class MarqueeStartPolicy {
 };
 
 enum class TextDataDetectType {
+    INVALID = -1,
     PHONE_NUMBER = 0,
     URL,
     EMAIL,
