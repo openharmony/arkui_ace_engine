@@ -2484,13 +2484,7 @@ void FrontendDelegateDeclarative::OnSurfaceChanged()
 
 void FrontendDelegateDeclarative::OnMediaQueryUpdate(bool isSynchronous)
 {
-    auto containerId = Container::CurrentId();
-    if (containerId < 0) {
-        auto container = Container::GetActive();
-        if (container) {
-            containerId = container->GetInstanceId();
-        }
-    }
+    auto containerId = Container::CurrentIdSafely();
     bool isInSubwindow = containerId >= 1000000;
     if (isInSubwindow) {
         return;
