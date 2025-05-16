@@ -20,9 +20,18 @@
 
 #include "core/components_ng/pattern/patternlock/patternlock_event_hub.h"
 #include "core/components_v2/pattern_lock/pattern_lock_controller.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
-
+enum class JsResourceType {
+    SELECTEDCOLOR,
+    PATHCOLOR,
+    ACTIVECOLOR,
+    REGULARCOLOR,
+    CIRCLERADIUS,
+    SIDELENGTH,
+    ACTIVECIRCLECOLOR,
+};
 class ACE_FORCE_EXPORT PatternLockModel {
 public:
     static PatternLockModel* GetInstance();
@@ -44,6 +53,7 @@ public:
     virtual void SetEnableWaveEffect(bool enableWaveEffect);
     virtual void SetEnableForeground(bool enableForeground);
     virtual void SetSkipUnselectedPoint(bool isSkipUnselectedPoint);
+    virtual void CreateWithResourceObj(JsResourceType jsResourceType, const RefPtr<ResourceObject>& resObj);
 
 private:
     static std::unique_ptr<PatternLockModel> instance_;

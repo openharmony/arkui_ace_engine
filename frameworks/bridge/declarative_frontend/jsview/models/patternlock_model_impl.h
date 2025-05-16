@@ -38,6 +38,7 @@ public:
     void SetEnableWaveEffect(bool enableWaveEffect) override;
     void SetEnableForeground(bool enableForeground) override;
     void SetSkipUnselectedPoint(bool isSkipUnselectedPoint) override;
+    void CreateWithResourceObj(JsResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) override {};
 };
 
 } // namespace OHOS::Ace::Framework
