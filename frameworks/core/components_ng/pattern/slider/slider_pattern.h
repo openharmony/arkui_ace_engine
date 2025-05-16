@@ -158,7 +158,7 @@ public:
     {
         isAccessibilityOn_ = value;
     }
-    void PlayHapticFeedback(bool isShowSteps, float step, float oldValue);
+    void PlayHapticFeedback(bool isShowSteps);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void DumpInfo() override;
 
@@ -259,7 +259,6 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState();
     bool MoveStep(int32_t stepCount);
-    void InitHapticController();
 #ifdef SUPPORT_DIGITAL_CROWN
     void InitDigitalCrownEvent(const RefPtr<FocusHub>& focusHub)
     {
@@ -451,7 +450,6 @@ private:
     uint64_t lastSendPostValueTime_ = 0;
     float accessibilityValue_ = 0.0f;
     bool isEnableHaptic_ = true;
-    bool hapticApiEnabled = false;
     double slipfactor_ = 0;
     RefPtr<FrameNode> sliderTipNode_ = nullptr;
     RefPtr<UINode> navigationNode_ = nullptr;
