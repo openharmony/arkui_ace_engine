@@ -822,12 +822,11 @@ HWTEST_F(SubMenuTestNg, GetSubMenuPosition001, TestSize.Level1)
     ASSERT_NE(menuItemNode, nullptr);
     auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
-    bool stacked = true;
     auto pipelineContext = menuItemNode->GetContextWithCheck();
     ASSERT_NE(pipelineContext, nullptr);
     pipelineContext->windowModal_ = WindowModal::NORMAL;
     SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
-    EXPECT_EQ(subMenuLayoutAlgorithm.GetSubMenuPosition(menuItemNode, stacked).x_, ZERO);
+    EXPECT_EQ(subMenuLayoutAlgorithm.GetSubMenuPosition(menuItemNode, SubMenuExpandingMode::STACK).x_, ZERO);
 }
 
 /**
