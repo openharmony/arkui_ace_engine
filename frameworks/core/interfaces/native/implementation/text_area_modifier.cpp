@@ -153,7 +153,7 @@ void TextOverflowImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetTextOverflow(frameNode, convValue);
 }
 void TextIndentImpl(Ark_NativePointer node,
-                    const Opt_Length* value)
+                    const Opt_Dimension* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

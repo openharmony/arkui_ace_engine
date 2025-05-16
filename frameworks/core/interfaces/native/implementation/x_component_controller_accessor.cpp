@@ -150,28 +150,6 @@ Ark_SurfaceRotationOptions GetXComponentSurfaceRotationImpl(Ark_XComponentContro
 #endif //XCOMPONENT_SUPPORTED
     return rotationOptions;
 }
-void OnSurfaceCreatedImpl(Ark_XComponentController peer,
-                          const Ark_String* surfaceId)
-{
-#ifdef XCOMPONENT_SUPPORTED
-    LOGE("XComponentControllerAccessor::OnSurfaceCreatedImpl - callback need to be supported");
-#endif //XCOMPONENT_SUPPORTED
-}
-void OnSurfaceChangedImpl(Ark_XComponentController peer,
-                          const Ark_String* surfaceId,
-                          const Ark_SurfaceRect* rect)
-{
-#ifdef XCOMPONENT_SUPPORTED
-    LOGE("XComponentControllerAccessor::OnSurfaceChangedImpl - callback need to be supported");
-#endif //XCOMPONENT_SUPPORTED
-}
-void OnSurfaceDestroyedImpl(Ark_XComponentController peer,
-                            const Ark_String* surfaceId)
-{
-#ifdef XCOMPONENT_SUPPORTED
-    LOGE("XComponentControllerAccessor::OnSurfaceDestroyedImpl - callback need to be supported");
-#endif //XCOMPONENT_SUPPORTED
-}
 void StartImageAnalyzerImpl(Ark_VMContext vmContext,
                             Ark_AsyncWorkerPtr asyncWorker,
                             Ark_XComponentController peer,
@@ -226,6 +204,30 @@ void SetOnSurfaceDestroyedCallbackImpl(Ark_XComponentController peer,
     peerImpl->SetOnSurfaceDestroyedEvent(*onSurfaceDestroyedCallback);
 #endif //XCOMPONENT_SUPPORTED
 }
+Callback_String_Void GetOnSurfaceCreatedImpl(Ark_XComponentController peer)
+{
+    return {};
+}
+void SetOnSurfaceCreatedImpl(Ark_XComponentController peer,
+                             const Callback_String_Void* onSurfaceCreated)
+{
+}
+Callback_String_SurfaceRect_Void GetOnSurfaceChangedImpl(Ark_XComponentController peer)
+{
+    return {};
+}
+void SetOnSurfaceChangedImpl(Ark_XComponentController peer,
+                             const Callback_String_SurfaceRect_Void* onSurfaceChanged)
+{
+}
+Callback_String_Void GetOnSurfaceDestroyedImpl(Ark_XComponentController peer)
+{
+    return {};
+}
+void SetOnSurfaceDestroyedImpl(Ark_XComponentController peer,
+                               const Callback_String_Void* onSurfaceDestroyed)
+{
+}
 } // XComponentControllerAccessor
 const GENERATED_ArkUIXComponentControllerAccessor* GetXComponentControllerAccessor()
 {
@@ -240,14 +242,14 @@ const GENERATED_ArkUIXComponentControllerAccessor* GetXComponentControllerAccess
         XComponentControllerAccessor::GetXComponentSurfaceRectImpl,
         XComponentControllerAccessor::SetXComponentSurfaceRotationImpl,
         XComponentControllerAccessor::GetXComponentSurfaceRotationImpl,
-        XComponentControllerAccessor::OnSurfaceCreatedImpl,
-        XComponentControllerAccessor::OnSurfaceChangedImpl,
-        XComponentControllerAccessor::OnSurfaceDestroyedImpl,
         XComponentControllerAccessor::StartImageAnalyzerImpl,
         XComponentControllerAccessor::StopImageAnalyzerImpl,
-        XComponentControllerAccessor::SetOnSurfaceCreatedCallbackImpl,
-        XComponentControllerAccessor::SetOnSurfaceChangedCallbackImpl,
-        XComponentControllerAccessor::SetOnSurfaceDestroyedCallbackImpl,
+        XComponentControllerAccessor::GetOnSurfaceCreatedImpl,
+        XComponentControllerAccessor::SetOnSurfaceCreatedImpl,
+        XComponentControllerAccessor::GetOnSurfaceChangedImpl,
+        XComponentControllerAccessor::SetOnSurfaceChangedImpl,
+        XComponentControllerAccessor::GetOnSurfaceDestroyedImpl,
+        XComponentControllerAccessor::SetOnSurfaceDestroyedImpl,
     };
     return &XComponentControllerAccessorImpl;
 }

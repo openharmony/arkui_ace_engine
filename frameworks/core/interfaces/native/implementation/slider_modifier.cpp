@@ -277,7 +277,7 @@ void TrackBorderRadiusImpl(Ark_NativePointer node,
     SliderModelStatic::SetTrackBorderRadius(frameNode, convValue);
 }
 void SelectedBorderRadiusImpl(Ark_NativePointer node,
-                              const Opt_Length* value)
+                              const Opt_Dimension* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

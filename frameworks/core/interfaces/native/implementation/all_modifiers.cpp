@@ -210,16 +210,12 @@ const GENERATED_ArkUIContextAccessor* GetContextAccessor();
 const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor();
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor();
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor();
-const GENERATED_ArkUIGestureOpsAccessor* GetGestureOpsAccessor();
 const GENERATED_ArkUIFocusControllerAccessor* GetFocusControllerAccessor();
 const GENERATED_ArkUIComponentContentAccessor* GetComponentContentAccessor();
 const GENERATED_ArkUISceneAccessor* GetSceneAccessor();
 const GENERATED_ArkUIWorkerEventListenerAccessor* GetWorkerEventListenerAccessor();
 const GENERATED_ArkUIRestrictedWorkerAccessor* GetRestrictedWorkerAccessor();
 const GENERATED_ArkUIUIContextAccessor* GetUIContextAccessor();
-const GENERATED_ArkUIStateStylesOpsAccessor* GetStateStylesOpsAccessor();
-const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* GetUIContextAtomicServiceBarAccessor();
-const GENERATED_ArkUIUIContextDispatchKeyEventAccessor* GetUIContextDispatchKeyEventAccessor();
 const GENERATED_ArkUIDrawableDescriptorAccessor* GetDrawableDescriptorAccessor();
 const GENERATED_ArkUILayeredDrawableDescriptorAccessor* GetLayeredDrawableDescriptorAccessor();
 const GENERATED_ArkUIPixelMapDrawableDescriptorAccessor* GetPixelMapDrawableDescriptorAccessor();
@@ -247,11 +243,8 @@ const GENERATED_ArkUILengthMetricsAccessor* GetLengthMetricsAccessor();
 const GENERATED_ArkUIShapeMaskAccessor* GetShapeMaskAccessor();
 const GENERATED_ArkUIShapeClipAccessor* GetShapeClipAccessor();
 const GENERATED_ArkUIMatrix4TransitAccessor* GetMatrix4TransitAccessor();
-const GENERATED_ArkUINodeContentAccessor* GetNodeContentAccessor();
 const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
 const GENERATED_ArkUIRenderNodeAccessor* GetRenderNodeAccessor();
-const GENERATED_ArkUITabsOpsAccessor* GetTabsOpsAccessor();
-const GENERATED_ArkUIGridItemOpsAccessor* GetGridItemOpsAccessor();
 const GENERATED_ArkUIFilterAccessor* GetFilterAccessor();
 const GENERATED_ArkUIVisualEffectAccessor* GetVisualEffectAccessor();
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor();
@@ -407,7 +400,6 @@ const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor();
 const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor();
 const GENERATED_ArkUILinearIndicatorControllerAccessor* GetLinearIndicatorControllerAccessor();
 const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor();
-const GENERATED_ArkUIStateModifier* GetUIStateModifier();
 const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
 {
     static const GENERATED_ArkUINodeModifiers modifiersImpl = {
@@ -529,7 +521,6 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetWaterFlowModifier,
         GetUIExtensionComponentModifier,
         GetLinearIndicatorModifier,
-        GetUIStateModifier,
     };
     return &modifiersImpl;
 }
@@ -542,16 +533,12 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetUnifiedDataAccessor,
         GetLazyForEachOpsAccessor,
         GetSystemOpsAccessor,
-        GetGestureOpsAccessor,
         GetFocusControllerAccessor,
         GetComponentContentAccessor,
         GetSceneAccessor,
         GetWorkerEventListenerAccessor,
         GetRestrictedWorkerAccessor,
         GetUIContextAccessor,
-        GetStateStylesOpsAccessor,
-        GetUIContextAtomicServiceBarAccessor,
-        GetUIContextDispatchKeyEventAccessor,
         GetDrawableDescriptorAccessor,
         GetLayeredDrawableDescriptorAccessor,
         GetPixelMapDrawableDescriptorAccessor,
@@ -579,11 +566,8 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetShapeMaskAccessor,
         GetShapeClipAccessor,
         GetMatrix4TransitAccessor,
-        GetNodeContentAccessor,
         GetPixelMapAccessor,
         GetRenderNodeAccessor,
-        GetTabsOpsAccessor,
-        GetGridItemOpsAccessor,
         GetFilterAccessor,
         GetVisualEffectAccessor,
         GetNavExtenderAccessor,
@@ -815,6 +799,7 @@ const GENERATED_ArkUIFullNodeAPI* GENERATED_GetFullAPI()
 }
 
 void setLogger(const ServiceLogger* logger) {
+    SetDummyLogger(reinterpret_cast<const GroupLogger*>(logger));
 }
 
 
@@ -831,23 +816,23 @@ EXTERN_C IDLIZE_API_EXPORT const OH_AnyAPI* GENERATED_GetArkAnyAPI(
     GENERATED_Ark_APIVariantKind kind, int version)
 {
     switch (static_cast<int>(kind)) {
-        case GENERATED_FULL:
-            if (version == GENERATED_ARKUI_FULL_API_VERSION)   {
+        case static_cast<int>(GENERATED_FULL):
+            if (version == GENERATED_ARKUI_FULL_API_VERSION) {
                 return reinterpret_cast<const OH_AnyAPI*>(GENERATED_GetFullAPI());
             }
             break;
-        case GENERATED_BASIC:
-            if (version == GENERATED_ARKUI_BASIC_NODE_API_VERSION)   {
+        case static_cast<int>(GENERATED_BASIC):
+            if (version == GENERATED_ARKUI_BASIC_NODE_API_VERSION) {
                 return reinterpret_cast<const OH_AnyAPI*>(GENERATED_GetBasicAPI());
             }
             break;
-        case GENERATED_EXTENDED:
-            if (version == GENERATED_ARKUI_EXTENDED_NODE_API_VERSION)   {
+        case static_cast<int>(GENERATED_EXTENDED):
+            if (version == GENERATED_ARKUI_EXTENDED_NODE_API_VERSION) {
                 return reinterpret_cast<const OH_AnyAPI*>(GENERATED_GetExtendedAPI());
             }
             break;
-        case GENERIC_SERVICE_API_KIND:
-            if (version == GENERIC_SERVICE_API_VERSION)   {
+        case static_cast<int>(GENERIC_SERVICE_API_KIND):
+            if (version == GENERIC_SERVICE_API_VERSION) {
                 return reinterpret_cast<const OH_AnyAPI*>(GetServiceAPI());
             }
             break;

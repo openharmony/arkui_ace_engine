@@ -698,7 +698,7 @@ void OnDidScrollImpl(Ark_NativePointer node,
 }
 void LanesImpl(Ark_NativePointer node,
                const Opt_Union_Number_LengthConstrain* value,
-               const Opt_Length* gutter)
+               const Opt_Dimension* gutter)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -288,7 +288,7 @@ void OnErrorImpl(Ark_NativePointer node,
 #endif // FORM_SUPPORTED
 }
 void OnRouterImpl(Ark_NativePointer node,
-                  const Opt_Callback_Any_Void* value)
+                  const Opt_FormComponentAttribute_onRouter_callback_type* value)
 {
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);

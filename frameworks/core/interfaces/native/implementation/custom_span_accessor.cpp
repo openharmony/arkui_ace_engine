@@ -30,17 +30,23 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_CustomSpanMetrics OnMeasureImpl(Ark_CustomSpan peer,
-                                    const Ark_CustomSpanMeasureInfo* measureInfo)
+void InvalidateImpl(Ark_CustomSpan peer)
+{
+}
+AsyncCallback_CustomSpanMeasureInfo_CustomSpanMetrics GetOnMeasureImpl(Ark_CustomSpan peer)
 {
     return {};
 }
-void OnDrawImpl(Ark_CustomSpan peer,
-                const Ark_DrawContext* context,
-                const Ark_CustomSpanDrawInfo* drawInfo)
+void SetOnMeasureImpl(Ark_CustomSpan peer,
+                      const AsyncCallback_CustomSpanMeasureInfo_CustomSpanMetrics* onMeasure)
 {
 }
-void InvalidateImpl(Ark_CustomSpan peer)
+Callback_DrawContext_CustomSpanDrawInfo_Void GetOnDrawImpl(Ark_CustomSpan peer)
+{
+    return {};
+}
+void SetOnDrawImpl(Ark_CustomSpan peer,
+                   const Callback_DrawContext_CustomSpanDrawInfo_Void* onDraw)
 {
 }
 } // CustomSpanAccessor
@@ -50,9 +56,11 @@ const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor()
         CustomSpanAccessor::DestroyPeerImpl,
         CustomSpanAccessor::CtorImpl,
         CustomSpanAccessor::GetFinalizerImpl,
-        CustomSpanAccessor::OnMeasureImpl,
-        CustomSpanAccessor::OnDrawImpl,
         CustomSpanAccessor::InvalidateImpl,
+        CustomSpanAccessor::GetOnMeasureImpl,
+        CustomSpanAccessor::SetOnMeasureImpl,
+        CustomSpanAccessor::GetOnDrawImpl,
+        CustomSpanAccessor::SetOnDrawImpl,
     };
     return &CustomSpanAccessorImpl;
 }

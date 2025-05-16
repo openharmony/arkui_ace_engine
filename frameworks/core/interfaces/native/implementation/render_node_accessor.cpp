@@ -36,7 +36,7 @@ void AppendChildImpl(Ark_RenderNode peer,
 }
 void InsertChildAfterImpl(Ark_RenderNode peer,
                           Ark_RenderNode child,
-                          const Ark_Union_RenderNode_Undefined* sibling)
+                          const Opt_RenderNode* sibling)
 {
 }
 void RemoveChildImpl(Ark_RenderNode peer,
@@ -46,20 +46,20 @@ void RemoveChildImpl(Ark_RenderNode peer,
 void ClearChildrenImpl(Ark_RenderNode peer)
 {
 }
-Ark_Union_RenderNode_Undefined GetChildImpl(Ark_RenderNode peer,
-                                            const Ark_Number* index)
+Opt_RenderNode GetChildImpl(Ark_RenderNode peer,
+                            const Ark_Number* index)
 {
     return {};
 }
-Ark_Union_RenderNode_Undefined GetFirstChildImpl(Ark_RenderNode peer)
+Opt_RenderNode GetFirstChildImpl(Ark_RenderNode peer)
 {
     return {};
 }
-Ark_Union_RenderNode_Undefined GetNextSiblingImpl(Ark_RenderNode peer)
+Opt_RenderNode GetNextSiblingImpl(Ark_RenderNode peer)
 {
     return {};
 }
-Ark_Union_RenderNode_Undefined GetPreviousSiblingImpl(Ark_RenderNode peer)
+Opt_RenderNode GetPreviousSiblingImpl(Ark_RenderNode peer)
 {
     return {};
 }

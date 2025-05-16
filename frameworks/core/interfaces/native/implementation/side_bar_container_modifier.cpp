@@ -318,7 +318,7 @@ void DividerImpl(Ark_NativePointer node,
     }
 }
 void MinContentWidthImpl(Ark_NativePointer node,
-                         const Opt_Length* value)
+                         const Opt_Dimension* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

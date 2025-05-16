@@ -220,7 +220,7 @@ void ShaderInputBufferImpl(Ark_NativePointer node,
     #endif
 }
 void RenderWidthImpl(Ark_NativePointer node,
-                     const Opt_Length* value)
+                     const Opt_Dimension* value)
 {
     #if defined(MODEL_COMPONENT_SUPPORTED)
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -231,7 +231,7 @@ void RenderWidthImpl(Ark_NativePointer node,
     #endif
 }
 void RenderHeightImpl(Ark_NativePointer node,
-                      const Opt_Length* value)
+                      const Opt_Dimension* value)
 {
     #if defined(MODEL_COMPONENT_SUPPORTED)
     auto frameNode = reinterpret_cast<FrameNode *>(node);

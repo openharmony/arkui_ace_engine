@@ -676,7 +676,7 @@ void Divider1Impl(Ark_NativePointer node,
     Divider0Impl(node, value);
 }
 void GradientHeight0Impl(Ark_NativePointer node,
-                         const Opt_Length* value)
+                         const Opt_Dimension* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -688,7 +688,7 @@ void GradientHeight0Impl(Ark_NativePointer node,
     TextPickerModelNG::SetGradientHeight(frameNode, heightDimension);
 }
 void GradientHeight1Impl(Ark_NativePointer node,
-                         const Opt_Length* value)
+                         const Opt_Dimension* value)
 {
     GradientHeight0Impl(node, value);
 }

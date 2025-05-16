@@ -106,7 +106,7 @@ void NavBarWidthRangeImpl(Ark_NativePointer node,
     NavigationModelStatic::SetMaxNavBarWidth(frameNode, max);
 }
 void MinContentWidthImpl(Ark_NativePointer node,
-                         const Opt_Length* value)
+                         const Opt_Dimension* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

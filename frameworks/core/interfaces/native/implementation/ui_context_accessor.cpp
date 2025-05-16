@@ -66,18 +66,18 @@ void AnimateToImmediatelyImpl(Ark_UIContext peer,
                               const Callback_Void* event)
 {
 }
-Ark_Union_FrameNode_Undefined GetFrameNodeByIdImpl(Ark_UIContext peer,
-                                                   const Ark_String* id)
+Opt_FrameNode GetFrameNodeByIdImpl(Ark_UIContext peer,
+                                   const Ark_String* id)
 {
     return {};
 }
-Ark_Union_FrameNode_Undefined GetAttachedFrameNodeByIdImpl(Ark_UIContext peer,
-                                                           const Ark_String* id)
+Opt_FrameNode GetAttachedFrameNodeByIdImpl(Ark_UIContext peer,
+                                           const Ark_String* id)
 {
     return {};
 }
-Ark_Union_FrameNode_Undefined GetFrameNodeByUniqueIdImpl(Ark_UIContext peer,
-                                                         const Ark_Number* id)
+Opt_FrameNode GetFrameNodeByUniqueIdImpl(Ark_UIContext peer,
+                                         const Ark_Number* id)
 {
     return {};
 }
@@ -111,7 +111,7 @@ Ark_Number Px2lpxImpl(Ark_UIContext peer,
 {
     return {};
 }
-Ark_Union_Context_Undefined GetHostContextImpl(Ark_UIContext peer)
+Opt_Context GetHostContextImpl(Ark_UIContext peer)
 {
     return {};
 }
@@ -120,7 +120,7 @@ void SetDynamicDimmingImpl(Ark_UIContext peer,
                            const Ark_Number* value)
 {
 }
-Ark_Union_String_Undefined GetWindowNameImpl(Ark_UIContext peer)
+Opt_String GetWindowNameImpl(Ark_UIContext peer)
 {
     return {};
 }

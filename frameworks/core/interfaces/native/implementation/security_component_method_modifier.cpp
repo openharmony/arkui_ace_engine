@@ -103,7 +103,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     return {};
 }
 void IconSizeImpl(Ark_NativePointer node,
-                  const Opt_Length* value)
+                  const Opt_Dimension* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -144,7 +144,7 @@ void OffsetImpl(Ark_NativePointer node,
     CommonMethodModifier::OffsetImpl(node, value);
 }
 void FontSizeImpl(Ark_NativePointer node,
-                  const Opt_Length* value)
+                  const Opt_Dimension* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -212,7 +212,7 @@ void BorderStyleImpl(Ark_NativePointer node,
     SecurityComponentModelNG::SetBackgroundBorderStyle(frameNode, optValue);
 }
 void BorderWidthImpl(Ark_NativePointer node,
-                     const Opt_Length* value)
+                     const Opt_Dimension* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -229,7 +229,7 @@ void BorderColorImpl(Ark_NativePointer node,
     SecurityComponentModelNG::SetBackgroundBorderColor(frameNode, color);
 }
 void BorderRadius0Impl(Ark_NativePointer node,
-                       const Opt_Length* value)
+                       const Opt_Dimension* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -260,7 +260,7 @@ void PaddingImpl(Ark_NativePointer node,
     }
 }
 void TextIconSpaceImpl(Ark_NativePointer node,
-                       const Opt_Length* value)
+                       const Opt_Dimension* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
