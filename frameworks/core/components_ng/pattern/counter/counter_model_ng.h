@@ -34,6 +34,7 @@ public:
     void SetBackgroundColor(const Color& value) override;
     void SetEnableDec(bool enableDec) override;
     void SetEnableInc(bool enableInc) override;
+    void CreateWithResourceObj(JsCounterResourceType resourceType, const RefPtr<ResourceObject>& resObj) override;
     static void SetEnableDec(FrameNode* frameNode, bool enableDec);
     static void SetEnableInc(FrameNode* frameNode, bool enableInc);
     static void SetHeight(FrameNode* frameNode, const Dimension& value);
