@@ -52,5 +52,5 @@ DeviceType InitDeviceType()
     return realDeviceType;
 }
 } // namespace
-DeviceType DeviceConfig::realDeviceType = InitDeviceType();
+const DeviceType DeviceConfig::realDeviceType = InitDeviceType();
 } // namespace OHOS::Ace
