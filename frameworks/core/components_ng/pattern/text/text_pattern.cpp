@@ -740,18 +740,22 @@ std::list<RefPtr<SpanItem>> TextPattern::GetSpanSelectedContent()
                 std::clamp((min - tag), 0, static_cast<int32_t>(wideString.length())),
                 std::clamp((max - min), 0, static_cast<int32_t>(wideString.length())),
                 wideString, false, false);
+            auto spanItem = MakeRefPtr<SpanItem>();
+            NG::FontStyle fontStyle;
+            NG::TextLineStyle textLineStyle;
+            GetSpanItemAttributeUseForHtml(fontStyle, textLineStyle, item->GetTextStyle());
+            spanItem->fontStyle = std::make_unique<FontStyle>(fontStyle);
+            spanItem->textLineStyle = std::make_unique<TextLineStyle>(textLineStyle);
+            spanItem->content = spanSelectedContent;
+            spanItem->spanItemType = item->spanItemType;
+            spans.emplace_back(spanItem);
         } else if (item->position - 1 >= selectStart && item->position != -1) {
             spanSelectedContent = u" ";
+            auto spanItem = item->GetSameStyleSpanItem(true);
+            spanItem->content = spanSelectedContent;
+            spanItem->spanItemType = item->spanItemType;
+            spans.emplace_back(spanItem);
         }
-        auto spanItem = MakeRefPtr<SpanItem>();
-        NG::FontStyle fontStyle;
-        NG::TextLineStyle textLineStyle;
-        GetSpanItemAttributeUseForHtml(fontStyle, textLineStyle, item->GetTextStyle());
-        spanItem->fontStyle = std::make_unique<FontStyle>(fontStyle);
-        spanItem->textLineStyle = std::make_unique<TextLineStyle>(textLineStyle);
-        spanItem->content = spanSelectedContent;
-        spanItem->spanItemType = item->spanItemType;
-        spans.emplace_back(spanItem);
         tag = item->position == -1 ? tag + 1 : item->position;
         if (item->position >= selectEnd) {
             break;
