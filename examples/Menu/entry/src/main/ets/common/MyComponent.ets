@@ -12,29 +12,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-@Entry
+
 @Component
-struct MenuItemDemo {
+export struct MyComponent {
+  title: string = 'test'
+  func: () => void = () => {
+  }
+
+  @Styles
+  pressedStyle(){
+    .backgroundColor(0x238E23)
+  }
+
+  @Styles
+  normalStyles() {
+    .backgroundColor(0x0000ff)
+  }
+
   build() {
-    Column() {
-      Text('click for Menu')
-        .bindMenu([
-          {
-            value: 'Menu1',
-            action: () => {
-              console.info('handle Menu1 select')
-            }
-          },
-          {
-            value: 'Menu2',
-            action: () => {
-              console.info('handle Menu2 select')
-            }
-          },
-        ])
-    }
-    .width('100%')
-    .margin({ top: 5 })
+    Text(this.title)
+      .key(this.title)
+      .fontSize(10)
+      .backgroundColor(0x0000ff)
+      .fontColor(0xffffff)
+      .padding(5)
+      .onClick(this.func)
+      .stateStyles({ pressed: this.pressedStyle, normal: this.normalStyles })
   }
 }
