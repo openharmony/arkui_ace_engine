@@ -22,6 +22,7 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_undo_manager.h"
 #include "core/components_ng/pattern/text/span/tlv_util.h"
 
 using namespace testing;
@@ -914,6 +915,8 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragDropStyledString002, TestSize.Level1)
     OHOS::Ace::UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
     event->SetData(unifiedData);
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->undoManager_ =
+        std::make_unique<StyledStringUndoManager>(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->HandleOnDragDropStyledString(event);
     EXPECT_NE(event->GetData(), nullptr);
     auto host = richEditorPattern->GetHost();
@@ -1024,6 +1027,8 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragDropStyledString005, TestSize.Level1)
     OHOS::Ace::UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
     event->SetData(unifiedData);
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->undoManager_ =
+        std::make_unique<StyledStringUndoManager>(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->HandleOnDragDropStyledString(event);
     auto host = richEditorPattern->GetContentHost();
     EXPECT_TRUE(host->isRestoreInfoUsed_);
@@ -1060,6 +1065,8 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragDropStyledString006, TestSize.Level1)
     OHOS::Ace::UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
     event->SetData(unifiedData);
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->undoManager_ =
+        std::make_unique<StyledStringUndoManager>(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->HandleOnDragDropStyledString(event);
     EXPECT_NE(event->GetData(), nullptr);
     auto host = richEditorPattern->GetHost();

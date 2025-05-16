@@ -261,6 +261,11 @@ struct SymbolSpanOptions : SpanOptionBase {
     }
 };
 
+struct BuilderSpanOptions : SpanOptionBase {
+    std::optional<int32_t> offset;
+    RefPtr<NG::UINode> customNode;
+};
+
 struct PlaceholderOptions {
     std::optional<std::u16string> value;
     std::optional<FontWeight> fontWeight;
