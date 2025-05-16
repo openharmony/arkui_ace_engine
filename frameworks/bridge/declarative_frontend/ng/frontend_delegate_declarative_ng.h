@@ -53,6 +53,9 @@ public:
         const std::string& profile, bool isNamedRouter = false);
     void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content,
         const std::string& params, const std::string& profile);
+    void RunIntentPage();
+    void SetRouterIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
+        const std::function<void()>&& loadPageCallback);
     void OnConfigurationUpdated(const std::string& data);
     bool OnStartContinuation();
     void OnCompleteContinuation(int32_t code);

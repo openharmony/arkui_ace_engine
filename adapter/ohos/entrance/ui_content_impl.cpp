@@ -978,6 +978,16 @@ UIContentErrorCode UIContentImpl::InitializeInner(
         errorCode = CommonInitializeForm(window, contentInfo, storage);
         CHECK_ERROR_CODE_RETURN(errorCode);
     }
+    if (!intentInfoSerialized_.empty()) {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        if (container) {
+            TAG_LOGI(AceLogTag::ACE_ROUTER, "intentInfo exist, will distribute intentInfo");
+            ContainerScope scope(instanceId_);
+            container->DistributeIntentInfo(intentInfoSerialized_, true, std::move(loadPageCallback_));
+            intentInfoSerialized_ = "";
+            loadPageCallback_ = nullptr;
+        }
+    }
     LOGI("[%{public}s][%{public}s][%{public}d]: Initialize: %{public}s", bundleName_.c_str(),
         moduleName_.c_str(), instanceId_, startUrl_.c_str());
     // run page.
@@ -5332,5 +5342,20 @@ void UIContentImpl::ConvertDecorButtonStyle(const Rosen::DecorButtonStyle& butto
     decorButtonStyle.closeButtonRightMargin = buttonStyle.closeButtonRightMargin;
     decorButtonStyle.colorMode = buttonStyle.colorMode;
     decorButtonStyle.spacingBetweenButtons = buttonStyle.spacingBetweenButtons;
+}
+
+void UIContentImpl::SetIntentParam(const std::string& intentInfoSerialized,
+    const std::function<void()>&& loadPageCallback, bool isColdStart)
+{
+    if (!isColdStart) {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        ContainerScope scope(instanceId_);
+        container->DistributeIntentInfo(intentInfoSerialized, false, std::move(loadPageCallback));
+        container->RunIntentPage();
+        return;
+    }
+    intentInfoSerialized_ = intentInfoSerialized;
+    loadPageCallback_ = std::move(loadPageCallback);
 }
 } // namespace OHOS::Ace

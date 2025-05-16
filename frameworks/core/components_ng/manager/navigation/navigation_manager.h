@@ -28,15 +28,35 @@
 namespace OHOS::Ace::NG {
 class NavigationStack;
 struct NavigationInfo {
-    std::string navigationId;
+    int32_t nodeId;
+    std::string navigationId; // inspectorId
     WeakPtr<NavigationStack> pathStack;
+    WeakPtr<FrameNode> navigationNode;
 
     NavigationInfo() = default;
     NavigationInfo(const std::string& id, const WeakPtr<NavigationStack>& navigationStack)
         : navigationId(std::move(id)), pathStack(navigationStack)
     {}
+    NavigationInfo(int32_t nodeId, const std::string& navigationId, WeakPtr<FrameNode> navigationNode)
+        : nodeId(nodeId), navigationId(std::move(navigationId)), navigationNode(navigationNode)
+    {}
 };
 
+struct NavigationIntentInfo {
+    std::string navigationInspectorId;
+    std::string navDestinationName;
+    std::string param;
+    bool isColdStart;
+
+    std::string ToString()
+    {
+        return "-------- Navigation info below --------\n"
+               "navigationId:   " + navigationInspectorId + "\n"
+               "navDestName:    " + navDestinationName + "\n"
+               "isColdStart:    " + (isColdStart? "yes" : "no") + "\n"
+               "---------------------------------------\n";
+    }
+};
 struct NavdestinationRecoveryInfo {
     std::string name;
     std::string param;
@@ -156,9 +176,9 @@ public:
     void StorageNavigationRecoveryInfo(std::unique_ptr<JsonValue> allNavigationInfo);
     const std::vector<NavdestinationRecoveryInfo> GetNavigationRecoveryInfo(std::string navigationId);
 
-    void AddNavigation(int32_t pageId, int32_t navigationId);
+    void AddNavigation(int32_t parentNodeId, const RefPtr<FrameNode>& navigationNode);
 
-    void RemoveNavigation(int32_t pageId);
+    void RemoveNavigation(int32_t navigationNodeId);
 
     std::vector<int32_t> FindNavigationInTargetParent(int32_t targetId);
 
@@ -174,7 +194,19 @@ public:
     void AddBeforeOrientationChangeTask(const std::function<void()>&& task);
     void ClearBeforeOrientationChangeTask();
     void OnOrientationChanged();
+    // for intent framework
+    bool FireNavigationIntentActively(int32_t pageId, bool needTransition);
+    void SetNavigationIntentInfo(const std::string& intentInfoSerialized, bool isColdStart);
 
+    std::optional<NavigationIntentInfo> GetNavigationIntentInfo() const
+    {
+        return navigationIntentInfo_;
+    }
+
+    void ResetNavigationIntentInfo()
+    {
+        navigationIntentInfo_.reset();
+    }
 private:
     struct DumpMapKey {
         int32_t nodeId;
@@ -191,12 +223,14 @@ private:
     };
 
     bool IsOverlayValid(const RefPtr<UINode>& frameNode);
-
     bool IsCustomDialogValid(const RefPtr<UINode>& node);
+    std::string GetJsonIntentInfo(std::unique_ptr<JsonValue> intentJson);
+    NavigationIntentInfo ParseNavigationIntentInfo(const std::string& intentInfoSerialized);
 
     std::unordered_map<std::string, WeakPtr<AceType>> recoverableNavigationMap_;
     std::unordered_map<std::string, std::vector<NavdestinationRecoveryInfo>> navigationRecoveryInfo_;
-    std::unordered_map<int32_t, std::vector<int32_t>> navigationMaps_;
+    // record all the navigation in current UI-Context. The key is the page/model id where the navigation is located.
+    std::unordered_map<int32_t, std::vector<NavigationInfo>> navigationMap_;
     std::map<DumpMapKey, DumpCallback> dumpMap_;
     std::vector<std::function<void()>> updateCallbacks_;
     bool isInteractive_ = false;
@@ -214,6 +248,7 @@ private:
 
     WeakPtr<PipelineContext> pipeline_;
     std::vector<std::function<void()>> beforeOrientationChangeTasks_;
+    std::optional<NavigationIntentInfo> navigationIntentInfo_ = std::nullopt;
 };
 } // namespace OHOS::Ace::NG
 

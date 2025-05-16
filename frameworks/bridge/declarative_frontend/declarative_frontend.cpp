@@ -562,6 +562,14 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             }
             return jsEngine->UpdateRootComponent();
         };
+        auto generateIntentPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+            const std::string& bundleName, const std::string& moduleName, const std::string& pagePath) {
+                auto jsEngine = weakEngine.Upgrade();
+                if (!jsEngine) {
+                    return false;
+                }
+                return jsEngine->GeneratePageByIntent(bundleName, moduleName, pagePath);
+        };
         auto getFullPathInfoCallback =
             [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() -> std::unique_ptr<JsonValue> {
             auto jsEngine = weakEngine.Upgrade();
@@ -617,6 +625,7 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         pageRouterManager->SetLoadJsByBufferCallback(std::move(loadPageByBufferCallback));
         pageRouterManager->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
         pageRouterManager->SetUpdateRootComponentCallback(std::move(updateRootComponentCallback));
+        pageRouterManager->SetGenerateIntentPageCallback(std::move(generateIntentPageCallback));
         pageRouterManager->SetGetFullPathInfoCallback(std::move(getFullPathInfoCallback));
         pageRouterManager->SetRestoreFullPathInfoCallback(std::move(restoreFullPathInfoCallback));
         pageRouterManager->SetGetNamedRouterInfoCallback(std::move(getNamedRouterInfoCallback));
@@ -723,6 +732,25 @@ UIContentErrorCode DeclarativeFrontend::RunPageByNamedRouter(const std::string& 
         return delegate_->RunPage(name, params, pageProfile_, true);
     }
 
+    return UIContentErrorCode::NULL_POINTER;
+}
+
+UIContentErrorCode DeclarativeFrontend::RunIntentPage()
+{
+    if (delegate_) {
+        delegate_->RunIntentPage();
+        return UIContentErrorCode::NO_ERRORS;
+    }
+    return UIContentErrorCode::NULL_POINTER;
+}
+
+UIContentErrorCode DeclarativeFrontend::SetRouterIntentInfo(const std::string& intentInfoSerialized,
+    bool isColdStart, const std::function<void()>&& loadPageCallback)
+{
+    if (delegate_) {
+        delegate_->SetRouterIntentInfo(intentInfoSerialized, isColdStart, std::move(loadPageCallback));
+        return UIContentErrorCode::NO_ERRORS;
+    }
     return UIContentErrorCode::NULL_POINTER;
 }
 

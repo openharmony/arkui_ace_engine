@@ -1452,7 +1452,7 @@ bool NavigationGroupNode::CheckNeedUpdateParentNode(const RefPtr<UINode>& curNod
     auto navigationManager = pipelineContext->GetNavigationManager();
     CHECK_NULL_RETURN(navigationManager, true);
     // update navigation manager map <parentId, std::vector<navigationId>>
-    navigationManager->AddNavigation(parentNode->GetId(), GetId());
+    navigationManager->AddNavigation(parentNode->GetId(), DynamicCast<FrameNode>(Claim(this)));
     return true;
 }
 

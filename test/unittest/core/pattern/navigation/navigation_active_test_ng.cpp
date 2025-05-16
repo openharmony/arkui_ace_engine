@@ -144,7 +144,7 @@ HWTEST_F(NavigationActiveTestNg, NavigationTransitionLifecycle001, TestSize.Leve
      * @tc.steps: step2. create navdestiantion and setActive callback
      */
     auto navDestinationNode = CreateAndSetLifecycle("pageA");
-    navigationManager->AddNavigation(pageNode->GetId(), navigationNode->GetId());
+    navigationManager->AddNavigation(pageNode->GetId(), navigationNode);
     mockNavPathStack->Add("pageA", navDestinationNode);
     navigationNode->MarkModifyDone();
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
@@ -198,7 +198,7 @@ HWTEST_F(NavigationActiveTestNg, NavigationTransitionLifecycle002, TestSize.Leve
      * @tc.steps: step2. create navdestiantion and setActive callback
      */
     auto navDestinationNode = CreateAndSetLifecycle("pageA");
-    navigationManager->AddNavigation(pageNode->GetId(), navigationNode->GetId());
+    navigationManager->AddNavigation(pageNode->GetId(), navigationNode);
     mockNavPathStack->Add("pageA", navDestinationNode);
     navigationNode->MarkModifyDone();
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
@@ -250,7 +250,7 @@ HWTEST_F(NavigationActiveTestNg, NavigationTransitionLifecycle003, TestSize.Leve
      * @tc.steps: step2. create navdestiantion and setActive callback
      */
     auto navDestinationNode = CreateAndSetLifecycle("pageA");
-    navigationManager->AddNavigation(pageNode->GetId(), navigationNode->GetId());
+    navigationManager->AddNavigation(pageNode->GetId(), navigationNode);
     mockNavPathStack->Add("pageA", navDestinationNode);
     navigationNode->MarkModifyDone();
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
@@ -308,7 +308,7 @@ HWTEST_F(NavigationActiveTestNg, NavigationTransitionLifecycle004, TestSize.Leve
      * @tc.steps: step2. create navdestiantion and setActive callback
      */
     auto navDestinationNode = CreateAndSetLifecycle("pageA");
-    navigationManager->AddNavigation(pageNode->GetId(), navigationNode->GetId());
+    navigationManager->AddNavigation(pageNode->GetId(), navigationNode);
     mockNavPathStack->Add("pageA", navDestinationNode);
     navigationNode->MarkModifyDone();
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();

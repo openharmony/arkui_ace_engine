@@ -235,6 +235,29 @@ void FrontendDelegateDeclarative::RunPage(
         TaskExecutor::TaskType::JS, "ArkUIRunPageContent");
 }
 
+void FrontendDelegateDeclarative::RunIntentPage()
+{
+    taskExecutor_->PostTask(
+        [delegate = Claim(this), weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_)]() {
+            auto pageRouterManager = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pageRouterManager);
+            pageRouterManager->RunIntentPage();
+        },
+        TaskExecutor::TaskType::JS, "ArkUIRunIntentPage");
+}
+
+void FrontendDelegateDeclarative::SetRouterIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
+    const std::function<void()>&& loadPageCallback)
+{
+    taskExecutor_->PostTask([weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_),
+        intentInfoSerialized, isColdStart, callback = std::move(loadPageCallback)]() {
+            auto pageRouterManager = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pageRouterManager);
+            pageRouterManager->SetRouterIntentInfo(intentInfoSerialized, isColdStart, std::move(callback));
+        },
+        TaskExecutor::TaskType::JS, "ArkUISetRouterIntentInfo");
+}
+
 void FrontendDelegateDeclarative::ChangeLocale(const std::string& language, const std::string& countryOrRegion)
 {
     taskExecutor_->PostTask(

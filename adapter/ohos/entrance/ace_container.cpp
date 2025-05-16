@@ -4506,4 +4506,26 @@ void AceContainer::UnsubscribeHighContrastChange()
     highContrastObserver_ = nullptr;
 }
 #endif
+
+void AceContainer::DistributeIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
+    const std::function<void()>&& loadPageCallback)
+{
+    // set router intent info
+    auto front = GetFrontend();
+    CHECK_NULL_VOID(front);
+    front->SetRouterIntentInfo(intentInfoSerialized, isColdStart, std::move(loadPageCallback));
+    // set navigation intent info
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(context);
+    auto navigationManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navigationManager);
+    navigationManager->SetNavigationIntentInfo(intentInfoSerialized, isColdStart);
+}
+
+UIContentErrorCode AceContainer::RunIntentPage()
+{
+    auto front = GetFrontend();
+    CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
+    return front->RunIntentPage();
+}
 } // namespace OHOS::Ace::Platform

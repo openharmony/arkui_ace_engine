@@ -129,6 +129,7 @@ public:
     uint64_t GetNavDestinationIdInt(int32_t index) override;
     bool GetIsForceSet(int32_t index) override;
     void ResetIsForceSetFlag(int32_t index) override;
+    void PushIntentNavDestination(const std::string& name, const std::string& params, bool needTransition) override;
 
 protected:
     JSRef<JSObject> dataSourceObj_;

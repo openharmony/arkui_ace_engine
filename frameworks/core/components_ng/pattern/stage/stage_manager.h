@@ -39,7 +39,8 @@ public:
     ~StageManager() override = default;
 
     // PushUrl and ReplaceUrl both use PushPage function
-    virtual bool PushPage(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
+    virtual bool PushPage(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true,
+        const std::function<bool()>&& pushIntentPageCallback = nullptr);
     virtual bool InsertPage(const RefPtr<FrameNode>& node, bool bellowTopOrBottom);
     virtual bool PopPage(const RefPtr<FrameNode>& inPageNode, bool needShowNext = true, bool needTransition = true);
     virtual bool PopPageToIndex(int32_t index, bool needShowNext = true, bool needTransition = true);

@@ -496,6 +496,7 @@ public:
     bool IsPageLevelConfigEnabled(bool considerSize = true);
     void OnStartOneTransitionAnimation();
     void OnFinishOneTransitionAnimation();
+    bool HandleIntent(bool needTransition);
 
 private:
     void FireOnNewParam(const RefPtr<UINode>& uiNode);

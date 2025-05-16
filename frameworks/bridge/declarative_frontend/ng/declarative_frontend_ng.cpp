@@ -258,10 +258,20 @@ void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskE
         return jsEngine->UpdateRootComponent();
     };
 
+    auto generateIntentPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+        const std::string& bundleName, const std::string& moduleName, const std::string& pagePath) {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return false;
+            }
+            return jsEngine->GeneratePageByIntent(bundleName, moduleName, pagePath);
+    };
+
     pageRouterManager->SetLoadJsCallback(std::move(loadPageCallback));
     pageRouterManager->SetLoadJsByBufferCallback(std::move(loadPageByBufferCallback));
     pageRouterManager->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
     pageRouterManager->SetUpdateRootComponentCallback(std::move(updateRootComponentCallback));
+    pageRouterManager->SetGenerateIntentPageCallback(std::move(generateIntentPageCallback));
 
     delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarativeNG>(taskExecutor);
     delegate_->SetMediaQueryCallback(std::move(mediaQueryCallback));
@@ -456,6 +466,25 @@ UIContentErrorCode DeclarativeFrontendNG::RunPageByNamedRouter(const std::string
 {
     if (delegate_) {
         delegate_->RunPage(name, params, pageProfile_, true);
+        return UIContentErrorCode::NO_ERRORS;
+    }
+    return UIContentErrorCode::NULL_POINTER;
+}
+
+UIContentErrorCode DeclarativeFrontendNG::RunIntentPage()
+{
+    if (delegate_) {
+        delegate_->RunIntentPage();
+        return UIContentErrorCode::NO_ERRORS;
+    }
+    return UIContentErrorCode::NULL_POINTER;
+}
+
+UIContentErrorCode DeclarativeFrontendNG::SetRouterIntentInfo(const std::string& intentInfoSerialized,
+    bool isColdStart, const std::function<void()>&& loadPageCallback)
+{
+    if (delegate_) {
+        delegate_->SetRouterIntentInfo(intentInfoSerialized, isColdStart, std::move(loadPageCallback));
         return UIContentErrorCode::NO_ERRORS;
     }
     return UIContentErrorCode::NULL_POINTER;

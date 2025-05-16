@@ -226,6 +226,29 @@ void FrontendDelegateDeclarativeNG::RunPage(
         TaskExecutor::TaskType::JS, "ArkUIRunPageContent");
 }
 
+void FrontendDelegateDeclarativeNG::RunIntentPage()
+{
+    taskExecutor_->PostTask(
+        [delegate = Claim(this), weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_)]() {
+            auto pageRouterManager = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pageRouterManager);
+            pageRouterManager->RunIntentPage();
+        },
+        TaskExecutor::TaskType::JS, "ArkUIRunIntentPage");
+}
+
+void FrontendDelegateDeclarativeNG::SetRouterIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
+    const std::function<void()>&& loadPageCallback)
+{
+    taskExecutor_->PostTask([weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_),
+        intentInfoSerialized, isColdStart, callback = std::move(loadPageCallback)]() {
+            auto pageRouterManager = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pageRouterManager);
+            pageRouterManager->SetRouterIntentInfo(intentInfoSerialized, isColdStart, std::move(callback));
+        },
+        TaskExecutor::TaskType::JS, "ArkUISetRouterIntentInfo");
+}
+
 void FrontendDelegateDeclarativeNG::OnConfigurationUpdated(const std::string& data)
 {
     // only support mediaQueryUpdate
