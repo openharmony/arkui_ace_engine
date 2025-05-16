@@ -315,6 +315,10 @@ bool JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINod
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
     auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "create node failed, pathInfo is null");
+        return false;
+    }
     auto name = pathInfo->GetPropertyValue<std::string>("name", "");
     auto param = pathInfo->GetProperty("param");
     RefPtr<NG::UINode> targetNode;
