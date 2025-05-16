@@ -971,7 +971,7 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
     }
     auto dragPoint =
         PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
-    if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::ARC_DOT) == SwiperIndicatorType::ARC_DOT) {
+    if (swiperIndicatorType_ == SwiperIndicatorType::ARC_DOT) {
         auto center = GetCenterPointF();
         float startAngle = GetAngleWithPoint(center, dragStartPoint_);
         float endAngle = GetEndAngle(center, dragPoint, startAngle);

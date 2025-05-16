@@ -1541,7 +1541,7 @@ void ArcSwiperPattern::HandleCrownActionUpdate(double degree, double mainDelta,
     }
     if (isChanged_ && oldCurrentIndex_ == currentIndex_ &&
         !(degree > 0 && currentIndex_ == 0) &&
-        !(degree < 0 && currentIndex_ == TotalCount() - 1)) {
+        !(degree < 0 && currentIndex_ + 1 == TotalCount())) {
         return;
     }
     isChanged_ = false;
