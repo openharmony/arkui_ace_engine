@@ -122,6 +122,7 @@ static std::vector<std::tuple<std::string, Array_Number, std::string>> setDataPa
 
 // Valid values for attribute 'max' of method 'setDataPanelOptions'
 static std::vector<std::tuple<std::string, Opt_Number, std::string>> setDataPanelOptionsMaxValidValues = {
+    {"100.000000", Converter::ArkValue<Opt_Number>(100), "100.000000"},
     {"1.000000", Converter::ArkValue<Opt_Number>(1), "1.000000"},
     {"2.000000", Converter::ArkValue<Opt_Number>(2.0f), "2.000000"},
 };
