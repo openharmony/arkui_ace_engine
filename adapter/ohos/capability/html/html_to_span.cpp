@@ -78,6 +78,18 @@ FontStyle StringToFontStyle(const std::string& fontStyle)
     return fontStyle == "italic" ? FontStyle::ITALIC : FontStyle::NORMAL;
 }
 
+SuperscriptStyle StringToSuperscriptStyle(const std::string& superscriptStyle)
+{
+    if (superscriptStyle == "superscript") {
+        return SuperscriptStyle::SUPERSCRIPT;
+    } else if (superscriptStyle == "subscript") {
+        return SuperscriptStyle::SUBSCRIPT;
+    } else if (superscriptStyle == "normal") {
+        return SuperscriptStyle::NORMAL;
+    }
+    return SuperscriptStyle::NONE;
+}
+
 TextDecorationStyle StringToTextDecorationStyle(const std::string& textDecorationStyle)
 {
     std::string value = StringUtils::TrimStr(textDecorationStyle);
@@ -261,13 +273,15 @@ void HtmlToSpan::InitFont(
         font->strokeWidth = FromString(value);
     } else if (key == "stroke-color") {
         font->strokeColor = ToSpanColor(value);
-    }
+    } else if (key == "font-superscript") {
+        font->superscript = StringToSuperscriptStyle(value);
+    } 
 }
 
 bool HtmlToSpan::IsFontAttr(const std::string& key)
 {
     if (key == "font-size" || key == "font-weight" || key == "font-style" || key == "font-family" ||
-        key == "color" || key == "stroke-width" || key == "stroke-color") {
+        key == "color" || key == "stroke-width" || key == "stroke-color" || key == "font-superscript") {
         return true;
     }
     return false;
@@ -885,6 +899,10 @@ void HtmlToSpan::AddStyleSpan(const std::string& element, SpanInfo& info)
     std::map<std::string, StyleValue> styles;
     if (element == "strong") {
         InitFont("font-weight", "bold", "font", styles);
+    } else if (element == "sup") {
+        InitFont("font-superscript", "superscript", "font", styles);
+    } else if (element == "sub") {
+        InitFont("font-superscript", "subscript", "font", styles);
     }
 
     for (auto [key, value] : styles) {

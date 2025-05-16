@@ -3701,6 +3701,13 @@ let TextDeleteDirection;
     TextDeleteDirection[TextDeleteDirection.FORWARD = 1] = 'FORWARD';
 })(TextDeleteDirection || (TextDeleteDirection = {}));
 
+let SuperscriptStyle;
+(function (SuperscriptStyle) {
+  SuperscriptStyle[SuperscriptStyle.NORMAL = 0] = 'NORMAL';
+  SuperscriptStyle[SuperscriptStyle.SUPERSCRIPT = 1] = 'SUPERSCRIPT';
+  SuperscriptStyle[SuperscriptStyle.SUBSCRIPT = 2] = 'SUBSCRIPT';
+})(SuperscriptStyle || (SuperscriptStyle = {}));
+
 let GestureRecognizerState;
 (function (GestureRecognizerState) {
   GestureRecognizerState[GestureRecognizerState.READY = 0] = 'READY';

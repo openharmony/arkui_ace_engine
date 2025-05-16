@@ -108,6 +108,18 @@ std::string SpanToHtml::StrokeColorToHtml(const std::optional<Color>& value)
     return ToHtmlStyleFormat("stroke-color", color);
 }
 
+std::string SpanToHtml::FontSuperscriptToHtml(const std::optional<SuperscriptStyle>& value)
+{
+    static const LinearEnumMapNode<SuperscriptStyle, std::string> table[] = {
+        { SuperscriptStyle::SUPERSCRIPT, "superscript" },
+        { SuperscriptStyle::SUBSCRIPT, "subscript" },
+        { SuperscriptStyle::NORMAL, "normal" },
+    };
+
+    auto index = BinarySearchFindIndex(table, ArraySize(table), value.value_or(SuperscriptStyle::NORMAL));
+    return ToHtmlStyleFormat("font-superscript", index < 0 ? "normal" : table[index].value);
+}
+
 std::string SpanToHtml::TextDecorationToHtml(const std::vector<TextDecoration>& decorations)
 {
     static const LinearEnumMapNode<TextDecoration, std::string> decorationTable[] = {
@@ -464,6 +476,7 @@ std::string SpanToHtml::NormalStyleToHtml(
     style += FontFamilyToHtml(fontStyle.GetFontFamily());
     style += StrokeWidthToHtml(fontStyle.GetStrokeWidth());
     style += StrokeColorToHtml(fontStyle.GetStrokeColor());
+    style += FontSuperscriptToHtml(fontStyle.GetSuperscript());
     style += DeclarationToHtml(fontStyle);
     style += ToHtml("vertical-align", textLineStyle.GetBaselineOffset());
     style += ToHtml("line-height", textLineStyle.GetLineHeight());
