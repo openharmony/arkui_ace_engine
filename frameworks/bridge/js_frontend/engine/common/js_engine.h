@@ -451,12 +451,17 @@ public:
     void ACE_EXPORT RegisterDrawChildrenInspectorCallback(
         const RefPtr<InspectorEvent>& drawChildrenEvent, const std::string& componentId)
     {
-        drawChildrenEvents_[componentId].emplace(drawChildrenEvent);
+        if (drawChildrenEvent) {
+            drawChildrenEvents_[componentId].emplace(drawChildrenEvent);
+        }
     }
 
     void ACE_EXPORT UnregisterDrawChildrenInspectorCallback(
         const RefPtr<InspectorEvent>& drawChildrenEvent, const std::string& componentId)
     {
+        if (!drawChildrenEvent) {
+            return;
+        }
         auto iter = drawChildrenEvents_.find(componentId);
         if (iter != drawChildrenEvents_.end()) {
             iter->second.erase(drawChildrenEvent);
@@ -484,10 +489,7 @@ public:
 
     bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) const
     {
-        if (drawChildrenEvents_.find(componentId) != drawChildrenEvents_.end()) {
-            return true;
-        }
-        return false;
+        return drawChildrenEvents_.find(componentId) != drawChildrenEvents_.end();
     }
 
     virtual void RunNativeEngineLoop();

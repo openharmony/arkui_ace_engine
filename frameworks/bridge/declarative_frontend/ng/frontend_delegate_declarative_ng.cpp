@@ -1090,17 +1090,19 @@ void FrontendDelegateDeclarativeNG::OnDrawChildrenCompleted(const std::string& c
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), componentId] {
             auto delegate = weak.Upgrade();
-            if (!delegate) {
-                return;
+            if (delegate && delegate->drawChildrenInspectorCallback_) {
+                delegate->drawChildrenInspectorCallback_(componentId);
             }
-            delegate->drawChildrenInspectorCallback_(componentId);
         },
         TaskExecutor::TaskType::JS, "ArkUIDrawChildrenCompleted");
 }
 
 bool FrontendDelegateDeclarativeNG::IsDrawChildrenCallbackFuncExist(const std::string& componentId)
 {
-    return isDrawChildrenCallbackFuncExistCallback_(componentId);
+    if (isDrawChildrenCallbackFuncExistCallback_) {
+        return isDrawChildrenCallbackFuncExistCallback_(componentId);
+    }
+    return false;
 }
 
 void FrontendDelegateDeclarativeNG::SetColorMode(ColorMode colorMode)
