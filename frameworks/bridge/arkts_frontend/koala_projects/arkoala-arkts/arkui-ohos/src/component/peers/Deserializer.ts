@@ -169,6 +169,7 @@ import { ImageFrameInfo } from "./../imageAnimator"
 import { MenuItemGroupOptions } from "./../menuItemGroup"
 import { MenuItemOptions } from "./../menuItem"
 import { TextBackgroundStyle } from "./../span"
+import { DividerStyle as DividerStyle_sidebar } from "./../sidebar"
 
 export class Deserializer extends DeserializerBase {
     constructor(data: KSerializerBuffer | KUint8ArrayPtr, length: int32) {
@@ -15083,6 +15084,50 @@ export class Deserializer extends DeserializerBase {
         let value : DividerStyle = ({strokeWidth: strokeWidth_result, color: color_result, startMargin: startMargin_result, endMargin: endMargin_result} as DividerStyle)
         return value
     }
+    readDividerStyleSidebar(): DividerStyle_sidebar {
+        let valueDeserializer : Deserializer = this
+        const strokeWidth_result : Length = (valueDeserializer.readLength() as Length)
+        const color_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let color_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (color_buf_runtimeType))
+        {
+            const color_buf__selector : int32 = valueDeserializer.readInt8()
+            let color_buf_ : Color | number | string | Resource | undefined
+            if (color_buf__selector == 0) {
+                color_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (color_buf__selector == 1) {
+                color_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (color_buf__selector == 2) {
+                color_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (color_buf__selector == 3) {
+                color_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for color_buf_ has to be chosen through deserialisation.")
+            }
+            color_buf = (color_buf_ as Color | number | string | Resource)
+        }
+        const color_result : ResourceColor | undefined = color_buf
+        const startMargin_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let startMargin_buf : Length | undefined
+        if ((RuntimeType.UNDEFINED) != (startMargin_buf_runtimeType))
+        {
+            startMargin_buf = (valueDeserializer.readLength() as Length)
+        }
+        const startMargin_result : Length | undefined = startMargin_buf
+        const endMargin_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let endMargin_buf : Length | undefined
+        if ((RuntimeType.UNDEFINED) != (endMargin_buf_runtimeType))
+        {
+            endMargin_buf = (valueDeserializer.readLength() as Length)
+        }
+        const endMargin_result : Length | undefined = endMargin_buf
+        let value : DividerStyle_sidebar = ({strokeWidth: strokeWidth_result, color: color_result, startMargin: startMargin_result, endMargin: endMargin_result} as DividerStyle_sidebar)
+        return value
+    }
     readDividerStyleOptions(): DividerStyleOptions {
         let valueDeserializer : Deserializer = this
         const strokeWidth_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -24025,28 +24070,28 @@ export class Deserializer extends DeserializerBase {
             paddingEnd_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
         }
         const paddingEnd_result : LengthMetrics | undefined = paddingEnd_buf
-        const mainTitleModifier_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let mainTitleModifier_buf : TextModifier | undefined
-        if ((RuntimeType.UNDEFINED) != (mainTitleModifier_buf_runtimeType))
-        {
-            mainTitleModifier_buf = valueDeserializer.readTextModifier()
-        }
-        const mainTitleModifier_result : TextModifier | undefined = mainTitleModifier_buf
-        const subTitleModifier_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let subTitleModifier_buf : TextModifier | undefined
-        if ((RuntimeType.UNDEFINED) != (subTitleModifier_buf_runtimeType))
-        {
-            subTitleModifier_buf = valueDeserializer.readTextModifier()
-        }
-        const subTitleModifier_result : TextModifier | undefined = subTitleModifier_buf
-        const enableHoverMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let enableHoverMode_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (enableHoverMode_buf_runtimeType))
-        {
-            enableHoverMode_buf = valueDeserializer.readBoolean()
-        }
-        const enableHoverMode_result : boolean | undefined = enableHoverMode_buf
-        let value : NavigationTitleOptions = ({backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, backgroundBlurStyleOptions: backgroundBlurStyleOptions_result, backgroundEffect: backgroundEffect_result, barStyle: barStyle_result, paddingStart: paddingStart_result, paddingEnd: paddingEnd_result, mainTitleModifier: mainTitleModifier_result, subTitleModifier: subTitleModifier_result, enableHoverMode: enableHoverMode_result} as NavigationTitleOptions)
+        // const mainTitleModifier_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        // let mainTitleModifier_buf : TextModifier | undefined
+        // if ((RuntimeType.UNDEFINED) != (mainTitleModifier_buf_runtimeType))
+        // {
+        //     mainTitleModifier_buf = valueDeserializer.readTextModifier()
+        // }
+        // const mainTitleModifier_result : TextModifier | undefined = mainTitleModifier_buf
+        // const subTitleModifier_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        // let subTitleModifier_buf : TextModifier | undefined
+        // if ((RuntimeType.UNDEFINED) != (subTitleModifier_buf_runtimeType))
+        // {
+        //     subTitleModifier_buf = valueDeserializer.readTextModifier()
+        // }
+        // const subTitleModifier_result : TextModifier | undefined = subTitleModifier_buf
+        // const enableHoverMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        // let enableHoverMode_buf : boolean | undefined
+        // if ((RuntimeType.UNDEFINED) != (enableHoverMode_buf_runtimeType))
+        // {
+        //     enableHoverMode_buf = valueDeserializer.readBoolean()
+        // }
+        // const enableHoverMode_result : boolean | undefined = enableHoverMode_buf
+        let value : NavigationTitleOptions = ({backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, backgroundBlurStyleOptions: backgroundBlurStyleOptions_result, backgroundEffect: backgroundEffect_result, barStyle: barStyle_result, paddingStart: paddingStart_result, paddingEnd: paddingEnd_result} as NavigationTitleOptions)
         return value
     }
     readOutlineOptions(): OutlineOptions {

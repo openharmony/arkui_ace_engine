@@ -333,6 +333,20 @@ void DisableAnimationImpl(Ark_NavPathStack peer,
 void SetInterceptionImpl(Ark_NavPathStack peer,
                          const Ark_NavigationInterception* interception)
 {
+    CHECK_NULL_VOID(peer);
+    auto pathStack = peer->GetNavPathStack();
+    CHECK_NULL_VOID(pathStack);
+    NavigationContext::InterceptionType result = new NavigationContext::Interception();
+    if (interception->modeChange.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        result->modeChange = CallbackHelper(interception->modeChange.value);
+    }
+    if (interception->willShow.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        result->willShow = CallbackHelper(interception->willShow.value);
+    }
+    if (interception->didShow.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        result->didShow = CallbackHelper(interception->didShow.value);
+    }
+    pathStack->NavigationContext::PathStack::SetInterception(result);
 }
 Array_NavPathInfo GetPathStackImpl(Ark_NavPathStack peer)
 {

@@ -51,7 +51,7 @@ export class NavExtender {
     }
     public static pushPath(pathStack: NavPathStack, info: NavPathInfo, options: NavigationOptions): void {
         const path_casted = pathStack as (NavPathStack)
-        const info_casted = info  as (NavPathInfo)
+        const info_casted = info as (NavPathInfo)
         const options_casted = options as (NavigationOptions)
         NavExtender.pushPath_serialize(path_casted, info_casted, options_casted)
     }
@@ -80,6 +80,18 @@ export class NavExtender {
         const pathStack_casted = pathStack as (NavPathStack)
         const name_casted = name as (string)
         return NavExtender.getIdByName_serialize(pathStack_casted, name_casted)
+    }
+    public static popToIndex(pathStack: NavPathStack, index: int32, animated: boolean): void {
+        const pathStack_casted = pathStack as (NavPathStack)
+        const index_casted = index as (int32)
+        const animated_cast = animated as boolean
+        NavExtender.popToIndex_serialize(pathStack_casted, index_casted, animated_cast)
+    }
+    public static popToName(pathStack: NavPathStack, name: string, animated: boolean): number {
+        const pathStack_casted = pathStack as (NavPathStack)
+        const name_casted = name as (string)
+        const animated_cast = animated as (boolean)
+        return NavExtender.popToName_serialize(pathStack_casted, name_casted, animated_cast)
     }
     private static setUpdateStackCallback_serialize(peer: NavPathStack, callback: NavExtender_OnUpdateStack): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -138,6 +150,15 @@ export class NavExtender {
         }
         const returnResult: Array<string> = buffer
         return returnResult
+    }
+    private static popToIndex_serialize(pathStack: NavPathStack, index: int32, animated: boolean): void
+    {
+        ArkUIGeneratedNativeModule._NavExtender_popToIndex(toPeerPtr(pathStack), index, animated ? 1 : 0)
+    }
+
+    private static popToName_serialize(pathStack: NavPathStack, name: string, animated: boolean): number
+    {
+        return ArkUIGeneratedNativeModule._NavExtender_popToName(toPeerPtr(pathStack), name, animated ? 1 : 0)
     }
 }
 export type NavExtender_OnUpdateStack = () => void;

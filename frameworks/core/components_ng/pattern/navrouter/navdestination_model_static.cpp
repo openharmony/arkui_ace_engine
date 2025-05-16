@@ -254,8 +254,16 @@ void NavDestinationModelStatic::CreateImageButton(const RefPtr<NavDestinationGro
 RefPtr<FrameNode> NavDestinationModelStatic::CreateFrameNode(int32_t nodeId)
 {
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId);
+    auto ctx = AceType::MakeRefPtr<NG::NavDestinationContext>();
+    auto navPathInfo = AceType::MakeRefPtr<NavPathInfo>();
+    ctx->SetNavPathInfo(navPathInfo);
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+        V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, [ctx]() {
+            auto pattern = AceType::MakeRefPtr<NavDestinationPattern>();
+            pattern->SetNavDestinationContext(ctx);
+            return pattern; 
+        });
+    ctx->SetUniqueId(navDestinationNode->GetId());
     if (!navDestinationNode->GetTitleBarNode()) {
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             CreateImageButton(navDestinationNode);
@@ -435,5 +443,68 @@ void NavDestinationModelStatic::SetIgnoreLayoutSafeArea(FrameNode* frameNode, co
     auto navdestinationLayoutProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navdestinationLayoutProperty);
     navdestinationLayoutProperty->UpdateIgnoreLayoutSafeArea(opts);
+}
+
+void NavDestinationModelStatic::SetToolbarConfiguration(FrameNode* frameNode, 
+    std::vector<NG::BarItem>&& toolBarItems)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navdestinationGroupNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(navdestinationGroupNode);
+    bool enabled = false;
+    auto hub = navdestinationGroupNode->GetEventHub<EventHub>();
+    if (hub) {
+        enabled = hub->IsEnabled();
+    }
+    FieldProperty fieldProperty;
+    fieldProperty.parentId = navdestinationGroupNode->GetInspectorId().value_or("");
+    fieldProperty.field = NG::DES_FIELD;
+    NavigationToolbarUtil::SetToolbarConfiguration(
+        navdestinationGroupNode, std::move(toolBarItems), enabled, fieldProperty);
+}
+
+void NavDestinationModelStatic::SetToolBarOptions(FrameNode* frameNode, NavigationToolbarOptions&& opt)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navdestinationGroupNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(navdestinationGroupNode);
+    NavigationToolbarUtil::SetToolbarOptions(navdestinationGroupNode, std::move(opt));
+}
+
+void NavDestinationModelStatic::SetToolbarMorebuttonOptions(FrameNode* frameNode, MoreButtonOptions&& opt)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navdestinationGroupNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(navdestinationGroupNode);
+    NavigationToolbarUtil::SetToolbarMoreButtonOptions(navdestinationGroupNode, std::move(opt));
+}
+
+void NavDestinationModelStatic::SetCustomMenu(FrameNode* frameNode, const RefPtr<UINode>& customNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    // if previous menu exists, remove it if their ids are not the same
+    // if previous node is not custom, their ids must not be the same
+    if (navDestinationGroupNode->GetMenu()) {
+        if (customNode->GetId() == navDestinationGroupNode->GetMenu()->GetId()) {
+            navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
+            return;
+        }
+        navDestinationGroupNode->SetMenu(customNode);
+        navDestinationGroupNode->UpdatePrevMenuIsCustom(true);
+        navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+        navDestinationGroupNode->MarkDirtyNode();
+        navDestinationGroupNode->MarkModifyDone();
+        return;
+    }
+    navDestinationGroupNode->SetMenu(customNode);
+    navDestinationGroupNode->UpdatePrevMenuIsCustom(true);
+    navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
+    navDestinationGroupNode->MarkDirtyNode();
+    navDestinationGroupNode->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG

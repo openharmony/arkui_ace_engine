@@ -127,7 +127,7 @@ bool PathStack::PushWithLaunchModeAndAnimated(PathInfo info, LaunchMode launchMo
     if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON) {
         MoveToTopInternal(it, animated);
     } else {
-        PopToInternal(it, nullptr, animated);
+        PopToInternal(it, animated);
     }
     return true;
 }
@@ -253,39 +253,38 @@ PathInfo PathStack::Pop(bool animated)
 
 void PathStack::PopTo(const std::string& name, const std::optional<bool>& animated)
 {
-    PopToName(name, nullptr, animated);
+    PopToName(name, animated);
 }
 
-int PathStack::PopToName(const std::string& name, const PopResultType& result, const std::optional<bool>& animated)
+int PathStack::PopToName(const std::string& name, const std::optional<bool>& animated)
 {
     auto it = FindNameInternal(name);
     if (it == pathArray_.end()) {
         return -1;
     }
     auto idx = std::distance(pathArray_.begin(), it);
-    PopToInternal(it, result, animated);
+    PopToInternal(it, animated);
     return idx;
 }
 
-void PathStack::PopToIndex(size_t index, const PopResultType& result, const std::optional<bool>& animated)
+void PathStack::PopToIndex(size_t index, const std::optional<bool>& animated)
 {
     auto it = std::next(pathArray_.begin(), index);
     if (it >= pathArray_.end()) {
         return;
     }
-    PopToInternal(it, result, animated);
+    PopToInternal(it, animated);
 }
 
 void PathStack::PopToInternal(std::vector<PathInfo>::iterator it,
-    const PopResultType& result, const std::optional<bool>& animated)
+    const std::optional<bool>& animated)
 {
     auto currentPathInfo = pathArray_.back();
     pathArray_.erase(std::next(it, 1), pathArray_.end());
     isReplace_ = NO_ANIM_NO_REPLACE;
 
-    if (result) {
-        PopInfo popInfo = {currentPathInfo, result};
-        currentPathInfo.InvokeOnPop(popInfo);
+    if (onPopCallback_) {
+        onPopCallback_(currentPathInfo.navDestinationId_.value_or(""));
     }
     animated_ = animated.value_or(DEFAULT_ANIMATED);
     InvokeOnStateChanged();
@@ -495,7 +494,7 @@ bool NavigationStack::IsEmpty()
 
 void NavigationStack::Pop()
 {
-    PathStack::Pop(true);
+    // PathStack::Pop(true);
 }
 
 void NavigationStack::Push(const std::string& name, const RefPtr<NG::RouteInfo>& routeInfo)
@@ -728,12 +727,36 @@ std::vector<std::string> NavigationStack::DumpStackInfo() const
 void NavigationStack::FireNavigationInterception(bool isBefore, const RefPtr<NG::NavDestinationContext>& from,
     const RefPtr<NG::NavDestinationContext>& to, NG::NavigationOperation operation, bool isAnimated)
 {
-    APP_LOGE("NavigationContext::NavigationStack::FireNavigationInterception - not implemented");
+    InterceptionType interception = PathStack::GetInterception();
+    CHECK_NULL_VOID(interception);
+    auto show = isBefore ? interception->willShow : interception->didShow;
+    if (show.IsValid()) {
+        Ark_Union_NavDestinationContext_NavBar tempfrom;
+        Ark_Union_NavDestinationContext_NavBar tempto;
+        auto preDestination = AceType::DynamicCast<NG::NavDestinationContext>(from);
+        if (!preDestination) {
+            tempfrom = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_String>("navbar");
+        } else {
+            tempfrom = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_NavDestinationContext>(from);
+        }
+        auto topDestination = AceType::DynamicCast<NG::NavDestinationContext>(to);
+        if (!topDestination) {
+            tempto = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_String>("navbar");
+        } else {
+            tempto = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_NavDestinationContext>(to);
+        }
+        show.Invoke(tempfrom, tempto, Converter::ArkValue<Ark_NavigationOperation>(operation), Converter::ArkValue<Ark_Boolean>(isAnimated));
+    }
 }
 
 void NavigationStack::FireNavigationModeChange(NG::NavigationMode mode)
 {
-    APP_LOGE("NavigationContext::NavigationStack::FireNavigationModeChange - not implemented");
+    InterceptionType interception = PathStack::GetInterception();
+    CHECK_NULL_VOID(interception);
+    auto modeChange = interception->modeChange;
+    if (modeChange.IsValid()) {
+        modeChange.Invoke(Converter::ArkValue<Ark_NavigationMode>(mode));
+    }
 }
 
 int32_t NavigationStack::LoadDestination(const std::string& name, const ParamType& param,

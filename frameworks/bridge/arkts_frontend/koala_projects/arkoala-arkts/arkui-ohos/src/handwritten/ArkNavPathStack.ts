@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {KPointer, toPeerPtr, runtimeType, RuntimeType, Finalizable} from '@koalaui/interop'
+import {KPointer, toPeerPtr, runtimeType, RuntimeType, Finalizable, InteropNativeModule} from '@koalaui/interop'
 import { int32 } from "@koalaui/common"
 import { LaunchMode, NavPathInfo, NavPathStack, NavigationOptions, PopInfo } from "../component/navigation"
 import { NavExtender } from "../component/navigationExtender"
@@ -23,10 +23,61 @@ export class PathStackUtils {
     static id: number = 0
     static result: object | undefined = undefined
     private static infoMaps: Map<string, NavPathInfo> = new Map<string, NavPathInfo>()
-    static addNavPathInfo(info: NavPathInfo): void {
+    private static infoArray: Array<NavPathInfo> = new Array<NavPathInfo>()
+    static addNavPathInfo(info: NavPathInfo, launchMode: LaunchMode, isReplace: boolean = false): void {
+        if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON) {
+            let index = PathStackUtils.infoArray.findIndex(element => element.name === info.name)
+            if (index != -1) {
+                PathStackUtils.infoArray[index] = info
+                let targetInfo = PathStackUtils.infoArray.splice(index, 1)
+                if (isReplace) {
+                    let popInfo = PathStackUtils.infoArray.pop()
+                    if (popInfo !== undefined && popInfo!.navDestinationId != undefined) {
+                        PathStackUtils.infoMaps.delete(popInfo?.navDestinationId!)
+                    }
+                }
+                PathStackUtils.infoArray.push(targetInfo[0])
+            }
+            return
+        } else if (launchMode === LaunchMode.POP_TO_SINGLETON) {
+            let index = PathStackUtils.infoArray.findIndex(element => element.name === info.name)
+            if (index != -1) {
+                PathStackUtils.infoArray[index] = info
+                if (isReplace) {
+                    let targetInfo = PathStackUtils.infoArray.splice(index, 1)
+                    let deletedInfos = PathStackUtils.infoArray.splice(index)
+                    deletedInfos.forEach((element) => {
+                        if (element.navDestinationId != undefined) {
+                            PathStackUtils.infoMaps.delete(element.navDestinationId!)
+                        }
+                    })
+                    PathStackUtils.infoArray.push(targetInfo[0])
+                } else {
+                    let deletedInfos = PathStackUtils.infoArray.splice(index + 1)
+                    deletedInfos.forEach((element) => {
+                        if (element.navDestinationId != undefined) {
+                            PathStackUtils.infoMaps.delete(element.navDestinationId!)
+                        }
+                    })
+                }
+            }
+            return
+        }
         const navDestinationId: string = "" + PathStackUtils.id
         info.navDestinationId = navDestinationId
+        if (isReplace) {
+            let popInfo = PathStackUtils.infoArray.pop()
+            if (popInfo !== undefined) {
+                let prenavDestinationId = popInfo.navDestinationId
+                if (prenavDestinationId !== undefined && PathStackUtils.infoMaps.has(prenavDestinationId)) {
+                    PathStackUtils.infoMaps.delete(prenavDestinationId!)
+                }
+            }
+        }
         PathStackUtils.infoMaps.set(navDestinationId, info)
+        PathStackUtils.infoArray.push(info)
+        PathStackUtils.id++;
+        info.updateNavPathInfo()
     }
     static getNavPathInfoById(navDestinationId: string): NavPathInfo | undefined {
         if (PathStackUtils.infoMaps.has(navDestinationId)) {
@@ -34,15 +85,68 @@ export class PathStackUtils {
         }
         return undefined
     }
+    static popPage(indexOrId?: number | string) {
+        try {
+            let id: string | undefined = ''
+            if (typeof indexOrId === 'string') {
+                id = indexOrId as string
+                let navId = indexOrId as string
+                let index = PathStackUtils.infoArray.findIndex(element => element.navDestinationId === navId)
+                if (index != -1) {
+                    PathStackUtils.infoArray.splice(index, 1)
+                }
+            } else if (typeof indexOrId === 'number') {
+                let inputIndex = indexOrId as number;
+                if (inputIndex < 0 || inputIndex >= PathStackUtils.infoArray.length) {
+                    inputIndex = PathStackUtils.infoArray.length - 1;
+                }
+                id = PathStackUtils.infoArray[inputIndex].navDestinationId;
+                PathStackUtils.infoArray.splice(inputIndex, 1);
+            } else {
+                indexOrId = PathStackUtils.infoArray.length - 1
+                id = PathStackUtils.infoArray[PathStackUtils.infoArray.length - 1].navDestinationId
+                PathStackUtils.infoArray.splice(PathStackUtils.infoArray.length - 1, 1)
+            }
+            if (typeof id === 'string') {
+                PathStackUtils.callOnPop(id!)
+            }
+        } catch (error) {
+            InteropNativeModule._NativeLog("AceNavigation::popPage error: " + error)
+        }
+        
+    }
+    static callOnPop(navDestinationId: string) {
+        try {
+            if (PathStackUtils.infoMaps.has(navDestinationId)) {
+                let info = PathStackUtils.infoMaps.get(navDestinationId)
+                if (info != undefined) {
+                    let callback = info!.onPop
+                    if (callback != undefined && info != undefined && PathStackUtils.result != undefined) {
+                        let popInfo: PopInfo = { info: info, result: PathStackUtils.result!}
+                        callback(popInfo)
+                    }
+                }
+                PathStackUtils.infoMaps.delete(navDestinationId)
+            }
+        } catch (error) {
+            InteropNativeModule._NativeLog("AceNavigation::callOnPop error:" + error)
+        }
+    }
     static pushPath(pathStack: NavPathStack, info: NavPathInfo, animated?: boolean | undefined | NavigationOptions | undefined): void {
         const animated_type = runtimeType(animated)
         let options: NavigationOptions = {animated: true, launchMode: LaunchMode.STANDARD}
         if (animated_type === RuntimeType.BOOLEAN) {
             options.animated = animated as boolean
         } else if (animated_type !== RuntimeType.UNDEFINED) {
-            options = animated as NavigationOptions
+            let userSetOptions = animated as NavigationOptions
+            if (runtimeType(userSetOptions.animated) !== RuntimeType.UNDEFINED) {
+                options.animated = userSetOptions.animated
+            }
+            if (runtimeType(userSetOptions.launchMode) !== RuntimeType.UNDEFINED) {
+                options.launchMode = userSetOptions.launchMode
+            }
         }
-        PathStackUtils.addNavPathInfo(info)
+        PathStackUtils.addNavPathInfo(info, options.launchMode!)
         NavExtender.pushPath(pathStack, info, options)
     }
 
@@ -60,13 +164,19 @@ export class PathStackUtils {
 
     static replacePath(pathStack: NavPathStack, info: NavPathInfo, animated?: boolean | undefined | NavigationOptions | undefined): void {
         const animated_type = runtimeType(animated)
-        PathStackUtils.addNavPathInfo(info)
         let options: NavigationOptions = {animated: true, launchMode: LaunchMode.STANDARD}
         if (animated_type === RuntimeType.BOOLEAN) {
             options.animated = animated as boolean
         } else if (animated_type !== RuntimeType.UNDEFINED) {
-            options = animated as NavigationOptions
+            let userSetOptions = animated as NavigationOptions
+            if (runtimeType(userSetOptions.animated) != RuntimeType.UNDEFINED) {
+                options.animated = userSetOptions.animated
+            }
+            if (runtimeType(userSetOptions.launchMode) != RuntimeType.UNDEFINED) {
+                options.launchMode = userSetOptions.launchMode
+            }
         }
+        PathStackUtils.addNavPathInfo(info, options.launchMode!, true)
         NavExtender.replacePath(pathStack, info, options)
     }
 
@@ -86,11 +196,13 @@ export class PathStackUtils {
         if (RuntimeType.BOOLEAN == result_type) {
             animated_value = result as (boolean)
         }
-        if (animated_type !== RuntimeType.BOOLEAN) {
+        if (animated_type === RuntimeType.BOOLEAN) {
             animated_value = animated!
         }
         const retval  = NavExtender.pop(pathStack, animated_value)
-        return PathStackUtils.getNavPathInfoById(retval)
+        const pathInfo = PathStackUtils.getNavPathInfoById(retval)
+        PathStackUtils.popPage(retval)
+        return pathInfo
     }
     static getParamByIndex(pathStack: NavPathStack, index: number): Object | undefined {
         const navDestinationId: string = NavExtender.getIdByIndex(pathStack, index as (int32));
@@ -111,5 +223,37 @@ export class PathStackUtils {
             }
         }
         return result
+    }
+    static popToIndex(pathStack: NavPathStack, index: number, result?: boolean | undefined | Object, animated?: boolean) {
+        const result_type = runtimeType(result)
+        if (result_type == RuntimeType.OBJECT) {
+            PathStackUtils.result = result as Object
+        }
+        let animated_value: boolean = true
+        if (RuntimeType.BOOLEAN === result_type) {
+            animated_value = result as boolean
+        }
+        if (RuntimeType.BOOLEAN === runtimeType(animated)) {
+            animated_value = animated as boolean
+        }
+        const index_casted = index as int32
+        PathStackUtils.popPage(index_casted)
+        NavExtender.popToIndex(pathStack, index_casted, animated_value)
+    }
+    static popToName(pathStack: NavPathStack, name: string, result?: boolean | undefined | Object, animated?: boolean): number {
+        const result_type = runtimeType(result)
+        if (result_type == RuntimeType.OBJECT) {
+            PathStackUtils.result = result as Object
+        }
+        let animated_value: boolean = true
+        if (result_type === RuntimeType.BOOLEAN) {
+            animated_value = result as boolean
+        }
+        if (RuntimeType.BOOLEAN === runtimeType(animated)) {
+            animated_value = animated as boolean
+        }
+        let index = NavExtender.popToName(pathStack, name, animated_value)
+        PathStackUtils.popPage(index)
+        return index
     }
 }

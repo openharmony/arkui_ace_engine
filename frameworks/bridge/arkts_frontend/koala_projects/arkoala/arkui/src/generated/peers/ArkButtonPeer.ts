@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, InteropNativeModule } from "@koalaui/interop"
 import { runtimeType, RuntimeType } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
 import { ComponentBase } from "../../ComponentBase"

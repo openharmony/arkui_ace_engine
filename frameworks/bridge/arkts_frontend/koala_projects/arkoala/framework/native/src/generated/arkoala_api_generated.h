@@ -18126,6 +18126,7 @@ typedef struct Opt_MenuOutlineOptions {
     Ark_MenuOutlineOptions value;
 } Opt_MenuOutlineOptions;
 typedef struct Ark_MoreButtonOptions {
+    Opt_ResourceColor backgroundColor;
     Opt_BlurStyle backgroundBlurStyle;
     Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
     Opt_BackgroundEffectOptions backgroundEffect;
@@ -23960,6 +23961,12 @@ typedef struct GENERATED_ArkUINavExtenderAccessor {
     void (*setOnPopCallback)(Ark_NavPathStack pathStack,
                             const Callback_String_Void* callback);
     Ark_String (*getNavDestinationId)(Ark_NavPathInfo info);
+    void (*popToIndex)(Ark_NavPathStack pathStack,
+                       Ark_Int32 index,
+                       Ark_Boolean animated);
+    Ark_Number (*popToName)(Ark_NavPathStack pathStack,
+                            const Ark_String* name,
+                            Ark_Boolean animated);
 } GENERATED_ArkUINavExtenderAccessor;
 
 typedef struct GENERATED_ArkUIEventEmulatorAccessor {

@@ -26,6 +26,8 @@
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 
 namespace OHOS::Ace::NG {
+using NavigationTransitionEvent = std::function<NG::NavigationTransition(
+     RefPtr<NG::NavDestinationContext> from, RefPtr<NG::NavDestinationContext> to, NG::NavigationOperation operation)>;
 class ACE_EXPORT NavigationModelStatic {
 public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -43,11 +45,19 @@ public:
     static void SetMenuOptions(FrameNode* frameNode, NG::NavigationMenuOptions&& opt);
     static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated = false);
     static void SetTitlebarOptions(FrameNode* frameNode, NavigationTitlebarOptions&& opt);
+
+    static void SetToolBarItems(FrameNode* frameNode, std::vector<NG::BarItem>&& toolBarItems);
+    static void SetToolbarConfiguration(FrameNode* frameNode, std::vector<NG::BarItem>&& toolBarItems);
+    static void SetToolbarOptions(FrameNode* frameNode, NavigationToolbarOptions&& opt);
+    static void SetToolbarMorebuttonOptions(FrameNode* frameNode, MoreButtonOptions&& opt);
     static void ParseCommonTitle(
         FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo, bool ignoreMainTitle = false);
     static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::SafeAreaExpandOpts& opts);
     static bool CreateBackButtonNode(RefPtr<FrameNode>& backButtonNode);
     static bool UpdateBackButtonProperty(const RefPtr<FrameNode>& backButtonNode);
+    static void SetCustomMenu(FrameNode* frameNode, const RefPtr<UINode>& customNode);
+    static void SetIsCustomAnimation(FrameNode* frameNode, bool isCustom);
+    static void SetCustomTransition(FrameNode* frameNode, NavigationTransitionEvent&& customTransition);
 
 private:
     static bool navBarWidthDoubleBind_;

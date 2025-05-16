@@ -188,6 +188,15 @@ Array_String GetIdByNameImpl(Ark_NavPathStack pathStack,
 
 void SetOnPopCallbackImpl(Ark_NavPathStack pathStack, const Callback_String_Void* callback)
 {
+    auto stack = pathStack;
+    CHECK_NULL_VOID(stack);
+    auto navigationStack = stack->GetNavPathStack();
+    CHECK_NULL_VOID(navigationStack);
+    auto popCallback = [callback = CallbackHelper(*callback)](const std::string& navDestinationId) {
+        auto idVal = Converter::ArkValue<Ark_String>(navDestinationId);
+        callback.Invoke(idVal);
+    };
+    navigationStack->SetOnPopCallback(std::move(popCallback));
 }
 
 Ark_String GetNavDestinationIdImpl(Ark_NavPathInfo info)
@@ -195,6 +204,32 @@ Ark_String GetNavDestinationIdImpl(Ark_NavPathInfo info)
     auto invalidVal = Converter::ArkValue<Ark_String>("", Converter::FC);
     CHECK_NULL_RETURN(info, invalidVal);
     return Converter::ArkValue<Ark_String>(info->data.navDestinationId_.value_or(""), Converter::FC);
+}
+
+void PopToIndexImpl(Ark_NavPathStack pathStack,
+                    Ark_Int32 index,
+                    Ark_Boolean animated)
+{
+    CHECK_NULL_VOID(pathStack);
+    auto navStack = pathStack->GetNavPathStack();
+    CHECK_NULL_VOID(navStack);
+    auto indexVal = Converter::Convert<int32_t>(index);
+    auto animatedVal = Converter::Convert<bool>(animated);
+    navStack->NavigationContext::PathStack::PopToIndex(indexVal, animatedVal);
+}
+
+Ark_Number PopToNameImpl(Ark_NavPathStack pathStack,
+                     const Ark_String* name,
+                     Ark_Boolean animated)
+{
+    auto invalidVal = Converter::ArkValue<Ark_Number>(-1);
+    CHECK_NULL_RETURN(pathStack, invalidVal);
+    auto navStack = pathStack->GetNavPathStack();
+    CHECK_NULL_RETURN(navStack, invalidVal);
+    auto nameVal = Converter::Convert<std::string>(*name);
+    auto animatedVal = Converter::Convert<bool>(animated);
+    auto index = navStack->NavigationContext::PathStack::PopToName(nameVal, animatedVal);
+    return Converter::ArkValue<Ark_Number>(index);
 }
 } // NavExtenderAccessor
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
@@ -223,6 +258,8 @@ const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
         NavExtenderAccessor::GetIdByNameImpl,
         NavExtenderAccessor::SetOnPopCallbackImpl,
         NavExtenderAccessor::GetNavDestinationIdImpl,
+        NavExtenderAccessor::PopToIndexImpl,
+        NavExtenderAccessor::PopToNameImpl,
     };
     return &NavExtenderAccessorImpl;
 }
