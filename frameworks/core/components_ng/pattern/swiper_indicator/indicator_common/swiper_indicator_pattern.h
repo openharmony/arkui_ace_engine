@@ -272,7 +272,6 @@ private:
     void HandleMouseClick(const GestureEvent& info);
     void HandleTouchClick(const GestureEvent& info);
     void InitHoverMouseEvent();
-    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
     void HoverInAnimation(const Color& hoverColor);
@@ -372,6 +371,7 @@ protected:
     virtual std::pair<int32_t, int32_t> CalMouseClickIndexStartAndEnd(int32_t itemCount, int32_t currentIndex);
     virtual void HandleLongDragUpdate(const TouchLocationInfo& info);
     virtual void HandleDragEnd(double dragVelocity);
+    virtual void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
 
     RefPtr<SwiperPattern> GetSwiperPattern() const
     {
