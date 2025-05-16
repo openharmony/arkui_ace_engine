@@ -230,7 +230,7 @@ ArkUINativeModuleValue RatingBridge::SetOnChange(ArkUIRuntimeCallInfo* runtimeCa
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    int32_t argsNumber = runtimeCallInfo->GetArgsNumber();
+    uint32_t argsNumber = runtimeCallInfo->GetArgsNumber();
     if (argsNumber != NUM_2) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -249,7 +249,7 @@ ArkUINativeModuleValue RatingBridge::SetOnChange(ArkUIRuntimeCallInfo* runtimeCa
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        panda::Local<panda::NumberRef> starParam = panda::NumberRef::New(vm, std::stod(star));
+        panda::Local<panda::NumberRef> starParam = panda::NumberRef::New(vm, StringUtils::StringToDouble(star));
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { starParam };
         func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
     };

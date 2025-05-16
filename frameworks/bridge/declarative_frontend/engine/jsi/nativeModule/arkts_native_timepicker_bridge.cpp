@@ -420,6 +420,7 @@ panda::Local<panda::ObjectRef> CreateTimePickerOnChange(EcmaVM* vm, const BaseEv
 {
     const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
     auto jsonValue = JsonUtil::Create(true);
+    CHECK_NULL_RETURN(eventInfo, panda::JSValueRef::Undefined(vm));
     std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(eventInfo->GetSelectedStr());
     if (!argsPtr) {
         return panda::JSValueRef::Undefined(vm);
@@ -444,7 +445,7 @@ ArkUINativeModuleValue TimepickerBridge::SetTimepickerOnChange(ArkUIRuntimeCallI
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    int32_t argsNumber = runtimeCallInfo->GetArgsNumber();
+    uint32_t argsNumber = runtimeCallInfo->GetArgsNumber();
     if (argsNumber != NUM_2) {
         return panda::JSValueRef::Undefined(vm);
     }
