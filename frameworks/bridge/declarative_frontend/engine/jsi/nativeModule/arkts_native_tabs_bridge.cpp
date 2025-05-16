@@ -1555,17 +1555,16 @@ ArkUINativeModuleValue TabsBridge::SetTabsCustomContentTransition(ArkUIRuntimeCa
     JsiCallbackInfo info = JsiCallbackInfo(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     if (info.Length() != 2) { // 2: Array length
-        GetArkUINodeModifiers()->getTabsModifier()->resetTabsOnContentWillChange(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
-    auto transitionObj = JSRef<JSObject>::Cast(info[1]);
-    if (transitionObj->IsUndefined() || !info[1]->IsFunction()) {
-        GetArkUINodeModifiers()->getTabsModifier()->resetTabsOnContentWillChange(nativeNode);
+    if (!info[1]->IsFunction()) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetTabsIsCustomAnimation(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-
-    ParseCustomContentTransition(transitionObj, info);
+    auto transitionFunc = JSRef<JSFunc>::Cast(info[1]);
+    
+    ParseCustomContentTransition(transitionFunc, info);
 
     GetArkUINodeModifiers()->getTabsModifier()->setTabsIsCustomAnimation(nativeNode, true);
     return panda::JSValueRef::Undefined(vm);
@@ -1579,16 +1578,15 @@ ArkUINativeModuleValue TabsBridge::ResetTabsCustomContentTransition(ArkUIRuntime
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTabsModifier()->resetTabsIsCustomAnimation(nativeNode);
-    TabsModel::GetInstance()->SetOnCustomAnimation(nullptr);
     return panda::JSValueRef::Undefined(vm);
 }
 
 void TabsBridge::ParseCustomContentTransition(
-    const Framework::JSRef<Framework::JSObject>& transitionObj, const Framework::JsiCallbackInfo& info)
+    const Framework::JSRef<Framework::JSFunc>& transitionFunc, const Framework::JsiCallbackInfo& info)
 {
     using namespace OHOS::Ace::Framework;
     RefPtr<JsTabsFunction> jsCustomAnimationFunc =
-        AceType::MakeRefPtr<JsTabsFunction>(JSRef<JSFunc>::Cast(transitionObj));
+        AceType::MakeRefPtr<JsTabsFunction>(transitionFunc);
     auto onCustomAnimation = [execCtx = info.GetExecutionContext(), func = std::move(jsCustomAnimationFunc)](
                                  int32_t from, int32_t to) -> TabContentAnimatedTransition {
         TabContentAnimatedTransition transitionInfo;
@@ -1610,7 +1608,7 @@ void TabsBridge::ParseCustomContentTransition(
         JSRef<JSVal> transition = transitionObj->GetProperty("transition");
         if (transition->IsFunction()) {
             RefPtr<JsTabsFunction> jsOnTransition =
-                AceType::MakeRefPtr<JsTabsFunction>(JSRef<JSFunc>::Cast(transition));
+                AceType::MakeRefPtr<JsTabsFunction>(transition);
             auto onTransition = [execCtx, func = std::move(jsOnTransition)](
                                     const RefPtr<TabContentTransitionProxy>& proxy) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

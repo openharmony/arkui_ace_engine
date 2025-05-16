@@ -58,8 +58,13 @@ void JSQRCode::Create(const JSCallbackInfo& info)
         return;
     }
     std::string value;
-    if (info[0]->IsNumber() || info[0]->IsNull() || info[0]->IsUndefined()) {
-        value = info[0]->ToString();
+    if (info[0]->IsNumber()) {
+        auto num = info[0]->ToNumber<int32_t>();
+        value = std::to_string(num);
+    } else if (info[0]->IsNull()) {
+        value = "null";
+    } else if (info[0]->IsUndefined()) {
+        value = "undefined";
     } else {
         ParseJsString(info[0], value);
     }
