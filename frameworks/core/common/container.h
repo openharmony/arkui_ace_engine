@@ -654,6 +654,7 @@ public:
     }
 
     virtual void TerminateUIExtension() {}
+    virtual void RequestAtomicServiceTerminate() {}
     virtual bool UIExtensionIsHalfScreen()
     {
         return false;

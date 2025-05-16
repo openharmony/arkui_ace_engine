@@ -713,6 +713,7 @@ public:
         int32_t eventType, int64_t timeMs);
 
     void TerminateUIExtension() override;
+    void RequestAtomicServiceTerminate() override;
     bool UIExtensionIsHalfScreen() override;
     void SetUIExtensionSubWindow(bool isUIExtensionSubWindow)
     {

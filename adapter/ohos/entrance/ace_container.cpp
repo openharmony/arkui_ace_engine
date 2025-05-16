@@ -3888,6 +3888,18 @@ void AceContainer::TerminateUIExtension()
     uiExtensionContext->TerminateSelf();
 }
 
+void AceContainer::RequestAtomicServiceTerminate()
+{
+    if (!IsUIExtensionWindow()) {
+        TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Not uiextension window.");
+        return;
+    }
+    auto sharedContext = runtimeContext_.lock();
+    auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
+    CHECK_NULL_VOID(uiExtensionContext);
+    uiExtensionContext->RequestComponentTerminate();
+}
+
 bool AceContainer::UIExtensionIsHalfScreen()
 {
     if (!IsUIExtensionWindow()) {

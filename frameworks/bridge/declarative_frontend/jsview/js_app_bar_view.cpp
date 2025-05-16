@@ -31,6 +31,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 const std::string EVENT_NAME_CUSTOM_APP_BAR_MENU_CLICK = "arkui_custom_app_bar_menu_click";
 const std::string EVENT_NAME_CUSTOM_APP_BAR_CLOSE_CLICK = "arkui_custom_app_bar_close_click";
+const std::string EVENT_NAME_CUSTOM_APP_BAR_CLOSE_CLICK_NG = "arkui_custom_app_bar_close_click_ng";
 const std::string EVENT_NAME_CUSTOM_APP_BAR_DID_BUILD = "arkui_custom_app_bar_did_build";
 const std::string EVENT_NAME_CUSTOM_APP_BAR_CREATE_SERVICE_PANEL = "arkui_custom_app_bar_create_service_panel";
 
@@ -58,6 +59,16 @@ void JSAppBar::OnCloseClick(const JSCallbackInfo& info)
     auto appBar = container->GetAppBar();
     CHECK_NULL_VOID(appBar);
     appBar->OnCloseClick();
+}
+
+void JSAppBar::RequestAtomicServiceTerminate(const JSCallbackInfo& info)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "JSAppBar RequestAtomicServiceTerminate");
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto appBar = container->GetAppBar();
+    CHECK_NULL_VOID(appBar);
+    appBar->RequestAtomicServiceTerminate();
 }
 
 void JSAppBar::OnDidBuild(const JSCallbackInfo& info)
@@ -149,6 +160,7 @@ void JSAppBar::CallNative(const JSCallbackInfo& info)
     nativeFucMap_ = {
         { EVENT_NAME_CUSTOM_APP_BAR_MENU_CLICK, JSAppBar::OnMenuClick },
         { EVENT_NAME_CUSTOM_APP_BAR_CLOSE_CLICK, JSAppBar::OnCloseClick },
+        { EVENT_NAME_CUSTOM_APP_BAR_CLOSE_CLICK_NG, JSAppBar::RequestAtomicServiceTerminate },
         { EVENT_NAME_CUSTOM_APP_BAR_DID_BUILD, JSAppBar::OnDidBuild },
         { EVENT_NAME_CUSTOM_APP_BAR_CREATE_SERVICE_PANEL, JSAppBar::OnCreateServicePanel },
     };
