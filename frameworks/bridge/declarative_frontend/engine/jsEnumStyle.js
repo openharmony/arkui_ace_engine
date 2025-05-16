@@ -3174,6 +3174,12 @@ let SaveDescription;
   SaveDescription[SaveDescription.SAVE_ALL = 12] = 'SAVE_ALL';
 })(SaveDescription || (SaveDescription = {}));
 
+let SaveButtonTipPosition;
+(function (SaveButtonTipPosition) {
+  SaveButtonTipPosition[SaveButtonTipPosition.ABOVE_BOTTOM = 0] = 'ABOVE_BOTTOM';
+  SaveButtonTipPosition[SaveButtonTipPosition.BELOW_TOP = 1] = 'BELOW_TOP';
+})(SaveButtonTipPosition || (SaveButtonTipPosition = {}));
+
 let SaveButtonOnClickResult;
 (function (SaveButtonOnClickResult) {
   SaveButtonOnClickResult[SaveButtonOnClickResult.SUCCESS = 0] =

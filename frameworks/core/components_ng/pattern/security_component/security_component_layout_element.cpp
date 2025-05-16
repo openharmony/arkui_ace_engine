@@ -19,13 +19,15 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_element.h"
-
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_property.h"
+#ifdef SECURITY_COMPONENT_ENABLE
+#include "core/image/image_loader.h"
+#endif
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/custom_paint/rosen_render_custom_paint.h"
@@ -59,13 +61,56 @@ void IconLayoutElement::Init(const RefPtr<SecurityComponentLayoutProperty>& prop
     CHECK_NULL_VOID(theme);
     minIconSize_ = theme->GetMinIconSize().ConvertToPx();
 
-    if (property->GetIconSize().has_value()) {
+    if (property->GetImageSourceInfo().has_value()) {
+#ifdef SECURITY_COMPONENT_ENABLE
+        auto image = property->GetImageSourceInfo().value();
+        auto imageLoader = ImageLoader::CreateImageLoader(image);
+        CHECK_NULL_VOID(imageLoader);
+        ImageErrorInfo imageErrInfo;
+        RefPtr<ImageData> data = imageLoader->GetImageData(image, imageErrInfo, Referenced::WeakClaim(Referenced::RawPtr(pipeline)));
+        RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(image, imageErrInfo, data);
+        CHECK_NULL_VOID(imageObj);
+        auto size = imageObj->GetImageSize();
+        alpha_ = (NearEqual(size.Width(), 0.0) || NearEqual(size.Height(), 0.0)) ? 1.0 : size.Height() / size.Width();
+#endif
+    }
+
+    width_ = isSymbolIcon ? Dimension(DEFAULT_SIZE_24, DimensionUnit::VP).ConvertToPx() :
+        theme->GetIconSize().ConvertToPx();
+    height_ = width_ * alpha_;
+
+    UpdateUserSetSize(property);
+
+    std::optional<NG::CalcLength> propWidth;
+    propWidth.emplace(Dimension(Dimension(width_).ConvertToVp(), DimensionUnit::VP));
+    std::optional<NG::CalcLength> propHeight;
+    propHeight.emplace(Dimension(Dimension(height_).ConvertToVp(), DimensionUnit::VP));
+    auto iconNode = iconWrap_->GetHostNode();
+    auto iconLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    iconLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(propWidth, propHeight));
+}
+
+void IconLayoutElement::UpdateUserSetSize(const RefPtr<SecurityComponentLayoutProperty>& property)
+{
+    if (property->GetIconCalcSize()->Width().has_value() && property->GetIconCalcSize()->Height().has_value()) {
+        isSetSize_ = true;
+        width_ = property->GetIconCalcSize()->Width()->GetDimension().ConvertToPx();
+        height_ = property->GetIconCalcSize()->Height()->GetDimension().ConvertToPx();
+        if (!property->GetImageSourceInfo().has_value()) {
+            double tmp = GreatNotEqual(width_, height_) ? height_ : width_;
+            width_ = height_ = tmp;
+        }
+    } else if (property->GetIconCalcSize()->Width().has_value()) {
+        isSetSize_ = true;
+        width_ = property->GetIconCalcSize()->Width()->GetDimension().ConvertToPx();
+        height_ = width_ * alpha_;
+    } else if (property->GetIconCalcSize()->Height().has_value()) {
+        isSetSize_ = true;
+        height_ = property->GetIconCalcSize()->Height()->GetDimension().ConvertToPx();
+        width_ = (NearEqual(alpha_, 0.0)) ? 0.0 : (height_ / alpha_);
+    } else if (property->GetIconSize().has_value()) {
         isSetSize_ = true;
         width_ = height_ = property->GetIconSize().value().ConvertToPx();
-    } else {
-        height_ = isSymbolIcon ? Dimension(DEFAULT_SIZE_24, DimensionUnit::VP).ConvertToPx() :
-                           theme->GetIconSize().ConvertToPx();
-        width_ = height_;
     }
 }
 
@@ -85,15 +130,33 @@ double IconLayoutElement::ShrinkWidth(double reduceSize)
     if (!isExist_ || isSetSize_) {
         return reduceSize;
     }
-    if (GreatNotEqual(minIconSize_, (width_ - reduceSize))) {
-        int remain = reduceSize - (width_ - minIconSize_);
-        height_ = width_ = minIconSize_;
-        return remain;
+    if (NearEqual(alpha_, 0.0)) {
+        return reduceSize;
     }
 
-    width_ -= reduceSize;
-    height_ = width_;
-    return 0.0;
+    if (GreatOrEqual(height_, width_)) {
+        if (GreatNotEqual(minIconSize_, (width_ - reduceSize))) {
+            int remain = reduceSize - (width_ - minIconSize_);
+            width_ = minIconSize_;
+            height_ = width_ * alpha_;
+            return remain;
+        }
+
+        width_ -= reduceSize;
+        height_ = width_ * alpha_;
+        return 0.0;
+    } else {
+        if (GreatNotEqual(minIconSize_, (height_ - reduceSize * alpha_))) {
+            int remain = reduceSize - (height_ - minIconSize_) / alpha_;
+            height_ = minIconSize_;
+            width_ = height_ / alpha_;
+            return remain;
+        }
+
+        width_ -= reduceSize;
+        height_ = width_ * alpha_;
+        return 0.0;
+    }
 }
 
 double IconLayoutElement::ShrinkHeight(double reduceSize)
@@ -101,14 +164,33 @@ double IconLayoutElement::ShrinkHeight(double reduceSize)
     if (!isExist_ || isSetSize_) {
         return reduceSize;
     }
-    if (GreatNotEqual(minIconSize_, (height_ - reduceSize))) {
-        double remain = reduceSize - (height_ - minIconSize_);
-        width_ = height_ = minIconSize_;
-        return remain;
+    if (NearEqual(alpha_, 0.0)) {
+        return reduceSize;
     }
-    height_ -= reduceSize;
-    width_ = height_;
-    return 0.0;
+
+    if (GreatOrEqual(height_, width_)) {
+        if (GreatNotEqual(minIconSize_, (width_ - reduceSize / alpha_))) {
+            int remain = reduceSize - (width_ - minIconSize_) * alpha_;
+            width_ = minIconSize_;
+            height_ = width_ * alpha_;
+            return remain;
+        }
+
+        height_ -= reduceSize;
+        width_ = height_ / alpha_;
+        return 0.0;
+    } else {
+        if (GreatNotEqual(minIconSize_, (height_ - reduceSize))) {
+            int remain = reduceSize - (height_ - minIconSize_);
+            height_ = minIconSize_;
+            width_ = height_ / alpha_;
+            return remain;
+        }
+
+        height_ -= reduceSize;
+        width_ = height_ / alpha_;
+        return 0.0;
+    }
 }
 
 void TextLayoutElement::UpdateFontSize()

@@ -841,10 +841,14 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     return true;
 }
 
-bool InitSCImageIconInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
-    RefPtr<FrameNode>& iconNode)
+bool InitSCIconInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& iconNode)
 {
     if (iconNode != nullptr) {
+        auto pipeline = iconNode->GetContextRefPtr();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto theme = pipeline->GetTheme<SecurityComponentTheme>();
+        CHECK_NULL_RETURN(theme, false);
+
         CHECK_NULL_RETURN(iconNode->GetGeometryNode(), false);
         auto iconProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_RETURN(iconProp, false);
@@ -852,9 +856,9 @@ bool InitSCImageIconInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonI
         auto width = iconProp->GetCalcLayoutConstraint()->selfIdealSize->Width();
         CHECK_EQUAL_RETURN(width.has_value(), false, false);
         buttonInfo.iconSize_ = width->GetDimension().ConvertToVp();
+
         auto fillColor = iconProp->GetImageSourceInfo()->GetFillColor();
-        CHECK_EQUAL_RETURN(fillColor.has_value(), false, false);
-        buttonInfo.iconColor_.value = fillColor->GetValue();
+        buttonInfo.iconColor_.value = fillColor.value_or(theme->GetIconColor()).GetValue();
     }
     return true;
 }
@@ -927,7 +931,7 @@ bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::
     RefPtr<FrameNode>& node)
 {
     RefPtr<FrameNode> iconNode = GetSecCompChildNode(node, V2::IMAGE_ETS_TAG);
-    if (!InitSCImageIconInfo(buttonInfo, iconNode)) {
+    if (!InitSCIconInfo(buttonInfo, iconNode)) {
         return false;
     }
 
@@ -962,6 +966,10 @@ void SecurityComponentHandler::WriteButtonInfo(
     buttonInfo.icon_ = layoutProperty->GetIconStyle().value();
     buttonInfo.bg_ = static_cast<SecCompBackground>(
         layoutProperty->GetBackgroundType().value());
+    buttonInfo.tipPosition_ = static_cast<Security::SecurityComponent::TipPosition>(
+        layoutProperty->GetTipPosition().value_or(TipPosition::ABOVE_BOTTOM));
+    buttonInfo.isCustomizable_ =
+        (layoutProperty->GetImageSourceInfo().has_value() || layoutProperty->GetTextContent().has_value());
 
     RectF rect = node->GetTransformRectRelativeToWindow();
     auto maxRadius = std::min(rect.Width(), rect.Height()) / HALF;
@@ -1271,12 +1279,13 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEventInner(int32_t
     std::string componentInfo;
     SecCompType type;
     std::string invalidEffectMsg;
-    auto ret = InitButtonInfo(componentInfo, node, type, message);
-    if (!message.empty()) {
-        invalidEffectMsg = message;
-    }
+    auto ret = InitButtonInfo(componentInfo, node, type, invalidEffectMsg);
     if (!ret) {
         return -1;
+    }
+    bool isSecCompCheckFailed = false;
+    if (!message.empty()) {
+        isSecCompCheckFailed = true;
     }
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::CurrentSafely());
     CHECK_NULL_RETURN(container, -1);
@@ -1287,6 +1296,9 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEventInner(int32_t
     SecCompInfo secCompInfo{ scId, componentInfo, event };
     int32_t res = SecCompKit::ReportSecurityComponentClickEvent(
         secCompInfo, token, std::move(callback), message);
+    if (isSecCompCheckFailed) {
+        return res;
+    }
     if (!message.empty() && message != "PARENT_HAVE_INVALID_EFFECT") {
         message = SEC_COMP_ID + std::to_string(node->GetId()) + SEC_COMP_TYPE + node->GetTag() + message;
     }
@@ -1298,7 +1310,7 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEventInner(int32_t
     return res;
 }
 
-bool SecurityComponentHandler::CheckSecurityComponentTextLimits(const RefPtr<FrameNode>& node, std::string& message)
+void SecurityComponentHandler::CheckSecurityComponentClickEvent(const RefPtr<FrameNode>& node, std::string& message)
 {
     auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
     if (layoutProperty && layoutProperty->GetIsMaxLineLimitExceeded().has_value() &&
@@ -1306,16 +1318,20 @@ bool SecurityComponentHandler::CheckSecurityComponentTextLimits(const RefPtr<Fra
         SC_LOG_ERROR("SecurityComponentCheckFail: The text of the security component is cliped by lines.");
         message = SEC_COMP_ID + std::to_string(node->GetId()) + SEC_COMP_TYPE +
             node->GetTag() + ", the text of the security component is cliped by lines";
-        return true;
+        return;
     }
     if (layoutProperty && layoutProperty->GetIsTextLimitExceeded().has_value() &&
         layoutProperty->GetIsTextLimitExceeded().value()) {
         SC_LOG_ERROR("SecurityComponentCheckFail: The text of the security component is out of range.");
         message = SEC_COMP_ID + std::to_string(node->GetId()) + SEC_COMP_TYPE +
             node->GetTag() + ", the text of the security component is out of range";
-        return true;
+        return;
     }
-    return false;
+    if (CheckComponentCoveredStatus(node->GetId(), message)) {
+        SC_LOG_ERROR("SecurityComponentCheckFail: Security component is covered by another component.");
+        message = SEC_COMP_ID + std::to_string(node->GetId()) + SEC_COMP_TYPE + node->GetTag() + message;
+        return;
+    }
 }
 
 int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scId,
@@ -1348,14 +1364,7 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
             static_cast<uint64_t>(time.time_since_epoch().count()) / SECOND_TO_MILLISECOND;
     }
 #endif
-    if (CheckSecurityComponentTextLimits(node, message)) {
-        return -1;
-    }
-    if (CheckComponentCoveredStatus(node->GetId(), message)) {
-        SC_LOG_ERROR("SecurityComponentCheckFail: Security component is covered by another component.");
-        message = SEC_COMP_ID + std::to_string(node->GetId()) + SEC_COMP_TYPE + node->GetTag() + message;
-        return -1;
-    }
+    CheckSecurityComponentClickEvent(node, message);
 
     return ReportSecurityComponentClickEventInner(scId, node, secEvent, std::move(callback), message);
 }
@@ -1375,22 +1384,9 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
         secEvent.extraInfo.data = data.data();
         secEvent.extraInfo.dataSize = data.size();
     }
-    auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
-    if (layoutProperty && layoutProperty->GetIsMaxLineLimitExceeded().has_value() &&
-        layoutProperty->GetIsMaxLineLimitExceeded().value()) {
-        SC_LOG_ERROR("SecurityComponentCheckFail: The text of the security component is cliped by lines.");
-        return -1;
-    }
-    if (layoutProperty && layoutProperty->GetIsTextLimitExceeded().has_value() &&
-        layoutProperty->GetIsTextLimitExceeded().value()) {
-        SC_LOG_ERROR("SecurityComponentCheckFail: The text of the security component is out of range.");
-        return -1;
-    }
     std::string message;
-    if (CheckComponentCoveredStatus(node->GetId(), message)) {
-        SC_LOG_ERROR("SecurityComponentCheckFail: Security component is covered by another component.");
-        return -1;
-    }
+    CheckSecurityComponentClickEvent(node, message);
+
     return ReportSecurityComponentClickEventInner(scId, node, secEvent, std::move(callback), message);
 }
 
@@ -1407,5 +1403,10 @@ bool SecurityComponentHandler::LoadSecurityComponentService()
 bool SecurityComponentHandler::IsSystemAppCalling()
 {
     return SecCompKit::IsSystemAppCalling();
+}
+
+bool SecurityComponentHandler::HasCustomPermissionForSecComp()
+{
+    return SecCompKit::HasCustomPermissionForSecComp();
 }
 } // namespace OHOS::Ace::NG
