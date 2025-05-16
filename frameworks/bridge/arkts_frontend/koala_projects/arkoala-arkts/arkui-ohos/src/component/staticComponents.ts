@@ -25,6 +25,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ArkUIAniModule } from "../ani/arkts/ArkUIAniModule"
 
 export class ArkRootPeer extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -38,14 +39,26 @@ export class ArkRootPeer extends PeerNode {
         return _peer
     }
 }
+// export class ArkComponentRootPeer extends PeerNode {
+//     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+//         super(peerPtr, id, name, flags)
+//     }
+//     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkComponentRootPeer {
+//         const peerId  = PeerNode.nextId()
+//         const _peerPtr  = ArkUIGeneratedNativeModule._ComponentRoot_construct(peerId, flags)
+//         const _peer  = new ArkComponentRootPeer(_peerPtr, peerId, "ComponentRoot", flags)
+//         component?.setPeer(_peer)
+//         return _peer
+//     }
+// }
 export class ArkComponentRootPeer extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkComponentRootPeer {
         const peerId  = PeerNode.nextId()
-        const _peerPtr  = ArkUIGeneratedNativeModule._ComponentRoot_construct(peerId, flags)
-        const _peer  = new ArkComponentRootPeer(_peerPtr, peerId, "ComponentRoot", flags)
+        const _peerPtr  = ArkUIAniModule._CustomNode_Constructor(peerId)
+        const _peer  = new ArkComponentRootPeer(_peerPtr, peerId, "customComponent", flags)
         component?.setPeer(_peer)
         return _peer
     }
