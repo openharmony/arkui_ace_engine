@@ -43,6 +43,7 @@ public:
 
     // cache (key: theme id - value: ark theme instance)
     void CacheClear();
+    void CacheResetColor();
     void CacheSet(const RefPtr<TokenTheme>& theme);
     const RefPtr<TokenTheme>& CacheGet(int32_t themeId);
     void CacheRemove(int32_t themeId);

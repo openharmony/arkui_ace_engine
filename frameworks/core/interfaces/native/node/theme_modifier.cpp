@@ -48,6 +48,12 @@ RefPtr<TokenColors> ConvertColorArrayToTokenColors(const ArkUI_Uint32* colorsArr
     themeColors->SetColors(std::move(colors));
     return themeColors;
 }
+
+std::vector<RefPtr<ResourceObject>> ConvertResObjArray(const void* resObjs)
+{
+    auto resourceObjs = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(resObjs));
+    return resourceObjs;
+}
 } // namespace
 
 ArkUINodeHandle CreateWithThemeNode(ArkUI_Int32 id)
@@ -64,7 +70,8 @@ ArkUINodeHandle GetWithThemeNode(ArkUI_Int32 id)
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(withThemeNode));
 }
 
-ArkUINodeHandle CreateTheme(ArkUI_Int32 themeId, const ArkUI_Uint32* colors, ArkUI_Int32 colorMode)
+ArkUINodeHandle CreateTheme(ArkUI_Int32 themeId, const ArkUI_Uint32* colors, ArkUI_Int32 colorMode,
+    const void* resObjs)
 {
     auto theme = TokenThemeStorage::GetInstance()->CacheGet(themeId);
     if (!theme) {
@@ -75,6 +82,8 @@ ArkUINodeHandle CreateTheme(ArkUI_Int32 themeId, const ArkUI_Uint32* colors, Ark
         theme = AceType::MakeRefPtr<TokenTheme>(themeId);
         theme->SetColors(themeColors);
         theme->SetColorMode(themeScopeColorMode);
+        auto resourceObjs = ConvertResObjArray(resObjs);
+        theme->SetResObjs(std::move(resourceObjs));
         TokenThemeStorage::GetInstance()->CacheSet(theme);
     }
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(theme));

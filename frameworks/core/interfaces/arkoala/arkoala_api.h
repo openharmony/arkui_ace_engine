@@ -6080,7 +6080,8 @@ struct ArkUICustomNodeExtModifier {
 struct ArkUIThemeModifier {
     ArkUINodeHandle (*createWithThemeNode)(ArkUI_Int32 id);
     ArkUINodeHandle (*getWithThemeNode)(ArkUI_Int32 id);
-    ArkUINodeHandle (*createTheme)(ArkUI_Int32 themeId, const ArkUI_Uint32* colors, ArkUI_Int32 colorMode);
+    ArkUINodeHandle (*createTheme)(ArkUI_Int32 themeId, const ArkUI_Uint32* colors, ArkUI_Int32 colorMode,
+        const void* resObjs);
     void (*createThemeScope)(ArkUINodeHandle node, ArkUINodeHandle theme);
     void (*setDefaultTheme)(const ArkUI_Uint32* colors, ArkUI_Bool isDark);
     void (*removeFromCache)(ArkUI_Int32 themeId);
