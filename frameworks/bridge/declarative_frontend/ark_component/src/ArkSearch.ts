@@ -806,7 +806,7 @@ class SearchEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
 }
 
 interface SearchParam {
-  value?: string;
+  value?: ResourceStr;
   placeholder?: ResourceStr;
   icon?: string;
   controller?: SearchController
@@ -896,7 +896,7 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
       SearchShowCounterModifier, arkValue);
     return this;
   }
-  searchButton(value: string, option?: SearchButtonOptions): SearchAttribute {
+  searchButton(value: string | Resource, option?: SearchButtonOptions): SearchAttribute {
     let searchButton = new ArkSearchButton();
     searchButton.value = value;
     searchButton.fontColor = option?.fontColor;

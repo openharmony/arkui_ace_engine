@@ -12833,7 +12833,7 @@ class TextLetterSpacingModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().text.resetLetterSpacing(node);
     }
-    else if (!isNumber(this.value) && !isString(this.value)) {
+    else if (!isNumber(this.value) && !isString(this.value) && !isResource(this.value)) {
       getUINativeModule().text.resetLetterSpacing(node);
     }
     else {
@@ -12890,7 +12890,7 @@ class TextBaselineOffsetModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().text.resetBaselineOffset(node);
     }
-    else if (!isNumber(this.value) && !isString(this.value)) {
+    else if (!isNumber(this.value) && !isString(this.value) && !isResource(this.value)) {
       getUINativeModule().text.resetBaselineOffset(node);
     }
     else {

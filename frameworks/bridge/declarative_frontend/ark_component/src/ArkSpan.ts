@@ -186,8 +186,8 @@ class SpanFontColorModifier extends ModifierWithKey<ResourceColor> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-class SpanLetterSpacingModifier extends ModifierWithKey<string> {
-  constructor(value: string) {
+class SpanLetterSpacingModifier extends ModifierWithKey<string | Resource> {
+  constructor(value: string | Resource) {
     super(value);
   }
   static identity = Symbol('spanLetterSpacing');
@@ -263,8 +263,8 @@ class SpanDecorationModifier extends ModifierWithKey<{ type: TextDecorationType,
     }
   }
 }
-class SpanFontWeightModifier extends ModifierWithKey<string> {
-  constructor(value: string) {
+class SpanFontWeightModifier extends ModifierWithKey<string | Resource> {
+  constructor(value: string | Resource) {
     super(value);
   }
   static identity = Symbol('spanfontweight');
@@ -985,7 +985,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     modifierWithKey(this._modifiersWithKeys, SpanFontStyleModifier.identity, SpanFontStyleModifier, value);
     return this;
   }
-  fontWeight(value: number | FontWeight | string): SpanAttribute {
+  fontWeight(value: number | FontWeight | string | Resource): SpanAttribute {
     modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier, value);
     return this;
   }
@@ -993,7 +993,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     modifierWithKey(this._modifiersWithKeys, SpanFontFamilyModifier.identity, SpanFontFamilyModifier, value);
     return this;
   }
-  letterSpacing(value: number | string): SpanAttribute {
+  letterSpacing(value: number | string | Resource): SpanAttribute {
     modifierWithKey(this._modifiersWithKeys, SpanLetterSpacingModifier.identity, SpanLetterSpacingModifier, value);
     return this;
   }

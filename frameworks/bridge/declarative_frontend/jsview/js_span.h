@@ -29,7 +29,7 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void SetFont(const JSCallbackInfo& info);
     static void SetFontSize(const JSCallbackInfo& info);
-    static void SetFontWeight(const std::string& value);
+    static void SetFontWeight(const JSCallbackInfo& info);
     static void SetTextColor(const JSCallbackInfo& info);
     static void SetTextShadow(const JSCallbackInfo& info);
     static void SetFontStyle(int32_t value);

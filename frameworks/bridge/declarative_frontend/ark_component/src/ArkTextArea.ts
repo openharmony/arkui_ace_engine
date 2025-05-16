@@ -336,8 +336,8 @@ class TextAreaFontColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
-class TextAreaFontWeightModifier extends ModifierWithKey<number | FontWeight | string> {
-  constructor(value: number | FontWeight | string) {
+class TextAreaFontWeightModifier extends ModifierWithKey<number | FontWeight | string | Resource> {
+  constructor(value: number | FontWeight | string | Resource) {
     super(value);
   }
   static identity: Symbol = Symbol('textAreaFontWeight');
@@ -1301,7 +1301,7 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     modifierWithKey(this._modifiersWithKeys, TextAreaFontStyleModifier.identity, TextAreaFontStyleModifier, value);
     return this;
   }
-  fontWeight(value: number | FontWeight | string): TextAreaAttribute {
+  fontWeight(value: number | FontWeight | string | Resource): TextAreaAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAreaFontWeightModifier.identity, TextAreaFontWeightModifier, value);
     return this;
   }
