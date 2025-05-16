@@ -1004,4 +1004,70 @@ bool MenuWrapperPattern::CheckPointInMenuZone(const RefPtr<FrameNode>& node, con
     auto menuZone = RectF(childOffset.GetX(), childOffset.GetY(), childSize.Width(), childSize.Height());
     return menuZone.IsInRegion(point);
 }
+
+bool MenuWrapperPattern::GetMenuMaskEnable()
+{
+    return menuParam_.maskEnable.value_or(false);
+}
+
+Color MenuWrapperPattern::GetMenuMaskColor()
+{
+    if (menuParam_.maskType.has_value() && menuParam_.maskType->maskColor.has_value()) {
+        return menuParam_.maskType->maskColor.value();
+    }
+
+    Color Color(NG::MENU_MASK_COLOR);
+    auto node = GetHost();
+    CHECK_NULL_RETURN(node, Color);
+    auto pipelineContext = node->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, Color);
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_RETURN(menuTheme, Color);
+    return menuTheme->GetPreviewMenuMaskColor();
+}
+
+BlurStyle MenuWrapperPattern::GetMenuMaskblurStyle()
+{
+    if (menuParam_.maskType.has_value() && menuParam_.maskType->maskBackGroundBlueStyle.has_value()) {
+        return menuParam_.maskType->maskBackGroundBlueStyle.value();
+    }
+    return BlurStyle::BACKGROUND_THIN;
+}
+
+void MenuWrapperPattern::SetMenuMaskEnable(bool maskEnable)
+{
+    menuParam_.maskEnable = maskEnable;
+}
+
+void MenuWrapperPattern::EnsureMenuMaskTypeInitialized()
+{
+    if (!menuParam_.maskType.has_value()) {
+        menuParam_.maskType.emplace();
+    }
+}
+
+void MenuWrapperPattern::SetMenuMaskColor(Color maskColor)
+{
+    EnsureMenuMaskTypeInitialized();
+    menuParam_.maskType->maskColor = maskColor;
+}
+
+void MenuWrapperPattern::SetMenuMaskblurStyle(BlurStyle maskBlurStyle)
+{
+    EnsureMenuMaskTypeInitialized();
+    menuParam_.maskType->maskBackGroundBlueStyle = maskBlurStyle;
+}
+
+void MenuWrapperPattern::UpdateFilterMaskType()
+{
+    auto filterNode = GetFilterColumnNode();
+    if (filterNode) {
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = GetMenuMaskblurStyle();
+        auto filterRenderContext = filterNode->GetRenderContext();
+        CHECK_NULL_VOID(filterRenderContext);
+        filterRenderContext->UpdateBackBlurStyle(styleOption);
+        filterRenderContext->UpdateBackgroundColor(GetMenuMaskColor());
+    }
+}
 } // namespace OHOS::Ace::NG
