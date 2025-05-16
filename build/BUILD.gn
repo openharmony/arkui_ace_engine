@@ -110,9 +110,8 @@ config("lto_link_config") {
     ldflags += [
       "-Wl,-mllvm,-force-sched-model=${ace_engine_feature_sched_model}",
       "-Wl,-Bsymbolic",
-      "-Wl,--aarch64-inline-plt",
     ]
-    if (ace_engine_feature_enable_codemerge) {
+    if (ace_engine_feature_enable_codemerge && !is_asan) {
       ldflags += [
         "-Wl,-plugin-opt=-split-machine-functions",
         "-Wl,-mllvm",
