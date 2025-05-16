@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1083,5 +1083,23 @@ HWTEST_F(MenuViewTestNg, SetWordBreak002, TestSize.Level1)
     auto textProperty = AceType::MakeRefPtr<TextLayoutProperty>();
     textProperty->UpdateWordBreak(theme->GetWordBreak());
     EXPECT_EQ(textProperty->GetWordBreak(), WordBreak::BREAK_ALL);
+}
+
+/**
+ * @tc.name: UpdateMenuProperties001
+ * @tc.desc: Verify UpdateMenuProperties function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuProperties001, TestSize.Level1)
+{
+    MenuParam menuParam;
+    menuParam.outlineWidth->SetBorderWidth(Dimension(10));
+    menuParam.enableArrow = true;
+    ASSERT_NE(wrapperNode_, nullptr);
+    auto menuWrapperPattern = wrapperNode_->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    menuWrapperPattern->SetHasCustomOutlineWidth(true);
+    MenuView::UpdateMenuProperties(wrapperNode_, menuFrameNode_, menuParam, MenuType::MENU);
+    EXPECT_EQ(menuWrapperPattern->GetMenuParam().outlineWidth->leftDimen->ToString(), "10.00px");
 }
 } // namespace OHOS::Ace::NG

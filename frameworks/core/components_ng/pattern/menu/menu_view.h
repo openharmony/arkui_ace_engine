@@ -110,6 +110,8 @@ private:
     static void UpdateMenuNodePositionLeft(MarginProperty& menuNodeMargin,
         std::map<AlignDirection, AlignRule>& menuNodeAlignRules, const PreparedInfoForDrag& data, float biasMenuLeft,
         std::map<std::string, AlignRule>& alignMap);
+    static void UpdateMenuOutlineWithArrow(
+        const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam);
 };
 } // namespace OHOS::Ace::NG
 
