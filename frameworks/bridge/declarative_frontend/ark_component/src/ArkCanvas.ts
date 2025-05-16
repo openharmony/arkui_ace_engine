@@ -18,8 +18,45 @@ class ArkCanvasComponent extends ArkComponent implements CanvasAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  onReady(event: () => void): this {
-    throw new Error('Method not implemented.');
+  onReady(event: VoidCallback): this {
+    modifierWithKey(this._modifiersWithKeys, CanvasOnReadyModifier.identity, CanvasOnReadyModifier, event);
+    return this;
+  }
+  enableAnalyzer(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, CanvasEnableAnalyzerModifier.identity,
+      CanvasEnableAnalyzerModifier, value);
+    return this;
+  }
+}
+
+class CanvasOnReadyModifier extends ModifierWithKey<VoidCallback> {
+  constructor(value: VoidCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('canvasOnReady');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().canvas.resetCanvasOnReady(node);
+    } else {
+      getUINativeModule().canvas.setCanvasOnReady(node, this.value);
+    }
+  }
+}
+
+class CanvasEnableAnalyzerModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('canvasEnableAnalyzer');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().canvas.resetCanvasEnableAnalyzer(node);
+    } else {
+      getUINativeModule().canvas.setCanvasEnableAnalyzer(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 

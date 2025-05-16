@@ -392,11 +392,20 @@ declare class ArkImageAnimatorComponent extends ArkComponent implements CommonMe
     fillMode(value: FillMode): ImageAnimatorAttribute;
     iterations(value: number): ImageAnimatorAttribute;
     monitorInvisibleArea(value: boolean): ImageAnimatorAttribute;
-    onStart(event: () => void): ImageAnimatorAttribute;
-    onPause(event: () => void): ImageAnimatorAttribute;
-    onRepeat(event: () => void): ImageAnimatorAttribute;
-    onCancel(event: () => void): ImageAnimatorAttribute;
-    onFinish(event: () => void): ImageAnimatorAttribute;
+    onStart(event: VoidCallback): VideoAttribute;
+    onPause(event: VoidCallback): VideoAttribute;
+    onFinish(event: VoidCallback): VideoAttribute;
+    onFullscreenChange(callback: Callback<FullscreenInfo>): VideoAttribute;
+    onPrepared(callback: Callback<PreparedInfo>): VideoAttribute;
+    onSeeking(callback: Callback<PlaybackInfo>): VideoAttribute;
+    onSeeked(callback: Callback<PlaybackInfo>): VideoAttribute;
+    onUpdate(callback: Callback<PlaybackInfo>): VideoAttribute;
+    onError(event: VoidCallback | ErrorCallback): VideoAttribute;
+    onStop(event: Callback<void>): VideoAttribute;
+    enableAnalyzer(enable: boolean): VideoAttribute;
+    analyzerConfig(config: ImageAnalyzerConfig): VideoAttribute;
+    surfaceBackgroundColor(color: ColorMetrics): VideoAttribute;
+    enableShortcutKey(enabled: boolean): VideoAttribute;
 }
 declare class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -2022,7 +2031,8 @@ declare class ArkShapeComponent extends ArkCommonShapeComponent implements Shape
 }
 declare class ArkCanvasComponent extends ArkComponent implements CanvasAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
-    onReady(event: () => void): this;
+    onReady(event: VoidCallback): this;
+    enableAnalyzer(value: boolean): this;
 }
 declare class ArkGridContainerComponent extends ArkComponent implements ColumnAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
