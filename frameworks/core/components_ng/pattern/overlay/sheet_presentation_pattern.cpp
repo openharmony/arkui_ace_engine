@@ -335,13 +335,6 @@ void SheetPresentationPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     InitFoldState();
-    auto sheetType = GetSheetType();
-    if (GetSheetType() == SheetType::SHEET_SIDE) {
-        sheetObject_ = AceType::MakeRefPtr<SheetSideObject>(sheetType);
-    } else {
-        sheetObject_ = AceType::MakeRefPtr<SheetObject>(sheetType);
-    }
-    sheetObject_->BindPattern(WeakClaim(this));
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
@@ -1097,12 +1090,13 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
 
 void SheetPresentationPattern::SheetTransitionForOverlay(bool isTransitionIn, bool isFirstTransition)
 {
-    // current sheet animation
+    // get sheet animation option and finishCallback
     AnimationOption option = sheetObject_->GetAnimationOptionForOverlay(isTransitionIn, isFirstTransition);
+    // Init other animation information, includes the starting point of the animation.
     sheetObject_->InitAnimationForOverlay(isTransitionIn, isFirstTransition);
     AnimationUtils::Animate(
         option,
-        sheetObject_->GetAnimationPropertyCallForOverlay(isTransitionIn),
+        sheetObject_->GetAnimationPropertyCallForOverlay(isTransitionIn), // Moving effect end point
         option.GetOnFinishEvent());
 }
 
@@ -3642,15 +3636,19 @@ void SheetPresentationPattern::RecoverScrollOrResizeAvoidStatus()
 
 void SheetPresentationPattern::OnWillAppear()
 {
+    isOnAppearing_ = true;
     TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onWillAppear state.");
     if (onWillAppear_) {
         onWillAppear_();
     }
+    // "SendMessagesBeforeXX" and "SendMessagesAfterXX" need to be called in conjunction.
+    // Currently, this is ensured through the lifecycle, and it is not recommended to call them separately.
     SendMessagesBeforeFirstTransitionIn(true);
 }
 
 void SheetPresentationPattern::OnAppear()
 {
+    isOnAppearing_ = false;
     TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onAppear state.");
     if (onAppear_) {
         onAppear_();
@@ -3662,6 +3660,7 @@ void SheetPresentationPattern::OnAppear()
 
 void SheetPresentationPattern::OnWillDisappear()
 {
+    isOnDisappearing_ = true;
     TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onWillDisappear state.");
     if (onWillDisappear_) {
         onWillDisappear_();
@@ -3679,6 +3678,7 @@ void SheetPresentationPattern::OnWillDisappear()
 
 void SheetPresentationPattern::OnDisappear()
 {
+    isOnDisappearing_ = false;
     TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onDisappear state.");
     if (onDisappear_) {
         isExecuteOnDisappear_ = true;
@@ -3730,6 +3730,8 @@ void SheetPresentationPattern::UnRegisterAvoidInfoChangeListener(FrameNode* host
 /**
  * @brief Update and Send messages in other fields before the sheet entrance animation starts.
  * Its timing is equivalent to the callback "onWillAppear".
+ * "SendMessagesBeforeXX" and "SendMessagesAfterXX" need to be called in conjunction.
+ * Currently, this is ensured through the lifecycle, and it is not recommended to call them separately.
  */
 void SheetPresentationPattern::SendMessagesBeforeFirstTransitionIn(bool isFirstTransition)
 {
@@ -3833,6 +3835,8 @@ void SheetPresentationPattern::UpdateSheetType()
 
 void SheetPresentationPattern::UpdateSheetObject(SheetType type)
 {
+    // The first CreateObject must be later than UpdateSheetStyle, must be earlier than MarkModifyDone.
+    // And must be earlier than the entry animation.
     RefPtr<SheetObject> sheetObject = sheetObject_;
     if (sheetObject && sheetObject->GetSheetType() == type) {
         return;
@@ -3844,10 +3848,11 @@ void SheetPresentationPattern::UpdateSheetObject(SheetType type)
     }
     if (sheetObject_) {
         sheetObject->CopyData(sheetObject_);
+        // start clear old sheet data
+        RemovePanEvent();
     }
     SetSheetObject(sheetObject);
     sheetObject_->BindPattern(WeakClaim(this));
-    RemovePanEvent();
     InitPanEvent();
 }
 
