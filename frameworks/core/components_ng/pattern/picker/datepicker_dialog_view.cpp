@@ -36,6 +36,8 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -104,6 +106,7 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     }
     pickerPattern->SetIsShowInDialog(true);
     pickerPattern->SetShowLunarSwitch(settingData.lunarswitch);
+    AddTextPropertiesResourceObj(settingData.properties, pickerPattern);
     pickerPattern->SetTextProperties(settingData.properties);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         isEnableHapticFeedback_ = settingData.isEnableHapticFeedback;
@@ -326,7 +329,9 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonRowNode()
 
 void DatePickerDialogView::CreateTitleIconNode(const RefPtr<FrameNode>& titleNode)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -2275,5 +2280,69 @@ DialogEvent DatePickerDialogView::GetDateChangeEvent(const RefPtr<FrameNode>& fr
         dateChangeEvent(info);
     };
     return dateChangeEvent;
+}
+
+void DatePickerDialogView::ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
+    std::function<void(const PickerTextStyle&)> updateTextStyleFunc)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    auto&& updateFunc = [textStyleOpt, frameNode, updateTextStyleFunc](const RefPtr<ResourceObject> resObj) {
+        PickerTextStyle textStyle;
+        Color color;
+        CalcDimension fontSize;
+        std::vector<std::string> families;
+
+        if (textStyleOpt.textColorResObj &&
+            ResourceParseUtils::ParseResColor(textStyleOpt.textColorResObj, color)) {
+            textStyle.textColor = color;
+        }
+
+        if (textStyleOpt.fontSizeResObj &&
+            ResourceParseUtils::ParseResDimensionFp(textStyleOpt.fontSizeResObj, fontSize)) {
+            textStyle.fontSize = fontSize;
+        }
+
+        if (textStyleOpt.fontFamilyResObj &&
+            ResourceParseUtils::ParseResFontFamilies(textStyleOpt.fontFamilyResObj, families)) {
+            textStyle.fontFamily = families;
+        }
+
+        updateTextStyleFunc(textStyle);
+    };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    pickerPattern->AddResObj(textStyleType, resObj, std::move(updateFunc));
+}
+
+void DatePickerDialogView::AddTextPropertiesResourceObj(const PickerTextProperties& properties,
+    const RefPtr<DatePickerPattern>& pickerPattern)
+{
+    CHECK_NULL_VOID(pickerPattern);
+
+    ParseResTextStyle(
+        properties.disappearTextStyle_,
+        "DatePickerDialog.DisappearTextStyle",
+        [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateDisappearTextStyle(textStyle); }
+    );
+
+    ParseResTextStyle(
+        properties.selectedTextStyle_,
+        "DatePickerDialog.SelectedTextStyle",
+        [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateSelectedTextStyle(textStyle); }
+    );
+
+    ParseResTextStyle(
+        properties.normalTextStyle_,
+        "DatePickerDialog.NormalTextStyle",
+        [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateNormalTextStyle(textStyle); }
+    );
 }
 } // namespace OHOS::Ace::NG

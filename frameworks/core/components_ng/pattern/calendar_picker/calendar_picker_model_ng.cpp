@@ -346,27 +346,6 @@ void CalendarPickerModelNG::SetTextStyle(const PickerTextStyle& textStyle)
     CHECK_NULL_VOID(pipeline);
     RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);
-
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
-    CHECK_NULL_VOID(pickerPattern);
-
-    auto&& updateFunc = [textStyle, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject> resObj) {
-        auto frameNode = weak.Upgrade();
-        CHECK_NULL_VOID(frameNode);
-
-        auto calendarPickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
-        CHECK_NULL_VOID(calendarPickerPattern);
-
-        PickerTextStyle &pickerTextStyleValue = const_cast<PickerTextStyle &>(textStyle);
-        pickerTextStyleValue.PickerReloadResource();
-        calendarPickerPattern->UpdateTextStyle(pickerTextStyleValue);
-    };
-
-    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
-    pickerPattern->AddResObj("CalendarPickerTextStyle", resObj, std::move(updateFunc));
-
     if (textStyle.fontSize.has_value() && textStyle.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, FontSize, textStyle.fontSize.value());
     } else {
@@ -926,5 +905,44 @@ std::string CalendarPickerModelNG::GetDisabledDateRange(FrameNode* frameNode)
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_RETURN(pickerPattern, "");
     return pickerPattern->GetDisabledDateRange();
+}
+
+void CalendarPickerModelNG::ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    auto&& updateFunc = [textStyleOpt, frameNode](const RefPtr<ResourceObject> resObj) {
+        PickerTextStyle textStyle;
+        auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+        CHECK_NULL_VOID(pickerPattern);
+        Color color;
+        if (textStyleOpt.textColorResObj &&
+            ResourceParseUtils::ParseResColor(textStyleOpt.textColorResObj, color)) {
+            textStyle.textColor = color;
+        }
+
+        CalcDimension fontSize;
+        if (textStyleOpt.fontSizeResObj &&
+            ResourceParseUtils::ParseResDimensionFp(textStyleOpt.fontSizeResObj, fontSize)) {
+            textStyle.fontSize = fontSize;
+        }
+
+        std::vector<std::string> families;
+        if (textStyleOpt.fontFamilyResObj &&
+            ResourceParseUtils::ParseResFontFamilies(textStyleOpt.fontFamilyResObj, families)) {
+            textStyle.fontFamily = families;
+        }
+        pickerPattern->UpdateTextStyle(textStyle);
+    };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    pickerPattern->AddResObj("CalendarPickerNormalTextStyle", resObj, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG

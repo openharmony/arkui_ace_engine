@@ -38,6 +38,8 @@ public:
     void ClearBorderWidth() override;
     void ClearPadding() override;
     void SetMarkToday(bool isMarkToday) override;
+    void ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt) override;
+
     static RefPtr<FrameNode> CreateNode(int32_t nodeId, const CalendarSettingData& settingData);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetTextStyle(FrameNode* frameNode, const PickerTextStyle& textStyle);

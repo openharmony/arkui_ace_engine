@@ -734,6 +734,14 @@ private:
         const RefPtr<FrameNode>& columnFrameNode, bool isZeroPrefixTypeHide, uint32_t selectedTime);
     void InitFocusEvent();
     void SetCallBack();
+    Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
+
+    void UpdateTextStyleCommon(
+        const PickerTextStyle& textStyle,
+        const TextStyle& defaultTextStyle,
+        std::function<void(const Color&)> updateTextColorFunc,
+        std::function<void(const Dimension&)> updateFontSizeFunc,
+        std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc);
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;

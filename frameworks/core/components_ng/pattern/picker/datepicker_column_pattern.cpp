@@ -60,7 +60,9 @@ constexpr int32_t BUFFER_NODE_NUMBER = 2;
 
 void DatePickerColumnPattern::OnModifyDone()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PickerTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(theme);
@@ -459,7 +461,9 @@ void DatePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
 
 void DatePickerColumnPattern::SetDividerHeight(uint32_t showOptionCount)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);

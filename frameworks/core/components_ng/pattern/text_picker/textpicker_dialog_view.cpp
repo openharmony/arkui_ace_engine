@@ -31,6 +31,8 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -85,6 +87,7 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
     textPickerPattern->SetColumnsKind(settingData.columnKind);
     textPickerPattern->SetIsShowInDialog(true);
     textPickerPattern->SetPickerTag(false);
+    AddTextPropertiesResourceObj(settingData.properties, textPickerPattern);
     textPickerPattern->SetTextProperties(settingData.properties);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         textPickerPattern->SetIsEnableHaptic(settingData.isEnableHapticFeedback);
@@ -249,6 +252,7 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     CHECK_NULL_RETURN(textPickerPattern, nullptr);
     textPickerPattern->SetIsShowInDialog(true);
     textPickerPattern->SetPickerTag(false);
+    AddTextPropertiesResourceObj(settingData.properties, textPickerPattern);
     textPickerPattern->SetTextProperties(settingData.properties);
     auto context = textPickerNode->GetContext();
     CHECK_NULL_RETURN(context, nullptr);
@@ -1658,4 +1662,85 @@ void TextPickerDialogView::GetUserSettingLimit()
     disappearTextStyleFont_ = pickerTheme->GetUserSetDisappearTextStyle();
 }
 
+void TextPickerDialogView::ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
+    std::function<void(const PickerTextStyle&)> updateTextStyleFunc)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    auto&& updateFunc = [textStyleOpt, frameNode, updateTextStyleFunc](const RefPtr<ResourceObject> resObj) {
+        PickerTextStyle textStyle;
+        Color color;
+        CalcDimension fontSize;
+        std::vector<std::string> families;
+        CalcDimension minFontSize;
+        CalcDimension maxFontSize;
+
+        if (textStyleOpt.textColorResObj &&
+            ResourceParseUtils::ParseResColor(textStyleOpt.textColorResObj, color)) {
+            textStyle.textColor = color;
+        }
+
+        if (textStyleOpt.fontSizeResObj &&
+            ResourceParseUtils::ParseResDimensionFp(textStyleOpt.fontSizeResObj, fontSize)) {
+            textStyle.fontSize = fontSize;
+        }
+
+        if (textStyleOpt.fontFamilyResObj &&
+            ResourceParseUtils::ParseResFontFamilies(textStyleOpt.fontFamilyResObj, families)) {
+            textStyle.fontFamily = families;
+        }
+
+        if (textStyleOpt.minFontSizeResObj &&
+            ResourceParseUtils::ParseResDimensionFp(textStyleOpt.minFontSizeResObj, minFontSize)) {
+            textStyle.minFontSize = minFontSize;
+        }
+
+        if (textStyleOpt.maxFontSizeResObj &&
+            ResourceParseUtils::ParseResDimensionFp(textStyleOpt.maxFontSizeResObj, maxFontSize)) {
+            textStyle.maxFontSize = maxFontSize;
+        }
+
+        updateTextStyleFunc(textStyle);
+    };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    pickerPattern->AddResObj(textStyleType, resObj, std::move(updateFunc));
+}
+
+void TextPickerDialogView::AddTextPropertiesResourceObj(const PickerTextProperties& properties,
+    const RefPtr<TextPickerPattern>& pickerPattern)
+{
+    CHECK_NULL_VOID(pickerPattern);
+
+    ParseResTextStyle(
+        properties.disappearTextStyle_,
+        "TextPickerDialog.DisappearTextStyle",
+        [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateDisappearTextStyle(textStyle); }
+    );
+
+    ParseResTextStyle(
+        properties.selectedTextStyle_,
+        "TextPickerDialog.SelectedTextStyle",
+        [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateSelectedTextStyle(textStyle); }
+    );
+
+    ParseResTextStyle(
+        properties.normalTextStyle_,
+        "TextPickerDialog.NormalTextStyle",
+        [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateNormalTextStyle(textStyle); }
+    );
+
+    ParseResTextStyle(
+        properties.defaultTextStyle_,
+        "TextPickerDialog.DefaultTextStyle",
+        [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateDefaultTextStyle(textStyle); }
+    );
+}
 } // namespace OHOS::Ace::NG

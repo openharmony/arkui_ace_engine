@@ -304,12 +304,11 @@ void JSCalendarPicker::SetTextStyle(const JSCallbackInfo& info)
         return;
     }
 
-    if (SystemProperties::ConfigChangePerform()) {
-        JSCalendarPicker::ParseTextStyleWithResObj(info[0], textStyle, "CalendarPickerTextStyle");
-    } else {
-        JSCalendarPicker::ParseTextStyle(info[0], textStyle);
-    }
+    JSCalendarPicker::ParseTextStyle(info[0], textStyle);
 
+    if (SystemProperties::ConfigChangePerform()) {
+        CalendarPickerModel::GetInstance()->ParseNormalTextStyleResObj(textStyle);
+    }
     CalendarPickerModel::GetInstance()->SetTextStyle(textStyle);
 }
 
@@ -543,84 +542,13 @@ void JSCalendarPicker::Create(const JSCallbackInfo& info)
     CalendarPickerModel::GetInstance()->Create(settingData);
 }
 
-void JSCalendarPicker::ParseTextStyleFontSize(const JSRef<JSVal>& fontSize, NG::PickerTextStyle& textStyle,
-    const std::string& key)
-{
-    CalcDimension size;
-    RefPtr<ResourceObject> fontSizeResObj;
-    if (!ParseJsDimensionFpNG(fontSize, size, fontSizeResObj) || size.Unit() == DimensionUnit::PERCENT) {
-        textStyle.fontSize = Dimension(-1);
-    } else {
-        textStyle.fontSize = size;
-    }
-
-    if (fontSizeResObj) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::PickerTextStyle& textStyle) {
-            CalcDimension size;
-            ResourceParseUtils::ParseResDimensionFp(resObj, size);
-            if (size.Unit() == DimensionUnit::PERCENT) {
-                textStyle.fontSize = Dimension(-1);
-            } else {
-                textStyle.fontSize = size;
-            }
-        };
-        std::string resKey = key + ".fontSize";
-        textStyle.PickerAddResource(resKey, fontSizeResObj, std::move(updateFunc));
-    }
-}
-
-void JSCalendarPicker::ParseTextStyleWithResObj(
-    const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle, const std::string& key)
-{
-    auto fontColor = paramObj->GetProperty("color");
-    auto fontStyle = paramObj->GetProperty("font");
-
-    Color color;
-    RefPtr<ResourceObject> colorResObj;
-    if (ParseJsColor(fontColor, color, colorResObj)) {
-        textStyle.textColor = color;
-    }
-
-    if (colorResObj) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::PickerTextStyle& textStyle) {
-            Color textColor;
-            ResourceParseUtils::ParseResColor(resObj, textColor);
-            textStyle.textColor = textColor;
-        };
-        std::string resKey = key + ".color";
-        textStyle.PickerAddResource(resKey, colorResObj, std::move(updateFunc));
-    }
-
-    if (!fontStyle->IsObject()) {
-        return;
-    }
-    JSRef<JSObject> fontObj = JSRef<JSObject>::Cast(fontStyle);
-    auto fontSize = fontObj->GetProperty("size");
-    auto fontWeight = fontObj->GetProperty("weight");
-    if (fontSize->IsNull() || fontSize->IsUndefined()) {
-        textStyle.fontSize = Dimension(-1);
-    } else {
-        ParseTextStyleFontSize(fontSize, textStyle, key);
-    }
-
-    if (!fontWeight->IsNull() && !fontWeight->IsUndefined()) {
-        std::string weight;
-        if (fontWeight->IsNumber()) {
-            weight = std::to_string(fontWeight->ToNumber<int32_t>());
-        } else {
-            ParseJsString(fontWeight, weight);
-        }
-        textStyle.fontWeight = ConvertStrToFontWeight(weight);
-    }
-}
-
 void JSCalendarPicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle)
 {
     auto fontColor = paramObj->GetProperty("color");
     auto fontStyle = paramObj->GetProperty("font");
 
     Color color;
-    if (ParseJsColor(fontColor, color)) {
+    if (ParseJsColor(fontColor, color, textStyle.textColorResObj)) {
         textStyle.textColor = color;
     }
 
@@ -634,7 +562,7 @@ void JSCalendarPicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::Picke
         textStyle.fontSize = Dimension(-1);
     } else {
         CalcDimension size;
-        if (!ParseJsDimensionFpNG(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
+        if (!ParseJsDimensionFpNG(fontSize, size, textStyle.fontSizeResObj) || size.Unit() == DimensionUnit::PERCENT) {
             textStyle.fontSize = Dimension(-1);
         } else {
             textStyle.fontSize = size;

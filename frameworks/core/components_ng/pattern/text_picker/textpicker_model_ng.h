@@ -169,6 +169,8 @@ private:
     static RefPtr<FrameNode> CreateColumnNode(uint32_t columnKind, uint32_t showCount);
     static void SetUnCascadeColumnsNode(FrameNode* frameNode, const std::vector<NG::TextCascadePickerOptions>& options);
     static void SetCascadeColumnsNode(FrameNode* frameNode, const std::vector<NG::TextCascadePickerOptions>& options);
+    void ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
+        std::function<void(const PickerTextStyle&)> updateTextStyleFunc);
 
     uint32_t maxCount_ = 0;
     std::vector<uint32_t> kinds_;
