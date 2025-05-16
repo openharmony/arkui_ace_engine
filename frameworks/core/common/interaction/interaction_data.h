@@ -59,6 +59,11 @@ struct DragDataCore {
     std::map<std::string, int64_t> summarys;
 };
 
+struct DragBundleInfo {
+    std::string bundleName;
+    bool isRemoteDev { false };
+};
+
 struct DragNotifyMsg {
     int32_t displayX = -1;
     int32_t displayY = -1;

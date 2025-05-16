@@ -594,7 +594,7 @@ public:
 
     bool CheckIsNewDrag(const DragPointerEvent& pointerEvent) const;
 
-    void RequireSummaryIfNecessary(const DragPointerEvent& pointerEvent);
+    void RequireSummaryAndDragBundleInfoIfNecessary(const DragPointerEvent& pointerEvent);
 
     inline void ResetPullId()
     {
@@ -665,6 +665,10 @@ public:
     void HandleTouchEvent(const TouchEvent& event);
     void HandleMouseEvent(const MouseEvent& event);
     void HandlePipelineOnHide();
+
+    void ResetBundleInfo();
+
+    void RequireBundleInfo();
 
 private:
     double CalcDragPreviewDistanceWithPoint(
@@ -801,6 +805,8 @@ private:
     std::map<int32_t, Point> fingerPointInfo_;
     bool isStartAnimationFinished_{};
     bool isPullThrow_ = false;
+    int32_t BundlecurrentPullId_ = -1;
+    DragBundleInfo dragBundleInfo_;
 };
 } // namespace OHOS::Ace::NG
 

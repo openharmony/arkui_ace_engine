@@ -793,6 +793,7 @@ void DragDropManager::TransDragWindowToDragFwk(int32_t windowContainerId)
 
 void DragDropManager::OnDragMoveOut(const DragPointerEvent& pointerEvent)
 {
+    ResetBundleInfo();
     Point point = pointerEvent.GetPoint();
     auto container = Container::Current();
     if (container && container->IsSceneBoardWindow()) {
@@ -889,7 +890,7 @@ void DragDropManager::OnDragStartForDragEvent(const DragPointerEvent& pointerEve
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     ResetPreTargetFrameNode(container->GetInstanceId());
-    RequireSummaryIfNecessary(pointerEvent);
+    RequireSummaryAndDragBundleInfoIfNecessary(pointerEvent);
     SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
     OnDragMove(pointerEvent, extraInfo_, frameNode);
     TAG_LOGI(AceLogTag::ACE_DRAG, "start drag, current windowId is %{public}d", container->GetWindowId());
@@ -981,7 +982,7 @@ void DragDropManager::HandleOnDragMove(const DragPointerEvent& pointerEvent, con
 void DragDropManager::OnDragMove(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
     const RefPtr<FrameNode>& node)
 {
-    RequireSummaryIfNecessary(pointerEvent);
+    RequireSummaryAndDragBundleInfoIfNecessary(pointerEvent);
     Point point = pointerEvent.GetPoint();
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -2029,6 +2030,8 @@ void DragDropManager::UpdateDragEvent(
     event->SetPreviewRect(GetDragWindowRect(point));
     event->SetPressedKeyCodes(pointerEvent.pressedKeyCodes);
     event->SetSourceTool(pointerEvent.sourceTool);
+    event->SetDragSource(dragBundleInfo_.bundleName);
+    event->SetRemoteDev(dragBundleInfo_.isRemoteDev);
 }
 
 std::string DragDropManager::GetExtraInfo()
@@ -3042,11 +3045,12 @@ bool DragDropManager::CheckIsNewDrag(const DragPointerEvent& pointerEvent) const
     return (pointerEvent.pullId != -1) && (pointerEvent.pullId != currentPullId_);
 }
 
-void DragDropManager::RequireSummaryIfNecessary(const DragPointerEvent& pointerEvent)
+void DragDropManager::RequireSummaryAndDragBundleInfoIfNecessary(const DragPointerEvent& pointerEvent)
 {
     if (CheckIsNewDrag(pointerEvent)) {
         currentPullId_ = pointerEvent.pullId;
         RequireSummary();
+        RequireBundleInfo();
     }
 }
 
@@ -3198,5 +3202,21 @@ void DragDropManager::HandlePipelineOnHide()
     if (IsItemDragging()) {
         CancelItemDrag();
     }
+}
+
+void DragDropManager::ResetBundleInfo()
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto dragBundleName = container->GetBundleName();
+    dragBundleInfo_.bundleName = dragBundleName;
+    dragBundleInfo_.isRemoteDev = false;
+}
+
+void DragDropManager::RequireBundleInfo()
+{
+    DragBundleInfo dragBundleInfo;
+    InteractionInterface::GetInstance()->GetDragBundleInfo(dragBundleInfo);
+    dragBundleInfo_ = dragBundleInfo;
 }
 } // namespace OHOS::Ace::NG

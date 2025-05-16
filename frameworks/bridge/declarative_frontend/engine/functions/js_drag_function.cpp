@@ -107,6 +107,8 @@ void JsDragEvent::JSBind(BindingTarget globalObj)
     JSClass<JsDragEvent>::CustomMethod("getPasteData", &JsDragEvent::GetJsPasteData);
     JSClass<JsDragEvent>::CustomMethod("getDisplayX", &JsDragEvent::GetScreenX);
     JSClass<JsDragEvent>::CustomMethod("getDisplayY", &JsDragEvent::GetScreenY);
+    JSClass<JsDragEvent>::CustomMethod("getDragSource", &JsDragEvent::GetDragSource);
+    JSClass<JsDragEvent>::CustomMethod("isRemote", &JsDragEvent::IsRemote);
     JSClass<JsDragEvent>::CustomMethod("getWindowX", &JsDragEvent::GetX);
     JSClass<JsDragEvent>::CustomMethod("getWindowY", &JsDragEvent::GetY);
     JSClass<JsDragEvent>::CustomMethod("getX", &JsDragEvent::GetX);
@@ -155,6 +157,18 @@ void JsDragEvent::GetScreenY(const JSCallbackInfo& args)
     auto yValue = JSVal(ToJSValue(PipelineBase::Px2VpWithCurrentDensity(dragEvent_->GetScreenY())));
     auto yValueRef = JSRef<JSVal>::Make(yValue);
     args.SetReturnValue(yValueRef);
+}
+
+void JsDragEvent::GetDragSource(const JSCallbackInfo& args)
+{
+    JSRef<JSVal> dragSource = JSRef<JSVal>::Make(ToJSValue(dragEvent_->GetDragSource()));
+    args.SetReturnValue(dragSource);
+}
+
+void JsDragEvent::IsRemote(const JSCallbackInfo& args)
+{
+    JSRef<JSVal> isRemoteDev = JSRef<JSVal>::Make(ToJSValue(dragEvent_->isRemoteDev()));
+    args.SetReturnValue(isRemoteDev);
 }
 
 void JsDragEvent::GetX(const JSCallbackInfo& args)

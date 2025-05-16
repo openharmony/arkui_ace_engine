@@ -54,6 +54,8 @@ public:
     void GetScreenY(const JSCallbackInfo& args);
     void GetX(const JSCallbackInfo& args);
     void GetY(const JSCallbackInfo& args);
+    void GetDragSource(const JSCallbackInfo& args);
+    void IsRemote(const JSCallbackInfo& args);
     void GetDescription(const JSCallbackInfo& args);
     void SetDescription(const JSCallbackInfo& args);
     void GetVelocityX(const JSCallbackInfo& args);

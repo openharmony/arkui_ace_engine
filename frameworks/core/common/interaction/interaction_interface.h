@@ -40,6 +40,8 @@ public:
     virtual int32_t StartDrag(const DragDataCore& dragData,
         std::function<void(const OHOS::Ace::DragNotifyMsg&)> callback) = 0;
 
+    virtual int32_t GetDragBundleInfo(DragBundleInfo& dragBundleInfo) = 0;
+
     virtual int32_t UpdateDragStyle(DragCursorStyleCore style, const int32_t eventId = -1) = 0;
 
     virtual int32_t UpdatePreviewStyle(const PreviewStyle& previewStyle) = 0;

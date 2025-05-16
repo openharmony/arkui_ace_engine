@@ -1817,6 +1817,11 @@ RefPtr<OHOS::Ace::DragEvent> GestureEventHub::CreateDragEvent(const GestureEvent
     event->SetDisplayX(info.GetScreenLocation().GetX());
     event->SetDisplayY(info.GetScreenLocation().GetY());
     event->SetSourceTool(info.GetSourceTool());
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, event);
+    auto dragBundleName = container->GetBundleName();
+    event->SetDragSource(dragBundleName);
+    event->SetRemoteDev(false);
     return event;
 }
 
