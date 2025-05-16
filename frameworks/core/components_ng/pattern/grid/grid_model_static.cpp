@@ -117,4 +117,22 @@ void GridModelStatic::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& 
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStop(std::move(onScrollStop));
 }
+
+void GridModelStatic::SetColumnsGap(FrameNode* frameNode, const std::optional<Dimension>& columnsGap)
+{
+    if (columnsGap && GreatOrEqual(columnsGap.value().Value(), 0.0f)) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsGap, columnsGap.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsGap, frameNode);
+    }
+}
+
+void GridModelStatic::SetRowsGap(FrameNode* frameNode, const std::optional<Dimension>& rowsGap)
+{
+    if (rowsGap && GreatOrEqual(rowsGap.value().Value(), 0.0f)) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, RowsGap, rowsGap.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, RowsGap, frameNode);
+    }
+}
 } // namespace OHOS::Ace::NG

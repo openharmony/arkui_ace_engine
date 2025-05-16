@@ -58,11 +58,13 @@ es2panda_Impl *GetImpl() {
     }
     auto library = FindLibrary();
     if (!library) {
-        throw std::runtime_error("No library (es2panda_lib.cc)");
+        printf("No library (es2panda_lib.cc)");
+        abort();
     }
     auto symbol = findSymbol(library, "es2panda_GetImpl");
     if (!symbol) {
-        throw std::runtime_error("No entry point");
+        printf("No entry point");
+        abort();
     }
     impl = reinterpret_cast<es2panda_Impl *(*)(int)>(symbol)(ES2PANDA_LIB_VERSION);
     return impl;

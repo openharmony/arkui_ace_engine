@@ -8050,7 +8050,7 @@ export interface CommonMethod {
     hoverEffect(value: HoverEffect | undefined): this
     onMouse(value: ((event: MouseEvent) => void) | undefined): this
     onTouch(value: ((event: TouchEvent) => void) | undefined): this
-    onKeyEvent(value: ((event: KeyEvent) => void) | undefined | ((parameter: KeyEvent) => boolean) | undefined): this
+    onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this
     onDigitalCrown(value: ((parameter: CrownEvent) => void) | undefined): this
     onKeyPreIme(value: ((parameter: KeyEvent) => boolean) | undefined): this
     onKeyEventDispatch(value: ((parameter: KeyEvent) => boolean) | undefined): this
@@ -8288,7 +8288,7 @@ export interface UICommonMethod {
     /** @memo */
     onTouch(value: ((event: TouchEvent) => void) | undefined): this
     /** @memo */
-    onKeyEvent(value: ((event: KeyEvent) => void) | undefined | ((parameter: KeyEvent) => boolean) | undefined): this
+    onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this
     /** @memo */
     onDigitalCrown(value: ((parameter: CrownEvent) => void) | undefined): this
     /** @memo */
@@ -8874,7 +8874,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public onTouch(value: ((event: TouchEvent) => void) | undefined): this {
         return this
     }
-    public onKeyEvent(value: ((event: KeyEvent) => void) | undefined | ((parameter: KeyEvent) => boolean) | undefined): this {
+    public onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
         return this
     }
     public onDigitalCrown(value: ((parameter: CrownEvent) => void) | undefined): this {
@@ -10285,14 +10285,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         return this
     }
     /** @memo */
-    public onKeyEvent(value: ((event: KeyEvent) => void) | undefined | ((parameter: KeyEvent) => boolean) | undefined): this {
+    public onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
         if (this.checkPriority("onKeyEvent")) {
             const value_type = runtimeType(value)
-            if ((RuntimeType.FUNCTION == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (((event: KeyEvent) => void) | undefined)
-                this.getPeer()?.onKeyEvent0Attribute(value_casted)
-                return this
-            }
             if ((RuntimeType.FUNCTION == value_type) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (((parameter: KeyEvent) => boolean) | undefined)
                 this.getPeer()?.onKeyEvent1Attribute(value_casted)
@@ -11816,12 +11811,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
             const id_type = runtimeType(id)
             const isGroup_type = runtimeType(isGroup)
             const arrowStepOut_type = runtimeType(arrowStepOut)
-            if ((RuntimeType.STRING == id_type) || (RuntimeType.UNDEFINED == id_type)) {
-                const id_casted = id as (string | undefined)
-                const isGroup_casted = isGroup as (boolean)
-                this.getPeer()?.focusScopeId0Attribute(id_casted, isGroup_casted)
-                return this
-            }
             if ((RuntimeType.STRING == id_type) || (RuntimeType.UNDEFINED == id_type)) {
                 const id_casted = id as (string | undefined)
                 const isGroup_casted = isGroup as (boolean)
@@ -13504,13 +13493,13 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         this.setType(type)
     }
     get touches(): Array<TouchObject> {
-        throw new Error("Not implemented")
+        return this.getTouches();
     }
     set touches(touches: Array<TouchObject>) {
         this.setTouches(touches)
     }
     get changedTouches(): Array<TouchObject> {
-        throw new Error("Not implemented")
+        return this.getChangedTouches()
     }
     set changedTouches(changedTouches: Array<TouchObject>) {
         this.setChangedTouches(changedTouches)
@@ -13583,8 +13572,15 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         return
     }
     private getHistoricalPoints_serialize(): Array<HistoricalPoint> {
-        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getHistoricalPoints(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getHistoricalPoints(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<HistoricalPoint> = new Array<HistoricalPoint>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -13601,8 +13597,15 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._TouchEvent_setType(this.peer!.ptr, TypeChecker.TouchType_ToNumeric(type))
     }
     private getTouches_serialize(): Array<TouchObject> {
-        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getTouches(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getTouches(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<TouchObject> = new Array<TouchObject>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -13622,8 +13625,15 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         thisSerializer.release()
     }
     private getChangedTouches_serialize(): Array<TouchObject> {
-        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getChangedTouches(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getChangedTouches(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<TouchObject> = new Array<TouchObject>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {

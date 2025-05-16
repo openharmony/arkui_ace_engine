@@ -218,6 +218,8 @@ const GENERATED_ArkUIWorkerEventListenerAccessor* GetWorkerEventListenerAccessor
 const GENERATED_ArkUIRestrictedWorkerAccessor* GetRestrictedWorkerAccessor();
 const GENERATED_ArkUIUIContextAccessor* GetUIContextAccessor();
 const GENERATED_ArkUIStateStylesOpsAccessor* GetStateStylesOpsAccessor();
+const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* GetUIContextAtomicServiceBarAccessor();
+const GENERATED_ArkUIUIContextDispatchKeyEventAccessor* GetUIContextDispatchKeyEventAccessor();
 const GENERATED_ArkUIDrawableDescriptorAccessor* GetDrawableDescriptorAccessor();
 const GENERATED_ArkUILayeredDrawableDescriptorAccessor* GetLayeredDrawableDescriptorAccessor();
 const GENERATED_ArkUIPixelMapDrawableDescriptorAccessor* GetPixelMapDrawableDescriptorAccessor();
@@ -245,6 +247,7 @@ const GENERATED_ArkUILengthMetricsAccessor* GetLengthMetricsAccessor();
 const GENERATED_ArkUIShapeMaskAccessor* GetShapeMaskAccessor();
 const GENERATED_ArkUIShapeClipAccessor* GetShapeClipAccessor();
 const GENERATED_ArkUIMatrix4TransitAccessor* GetMatrix4TransitAccessor();
+const GENERATED_ArkUINodeContentAccessor* GetNodeContentAccessor();
 const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
 const GENERATED_ArkUIRenderNodeAccessor* GetRenderNodeAccessor();
 const GENERATED_ArkUIGridItemOpsAccessor* GetGridItemOpsAccessor();
@@ -546,6 +549,8 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetRestrictedWorkerAccessor,
         GetUIContextAccessor,
         GetStateStylesOpsAccessor,
+        GetUIContextAtomicServiceBarAccessor,
+        GetUIContextDispatchKeyEventAccessor,
         GetDrawableDescriptorAccessor,
         GetLayeredDrawableDescriptorAccessor,
         GetPixelMapDrawableDescriptorAccessor,
@@ -573,6 +578,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetShapeMaskAccessor,
         GetShapeClipAccessor,
         GetMatrix4TransitAccessor,
+        GetNodeContentAccessor,
         GetPixelMapAccessor,
         GetRenderNodeAccessor,
         GetGridItemOpsAccessor,

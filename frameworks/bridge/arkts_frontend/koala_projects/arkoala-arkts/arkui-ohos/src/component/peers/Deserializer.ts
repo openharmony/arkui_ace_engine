@@ -111,7 +111,7 @@ import { GridItemStyle, GridItemOptions } from "./../gridItem"
 import { ImageAnalyzerController, ImageAnalyzerControllerInternal, ImageAnalyzerType, ImageAnalyzerConfig, ImageAIOptions } from "./../imageCommon"
 import { IndicatorComponentController, IndicatorComponentControllerInternal } from "./../indicatorcomponent"
 import { ItemState } from "./../stepperItem"
-import { LayoutMode, SelectedMode, BoardStyle, TabBarSymbol, TabBarIconStyle, TabBarOptions, BottomTabBarStyle, SubTabBarStyle } from "./../tabContent"
+import { LayoutMode, SelectedMode, BoardStyle, TabBarSymbol, TabBarIconStyle, TabBarOptions, BottomTabBarStyle, SubTabBarStyle, SubTabBarIndicatorStyle, TabBarLabelStyle } from "./../tabContent"
 import { ListItemGroupStyle, ListItemGroupOptions } from "./../listItemGroup"
 import { LoadingProgressStyle } from "./../loadingProgress"
 import { MarqueeStartPolicy, MarqueeState, TextAttribute, TextOverflowOptions, TextMarqueeOptions, Callback_MarqueeState_Void, TextSpanType, TextResponseType, TextController, TextControllerInternal, TextOptions } from "./../text"
@@ -9816,13 +9816,6 @@ export class Deserializer extends DeserializerBase {
             total_buf = (valueDeserializer.readNumber() as number)
         }
         const total_result : number | undefined = total_buf
-        const style_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let style_buf : ProgressStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (style_buf_runtimeType))
-        {
-            style_buf = TypeChecker.ProgressStyle_FromNumeric(valueDeserializer.readInt32())
-        }
-        const style_result : ProgressStyle | undefined = style_buf
         const type_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let type_buf : ProgressType | undefined
         if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))
@@ -9830,7 +9823,7 @@ export class Deserializer extends DeserializerBase {
             type_buf = TypeChecker.ProgressType_FromNumeric(valueDeserializer.readInt32())
         }
         const type_result : ProgressType | undefined = type_buf
-        let value : ProgressOptions = ({value: value_result, total: total_result, style: style_result, type: type_result} as ProgressOptions)
+        let value : ProgressOptions = ({value: value_result, total: total_result, type: type_result} as ProgressOptions)
         return value
     }
     readProgressStyleOptions(): ProgressStyleOptions {
@@ -16205,6 +16198,63 @@ export class Deserializer extends DeserializerBase {
         }
         const mask_result : boolean | undefined = mask_buf
         let value : IndicatorStyle = ({height: height_result, width: width_result, borderRadius: borderRadius_result, marginTop: marginTop_result, color: color_result, selectedColor: selectedColor_result, left: left_result, top: top_result, right: right_result, bottom: bottom_result, size: size_result, mask: mask_result} as IndicatorStyle)
+        return value
+    }
+    readSubTabBarIndicatorStyle(): SubTabBarIndicatorStyle {
+        let valueDeserializer : Deserializer = this
+        const color_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let color_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (color_buf_runtimeType))
+        {
+            const color_buf__selector : int32 = valueDeserializer.readInt8()
+            let color_buf_ : Color | number | string | Resource | undefined
+            if (color_buf__selector == 0) {
+                color_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (color_buf__selector == 1) {
+                color_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (color_buf__selector == 2) {
+                color_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (color_buf__selector == 3) {
+                color_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for color_buf_ has to be chosen through deserialisation.")
+            }
+            color_buf = (color_buf_ as Color | number | string | Resource)
+        }
+        const color_result : ResourceColor | undefined = color_buf
+        const height_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let height_buf : Length | undefined
+        if ((RuntimeType.UNDEFINED) != (height_buf_runtimeType))
+        {
+            height_buf = (valueDeserializer.readLength() as Length)
+        }
+        const height_result : Length | undefined = height_buf
+        const width_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let width_buf : Length | undefined
+        if ((RuntimeType.UNDEFINED) != (width_buf_runtimeType))
+        {
+            width_buf = (valueDeserializer.readLength() as Length)
+        }
+        const width_result : Length | undefined = width_buf
+        const borderRadius_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let borderRadius_buf : Length | undefined
+        if ((RuntimeType.UNDEFINED) != (borderRadius_buf_runtimeType))
+        {
+            borderRadius_buf = (valueDeserializer.readLength() as Length)
+        }
+        const borderRadius_result : Length | undefined = borderRadius_buf
+        const marginTop_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let marginTop_buf : Length | undefined
+        if ((RuntimeType.UNDEFINED) != (marginTop_buf_runtimeType))
+        {
+            marginTop_buf = (valueDeserializer.readLength() as Length)
+        }
+        const marginTop_result : Length | undefined = marginTop_buf
+        let value : SubTabBarIndicatorStyle = ({color: color_result, height: height_result, width: width_result, borderRadius: borderRadius_result, marginTop: marginTop_result} as SubTabBarIndicatorStyle)
         return value
     }
     readJavaScriptProxy(): JavaScriptProxy {
@@ -23857,6 +23907,145 @@ export class Deserializer extends DeserializerBase {
         }
         const unselectedColor_result : ResourceColor | undefined = unselectedColor_buf
         let value : LabelStyle = ({overflow: overflow_result, maxLines: maxLines_result, minFontSize: minFontSize_result, maxFontSize: maxFontSize_result, heightAdaptivePolicy: heightAdaptivePolicy_result, font: font_result, selectedColor: selectedColor_result, unselectedColor: unselectedColor_result} as LabelStyle)
+        return value
+    }
+    readTabBarLabelStyle(): TabBarLabelStyle {
+        let valueDeserializer : Deserializer = this
+        const overflow_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let overflow_buf : TextOverflow | undefined
+        if ((RuntimeType.UNDEFINED) != (overflow_buf_runtimeType))
+        {
+            overflow_buf = TypeChecker.TextOverflow_FromNumeric(valueDeserializer.readInt32())
+        }
+        const overflow_result : TextOverflow | undefined = overflow_buf
+        const maxLines_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let maxLines_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (maxLines_buf_runtimeType))
+        {
+            maxLines_buf = (valueDeserializer.readNumber() as number)
+        }
+        const maxLines_result : number | undefined = maxLines_buf
+        const minFontSize_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let minFontSize_buf : number | ResourceStr | undefined
+        if ((RuntimeType.UNDEFINED) != (minFontSize_buf_runtimeType))
+        {
+            const minFontSize_buf__selector : int32 = valueDeserializer.readInt8()
+            let minFontSize_buf_ : number | ResourceStr | undefined
+            if (minFontSize_buf__selector == 0) {
+                minFontSize_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (minFontSize_buf__selector == 1) {
+                const minFontSize_buf__u_selector : int32 = valueDeserializer.readInt8()
+                let minFontSize_buf__u : string | Resource | undefined
+                if (minFontSize_buf__u_selector == 0) {
+                    minFontSize_buf__u = (valueDeserializer.readString() as string)
+                }
+                else if (minFontSize_buf__u_selector == 1) {
+                    minFontSize_buf__u = valueDeserializer.readResource()
+                }
+                else {
+                    throw new Error("One of the branches for minFontSize_buf__u has to be chosen through deserialisation.")
+                }
+                minFontSize_buf_ = (minFontSize_buf__u as string | Resource)
+            }
+            else {
+                throw new Error("One of the branches for minFontSize_buf_ has to be chosen through deserialisation.")
+            }
+            minFontSize_buf = (minFontSize_buf_ as number | ResourceStr)
+        }
+        const minFontSize_result : number | ResourceStr | undefined = minFontSize_buf
+        const maxFontSize_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let maxFontSize_buf : number | ResourceStr | undefined
+        if ((RuntimeType.UNDEFINED) != (maxFontSize_buf_runtimeType))
+        {
+            const maxFontSize_buf__selector : int32 = valueDeserializer.readInt8()
+            let maxFontSize_buf_ : number | ResourceStr | undefined
+            if (maxFontSize_buf__selector == 0) {
+                maxFontSize_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (maxFontSize_buf__selector == 1) {
+                const maxFontSize_buf__u_selector : int32 = valueDeserializer.readInt8()
+                let maxFontSize_buf__u : string | Resource | undefined
+                if (maxFontSize_buf__u_selector == 0) {
+                    maxFontSize_buf__u = (valueDeserializer.readString() as string)
+                }
+                else if (maxFontSize_buf__u_selector == 1) {
+                    maxFontSize_buf__u = valueDeserializer.readResource()
+                }
+                else {
+                    throw new Error("One of the branches for maxFontSize_buf__u has to be chosen through deserialisation.")
+                }
+                maxFontSize_buf_ = (maxFontSize_buf__u as string | Resource)
+            }
+            else {
+                throw new Error("One of the branches for maxFontSize_buf_ has to be chosen through deserialisation.")
+            }
+            maxFontSize_buf = (maxFontSize_buf_ as number | ResourceStr)
+        }
+        const maxFontSize_result : number | ResourceStr | undefined = maxFontSize_buf
+        const heightAdaptivePolicy_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let heightAdaptivePolicy_buf : TextHeightAdaptivePolicy | undefined
+        if ((RuntimeType.UNDEFINED) != (heightAdaptivePolicy_buf_runtimeType))
+        {
+            heightAdaptivePolicy_buf = TypeChecker.TextHeightAdaptivePolicy_FromNumeric(valueDeserializer.readInt32())
+        }
+        const heightAdaptivePolicy_result : TextHeightAdaptivePolicy | undefined = heightAdaptivePolicy_buf
+        const font_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let font_buf : Font | undefined
+        if ((RuntimeType.UNDEFINED) != (font_buf_runtimeType))
+        {
+            font_buf = valueDeserializer.readFont()
+        }
+        const font_result : Font | undefined = font_buf
+        const selectedColor_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let selectedColor_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (selectedColor_buf_runtimeType))
+        {
+            const selectedColor_buf__selector : int32 = valueDeserializer.readInt8()
+            let selectedColor_buf_ : Color | number | string | Resource | undefined
+            if (selectedColor_buf__selector == 0) {
+                selectedColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (selectedColor_buf__selector == 1) {
+                selectedColor_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (selectedColor_buf__selector == 2) {
+                selectedColor_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (selectedColor_buf__selector == 3) {
+                selectedColor_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for selectedColor_buf_ has to be chosen through deserialisation.")
+            }
+            selectedColor_buf = (selectedColor_buf_ as Color | number | string | Resource)
+        }
+        const selectedColor_result : ResourceColor | undefined = selectedColor_buf
+        const unselectedColor_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let unselectedColor_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (unselectedColor_buf_runtimeType))
+        {
+            const unselectedColor_buf__selector : int32 = valueDeserializer.readInt8()
+            let unselectedColor_buf_ : Color | number | string | Resource | undefined
+            if (unselectedColor_buf__selector == 0) {
+                unselectedColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (unselectedColor_buf__selector == 1) {
+                unselectedColor_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (unselectedColor_buf__selector == 2) {
+                unselectedColor_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (unselectedColor_buf__selector == 3) {
+                unselectedColor_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for unselectedColor_buf_ has to be chosen through deserialisation.")
+            }
+            unselectedColor_buf = (unselectedColor_buf_ as Color | number | string | Resource)
+        }
+        const unselectedColor_result : ResourceColor | undefined = unselectedColor_buf
+        let value : TabBarLabelStyle = ({overflow: overflow_result, maxLines: maxLines_result, minFontSize: minFontSize_result, maxFontSize: maxFontSize_result, heightAdaptivePolicy: heightAdaptivePolicy_result, font: font_result, selectedColor: selectedColor_result, unselectedColor: unselectedColor_result} as TabBarLabelStyle)
         return value
     }
     readMenuOutlineOptions(): MenuOutlineOptions {

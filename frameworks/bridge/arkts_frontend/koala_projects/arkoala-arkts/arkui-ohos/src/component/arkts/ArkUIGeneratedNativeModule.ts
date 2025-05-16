@@ -3949,6 +3949,10 @@ export class ArkUIGeneratedNativeModule {
     native static _UIContext_getMaxFontScale(ptr: KPointer): number
     @ani.unsafe.Direct
     native static _StateStylesOps_onStateStyleChange(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _UIContextAtomicServiceBar_getBarRect(): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _UIContextDispatchKeyEvent_dispatchKeyEvent(thisArray: KSerializerBuffer, thisLength: int32, event: KPointer): boolean
     @ani.unsafe.Direct
     native static _DrawableDescriptor_ctor(): KPointer
     @ani.unsafe.Direct
@@ -4285,6 +4289,14 @@ export class ArkUIGeneratedNativeModule {
     native static _Matrix4Transit_transformPoint(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _Matrix4Transit_setPolyToPoly(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _NodeContent_ctor(): KPointer
+    @ani.unsafe.Direct
+    native static _NodeContent_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _NodeContent_addFrameNode(ptr: KPointer, node: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _NodeContent_removeFrameNode(ptr: KPointer, node: KPointer): boolean
     @ani.unsafe.Direct
     native static _PixelMap_ctor(): KPointer
     @ani.unsafe.Direct
@@ -5967,8 +5979,8 @@ export class ArkUIGeneratedNativeModule {
     native static _Scroller_currentOffset(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _Scroller_scrollToIndex(ptr: KPointer, value: number, thisArray: KSerializerBuffer, thisLength: int32): undefined
-    @ani.unsafe.Quick
-    native static _Scroller_scrollBy(ptr: KPointer, dx: Length, dy: Length): undefined
+    @ani.unsafe.Direct
+    native static _Scroller_scrollBy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): undefined
     @ani.unsafe.Direct
     native static _Scroller_isAtEnd(ptr: KPointer): boolean
     native static _Scroller_getItemRect(ptr: KPointer, index: number): KInteropReturnBuffer

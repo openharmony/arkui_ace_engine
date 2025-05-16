@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#undef KOALA_INTEROP_MODULE
 #define KOALA_INTEROP_MODULE InteropNativeModule
 #include "common-interop.h"
 #include "interop-types.h"

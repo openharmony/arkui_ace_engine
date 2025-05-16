@@ -92,6 +92,55 @@ namespace {
     }
     static const int32_t MIN_FONT_WEIGHT = ConvertToVariableFontWeight(OHOS::Ace::FontWeight::W100);
     static const int32_t MAX_FONT_WEIGHT = ConvertToVariableFontWeight(OHOS::Ace::FontWeight::W900);
+    const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
+
+    std::string GetReplaceContentStr(
+        int32_t pos, const std::string& type, std::vector<std::string>& params, int32_t containCount)
+    {
+        auto index = pos + containCount;
+        if (index < 0) {
+            return std::string();
+        }
+        return params.at(index);
+    }
+    void ReplaceHolder(std::string& originStr, std::vector<std::string>& params, int32_t containCount)
+    {
+        auto size = static_cast<int32_t>(params.size());
+        if (containCount == size) {
+            return;
+        }
+        std::string::const_iterator start = originStr.begin();
+        std::string::const_iterator end = originStr.end();
+        std::smatch matches;
+        bool shortHolderType = false;
+        bool firstMatch = true;
+        int searchTime = 0;
+        while (std::regex_search(start, end, matches, RESOURCE_APP_STRING_PLACEHOLDER)) {
+            std::string pos = matches[2];
+            std::string type = matches[4];
+            if (firstMatch) {
+                firstMatch = false;
+                shortHolderType = pos.length() == 0;
+            } else {
+                if (shortHolderType ^ (pos.length() == 0)) {
+                    return;
+                }
+            }
+    
+            std::string replaceContentStr;
+            if (shortHolderType) {
+                replaceContentStr = GetReplaceContentStr(searchTime, type, params, containCount);
+            } else {
+                replaceContentStr =
+                    GetReplaceContentStr(OHOS::Ace::Framework::StringToInt(pos) - 1, type, params, containCount);
+            }
+    
+            originStr.replace(matches[0].first - originStr.begin(), matches[0].length(), replaceContentStr);
+            start = originStr.begin() + matches.prefix().length() + replaceContentStr.length();
+            end = originStr.end();
+            searchTime++;
+        }
+    }
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -242,8 +291,10 @@ std::optional<std::string> ResourceConverter::ToString()
         case ResourceType::STRING:
             if (id_ != -1) {
                 result = themeConstants_->GetString(id_);
+                ReplaceHolder(result.value(), params_, 0);
             } else if (!params_.empty()) {
                 result = themeConstants_->GetStringByName(params_.front());
+                ReplaceHolder(result.value(), params_, 1);
             } else {
                 LOGE("Unknown resource value OHOS::Ace::NG::Converter::ResourceConverter");
             }
@@ -727,6 +778,17 @@ EdgesParam Convert(const Ark_Edges& src)
     edges.left = OptConvert<Dimension>(src.left);
     edges.top = OptConvert<Dimension>(src.top);
     edges.right = OptConvert<Dimension>(src.right);
+    edges.bottom = OptConvert<Dimension>(src.bottom);
+    return edges;
+}
+
+template<>
+EdgesParam Convert(const Ark_LocalizedEdges& src)
+{
+    EdgesParam edges;
+    edges.start = OptConvert<Dimension>(src.start);
+    edges.top = OptConvert<Dimension>(src.top);
+    edges.end = OptConvert<Dimension>(src.end);
     edges.bottom = OptConvert<Dimension>(src.bottom);
     return edges;
 }
@@ -1759,7 +1821,7 @@ void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src)
 template<>
 Dimension Convert(const Ark_Length& src)
 {
-    if (src.type == Ark_Tag::INTEROP_TAG_RESOURCE) {
+    if (src.type == Ark_Tag::INTEROP_TAG_RESOURCE || src.type == Ark_RuntimeType::INTEROP_RUNTIME_OBJECT) {
         auto resource = ArkValue<Ark_Resource>(src);
         ResourceConverter converter(resource);
         return converter.ToDimension().value_or(Dimension());
@@ -1858,9 +1920,9 @@ template<>
 PaddingProperty Convert(const Ark_LocalizedPadding& src)
 {
     PaddingProperty dst;
-    dst.left = OptConvert<CalcLength>(src.start);
+    dst.start = OptConvert<CalcLength>(src.start);
     dst.top = OptConvert<CalcLength>(src.top);
-    dst.right = OptConvert<CalcLength>(src.end);
+    dst.end = OptConvert<CalcLength>(src.end);
     dst.bottom = OptConvert<CalcLength>(src.bottom);
     return dst;
 }
@@ -1979,6 +2041,16 @@ BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src)
 }
 
 template<>
+BorderColorProperty Convert(const Ark_ResourceColor& src)
+{
+    BorderColorProperty dst;
+    if (auto borderColor = Converter::OptConvert<Color>(src); borderColor.has_value()) {
+        dst.SetColor(borderColor.value());
+    }
+    return dst;
+}
+
+template<>
 BorderRadiusProperty Convert(const Ark_BorderRadiuses& src)
 {
     BorderRadiusProperty borderRadius;
@@ -2047,16 +2119,27 @@ template<>
 BorderWidthProperty Convert(const Ark_LengthMetrics& src)
 {
     BorderWidthProperty dst;
-    LOGE("Convert [Ark_LengthMetrics] to [BorderWidthProperty] is not implemented yet");
+    if (auto width = Converter::Convert<Dimension>(src); !width.IsNegative()) {
+        dst.SetBorderWidth(width);
+        dst.multiValued = false;
+    }
     return dst;
 }
 
 template<>
 BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
 {
-    BorderWidthProperty dst;
-    LOGE("ARKOALA: Convert to [BorderWidthProperty] from [Ark_LocalizedEdgeWidths] is not supported\n");
-    return dst;
+    BorderWidthProperty widthProperty;
+    widthProperty.topDimen = Converter::OptConvert<Dimension>(src.top);
+    Validator::ValidateNonNegative(widthProperty.topDimen);
+    widthProperty.leftDimen = Converter::OptConvert<Dimension>(src.start);
+    Validator::ValidateNonNegative(widthProperty.leftDimen);
+    widthProperty.bottomDimen = Converter::OptConvert<Dimension>(src.bottom);
+    Validator::ValidateNonNegative(widthProperty.bottomDimen);
+    widthProperty.rightDimen = Converter::OptConvert<Dimension>(src.end);
+    Validator::ValidateNonNegative(widthProperty.rightDimen);
+    widthProperty.multiValued = true;
+    return widthProperty;
 }
 
 template<>

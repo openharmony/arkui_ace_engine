@@ -167,7 +167,6 @@ export class ArkProgressPeer extends ArkCommonMethodPeer {
 export interface ProgressOptions {
     value: number;
     total?: number;
-    style?: ProgressStyle;
     type?: ProgressType;
 }
 export enum ProgressType {

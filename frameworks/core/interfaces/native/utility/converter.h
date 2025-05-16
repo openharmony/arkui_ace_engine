@@ -454,6 +454,7 @@ namespace Converter {
     template<> BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src);
     template<> BorderColorProperty Convert(const Ark_EdgeColors& src);
     template<> BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src);
+    template<> BorderColorProperty Convert(const Ark_ResourceColor& src);
     template<> BorderRadiusProperty Convert(const Ark_BorderRadiuses& src);
     template<> BorderRadiusProperty Convert(const Ark_Length& src);
     template<> BorderRadiusProperty Convert(const Ark_LengthMetrics& src);
@@ -489,6 +490,7 @@ namespace Converter {
     template<> DimensionRect Convert(const Ark_Rectangle &src);
     template<> DragPreviewOption Convert(const Ark_DragPreviewOptions &src);
     template<> EdgesParam Convert(const Ark_Edges& src);
+    template<> EdgesParam Convert(const Ark_LocalizedEdges& src);
     template<> EffectOption Convert(const Ark_BackgroundEffectOptions& src);
     template<> EventTarget Convert(const Ark_EventTarget& src);
     template<> FingerInfo Convert(const Ark_FingerInfo& src);
@@ -582,10 +584,10 @@ namespace Converter {
     template<> uint32_t Convert(const Ark_LayoutSafeAreaEdge& src);
     template<> uint32_t Convert(const Ark_LayoutSafeAreaType& src);
     template<> NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src);
-    template<> NG::NavigationBackgroundOptions Convert(const Ark_NavigationToolbarOptions& src);
     template<> NG::NavigationBackgroundOptions Convert(const Ark_NavigationTitleOptions& src);
-    template<> NG::NavigationBarOptions Convert(const Ark_NavigationToolbarOptions& src);
+    template<> NG::NavigationBackgroundOptions Convert(const Ark_NavigationToolbarOptions& src);
     template<> NG::NavigationBarOptions Convert(const Ark_NavigationTitleOptions& src);
+    template<> NG::NavigationBarOptions Convert(const Ark_NavigationToolbarOptions& src);
     template<> NG::NavToolbarItemStatus Convert(const Opt_ToolbarItemStatus& src);
     template<> float Convert(const Ark_Float32& src);
     template<> std::map<std::string, std::string> Convert(const Map_String_String& src);

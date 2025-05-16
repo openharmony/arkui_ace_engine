@@ -25,13 +25,12 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
 import { Resource } from "global/resource"
 import { ComponentContent } from "./arkui-custom"
-import { VoidCallback, Length, ResourceColor, ResourceStr, Padding, Dimension, LocalizedPadding } from "./units"
+import { VoidCallback, Length, ResourceColor, ResourceStr, Padding, Dimension, LocalizedPadding, Font } from "./units"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { SymbolGlyphModifier, IndicatorStyle, LabelStyle } from "./arkui-external"
-
-import { VerticalAlign } from "./enums"
+import { SymbolGlyphModifier } from "./arkui-external"
+import { VerticalAlign, TextOverflow, TextHeightAdaptivePolicy } from "./enums"
 export class ArkTabContentPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -184,8 +183,25 @@ export enum LayoutMode {
     VERTICAL = 1,
     HORIZONTAL = 2
 }
+export interface SubTabBarIndicatorStyle {
+    color?: ResourceColor,
+    height?: Length,
+    width?: Length,
+    borderRadius?: Length,
+    marginTop?: Length
+}
 export interface BoardStyle {
     borderRadius?: Length;
+}
+export interface TabBarLabelStyle {
+    overflow?: TextOverflow,
+    maxLines?: number,
+    minFontSize?: number | ResourceStr,
+    maxFontSize?: number | ResourceStr,
+    heightAdaptivePolicy?: TextHeightAdaptivePolicy,
+    font?: Font,
+    selectedColor?: ResourceColor,
+    unselectedColor?: ResourceColor
 }
 export interface TabBarIconStyle {
     selectedColor?: ResourceColor;
@@ -308,10 +324,10 @@ export function TabContent(
 }
 export class SubTabBarStyle {
     _content?: ResourceStr | ResourceStr | ComponentContent | undefined
-    _indicator?: IndicatorStyle | undefined
+    _indicator?: SubTabBarIndicatorStyle | undefined
     _selectedMode?: SelectedMode | undefined
     _board?: BoardStyle | undefined
-    _labelStyle?: LabelStyle | undefined
+    _labelStyle?: TabBarLabelStyle | undefined
     _padding?: Padding | Dimension | LocalizedPadding | undefined
     _id?: string | undefined
     constructor(content: ResourceStr | ResourceStr | ComponentContent) {
@@ -320,7 +336,7 @@ export class SubTabBarStyle {
     public static of(content: ResourceStr | ResourceStr | ComponentContent): SubTabBarStyle {
         return new SubTabBarStyle(content)
     }
-    indicator(value: IndicatorStyle): this {
+    indicator(value: SubTabBarIndicatorStyle): this {
         this._indicator = value
         return this
     }
@@ -332,7 +348,7 @@ export class SubTabBarStyle {
         this._board = value
         return this
     }
-    labelStyle(value: LabelStyle): this {
+    labelStyle(value: TabBarLabelStyle): this {
         this._labelStyle = value
         return this
     }
@@ -348,7 +364,7 @@ export class SubTabBarStyle {
 export class BottomTabBarStyle {
     _icon?: ResourceStr | TabBarSymbol | undefined
     _text?: ResourceStr | undefined
-    _labelStyle?: LabelStyle | undefined
+    _labelStyle?: TabBarLabelStyle | undefined
     _padding?: Padding | Dimension | LocalizedPadding | undefined
     _layoutMode?: LayoutMode | undefined
     _verticalAlign?: VerticalAlign | undefined
@@ -362,7 +378,7 @@ export class BottomTabBarStyle {
     static of(icon: ResourceStr | TabBarSymbol, text: ResourceStr): BottomTabBarStyle {
         return new BottomTabBarStyle(icon, text)
     }
-    labelStyle(value: LabelStyle): this {
+    labelStyle(value: TabBarLabelStyle): this {
         this._labelStyle = value
         return this
     }

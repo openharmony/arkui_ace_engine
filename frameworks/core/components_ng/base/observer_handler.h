@@ -202,7 +202,10 @@ public:
     void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
     using DensityHandleFunc = void (*)(AbilityContextInfo&, double);
+    using DensityHandleFuncForAni = std::function<void()>;
     void SetHandleDensityChangeFunc(DensityHandleFunc func);
+        void SetHandleDensityChangeFuncForAni(DensityHandleFuncForAni func);
+
     void SetLayoutDoneHandleFunc(DrawCommandSendHandleFunc func);
     void HandleLayoutDoneCallBack();
     void SetDrawCommandSendHandleFunc(LayoutDoneHandleFunc func);
@@ -219,6 +222,7 @@ private:
     LayoutDoneHandleFunc layoutDoneHandleFunc_ = nullptr;
     DrawCommandSendHandleFunc drawCommandSendHandleFunc_ = nullptr;
     DensityHandleFunc densityHandleFunc_ = nullptr;
+    DensityHandleFuncForAni densityHandleFuncForAni_ = nullptr;
     NavDestinationSwitchHandleFunc navDestinationSwitchHandleFunc_ = nullptr;
     WillClickHandleFunc willClickHandleFunc_ = nullptr;
     DidClickHandleFunc didClickHandleFunc_ = nullptr;

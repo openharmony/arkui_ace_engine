@@ -69,7 +69,8 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest001, TestSize.Level
     auto checkVal1 = GetStringAttribute(node_, "selectedColor");
     EXPECT_EQ(checkVal1, "#FF007DFF");
     Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xFF123456);
-    modifier_->setSelectedColor0(node_, &color);
+    auto optColor = Converter::ArkValue<Opt_ResourceColor>(color);
+    modifier_->setSelectedColor0(node_, &optColor);
     auto checkVal2 = GetStringAttribute(node_, "selectedColor");
     EXPECT_EQ(checkVal2, "#FF123456");
 }
@@ -84,7 +85,8 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest002, TestSize.Level
     auto checkVal1 = GetStringAttribute(node_, "unselectedColor");
     EXPECT_EQ(checkVal1, "#FF000000");
     Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xFF123456);
-    modifier_->setUnselectedColor0(node_, &color);
+    auto optColor = Converter::ArkValue<Opt_ResourceColor>(color);
+    modifier_->setUnselectedColor0(node_, &optColor);
     auto checkVal2 = GetStringAttribute(node_, "unselectedColor");
     EXPECT_EQ(checkVal2, "#FF123456");
 }
@@ -98,7 +100,8 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest003, TestSize.Level
 {
     auto checkVal1 = GetStringAttribute(node_, "selectAll");
     EXPECT_EQ(checkVal1, "false");
-    modifier_->setSelectAll0(node_, true);
+    auto optValue = Converter::ArkValue<Opt_Boolean>(true);
+    modifier_->setSelectAll0(node_, &optValue);
     auto checkVal2 = GetStringAttribute(node_, "selectAll");
     EXPECT_EQ(checkVal2, "true");
 }
@@ -115,7 +118,8 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest004, TestSize.Level
     style.strokeColor.value = color;
     style.size = Converter::ArkValue<Opt_Length>("111.00px");
     style.strokeWidth = Converter::ArkValue<Opt_Length>("222.00px");
-    modifier_->setMark0(node_, &style);
+    auto optStyle = Converter::ArkValue<Opt_MarkStyle>(style);
+    modifier_->setMark0(node_, &optStyle);
 
     auto jsonValue = GetJsonValue(node_);
     auto mark = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, "mark");
@@ -142,12 +146,12 @@ HWTEST_F(CheckboxGroupModifierTest, DISABLED_CheckboxGroupModifierTest005, TestS
     }
     auto checkVal1 = GetStringAttribute(node_, "checkboxShape");
     EXPECT_EQ(checkVal1, "CIRCLE");
-
-    modifier_->setCheckboxShape0(node_, ARK_CHECK_BOX_SHAPE_ROUNDED_SQUARE);
+    auto optValue = Converter::ArkValue<Opt_CheckBoxShape>(ARK_CHECK_BOX_SHAPE_ROUNDED_SQUARE);
+    modifier_->setCheckboxShape0(node_, &optValue);
     auto checkVal2 = GetStringAttribute(node_, "checkboxShape");
     EXPECT_EQ(checkVal2, "ROUNDED_SQUARE");
-
-    modifier_->setCheckboxShape0(node_, ARK_CHECK_BOX_SHAPE_CIRCLE);
+    optValue = Converter::ArkValue<Opt_CheckBoxShape>(ARK_CHECK_BOX_SHAPE_CIRCLE);
+    modifier_->setCheckboxShape0(node_, &optValue);
     auto checkVal3 = GetStringAttribute(node_, "checkboxShape");
     EXPECT_EQ(checkVal3, "CIRCLE");
 }
@@ -172,7 +176,8 @@ HWTEST_F(CheckboxGroupModifierTest, SetOnChangeTest, TestSize.Level1)
         };
     };
     auto arkCallback = Converter::ArkValue<OnCheckboxGroupChangeCallback>(testCallback, frameNode->GetId());
-    modifier_->setOnChange0(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_OnCheckboxGroupChangeCallback>(arkCallback);
+    modifier_->setOnChange0(node_, &optCallback);
     auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
     ASSERT_NE(eventHub, nullptr);
     CheckboxGroupResult info({"test1", "test2"}, 2);
@@ -196,20 +201,19 @@ HWTEST_F(CheckboxGroupModifierTest, setOnChangeEventSelectAllImpl, TestSize.Leve
 
     struct CheckEvent {
         int32_t nodeId;
-        bool value;
+        std::optional<bool> value;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
-
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Boolean parameter) {
+    auto checkCallback = [](const Ark_Int32 resourceId, const Opt_Boolean parameter) {
+        auto param = Converter::OptConvert<bool>(parameter);
         checkEvent = {
             .nodeId = resourceId,
-            .value = Converter::Convert<bool>(parameter)
+            .value = param
         };
     };
 
-    Callback_Boolean_Void arkCallback = Converter::ArkValue<Callback_Boolean_Void>(checkCallback, contextId);
-
+    auto arkCallback = Converter::ArkValue<Callback_Opt_Boolean_Void>(checkCallback, contextId);
     modifier_->set_onChangeEvent_selectAll(node_, &arkCallback);
 
     std::vector<std::string> vec;

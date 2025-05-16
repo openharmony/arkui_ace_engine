@@ -142,6 +142,41 @@ public:
 
     static void BindBackground(FrameNode* frameNode,
         std::function<RefPtr<UINode>()>&& buildFunc, const std::optional<Alignment>& align);
+    static void SetFlexGrow(FrameNode* frameNode, float value);
+    static void SetFlexShrink(FrameNode* frameNode, float value);
+    static void SetFlexBasis(FrameNode* frameNode, const std::optional<Dimension>& optValue);
+    static void SetPadding(FrameNode* frameNode, const std::optional<PaddingProperty>& value);
+    static void SetMargin(FrameNode* frameNode, const std::optional<PaddingProperty>& value);
+    static void SetAspectRatio(FrameNode* frameNode, float ratio);
+    static void ResetAspectRatio(FrameNode* frameNode);
+    static void SetLayoutWeight(FrameNode* frameNode, float value);
+    static void SetAlignSelf(FrameNode* frameNode, FlexAlign value);
+    static void SetLayoutDirection(FrameNode* frameNode, TextDirection value);
+    static void SetBorderStyle(FrameNode *frameNode, const BorderStyleProperty& value);
+    static void SetBorderWidth(FrameNode *frameNode, const BorderWidthProperty& value);
+    static void SetBorderColor(FrameNode *frameNode, const BorderColorProperty& value);
+    static void SetBorderRadius(FrameNode *frameNode, const BorderRadiusProperty& value);
+    static void SetDashGap(FrameNode *frameNode, const BorderWidthProperty& value);
+    static void SetDashWidth(FrameNode *frameNode, const BorderWidthProperty& value);
+    static void SetAlign(FrameNode* frameNode, Alignment alignment);
+    static void SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value);
+    static void SetPositionEdges(FrameNode* frameNode, const EdgesParam& value);
+    static void SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized);
+    static void SetMarkAnchorStart(FrameNode* frameNode, const std::optional<Dimension>& markAnchorStart);
+    static void MarkAnchor(FrameNode* frameNode, const std::optional<OffsetT<Dimension>>& value);
+    static void ResetMarkAnchorStart(FrameNode* frameNode);
+    static void SetOffset(FrameNode* frameNode, const OffsetT<Dimension>& value);
+    static void SetOffsetEdges(FrameNode* frameNode, const EdgesParam& value);
+    static void SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized);
+    static void UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
+    static void SetAlignRules(FrameNode* frameNode,
+        const std::optional<std::map<AlignDirection, AlignRule>>& alignRules);
+    static void SetBias(FrameNode* frameNode, const std::optional<BiasPair>& biasPair);
+    static void SetBias(FrameNode* frameNode, const std::optional<float>& horisontal,
+        const std::optional<float>& vertical);
+    static void SetPixelRound(FrameNode* frameNode, uint16_t value);
+    static void SetMaxWidth(FrameNode* frameNode, const CalcDimension& minWidth);
+    static void SetMaxHeight(FrameNode* frameNode, const CalcDimension& minHeight);
 
 private:
     static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);

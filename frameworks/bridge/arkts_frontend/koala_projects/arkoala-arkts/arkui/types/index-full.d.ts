@@ -2686,9 +2686,6 @@ declare class ContainerSpanAttribute {
     textBackgroundStyle(value: TextBackgroundStyle): ContainerSpanAttribute;
     attributeModifier(value: AttributeModifier<ContainerSpanAttribute>): ContainerSpanAttribute;
 }
-declare interface Content {
-    _ContentStub: string;
-}
 declare class ContentSlotAttribute {
 }
 declare interface ContentSlotInterface {
@@ -8895,6 +8892,13 @@ declare class ComponentObserver {
 }
 declare class UIInspector {
     createComponentObserver(id: string): ComponentObserver;
+}
+declare class UIObserver {
+    on(type: string, callback: () => void): void;
+    off(type: string, callback?: () => void): void;
+}
+declare class Observer {
+    createUIObserver(id: number): UIObserver;
 }
 declare const AbilityComponent: AbilityComponentInterface
 declare const AbilityComponentInstance: AbilityComponentAttribute

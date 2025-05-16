@@ -179,10 +179,13 @@ void ColumnsGapImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<Dimension>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        GridModelStatic::SetColumnsGap(frameNode, std::optional<Dimension>(0));
         return;
     }
-    GridModelNG::SetColumnsGap(frameNode, *convValue);
+    if (convValue.value().Value() < 0) {
+        convValue = std::optional<Dimension>(0);
+    }
+    GridModelStatic::SetColumnsGap(frameNode, *convValue);
 }
 void RowsGapImpl(Ark_NativePointer node,
                  const Opt_Length* value)
@@ -191,10 +194,13 @@ void RowsGapImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<Dimension>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        GridModelStatic::SetRowsGap(frameNode, std::optional<Dimension>(0));
         return;
     }
-    GridModelNG::SetRowsGap(frameNode, *convValue);
+    if (convValue.value().Value() < 0) {
+        convValue = std::optional<Dimension>(0);
+    }
+    GridModelStatic::SetRowsGap(frameNode, *convValue);
 }
 void ScrollBarWidthImpl(Ark_NativePointer node,
                         const Opt_Union_Number_String* value)
@@ -274,9 +280,13 @@ void CachedCount1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(count);
-    //auto convValue = Converter::OptConvert<type>(count); // for enums
-    //GridModelNG::SetCachedCount1(frameNode, convValue);
+    auto convValue = Converter::OptConvert<int32_t>(*count).value_or(1);
+    if (convValue < 0) {
+        convValue = 1;
+    }
+    GridModelNG::SetCachedCount(frameNode, convValue);
+    auto showValue = Converter::OptConvert<bool>(*show).value_or(false);
+    GridModelNG::SetShowCached(frameNode, showValue);
 }
 void EditModeImpl(Ark_NativePointer node,
                   const Opt_Boolean* value)

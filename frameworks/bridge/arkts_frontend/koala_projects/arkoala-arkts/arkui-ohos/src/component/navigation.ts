@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, InteropNativeModule, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, KSerializerBuffer, KInteropReturnBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, InteropNativeModule, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32, int8 } from "@koalaui/common"
 import { GlobalStateManager, StateContext, __context, memo, memoEntry } from '@koalaui/runtime'
 import { Serializer } from "./peers/Serializer"
@@ -232,10 +232,10 @@ export class NavPathStack implements MaterializedBase {
     public pop(result: Object, animated?: boolean): NavPathInfo | undefined {
         return PathStackUtils.pop(this, result, animated)
     }
-    public popToName(name: string, result?: boolean | undefined | Object, animated?: boolean): number {
+    public popToName(name: string, result: Object, animated?: boolean): number {
         return PathStackUtils.popToName(this, name, result, animated)
     }
-    public popToIndex(index: number, result?: boolean | undefined | Object, animated?: boolean): void {
+    public popToIndex(index: number, result: Object, animated?: boolean): void {
         PathStackUtils.popToIndex(this, index, result, animated)
     }
     public moveToTop(name: string, animated?: boolean): number {

@@ -30,6 +30,8 @@ import shutil
 import subprocess
 from typing import Dict, List
 
+from preprocess import merge_component
+
 
 TARGET_CMD = "arkoala:abc"
 ABC_FILE = "arkoala.abc"
@@ -81,7 +83,7 @@ def parse_argv(argv) -> Paths:
     path.check_fast_arktsc = os.path.join(path.check_bin_path, "fast-arktsc")
     path.dist_path = os.path.join(path.build_path, "dist")
     path.logfile = os.path.join(path.dist_path, "koala_build.log")
-    path.arkui_ohos_path = os.path.join(path.project_path, "arkoala-arkts" ,"arkui-ohos")
+    path.arkui_ohos_path = os.path.join(path.project_path, "arkoala-arkts" ,"arkui-ohos-preprocess")
     return path
 
 
@@ -350,8 +352,35 @@ def resolve_innerkis_config(path: Paths, config_file, output_file):
         sys.exit(1)
 
 
+def pre_processing(path: Paths):
+    start_time = time.time()
+    original_path = os.path.join(
+        path.project_path, "arkoala-arkts", "arkui-ohos")
+    target_path = os.path.join(
+        path.project_path, "arkoala-arkts", "arkui-ohos-preprocess")
+
+    if os.path.exists(target_path):
+        shutil.rmtree(target_path)
+
+    def ignore_build_path(src, names):
+        return ["build"] if "build" in names else []
+
+    shutil.copytree(original_path, target_path, ignore=ignore_build_path, dirs_exist_ok=True)
+
+    handwritten_path = os.path.join(target_path, "src", "handwritten", "component")
+    generated_path = os.path.join(target_path, "src", "component")
+
+    merge_component(handwritten_path, generated_path)
+
+    shutil.rmtree(handwritten_path)
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"Arkoala: preprocess time: {elapsed_time:.2f} seconds")
+    return
+
 def main(argv):
     path = parse_argv(argv)
+    pre_processing(path)
     prebuilt_dist(path)
     env = os.environ.copy()
     env_old_path = env["PATH"]

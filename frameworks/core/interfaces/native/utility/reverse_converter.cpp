@@ -639,6 +639,26 @@ void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& sr
     dst.y.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
     dst.y.f32 = static_cast<float>(
         PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
+    
+    dst.pressedTime.tag = Ark_Tag::INTEROP_TAG_OBJECT;
+    dst.pressedTime.value.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
+    dst.pressedTime.value.f32 = static_cast<float>(
+        src.GetPressedTime().time_since_epoch().count());
+
+    dst.pressure.tag = Ark_Tag::INTEROP_TAG_OBJECT;
+    dst.pressure.value.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
+    dst.pressure.value.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(src.GetForce()));
+
+    dst.width.tag = Ark_Tag::INTEROP_TAG_OBJECT;
+    dst.width.value.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
+    dst.width.value.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(src.GetWidth()));
+
+    dst.height.tag = Ark_Tag::INTEROP_TAG_OBJECT;
+    dst.height.value.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
+    dst.height.value.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(src.GetHeight()));
 }
 
 void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src)

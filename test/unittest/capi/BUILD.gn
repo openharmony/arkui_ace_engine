@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 native_root = "${ace_root}/frameworks/core/interfaces/native"
 import("$native_root/common_sources.gni")
 import("$native_root/generated/interface/node_interface.gni")
@@ -23,6 +24,14 @@ group("linux_capi_unittest") {
     "modifiers:capi_modifiers_unittest",
     "utils:capi_utils_unittest",
   ]
+}
+
+ace_unittest("capi_fake_test") {
+  type = "new"
+  module_output = "capi"
+  sources = []
+  extra_deps = []
+  extra_deps += [ "..:run_linux_unittest_capi" ]
 }
 
 rebased_generated_sources = []

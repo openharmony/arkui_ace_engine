@@ -134,21 +134,14 @@ export class PeerNode extends IncrementalNode {
                     this.insertMark = peerPtr
                     return
                 }
-                // Find the closest peer node backward.
-                let sibling: PeerNode | undefined = findSiblingPeerNode(child, false)
+                // Find the closest peer node forward.
+                let sibling: PeerNode | undefined = findSiblingPeerNode(child, true)
                 if (sibling === undefined) {
-                    // Add child to the beginning.
-                    this.peer.insertChildAt(peerPtr, 0)
+                    // Add to the end (common case!).
+                    this.peer.addChild(peerPtr)
                 } else {
-                    // Find the closest peer node forward.
-                    sibling = findSiblingPeerNode(child, true)
-                    if (sibling === undefined) {
-                        // Add to the end (common case!).
-                        this.peer.addChild(peerPtr)
-                    } else {
-                        // Insert child in the middle.
-                        this.peer.insertChildBefore(peerPtr, sibling?.peer?.ptr ?? nullptr)
-                    }
+                    // Insert child in the middle.
+                    this.peer.insertChildBefore(peerPtr, sibling?.peer?.ptr ?? nullptr)
                 }
             }
         }

@@ -459,6 +459,9 @@ typedef struct NavPathStackPeer* Ark_NavPathStack;
 typedef struct Opt_NavPathStack Opt_NavPathStack;
 typedef struct Ark_NestedScrollOptions Ark_NestedScrollOptions;
 typedef struct Opt_NestedScrollOptions Opt_NestedScrollOptions;
+typedef struct NodeContentPeer NodeContentPeer;
+typedef struct NodeContentPeer* Ark_NodeContent;
+typedef struct Opt_NodeContent Opt_NodeContent;
 typedef struct Ark_NodeController Ark_NodeController;
 typedef struct Opt_NodeController Opt_NodeController;
 typedef struct Opt_Number Opt_Number;
@@ -2659,6 +2662,8 @@ typedef struct Ark_ImageFrameInfo Ark_ImageFrameInfo;
 typedef struct Opt_ImageFrameInfo Opt_ImageFrameInfo;
 typedef struct Ark_IndicatorStyle Ark_IndicatorStyle;
 typedef struct Opt_IndicatorStyle Opt_IndicatorStyle;
+typedef struct Ark_SubTabBarIndicatorStyle Ark_SubTabBarIndicatorStyle;
+typedef struct Opt_SubTabBarIndicatorStyle Opt_SubTabBarIndicatorStyle;
 typedef struct Ark_JavaScriptProxy Ark_JavaScriptProxy;
 typedef struct Opt_JavaScriptProxy Opt_JavaScriptProxy;
 typedef struct Ark_LightSource Ark_LightSource;
@@ -3020,6 +3025,8 @@ typedef struct Ark_ImageAttachmentInterface Ark_ImageAttachmentInterface;
 typedef struct Opt_ImageAttachmentInterface Opt_ImageAttachmentInterface;
 typedef struct Ark_LabelStyle Ark_LabelStyle;
 typedef struct Opt_LabelStyle Opt_LabelStyle;
+typedef struct Ark_TabBarLabelStyle Ark_TabBarLabelStyle;
+typedef struct Opt_TabBarLabelStyle Opt_TabBarLabelStyle;
 typedef struct Ark_MenuOutlineOptions Ark_MenuOutlineOptions;
 typedef struct Opt_MenuOutlineOptions Opt_MenuOutlineOptions;
 typedef struct Ark_MoreButtonOptions Ark_MoreButtonOptions;
@@ -7041,6 +7048,10 @@ typedef struct Opt_NestedScrollOptions {
     Ark_Tag tag;
     Ark_NestedScrollOptions value;
 } Opt_NestedScrollOptions;
+typedef struct Opt_NodeContent {
+    Ark_Tag tag;
+    Ark_NodeContent value;
+} Opt_NodeContent;
 typedef struct Ark_NodeController {
     void *handle;
 } Ark_NodeController;
@@ -16278,6 +16289,17 @@ typedef struct Opt_IndicatorStyle {
     Ark_Tag tag;
     Ark_IndicatorStyle value;
 } Opt_IndicatorStyle;
+typedef struct Ark_SubTabBarIndicatorStyle {
+    Opt_ResourceColor color;
+    Opt_Length height;
+    Opt_Length width;
+    Opt_Length borderRadius;
+    Opt_Length marginTop;
+} Ark_SubTabBarIndicatorStyle;
+typedef struct Opt_SubTabBarIndicatorStyle {
+    Ark_Tag tag;
+    Ark_SubTabBarIndicatorStyle value;
+} Opt_SubTabBarIndicatorStyle;
 typedef struct Ark_JavaScriptProxy {
     Ark_Object object_;
     Ark_String name;
@@ -18117,6 +18139,20 @@ typedef struct Opt_LabelStyle {
     Ark_Tag tag;
     Ark_LabelStyle value;
 } Opt_LabelStyle;
+typedef struct Ark_TabBarLabelStyle {
+    Opt_TextOverflow overflow;
+    Opt_Number maxLines;
+    Opt_Union_Number_ResourceStr minFontSize;
+    Opt_Union_Number_ResourceStr maxFontSize;
+    Opt_TextHeightAdaptivePolicy heightAdaptivePolicy;
+    Opt_Font font;
+    Opt_ResourceColor selectedColor;
+    Opt_ResourceColor unselectedColor;
+} Ark_TabBarLabelStyle;
+typedef struct Opt_TabBarLabelStyle {
+    Ark_Tag tag;
+    Ark_TabBarLabelStyle value;
+} Opt_TabBarLabelStyle;
 typedef struct Ark_MenuOutlineOptions {
     Opt_Union_Dimension_EdgeOutlineWidths width;
     Opt_Union_ResourceColor_EdgeColors color;
@@ -18525,7 +18561,7 @@ typedef struct Opt_AttachmentType {
 typedef struct Ark_BottomTabBarStyle {
     Opt_Union_ResourceStr_TabBarSymbol _icon;
     Opt_ResourceStr _text;
-    Opt_LabelStyle _labelStyle;
+    Opt_TabBarLabelStyle _labelStyle;
     Opt_Union_Padding_Dimension_LocalizedPadding _padding;
     Opt_LayoutMode _layoutMode;
     Opt_VerticalAlign _verticalAlign;
@@ -18748,10 +18784,10 @@ typedef struct Opt_SpanStyle {
 } Opt_SpanStyle;
 typedef struct Ark_SubTabBarStyle {
     Opt_Union_String_Resource_ComponentContent _content;
-    Opt_IndicatorStyle _indicator;
+    Opt_SubTabBarIndicatorStyle _indicator;
     Opt_SelectedMode _selectedMode;
     Opt_BoardStyle _board;
-    Opt_LabelStyle _labelStyle;
+    Opt_TabBarLabelStyle _labelStyle;
     Opt_Union_Union_Padding_Dimension_LocalizedPadding _padding;
     Opt_String _id;
 } Ark_SubTabBarStyle;
@@ -23400,6 +23436,15 @@ typedef struct GENERATED_ArkUIStateStylesOpsAccessor {
                                const Callback_StateStylesChange* stateStyleChange);
 } GENERATED_ArkUIStateStylesOpsAccessor;
 
+typedef struct GENERATED_ArkUIUIContextAtomicServiceBarAccessor {
+    Ark_Frame (*getBarRect)();
+} GENERATED_ArkUIUIContextAtomicServiceBarAccessor;
+
+typedef struct GENERATED_ArkUIUIContextDispatchKeyEventAccessor {
+    Ark_Boolean (*dispatchKeyEvent)(const Ark_Union_Number_String* node,
+                                    Ark_KeyEvent event);
+} GENERATED_ArkUIUIContextDispatchKeyEventAccessor;
+
 typedef struct GENERATED_ArkUIDrawableDescriptorAccessor {
     void (*destroyPeer)(Ark_DrawableDescriptor peer);
     Ark_DrawableDescriptor (*ctor)();
@@ -23763,6 +23808,15 @@ typedef struct GENERATED_ArkUIMatrix4TransitAccessor {
                                         const Ark_PolyToPolyOptions* options);
 } GENERATED_ArkUIMatrix4TransitAccessor;
 
+typedef struct GENERATED_ArkUINodeContentAccessor {
+    void (*destroyPeer)(Ark_NodeContent peer);
+    Ark_NodeContent (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    Ark_Boolean (*addFrameNode)(Ark_NodeContent peer,
+                         Ark_FrameNode node);
+    Ark_Boolean (*removeFrameNode)(Ark_NodeContent peer,
+                            Ark_FrameNode node);
+} GENERATED_ArkUINodeContentAccessor;
 typedef struct GENERATED_ArkUIPixelMapAccessor {
     void (*destroyPeer)(Ark_PixelMap peer);
     Ark_PixelMap (*ctor)();
@@ -25587,8 +25641,8 @@ typedef struct GENERATED_ArkUIScrollerAccessor {
                           const Opt_ScrollAlign* align,
                           const Opt_ScrollToIndexOptions* options);
     void (*scrollBy)(Ark_Scroller peer,
-                     const Ark_Length* dx,
-                     const Ark_Length* dy);
+                     const Opt_Length* dx,
+                     const Opt_Length* dy);
     Ark_Boolean (*isAtEnd)(Ark_Scroller peer);
     Ark_RectResult (*getItemRect)(Ark_VMContext vmContext,
                                   Ark_Scroller peer,
@@ -26655,6 +26709,8 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIRestrictedWorkerAccessor* (*getRestrictedWorkerAccessor)();
     const GENERATED_ArkUIUIContextAccessor* (*getUIContextAccessor)();
     const GENERATED_ArkUIStateStylesOpsAccessor* (*getStateStylesOpsAccessor)();
+    const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* (*getUIContextAtomicServiceBarAccessor)();
+    const GENERATED_ArkUIUIContextDispatchKeyEventAccessor* (*getUIContextDispatchKeyEventAccessor)();
     const GENERATED_ArkUIDrawableDescriptorAccessor* (*getDrawableDescriptorAccessor)();
     const GENERATED_ArkUILayeredDrawableDescriptorAccessor* (*getLayeredDrawableDescriptorAccessor)();
     const GENERATED_ArkUIPixelMapDrawableDescriptorAccessor* (*getPixelMapDrawableDescriptorAccessor)();
@@ -26682,6 +26738,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIShapeMaskAccessor* (*getShapeMaskAccessor)();
     const GENERATED_ArkUIShapeClipAccessor* (*getShapeClipAccessor)();
     const GENERATED_ArkUIMatrix4TransitAccessor* (*getMatrix4TransitAccessor)();
+    const GENERATED_ArkUINodeContentAccessor* (*getNodeContentAccessor)();
     const GENERATED_ArkUIPixelMapAccessor* (*getPixelMapAccessor)();
     const GENERATED_ArkUIRenderNodeAccessor* (*getRenderNodeAccessor)();
     const GENERATED_ArkUIGridItemOpsAccessor* (*getGridItemOpsAccessor)();

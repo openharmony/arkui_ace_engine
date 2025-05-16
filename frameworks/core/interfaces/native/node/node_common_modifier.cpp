@@ -2963,7 +2963,7 @@ void ResetMarkAnchor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::MarkAnchor(frameNode, std::optional<OffsetT<Dimension>>({Dimension(0.0_vp), Dimension(0.0_vp)}));
+    ViewAbstract::MarkAnchor(frameNode, { Dimension(0.0_vp), Dimension(0.0_vp) });
 }
 
 void SetVisibility(ArkUINodeHandle node, ArkUI_Int32 value)

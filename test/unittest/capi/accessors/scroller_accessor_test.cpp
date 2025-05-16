@@ -360,10 +360,12 @@ HWTEST_F(ScrollerAccessorTest, scrollByXTest, TestSize.Level1)
     };
 
     Ark_Length arkDy = Converter::ArkValue<Ark_Length>(0._px);
+    Opt_Length opt1 = Converter::ArkValue<Opt_Length>(arkDy);
 
     for (const auto &[arkLength, expected]: testPlan) {
         EXPECT_CALL(*mockScrollerController_, ScrollBy(expected, 0, false)).Times(1);
-        accessor_->scrollBy(peer_, &arkLength, &arkDy);
+        Opt_Length optArkLength = Converter::ArkValue<Opt_Length>(arkLength);
+        accessor_->scrollBy(peer_, &optArkLength, &opt1);
     }
 }
 
@@ -398,10 +400,12 @@ HWTEST_F(ScrollerAccessorTest, scrollByYTest, TestSize.Level1)
     };
 
     Ark_Length arkDx = Converter::ArkValue<Ark_Length>(0._px);
+    Opt_Length opt1 = Converter::ArkValue<Opt_Length>(arkDx);
 
     for (const auto &[arkLength, expected]: testPlan) {
         EXPECT_CALL(*mockScrollerController_, ScrollBy(0, expected, false)).Times(1);
-        accessor_->scrollBy(peer_, &arkDx, &arkLength);
+        Opt_Length optArkLength = Converter::ArkValue<Opt_Length>(arkLength);
+        accessor_->scrollBy(peer_, &opt1, &optArkLength);
     }
 }
 

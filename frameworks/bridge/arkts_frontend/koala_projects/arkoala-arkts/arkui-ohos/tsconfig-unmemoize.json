@@ -46,6 +46,12 @@
             "@ohos/animator": [
                 "./ohos.animator.ts"
             ],
+            "@ohos/arkui/componentUtils": [
+                "./ohos.arkui.componentUtils.ts"
+            ],
+            "@ohos/arkui/focusController": [
+                "./ohos.arkui.focusController.ts"
+            ],
             "@ohos/arkui/UIContext": [
                 "./ohos.arkui.UIContext.ts"
             ],
@@ -58,8 +64,11 @@
             "global/resource": [
                 "./global/resource/resource.ts"
             ],
-            "@ohos.router": [ 
+            "@ohos.router": [
                 "./ohos.router.ts"
+            ],
+            "@ohos/observer": [
+                "./ohos.observer.ts"
             ]
         },
         "rootDir": "."
@@ -70,8 +79,11 @@
         "./ohos.font.ts",
         "./ohos.arkui.UIContext.ts",
         "./ohos.animator.ts",
+        "./ohos.arkui.componentUtils.ts",
+        "./ohos.arkui.focusController.ts",
         "./global/**/*.ts",
-        "./ohos.router.ts"
+        "./ohos.router.ts",
+        "./ohos.observer.ts",
     ],
     "exclude": [
         "./src/component/arkts",

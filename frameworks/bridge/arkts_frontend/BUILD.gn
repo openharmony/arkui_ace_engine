@@ -46,7 +46,7 @@ template("arkts_frontend") {
     ]
     external_deps = [
       "hilog:libhilog",
-      "runtime_core:ani",
+      "runtime_core:ani"
     ]
   }
 }

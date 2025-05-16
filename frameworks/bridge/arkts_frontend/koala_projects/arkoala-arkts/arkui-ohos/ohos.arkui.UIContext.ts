@@ -19,6 +19,7 @@
 import { FrameNode, FrameNodeInternal } from "./src/FrameNode"
 import { GlobalScope_ohos_font } from "./src/component/arkui-external"
 import { GlobalScope_ohos_measure_utils } from "./src/component/arkui-external"
+import { UIContextDispatchKeyEvent, UIContextAtomicServiceBar } from "./src/component/arkui-custom"
 import { FontOptions, FontInfo } from "@ohos/font/font"
 import { MeasureOptions } from "@ohos/measure"
 import { SizeOptions } from "./src/component/units"
@@ -31,6 +32,14 @@ import { AnimatorResult, AnimatorOptions, Animator} from "@ohos/animator"
 import { Context } from "#external"
 import { ArkUIAniModule } from "arkui.ani"
 import { Serializer } from "./src/component/peers/Serializer"
+import { componentUtils } from "@ohos/arkui/componentUtils"
+import { focusController } from "@ohos/arkui/focusController"
+import { Frame } from "./src/component/arkui-graphics"
+import { KeyEvent } from "./src/component/common"
+import { Nullable } from "./src/component/enums"
+import { KeyProcessingMode } from "./src/component/focus"
+import {observer} from "@ohos/observer"
+import router from './ohos.router'
 
 export class Font {
     instanceId_: int32 = 10001;
@@ -75,10 +84,102 @@ export class MeasureUtils {
     }
 }
 
-export class UIContext {
-    instanceId_: int32 = 100000;
+export class Router {
+    public pushUrl(options: router.RouterOptions): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            router.pushUrl(options)
+        })
+    }
+
+    public back(options?:router.RouterOptions): void {
+        router.back(options)
+    }
+
+    public clear(): void {
+        router.clear()
+    }
+}
+
+export interface AtomicServiceBar {
+    getBarRect(): Frame;
+}
+
+export class AtomicServiceBarInternal implements AtomicServiceBar {
+    instanceId_: int32;
     constructor(instanceId: int32) {
         this.instanceId_ = instanceId;
+    }
+    public getBarRect(): Frame {
+        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        let frame = UIContextAtomicServiceBar.getBarRect();
+        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        return frame;
+    }
+}
+export class ComponentUtils {
+    instanceId_: int32
+    constructor(instanceId: int32) {
+        this.instanceId_ = instanceId;
+    }
+
+    public getRectangleById(id: string): componentUtils.ComponentInfo {
+       ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+       let componentInformation = componentUtils.getRectangleById(id);
+       ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+       return componentInformation;
+    }
+}
+
+
+export class FocusController {
+    instanceId_: int32
+    constructor(instanceId: int32) {
+        this.instanceId_ = instanceId;
+    }
+
+    public clearFocus(): void {
+        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        focusController.clearFocus();
+        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+    }
+
+    public requestFocus(key: string): void {
+        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        focusController.requestFocus(key);
+        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+    }
+
+    public activate(isActive: boolean, autoInactive?: boolean): void {
+        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        focusController.activate(isActive, autoInactive);
+        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+    }
+
+    public setAutoFocusTransfer(isAutoFocusTransfer: boolean): void {
+        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        focusController.setAutoFocusTransfer(isAutoFocusTransfer);
+        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+    }
+    public setKeyProcessingMode(mode: KeyProcessingMode): void {
+        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        focusController.setKeyProcessingMode(mode);
+        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+    }
+}
+
+export class UIContext {
+    instanceId_: int32 = 100000;
+    observer_ :UIObserver |null = null;
+    router_: Router = new Router()
+    focusController_: FocusController;
+    componentUtils_: ComponentUtils;
+    atomicServiceBar_: AtomicServiceBarInternal;
+
+    constructor(instanceId: int32) {
+        this.instanceId_ = instanceId;
+        this.focusController_ = new FocusController(instanceId);
+        this.componentUtils_ = new ComponentUtils(instanceId);
+        this.atomicServiceBar_ = new AtomicServiceBarInternal(instanceId);
     }
     public getFont() : Font {
         let font : Font = new Font(this.instanceId_);
@@ -102,6 +203,32 @@ export class UIContext {
     }
     getHostContext(): Context | undefined {
         return ArkUIAniModule._Common_GetHostContext();
+    }
+    
+    public getAtomicServiceBar(): Nullable<AtomicServiceBar> {
+        return this.atomicServiceBar_;
+    }
+
+    public dispatchKeyEvent(node: number | string, event: KeyEvent): boolean {
+        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        let result = UIContextDispatchKeyEvent.dispatchKeyEvent(node, event);
+        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        return result;
+    }
+
+    public getFocusController(): FocusController {
+        return this.focusController_;
+    }
+
+    public getComponentUtils(): ComponentUtils {
+        return this.componentUtils_;
+    }
+
+    public getRouter(): Router {
+        if (this.router_ === undefined) {
+            this.router_ = new Router()
+        }
+        return this.router_
     }
 
     public animateTo(param: AnimateParam, event: (() => void)): void {
@@ -158,10 +285,41 @@ export class UIContext {
         this.setFrameCallback(onFrameFunc, onIdleFunc, delayTime)
         ArkUIAniModule._Common_Restore_InstanceId()
     }
+    public getUIObserver(): UIObserver {
+        if (!this.observer_) {
+            this.observer_ = new UIObserver(this.instanceId_);
+        }
+        return this.observer_ as UIObserver;
+    }
 }
 export abstract class FrameCallback {
     onFrame(frameTimeInNano: number): void {}
     onIdle(timeLeftInNano: number): void {}
 }
+
 export class UIObserver {
+    private instanceId_: number = 100000;
+    private observerImpl: observer.UIObserver | null = null;
+
+    constructor(instanceId: number) {
+        this.instanceId_ = instanceId;
+        this.createUIObserver(this.instanceId_);
+    }
+
+    private createUIObserver(id: number): observer.UIObserver | null {
+        this.observerImpl = observer.createUIObserver(id);
+        return this.observerImpl;
+    }
+
+    public on(type: string, callback: () => void): void {
+        if (this.observerImpl) {
+            this.observerImpl!.on(type, callback);
+        }
+    }
+
+    public off(type: string, callback?: (() => void) | undefined): void {
+        if (this.observerImpl) {
+            this.observerImpl!.off(type, callback);
+        }
+    }
 }

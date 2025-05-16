@@ -12700,6 +12700,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         //undefinedModelNG::SetOnStateStyleChange(frameNode, convValue);
     }
     } // StateStylesOpsAccessor
+    namespace UIContextAtomicServiceBarAccessor {
+    Ark_Frame GetBarRectImpl()
+    {
+        return {};
+    }
+    } // UIContextAtomicServiceBarAccessor
+    namespace UIContextDispatchKeyEventAccessor {
+    Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Number_String* node,
+                                     Ark_KeyEvent event)
+    {
+        return {};
+    }
+    } // UIContextDispatchKeyEventAccessor
     namespace DrawableDescriptorAccessor {
     void DestroyPeerImpl(Ark_DrawableDescriptor peer)
     {
@@ -13646,6 +13659,33 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // Matrix4TransitAccessor
+    namespace NodeContentAccessor {
+    void DestroyPeerImpl(Ark_NodeContent peer)
+    {
+        auto peerImpl = reinterpret_cast<NodeContentPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_NodeContent CtorImpl()
+    {
+        return new NodeContentPeer();
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_Boolean AddFrameNodeImpl(Ark_NodeContent peer,
+                                 Ark_FrameNode node)
+    {
+        return {};
+    }
+    Ark_Boolean RemoveFrameNodeImpl(Ark_NodeContent peer,
+                                    Ark_FrameNode node)
+    {
+        return {};
+    }
+    } // NodeContentAccessor
     namespace PixelMapAccessor {
     void DestroyPeerImpl(Ark_PixelMap peer)
     {
@@ -18153,8 +18193,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void ScrollByImpl(Ark_Scroller peer,
-                      const Ark_Length* dx,
-                      const Ark_Length* dy)
+                      const Opt_Length* dx,
+                      const Opt_Length* dy)
     {
     }
     Ark_Boolean IsAtEndImpl(Ark_Scroller peer)
@@ -20844,6 +20884,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &StateStylesOpsAccessorImpl;
     }
+    const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* GetUIContextAtomicServiceBarAccessor()
+    {
+        static const GENERATED_ArkUIUIContextAtomicServiceBarAccessor UIContextAtomicServiceBarAccessorImpl {
+            UIContextAtomicServiceBarAccessor::GetBarRectImpl,
+        };
+        return &UIContextAtomicServiceBarAccessorImpl;
+    }
+
+    const GENERATED_ArkUIUIContextDispatchKeyEventAccessor* GetUIContextDispatchKeyEventAccessor()
+    {
+        static const GENERATED_ArkUIUIContextDispatchKeyEventAccessor UIContextDispatchKeyEventAccessorImpl {
+            UIContextDispatchKeyEventAccessor::DispatchKeyEventImpl,
+        };
+        return &UIContextDispatchKeyEventAccessorImpl;
+    }
+
     const GENERATED_ArkUIDrawableDescriptorAccessor* GetDrawableDescriptorAccessor()
     {
         static const GENERATED_ArkUIDrawableDescriptorAccessor DrawableDescriptorAccessorImpl {
@@ -21292,6 +21348,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct Matrix4TransitPeer {
         virtual ~Matrix4TransitPeer() = default;
+    };
+
+    const GENERATED_ArkUINodeContentAccessor* GetNodeContentAccessor()
+    {
+        static const GENERATED_ArkUINodeContentAccessor NodeContentAccessorImpl {
+            NodeContentAccessor::DestroyPeerImpl,
+            NodeContentAccessor::CtorImpl,
+            NodeContentAccessor::GetFinalizerImpl,
+            NodeContentAccessor::AddFrameNodeImpl,
+            NodeContentAccessor::RemoveFrameNodeImpl,
+        };
+        return &NodeContentAccessorImpl;
+    }
+
+    struct NodeContentPeer {
+        virtual ~NodeContentPeer() = default;
     };
     const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor()
     {
@@ -24309,6 +24381,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetRestrictedWorkerAccessor,
             GetUIContextAccessor,
             GetStateStylesOpsAccessor,
+            GetUIContextAtomicServiceBarAccessor,
+            GetUIContextDispatchKeyEventAccessor,
             GetDrawableDescriptorAccessor,
             GetLayeredDrawableDescriptorAccessor,
             GetPixelMapDrawableDescriptorAccessor,
@@ -24336,6 +24410,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetShapeMaskAccessor,
             GetShapeClipAccessor,
             GetMatrix4TransitAccessor,
+            GetNodeContentAccessor,
             GetPixelMapAccessor,
             GetRenderNodeAccessor,
             GetGridItemOpsAccessor,

@@ -886,9 +886,9 @@ void TabsModelNG::SetTabBarPosition(FrameNode* frameNode, const std::optional<Ba
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarPosition, frameNode);
     }
-
-    if ((!oldTabBarPosition.has_value() && tabBarPositionOpt == BarPosition::END) ||
-        (oldTabBarPosition == tabBarPositionOpt)) {
+    auto tabBarPosition = tabBarPositionOpt.value_or(BarPosition::START);
+    if ((!oldTabBarPosition.has_value() && tabBarPosition == BarPosition::END) ||
+        (oldTabBarPosition.has_value() && oldTabBarPosition.value() == tabBarPosition)) {
         return;
     }
 
@@ -897,7 +897,7 @@ void TabsModelNG::SetTabBarPosition(FrameNode* frameNode, const std::optional<Ba
     auto tabsFocusNode = tabsNode->GetFocusHub();
     CHECK_NULL_VOID(tabsFocusNode);
     if (!tabsFocusNode->IsCurrentFocus()) {
-        auto tabBarPosition = tabsLayoutProperty->GetTabBarPosition().value_or(BarPosition::START);
+        tabBarPosition = tabsLayoutProperty->GetTabBarPosition().value_or(BarPosition::START);
         if (tabBarPosition == BarPosition::START) {
             auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
             CHECK_NULL_VOID(tabBarNode);
