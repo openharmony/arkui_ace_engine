@@ -32,7 +32,7 @@ void EventHub::OnAttachContext(PipelineContext *context)
         context->AddOnAreaChangeNode(host->GetId());
     }
 
-    if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false)) {
+    if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false) || HasThrottledVisibleAreaCallback()) {
         context->AddVisibleAreaChangeNode(host->GetId());
     }
 }
