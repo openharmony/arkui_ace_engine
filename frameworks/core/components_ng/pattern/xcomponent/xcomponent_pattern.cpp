@@ -2141,4 +2141,25 @@ void XComponentPattern::NativeStartImageAnalyzer(std::function<void(int32_t)>& c
         },
         "ArkUIXComponentCreateAnalyzerOverlay");
 }
+
+RSCanvas* XComponentPattern::LockCanvas()
+{
+    CHECK_NULL_RETURN(nativeWindow_, nullptr);
+    auto canvas = RSCanvasUtils::CreateLockCanvas(reinterpret_cast<OHNativeWindow*>(nativeWindow_));
+    if (canvas == nullptr) {
+        TAG_LOGW(
+            AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] LockCanvas's returnValue is nullptr", GetId().c_str());
+    }
+    return canvas;
+}
+
+void XComponentPattern::UnlockCanvasAndPost(RSCanvas* canvas)
+{
+    CHECK_NULL_VOID(canvas);
+    CHECK_NULL_VOID(nativeWindow_);
+    bool isUnlockOk = RSCanvasUtils::UnlockCanvas(canvas, reinterpret_cast<OHNativeWindow*>(nativeWindow_));
+    if (!isUnlockOk) {
+        TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] UnlockCanvasAndPost failed", GetId().c_str());
+    }
+}
 } // namespace OHOS::Ace::NG

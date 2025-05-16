@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 
+#include "canvas_napi/js_canvas.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 #include "js_utils.h"
 
@@ -133,6 +134,8 @@ void JSXComponentController::JSBind(BindingTarget globalObj)
         "setXComponentSurfaceRotation", &JSXComponentController::SetXComponentSurfaceRotation);
     JSClass<JSXComponentController>::CustomMethod(
         "getXComponentSurfaceRotation", &JSXComponentController::GetXComponentSurfaceRotation);
+    JSClass<JSXComponentController>::CustomMethod("lockCanvas", &JSXComponentController::LockCanvas);
+    JSClass<JSXComponentController>::CustomMethod("unlockCanvasAndPost", &JSXComponentController::UnlockCanvasAndPost);
     JSClass<JSXComponentController>::Bind(
         globalObj, JSXComponentController::Constructor, JSXComponentController::Destructor);
 }
@@ -322,5 +325,39 @@ void JSXComponentController::GetXComponentSurfaceRotation(const JSCallbackInfo& 
     bool lock = xcomponentController_->GetSurfaceRotation();
     retObj->SetProperty("lock", lock);
     args.SetReturnValue(retObj);
+}
+
+void JSXComponentController::LockCanvas(const JSCallbackInfo& args)
+{
+    CHECK_NULL_VOID(xcomponentController_);
+    auto rsCanvas = xcomponentController_->LockCanvas();
+    CHECK_NULL_VOID(rsCanvas);
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    ScopeRAII scope(env);
+    auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, rsCanvas);
+    JSRef<JSVal> jsCanvasVal = JsConverter::ConvertNapiValueToJsVal(jsCanvas);
+    args.SetReturnValue(jsCanvasVal);
+}
+
+void JSXComponentController::UnlockCanvasAndPost(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        return;
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    ScopeRAII scope(env);
+    auto jsCanvas = JsConverter::ConvertJsValToNapiValue(args[0]);
+    OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
+    napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
+    CHECK_NULL_VOID(unwrapCanvas);
+    auto rsCanvas = unwrapCanvas->GetCanvas();
+    CHECK_NULL_VOID(xcomponentController_);
+    xcomponentController_->UnlockCanvasAndPost(rsCanvas);
 }
 } // namespace OHOS::Ace::Framework

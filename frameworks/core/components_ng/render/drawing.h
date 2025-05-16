@@ -52,6 +52,7 @@
 #include "rosen_text/typography_types.h"
 #include "rosen_text/text_style.h"
 #include "utils/camera3d.h"
+#include "utils/canvas_utils.h"
 #include "utils/point3.h"
 #include "utils/scalar.h"
 #include "utils/picture_recorder.h"
@@ -82,6 +83,7 @@ using RSAlphaType = Rosen::Drawing::AlphaType;
 using RSScalar = Rosen::Drawing::scalar;
 using RSClipOp = Rosen::Drawing::ClipOp;
 using RSSkCanvas = Rosen::Drawing::SkiaCanvas;
+using RSCanvasUtils = Rosen::Drawing::CanvasUtils;
 using RSMatrix = Rosen::Drawing::Matrix;
 using RSCamera3D = Rosen::Drawing::Camera3D;
 using RSMaskFilter = Rosen::Drawing::MaskFilter;

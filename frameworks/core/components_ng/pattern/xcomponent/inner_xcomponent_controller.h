@@ -22,6 +22,18 @@
 
 #include "interfaces/inner_api/xcomponent_controller/xcomponent_controller.h"
 
+#ifndef ACE_UNITTEST
+namespace OHOS::Rosen::Drawing {
+class Canvas;
+}
+using RSCanvas = OHOS::Rosen::Drawing::Canvas;
+#else
+namespace OHOS::Ace::Testing {
+class TestingCanvas;
+}
+using RSCanvas = OHOS::Ace::Testing::TestingCanvas;
+#endif
+
 namespace OHOS::Ace {
 enum class ImageAnalyzerState;
 using OnAnalyzedCallback = std::optional<std::function<void(ImageAnalyzerState)>>;
@@ -70,6 +82,11 @@ public:
     {
         return false;
     }
+    virtual RSCanvas* LockCanvas()
+    {
+        return nullptr;
+    }
+    virtual void UnlockCanvasAndPost(RSCanvas* canvas) {}
 
 private:
     ConfigSurfaceImpl configSurfaceImpl_;
