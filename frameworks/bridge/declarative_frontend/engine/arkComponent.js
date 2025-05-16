@@ -32863,7 +32863,7 @@ class TabsCustomContentTransitionModifier extends ModifierWithKey {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-TabsOnContentWillChangeModifier.identity = Symbol('tabscustomcontenttransition');
+TabsCustomContentTransitionModifier.identity = Symbol('tabscustomcontenttransition');
 class TabsHideTitleBarModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

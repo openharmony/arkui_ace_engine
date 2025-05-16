@@ -99,7 +99,7 @@ public:
 
 private:
     static void ParseCustomContentTransition(
-        const Framework::JSRef<Framework::JSObject>& transitionObj, const Framework::JsiCallbackInfo& info);
+        const Framework::JSRef<Framework::JSFunc>& transitionFunc, const Framework::JsiCallbackInfo& info);
 };
 } // namespace OHOS::Ace::NG
 
