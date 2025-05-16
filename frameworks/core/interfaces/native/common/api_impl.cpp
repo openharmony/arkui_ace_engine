@@ -123,6 +123,11 @@ Ark_Int32 AddChild(Ark_NodeHandle parentNode, Ark_NodeHandle childNode)
     CHECK_NULL_RETURN(childNode, result);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
+    if (auto* groupNode = AceType::DynamicCast<GroupNode>(parent); groupNode) {
+        groupNode->AddChildToGroup(AceType::Claim(child));
+        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return result;
+    }
     parent->AddChild(AceType::Claim(child));
     auto* frameNode = AceType::DynamicCast<FrameNode>(child);
     if (frameNode) {
