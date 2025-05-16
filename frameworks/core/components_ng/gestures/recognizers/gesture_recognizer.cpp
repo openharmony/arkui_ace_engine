@@ -65,6 +65,14 @@ void NGGestureRecognizer::SetPreventDefault(bool preventDefault)
     preventDefault_ = preventDefault;
 }
 
+bool NGGestureRecognizer::CheckoutDownFingers(int32_t fingerId) const
+{
+    auto eventManager = GetCurrentEventManager();
+    CHECK_NULL_RETURN(eventManager, true);
+    auto downFingerIds = eventManager->GetDownFingerIds();
+    return downFingerIds.find(fingerId) != downFingerIds.end();
+}
+
 bool NGGestureRecognizer::IsAllowedType(SourceTool type)
 {
     // allow all types by default
