@@ -77,6 +77,7 @@ build_component_ng("window_scene") {
       "window_manager:scene_session_manager",
       "window_manager:screen_session",
       "window_manager:screen_session_manager_client",
+      "preferences:native_preferences",
     ]
   }
 }
