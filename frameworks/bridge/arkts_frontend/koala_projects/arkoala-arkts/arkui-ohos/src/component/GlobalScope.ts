@@ -18,7 +18,7 @@
 
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ComponentInfo, Offset_componentutils, TranslateResult, ScaleResult, RotateResult, Matrix4Result } from "./arkui-componentutils"
-import { Size, Edges } from "./arkui-graphics"
+import { Edges } from "./arkui-graphics"
 import { Dimension, BorderRadiuses, Length } from "./units"
 import { WrappedBuilder, Callback_WrappedBuilder_Args_Void, CommonConfiguration } from "./arkui-wrapper-builder"
 import { Context, BaseContext, Context_getGroupDir_Callback, ContextInternal, PointerStyle } from "./arkui-custom"

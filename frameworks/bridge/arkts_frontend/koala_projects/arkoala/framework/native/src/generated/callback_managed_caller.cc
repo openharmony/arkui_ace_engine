@@ -4978,6 +4978,26 @@ void callManagedNavExtender_OnUpdateStackSync(Ark_VMContext vmContext, Ark_Int32
     argsSerializer.writeInt32(resourceId);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
+void callManagedNodeContainer_AboutToResizeCallback(Ark_Int32 resourceId, Ark_Size size)
+{
+    CallbackBuffer _buffer = {{}, {}};
+    const Ark_CallbackResource _callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    _buffer.resourceHolder.holdCallbackResource(&_callbackResourceSelf);
+    Serializer argsSerializer = Serializer((KSerializerBuffer)&(_buffer.buffer), sizeof(_buffer.buffer), &(_buffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_NodeContainer_AboutToResizeCallback);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeSize(size);
+    enqueueCallback(&_buffer);
+}
+void callManagedNodeContainer_AboutToResizeCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Size size)
+{
+    uint8_t _buffer[4096];
+    Serializer argsSerializer = Serializer((KSerializerBuffer)&_buffer, sizeof(_buffer), nullptr);
+    argsSerializer.writeInt32(Kind_NodeContainer_AboutToResizeCallback);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeSize(size);
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
+}
 void callManagedOnAdsBlockedCallback(Ark_Int32 resourceId, Ark_AdsBlockedDetails details)
 {
     CallbackBuffer _buffer = {{}, {}};
@@ -7410,6 +7430,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_MenuOnAppearCallback: return reinterpret_cast<Ark_NativePointer>(callManagedMenuOnAppearCallback);
         case Kind_NavDestinationTransitionDelegate: return reinterpret_cast<Ark_NativePointer>(callManagedNavDestinationTransitionDelegate);
         case Kind_NavExtender_OnUpdateStack: return reinterpret_cast<Ark_NativePointer>(callManagedNavExtender_OnUpdateStack);
+        case Kind_NodeContainer_AboutToResizeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedNodeContainer_AboutToResizeCallback);
         case Kind_OnAdsBlockedCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnAdsBlockedCallback);
         case Kind_OnAlphabetIndexerPopupSelectCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnAlphabetIndexerPopupSelectCallback);
         case Kind_OnAlphabetIndexerRequestPopupDataCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnAlphabetIndexerRequestPopupDataCallback);
@@ -7701,6 +7722,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_MenuOnAppearCallback: return reinterpret_cast<Ark_NativePointer>(callManagedMenuOnAppearCallbackSync);
         case Kind_NavDestinationTransitionDelegate: return reinterpret_cast<Ark_NativePointer>(callManagedNavDestinationTransitionDelegateSync);
         case Kind_NavExtender_OnUpdateStack: return reinterpret_cast<Ark_NativePointer>(callManagedNavExtender_OnUpdateStackSync);
+        case Kind_NodeContainer_AboutToResizeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedNodeContainer_AboutToResizeCallbackSync);
         case Kind_OnAdsBlockedCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnAdsBlockedCallbackSync);
         case Kind_OnAlphabetIndexerPopupSelectCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnAlphabetIndexerPopupSelectCallbackSync);
         case Kind_OnAlphabetIndexerRequestPopupDataCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnAlphabetIndexerRequestPopupDataCallbackSync);

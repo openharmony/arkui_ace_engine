@@ -90,7 +90,7 @@ void SetAboutToDisappearImpl(Ark_NativePointer self, const Callback_Void* value)
     eventHub->SetControllerAboutToDisappear(std::move(aboutToDisappearFunc));
 }
 
-void SetAboutToResizeImpl(Ark_NativePointer self, const Callback_Number_Number_Void* value)
+void SetAboutToResizeImpl(Ark_NativePointer self, const NodeContainer_AboutToResizeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(self);
     CHECK_NULL_VOID(frameNode);
@@ -98,9 +98,8 @@ void SetAboutToResizeImpl(Ark_NativePointer self, const Callback_Number_Number_V
     CHECK_NULL_VOID(pattern);
     CHECK_NULL_VOID(value);
     auto aboutToResizeFunc = [arkCallback = CallbackHelper(*value)](const SizeF& size) -> void {
-        auto arkWidth = Converter::ArkValue<Ark_Number>(size.Width());
-        auto arkHeight = Converter::ArkValue<Ark_Number>(size.Height());
-        arkCallback.Invoke(arkWidth, arkHeight);
+        auto arkSize = Converter::ArkValue<Ark_Size>(size);
+        arkCallback.Invoke(arkSize);
     };
     pattern->SetOnResize(aboutToResizeFunc);
 }

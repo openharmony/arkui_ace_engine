@@ -27,6 +27,7 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { DrawingCanvas } from "./arkui-drawing"
 import { Dimension } from "./units"
+import { Size } from "../Graphics"
 export class ShapeMaskInternal {
     public static fromPtr(ptr: KPointer): ShapeMask {
         const obj : ShapeMask = new ShapeMask()
@@ -247,10 +248,6 @@ export class ShapeClip implements MaterializedBase {
         ArkUIGeneratedNativeModule._ShapeClip_setCommandPath(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-}
-export interface Size {
-    width: number;
-    height: number;
 }
 export interface DrawContext {
     size: Size;
