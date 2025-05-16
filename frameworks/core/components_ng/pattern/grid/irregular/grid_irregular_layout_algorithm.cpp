@@ -198,6 +198,7 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
     if (wrapper_->ConstraintChanged()) {
         // need to remeasure all items in current view
         postJumpOffset_ = info_.currentOffset_;
+        info_.lineHeightMap_.clear();
         PrepareJumpOnReset(info_);
     }
 }
@@ -656,14 +657,25 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
     filler.FillMatrixOnly(std::min(info_.GetChildrenCount(), info_.endIndex_ + cacheCnt));
 
     GridLayoutUtils::PreloadGridItems(wrapper_->GetHostNode()->GetPattern<GridPattern>(), std::move(itemsToPreload),
-        [crossLens = crossLens_, crossGap = crossGap_, mainGap = mainGap_](
-            const RefPtr<FrameNode>& host, int32_t itemIdx) {
+        [](const RefPtr<FrameNode>& host, int32_t itemIdx) {
             CHECK_NULL_RETURN(host, false);
             auto pattern = host->GetPattern<GridPattern>();
             CHECK_NULL_RETURN(pattern, false);
 
             ScopedLayout scope(host->GetContext());
             auto& info = pattern->GetMutableLayoutInfo();
+            const auto& contentSize = host->GetGeometryNode()->GetContentSize();
+            auto props = DynamicCast<GridLayoutProperty>(host->GetLayoutProperty());
+            auto crossGap = GridUtils::GetCrossGap(props, contentSize, info.axis_);
+            auto mainGap = GridUtils::GetMainGap(props, contentSize, info.axis_);        
+            std::string args = info.axis_ == Axis::VERTICAL ? props->GetColumnsTemplate().value_or("") : props->GetRowsTemplate().value_or("");
+            const float crossSize = contentSize.CrossSize(info.axis_);
+            auto res = ParseTemplateArgs(GridUtils::ParseArgs(args), crossSize, crossGap, info.GetChildrenCount());
+            auto crossLens = std::vector<float>(res.first.begin(), res.first.end());
+            if (crossLens.empty()) {
+                crossLens.push_back(crossSize);
+            }        
+            crossGap = res.second;
             GridIrregularFiller filler(&info, RawPtr(host));
             const auto pos = info.GetItemPos(itemIdx);
             auto constraint = filler
