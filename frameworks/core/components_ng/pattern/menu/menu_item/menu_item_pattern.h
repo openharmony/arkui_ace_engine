@@ -427,6 +427,7 @@ private:
     void AddSelectIcon(RefPtr<FrameNode>& row);
     void UpdateIcon(RefPtr<FrameNode>& row, bool isStart);
     void AddExpandIcon(RefPtr<FrameNode>& row);
+    bool ISNeedAddExpandIcon(RefPtr<FrameNode>& row);
     void AddClickableArea();
     void SetRowAccessibilityLevel();
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);

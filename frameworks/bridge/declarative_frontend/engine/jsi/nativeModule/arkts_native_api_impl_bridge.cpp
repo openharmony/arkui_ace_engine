@@ -4513,6 +4513,10 @@ void ArkUINativeModule::RegisterMenuAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetSubMenuExpandingMode));
     menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSubMenuExpandingMode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetSubMenuExpandingMode));
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSubMenuExpandSymbol"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetSubMenuExpandSymbol));
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSubMenuExpandSymbol"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetSubMenuExpandSymbol));
     menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontSize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetFontSize));
     menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontSize"),

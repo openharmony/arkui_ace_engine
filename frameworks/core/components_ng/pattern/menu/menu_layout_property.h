@@ -96,6 +96,16 @@ public:
         ResetItemGroupDivider();
     }
 
+    std::function<void(WeakPtr<NG::FrameNode>)>& GetExpandSymbol()
+    {
+        return expandSymbol_;
+    }
+
+    void SetExpandSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& symbol)
+    {
+        expandSymbol_ = symbol;
+    }
+
     // if is a rect in target frameNode
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsRectInTarget, bool, PROPERTY_UPDATE_MEASURE);
     // target frameNode that this menu belongs to
@@ -139,6 +149,9 @@ public:
     void BindToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void DividerToJsonValue(std::unique_ptr<JsonValue>& json) const;
     ACE_DISALLOW_COPY_AND_MOVE(MenuLayoutProperty);
+
+private:
+    std::function<void(WeakPtr<NG::FrameNode>)> expandSymbol_;
 };
 } // namespace OHOS::Ace::NG
 

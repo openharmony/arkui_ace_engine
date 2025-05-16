@@ -226,6 +226,22 @@ void ResetSubMenuExpandingMode(ArkUINodeHandle node)
     MenuModelNG::SetExpandingMode(frameNode, SubMenuExpandingMode::SIDE);
 }
 
+void SetSubMenuExpandSymbol(ArkUINodeHandle node, void* symbolFunction)
+{
+    CHECK_NULL_VOID(symbolFunction);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto symbolCallback = reinterpret_cast<std::function<void(WeakPtr<NG::FrameNode>)>*>(symbolFunction);
+    MenuModelNG::SetExpandSymbol(frameNode, std::move(*symbolCallback));
+}
+
+void ResetSubMenuExpandSymbol(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MenuModelNG::SetExpandSymbol(frameNode, nullptr);
+}
+
 void SetMenuFontSize(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -261,6 +277,8 @@ const ArkUIMenuModifier* GetMenuModifier()
         .resetMenuItemGroupDivider = ResetMenuItemGroupDivider,
         .setSubMenuExpandingMode = SetSubMenuExpandingMode,
         .resetSubMenuExpandingMode = ResetSubMenuExpandingMode,
+        .setSubMenuExpandSymbol = SetSubMenuExpandSymbol,
+        .resetSubMenuExpandSymbol = ResetSubMenuExpandSymbol,
         .setMenuFontSize = SetMenuFontSize,
         .resetMenuFontSize = ResetMenuFontSize,
     };
