@@ -1660,4 +1660,46 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest015, TestSize.Level1)
     EXPECT_EQ(padding->top.value().GetDimension(), DEFAULT_MENU_BUTTON_PADDING);
     EXPECT_EQ(padding->bottom.value().GetDimension(), DEFAULT_MENU_BUTTON_PADDING);
 }
+
+/**
+ * @tc.name: NavdestinationTest016
+ * @tc.desc: Test BuildMoreItemNodeAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, NavdestinationTest016, TestSize.Level1)
+{
+    OptionParam optionParam;
+    std::vector<OptionParam> params = {};
+    params.push_back(optionParam);
+    MenuParam menuParam;
+    menuParam.isShowInSubWindow = true;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    selectTheme->expandDisplay_ = true;
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto barItemNode = NavigationTitleUtil::CreateBarItemNode(true, theme);
+    ASSERT_NE(barItemNode, nullptr);
+    auto menuItemNode = NavigationTitleUtil::CreateMenuItemButton(theme);
+    ASSERT_NE(menuItemNode, nullptr);
+    auto barMenuNode = MenuView::Create(
+        std::move(params), menuItemNode->GetId(), menuItemNode->GetTag(), MenuType::NAVIGATION_MENU, menuParam);
+    ASSERT_NE(barMenuNode, nullptr);
+    NavigationTitleUtil::BuildMoreItemNodeAction(menuItemNode,barItemNode, barMenuNode, menuParam);
+    bool isClick = false;
+    BarItem barItem;
+    barItem.action = [&isClick]() { isClick = !isClick; };
+    auto gestureEventHub = menuItemNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto clickListener = gestureEventHub->clickEventActuator_->clickEvents_.back();
+    ASSERT_NE(clickListener, nullptr);
+    ASSERT_NE(clickListener->callback_, nullptr);
+    GestureEvent info;
+    info.SetSourceDevice(SourceType::MOUSE);
+    clickListener->callback_(info);
+    EXPECT_FALSE(isClick);
+}
 } // namespace OHOS::Ace::NG
