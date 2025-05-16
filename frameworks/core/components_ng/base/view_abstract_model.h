@@ -74,13 +74,19 @@ public:
     
     // basic size
     virtual void SetWidth(const CalcDimension& width) = 0;
+    virtual void SetWidth(const RefPtr<ResourceObject>& resObj) {}
     virtual void SetHeight(const CalcDimension& height) = 0;
     virtual void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isWidth) = 0;
+    virtual void SetHeight(const RefPtr<ResourceObject>& resObj) {}
     virtual void ClearWidthOrHeight(bool isWidth) = 0;
     virtual void SetMinWidth(const CalcDimension& minWidth) = 0;
+    virtual void SetMinWidth(const RefPtr<ResourceObject>& resObj) {}
     virtual void SetMinHeight(const CalcDimension& minHeight) = 0;
+    virtual void SetMinHeight(const RefPtr<ResourceObject>& resObj) {}
     virtual void SetMaxWidth(const CalcDimension& maxWidth) = 0;
+    virtual void SetMaxWidth(const RefPtr<ResourceObject>& resObj) {}
     virtual void SetMaxHeight(const CalcDimension& maxHeight) = 0;
+    virtual void SetMaxHeight(const RefPtr<ResourceObject>& resObj) {}
     virtual void ResetMinSize(bool resetWidth) = 0;
     virtual void ResetMaxSize(bool resetWidth) = 0;
 
@@ -109,10 +115,12 @@ public:
     virtual void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) = 0;
     virtual void SetPaddings(const NG::PaddingProperty& paddings) = 0;
+    virtual void SetPadding(const RefPtr<ResourceObject>& resObj) {}
     virtual void SetMargin(const CalcDimension& value) = 0;
     virtual void SetMargins(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) = 0;
     virtual void SetMargins(const NG::MarginProperty& margins) = 0;
+    virtual void SetMargin(const RefPtr<ResourceObject>& resObj) {}
     virtual void ResetSafeAreaPadding() = 0;
     virtual void SetSafeAreaPadding(const CalcDimension& value) = 0;
     virtual void SetSafeAreaPaddings(const NG::PaddingProperty& paddings) = 0;
@@ -124,15 +132,19 @@ public:
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight) = 0;
     virtual void SetBorderRadius(const NG::BorderRadiusProperty& borderRadius) = 0;
+    virtual void SetBorderRadius(const RefPtr<ResourceObject>& resobj) {}
     virtual void SetBorderColor(const Color& value) = 0;
     virtual void SetBorderColor(const std::optional<Color>& colorLeft, const std::optional<Color>& colorRight,
         const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) = 0;
     virtual void SetBorderColor(const NG::BorderColorProperty& borderColors) = 0;
+    virtual void SetBorderColor(const RefPtr<ResourceObject>& resobj) {}
     virtual void SetBorderWidth(const Dimension& value) = 0;
     virtual void SetBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) = 0;
     virtual void SetBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom, bool isLocalized) = 0;
+    virtual void SetBorderWidth(const RefPtr<ResourceObject>& resobj) {}
+    virtual void SetBorderWidth(const NG::BorderWidthProperty& value) {}
     virtual void SetBorderStyle(const BorderStyle& value) = 0;
     virtual void SetBorderStyle(const std::optional<BorderStyle>& styleLeft,
         const std::optional<BorderStyle>& styleRight, const std::optional<BorderStyle>& styleTop,
@@ -140,9 +152,11 @@ public:
     virtual void SetDashGap(const Dimension& value) {}
     virtual void SetDashGap(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) {}
+    virtual void SetDashGap(const NG::BorderWidthProperty& value) {}
     virtual void SetDashWidth(const Dimension& value) {}
     virtual void SetDashWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) {}
+    virtual void SetDashWidth(const NG::BorderWidthProperty& value) {}
     virtual void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) = 0;
     virtual void SetBorderImageGradient(const NG::Gradient& gradient) = 0;
 
@@ -192,10 +206,16 @@ public:
 
     // position
     virtual void SetPosition(const Dimension& x, const Dimension& y) = 0;
+    virtual void SetPosition(const Dimension& x, const Dimension& y,
+        const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj) {}
     virtual void SetOffset(const Dimension& x, const Dimension& y) = 0;
+    virtual void SetOffset(const Dimension& x, const Dimension& y,
+        const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj) {}
     virtual void SetPositionEdges(const EdgesParam& value) {};
     virtual void SetOffsetEdges(const EdgesParam& value) {};
     virtual void MarkAnchor(const Dimension& x, const Dimension& y) = 0;
+    virtual void MarkAnchor(const Dimension& x, const Dimension& y,
+        const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj) {}
     virtual void ResetPosition() {};
 
     // transforms
