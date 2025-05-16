@@ -167,6 +167,7 @@ public:
     void BeforeCreateLayoutWrapper() override;
 
     void AddChildSpanItem(const RefPtr<UINode>& child);
+    void SetSpanItemEvent(const RefPtr<SpanItem>& spanItem, RefPtr<FocusHub>& focusHub);
     void AddImageToSpanItem(const RefPtr<UINode>& child);
 
     FocusPattern GetFocusPattern() const override
@@ -991,8 +992,11 @@ private:
     Color GetUrlHoverColor();
     Color GetUrlPressColor();
     void SetAccessibilityAction();
-    void CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanHasClick);
-    void CollectTextSpanNodes(const RefPtr<SpanNode>& child, bool& isSpanHasClick);
+    void SetSpanEventFlagValue(
+        const RefPtr<UINode>& code, bool& isSpanHasClick, bool& isSpanHasLongPress);
+    void CollectSymbolSpanNodes(const RefPtr<SpanNode>& spanNode, const RefPtr<UINode>& node);
+    void CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanHasClick, bool& isSpanHasLongPress);
+    void CollectTextSpanNodes(const RefPtr<SpanNode>& child, bool& isSpanHasClick, bool& isSpanHasLongPress);
     void UpdateContainerChildren(const RefPtr<UINode>& parent, const RefPtr<UINode>& child);
     RefPtr<RenderContext> GetRenderContext();
     void ProcessBoundRectByTextShadow(RectF& rect);
@@ -1003,6 +1007,7 @@ private:
     void HandleMouseLeftPressAction(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseLeftMoveAction(const MouseInfo& info, const Offset& textOffset);
+    void InitSpanItemEvent(bool& isSpanHasClick, bool& isSpanHasLongPress);
     void InitSpanItem(std::stack<SpanNodeInfo> nodes);
     int32_t GetSelectionSpanItemIndex(const MouseInfo& info);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);

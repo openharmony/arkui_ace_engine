@@ -1251,6 +1251,112 @@ HWTEST_F(SpanTestNg, SpanNodeGetOrCreateSpanNode004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SpanOnClick001
+ * @tc.desc: Test OnClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanOnClick001, TestSize.Level1)
+{
+    auto node = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, 1);
+    auto* frameNode = reinterpret_cast<FrameNode*>(Referenced::RawPtr(node));
+    ASSERT_NE(frameNode, nullptr);
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    ASSERT_NE(spanNode, nullptr);
+    auto spanOnClickFunc = [](GestureEvent& info) {};
+    spanNode->UpdateOnClickEvent(std::move(spanOnClickFunc));
+    EXPECT_NE(spanNode->spanItem_->onClick, nullptr);
+}
+
+/**
+ * @tc.name: SpanOnClick002
+ * @tc.desc: Test OnClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanOnClick002, TestSize.Level1)
+{
+    auto node = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    ASSERT_NE(frameNode, nullptr);
+    auto imageSpanItem = AceType::MakeRefPtr<ImageSpanItem>();
+    imageSpanItem->nodeId_ = frameNode->GetId();
+    imageSpanItem->UpdatePlaceholderBackgroundStyle(frameNode);
+    auto spanOnClickFunc = [](GestureEvent& info) {};
+    imageSpanItem->SetOnClickEvent(std::move(spanOnClickFunc));
+    EXPECT_NE(imageSpanItem->onClick, nullptr);
+}
+
+/**
+ * @tc.name: SpanOnClick003
+ * @tc.desc: Test OnClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanOnClick003, TestSize.Level1)
+{
+    auto node = CustomSpanNode::GetOrCreateSpanNode(V2::CUSTOM_SPAN_NODE_ETS_TAG, 1);
+    auto customSpanNode = AceType::DynamicCast<CustomSpanNode>(node);
+    ASSERT_NE(customSpanNode, nullptr);
+    auto customSpan = customSpanNode->GetSpanItem();
+    customSpan->placeholderSpanNodeId = customSpanNode->GetId();
+    auto spanOnClickFunc = [](GestureEvent& info) {};
+    customSpan->SetOnClickEvent(std::move(spanOnClickFunc));
+    EXPECT_NE(customSpan->onClick, nullptr);
+}
+
+/**
+ * @tc.name: SpanOnLongPress001 
+ * @tc.desc: Test OnLongPress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanOnLongPress001, TestSize.Level1)
+{
+    auto node = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, 1);
+    auto* frameNode = reinterpret_cast<FrameNode*>(Referenced::RawPtr(node));
+    ASSERT_NE(frameNode, nullptr);
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    ASSERT_NE(spanNode, nullptr);
+    auto spanOnLongPressFunc = [](GestureEvent& info) {};
+    spanNode->UpdateOnLongPressEvent(std::move(spanOnLongPressFunc));
+    EXPECT_NE(spanNode->spanItem_->onLongPress, nullptr);
+}
+
+/**
+ * @tc.name: SpanOnLongPress002
+ * @tc.desc: Test OnLongPress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanOnLongPress002, TestSize.Level1)
+{
+    auto node = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    ASSERT_NE(frameNode, nullptr);
+    auto imageSpanItem = AceType::MakeRefPtr<ImageSpanItem>();
+    imageSpanItem->nodeId_ = frameNode->GetId();
+    imageSpanItem->UpdatePlaceholderBackgroundStyle(frameNode);
+    auto spanOnLongpressFunc = [](GestureEvent& info) {};
+    imageSpanItem->SetLongPressEvent(std::move(spanOnLongpressFunc));
+    EXPECT_NE(imageSpanItem->onLongPress, nullptr);
+}
+
+/**
+ * @tc.name: SpanOnLongPress003
+ * @tc.desc: Test OnLongPress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanOnLongPress003, TestSize.Level1)
+{
+    auto node = CustomSpanNode::GetOrCreateSpanNode(V2::CUSTOM_SPAN_NODE_ETS_TAG, 1);
+    auto customSpanNode = AceType::DynamicCast<CustomSpanNode>(node);
+    ASSERT_NE(customSpanNode, nullptr);
+    auto customSpan = customSpanNode->GetSpanItem();
+    customSpan->placeholderSpanNodeId = customSpanNode->GetId();
+    auto spanOnLongpressFunc = [](GestureEvent& info) {};
+    customSpan->SetLongPressEvent(std::move(spanOnLongpressFunc));
+    EXPECT_NE(customSpan->onLongPress, nullptr);
+}
+
+/**
  * @tc.name: SpanNodeDumpInfo001
  * @tc.desc: Test SpanNode DumpInfo.
  * @tc.type: FUNC
