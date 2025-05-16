@@ -46,6 +46,7 @@
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 
 namespace OHOS::Ace::NG {
 
@@ -5662,6 +5663,11 @@ void ViewAbstract::SetDragEventStrictReportingEnabled(int32_t instanceId, bool d
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetEventStrictReportingEnabled(dragEventStrictReportingEnabled);
+}
+
+void ViewAbstract::EnableDropDisallowedBadge(bool enableDropDisallowedBadge)
+{
+    DragDropGlobalController::GetInstance().SetEnableDropDisallowedBadge(enableDropDisallowedBadge);
 }
 
 void ViewAbstract::SetDisallowDropForcedly(bool isDisallowDropForcedly)
