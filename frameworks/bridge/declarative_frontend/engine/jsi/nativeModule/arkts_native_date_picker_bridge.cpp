@@ -359,6 +359,7 @@ double GetMSByDateToDouble(const std::string& date)
 panda::Local<panda::ObjectRef> CreateOnChange(EcmaVM* vm, const BaseEventInfo* info)
 {
     const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
+    CHECK_NULL_RETURN(eventInfo, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> jsonValue =
         panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, eventInfo->GetSelectedStr().c_str()));
     if (jsonValue->IsUndefined()) {
@@ -371,7 +372,7 @@ ArkUINativeModuleValue DatePickerBridge::SetDatePickerOnChange(ArkUIRuntimeCallI
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    int32_t argsNumber = runtimeCallInfo->GetArgsNumber();
+    uint32_t argsNumber = runtimeCallInfo->GetArgsNumber();
     if (argsNumber != NUM_2) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -412,7 +413,7 @@ ArkUINativeModuleValue DatePickerBridge::SetDatePickerOnDateChange(ArkUIRuntimeC
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    int32_t argsNumber = runtimeCallInfo->GetArgsNumber();
+    uint32_t argsNumber = runtimeCallInfo->GetArgsNumber();
     if (argsNumber != NUM_2) {
         return panda::JSValueRef::Undefined(vm);
     }

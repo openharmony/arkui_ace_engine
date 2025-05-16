@@ -854,6 +854,9 @@ void ProgressPattern::ReportProgressEvent()
     auto progressPaintProperty = host->GetPaintProperty<NG::ProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
     auto value = progressPaintProperty->GetValueValue(PROGRESS_DEFAULT_VALUE);
+    if (!progressPaintProperty->GetMaxValue().has_value()){
+        return;
+    }
     auto maxValue = progressPaintProperty->GetMaxValue().value();
     if (value >= maxValue) {
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Progress.onProgress");
