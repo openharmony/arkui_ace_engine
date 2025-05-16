@@ -126,6 +126,10 @@ JSRef<JSVal> LoadImageFailEventToJSValue(const LoadImageFailEvent& eventInfo)
     obj->SetProperty("componentWidth", eventInfo.GetComponentWidth());
     obj->SetProperty("componentHeight", eventInfo.GetComponentHeight());
     obj->SetProperty("message", eventInfo.GetErrorMessage());
+    auto businessErrorObj = JSRef<JSObject>::New();
+    businessErrorObj->SetProperty<int32_t>("code", static_cast<int32_t>(eventInfo.GetErrorInfo().errorCode));
+    businessErrorObj->SetProperty("message", eventInfo.GetErrorInfo().errorMessage);
+    obj->SetPropertyObject("error", businessErrorObj);
     return JSRef<JSVal>::Cast(obj);
 }
 

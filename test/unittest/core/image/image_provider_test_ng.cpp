@@ -219,7 +219,7 @@ HWTEST_F(ImageProviderTestNg, NotifiersTest001, TestSize.Level1)
         callbackFlag = 2;
         return;
     };
-    auto callback3 = [](const ImageSourceInfo& src, const std::string& errorMsg) {
+    auto callback3 = [](const ImageSourceInfo& src, const std::string& errorMsg, const ImageErrorInfo& errorInfo) {
         callbackFlag = 3;
         return;
     };
@@ -521,19 +521,20 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg005, TestSize.Level1)
 HWTEST_F(ImageProviderTestNg, ImageProviderTestNg006, TestSize.Level1)
 {
     auto src = ImageSourceInfo(SRC_JPG);
-    EXPECT_FALSE(ImageProvider::BuildImageObject(src, nullptr));
+    ImageErrorInfo errorInfo;
+    EXPECT_FALSE(ImageProvider::BuildImageObject(src, errorInfo, nullptr));
 
     auto data = AceType::MakeRefPtr<DrawingImageData>(nullptr, 0);
-    auto imageObject = ImageProvider::BuildImageObject(src, data);
+    auto imageObject = ImageProvider::BuildImageObject(src, errorInfo, data);
     EXPECT_TRUE(AceType::DynamicCast<StaticImageObject>(imageObject));
 
     data = AceType::MakeRefPtr<DrawingImageData>(nullptr, 2);
-    imageObject = ImageProvider::BuildImageObject(src, data);
+    imageObject = ImageProvider::BuildImageObject(src, errorInfo, data);
     EXPECT_TRUE(AceType::DynamicCast<AnimatedImageObject>(imageObject));
 
     // thumbnail src with mismatched data
     src = ImageSourceInfo(SRC_THUMBNAIL);
-    EXPECT_FALSE(ImageProvider::BuildImageObject(src, data));
+    EXPECT_FALSE(ImageProvider::BuildImageObject(src, errorInfo, data));
 }
 
 /**
@@ -663,7 +664,7 @@ HWTEST_F(ImageProviderTestNg, NotifiersTest002, TestSize.Level1)
         callbackFlag = 2;
         return;
     };
-    auto callback3 = [](const ImageSourceInfo& src, const std::string& errorMsg) {
+    auto callback3 = [](const ImageSourceInfo& src, const std::string& errorMsg, const ImageErrorInfo& errorInfo) {
         callbackFlag = 3;
         return;
     };
@@ -1553,9 +1554,10 @@ HWTEST_F(ImageProviderTestNg, PrepareImageData001, TestSize.Level1)
     EXPECT_NE(imageProvider, nullptr);
 
     auto src = ImageSourceInfo(SRC_JPG);
-    EXPECT_FALSE(ImageProvider::BuildImageObject(src, nullptr));
+    ImageErrorInfo errorInfo;
+    EXPECT_FALSE(ImageProvider::BuildImageObject(src, errorInfo, nullptr));
     auto data = AceType::MakeRefPtr<DrawingImageData>(nullptr, 0);
-    auto imageObject = ImageProvider::BuildImageObject(src, data);
+    auto imageObject = ImageProvider::BuildImageObject(src, errorInfo, data);
 
     auto lock = imageObject->GetPrepareImageDataLock();
     lock.__owns_ = false;
@@ -1574,9 +1576,10 @@ HWTEST_F(ImageProviderTestNg, PrepareImageData002, TestSize.Level1)
     EXPECT_NE(imageProvider, nullptr);
 
     auto src = ImageSourceInfo(SRC_JPG);
-    EXPECT_FALSE(ImageProvider::BuildImageObject(src, nullptr));
+    ImageErrorInfo errorInfo;
+    EXPECT_FALSE(ImageProvider::BuildImageObject(src, errorInfo, nullptr));
     auto data = AceType::MakeRefPtr<DrawingImageData>(nullptr, 0);
-    auto imageObject = ImageProvider::BuildImageObject(src, data);
+    auto imageObject = ImageProvider::BuildImageObject(src, errorInfo, data);
     imageObject->data_ = nullptr;
 
     MockContainer::SetUp();
@@ -1596,9 +1599,10 @@ HWTEST_F(ImageProviderTestNg, PrepareImageData003, TestSize.Level1)
     EXPECT_NE(imageProvider, nullptr);
 
     auto src = ImageSourceInfo(SRC_JPG);
-    EXPECT_FALSE(ImageProvider::BuildImageObject(src, nullptr));
+    ImageErrorInfo errorInfo;
+    EXPECT_FALSE(ImageProvider::BuildImageObject(src, errorInfo, nullptr));
     auto data = AceType::MakeRefPtr<DrawingImageData>(nullptr, 0);
-    auto imageObject = ImageProvider::BuildImageObject(src, data);
+    auto imageObject = ImageProvider::BuildImageObject(src, errorInfo, data);
     imageObject->data_ = nullptr;
 
     MockContainer::SetUp();
@@ -1648,7 +1652,7 @@ HWTEST_F(ImageProviderTestNg, CreateImageObjHelper002, TestSize.Level1)
     MockContainer::SetUp();
     auto container = MockContainer::Current();
     auto data = AceType::MakeRefPtr<MockImageData>();
-    EXPECT_CALL(*g_loader, LoadDecodedImageData(testing::_, testing::_)).WillOnce(testing::Return(data));
+    EXPECT_CALL(*g_loader, LoadDecodedImageData(testing::_, testing::_, testing::_)).WillOnce(testing::Return(data));
     auto pixmap = AceType::MakeRefPtr<MockPixelMap>();
     src.pixmap_ = pixmap;
 
@@ -1678,9 +1682,10 @@ HWTEST_F(ImageProviderTestNg, CreateImageObjHelper003, TestSize.Level1)
     auto pixmap = AceType::MakeRefPtr<MockPixelMap>();
     src.pixmap_ = pixmap;
     auto data = AceType::MakeRefPtr<PixmapData>(pixmap);
-    EXPECT_CALL(*g_loader, LoadDecodedImageData(testing::_, testing::_)).WillOnce(testing::Return(data));
+    EXPECT_CALL(*g_loader, LoadDecodedImageData(testing::_, testing::_, testing::_)).WillOnce(testing::Return(data));
 
-    auto imageObject = ImageProvider::BuildImageObject(src, data);
+    ImageErrorInfo errorInfo;
+    auto imageObject = ImageProvider::BuildImageObject(src, errorInfo, data);
 
     EXPECT_CALL(*pixmap, GetWidth()).Times(1);
     EXPECT_CALL(*pixmap, GetHeight()).Times(1);
@@ -1718,10 +1723,11 @@ HWTEST_F(ImageProviderTestNg, ImageProviderFailCallback001, TestSize.Level1)
 
     // Define the error message.
     auto errorMsg = "error";
+    ImageErrorInfo errorInfo;
 
     // Invoke FailCallback to trigger the failure callback.
     // Expected behavior: ctx1 and ctx3 should update their error messages.
-    ImageProvider::FailCallback(src.GetKey(), errorMsg, true);
+    ImageProvider::FailCallback(src.GetKey(), errorMsg, errorInfo, true);
 
     // Verify that ctx1 and ctx3 have correctly received the error message.
     EXPECT_EQ(ctx1->errorMsg_, errorMsg);
@@ -1762,10 +1768,11 @@ HWTEST_F(ImageProviderTestNg, ImageProviderFailCallback002, TestSize.Level1)
 
     // Define the error message.
     auto errorMsg = "error";
+    ImageErrorInfo errorInfo;
 
     // Invoke FailCallback to trigger the failure callback.
     // Expected behavior: ctx1 and ctx3 should update their error messages.
-    ImageProvider::FailCallback(src.GetKey(), errorMsg, true);
+    ImageProvider::FailCallback(src.GetKey(), errorMsg, errorInfo, true);
 
     // Verify that ctx1 and ctx4 have correctly received the error message.
     EXPECT_EQ(ctx1->errorMsg_, errorMsg);
@@ -1804,10 +1811,11 @@ HWTEST_F(ImageProviderTestNg, ImageProviderFailCallback003, TestSize.Level1)
 
     // Define the error message.
     auto errorMsg = "error";
+    ImageErrorInfo errorInfo;
 
     // Invoke FailCallback to trigger the failure callback.
     // Expected behavior: all ctx should update their error messages.
-    ImageProvider::FailCallback(src.GetKey(), errorMsg, true);
+    ImageProvider::FailCallback(src.GetKey(), errorMsg, errorInfo, true);
 
     // Verify that all ctx have correctly received the error message.
     EXPECT_EQ(ctx1->errorMsg_, errorMsg);

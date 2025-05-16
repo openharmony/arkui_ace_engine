@@ -103,8 +103,23 @@ RefPtr<CanvasImage> ImageDecoder::MakeDrawingImage(
     return canvasImage;
 }
 
+RefPtr<CanvasImage> CreatePixelMapImage(
+    const ImageDfxConfig& imageDfxConfig, const RefPtr<PixelMap>& pixmap, const ImageDecoderConfig& imageDecoderConfig)
+{
+    auto image = PixelMapImage::Create(pixmap);
+    if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE,
+            "Image Decode success, Info:%{public}s-%{public}s-%{public}d x %{public}d-%{public}d-%{public}d",
+            imageDfxConfig.ToStringWithSrc().c_str(), imageDecoderConfig.desiredSize_.ToString().c_str(),
+            image->GetWidth(), image->GetHeight(), imageDecoderConfig.isHdrDecoderNeed_,
+            static_cast<int32_t>(imageDecoderConfig.photoDecodeFormat_));
+        pixmap->SavePixelMapToFile(imageDfxConfig.ToStringWithoutSrc() + "_decode_");
+    }
+    return image;
+}
+
 RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(
-    const RefPtr<ImageObject>& obj, const ImageDecoderConfig& imageDecoderConfig)
+    const RefPtr<ImageObject>& obj, const ImageDecoderConfig& imageDecoderConfig, ImageErrorInfo& errorInfo)
 {
     CHECK_NULL_RETURN(obj, nullptr);
     ImageProvider::PrepareImageData(obj);
@@ -114,10 +129,13 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(
     CHECK_NULL_RETURN(data, nullptr);
     auto imageDfxConfig = obj->GetImageDfxConfig();
     auto src = imageDfxConfig.GetImageSrc();
-    auto source = ImageSource::Create(static_cast<const uint8_t*>(data->GetData()), data->GetSize());
+    uint32_t mediaErrorCode = 0;
+    auto source = ImageSource::Create(static_cast<const uint8_t*>(data->GetData()), data->GetSize(), mediaErrorCode);
     if (!source) {
         TAG_LOGE(AceLogTag::ACE_IMAGE, "ImageSouce Create Fail, %{private}s-%{public}s.", src.c_str(),
             imageDfxConfig.ToStringWithoutSrc().c_str());
+        errorInfo = { ImageErrorCode::MAKE_CANVAS_IMAGE_SOURCE_CREATE_FAILED,
+            "ErrorCode: " + std::to_string(mediaErrorCode) + ", ImageSouce Create Fail." };
         return nullptr;
     }
 
@@ -139,23 +157,18 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(
         static_cast<int32_t>(imageDecoderConfig.imageQuality_),
         static_cast<int32_t>(imageDecoderConfig.photoDecodeFormat_), isTrimMemRebuild.c_str());
 
-    auto pixmap = source->CreatePixelMap({ width, height }, imageDecoderConfig.imageQuality_,
-        imageDecoderConfig.isHdrDecoderNeed_, imageDecoderConfig.photoDecodeFormat_);
+    PixelMapConfig pixelMapConfig = { imageDecoderConfig.imageQuality_, imageDecoderConfig.isHdrDecoderNeed_,
+        imageDecoderConfig.photoDecodeFormat_ };
+    auto pixmap = source->CreatePixelMap({ width, height }, mediaErrorCode, pixelMapConfig);
     if (!pixmap) {
         TAG_LOGE(AceLogTag::ACE_IMAGE, "PixelMap Create Fail, src = %{private}s-%{public}s.", src.c_str(),
             imageDfxConfig.ToStringWithoutSrc().c_str());
+        errorInfo = { ImageErrorCode::MAKE_CANVAS_IMAGE_PIXELMAP_FAILED,
+            "ErrorCode: " + std::to_string(mediaErrorCode) + ", PixelMap Create Fail." };
         return nullptr;
     }
 
-    auto image = PixelMapImage::Create(pixmap);
-    if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE,
-            "Image Decode success, Info:%{public}s-%{public}s-%{public}d x %{public}d-%{public}d-%{public}d",
-            imageDfxConfig.ToStringWithSrc().c_str(), imageDecoderConfig.desiredSize_.ToString().c_str(),
-            image->GetWidth(), image->GetHeight(), imageDecoderConfig.isHdrDecoderNeed_,
-            static_cast<int32_t>(imageDecoderConfig.photoDecodeFormat_));
-        pixmap->SavePixelMapToFile(imageDfxConfig.ToStringWithoutSrc() + "_decode_");
-    }
+    auto image = CreatePixelMapImage(imageDfxConfig, pixmap, imageDecoderConfig);
 
     AddToPixelMapCache(obj->GetSourceInfo(), imageDecoderConfig.desiredSize_, image->GetPixelMap());
 
