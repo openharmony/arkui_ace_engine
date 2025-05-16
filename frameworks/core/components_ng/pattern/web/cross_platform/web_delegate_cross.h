@@ -493,6 +493,7 @@ private:
     bool OnShowFileChooser(void* object);
     void OnGeolocationPermissionsShowPrompt(void* object);
     void RecordWebEvent(Recorder::EventType eventType, const std::string& param) const;
+    void RunJsProxyCallback();
 
     WeakPtr<NG::WebPattern> webPattern_;
     WeakPtr<PipelineBase> context_;
