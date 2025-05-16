@@ -137,19 +137,22 @@ HWTEST_F(GridItemModifierTest, setRowStartTestValidValues, TestSize.Level1)
 
     // check positive value
     inputValue = Converter::ArkValue<Ark_Number>(1);
-    modifier_->setRowStart(node_, &inputValue);
+    auto optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    modifier_->setRowStart(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_START_NAME);
     EXPECT_EQ(strResult, "1");
 
     // check another positive value
     inputValue = Converter::ArkValue<Ark_Number>(5);
-    modifier_->setRowStart(node_, &inputValue);
+    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    modifier_->setRowStart(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_START_NAME);
     EXPECT_EQ(strResult, "5");
 
     // check negative value
     inputValue = Converter::ArkValue<Ark_Number>(-10);
-    modifier_->setRowStart(node_, &inputValue);
+    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    modifier_->setRowStart(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_START_NAME);
     EXPECT_EQ(strResult, "-10");
 }
@@ -192,19 +195,22 @@ HWTEST_F(GridItemModifierTest, setRowEndTestValidValues, TestSize.Level1)
 
     // check positive value
     inputValue = Converter::ArkValue<Ark_Number>(1);
-    modifier_->setRowEnd(node_, &inputValue);
+    auto optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    modifier_->setRowEnd(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_END_NAME);
     EXPECT_EQ(strResult, "1");
 
     // check another positive value
     inputValue = Converter::ArkValue<Ark_Number>(5);
-    modifier_->setRowEnd(node_, &inputValue);
+    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    modifier_->setRowEnd(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_END_NAME);
     EXPECT_EQ(strResult, "5");
 
     // check negative value
     inputValue = Converter::ArkValue<Ark_Number>(-10);
-    modifier_->setRowEnd(node_, &inputValue);
+    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    modifier_->setRowEnd(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_END_NAME);
     EXPECT_EQ(strResult, "-10");
 }
@@ -247,19 +253,22 @@ HWTEST_F(GridItemModifierTest, setColumnStartTestValidValues, TestSize.Level1)
 
     // check positive value
     inputValue = Converter::ArkValue<Ark_Number>(1);
-    modifier_->setColumnStart(node_, &inputValue);
+    auto optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    modifier_->setColumnStart(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_START_NAME);
     EXPECT_EQ(strResult, "1");
 
     // check another positive value
     inputValue = Converter::ArkValue<Ark_Number>(5);
-    modifier_->setColumnStart(node_, &inputValue);
+    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    modifier_->setColumnStart(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_START_NAME);
     EXPECT_EQ(strResult, "5");
 
     // check negative value
     inputValue = Converter::ArkValue<Ark_Number>(-10);
-    modifier_->setColumnStart(node_, &inputValue);
+    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    modifier_->setColumnStart(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_START_NAME);
     EXPECT_EQ(strResult, "-10");
 }
@@ -302,19 +311,22 @@ HWTEST_F(GridItemModifierTest, setColumnEndTestValidValues, TestSize.Level1)
 
     // check positive value
     inputValue = Converter::ArkValue<Ark_Number>(1);
-    modifier_->setColumnEnd(node_, &inputValue);
+    auto optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    modifier_->setColumnEnd(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_END_NAME);
     EXPECT_EQ(strResult, "1");
 
     // check another positive value
     inputValue = Converter::ArkValue<Ark_Number>(5);
-    modifier_->setColumnEnd(node_, &inputValue);
+    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    modifier_->setColumnEnd(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_END_NAME);
     EXPECT_EQ(strResult, "5");
 
     // check negative value
     inputValue = Converter::ArkValue<Ark_Number>(-10);
-    modifier_->setColumnEnd(node_, &inputValue);
+    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    modifier_->setColumnEnd(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_END_NAME);
     EXPECT_EQ(strResult, "-10");
 }
@@ -357,13 +369,15 @@ HWTEST_F(GridItemModifierTest, setForceRebuildTestValidValues, TestSize.Level1)
 
     // check true value
     inputValue = Converter::ArkValue<Ark_Boolean>(true);
-    modifier_->setForceRebuild(node_, inputValue);
+    auto optInputValue = Converter::ArkValue<Opt_Boolean>(inputValue);
+    modifier_->setForceRebuild(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_FORCE_REBUILD_NAME);
     EXPECT_EQ(strResult, "true");
 
     // check false value
     inputValue = Converter::ArkValue<Ark_Boolean>(false);
-    modifier_->setForceRebuild(node_, inputValue);
+    optInputValue = Converter::ArkValue<Opt_Boolean>(inputValue);
+    modifier_->setForceRebuild(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_FORCE_REBUILD_NAME);
     EXPECT_EQ(strResult, "false");
 }
@@ -393,13 +407,15 @@ HWTEST_F(GridItemModifierTest, setSelectableTestValidValues, TestSize.Level1)
 
     // check false value
     inputValue = Converter::ArkValue<Ark_Boolean>(false);
-    modifier_->setSelectable(node_, inputValue);
+    auto optInputValue = Converter::ArkValue<Opt_Boolean>(inputValue);
+    modifier_->setSelectable(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_SELECTABLE_NAME);
     EXPECT_EQ(strResult, "false");
 
     // check true value
     inputValue = Converter::ArkValue<Ark_Boolean>(true);
-    modifier_->setSelectable(node_, inputValue);
+    optInputValue = Converter::ArkValue<Opt_Boolean>(inputValue);
+    modifier_->setSelectable(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_SELECTABLE_NAME);
     EXPECT_EQ(strResult, "true");
 }
@@ -429,13 +445,15 @@ HWTEST_F(GridItemModifierTest, setSelectedTestValidValues, TestSize.Level1)
 
     // check true value
     inputValue = Converter::ArkValue<Ark_Boolean>(true);
-    modifier_->setSelected(node_, inputValue);
+    auto optInputValue = Converter::ArkValue<Opt_Boolean>(inputValue);
+    modifier_->setSelected(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_SELECTED_NAME);
     EXPECT_EQ(strResult, "true");
 
     // check false value
     inputValue = Converter::ArkValue<Ark_Boolean>(false);
-    modifier_->setSelected(node_, inputValue);
+    optInputValue = Converter::ArkValue<Opt_Boolean>(inputValue);
+    modifier_->setSelected(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_SELECTED_NAME);
     EXPECT_EQ(strResult, "false");
 }
@@ -465,7 +483,8 @@ HWTEST_F(GridItemModifierTest, setOnSelectTest, TestSize.Level1)
         }
     };
 
-    modifier_->setOnSelect(node_, &onSelect);
+    auto optOnSelect = Converter::ArkValue<Opt_Callback_Boolean_Void>(onSelect);
+    modifier_->setOnSelect(node_, &optOnSelect);
 
     // check true value
     EXPECT_EQ(checkEvent.has_value(), false);
@@ -494,20 +513,19 @@ HWTEST_F(GridItemModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
 
     struct CheckEvent {
         int32_t nodeId;
-        bool value;
+        std::optional<bool> value;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
 
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Boolean parameter) {
+    auto checkCallback = [](const Ark_Int32 resourceId, const Opt_Boolean parameter) {
         checkEvent = {
             .nodeId = resourceId,
-            .value = Converter::Convert<bool>(parameter)
+            .value = Converter::OptConvert<bool>(parameter)
         };
     };
 
-    Callback_Boolean_Void arkCallback = Converter::ArkValue<Callback_Boolean_Void>(checkCallback, contextId);
-
+    Callback_Opt_Boolean_Void arkCallback = Converter::ArkValue<Callback_Opt_Boolean_Void>(checkCallback, contextId);
     modifier_->set_onChangeEvent_selected(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);

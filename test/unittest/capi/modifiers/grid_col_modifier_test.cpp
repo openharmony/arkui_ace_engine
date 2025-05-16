@@ -187,7 +187,8 @@ HWTEST_F(GridColModifierTest, setSpanTestDefaultValues, TestSize.Level1)
     CHECK_NULL_VOID(node_);
     auto initValue = Converter::ArkUnion<Ark_Union_Number_GridColColumnOption,
         Ark_GridColColumnOption>(ATTRIBUTE_SPAN_DEFAULT_VALUE);
-    modifier_->setSpan(node_, &initValue);
+    auto optInitValue = Converter::ArkValue<Opt_Union_Number_GridColColumnOption>(initValue);
+    modifier_->setSpan(node_, &optInitValue);
     std::unique_ptr<JsonValue> jsonLayout = GetLayoutJsonValue(node_);
     CHECK_NULL_VOID(jsonLayout);
     int32_t span = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_SPAN_NAME));
@@ -218,7 +219,8 @@ HWTEST_F(GridColModifierTest, setSpanTestValidValues, TestSize.Level1)
     inputValueSpan = initValueSpan;
     for (auto&& value: spanValidValues) {
         inputValueSpan = std::get<1>(value);
-        modifier_->setSpan(node_, &inputValueSpan);
+        auto optInputValueSpan = Converter::ArkValue<Opt_Union_Number_GridColColumnOption>(inputValueSpan);
+        modifier_->setSpan(node_, &optInputValueSpan);
         jsonLayout = GetLayoutJsonValue(node_);
         CHECK_NULL_VOID(jsonLayout);
         resultValue = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_SPAN_NAME));
@@ -250,7 +252,8 @@ HWTEST_F(GridColModifierTest, setSpanTestInvalidValues, TestSize.Level1)
     inputValueSpan = initValueSpan;
     for (auto&& value: spanInvalidValues) {
         inputValueSpan = std::get<1>(value);
-        modifier_->setSpan(node_, &inputValueSpan);
+        auto optInputValueSpan = Converter::ArkValue<Opt_Union_Number_GridColColumnOption>(inputValueSpan);
+        modifier_->setSpan(node_, &optInputValueSpan);
         jsonLayout = GetLayoutJsonValue(node_);
         CHECK_NULL_VOID(jsonLayout);
         resultValue = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_SPAN_NAME));
@@ -269,7 +272,8 @@ HWTEST_F(GridColModifierTest, setOffsetTestDefaultValues, TestSize.Level1)
     CHECK_NULL_VOID(node_);
     auto initValue = Converter::ArkUnion<Ark_Union_Number_GridColColumnOption,
         Ark_GridColColumnOption>(ATTRIBUTE_GRID_COL_OFFSET_DEFAULT_VALUE);
-    modifier_->setGridColOffset(node_, &initValue);
+    auto optInitValue = Converter::ArkValue<Opt_Union_Number_GridColColumnOption>(initValue);
+    modifier_->setGridColOffset(node_, &optInitValue);
     std::unique_ptr<JsonValue> jsonLayout = GetLayoutJsonValue(node_);
     CHECK_NULL_VOID(jsonLayout);
     int32_t offset = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_GRID_COL_OFFSET_NAME));
@@ -300,7 +304,8 @@ HWTEST_F(GridColModifierTest, setOffsetTestValidValues, TestSize.Level1)
     inputValueOffset = initValueOffset;
     for (auto&& value: offsetValidValues) {
         inputValueOffset = std::get<1>(value);
-        modifier_->setGridColOffset(node_, &inputValueOffset);
+        auto optInputValueOffset = Converter::ArkValue<Opt_Union_Number_GridColColumnOption>(inputValueOffset);
+        modifier_->setGridColOffset(node_, &optInputValueOffset);
         jsonLayout = GetLayoutJsonValue(node_);
         CHECK_NULL_VOID(jsonLayout);
         resultValue = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_GRID_COL_OFFSET_NAME));
@@ -332,7 +337,8 @@ HWTEST_F(GridColModifierTest, setOffsetTestInvalidValues, TestSize.Level1)
     inputValueOffset = initValueOffset;
     for (auto&& value: offsetInvalidValues) {
         inputValueOffset = std::get<1>(value);
-        modifier_->setGridColOffset(node_, &inputValueOffset);
+        auto optInputValueOffset = Converter::ArkValue<Opt_Union_Number_GridColColumnOption>(inputValueOffset);
+        modifier_->setGridColOffset(node_, &optInputValueOffset);
         jsonLayout = GetLayoutJsonValue(node_);
         CHECK_NULL_VOID(jsonLayout);
         resultValue = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_GRID_COL_OFFSET_NAME));
@@ -351,7 +357,8 @@ HWTEST_F(GridColModifierTest, setOrderTestDefaultValues, TestSize.Level1)
     CHECK_NULL_VOID(node_);
     auto initValue = Converter::ArkUnion<Ark_Union_Number_GridColColumnOption,
         Ark_GridColColumnOption>(ATTRIBUTE_ORDER_DEFAULT_VALUE);
-    modifier_->setOrder(node_, &initValue);
+    auto optInitValue = Converter::ArkValue<Opt_Union_Number_GridColColumnOption>(initValue);
+    modifier_->setOrder(node_, &optInitValue);
     std::unique_ptr<JsonValue> jsonLayout = GetLayoutJsonValue(node_);
     CHECK_NULL_VOID(jsonLayout);
     int32_t order = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_ORDER_NAME));
@@ -382,7 +389,8 @@ HWTEST_F(GridColModifierTest, setOrderTestValidValues, TestSize.Level1)
     inputValueOrder = initValueOrder;
     for (auto&& value: orderValidValues) {
         inputValueOrder = std::get<1>(value);
-        modifier_->setOrder(node_, &inputValueOrder);
+        auto optInputValueOrder = Converter::ArkValue<Opt_Union_Number_GridColColumnOption>(inputValueOrder);
+        modifier_->setOrder(node_, &optInputValueOrder);
         jsonLayout = GetLayoutJsonValue(node_);
         CHECK_NULL_VOID(jsonLayout);
         resultValue = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_ORDER_NAME));
@@ -414,7 +422,8 @@ HWTEST_F(GridColModifierTest, setOrderTestInvalidValues, TestSize.Level1)
     inputValueOrder = initValueOrder;
     for (auto&& value: orderInvalidValues) {
         inputValueOrder = std::get<1>(value);
-        modifier_->setOrder(node_, &inputValueOrder);
+        auto optInputValueOrder = Converter::ArkValue<Opt_Union_Number_GridColColumnOption>(inputValueOrder);
+        modifier_->setOrder(node_, &optInputValueOrder);
         jsonLayout = GetLayoutJsonValue(node_);
         CHECK_NULL_VOID(jsonLayout);
         resultValue = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_ORDER_NAME));

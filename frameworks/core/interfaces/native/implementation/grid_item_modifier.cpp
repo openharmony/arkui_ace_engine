@@ -70,6 +70,7 @@ void RowStartImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<int32_t>(*value);
     if (!convValue) {
         // TODO: Reset value
@@ -82,6 +83,7 @@ void RowEndImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<int32_t>(*value);
     if (!convValue) {
         // TODO: Reset value
@@ -94,6 +96,7 @@ void ColumnStartImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<int32_t>(*value);
     if (!convValue) {
         // TODO: Reset value
@@ -106,6 +109,7 @@ void ColumnEndImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<int32_t>(*value);
     if (!convValue) {
         // TODO: Reset value
@@ -118,6 +122,7 @@ void ForceRebuildImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
         // TODO: Reset value
@@ -130,6 +135,7 @@ void SelectableImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
         // TODO: Reset value
@@ -142,6 +148,7 @@ void SelectedImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
         GridItemModelNG::SetSelected(frameNode, false);
@@ -154,6 +161,7 @@ void OnSelectImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         // TODO: Reset value

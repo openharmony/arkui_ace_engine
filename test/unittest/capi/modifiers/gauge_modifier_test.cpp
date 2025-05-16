@@ -286,7 +286,8 @@ HWTEST_F(GaugeModifierTest, setValueTestValidValues, TestSize.Level1)
     inputValueValue = initValueValue;
     for (auto&& value: valueValueValidValues) {
         inputValueValue = std::get<1>(value);
-        modifier_->setValue(node_, &inputValueValue);
+        auto optInputValueValue = Converter::ArkValue<Opt_Number>(inputValueValue);    
+        modifier_->setValue(node_, &optInputValueValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
         expectedStr = std::get<2>(value);
@@ -340,7 +341,8 @@ HWTEST_F(GaugeModifierTest, setStartAngleTestValidValues, TestSize.Level1)
     inputValueStartAngleAngle = initValueStartAngleAngle;
     for (auto&& value: angleValidValues) {
         inputValueStartAngleAngle = std::get<1>(value);
-        modifier_->setStartAngle(node_, &inputValueStartAngleAngle);
+        auto optInputValueStartAngleAngle = Converter::ArkValue<Opt_Number>(inputValueStartAngleAngle);
+        modifier_->setStartAngle(node_, &optInputValueStartAngleAngle);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_START_ANGLE_ANGLE_NAME);
         expectedStr = std::get<2>(value);
@@ -382,7 +384,8 @@ HWTEST_F(GaugeModifierTest, setEndAngleTestValidValues, TestSize.Level1)
     inputValueEndAngleAngle = initValueEndAngleAngle;
     for (auto&& value: angleValidValues) {
         inputValueEndAngleAngle = std::get<1>(value);
-        modifier_->setEndAngle(node_, &inputValueEndAngleAngle);
+        auto optInputValueEndAngleAngle = Converter::ArkValue<Opt_Number>(inputValueEndAngleAngle);    
+        modifier_->setEndAngle(node_, &optInputValueEndAngleAngle);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_END_ANGLE_ANGLE_NAME);
         expectedStr = std::get<2>(value);
@@ -569,7 +572,8 @@ HWTEST_F(GaugeModifierTest, setColorsTestValidValues, TestSize.Level1)
     inputColors = initColors;
     for (auto&& value: colorsValidValues) {
         inputColors = std::get<1>(value);
-        modifier_->setColors(node_, &inputColors);
+        auto optInputColors = Converter::ArkValue<Opt_Type_GaugeAttribute_colors_colors>(inputColors);
+        modifier_->setColors(node_, &optInputColors);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLORS_NAME);
         expectedStr = std::get<2>(value);
@@ -627,7 +631,8 @@ HWTEST_F(GaugeModifierTest, setStrokeWidthTestValidValues, TestSize.Level1)
     inputValueStrokeWidthLength = initValueStrokeWidthLength;
     for (auto&& value: strokeWidthStrokeWidthLengthValidValues) {
         inputValueStrokeWidthLength = std::get<1>(value);
-        modifier_->setStrokeWidth(node_, &inputValueStrokeWidthLength);
+        auto optInputValueStrokeWidthLength = Converter::ArkValue<Opt_Length>(inputValueStrokeWidthLength);
+        modifier_->setStrokeWidth(node_, &optInputValueStrokeWidthLength);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_WIDTH_LENGTH_NAME);
         expectedStr = std::get<2>(value);
@@ -663,9 +668,11 @@ HWTEST_F(GaugeModifierTest, setStrokeWidthTestInvalidValues, TestSize.Level1)
     // Verifying attribute's 'min'  values
     for (auto&& value: strokeWidthStrokeWidthLengthInvalidValues) {
         inputValueStrokeWidthLength = initValueStrokeWidthLength;
-        modifier_->setStrokeWidth(node_, &inputValueStrokeWidthLength);
+        auto optInputValueStrokeWidthLength = Converter::ArkValue<Opt_Length>(inputValueStrokeWidthLength);
+        modifier_->setStrokeWidth(node_, &optInputValueStrokeWidthLength);
         inputValueStrokeWidthLength = std::get<1>(value);
-        modifier_->setStrokeWidth(node_, &inputValueStrokeWidthLength);
+        optInputValueStrokeWidthLength = Converter::ArkValue<Opt_Length>(inputValueStrokeWidthLength);
+        modifier_->setStrokeWidth(node_, &optInputValueStrokeWidthLength);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_WIDTH_LENGTH_NAME);
         expectedStr = ATTRIBUTE_STROKE_WIDTH_LENGTH_DEFAULT_VALUE;
@@ -701,7 +708,8 @@ HWTEST_F(GaugeModifierTest, setDescriptionTest_CustomNodeBuilder, TestSize.Level
     int callsCount = 0;
     CustomNodeBuilderTestHelper<GaugeModifierTest> builderHelper(this, frameNode);
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
-    modifier_->setDescription(node_, &builder);
+    auto optBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);        
+    modifier_->setDescription(node_, &optBuilder);
     EXPECT_EQ(builderHelper.GetCallsCountAsync(), ++callsCount);
 }
 
@@ -792,7 +800,8 @@ HWTEST_F(GaugeModifierTest, setTrackShadowTestValidValues, TestSize.Level1)
     inputValueTrackShadow = initValueTrackShadow;
     for (auto&& value: trackShadowRadiusValidValues) {
         inputValueTrackShadow.radius = std::get<1>(value);
-        modifier_->setTrackShadow(node_, &inputValueTrackShadow);
+        auto optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
+        modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         jsonValue = GetJsonValue(node_);
         resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_RADIUS_NAME);
@@ -804,7 +813,8 @@ HWTEST_F(GaugeModifierTest, setTrackShadowTestValidValues, TestSize.Level1)
     inputValueTrackShadow = initValueTrackShadow;
     for (auto&& value: trackShadowOffsetXValidValues) {
         inputValueTrackShadow.offsetX = std::get<1>(value);
-        modifier_->setTrackShadow(node_, &inputValueTrackShadow);
+        auto optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
+        modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         jsonValue = GetJsonValue(node_);
         resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_X_NAME);
@@ -816,7 +826,8 @@ HWTEST_F(GaugeModifierTest, setTrackShadowTestValidValues, TestSize.Level1)
     inputValueTrackShadow = initValueTrackShadow;
     for (auto&& value: trackShadowOffsetYValidValues) {
         inputValueTrackShadow.offsetY = std::get<1>(value);
-        modifier_->setTrackShadow(node_, &inputValueTrackShadow);
+        auto optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
+        modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         jsonValue = GetJsonValue(node_);
         resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_NAME);
@@ -867,9 +878,11 @@ HWTEST_F(GaugeModifierTest, setTrackShadowTestInvalidValues, TestSize.Level1)
     // Verifying attribute's 'radius'  values
     for (auto&& value: trackShadowRadiusInvalidValues) {
         inputValueTrackShadow = initValueTrackShadow;
-        modifier_->setTrackShadow(node_, &inputValueTrackShadow);
+        auto optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
+        modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         inputValueTrackShadow.radius = std::get<1>(value);
-        modifier_->setTrackShadow(node_, &inputValueTrackShadow);
+        optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
+        modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         jsonValue = GetJsonValue(node_);
         resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_RADIUS_NAME);
@@ -880,9 +893,11 @@ HWTEST_F(GaugeModifierTest, setTrackShadowTestInvalidValues, TestSize.Level1)
     // Verifying attribute's 'offsetX'  values
     for (auto&& value: trackShadowOffsetXInvalidValues) {
         inputValueTrackShadow = initValueTrackShadow;
-        modifier_->setTrackShadow(node_, &inputValueTrackShadow);
+        auto optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
+        modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         inputValueTrackShadow.offsetX = std::get<1>(value);
-        modifier_->setTrackShadow(node_, &inputValueTrackShadow);
+        optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
+        modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         jsonValue = GetJsonValue(node_);
         resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_X_NAME);
@@ -893,9 +908,11 @@ HWTEST_F(GaugeModifierTest, setTrackShadowTestInvalidValues, TestSize.Level1)
     // Verifying attribute's 'offsetY'  values
     for (auto&& value: trackShadowOffsetYInvalidValues) {
         inputValueTrackShadow = initValueTrackShadow;
-        modifier_->setTrackShadow(node_, &inputValueTrackShadow);
+        auto optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
+        modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         inputValueTrackShadow.offsetY = std::get<1>(value);
-        modifier_->setTrackShadow(node_, &inputValueTrackShadow);
+        optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
+        modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         jsonValue = GetJsonValue(node_);
         resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_NAME);
@@ -967,7 +984,8 @@ HWTEST_F(GaugeModifierTest, setIndicatorTestValidValues, TestSize.Level1)
     inputValueIndicator = initValueIndicator;
     for (auto&& value: indicatorIconValidValues) {
         inputValueIndicator.icon = std::get<1>(value);
-        modifier_->setIndicator(node_, &inputValueIndicator);
+        auto optInputValueIndicator = Converter::ArkValue<Opt_GaugeIndicatorOptions>(inputValueIndicator);
+        modifier_->setIndicator(node_, &optInputValueIndicator);
         jsonValue = GetJsonValue(node_);
         resultIndicator = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_INDICATOR_NAME);
         resultStr = GetAttrValue<std::string>(resultIndicator, ATTRIBUTE_INDICATOR_ICON_NAME);
@@ -979,7 +997,8 @@ HWTEST_F(GaugeModifierTest, setIndicatorTestValidValues, TestSize.Level1)
     inputValueIndicator = initValueIndicator;
     for (auto&& value: indicatorSpaceValidValues) {
         inputValueIndicator.space = std::get<1>(value);
-        modifier_->setIndicator(node_, &inputValueIndicator);
+        auto optInputValueIndicator = Converter::ArkValue<Opt_GaugeIndicatorOptions>(inputValueIndicator);
+        modifier_->setIndicator(node_, &optInputValueIndicator);
         jsonValue = GetJsonValue(node_);
         resultIndicator = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_INDICATOR_NAME);
         resultStr = GetAttrValue<std::string>(resultIndicator, ATTRIBUTE_INDICATOR_SPACE_NAME);
@@ -1022,9 +1041,11 @@ HWTEST_F(GaugeModifierTest, setIndicatorTestInvalidValues, TestSize.Level1)
     // Verifying attribute's 'icon'  values
     for (auto&& value: indicatorIconInvalidValues) {
         inputValueIndicator = initValueIndicator;
-        modifier_->setIndicator(node_, &inputValueIndicator);
+        auto optInputValueIndicator = Converter::ArkValue<Opt_GaugeIndicatorOptions>(inputValueIndicator);
+        modifier_->setIndicator(node_, &optInputValueIndicator);
         inputValueIndicator.icon = std::get<1>(value);
-        modifier_->setIndicator(node_, &inputValueIndicator);
+        optInputValueIndicator = Converter::ArkValue<Opt_GaugeIndicatorOptions>(inputValueIndicator);
+        modifier_->setIndicator(node_, &optInputValueIndicator);
         jsonValue = GetJsonValue(node_);
         resultIndicator = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_INDICATOR_NAME);
         resultStr = GetAttrValue<std::string>(resultIndicator, ATTRIBUTE_INDICATOR_ICON_NAME);
@@ -1035,9 +1056,11 @@ HWTEST_F(GaugeModifierTest, setIndicatorTestInvalidValues, TestSize.Level1)
     // Verifying attribute's 'space'  values
     for (auto&& value: indicatorSpaceInvalidValues) {
         inputValueIndicator = initValueIndicator;
-        modifier_->setIndicator(node_, &inputValueIndicator);
+        auto optInputValueIndicator = Converter::ArkValue<Opt_GaugeIndicatorOptions>(inputValueIndicator);
+        modifier_->setIndicator(node_, &optInputValueIndicator);
         inputValueIndicator.space = std::get<1>(value);
-        modifier_->setIndicator(node_, &inputValueIndicator);
+        optInputValueIndicator = Converter::ArkValue<Opt_GaugeIndicatorOptions>(inputValueIndicator);
+        modifier_->setIndicator(node_, &optInputValueIndicator);
         jsonValue = GetJsonValue(node_);
         resultIndicator = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_INDICATOR_NAME);
         resultStr = GetAttrValue<std::string>(resultIndicator, ATTRIBUTE_INDICATOR_SPACE_NAME);
