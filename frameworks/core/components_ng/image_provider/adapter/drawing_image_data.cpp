@@ -112,14 +112,12 @@ ImageRotateOrientation GetImageRotateOrientation(SkEncodedOrigin origin)
 {
     switch (origin) {
         case SkEncodedOrigin::kTopRight_SkEncodedOrigin:
-            // Reflected across y-axis
-            return ImageRotateOrientation::DOWN_MIRROR;
+            return ImageRotateOrientation::UP_MIRROR;
         case SkEncodedOrigin::kBottomRight_SkEncodedOrigin:
             // Rotated 180
             return ImageRotateOrientation::DOWN;
         case SkEncodedOrigin::kBottomLeft_SkEncodedOrigin:
-            // Reflected across x-axis
-            return ImageRotateOrientation::UP_MIRROR;
+            return ImageRotateOrientation::DOWN_MIRROR;
         case SkEncodedOrigin::kLeftTop_SkEncodedOrigin:
             // Reflected across x-axis, Rotated 90 CCW
             return ImageRotateOrientation::LEFT_MIRROR;
@@ -132,6 +130,8 @@ ImageRotateOrientation GetImageRotateOrientation(SkEncodedOrigin origin)
         case SkEncodedOrigin::kLeftBottom_SkEncodedOrigin:
             // Rotated 90 CCW
             return ImageRotateOrientation::LEFT;
+        case SkEncodedOrigin::kTopLeft_SkEncodedOrigin:
+            return ImageRotateOrientation::UP;
         default:
             return ImageRotateOrientation::UP;
     }

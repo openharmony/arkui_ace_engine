@@ -563,8 +563,8 @@ enum class ImageRotateOrientation {
 
 enum class OrientationFit {
     NONE = 0,
-    HORIZONTAL_FLIP = 1,
-    VERTICAL_FLIP = 2
+    VERTICAL_FLIP = 1,
+    HORIZONTAL_FLIP = 2
 };
 
 enum class ImageRenderMode {
