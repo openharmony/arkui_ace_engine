@@ -17,6 +17,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/models/image_animator_model_impl.h"
+#include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 
@@ -267,7 +268,8 @@ void JSImageAnimator::ParseImages(const JSRef<JSVal>& image, ImageProperties& im
         return;
     }
     JSRef<JSObject> jsObjImage = JSRef<JSObject>::Cast(image);
-    bool srcValid = ParseJsMedia(jsObjImage->GetProperty("src"), imageProperties.src);
+    RefPtr<ResourceObject> resObj;
+    bool srcValid = ParseJsMedia(jsObjImage->GetProperty("src"), imageProperties.src, resObj);
     GetJsMediaBundleInfo(jsObjImage->GetProperty("src"), imageProperties.bundleName, imageProperties.moduleName);
     if (!srcValid) {
 #if defined(PIXEL_MAP_SUPPORTED)
@@ -279,6 +281,9 @@ void JSImageAnimator::ParseImages(const JSRef<JSVal>& image, ImageProperties& im
     ParseJsDimensionVp(jsObjImage->GetProperty("top"), imageProperties.top);
     ParseJsDimensionVp(jsObjImage->GetProperty("left"), imageProperties.left);
     ParseJsInt32(jsObjImage->GetProperty("duration"), imageProperties.duration);
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        ImageModel::GetInstance()->CreateWithResourceObj(ImageResourceType::SRC, resObj);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

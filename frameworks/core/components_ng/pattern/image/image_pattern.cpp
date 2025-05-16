@@ -1924,7 +1924,9 @@ void ImagePattern::OnLanguageConfigurationUpdate()
 
 void ImagePattern::OnColorConfigurationUpdate()
 {
-    OnConfigurationUpdate();
+    if (!SystemProperties::ConfigChangePerform()) {
+        OnConfigurationUpdate();
+    }
 }
 
 void ImagePattern::OnDirectionConfigurationUpdate()
@@ -2803,5 +2805,42 @@ void ImagePattern::OnInActive()
     if (status_ == AnimatorStatus::RUNNING) {
         animator_->Pause();
     }
+}
+
+void ImagePattern::UpdateImageSourceinfo(const ImageSourceInfo& sourceInfo)
+{
+    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void ImagePattern::UpdateImageFill(const Color& color)
+{
+    auto renderProperty = GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(renderProperty);
+    renderProperty->UpdateSvgFillColor(color);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateForegroundColor(color);
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void ImagePattern::UpdateImageAlt(const ImageSourceInfo& sourceInfo)
+{
+    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    imageLayoutProperty->UpdateAlt(sourceInfo);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 } // namespace OHOS::Ace::NG

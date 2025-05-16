@@ -385,6 +385,11 @@ public:
 
     void DrawDrawable(RSCanvas& canvas);
 
+    void OnConfigurationUpdate();
+    void UpdateImageSourceinfo(const ImageSourceInfo& sourceInfo);
+    void UpdateImageFill(const Color& color);
+    void UpdateImageAlt(const ImageSourceInfo& sourceInfo);
+
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
@@ -471,7 +476,6 @@ private:
     void OnColorConfigurationUpdate() override;
     void OnDirectionConfigurationUpdate() override;
     void OnIconConfigurationUpdate() override;
-    void OnConfigurationUpdate();
     ImageDfxConfig CreateImageDfxConfig(const ImageSourceInfo& src);
     void LoadImage(const ImageSourceInfo& src, bool needLayout);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
