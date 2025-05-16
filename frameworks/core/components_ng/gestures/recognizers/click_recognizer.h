@@ -116,7 +116,6 @@ private:
         tappedCount_ = 0;
         equalsToFingers_ = false;
         focusPoint_ = {};
-        paintRect_ = RectF();
         fingerDeadlineTimer_.Cancel();
         tapDeadlineTimer_.Cancel();
         currentTouchPointsNum_ = 0;
@@ -153,7 +152,6 @@ private:
     TimeStamp time_;
     Offset focusPoint_;
     TimeStamp touchDownTime_;
-    RectF paintRect_;
     int32_t currentTouchPointsNum_ = 0;
     bool useCatchMode_ = true;
     std::vector<RectF> responseRegionBuffer_;
