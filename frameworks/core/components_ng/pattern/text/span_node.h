@@ -210,8 +210,6 @@ using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 class InspectorFilter;
 class Paragraph;
 
-enum class SpanItemType { NORMAL = 0, IMAGE = 1, CustomSpan = 2, SYMBOL = 3, PLACEHOLDER = 4 };
-
 struct PlaceholderStyle {
     double width = 0.0f;
     double height = 0.0f;

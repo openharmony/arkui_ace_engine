@@ -2330,7 +2330,7 @@ HWTEST_F(TextFieldTenPatternNg, EncodeTlvSpanItems002, TestSize.Level1)
     int32_t cursor = 1;
     auto [frameNode, pattern] = Init();
     RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
-    spanItem->spanItemType = NG::SpanItemType::SYMBOL;
+    spanItem->spanItemType = SpanItemType::SYMBOL;
     int32_t textSelectorLength = pattern->textSelector_.GetTextEnd() - pattern->textSelector_.GetTextStart();
     
     std::string pasteData;

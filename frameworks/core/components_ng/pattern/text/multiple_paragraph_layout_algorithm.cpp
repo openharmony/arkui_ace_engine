@@ -557,8 +557,14 @@ bool MultipleParagraphLayoutAlgorithm::ReLayoutParagraphBySpan(LayoutWrapper* la
         }
         TextStyle spanTextStyle;
         needReCreateParagraph_ |= child->UpdateSpanTextStyle(inheritTextStyle_, frameNode);
-        ACE_TEXT_SCOPED_TRACE(
-            "ReLayoutParagraphBySpan[id: %d][needReCreateParagraph_:%d]", child->nodeId_, needReCreateParagraph_);
+        auto style = child->GetTextStyle();
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE(
+                "ReLayoutParagraphBySpan[id:%d][needReCreateParagraph_:%d][textStyleBitmap:%s][textColor:%s]",
+                child->nodeId_, needReCreateParagraph_,
+                style.has_value() ? style->GetReLayoutTextStyleBitmap().to_string().c_str() : "Na",
+                style.has_value() ? style->GetTextColor().ColorToString().c_str() : "Na");
+        }
         CHECK_NULL_RETURN(!needReCreateParagraph_, false);
         if (child->GetTextStyle().has_value()) {
             spanTextStyle = child->GetTextStyle().value();

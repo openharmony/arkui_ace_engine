@@ -552,7 +552,7 @@ std::string SpanToHtml::ToHtml(const SpanString& spanString)
             out += "<p " + paragraphStyle + ">";
             newLine = false;
         }
-        if (item->spanItemType == OHOS::Ace::NG::SpanItemType::NORMAL) {
+        if (item->spanItemType == SpanItemType::NORMAL) {
             if (paragrapStart == 0) {
                 paragrapStart = out.length();
             }
@@ -571,7 +571,7 @@ std::string SpanToHtml::ToHtml(const SpanString& spanString)
             } else {
                 out += content + "</span>";
             }
-        } else if (item->spanItemType == OHOS::Ace::NG::SpanItemType::IMAGE) {
+        } else if (item->spanItemType == SpanItemType::IMAGE) {
             out += ImageToHtml(item);
         }
     }

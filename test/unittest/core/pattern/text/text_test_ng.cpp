@@ -3254,6 +3254,8 @@ HWTEST_F(TextTestNg, TextSelectOverlayTestOnResetTextSelection001, TestSize.Leve
 {
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", DEFAULT_NODE_ID, pattern);
+    ASSERT_NE(frameNode, nullptr);
     auto textSelectOverlay = pattern->selectOverlay_;
     ASSERT_NE(textSelectOverlay, nullptr);
     auto textPattern = textSelectOverlay->GetPattern<TextPattern>();
@@ -3307,6 +3309,8 @@ HWTEST_F(TextTestNg, TextSelectOverlayTestUpdateSelectorOnHandleMove001, TestSiz
 {
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", DEFAULT_NODE_ID, pattern);
+    ASSERT_NE(frameNode, nullptr);
     auto textSelectOverlay = pattern->selectOverlay_;
     ASSERT_NE(textSelectOverlay, nullptr);
 

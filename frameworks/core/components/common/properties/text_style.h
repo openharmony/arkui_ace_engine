@@ -263,6 +263,23 @@ inline std::string ToString(const PlaceholderAlignment& placeholderAlignment)
 }
 } // namespace StringUtils
 
+enum class SpanItemType { NORMAL = 0, IMAGE = 1, CustomSpan = 2, SYMBOL = 3, PLACEHOLDER = 4 };
+
+namespace StringUtils {
+inline std::string ToString(const SpanItemType& spanItemType)
+{
+    static const LinearEnumMapNode<SpanItemType, std::string> table[] = {
+        { SpanItemType::NORMAL, "NORMAL" },
+        { SpanItemType::IMAGE, "IMAGE" },
+        { SpanItemType::CustomSpan, "CustomSpan" },
+        { SpanItemType::SYMBOL, "SYMBOL" },
+        { SpanItemType::PLACEHOLDER, "PLACEHOLDER" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), spanItemType);
+    return iter != -1 ? table[iter].value : "";
+}
+}
+
 struct TextSizeGroup {
     Dimension fontSize = 14.0_px;
     uint32_t maxLines = INT32_MAX;
@@ -681,6 +698,12 @@ public:
     {
         return fontSize_.value;
     }
+
+    float GetFontSizeActual()
+    {
+        return fontSize_.actualValue;
+    }
+
     void ResetTextBaselineOffset()
     {
         propBaselineOffset_.Reset();

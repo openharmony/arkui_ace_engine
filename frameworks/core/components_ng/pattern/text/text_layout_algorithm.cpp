@@ -58,6 +58,10 @@ TextLayoutAlgorithm::TextLayoutAlgorithm(
     std::list<RefPtr<SpanItem>> spans, RefPtr<ParagraphManager> pManager, bool isSpanStringMode,
     const TextStyle& textStyle, bool isMarquee)
 {
+    if (SystemProperties::GetTextTraceEnabled()) {
+        ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::TextLayoutAlgorithm[styleUid:%d][isSpanStringMode:%d][size:%d]",
+            textStyle.GetTextStyleUid(), isSpanStringMode, static_cast<int32_t>(spans.size()));
+    }
     paragraphManager_ = pManager;
     isSpanStringMode_ = isSpanStringMode;
     textStyle_ = textStyle;
@@ -149,9 +153,8 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     inheritTextStyle_ = textStyle_;
     MeasureChildren(layoutWrapper, textStyle_);
     CheckNeedReCreateParagraph(layoutWrapper, textStyle_);
-    ACE_SCOPED_TRACE(
-        "TextLayoutAlgorithm::MeasureContent[id:%d][needReCreateParagraph:%d]", host->GetId(), needReCreateParagraph_);
-
+    ACE_SCOPED_TRACE("TextLayoutAlgorithm::MeasureContent[id:%d][needReCreateParagraph:%d][size:%d]", host->GetId(),
+        needReCreateParagraph_, static_cast<int32_t>(spans_.size()));
     if (textStyle_.GetTextOverflow() == TextOverflow::MARQUEE) { // create a paragraph with all text in 1 line
         isMarquee_ = true;
         auto result = BuildTextRaceParagraph(textStyle_, textLayoutProperty, contentConstraint, layoutWrapper);
@@ -450,6 +453,10 @@ bool TextLayoutAlgorithm::ReLayoutParagraphs(
     } else if (!needReCreateParagraph_ && needReLayout) {
         auto tempTextStyle = textStyle;
         tempTextStyle.ResetTextBaselineOffset();
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::ReLayoutParagraphs[id:%d][textStyleBitmap:%s]",
+                tempTextStyle.GetTextStyleUid(), tempTextStyle.GetReLayoutTextStyleBitmap().to_string().c_str());
+        }
         textStyles.emplace_back(tempTextStyle);
         parStyle = GetParagraphStyle(textStyle);
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -479,8 +486,13 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(TextStyle& textStyle, const s
 {
     auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
     auto needReLayout = textStyle.NeedReLayout();
-    ACE_TEXT_SCOPED_TRACE("CreateParagraphAndLayout[maxSize:%s][Len:%d][needReCreateParagraph:%d][needReLayout:%d]",
-        maxSize.ToString().c_str(), static_cast<int32_t>(content.length()), needReCreateParagraph_, needReLayout);
+    if (SystemProperties::GetTextTraceEnabled()) {
+        ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::CreateParagraphAndLayout[contentConstraint:%s][maxSize:%s][Len:%d]["
+                              "needReCreateParagraph:%d][needReLayout:%d][fontSize:%s][fontColor:%s]",
+            contentConstraint.ToString().c_str(), maxSize.ToString().c_str(), static_cast<int32_t>(content.length()),
+            needReCreateParagraph_, needReLayout, textStyle.GetFontSize().ToString().c_str(),
+            textStyle.GetTextColor().ColorToString().c_str());
+    }
 
     if (needReCreateParagraph_ && !CreateParagraph(textStyle, content, layoutWrapper, maxSize.Width())) {
         return false;
