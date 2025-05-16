@@ -42,6 +42,7 @@ template("arkts_frontend") {
       "ani_context_module.cpp",
       "arkts_ani_utils.cpp",
       "arkts_frontend.cpp",
+      "arkts_plugin_frontend.cpp",
       "entry/arkts_entry_loader.cpp",
     ]
     external_deps = [

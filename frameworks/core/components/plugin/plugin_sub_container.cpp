@@ -26,6 +26,7 @@
 #include "core/components/plugin/plugin_element.h"
 #include "core/components/plugin/plugin_window.h"
 #include "core/components/plugin/render_plugin.h"
+#include "bridge/arkts_frontend/arkts_plugin_frontend.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -55,13 +56,19 @@ void PluginSubContainer::Initialize()
 
     taskExecutor_ = executor;
 
-    frontend_ = AceType::MakeRefPtr<PluginFrontend>();
-    if (!frontend_) {
+    auto container = AceEngine::Get().GetContainer(outSidePipelineContext->GetInstanceId());
+    if (!container) {
         return;
     }
 
-    auto container = AceEngine::Get().GetContainer(outSidePipelineContext->GetInstanceId());
-    if (!container) {
+    if (outSidePipelineContext->GetFrontendType() == FrontendType::ARK_TS) {
+        frontend_ = AceType::MakeRefPtr<ArktsPluginFrontend>(container->GetSharedRuntime());
+        frontend_->Initialize(FrontendType::ARK_TS, taskExecutor_);
+        TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "PluginSubContainer initialize end.");
+        return;
+    }
+    frontend_ = AceType::MakeRefPtr<PluginFrontend>();
+    if (!frontend_) {
         return;
     }
 
@@ -98,6 +105,11 @@ void PluginSubContainer::Destroy()
 {
     TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "PluginSubContainer Destroy.");
     ContainerScope scope(instanceId_);
+    auto frameNode = pluginNode_.Upgrade();
+    if (frameNode) {
+        frameNode->RemoveChild(pageNode_.Upgrade());
+    }
+
     ResourceManager::GetInstance().RemoveResourceAdapter("", "", instanceId_);
     if (frontend_) {
         frontend_->Destroy();

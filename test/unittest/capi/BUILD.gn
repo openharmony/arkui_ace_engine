@@ -132,6 +132,7 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
   if (defined(plugin_components_support_for_test) &&
       plugin_components_support_for_test) {
     sources += [
+      "$ace_root/frameworks/core/common/plugin_manager.cpp",
       "$ace_root/frameworks/core/components_ng/pattern/plugin/plugin_model_static_ng.cpp",
       "$ace_root/frameworks/core/components_ng/pattern/plugin/plugin_node.cpp",
     ]
