@@ -331,6 +331,11 @@ public:
             theme->menuItemHorIntervalPadding_ =
                 pattern->GetAttr<Dimension>("menu_item_hor_interval", theme->menuItemHorIntervalPadding_);
             theme->menuPadding_ = pattern->GetAttr<Dimension>("menu_padding_interval", theme->menuPadding_);
+            if (theme->GetExpandDisplay()) {
+                theme->menuWordBreak_ = WordBreak::BREAK_ALL;
+            } else {
+                theme->menuWordBreak_ = WordBreak::BREAK_WORD;
+            }
         }
 
         void ParseAttribute(const RefPtr<SelectTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
@@ -513,6 +518,7 @@ public:
         theme->menuBackgroundBlurStyle_ = menuBackgroundBlurStyle_;
         theme->menuItemHorIntervalPadding_ = menuItemHorIntervalPadding_;
         theme->menuPadding_ = menuPadding_;
+        theme->menuWordBreak_ = menuWordBreak_;
     }
 
     void CloneWideScreenAttrs(RefPtr<SelectTheme>& theme)
@@ -1487,6 +1493,11 @@ public:
     {
         return menuBackgroundBlurStyle_;
     }
+
+    WordBreak GetWordBreak() const
+    {
+        return menuWordBreak_;
+    }
     
 private:
     Color disabledColor_;
@@ -1657,6 +1668,7 @@ private:
     double optionFocusStyleType_ = 0.0;
     bool menuNeedFocus_ = false;
     int menuBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
+    WordBreak menuWordBreak_ = WordBreak::BREAK_WORD;
 };
 
 } // namespace OHOS::Ace

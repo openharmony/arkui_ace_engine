@@ -1852,6 +1852,7 @@ RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<Fr
     auto textAlign = static_cast<TextAlign>(theme->GetOptionContentNormalAlign());
     auto convertValue = ConvertTxtTextAlign(IsRightToLeft, textAlign);
     textProperty->UpdateAlignment(convertValue);
+    textProperty->UpdateWordBreak(theme->GetWordBreak());
     textNode->MountToParent(parent);
     textNode->MarkModifyDone();
 
