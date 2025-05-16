@@ -42,6 +42,7 @@
 namespace OHOS::Ace::NG {
 namespace {
     constexpr int32_t MAX_POINTS = 10;
+    constexpr int32_t API_TARGET_VERSION_MASK = 1000;
 }
 ArkUIGesture* createPanGesture(
     ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 distance, bool limitFingerCount, void* userData = nullptr)
@@ -480,7 +481,7 @@ void SendGestureEvent(GestureEvent& info, int32_t eventKind, void* extraParam)
     eventData.nodeId = 0;
     eventData.extraParam = reinterpret_cast<ArkUI_Int64>(extraParam);
     eventData.gestureAsyncEvent.subKind = eventKind;
-    eventData.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    eventData.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
     GetGestureEvent(eventData.gestureAsyncEvent, info);
     if (info.GetInputEventType() == InputEventType::AXIS) {
         ArkUIAxisEvent rawInputEvent;
@@ -786,8 +787,8 @@ void setGestureInterrupterToNodeWithUserData(
         }
         interruptInfo.responseLinkRecognizer = othersRecognizer;
         interruptInfo.count = count;
-        ArkUI_UIInputEvent inputEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID,
-            &rawInputEvent };
+        ArkUI_UIInputEvent inputEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID, &rawInputEvent };
+        inputEvent.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
         ArkUIGestureEvent arkUIGestureEvent { gestureEvent, nullptr };
         interruptInfo.inputEvent = &inputEvent;
         interruptInfo.gestureEvent = &arkUIGestureEvent;
