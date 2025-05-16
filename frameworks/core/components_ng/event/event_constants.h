@@ -108,6 +108,7 @@ enum class GestureCallbackType {
     UPDATE,
     END,
     CANCEL,
+    ACTION,
 };
 
 } // namespace OHOS::Ace::NG

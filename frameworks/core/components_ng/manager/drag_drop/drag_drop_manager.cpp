@@ -699,6 +699,10 @@ void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& f
     draggedFrameNode_ = preTargetFrameNode_;
     preMovePoint_ = point;
     parentHitNodes_.emplace(frameNode->GetId());
+    DragDropBehaviorReporter::GetInstance().UpdateFrameNodeId(frameNode->GetId());
+    DragDropBehaviorReporter::GetInstance().UpdateStartPoint(point);
+    DragDropBehaviorReporter::GetInstance().UpdateLongPressDurationEnd(GetSysTimestamp());
+    DragDropBehaviorReporter::GetInstance().UpdateDropResult(DropResult::DROP_FAIL);
 
     // Reset hover status when drag start.
     auto pipeline = frameNode->GetContextRefPtr();
@@ -1148,6 +1152,7 @@ void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std:
 {
     RemoveDeadlineTimer();
     Point point = pointerEvent.GetPoint();
+    DragDropBehaviorReporter::GetInstance().UpdateEndPoint(point);
     dragDropPointerEvent_ = pointerEvent;
     auto preTargetFrameNode = preTargetFrameNode_;
     DoDragReset();
@@ -1360,6 +1365,7 @@ void DragDropManager::OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefP
     UpdateDragEvent(event, pointerEvent);
     auto extraParams = eventHub->GetDragExtraParams(extraInfo_, point, DragEventType::DROP);
     DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
+    DragDropBehaviorReporter::GetInstance().UpdateDropResult(DropResult::DROP_SUCCESS);
     eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, event, extraParams);
     if (event->IsDragEndPending() && event->GetRequestIdentify() != -1) {
         if (PostStopDrag(dragFrameNode, pointerEvent, event, extraParams)) {
