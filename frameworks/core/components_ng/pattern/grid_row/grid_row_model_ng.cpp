@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,12 @@
 namespace OHOS::Ace::NG {
 void GridRowModelNG::Create()
 {
-    auto col = Referenced::MakeRefPtr<V2::GridContainerSize>();
+    RefPtr<V2::GridContainerSize> col;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        col = Referenced::MakeRefPtr<V2::GridContainerSize>(NG::DEFAULT_COLUMN_NUMBER);
+    } else {
+        col = Referenced::MakeRefPtr<V2::GridContainerSize>();
+    }
     auto gutter = Referenced::MakeRefPtr<V2::Gutter>();
     auto breakpoints = Referenced::MakeRefPtr<V2::BreakPoints>();
     auto direction = V2::GridRowDirection::Row;
