@@ -3143,6 +3143,10 @@ struct ArkUIFolderStackModifier {
     void (*resetEnableAnimation)(ArkUINodeHandle node);
     void (*setAutoHalfFold)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetAutoHalfFold)(ArkUINodeHandle node);
+    void (*setOnFolderStateChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnFolderStateChange)(ArkUINodeHandle node);
+    void (*setOnHoverStatusChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnHoverStatusChange)(ArkUINodeHandle node);
 };
 
 struct ArkUINavigatorModifier {
