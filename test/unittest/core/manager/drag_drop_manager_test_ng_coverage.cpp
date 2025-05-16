@@ -2029,4 +2029,56 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage072, TestSi
     dragDropManager->HandleDragEvent(pointerEvent, DragEventAction::DRAG_EVENT_START, frameNode);
     EXPECT_EQ(dragDropManager->isWindowConsumed_, false);
 }
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage073
+ * @tc.desc: Test OnDragDrop IsDragEndPending
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage073, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DragDropManager DragEvent and FrameNode.
+     * @tc.expected: dragDropManager dragEvent frameNode are not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create Pipeline .
+     * @tc.expected: pipeline is not null.
+     */
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    ASSERT_NE(pipeline->taskExecutor_, nullptr);
+    frameNode->context_ = AceType::RawPtr(pipeline);
+    /**
+     * @tc.steps: step3. create DragPointerEvent, and call SetResult(DragRet::DRAG_SUCCESS), then call OnDragDrop.
+     * @tc.expected: Result is DragRet::DRAG_SUCCESS.
+     */
+    DragPointerEvent pointerEvent;
+    dragEvent->SetResult(DragRet::DRAG_SUCCESS);
+    dragDropManager->OnDragDrop(dragEvent, frameNode, pointerEvent);
+    EXPECT_EQ(dragEvent->GetResult(), DragRet::DRAG_SUCCESS);
+    /**
+     * @tc.steps: step4. create displayId and set SetDisplayId(displayId).
+     */
+    int32_t displayId = 0;
+    dragEvent->SetDisplayId(displayId);
+    dragEvent->SetResult(DragRet::DRAG_SUCCESS);
+    dragEvent->SetIsDragEndPending(true);
+    dragEvent->SetRequestIdentify(1);
+    /**
+     * @tc.steps: step5. set call OnDragDrop and call GetDisplayId.
+     * @tc.expected: retDisplayId is displayId.
+     */
+    dragDropManager->OnDragDrop(dragEvent, frameNode, pointerEvent);
+    auto retDisplayId = dragEvent->GetDisplayId();
+    EXPECT_EQ(retDisplayId, displayId);
+}
 } // namespace OHOS::Ace::NG
