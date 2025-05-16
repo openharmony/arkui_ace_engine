@@ -1633,6 +1633,7 @@ void GestureEventHub::UpdateMenuNode(
     CHECK_NULL_VOID(menuNode);
     auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildByIndex(0));
     CHECK_NULL_VOID(scrollNode);
+    data.scrollNode = scrollNode;
     auto menuGeometryNode = scrollNode->GetGeometryNode();
     CHECK_NULL_VOID(menuGeometryNode);
     auto menuNodeSize = menuGeometryNode->GetFrameRect();
@@ -1744,7 +1745,7 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     pipeline->FlushSyncGeometryNodeTasks();
     overlayManager->RemovePixelMap();
     DragAnimationHelper::ShowBadgeAnimation(data.textNode);
-    DragAnimationHelper::ShowMenuHideAnimation(data.imageNode, data);
+    DragAnimationHelper::ShowMenuHideAnimation(data);
     DragAnimationHelper::HideDragNodeCopy(overlayManager);
 
     dragDropManager->DoDragStartAnimation(

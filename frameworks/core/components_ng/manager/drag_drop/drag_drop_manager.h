@@ -375,6 +375,7 @@ public:
         RefPtr<FrameNode> menuPreviewImageNode { nullptr };
         RefPtr<FrameNode> relativeContainerNode { nullptr };
         RefPtr<FrameNode> stackNode { nullptr };
+        RefPtr<FrameNode> menuNode { nullptr };
         RectF originPreviewRect;
         RectF dragPreviewRect;
         bool isMenuShow = false;

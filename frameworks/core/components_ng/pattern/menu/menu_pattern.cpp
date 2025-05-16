@@ -1296,14 +1296,6 @@ RefPtr<FrameNode> MenuPattern::DuplicateMenuNode(const RefPtr<FrameNode>& menuNo
     CHECK_NULL_RETURN(menuNode, duplicateMenuNode);
     auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(menuLayoutProperty, duplicateMenuNode);
-    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildByIndex(0));
-    CHECK_NULL_RETURN(scrollNode, duplicateMenuNode);
-    auto menuUINode = scrollNode->GetParent();
-    CHECK_NULL_RETURN(menuUINode, duplicateMenuNode);
-    menuUINode->RemoveChild(scrollNode);
-    menuUINode->RebuildRenderContextTree();
-    menuUINode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-    duplicateMenuNode->AddChild(scrollNode);
     if (menuLayoutProperty->GetBorderRadius().has_value()) {
         BorderRadiusProperty borderRadius = menuLayoutProperty->GetBorderRadiusValue();
         UpdateBorderRadius(duplicateMenuNode, borderRadius);
@@ -1319,7 +1311,7 @@ void MenuPattern::SetMenuBackGroundStyle(const RefPtr<FrameNode>& menuNode, cons
     CHECK_NULL_VOID(renderContext);
     BlurStyleOption styleOption;
     if (menuParam.backgroundColor.has_value()) {
-        styleOption.blurStyle = BlurStyle::NO_MATERIAL;
+        styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
         renderContext->UpdateBackgroundColor(menuParam.backgroundColor.value_or(Color::TRANSPARENT));
     } else {
         styleOption.blurStyle = static_cast<BlurStyle>(

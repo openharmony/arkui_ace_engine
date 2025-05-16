@@ -100,6 +100,7 @@ struct PreparedInfoForDrag {
     RefPtr<FrameNode> textRowNode { nullptr };
     RefPtr<FrameNode> textNode { nullptr };
     RefPtr<FrameNode> menuNode { nullptr };
+    RefPtr<FrameNode> scrollNode { nullptr };
     // for menu follow animation
     float menuPositionLeft = 0.0f;
     float menuPositionTop = 0.0f;
