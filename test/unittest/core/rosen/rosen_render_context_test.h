@@ -43,6 +43,8 @@ public:
     void SetUp() override;
     void TearDown() override;
     RefPtr<RosenRenderContext> InitRosenRenderContext(const RefPtr<FrameNode>& frameNode);
+    RefPtr<RosenRenderContext> InitRosenRenderContext(const RefPtr<FrameNode>& frameNode,
+        const RenderContext::ContextType& type);
 };
 } // namespace OHOS::Ace::NG
 

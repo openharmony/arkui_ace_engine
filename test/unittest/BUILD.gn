@@ -894,7 +894,6 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/effect_component/effect_component_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/flex/wrap_layout_algorithm.cpp",
