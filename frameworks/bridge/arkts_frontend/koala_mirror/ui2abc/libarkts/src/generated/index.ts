@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+export * from "./peers/ArkTsConfig"
 export * from "./peers/SourcePosition"
 export * from "./peers/SourceRange"
 export * from "./peers/LabelPair"
@@ -32,6 +33,7 @@ export * from "./peers/VReg"
 export * from "./peers/IRNode"
 export * from "./peers/ErrorLogger"
 export * from "./peers/VerificationContext"
+export * from "./peers/Path"
 export * from "./peers/DynamicImportData"
 export * from "./peers/OverloadInfo"
 export * from "./peers/NumberLiteral"

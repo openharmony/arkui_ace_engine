@@ -1807,6 +1807,9 @@ export class Es2pandaNativeModule {
     _AstNodeDumpEtsSrcConst(context: KNativePointer, receiver: KNativePointer): KStringPtr {
         throw new Error("This methods was not overloaded by native module initialization")
     }
+    _AstNodeDumpDeclConst(context: KNativePointer, receiver: KNativePointer): KStringPtr {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
     _AstNodeDumpConst(context: KNativePointer, receiver: KNativePointer, dumper: KNativePointer): void {
         throw new Error("This methods was not overloaded by native module initialization")
     }
@@ -3265,6 +3268,9 @@ export class Es2pandaNativeModule {
     _CreateSrcDumper(context: KNativePointer, node: KNativePointer): KNativePointer {
         throw new Error("This methods was not overloaded by native module initialization")
     }
+    _CreateSrcDumper1(context: KNativePointer, node: KNativePointer, isDeclgen: KBoolean): KNativePointer {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
     _SrcDumperAdd(context: KNativePointer, receiver: KNativePointer, str: KStringPtr): void {
         throw new Error("This methods was not overloaded by native module initialization")
     }
@@ -3290,6 +3296,21 @@ export class Es2pandaNativeModule {
         throw new Error("This methods was not overloaded by native module initialization")
     }
     _SrcDumperEndl(context: KNativePointer, receiver: KNativePointer, num: KUInt): void {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _SrcDumperIsDeclgenConst(context: KNativePointer, receiver: KNativePointer): KBoolean {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _SrcDumperDumpNode(context: KNativePointer, receiver: KNativePointer, key: KStringPtr): void {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _SrcDumperRemoveNode(context: KNativePointer, receiver: KNativePointer, key: KStringPtr): void {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _SrcDumperIsIndirectDepPhaseConst(context: KNativePointer, receiver: KNativePointer): KBoolean {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _SrcDumperRun(context: KNativePointer, receiver: KNativePointer): void {
         throw new Error("This methods was not overloaded by native module initialization")
     }
     _CreateETSClassLiteral(context: KNativePointer, expr: KNativePointer): KNativePointer {

@@ -14,7 +14,8 @@
     ],
     "config": {
         "gen_version": "2.1.5",
-        "panda_sdk_path": "../../incremental/tools/panda/node_modules/@panda/sdk"
+        "panda_sdk_path": "../../incremental/tools/panda/node_modules/@panda/sdk",
+        "ohos_panda_sdk_path": "../build/sdk"
     },
     "dependencies": {
         "@koalaui/ets-tsc": "4.9.5-r5",
@@ -52,6 +53,7 @@
         "run:memo": "npm run compile && npm run compile:plugins && npm run compile --prefix ../memo-plugin && npm run memo",
         "run:abc": "../../incremental/tools/panda/node_modules/@panda/sdk/linux_host_tools/bin/ark --load-runtimes=ets --boot-panda-files=../../incremental/tools/panda/node_modules/@panda/sdk/ets/etsstdlib.abc ./main.abc main.ETSGLOBAL::main",
         "mocha": "PANDA_SDK_PATH=../../incremental/tools/panda/node_modules/@panda/sdk TS_NODE_PROJECT=./test/tsconfig.json mocha -r tsconfig-paths/register --reporter-option maxDiffSize=0",
+        "mocha:ohos": "PANDA_SDK_PATH=../build/sdk TS_NODE_PROJECT=./test/tsconfig.json mocha -r tsconfig-paths/register --reporter-option maxDiffSize=0",
         "test": "npm run compile:native && npm run mocha",
         "compile:playground": "cd playground && meson setup build && meson compile -C build",
         "run:playground": "npm run compile:playground && ./playground/build/playground.out",
@@ -60,6 +62,7 @@
         "panda:sdk:reinstall": "npm run panda:sdk:clean && npm run panda:sdk:install",
         "regenerate:current": "npm run compile -C ../../../arktscgen && node ../../../arktscgen --panda-sdk-path $npm_package_config_panda_sdk_path --output-dir ../ --options-file ./generator/options.json5 --no-initialize --debug",
         "regenerate": "npx --yes @idlizer/arktscgen@$npm_package_config_gen_version --panda-sdk-path $npm_package_config_panda_sdk_path --output-dir ../ --options-file ./generator/options.json5 --no-initialize",
+        "regenerate:ohos": "npx --yes @idlizer/arktscgen@$npm_package_config_gen_version --panda-sdk-path $npm_package_config_ohos_panda_sdk_path --output-dir ../ --options-file ./generator/options.json5 --no-initialize",
         "reinstall:regenerate": "npm run panda:sdk:reinstall && npm run regenerate"
     }
 }

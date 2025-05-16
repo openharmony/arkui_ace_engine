@@ -32,8 +32,8 @@ export class SrcDumper extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
-    static createSrcDumper(node?: AstNode): SrcDumper {
-        return new SrcDumper(global.generatedEs2panda._CreateSrcDumper(global.context, passNode(node)))
+    static create1SrcDumper(node: AstNode | undefined, isDeclgen: boolean): SrcDumper {
+        return new SrcDumper(global.generatedEs2panda._CreateSrcDumper1(global.context, passNode(node), isDeclgen))
     }
     /** @deprecated */
     add(str: string): this {
@@ -76,6 +76,27 @@ export class SrcDumper extends ArktsObject {
     /** @deprecated */
     endl(num: number): this {
         global.generatedEs2panda._SrcDumperEndl(global.context, this.peer, num)
+        return this
+    }
+    get isDeclgen(): boolean {
+        return global.generatedEs2panda._SrcDumperIsDeclgenConst(global.context, this.peer)
+    }
+    /** @deprecated */
+    dumpNode(key: string): this {
+        global.generatedEs2panda._SrcDumperDumpNode(global.context, this.peer, key)
+        return this
+    }
+    /** @deprecated */
+    removeNode(key: string): this {
+        global.generatedEs2panda._SrcDumperRemoveNode(global.context, this.peer, key)
+        return this
+    }
+    get isIndirectDepPhase(): boolean {
+        return global.generatedEs2panda._SrcDumperIsIndirectDepPhaseConst(global.context, this.peer)
+    }
+    /** @deprecated */
+    run(): this {
+        global.generatedEs2panda._SrcDumperRun(global.context, this.peer)
         return this
     }
 }
