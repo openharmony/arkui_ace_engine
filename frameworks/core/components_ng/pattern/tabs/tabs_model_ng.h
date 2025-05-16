@@ -118,6 +118,20 @@ public:
     static void SetIsCustomAnimation(FrameNode* frameNode, bool isCustom);
     static void SetOnContentWillChange(FrameNode* frameNode, std::function<bool(int32_t, int32_t)>&& callback);
 
+    static void HandleBarBackgroundColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleBarHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleBarGridGutter(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleBarGridMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleDividerStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleDividerColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleDividerStartMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleDividerEndMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleScrollableBarMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleBackgroundEffectColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleBackgroundEffectInactiveColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleBackgroundBlurStyleInactiveColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);
     static RefPtr<SwiperController> GetSwiperController(const RefPtr<FrameNode>& swiperNode,
@@ -133,19 +147,6 @@ private:
     static RefPtr<TabBarPaintProperty> GetTabBarPaintProperty(FrameNode* frameNode);
     static RefPtr<SwiperLayoutProperty> GetSwiperLayoutProperty(FrameNode* frameNode);
     static RefPtr<SwiperPaintProperty> GetSwiperPaintProperty(FrameNode* frameNode);
-    static void HandleBarBackgroundColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
-    static void HandleBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
-    static void HandleBarHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
-    static void HandleBarGridGutter(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
-    static void HandleBarGridMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
-    static void HandleDividerStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
-    static void HandleDividerColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
-    static void HandleDividerStartMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
-    static void HandleDividerEndMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
-    static void HandleScrollableBarMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
-    static void HandleBackgroundEffectColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
-    static void HandleBackgroundEffectInactiveColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
-    static void HandleBackgroundBlurStyleInactiveColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 };
 
 } // namespace OHOS::Ace::NG

@@ -1263,8 +1263,6 @@ void TabsModelNG::CreateWithResourceObj(TabJsResType jsResourceType, const RefPt
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TabsPattern>();
-    CHECK_NULL_VOID(pattern);
     if (resObj) {
         switch (jsResourceType) {
             case TabJsResType::BAR_BACKGROUND_COLOR:
