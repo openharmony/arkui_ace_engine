@@ -155,6 +155,10 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 void PipelineContext::FlushMessages()
 {
     ACE_FUNCTION_TRACK();
+    if (isFirstPage_) {
+        LOGI("page not loaded, wait..");
+        return;
+    }
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
         rsUIDirector_->SendMessages();
