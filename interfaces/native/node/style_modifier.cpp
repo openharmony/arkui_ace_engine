@@ -8153,7 +8153,8 @@ int32_t SetSwiperShowDisplayArrow(ArkUI_NodeHandle node, const ArkUI_AttributeIt
     for (const auto& str : displayArrow) {
         ss << std::fixed << std::setprecision(0) << str << "|";
     } 
-    fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperDisplayArrow(node->uiNodeHandle, DeleteLastChar(ss).c_str());
+    fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperDisplayArrow(node->uiNodeHandle,
+        DeleteLastChar(ss).c_str());
     return ERROR_CODE_NO_ERROR;
 }
 
