@@ -27,6 +27,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float PARAGRAPH_SAVE_BOUNDARY = 1.0f;
+constexpr uint32_t DEFAULT_MINLINES = 1;
 } // namespace
 std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
@@ -75,19 +76,21 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
         // Used for empty text.
         preferredHeight_ = pattern->PreferredLineHeight(true);
     }
-
+    std::optional<SizeF> contentSize;
     // Paragraph layout.}
     if (isInlineStyle) {
         auto fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
             textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         auto paragraphData = CreateParagraphData { false, fontSize };
         CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), paragraphData);
-        return InlineMeasureContent(textFieldContentConstraint, layoutWrapper);
+        contentSize = InlineMeasureContent(textFieldContentConstraint, layoutWrapper);
     } else if (showPlaceHolder_) {
-        return PlaceHolderMeasureContent(textFieldContentConstraint, layoutWrapper);
+        contentSize = PlaceHolderMeasureContent(textFieldContentConstraint, layoutWrapper);
     } else {
-        return TextAreaMeasureContent(textFieldContentConstraint, layoutWrapper);
+        contentSize = TextAreaMeasureContent(textFieldContentConstraint, layoutWrapper);
     }
+    CalcMeasureContentWithMinLines(contentSize, layoutWrapper, contentConstraint);
+    return contentSize;
 }
 
 void TextAreaLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -226,5 +229,37 @@ bool TextAreaLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, cons
         CreateParagraph(textStyle, content, false, pattern->GetNakedCharPosition(), paragraphData);
     }
     return true;
+}
+
+void TextAreaLayoutAlgorithm::CalcMeasureContentWithMinLines(
+    std::optional<SizeF>& size, LayoutWrapper* layoutWrapper, const LayoutConstraintF& contentConstraint)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    if (!size.has_value()) {
+        return;
+    }
+    auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (!(textFieldLayoutProperty && textFieldLayoutProperty->HasMinLines() &&
+            textFieldLayoutProperty->GetMinLines().value() >= DEFAULT_MINLINES)) {
+        return;
+    }
+    auto paragraph = GetParagraph();
+    CHECK_NULL_VOID(paragraph);
+    auto paragraphHeight = paragraph->GetHeight();
+    if (LessOrEqual(paragraphHeight, 0.0)) {
+        return;
+    }
+    auto lineCount = std::max(static_cast<uint32_t>(paragraph->GetLineCount()), DEFAULT_MINLINES);
+    auto perLineHeight = paragraphHeight / lineCount;
+    auto minLines = textFieldLayoutProperty->GetMinLines().value();
+    if (textFieldLayoutProperty->HasNormalMaxViewLines()) {
+        minLines = std::min(minLines, textFieldLayoutProperty->GetNormalMaxViewLines().value());
+    }
+    auto finalMinHeight = perLineHeight * minLines;
+    finalMinHeight = std::clamp(finalMinHeight, contentConstraint.minSize.Height(), contentConstraint.maxSize.Height());
+    if (GreatNotEqual(finalMinHeight, size.value().Height())) {
+        size.value().SetHeight(finalMinHeight);
+    }
 }
 } // namespace OHOS::Ace::NG

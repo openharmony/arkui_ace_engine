@@ -13818,6 +13818,23 @@ class TextAreaMaxLinesModifier extends ModifierWithKey {
   }
 }
 TextAreaMaxLinesModifier.identity = Symbol('textAreaMaxLines');
+class TextAreaMinLinesModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetMinLines(node);
+    }
+    else {
+      getUINativeModule().textArea.setMinLines(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaMinLinesModifier.identity = Symbol('textAreaMinLines');
 class TextAreaMinFontSizeModifier extends ModifierWithKey {
     constructor(value) {
         super(value);
@@ -14952,6 +14969,10 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   maxLines(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaMaxLinesModifier.identity, TextAreaMaxLinesModifier, value);
+    return this;
+  }
+  minLines(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaMinLinesModifier.identity, TextAreaMinLinesModifier, value);
     return this;
   }
   customKeyboard(value) {
