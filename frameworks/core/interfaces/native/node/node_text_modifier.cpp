@@ -866,6 +866,13 @@ ArkUI_Int32 GetFontWeight(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(TextModelNG::GetFontWeight(frameNode));
 }
 
+ArkUI_Int32 GetLineCount(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetLineCount(frameNode));
+}
+
 ArkUI_Int32 GetItalicFontStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1397,6 +1404,7 @@ const ArkUITextModifier* GetTextModifier()
         .setOnMarqueeStateChange = SetOnMarqueeStateChange,
         .resetOnMarqueeStateChange = ResetOnMarqueeStateChange,
         .setImmutableFontWeight = SetImmutableFontWeight,
+        .getLineCount = GetLineCount,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

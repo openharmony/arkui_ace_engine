@@ -2648,6 +2648,7 @@ struct ArkUITextModifier {
     void (*setOnMarqueeStateChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnMarqueeStateChange)(ArkUINodeHandle node);
     void (*setImmutableFontWeight)(ArkUINodeHandle node, ArkUI_Int32 weight);
+    ArkUI_Int32 (*getLineCount)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
