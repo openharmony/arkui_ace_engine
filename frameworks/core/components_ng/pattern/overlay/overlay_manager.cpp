@@ -5288,6 +5288,9 @@ void OverlayManager::CleanInvalidModalNode(const WeakPtr<FrameNode>& invalidNode
     }
 }
 
+/**
+ * @brief Close Sheet by @State.
+ */
 void OverlayManager::CloseSheet(const SheetKey& sheetKey)
 {
     if (modalStack_.empty()) {
@@ -5513,100 +5516,11 @@ void OverlayManager::PlaySheetTransition(
     CHECK_NULL_VOID(sheetNode);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
-
-    // current sheet animation
-    AnimationOption option;
-    const RefPtr<InterpolatingSpring> curve =
-        AceType::MakeRefPtr<InterpolatingSpring>(0.0f, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
-    option.SetCurve(curve);
-    sheetPattern->SetSheetAnimationOption(option);
-    auto context = sheetNode->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    context->UpdateRenderGroup(true, false, true);
-    TAG_LOGD(AceLogTag::ACE_SHEET, "UpdateRenderGroup start");
-    if (isTransitionIn) {
-        sheetPattern->SetCurrentHeight(sheetHeight_);
-        float offset = sheetPattern->ComputeTransitionOffset(sheetHeight_);
-        if (isFirstTransition) {
-            sheetPattern->SendMessagesBeforeFirstTransitionIn(true);
-            sheetPattern->SheetTransitionAction(offset, true, isTransitionIn);
-            auto pipelineContext = sheetNode->GetContextWithCheck();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->UpdateOcclusionCullingStatus(true, sheetNode);
-            if (NearZero(sheetHeight_)) {
-                return;
-            }
-        }
-        if (sheetPattern->IsFoldStatusChanged()) {
-            option.SetDuration(0);
-            option.SetCurve(Curves::LINEAR);
-        }
-        sheetPattern->FireOnTypeDidChange();
-        sheetPattern->FireOnWidthDidChange(sheetNode);
-        option.SetOnFinishEvent(
-            [sheetWK = WeakClaim(RawPtr(sheetNode)), weak = AceType::WeakClaim(this), isFirst = isFirstTransition] {
-                auto sheetNode = sheetWK.Upgrade();
-                CHECK_NULL_VOID(sheetNode);
-                auto context = sheetNode->GetRenderContext();
-                CHECK_NULL_VOID(context);
-                context->UpdateRenderGroup(false, false, true);
-                TAG_LOGD(AceLogTag::ACE_SHEET, "UpdateRenderGroup finished");
-                auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
-                if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
-                    isFirst) {
-                    pattern->OnAppear();
-                    pattern->SendMessagesAfterFirstTransitionIn(true);
-                }
-                pattern->AvoidAiBar();
-                auto overlay = weak.Upgrade();
-                CHECK_NULL_VOID(overlay);
-                pattern->FireOnDetentsDidChange(overlay->sheetHeight_);
-                pattern->FireOnHeightDidChange();
-            });
-        ACE_SCOPED_TRACE("Sheet start admission");
-        sheetPattern->UpdateAccessibilityDetents(sheetHeight_);
-        sheetPattern->SetBottomStyleHotAreaInSubwindow();
-        AnimationUtils::Animate(
-            option,
-            [sheetWK = WeakClaim(RawPtr(sheetNode)), offset, isTransitionIn]() {
-                auto sheetNode = sheetWK.Upgrade();
-                CHECK_NULL_VOID(sheetNode);
-                auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-                CHECK_NULL_VOID(sheetPattern);
-                sheetPattern->SheetTransitionAction(offset, false, isTransitionIn);
-            },
-            option.GetOnFinishEvent());
-    } else {
-        sheetPattern->SendMessagesBeforeTransitionOut();
-        option.SetOnFinishEvent(
-            [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)), weakOverlayManager = WeakClaim(this)] {
-                auto sheet = sheetWK.Upgrade();
-                auto overlayManager = weakOverlayManager.Upgrade();
-                CHECK_NULL_VOID(sheet && overlayManager);
-                if (!sheet->GetPattern<SheetPresentationPattern>()->IsExecuteOnDisappear()) {
-                    sheet->GetPattern<SheetPresentationPattern>()->OnDisappear();
-                }
-                overlayManager->FireAutoSave(sheet);
-                overlayManager->RemoveSheet(sheet);
-                auto pipelineContext = sheet->GetContextWithCheck();
-                CHECK_NULL_VOID(pipelineContext);
-                pipelineContext->UpdateOcclusionCullingStatus(false, nullptr);
-            });
-        float offset = sheetPattern->ComputeTransitionOffset(sheetHeight_);
-        AnimationUtils::Animate(
-            option,
-            [sheetWK = WeakClaim(RawPtr(sheetNode)), offset, isTransitionIn]() {
-                auto sheetNode = sheetWK.Upgrade();
-                CHECK_NULL_VOID(sheetNode);
-                auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-                CHECK_NULL_VOID(sheetPattern);
-                sheetPattern->SheetTransitionAction(offset, false, isTransitionIn);
-            },
-            option.GetOnFinishEvent());
-        auto pipelineContext = sheetNode->GetContextWithCheck();
-        CHECK_NULL_VOID(pipelineContext);
-        pipelineContext->UpdateOcclusionCullingStatus(true, sheetNode);
+    if (sheetPattern->GetSheetType() != SheetType::SHEET_SIDE && isTransitionIn && isFirstTransition &&
+        NearZero(sheetHeight_)) {
+        return;
     }
+    sheetPattern->SheetTransitionForOverlay(isTransitionIn, isFirstTransition);
 }
 
 void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
@@ -5630,7 +5544,7 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
         CHECK_NULL_VOID(sheetNode);
         UpdateSheetPage(sheetNode, sheetStyle, targetId, false, false,
             std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
-            std::move(onWillDisappear), std::move(onHeightDidChange),
+            std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
             std::move(onDetentsDidChange), std::move(onWidthDidChange),
             std::move(onTypeDidChange), std::move(sheetSpringBack));
         return;
@@ -5745,7 +5659,8 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
     int32_t targetId, bool isStartByUIContext, bool isPartialUpdate,
     std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
     std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
-    std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+    std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+    std::function<void(const float)>&& onHeightDidChange,
     std::function<void(const float)>&& onDetentsDidChange,
     std::function<void(const float)>&& onWidthDidChange,
     std::function<void(const float)>&& onTypeDidChange,
@@ -5768,6 +5683,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
         sheetNodePattern->UpdateOnDisappear(std::move(onDisappear));
         sheetNodePattern->UpdateShouldDismiss(std::move(shouldDismiss));
         sheetNodePattern->UpdateOnWillDismiss(std::move(onWillDismiss));
+        sheetNodePattern->UpdateOnWillAppear(std::move(onWillAppear));
         sheetNodePattern->UpdateOnWillDisappear(std::move(onWillDisappear));
         sheetNodePattern->UpdateOnHeightDidChange(std::move(onHeightDidChange));
         sheetNodePattern->UpdateOnDetentsDidChange(std::move(onDetentsDidChange));
@@ -5858,10 +5774,8 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
     CHECK_NULL_VOID(sheetNodePattern);
     sheetNodePattern->UpdateIndexByDetentSelection(sheetStyle, true);
     ComputeSheetOffset(sheetStyle, sheetNode);
-    TAG_LOGI(AceLogTag::ACE_SHEET, "bindSheet lifecycle change to onWillAppear state.");
-    if (onWillAppear) {
-        onWillAppear();
-    }
+    sheetNodePattern->OnWillAppear();
+
     // fire navigation onActive
     FireNavigationLifecycle(sheetNode, static_cast<int32_t>(NavDestinationLifecycle::ON_INACTIVE),
         true, static_cast<int32_t>(NavDestinationActiveReason::SHEET));
@@ -5939,6 +5853,7 @@ void OverlayManager::SetSheetProperty(
     sheetNodePattern->UpdateOnDisappear(std::move(onDisappear));
     sheetNodePattern->UpdateShouldDismiss(std::move(shouldDismiss));
     sheetNodePattern->UpdateOnWillDismiss(std::move(onWillDismiss));
+    sheetNodePattern->UpdateOnWillAppear(std::move(onWillAppear));
     sheetNodePattern->UpdateOnWillDisappear(std::move(onWillDisappear));
     sheetNodePattern->UpdateOnHeightDidChange(std::move(onHeightDidChange));
     sheetNodePattern->UpdateOnDetentsDidChange(std::move(onDetentsDidChange));
@@ -6286,7 +6201,7 @@ void OverlayManager::ComputeDetentsSheetOffset(const NG::SheetStyle& sheetStyle,
     auto sheetMaxHeight = sheetPattern->GetPageHeightWithoutOffset();
     auto sheetTopSafeArea = sheetPattern->GetSheetTopSafeArea();
     auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - sheetTopSafeArea;
-    auto selection = sheetStyle.detents[sheetPattern->GetDetentsIndex()];
+    auto selection = sheetStyle.detents[sheetPattern->GetDetentsFinalIndex()];
     if (selection.sheetMode.has_value()) {
         auto context = sheetNode->GetContext();
         CHECK_NULL_VOID(context);

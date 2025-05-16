@@ -1617,7 +1617,7 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     std::function<void()> onAppearCallback;
     std::function<void()> onDisappearCallback;
     std::function<void()> onWillAppearCallback;
-    std::function<void()> onWillDisappearCallback  ;
+    std::function<void()> onWillDisappearCallback;
     std::function<void()> shouldDismissFunc;
     std::function<void(const int32_t)> onWillDismissCallback;
     std::function<void(const float)> onHeightDidChangeCallback;
@@ -1733,7 +1733,7 @@ void JSViewAbstract::ParseSheetStyle(
         if (type->IsNumber()) {
             auto sheetType = type->ToNumber<int32_t>();
             if (sheetType >= static_cast<int>(NG::SheetType::SHEET_BOTTOM) &&
-                sheetType <= static_cast<int>(NG::SheetType::SHEET_POPUP)) {
+                sheetType <= static_cast<int>(NG::SheetType::SHEET_SIDE)) {
                 sheetStyle.sheetType = static_cast<NG::SheetType>(sheetType);
             }
         }
