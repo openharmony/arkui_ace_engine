@@ -448,8 +448,9 @@ void ListLanesLayoutAlgorithm::LayoutCachedALine(LayoutWrapper* layoutWrapper,
 {
     auto wrapper = GetChildByIndex(layoutWrapper, pos.first, true);
     CHECK_NULL_VOID(wrapper);
+    bool isDirty = wrapper->CheckNeedForceMeasureAndLayout() || !IsListLanesEqual(wrapper);
     LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
-    SyncGeometry(wrapper);
+    SyncGeometry(wrapper, isDirty);
     wrapper->SetActive(false);
     SetCachedItemInfo(pos.first, std::move(pos.second));
 }
