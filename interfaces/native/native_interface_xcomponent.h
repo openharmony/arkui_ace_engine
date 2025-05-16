@@ -1081,6 +1081,99 @@ int32_t OH_ArkUI_XComponent_Finalize(ArkUI_NodeHandle node);
  */
 int32_t OH_ArkUI_XComponent_IsInitialized(ArkUI_NodeHandle node, bool* isInitialized);
 
+/**
+ * @brief Provides an encapsulated <b>OH_NativeXComponent_ExtraMouseEventInfo</b>
+ *     instance which has extra info compared to OH_NativeXComponent_MouseEvent.
+ *
+ * @since 20
+ * @version 1.0
+ */
+typedef struct OH_NativeXComponent_ExtraMouseEventInfo OH_NativeXComponent_ExtraMouseEventInfo;
+
+/**
+ * @brief Obtains the extra mouse event dispatched by the ArkUI XComponent.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param extraMouseEventInfo Indicates the pointer to pointer of <b>OH_NativeXComponent_ExtraMouseEventInfo</b> instance.
+ * @return Returns the status code of the execution.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} the execution is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_GetExtraMouseEventInfo(
+    OH_NativeXComponent* component, OH_NativeXComponent_ExtraMouseEventInfo** extraMouseEventInfo);
+
+/**
+ * @brief Obtains the state of the modifier keys of the mouse event.
+ *
+ * @param ExtraMouseEventInfo Indicates the pointer to this <b>OH_NativeXComponent_ExtraMouseEventInfo</b> instance.
+ * @param keys Pointer to a variable where the current combination of pressed modifier keys will be returned.
+ *        The application can use bitwise operations to determine the state of each modifier key.
+ *        Modifier keys can be referred to {@link ArkUI_ModifierKeyName}.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_GetMouseEventModifierKeyStates(
+    OH_NativeXComponent_ExtraMouseEventInfo* ExtraMouseEventInfo, uint64_t* keys);
+
+/**
+ * @brief Obtains the state of the modifier keys of the key event.
+ *
+ * @param keyEvent Indicates the pointer to this <b>OH_NativeXComponent_KeyEvent</b> instance.
+ * @param keys Pointer to a variable where the current combination of pressed modifier keys will be returned.
+ *        The application can use bitwise operations to determine the state of each modifier key.
+ *        Modifier keys can be referred to {@link ArkUI_ModifierKeyName}.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_GetKeyEventModifierKeyStates(OH_NativeXComponent_KeyEvent* keyEvent, uint64_t* keys);
+
+/**
+ * @brief Obtains the Num Lock state of the key event.
+ *
+ * @param keyEvent Indicates the pointer to this <b>OH_NativeXComponent_KeyEvent</b> instance.
+ * @param isNumLockOn Return whether the Num Lock is on.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_GetKeyEventNumLockState(OH_NativeXComponent_KeyEvent* keyEvent, bool* isNumLockOn);
+
+/**
+ * @brief Obtains the Caps Lock state of the key event.
+ *
+ * @param keyEvent Indicates the pointer to this <b>OH_NativeXComponent_KeyEvent</b> instance.
+ * @param isCapsLockOn Return whether the Caps Lock is on.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_GetKeyEventCapsLockState(OH_NativeXComponent_KeyEvent* keyEvent, bool* isCapsLockOn);
+
+/**
+ * @brief Obtains the Scroll Lock state of the key event.
+ *
+ * @param keyEvent Indicates the pointer to this <b>OH_NativeXComponent_KeyEvent</b> instance.
+ * @param isScrollLockOn Return whether the Scroll Lock is on.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_GetKeyEventScrollLockState(OH_NativeXComponent_KeyEvent* keyEvent, bool* isScrollLockOn);
+
 #ifdef __cplusplus
 };
 #endif

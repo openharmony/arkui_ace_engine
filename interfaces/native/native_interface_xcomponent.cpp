@@ -560,6 +560,61 @@ int32_t OH_ArkUI_XComponent_IsInitialized(ArkUI_NodeHandle node, bool* isInitial
     return res;
 }
 
+int32_t OH_NativeXComponent_GetExtraMouseEventInfo(OH_NativeXComponent* component,
+    OH_NativeXComponent_ExtraMouseEventInfo** extraMouseEventInfo)
+{
+    if ((component == nullptr) || (extraMouseEventInfo == nullptr)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    return component->GetExtraMouseEventInfo(extraMouseEventInfo);
+}
+
+int32_t OH_NativeXComponent_GetMouseEventModifierKeyStates(
+    OH_NativeXComponent_ExtraMouseEventInfo* ExtraMouseEventInfo, uint64_t* keys)
+{
+    if ((ExtraMouseEventInfo == nullptr) || (keys == nullptr)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    (*keys) = ExtraMouseEventInfo->modifierKeyStates;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_NativeXComponent_GetKeyEventModifierKeyStates(OH_NativeXComponent_KeyEvent* keyEvent, uint64_t* keys)
+{
+    if ((keyEvent == nullptr) || (keys == nullptr)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    (*keys) = keyEvent->modifierKeyStates;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_NativeXComponent_GetKeyEventNumLockState(OH_NativeXComponent_KeyEvent* keyEvent, bool* isNumLockOn)
+{
+    if ((keyEvent == nullptr) || (isNumLockOn == nullptr)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    (*isNumLockOn) = keyEvent->isNumLockOn;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_NativeXComponent_GetKeyEventCapsLockState(OH_NativeXComponent_KeyEvent* keyEvent, bool* isCapsLockOn)
+{
+    if ((keyEvent == nullptr) || (isCapsLockOn == nullptr)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    (*isCapsLockOn) = keyEvent->isCapsLockOn;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_NativeXComponent_GetKeyEventScrollLockState(OH_NativeXComponent_KeyEvent* keyEvent, bool* isScrollLockOn)
+{
+    if ((keyEvent == nullptr) || (isScrollLockOn == nullptr)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    (*isScrollLockOn) = keyEvent->isScrollLockOn;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
 #ifdef __cplusplus
 };
 #endif

@@ -3358,5 +3358,29 @@
     {
         "first_introduced": "20",
         "name": "OH_ArkUI_RemoveSupportedUIStates"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_NativeXComponent_GetExtraMouseEventInfo"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_NativeXComponent_GetMouseEventModifierKeyStates"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_NativeXComponent_GetKeyEventModifierKeyStates"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_NativeXComponent_GetKeyEventNumLockState"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_NativeXComponent_GetKeyEventCapsLockState"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_NativeXComponent_GetKeyEventScrollLockState"
     }
 ]

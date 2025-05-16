@@ -118,7 +118,8 @@ public:
 
     void NativeXComponentDispatchTouchEvent(const OH_NativeXComponent_TouchEvent& touchEvent,
         const std::vector<XComponentTouchPoint>& xComponentTouchPoints);
-    void NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent);
+    void NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent,
+        const OH_NativeXComponent_ExtraMouseEventInfo& extraMouseEventInfo);
     void NativeXComponentDispatchAxisEvent(AxisEvent* axisEvent);
 
     void InitXComponent();
