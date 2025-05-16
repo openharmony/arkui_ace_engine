@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/select/select_accessibility_property.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
 #include "core/components_ng/pattern/select/select_layout_algorithm.h"
+#include "core/components_ng/pattern/select/select_layout_property.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/select/select_paint_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -185,6 +186,11 @@ public:
         return isHover_;
     }
 
+    void SetShowInSubWindow(bool isShowInSubWindow);
+    void ResetShowInSubWindow();
+    void SetShowDefaultSelectedIcon(bool show);
+    void ResetShowDefaultSelectedIcon();
+
     void SetItemSelected(int index, const std::string& value);
     void PlayBgColorAnimation(bool isHoverChange = true);
     void SetSpace(const Dimension& value);
@@ -198,6 +204,7 @@ public:
     void OnColorConfigurationUpdate() override;
     void OnLanguageConfigurationUpdate() override;
     void ShowSelectMenu();
+    void ShowSelectMenuInSubWindow();
     
     Dimension GetFontSize();
     void SetOptionWidth(const Dimension& value);
@@ -214,6 +221,10 @@ public:
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
         return MakeRefPtr<SelectPaintProperty>();
+    }
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    {
+        return MakeRefPtr<SelectLayoutProperty>();
     }
     void ResetFontColor();
     void SetMenuOutline(const MenuParam& menuParam);

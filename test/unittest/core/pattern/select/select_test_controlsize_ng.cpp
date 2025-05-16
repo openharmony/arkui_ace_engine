@@ -494,4 +494,72 @@ HWTEST_F(SelectControlSizeNg, SetControlSize010, TestSize.Level1)
     SelectModelNG::SetControlSize(selectFrameNode, std::nullopt);
     EXPECT_EQ(selectPattern->GetControlSize(), backupControlSize);
 }
+
+/**
+ * @tc.name: SetShowInSubWindow001
+ * @tc.desc: Test SelectPattern SetShowInSubWindow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectControlSizeNg, SetShowInSubWindow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, select frame node and select pattern.
+     * @tc.expected: Objects are created successfully.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto viewStackProcessor = ViewStackProcessor::GetInstance();
+    ASSERT_NE(viewStackProcessor, nullptr);
+    auto selectFrameNode = viewStackProcessor->GetMainFrameNode();
+    ASSERT_NE(selectFrameNode, nullptr);
+    auto selectLayoutProps = selectFrameNode->GetLayoutProperty<SelectLayoutProperty>();
+    ASSERT_NE(selectLayoutProps, nullptr);
+
+    /**
+     * @tc.steps: step2. Call SetShowInSubWindow and set SetShowInSubWindow with bool value.
+     * @tc.expected: SelectLayoutProperty's isShowInSubWindow_ and the set value are equal.
+     */
+    EXPECT_EQ(selectLayoutProps->GetShowInSubWindowValue(false), false);
+    SelectModelNG::SetShowInSubWindow(selectFrameNode, true);
+    EXPECT_EQ(selectLayoutProps->GetShowInSubWindowValue(false), true);
+    SelectModelNG::SetShowInSubWindow(selectFrameNode, false);
+    EXPECT_EQ(selectLayoutProps->GetShowInSubWindowValue(false), false);
+}
+
+/**
+ * @tc.name: SetShowDefaultSelectedIcon
+ * @tc.desc: Test SelectPattern SetShowDefaultSelectedIcon.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectControlSizeNg, SetShowDefaultSelectedIcon001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, select frame node and select pattern.
+     * @tc.expected: Objects are created successfully.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto viewStackProcessor = ViewStackProcessor::GetInstance();
+    ASSERT_NE(viewStackProcessor, nullptr);
+    auto selectFrameNode = viewStackProcessor->GetMainFrameNode();
+    ASSERT_NE(selectFrameNode, nullptr);
+    auto selectLayoutProps = selectFrameNode->GetLayoutProperty<SelectLayoutProperty>();
+    ASSERT_NE(selectLayoutProps, nullptr);
+
+    /**
+     * @tc.steps: step2. Call SetShowDefaultSelectedIcon and set SetShowDefaultSelectedIcon with bool value.
+     * @tc.expected: SelectLayoutProperty's isShowInSubWindow_ and the set value are equal.
+     */
+    EXPECT_EQ(selectLayoutProps->GetShowDefaultSelectedIconValue(false), false);
+    SelectModelNG::SetShowDefaultSelectedIcon(selectFrameNode, true);
+    EXPECT_EQ(selectLayoutProps->GetShowDefaultSelectedIconValue(false), true);
+    SelectModelNG::SetShowDefaultSelectedIcon(selectFrameNode, false);
+    EXPECT_EQ(selectLayoutProps->GetShowDefaultSelectedIconValue(false), false);
+}
 } // namespace OHOS::Ace::NG

@@ -119,6 +119,10 @@ public:
     virtual void SetArrowModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply);
     virtual void SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply);
     virtual void SetSelectedOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply);
+    virtual void SetShowInSubWindow(bool isShowInSubWindow) = 0;
+    virtual void ResetShowInSubWindow() = 0;
+    virtual void SetShowDefaultSelectedIcon(bool show) = 0;
+    virtual void ResetShowDefaultSelectedIcon() = 0;
 
 private:
     static std::unique_ptr<SelectModel> instance_;
