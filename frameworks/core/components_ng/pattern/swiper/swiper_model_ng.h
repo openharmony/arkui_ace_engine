@@ -44,9 +44,11 @@ public:
     void SetDisableSwipe(bool disableSwipe) override;
     void SetEdgeEffect(EdgeEffect EdgeEffect) override;
     void SetDisplayMode(SwiperDisplayMode displayMode) override;
+    void ResetDisplayMode() override;
     void SetDisplayCount(int32_t displayCount) override;
     void ResetDisplayCount() override;
     void SetMinSize(const Dimension& minSize) override;
+    void ResetMinSize() override;
     void SetShowIndicator(bool showIndicator) override;
     void SetIndicatorType(SwiperIndicatorType indicatorType) override;
     void SetIsIndicatorCustomSize(bool isCustomSize) override;
