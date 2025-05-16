@@ -135,7 +135,13 @@ public:
         return false;
     }
 
-    virtual bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs)
+    virtual bool LoadNamedRouterSource(const std::string& routeNameOrUrl, bool isNamedRoute)
+    {
+        return false;
+    }
+
+    virtual bool GeneratePageByIntent(
+        const std::string& bundleName, const std::string& moduleName, const std::string& pagePath)
     {
         return false;
     }

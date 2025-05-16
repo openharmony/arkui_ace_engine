@@ -269,6 +269,8 @@ public:
 
     virtual void SetIsEntryByIndex(int32_t index, bool isEntry) {}
 
+    virtual void PushIntentNavDestination(const std::string& name, const std::string& params, bool needTransition) {}
+
 protected:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     void AddForDefault(const std::string& name, const RefPtr<UINode>& navDestinationNode,

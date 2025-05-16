@@ -467,7 +467,15 @@ public:
         const std::string& namedRoute, panda::Local<panda::ObjectRef> params);
     static void AddToNavigationBuilderMap(std::string name,
         panda::Global<panda::ObjectRef> builderFunc);
-    bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs) override;
+    /**
+     * @brief find the router page by name or url, then call its constructor to build the page.
+     */
+    bool LoadNamedRouterSource(const std::string& routeNameOrUrl, bool isNamedRoute) override;
+    /**
+     * @brief find the router page by intentInfo, then call its constructor to build the page.
+     */
+    bool GeneratePageByIntent(
+        const std::string& bundleName, const std::string& moduleName, const std::string& pagePath) override;
     std::unique_ptr<JsonValue> GetFullPathInfo() override;
     void RestoreFullPathInfo(std::unique_ptr<JsonValue> namedRouterInfo) override;
     std::unique_ptr<JsonValue> GetNamedRouterInfo() override;

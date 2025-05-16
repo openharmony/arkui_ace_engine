@@ -378,9 +378,11 @@ void NavigationPattern::OnModifyDone()
         DoNavbarHideAnimation(hostNode);
     }
 
-    // AddRecoverableNavigation function will check inside whether current navigation can be recovered
-    pipeline->GetNavigationManager()->AddRecoverableNavigation(hostNode->GetCurId(), hostNode);
-    RestoreJsStackIfNeeded();
+    if (!HandleIntent(false)) {
+        // AddRecoverableNavigation function will check inside whether current navigation can be recovered
+        pipeline->GetNavigationManager()->AddRecoverableNavigation(hostNode->GetCurId(), hostNode);
+        RestoreJsStackIfNeeded();
+    }
     UpdateToobarFocusColor();
     UpdateDividerBackgroundColor();
     NavigationModifyDoneToolBarManager();
@@ -4294,5 +4296,27 @@ void NavigationPattern::NavigationModifyDoneToolBarManager()
 {
     CHECK_NULL_VOID(toolbarManager_);
     toolbarManager_->OnToolBarManagerModifyDone();
+}
+
+bool NavigationPattern::HandleIntent(bool needTransition)
+{
+    auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto navigationManager = context->GetNavigationManager();
+    CHECK_NULL_RETURN(navigationManager, false);
+    auto navigationIntentInfo = navigationManager->GetNavigationIntentInfo();
+    if (!navigationIntentInfo.has_value()) {
+        return false;
+    }
+    if (navigationIntentInfo.value().navigationInspectorId != host->GetCurId()) {
+        return false;
+    }
+    navigationManager->ResetNavigationIntentInfo();
+    // add the intentInfo into navPathStack
+    navigationStack_->PushIntentNavDestination(navigationIntentInfo.value().navDestinationName,
+        navigationIntentInfo.value().param, needTransition && !navigationIntentInfo.value().isColdStart);
+    return true;
 }
 } // namespace OHOS::Ace::NG

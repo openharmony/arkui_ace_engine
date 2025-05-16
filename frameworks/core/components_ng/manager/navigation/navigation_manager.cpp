@@ -23,6 +23,9 @@
 
 namespace OHOS::Ace::NG {
 constexpr int32_t INDENT_SIZE = 2;
+constexpr char INTENT_PARAM_KEY[] = "ohos.insightIntent.executeParam.param";
+constexpr char INTENT_NAVIGATION_ID_KEY[] = "ohos.insightIntent.pageParam.navigationId";
+constexpr char INTENT_NAVDESTINATION_NAME_KEY[] = "ohos.insightIntent.pageParam.navDestinationName";
 
 void NavigationManager::AddNavigationDumpCallback(int32_t nodeId, int32_t depth, const DumpCallback& callback)
 {
@@ -338,33 +341,32 @@ const std::vector<NavdestinationRecoveryInfo> NavigationManager::GetNavigationRe
     return ret;
 }
 
-void NavigationManager::AddNavigation(int32_t parentId, int32_t navigationId)
+void NavigationManager::AddNavigation(int32_t parentNodeId, const RefPtr<FrameNode>& navigationNode)
 {
-    auto iter = navigationMaps_.find(parentId);
-    if (iter == navigationMaps_.end()) {
-        // insert into navigation maps
-        std::vector<int32_t> navigationIds;
-        navigationIds.push_back(navigationId);
-        navigationMaps_[parentId] = navigationIds;
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(navigationNode);
+    CHECK_NULL_VOID(navigation);
+    auto navigationInfo = NavigationInfo(navigation->GetId(), navigation->GetCurId(), navigation);
+    if (navigationMap_.find(parentNodeId) != navigationMap_.end()) {
+        navigationMap_[parentNodeId].push_back(navigationInfo);
         return;
     }
-    auto navigations = iter->second;
-    navigations.push_back(navigationId);
-    iter->second = navigations;
+    navigationMap_[parentNodeId] = { navigationInfo };
 }
 
-void NavigationManager::RemoveNavigation(int32_t navigationId)
+void NavigationManager::RemoveNavigation(int32_t navigationNodeId)
 {
-    for (auto navigationIter = navigationMaps_.begin(); navigationIter != navigationMaps_.end();) {
-        auto navigationIds = navigationIter->second;
-        auto it = std::find(navigationIds.begin(), navigationIds.end(), navigationId);
-        if (it == navigationIds.end()) {
+    for (auto navigationIter = navigationMap_.begin(); navigationIter != navigationMap_.end();) {
+        auto navigationInfos = navigationIter->second;
+        auto it = std::find_if(navigationInfos.begin(), navigationInfos.end(), [navigationNodeId](auto info) {
+            return navigationNodeId == info.nodeId;
+        });
+        if (it == navigationInfos.end()) {
             navigationIter++;
             continue;
         }
-        navigationIds.erase(it);
-        if (navigationIds.empty()) {
-            navigationIter = navigationMaps_.erase(navigationIter);
+        navigationInfos.erase(it);
+        if (navigationInfos.empty()) {
+            navigationIter = navigationMap_.erase(navigationIter);
         } else {
             navigationIter++;
         }
@@ -373,12 +375,17 @@ void NavigationManager::RemoveNavigation(int32_t navigationId)
 
 std::vector<int32_t> NavigationManager::FindNavigationInTargetParent(int32_t targetId)
 {
-    auto it = navigationMaps_.find(targetId);
-    if (it == navigationMaps_.end()) {
+    auto it = navigationMap_.find(targetId);
+    if (it == navigationMap_.end()) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't find inner navigation");
         return {};
     }
-    return it->second;
+    std::vector<int32_t> navigationIds = {};
+    auto navigationInfos = it->second;
+    for (auto navigationInfo : navigationInfos) {
+        navigationIds.push_back(navigationInfo.nodeId);
+    }
+    return navigationIds;
 }
 
 void NavigationManager::FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason)
@@ -521,5 +528,71 @@ void NavigationManager::OnOrientationChanged()
             task();
         }
     }
+}
+
+void NavigationManager::SetNavigationIntentInfo(const std::string& intentInfoSerialized, bool isColdStart)
+{
+    if (intentInfoSerialized.empty()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "error, serialized intent info is empty!");
+        return;
+    }
+    navigationIntentInfo_ = ParseNavigationIntentInfo(intentInfoSerialized);
+    navigationIntentInfo_.value().isColdStart = isColdStart;
+}
+
+NavigationIntentInfo NavigationManager::ParseNavigationIntentInfo(const std::string& intentInfoSerialized)
+{
+    NavigationIntentInfo intentInfo;
+    auto intentJson = JsonUtil::ParseJsonString(intentInfoSerialized);
+    if (!intentJson || !intentJson->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "error, intent info is an invalid json object!");
+        return intentInfo;
+    }
+    intentInfo.param = GetJsonIntentInfo(intentJson->GetObject(INTENT_PARAM_KEY));
+    intentInfo.navigationInspectorId = GetJsonIntentInfo(intentJson->GetObject(INTENT_NAVIGATION_ID_KEY));
+    intentInfo.navDestinationName = GetJsonIntentInfo(intentJson->GetObject(INTENT_NAVDESTINATION_NAME_KEY));
+    return intentInfo;
+}
+
+bool NavigationManager::FireNavigationIntentActively(int32_t pageId, bool needTransition)
+{
+    if (navigationMap_.find(pageId) == navigationMap_.end()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "error, no navigation in current page(id: %{public}d)", pageId);
+        return false;
+    }
+    if (!navigationIntentInfo_.has_value()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "error, navigation intent info is empty!");
+        return false;
+    }
+    auto navigationInfos = navigationMap_[pageId];
+    // find target navigation
+    for (auto navigationInfo : navigationInfos) {
+        if (navigationInfo.navigationId == navigationIntentInfo_.value().navigationInspectorId) {
+            auto navigationNode = navigationInfo.navigationNode.Upgrade();
+            if (!navigationNode) {
+                return false;
+            }
+            auto pattern = navigationNode->GetPattern<NavigationPattern>();
+            if (!pattern) {
+                return false;
+            }
+            return pattern->HandleIntent(needTransition);
+        }
+    }
+    TAG_LOGE(AceLogTag::ACE_NAVIGATION,
+        "error, specified navigation(id: %{public}s) doesn't exist in current page(id: %{public}d)",
+        navigationIntentInfo_.value().navigationInspectorId.c_str(), pageId);
+    return false;
+}
+
+std::string NavigationManager::GetJsonIntentInfo(std::unique_ptr<JsonValue> intentJson)
+{
+    if (!intentJson || !intentJson->IsObject()) {
+        return "";
+    }
+    if (!intentJson->GetChild() || !intentJson->GetChild()->IsString()) {
+        return "";
+    }
+    return intentJson->GetChild()->GetString();
 }
 } // namespace OHOS::Ace::NG

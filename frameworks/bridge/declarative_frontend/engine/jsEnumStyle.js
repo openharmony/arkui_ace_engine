@@ -2872,6 +2872,15 @@ class NavPathStack {
     }
     item.isEntry = isEntry;
   }
+  // for inner use
+  pushIntentNavDestination(name, param, needTransition) {
+    if (typeof(name) !== 'string' || typeof(param) !== 'string') {
+      return;
+    }
+    let paramObj = param === '' ? undefined : JSON.parse(param);
+    let option = { launchMode: LaunchMode.MOVE_TO_TOP_SINGLETON, animated: needTransition };
+    this.pushPath(new NavPathInfo(name, paramObj), option);
+  }
 }
 
 globalThis.NavPathStack = NavPathStack;

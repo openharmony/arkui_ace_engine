@@ -47,6 +47,7 @@ using GetNamedRouterInfoCallback = std::function<std::unique_ptr<JsonValue>()>;
 using IsNamedRouterNeedPreloadCallback = std::function<bool(const std::string&)>;
 using PreloadNamedRouterCallback = std::function<void(const std::string&, std::function<void(bool)>&&)>;
 using UpdateRootComponentCallback = std::function<bool()>;
+using GenerateIntentPageCallback = std::function<bool(const std::string&, const std::string&, const std::string&)>;
 #if defined(PREVIEW)
 using IsComponentPreviewCallback = std::function<bool()>;
 #endif
@@ -54,6 +55,25 @@ using IsComponentPreviewCallback = std::function<bool()>;
 enum class RouterMode {
     STANDARD = 0,
     SINGLE,
+};
+
+struct RouterIntentInfo {
+    std::string bundleName;
+    std::string moduleName;
+    std::string pagePath;
+    std::string param;
+    std::function<void()> loadPageCallback;
+    bool isColdStart;
+
+    std::string ToString()
+    {
+        return "----------- RouterIntentInfo -----------\n"
+               "bundleName:  " + bundleName + "\n"
+               "moduleName:  " + moduleName + "\n"
+               "pagePath:    " + pagePath + "\n"
+               "isColdStart: " + (isColdStart? "yes" : "no") + "\n"
+               "----------------------------------------\n";
+    }
 };
 
 struct RouterPageInfo {
@@ -65,6 +85,8 @@ struct RouterPageInfo {
     std::string path;
     bool isNamedRouterMode = false;
     std::shared_ptr<std::vector<uint8_t>> content;
+    RouterIntentInfo intentInfo;
+    bool isUseIntent = false;
 };
 
 class PageRouterManager : public AceType {
@@ -138,6 +160,11 @@ public:
     {
         updateRootComponent_ = callback;
     }
+
+    void SetGenerateIntentPageCallback(GenerateIntentPageCallback&& callback)
+    {
+        generateIntentPageCallback_ = callback;
+    }
 #if defined(PREVIEW)
     void SetIsComponentPreview(IsComponentPreviewCallback&& callback)
     {
@@ -204,6 +231,11 @@ public:
 
     // begin from 1
     bool IsUnrestoreByIndex(int32_t index);
+
+    void RunIntentPage();
+    bool FireNavigationIntentActively(int32_t pageId, bool needTransition);
+    void SetRouterIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
+        const std::function<void()>&& loadPageCallback);
 
 protected:
     class RouterOptScope {
@@ -279,6 +311,7 @@ protected:
 
     static bool OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition,
         bool isCardRouter = false, int64_t cardId = 0);
+    bool OnPageReadyAndHandleIntent(const RefPtr<FrameNode>& pageNode, bool needHideLast);
     bool OnPopPage(bool needShowNext, bool needTransition);
     static bool OnPopPageToIndex(int32_t index, bool needShowNext, bool needTransition);
     static bool OnCleanPageStack();
@@ -304,6 +337,12 @@ protected:
     void LoadOhmUrlPage(const std::string& url, std::function<void()>&& finishCallback,
         const std::function<void(const std::string& errorMsg, int32_t errorCode)>& errorCallback,
         const std::string& finishCallbackTaskName, const std::string& errorCallbackTaskName);
+    bool GenerateRouterPageInner(const RouterPageInfo& target);
+    std::pair<int32_t, RefPtr<FrameNode>> FindIntentPageInStack() const;
+    std::string GetJsonIntentInfo(std::unique_ptr<JsonValue> intentJson);
+    RouterIntentInfo ParseRouterIntentInfo(const std::string& intentInfoSerialized);
+    // only for @normalized ohmUrl
+    std::string ParseUrlNameFromOhmUrl(const std::string& ohmUrl);
 
     RefPtr<Framework::ManifestParser> manifestParser_;
 
@@ -325,6 +364,7 @@ protected:
     IsNamedRouterNeedPreloadCallback isNamedRouterNeedPreload_;
     PreloadNamedRouterCallback preloadNamedRouter_;
     UpdateRootComponentCallback updateRootComponent_;
+    GenerateIntentPageCallback generateIntentPageCallback_;
     bool isCardRouter_ = false;
     int32_t pageId_ = 0;
     std::list<WeakPtr<FrameNode>> pageRouterStack_;
@@ -334,6 +374,7 @@ protected:
 #if defined(PREVIEW)
     IsComponentPreviewCallback isComponentPreview_;
 #endif
+    std::optional<RouterIntentInfo> intentInfo_ = std::nullopt;
 
     ACE_DISALLOW_COPY_AND_MOVE(PageRouterManager);
 };

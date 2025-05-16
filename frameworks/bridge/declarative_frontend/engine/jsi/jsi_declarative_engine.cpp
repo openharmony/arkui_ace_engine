@@ -1843,28 +1843,28 @@ std::string JsiDeclarativeEngine::SearchRouterRegisterMap(const std::string& pag
     return "";
 }
 
-bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs)
+bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& routeNameOrUrl, bool isNamedRoute)
 {
     CHECK_NULL_RETURN(!namedRouterRegisterMap_.empty(), false);
-    auto iter = namedRouterRegisterMap_.find(namedRoute);
-    if (isTriggeredByJs && iter == namedRouterRegisterMap_.end()) {
-        LOGW("named route %{public}s not found!", namedRoute.c_str());
+    auto iter = namedRouterRegisterMap_.find(routeNameOrUrl);
+    if (isNamedRoute && iter == namedRouterRegisterMap_.end()) {
+        LOGW("named route %{public}s not found!", routeNameOrUrl.c_str());
         return false;
     }
     // if this triggering is not from js named router api,
-    // 'namedRoute' will be used as url to find the page in 'main_pages.json'
-    if (!isTriggeredByJs) {
+    // 'routeNameOrUrl' will be used as url to find the page in 'main_pages.json'
+    if (!isNamedRoute) {
         std::string bundleName;
         std::string moduleName;
-        std::string url = namedRoute;
+        std::string url = routeNameOrUrl;
 #if !defined(PREVIEW)
-        if (namedRoute.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
-            size_t bundleEndPos = namedRoute.find('/');
-            bundleName = namedRoute.substr(strlen(BUNDLE_TAG), bundleEndPos - strlen(BUNDLE_TAG));
+        if (routeNameOrUrl.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
+            size_t bundleEndPos = routeNameOrUrl.find('/');
+            bundleName = routeNameOrUrl.substr(strlen(BUNDLE_TAG), bundleEndPos - strlen(BUNDLE_TAG));
             size_t moduleStartPos = bundleEndPos + 1;
-            size_t moduleEndPos = namedRoute.find('/', moduleStartPos);
-            moduleName = namedRoute.substr(moduleStartPos, moduleEndPos - moduleStartPos);
-            url = namedRoute.substr(moduleEndPos + strlen("/ets/"));
+            size_t moduleEndPos = routeNameOrUrl.find('/', moduleStartPos);
+            moduleName = routeNameOrUrl.substr(moduleStartPos, moduleEndPos - moduleStartPos);
+            url = routeNameOrUrl.substr(moduleEndPos + strlen("/ets/"));
         } else {
             bundleName = AceApplicationInfo::GetInstance().GetPackageName();
             auto container = Container::Current();
@@ -1903,6 +1903,46 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
         return false;
     }
 
+    CHECK_NULL_RETURN(engineInstance_, false);
+    auto runtime = engineInstance_->GetJsRuntime();
+    auto vm = const_cast<EcmaVM*>(std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm());
+    std::vector<Local<JSValueRef>> argv;
+    LocalScope scope(vm);
+    JSViewStackProcessor::JsStartGetAccessRecordingFor(JSViewStackProcessor::JsAllocateNewElmetIdForNextComponent());
+    auto ret = iter->second.pageGenerator->Call(vm, JSNApi::GetGlobalObject(vm), argv.data(), 0);
+    if (!ret->IsObject(vm)) {
+        return false;
+    }
+#if defined(PREVIEW)
+    panda::Global<panda::ObjectRef> rootView(vm, ret->ToObject(vm));
+    shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    arkRuntime->AddRootView(rootView);
+#endif
+    Framework::UpdateRootComponent(vm, ret->ToObject(vm));
+    JSViewStackProcessor::JsStopGetAccessRecording();
+    return true;
+}
+
+bool JsiDeclarativeEngine::GeneratePageByIntent(
+    const std::string& bundleName, const std::string& moduleName, const std::string& pagePath)
+{
+    TAG_LOGI(AceLogTag::ACE_ROUTER,
+        "will generate intent page, bundleName: %{public}s, moduleName: %{public}s, pagePath: %{public}s",
+        bundleName.c_str(), moduleName.c_str(), pagePath.c_str());
+    auto iter = std::find_if(namedRouterRegisterMap_.begin(), namedRouterRegisterMap_.end(),
+        [&bundleName, &moduleName, &pagePath](const auto& item) {
+            return item.second.bundleName == bundleName
+                && item.second.moduleName == moduleName
+                && item.second.pagePath == pagePath;
+        });
+    if (iter == namedRouterRegisterMap_.end()) {
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "intent page not found in router page map!");
+        return false;
+    }
+    if (iter->second.pageGenerator.IsEmpty()) {
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "this intent page has no page-generator!");
+        return false;
+    }
     CHECK_NULL_RETURN(engineInstance_, false);
     auto runtime = engineInstance_->GetJsRuntime();
     auto vm = const_cast<EcmaVM*>(std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm());

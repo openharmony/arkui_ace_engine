@@ -135,7 +135,8 @@ void StageManager::PageChangeCloseKeyboard()
 #endif
 }
 
-bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition)
+bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition,
+    const std::function<bool()>&& pushIntentPageCallback)
 {
     CHECK_NULL_RETURN(stageNode_, false);
     CHECK_NULL_RETURN(node, false);
@@ -177,6 +178,10 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     node->MountToParent(stageNode_);
     // then build the total child. Build will trigger page create and onAboutToAppear
     node->Build(nullptr);
+    // after new page aboutToAppear, jump to intentPage
+    if (pushIntentPageCallback && pushIntentPageCallback()) {
+        return true;
+    }
     // fire new lifecycle
     if (hidePageNode && needHideLast && isNewLifecycle) {
         FirePageHide(hidePageNode, needTransition ? PageTransitionType::EXIT_PUSH : PageTransitionType::NONE);

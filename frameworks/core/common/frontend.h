@@ -146,6 +146,17 @@ public:
         return UIContentErrorCode::NO_ERRORS;
     }
 
+    virtual UIContentErrorCode RunIntentPage()
+    {
+        return UIContentErrorCode::NO_ERRORS;
+    }
+
+    virtual UIContentErrorCode SetRouterIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
+        const std::function<void()>&& loadPageCallback)
+    {
+        return UIContentErrorCode::NO_ERRORS;
+    }
+
     virtual void ReplacePage(const std::string& url, const std::string& params) = 0;
 
     virtual void PushPage(const std::string& url, const std::string& params) = 0;

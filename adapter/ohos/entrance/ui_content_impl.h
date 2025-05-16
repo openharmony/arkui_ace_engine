@@ -426,7 +426,7 @@ public:
 
     // intent framework
     void SetIntentParam(const std::string& intentInfoSerialized,
-        const std::function<void()>&& loadPageCallback, bool isColdStart) override {}
+        const std::function<void()>&& loadPageCallback, bool isColdStart) override;
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -526,6 +526,9 @@ private:
     std::shared_ptr<OHOS::Rosen::RSTransaction> cachedRsTransaction_ = nullptr;
     std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea> cachedAvoidAreas_;
     std::shared_mutex destructMutex_;
+
+    std::function<void()> loadPageCallback_;
+    std::string intentInfoSerialized_;
 };
 
 } // namespace OHOS::Ace

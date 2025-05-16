@@ -852,6 +852,11 @@ public:
 
     void DispatchExtensionDataToHostWindow(uint32_t code, const AAFwk::Want& data, int32_t persistenId);
 
+    void DistributeIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
+        const std::function<void()>&& loadPageCallback);
+
+    UIContentErrorCode RunIntentPage();
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();

@@ -1418,4 +1418,24 @@ void JSNavigationStack::ResetSingletonMoved()
     }
     dataSourceObj_->SetProperty<bool>("hasSingletonMoved", false);
 }
+
+void JSNavigationStack::PushIntentNavDestination(
+    const std::string& name, const std::string& params, bool needTransition)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation push intent navDestination(%{public}s)", name.c_str());
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto pushIntentNavDestinationFunc = dataSourceObj_->GetProperty("pushIntentNavDestination");
+    if (!pushIntentNavDestinationFunc->IsFunction()) {
+        return;
+    }
+    auto func = JSRef<JSFunc>::Cast(pushIntentNavDestinationFunc);
+    JSRef<JSVal> arg[3];
+    arg[0] = JSRef<JSVal>::Make(ToJSValue(name));
+    arg[1] = JSRef<JSVal>::Make(ToJSValue(params));
+    arg[2] = JSRef<JSVal>::Make(ToJSValue(needTransition));
+    func->Call(dataSourceObj_, 3, arg);
+}
 } // namespace OHOS::Ace::Framework
