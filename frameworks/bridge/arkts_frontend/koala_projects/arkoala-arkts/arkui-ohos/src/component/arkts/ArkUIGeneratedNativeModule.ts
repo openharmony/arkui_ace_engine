@@ -4489,9 +4489,9 @@ export class ArkUIGeneratedNativeModule {
     native static _NavExtender_title(navigation: KPointer, title: KStringPtr, hasSubTitle: KInt): void
     @ani.unsafe.Quick
     native static _NavExtender_subTitle(navigation: KPointer, subTitle: KStringPtr): void
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _NavExtender_pushPath(pathStack: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _NavExtender_replacePath(pathStack: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
     native static _NavExtender_pop(pathStack: KPointer, isAnimated: KInt): string
@@ -4501,8 +4501,12 @@ export class ArkUIGeneratedNativeModule {
     native static _NavExtender_getIdByName(pathStack: KPointer, name: KStringPtr): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _NavExtender_getNavDestinationId(info: KPointer): string
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _NavExtender_setOnPopCallback(pathStack: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NavExtender_popToIndex(pathStack: KPointer, index: int32, animated: KInt): void
+    @ani.unsafe.Quick
+    native static _NavExtender_popToName(pathStack: KPointer, name: KStringPtr, animated: KInt): number
     @ani.unsafe.Direct
     native static _EventEmulator_emitClickEvent(node: KPointer, event: KPointer): void
     @ani.unsafe.Quick

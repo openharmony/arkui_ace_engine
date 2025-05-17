@@ -26,6 +26,8 @@
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 
 namespace OHOS::Ace::NG {
+using NavigationTransitionEvent = std::function<NG::NavigationTransition(
+     RefPtr<NG::NavDestinationContext> from, RefPtr<NG::NavDestinationContext> to, NG::NavigationOperation operation)>;
 class ACE_EXPORT NavigationModelStatic {
 public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -53,6 +55,9 @@ public:
     static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::SafeAreaExpandOpts& opts);
     static bool CreateBackButtonNode(RefPtr<FrameNode>& backButtonNode);
     static bool UpdateBackButtonProperty(const RefPtr<FrameNode>& backButtonNode);
+    static void SetCustomMenu(FrameNode* frameNode, const RefPtr<UINode>& customNode);
+    static void SetIsCustomAnimation(FrameNode* frameNode, bool isCustom);
+    static void SetCustomTransition(FrameNode* frameNode, NavigationTransitionEvent&& customTransition);
 
 private:
     static bool navBarWidthDoubleBind_;

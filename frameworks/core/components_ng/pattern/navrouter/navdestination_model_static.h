@@ -52,6 +52,10 @@ public:
     static void ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo);
     static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated = false);
     static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
+    static void SetToolbarConfiguration(FrameNode* frameNode, std::vector<NG::BarItem>&& toolBarItems);
+    static void SetToolBarOptions(FrameNode* frameNode, NavigationToolbarOptions&& opt);
+    static void SetToolbarMorebuttonOptions(FrameNode* frameNode, MoreButtonOptions&& opt);
+    static void SetCustomMenu(FrameNode* frameNode, const RefPtr<UINode>& customNode);
 };
 } // namespace OHOS::Ace::NG
 

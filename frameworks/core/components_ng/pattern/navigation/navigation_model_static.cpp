@@ -767,4 +767,48 @@ bool NavigationModelStatic::UpdateBackButtonProperty(const RefPtr<FrameNode>& ba
     backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     return true;
 }
+
+void NavigationModelStatic::SetCustomMenu(FrameNode* frameNode, const RefPtr<UINode>& customNode)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    // if previous menu exists, remove it if their ids are not the same
+    // if previous node is not custom, their ids must not be the same
+    if (navBarNode->GetMenu()) {
+        if (customNode->GetId() == navBarNode->GetMenu()->GetId()) {
+            navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
+            return;
+        }
+        navBarNode->SetMenu(customNode);
+        navBarNode->UpdatePrevMenuIsCustom(true);
+        navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+        navBarNode->MarkDirtyNode();
+        navBarNode->MarkModifyDone();
+        return;
+    }
+    navBarNode->SetMenu(customNode);
+    navBarNode->UpdatePrevMenuIsCustom(true);
+    navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
+    navBarNode->MarkDirtyNode();
+    navBarNode->MarkModifyDone();
+}
+
+void NavigationModelStatic::SetIsCustomAnimation(FrameNode* frameNode, bool isCustom)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsCustomAnimation(isCustom);
+}
+void NavigationModelStatic::SetCustomTransition(FrameNode* frameNode, NavigationTransitionEvent&& customTransition)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNavigationTransition(std::move(customTransition));
+}
 } // namespace OHOS::Ace::NG

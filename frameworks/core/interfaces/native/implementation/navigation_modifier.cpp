@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/components_ng/pattern/navigation/navigation_model_static.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -115,6 +116,7 @@ void BackButtonIcon0Impl(Ark_NativePointer node, const Opt_Union_String_PixelMap
                 break;
             }
             case pixelType: {
+                pixMap = Converter::OptConvert<RefPtr<PixelMap>>(value->value.value1).value_or(nullptr);
                 break;
             }
             case resourceType: {
@@ -160,6 +162,7 @@ void BackButtonIcon1Impl(Ark_NativePointer node,
                 break;
             }
             case pixelType: {
+                pixMap = Converter::OptConvert<RefPtr<PixelMap>>(icon->value.value1).value_or(nullptr);
                 break;
             }
             case resourceType: {
@@ -254,6 +257,9 @@ void Menus0Impl(Ark_NativePointer node, const Opt_Union_Array_NavigationMenuItem
             auto menuItemArray = Converter::Convert<std::vector<NG::BarItem>>(value->value.value0);
             NavigationModelStatic::SetMenuItems(frameNode, std::move(menuItemArray));
         } else if (typeValue == 1) {
+            CallbackHelper(value->value.value1).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+                NavigationModelStatic::SetCustomMenu(frameNode, std::move(uiNode));
+            }, node);
         }
     }
     NavigationModelStatic::SetMenuOptions(frameNode, std::move(options));
@@ -273,6 +279,9 @@ void Menus1Impl(Ark_NativePointer node,
             auto menuItemArray = Converter::Convert<std::vector<NG::BarItem>>(items->value.value0);
             NavigationModelStatic::SetMenuItems(frameNode, std::move(menuItemArray));
         } else if (typeValue == 1) {
+            CallbackHelper(items->value.value1).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+                NavigationModelStatic::SetCustomMenu(frameNode, std::move(uiNode));
+            }, node);
         }
     }
     if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED &&
@@ -377,7 +386,26 @@ void OnNavigationModeChangeImpl(Ark_NativePointer node,
 void NavDestinationImpl(Ark_NativePointer node, const Opt_Callback_String_Opt_Object_Void* value) {}
 void CustomNavContentTransitionImpl(
     Ark_NativePointer node, const Opt_Type_NavigationAttribute_customNavContentTransition_delegate* value)
-{}
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        NavigationModelStatic::SetIsCustomAnimation(frameNode, false);
+        return;
+    }
+    auto onNavigationAnimation = [callback = CallbackHelper(value->value)](RefPtr<NG::NavDestinationContext> from,
+        RefPtr<NG::NavDestinationContext> to, NG::NavigationOperation operation) -> NG::NavigationTransition {
+        NG::NavigationTransition transition;
+        transition.isValid = false;
+        auto fromContext = Converter::ArkValue<Ark_NavContentInfo>(from);
+        auto toContext = Converter::ArkValue<Ark_NavContentInfo>(to);
+        auto navOperation = static_cast<Ark_NavigationOperation>(operation);
+        auto resultOpt = callback.InvokeWithOptConvertResult<NG::NavigationTransition, Opt_NavigationAnimatedTransition, Callback_Opt_NavigationAnimatedTransition_Void>(fromContext, toContext, navOperation);
+        return resultOpt.value_or(transition);
+    };
+    NavigationModelStatic::SetIsCustomAnimation(frameNode, true);
+    NavigationModelStatic::SetCustomTransition(frameNode, std::move(onNavigationAnimation));
+}
 void SystemBarStyleImpl(Ark_NativePointer node, const Opt_SystemBarStyle* value) {}
 void RecoverableImpl(Ark_NativePointer node, const Opt_Boolean* value) {}
 void EnableDragBarImpl(Ark_NativePointer node, const Opt_Boolean* value) {}

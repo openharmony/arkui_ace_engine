@@ -124,10 +124,9 @@ public:
     void SetAnimated(bool value);
     PathInfo Pop(bool isAnimated);
     void PopTo(const std::string& name, const std::optional<bool>& animated);
-    int PopToName(const std::string& name, const PopResultType& result, const std::optional<bool>& animated);
-    void PopToIndex(size_t index, const PopResultType& result, const std::optional<bool>& animated);
-    void PopToInternal(std::vector<PathInfo>::iterator it,
-        const PopResultType& result, const std::optional<bool>& animated);
+    int PopToName(const std::string& name, const std::optional<bool>& animated);
+    void PopToIndex(size_t index, const std::optional<bool>& animated);
+    void PopToInternal(std::vector<PathInfo>::iterator it, const std::optional<bool>& animated);
     int MoveToTop(const std::string& name, const std::optional<bool>& animated);
     void MoveIndexToTop(size_t index, const std::optional<bool>& animated);
     void MoveToTopInternal(std::vector<PathInfo>::iterator it, const std::optional<bool>& animated);
@@ -143,8 +142,16 @@ public:
     size_t Size() const;
     void DisableAnimation(bool disableAnimation);
     void SetInterception(InterceptionType interception);
+    InterceptionType GetInterception()
+    {
+        return interception_;
+    }
     PathInfo* GetPathInfo(size_t index);
     std::vector<std::string> GetIdByName(const std::string& name);
+    void SetOnPopCallback(std::function<void(const std::string)> popCallback)
+    {
+        onPopCallback_ = popCallback;
+    }
 protected:
     std::vector<PathInfo> pathArray_;
     enum IsReplace isReplace_ = NO_ANIM_NO_REPLACE;
@@ -154,6 +161,7 @@ protected:
     std::vector<PathInfo> popArray_ = {};
     InterceptionType interception_ = nullptr;
     std::function<void()> onStateChangedCallback_;
+    std::function<void(const std::string)> onPopCallback_;
     void SetOnStateChangedCallback(std::function<void()> callback); // the extra NavigationStack invokes this
     void InvokeOnStateChanged();
     std::vector<PathInfo>::iterator FindNameInternal(const std::string& name);

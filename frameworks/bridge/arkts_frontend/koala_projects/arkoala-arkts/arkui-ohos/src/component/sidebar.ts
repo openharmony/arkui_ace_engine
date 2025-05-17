@@ -24,8 +24,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
 import { Callback_Boolean_Void } from "./navigation"
-import { Length, Dimension, PX, VP, FP, LPX, Percentage } from "./units"
-import { DividerStyle } from "./tabs"
+import { Length, Dimension, PX, VP, FP, LPX, Percentage, ResourceColor } from "./units"
 import { Callback_Opt_Boolean_Void } from "./checkbox"
 import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -33,6 +32,12 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { PixelMap } from "./arkui-pixelmap"
 
+export interface DividerStyle {
+    strokeWidth: Length;
+    color?: ResourceColor;
+    startMargin?: Length;
+    endMargin?: Length;
+}
 export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -207,7 +212,7 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
-            thisSerializer.writeDividerStyle(value_value)
+            thisSerializer.writeDividerStyleSidebar(value_value)
         }
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_divider(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()

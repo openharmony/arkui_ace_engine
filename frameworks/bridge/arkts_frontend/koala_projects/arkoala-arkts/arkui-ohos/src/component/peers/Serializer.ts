@@ -168,6 +168,8 @@ import { ImageFrameInfo } from "./../imageAnimator"
 import { MenuItemGroupOptions } from "./../menuItemGroup"
 import { MenuItemOptions } from "./../menuItem"
 import { TextBackgroundStyle } from "./../span"
+import { DividerStyle as DividerStyle_sidebar } from "./../sidebar"
+
 export class Serializer extends SerializerBase {
     private static pool?: Array<Serializer> | undefined = undefined
     private static poolTop: int32 = -1
@@ -11043,6 +11045,56 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeLength(value_endMargin_value)
         }
     }
+    writeDividerStyleSidebar(value: DividerStyle_sidebar): void {
+        let valueSerializer : Serializer = this
+        const value_strokeWidth  = value.strokeWidth
+        valueSerializer.writeLength(value_strokeWidth)
+        const value_color  = value.color
+        let value_color_type : int32 = RuntimeType.UNDEFINED
+        value_color_type = runtimeType(value_color)
+        valueSerializer.writeInt8(value_color_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_color_type)) {
+            const value_color_value  = value_color!
+            let value_color_value_type : int32 = RuntimeType.UNDEFINED
+            value_color_value_type = runtimeType(value_color_value)
+            if (TypeChecker.isColor(value_color_value)) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_color_value_0  = value_color_value as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_color_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_color_value_type) {
+                valueSerializer.writeInt8(1 as int32)
+                const value_color_value_1  = value_color_value as number
+                valueSerializer.writeNumber(value_color_value_1)
+            }
+            else if (RuntimeType.STRING == value_color_value_type) {
+                valueSerializer.writeInt8(2 as int32)
+                const value_color_value_2  = value_color_value as string
+                valueSerializer.writeString(value_color_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_color_value_type) {
+                valueSerializer.writeInt8(3 as int32)
+                const value_color_value_3  = value_color_value as Resource
+                valueSerializer.writeResource(value_color_value_3)
+            }
+        }
+        const value_startMargin  = value.startMargin
+        let value_startMargin_type : int32 = RuntimeType.UNDEFINED
+        value_startMargin_type = runtimeType(value_startMargin)
+        valueSerializer.writeInt8(value_startMargin_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_startMargin_type)) {
+            const value_startMargin_value  = value_startMargin!
+            valueSerializer.writeLength(value_startMargin_value)
+        }
+        const value_endMargin  = value.endMargin
+        let value_endMargin_type : int32 = RuntimeType.UNDEFINED
+        value_endMargin_type = runtimeType(value_endMargin)
+        valueSerializer.writeInt8(value_endMargin_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_endMargin_type)) {
+            const value_endMargin_value  = value_endMargin!
+            valueSerializer.writeLength(value_endMargin_value)
+        }
+    }
     writeDividerStyleOptions(value: DividerStyleOptions): void {
         let valueSerializer : Serializer = this
         const value_strokeWidth  = value.strokeWidth
@@ -21274,30 +21326,31 @@ export class Serializer extends SerializerBase {
             const value_paddingEnd_value  = value_paddingEnd!
             valueSerializer.writeLengthMetrics(value_paddingEnd_value)
         }
-        const value_mainTitleModifier  = value.mainTitleModifier
-        let value_mainTitleModifier_type : int32 = RuntimeType.UNDEFINED
-        value_mainTitleModifier_type = runtimeType(value_mainTitleModifier)
-        valueSerializer.writeInt8(value_mainTitleModifier_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_mainTitleModifier_type)) {
-            const value_mainTitleModifier_value  = value_mainTitleModifier!
-            valueSerializer.writeTextModifier(value_mainTitleModifier_value)
-        }
-        const value_subTitleModifier  = value.subTitleModifier
-        let value_subTitleModifier_type : int32 = RuntimeType.UNDEFINED
-        value_subTitleModifier_type = runtimeType(value_subTitleModifier)
-        valueSerializer.writeInt8(value_subTitleModifier_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_subTitleModifier_type)) {
-            const value_subTitleModifier_value  = value_subTitleModifier!
-            valueSerializer.writeTextModifier(value_subTitleModifier_value)
-        }
-        const value_enableHoverMode  = value.enableHoverMode
-        let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED
-        value_enableHoverMode_type = runtimeType(value_enableHoverMode)
-        valueSerializer.writeInt8(value_enableHoverMode_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_enableHoverMode_type)) {
-            const value_enableHoverMode_value  = value_enableHoverMode!
-            valueSerializer.writeBoolean(value_enableHoverMode_value)
-        }
+        // TBD: Modifier is not implemented yet
+        // const value_mainTitleModifier  = value.mainTitleModifier
+        // let value_mainTitleModifier_type : int32 = RuntimeType.UNDEFINED
+        // value_mainTitleModifier_type = runtimeType(value_mainTitleModifier)
+        // valueSerializer.writeInt8(value_mainTitleModifier_type as int32)
+        // if ((RuntimeType.UNDEFINED) != (value_mainTitleModifier_type)) {
+        //     const value_mainTitleModifier_value  = value_mainTitleModifier!
+        //     valueSerializer.writeTextModifier(value_mainTitleModifier_value)
+        // }
+        // const value_subTitleModifier  = value.subTitleModifier
+        // let value_subTitleModifier_type : int32 = RuntimeType.UNDEFINED
+        // value_subTitleModifier_type = runtimeType(value_subTitleModifier)
+        // valueSerializer.writeInt8(value_subTitleModifier_type as int32)
+        // if ((RuntimeType.UNDEFINED) != (value_subTitleModifier_type)) {
+        //     const value_subTitleModifier_value  = value_subTitleModifier!
+        //     valueSerializer.writeTextModifier(value_subTitleModifier_value)
+        // }
+        // const value_enableHoverMode  = value.enableHoverMode
+        // let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED
+        // value_enableHoverMode_type = runtimeType(value_enableHoverMode)
+        // valueSerializer.writeInt8(value_enableHoverMode_type as int32)
+        // if ((RuntimeType.UNDEFINED) != (value_enableHoverMode_type)) {
+        //     const value_enableHoverMode_value  = value_enableHoverMode!
+        //     valueSerializer.writeBoolean(value_enableHoverMode_value)
+        // }
     }
     writeOutlineOptions(value: OutlineOptions): void {
         let valueSerializer : Serializer = this

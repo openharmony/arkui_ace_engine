@@ -734,6 +734,56 @@ void AssignArkValue(Ark_RichEditorImageSpanStyleResult& dst, const ImageStyleRes
 
 void AssignArkValue(Ark_NavDestinationContext& dst, const RefPtr<NG::NavDestinationContext>& src)
 {
-    dst->SetHandler(src);
+    auto peer = GeneratedModifier::GetFullAPI()->getAccessors()->getNavDestinationContextAccessor()->ctor();
+    peer->SetHandler(src);
+    dst = peer;
+}
+
+void AssignArkValue(Ark_NavigationTransitionProxy& dst, const RefPtr<NavigationTransitionProxy>& src)
+{
+    auto peer = GeneratedModifier::GetFullAPI()->getAccessors()->getNavigationTransitionProxyAccessor()->ctor();
+    peer->SetHandler(src);
+    dst = peer;
+}
+
+void AssignArkValue(Ark_NavContentInfo& dst, const RefPtr<NG::NavDestinationContext>& src)
+{
+    if (!src) {
+        dst.name.tag = InteropTag::INTEROP_TAG_UNDEFINED;
+        dst.param.tag = InteropTag::INTEROP_TAG_UNDEFINED;
+        dst.mode.tag = InteropTag::INTEROP_TAG_UNDEFINED;
+        dst.navDestinationId.tag = InteropTag::INTEROP_TAG_UNDEFINED;
+        dst.index = Converter::ArkValue<Ark_Number>(-1);
+        return;
+    }
+    auto navPathInfo = src->GetNavPathInfo();
+    if (navPathInfo) {
+        auto name = navPathInfo->GetName();
+        dst.name.tag = InteropTag::INTEROP_TAG_STRING;
+        dst.name.value = Converter::ArkValue<Ark_String>(name, Converter::FC);
+        dst.param.tag = InteropTag::INTEROP_TAG_UNDEFINED;
+        // tbd: param info
+    } else {
+        dst.name.tag = InteropTag::INTEROP_TAG_UNDEFINED;
+        dst.param.tag = InteropTag::INTEROP_TAG_UNDEFINED;
+    }
+    auto index = src->GetIndex();
+    dst.index = Converter::ArkValue<Ark_Number>(index);
+    auto mode = src->GetMode();
+    dst.mode.tag = InteropTag::INTEROP_TAG_INT32;
+    dst.mode.value = static_cast<Ark_NavDestinationMode>(mode);
+    auto navDestinationId = src->GetNavDestinationId();
+    dst.navDestinationId.tag = InteropTag::INTEROP_TAG_STRING;
+    dst.navDestinationId.value = Converter::ArkValue<Ark_String>(std::to_string(navDestinationId), Converter::FC);
+}
+
+void AssignArkValue(Ark_NavigationMode& dst, NG::NavigationMode& src)
+{
+    dst = static_cast<Ark_NavigationMode>(src);
+}
+
+void AssignArkValue(Ark_NavigationOperation& dst, const NG::NavigationOperation& src)
+{
+    dst = static_cast<Ark_NavigationOperation>(src);
 }
 } // namespace OHOS::Ace::NG::Converter

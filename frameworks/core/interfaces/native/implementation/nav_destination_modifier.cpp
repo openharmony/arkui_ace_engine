@@ -164,6 +164,7 @@ void BackButtonIcon0Impl(Ark_NativePointer node,
                 break;
             }
             case pixelType: {
+                pixMap = Converter::OptConvert<RefPtr<PixelMap>>(value->value.value1).value_or(nullptr);
                 break;
             }
             case symbolType: {
@@ -214,6 +215,7 @@ void BackButtonIcon1Impl(Ark_NativePointer node,
                 break;
             }
             case pixelType: {
+                pixMap = Converter::OptConvert<RefPtr<PixelMap>>(icon->value.value1).value_or(nullptr);
                 break;
             }
             case symbolType: {
@@ -250,6 +252,9 @@ void Menus0Impl(Ark_NativePointer node,
             auto menuItemArray = Converter::Convert<std::vector<NG::BarItem>>(value->value.value0);
             NavDestinationModelStatic::SetMenuItems(frameNode, std::move(menuItemArray));
         } else if (typeValue == 1) {
+            CallbackHelper(value->value.value1).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+                NavDestinationModelStatic::SetCustomMenu(frameNode, std::move(uiNode));
+            }, node);
         }
     }
     NavDestinationModelStatic::SetMenuOptions(frameNode, std::move(options));
@@ -269,6 +274,9 @@ void Menus1Impl(Ark_NativePointer node,
             auto menuItemArray = Converter::Convert<std::vector<NG::BarItem>>(items->value.value0);
             NavDestinationModelStatic::SetMenuItems(frameNode, std::move(menuItemArray));
         } else if (typeValue == 1) {
+            CallbackHelper(items->value.value1).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+                NavDestinationModelStatic::SetCustomMenu(frameNode, std::move(uiNode));
+            }, node);
         }
     }
     if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED &&
@@ -497,9 +505,36 @@ void ToolbarConfigurationImpl(Ark_NativePointer node, const Opt_Union_Array_Tool
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = Converter::Convert<type>(toolbarParam);
-    // auto convValue = Converter::OptConvert<type>(toolbarParam); // for enums
-    // NavDestinationModelNG::SetToolbarConfiguration(frameNode, convValue);
+    CHECK_NULL_VOID(toolbarParam);
+    NG::NavigationToolbarOptions toolbarOptions;
+    if (toolbarParam->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto typeValue = toolbarParam->value.selector;
+        if (typeValue == 0) {
+            NG::MoreButtonOptions toolbarMoreButtonOptions;
+            if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED &&
+                options->value.moreButtonOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+                NG::NavigationBackgroundOptions bgOptions =
+                    Converter::Convert<NG::NavigationBackgroundOptions>(options->value.moreButtonOptions.value);
+                toolbarMoreButtonOptions.bgOptions = bgOptions;
+            }
+            NavDestinationModelStatic::SetToolbarMorebuttonOptions(frameNode, std::move(toolbarMoreButtonOptions));
+            auto toolbarItemArray = Converter::Convert<std::vector<NG::BarItem>>(toolbarParam->value.value0);
+            NavDestinationModelStatic::SetToolbarConfiguration(frameNode, std::move(toolbarItemArray));
+        } else if (typeValue == 1) {
+        }
+    }
+
+    if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        NG::NavigationBackgroundOptions bgOptions =
+            Converter::Convert<NG::NavigationBackgroundOptions>(options->value);
+        toolbarOptions.bgOptions = bgOptions;
+    }
+    if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        NG::NavigationBarOptions brOptions =
+            Converter::Convert<NG::NavigationBarOptions>(options->value);
+        toolbarOptions.brOptions = brOptions;
+    }
+    NavDestinationModelStatic::SetToolBarOptions(frameNode, std::move(toolbarOptions));
 }
 void HideToolBarImpl(Ark_NativePointer node, const Opt_Boolean* hide, const Opt_Boolean* animated)
 {

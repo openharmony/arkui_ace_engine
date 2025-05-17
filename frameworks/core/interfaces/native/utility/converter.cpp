@@ -673,6 +673,12 @@ CalcDimension Convert(const Ark_Length& src)
 }
 
 template<>
+CalcDimension Convert(const Ark_LengthMetrics& src)
+{
+    return Convert<Dimension>(src);
+}
+
+template<>
 CalcDimension Convert(const Ark_String& src)
 {
     auto str = Convert<std::string>(src);
@@ -2752,12 +2758,102 @@ template<>
 void AssignCast(std::optional<NavigationTitlebarOptions>& dst, const Ark_NavigationTitleOptions& value)
 {
     dst = NavigationTitlebarOptions();
-    if (value.backgroundColor.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        dst->bgOptions.color = Converter::OptConvert<Color>(value.backgroundColor);
+    dst->bgOptions = Converter::Convert<NavigationBackgroundOptions>(value);
+    dst->brOptions = Converter::Convert<NavigationBarOptions>(value);
+}
+
+template<>
+NG::NavigationBackgroundOptions Convert(const Ark_NavigationTitleOptions& src)
+{
+    NG::NavigationBackgroundOptions options;
+    options.color.reset();
+    options.blurStyleOption.reset();
+    options.effectOption.reset();
+    BlurStyleOption styleOptions;
+    EffectOption effectOption;
+
+    if (src.backgroundColor.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        options.color = Converter::OptConvert<Color>(src.backgroundColor.value);
     }
-    if (value.paddingStart.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        dst->brOptions.paddingStart = Converter::OptConvert<Dimension>(value.paddingStart);
+
+    if (src.backgroundBlurStyleOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        styleOptions = Converter::Convert<BlurStyleOption>(src.backgroundBlurStyleOptions.value);
     }
+
+    if (src.backgroundBlurStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto blurStyle = static_cast<int32_t>(src.backgroundBlurStyle.value);
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            styleOptions.blurStyle = static_cast<BlurStyle>(blurStyle);
+        }
+    }
+
+    if (src.backgroundEffect.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        effectOption = Converter::Convert<EffectOption>(src.backgroundEffect.value);
+    }
+    options.blurStyleOption = styleOptions;
+    options.effectOption = effectOption;
+    return options;
+}
+
+template<>
+NG::NavigationBarOptions Convert(const Ark_NavigationTitleOptions& src)
+{
+    NG::NavigationBarOptions options;
+    options.paddingStart.reset();
+    options.paddingEnd.reset();
+    options.barStyle.reset();
+    if (src.barStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto barStyle = static_cast<int32_t>(src.barStyle.value);
+        if (barStyle >= static_cast<int32_t>(NG::BarStyle::STANDARD) &&
+            barStyle <= static_cast<int32_t>(NG::BarStyle::SAFE_AREA_PADDING)) {
+            options.barStyle = static_cast<NG::BarStyle>(barStyle);
+        } else {
+            options.barStyle = NG::BarStyle::STANDARD;
+        }
+    }
+    if (src.paddingStart.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        options.paddingStart = Converter::Convert<CalcDimension>(src.paddingStart.value);
+    }
+    if (src.paddingEnd.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        options.paddingEnd = Converter::Convert<CalcDimension>(src.paddingEnd.value);
+    }
+    return options;
+}
+
+template<>
+void AssignCast(std::optional<NG::NavigationTransition>& dst, const Opt_NavigationAnimatedTransition& src)
+{
+    NG::NavigationTransition transition;
+    dst = transition;
+    if (src.tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        dst->isValid = false;
+        return;
+    }
+    dst->isValid = true;
+    if (src.value.isInteractive.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        dst->interactive = Converter::Convert<bool>(src.value.isInteractive.value);
+    } else {
+        dst->interactive = false;
+    }
+    if (src.value.timeout.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        dst->timeout = Converter::Convert<int32_t>(src.value.timeout.value);
+    }
+    if (!dst->interactive) {
+        dst->timeout = dst->timeout < 0 ? 1000 : dst->timeout;
+    }
+    if (src.value.onTransitionEnd.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto onTransitionEnd = [callback = CallbackHelper(src.value.onTransitionEnd.value)](bool success) {
+            auto isSuccess = Converter::ArkValue<Ark_Boolean>(success);
+            callback.Invoke(isSuccess);
+        };
+        dst->endCallback = std::move(onTransitionEnd);
+    }
+    auto transitionCallback = [callback = CallbackHelper(src.value.transition)](const RefPtr<NavigationTransitionProxy>& transitionProxy) {
+        auto transition = Converter::ArkValue<Ark_NavigationTransitionProxy>(transitionProxy);
+        callback.Invoke(transition);
+    };
+    dst->transition = std::move(transitionCallback);
 }
 
 template<>

@@ -1312,7 +1312,7 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
     public toolbarConfiguration(toolbarParam: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): this {
         if (this.checkPriority("toolbarConfiguration")) {
             const toolbarParam_casted = toolbarParam as (Array<ToolbarItem> | CustomBuilder | undefined)
-            const options_casted = options as (NavigationToolbarOptions)
+            const options_casted = options as (NavigationToolbarOptions | undefined)
             this.getPeer()?.toolbarConfigurationAttribute(toolbarParam_casted, options_casted)
             return this
         }
