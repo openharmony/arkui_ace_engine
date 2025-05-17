@@ -285,6 +285,8 @@ public:
     // for recognizer group
     void AddGestureProcedure(const TouchEvent& point, const RefPtr<NGGestureRecognizer>& recognizer) const;
 
+    void AddGestureProcedure(const AxisEvent& event, const RefPtr<NGGestureRecognizer>& recognizer) const;
+
     void SetGestureInfo(const RefPtr<GestureInfo>& gestureInfo)
     {
         gestureInfo_ = gestureInfo;

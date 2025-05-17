@@ -1145,16 +1145,27 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event, bool sendOnTouch)
                 refereeNG_->AddGestureToScope(event.id, curResultIter->second);
             }
         }
+        // add gesture snapshot to dump
+        for (const auto& target : curResultIter->second) {
+            AddGestureSnapshot(event.id, 0, target, NG::EventTreeType::TOUCH);
+        }
     }
 
     ACE_FUNCTION_TRACE_COMMERCIAL();
     for (const auto& entry : curResultIter->second) {
         auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
         if (!recognizer && !sendOnTouch) {
+            eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)), "",
+                std::string("Handle").append(GestureSnapshot::TransAxisType(event.action)), "", "");
             continue;
         }
         if (!entry->HandleEvent(event)) {
             break;
+        }
+        if (recognizer) {
+            eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)), event, "",
+                NG::TransRefereeState(recognizer->GetRefereeState()),
+                NG::TransGestureDisposal(recognizer->GetGestureDisposal()));
         }
     }
     if ((event.action == AxisAction::END || event.action == AxisAction::NONE || event.action == AxisAction::CANCEL) &&

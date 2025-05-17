@@ -636,6 +636,22 @@ std::string GestureSnapshot::TransTouchType(TouchType type)
     }
 }
 
+std::string GestureSnapshot::TransAxisType(AxisAction action)
+{
+    switch (action) {
+        case AxisAction::BEGIN:
+            return "AxisBegin";
+        case AxisAction::UPDATE:
+            return "AxisUpdate";
+        case AxisAction::END:
+            return "AxisEnd";
+        case AxisAction::CANCEL:
+            return "AxisCancel";
+        default:
+            return std::string("Type:").append(std::to_string(static_cast<int32_t>(action)));
+    }
+}
+
 std::tuple<std::string, std::string> GestureSnapshot::GetIds() const
 {
     std::stringstream oss;

@@ -321,6 +321,7 @@ public:
     bool CheckNeedAddMove(const std::string& state, const std::string& disposal);
     void Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const;
     static std::string TransTouchType(TouchType type);
+    static std::string TransAxisType(AxisAction action);
     std::tuple<std::string, std::string> GetIds() const;
     void Dump(std::unique_ptr<JsonValue>& json) const;
 
