@@ -16,7 +16,7 @@
 import { int32, KoalaCallsiteKey } from "@koalaui/common"
 import { Disposable, IncrementalNode, scheduleCallback } from "@koalaui/runtime"
 import { NativePeerNode } from "./NativePeerNode"
-import { nullptr, pointer } from "@koalaui/interop"
+import { nullptr, pointer, InteropNativeModule } from "@koalaui/interop"
 import { ArkRootPeer } from "./component"
 import { ReusablePool } from "./ReusablePool"
 

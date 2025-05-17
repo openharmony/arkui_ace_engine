@@ -31,6 +31,7 @@ import { EdgeEffect, PageFlipMode, Color } from "./enums"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { Resource } from "global/resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { TabsOpsHandWritten } from "./../handwritten"
 
 export class TabsControllerInternal {
     public static fromPtr(ptr: KPointer): TabsController {
@@ -934,20 +935,8 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
     /** @memo */
     public barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this {
         if (this.checkPriority("barMode")) {
-            const value_type = runtimeType(value)
-            const options_type = runtimeType(options)
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
-                const value_casted = value as (BarMode | undefined)
-                this.getPeer()?.barMode0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
-                const value_casted = value as (BarMode | undefined)
-                const options_casted = options as (ScrollableBarModeOptions)
-                this.getPeer()?.barMode1Attribute(value_casted, options_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            TabsOpsHandWritten.hookTabsAttributeBarModeImpl(this.getPeer().peer.ptr,
+                value, options);
         }
         return this
     }
@@ -1116,20 +1105,8 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
     /** @memo */
     public barBackgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions): this {
         if (this.checkPriority("barBackgroundBlurStyle")) {
-            const style_type = runtimeType(style)
-            const options_type = runtimeType(options)
-            if (((RuntimeType.OBJECT == style_type) || (RuntimeType.OBJECT == style_type)) && (RuntimeType.UNDEFINED == options_type)) {
-                const value_casted = style as (BlurStyle | undefined)
-                this.getPeer()?.barBackgroundBlurStyle0Attribute(value_casted)
-                return this
-            }
-            if (((RuntimeType.OBJECT == style_type) || (RuntimeType.OBJECT == style_type)) && ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type))) {
-                const style_casted = style as (BlurStyle | undefined)
-                const options_casted = options as (BackgroundBlurStyleOptions | undefined)
-                this.getPeer()?.barBackgroundBlurStyle1Attribute(style_casted, options_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            TabsOpsHandWritten.hookTabsAttributeBarBackgroundBlurStyleImpl(this.getPeer().peer.ptr,
+            style, options);
         }
         return this
     }

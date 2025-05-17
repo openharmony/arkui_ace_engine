@@ -13936,6 +13936,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // RenderNodeAccessor
+    namespace TabsOpsAccessor {
+    Ark_NativePointer RegisterBarModeImpl(Ark_NativePointer node,
+                                          const Opt_BarMode* value,
+                                          const Opt_ScrollableBarModeOptions* options)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterBarMode(frameNode, convValue);
+        return {};
+    }
+    Ark_NativePointer RegisterBarBackgroundBlurStyleImpl(Ark_NativePointer node,
+                                                         const Opt_BlurStyle* style,
+                                                         const Opt_BackgroundBlurStyleOptions* options)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterBarBackgroundBlurStyle(frameNode, convValue);
+        return {};
+    }
+    } // TabsOpsAccessor
     namespace GridItemOpsAccessor {
     Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
                                                     Ark_Boolean value,
@@ -21380,6 +21404,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct RenderNodePeer {
         virtual ~RenderNodePeer() = default;
     };
+    const GENERATED_ArkUITabsOpsAccessor* GetTabsOpsAccessor()
+    {
+        static const GENERATED_ArkUITabsOpsAccessor TabsOpsAccessorImpl {
+            TabsOpsAccessor::RegisterBarModeImpl,
+        };
+        return &TabsOpsAccessorImpl;
+    }
+
     const GENERATED_ArkUIGridItemOpsAccessor* GetGridItemOpsAccessor()
     {
         static const GENERATED_ArkUIGridItemOpsAccessor GridItemOpsAccessorImpl {
@@ -24334,6 +24366,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetMatrix4TransitAccessor,
             GetPixelMapAccessor,
             GetRenderNodeAccessor,
+            GetTabsOpsAccessor,
             GetGridItemOpsAccessor,
             GetFilterAccessor,
             GetVisualEffectAccessor,

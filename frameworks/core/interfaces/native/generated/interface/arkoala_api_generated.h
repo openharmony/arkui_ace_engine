@@ -23844,6 +23844,15 @@ typedef struct GENERATED_ArkUIRenderNodeAccessor {
                                  Ark_LengthMetricsUnit lengthMetricsUnit);
 } GENERATED_ArkUIRenderNodeAccessor;
 
+typedef struct GENERATED_ArkUITabsOpsAccessor {
+    Ark_NativePointer (*registerBarMode)(Ark_NativePointer node,
+                                         const Opt_BarMode* value,
+                                         const Opt_ScrollableBarModeOptions* options);
+    Ark_NativePointer (*registerBarBackgroundBlurStyle)(Ark_NativePointer node,
+                                                        const Opt_BlurStyle* style,
+                                                        const Opt_BackgroundBlurStyleOptions* options);
+} GENERATED_ArkUITabsOpsAccessor;
+
 typedef struct GENERATED_ArkUIGridItemOpsAccessor {
     Ark_NativePointer (*registerSelectedCallback)(Ark_NativePointer node,
                                                   Ark_Boolean value,
@@ -26649,6 +26658,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIMatrix4TransitAccessor* (*getMatrix4TransitAccessor)();
     const GENERATED_ArkUIPixelMapAccessor* (*getPixelMapAccessor)();
     const GENERATED_ArkUIRenderNodeAccessor* (*getRenderNodeAccessor)();
+    const GENERATED_ArkUITabsOpsAccessor* (*getTabsOpsAccessor)();
     const GENERATED_ArkUIGridItemOpsAccessor* (*getGridItemOpsAccessor)();
     const GENERATED_ArkUIFilterAccessor* (*getFilterAccessor)();
     const GENERATED_ArkUIVisualEffectAccessor* (*getVisualEffectAccessor)();

@@ -247,6 +247,7 @@ const GENERATED_ArkUIShapeClipAccessor* GetShapeClipAccessor();
 const GENERATED_ArkUIMatrix4TransitAccessor* GetMatrix4TransitAccessor();
 const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
 const GENERATED_ArkUIRenderNodeAccessor* GetRenderNodeAccessor();
+const GENERATED_ArkUITabsOpsAccessor* GetTabsOpsAccessor();
 const GENERATED_ArkUIGridItemOpsAccessor* GetGridItemOpsAccessor();
 const GENERATED_ArkUIFilterAccessor* GetFilterAccessor();
 const GENERATED_ArkUIVisualEffectAccessor* GetVisualEffectAccessor();
@@ -575,6 +576,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetMatrix4TransitAccessor,
         GetPixelMapAccessor,
         GetRenderNodeAccessor,
+        GetTabsOpsAccessor,
         GetGridItemOpsAccessor,
         GetFilterAccessor,
         GetVisualEffectAccessor,

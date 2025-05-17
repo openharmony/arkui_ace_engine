@@ -27914,6 +27914,42 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // RenderNodeAccessor
+    namespace TabsOpsAccessor {
+    Ark_NativePointer RegisterBarModeImpl(Ark_NativePointer node,
+                                          const Opt_BarMode* value,
+                                          const Opt_ScrollableBarModeOptions* options)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerBarMode(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer RegisterBarBackgroundBlurStyleImpl(Ark_NativePointer node,
+                                                         const Opt_BlurStyle* style,
+                                                         const Opt_BackgroundBlurStyleOptions* options)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerBarBackgroundBlurStyle(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, style);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // TabsOpsAccessor
     namespace GridItemOpsAccessor {
     Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
                                                     Ark_Boolean value,
@@ -43480,6 +43516,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct RenderNodePeer {
         virtual ~RenderNodePeer() = default;
     };
+    const GENERATED_ArkUITabsOpsAccessor* GetTabsOpsAccessor()
+    {
+        static const GENERATED_ArkUITabsOpsAccessor TabsOpsAccessorImpl {
+            TabsOpsAccessor::RegisterBarModeImpl,
+            TabsOpsAccessor::RegisterBarBackgroundBlurStyleImpl,
+        };
+        return &TabsOpsAccessorImpl;
+    }
+
     const GENERATED_ArkUIFilterAccessor* GetFilterAccessor()
     {
         static const GENERATED_ArkUIFilterAccessor FilterAccessorImpl {
@@ -46426,6 +46471,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetMatrix4TransitAccessor,
             GetPixelMapAccessor,
             GetRenderNodeAccessor,
+            GetTabsOpsAccessor,
             GetFilterAccessor,
             GetVisualEffectAccessor,
             GetNavExtenderAccessor,
