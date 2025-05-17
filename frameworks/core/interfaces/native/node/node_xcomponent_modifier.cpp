@@ -141,7 +141,7 @@ void* GetNativeXComponent(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto xcPattern = frameNode->GetPattern<XComponentPattern>();
     CHECK_NULL_RETURN(xcPattern, nullptr);
-    if (xcPattern->HasGotSurfaceHolder()) {
+    if (xcPattern->HasGotSurfaceHolder() || xcPattern->IsNativeXComponentDisabled()) {
         return nullptr;
     }
     auto pair = xcPattern->GetNativeXComponent();
@@ -420,6 +420,53 @@ ArkUI_Bool GetXComponentIsBindNative(ArkUINodeHandle node)
     CHECK_NULL_RETURN(xcPattern, false);
     return static_cast<ArkUI_Bool>(xcPattern->IsBindNative());
 }
+
+ArkUI_Int32 SetExpectedFrameRateRange(
+    ArkUINodeHandle node, ArkUI_Int32 min, ArkUI_Int32 max, ArkUI_Int32 expected)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    if (!(min <= max && expected >= min && expected <= max)) {
+        LOGE("Xcomponent Expeted FrameRateRange Error.");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return XComponentModelNG::SetExpectedRateRange(frameNode, min, max, expected);
+}
+
+ArkUI_Int32 RegisterOnFrameCallback(ArkUINodeHandle node,
+    void(*callback)(void*, uint64_t, uint64_t), void* arkuiNode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    return XComponentModelNG::SetOnFrameCallback(frameNode, callback, arkuiNode);
+}
+
+ArkUI_Int32 UnregisterOnFrameCallback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    return XComponentModelNG::UnregisterOnFrameCallback(frameNode);
+}
+
+ArkUI_Int32 SetNeedSoftKeyboard(ArkUINodeHandle node, bool needSoftKeyboard)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    return XComponentModelNG::SetNeedSoftKeyboard(frameNode, needSoftKeyboard);
+}
+
+void* CreateAccessibilityProvider(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return XComponentModelNG::CreateAccessibilityProvider(frameNode);
+}
+
+void DisposeAccessibilityProvider(void* provider)
+{
+    XComponentModelNG::DisposeAccessibilityProvider(
+        reinterpret_cast<ArkUI_AccessibilityProvider*>(provider));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -466,6 +513,12 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         .isInitialized = IsInitialized,
         .finalize = Finalize,
         .getXComponentIsBindNative = GetXComponentIsBindNative,
+        .setExpectedFrameRateRange = SetExpectedFrameRateRange,
+        .registerOnFrameCallback = RegisterOnFrameCallback,
+        .unregisterOnFrameCallback = UnregisterOnFrameCallback,
+        .setNeedSoftKeyboard = SetNeedSoftKeyboard,
+        .createAccessibilityProvider = CreateAccessibilityProvider,
+        .disposeAccessibilityProvider = DisposeAccessibilityProvider,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
