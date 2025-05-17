@@ -365,9 +365,9 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEv
     auto finalOffset = info_.currentHeight_ - info_.prevHeight_;
     if (!NearZero(finalOffset)) {
         bool scrollDownToEnd =
-            LessNotEqual(info_.prevHeight_, info_.endHeight_) && GreatOrEqual(info_.currentHeight_, info_.endHeight_);
+            LessOrEqual(info_.prevHeight_, endHeight_) && GreatOrEqual(info_.currentHeight_, endHeight_);
         bool scrollUpToEnd =
-            GreatNotEqual(info_.prevHeight_, info_.endHeight_) && LessOrEqual(info_.currentHeight_, info_.endHeight_);
+            GreatNotEqual(info_.prevHeight_, endHeight_) && LessOrEqual(info_.currentHeight_, endHeight_);
         if (scrollDownToEnd || scrollUpToEnd) {
             FireObserverOnReachEnd();
             ReportOnItemGridEvent("onReachEnd");
@@ -521,7 +521,6 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     bool indexChanged =
         (gridLayoutInfo.startIndex_ != info_.startIndex_) || (gridLayoutInfo.endIndex_ != info_.endIndex_);
-    bool offsetEnd = info_.offsetEnd_;
     info_ = gridLayoutInfo;
     info_.synced_ = true;
     AnimateToTarget(scrollAlign_, layoutAlgorithmWrapper);
@@ -533,12 +532,8 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     bool sizeDiminished =
         IsOutOfBoundary(true) && !NearZero(curDelta) && (info_.prevHeight_ - info_.currentHeight_ - curDelta > 0.1f);
 
-    if (!offsetEnd && info_.offsetEnd_) {
-        bool irregular = UseIrregularLayout();
-        float mainGap = GetMainGap();
-        auto itemsHeight = info_.GetTotalHeightOfItemsInView(mainGap, irregular);
-        auto overScroll = info_.currentOffset_ - (GetMainContentSize() - itemsHeight);
-        info_.endHeight_ = info_.currentHeight_ - overScroll;
+    if (info_.offsetEnd_) {
+        endHeight_ = GetTotalHeight() - GetMainContentSize();
     }
     ProcessEvent(indexChanged, info_.currentHeight_ - info_.prevHeight_);
     info_.prevHeight_ = info_.currentHeight_;
@@ -1198,7 +1193,7 @@ void GridPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc("scrollStop:" + std::to_string(scrollStop_));
     DumpLog::GetInstance().AddDesc("prevHeight:" + std::to_string(info_.prevHeight_));
     DumpLog::GetInstance().AddDesc("currentHeight:" + std::to_string(info_.currentHeight_));
-    DumpLog::GetInstance().AddDesc("endHeight:" + std::to_string(info_.endHeight_));
+    DumpLog::GetInstance().AddDesc("endHeight:" + std::to_string(endHeight_));
     DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(info_.currentOffset_));
     DumpLog::GetInstance().AddDesc("prevOffset:" + std::to_string(info_.prevOffset_));
     DumpLog::GetInstance().AddDesc("lastMainSize:" + std::to_string(info_.lastMainSize_));
@@ -1625,7 +1620,7 @@ void GridPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("scrollStop", std::to_string(scrollStop_).c_str());
     json->Put("prevHeight", info_.prevHeight_);
     json->Put("currentHeight", info_.currentHeight_);
-    json->Put("endHeight", info_.endHeight_);
+    json->Put("endHeight", endHeight_);
     json->Put("currentOffset", std::to_string(info_.currentOffset_).c_str());
     json->Put("prevOffset", std::to_string(info_.prevOffset_).c_str());
     json->Put("lastMainSize", std::to_string(info_.lastMainSize_).c_str());
