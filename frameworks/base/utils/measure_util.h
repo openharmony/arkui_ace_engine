@@ -49,6 +49,8 @@ class ACE_FORCE_EXPORT MeasureUtil {
 public:
     static double MeasureText(const MeasureContext& context);
     static Size MeasureTextSize(const MeasureContext& context);
+    static double MeasureTextWidth(const TextStyle& textStyle, const std::string& text);
+    static Size MeasureTextSize(const TextStyle& textStyle, const std::string& text);
 };
 } // namespace OHOS::Ace
 

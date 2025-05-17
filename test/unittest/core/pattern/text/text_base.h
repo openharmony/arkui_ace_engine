@@ -21,6 +21,7 @@
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "core/common/ai/data_detector_adapter.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -181,6 +182,22 @@ struct ImageSpanNodeProperty {
     std::optional<ImageFit> imageFit = std::nullopt;
     std::optional<VerticalAlign> verticalAlign = std::nullopt;
 };
+
+// include span string and position
+struct AISpanTestInfo {
+    std::variant<std::string, std::u16string> content;
+    vector<Ace::AISpan> aiSpans;
+};
+
+const AISpanTestInfo U16_TEXT_FOR_AI_INFO = { std::u16string(u"phone: 12345678900,url: www.baidu.com Hello World"),
+                                              { {7, 18, "12345678900", TextDataDetectType::PHONE_NUMBER},
+                                                {24, 37, "www.baidu.com", TextDataDetectType::URL} }
+                                            };
+
+const AISpanTestInfo U16_TEXT_FOR_AI_INFO_2 = { std::u16string(u"email: 1234@abc.com,date: 2025.09.12, "),
+                                                { {7, 19, "12345678900", TextDataDetectType::EMAIL},
+                                                  {26, 36, "www.baidu.com", TextDataDetectType::DATE_TIME} }
+                                              };
 
 class TextBases : public TestNG {
 public:

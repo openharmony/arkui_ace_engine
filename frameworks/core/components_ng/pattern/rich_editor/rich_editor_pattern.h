@@ -1292,7 +1292,7 @@ public:
     float GetCaretWidth();
 
 protected:
-    bool CanStartAITask() override;
+    bool CanStartAITask() const override;
     std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
     PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect) override;
     std::pair<int32_t, int32_t> GetStartAndEnd(int32_t start, const RefPtr<SpanItem>& spanItem) override;

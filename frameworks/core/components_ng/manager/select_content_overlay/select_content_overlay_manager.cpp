@@ -211,6 +211,8 @@ SelectOverlayInfo SelectContentOverlayManager::BuildSelectOverlayInfo(int32_t re
     overlayInfo.menuCallback.onAIWrite = MakeMenuCallback(OptionMenuActionId::AI_WRITE, overlayInfo);
     overlayInfo.menuCallback.onAppear = MakeMenuCallback(OptionMenuActionId::APPEAR, overlayInfo);
     overlayInfo.menuCallback.onDisappear = MakeMenuCallback(OptionMenuActionId::DISAPPEAR, overlayInfo);
+    overlayInfo.menuCallback.onAIMenuOption =
+        MakeMenuCallbackWithInfo(OptionMenuActionId::AI_MENU_OPTION, overlayInfo);
     overlayInfo.isUseOverlayNG = true;
     RegisterTouchCallback(overlayInfo);
     RegisterHandleCallback(overlayInfo);
@@ -344,6 +346,23 @@ std::function<void()> SelectContentOverlayManager::MakeMenuCallback(
     };
 }
 
+// return callback funtion with label information as input
+std::function<void(std::string)> SelectContentOverlayManager::MakeMenuCallbackWithInfo(
+    OptionMenuActionId id, const SelectOverlayInfo& info)
+{
+    auto callback = selectOverlayHolder_->GetCallback();
+    CHECK_NULL_RETURN(callback, nullptr);
+    return [actionId = id, weakCallback = WeakClaim(AceType::RawPtr(callback)),
+            menuType = info.menuInfo.menuType, logInfo = GetOwnerDebugInfo()](const std::string& labelInfo = "") {
+        auto callback = weakCallback.Upgrade();
+        CHECK_NULL_VOID(callback);
+        TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY,
+            "MakeMenuCallbackWithInfo called, menu id %{public}d, menu type %{public}d, consumer %{public}s", actionId,
+            menuType, logInfo.c_str());
+        callback->OnMenuItemAction(actionId, menuType, labelInfo);
+    };
+}
+
 void SelectContentOverlayManager::UpdateExistOverlay(const SelectOverlayInfo& info, bool animation, int32_t requestCode)
 {
     TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "UpdateExistOverlay called by %{public}s", GetOwnerDebugInfo().c_str());
@@ -428,6 +447,21 @@ void SelectContentOverlayManager::SwitchToHandleMode(HandleLevelMode mode, bool 
     }
 }
 
+void SelectContentOverlayManager::HandleDirtyViewPort(RefPtr<SelectContentOverlayPattern>& menuPattern)
+{
+    auto viewPort = selectOverlayHolder_->GetAncestorNodeViewPort();
+    if (viewPort) {
+        ConvertRectRelativeToParent(*viewPort);
+    }
+    if (menuPattern) {
+        menuPattern->UpdateViewPort(viewPort);
+    }
+    auto handlePattern = GetSelectHandlePattern(WeakClaim(this));
+    if (handlePattern) {
+        handlePattern->UpdateViewPort(viewPort);
+    }
+}
+
 void SelectContentOverlayManager::MarkInfoChange(SelectOverlayDirtyFlag dirty)
 {
     CHECK_NULL_VOID(selectOverlayHolder_);
@@ -445,16 +479,22 @@ void SelectContentOverlayManager::MarkInfoChange(SelectOverlayDirtyFlag dirty)
             TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Update all menu item: %{public}s - %{public}s",
                 menuInfo.ToString().c_str(), GetOwnerDebugInfo().c_str());
             menuPattern->UpdateSelectMenuInfo(menuInfo);
-        }
-        if ((dirty & DIRTY_COPY_ALL_ITEM) == DIRTY_COPY_ALL_ITEM) {
-            auto oldMenuInfo = menuPattern->GetSelectMenuInfo();
-            SelectMenuInfo menuInfo = { .showCopy = oldMenuInfo.showCopy, .showCopyAll = oldMenuInfo.showCopyAll };
-            selectOverlayHolder_->OnUpdateMenuInfo(menuInfo, DIRTY_COPY_ALL_ITEM);
-            oldMenuInfo.showCopyAll = menuInfo.showCopyAll;
-            oldMenuInfo.showCopy = menuInfo.showCopy;
+        } else if (
+            (dirty & DIRTY_COPY_ALL_ITEM) == DIRTY_COPY_ALL_ITEM ||
+            (dirty & DIRTY_AI_MENU_ITEM) == DIRTY_AI_MENU_ITEM) { // Diff specified flags
+            auto localReplacedMenuInfo = menuPattern->GetSelectMenuInfo();
+            SelectMenuInfo menuInfo;
+            selectOverlayHolder_->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
+            if ((dirty & DIRTY_COPY_ALL_ITEM) == DIRTY_COPY_ALL_ITEM) { // can extract to function
+                localReplacedMenuInfo.showCopyAll = menuInfo.showCopyAll;
+                localReplacedMenuInfo.showCopy = menuInfo.showCopy;
+            }
+            if ((dirty & DIRTY_AI_MENU_ITEM) == DIRTY_AI_MENU_ITEM) {
+                localReplacedMenuInfo.aiMenuOptionType = menuInfo.aiMenuOptionType;
+            }
             TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Update select all menu: %{public}s - %{public}s",
-                oldMenuInfo.ToString().c_str(), GetOwnerDebugInfo().c_str());
-            menuPattern->UpdateSelectMenuInfo(oldMenuInfo);
+                localReplacedMenuInfo.ToString().c_str(), GetOwnerDebugInfo().c_str());
+            menuPattern->UpdateSelectMenuInfo(localReplacedMenuInfo);
         }
         if ((dirty & DIRTY_SELECT_TEXT) == DIRTY_SELECT_TEXT) {
             auto selectedInfo = selectOverlayHolder_->GetSelectedText();
@@ -462,17 +502,7 @@ void SelectContentOverlayManager::MarkInfoChange(SelectOverlayDirtyFlag dirty)
         }
     }
     if ((dirty & DIRTY_VIEWPORT) == DIRTY_VIEWPORT) {
-        auto viewPort = selectOverlayHolder_->GetAncestorNodeViewPort();
-        if (viewPort) {
-            ConvertRectRelativeToParent(*viewPort);
-        }
-        if (menuPattern) {
-            menuPattern->UpdateViewPort(viewPort);
-        }
-        auto handlePattern = GetSelectHandlePattern(WeakClaim(this));
-        if (handlePattern) {
-            handlePattern->UpdateViewPort(viewPort);
-        }
+        HandleDirtyViewPort(menuPattern);
     }
     UpdateHandleInfosWithFlag(dirty);
     shareOverlayInfo_->containerModalOffset = GetContainerModalOffset();

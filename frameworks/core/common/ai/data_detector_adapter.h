@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_AI_PROPERTIES_H
 
 #include <set>
+#include <unordered_map>
 
 #include "interfaces/inner_api/ace/ai/data_detector_interface.h"
 #include "interfaces/inner_api/ace/ai/data_url_analyzer.h"
@@ -27,6 +28,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/utils.h"
 
+#include "frameworks/core/components/common/layout/constants.h"
 namespace OHOS::AAFwk {
 class Want;
 class WantParams;
@@ -43,7 +45,7 @@ struct AISpan {
     int32_t start = 0;
     int32_t end = 0;
     std::string content = "";
-    TextDataDetectType type = TextDataDetectType::PHONE_NUMBER;
+    TextDataDetectType type = TextDataDetectType::INVALID;
     bool operator==(const AISpan& span) const
     {
         return start == span.start && end == span.end && content == span.content && type == span.type;

@@ -2376,4 +2376,103 @@ HWTEST_F(TextTestThreeNg, TextMarqueeEvents002, TestSize.Level1)
     EXPECT_EQ(textPattern->focusInitialized_, false);
     EXPECT_EQ(textPattern->hoverInitialized_, false);
 }
+
+/**
+ * @tc.name: PrepareAIMenuOptions
+ * @tc.desc: test test_pattern.h PrepareAIMenuOptions function with valid textSelector
+ *           check single ai entity in selection range
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, PrepareAIMenuOptions001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and text textPattern
+     */
+    auto [frameNode, textPattern] = Init();
+    textPattern->textSelector_.Update(0, 22);
+
+    /**
+     * @tc.steps: step2. prepare spanItem1
+     */
+    auto spanItem1 = AceType::MakeRefPtr<SpanItem>();
+    spanItem1->content = std::get<std::u16string>(U16_TEXT_FOR_AI_INFO.content);
+    spanItem1->position = spanItem1->content.length();
+    textPattern->spans_.emplace_back(spanItem1);
+
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+    textPattern->pManager_->AddParagraph({ .paragraph = mockParagraph, .start = 0, .end = 100 });
+
+    textPattern->SetTextDetectEnable(true);
+    textPattern->copyOption_ = CopyOptions::Local;
+
+    auto aiSpan1 = U16_TEXT_FOR_AI_INFO.aiSpans[0];
+    auto aiSpan2 = U16_TEXT_FOR_AI_INFO.aiSpans[1];
+    std::map<int32_t, Ace::AISpan> aiSpanMap;
+    aiSpanMap[aiSpan1.start] = aiSpan1;
+    aiSpanMap[aiSpan2.start] = aiSpan2;
+    textPattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
+
+    /**
+     * @tc.steps: step3. create GestureEvent and call PrepareAIMenuOptions function.
+     * @tc.expected: aiMenuOptions is been setted true.
+     */
+    std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions;
+    textPattern->PrepareAIMenuOptions(aiMenuOptions);
+    EXPECT_EQ(aiMenuOptions.size(), 1);
+    auto aiSpan = aiMenuOptions.begin()->second;
+    EXPECT_EQ(aiSpan.type, TextDataDetectType::PHONE_NUMBER);
+    textPattern->pManager_->Reset();
+}
+
+
+/**
+ * @tc.name: PrepareAIMenuOptions
+ * @tc.desc: test test_pattern.h PrepareAIMenuOptions function with valid textSelector
+ *           check multi ai entity in selection range
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, PrepareAIMenuOptions002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and text textPattern
+     */
+    auto [frameNode, textPattern] = Init();
+    textPattern->textSelector_.Update(0, 40);
+
+    /**
+     * @tc.steps: step2. prepare spanItem with at least 2 ai entity
+     */
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = std::get<std::u16string>(U16_TEXT_FOR_AI_INFO_2.content);
+    spanItem->position = spanItem->content.length();
+    textPattern->spans_.emplace_back(spanItem);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> selectedRects { RectF(0, 0, 20, 20), RectF(30, 30, 20, 20), RectF(60, 60, 20, 20) };
+    EXPECT_CALL(*paragraph, GetRectsForPlaceholders(_)).WillRepeatedly(SetArgReferee<0>(selectedRects));
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+
+    textPattern->SetTextDetectEnable(true);
+    textPattern->copyOption_ = CopyOptions::Local;
+
+    auto aiSpan1 = U16_TEXT_FOR_AI_INFO_2.aiSpans[0];
+    auto aiSpan2 = U16_TEXT_FOR_AI_INFO_2.aiSpans[1];
+    std::map<int32_t, Ace::AISpan> aiSpanMap;
+    aiSpanMap[aiSpan1.start] = aiSpan1;
+    aiSpanMap[aiSpan2.start] = aiSpan2;
+    textPattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
+
+    /**
+     * @tc.steps: step3. create GestureEvent and call PrepareAIMenuOptions function.
+     * @tc.expected: aiMenuOptions is been setted true.
+     */
+    std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions;
+    auto ret = textPattern->PrepareAIMenuOptions(aiMenuOptions);
+    auto aiSpan = aiMenuOptions.begin()->second;
+    EXPECT_EQ(aiSpan.type, TextDataDetectType::EMAIL);
+    EXPECT_EQ(ret, false);
+    textPattern->pManager_->Reset();
+}
 } // namespace OHOS::Ace::NG

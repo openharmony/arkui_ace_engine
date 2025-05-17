@@ -10012,7 +10012,7 @@ void RichEditorPattern::HandleOnCameraInput()
 #endif
 }
 
-bool RichEditorPattern::CanStartAITask()
+bool RichEditorPattern::CanStartAITask() const
 {
     return TextPattern::CanStartAITask() && !isEditing_ && !spans_.empty();
 }

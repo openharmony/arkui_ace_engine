@@ -64,6 +64,13 @@ constexpr float RICH_DEFAULT_SHADOW_COLOR = 0x33000000;
 constexpr float RICH_DEFAULT_ELEVATION = 120.0f;
 constexpr Dimension CLICK_THRESHOLD = 5.0_vp;
 const OffsetF DEFAULT_NEGATIVE_CARET_OFFSET {-1.0f, -1.0f};
+constexpr int MAX_SELECTED_AI_ENTITY = 1;
+
+const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
+    { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
+    { TextDataDetectType::EMAIL, "email" }, { TextDataDetectType::ADDRESS, "location" },
+    { TextDataDetectType::DATE_TIME, "datetime" }
+};
 
 bool IsJumpLink(const std::string& content)
 {
@@ -643,6 +650,21 @@ void TextPattern::HandleOnCopy()
     eventHub->FireOnCopy(value);
 }
 
+void TextPattern::HandleAIMenuOption(const std::string& labelInfo)
+{
+    // lableInfo can be used for further extension: multiple ai entity in selected range
+    // only support one ai entity's first function now, hence pick begin
+    CHECK_NE_VOID(isShowAIMenuOption_, true);
+    CHECK_NE_VOID(aiMenuOptions_.size(), 1);
+    auto aiSpan = aiMenuOptions_.begin()->second;
+    auto aiEntityType = aiSpan.type;
+    auto menuOptionAndActions = dataDetectorAdapter_->textDetectResult_.
+                                menuOptionAndAction[TEXT_DETECT_MAP.at(aiEntityType)];
+    CHECK_EQUAL_VOID(menuOptionAndActions.empty(), true);
+    HiddenMenu();
+    dataDetectorAdapter_->OnClickAIMenuOption(aiSpan, *menuOptionAndActions.begin(), nullptr);
+}
+
 void TextPattern::HandleOnCopySpanString()
 {
     auto subSpanString = styledString_->GetSubSpanString(textSelector_.GetTextStart(),
@@ -867,6 +889,44 @@ RefPtr<RenderContext> TextPattern::GetRenderContext()
     return frameNode->GetRenderContext();
 }
 
+// ret: whether show aiMenuOption
+bool TextPattern::PrepareAIMenuOptions(
+        std::unordered_map<TextDataDetectType, AISpan>& aiMenuOptions)
+{
+    aiMenuOptions.clear();
+    CHECK_NULL_RETURN(IsSelected(), false);
+    CHECK_NULL_RETURN(dataDetectorAdapter_, false);
+    int selectedAiEntityNum = 0;
+    auto baseOffset = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
+    auto destinationOffset = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
+    auto spanIter = dataDetectorAdapter_->aiSpanMap_.lower_bound(baseOffset);
+
+    for (;spanIter != dataDetectorAdapter_->aiSpanMap_.end(); spanIter++) {
+        auto aiSpanStart = spanIter->first;
+        auto aiSpanEnd = spanIter->second.end; // [start, end)
+        if (aiSpanStart >= baseOffset && aiSpanEnd <= destinationOffset) {
+            ++selectedAiEntityNum;
+        } else {
+            break;
+        }
+        if (selectedAiEntityNum > MAX_SELECTED_AI_ENTITY) {
+            break;
+        } else { // put ai span functions
+            aiMenuOptions[spanIter->second.type] = spanIter->second;
+        }
+    }
+    return selectedAiEntityNum == MAX_SELECTED_AI_ENTITY;
+}
+
+void TextPattern::UpdateAIMenuOptions()
+{
+    if (copyOption_ == CopyOptions::Local && NeedShowAIDetect()) {
+        isShowAIMenuOption_ = PrepareAIMenuOptions(aiMenuOptions_);
+    } else {
+        isShowAIMenuOption_ = false;
+    }
+}
+
 void TextPattern::ShowSelectOverlay(const OverlayRequest& request)
 {
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
@@ -876,6 +936,7 @@ void TextPattern::ShowSelectOverlay(const OverlayRequest& request)
         ResetSelection();
         return;
     }
+    UpdateAIMenuOptions();
     selectOverlay_->ProcessOverlay(request);
 }
 
@@ -4831,7 +4892,7 @@ void TextPattern::SetTextDetectEnable(bool enable)
     host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
 }
 
-bool TextPattern::CanStartAITask()
+bool TextPattern::CanStartAITask() const
 {
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     if (textLayoutProperty) {
@@ -5371,7 +5432,7 @@ bool TextPattern::DidExceedMaxLines() const
     return pManager_->DidExceedMaxLines();
 }
 
-bool TextPattern::IsSetObscured()
+bool TextPattern::IsSetObscured() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
