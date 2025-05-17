@@ -190,6 +190,7 @@ public:
     virtual void SetOnSelected(std::function<void(const BaseEventInfo* info)>&& onSelected) {}
     virtual void SetIndicatorController(Framework::JSIndicatorController* controller) {}
     virtual Framework::JSIndicatorController* GetIndicatorController() { return nullptr; }
+    virtual void SetMaintainVisibleContentPosition(bool value) {}
 
 private:
     static std::unique_ptr<SwiperModel> instance_;

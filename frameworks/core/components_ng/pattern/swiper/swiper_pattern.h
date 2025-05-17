@@ -816,6 +816,15 @@ public:
     bool HasRepeatTotalCountDifference(RefPtr<UINode> node) const;
     int32_t OnInjectionEvent(const std::string& command) override;
 
+    bool GetMaintainVisibleContentPosition()
+    {
+        auto props = GetLayoutProperty<SwiperLayoutProperty>();
+        CHECK_NULL_RETURN(props, false);
+        return props->GetMaintainVisibleContentPosition().value_or(false);
+    }
+
+    void NotifyDataChange(int32_t index, int32_t count) override;
+
 protected:
     void MarkDirtyNodeSelf();
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);

@@ -3137,6 +3137,9 @@ struct ArkUISwiperModifier {
     ArkUI_Int32 (*getSwiperSwipeByGroup)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getSwiperDisplayMode)(ArkUINodeHandle node);
     ArkUISwiperArrowStyle (*getSwiperArrowStyle)(ArkUINodeHandle node);
+    void (*setMaintainVisibleContentPosition)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetMaintainVisibleContentPosition)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getMaintainVisibleContentPosition)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {

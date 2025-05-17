@@ -221,6 +221,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("pageFlipMode", &JSSwiper::SetPageFlipMode);
     JSClass<JSSwiper>::StaticMethod("onContentWillScroll", &JSSwiper::SetOnContentWillScroll);
     JSClass<JSSwiper>::StaticMethod("onSelected", &JSSwiper::SetOnSelected);
+    JSClass<JSSwiper>::StaticMethod("maintainVisibleContentPosition", &JSSwiper::SetMaintainVisibleContentPosition);
     JSClass<JSSwiper>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -1680,5 +1681,15 @@ void JSSwiper::SetOnSelected(const JSCallbackInfo& info)
         func->Execute(*swiperInfo);
     };
     SwiperModel::GetInstance()->SetOnSelected(std::move(onSelected));
+}
+
+void JSSwiper::SetMaintainVisibleContentPosition(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        SwiperModel::GetInstance()->SetMaintainVisibleContentPosition(false);
+        return;
+    }
+
+    SwiperModel::GetInstance()->SetMaintainVisibleContentPosition(info[0]->ToBoolean());
 }
 } // namespace OHOS::Ace::Framework

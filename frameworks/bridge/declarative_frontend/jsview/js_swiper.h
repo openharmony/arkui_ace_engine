@@ -78,6 +78,7 @@ protected:
     static void GetAutoPlayOptionsInfo(const JSRef<JSObject>& obj, SwiperAutoPlayOptions& swiperAutoPlayOptions);
     static void SetIndicatorController(const JSCallbackInfo& info);
     static void ResetSwiperNode();
+    static void SetMaintainVisibleContentPosition(const JSCallbackInfo& info);
 
     private:
         static bool ParseSpace(const JSRef<JSVal>& jsValue, CalcDimension& result);
