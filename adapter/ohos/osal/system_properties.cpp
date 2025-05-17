@@ -608,6 +608,15 @@ bool SystemProperties::IsSyscapExist(const char* cap)
 #endif
 }
 
+bool SystemProperties::IsApiVersionGreaterOrEqual(int majorVersion, int minorVersion, int patchVersion)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    return CheckApiVersionGreaterOrEqual(majorVersion, minorVersion, patchVersion);
+#else
+    return false;
+#endif
+}
+
 void SystemProperties::InitDeviceType(DeviceType)
 {
     // Do nothing, no need to store type here, use system property at 'GetDeviceType' instead.

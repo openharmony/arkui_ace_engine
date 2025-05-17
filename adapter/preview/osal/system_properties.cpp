@@ -158,6 +158,11 @@ bool SystemProperties::IsSyscapExist(const char* cap)
     return false;
 }
 
+bool SystemProperties::IsApiVersionGreaterOrEqual(int majorVersion, int minorVersion, int patchVersion)
+{
+    return false;
+}
+
 void SystemProperties::InitDeviceTypeBySystemProperty()
 {
     deviceType_ = DeviceType::PHONE;

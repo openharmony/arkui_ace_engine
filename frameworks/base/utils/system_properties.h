@@ -118,6 +118,10 @@ public:
      * check SystemCapability.
      */
     static bool IsSyscapExist(const char* cap);
+    /*
+     * check ApiVersion.
+     */
+    static bool IsApiVersionGreaterOrEqual(int majorVersion, int minorVersion, int patchVersion);
 
     /**
      * Set type of current device.

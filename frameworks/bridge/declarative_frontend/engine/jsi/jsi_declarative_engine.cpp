@@ -26,6 +26,7 @@
 
 #include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
+#include "base/utils/system_properties.h"
 #ifdef WINDOWS_PLATFORM
 #include <algorithm>
 #endif
@@ -248,6 +249,67 @@ bool PreloadAceConsole(const shared_ptr<JsRuntime>& runtime, const shared_ptr<Js
     aceConsoleObj->SetProperty(runtime, "warn", runtime->NewFunction(JsiBaseUtils::JsWarnLogPrint));
     aceConsoleObj->SetProperty(runtime, "error", runtime->NewFunction(JsiBaseUtils::JsErrorLogPrint));
     return global->SetProperty(runtime, "aceConsole", aceConsoleObj);
+}
+
+shared_ptr<JsValue> ApiVersionIsGreaterOrEqual(const shared_ptr<JsRuntime>& runtime,
+    const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (argc != 1) {
+        LOGE("count of args should 1");
+        return runtime->NewNull();
+    }
+    if (!argv[0]->IsString(runtime)) {
+        LOGW("first arg is not a string");
+        return runtime->NewNull();
+    }
+
+    std::string versionStr = argv[0]->ToString(runtime);
+    std::vector<std::string> parts;
+    std::string currentPart;
+    for (char c : versionStr) {
+        if (c == '.') {
+            parts.push_back(currentPart);
+            currentPart.clear();
+        } else {
+            currentPart += c;
+        }
+    }
+    parts.push_back(currentPart);
+    while (parts.size() < 3) {  // 3 分解参数个数
+        parts.push_back("");
+    }
+
+    auto convertToInt = [](const std::string& s) -> int32_t {
+        if (s.empty()) return 0;
+
+        for (char c : s) {
+            if (!isdigit(static_cast<unsigned char>(c))) {
+                return 0;
+            }
+        }
+
+        const char* str = s.c_str();
+        char* endPtr;
+        errno = 0;
+        long num = std::strtol(str, &endPtr, 10);
+
+        if (*endPtr != '\0' || errno == ERANGE || num < INT32_MIN || num > INT32_MAX) {
+            return 0;
+        }
+        return static_cast<int32_t>(num);
+    };
+
+    int32_t major = convertToInt(parts[0]);
+    int32_t minor = convertToInt(parts[1]);
+    int32_t patch = convertToInt(parts[2]);
+    bool ret = Ace::SystemProperties::IsApiVersionGreaterOrEqual(major, minor, patch);
+    return runtime->NewBoolean(ret);
+}
+
+bool PreloadCheckApiVersion(const shared_ptr<JsRuntime>& runtime)
+{    
+    shared_ptr<JsValue> global = runtime->GetGlobal();
+    return global->SetProperty(runtime, IS_API_VERSION_GREATER_OR_EQUAL, runtime->NewFunction(ApiVersionIsGreaterOrEqual));
 }
 
 bool PreloadAceTrace(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
@@ -483,6 +545,7 @@ void JsiDeclarativeEngineInstance::InitJsObject()
 {
     CHECK_RUN_ON(JS);
     LocalScope scope(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
+    PreloadCheckApiVersion(runtime_);
     if (!isModulePreloaded_ || !usingSharedRuntime_) {
         InitGlobalObjectTemplate();
     }
