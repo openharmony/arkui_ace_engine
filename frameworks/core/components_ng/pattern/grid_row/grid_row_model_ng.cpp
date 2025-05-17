@@ -42,6 +42,19 @@ void GridRowModelNG::Create(const RefPtr<V2::GridContainerSize>& col, const RefP
         V2::GRID_ROW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridRowLayoutPattern>(); });
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Columns, *col);
+    auto gridRowpattern = frameNode->GetPattern<GridRowLayoutPattern>();
+    CHECK_NULL_VOID(gridRowpattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [gutter, weak = AceType::WeakClaim(
+        AceType::RawPtr(frameNode))](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        RefPtr<V2::Gutter> &value = const_cast<RefPtr<V2::Gutter> &>(gutter);
+        value->ReloadResources(value);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, *value, frameNode);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    gridRowpattern->AddResObj("gridrow.gutter", resObj, std::move(updateFunc));
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, *gutter);
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, BreakPoints, *breakpoints);
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Direction, direction);
