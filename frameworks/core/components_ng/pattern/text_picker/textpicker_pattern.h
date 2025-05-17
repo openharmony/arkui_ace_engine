@@ -563,6 +563,7 @@ private:
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintFocusState();
     void SetButtonIdeaSize();
+    void CalculateButtonMetrics(RefPtr<UINode> child, RefPtr<PickerTheme> pickerTheme);
     std::string GetRangeStr() const;
     std::string GetOptionsMultiStr() const;
     std::string GetOptionsMultiStrInternal() const;
@@ -578,7 +579,7 @@ private:
     void SupplementOption(const std::vector<NG::TextCascadePickerOptions>& reOptions,
         std::vector<NG::RangeContent>& rangeContents, uint32_t patterIndex);
     void ProcessCascadeOptionsValues(const std::vector<std::string>& rangeResultValue, uint32_t index);
-    void SetFocusCornerRadius(RoundRect& paintRect);
+    void SetFocusCornerRadius(RoundRect& paintRect, const BorderRadiusProperty& radius);
     void UpdateButtonMargin(
         const RefPtr<FrameNode>& buttonNode, const RefPtr<DialogTheme>& dialogTheme, const bool isConfirmOrNextNode);
     void CheckFocusID(int32_t childSize);

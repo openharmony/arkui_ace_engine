@@ -88,6 +88,7 @@ public:
             theme->dividerThickness_ = DIVIDER_THICKNESS;
             Parse(themeStyle, theme);
             InitializeSelectorItemStyles(theme, themeStyle);
+            InitializeSelectedBackgroundStyle(theme, themeStyle);
         }
 
     private:
@@ -199,6 +200,19 @@ public:
             }
         }
 
+        void InitializeSelectedBackgroundStyle(
+            const RefPtr<PickerTheme>& theme, const RefPtr<ThemeStyle>& themeStyle) const
+        {
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("picker_pattern", nullptr);
+            if (!pattern) {
+                return;
+            }
+            theme->selectedBackgroundColor_ = pattern->GetAttr<Color>(
+                "picker_selected_background_color", Color(0x0c182431));
+            theme->selectedBorderRadius_ = NG::BorderRadiusProperty(
+                pattern->GetAttr<Dimension>("picker_selected_border_radius", 24.0_vp));
+        }
+
         void InitializeTextStyles(const RefPtr<PickerTheme>& theme, const RefPtr<ThemeStyle>& themeStyle) const
         {
             InitializeItemTextStyles(theme, themeStyle);
@@ -255,6 +269,7 @@ public:
         theme->defaultStartDate_ = defaultStartDate_;
         theme->defaultEndDate_ = defaultEndDate_;
         cloneSelectorProps(theme);
+        cloneSelectedBackgroundStyle(theme);
         return theme;
     }
 
@@ -270,6 +285,12 @@ public:
         theme->selectorItemFocusBgColor_ = selectorItemFocusBgColor_;
         theme->selectorItemNormalBgColor_ = selectorItemNormalBgColor_;
         theme->focusPadding_ = focusPadding_;
+    }
+
+    void cloneSelectedBackgroundStyle(RefPtr<PickerTheme> theme) const
+    {
+        theme->selectedBackgroundColor_ = selectedBackgroundColor_;
+        theme->selectedBorderRadius_ = selectedBorderRadius_;
     }
 
     const TextStyle& GetOptionStyle(bool selected, bool focus) const
@@ -651,6 +672,16 @@ public:
         return crownSensitivity_;
     }
 
+    const Color& GetSelectedBackgroundColor() const
+    {
+        return selectedBackgroundColor_;
+    }
+
+    const NG::BorderRadiusProperty& GetSelectedBorderRadius() const
+    {
+        return selectedBorderRadius_;
+    }
+
     bool IsCircleDial() const
     {
         return showCircleDial_;
@@ -769,6 +800,9 @@ private:
     std::string lunarSwitch_;
     std::string prevText_;
     std::string nextText_;
+
+    Color selectedBackgroundColor_;
+    NG::BorderRadiusProperty selectedBorderRadius_;
 };
 
 } // namespace OHOS::Ace

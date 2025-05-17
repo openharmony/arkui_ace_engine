@@ -68,6 +68,11 @@ struct PickerTextProperties {
     PickerTextStyle defaultTextStyle_;
 };
 
+struct PickerBackgroundStyle {
+    std::optional<Color> color;
+    std::optional<NG::BorderRadiusProperty> borderRadius;
+};
+
 // textpicker column kind
 const uint32_t ICON = 0x01;
 const uint32_t TEXT = 0x02;
@@ -117,6 +122,7 @@ struct TextPickerSettingData {
     bool canLoop = true;
     int32_t crownSensitivity;
     PickerTextProperties properties;
+    PickerBackgroundStyle pickerBgStyle;
     std::vector<uint32_t> selectedValues;
     std::vector<std::string> values;
     std::vector<NG::TextCascadePickerOptions> options;
