@@ -1364,4 +1364,14 @@ void WebClientImpl::OnScrollStart(const float x, const float y)
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnScrollStart(x, y);
 }
+
+void WebClientImpl::OnPip(int status, int delegate_id, int child_id,
+    int frame_routing_id, int width, int height)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebClientImpl::OnPip");
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnPip(status, delegate_id, child_id, frame_routing_id, width, height);
+}
 } // namespace OHOS::Ace

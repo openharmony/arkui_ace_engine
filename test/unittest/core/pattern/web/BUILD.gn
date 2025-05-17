@@ -728,6 +728,7 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "samgr:samgr_proxy",
     "webview:libnweb",
     "window_manager:libwm",
+    "window_manager:libpip_ndk",
   ]
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
