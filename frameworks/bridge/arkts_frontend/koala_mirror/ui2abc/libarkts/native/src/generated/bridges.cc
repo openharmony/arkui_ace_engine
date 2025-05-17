@@ -5748,6 +5748,15 @@ KNativePointer impl_AstNodeDumpEtsSrcConst(KNativePointer context, KNativePointe
 }
 KOALA_INTEROP_2(AstNodeDumpEtsSrcConst, KNativePointer, KNativePointer, KNativePointer);
 
+KNativePointer impl_AstNodeDumpDeclConst(KNativePointer context, KNativePointer receiver)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+    auto result = GetImpl()->AstNodeDumpDeclConst(_context, _receiver);
+    return new std::string(result);
+}
+KOALA_INTEROP_2(AstNodeDumpDeclConst, KNativePointer, KNativePointer, KNativePointer);
+
 void impl_AstNodeDumpConst(KNativePointer context, KNativePointer receiver, KNativePointer dumper)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
@@ -10466,6 +10475,16 @@ KNativePointer impl_CreateSrcDumper(KNativePointer context, KNativePointer node)
 }
 KOALA_INTEROP_2(CreateSrcDumper, KNativePointer, KNativePointer, KNativePointer);
 
+KNativePointer impl_CreateSrcDumper1(KNativePointer context, KNativePointer node, KBoolean isDeclgen)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _node = reinterpret_cast<es2panda_AstNode*>(node);
+    const auto _isDeclgen = static_cast<KBoolean>(isDeclgen);
+    auto result = GetImpl()->CreateSrcDumper1(_context, _node, _isDeclgen);
+    return result;
+}
+KOALA_INTEROP_3(CreateSrcDumper1, KNativePointer, KNativePointer, KNativePointer, KBoolean);
+
 void impl_SrcDumperAdd(KNativePointer context, KNativePointer receiver, KStringPtr& str)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
@@ -10552,6 +10571,53 @@ void impl_SrcDumperEndl(KNativePointer context, KNativePointer receiver, KUInt n
     return ;
 }
 KOALA_INTEROP_V3(SrcDumperEndl, KNativePointer, KNativePointer, KUInt);
+
+KBoolean impl_SrcDumperIsDeclgenConst(KNativePointer context, KNativePointer receiver)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_SrcDumper*>(receiver);
+    auto result = GetImpl()->SrcDumperIsDeclgenConst(_context, _receiver);
+    return result;
+}
+KOALA_INTEROP_2(SrcDumperIsDeclgenConst, KBoolean, KNativePointer, KNativePointer);
+
+void impl_SrcDumperDumpNode(KNativePointer context, KNativePointer receiver, KStringPtr& key)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_SrcDumper*>(receiver);
+    const auto _key = getStringCopy(key);
+    GetImpl()->SrcDumperDumpNode(_context, _receiver, _key);
+    return ;
+}
+KOALA_INTEROP_V3(SrcDumperDumpNode, KNativePointer, KNativePointer, KStringPtr);
+
+void impl_SrcDumperRemoveNode(KNativePointer context, KNativePointer receiver, KStringPtr& key)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_SrcDumper*>(receiver);
+    const auto _key = getStringCopy(key);
+    GetImpl()->SrcDumperRemoveNode(_context, _receiver, _key);
+    return ;
+}
+KOALA_INTEROP_V3(SrcDumperRemoveNode, KNativePointer, KNativePointer, KStringPtr);
+
+KBoolean impl_SrcDumperIsIndirectDepPhaseConst(KNativePointer context, KNativePointer receiver)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_SrcDumper*>(receiver);
+    auto result = GetImpl()->SrcDumperIsIndirectDepPhaseConst(_context, _receiver);
+    return result;
+}
+KOALA_INTEROP_2(SrcDumperIsIndirectDepPhaseConst, KBoolean, KNativePointer, KNativePointer);
+
+void impl_SrcDumperRun(KNativePointer context, KNativePointer receiver)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_SrcDumper*>(receiver);
+    GetImpl()->SrcDumperRun(_context, _receiver);
+    return ;
+}
+KOALA_INTEROP_V2(SrcDumperRun, KNativePointer, KNativePointer);
 
 KNativePointer impl_CreateETSClassLiteral(KNativePointer context, KNativePointer expr)
 {
