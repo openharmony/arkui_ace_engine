@@ -435,7 +435,7 @@
         },
         "textoverlay":{
             "paste":"Поставяне",
-            "select_all":"Избиране на всички",
+            "select_all":"Всичко",
             "cut":"Изрязване",
             "copy":"Копиране",
             "search":"Търсене",
@@ -631,11 +631,11 @@
             "translate":"ترجمة"
         },
         "refresh":{
-            "last_updated":"تاريخ آخر تحديث:‏ %s"
+            "last_updated":"آخر تحديث: %s"
         },
         "switch":{
-            "on":"تشغيل",
-            "off":"إغلاق"
+            "on":"مشغّل",
+            "off":"مغلق"
         },
         "stepper":{
             "skip":"تخطي",
@@ -672,8 +672,8 @@
             "last_updated":"Última actualización: %s"
         },
         "switch":{
-            "on":"Sí",
-            "off":"No"
+            "on":"Activado",
+            "off":"Desactivado"
         },
         "stepper":{
             "skip":"Omitir",
@@ -1053,7 +1053,7 @@
         },
         "textoverlay":{
             "paste":"Colar",
-            "select_all":"Selecionar todos",
+            "select_all":"Selecionar tudo",
             "cut":"Recortar",
             "copy":"Copiar",
             "search":"Pesquisar",
@@ -1470,8 +1470,8 @@
             "last_updated":"Última actualización: %s"
         },
         "switch":{
-            "on":"Sí",
-            "off":"No"
+            "on":"Activado",
+            "off":"Desactivado"
         },
         "stepper":{
             "skip":"Omitir",
@@ -1567,12 +1567,12 @@
     },
     "be":{
         "common":{
-            "ok":"ОК",
-            "cancel":"Адмяніць"
+            "cancel":"Адмяніць",
+            "more":"Больш"
         },
         "textoverlay":{
             "paste":"Уставіць",
-            "select_all":"Выбраць усё",
+            "select_all":"Выбраць усе",
             "cut":"Выразаць",
             "copy":"Капіраваць",
             "search":"Шукаць",
@@ -1583,14 +1583,23 @@
             "last_updated":"Апошняе абнаўленне: %s"
         },
         "switch":{
-            "on":"Укл.",
-            "off":"Выкл."
+            "on":"Уключана",
+            "off":"Выключана"
         },
         "stepper":{
             "skip":"Прапусціць",
             "next":"Далей",
             "start":"Пачаць",
             "back":"Назад"
+        },
+        "navigation":{
+            "back":"Назад"
+        },
+        "sheet":{
+            "close":"Закрыць"
+        },
+        "datepicker":{
+            "lunarSwitch":"Паказваць месячны каляндар"
         }
     },
     "fi":{
