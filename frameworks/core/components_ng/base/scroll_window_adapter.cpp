@@ -159,7 +159,7 @@ bool ScrollWindowAdapter::UpdateSlidingOffset(float delta)
 
     if (GreatOrEqual(std::abs(delta), size_.MainSize(axis_))) {
         auto pattern = container_->GetPattern<LazyContainer>();
-        int32_t jumpIndex = pattern ? pattern->ArkoalaConvertLargeDelta(delta) : -1;
+        int32_t jumpIndex = pattern ? pattern->ConvertLargeDelta(delta) : -1;
         if (jumpIndex >= 0) {
             jumpIndex = std::clamp(jumpIndex, 0, totalCount_ - 1);
             PrepareJump(jumpIndex);

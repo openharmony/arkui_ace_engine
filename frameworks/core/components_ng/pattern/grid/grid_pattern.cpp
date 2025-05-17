@@ -1700,7 +1700,7 @@ RefPtr<FillAlgorithm> GridPattern::CreateFillAlgorithm()
     }
     return MakeRefPtr<GridFillAlgorithm>(*props, info_);
 }
-int32_t GridPattern::ArkoalaConvertLargeDelta(float delta)
+int32_t GridPattern::ConvertLargeDelta(float delta)
 {
     auto converter = GridLargeDeltaConverter(info_, GetHost().GetRawPtr());
     int32_t res = converter.Convert(delta);

@@ -827,7 +827,7 @@ std::function<bool(int32_t)> WaterFlowPattern::GetScrollIndexAbility()
     };
 }
 
-int32_t WaterFlowPattern::ArkoalaConvertLargeDelta(float delta)
+int32_t WaterFlowPattern::ConvertLargeDelta(float delta)
 {
     if (layoutInfo_->Mode() != LayoutMode::SLIDING_WINDOW) {
         return -1;

@@ -42,7 +42,7 @@ public:
      *
      * @return item index to jump to. Return -1 if conversion fails.
      */
-    virtual int32_t ArkoalaConvertLargeDelta(float delta)
+    virtual int32_t ConvertLargeDelta(float delta)
     {
         return -1;
     }
