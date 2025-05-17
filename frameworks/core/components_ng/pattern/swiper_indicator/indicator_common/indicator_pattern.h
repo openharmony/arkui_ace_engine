@@ -235,6 +235,7 @@ public:
     std::pair<int32_t, int32_t> CalMouseClickIndexStartAndEnd(int32_t itemCount, int32_t currentIndex) override;
     bool CheckIsTouchBottom(const TouchLocationInfo& info);
     void HandleDragEnd(double dragVelocity) override;
+    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub) override; 
     void HandleLongDragUpdate(const TouchLocationInfo& info) override;
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);

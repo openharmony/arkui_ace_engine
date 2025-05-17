@@ -544,6 +544,27 @@ void IndicatorPattern::HandleDragEnd(double dragVelocity)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void IndicatorPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    SwiperIndicatorPattern::InitTouchEvent(gestureHub);
+    auto stopAnimationCb = [weak = WeakClaim(this)](bool ifImmediately) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            if (pattern->GetDotIndicatorModifier()) {
+                pattern->GetDotIndicatorModifier()->StopAnimation(ifImmediately);
+            }
+            if (pattern->GetOverlengthDotIndicatorModifier()) {
+                pattern->GetOverlengthDotIndicatorModifier()->StopAnimation(ifImmediately);
+            }
+        }
+    };
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    swiperPattern->SetStopIndicatorAnimationCb(stopAnimationCb);
+}
+
 void IndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
 {
     if (GetBindSwiperNode()) {
