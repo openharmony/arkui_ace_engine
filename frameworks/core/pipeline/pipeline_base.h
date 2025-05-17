@@ -1468,6 +1468,16 @@ public:
     void FireAllUIExtensionEvents();
     void FireUIExtensionEventOnceImmediately(NG::UIExtCallbackEventId eventId);
 
+    void SaveConfigurationConfig(const ConfigurationChange& configurationChange)
+    {
+        configurationChange_ = configurationChange;
+    }
+
+    const ConfigurationChange& GetConfigurationChange() const
+    {
+        return configurationChange_;
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1658,6 +1668,7 @@ private:
     std::set<NG::UIExtCallbackEvent> uiExtensionEvents_;
     std::function<void(uint32_t, int64_t)> accessibilityCallback_;
     std::set<AccessibilityCallbackEvent> accessibilityEvents_;
+    ConfigurationChange configurationChange_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

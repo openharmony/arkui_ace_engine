@@ -243,6 +243,7 @@ class JSBuilderNode extends BaseNode {
                 childView.forceCompleteRerender(true);
             }
         }
+        getUINativeModule().frameNode.updateConfiguration(this.getFrameNode()?.getNodePtr());
         this.updateEnd();
         __JSScopeUtil__.restoreInstanceId();
     }
