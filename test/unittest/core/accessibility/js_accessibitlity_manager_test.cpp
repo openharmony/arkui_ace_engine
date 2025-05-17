@@ -2016,6 +2016,52 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager038, TestSize.Level1)
     EXPECT_TRUE(jsAccessibilityManager->IsSendAccessibilityEvent(accessibilityEvent));
 }
 
+/**
+* @tc.name: AddHoverTransparentCallbackTest001
+* @tc.desc: AddHoverTransparentCallback
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, AddHoverTransparentCallbackTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create jsAccessibilityManager.
+     */
+    MockJsAccessibilityManager mockJsManger;
+
+    /**
+     * @tc.steps: step2. create frameNode and add to list.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode1", 1, AceType::MakeRefPtr<Pattern>(), true);
+    mockJsManger.AddHoverTransparentCallback(frameNode);
+
+    /**
+     * @tc.steps: step3. test IsInHoverTransparentCallbackList return true.
+     */
+    EXPECT_TRUE(mockJsManger.IsInHoverTransparentCallbackList(frameNode));
+}
+
+/**
+* @tc.name: IsInHoverTransparentCallbackListTest001
+* @tc.desc: IsInHoverTransparentCallbackList
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, IsInHoverTransparentCallbackListTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create jsAccessibilityManager.
+     */
+    MockJsAccessibilityManager mockJsManger;
+
+    /**
+     * @tc.steps: step2. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode2", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step3. test IsInHoverTransparentCallbackList return false.
+     */
+    EXPECT_FALSE(mockJsManger.IsInHoverTransparentCallbackList(frameNode));
+}
 
 /**
 * @tc.name: GetComponentTypeAndPageIdByNodeIdTest001
@@ -2046,8 +2092,6 @@ HWTEST_F(JsAccessibilityManagerTest, GetComponentTypeAndPageIdByNodeIdTest001, T
 
     EXPECT_EQ(infoOfNode.componentType, root->GetTag());
 }
-
-
 
 /**
 * @tc.name: IsSendAccessibilityEventTest001
