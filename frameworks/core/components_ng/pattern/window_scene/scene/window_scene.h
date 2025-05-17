@@ -48,6 +48,7 @@ protected:
 
     void OnActivation() override;
     void OnAttachToMainTree() override;
+    void OnBackground() override;
     void OnConnect() override;
     void OnDisconnect() override;
     void OnLayoutFinished() override;
