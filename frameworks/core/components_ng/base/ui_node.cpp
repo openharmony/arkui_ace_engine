@@ -1467,6 +1467,17 @@ void UINode::OnRecycle()
 
 void UINode::NotifyColorModeChange(uint32_t colorMode)
 {
+    if (CheckShouldClearCache()) {
+        auto customNode = DynamicCast<CustomNode>(this);
+        if (customNode) {
+            ContainerScope scope(instanceId_);
+            ACE_LAYOUT_TRACE_BEGIN("UINode %d %s is customnode %d",
+                GetId(), GetTag().c_str(), customNode ? true : false);
+            customNode->FireClearAllRecycleFunc();
+            SetShouldClearCache(false);
+            ACE_LAYOUT_TRACE_END()
+        }
+    }
     for (const auto& child : GetChildren()) {
         child->SetShouldClearCache(CheckShouldClearCache());
         child->SetRerenderable(GetRerenderable());
