@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 
 #include "session_manager/include/scene_session_manager.h"
-#include "session/host/include/scene_persistent_storage.h"
 #include "start_window_option.h"
 #include "ui/rs_surface_node.h"
 
