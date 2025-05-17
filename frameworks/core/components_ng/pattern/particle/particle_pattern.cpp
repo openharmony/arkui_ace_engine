@@ -62,6 +62,23 @@ void ParticlePattern::OnAttachToMainTree()
     }
 }
 
+std::unique_ptr<JsonValue> ParticlePattern::ParseAnnulusRegionJson(const ParticleOption& particleOption,
+    const ParticleAnnulusRegion& annulusRegion) const
+{
+    auto emitterOptionOpt = particleOption.GetEmitterOption();
+    auto objectAnnulusRegionJson = JsonUtil::Create(true);
+    auto center = annulusRegion.center_;
+    auto centerObj = JsonUtil::Create(true);
+    centerObj->Put("x", center.first.ToString().c_str());
+    centerObj->Put("y", center.second.ToString().c_str());
+    objectAnnulusRegionJson->Put("center", centerObj);
+    objectAnnulusRegionJson->Put("innerRadius", std::to_string(annulusRegion.innerRadius_.ConvertToPx()).c_str());
+    objectAnnulusRegionJson->Put("outerRadius", std::to_string(annulusRegion.outerRadius_.ConvertToPx()).c_str());
+    objectAnnulusRegionJson->Put("startAngle", std::to_string(annulusRegion.startAngle_).c_str());
+    objectAnnulusRegionJson->Put("endAngle", std::to_string(annulusRegion.endAngle_).c_str());
+    return objectAnnulusRegionJson;
+}
+
 std::unique_ptr<JsonValue> ParticlePattern::ParseEmitterParticleJson(const ParticleOption& particleOption) const
 {
     auto emitterOptionOpt = particleOption.GetEmitterOption();
@@ -132,6 +149,8 @@ void ParticlePattern::GetEmitterJson(const std::unique_ptr<JsonValue>& objectPar
             objectEmitterJson->Put("shape", "ParticleEmitterShape.CIRCLE");
         } else if (shapeInt == ParticleEmitterShape::ELLIPSE) {
             objectEmitterJson->Put("shape", "ParticleEmitterShape.ELLIPSE");
+        } else if (shapeInt == ParticleEmitterShape::ANNULUS) {
+            objectEmitterJson->Put("shape", "ParticleEmitterShape.ANNULUS");
         } else {
             objectEmitterJson->Put("shape", "ParticleEmitterShape.RECTANGLE");
         }
@@ -145,6 +164,11 @@ void ParticlePattern::GetEmitterJson(const std::unique_ptr<JsonValue>& objectPar
     if (sizeOpt.has_value()) {
         auto position = "[" + sizeOpt.value().first.ToString() + "," + sizeOpt.value().second.ToString() + "]";
         objectEmitterJson->Put("size", position.c_str());
+    }
+    auto annulusRegionOpt = emitterOptionOpt.GetAnnulusRegion();
+    if (annulusRegionOpt.has_value()) {
+        auto objectAnnulusRegionJson = ParseAnnulusRegionJson(particleOption, annulusRegionOpt.value());
+        objectEmitterJson->Put("annulusRegion", objectAnnulusRegionJson);
     }
     objectParticlesJson->Put("emitter", objectEmitterJson);
 }

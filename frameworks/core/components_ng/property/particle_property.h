@@ -33,7 +33,7 @@ enum ACE_EXPORT UpdaterType { NONE_UPDATER = 0, RANDOM, CURVE };
 
 enum ACE_EXPORT ParticleType { POINT = 0, IMAGE };
 
-enum ACE_EXPORT ParticleEmitterShape { RECTANGLE = 0, CIRCLE, ELLIPSE };
+enum ACE_EXPORT ParticleEmitterShape { RECTANGLE = 0, CIRCLE, ELLIPSE, ANNULUS };
 
 enum ACE_EXPORT DistributionType { UNIFORM = 0, GAUSSIAN };
 
@@ -232,6 +232,49 @@ private:
     std::optional<int64_t> lifeTimeRange_;
 };
 
+struct ParticleAnnulusRegion {
+    ParticleAnnulusRegion(std::pair<CalcDimension, CalcDimension> centerValue, CalcDimension innerRadiusValue,
+        CalcDimension outerRadiusValue, float startAngleValue, float endAngleValue)
+        : center_(centerValue), innerRadius_(innerRadiusValue),
+          outerRadius_(outerRadiusValue), startAngle_(startAngleValue), endAngle_(endAngleValue) {}
+
+    bool operator==(const ParticleAnnulusRegion& others) const
+    {
+        return (center_ == others.center_) && (innerRadius_ == others.innerRadius_) &&
+        (outerRadius_ == others.outerRadius_) && (startAngle_ == others.startAngle_) &&
+        (endAngle_ == others.endAngle_);
+    }
+
+    std::string ToString() const
+    {
+        std::string str;
+        str.append("center: [")
+            .append(center_.first.ToString())
+            .append(",")
+            .append(center_.second.ToString())
+            .append("]");
+        str.append("innerRadius: [")
+            .append(std::to_string(innerRadius_.ConvertToPx()))
+            .append("]");
+        str.append("outerRadius: [")
+            .append(std::to_string(outerRadius_.ConvertToPx()))
+            .append("]");
+        str.append("startAngle: [")
+            .append(std::to_string(startAngle_))
+            .append("]");
+        str.append("endAngle: [")
+            .append(std::to_string(endAngle_))
+            .append("]");
+        return str;
+    }
+
+    std::pair<CalcDimension, CalcDimension> center_;
+    CalcDimension innerRadius_;
+    CalcDimension outerRadius_;
+    float startAngle_;
+    float endAngle_;
+};
+
 struct EmitterOption {
 public:
     const Particle& GetParticle() const
@@ -282,10 +325,21 @@ public:
         return shape_;
     }
 
+    void SetAnnulusRegion(ParticleAnnulusRegion& annulusRegion)
+    {
+        annulusRegion_ = annulusRegion;
+    }
+
+    const std::optional<ParticleAnnulusRegion>& GetAnnulusRegion() const
+    {
+        return annulusRegion_;
+    }
+
     bool operator==(const EmitterOption& other) const
     {
         return particle_ == other.GetParticle() && emitterRate_ == other.GetEmitterRate() &&
-               position_ == other.GetPosition() && size_ == other.GetSize() && shape_ == other.GetShape();
+               position_ == other.GetPosition() && size_ == other.GetSize() &&
+               shape_ == other.GetShape() && annulusRegion_ == other.GetAnnulusRegion();
     }
 
     std::string ToString() const
@@ -316,6 +370,9 @@ public:
         str.append("shape: [")
             .append(shape_.has_value() ? std::to_string(static_cast<int32_t>(shape_.value())) : "NA")
             .append("]");
+        str.append("annulusRegion: [")
+            .append(annulusRegion_.has_value() ? annulusRegion_->ToString() : "NA")
+            .append("]");
         return str;
     }
 
@@ -325,6 +382,7 @@ private:
     std::optional<std::pair<Dimension, Dimension>> position_;
     std::optional<std::pair<Dimension, Dimension>> size_;
     std::optional<ParticleEmitterShape> shape_;
+    std::optional<ParticleAnnulusRegion> annulusRegion_;
 };
 
 struct ParticleFloatPropertyUpdaterConfig {
