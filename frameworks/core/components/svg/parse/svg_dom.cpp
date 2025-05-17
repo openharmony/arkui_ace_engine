@@ -45,7 +45,7 @@ namespace {
 
 const char DOM_SVG_STYLE[] = "style";
 const char DOM_SVG_CLASS[] = "class";
-constexpr int32_t MAX_SVG_NODE_COUNT = 5000;
+constexpr int32_t MAX_SVG_NODE_COUNT = 1000;
 
 } // namespace
 
@@ -148,6 +148,9 @@ bool SvgDom::ParseSvg(SkStream& svgStream)
         svgContext_ = AceType::MakeRefPtr<SvgContext>();
     }
     root_ = TranslateSvgNode(xmlDom, xmlDom.getRootNode(), nullptr);
+    if (GetSvgNodeCount() > MAX_SVG_NODE_COUNT) {
+        root_ = nullptr;
+    }
     if (root_ == nullptr) {
         return false;
     }
