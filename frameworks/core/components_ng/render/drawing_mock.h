@@ -21,6 +21,7 @@
 #include "test/mock/core/rosen/testing_brush.h"
 #include "test/mock/core/rosen/testing_camera.h"
 #include "test/mock/core/rosen/testing_canvas.h"
+#include "test/mock/core/rosen/testing_canvas_utils.h"
 #include "test/mock/core/rosen/testing_color.h"
 #include "test/mock/core/rosen/testing_color_filter.h"
 #include "test/mock/core/rosen/testing_color_matrix.h"
@@ -59,6 +60,7 @@
 namespace OHOS::Ace {
 namespace RSDrawing = Testing;
 using RSCanvas = Testing::TestingCanvas;
+using RSCanvasUtils = Testing::TestingCanvasUtils;
 using RSPen = Testing::TestingPen;
 using RSBrush = Testing::TestingBrush;
 using RSPath = Testing::TestingPath;

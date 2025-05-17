@@ -190,4 +190,18 @@ bool XComponentControllerNG::GetSurfaceRotation()
     CHECK_NULL_RETURN(pattern, false);
     return pattern->GetSurfaceRotation();
 }
+
+RSCanvas* XComponentControllerNG::LockCanvas()
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->LockCanvas();
+}
+
+void XComponentControllerNG::UnlockCanvasAndPost(RSCanvas* canvas)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UnlockCanvasAndPost(canvas);
+}
 } // namespace OHOS::Ace::NG

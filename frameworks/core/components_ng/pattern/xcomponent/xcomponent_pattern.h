@@ -343,6 +343,8 @@ public:
     RenderFit GetSurfaceRenderFit() const;
     bool GetEnableAnalyzer();
     void NativeStartImageAnalyzer(std::function<void(int32_t)>& callback);
+    RSCanvas* LockCanvas();
+    void UnlockCanvasAndPost(RSCanvas* canvas);
 
 protected:
     void OnAttachToMainTree() override;
