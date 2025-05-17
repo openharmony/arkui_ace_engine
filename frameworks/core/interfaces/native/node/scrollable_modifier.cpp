@@ -266,6 +266,34 @@ int32_t GetBackToTop(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, DEFAULT_BACKTOTOP);
     return ScrollableModelNG::GetBackToTop(frameNode);
 }
+
+void SetScrollBarMargin(ArkUINodeHandle node, ArkUI_Float32 marginStart, ArkUI_Int32 marginStartLengthUnit,
+    ArkUI_Float32 marginEnd, ArkUI_Int32 marginEndLengthUnit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollBarMargin scrollBarMargin;
+    scrollBarMargin.start_ = Dimension(marginStart, static_cast<OHOS::Ace::DimensionUnit>(marginStartLengthUnit));
+    scrollBarMargin.end_ = Dimension(marginEnd, static_cast<OHOS::Ace::DimensionUnit>(marginEndLengthUnit));
+    ScrollableModelNG::SetScrollBarMargin(frameNode, scrollBarMargin);
+}
+
+void ResetScrollBarMargin(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::ResetScrollBarMargin(frameNode);
+}
+
+void GetScrollBarMargin(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollBarMargin scrollBarMargin;
+    ScrollableModelNG::GetScrollBarMargin(frameNode, scrollBarMargin);
+    (*values)[0].i32 = scrollBarMargin.start_.ConvertToVp();
+    (*values)[1].i32 = scrollBarMargin.end_.ConvertToVp();
+}
 } // namespace
 
 namespace NodeModifier {
@@ -302,6 +330,9 @@ const ArkUIScrollableModifier* GetScrollableModifier()
         .setBackToTop = SetBackToTop,
         .resetBackToTop = ResetBackToTop,
         .getBackToTop = GetBackToTop,
+        .setScrollBarMargin = SetScrollBarMargin,
+        .resetScrollBarMargin = ResetScrollBarMargin,
+        .getScrollBarMargin = GetScrollBarMargin,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
