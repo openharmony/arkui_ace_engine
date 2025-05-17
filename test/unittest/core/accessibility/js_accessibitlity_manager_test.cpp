@@ -1819,4 +1819,77 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager034, TestSize.Level1)
     infos.push_back(info);
     EXPECT_NO_THROW(jsAccessibilityManager->UpdateElementInfosTreeId(infos));
 }
+
+
+/**
+* @tc.name: GetComponentTypeAndPageIdByNodeIdTest001
+* @tc.desc: GetComponentTypeAndPageIdByNodeId
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, GetComponentTypeAndPageIdByNodeIdTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager, test node
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto root = context->GetRootElement();
+    CHECK_NULL_VOID(root);
+
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    Framework::GetInfoByNodeId infoOfNode;
+    /**
+     * @tc.steps: step2. check get infos by nodeId
+     */
+    jsAccessibilityManager->GetComponentTypeAndPageIdByNodeId(root->GetAccessibilityId(), root->GetContextRefPtr(), infoOfNode);
+
+    EXPECT_EQ(infoOfNode.componentType, root->GetTag());
+}
+
+
+
+/**
+* @tc.name: IsSendAccessibilityEventTest001
+* @tc.desc: IsSendAccessibilityEvent in UIExtensionWindow
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, IsSendAccessibilityEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager, test node
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto root = context->GetRootElement();
+    CHECK_NULL_VOID(root);
+
+    jsAccessibilityManager->SetPipelineContext(context);
+    auto container = Platform::AceContainer::GetContainer(context->GetInstanceId());
+    CHECK_NULL_VOID(container);
+
+    AccessibilityEvent accessibilityEvent {
+        .nodeId = root->GetAccessibilityId(),
+        .type = AccessibilityEventType::PAGE_CHANGE
+    };
+
+    auto IsUIExtensionWindowBackup = container->IsUIExtensionWindow();
+    container->SetUIExtensionSubWindow(true);
+    jsAccessibilityManager->AddToPageEventController(root);
+    /**
+     * @tc.steps: step2. save pages when in UIExtensionWindow
+     */
+    auto result = jsAccessibilityManager->IsSendAccessibilityEvent(accessibilityEvent);
+    EXPECT_EQ(result, false);
+
+    container->SetUIExtensionSubWindow(IsUIExtensionWindowBackup);
+}
 } // namespace OHOS::Ace::NG
