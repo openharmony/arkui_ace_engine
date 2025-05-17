@@ -73,7 +73,6 @@ build_component_ng("window_scene") {
       "init:libbegetutil",
       "input:libmmi-client",
       "ipc:ipc_single",
-      "preferences:native_preferences",
       "window_manager:scene_session",
       "window_manager:scene_session_manager",
       "window_manager:screen_session",

@@ -75,7 +75,6 @@ group("core_pattern_unittest") {
     "patternlock:patternlock_test_ng",
     "picker:date_picker_test_ng",
     "plugin:plugin_component_test",
-    "preferences:native_preferences",
     "progress:progress_test_ng",
     "qrcode:qrcode_test_ng",
     "radio:radio_test_ng",

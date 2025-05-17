@@ -53,7 +53,6 @@ ace_unittest("window_scene_test") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "napi:ace_napi",
-    "preferences:native_preferences",
     "relational_store:native_rdb",
     "window_manager:libdm",
     "window_manager:libwm",

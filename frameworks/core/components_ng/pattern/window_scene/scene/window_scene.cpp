@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
 
 #include "session_manager/include/scene_session_manager.h"
-#include "session/host/include/scene_persistent_storage.h"
 
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -581,9 +580,9 @@ void WindowScene::OnActivation()
 
 void WindowScene::OnBackground()
 {
-    auto isPersistentImageFit = Rosen::ScenePersistentStorage::HasKey(
-        "SetImageForRecent_" + std::to_string(session_->GetPersistentId()),
-        Rosen::ScenePersistentStorageType::MAXIMIZE_STATE);
+    int32_t imageFit = 0;
+    auto isPersistentImageFit = Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
+        session_->GetPersistentId(), imageFit);
     CHECK_EQUAL_VOID(isPersistentImageFit, false);
     auto uiTask = [weakThis = WeakClaim(this)]() {
         ACE_SCOPED_TRACE("WindowScene::OnBackground");
@@ -601,7 +600,7 @@ void WindowScene::OnBackground()
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneActivation", TaskExecutor::TaskType::UI);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneBackground", TaskExecutor::TaskType::UI);
 }
 
 void WindowScene::DisposeSnapshotAndBlankWindow()
