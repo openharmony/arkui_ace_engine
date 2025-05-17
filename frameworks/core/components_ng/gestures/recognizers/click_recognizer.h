@@ -158,7 +158,6 @@ private:
     CancelableCallback<void()> fingerDeadlineTimer_;
     CancelableCallback<void()> tapDeadlineTimer_;
     std::vector<RectF> responseRegionBuffer_;
-    RectF paintRect_;
 
     int32_t currentTouchPointsNum_ = 0;
 
