@@ -28,7 +28,7 @@ import { Resource } from "global/resource"
 import { LengthMetrics } from "../Graphics"
 import { OutlineStyle } from "./common"
 import { Color, FontWeight, FontStyle, BorderStyle, DividerMode } from "./enums"
-import { ColorMetrics, EdgeStyles } from "./arkui-external"
+import { ColorMetrics } from "./arkui-external"
 export class ColorFilterInternal {
     public static fromPtr(ptr: KPointer): ColorFilter {
         const obj : ColorFilter = new ColorFilter(undefined)
@@ -190,6 +190,12 @@ export interface ConstraintSizeOptions {
 export interface SizeOptions {
     width?: Length;
     height?: Length;
+}
+export interface EdgeStyles {
+    top?: BorderStyle;
+    right?: BorderStyle;
+    bottom?: BorderStyle;
+    left?: BorderStyle;
 }
 export interface BorderOptions {
     width?: EdgeWidths | Length | LocalizedEdgeWidths;

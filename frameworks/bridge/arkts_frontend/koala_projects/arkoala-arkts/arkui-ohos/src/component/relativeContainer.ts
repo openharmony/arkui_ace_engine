@@ -171,12 +171,12 @@ export class ArkRelativeContainerComponent extends ArkCommonMethodComponent impl
     public barrier(value: Array<BarrierStyle> | undefined | Array<LocalizedBarrierStyle> | undefined): this {
         if (this.checkPriority("barrier")) {
             const value_type = runtimeType(value)
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+            if ((RuntimeType.OBJECT == value_type && TypeChecker.isArray_BarrierStyle(value)) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (Array<BarrierStyle> | undefined)
                 this.getPeer()?.barrier0Attribute(value_casted)
                 return this
             }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+            if ((RuntimeType.OBJECT == value_type && TypeChecker.isArray_LocalizedBarrierStyle(value)) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (Array<LocalizedBarrierStyle> | undefined)
                 this.getPeer()?.barrier1Attribute(value_casted)
                 return this

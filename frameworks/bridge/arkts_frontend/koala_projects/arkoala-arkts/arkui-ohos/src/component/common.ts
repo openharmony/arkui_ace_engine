@@ -27,10 +27,10 @@ import { DrawContext, Edges } from "./arkui-graphics"
 import { LengthMetrics } from "../Graphics"
 import { UnifiedData, UnifiedDataInternal, ComponentContent, Context, PointerStyle, ContextInternal, GestureOps, StateStylesOps } from "./arkui-custom"
 import { UIContext } from "@ohos/arkui/UIContext"
-import { Summary, IntentionCode, EdgeStyles, CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
+import { Summary, IntentionCode, CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
 import { Callback_Void } from "./abilityComponent"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransitionEffectType, GradientDirection, HorizontalAlign, VerticalAlign, TransitionType, FontWeight, FontStyle, TouchType, InteractionHand, CrownAction, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, IlluminatedType, MouseButton, MouseAction, AccessibilityHoverType, AxisAction, AxisModel, ScrollSource } from "./enums"
-import { ResourceColor, ConstraintSizeOptions, DirectionalEdgesT, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Bias, Font } from "./units"
+import { ResourceColor, ConstraintSizeOptions, DirectionalEdgesT, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Bias, Font, EdgeStyles } from "./units"
 import { Resource } from "global/resource"
 import { TextRange } from "./textCommon"
 import { ComponentBase } from "./../ComponentBase"
@@ -2683,7 +2683,8 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
-            if ((TypeChecker.isColor(value_value)) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+            if ((TypeChecker.isColor(value_value)) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.STRING == value_value_type) || ((RuntimeType.OBJECT == value_value_type)
+                && (TypeChecker.isResource(value_value, false, false, false, false, false)))) {
                 thisSerializer.writeInt8(0 as int32)
                 const value_value_0  = value_value as ResourceColor
                 let value_value_0_type : int32 = RuntimeType.UNDEFINED
@@ -7275,21 +7276,21 @@ export interface ScaleOptions {
     centerX?: number | string;
     centerY?: number | string;
 }
-export interface Literal_String_anchor_HorizontalAlign_align {
+export interface HorizontalAlignOptions {
     anchor: string;
     align: HorizontalAlign;
 }
-export interface Literal_String_anchor_VerticalAlign_align {
+export interface VerticalAlignOptions {
     anchor: string;
     align: VerticalAlign;
 }
 export interface AlignRuleOption {
-    left?: Literal_String_anchor_HorizontalAlign_align;
-    right?: Literal_String_anchor_HorizontalAlign_align;
-    middle?: Literal_String_anchor_HorizontalAlign_align;
-    top?: Literal_String_anchor_VerticalAlign_align;
-    bottom?: Literal_String_anchor_VerticalAlign_align;
-    center?: Literal_String_anchor_VerticalAlign_align;
+    left?: HorizontalAlignOptions;
+    right?: HorizontalAlignOptions;
+    middle?: HorizontalAlignOptions;
+    top?: VerticalAlignOptions;
+    bottom?: VerticalAlignOptions;
+    center?: VerticalAlignOptions;
     bias?: Bias;
 }
 export interface LocalizedHorizontalAlignParam {
@@ -10976,12 +10977,12 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
     public alignRules(value: AlignRuleOption | undefined | LocalizedAlignRuleOptions | undefined): this {
         if (this.checkPriority("alignRules")) {
             const value_type = runtimeType(value)
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+            if (((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) && TypeChecker.isAlignRuleOption(value, false, false, false, false, false, false, false)) {
                 const value_casted = value as (AlignRuleOption | undefined)
                 this.getPeer()?.alignRules0Attribute(value_casted)
                 return this
             }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+            if (((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) && TypeChecker.isLocalizedAlignRuleOptions(value, false, false, false, false, false, false, false)) {
                 const value_casted = value as (LocalizedAlignRuleOptions | undefined)
                 this.getPeer()?.alignRules1Attribute(value_casted)
                 return this
