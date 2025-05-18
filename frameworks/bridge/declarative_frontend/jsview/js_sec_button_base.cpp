@@ -17,6 +17,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/text_style.h"
@@ -36,6 +37,26 @@ void JSSecButtonBase::SetIconSize(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
+
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> iconSizeObj = JSRef<JSObject>::Cast(info[0]);
+
+        CalcDimension widthDimen;
+        std::optional<NG::CalcLength> width;
+        if (ParseJsDimensionVp(iconSizeObj->GetProperty("width"), widthDimen)) {
+            width.emplace(widthDimen);
+        }
+        CalcDimension heightDimen;
+        std::optional<NG::CalcLength> height;
+        if (ParseJsDimensionVp(iconSizeObj->GetProperty("height"), heightDimen)) {
+            height.emplace(heightDimen);
+        }
+        if ((!width.has_value()) && (!height.has_value())) {
+            return;
+        }
+        SecurityComponentModelNG::SetIconSize(NG::CalcSize(width, height));
+        return;
+    }
 
     CalcDimension value;
     if (!ParseJsDimensionVpNG(info[0], value, false) || value.IsNegative()) {

@@ -78,6 +78,7 @@ constexpr int INDEX_ONE = 1;
 constexpr int INDEX_TWO = 2;
 constexpr int INDEX_SIZE = 3;
 constexpr int ICON_RESOURCE_TABLE = 2;
+const std::string CUSTOMIZE_TEXT = "customize";
 }
 
 namespace {
@@ -1115,7 +1116,121 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest007, Tes
     ASSERT_NE(frameNode, nullptr);
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     ASSERT_NE(property, nullptr);
-    EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 0.0);
+    EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 15.0);
+}
+
+/**
+ * @tc.name: SecurityComponentSavePropertyTest008
+ * @tc.desc: Test set security component property with customize permission
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest008, TestSize.Level1)
+{
+    CreateSecurityComponentNotFinish(0, 0, static_cast<int32_t>(ButtonType::CAPSULE),
+        V2::SAVE_BUTTON_ETS_TAG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateHasCustomPermissionForSecComp(true);
+    SaveButtonModelNG sc;
+    std::optional<NG::CalcLength> width(Dimension(15.0));
+    std::optional<NG::CalcLength> height(Dimension(15.0));
+    sc.SetIconSize(CalcSize(width, height));
+    sc.SetIconBorderRadius(Dimension(3.0));
+    sc.SetText(CUSTOMIZE_TEXT);
+    sc.SetStateEffect(false);
+    sc.SetTipPosition(TipPosition::BELOW_TOP);
+
+    NG::BorderRadiusProperty borderRadiusEmpty;
+    NG::BorderRadiusProperty borderRadiusSetted;
+    borderRadiusSetted.radiusTopLeft = Dimension(3.0);
+    borderRadiusSetted.radiusTopRight = Dimension(3.0);
+    borderRadiusSetted.radiusBottomLeft = Dimension(3.0);
+    borderRadiusSetted.radiusBottomRight = Dimension(3.0);
+    std::optional<NG::CalcLength> widthDefault(Dimension(16.0));
+    std::optional<NG::CalcLength> heightDefault(Dimension(16.0));
+    EXPECT_EQ(property->GetIconCalcSize().value_or(CalcSize(widthDefault, heightDefault)), CalcSize(width, height));
+    EXPECT_EQ(property->GetIconBorderRadius().value_or(borderRadiusEmpty), borderRadiusSetted);
+    EXPECT_EQ(property->GetTextContent().value_or(""), CUSTOMIZE_TEXT);
+    EXPECT_EQ(property->GetStateEffect().value_or(true), false);
+    EXPECT_EQ(property->GetTipPosition().value_or(TipPosition::ABOVE_BOTTOM), TipPosition::BELOW_TOP);
+
+    std::optional<Dimension> topLeft(Dimension(3.0));
+    std::optional<Dimension> topRight(Dimension(3.0));
+    std::optional<Dimension> bottomLeft(Dimension(3.0));
+    std::optional<Dimension> bottomRight(Dimension(3.0));
+    sc.SetIconBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+    EXPECT_EQ(property->GetIconBorderRadius().value_or(borderRadiusEmpty), borderRadiusSetted);
+}
+
+/**
+ * @tc.name: SecurityComponentSavePropertyTest009
+ * @tc.desc: Test set security component property without customize permission
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest009, TestSize.Level1)
+{
+    CreateSecurityComponentNotFinish(0, 0, static_cast<int32_t>(ButtonType::CAPSULE),
+        V2::SAVE_BUTTON_ETS_TAG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateHasCustomPermissionForSecComp(false);
+    SaveButtonModelNG sc;
+    std::optional<NG::CalcLength> width(Dimension(15.0));
+    std::optional<NG::CalcLength> height(Dimension(15.0));
+    sc.SetIconSize(CalcSize(width, height));
+    sc.SetIconBorderRadius(Dimension(3.0));
+    sc.SetText(CUSTOMIZE_TEXT);
+    sc.SetStateEffect(false);
+    sc.SetTipPosition(TipPosition::BELOW_TOP);
+
+    NG::BorderRadiusProperty borderRadiusEmpty;
+    NG::BorderRadiusProperty borderRadiusSetted;
+    borderRadiusSetted.radiusTopLeft = Dimension(3.0);
+    borderRadiusSetted.radiusTopRight = Dimension(3.0);
+    borderRadiusSetted.radiusBottomLeft = Dimension(3.0);
+    borderRadiusSetted.radiusBottomRight = Dimension(3.0);
+    std::optional<NG::CalcLength> widthDefault(Dimension(16.0));
+    std::optional<NG::CalcLength> heightDefault(Dimension(16.0));
+    EXPECT_EQ(property->GetIconCalcSize().value_or(CalcSize(widthDefault, heightDefault)),
+        CalcSize(width, height));
+    EXPECT_EQ(property->GetIconBorderRadius().value_or(borderRadiusEmpty), borderRadiusEmpty);
+    EXPECT_EQ(property->GetTextContent().value_or(""), "");
+    EXPECT_EQ(property->GetStateEffect().value_or(true), true);
+    EXPECT_EQ(property->GetTipPosition().value_or(TipPosition::ABOVE_BOTTOM), TipPosition::ABOVE_BOTTOM);
+
+    std::optional<Dimension> topLeft(Dimension(3.0));
+    std::optional<Dimension> topRight(Dimension(3.0));
+    std::optional<Dimension> bottomLeft(Dimension(3.0));
+    std::optional<Dimension> bottomRight(Dimension(3.0));
+    sc.SetIconBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+    EXPECT_EQ(property->GetIconBorderRadius().value_or(borderRadiusEmpty), borderRadiusEmpty);
+}
+
+/**
+ * @tc.name: SecurityComponentSavePropertyTest010
+ * @tc.desc: Test set security component text without init text
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest010, TestSize.Level1)
+{
+    CreateSecurityComponentNotFinish(-1, 1, static_cast<int32_t>(ButtonType::CAPSULE),
+        V2::SAVE_BUTTON_ETS_TAG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateHasCustomPermissionForSecComp(true);
+    SaveButtonModelNG sc;
+    sc.SetText(CUSTOMIZE_TEXT);
+
+    EXPECT_EQ(property->GetTextContent().value_or(""), CUSTOMIZE_TEXT);
 }
 
 /**
@@ -1541,7 +1656,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest007, Te
     ASSERT_NE(frameNode, nullptr);
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     ASSERT_NE(property, nullptr);
-    EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 0.0);
+    EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 15.0);
 }
 
 /**

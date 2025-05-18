@@ -13,17 +13,18 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_paint_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #ifdef SECURITY_COMPONENT_ENABLE
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 #endif
 #include "core/components_ng/pattern/security_component/security_component_log.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components/common/layout/constants.h"
 #ifdef SECURITY_COMPONENT_ENABLE
 #include "pointer_event.h"
@@ -464,11 +465,25 @@ FocusPattern SecurityComponentPattern::GetFocusPattern() const
 void SecurityComponentPattern::UpdateIconProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& iconNode)
 {
     auto iconLayoutProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    auto iconRenderProperty = iconNode->GetPaintPropertyPtr<ImageRenderProperty>();
+    auto iconRenderContext = iconNode->GetRenderContext();
     auto scLayoutProp = scNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_VOID(scLayoutProp);
-    if (scLayoutProp->GetIconSize().has_value()) {
-        auto iconSize = scLayoutProp->GetIconSize().value();
-        iconLayoutProp->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(iconSize), NG::CalcLength(iconSize)));
+
+    if (scLayoutProp->GetImageSourceInfo().has_value()) {
+        iconLayoutProp->UpdateImageSourceInfo(scLayoutProp->GetImageSourceInfo().value());
+        auto host = GetHost();
+        auto* pipeline = host->GetContextWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto secCompTheme = pipeline->GetTheme<SecurityComponentTheme>();
+        iconLayoutProp->UpdateUserDefinedIdealSize(
+            CalcSize(NG::CalcLength(secCompTheme->GetIconSize()), std::nullopt));
+    }
+
+    if (scLayoutProp->GetIconBorderRadius().has_value()) {
+        iconRenderContext->UpdateBorderRadius(scLayoutProp->GetIconBorderRadius().value());
+        iconRenderProperty->UpdateNeedBorderRadius(true);
+        iconRenderProperty->UpdateBorderRadius(scLayoutProp->GetIconBorderRadius().value());
     }
 
     auto scPaintProp = scNode->GetPaintProperty<SecurityComponentPaintProperty>();
@@ -512,6 +527,9 @@ void SecurityComponentPattern::UpdateTextProperty(RefPtr<FrameNode>& scNode, Ref
     }
     if (scLayoutProp->GetFontWeight().has_value()) {
         textLayoutProp->UpdateFontWeight(scLayoutProp->GetFontWeight().value());
+    }
+    if (scLayoutProp->GetTextContent().has_value()) {
+        textLayoutProp->UpdateContent(scLayoutProp->GetTextContent().value());
     }
     if (scLayoutProp->GetFontFamily().has_value()) {
         textLayoutProp->UpdateFontFamily(scLayoutProp->GetFontFamily().value());
@@ -629,6 +647,12 @@ void SecurityComponentPattern::OnModifyDone()
     if (buttonNode != nullptr) {
         UpdateButtonProperty(frameNode, buttonNode);
         buttonNode->MarkModifyDone();
+    }
+
+    auto scLayoutProp = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    auto symbolIconNode = GetSecCompChildNode(frameNode, V2::SYMBOL_ETS_TAG);
+    if (((iconNode == nullptr) && (symbolIconNode == nullptr)) || (textNode == nullptr)) {
+        scLayoutProp->UpdateTextIconSpace(Dimension(0.0));
     }
 
     InitOnClick(frameNode, iconNode, textNode, buttonNode);

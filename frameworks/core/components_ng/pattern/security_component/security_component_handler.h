@@ -57,6 +57,7 @@ public:
     static bool IsSecurityComponentServiceExist();
     static bool LoadSecurityComponentService();
     static bool IsSystemAppCalling();
+    static bool HasCustomPermissionForSecComp();
 
 private:
     static bool CheckOpacity(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
@@ -141,7 +142,7 @@ private:
         RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, std::string& message);
     static bool IsSecComponentClipped(RefPtr<FrameNode>& parentNode, RectF& visibleRect, const RectF& frameRect,
         OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
-    static bool CheckSecurityComponentTextLimits(const RefPtr<FrameNode>& node, std::string& message);
+    static void CheckSecurityComponentClickEvent(const RefPtr<FrameNode>& node, std::string& message);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_HANDLER_H

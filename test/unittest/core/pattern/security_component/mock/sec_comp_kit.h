@@ -112,6 +112,11 @@ public:
     {
         return false;
     };
+
+    static bool HasCustomPermissionForSecComp()
+    {
+        return true;
+    };
 };
 }  // namespace SecurityComponent
 }  // namespace Security

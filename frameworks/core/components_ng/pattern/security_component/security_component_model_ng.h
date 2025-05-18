@@ -18,6 +18,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/pattern/security_component/save_button/save_button_common.h"
 #include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components/common/layout/constants.h"
@@ -43,14 +44,23 @@ public:
         SecurityComponentElementStyle& style,
         const std::function<RefPtr<Pattern>(void)>& patternCreator, bool isArkuiComponent);
     static void SetIconSize(const Dimension& value);
+    static void SetIconSize(const NG::CalcSize& value);
     static void SetSymbolIconSize(const Dimension& value);
     static void SetIconColor(const Color& value);
+    static void SetIconBorderRadius(const Dimension& value);
+    static void SetIconBorderRadius(const std::optional<Dimension>& topLeft,
+        const std::optional<Dimension>& topRight, const std::optional<Dimension>& bottomLeft,
+        const std::optional<Dimension>& bottomRight);
+    static void SetIcon(const ImageSourceInfo& value);
+    static void SetText(const std::string& value);
     static void SetSymbolIconColor(const std::vector<Color>& value);
     static void SetFontSize(const Dimension& value);
     static void SetFontStyle(const Ace::FontStyle& value);
     static void SetFontWeight(const FontWeight& value);
     static void SetFontFamily(const std::vector<std::string>& fontFamilies);
     static void SetFontColor(const Color& value);
+    static void SetStateEffect(const bool& value);
+    static void SetTipPosition(const TipPosition& value);
     static void SetBackgroundColor(const Color& value);
     static void SetBackgroundBorderWidth(const Dimension& value);
     static void SetBackgroundBorderColor(const Color& value);
