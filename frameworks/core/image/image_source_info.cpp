@@ -22,7 +22,6 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr uint32_t FILE_SUFFIX_LEN = 4;
-constexpr uint32_t APNG_FILE_SUFFIX_LEN = 5;
 constexpr uint32_t MAX_BASE64_LENGTH = 50; // prevent the Base64 image format from too long.
 
 bool CheckSvgExtension(const std::string& src)
@@ -51,24 +50,6 @@ bool ImageSourceInfo::IsSVGSource(const std::string& src, SrcType srcType, Inter
     }
     return (src.empty() && resourceId > InternalResource::ResourceId::SVG_START &&
             resourceId < InternalResource::ResourceId::SVG_END);
-}
-
-bool ImageSourceInfo::IsPngSource(const std::string& src, InternalResource::ResourceId resourceId)
-{
-    // 4 is the length of ".png" or is .apng
-    if (!src.empty()) {
-        std::string head = src.size() > APNG_FILE_SUFFIX_LEN
-                               ? src.substr(src.size() - APNG_FILE_SUFFIX_LEN, APNG_FILE_SUFFIX_LEN)
-                           : src.size() == 4 ? src.substr(src.size() - FILE_SUFFIX_LEN, FILE_SUFFIX_LEN)
-                                             : "";
-        std::transform(head.begin(), head.end(), head.begin(), [](unsigned char c) { return std::tolower(c); });
-
-        return (head.size() > FILE_SUFFIX_LEN && head.substr(head.size() - FILE_SUFFIX_LEN) == ".png") ||
-               (head.size() > APNG_FILE_SUFFIX_LEN && head.substr(head.size() - APNG_FILE_SUFFIX_LEN) == ".apng");
-    } else if (resourceId < InternalResource::ResourceId::SVG_START) {
-        return true;
-    }
-    return false;
 }
 
 bool ImageSourceInfo::IsValidBase64Head(const std::string& uri, const std::string& pattern)
@@ -140,8 +121,7 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
 ImageSourceInfo::ImageSourceInfo(std::string imageSrc, std::string bundleName, std::string moduleName, Dimension width,
     Dimension height, InternalResource::ResourceId resourceId, const RefPtr<PixelMap>& pixmap)
     : src_(std::move(imageSrc)), bundleName_(std::move(bundleName)), moduleName_(std::move(moduleName)),
-      sourceWidth_(width), sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap),
-      isPng_(IsPngSource(src_, resourceId_)), srcType_(ResolveSrcType())
+      sourceWidth_(width), sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap), srcType_(ResolveSrcType())
 {
     isSvg_ = IsSVGSource(src_, srcType_, resourceId_);
     // count how many source set.
@@ -172,8 +152,7 @@ ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<std::string>& imageSrc, s
     std::string moduleName, Dimension width, Dimension height, InternalResource::ResourceId resourceId,
     const RefPtr<PixelMap>& pixmap)
     : srcRef_(imageSrc), bundleName_(std::move(bundleName)), moduleName_(std::move(moduleName)), sourceWidth_(width),
-      sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap), isPng_(IsPngSource(*srcRef_, resourceId_)),
-      srcType_(ResolveSrcType())
+      sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap), srcType_(ResolveSrcType())
 {
     // count how many source set.
     int32_t count = 0;
@@ -322,11 +301,6 @@ bool ImageSourceInfo::IsValid() const
     auto& src = GetSrc();
     return (src.empty() && resourceId_ != InternalResource::ResourceId::NO_ID) ||
            (!src.empty() && resourceId_ == InternalResource::ResourceId::NO_ID) || pixmap_;
-}
-
-bool ImageSourceInfo::IsPng() const
-{
-    return isPng_;
 }
 
 bool ImageSourceInfo::IsSvg() const
