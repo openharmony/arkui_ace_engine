@@ -51,6 +51,7 @@ public:
     void SetTextIndent(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
     void SetLineSpacing(const Dimension& value) override;
+    void SetIsOnlyBetweenLines(bool isOnlyBetweenLines) override;
     void SetTextDecoration(TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(TextDecorationStyle value) override;

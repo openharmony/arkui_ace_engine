@@ -12904,7 +12904,7 @@ class TextLineSpacingModifier extends ModifierWithKey {
       getUINativeModule().text.resetLineSpacing(node);
     }
     else {
-      getUINativeModule().text.setLineSpacing(node, this.value);
+      getUINativeModule().text.setLineSpacing(node, this.value.value, this.value.onlyBetweenLines);
     }
   }
   checkObjectDiff() {
@@ -13483,8 +13483,11 @@ class ArkTextComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextLetterSpacingModifier.identity, TextLetterSpacingModifier, value);
     return this;
   }
-  lineSpacing(value) {
-    modifierWithKey(this._modifiersWithKeys, TextLineSpacingModifier.identity, TextLineSpacingModifier, value);
+  lineSpacing(value, options) {
+    let arkLineSpacing = new ArkLineSpacing();
+    arkLineSpacing.value = value;
+    arkLineSpacing.onlyBetweenLines = options?.onlyBetweenLines;
+    modifierWithKey(this._modifiersWithKeys, TextLineSpacingModifier.identity, TextLineSpacingModifier, arkLineSpacing);
     return this;
   }
   textCase(value) {
@@ -13690,7 +13693,7 @@ class TextAreaLineSpacingModifier extends ModifierWithKey {
       getUINativeModule().textArea.resetLineSpacing(node);
     }
     else {
-      getUINativeModule().textArea.setLineSpacing(node, this.value);
+      getUINativeModule().textArea.setLineSpacing(node, this.value.value, this.value.onlyBetweenLines);
     }
   }
   checkObjectDiff() {
@@ -15072,8 +15075,12 @@ class ArkTextAreaComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextAreaLetterSpacingModifier.identity, TextAreaLetterSpacingModifier, value);
     return this;
   }
-  lineSpacing(value) {
-    modifierWithKey(this._modifiersWithKeys, TextAreaLineSpacingModifier.identity, TextAreaLineSpacingModifier, value);
+  lineSpacing(value, options) {
+    let arkLineSpacing = new ArkLineSpacing();
+    arkLineSpacing.value = value;
+    arkLineSpacing.onlyBetweenLines = options?.onlyBetweenLines;
+    modifierWithKey(this._modifiersWithKeys, TextAreaLineSpacingModifier.identity, TextAreaLineSpacingModifier,
+      arkLineSpacing);
     return this;
   }
   lineHeight(value) {
@@ -18873,6 +18880,20 @@ class ArkTextFont {
       this.value === another.value &&
       this.enableVariableFontWeight === another.enableVariableFontWeight
     );
+  }
+
+  checkObjectDiff(another) {
+    return !this.isEqual(another);
+  }
+}
+
+class ArkLineSpacing {
+  constructor() {
+    this.value = undefined;
+    this.onlyBetweenLines = undefined;
+  }
+  isEqual(another) {
+    return (this.value === another.value) && (this.onlyBetweenLines === another.onlyBetweenLines);
   }
 
   checkObjectDiff(another) {

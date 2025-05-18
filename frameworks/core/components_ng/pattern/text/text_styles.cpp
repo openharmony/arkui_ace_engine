@@ -104,6 +104,7 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, WordBreak, WordBreak);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, EllipsisMode, EllipsisMode);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineBreakStrategy, LineBreakStrategy);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, IsOnlyBetweenLines, IsOnlyBetweenLines);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, ParagraphSpacing, ParagraphSpacing);
 }
 
@@ -162,6 +163,7 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(textLineStyle, WordBreak, SetWordBreak);
         UPDATE_TEXT_STYLE(textLineStyle, EllipsisMode, SetEllipsisMode);
         UPDATE_TEXT_STYLE(textLineStyle, LineBreakStrategy, SetLineBreakStrategy);
+        UPDATE_TEXT_STYLE(textLineStyle, IsOnlyBetweenLines, SetIsOnlyBetweenLines);
         UPDATE_TEXT_STYLE(textLineStyle, ParagraphSpacing, SetParagraphSpacing);
     }
 }

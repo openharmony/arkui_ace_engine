@@ -1951,7 +1951,7 @@ HWTEST_F(TextTestThreeNg, TextModelNgProperty001, TestSize.Level1)
     TextModelNG::SetTextDecorationStyle(node, TextDecorationStyle::SOLID);
     TextModelNG::SetTextCase(node, TextCase::UPPERCASE);
     TextModelNG::SetMaxLines(node, 10); // 10 means maxlines.
-    TextModelNG::SetLineSpacing(node, ADAPT_LINE_SPACING_VALUE);
+    TextModelNG::SetLineSpacing(node, ADAPT_LINE_SPACING_VALUE, true);
 
     /**
      * @tc.steps: step2. test property.
@@ -1970,6 +1970,7 @@ HWTEST_F(TextTestThreeNg, TextModelNgProperty001, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetTextCase().value(), TextCase::UPPERCASE);
     EXPECT_EQ(layoutProperty->GetMaxLines().value(), 10);
     EXPECT_EQ(layoutProperty->GetLineSpacing().value(), ADAPT_LINE_SPACING_VALUE);
+    EXPECT_EQ(layoutProperty->GetIsOnlyBetweenLines().value(), true);
 }
 
 /**

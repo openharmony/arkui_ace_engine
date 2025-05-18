@@ -1655,6 +1655,19 @@ class ArkTextFont {
   }
 }
 
+class ArkLineSpacing {
+  value: LengthMetrics;
+  onlyBetweenLines: boolean;
+  constructor() {
+    this.value = undefined;
+    this.onlyBetweenLines = undefined;
+  }
+  isEqual(another: ArkLineSpacing): boolean {
+    return this.value === another.value &&
+      this.onlyBetweenLines === another.onlyBetweenLines;
+  }
+}
+
 class ArkFontWeight {
   value: number | FontWeight | string;
   enableVariableFontWeight: boolean;

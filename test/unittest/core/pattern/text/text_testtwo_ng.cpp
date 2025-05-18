@@ -1114,6 +1114,7 @@ HWTEST_F(TextTestTwoNg, UpdateChildProperty001, TestSize.Level1)
     testProperty.lineHeightValue = std::make_optional(LINE_HEIGHT_VALUE);
     testProperty.fontFamilyValue = std::make_optional(FONT_FAMILY_VALUE);
     testProperty.lineSpacingValue = std::make_optional(LINE_SPACING_VALUE);
+    testProperty.isOnlyBetweenLines = std::make_optional(true);
     /**
      * @tc.steps: step1. create text FrameNode and SpanNode, Update parent FrameNode properties
      * @tc.expected: Successfully created parent Node and child Node
@@ -1169,6 +1170,7 @@ HWTEST_F(TextTestTwoNg, UpdateChildProperty001, TestSize.Level1)
         EXPECT_EQ(spanTextStyle.GetLineHeight(), LINE_HEIGHT_VALUE);
         EXPECT_EQ(spanTextStyle.GetFontFamilies(), FONT_FAMILY_VALUE);
         EXPECT_EQ(spanTextStyle.GetLineSpacing(), LINE_SPACING_VALUE);
+        EXPECT_EQ(spanTextStyle.GetIsOnlyBetweenLines(), true);
     }
 }
 

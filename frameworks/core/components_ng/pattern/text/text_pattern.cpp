@@ -4413,6 +4413,7 @@ void TextPattern::DumpTextStyleInfo2()
                                         : "Na")
                             .append(std::string(" FontStyle: "))
                             .append(StringUtils::ToString(textStyle_->GetFontStyle())));
+        auto hasIsOnlyBetweenLines = (textLayoutProp->GetIsOnlyBetweenLinesValue(false)) ? "true" : "false";
         dumpLog.AddDesc(
             std::string("LineHeight: ")
                 .append(textStyle_->GetLineHeight().ToString())
@@ -4425,7 +4426,12 @@ void TextPattern::DumpTextStyleInfo2()
                 .append(" pro: ")
                 .append(textLayoutProp->HasLineSpacing()
                             ? textLayoutProp->GetLineSpacingValue(Dimension(0.0, DimensionUnit::FP)).ToString()
-                            : "Na"));
+                            : "Na")
+                .append(" isOnlyBetweenLines: ")
+                .append((textStyle_->GetIsOnlyBetweenLines()) ? "true" : "false")
+                .append(" pro: ")
+                .append(textLayoutProp->HasIsOnlyBetweenLines() ? hasIsOnlyBetweenLines : "Na"));
+
     }
 }
 
@@ -5809,6 +5815,7 @@ void TextPattern::SetTextStyleDumpInfo(std::unique_ptr<JsonValue>& json)
         json->Put("FontStyle", StringUtils::ToString(textStyle_->GetFontStyle()).c_str());
         json->Put("LineHeight", textStyle_->GetLineHeight().ToString().c_str());
         json->Put("LineSpacing", textStyle_->GetLineSpacing().ToString().c_str());
+        json->Put("isOnlyBetweenLines", (textStyle_->GetIsOnlyBetweenLines()) ? "true" : "false");
         json->Put("BaselineOffset", textStyle_->GetBaselineOffset().ToString().c_str());
         json->Put("TextIndent", textStyle_->GetTextIndent().ToString().c_str());
         json->Put("LetterSpacing", textStyle_->GetLetterSpacing().ToString().c_str());

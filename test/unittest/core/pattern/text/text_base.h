@@ -163,6 +163,7 @@ struct TestProperty {
     std::optional<uint32_t> maxLinesValue = std::nullopt;
     std::optional<Dimension> lineHeightValue = std::nullopt;
     std::optional<Dimension> lineSpacingValue = std::nullopt;
+    std::optional<bool> isOnlyBetweenLines = std::nullopt;
     std::optional<Ace::TextDecoration> textDecorationValue = std::nullopt;
     std::optional<Color> textDecorationColorValue = std::nullopt;
     std::optional<Dimension> baselineOffsetValue = std::nullopt;

@@ -3206,9 +3206,11 @@ HWTEST_F(TextTestFiveNg, UseSelfStyle002, TestSize.Level1)
     textLineStyle->UpdateTextIndent(Dimension(40, DimensionUnit::PX));
     textLineStyle->UpdateWordBreak(WordBreak::NORMAL);
     textLineStyle->UpdateEllipsisMode(EllipsisMode::HEAD);
+    textLineStyle->UpdateIsOnlyBetweenLines(true);
 
     UseSelfStyle(nullptr, textLineStyle, textStyle);
     EXPECT_EQ(textStyle.GetLineSpacing(), Dimension(1.0, DimensionUnit::PX));
+    EXPECT_EQ(textStyle.GetIsOnlyBetweenLines(), true);
 }
 
 /**
