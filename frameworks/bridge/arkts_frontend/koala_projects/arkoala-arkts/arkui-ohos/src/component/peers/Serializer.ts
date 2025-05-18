@@ -19119,7 +19119,7 @@ export class Serializer extends SerializerBase {
                 const value_color_value_0  = value_color_value as EdgeColors
                 valueSerializer.writeEdgeColors(value_color_value_0)
             }
-            else if ((TypeChecker.isColor(value_color_value)) || (RuntimeType.NUMBER == value_color_value_type) || (RuntimeType.STRING == value_color_value_type) || (RuntimeType.OBJECT == value_color_value_type)) {
+            else if ((TypeChecker.isColor(value_color_value)) || (RuntimeType.NUMBER == value_color_value_type) || (RuntimeType.STRING == value_color_value_type) || (RuntimeType.OBJECT == value_color_value_type && (TypeChecker.isResource(value_color_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_color_value_1  = value_color_value as ResourceColor
                 let value_color_value_1_type : int32 = RuntimeType.UNDEFINED
