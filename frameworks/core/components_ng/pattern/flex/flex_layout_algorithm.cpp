@@ -313,7 +313,7 @@ bool FlexLayoutAlgorithm::AddElementIntoLayoutPolicyChildren(LayoutWrapper* layo
     CHECK_NULL_RETURN(childLayoutProperty, false);
     auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
     CHECK_NULL_RETURN(layoutPolicy, false);
-    if (!layoutPolicy.value().isMatch()) {
+    if (!layoutPolicy.value().IsMatch()) {
         return false;
     }
     layoutPolicyChildren_.emplace_back(child);
