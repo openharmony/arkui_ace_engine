@@ -408,6 +408,8 @@ public:
 
     void ReverseLayoutedItemInfo(int32_t totalItemCount, float mainSize);
 
+    void ResetLayoutItem(LayoutWrapper* layoutWrapper);
+
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
