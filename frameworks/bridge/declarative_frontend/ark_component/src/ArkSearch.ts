@@ -805,6 +805,42 @@ class SearchEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class SearchStrokeWidthModifier extends ModifierWithKey<LengthMetrics> {
+  constructor(value: LengthMetrics) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchStrokeWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetStrokeWidth(node);
+    } else if (!isObject(this.value)) {
+      getUINativeModule().textArea.resetStrokeWidth(node);
+    } else {
+      getUINativeModule().textArea.setStrokeWidth(node, this.value.value, this.value.unit);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SearchStrokeColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchStrokeColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetStrokeColor(node);
+    } else {
+      getUINativeModule().search.setStrokeColor(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 interface SearchParam {
   value?: ResourceStr;
   placeholder?: ResourceStr;
@@ -1048,6 +1084,14 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   }
   enableHapticFeedback(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, SearchEnableHapticFeedbackModifier.identity, SearchEnableHapticFeedbackModifier, value);
+    return this;
+  }
+  strokeWidth(value: LengthMetrics):this {
+    modifierWithKey(this._modifiersWithKeys, SearchStrokeWidthModifier.identity, SearchStrokeWidthModifier, value);
+    return this;
+  }
+  strokeColor(value: ResourceColor):this {
+    modifierWithKey(this._modifiersWithKeys, SearchStrokeColorModifier.identity, SearchStrokeColorModifier, value);
     return this;
   }
 }

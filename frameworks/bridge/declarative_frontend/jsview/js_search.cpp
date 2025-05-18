@@ -135,6 +135,8 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("type", &JSSearch::SetType);
     JSClass<JSSearch>::StaticMethod("dragPreviewOptions", &JSSearch::SetDragPreviewOptions);
     JSClass<JSSearch>::StaticMethod("editMenuOptions", &JSSearch::EditMenuOptions);
+    JSClass<JSSearch>::StaticMethod("strokeWidth", &JSSearch::SetStrokeWidth);
+    JSClass<JSSearch>::StaticMethod("strokeColor", &JSSearch::SetStrokeColor);
     JSBindMore();
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -1512,5 +1514,30 @@ void JSSearch::SetOnWillChange(const JSCallbackInfo& info)
         return true;
     };
     SearchModel::GetInstance()->SetOnWillChangeEvent(std::move(onWillChange));
+}
+
+void JSSearch::SetStrokeWidth(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    CalcDimension value;
+    if (!ParseLengthMetricsToDimension(info[0], value)) {
+        value.Reset();
+    }
+    SearchModel::GetInstance()->SetStrokeWidth(value);
+}
+
+void JSSearch::SetStrokeColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color strokeColor;
+    if (!ParseJsColor(info[0], strokeColor)) {
+        SearchModel::GetInstance()->ResetStrokeColor();
+        return;
+    }
+    SearchModel::GetInstance()->SetStrokeColor(strokeColor);
 }
 } // namespace OHOS::Ace::Framework

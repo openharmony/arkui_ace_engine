@@ -137,6 +137,9 @@ public:
     void SetEnableHapticFeedback(bool state) override;
     void SetStopBackPress(bool isStopBackPress) override;
     void SetKeyboardAppearance(KeyboardAppearance value) override;
+    void SetStrokeWidth(const Dimension& value) override;
+    void SetStrokeColor(const Color& value) override;
+    void ResetStrokeColor() override;
 
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
@@ -317,6 +320,11 @@ public:
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
     static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
     static int32_t GetKeyboardAppearance(FrameNode* frameNode);
+    static Dimension GetStrokeWidth(FrameNode* frameNode);
+    static Color GetStrokeColor(FrameNode* frameNode);
+    static void SetStrokeWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetStrokeColor(FrameNode* frameNode, const Color& value);
+    static void ResetStrokeColor(FrameNode* frameNode);
 
 private:
     void AddDragFrameNodeToManager() const;

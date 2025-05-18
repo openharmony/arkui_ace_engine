@@ -502,6 +502,8 @@ declare class ArkSearchComponent extends ArkComponent implements CommonMethod<Se
     copyOption(value: CopyOptions): SearchAttribute;
     textAlign(value: TextAlign): SearchAttribute;
     height(value: Length): this;
+    strokeWidth(value: LengthMetrics): SearchAttribute;
+    strokeColor(valeu: ResourceColor): SearchAttribute;
 }
 declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     _changed: boolean;
@@ -796,6 +798,8 @@ declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<
     maxLines(value: number): TextAreaAttribute;
     customKeyboard(value: CustomBuilder): TextAreaAttribute;
     ellipsisMode(value: EllipsisMode): TextAreaAttribute;
+    strokeWidth(value: LengthMetrics): TextAreaAttribute;
+    strokeColor(value: ResourceColor): TextAreaAttribute;
 }
 declare class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -846,6 +850,8 @@ declare class ArkTextInputComponent extends ArkComponent implements CommonMethod
     maxLines(value: number): TextInputAttribute;
     customKeyboard(event: () => void): TextInputAttribute;
     ellipsisMode(value: EllipsisMode): TextInputAttribute;
+    strokeWidth(value: LengthMetrics): TextInputAttribute;
+    strokeColor(value: ResourceColor): TextInputAttribute;
 }
 declare class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
