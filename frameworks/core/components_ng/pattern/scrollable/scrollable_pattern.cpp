@@ -565,11 +565,11 @@ void ScrollablePattern::AddScrollEvent()
             const std::list<RefPtr<NGGestureRecognizer>>& activeRecognizers) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->OnTouchTestDoneCallback(baseGestureEvent, activeRecognizers);
+            pattern->OnTouchTestDone(baseGestureEvent, activeRecognizers);
         });
 }
 
-void ScrollablePattern::OnTouchTestDoneCallback(const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,
+void ScrollablePattern::OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,
     const std::list<RefPtr<NGGestureRecognizer>>& activeRecognizers)
 {
     CHECK_NULL_VOID(scrollableEvent_);

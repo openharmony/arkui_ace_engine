@@ -966,7 +966,7 @@ private:
     void OnAttachToFrameNode() override;
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void RegisterWindowStateChangedCallback();
-    void OnTouchTestDoneCallback(const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,
+    void OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,
         const std::list<RefPtr<NGGestureRecognizer>>& activeRecognizers);
 
     // select with mouse
