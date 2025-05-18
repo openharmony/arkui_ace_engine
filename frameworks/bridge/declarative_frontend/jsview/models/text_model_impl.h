@@ -80,6 +80,7 @@ public:
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void SetHalfLeading(bool halfLeading) override;
     void SetEnableHapticFeedback(bool state) override {};
+    void SetLineThicknessScale(float value) override {};
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

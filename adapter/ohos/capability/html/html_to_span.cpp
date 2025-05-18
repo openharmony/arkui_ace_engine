@@ -1065,8 +1065,8 @@ RefPtr<SpanBase> HtmlToSpan::MakeDecorationSpan(const SpanInfo& info, StyleValue
 {
     auto style = Get<DecorationSpanParam>(&value);
     if (style != nullptr) {
-        return AceType::MakeRefPtr<DecorationSpan>(
-            style->decorationType, style->color, style->decorationSytle, info.start, info.end);
+        return AceType::MakeRefPtr<DecorationSpan>(style->decorationType, style->color,
+            style->decorationSytle, 1.0f, info.start, info.end);
     }
 
     return nullptr;

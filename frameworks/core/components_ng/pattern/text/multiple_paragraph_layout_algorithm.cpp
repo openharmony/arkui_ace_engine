@@ -99,6 +99,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     }
     UpdateFontFamilyWithSymbol(textStyle, fontFamilies, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
     UpdateSymbolStyle(textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
+    auto lineThicknessScale = textLayoutProperty->GetLineThicknessScale().value_or(1.0f);
+    textStyle.SetLineThicknessScale(lineThicknessScale);
     auto textColor = textLayoutProperty->GetTextColorValue(textTheme->GetTextStyle().GetTextColor());
     if (contentModifier) {
         if (textLayoutProperty->GetIsAnimationNeededValue(true)) {
@@ -109,8 +111,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     }
     textStyle.SetHalfLeading(textLayoutProperty->GetHalfLeadingValue(pipeline->GetHalfLeading()));
     SetAdaptFontSizeStepToTextStyle(textStyle, textLayoutProperty->GetAdaptFontSizeStep());
-    // Register callback for fonts.
-    FontRegisterCallback(frameNode, textStyle);
+    FontRegisterCallback(frameNode, textStyle); // Register callback for fonts.
     textStyle.SetTextDirection(GetTextDirection(content, layoutWrapper));
     textStyle.SetLocale(Localization::GetInstance()->GetFontLocale());
     UpdateTextColorIfForeground(frameNode, textStyle, textColor);

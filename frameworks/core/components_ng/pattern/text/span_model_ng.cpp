@@ -166,6 +166,11 @@ void SpanModelNG::SetTextDecorationColor(const Color& value)
     ACE_UPDATE_SPAN_PROPERTY(TextDecorationColor, value);
 }
 
+void SpanModelNG::SetLineThicknessScale(float value)
+{
+    ACE_UPDATE_SPAN_PROPERTY(LineThicknessScale, value);
+}
+
 void SpanModelNG::SetTextCase(Ace::TextCase value)
 {
     ACE_UPDATE_SPAN_PROPERTY(TextCase, value);
@@ -393,6 +398,18 @@ void SpanModelNG::SetTextDecorationColor(UINode* uiNode, const Color& value)
 void SpanModelNG::ResetTextDecorationColor(UINode *uiNode)
 {
     ACE_RESET_NODE_SPAN_PROPERTY(TextDecorationColor, uiNode);
+}
+
+void SpanModelNG::SetLineThicknessScale(UINode *uiNode, float value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateLineThicknessScale(value);
+}
+
+void SpanModelNG::ResetLineThicknessScale(UINode* uiNode)
+{
+    ACE_RESET_NODE_SPAN_PROPERTY(LineThicknessScale, uiNode);
 }
 
 void SpanModelNG::SetTextColor(UINode* uiNode, const Color& value)

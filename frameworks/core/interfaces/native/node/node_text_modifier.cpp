@@ -343,13 +343,20 @@ void ResetTextTextOverflow(ArkUINodeHandle node)
     TextModelNG::SetTextOverflow(frameNode, TextOverflow::NONE);
 }
 
-void SetTextDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style)
+void SetTextDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration,
+    ArkUI_Uint32 color, ArkUI_Int32 style, ArkUI_Float32 lineThicknessScale = 1.0f)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetTextDecoration(frameNode, static_cast<TextDecoration>(decoration));
     TextModelNG::SetTextDecorationColor(frameNode, Color(color));
     TextModelNG::SetTextDecorationStyle(frameNode, static_cast<TextDecorationStyle>(style));
+    TextModelNG::SetLineThicknessScale(frameNode, lineThicknessScale);
+}
+
+void SetTextDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style)
+{
+    SetTextDecoration(node, decoration, color, style, 1.0f); // make cj happy
 }
 
 void GetTextDecoration(ArkUINodeHandle node, ArkUITextDecorationType* decoration)

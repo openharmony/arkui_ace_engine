@@ -56,6 +56,7 @@ std::string GetDeclaration(const std::optional<Color>& color, const std::optiona
             .c_str());
     return jsonSpanDeclaration->ToString();
 }
+
 inline std::unique_ptr<JsonValue> ConvertShadowToJson(const Shadow& shadow)
 {
     auto jsonShadow = JsonUtil::Create(true);
@@ -469,6 +470,7 @@ void SpanItem::UpdateReLayoutTextStyle(
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecoration, TextDecoration);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecorationColor, TextDecorationColor);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecorationStyle, TextDecorationStyle);
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, LineThicknessScale, LineThicknessScale);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextCase, TextCase);
 
     UPDATE_SPAN_TEXT_STYLE(fontStyle, VariableFontWeight, VariableFontWeight);
@@ -819,6 +821,7 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
     COPY_TEXT_STYLE(fontStyle, TextDecoration, UpdateTextDecoration);
     COPY_TEXT_STYLE(fontStyle, TextDecorationColor, UpdateTextDecorationColor);
     COPY_TEXT_STYLE(fontStyle, TextDecorationStyle, UpdateTextDecorationStyle);
+    COPY_TEXT_STYLE(fontStyle, LineThicknessScale, UpdateLineThicknessScale);
     COPY_TEXT_STYLE(fontStyle, TextCase, UpdateTextCase);
     COPY_TEXT_STYLE(fontStyle, AdaptMinFontSize, UpdateAdaptMinFontSize);
     COPY_TEXT_STYLE(fontStyle, AdaptMaxFontSize, UpdateAdaptMaxFontSize);
@@ -921,6 +924,8 @@ void SpanItem::EncodeFontStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TLV_INHERIT(fontStyle, AdaptMinFontSize, TLV_SPAN_FONT_STYLE_ADPATMINFONTSIZE, Dimension, AdaptMinFontSize);
     WRITE_TLV_INHERIT(fontStyle, AdaptMaxFontSize, TLV_SPAN_FONT_STYLE_ADPATMAXFONTSIZE, Dimension, AdaptMaxFontSize);
     WRITE_TLV_INHERIT(fontStyle, LetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension, LetterSpacing);
+    WRITE_TLV_INHERIT(fontStyle, LineThicknessScale, TLV_SPAN_FONT_STYLE_LineThicknessScale, Float,
+        LineThicknessScale);
 }
 
 void SpanItem::EncodeTextLineStyleTlv(std::vector<uint8_t>& buff) const
@@ -974,6 +979,7 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             READ_TEXT_STYLE_TLV(fontStyle, UpdateAdaptMinFontSize, TLV_SPAN_FONT_STYLE_ADPATMINFONTSIZE, Dimension);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateAdaptMaxFontSize, TLV_SPAN_FONT_STYLE_ADPATMAXFONTSIZE, Dimension);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateLetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateLineThicknessScale, TLV_SPAN_FONT_STYLE_LineThicknessScale, Float);
 
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateLineHeight, TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHT, Dimension);
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateLineSpacing, TLV_SPAN_TEXT_LINE_STYLE_LINESPACING, Dimension);
