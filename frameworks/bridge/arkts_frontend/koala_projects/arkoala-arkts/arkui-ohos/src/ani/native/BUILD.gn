@@ -28,9 +28,11 @@ ohos_shared_library("arkoala_native_ani") {
     "custom_node/",
     "web/",
     "content_slot/",
+    "drag_and_drop/",
   ]
 
   sources = [
+    "ani_utils.cpp",
     "common/common_module.cpp",
     "load.cpp",
     "module.cpp",
@@ -38,6 +40,7 @@ ohos_shared_library("arkoala_native_ani") {
     "web/web_module_methods.cpp",
     "utils/convert_utils.cpp",
     "content_slot/content_slot_module.cpp",
+    "drag_and_drop/native_drag_drop_global.cpp",
   ]
 
   external_deps = [

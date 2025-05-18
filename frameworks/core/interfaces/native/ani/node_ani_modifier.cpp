@@ -17,7 +17,11 @@
 #include "content_slot_ani_modifier.h"
 #include "image_ani_modifier.h"
 #include "web_ani_modifier.h"
+<<<<<<< HEAD
 #include "custom_node_ani_modifier.h"
+=======
+#include "drag_ani_modifier.h"
+>>>>>>> 1ee0a71787 (fix onDragStart)
 
 extern "C" {
 const ArkUIAniModifiers* GetArkUIAniModifiers()
@@ -26,6 +30,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .version = ARKUI_ANI_API_VERSION,
         .getImageAniModifier = OHOS::Ace::NG::GetImageAniModifier,
         .getWebAniModifier = OHOS::Ace::NG::GetWebAniModifier,
+        .getDragAniModifier = OHOS::Ace::NG::GetDragAniModifier,
         .getCommonAniModifier = OHOS::Ace::NG::GetCommonAniModifier,
         .getCustomNodeAniModifier = OHOS::Ace::NG::GetCustomNodeAniModifier,
         .getContentSlotAniModifier = OHOS::Ace::NG::GetContentSlotAniModifier,

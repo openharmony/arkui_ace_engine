@@ -16,7 +16,7 @@
 #pragma once
 
 #include "core/gestures/drag_event.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
 struct DragEventPeer {
     virtual ~DragEventPeer() = default;

@@ -1251,6 +1251,8 @@ typedef struct Callback_OnDataResubmittedEvent_Void Callback_OnDataResubmittedEv
 typedef struct Opt_Callback_OnDataResubmittedEvent_Void Opt_Callback_OnDataResubmittedEvent_Void;
 typedef struct Callback_OnDownloadStartEvent_Void Callback_OnDownloadStartEvent_Void;
 typedef struct Opt_Callback_OnDownloadStartEvent_Void Opt_Callback_OnDownloadStartEvent_Void;
+typedef struct Callback_onDragStart Callback_onDragStart;
+typedef struct Opt_Callback_onDragStart Opt_Callback_onDragStart;
 typedef struct Callback_OnErrorReceiveEvent_Void Callback_OnErrorReceiveEvent_Void;
 typedef struct Opt_Callback_OnErrorReceiveEvent_Void Opt_Callback_OnErrorReceiveEvent_Void;
 typedef struct Callback_OnFaviconReceivedEvent_Void Callback_OnFaviconReceivedEvent_Void;
@@ -9898,6 +9900,16 @@ typedef struct Opt_Callback_OnDownloadStartEvent_Void {
     Ark_Tag tag;
     Callback_OnDownloadStartEvent_Void value;
 } Opt_Callback_OnDownloadStartEvent_Void;
+typedef struct Callback_onDragStart {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_NativePointer node, const Ark_DragEvent dragEvent, const Ark_String extraParam);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer node, const Ark_DragEvent dragEvent, const Ark_String extraParam);
+} Callback_onDragStart;
+typedef struct Opt_Callback_onDragStart {
+    Ark_Tag tag;
+    Callback_onDragStart value;
+} Opt_Callback_onDragStart;
 typedef struct Callback_OnErrorReceiveEvent_Void {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_OnErrorReceiveEvent parameter);
@@ -23723,6 +23735,11 @@ typedef struct GENERATED_ArkUIUIContextAccessor {
     Ark_Number (*getMaxFontScale)(Ark_UIContext peer);
 } GENERATED_ArkUIUIContextAccessor;
 
+typedef struct GENERATED_ArkUIDragDropOpsAccessor {
+    void (*registerOnDragStart)(Ark_NativePointer node,
+                                const Callback_onDragStart* onDragStart);
+} GENERATED_ArkUIDragDropOpsAccessor;
+
 typedef struct GENERATED_ArkUIStateStylesOpsAccessor {
     void (*onStateStyleChange)(Ark_NativePointer node,
                                const Callback_StateStylesChange* stateStyleChange);
@@ -27138,6 +27155,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIRestrictedWorkerAccessor* (*getRestrictedWorkerAccessor)();
     const GENERATED_ArkUIUIContextAccessor* (*getUIContextAccessor)();
     const GENERATED_ArkUIStateStylesOpsAccessor* (*getStateStylesOpsAccessor)();
+    const GENERATED_ArkUIDragDropOpsAccessor* (*getDragDropOpsAccessor)();
     const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* (*getUIContextAtomicServiceBarAccessor)();
     const GENERATED_ArkUIUIContextDispatchKeyEventAccessor* (*getUIContextDispatchKeyEventAccessor)();
     const GENERATED_ArkUIDrawableDescriptorAccessor* (*getDrawableDescriptorAccessor)();

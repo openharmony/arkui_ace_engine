@@ -94,4 +94,20 @@ bool AniUtils::GetBoolOrUndefined(ani_env *env, ani_object param, const char *na
 
     return res;
 }
+
+std::string AniUtils::ANIStringToStdString(ani_env* env, ani_string ani_str)
+{
+    ani_size strSize;
+    env->String_GetUTF8Size(ani_str, &strSize);
+
+    std::vector<char> buffer(strSize + 1);
+    char* utf8Buffer = buffer.data();
+
+    ani_size bytes_written = 0;
+    env->String_GetUTF8(ani_str, utf8Buffer, strSize + 1, &bytes_written);
+
+    utf8Buffer[bytes_written] = '\0';
+    std::string content = std::string(utf8Buffer);
+    return content;
+};
 }
