@@ -28,7 +28,7 @@ bool RadioAccessibilityProperty::IsChecked() const
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, false);
     auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
-    CHECK_NULL_RETURN(frameNode, false);
+    CHECK_NULL_RETURN(radioPaintProperty, false);
     return radioPaintProperty->GetRadioCheckValue();
 }
 
