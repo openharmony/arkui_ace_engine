@@ -370,6 +370,16 @@ public:
         return isRemoteDev_;
     }
     
+    void SetDisplayId(int32_t displayId)
+    {
+        displayId_ = displayId;
+    }
+
+    int32_t GetDisplayId() const
+    {
+        return displayId_;
+    }
+
 private:
     RefPtr<PasteData> pasteData_;
     double screenX_ = 0.0;
@@ -399,6 +409,7 @@ private:
     bool isDragEndPending_ = false;
     std::string bundleName_;
     bool isRemoteDev_ { false };
+    int32_t displayId_ = -1;
 };
 
 class NotifyDragEvent : public DragEvent {

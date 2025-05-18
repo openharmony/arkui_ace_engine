@@ -2045,6 +2045,7 @@ void DragDropManager::UpdateDragEvent(
     event->SetSourceTool(pointerEvent.sourceTool);
     event->SetDragSource(dragBundleInfo_.bundleName);
     event->SetRemoteDev(dragBundleInfo_.isRemoteDev);
+    event->SetDisplayId(pointerEvent.displayId);
 }
 
 std::string DragDropManager::GetExtraInfo()

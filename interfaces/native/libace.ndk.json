@@ -2116,6 +2116,10 @@
         "name": "OH_ArkUI_DragEvent_GetModifierKeyStates"
     },
     {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_DragEvent_GetDisplayId"
+    },
+    {
         "first_introduced": "12",
         "name": "OH_ArkUI_SetDragEventStrictReportWithNode"
     },
