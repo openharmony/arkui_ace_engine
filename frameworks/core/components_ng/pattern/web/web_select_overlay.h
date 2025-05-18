@@ -145,6 +145,7 @@ public:
 
     // override SelectOverlayCallback
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) override;
+    void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type, const std::string& labelInfo) override;
     void OnHandleMove(const RectF& rect, bool isFirst) override;
     void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override;
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;
@@ -156,6 +157,7 @@ public:
     void OnHandleMarkInfoChange(const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
     void OnAfterSelectOverlayShow(bool isCreated) override;
     // override SelectOverlayCallback end
+    void UpdateAISelectMenu(TextDataDetectType type, std::string content);
 private:
     void UpdateSelectMenuOptions();
     bool isShowHandle_ = false;
@@ -176,6 +178,8 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(WebSelectOverlay);
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;
+    TextDataDetectType aiMenuType_ = TextDataDetectType::INVALID;
+    std::string aiMenucontent_;
 };
 } // namespace OHOS::Ace::NG
 

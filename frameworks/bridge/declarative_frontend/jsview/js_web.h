@@ -172,6 +172,8 @@ public:
     static void EditMenuOptions(const JSCallbackInfo& info);
     static void EnableHapticFeedback(const JSCallbackInfo& args);
     static void EnableWebAVSession(const JSCallbackInfo& args);
+    static void EnableDataDetector(const JSCallbackInfo& args);
+    static void DataDetectorConfig(const JSCallbackInfo& args);
     static void EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight);
 
 protected:

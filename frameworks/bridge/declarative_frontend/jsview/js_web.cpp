@@ -2034,6 +2034,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("runJavaScriptOnDocumentStart", &JSWeb::RunJavaScriptOnDocumentStart);
     JSClass<JSWeb>::StaticMethod("runJavaScriptOnDocumentEnd", &JSWeb::RunJavaScriptOnDocumentEnd);
     JSClass<JSWeb>::StaticMethod("enableWebAVSession", &JSWeb::EnableWebAVSession);
+    JSClass<JSWeb>::StaticMethod("enableDataDetector", &JSWeb::EnableDataDetector);
+    JSClass<JSWeb>::StaticMethod("dataDetectorConfig", &JSWeb::DataDetectorConfig);
     JSClass<JSWeb>::StaticMethod("enableFollowSystemFontWeight", &JSWeb::EnableFollowSystemFontWeight);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -5665,6 +5667,32 @@ void JSWeb::EnableWebAVSession(const JSCallbackInfo& args)
     }
     bool isEnabled = args[0]->ToBoolean();
     WebModel::GetInstance()->SetWebMediaAVSessionEnabled(isEnabled);
+}
+
+void JSWeb::EnableDataDetector(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        return;
+    }
+    bool isEnabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetEnableDataDetector(isEnabled);
+}
+
+void JSWeb::DataDetectorConfig(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1) {
+        return;
+    }
+    JSRef<JSVal> obj = args[0];
+    if (!obj->IsObject()) {
+        return;
+    }
+
+    TextDetectConfig textDetectConfig;
+    if (!JSViewAbstract::ParseDataDetectorConfig(args, textDetectConfig)) {
+        return;
+    }
+    WebModel::GetInstance()->SetDataDetectorConfig(textDetectConfig);
 }
 
 void JSWeb::EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)

@@ -3238,6 +3238,9 @@ void WebDelegate::InitWebViewWithSurface()
             auto spanstringConvertHtmlImpl = std::make_shared<SpanstringConvertHtmlImpl>(Container::CurrentId());
             spanstringConvertHtmlImpl->SetWebDelegate(weak);
             delegate->nweb_->PutSpanstringConvertHtmlCallback(spanstringConvertHtmlImpl);
+            auto pattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->InitDataDetector();
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebInitWebViewWithSurface");
 }
@@ -4809,6 +4812,8 @@ void WebDelegate::OnPageStarted(const std::string& param)
             CHECK_NULL_VOID(webEventHub);
             webEventHub->FireOnPageStartedEvent(std::make_shared<LoadWebPageStartEvent>(param));
             delegate->RecordWebEvent(Recorder::EventType::WEB_PAGE_BEGIN, param);
+            delegate->ResetStateOfDataDetectorJS();
+            webPattern->InitDataDetector();
         },
         TaskExecutor::TaskType::JS, "ArkUIWebPageStarted");
     auto pattern = webPattern_.Upgrade();
@@ -4836,6 +4841,7 @@ void WebDelegate::OnPageFinished(const std::string& param)
                 TAG_LOGI(AceLogTag::ACE_WEB, "OnPageFinished:Start to RunJsInit.");
                 webPattern->RunJsInit();
             }
+            delegate->RunDataDetectorJS();
         },
         TaskExecutor::TaskType::JS, "ArkUIWebPageFinished");
     
@@ -8030,6 +8036,59 @@ void WebDelegate::SetNativeInnerWeb(bool isInnerWeb)
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
         nweb_->SetNativeInnerWeb(isInnerWeb);
+    }
+}
+
+void WebDelegate::ResetStateOfDataDetectorJS()
+{
+    initDataDetectorJS_ = false;
+}
+
+void WebDelegate::RunDataDetectorJS()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    if (!webPattern->GetDataDetectorEnable()) {
+        return;
+    }
+    if (initDataDetectorJS_) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::RunDataDetectorJS");
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            delegate->nweb_->RunDataDetectorJS();
+        },
+        TaskExecutor::TaskType::PLATFORM, "RunDataDetectorJS");
+    initDataDetectorJS_ = true;
+}
+
+void WebDelegate::SetDataDetectorEnable(bool enable)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::SetDataDetectorEnable enable: %{public}d", enable);
+    if (nweb_) {
+        nweb_->SetDataDetectorEnable(enable);
+    }
+}
+
+void WebDelegate::OnDataDetectorSelectText()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnDataDetectorSelectText");
+    if (nweb_) {
+        nweb_->OnDataDetectorSelectText();
+    }
+}
+
+void WebDelegate::OnDataDetectorCopy(const std::vector<std::string>& recordMix)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnDataDetectorCopy");
+    if (nweb_) {
+        nweb_->OnDataDetectorCopy(recordMix);
     }
 }
 
