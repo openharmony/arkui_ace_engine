@@ -3220,6 +3220,10 @@
         "name": "OH_ArkUI_CustomDialog_RegisterOnDidDisappearCallback"
     },
     {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_CustomDialog_GetState"
+    },
+    {
         "first_introduced": "18",
         "name": "OH_ArkUI_SurfaceHolder_Create"
     },

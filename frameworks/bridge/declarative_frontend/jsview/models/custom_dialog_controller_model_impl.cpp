@@ -222,7 +222,8 @@ void CustomDialogControllerModelImpl::CloseDialog(DialogProperties& dialogProper
 void CustomDialogControllerModelImpl::SetOpenDialog(DialogProperties& dialogProperties,
     const WeakPtr<AceType>& controller, std::vector<WeakPtr<AceType>>& dialogs,
     bool& pending, bool& isShown, std::function<void()>&& cancelTask, std::function<void()>&& buildFunc,
-    RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog, std::list<DialogOperation>& dialogOperation)
+    RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog, std::list<DialogOperation>& dialogOperation,
+    bool& hasBind)
 {
     // Cannot reuse component because might depend on state
     if (customDialog) {
@@ -246,5 +247,10 @@ void CustomDialogControllerModelImpl::SetCloseDialog(DialogProperties& dialogPro
 {
     CloseDialog(
         dialogProperties, pending, isShown, std::move(cancelTask), dialogComponent, customDialog, dialogOperation);
+}
+
+PromptActionCommonState CustomDialogControllerModelImpl::GetState(std::vector<WeakPtr<AceType>>& dialogs, bool& hasBind)
+{
+    return PromptActionCommonState::UNINITIALIZED;
 }
 } // namespace OHOS::Ace::Framework

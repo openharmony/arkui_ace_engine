@@ -111,6 +111,7 @@ private:
     NativeView* ownerView_ = nullptr;
     bool isShown_ = false;
     bool pending_ = false;
+    bool hasBind_ = false;
     // NG
     std::vector<WeakPtr<AceType>> dialogs_;
 

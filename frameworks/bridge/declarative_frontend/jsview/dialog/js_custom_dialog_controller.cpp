@@ -347,7 +347,6 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
     if (!jsBuilderFunction_) {
         return;
     }
-
     if (this->ownerView_ == nullptr) {
         return;
     }
@@ -397,7 +396,8 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
     dialogProperties_.isSysBlurStyle =
         Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) ? true : false;
     CustomDialogControllerModel::GetInstance()->SetOpenDialog(dialogProperties_, WeakClaim(this), dialogs_, pending_,
-        isShown_, std::move(cancelTask), std::move(buildFunc), dialogComponent_, customDialog_, dialogOperation_);
+        isShown_, std::move(cancelTask), std::move(buildFunc), dialogComponent_, customDialog_, dialogOperation_,
+        hasBind_);
 }
 
 void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
@@ -428,6 +428,12 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
 
     CustomDialogControllerModel::GetInstance()->SetCloseDialog(dialogProperties_, WeakClaim(this), dialogs_, pending_,
         isShown_, std::move(cancelTask), dialogComponent_, customDialog_, dialogOperation_);
+}
+
+void JSCustomDialogController::JsGetState(const JSCallbackInfo& info)
+{
+    PromptActionCommonState state = CustomDialogControllerModel::GetInstance()->GetState(dialogs_, hasBind_);
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(state))));
 }
 
 bool JSCustomDialogController::ParseAnimation(
@@ -496,6 +502,7 @@ void JSCustomDialogController::JSBind(BindingTarget object)
     JSClass<JSCustomDialogController>::Declare("NativeCustomDialogController");
     JSClass<JSCustomDialogController>::CustomMethod("open", &JSCustomDialogController::JsOpenDialog);
     JSClass<JSCustomDialogController>::CustomMethod("close", &JSCustomDialogController::JsCloseDialog);
+    JSClass<JSCustomDialogController>::CustomMethod("getState", &JSCustomDialogController::JsGetState);
     JSClass<JSCustomDialogController>::Bind(
         object, &JSCustomDialogController::ConstructorCallback, &JSCustomDialogController::DestructorCallback);
 }
