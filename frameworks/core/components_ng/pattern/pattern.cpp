@@ -15,8 +15,10 @@
 
 #include "core/components_ng/pattern/pattern.h"
 
-#include "core/components_ng/pattern/corner_mark/corner_mark.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/corner_mark/corner_mark.h"
 
 namespace OHOS::Ace::NG {
 void Pattern::OnColorModeChange(uint32_t colorMode)
@@ -73,6 +75,11 @@ int32_t Pattern::OnRecvCommand(const std::string& command)
     if (event.compare("click") == 0) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, RET_FAILED);
+        auto eventHub = host->GetEventHub<EventHub>();
+        CHECK_NULL_RETURN(eventHub, RET_FAILED);
+        if (!eventHub->IsEnabled()) {
+            return RET_FAILED;
+        }
         auto gestureHub = host->GetOrCreateGestureEventHub();
         CHECK_NULL_RETURN(gestureHub, RET_FAILED);
         auto clickEventFunc = gestureHub->GetClickEvent();
@@ -96,7 +103,7 @@ void Pattern::UnRegisterResource(const std::string& key)
 {
     RemoveResObj(key);
 }
- 
+
 template<typename T>
 void Pattern::RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
 {
@@ -108,7 +115,7 @@ void Pattern::RegisterResource(const std::string& key, const RefPtr<ResourceObje
     AddResObj(key, resObj, std::move(updateFunc));
     UpdateProperty<T>(key, value, GetHost());
 }
- 
+
 template void Pattern::RegisterResource<CalcDimension>(
     const std::string&, const RefPtr<ResourceObject>&, CalcDimension);
 template void Pattern::RegisterResource<Dimension>(
@@ -132,7 +139,7 @@ void Pattern::UpdateResource(const std::string& key, const RefPtr<ResourceObject
     T value = ParseResObjToValue<T>(resObj);
     UpdateProperty<T>(key, value, frameNode);
 }
- 
+
 template<typename T>
 T Pattern::ParseResObjToValue(const RefPtr<ResourceObject>& resObj)
 {
@@ -154,7 +161,7 @@ T Pattern::ParseResObjToValue(const RefPtr<ResourceObject>& resObj)
     }
     return value;
 }
- 
+
 template<typename T>
 void Pattern::UpdateProperty(const std::string& key, T value, RefPtr<FrameNode> frameNode)
 {
