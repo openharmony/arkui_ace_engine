@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG {
 void DragDropManagerTestNgCoverage::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
-    MockContainer::SetUp();
+    MockContainer::SetUp(NG::PipelineContext::GetCurrentContext());
 }
 
 void DragDropManagerTestNgCoverage::TearDownTestCase()

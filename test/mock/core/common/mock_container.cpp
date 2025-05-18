@@ -103,6 +103,11 @@ void MockContainer::SetUp()
     container_ = AceType::MakeRefPtr<MockContainer>();
 }
 
+void MockContainer::SetUp(RefPtr<PipelineBase> pipelineContext)
+{
+    container_ = AceType::MakeRefPtr<MockContainer>(pipelineContext);
+}
+
 void MockContainer::TearDown()
 {
     container_ = nullptr;
