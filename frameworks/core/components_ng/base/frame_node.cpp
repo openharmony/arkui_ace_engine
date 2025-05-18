@@ -1376,6 +1376,7 @@ void FrameNode::NotifyColorModeChange(uint32_t colorMode)
     }
 
     if (pattern_) {
+        pattern_->OnThemeScopeUpdate(GetThemeScopeId());
         pattern_->OnColorConfigurationUpdate();
         pattern_->OnColorModeChange(colorMode);
     }

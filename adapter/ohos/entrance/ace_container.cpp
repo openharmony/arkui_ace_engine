@@ -3132,8 +3132,13 @@ void AceContainer::ProcessColorModeUpdate(
     ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig)
 {
     configurationChange.colorModeUpdate = true;
-    // clear cache of ark theme instances when configuration updates
-    NG::TokenThemeStorage::GetInstance()->CacheClear();
+    if (SystemProperties::ConfigChangePerform()) {
+        // reread all cache color of ark theme when configuration updates
+        NG::TokenThemeStorage::GetInstance()->CacheResetColor();
+    } else {
+        // clear cache of ark theme instances when configuration updates
+        NG::TokenThemeStorage::GetInstance()->CacheClear();
+    }
     if (parsedConfig.colorMode == "dark") {
         SetColorMode(ColorMode::DARK);
         SetColorScheme(ColorScheme::SCHEME_DARK);

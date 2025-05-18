@@ -28,7 +28,7 @@ public:
 
 private:
     static bool HandleThemeColorsArg(const EcmaVM* vm, const Local<JSValueRef>& colorsArg,
-        std::vector<ArkUI_Uint32>& colors);
+        std::vector<ArkUI_Uint32>& colors, std::vector<RefPtr<ResourceObject>>& resObjs);
     static ArkUINodeHandle CreateWithThemeNode(ArkUI_Int32 themeScopeId);
 };
 }

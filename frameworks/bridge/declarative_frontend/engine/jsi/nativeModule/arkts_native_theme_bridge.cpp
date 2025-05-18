@@ -31,37 +31,20 @@ ArkUINativeModuleValue ThemeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo
     Local<JSValueRef> colorModeArg = runtimeCallInfo->GetCallArgRef(3); // 3: colorModeArg index
     Local<JSValueRef> onThemeScopeDestroyArg = runtimeCallInfo->GetCallArgRef(4); // 4: destroy callback arg index
 
-    // handle theme scope id argument
-    if (!themeScopeIdArg->IsNumber()) {
+    // check all argument valid
+    if (!themeScopeIdArg->IsNumber() || !themeIdArg->IsNumber() || !colorsArg->IsArray(vm) ||
+        !colorModeArg->IsNumber() || !onThemeScopeDestroyArg->IsFunction(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     ArkUI_Int32 themeScopeId = static_cast<ArkUI_Int32>(themeScopeIdArg->Int32Value(vm));
-
-    // handle theme id argument
-    if (!themeIdArg->IsNumber()) {
-        return panda::JSValueRef::Undefined(vm);
-    }
     ArkUI_Int32 themeId = static_cast<ArkUI_Int32>(themeIdArg->Int32Value(vm));
-
-    // handle colors argument
-    if (!colorsArg->IsArray(vm)) {
-        return panda::JSValueRef::Undefined(vm);
-    }
     std::vector<ArkUI_Uint32> colors;
-    if (!HandleThemeColorsArg(vm, colorsArg, colors)) {
+    std::vector<RefPtr<ResourceObject>> resObjs;
+    if (!HandleThemeColorsArg(vm, colorsArg, colors, resObjs)) {
         return panda::JSValueRef::Undefined(vm);
     }
 
-    // handle color mode argument
-    if (!colorModeArg->IsNumber()) {
-        return panda::JSValueRef::Undefined(vm);
-    }
     ArkUI_Int32 colorMode = static_cast<ArkUI_Int32>(colorModeArg->Int32Value(vm));
-
-    // handle on theme scope destroy argument
-    if (!onThemeScopeDestroyArg->IsFunction(vm)) {
-        return panda::JSValueRef::Undefined(vm);
-    }
     auto obj = onThemeScopeDestroyArg->ToObject(vm);
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
@@ -74,7 +57,7 @@ ArkUINativeModuleValue ThemeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo
 
     // execute C-API
     auto themeModifier = GetArkUINodeModifiers()->getThemeModifier();
-    auto theme = themeModifier->createTheme(themeId, colors.data(), colorMode);
+    auto theme = themeModifier->createTheme(themeId, colors.data(), colorMode, static_cast<void*>(&resObjs));
     CHECK_NULL_RETURN(theme, panda::NativePointerRef::New(vm, nullptr));
     ArkUINodeHandle node = themeModifier->getWithThemeNode(themeScopeId);
     if (!node) {
@@ -87,7 +70,7 @@ ArkUINativeModuleValue ThemeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo
 }
 
 bool ThemeBridge::HandleThemeColorsArg(const EcmaVM* vm, const Local<JSValueRef>& colorsArg,
-    std::vector<ArkUI_Uint32>& colors)
+    std::vector<ArkUI_Uint32>& colors, std::vector<RefPtr<ResourceObject>>& resObjs)
 {
     auto basisTheme = TokenThemeStorage::GetInstance()->GetDefaultTheme();
     if (!basisTheme) {
@@ -99,9 +82,11 @@ bool ThemeBridge::HandleThemeColorsArg(const EcmaVM* vm, const Local<JSValueRef>
     for (size_t i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
         Color color;
         auto colorParams = panda::ArrayRef::GetValueAt(vm, colorsArg, i);
-        if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color)) {
+        RefPtr<ResourceObject> resObj;
+        if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color, resObj)) {
             color = basisTheme->Colors()->GetByIndex(i);
         }
+        resObjs.push_back(resObj);
         colors.push_back(static_cast<ArkUI_Uint32>(color.GetValue()));
     }
     return true;

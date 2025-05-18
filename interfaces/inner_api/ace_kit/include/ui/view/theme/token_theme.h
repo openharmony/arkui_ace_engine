@@ -18,6 +18,7 @@
 
 #include "ui/base/ace_type.h"
 #include "ui/view/theme/token_colors.h"
+#include "ui/resource/resource_object.h"
 
 namespace OHOS::Ace {
 
@@ -56,9 +57,20 @@ public:
     {
         return id_;
     }
+
+    void SetResObjs(std::vector<RefPtr<ResourceObject>>&& resObjs)
+    {
+        resObjs_ = std::move(resObjs);
+    }
+
+    const std::vector<RefPtr<ResourceObject>>& GetResObjs() const
+    {
+        return resObjs_;
+    }
 private:
     int32_t id_ { 0 };
     RefPtr<TokenColors> colors_;
+    std::vector<RefPtr<ResourceObject>> resObjs_;
     ColorMode colorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
 };
 

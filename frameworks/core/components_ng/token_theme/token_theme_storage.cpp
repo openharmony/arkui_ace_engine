@@ -20,6 +20,7 @@
 #include "base/utils/utils.h"
 #include "base/utils/system_properties.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -105,6 +106,30 @@ void TokenThemeStorage::CacheClear()
 {
     std::lock_guard<std::mutex> lock(themeCacheMutex_);
     themeCache_.clear();
+}
+
+void TokenThemeStorage::CacheResetColor()
+{
+    for (auto& [themeId, theme] : themeCache_) {
+        LOGD("Theme reset colors with id %{public}d", themeId);
+        auto resObjs = theme->GetResObjs();
+        if (resObjs.size() != TokenColors::TOTAL_NUMBER) {
+            continue;
+        }
+        auto tokenColor = theme->Colors();
+        for (int32_t i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
+            if (!resObjs[i]) {
+                continue;
+            }
+            Color colorValue;
+            auto state = ResourceParseUtils::ParseResColor(resObjs[i], colorValue);
+            if (!state) {
+                continue;
+            }
+            tokenColor->SetColor(i, colorValue);
+        }
+        theme->SetColors(tokenColor);
+    }
 }
 
 void TokenThemeStorage::CacheSet(const RefPtr<TokenTheme>& theme)
