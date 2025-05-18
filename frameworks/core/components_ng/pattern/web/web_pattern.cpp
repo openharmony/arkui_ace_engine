@@ -738,6 +738,16 @@ void WebPattern::OnAttachToMainTree()
     InitSlideUpdateListener();
     // report component is in foreground.
     delegate_->OnRenderToForeground();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frontend = pipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->AddToPageEventController(host);
 }
 
 void WebPattern::OnDetachFromMainTree()
@@ -799,11 +809,6 @@ void WebPattern::OnAttachToFrameNode()
     pipeline->RegisterListenerForTranslate(WeakClaim(RawPtr(host)));
     EventRecorder::Get().OnAttachWeb(host);
 #endif
-    auto frontend = pipeline->GetFrontend();
-    CHECK_NULL_VOID(frontend);
-    auto accessibilityManager = frontend->GetAccessibilityManager();
-    CHECK_NULL_VOID(accessibilityManager);
-    accessibilityManager->AddToPageEventController(host);
 }
 
 void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)

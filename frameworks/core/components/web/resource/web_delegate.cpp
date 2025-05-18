@@ -5405,6 +5405,10 @@ void WebDelegate::AccessibilitySendPageChange()
             }
             if (webNode->IsOnMainTree()) {
                 if (!accessibilityManager->CheckAccessibilityVisible(webNode)) {
+                    TAG_LOGI(AceLogTag::ACE_WEB,
+                        "WebDelegate::AccessibilitySendPageChange CheckAcceessibilityVisible accessibilityId = "
+                        "%{public}" PRId64,
+                        webNode->GetAccessibilityId());
                     return;
                 }
                 if (accessibilityManager->CheckPageEventCached(webNode, false)) {
