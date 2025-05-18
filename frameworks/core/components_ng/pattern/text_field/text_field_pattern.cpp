@@ -1632,6 +1632,10 @@ void TextFieldPattern::HandleOnUndoAction()
         selectController_->MoveCaretToContentRect(
             textEditingValue.caretPosition, TextAffinity::DOWNSTREAM);
     }
+
+    CloseSelectOverlay();
+    StartTwinkling();
+
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -5693,7 +5697,8 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
     }
     CloseSelectOverlay(true);
     StartTwinkling();
-    UpdateEditingValueToRecord();
+    auto beforeCaretPosition = end - start + selectController_->GetCaretIndex();
+    UpdateEditingValueToRecord(beforeCaretPosition);
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -6408,8 +6413,15 @@ void TextFieldPattern::HandleSelectionUp()
         auto caretXPosition = GetOriginCaretPosition(originCaretPosition) &&
             GreatNotEqual(selectController_->GetCaretRect().GetX() - contentRect_.GetX(), 0) ? // handle when line head
             originCaretPosition.GetX() : selectController_->GetCaretRect().GetX();
-        selectController_->MoveSecondHandleByKeyBoard(paragraph_->GetGlyphIndexByCoordinate(
-            Offset(caretXPosition - contentRect_.GetX(), newOffsetY)));
+        auto offset = Offset(caretXPosition - contentRect_.GetX(), newOffsetY);
+        auto index = paragraph_->GetGlyphIndexByCoordinate(offset);
+        bool isAtLineBegin = false;
+        LineMetrics lineMetrics;
+        if (paragraph_->GetLineMetricsByCoordinate(offset, lineMetrics) && LessOrEqual(offset.GetX(), lineMetrics.x)) {
+            isAtLineBegin = true;
+        }
+        selectController_->MoveSecondHandleByKeyBoard(index, isAtLineBegin ?
+            std::make_optional<TextAffinity>(TextAffinity::DOWNSTREAM) : std::nullopt);
     } else {
         selectController_->MoveSecondHandleByKeyBoard(0);
     }
