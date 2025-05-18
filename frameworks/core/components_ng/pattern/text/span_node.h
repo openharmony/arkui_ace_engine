@@ -270,6 +270,7 @@ public:
     GestureEventFunc onDoubleClick;
     OnHoverFunc onHover;
     bool isOnHover = false;
+    std::function<void(TouchEventInfo&)> onTouch;
     [[deprecated]] std::list<RefPtr<SpanItem>> children;
     std::map<int32_t, AISpan> aiSpanMap;
     int32_t placeholderIndex = -1;
@@ -365,6 +366,11 @@ public:
     void ResetHoverEvent()
     {
         onHover = OnHoverFunc();
+    }
+
+    void SetTouchEvent(std::function<void(TouchEventInfo&)>&& onTouch_)
+    {
+        onTouch = std::move(onTouch_);
     }
 
     void SetIsParentText(bool isText)

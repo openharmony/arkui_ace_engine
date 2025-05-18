@@ -1379,7 +1379,8 @@ private:
     void HandleMouseRightButton(const MouseInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleImageHoverEvent(const MouseInfo& info);
-    void HandleTouchEvent(const TouchEventInfo& info);
+    void HandleTouchEvent(TouchEventInfo& info);
+    void HandleUserTouchEvent(TouchEventInfo& info);
     std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
     void HandleTouchDown(const TouchLocationInfo& info);
     void HandleTouchUp();
