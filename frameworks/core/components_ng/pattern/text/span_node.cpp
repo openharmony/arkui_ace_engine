@@ -917,6 +917,8 @@ void SpanItem::EncodeFontStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TLV_INHERIT(fontStyle, FontWeight, TLV_SPAN_FONT_STYLE_FONTWEIGHT, FontWeight, FontWeight);
     WRITE_TLV_INHERIT(fontStyle, FontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily, FontFamilies);
     WRITE_TLV_INHERIT(fontStyle, FontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature, FontFeatures);
+    WRITE_TLV_INHERIT(fontStyle, StrokeWidth, TLV_SPAN_FONT_STYLE_STROKEWIDTH, Dimension, StrokeWidth);
+    WRITE_TLV_INHERIT(fontStyle, StrokeColor, TLV_SPAN_FONT_STYLE_STROKECOLOR, Color, StrokeColor);
     WRITE_TLV_INHERIT(fontStyle, TextDecoration, TLV_SPAN_FONT_STYLE_TEXTDECORATION, TextDecoration, TextDecoration);
     WRITE_TLV_INHERIT(
         fontStyle, TextDecorationColor, TLV_SPAN_FONT_STYLE_TEXTDECORATIONCOLOR, Color, TextDecorationColor);
@@ -973,6 +975,8 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             READ_TEXT_STYLE_TLV(fontStyle, UpdateFontWeight, TLV_SPAN_FONT_STYLE_FONTWEIGHT, FontWeight);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateFontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateFontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateStrokeWidth, TLV_SPAN_FONT_STYLE_STROKEWIDTH, Dimension);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateStrokeColor, TLV_SPAN_FONT_STYLE_STROKECOLOR, Color);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateTextDecoration, TLV_SPAN_FONT_STYLE_TEXTDECORATION, TextDecoration);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateTextDecorationColor, TLV_SPAN_FONT_STYLE_TEXTDECORATIONCOLOR, Color);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateTextDecorationStyle,

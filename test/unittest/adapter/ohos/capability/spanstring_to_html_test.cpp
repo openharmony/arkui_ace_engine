@@ -472,9 +472,10 @@ HWTEST_F(HtmlConvertTestNg, SpanStringConvert008, TestSize.Level1)
     auto out = convert.ToHtml(*spanString);
     std::string result =
         "<div ><p style=\"word-break: break_word;text-overflow: clip;\"><span style=\"font-size: 16.00px;"
-        "font-style: normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;\">th</span>"
-        "<span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;"
-        "font-family: HarmonyOS Sans;\">is is a normal text Hello WORLD</span></p></div>";
+        "font-style: normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;"
+        "stroke-width: 0.00px;stroke-color: #000000FF;\">th</span><span style=\"font-size: 16.00px;"
+        "font-style: normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;"
+        "stroke-width: 0.00px;stroke-color: #000000FF;\">is is a normal text Hello WORLD</span></p></div>";
     EXPECT_EQ(out, result);
 }
 
@@ -513,8 +514,9 @@ HWTEST_F(HtmlConvertTestNg, SpanStringConvert009, TestSize.Level1)
     std::string result =
         "<div ><p style=\"text-align: center;text-indent: 20.00px;word-break: break_all;text-overflow: clip;\">"
         "<span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;"
-        "font-family: HarmonyOS Sans;\">this </span><span style=\"font-size: 16.00px;font-style: normal;"
-        "font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;\">text with CENTER BREAK_ALL"
+        "font-family: HarmonyOS Sans;stroke-width: 0.00px;stroke-color: #000000FF;\">this </span>"
+        "<span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;"
+        "font-family: HarmonyOS Sans;stroke-width: 0.00px;stroke-color: #000000FF;\">text with CENTER BREAK_ALL"
         " textIndent property</span></p></div>";
     EXPECT_EQ(out, result);
 }
@@ -552,10 +554,11 @@ HWTEST_F(HtmlConvertTestNg, SpanStringConvert010, TestSize.Level1)
     auto out = convert.ToHtml(*spanString);
     std::string result =
         "<div ><p style=\"word-break: break_word;text-overflow: clip;\"><span style=\"font-size: 16.00px;"
-        "font-style: normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;\">big"
-        " \xE4\xB8\xAD\xE6\x96\x87\xE6\xB7\xB7</span><span style=\"font-size: 16.00px;font-style: "
-        "normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans"
-        ";\">\xE6\x8E\x92\xE6\x83\x85\xE5\x86\xB5 text</span></p></div>"; // xE4 etc is corresponding Chinese
+        "font-style: normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;"
+        "stroke-width: 0.00px;stroke-color: #000000FF;\">big \xE4\xB8\xAD\xE6\x96\x87\xE6\xB7\xB7</span>"
+        "<span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;"
+        "font-family: HarmonyOS Sans;stroke-width: 0.00px;stroke-color: #000000FF;\">"
+        "\xE6\x8E\x92\xE6\x83\x85\xE5\x86\xB5 text</span></p></div>"; // xE4 etc is corresponding Chinese
     EXPECT_EQ(out, result);
 }
 
@@ -592,10 +595,11 @@ HWTEST_F(HtmlConvertTestNg, SpanStringConvert011, TestSize.Level1)
     auto out = convert.ToHtml(*spanString);
     std::string result =
         "<div ><p style=\"text-align: start;text-indent: 10.00px;\"><span style=\"font-size: 16.00px;"
-        "font-style: normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;\">complex"
-        "</span><span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;"
-        "font-family: HarmonyOS Sans;\">t text span style= font size: 40px;text shadow: 0 0 3px red; "
-        "shadow span </span></p></div>";
+        "font-style: normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;"
+        "stroke-width: 0.00px;stroke-color: #000000FF;\">complex</span><span style=\"font-size: 16.00px;"
+        "font-style: normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;"
+        "stroke-width: 0.00px;stroke-color: #000000FF;\">t text span style= font size: 40px;"
+        "text shadow: 0 0 3px red; shadow span </span></p></div>";
     EXPECT_EQ(out, result);
 }
 

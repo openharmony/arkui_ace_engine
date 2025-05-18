@@ -248,12 +248,17 @@ void HtmlToSpan::InitFont(
     } else if (key == "font-family") {
         font->fontFamilies = ParseFontFamily(value);
     } else if (key == "font-variant") { // not support
+    } else if (key == "stroke-width") {
+        font->strokeWidth = FromString(value);
+    } else if (key == "stroke-color") {
+        font->strokeColor = ToSpanColor(value);
     }
 }
 
 bool HtmlToSpan::IsFontAttr(const std::string& key)
 {
-    if (key == "font-size" || key == "font-weight" || key == "font-style" || key == "font-family" || key == "color") {
+    if (key == "font-size" || key == "font-weight" || key == "font-style" || key == "font-family" ||
+        key == "color" || key == "stroke-width" || key == "stroke-color") {
         return true;
     }
     return false;
