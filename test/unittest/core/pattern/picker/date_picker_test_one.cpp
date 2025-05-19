@@ -1212,7 +1212,7 @@ HWTEST_F(DatePickerTestOne, PlayRestAnimation001, TestSize.Level1)
     CreateDatePickerColumnNode();
     ASSERT_NE(columnPattern_, nullptr);
 
-    DatePickerOptionProperty datePickerOptionProperty;
+    PickerOptionProperty datePickerOptionProperty;
     datePickerOptionProperty.prevDistance = 0.0f;
     datePickerOptionProperty.nextDistance = 1.0f;
     columnPattern_->optionProperties_.clear();

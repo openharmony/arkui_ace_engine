@@ -2486,6 +2486,7 @@ frameworks/core/components_ng/pattern/particle/ @arkui_superman
 frameworks/core/components_ng/pattern/pattern.h @arkui_architecture
 frameworks/core/components_ng/pattern/patternlock/ @arkui_image
 frameworks/core/components_ng/pattern/picker/ @arkui_image
+frameworks/core/components_ng/pattern/picker_utils/ @arkui_image
 frameworks/core/components_ng/pattern/plugin/ @arkuiabilitygroup
 frameworks/core/components_ng/pattern/preview_mock/ @arkuistatemgmt
 frameworks/core/components_ng/pattern/progress/ @arkui_image
