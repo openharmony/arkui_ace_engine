@@ -7409,8 +7409,8 @@ Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, G
         panda::NumberRef::New(vm, info.GetVelocity().GetVelocityX() / density),
         panda::NumberRef::New(vm, info.GetVelocity().GetVelocityY() / density),
         panda::NumberRef::New(vm, info.GetVelocity().GetVelocityValue() / density),
-        panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
-        panda::NumberRef::New(vm, info.GetDeviceId()) };
+        panda::NumberRef::New(vm, info.GetDeviceId()),
+        panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value_or(0.0f))));
