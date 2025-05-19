@@ -260,6 +260,17 @@ std::string ViewFunctions::ExecuteOnDumpInfo()
     return res;
 }
 
+void ViewFunctions::ExecuteClearAllRecycle()
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    auto func = jsClearAllRecycle_.Lock();
+    if (!func->IsEmpty()) {
+        auto result = func->Call(jsObject_.Lock());
+    } else {
+        LOGE("the clearAllRecycle func is null");
+    }
+}
+
 #else
 
 void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper) {}
@@ -347,6 +358,11 @@ void ViewFunctions::InitViewFunctions(
         JSRef<JSVal> jsOnDumpInspector = jsObject->GetProperty("onDumpInspector");
         if (jsOnDumpInspector->IsFunction()) {
             jsOnDumpInspector_ = JSRef<JSFunc>::Cast(jsOnDumpInspector);
+        }
+
+        JSRef<JSVal> jsClearAllRecycle = jsObject->GetProperty("__ClearAllRecyle__PUV2ViewBase__Internal");
+        if (jsClearAllRecycle->IsFunction()) {
+            jsClearAllRecycle_ = JSRef<JSFunc>::Cast(jsClearAllRecycle);
         }
 
         JSRef<JSVal> jsPrebuildComponent = jsObject->GetProperty("prebuildComponent");
