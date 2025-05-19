@@ -52,6 +52,18 @@ struct SwiperParameters {
     std::optional<bool> ignoreSizeValue;
     std::optional<bool> setIgnoreSizeValue;
     std::optional<Dimension> dimSpace;
+
+    RefPtr<ResourceObject> resourceDimLeftValueObject;
+    RefPtr<ResourceObject> resourceDimTopValueObject;
+    RefPtr<ResourceObject> resourceDimRightValueObject;
+    RefPtr<ResourceObject> resourceDimBottomValueObject;
+    RefPtr<ResourceObject> resourceColorValueObject;
+    RefPtr<ResourceObject> resourceSelectedColorValueObject;
+    RefPtr<ResourceObject> resourceItemWidthValueObject;
+    RefPtr<ResourceObject> resourceItemHeightValueObject;
+    RefPtr<ResourceObject> resourceSelectedItemWidthValueObject;
+    RefPtr<ResourceObject> resourceSelectedItemHeightValueObject;
+    RefPtr<ResourceObject> resourceItemSizeValueObject;
 };
 
 struct SwiperDigitalParameters {
@@ -69,6 +81,15 @@ struct SwiperDigitalParameters {
     std::optional<FontWeight> selectedFontWeight;
     std::optional<bool> ignoreSizeValue;
     std::optional<bool> setIgnoreSizeValue;
+
+    RefPtr<ResourceObject> resourceDimLeftValueObject;
+    RefPtr<ResourceObject> resourceDimTopValueObject;
+    RefPtr<ResourceObject> resourceDimRightValueObject;
+    RefPtr<ResourceObject> resourceDimBottomValueObject;
+    RefPtr<ResourceObject> resourceFontColorValueObject;
+    RefPtr<ResourceObject> resourceSelectedFontColorValueObject;
+    RefPtr<ResourceObject> resourceFontSizeValueObject;
+    RefPtr<ResourceObject> resourceSelectedFontSizeValueObject;
 };
 
 struct SwiperArcDotParameters {
@@ -86,6 +107,11 @@ struct SwiperArrowParameters {
     std::optional<Color> backgroundColor;
     std::optional<Dimension> arrowSize;
     std::optional<Color> arrowColor;
+
+    RefPtr<ResourceObject> resourceBackgroundSizeValueObject;
+    RefPtr<ResourceObject> resourceBackgroundColorValueObject;
+    RefPtr<ResourceObject> resourceArrowSizeValueObject;
+    RefPtr<ResourceObject> resourceArrowColorValueObject;
 };
 
 struct AnimationCallbackInfo {
@@ -183,6 +209,8 @@ public:
     virtual void SetJSIndicatorController(std::function<void()> resetFunc) {}
     virtual void SetOnSelected(std::function<void(const BaseEventInfo* info)>&& onSelected) {}
     virtual void SetMaintainVisibleContentPosition(bool value) {}
+    virtual void ProcessNextMarginwithResourceObj(const RefPtr<ResourceObject>& resObj) {}
+    virtual void ProcessPreviousMarginwithResourceObj(const RefPtr<ResourceObject>& resObj) {};
 
 private:
     static std::unique_ptr<SwiperModel> instance_;

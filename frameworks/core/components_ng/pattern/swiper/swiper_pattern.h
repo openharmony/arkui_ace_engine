@@ -810,6 +810,8 @@ public:
     }
 
     void NotifyDataChange(int32_t index, int32_t count) override;
+    void OnColorModeChange(uint32_t colorMode) override;
+    void ResetOnForceMeasure();
 
 protected:
     void MarkDirtyNodeSelf();
@@ -1186,7 +1188,6 @@ private:
                SwiperUtils::IsStretch(swiperLayoutProperty);
     }
 
-    void ResetOnForceMeasure();
     void UpdateTabBarIndicatorCurve();
     const RefPtr<Curve> GetTabBarAnimationCurve(const RefPtr<Curve>& curve);
     bool CheckDragOutOfBoundary(double dragVelocity);
