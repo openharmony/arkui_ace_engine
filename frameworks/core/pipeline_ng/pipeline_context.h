@@ -363,6 +363,8 @@ public:
 
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
 
+    void AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle);
+
     void AddLayoutNode(const RefPtr<FrameNode>& layoutNode);
 
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);

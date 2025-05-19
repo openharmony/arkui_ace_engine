@@ -128,6 +128,8 @@ constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr uint32_t SAFE_AREA_TYPE_LIMIT = 3;
 constexpr uint32_t SAFE_AREA_EDGE_LIMIT = 4;
+constexpr uint32_t LAYOUT_SAFE_AREA_TYPE_LIMIT = 2;
+constexpr uint32_t LAYOUT_SAFE_AREA_EDGE_LIMIT = 6;
 constexpr int32_t MAX_ALIGN_VALUE = 8;
 constexpr int32_t UNKNOWN_RESOURCE_ID = -1;
 constexpr int32_t UNKNOWN_RESOURCE_TYPE = -1;
@@ -7022,6 +7024,53 @@ void JSViewAbstract::JsExpandSafeArea(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->UpdateSafeAreaExpandOpts(opts);
 }
 
+void JSViewAbstract::JsIgnoreLayoutSafeArea(const JSCallbackInfo& info)
+{
+    static std::vector<uint32_t> LayoutTypeEnum {
+        NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        NG::LAYOUT_SAFE_AREA_TYPE_KEYBOARD,
+        NG::LAYOUT_SAFE_AREA_TYPE_ALL
+    };
+    static std::vector<uint32_t> LayoutEdgeEnum {
+        NG::LAYOUT_SAFE_AREA_EDGE_TOP,
+        NG::LAYOUT_SAFE_AREA_EDGE_BOTTOM,
+        NG::LAYOUT_SAFE_AREA_EDGE_START,
+        NG::LAYOUT_SAFE_AREA_EDGE_END,
+        NG::LAYOUT_SAFE_AREA_EDGE_VERTICAL,
+        NG::LAYOUT_SAFE_AREA_EDGE_HORIZONTAL,
+        NG::LAYOUT_SAFE_AREA_EDGE_ALL
+    };
+    NG::IgnoreLayoutSafeAreaOpts opts { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    if (info.Length() >= PARAMETER_LENGTH_FIRST && info[0]->IsArray()) {
+        auto paramArray = JSRef<JSArray>::Cast(info[0]);
+        uint32_t layoutSafeAreaType = NG::LAYOUT_SAFE_AREA_TYPE_NONE;
+        for (size_t i = 0; i < paramArray->Length(); ++i) {
+            if (!paramArray->GetValueAt(i)->IsNumber() ||
+                paramArray->GetValueAt(i)->ToNumber<uint32_t>() > LAYOUT_SAFE_AREA_TYPE_LIMIT) {
+                layoutSafeAreaType = NG::SAFE_AREA_TYPE_SYSTEM;
+                break;
+            }
+            layoutSafeAreaType |= LayoutTypeEnum[paramArray->GetValueAt(i)->ToNumber<uint32_t>()];
+        }
+        opts.type = layoutSafeAreaType;
+    }
+    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsArray()) {
+        auto paramArray = JSRef<JSArray>::Cast(info[1]);
+        uint32_t layoutSafeAreaEdge = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+        for (size_t i = 0; i < paramArray->Length(); ++i) {
+            if (!paramArray->GetValueAt(i)->IsNumber() ||
+                paramArray->GetValueAt(i)->ToNumber<uint32_t>() > LAYOUT_SAFE_AREA_EDGE_LIMIT) {
+                layoutSafeAreaEdge = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
+                break;
+            }
+            layoutSafeAreaEdge |= LayoutEdgeEnum[paramArray->GetValueAt(i)->ToNumber<uint32_t>()];
+        }
+        opts.edges = layoutSafeAreaEdge;
+    }
+
+    ViewAbstractModel::GetInstance()->UpdateIgnoreLayoutSafeAreaOpts(opts);
+}
+
 void ParseJSLightSource(JSRef<JSObject>& lightSource)
 {
     if (lightSource->IsUndefined()) {
@@ -7361,6 +7410,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("freeze", &JSViewAbstract::JsSetFreeze);
 
     JSClass<JSViewAbstract>::StaticMethod("expandSafeArea", &JSViewAbstract::JsExpandSafeArea);
+    JSClass<JSViewAbstract>::StaticMethod("ignoreLayoutSafeArea", &JSViewAbstract::JsIgnoreLayoutSafeArea);
 
     JSClass<JSViewAbstract>::StaticMethod("drawModifier", &JSViewAbstract::JsDrawModifier);
     JSClass<JSViewAbstract>::StaticMethod("customProperty", &JSViewAbstract::JsCustomProperty);

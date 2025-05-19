@@ -3358,6 +3358,27 @@ void ResetExpandSafeArea(ArkUINodeHandle node)
     ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
 }
 
+void SetIgnoreLayoutSafeArea(ArkUINodeHandle node, ArkUI_Uint32 layoutSafeAreaType, ArkUI_Uint32 layoutSafeAreaEdge)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::IgnoreLayoutSafeAreaOpts opts { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    opts.type = layoutSafeAreaType;
+    opts.edges = layoutSafeAreaEdge;
+    ViewAbstract::UpdateIgnoreLayoutSafeAreaOpts(frameNode, opts);
+}
+
+void ResetIgnoreLayoutSafeArea(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::IgnoreLayoutSafeAreaOpts opts;
+    opts.type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM;
+    opts.edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
+    ViewAbstract::UpdateIgnoreLayoutSafeAreaOpts(frameNode, opts);
+}
+
 void SetFlexBasis(ArkUINodeHandle node, const struct ArkUIStringAndFloat* flexBasisValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -7215,6 +7236,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetGridSpan = ResetGridSpan,
         .setExpandSafeArea = SetExpandSafeArea,
         .resetExpandSafeArea = ResetExpandSafeArea,
+        .setIgnoreLayoutSafeArea = SetIgnoreLayoutSafeArea,
+        .resetIgnoreLayoutSafeArea = ResetIgnoreLayoutSafeArea,
         .setFlexBasis = SetFlexBasis,
         .resetFlexBasis = ResetFlexBasis,
         .setAlignRules = SetAlignRules,

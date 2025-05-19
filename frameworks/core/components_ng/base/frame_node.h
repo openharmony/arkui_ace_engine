@@ -240,7 +240,7 @@ public:
     RefPtr<LayoutWrapperNode> UpdateLayoutWrapper(
         RefPtr<LayoutWrapperNode> layoutWrapper, bool forceMeasure = false, bool forceLayout = false);
 
-    void CreateLayoutTask(bool forceUseMainThread = false);
+    void CreateLayoutTask(bool forceUseMainThread = false, LayoutType layoutTaskType = LayoutType::NONE);
 
     std::optional<UITask> CreateRenderTask(bool forceUseMainThread = false);
 

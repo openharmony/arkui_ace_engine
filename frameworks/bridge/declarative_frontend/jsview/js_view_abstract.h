@@ -535,6 +535,7 @@ public:
     static void JSRenderGroup(const JSCallbackInfo& info);
     static void JSRenderFit(const JSCallbackInfo& info);
     static void JsExpandSafeArea(const JSCallbackInfo& info);
+    static void JsIgnoreLayoutSafeArea(const JSCallbackInfo& info);
     static void JsGestureModifier(const JSCallbackInfo& info);
     static void JsCustomProperty(const JSCallbackInfo& info);
 

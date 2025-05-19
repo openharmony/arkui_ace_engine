@@ -31,6 +31,7 @@
 #include "core/components_ng/layout/layout_wrapper_builder.h"
 #include "core/components_ng/property/constraint_flags.h"
 #include "core/components_ng/property/layout_constraint.h"
+#include "ui/properties/safe_area_insets.h"
 
 namespace OHOS::Ace::NG {
 class FrameNode;
@@ -236,7 +237,10 @@ public:
     void AdjustNotExpandNode();
     void AdjustFixedSizeNode(RectF& frame);
     void ExpandHelper(const std::unique_ptr<SafeAreaExpandOpts>& opts, RectF& frame);
-    ExpandEdges GetAccumulatedSafeAreaExpand(bool includingSelf = false);
+    ExpandEdges GetAccumulatedSafeAreaExpand(bool includingSelf = false,
+        IgnoreLayoutSafeAreaOpts options = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+            .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL },
+        bool fromMarginRect = false);
     void ResetSafeAreaPadding();
 
     bool SkipSyncGeometryNode() const
@@ -254,6 +258,11 @@ public:
     void AddChildToExpandListIfNeeded(const WeakPtr<FrameNode>& node);
     void ApplyConstraintWithoutMeasure(const std::optional<LayoutConstraintF>& constraint);
 
+    bool GetIgnoreLayoutProcess()
+    {
+        return ignoreLayoutProcess_;
+    }
+
 protected:
     void CreateRootConstraint();
     void ApplyConstraint(LayoutConstraintF constraint);
@@ -263,11 +272,29 @@ protected:
     OffsetF ExpandIntoKeyboard();
     bool CheckValidSafeArea();
     float GetPageCurrentOffset();
+
+    void SetIgnoreLayoutProcess(bool switchTo)
+    {
+        ignoreLayoutProcess_ = switchTo;
+    }
+
+    void ResetIgnoreLayoutProcess()
+    {
+        ignoreLayoutProcess_ = false;
+    }
+
+    enum class StartPoint {
+        NORMAL = 0,
+        INCLUDING_SELF,
+        FROM_MARGIN
+    };
     bool AccumulateExpandCacheHit(ExpandEdges& totalExpand, const PaddingPropertyF& innerSpace);
-    void GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false);
+    ExpandEdges GetAccumulatedSafeAreaExpandForAllEdges(
+        StartPoint startPoint = StartPoint::NORMAL, LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM);
+    void GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false,
+        LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM);
     void ParseSafeAreaPaddingSides(const PaddingPropertyF& parentSafeAreaPadding,
         const PaddingPropertyF& parentInnerSpace, const RectF& adjustingRect, ExpandEdges& rollingExpand);
-
     WeakPtr<FrameNode> hostNode_;
 
     ConstraintFlags constraintChanges_;
@@ -279,6 +306,7 @@ protected:
     bool needSkipSyncGeometryNode_ = false;
     std::optional<bool> skipMeasureContent_;
     std::optional<bool> needForceMeasureAndLayout_;
+    bool ignoreLayoutProcess_ = false;
 
 private:
     void AdjustChildren(const OffsetF& offset, bool parentScrollable);

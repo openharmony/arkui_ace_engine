@@ -1188,6 +1188,12 @@ enum class DividerMode {
     FLOATING_ABOVE_MENU = 0,
     EMBEDDED_IN_MENU = 1,
 };
+
+enum class LayoutType : int32_t {
+    NONE = 0,
+    MEASURE_FOR_IGNORE = 1,
+    LAYOUT_FOR_IGNORE = 2
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_CONSTANTS_H

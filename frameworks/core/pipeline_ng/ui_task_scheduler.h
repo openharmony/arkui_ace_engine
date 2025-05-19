@@ -39,6 +39,8 @@ constexpr TaskThread MAIN_TASK = 1;
 constexpr TaskThread BACKGROUND_TASK = 1 << 1;
 constexpr TaskThread UNDEFINED_TASK = 1 << 2;
 
+using IgnoreLayoutSafeAreaBundle = std::pair<std::vector<RefPtr<FrameNode>>, RefPtr<FrameNode>>;
+
 class UITask {
 public:
     explicit UITask(std::function<void()>&& task) : task_(std::move(task)) {}
@@ -77,6 +79,7 @@ public:
 
     // Called on Main Thread.
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
+    void AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle);
     void AddLayoutNode(const RefPtr<FrameNode>& layoutNode);
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
     void AddPredictTask(PredictTask&& task);
@@ -154,6 +157,7 @@ public:
     }
 
     void FlushSyncGeometryNodeTasks();
+    void FlushPostponedLayoutTask(bool forceUseMainThread);
 
 private:
     bool NeedAdditionalLayout();
@@ -184,6 +188,7 @@ private:
     using LayoutNodesSet = std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>>;
     using RootDirtyMap = std::map<uint32_t, PageDirtySet>;
 
+    std::vector<IgnoreLayoutSafeAreaBundle> ignoreLayoutSafeAreaBundles_;
     std::list<RefPtr<FrameNode>> dirtyLayoutNodes_;
     std::list<RefPtr<FrameNode>> layoutNodes_;
     RootDirtyMap dirtyRenderNodes_;
