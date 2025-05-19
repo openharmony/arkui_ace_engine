@@ -1282,4 +1282,25 @@ size_t TextModelNG::GetLineCount(FrameNode* frameNode)
     CHECK_NULL_RETURN(textPattern, 0);
     return textPattern->GetLineCount();
 }
+
+void TextModelNG::SetEnableAutoSpacing(bool enabled)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EnableAutoSpacing, enabled, frameNode);
+}
+
+void TextModelNG::SetEnableAutoSpacing(FrameNode* frameNode, bool enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EnableAutoSpacing, enabled, frameNode);
+}
+
+bool TextModelNG::GetEnableAutoSpacing(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, EnableAutoSpacing, value, frameNode, value);
+    return value;
+}
 } // namespace OHOS::Ace::NG

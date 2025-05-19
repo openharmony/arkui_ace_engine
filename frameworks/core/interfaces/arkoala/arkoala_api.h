@@ -2677,6 +2677,8 @@ struct ArkUITextModifier {
     void (*resetOnMarqueeStateChange)(ArkUINodeHandle node);
     void (*setImmutableFontWeight)(ArkUINodeHandle node, ArkUI_Int32 weight);
     ArkUI_Int32 (*getLineCount)(ArkUINodeHandle node);
+    void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
+    void (*resetEnableAutoSpacing)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -4106,6 +4108,8 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaStrokeColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetTextAreaStrokeColor)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextAreaStrokeColor)(ArkUINodeHandle node);
+    void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
+    void (*resetEnableAutoSpacing)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -4336,6 +4340,8 @@ struct ArkUITextInputModifier {
     void (*setTextInputStrokeColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetTextInputStrokeColor)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextInputStrokeColor)(ArkUINodeHandle node);
+    void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
+    void (*resetEnableAutoSpacing)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -5084,6 +5090,8 @@ struct ArkUISearchModifier {
     void (*resetSearchStrokeWidth)(ArkUINodeHandle node);
     void (*setSearchStrokeColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetSearchStrokeColor)(ArkUINodeHandle node);
+    void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
+    void (*resetEnableAutoSpacing)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {

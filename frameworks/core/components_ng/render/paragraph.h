@@ -159,6 +159,7 @@ struct ParagraphStyle {
     int32_t textStyleUid = 0;
     bool isOnlyBetweenLines = false;
     bool isFirstParagraphLineSpacing = true;
+    bool enableAutoSpacing = false;
 
     bool operator==(const ParagraphStyle others) const
     {
@@ -167,7 +168,8 @@ struct ParagraphStyle {
                ellipsisMode == others.ellipsisMode && textOverflow == others.textOverflow &&
                leadingMargin == others.leadingMargin && fontSize == others.fontSize &&
                halfLeading == others.halfLeading && indent == others.indent &&
-               paragraphSpacing == others.paragraphSpacing && isOnlyBetweenLines == others.isOnlyBetweenLines;
+               paragraphSpacing == others.paragraphSpacing && isOnlyBetweenLines == others.isOnlyBetweenLines &&
+               enableAutoSpacing == others.enableAutoSpacing;
     }
 
     bool operator!=(const ParagraphStyle others) const
@@ -193,6 +195,8 @@ struct ParagraphStyle {
         result += indent.ToString();
         result += ", paragraphSpacing: ";
         result += paragraphSpacing.ToString();
+        result += ", enableAutoSpacing: ";
+        result += enableAutoSpacing;
         return result;
     }
 };

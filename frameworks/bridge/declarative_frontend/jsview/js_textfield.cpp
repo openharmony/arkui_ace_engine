@@ -2131,6 +2131,15 @@ void JSTextField::SetOnWillChange(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetOnWillChangeEvent(std::move(onWillChange));
 }
 
+void JSTextField::SetEnableAutoSpacing(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    TextFieldModel::GetInstance()->SetEnableAutoSpacing(enabled);
+}
+
 void JSTextField::SetStrokeWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
