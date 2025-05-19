@@ -34667,6 +34667,48 @@ void impl_RenderNode_setLengthMetricsUnit(Ark_NativePointer thisPtr, Ark_Int32 l
         GetAccessors()->getRenderNodeAccessor()->setLengthMetricsUnit(self, static_cast<Ark_LengthMetricsUnit>(lengthMetricsUnit));
 }
 KOALA_INTEROP_DIRECT_V2(RenderNode_setLengthMetricsUnit, Ark_NativePointer, Ark_Int32)
+Ark_NativePointer impl_TabsOps_registerBarMode(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_BarMode value_value_buf = {};
+        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
+        {
+            value_value_buf.value = static_cast<Ark_BarMode>(thisDeserializer.readInt32());
+        }
+        Opt_BarMode value_value = value_value_buf;;
+        const auto options_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_ScrollableBarModeOptions options_value_buf = {};
+        options_value_buf.tag = options_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (options_value_buf_runtimeType))
+        {
+            options_value_buf.value = thisDeserializer.readScrollableBarModeOptions();
+        }
+        Opt_ScrollableBarModeOptions options_value = options_value_buf;;
+        return GetAccessors()->getTabsOpsAccessor()->registerBarMode(node, (const Opt_BarMode*)&value_value, (const Opt_ScrollableBarModeOptions*)&options_value);
+}
+KOALA_INTEROP_DIRECT_3(TabsOps_registerBarMode, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_TabsOps_registerBarBackgroundBlurStyle(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto style_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_BlurStyle style_value_buf = {};
+        style_value_buf.tag = style_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (style_value_buf_runtimeType))
+        {
+            style_value_buf.value = static_cast<Ark_BlurStyle>(thisDeserializer.readInt32());
+        }
+        Opt_BlurStyle style_value = style_value_buf;;
+        const auto options_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_BackgroundBlurStyleOptions options_value_buf = {};
+        options_value_buf.tag = options_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (options_value_buf_runtimeType))
+        {
+            options_value_buf.value = thisDeserializer.readBackgroundBlurStyleOptions();
+        }
+        Opt_BackgroundBlurStyleOptions options_value = options_value_buf;;
+        return GetAccessors()->getTabsOpsAccessor()->registerBarBackgroundBlurStyle(node, (const Opt_BlurStyle*)&style_value, (const Opt_BackgroundBlurStyleOptions*)&options_value);
+}
+KOALA_INTEROP_DIRECT_3(TabsOps_registerBarBackgroundBlurStyle, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_GridItemOps_registerSelectedCallback(Ark_NativePointer node, Ark_Boolean value, KSerializerBuffer thisArray, int32_t thisLength) {
     Deserializer thisDeserializer(thisArray, thisLength);
     SelectedCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_SelectedCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_SelectedCallback))))};;

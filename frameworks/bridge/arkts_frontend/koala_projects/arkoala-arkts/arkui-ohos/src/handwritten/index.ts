@@ -19,6 +19,7 @@ export * from "./ArkStateStyle"
 export * from "./Router"
 export * from "./ForeignFunctions"
 export * from "./GridItemOpsHandWritten"
+export * from "./TabsOpsHandWritten"
 
 // export interface PageTransitionExitInterface { }
 // export interface CommonTransition { }
