@@ -1789,6 +1789,11 @@ void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
     if (!deviceType.empty()) {
         SystemProperties::SetConfigDeviceType(deviceType);
     }
+    auto smartGesture = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_SMART_GESTURE_SWITCH);
+    if (!smartGesture.empty()) {
+        SystemProperties::SetFocusCanBeActive(smartGesture ==
+            OHOS::AppExecFwk::ConfigurationInner::SMART_GESTURE_AUTO);
+    }
 }
 
 std::shared_ptr<Rosen::RSSurfaceNode> UIContentImpl::GetFormRootNode()
