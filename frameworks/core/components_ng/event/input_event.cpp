@@ -76,6 +76,10 @@ void InputEventActuator::OnCollectHoverEvent(
     if (inputEvents_.empty() && !userCallback_ && !userJSFrameNodeCallback_) {
         return;
     }
+    auto inputEventHub = inputEventHub_.Upgrade();
+    if (inputEventHub && inputEventHub->GetFrameNode()) {
+        hoverEventTarget_->AttachFrameNode(inputEventHub->GetFrameNode());
+    }
 
     auto onHoverCallback = [weak = WeakClaim(this)](bool info, HoverInfo& hoverInfo) {
         auto actuator = weak.Upgrade();
@@ -107,6 +111,10 @@ void InputEventActuator::OnCollectHoverEventForTips(
 {
     if (inputEvents_.empty()) {
         return;
+    }
+    auto inputEventHub = inputEventHub_.Upgrade();
+    if (inputEventHub && inputEventHub->GetFrameNode()) {
+        hoverEventTarget_->AttachFrameNode(inputEventHub->GetFrameNode());
     }
 
     auto onHoverCallback = [weak = WeakClaim(this)](bool info, HoverInfo& hoverInfo) {
