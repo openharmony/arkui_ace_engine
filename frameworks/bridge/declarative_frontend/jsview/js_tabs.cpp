@@ -59,6 +59,7 @@ TabsModel* TabsModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
+constexpr int32_t PARAM_COUNT = 2;
 constexpr int32_t SM_COLUMN_NUM = 4;
 constexpr int32_t MD_COLUMN_NUM = 8;
 constexpr int32_t LG_COLUMN_NUM = 12;

@@ -770,6 +770,47 @@ ArkUINativeModuleValue TabsBridge::ResetTabsOptionsController(ArkUIRuntimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue TabsBridge::SetTabsOptionsBarModifier(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> barModifierArg = runtimeCallInfo->GetCallArgRef(1);
+    if (barModifierArg->IsUndefined() || barModifierArg->IsNull() || !barModifierArg->IsObject(vm)) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetTabsOptionsBarModifier(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applyCommonModifierToNode"));
+    if (globalFunc->IsFunction(vm)) {
+        panda::Local<panda::FunctionRef> funcRef = globalFunc;
+        auto func = panda::CopyableGlobal(vm, funcRef);
+        auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+        CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+        auto tabsNode = AceType::DynamicCast<NG::TabsNode>(frameNode);
+        CHECK_NULL_RETURN(tabsNode, panda::JSValueRef::Undefined(vm));
+        auto tabBarNode = AceType::DynamicCast<NG::FrameNode>(tabsNode->GetTabBar());
+        CHECK_NULL_RETURN(tabBarNode, panda::JSValueRef::Undefined(vm));
+        panda::Local<panda::JSValueRef> params[SIZE_OF_VALUES] = { barModifierArg,
+            panda::NativePointerRef::New(vm, AceType::RawPtr(tabBarNode)) };
+        func->Call(vm, func.ToLocal(), params, SIZE_OF_VALUES);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetTabsOptionsBarModifier(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetTabsOptionsBarModifier(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue TabsBridge::SetScrollable(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
