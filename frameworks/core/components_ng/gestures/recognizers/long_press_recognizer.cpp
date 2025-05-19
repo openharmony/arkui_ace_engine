@@ -257,6 +257,8 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     if (touchPoints_.find(event.id) != touchPoints_.end()) {
         touchPoints_.erase(event.id);
     }
+    touchPoints_[event.id] = event;
+    UpdateFingerListInfo();
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == 0) {
         SendCallbackMsg(onActionCancel_, false, GestureCallbackType::CANCEL);
         lastRefereeState_ = RefereeState::READY;
@@ -574,6 +576,9 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
         info->SetRollAngle(trackPoint.rollAngle.value());
     }
     info->SetSourceTool(trackPoint.sourceTool);
+    info->SetRawInputEventType(inputEventType_);
+    info->SetRawInputEvent(lastPointEvent_);
+    info->SetRawInputDeviceId(deviceId_);
     if (gestureRecognizerJudgeFunc &&
         gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_) == GestureJudgeResult::REJECT) {
         return GestureJudgeResult::REJECT;

@@ -571,6 +571,7 @@ bool PanRecognizer::HandlePanAccept()
 
 void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    UpdateTouchEventInfo(event);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -590,6 +591,8 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
     isTouchEventFinished_ = false;
+    touchPoints_[event.id] = TouchEvent();
+    UpdateTouchPointWithAxisEvent(event);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -874,6 +877,9 @@ GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
     }
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
     info->SetForce(lastTouchEvent_.force);
+    info->SetRawInputEventType(inputEventType_);
+    info->SetRawInputEvent(lastPointEvent_);
+    info->SetRawInputDeviceId(deviceId_);
     if (lastTouchEvent_.tiltX.has_value()) {
         info->SetTiltX(lastTouchEvent_.tiltX.value());
     }

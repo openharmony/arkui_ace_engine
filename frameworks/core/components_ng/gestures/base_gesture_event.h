@@ -17,6 +17,10 @@
 
 #include "core/gestures/gesture_info.h"
 
+namespace OHOS::MMI {
+class PointerEvent;
+} // namespace OHOS::MMI
+
 namespace OHOS::Ace {
 
 class ACE_EXPORT BaseGestureEvent : public BaseEventInfo {
@@ -36,8 +40,41 @@ public:
         fingerList_ = fingerList;
     }
 
+    InputEventType GetRawInputEventType() const
+    {
+        return rawInputEventType_;
+    }
+
+    void SetRawInputEventType(InputEventType type)
+    {
+        rawInputEventType_ = type;
+    }
+
+    std::shared_ptr<MMI::PointerEvent> GetRawInputEvent() const
+    {
+        return rawInputEvent_;
+    }
+
+    void SetRawInputEvent(std::shared_ptr<MMI::PointerEvent> rawInputEvent)
+    {
+        rawInputEvent_ = rawInputEvent;
+    }
+
+    int64_t GetRawInputDeviceId() const
+    {
+        return rawInputDeviceId_;
+    }
+
+    void SetRawInputDeviceId(int64_t rawInputDeviceId)
+    {
+        rawInputDeviceId_ = rawInputDeviceId;
+    }
+
 protected:
     std::list<FingerInfo> fingerList_;
+    InputEventType rawInputEventType_;
+    std::shared_ptr<MMI::PointerEvent> rawInputEvent_;
+    int64_t rawInputDeviceId_;
 };
 
 class ACE_EXPORT TapGestureEvent : public BaseGestureEvent {
