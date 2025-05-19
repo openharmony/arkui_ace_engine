@@ -36,7 +36,7 @@ public:
     static void SetMenuOptions(FrameNode* frameNode, NavigationMenuOptions&& opt);
     static void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);
     static void CreateImageButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);
-    static RefPtr<NG::FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<NG::FrameNode> CreateFrameNode(int32_t nodeId, std::function<void()>&& deepRenderFunc = nullptr);
     static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated = false);
     static void SetOnShown(FrameNode* frameNode, std::function<void()>&& onShow);
     static void SetOnHidden(FrameNode* frameNode, std::function<void()>&& onHidden);
@@ -56,6 +56,9 @@ public:
     static void SetToolBarOptions(FrameNode* frameNode, NavigationToolbarOptions&& opt);
     static void SetToolbarMorebuttonOptions(FrameNode* frameNode, MoreButtonOptions&& opt);
     static void SetCustomMenu(FrameNode* frameNode, const RefPtr<UINode>& customNode);
+    static void SetCustomTitle(FrameNode* frameNode, const RefPtr<UINode>& customNode);
+    static void SetCustomToolBar(FrameNode* frameNode, const RefPtr<UINode>& customNode);
+    static void SetTitleHeight(FrameNode* frameNode, const Dimension& titleHeight, bool isValid = true);
 };
 } // namespace OHOS::Ace::NG
 

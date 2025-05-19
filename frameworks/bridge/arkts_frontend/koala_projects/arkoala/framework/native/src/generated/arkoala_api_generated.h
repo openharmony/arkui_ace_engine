@@ -24597,10 +24597,10 @@ typedef struct GENERATED_ArkUINavPathInfoAccessor {
     Opt_Callback_PopInfo_Void (*getOnPop)(Ark_NavPathInfo peer);
     void (*setOnPop)(Ark_NavPathInfo peer,
                      const Callback_PopInfo_Void* onPop);
-    Opt_Boolean (*getIsEntry)(Ark_NavPathInfo peer);
+    Ark_Boolean (*getIsEntry)(Ark_NavPathInfo peer);
     void (*setIsEntry)(Ark_NavPathInfo peer,
                        Ark_Boolean isEntry);
-    Opt_String (*getNavDestinationId)(Ark_NavPathInfo peer);
+    Ark_String (*getNavDestinationId)(Ark_NavPathInfo peer);
     void (*setNavDestinationId)(Ark_NavPathInfo peer,
                                 const Ark_String* navDestinationId);
 } GENERATED_ArkUINavPathInfoAccessor;
@@ -25530,7 +25530,7 @@ typedef struct GENERATED_ArkUINavDestinationContextAccessor {
     Ark_NavPathStack (*getPathStack)(Ark_NavDestinationContext peer);
     void (*setPathStack)(Ark_NavDestinationContext peer,
                          Ark_NavPathStack pathStack);
-    Opt_String (*getNavDestinationId)(Ark_NavDestinationContext peer);
+    Ark_String (*getNavDestinationId)(Ark_NavDestinationContext peer);
     void (*setNavDestinationId)(Ark_NavDestinationContext peer,
                                 const Ark_String* navDestinationId);
 } GENERATED_ArkUINavDestinationContextAccessor;

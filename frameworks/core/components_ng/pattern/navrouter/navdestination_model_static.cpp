@@ -251,17 +251,33 @@ void NavDestinationModelStatic::CreateImageButton(const RefPtr<NavDestinationGro
     backButtonNode->MarkModifyDone();
 }
 
-RefPtr<FrameNode> NavDestinationModelStatic::CreateFrameNode(int32_t nodeId)
+RefPtr<FrameNode> NavDestinationModelStatic::CreateFrameNode(int32_t nodeId, std::function<void()>&& deepRenderFunc)
 {
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId);
+    auto deepRender = [nodeId, deepRenderFunc = std::move(deepRenderFunc)]() -> RefPtr<UINode> {
+        CHECK_NULL_RETURN(deepRenderFunc, nullptr);
+        auto parent = AceType::DynamicCast<UINode>(FrameNode::GetFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId));
+        auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(parent);
+        if (navDestinationNode && navDestinationNode->GetContentNode()) {
+            parent = navDestinationNode->GetContentNode();
+        }
+        if (deepRenderFunc) {
+            ScopedViewStackProcessor scopedViewStackProcessor;
+            ViewStackProcessor::GetInstance()->Push(parent);
+            deepRenderFunc();
+            ViewStackProcessor::GetInstance()->PopContainer();
+            ViewStackProcessor::GetInstance()->Finish();
+        }
+        return parent;
+    };
     auto ctx = AceType::MakeRefPtr<NG::NavDestinationContext>();
     auto navPathInfo = AceType::MakeRefPtr<NavPathInfo>();
     ctx->SetNavPathInfo(navPathInfo);
-    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, [ctx]() {
-            auto pattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId,
+        [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), ctx]() {
+            auto pattern = AceType::MakeRefPtr<NavDestinationPattern>(shallowBuilder);
             pattern->SetNavDestinationContext(ctx);
-            return pattern; 
+            return pattern;
         });
     ctx->SetUniqueId(navDestinationNode->GetId());
     if (!navDestinationNode->GetTitleBarNode()) {
@@ -506,5 +522,55 @@ void NavDestinationModelStatic::SetCustomMenu(FrameNode* frameNode, const RefPtr
     navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
     navDestinationGroupNode->MarkDirtyNode();
     navDestinationGroupNode->MarkModifyDone();
+}
+
+void NavDestinationModelStatic::SetCustomTitle(FrameNode* frameNode, const RefPtr<UINode>& customNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(customNode);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    if (!navDestinationNode->GetPrevTitleIsCustomValue(false)) {
+        titleBarNode->RemoveChild(titleBarNode->GetTitle());
+        titleBarNode->RemoveChild(titleBarNode->GetSubtitle());
+        titleBarNode->SetTitle(nullptr);
+        titleBarNode->SetSubtitle(nullptr);
+    }
+    navDestinationNode->UpdatePrevTitleIsCustom(true);
+    auto currentTitle = titleBarNode->GetTitle();
+    if (currentTitle && customNode->GetId() == currentTitle->GetId()) {
+        // do nothing
+        return;
+    }
+    // update custom title
+    titleBarNode->RemoveChild(currentTitle);
+    titleBarNode->SetTitle(customNode);
+    titleBarNode->AddChild(customNode);
+    titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void NavDestinationModelStatic::SetCustomToolBar(FrameNode* frameNode, const RefPtr<UINode>& customNode)
+{
+    auto navDestinationGroupNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    NavigationToolbarUtil::SetCustomToolBar(navDestinationGroupNode, customNode);
+}
+
+void NavDestinationModelStatic::SetTitleHeight(FrameNode* frameNode, const Dimension& titleHeight, bool isValid)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    if (isValid) {
+        titleBarLayoutProperty->UpdateTitleHeight(titleHeight);
+    } else {
+        titleBarLayoutProperty->ResetTitleHeight();
+    }
 }
 } // namespace OHOS::Ace::NG

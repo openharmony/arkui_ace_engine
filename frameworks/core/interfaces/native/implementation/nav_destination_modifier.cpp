@@ -36,7 +36,11 @@ namespace NavDestinationModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = NavDestinationModelStatic::CreateFrameNode(id);
+    RefPtr<FrameNode> frameNode = nullptr;
+    auto contentCreator = []() {
+        // empty content creator to be done
+    };
+    frameNode = NavDestinationModelStatic::CreateFrameNode(id, std::move(contentCreator));
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -482,13 +486,16 @@ void TitleImpl(Ark_NativePointer node,
         NavDestinationModelStatic::ParseCommonTitle(frameNode, info);
         return;
     }
-    const int8_t resourceType = 4;
-    if (selector == resourceType) {
-        Converter::ResourceConverter converter(value->value.value4);
-        info.title = converter.ToString().value_or("");
-        info.hasMainTitle = true;
-        info.hasSubTitle = false;
-        NavDestinationModelStatic::ParseCommonTitle(frameNode, info);
+    const int8_t customTitleSelector = 1;
+    if (selector == customTitleSelector) {
+        CallbackHelper(value->value.value1)
+            .BuildAsync(
+                [frameNode](const RefPtr<UINode>& uiNode) {
+                    CalcDimension titleHeight;
+                    NavDestinationModelStatic::SetTitleHeight(frameNode, titleHeight, false);
+                    NavDestinationModelStatic::SetCustomTitle(frameNode, uiNode);
+                },
+                node);
         return;
     }
     const int8_t commonTitleSelector = 2;
@@ -498,6 +505,42 @@ void TitleImpl(Ark_NativePointer node,
         info.hasSubTitle = true;
         info.hasMainTitle = true;
         NavDestinationModelStatic::ParseCommonTitle(frameNode, info);
+    }
+    const int8_t navigationCustomTitleSelector = 3;
+    if (selector == navigationCustomTitleSelector) {
+        auto titleHeightSelector = value->value.value3.height.selector;
+        const int8_t titleHeightType = 0;
+        const int8_t lengthType = 1;
+        if (titleHeightSelector == titleHeightType) {
+            auto titleWithSub = static_cast<uint32_t>(value->value.value3.height.value0);
+            if (titleWithSub == 0) {
+                NavDestinationModelStatic::SetTitleHeight(frameNode, NG::SINGLE_LINE_TITLEBAR_HEIGHT);
+            } else if (titleWithSub == 1) {
+                NavDestinationModelStatic::SetTitleHeight(frameNode, NG::DOUBLE_LINE_TITLEBAR_HEIGHT);
+            }
+        } else if (titleHeightSelector == lengthType) {
+            CalcDimension length = Converter::Convert<CalcDimension>(value->value.value3.height.value1);
+            if (length.Value() < 0) {
+                NavDestinationModelStatic::SetTitleHeight(frameNode, Dimension());
+            } else {
+                NavDestinationModelStatic::SetTitleHeight(frameNode, length);
+            }
+        }
+        CallbackHelper(value->value.value3.builder)
+            .BuildAsync(
+                [frameNode](
+                    const RefPtr<UINode>& uiNode) { NavDestinationModelStatic::SetCustomTitle(frameNode, uiNode); },
+                node);
+        return;
+    }
+    const int8_t resourceType = 4;
+    if (selector == resourceType) {
+        Converter::ResourceConverter converter(value->value.value4);
+        info.title = converter.ToString().value_or("");
+        info.hasMainTitle = true;
+        info.hasSubTitle = false;
+        NavDestinationModelStatic::ParseCommonTitle(frameNode, info);
+        return;
     }
 }
 void ToolbarConfigurationImpl(Ark_NativePointer node, const Opt_Union_Array_ToolbarItem_CustomBuilder* toolbarParam,
@@ -521,6 +564,12 @@ void ToolbarConfigurationImpl(Ark_NativePointer node, const Opt_Union_Array_Tool
             auto toolbarItemArray = Converter::Convert<std::vector<NG::BarItem>>(toolbarParam->value.value0);
             NavDestinationModelStatic::SetToolbarConfiguration(frameNode, std::move(toolbarItemArray));
         } else if (typeValue == 1) {
+            CallbackHelper(toolbarParam->value.value1)
+                .BuildAsync(
+                    [frameNode](const RefPtr<UINode>& uiNode) {
+                        NavDestinationModelStatic::SetCustomToolBar(frameNode, uiNode);
+                    },
+                    node);
         }
     }
 

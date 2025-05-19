@@ -98,10 +98,15 @@ export class PathStackUtils {
             } else if (typeof indexOrId === 'number') {
                 let inputIndex = indexOrId as number;
                 if (inputIndex < 0 || inputIndex >= PathStackUtils.infoArray.length) {
-                    inputIndex = PathStackUtils.infoArray.length - 1;
+                    return;
                 }
-                id = PathStackUtils.infoArray[inputIndex].navDestinationId;
-                PathStackUtils.infoArray.splice(inputIndex, 1);
+                id = PathStackUtils.infoArray[PathStackUtils.infoArray.length - 1].navDestinationId;
+                let removeArray = PathStackUtils.infoArray.splice(inputIndex + 1);
+                removeArray.forEach((element) => {
+                    if (element.navDestinationId != undefined && element.navDestinationId == id) {
+                        PathStackUtils.infoMaps.delete(element.navDestinationId!)
+                    }
+                })
             } else {
                 indexOrId = PathStackUtils.infoArray.length - 1
                 id = PathStackUtils.infoArray[PathStackUtils.infoArray.length - 1].navDestinationId
