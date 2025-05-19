@@ -608,4 +608,17 @@ std::pair<int32_t, int32_t> IndicatorPattern::CalMouseClickIndexStartAndEnd(
     }
     return { start, end };
 }
+
+void IndicatorPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto indicatorNode = GetHost();
+    CHECK_NULL_VOID(indicatorNode);
+    if (GetIndicatorType() == SwiperIndicatorType::DOT) {
+        SaveDotIndicatorProperty();
+    } else if (GetIndicatorType() == SwiperIndicatorType::DIGIT) {
+        SaveDigitIndicatorProperty();
+        SwiperIndicatorPattern::OnModifyDone();
+    }
+}
 } // namespace OHOS::Ace::NG
