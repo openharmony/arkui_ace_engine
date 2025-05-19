@@ -768,7 +768,6 @@ bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto video = AceType::DynamicCast<FrameNode>(movingPhoto->GetVideo());
     CHECK_NULL_RETURN(video, false);
     video->GetRenderContext()->SetClipToBounds(true);
-    video->GetRenderContext()->UpdateOpacity(0.0);
     return false;
 }
 
