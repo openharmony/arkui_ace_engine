@@ -924,7 +924,7 @@ bool SwiperPattern::IsFocusNodeInItemPosition(const RefPtr<FocusHub>& targetFocu
 
 void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
 {
-    if (GetDisableFlushFocus()) {
+    if (GetAndResetDisableFlushFocus()) {
         return;
     }
     CHECK_NULL_VOID(curShowFrame);

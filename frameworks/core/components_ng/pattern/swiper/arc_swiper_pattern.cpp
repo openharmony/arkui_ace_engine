@@ -1422,12 +1422,10 @@ int32_t ArcSwiperPattern::CalcTime(int32_t time)
     return time * duration / baseTime;
 }
 
-bool ArcSwiperPattern::GetDisableFlushFocus()
+bool ArcSwiperPattern::GetAndResetDisableFlushFocus()
 {
     bool ret = isDisableFlushFocus_;
-    if (isDisableFlushFocus_) {
-        isDisableFlushFocus_ = false;
-    }
+    isDisableFlushFocus_ = false;
     return ret;
 }
 
