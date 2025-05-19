@@ -68,16 +68,17 @@ void JSGridItem::CreateForPartialUpdate(const JSCallbackInfo& args)
     }
 
     auto isLazy = args[1]->ToBoolean();
-    auto jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(args[0]));
-    auto gridItemDeepRenderFunc = [execCtx = args.GetExecutionContext(), jsDeepRenderFunc = std::move(jsDeepRender)](
-                                      int32_t elmtId) {
+    auto vm = args.GetVm();
+    auto jsFunc = JSRef<JSFunc>::Cast(args[0]);
+    auto func = jsFunc->GetLocalHandle();
+    auto gridItemDeepRenderFunc = [vm, func = panda::CopyableGlobal(vm, func)](int32_t elmtId) {
         ACE_SCOPED_TRACE("JSGridItem::ExecuteDeepRender");
         ACE_DCHECK(componentsStack_.empty());
-        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-        JSRef<JSVal> jsParams[2];
-        jsParams[0] = JSRef<JSVal>::Make(ToJSValue(elmtId));
-        jsParams[1] = JSRef<JSVal>::Make(ToJSValue(true));
-        jsDeepRenderFunc->ExecuteJS(2, jsParams);
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        panda::Local<panda::JSValueRef> params[2] = { panda::NumberRef::New(vm, elmtId),
+            panda::BooleanRef::New(vm, true) };
+        func->Call(vm, func.ToLocal(), params, 2);
     };
 
     NG::GridItemStyle gridItemStyle = NG::GridItemStyle::NONE;
@@ -166,15 +167,17 @@ void JSGridItem::SetSelected(const JSCallbackInfo& info)
     GridItemModel::GetInstance()->SetSelected(select);
 
     if (changeEventVal->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+        auto vm = info.GetVm();
+        auto jsFunc = JSRef<JSFunc>::Cast(changeEventVal);
+        auto func = jsFunc->GetLocalHandle();
         auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                               bool param) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto changeEvent = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](bool param) {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
             ACE_SCORING_EVENT("GridItem.ChangeEvent");
-            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
             PipelineContext::SetCallBackNode(node);
-            func->ExecuteJS(1, &newJSVal);
+            panda::Local<panda::JSValueRef> params[1] = { panda::BooleanRef::New(vm, param) };
+            func->Call(vm, func.ToLocal(), params, 1);
         };
         GridItemModel::GetInstance()->SetSelectChangeEvent(std::move(changeEvent));
     }
@@ -192,7 +195,6 @@ void JSGridItem::JSBind(BindingTarget globalObj)
     JSClass<JSGridItem>::StaticMethod("rowEnd", &JSGridItem::SetRowEnd, opt);
     JSClass<JSGridItem>::StaticMethod("forceRebuild", &JSGridItem::ForceRebuild, opt);
     JSClass<JSGridItem>::StaticMethod("selectable", &JSGridItem::SetSelectable, opt);
-    JSClass<JSGridItem>::StaticMethod("onSelect", &JSGridItem::SelectCallback);
     JSClass<JSGridItem>::StaticMethod("width", &JSGridItem::SetGridItemWidth);
     JSClass<JSGridItem>::StaticMethod("height", &JSGridItem::SetGridItemHeight);
     JSClass<JSGridItem>::StaticMethod("selected", &JSGridItem::SetSelected);

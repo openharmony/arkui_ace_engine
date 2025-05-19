@@ -180,7 +180,7 @@ void JSListItemGroup::Create(const JSCallbackInfo& args)
             NG::ListItemGroupModelNG::GetInstance()->RemoveHeader();
         }
     } else {
-        if (!SetHeaderBuilder(obj)) {
+        if (!SetHeaderBuilder(args.GetVm(), obj)) {
             NG::ListItemGroupModelNG::GetInstance()->RemoveHeader();
         }
     }
@@ -191,7 +191,7 @@ void JSListItemGroup::Create(const JSCallbackInfo& args)
             NG::ListItemGroupModelNG::GetInstance()->RemoveFooter();
         }
     } else {
-        if (!SetFooterBuilder(obj)) {
+        if (!SetFooterBuilder(args.GetVm(), obj)) {
             NG::ListItemGroupModelNG::GetInstance()->RemoveFooter();
         }
     }
@@ -253,24 +253,34 @@ bool JSListItemGroup::ParseHeaderAndFooterContent(const JSRef<JSVal>& contentPar
     return true;
 }
 
-bool JSListItemGroup::SetHeaderBuilder(const JSRef<JSObject>& obj)
+bool JSListItemGroup::SetHeaderBuilder(const panda::ecmascript::EcmaVM* vm, const JSRef<JSObject>& obj)
 {
     auto headerObject = obj->GetProperty("header");
     if (headerObject->IsFunction()) {
-        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(headerObject));
-        auto headerAction = [builderFunc]() { builderFunc->Execute(); };
+        auto jsFunc = JSRef<JSFunc>::Cast(headerObject);
+        auto func = jsFunc->GetLocalHandle();
+        auto headerAction = [vm, func = panda::CopyableGlobal(vm, func)]() {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            func->Call(vm, func.ToLocal(), nullptr, 0);
+        };
         ListItemGroupModel::GetInstance()->SetHeader(headerAction);
         return true;
     }
     return false;
 }
 
-bool JSListItemGroup::SetFooterBuilder(const JSRef<JSObject>& obj)
+bool JSListItemGroup::SetFooterBuilder(const panda::ecmascript::EcmaVM* vm, const JSRef<JSObject>& obj)
 {
     auto footerObject = obj->GetProperty("footer");
     if (footerObject->IsFunction()) {
-        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(footerObject));
-        auto footerAction = [builderFunc]() { builderFunc->Execute(); };
+        auto jsFunc = JSRef<JSFunc>::Cast(footerObject);
+        auto func = jsFunc->GetLocalHandle();
+        auto footerAction = [vm, func = panda::CopyableGlobal(vm, func)]() {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            func->Call(vm, func.ToLocal(), nullptr, 0);
+        };
         ListItemGroupModel::GetInstance()->SetFooter(footerAction);
         return true;
     }

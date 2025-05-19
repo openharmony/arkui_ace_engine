@@ -247,8 +247,7 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
         }
         if (footerObject->IsFunction()) {
             // ignore footer if sections are present
-            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(footerObject));
-            auto footerAction = [builderFunc]() { builderFunc->Execute(); };
+            auto footerAction = [jsFunc = JSRef<JSFunc>::Cast(footerObject)]() { jsFunc->Call(JSRef<JSObject>()); };
             WaterFlowModel::GetInstance()->SetFooter(footerAction);
         }
     }
@@ -268,9 +267,6 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlow>::StaticMethod("rowsTemplate", &JSWaterFlow::SetRowsTemplate, opt);
     JSClass<JSWaterFlow>::StaticMethod("nestedScroll", &JSWaterFlow::SetNestedScroll);
     JSClass<JSWaterFlow>::StaticMethod("enableScrollInteraction", &JSWaterFlow::SetScrollEnabled);
-    JSClass<JSWaterFlow>::StaticMethod("onReachStart", &JSWaterFlow::ReachStartCallback);
-    JSClass<JSWaterFlow>::StaticMethod("onReachEnd", &JSWaterFlow::ReachEndCallback);
-    JSClass<JSWaterFlow>::StaticMethod("onScrollFrameBegin", &JSWaterFlow::ScrollFrameBeginCallback);
     JSClass<JSWaterFlow>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSWaterFlow>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSWaterFlow>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -287,9 +283,6 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlow>::StaticMethod("edgeEffect", &JSWaterFlow::SetEdgeEffect);
 
     JSClass<JSWaterFlow>::StaticMethod("onScroll", &JSWaterFlow::JsOnScroll);
-    JSClass<JSWaterFlow>::StaticMethod("onScrollStart", &JSWaterFlow::JsOnScrollStart);
-    JSClass<JSWaterFlow>::StaticMethod("onScrollStop", &JSWaterFlow::JsOnScrollStop);
-    JSClass<JSWaterFlow>::StaticMethod("onScrollIndex", &JSWaterFlow::JsOnScrollIndex);
 
     JSClass<JSWaterFlow>::StaticMethod("scrollBar", &JSWaterFlow::SetScrollBar, opt);
     JSClass<JSWaterFlow>::StaticMethod("scrollBarWidth", &JSWaterFlow::SetScrollBarWidth, opt);
@@ -521,7 +514,7 @@ void JSWaterFlow::SetEdgeEffect(const JSCallbackInfo& info)
 void JSWaterFlow::JsOnScroll(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+        auto onScroll = [func = JSRef<JSFunc>::Cast(args[0])](
                             const CalcDimension& scrollOffset, const ScrollState& scrollState) {
             auto params = ConvertToJSValues(scrollOffset, scrollState);
             func->Call(JSRef<JSObject>(), params.size(), params.data());

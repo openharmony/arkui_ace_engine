@@ -855,7 +855,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetOnSelected(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    auto callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const int32_t selected) {
+    std::function<void(const int32_t selected)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                               const int32_t selected) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));

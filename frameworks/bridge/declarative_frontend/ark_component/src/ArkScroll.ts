@@ -289,9 +289,9 @@ class ScrollOnScrollModifier extends ModifierWithKey<(xOffset: number, yOffset: 
   static identity: Symbol = Symbol('scrollOnScroll');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().scroll.resetScrollOnScrollModifier(node);
+      getUINativeModule().scroll.resetScrollOnScroll(node);
     } else {
-      getUINativeModule().scroll.setScrollOnScrollModifier(node, this.value);
+      getUINativeModule().scroll.setScrollOnScroll(node, this.value);
     }
   }
 }
@@ -499,3 +499,44 @@ globalThis.Scroll.attributeModifier = function (modifier: ArkComponent): void {
     return new modifierJS.ScrollModifier(nativePtr, classType);
   });
 };
+
+globalThis.Scroll.onScrollFrameBegin = function (value: (offset: number, state: ScrollState) => { offsetRemain: number }): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scroll.setScrollOnScrollFrameBegin(nodePtr, value);
+}
+globalThis.Scroll.onScroll = function (value: (xOffset: number, yOffset: number) => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scroll.setScrollOnScroll(nodePtr, value);
+}
+globalThis.Scroll.onWillScroll = function (value: (xOffset: number, yOffset: number, scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scroll.setScrollOnWillScroll(nodePtr, value);
+}
+globalThis.Scroll.onDidScroll = function (value: (xOffset: number, yOffset: number, scrollState: ScrollState) => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scroll.setScrollOnDidScroll(nodePtr, value);
+}
+globalThis.Scroll.onScrollEdge = function (value: (side: Edge) => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scroll.setScrollOnScrollEdge(nodePtr, value);
+}
+globalThis.Scroll.onScrollEnd = function (value: () => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scroll.setScrollOnScrollEnd(nodePtr, value);
+}
+globalThis.Scroll.onScrollStart = function (value: () => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scroll.setScrollOnScrollStart(nodePtr, value);
+}
+globalThis.Scroll.onScrollStop = function (value: () => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scroll.setScrollOnScrollStop(nodePtr, value);
+}
+globalThis.Scroll.onReachStart = function (value: () => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scrollable.setOnReachStart(nodePtr, value);
+}
+globalThis.Scroll.onReachEnd = function (value: () => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scrollable.setOnReachEnd(nodePtr, value);
+}

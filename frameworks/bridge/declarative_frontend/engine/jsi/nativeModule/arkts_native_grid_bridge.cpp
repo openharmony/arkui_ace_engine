@@ -32,48 +32,48 @@ constexpr int32_t DEFAULT_CACHED_COUNT = 1;
 constexpr size_t GRID_ITEM_SIZE_RESULT_LENGTH = 2;
 constexpr size_t GRID_ITEM_RECT_RESULT_LENGTH = 4;
 namespace {
-void ParseGridItemSize(const Framework::JSRef<Framework::JSVal>& value, GridItemSize& gridItemSize)
+void ParseGridItemSize(const EcmaVM* vm, const Local<JSValueRef>& value, GridItemSize& gridItemSize)
 {
-    if (value->IsArray()) {
-        auto array = Framework::JSRef<Framework::JSArray>::Cast(value);
-        auto length = array->Length();
+    if (value->IsArray(vm)) {
+        auto array = Local<panda::ArrayRef>(value);
+        auto length = array->Length(vm);
         if (length != GRID_ITEM_SIZE_RESULT_LENGTH) {
             return;
         }
-        Framework::JSRef<Framework::JSVal> rows = array->GetValueAt(0);
+        auto rows = panda::ArrayRef::GetValueAt(vm, array, 0);
         if (rows->IsNumber()) {
-            gridItemSize.rows = rows->ToNumber<int32_t>();
+            gridItemSize.rows = static_cast<int32_t>(rows->ToNumber(vm)->Value());
         }
-        Framework::JSRef<Framework::JSVal> columns = array->GetValueAt(1);
+        auto columns = panda::ArrayRef::GetValueAt(vm, array, 1);
         if (columns->IsNumber()) {
-            gridItemSize.columns = columns->ToNumber<int32_t>();
+            gridItemSize.columns = static_cast<int32_t>(columns->ToNumber(vm)->Value());
         }
     }
 }
 
-void ParseGridItemRect(const Framework::JSRef<Framework::JSVal>& value, GridItemRect& gridItemRect)
+void ParseGridItemRect(const EcmaVM* vm, const Local<JSValueRef>& value, GridItemRect& gridItemRect)
 {
-    if (value->IsArray()) {
-        Framework::JSRef<Framework::JSArray> array = Framework::JSRef<Framework::JSArray>::Cast(value);
-        auto length = array->Length();
+    if (value->IsArray(vm)) {
+        auto array = Local<panda::ArrayRef>(value);
+        auto length = array->Length(vm);
         if (length != GRID_ITEM_RECT_RESULT_LENGTH) {
             return;
         }
-        auto rowStart = array->GetValueAt(GridItemRect::ROW_START);
+        auto rowStart = panda::ArrayRef::GetValueAt(vm, array, GridItemRect::ROW_START);
         if (rowStart->IsNumber()) {
-            gridItemRect.rowStart = rowStart->ToNumber<int32_t>();
+            gridItemRect.rowStart = static_cast<int32_t>(rowStart->ToNumber(vm)->Value());
         }
-        auto rowSpan = array->GetValueAt(GridItemRect::ROW_SPAN);
+        auto rowSpan = panda::ArrayRef::GetValueAt(vm, array, GridItemRect::ROW_SPAN);
         if (rowSpan->IsNumber()) {
-            gridItemRect.rowSpan = rowSpan->ToNumber<int32_t>();
+            gridItemRect.rowSpan = static_cast<int32_t>(rowSpan->ToNumber(vm)->Value());
         }
-        auto columnStart = array->GetValueAt(GridItemRect::COLUMN_START);
+        auto columnStart = panda::ArrayRef::GetValueAt(vm, array, GridItemRect::COLUMN_START);
         if (columnStart->IsNumber()) {
-            gridItemRect.columnStart = columnStart->ToNumber<int32_t>();
+            gridItemRect.columnStart = static_cast<int32_t>(columnStart->ToNumber(vm)->Value());
         }
-        auto columnSpan = array->GetValueAt(GridItemRect::COLUMN_SPAN);
+        auto columnSpan = panda::ArrayRef::GetValueAt(vm, array, GridItemRect::COLUMN_SPAN);
         if (columnSpan->IsNumber()) {
-            gridItemRect.columnSpan = columnSpan->ToNumber<int32_t>();
+            gridItemRect.columnSpan = static_cast<int32_t>(columnSpan->ToNumber(vm)->Value());
         }
     }
 }
@@ -82,18 +82,18 @@ void ParseGetGridItemSize(const EcmaVM* vm, const Local<JSValueRef>& getSizeByIn
 {
     if (getSizeByIndex->IsFunction(vm)) {
         Local<panda::FunctionRef> functionRef = getSizeByIndex->ToObject(vm);
-        auto onGetIrregularSizeByIndex =
-            [func = AceType::MakeRefPtr<Framework::JsFunction>(Framework::JSRef<Framework::JSObject>(),
-                 Framework::JSRef<Framework::JSFunc>(Framework::JSFunc(functionRef)))](int32_t index) {
-                GridItemSize gridItemSize;
-                auto itemIndex = Framework::JSRef<Framework::JSVal>::Make(Framework::ToJSValue(index));
-                auto result = func->ExecuteJS(1, &itemIndex);
-                if (!result->IsArray()) {
-                    return gridItemSize;
-                }
-                ParseGridItemSize(result, gridItemSize);
+        auto onGetIrregularSizeByIndex = [vm, func = panda::CopyableGlobal(vm, functionRef)](int32_t index) {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            GridItemSize gridItemSize;
+            panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, index) };
+            auto result = func->Call(vm, func.ToLocal(), params, 1);
+            if (!result->IsArray(vm)) {
                 return gridItemSize;
-            };
+            }
+            ParseGridItemSize(vm, result, gridItemSize);
+            return gridItemSize;
+        };
         option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
     }
 }
@@ -102,18 +102,18 @@ void ParseGetGridItemRect(const EcmaVM* vm, const Local<JSValueRef>& getRectByIn
 {
     if (getRectByIndex->IsFunction(vm)) {
         Local<panda::FunctionRef> functionRef = getRectByIndex->ToObject(vm);
-        auto onGetRectByIndex =
-            [func = AceType::MakeRefPtr<Framework::JsFunction>(Framework::JSRef<Framework::JSObject>(),
-                 Framework::JSRef<Framework::JSFunc>(Framework::JSFunc(functionRef)))](int32_t index) {
-                GridItemRect gridItemRect;
-                auto itemIndex = Framework::JSRef<Framework::JSVal>::Make(Framework::ToJSValue(index));
-                auto result = func->ExecuteJS(1, &itemIndex);
-                if (!result->IsArray()) {
-                    return gridItemRect;
-                }
-                ParseGridItemRect(result, gridItemRect);
+        auto onGetRectByIndex = [vm, func = panda::CopyableGlobal(vm, functionRef)](int32_t index) {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            GridItemRect gridItemRect;
+            panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, index) };
+            auto result = func->Call(vm, func.ToLocal(), params, 1);
+            if (!result->IsArray(vm)) {
                 return gridItemRect;
-            };
+            }
+            ParseGridItemRect(vm, result, gridItemRect);
+            return gridItemRect;
+        };
         option.getRectByIndex = std::move(onGetRectByIndex);
     }
 }
@@ -902,25 +902,30 @@ ArkUINativeModuleValue GridBridge::SetOnGridItemDragStart(ArkUIRuntimeCallInfo* 
     }
 
     RefPtr<JsDragFunction> jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[1]));
-    std::function<void(const ItemDragInfo&, int32_t)> callback = [vm, frameNode, func = std::move(jsOnDragFunc),
-                                                                     execCtx = info.GetExecutionContext()](
+    std::function<void(const ItemDragInfo&, int32_t)> callback = [vm, frameNode, func = std::move(jsOnDragFunc)](
                                                                      const ItemDragInfo& dragInfo, int32_t itemIndex) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
 
-        auto ret = func->ItemDragStartExecute(dragInfo, itemIndex);
-        if (!ret->IsFunction()) {
-            return;
-        }
-
-        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(ret));
-        if (!builderFunc) {
+        auto result = func->ItemDragStartExecute(dragInfo, itemIndex);
+        auto ret = result->GetLocalHandle();
+        panda::Local<panda::FunctionRef> builderFuncRef;
+        if (ret->IsFunction(vm)) {
+            builderFuncRef = ret->ToObject(vm);
+        } else if (ret->IsObject(vm)) {
+            auto builderObj = JSRef<JSObject>::Make(ret);
+            auto builder = builderObj->GetProperty("builder");
+            if (!builder->IsFunction()) {
+                return;
+            }
+            builderFuncRef = builder->GetLocalHandle()->ToObject(vm);
+        } else {
             return;
         }
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        builderFunc->Execute();
+        auto builderFunc = panda::CopyableGlobal(vm, builderFuncRef);
+        builderFunc->Call(vm, builderFunc.ToLocal(), nullptr, 0);
     };
     GetArkUINodeModifiers()->getGridModifier()->setOnGridItemDragStart(nativeNode, reinterpret_cast<void*>(&callback));
     return panda::JSValueRef::Undefined(vm);
@@ -954,10 +959,8 @@ ArkUINativeModuleValue GridBridge::SetOnGridItemDragEnter(ArkUIRuntimeCallInfo* 
     }
     RefPtr<JsDragFunction> jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[1]));
 
-    std::function<void(const ItemDragInfo&)> callback = [vm, frameNode, func = std::move(jsOnDragFunc),
-                                                            execCtx = info.GetExecutionContext()](
+    std::function<void(const ItemDragInfo&)> callback = [vm, frameNode, func = std::move(jsOnDragFunc)](
                                                             const ItemDragInfo& dragInfo) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
 
@@ -997,9 +1000,8 @@ ArkUINativeModuleValue GridBridge::SetOnGridItemDragMove(ArkUIRuntimeCallInfo* r
     RefPtr<JsDragFunction> jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[1]));
 
     std::function<void(const ItemDragInfo&, int32_t, int32_t)> callback =
-        [vm, frameNode, func = std::move(jsOnDragFunc), execCtx = info.GetExecutionContext()](
+        [vm, frameNode, func = std::move(jsOnDragFunc)](
             const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
 
@@ -1038,10 +1040,8 @@ ArkUINativeModuleValue GridBridge::SetOnGridItemDragLeave(ArkUIRuntimeCallInfo* 
     }
     RefPtr<JsDragFunction> jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[1]));
 
-    std::function<void(const ItemDragInfo&, int32_t)> callback = [vm, frameNode, func = std::move(jsOnDragFunc),
-                                                                     execCtx = info.GetExecutionContext()](
+    std::function<void(const ItemDragInfo&, int32_t)> callback = [vm, frameNode, func = std::move(jsOnDragFunc)](
                                                                      const ItemDragInfo& dragInfo, int32_t itemIndex) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
 
@@ -1081,9 +1081,8 @@ ArkUINativeModuleValue GridBridge::SetOnGridItemDrop(ArkUIRuntimeCallInfo* runti
     RefPtr<JsDragFunction> jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[1]));
 
     std::function<void(const ItemDragInfo&, int32_t, int32_t, bool)> callback =
-        [vm, frameNode, func = std::move(jsOnDragFunc), execCtx = info.GetExecutionContext()](
+        [vm, frameNode, func = std::move(jsOnDragFunc)](
             const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
 

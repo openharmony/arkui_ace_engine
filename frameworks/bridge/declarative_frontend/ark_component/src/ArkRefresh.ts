@@ -154,3 +154,16 @@ globalThis.Refresh.attributeModifier = function (modifier: ArkComponent): void {
     return new modifierJS.RefreshModifier(nativePtr, classType);
   });
 };
+
+globalThis.Refresh.onStateChange = function (value: (state: RefreshStatus) => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().refresh.setOnStateChange(nodePtr, value);
+}
+globalThis.Refresh.onRefreshing = function (value: () => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().refresh.setOnRefreshing(nodePtr, value);
+}
+globalThis.Refresh.onOffsetChange = function (value: Callback<number>): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().refresh.setOnOffsetChange(nodePtr, value);
+}

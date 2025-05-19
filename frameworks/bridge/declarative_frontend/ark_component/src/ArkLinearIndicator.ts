@@ -92,3 +92,8 @@ globalThis.LinearIndicator.attributeModifier = function (modifier: ArkComponent)
     return new modifierJS.LinearIndicatorModifier(nativePtr, classType);
   });
 };
+
+globalThis.LinearIndicator.onChange = function (value: OnLinearIndicatorChangeCallback): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().linearIndicator.setOnChange(nodePtr, value);
+}

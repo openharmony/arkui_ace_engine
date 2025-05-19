@@ -142,9 +142,9 @@ class TabContentOnWillHideModifier extends ModifierWithKey<VoidCallback> {
   static identity: Symbol = Symbol('contentonwillhide');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().tabContent.resetContentOnWillHide(node);
+      getUINativeModule().tabContent.resetTabContentOnWillHide(node);
     } else {
-      getUINativeModule().tabContent.setContentOnWillHide(node, this.value);
+      getUINativeModule().tabContent.setTabContentOnWillHide(node, this.value);
     }
   }
 
@@ -161,3 +161,12 @@ globalThis.TabContent.attributeModifier = function (modifier: ArkComponent): voi
     return new modifierJS.TabContentModifier(nativePtr, classType);
   });
 };
+
+globalThis.TabContent.onWillShow = function (value: VoidCallback): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().tabContent.setTabContentOnWillShow(nodePtr, value);
+}
+globalThis.TabContent.onWillHide = function (value: VoidCallback): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().tabContent.setTabContentOnWillHide(nodePtr, value);
+}

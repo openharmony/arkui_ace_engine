@@ -59,6 +59,7 @@ TabsModel* TabsModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
+constexpr int32_t PARAM_COUNT = 2;
 constexpr int32_t SM_COLUMN_NUM = 4;
 constexpr int32_t MD_COLUMN_NUM = 8;
 constexpr int32_t LG_COLUMN_NUM = 12;
@@ -96,14 +97,15 @@ RefPtr<Curve> CreateAnimationCurveByObject(const JSCallbackInfo& info)
     std::function<float(float)> customCallBack = nullptr;
     JSRef<JSVal> onCallBack = object->GetProperty("__curveCustomFunc");
     if (onCallBack->IsFunction()) {
-        RefPtr<JsFunction> jsFuncCallBack =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCallBack));
-        customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentId()](float time) -> float {
+        auto vm = info.GetVm();
+        auto jsFunc = JSRef<JSFunc>::Cast(onCallBack);
+        auto func = jsFunc->GetLocalHandle();
+        customCallBack = [vm, func = panda::CopyableGlobal(vm, func), id = Container::CurrentId()](
+                             float time) -> float {
             ContainerScope scope(id);
-            JSRef<JSVal> params[1];
-            params[0] = JSRef<JSVal>::Make(ToJSValue(time));
-            auto result = func->ExecuteJS(1, params);
-            auto resultValue = result->IsNumber() ? result->ToNumber<float>() : 1.0f;
+            panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, time) };
+            auto result = func->Call(vm, func.ToLocal(), params, 1);
+            auto resultValue = result->IsNumber() ? static_cast<float>(result->ToNumber(vm)->Value()) : 1.0f;
             return resultValue;
         };
     }
@@ -272,11 +274,13 @@ void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& change
 {
     CHECK_NULL_VOID(!changeEventVal->IsUndefined() && changeEventVal->IsFunction());
 
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto vm = info.GetVm();
+    auto jsFunc = JSRef<JSFunc>::Cast(changeEventVal);
+    auto func = jsFunc->GetLocalHandle();
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onChangeEvent = [executionContext = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                             const BaseEventInfo* info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+    auto onChangeEvent = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](const BaseEventInfo* info) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
         if (!tabsInfo) {
             TAG_LOGW(AceLogTag::ACE_TABS, "ParseTabsIndexObject execute onChange event failed.");
@@ -284,8 +288,8 @@ void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& change
         }
         ACE_SCORING_EVENT("Tabs.onChangeEvent");
         PipelineContext::SetCallBackNode(node);
-        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(tabsInfo->GetIndex()));
-        func->ExecuteJS(1, &newJSVal);
+        panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, tabsInfo->GetIndex()) };
+        func->Call(vm, func.ToLocal(), params, 1);
     };
     TabsModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
 }
@@ -813,30 +817,20 @@ void JSTabs::SetBarModifier(const JSCallbackInfo& info, const JsiRef<JsiValue>& 
     if (!val->IsObject()) {
         return;
     }
-    JSRef<JSObject> modifierObj = JSRef<JSObject>::Cast(val);
     auto vm = info.GetVm();
     auto globalObj = JSNApi::GetGlobalObject(vm);
     auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applyCommonModifierToNode"));
-    JsiValue jsiValue(globalFunc);
-    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
-    std::function<void(WeakPtr<NG::FrameNode>)> onApply = nullptr;
-    if (globalFuncRef->IsFunction()) {
-        RefPtr<JsFunction> jsFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
-        onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                      modifierParam = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            CHECK_NULL_VOID(func);
-            auto node = frameNode.Upgrade();
-            CHECK_NULL_VOID(node);
-            JSRef<JSVal> params[2];
-            params[0] = modifierParam;
-            params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
-            PipelineContext::SetCallBackNode(node);
-            func->ExecuteJS(2, params);
-        };
+    if (globalFunc->IsFunction(vm)) {
+        panda::Local<panda::FunctionRef> funcRef = globalFunc;
+        auto func = panda::CopyableGlobal(vm, funcRef);
+        auto tabsNode = AceType::DynamicCast<NG::TabsNode>(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabBarNode = AceType::DynamicCast<NG::FrameNode>(tabsNode->GetTabBar());
+        CHECK_NULL_VOID(tabBarNode);
+        panda::Local<panda::JSValueRef> params[PARAM_COUNT] = { val->GetLocalHandle(),
+            panda::NativePointerRef::New(vm, AceType::RawPtr(tabBarNode)) };
+        func->Call(vm, func.ToLocal(), params, PARAM_COUNT);
     }
-    TabsModel::GetInstance()->SetBarModifier(std::move(onApply));
 }
 
 void JSTabs::SetCachedMaxCount(const JSCallbackInfo& info)
@@ -882,12 +876,6 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("animationCurve", &JSTabs::SetAnimationCurve);
     JSClass<JSTabs>::StaticMethod("animationDuration", &JSTabs::SetAnimationDuration);
     JSClass<JSTabs>::StaticMethod("divider", &JSTabs::SetDivider);
-    JSClass<JSTabs>::StaticMethod("onChange", &JSTabs::SetOnChange);
-    JSClass<JSTabs>::StaticMethod("onTabBarClick", &JSTabs::SetOnTabBarClick);
-    JSClass<JSTabs>::StaticMethod("onUnselected", &JSTabs::SetOnUnselected);
-    JSClass<JSTabs>::StaticMethod("onAnimationStart", &JSTabs::SetOnAnimationStart);
-    JSClass<JSTabs>::StaticMethod("onAnimationEnd", &JSTabs::SetOnAnimationEnd);
-    JSClass<JSTabs>::StaticMethod("onGestureSwipe", &JSTabs::SetOnGestureSwipe);
     JSClass<JSTabs>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSTabs>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTabs>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
@@ -903,14 +891,11 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("barBackgroundColor", &JSTabs::SetBarBackgroundColor);
     JSClass<JSTabs>::StaticMethod("clip", &JSTabs::SetClip);
     JSClass<JSTabs>::StaticMethod("barGridAlign", &JSTabs::SetBarGridAlign);
-    JSClass<JSTabs>::StaticMethod("customContentTransition", &JSTabs::SetCustomContentTransition);
-    JSClass<JSTabs>::StaticMethod("onContentWillChange", &JSTabs::SetOnContentWillChange);
     JSClass<JSTabs>::StaticMethod("animationMode", &JSTabs::SetAnimateMode);
     JSClass<JSTabs>::StaticMethod("edgeEffect", &JSTabs::SetEdgeEffect);
     JSClass<JSTabs>::StaticMethod("barBackgroundEffect", &JSTabs::SetBarBackgroundEffect);
     JSClass<JSTabs>::StaticMethod("pageFlipMode", &JSTabs::SetPageFlipMode);
     JSClass<JSTabs>::StaticMethod("cachedMaxCount", &JSTabs::SetCachedMaxCount);
-    JSClass<JSTabs>::StaticMethod("onSelected", &JSTabs::SetOnSelected);
 
     JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }

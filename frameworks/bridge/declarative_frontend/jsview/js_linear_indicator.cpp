@@ -135,7 +135,6 @@ void JSLinearIndicator::JSBind(BindingTarget globalObj)
     JSClass<JSLinearIndicator>::StaticMethod("create", &JSLinearIndicator::Create, opt);
     JSClass<JSLinearIndicator>::StaticMethod("indicatorStyle", &JSLinearIndicator::SetStyle, opt);
     JSClass<JSLinearIndicator>::StaticMethod("indicatorLoop", &JSLinearIndicator::Loop, opt);
-    JSClass<JSLinearIndicator>::StaticMethod("onChange", &JSLinearIndicator::OnChange, opt);
     JSClass<JSLinearIndicator>::StaticMethod("height", &JSLinearIndicator::JsHeight, opt);
     JSClass<JSLinearIndicator>::StaticMethod("padding", &JSLinearIndicator::JsPadding, opt);
     JSClass<JSLinearIndicator>::StaticMethod("paddingLeft", &JSLinearIndicator::SetPaddingLeft, opt);

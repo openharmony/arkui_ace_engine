@@ -29,6 +29,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
@@ -2057,6 +2058,14 @@ ArkUINativeModuleValue FrameNodeBridge::GetFirstUINode(ArkUIRuntimeCallInfo* run
     auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getFirstUINode(nativeNode);
     CHECK_NULL_RETURN(nodePtr, panda::JSValueRef::Undefined(vm));
     return panda::NativePointerRef::New(vm, nodePtr);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::GetStackTopNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    auto* node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(node, panda::JSValueRef::Undefined(vm));
+    return panda::NativePointerRef::New(vm, node);
 }
 
 ArkUINativeModuleValue FrameNodeBridge::TriggerOnReuse(ArkUIRuntimeCallInfo* runtimeCallInfo)
