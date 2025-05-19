@@ -23230,6 +23230,7 @@ typedef struct GENERATED_ArkUIGestureOpsAccessor {
                                           Ark_PanDirection direction,
                                           const Ark_Number* distance,
                                           Ark_Boolean isFingerCountLimited);
+    Ark_NativePointer (*createPanGestureWithPanGestureOptions)(Ark_NativePointer panGestureOptions);
     Ark_NativePointer (*createPinchGesture)(const Ark_Number* fingers,
                                             const Ark_Number* distance,
                                             Ark_Boolean isFingerCountLimited);
@@ -25295,7 +25296,7 @@ typedef struct GENERATED_ArkUILongPressGestureInterfaceAccessor {
 
 typedef struct GENERATED_ArkUIPanGestureOptionsAccessor {
     void (*destroyPeer)(Ark_PanGestureOptions peer);
-    Ark_PanGestureOptions (*ctor)(const Opt_Literal_Number_distance_fingers_PanDirection_direction* value);
+    Ark_PanGestureOptions (*ctor)(const Opt_PanGestureHandlerOptions* value);
     Ark_NativePointer (*getFinalizer)();
     void (*setDirection)(Ark_PanGestureOptions peer,
                          Ark_PanDirection value);

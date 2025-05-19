@@ -32033,6 +32033,10 @@ Ark_NativePointer impl_GestureOps_createPanGesture(KInteropNumber fingers, Ark_I
         return GetAccessors()->getGestureOpsAccessor()->createPanGesture((const Ark_Number*) (&fingers), static_cast<Ark_PanDirection>(direction), (const Ark_Number*) (&distance), isFingerCountLimited);
 }
 KOALA_INTEROP_DIRECT_4(GestureOps_createPanGesture, Ark_NativePointer, KInteropNumber, Ark_Int32, KInteropNumber, Ark_Boolean)
+Ark_NativePointer impl_GestureOps_createPanGestureWithPanGestureOptions(Ark_NativePointer panGestureOptions) {
+        return GetAccessors()->getGestureOpsAccessor()->createPanGestureWithPanGestureOptions(panGestureOptions);
+}
+KOALA_INTEROP_DIRECT_1(GestureOps_createPanGestureWithPanGestureOptions, Ark_NativePointer, Ark_NativePointer)
 Ark_NativePointer impl_GestureOps_createPinchGesture(KInteropNumber fingers, KInteropNumber distance, Ark_Boolean isFingerCountLimited) {
         return GetAccessors()->getGestureOpsAccessor()->createPinchGesture((const Ark_Number*) (&fingers), (const Ark_Number*) (&distance), isFingerCountLimited);
 }
@@ -35929,13 +35933,16 @@ void impl_TouchEvent_setChangedTouches(Ark_NativePointer thisPtr, KSerializerBuf
         GetAccessors()->getTouchEventAccessor()->setChangedTouches(self, (const Array_TouchObject*)&changedTouches_value);
 }
 KOALA_INTEROP_DIRECT_V3(TouchEvent_setChangedTouches, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_TouchEvent_getStopPropagation(Ark_NativePointer thisPtr) {
+KInteropReturnBuffer impl_TouchEvent_getStopPropagation(Ark_NativePointer thisPtr) {
         Ark_TouchEvent self = reinterpret_cast<Ark_TouchEvent>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getTouchEventAccessor()->getStopPropagation(self);
-        // TODO: Value serialization needs to be implemented
-        return {};
+        [[maybe_unused]] const auto &retValue = GetAccessors()->getTouchEventAccessor()->getStopPropagation(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeCallbackResource(retValue.resource);
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.call));
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.callSync));
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_DIRECT_1(TouchEvent_getStopPropagation, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_1(TouchEvent_getStopPropagation, KInteropReturnBuffer, Ark_NativePointer)
 void impl_TouchEvent_setStopPropagation(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_TouchEvent self = reinterpret_cast<Ark_TouchEvent>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
@@ -39332,39 +39339,15 @@ KOALA_INTEROP_DIRECT_3(LongPressGestureInterface_onActionCancel1, Ark_NativePoin
 Ark_NativePointer impl_PanGestureOptions_ctor(KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Literal_Number_distance_fingers_PanDirection_direction value_value_buf = {};
+        Opt_PanGestureHandlerOptions value_value_buf = {};
         value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
         {
-            Ark_Literal_Number_distance_fingers_PanDirection_direction value_value_buf_ = {};
-            const auto value_value_buf__fingers_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-            Opt_Number value_value_buf__fingers_buf = {};
-            value_value_buf__fingers_buf.tag = value_value_buf__fingers_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-            if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf__fingers_buf_runtimeType))
-            {
-                value_value_buf__fingers_buf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
-            }
-            value_value_buf_.fingers = value_value_buf__fingers_buf;
-            const auto value_value_buf__direction_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-            Opt_PanDirection value_value_buf__direction_buf = {};
-            value_value_buf__direction_buf.tag = value_value_buf__direction_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-            if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf__direction_buf_runtimeType))
-            {
-                value_value_buf__direction_buf.value = static_cast<Ark_PanDirection>(thisDeserializer.readInt32());
-            }
-            value_value_buf_.direction = value_value_buf__direction_buf;
-            const auto value_value_buf__distance_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-            Opt_Number value_value_buf__distance_buf = {};
-            value_value_buf__distance_buf.tag = value_value_buf__distance_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-            if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf__distance_buf_runtimeType))
-            {
-                value_value_buf__distance_buf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
-            }
-            value_value_buf_.distance = value_value_buf__distance_buf;
+            Ark_PanGestureHandlerOptions value_value_buf_ = thisDeserializer.readPanGestureHandlerOptions();
             value_value_buf.value = value_value_buf_;
         }
-        Opt_Literal_Number_distance_fingers_PanDirection_direction value_value = value_value_buf;;
-        return GetAccessors()->getPanGestureOptionsAccessor()->ctor((const Opt_Literal_Number_distance_fingers_PanDirection_direction*)&value_value);
+        Opt_PanGestureHandlerOptions value_value = value_value_buf;;
+        return GetAccessors()->getPanGestureOptionsAccessor()->ctor((const Opt_PanGestureHandlerOptions*)&value_value);
 }
 KOALA_INTEROP_DIRECT_2(PanGestureOptions_ctor, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_PanGestureOptions_getFinalizer() {

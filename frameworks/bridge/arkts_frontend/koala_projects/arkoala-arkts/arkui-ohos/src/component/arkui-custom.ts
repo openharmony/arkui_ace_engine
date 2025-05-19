@@ -250,6 +250,10 @@ export class GestureOps {
         const isFingerCountLimited_casted = isFingerCountLimited as (boolean)
         return GestureOps.createPanGesture_serialize(fingers_casted, direction_casted, distance_casted, isFingerCountLimited_casted)
     }
+    public static createPanGestureWithPanGestureOptions(panGestureOptions: KPointer): KPointer {
+        const panGestureOptions_casted = panGestureOptions as (KPointer)
+        return GestureOps.createPanGestureWithPanGestureOptions_serialize(panGestureOptions_casted)
+    }
     public static createPinchGesture(fingers: number, distance: number, isFingerCountLimited: boolean): KPointer {
         const fingers_casted = fingers as (number)
         const distance_casted = distance as (number)
@@ -357,6 +361,10 @@ export class GestureOps {
     }
     private static createPanGesture_serialize(fingers: number, direction: PanDirection, distance: number, isFingerCountLimited: boolean): KPointer {
         const retval  = ArkUIGeneratedNativeModule._GestureOps_createPanGesture(fingers, TypeChecker.PanDirection_ToNumeric(direction), distance, isFingerCountLimited ? 1 : 0)
+        return retval
+    }
+    private static createPanGestureWithPanGestureOptions_serialize(panGestureOptions: KPointer): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_createPanGestureWithPanGestureOptions(panGestureOptions)
         return retval
     }
     private static createPinchGesture_serialize(fingers: number, distance: number, isFingerCountLimited: boolean): KPointer {
