@@ -1336,14 +1336,10 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
 {
     CHECK_NULL_VOID(menuNode);
     CHECK_NULL_VOID(wrapperNode);
-    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
         UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
     } else {
-        if (menuWrapperPattern->GetHasCustomOutlineWidth()) {
-            menuWrapperPattern->SetMenuParam(menuParam);
-        }
+        UpdateMenuOutlineWithArrow(menuNode, wrapperNode, menuParam);
     }
     menuNode->MarkModifyDone();
 
@@ -2178,5 +2174,26 @@ void MenuView::UpdateMenuNodeByAnimation(const RefPtr<FrameNode>& menuNode, cons
     }
     menuNodeRenderContext->UpdateTransformCenter(DimensionOffset(Offset(x, y)));
     menuNodeRenderContext->UpdateTransformScale({ 0.4f, 0.4f });
+}
+
+void MenuView::UpdateMenuOutlineWithArrow(
+    const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(wrapperNode);
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    if (!menuWrapperPattern->GetHasCustomOutlineWidth()) {
+        return;
+    }
+    CHECK_NULL_VOID(menuNode);
+    auto renderContext = menuNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    BorderWidthProperty outerWidthProp;
+    outerWidthProp.SetBorderWidth(Dimension(0));
+    renderContext->SetOuterBorderWidth(outerWidthProp);
+    BorderColorProperty outerColorProp;
+    outerColorProp.SetColor(Color::TRANSPARENT);
+    renderContext->SetOuterBorderColor(outerColorProp);
+    menuWrapperPattern->SetMenuParam(menuParam);
 }
 } // namespace OHOS::Ace::NG
