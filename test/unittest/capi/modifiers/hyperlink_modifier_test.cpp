@@ -261,7 +261,8 @@ HWTEST_F(HyperlinkModifierTest, setColorTestColorValidValues, TestSize.Level1)
         Ark_Union_Color_Number_String_Resource inputValueColor = initValueColor;
 
         inputValueColor = value;
-        modifier_->setColor(node_, &inputValueColor);
+        auto optInputValueColor = Converter::ArkValue<Opt_Union_Color_Number_String_Resource>(inputValueColor);
+        modifier_->setColor(node_, &optInputValueColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
         EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setColor, attribute: color";
@@ -298,9 +299,11 @@ HWTEST_F(HyperlinkModifierTest, DISABLED_setColorTestColorInvalidValues, TestSiz
                           const std::string& input, const Ark_Union_Color_Number_String_Resource& value) {
         Ark_Union_Color_Number_String_Resource inputValueColor = initValueColor;
 
-        modifier_->setColor(node_, &inputValueColor);
+        auto optInputValueColor = Converter::ArkValue<Opt_Union_Color_Number_String_Resource>(inputValueColor);
+        modifier_->setColor(node_, &optInputValueColor);
         inputValueColor = value;
-        modifier_->setColor(node_, &inputValueColor);
+        optInputValueColor = Converter::ArkValue<Opt_Union_Color_Number_String_Resource>(inputValueColor);
+        modifier_->setColor(node_, &optInputValueColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_DEFAULT_VALUE)
