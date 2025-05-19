@@ -731,6 +731,15 @@ bool WebPattern::NeedSoftKeyboard() const
     return false;
 }
 
+void WebPattern::EnableSecurityLayer(bool isNeedSecurityLayer)
+{
+    if (!renderContextForSurface_) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebPattern::EnableSecurityLayer, renderContextForSurface_ is null");
+        return;
+    }
+    renderContextForSurface_->SetSecurityLayer(isNeedSecurityLayer);
+}
+
 void WebPattern::OnAttachToMainTree()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "OnAttachToMainTree WebId %{public}d", GetWebId());
@@ -2314,6 +2323,7 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
         SetActiveStatusInner(false);
     }
     HideMagnifier();
+    EnableSecurityLayer(false);
 }
 
 bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
