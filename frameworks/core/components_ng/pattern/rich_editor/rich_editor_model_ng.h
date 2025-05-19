@@ -99,6 +99,7 @@ public:
     static void SetMaxLines(FrameNode* frameNode, uint32_t value);
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
     static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnabled);
 
 private:
     void SetDraggable(bool draggable);

@@ -645,4 +645,12 @@ void RichEditorModelNG::SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppe
     CHECK_NULL_VOID(pattern);
     pattern->SetKeyboardAppearance(value);
 }
+
+void RichEditorModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetEnableHapticFeedback(isEnabled);
+}
 } // namespace OHOS::Ace::NG
