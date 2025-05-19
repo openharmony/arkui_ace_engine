@@ -4077,10 +4077,10 @@ void TextFieldPattern::InitMouseEvent()
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent_);
 
-    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover, const HoverInfo& info) {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            pattern->OnHover(isHover);
+            pattern->OnHover(isHover, info);
         }
     };
     hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
@@ -4138,7 +4138,7 @@ void TextFieldPattern::InitPanEvent()
     });
 }
 
-void TextFieldPattern::OnHover(bool isHover)
+void TextFieldPattern::OnHover(bool isHover, const HoverInfo& info)
 {
     auto frame = GetHost();
     CHECK_NULL_VOID(frame);
@@ -4152,8 +4152,10 @@ void TextFieldPattern::OnHover(bool isHover)
     }
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Textfield %{public}d %{public}s", frame->GetId(),
         isHover ? "on hover" : "exit hover");
-    pipeline->SetMouseStyleHoldNode(frameId);
-    if (!isHover) {
+    if (isHover) {
+        pipeline->SetMouseStyleHoldNode(frameId);
+        ChangeMouseState(info.GetLocalLocation(), frameId);
+    } else {
         int32_t windowId = 0;
 #ifdef WINDOW_SCENE_SUPPORTED
         windowId = static_cast<int32_t>(GetSCBSystemWindowId());
@@ -10792,13 +10794,13 @@ void TextFieldPattern::InitCancelButtonMouseEvent()
     CHECK_NULL_VOID(imageTouchHub);
     auto imageInputHub = stackNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(imageInputHub);
-    auto imageHoverTask = [weak = WeakClaim(this),
-        cleanNodeResponseAreaWeak = WeakPtr<TextInputResponseArea>(cleanNodeResponseArea_)](bool isHover) {
+    auto imageHoverTask = [weak = WeakClaim(this), cleanNodeResponseAreaWeak =
+        WeakPtr<TextInputResponseArea>(cleanNodeResponseArea_)](bool isHover, const HoverInfo& info) {
             auto cleanNodeResponseArea = cleanNodeResponseAreaWeak.Upgrade();
             CHECK_NULL_VOID(cleanNodeResponseArea);
             auto pattern = weak.Upgrade();
             if (pattern) {
-                pattern->OnHover(isHover);
+                pattern->OnHover(isHover, info);
                 pattern->HandleButtonMouseEvent(cleanNodeResponseArea, isHover);
             }
     };
@@ -10835,13 +10837,13 @@ void TextFieldPattern::InitPasswordButtonMouseEvent()
     CHECK_NULL_VOID(imageTouchHub);
     auto imageInputHub = stackNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(imageInputHub);
-    auto imageHoverTask =
-        [weak = WeakClaim(this), responseAreaWeak = WeakPtr<TextInputResponseArea>(responseArea_)](bool isHover) {
+    auto imageHoverTask = [weak = WeakClaim(this), responseAreaWeak =
+        WeakPtr<TextInputResponseArea>(responseArea_)](bool isHover, const HoverInfo& info) {
             auto responseArea = responseAreaWeak.Upgrade();
             CHECK_NULL_VOID(responseArea);
             auto pattern = weak.Upgrade();
             if (pattern) {
-                pattern->OnHover(isHover);
+                pattern->OnHover(isHover, info);
                 pattern->HandleButtonMouseEvent(responseArea, isHover);
             }
     };

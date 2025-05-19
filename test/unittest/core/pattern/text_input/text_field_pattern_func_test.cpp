@@ -246,7 +246,8 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc012, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->OnHover(true);
+    HoverInfo info;
+    pattern->OnHover(true, info);
     EXPECT_TRUE(pattern->isOnHover_ == true);
 }
 
@@ -258,7 +259,8 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc013, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->OnHover(false);
+    HoverInfo info;
+    pattern->OnHover(false, info);
     EXPECT_FALSE(pattern->isOnHover_ == true);
 }
 
