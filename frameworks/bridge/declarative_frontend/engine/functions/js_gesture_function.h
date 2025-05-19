@@ -35,6 +35,7 @@ private:
     JSRef<JSObject> CreateGestureEvent(const GestureEvent& info);
     JSRef<JSObject> CreateFingerInfo(const FingerInfo& fingerInfo);
     JSRef<JSArray> CreateFingerListArray(const GestureEvent& info);
+    JSRef<JSArray> CreateFingerInfosArray(const GestureEvent& info);    
 };
 
 } // namespace OHOS::Ace::Framework

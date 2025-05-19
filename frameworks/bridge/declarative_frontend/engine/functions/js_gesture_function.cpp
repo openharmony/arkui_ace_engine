@@ -65,6 +65,7 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
         "getModifierKeyState",
         JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
     gestureInfoObj->SetPropertyObject("fingerList", CreateFingerListArray(info));
+    gestureInfoObj->SetPropertyObject("fingerInfos", CreateFingerInfosArray(info));
     gestureInfoObj->SetProperty<double>("deviceId", info.GetDeviceId());
 
     auto target = CreateEventTargetObject(info);
@@ -99,6 +100,31 @@ JSRef<JSArray> JsGestureFunction::CreateFingerListArray(const GestureEvent& info
         }
     }
     auto idx = maxFingerId + 1;
+    for (const FingerInfo& fingerInfo : notTouchFingerList) {
+        JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
+        fingerArr->SetValueAt(idx++, element);
+    }
+    return fingerArr;
+}
+
+JSRef<JSArray> JsGestureFunction::CreateFingerInfosArray(const GestureEvent& info)
+{
+    JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
+    const std::list<FingerInfo>& fingerList = info.GetFingerList();
+    std::list<FingerInfo> notTouchFingerList;
+    std::vector<JSRef<JSObject>> validFingers;
+    for (const FingerInfo& fingerInfo : fingerList) {
+        JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
+        if (fingerInfo.sourceType_ == SourceType::TOUCH && fingerInfo.sourceTool_ == SourceTool::FINGER) {
+            validFingers.emplace_back(element);
+        } else {
+            notTouchFingerList.emplace_back(fingerInfo);
+        }
+    }
+    for (size_t i = 0; i < validFingers.size(); ++i) {
+        fingerArr->SetValueAt(i, validFingers[i]);
+    }
+    auto idx = validFingers.size();
     for (const FingerInfo& fingerInfo : notTouchFingerList) {
         JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
         fingerArr->SetValueAt(idx++, element);
