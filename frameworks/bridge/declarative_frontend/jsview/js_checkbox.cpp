@@ -36,6 +36,7 @@
 namespace OHOS::Ace {
 namespace {
 constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
+const Dimension CHECK_BOX_MARK_WIDTH_DEFAULT_VALUE = 2.0_vp;
 }
 std::unique_ptr<CheckBoxModel> CheckBoxModel::instance_ = nullptr;
 std::mutex CheckBoxModel::mutex_;
@@ -279,16 +280,18 @@ void JSCheckbox::SetCheckboxStyle(int32_t checkBoxStyle)
 void JSCheckbox::Mark(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<CheckboxTheme>();
+    auto defaultPointColor = theme ? theme->GetPointColor() : Color::WHITE;
+    auto defaultStroke = theme ? theme->GetCheckStroke() : CHECK_BOX_MARK_WIDTH_DEFAULT_VALUE;
     if (!info[0]->IsObject()) {
-        CheckBoxModel::GetInstance()->SetCheckMarkColor(theme->GetPointColor());
+        CheckBoxModel::GetInstance()->SetCheckMarkColor(defaultPointColor);
         CheckBoxModel::GetInstance()->SetCheckMarkSize(Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE));
-        CheckBoxModel::GetInstance()->SetCheckMarkWidth(theme->GetCheckStroke());
+        CheckBoxModel::GetInstance()->SetCheckMarkWidth(defaultStroke);
         return;
     }
 
     auto markObj = JSRef<JSObject>::Cast(info[0]);
     auto strokeColorValue = markObj->GetProperty("strokeColor");
-    Color strokeColor = theme->GetPointColor();
+    Color strokeColor = defaultPointColor;
     if (!ParseJsColor(strokeColorValue, strokeColor)) {
         JSCheckBoxTheme::ObtainCheckMarkColor(strokeColor);
     }
@@ -307,7 +310,7 @@ void JSCheckbox::Mark(const JSCallbackInfo& info)
         (strokeWidth.ConvertToVp() >= 0)) {
         CheckBoxModel::GetInstance()->SetCheckMarkWidth(strokeWidth);
     } else {
-        CheckBoxModel::GetInstance()->SetCheckMarkWidth(theme->GetCheckStroke());
+        CheckBoxModel::GetInstance()->SetCheckMarkWidth(defaultStroke);
     }
 }
 
