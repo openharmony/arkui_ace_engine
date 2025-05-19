@@ -50,6 +50,35 @@ HWTEST_F(SwiperPatternTestNg, HasCustomIndicatorOffset, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ComputeTargetIndex_CurrentFalse
+ * @tc.desc: Test SwiperPattern ComputeTargetIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, ComputeTargetIndex_CurrentFalse, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    RefPtr<SwiperLayoutProperty> swiperLayoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 3, swiperPattern);
+    ASSERT_NE(node, nullptr);
+    frameNode->children_.clear();
+    for (int32_t i = 0; i < 4; i++) {
+        frameNode->children_.emplace_back(node);
+    }
+    swiperLayoutProperty->propDisplayCount_ = 1;
+    swiperLayoutProperty->propSwipeByGroup_ = false;
+    frameNode->layoutProperty_ = swiperLayoutProperty;
+    swiperPattern->frameNode_ = frameNode;
+    swiperPattern->currentIndex_ = -4;
+    swiperPattern->targetIndex_ = -3;
+    int32_t targetIndex = 1;
+    auto result = swiperPattern->ComputeTargetIndex(1, targetIndex);
+    EXPECT_EQ(targetIndex, -3);
+    EXPECT_FALSE(result);
+}
+
+/**
  * @tc.name: CalcWillScrollOffset001
  * @tc.desc: Test SwiperPattern CalcWillScrollOffset
  * @tc.type: FUNC
