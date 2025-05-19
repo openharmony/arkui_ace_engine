@@ -69,7 +69,10 @@ void PinchRecognizer::OnAccepted()
     }
     localMatrix_ = NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false,
         isPostEventResult_, touchPoint.postEventNodeId);
-    SendCallbackMsg(onActionStart_, GestureCallbackType::START);
+    {
+        ACE_SCOPED_TRACE("PinchRecognizer onActionStart, currentDev_: %f", currentDev_);
+        SendCallbackMsg(onActionStart_, GestureCallbackType::START);
+    }
     isNeedResetVoluntarily_ = false;
 }
 
@@ -179,7 +182,10 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(activeFingers_.size()) == fingers_) {
-        SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
+        {
+            ACE_SCOPED_TRACE("PinchRecognizer onActionEnd");
+            SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
+        }
         int64_t overTime = GetSysTimestamp();
         int64_t inputTime = overTime;
         if (firstInputTime_.has_value()) {
@@ -208,7 +214,10 @@ void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
         return;
     }
     if (refereeState_ == RefereeState::SUCCEED) {
-        SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
+        {
+            ACE_SCOPED_TRACE("PinchRecognizer onActionEnd");
+            SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
+        }
         isPinchEnd_ = true;
         int64_t overTime = GetSysTimestamp();
         int64_t inputTime = overTime;
@@ -261,6 +270,7 @@ void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
             return;
         }
         if (isFlushTouchEventsEnd_) {
+            ACE_SCOPED_TRACE("PinchRecognizer onActionUpdate, currentDev_: %f", currentDev_);
             SendCallbackMsg(onActionUpdate_, GestureCallbackType::UPDATE);
         }
     }
@@ -309,7 +319,10 @@ void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
             }
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
         }
-        SendCallbackMsg(onActionUpdate_, GestureCallbackType::UPDATE);
+        {
+            ACE_SCOPED_TRACE("PinchRecognizer onActionUpdate, currentDev_: %f", currentDev_);
+            SendCallbackMsg(onActionUpdate_, GestureCallbackType::UPDATE);
+        }
     }
 }
 
@@ -324,6 +337,7 @@ void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(activeFingers_.size()) == fingers_) {
+        ACE_SCOPED_TRACE("PinchRecognizer onActionCancel");
         SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
         lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
@@ -341,6 +355,7 @@ void PinchRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
+        ACE_SCOPED_TRACE("PinchRecognizer onActionCancel");
         SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
     }
 }
@@ -516,6 +531,7 @@ bool PinchRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognize
 
     if (curr->fingers_ != fingers_ || curr->distance_ != distance_ || curr->priorityMask_ != priorityMask_) {
         if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(activeFingers_.size()) == fingers_) {
+            ACE_SCOPED_TRACE("PinchRecognizer onActionCancel");
             SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
         }
         ResetStatus();
@@ -561,6 +577,7 @@ bool PinchRecognizer::ProcessAxisReject()
     if (refereeState_ == RefereeState::SUCCEED) {
         lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
+        ACE_SCOPED_TRACE("PinchRecognizer onActionEnd");
         SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
         isPinchEnd_ = true;
         return true;
