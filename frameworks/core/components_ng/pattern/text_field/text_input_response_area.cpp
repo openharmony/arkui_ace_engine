@@ -374,9 +374,6 @@ void PasswordResponseArea::Refresh()
     if (!IsShowSymbol() && !IsSymbolIcon()) {
         auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
-        if (!imageLayoutProperty->HasImageSourceInfo()) {
-            return;
-        }
         auto currentSrc = imageLayoutProperty->GetImageSourceInfoValue().GetSrc();
         LoadImageSourceInfo();
         auto src = isObscured_ ? hideIcon_->GetSrc() : showIcon_->GetSrc();
@@ -1212,12 +1209,6 @@ void CleanNodeResponseArea::LoadingImageProperty()
             }
             iconSize_ = Dimension(iconSizeValue).ConvertToPxDistribute(minFontScale, maxFontScale);
         }
-    } else {
-        auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern);
-        CHECK_NULL_VOID(textFieldPattern);
-        auto theme = textFieldPattern->GetTheme();
-        CHECK_NULL_VOID(theme);
-        iconSize_ = theme->GetCancelIconSize();
     }
     if (textFieldLayoutProperty->HasIconSrc()) {
         iconSrc_ = textFieldLayoutProperty->GetIconSrcValue();

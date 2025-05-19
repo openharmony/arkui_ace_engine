@@ -225,10 +225,15 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, updateColor);
 }
 
+void ViewAbstract::SetBackgroundColor(FrameNode *frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
+}
+
 void ViewAbstract::SetBackgroundColor(FrameNode *frameNode, const std::optional<Color>& color)
 {
     if (color) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, *color, frameNode);
+        ViewAbstract::SetBackgroundColor(frameNode, color.value());
     } else {
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundColor, frameNode);
     }

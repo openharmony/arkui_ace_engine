@@ -6767,10 +6767,6 @@ std::string TextFieldPattern::TextInputActionToString() const
             return "EnterKeyType.Send";
         case TextInputAction::NEXT:
             return "EnterKeyType.Next";
-        case TextInputAction::PREVIOUS:
-            return "EnterKeyType.PREVIOUS";
-        case TextInputAction::NEW_LINE:
-            return "EnterKeyType.NEW_LINE";
         default:
             return "EnterKeyType.Done";
     }
@@ -6870,15 +6866,6 @@ void TextFieldPattern::InitTheme()
     auto context = tmpHost->GetContext();
     CHECK_NULL_VOID(context);
     textFieldTheme_ = context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
-}
-
-std::string TextFieldPattern::GetLineBreakStrategy() const
-{
-    auto retStr = V2::ConvertWrapLineBreakStrategyToString(LineBreakStrategy::GREEDY);
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, retStr);
-    return V2::ConvertWrapLineBreakStrategyToString(
-        layoutProperty->GetLineBreakStrategyValue(LineBreakStrategy::GREEDY));
 }
 
 std::string TextFieldPattern::GetTextColor() const
@@ -7625,9 +7612,6 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     json->PutExtAttr("barState", GetBarStateString().c_str(), filter);
     json->PutExtAttr("caretPosition", std::to_string(GetCaretIndex()).c_str(), filter);
     json->PutExtAttr("enablePreviewText", GetSupportPreviewText(), filter);
-    json->PutExtAttr("enableKeyboardOnFocus", NeedToRequestKeyboardOnFocus(), filter);
-    json->PutExtAttr("enableHapticFeedback", GetEnableHapticFeedback(), filter);
-    json->PutExtAttr("lineBreakStrategy", GetLineBreakStrategy().c_str(), filter);
     json->PutExtAttr("minFontScale", GetMinFontScale().c_str(), filter);
     json->PutExtAttr("maxFontScale", GetMaxFontScale().c_str(), filter);
     json->PutExtAttr("ellipsisMode",GetEllipsisMode().c_str(), filter);
@@ -9152,7 +9136,7 @@ PaddingProperty TextFieldPattern::GetPaddingByUserValue()
     CHECK_NULL_RETURN(theme, padding);
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, padding);
-    padding = paintProperty->GetPaddingByUserValue(padding);
+    padding = paintProperty->GetPaddingByUserValue();
     auto themePadding = IsUnderlineMode() ? theme->GetUnderlinePadding() : theme->GetPadding();
     if (!padding.top.has_value()) {
         padding.top = CalcLength(CalcLength(themePadding.Top()).GetDimension());
