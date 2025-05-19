@@ -16,7 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #ifdef WEB_SUPPORTED
-#include "core/components_ng/pattern/web/web_model_ng.h"
+#include "core/components_ng/pattern/web/web_model_static.h"
 #include "core/interfaces/native/implementation/web_controller_peer_impl.h"
 #include "core/interfaces/native/implementation/webview_controller_peer_impl.h"
 #include "core/interfaces/native/implementation/web_modifier_callbacks.h"
@@ -181,7 +181,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #ifdef WEB_SUPPORTED
-    auto frameNode = WebModelNG::CreateFrameNode(id);
+    auto frameNode = WebModelStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -199,30 +199,21 @@ void SetWebOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto webSrc = Converter::OptConvert<std::string>(value->src);
-    WebModelNG::SetWebSrc(frameNode, webSrc);
+    WebModelStatic::SetWebSrc(frameNode, webSrc);
     auto renderMode = Converter::OptConvert<RenderMode>(value->renderMode);
-    WebModelNG::SetRenderMode(frameNode, renderMode);
+    WebModelStatic::SetRenderMode(frameNode, renderMode);
     auto incognitoMode = Converter::OptConvert<bool>(value->incognitoMode);
-    WebModelNG::SetIncognitoMode(frameNode, incognitoMode);
+    WebModelStatic::SetIncognitoMode(frameNode, incognitoMode);
     auto sharedRenderProcessToken = Converter::OptConvert<std::string>(value->sharedRenderProcessToken);
-    WebModelNG::SetSharedRenderProcessToken(frameNode, sharedRenderProcessToken);
+    WebModelStatic::SetSharedRenderProcessToken(frameNode, sharedRenderProcessToken);
     Converter::VisitUnion(value->controller,
         [frameNode](const Ark_WebController& controller) {
             auto peerImplPtr = controller;
             CHECK_NULL_VOID(peerImplPtr);
-            WebModelNG::SetWebController(frameNode, peerImplPtr->GetController());
+            WebModelStatic::SetWebController(frameNode, peerImplPtr->GetController());
         },
         [frameNode](const Ark_WebviewController& controller) {
-            WebviewControllerPeer* peerImplPtr = controller;
-            CHECK_NULL_VOID(peerImplPtr);
-            auto setWebIdCallback = [peerImplPtr](int32_t webId) {
-                peerImplPtr->nwebId = webId;
-            };
-            WebModelNG::SetWebIdCallback(frameNode, std::move(setWebIdCallback));
-            auto setHapPathCallback = [peerImplPtr](const std::string& hapPath) {
-                peerImplPtr->hapPath = hapPath;
-            };
-            WebModelNG::SetHapPathCallback(frameNode, std::move(setHapPathCallback));
+            (void)controller;
         },
         []() {}
     );
@@ -241,7 +232,7 @@ void JavaScriptAccessImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetJsEnabled(frameNode, *convValue);
+    WebModelStatic::SetJsEnabled(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void FileAccessImpl(Ark_NativePointer node,
@@ -255,7 +246,7 @@ void FileAccessImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetFileAccessEnabled(frameNode, *convValue);
+    WebModelStatic::SetFileAccessEnabled(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void OnlineImageAccessImpl(Ark_NativePointer node,
@@ -269,7 +260,7 @@ void OnlineImageAccessImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetOnLineImageAccessEnabled(frameNode, *convValue);
+    WebModelStatic::SetOnLineImageAccessEnabled(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void DomStorageAccessImpl(Ark_NativePointer node,
@@ -283,7 +274,7 @@ void DomStorageAccessImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetDomStorageAccessEnabled(frameNode, *convValue);
+    WebModelStatic::SetDomStorageAccessEnabled(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void ImageAccessImpl(Ark_NativePointer node,
@@ -297,7 +288,7 @@ void ImageAccessImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetImageAccessEnabled(frameNode, *convValue);
+    WebModelStatic::SetImageAccessEnabled(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void MixedModeImpl(Ark_NativePointer node,
@@ -307,7 +298,7 @@ void MixedModeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<MixedModeContent>(*value);
-    WebModelNG::SetMixedMode(frameNode, convValue);
+    WebModelStatic::SetMixedMode(frameNode, convValue);
 #endif // WEB_SUPPORTED
 }
 void ZoomAccessImpl(Ark_NativePointer node,
@@ -321,7 +312,7 @@ void ZoomAccessImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetZoomAccessEnabled(frameNode, *convValue);
+    WebModelStatic::SetZoomAccessEnabled(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void GeolocationAccessImpl(Ark_NativePointer node,
@@ -335,7 +326,7 @@ void GeolocationAccessImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetGeolocationAccessEnabled(frameNode, *convValue);
+    WebModelStatic::SetGeolocationAccessEnabled(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void JavaScriptProxyImpl(Ark_NativePointer node,
@@ -357,7 +348,7 @@ void CacheModeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<WebCacheMode>(*value);
-    WebModelNG::SetCacheMode(frameNode, convValue);
+    WebModelStatic::SetCacheMode(frameNode, convValue);
 #endif // WEB_SUPPORTED
 }
 void DarkModeImpl(Ark_NativePointer node,
@@ -367,7 +358,7 @@ void DarkModeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<WebDarkMode>(*value);
-    WebModelNG::SetDarkMode(frameNode, convValue);
+    WebModelStatic::SetDarkMode(frameNode, convValue);
 #endif // WEB_SUPPORTED
 }
 void ForceDarkAccessImpl(Ark_NativePointer node,
@@ -381,7 +372,7 @@ void ForceDarkAccessImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetForceDarkAccess(frameNode, *convValue);
+    WebModelStatic::SetForceDarkAccess(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void MediaOptionsImpl(Ark_NativePointer node,
@@ -395,8 +386,8 @@ void MediaOptionsImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetAudioResumeInterval(frameNode, Converter::OptConvert<int32_t>(optValue->resumeInterval));
-    WebModelNG::SetAudioExclusive(frameNode, Converter::OptConvert<bool>(optValue->audioExclusive));
+    WebModelStatic::SetAudioResumeInterval(frameNode, Converter::OptConvert<int32_t>(optValue->resumeInterval));
+    WebModelStatic::SetAudioExclusive(frameNode, Converter::OptConvert<bool>(optValue->audioExclusive));
 #endif // WEB_SUPPORTED
 }
 void TableDataImpl(Ark_NativePointer node,
@@ -420,7 +411,7 @@ void OverviewModeAccessImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetOverviewModeAccessEnabled(frameNode, *convValue);
+    WebModelStatic::SetOverviewModeAccessEnabled(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void OverScrollModeImpl(Ark_NativePointer node,
@@ -430,16 +421,18 @@ void OverScrollModeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<OverScrollMode>(*value);
-    WebModelNG::SetOverScrollMode(frameNode, convValue);
+    WebModelStatic::SetOverScrollMode(frameNode, convValue);
 #endif // WEB_SUPPORTED
 }
 void BlurOnKeyboardHideModeImpl(Ark_NativePointer node,
                                 const Opt_BlurOnKeyboardHideMode* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //WebModelNG::SetBlurOnKeyboardHideMode(frameNode, convValue);
+    // auto convValue = Converter::OptConvert<BlurOnKeyboardHideMode>(*value);
+    // WebModelStatic::SetBlurOnKeyboardHideMode(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void TextZoomAtioImpl(Ark_NativePointer node,
                       const Opt_Number* value)
@@ -452,7 +445,7 @@ void TextZoomAtioImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetTextZoomRatio(frameNode, *convValue);
+    WebModelStatic::SetTextZoomRatio(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void TextZoomRatioImpl(Ark_NativePointer node,
@@ -466,7 +459,7 @@ void TextZoomRatioImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetTextZoomRatio(frameNode, *convValue);
+    WebModelStatic::SetTextZoomRatio(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void DatabaseAccessImpl(Ark_NativePointer node,
@@ -480,7 +473,7 @@ void DatabaseAccessImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetDatabaseAccessEnabled(frameNode, *convValue);
+    WebModelStatic::SetDatabaseAccessEnabled(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void InitialScaleImpl(Ark_NativePointer node,
@@ -494,7 +487,7 @@ void InitialScaleImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::InitialScale(frameNode, *convValue);
+    WebModelStatic::InitialScale(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void UserAgentImpl(Ark_NativePointer node,
@@ -508,7 +501,7 @@ void UserAgentImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetUserAgent(frameNode, *convValue);
+    WebModelStatic::SetUserAgent(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void MetaViewportImpl(Ark_NativePointer node,
@@ -522,7 +515,7 @@ void MetaViewportImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetMetaViewport(frameNode, *convValue);
+    WebModelStatic::SetMetaViewport(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void OnPageEndImpl(Ark_NativePointer node,
@@ -538,10 +531,11 @@ void OnPageEndImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onPageEnd = [callback = CallbackHelper(*optValue), weakNode, instanceId] (const BaseEventInfo* info) {
+    auto onPageEnd = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
         OnPageEnd(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnPageFinish(frameNode, std::move(onPageEnd));
+    WebModelStatic::SetOnPageFinish(frameNode, std::move(onPageEnd));
 #endif // WEB_SUPPORTED
 }
 void OnPageBeginImpl(Ark_NativePointer node,
@@ -557,10 +551,11 @@ void OnPageBeginImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onPageBegin = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+    auto onPageBegin = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
         OnPageBegin(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnPageStart(frameNode, onPageBegin);
+    WebModelStatic::SetOnPageStart(frameNode, onPageBegin);
 #endif // WEB_SUPPORTED
 }
 void OnProgressChangeImpl(Ark_NativePointer node,
@@ -576,10 +571,11 @@ void OnProgressChangeImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onProgressChange = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+    auto onProgressChange = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
         OnProgressChange(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnProgressChange(frameNode, onProgressChange);
+    WebModelStatic::SetOnProgressChange(frameNode, onProgressChange);
 #endif // WEB_SUPPORTED
 }
 void OnTitleReceiveImpl(Ark_NativePointer node,
@@ -595,10 +591,11 @@ void OnTitleReceiveImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onTitleReceive = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+    auto onTitleReceive = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
         OnTitleReceive(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnTitleReceive(frameNode, onTitleReceive);
+    WebModelStatic::SetOnTitleReceive(frameNode, onTitleReceive);
 #endif // WEB_SUPPORTED
 }
 void OnGeolocationHideImpl(Ark_NativePointer node,
@@ -614,10 +611,11 @@ void OnGeolocationHideImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onGeolocationHide = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+    auto onGeolocationHide = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
         OnGeolocationHide(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnGeolocationHide(frameNode, onGeolocationHide);
+    WebModelStatic::SetOnGeolocationHide(frameNode, onGeolocationHide);
 #endif // WEB_SUPPORTED
 }
 void OnGeolocationShowImpl(Ark_NativePointer node,
@@ -633,10 +631,11 @@ void OnGeolocationShowImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onGeolocationShow = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+    auto onGeolocationShow = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
         OnGeolocationShow(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnGeolocationShow(frameNode, onGeolocationShow);
+    WebModelStatic::SetOnGeolocationShow(frameNode, onGeolocationShow);
 #endif // WEB_SUPPORTED
 }
 void OnRequestSelectedImpl(Ark_NativePointer node,
@@ -651,10 +650,11 @@ void OnRequestSelectedImpl(Ark_NativePointer node,
         return;
     }
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onRequestSelected = [callback = CallbackHelper(*optValue), weakNode](const BaseEventInfo* info) {
+    auto onRequestSelected = [callback = CallbackHelper(*optValue), weakNode](
+        const BaseEventInfo* info) {
         OnRequestSelected(callback, weakNode, info);
     };
-    WebModelNG::SetOnRequestFocus(frameNode, onRequestSelected);
+    WebModelStatic::SetOnRequestFocus(frameNode, onRequestSelected);
 #endif // WEB_SUPPORTED
 }
 void OnAlertImpl(Ark_NativePointer node,
@@ -670,10 +670,11 @@ void OnAlertImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onAlert = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) -> bool {
+    auto onAlert = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> bool {
         return OnAlert(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnCommonDialog(frameNode, onAlert, DialogEventType::DIALOG_EVENT_ALERT);
+    WebModelStatic::SetOnCommonDialog(frameNode, onAlert, DialogEventType::DIALOG_EVENT_ALERT);
 #endif // WEB_SUPPORTED
 }
 void OnBeforeUnloadImpl(Ark_NativePointer node,
@@ -693,7 +694,7 @@ void OnBeforeUnloadImpl(Ark_NativePointer node,
         const BaseEventInfo* info) -> bool {
         return OnBeforeUnload(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnCommonDialog(frameNode, onBeforeUnload, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
+    WebModelStatic::SetOnCommonDialog(frameNode, onBeforeUnload, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
 #endif // WEB_SUPPORTED
 }
 void OnConfirmImpl(Ark_NativePointer node,
@@ -709,10 +710,11 @@ void OnConfirmImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onConfirm = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) -> bool {
+    auto onConfirm = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> bool {
         return OnConfirm(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnCommonDialog(frameNode, onConfirm, DialogEventType::DIALOG_EVENT_CONFIRM);
+    WebModelStatic::SetOnCommonDialog(frameNode, onConfirm, DialogEventType::DIALOG_EVENT_CONFIRM);
 #endif // WEB_SUPPORTED
 }
 void OnPromptImpl(Ark_NativePointer node,
@@ -728,10 +730,11 @@ void OnPromptImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onPrompt = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) -> bool {
+    auto onPrompt = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> bool {
         return OnPrompt(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnCommonDialog(frameNode, onPrompt, DialogEventType::DIALOG_EVENT_PROMPT);
+    WebModelStatic::SetOnCommonDialog(frameNode, onPrompt, DialogEventType::DIALOG_EVENT_PROMPT);
 #endif // WEB_SUPPORTED
 }
 void OnConsoleImpl(Ark_NativePointer node,
@@ -746,10 +749,11 @@ void OnConsoleImpl(Ark_NativePointer node,
         return;
     }
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onConsole = [callback = CallbackHelper(*optValue), weakNode](const BaseEventInfo* info) -> bool {
+    auto onConsole = [callback = CallbackHelper(*optValue), weakNode](
+        const BaseEventInfo* info) -> bool {
         return OnConsole(callback, weakNode, info);
     };
-    WebModelNG::SetOnConsoleLog(frameNode, onConsole);
+    WebModelStatic::SetOnConsoleLog(frameNode, onConsole);
 #endif // WEB_SUPPORTED
 }
 void OnErrorReceiveImpl(Ark_NativePointer node,
@@ -765,10 +769,11 @@ void OnErrorReceiveImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onErrorReceive = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+    auto onErrorReceive = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
         OnErrorReceive(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnErrorReceive(frameNode, onErrorReceive);
+    WebModelStatic::SetOnErrorReceive(frameNode, onErrorReceive);
 #endif // WEB_SUPPORTED
 }
 void OnHttpErrorReceiveImpl(Ark_NativePointer node,
@@ -784,10 +789,11 @@ void OnHttpErrorReceiveImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onHttpErrorReceive = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+    auto onHttpErrorReceive = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
         OnHttpErrorReceive(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnHttpErrorReceive(frameNode, onHttpErrorReceive);
+    WebModelStatic::SetOnHttpErrorReceive(frameNode, onHttpErrorReceive);
 #endif // WEB_SUPPORTED
 }
 void OnDownloadStartImpl(Ark_NativePointer node,
@@ -803,10 +809,11 @@ void OnDownloadStartImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onDownloadStart = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+    auto onDownloadStart = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
         OnDownloadStart(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnDownloadStart(frameNode, onDownloadStart);
+    WebModelStatic::SetOnDownloadStart(frameNode, onDownloadStart);
 #endif // WEB_SUPPORTED
 }
 void OnRefreshAccessedHistoryImpl(Ark_NativePointer node,
@@ -826,7 +833,7 @@ void OnRefreshAccessedHistoryImpl(Ark_NativePointer node,
         const BaseEventInfo* info) {
         OnRefreshAccessedHistory(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetRefreshAccessedHistoryId(frameNode, onRefreshAccessedHistory);
+    WebModelStatic::SetRefreshAccessedHistoryId(frameNode, onRefreshAccessedHistory);
 #endif // WEB_SUPPORTED
 }
 void OnUrlLoadInterceptImpl(Ark_NativePointer node,
@@ -846,7 +853,7 @@ void OnUrlLoadInterceptImpl(Ark_NativePointer node,
         const BaseEventInfo* info) -> bool {
         return OnUrlLoadIntercept(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnUrlLoadIntercept(frameNode, onUrlLoadIntercept);
+    WebModelStatic::SetOnUrlLoadIntercept(frameNode, onUrlLoadIntercept);
 #endif // WEB_SUPPORTED
 }
 void OnSslErrorReceiveImpl(Ark_NativePointer node,
@@ -867,11 +874,11 @@ void OnRenderExited0Impl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onRenderExited = [callback = CallbackHelper(*optValue), weakNode, instanceId]
-        (const BaseEventInfo* info) {
+    auto onRenderExited = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
         OnRenderExited(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetRenderExitedId(frameNode, onRenderExited);
+    WebModelStatic::SetRenderExitedId(frameNode, onRenderExited);
 #endif // WEB_SUPPORTED
 }
 void OnRenderExited1Impl(Ark_NativePointer node,
@@ -896,7 +903,7 @@ void OnShowFileSelectorImpl(Ark_NativePointer node,
         const BaseEventInfo* info) -> bool {
         return OnShowFileSelector(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnFileSelectorShow(frameNode, onShowFileSelector);
+    WebModelStatic::SetOnFileSelectorShow(frameNode, onShowFileSelector);
 #endif // WEB_SUPPORTED
 }
 void OnFileSelectorShowImpl(Ark_NativePointer node,
@@ -917,10 +924,11 @@ void OnResourceLoadImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onResourceLoad = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+    auto onResourceLoad = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
         OnResourceLoad(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetResourceLoadId(frameNode, onResourceLoad);
+    WebModelStatic::SetResourceLoadId(frameNode, onResourceLoad);
 #endif // WEB_SUPPORTED
 }
 void OnFullScreenExitImpl(Ark_NativePointer node,
@@ -936,10 +944,11 @@ void OnFullScreenExitImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onFullScreenExit = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+    auto onFullScreenExit = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
         OnFullScreenExit(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnFullScreenExit(frameNode, onFullScreenExit);
+    WebModelStatic::SetOnFullScreenExit(frameNode, onFullScreenExit);
 #endif // WEB_SUPPORTED
 }
 void OnFullScreenEnterImpl(Ark_NativePointer node,
@@ -955,10 +964,11 @@ void OnFullScreenEnterImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onFullScreenEnter = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+    auto onFullScreenEnter = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
         OnFullScreenEnter(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnFullScreenEnter(frameNode, onFullScreenEnter);
+    WebModelStatic::SetOnFullScreenEnter(frameNode, onFullScreenEnter);
 #endif // WEB_SUPPORTED
 }
 void OnScaleChangeImpl(Ark_NativePointer node,
@@ -974,10 +984,11 @@ void OnScaleChangeImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onScaleChange = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+    auto onScaleChange = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
         OnScaleChange(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetScaleChangeId(frameNode, onScaleChange);
+    WebModelStatic::SetScaleChangeId(frameNode, onScaleChange);
 #endif // WEB_SUPPORTED
 }
 void OnHttpAuthRequestImpl(Ark_NativePointer node,
@@ -997,7 +1008,7 @@ void OnHttpAuthRequestImpl(Ark_NativePointer node,
         const BaseEventInfo* info) -> bool {
         return OnHttpAuthRequest(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnHttpAuthRequest(frameNode, onHttpAuthRequest);
+    WebModelStatic::SetOnHttpAuthRequest(frameNode, onHttpAuthRequest);
 #endif // WEB_SUPPORTED
 }
 void OnInterceptRequestImpl(Ark_NativePointer node,
@@ -1017,7 +1028,7 @@ void OnInterceptRequestImpl(Ark_NativePointer node,
         const BaseEventInfo* info) -> RefPtr<WebResponse> {
         return OnInterceptRequest(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnInterceptRequest(frameNode, onInterceptRequest);
+    WebModelStatic::SetOnInterceptRequest(frameNode, onInterceptRequest);
 #endif // WEB_SUPPORTED
 }
 void OnPermissionRequestImpl(Ark_NativePointer node,
@@ -1033,10 +1044,11 @@ void OnPermissionRequestImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onPermissionRequest = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+    auto onPermissionRequest = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
         OnPermissionRequest(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetPermissionRequestEventId(frameNode, onPermissionRequest);
+    WebModelStatic::SetPermissionRequestEventId(frameNode, onPermissionRequest);
 #endif // WEB_SUPPORTED
 }
 void OnScreenCaptureRequestImpl(Ark_NativePointer node,
@@ -1056,7 +1068,7 @@ void OnScreenCaptureRequestImpl(Ark_NativePointer node,
         const BaseEventInfo* info) {
         OnScreenCaptureRequest(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetScreenCaptureRequestEventId(frameNode, onScreenCaptureRequest);
+    WebModelStatic::SetScreenCaptureRequestEventId(frameNode, onScreenCaptureRequest);
 #endif // WEB_SUPPORTED
 }
 void OnContextMenuShowImpl(Ark_NativePointer node,
@@ -1076,7 +1088,7 @@ void OnContextMenuShowImpl(Ark_NativePointer node,
         const BaseEventInfo* info) -> bool {
         return OnContextMenuShow(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnContextMenuShow(frameNode, onContextMenuShow);
+    WebModelStatic::SetOnContextMenuShow(frameNode, onContextMenuShow);
 #endif // WEB_SUPPORTED
 }
 void OnContextMenuHideImpl(Ark_NativePointer node,
@@ -1092,10 +1104,11 @@ void OnContextMenuHideImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onContextMenuHide = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+    auto onContextMenuHide = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
         OnContextMenuHide(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnContextMenuHide(frameNode, onContextMenuHide);
+    WebModelStatic::SetOnContextMenuHide(frameNode, onContextMenuHide);
 #endif // WEB_SUPPORTED
 }
 void MediaPlayGestureAccessImpl(Ark_NativePointer node,
@@ -1109,7 +1122,7 @@ void MediaPlayGestureAccessImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetMediaPlayGestureAccess(frameNode, *convValue);
+    WebModelStatic::SetMediaPlayGestureAccess(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void OnSearchResultReceiveImpl(Ark_NativePointer node,
@@ -1129,7 +1142,7 @@ void OnSearchResultReceiveImpl(Ark_NativePointer node,
         const BaseEventInfo* info) {
         OnSearchResultReceive(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetSearchResultReceiveEventId(frameNode, onSearchResultReceive);
+    WebModelStatic::SetSearchResultReceiveEventId(frameNode, onSearchResultReceive);
 #endif // WEB_SUPPORTED
 }
 void OnScrollImpl(Ark_NativePointer node,
@@ -1145,10 +1158,11 @@ void OnScrollImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onScroll = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+    auto onScroll = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
         OnScroll(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetScrollId(frameNode, onScroll);
+    WebModelStatic::SetScrollId(frameNode, onScroll);
 #endif // WEB_SUPPORTED
 }
 void OnSslErrorEventReceiveImpl(Ark_NativePointer node,
@@ -1168,7 +1182,7 @@ void OnSslErrorEventReceiveImpl(Ark_NativePointer node,
         const BaseEventInfo* info) -> bool {
         return OnSslErrorEventReceive(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnSslErrorRequest(frameNode, onSslErrorEventReceive);
+    WebModelStatic::SetOnSslErrorRequest(frameNode, onSslErrorEventReceive);
 #endif // WEB_SUPPORTED
 }
 void OnSslErrorEventImpl(Ark_NativePointer node,
@@ -1188,7 +1202,7 @@ void OnSslErrorEventImpl(Ark_NativePointer node,
         const BaseEventInfo* info) -> bool {
         return OnSslError(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnAllSslErrorRequest(frameNode, onSslErrorEvent);
+    WebModelStatic::SetOnAllSslErrorRequest(frameNode, onSslErrorEvent);
 #endif // WEB_SUPPORTED
 }
 void OnClientAuthenticationRequestImpl(Ark_NativePointer node,
@@ -1208,7 +1222,7 @@ void OnClientAuthenticationRequestImpl(Ark_NativePointer node,
         const BaseEventInfo* info) -> bool {
         return OnClientAuthentication(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnSslSelectCertRequest(frameNode, onClientAuthenticationRequest);
+    WebModelStatic::SetOnSslSelectCertRequest(frameNode, onClientAuthenticationRequest);
 #endif // WEB_SUPPORTED
 }
 void OnWindowNewImpl(Ark_NativePointer node,
@@ -1228,7 +1242,7 @@ void OnWindowNewImpl(Ark_NativePointer node,
         const std::shared_ptr<BaseEventInfo>& info) {
         OnWindowNew(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetWindowNewEvent(frameNode, onWindowNew);
+    WebModelStatic::SetWindowNewEvent(frameNode, onWindowNew);
 #endif // WEB_SUPPORTED
 }
 void OnWindowExitImpl(Ark_NativePointer node,
@@ -1244,10 +1258,11 @@ void OnWindowExitImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onWindowExit = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+    auto onWindowExit = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
         OnWindowExit(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetWindowExitEventId(frameNode, onWindowExit);
+    WebModelStatic::SetWindowExitEventId(frameNode, onWindowExit);
 #endif // WEB_SUPPORTED
 }
 void MultiWindowAccessImpl(Ark_NativePointer node,
@@ -1261,7 +1276,7 @@ void MultiWindowAccessImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetMultiWindowAccessEnabled(frameNode, *convValue);
+    WebModelStatic::SetMultiWindowAccessEnabled(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void OnInterceptKeyEventImpl(Ark_NativePointer node,
@@ -1276,10 +1291,11 @@ void OnInterceptKeyEventImpl(Ark_NativePointer node,
         return;
     }
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onInterceptKeyEvent = [callback = CallbackHelper(*optValue), weakNode](KeyEventInfo& keyEventInfo) -> bool {
+    auto onInterceptKeyEvent = [callback = CallbackHelper(*optValue), weakNode](
+        KeyEventInfo& keyEventInfo) -> bool {
         return OnInterceptKey(callback, weakNode, keyEventInfo);
     };
-    WebModelNG::SetOnInterceptKeyEventCallback(frameNode, onInterceptKeyEvent);
+    WebModelStatic::SetOnInterceptKeyEventCallback(frameNode, onInterceptKeyEvent);
 #endif // WEB_SUPPORTED
 }
 void WebStandardFontImpl(Ark_NativePointer node,
@@ -1293,7 +1309,7 @@ void WebStandardFontImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetWebStandardFont(frameNode, *convValue);
+    WebModelStatic::SetWebStandardFont(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void WebSerifFontImpl(Ark_NativePointer node,
@@ -1307,7 +1323,7 @@ void WebSerifFontImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetWebSerifFont(frameNode, *convValue);
+    WebModelStatic::SetWebSerifFont(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void WebSansSerifFontImpl(Ark_NativePointer node,
@@ -1321,7 +1337,7 @@ void WebSansSerifFontImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetWebSansSerifFont(frameNode, *convValue);
+    WebModelStatic::SetWebSansSerifFont(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void WebFixedFontImpl(Ark_NativePointer node,
@@ -1335,7 +1351,7 @@ void WebFixedFontImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetWebFixedFont(frameNode, *convValue);
+    WebModelStatic::SetWebFixedFont(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void WebFantasyFontImpl(Ark_NativePointer node,
@@ -1349,7 +1365,7 @@ void WebFantasyFontImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetWebFantasyFont(frameNode, *convValue);
+    WebModelStatic::SetWebFantasyFont(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void WebCursiveFontImpl(Ark_NativePointer node,
@@ -1363,7 +1379,7 @@ void WebCursiveFontImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetWebCursiveFont(frameNode, *convValue);
+    WebModelStatic::SetWebCursiveFont(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void DefaultFixedFontSizeImpl(Ark_NativePointer node,
@@ -1377,7 +1393,7 @@ void DefaultFixedFontSizeImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetDefaultFixedFontSize(frameNode, *convValue);
+    WebModelStatic::SetDefaultFixedFontSize(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void DefaultFontSizeImpl(Ark_NativePointer node,
@@ -1391,7 +1407,7 @@ void DefaultFontSizeImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetDefaultFontSize(frameNode, *convValue);
+    WebModelStatic::SetDefaultFontSize(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void MinFontSizeImpl(Ark_NativePointer node,
@@ -1405,7 +1421,7 @@ void MinFontSizeImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetMinFontSize(frameNode, *convValue);
+    WebModelStatic::SetMinFontSize(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void MinLogicalFontSizeImpl(Ark_NativePointer node,
@@ -1419,7 +1435,7 @@ void MinLogicalFontSizeImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetMinLogicalFontSize(frameNode, *convValue);
+    WebModelStatic::SetMinLogicalFontSize(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void DefaultTextEncodingFormatImpl(Ark_NativePointer node,
@@ -1434,7 +1450,7 @@ void DefaultTextEncodingFormatImpl(Ark_NativePointer node,
         return;
     }
     EraseSpace(*convValue);
-    WebModelNG::SetDefaultTextEncodingFormat(frameNode, *convValue);
+    WebModelStatic::SetDefaultTextEncodingFormat(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void ForceDisplayScrollBarImpl(Ark_NativePointer node,
@@ -1448,7 +1464,7 @@ void ForceDisplayScrollBarImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetOverlayScrollbarEnabled(frameNode, *convValue);
+    WebModelStatic::SetOverlayScrollbarEnabled(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void BlockNetworkImpl(Ark_NativePointer node,
@@ -1462,7 +1478,7 @@ void BlockNetworkImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetBlockNetwork(frameNode, *convValue);
+    WebModelStatic::SetBlockNetwork(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void HorizontalScrollBarAccessImpl(Ark_NativePointer node,
@@ -1476,7 +1492,7 @@ void HorizontalScrollBarAccessImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetHorizontalScrollBarAccessEnabled(frameNode, *convValue);
+    WebModelStatic::SetHorizontalScrollBarAccessEnabled(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void VerticalScrollBarAccessImpl(Ark_NativePointer node,
@@ -1490,7 +1506,7 @@ void VerticalScrollBarAccessImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetVerticalScrollBarAccessEnabled(frameNode, *convValue);
+    WebModelStatic::SetVerticalScrollBarAccessEnabled(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void OnTouchIconUrlReceivedImpl(Ark_NativePointer node,
@@ -1510,7 +1526,7 @@ void OnTouchIconUrlReceivedImpl(Ark_NativePointer node,
         const std::shared_ptr<BaseEventInfo>& info) {
         OnTouchIconUrlReceived(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetTouchIconUrlId(frameNode, onTouchIconUrlReceived);
+    WebModelStatic::SetTouchIconUrlId(frameNode, onTouchIconUrlReceived);
 #endif // WEB_SUPPORTED
 }
 void OnFaviconReceivedImpl(Ark_NativePointer node,
@@ -1530,7 +1546,7 @@ void OnFaviconReceivedImpl(Ark_NativePointer node,
         const std::shared_ptr<BaseEventInfo>& info) {
         OnFaviconReceived(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetFaviconReceivedId(frameNode, onFaviconReceived);
+    WebModelStatic::SetFaviconReceivedId(frameNode, onFaviconReceived);
 #endif // WEB_SUPPORTED
 }
 void OnPageVisibleImpl(Ark_NativePointer node,
@@ -1550,7 +1566,7 @@ void OnPageVisibleImpl(Ark_NativePointer node,
         const std::shared_ptr<BaseEventInfo>& info) {
         OnPageVisible(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetPageVisibleId(frameNode, std::move(onPageVisible));
+    WebModelStatic::SetPageVisibleId(frameNode, std::move(onPageVisible));
 #endif // WEB_SUPPORTED
 }
 void OnDataResubmittedImpl(Ark_NativePointer node,
@@ -1570,7 +1586,7 @@ void OnDataResubmittedImpl(Ark_NativePointer node,
         const std::shared_ptr<BaseEventInfo>& info) {
         OnDataResubmitted(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnDataResubmitted(frameNode, onDataResubmitted);
+    WebModelStatic::SetOnDataResubmitted(frameNode, onDataResubmitted);
 #endif // WEB_SUPPORTED
 }
 void PinchSmoothImpl(Ark_NativePointer node,
@@ -1584,7 +1600,7 @@ void PinchSmoothImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetPinchSmoothModeEnabled(frameNode, *convValue);
+    WebModelStatic::SetPinchSmoothModeEnabled(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void AllowWindowOpenMethodImpl(Ark_NativePointer node,
@@ -1598,7 +1614,7 @@ void AllowWindowOpenMethodImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetAllowWindowOpenMethod(frameNode, *convValue);
+    WebModelStatic::SetAllowWindowOpenMethod(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void OnAudioStateChangedImpl(Ark_NativePointer node,
@@ -1618,7 +1634,7 @@ void OnAudioStateChangedImpl(Ark_NativePointer node,
         const std::shared_ptr<BaseEventInfo>& info) {
         OnAudioStateChanged(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetAudioStateChangedId(frameNode, onAudioStateChanged);
+    WebModelStatic::SetAudioStateChangedId(frameNode, onAudioStateChanged);
 #endif // WEB_SUPPORTED
 }
 void OnFirstContentfulPaintImpl(Ark_NativePointer node,
@@ -1638,7 +1654,7 @@ void OnFirstContentfulPaintImpl(Ark_NativePointer node,
         const std::shared_ptr<BaseEventInfo>& info) {
         OnFirstContentfulPaint(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetFirstContentfulPaintId(frameNode, std::move(onFirstContentfulPaint));
+    WebModelStatic::SetFirstContentfulPaintId(frameNode, std::move(onFirstContentfulPaint));
 #endif // WEB_SUPPORTED
 }
 void OnFirstMeaningfulPaintImpl(Ark_NativePointer node,
@@ -1658,7 +1674,7 @@ void OnFirstMeaningfulPaintImpl(Ark_NativePointer node,
         const std::shared_ptr<BaseEventInfo>& info) {
         OnFirstMeaningfulPaint(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetFirstMeaningfulPaintId(frameNode, std::move(onFirstMeaningfulPaint));
+    WebModelStatic::SetFirstMeaningfulPaintId(frameNode, std::move(onFirstMeaningfulPaint));
 #endif // WEB_SUPPORTED
 }
 void OnLargestContentfulPaintImpl(Ark_NativePointer node,
@@ -1678,7 +1694,7 @@ void OnLargestContentfulPaintImpl(Ark_NativePointer node,
         const std::shared_ptr<BaseEventInfo>& info) {
         OnLargestContentfulPaint(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetLargestContentfulPaintId(frameNode, std::move(onLargestContentfulPaint));
+    WebModelStatic::SetLargestContentfulPaintId(frameNode, std::move(onLargestContentfulPaint));
 #endif // WEB_SUPPORTED
 }
 void OnLoadInterceptImpl(Ark_NativePointer node,
@@ -1698,7 +1714,7 @@ void OnLoadInterceptImpl(Ark_NativePointer node,
         const BaseEventInfo* info) -> bool {
         return OnLoadIntercept(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnLoadIntercept(frameNode, std::move(onLoadIntercept));
+    WebModelStatic::SetOnLoadIntercept(frameNode, std::move(onLoadIntercept));
 #endif // WEB_SUPPORTED
 }
 void OnControllerAttachedImpl(Ark_NativePointer node,
@@ -1717,7 +1733,7 @@ void OnControllerAttachedImpl(Ark_NativePointer node,
     auto onControllerAttached = [callback = CallbackHelper(*optValue), weakNode, instanceId]() {
         OnControllerAttached(callback, weakNode, instanceId);
     };
-    WebModelNG::SetOnControllerAttached(frameNode, std::move(onControllerAttached));
+    WebModelStatic::SetOnControllerAttached(frameNode, std::move(onControllerAttached));
 #endif // WEB_SUPPORTED
 }
 void OnOverScrollImpl(Ark_NativePointer node,
@@ -1733,10 +1749,11 @@ void OnOverScrollImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onOverScroll = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+    auto onOverScroll = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
         OnOverScroll(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOverScrollId(frameNode, onOverScroll);
+    WebModelStatic::SetOverScrollId(frameNode, onOverScroll);
 #endif // WEB_SUPPORTED
 }
 void OnSafeBrowsingCheckResultImpl(Ark_NativePointer node,
@@ -1756,7 +1773,7 @@ void OnSafeBrowsingCheckResultImpl(Ark_NativePointer node,
         const std::shared_ptr<BaseEventInfo>& info) {
         OnSafeBrowsingCheckResult(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetSafeBrowsingCheckResultId(frameNode, std::move(onSafeBrowsingCheckResult));
+    WebModelStatic::SetSafeBrowsingCheckResultId(frameNode, std::move(onSafeBrowsingCheckResult));
 #endif // WEB_SUPPORTED
 }
 void OnNavigationEntryCommittedImpl(Ark_NativePointer node,
@@ -1776,7 +1793,7 @@ void OnNavigationEntryCommittedImpl(Ark_NativePointer node,
         const std::shared_ptr<BaseEventInfo>& info) {
         OnNavigationEntryCommitted(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetNavigationEntryCommittedId(frameNode, std::move(onNavigationEntryCommitted));
+    WebModelStatic::SetNavigationEntryCommittedId(frameNode, std::move(onNavigationEntryCommitted));
 #endif // WEB_SUPPORTED
 }
 void OnIntelligentTrackingPreventionResultImpl(Ark_NativePointer node,
@@ -1796,7 +1813,8 @@ void OnIntelligentTrackingPreventionResultImpl(Ark_NativePointer node,
         const std::shared_ptr<BaseEventInfo>& info) {
         OnIntelligentTrackingPrevention(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetIntelligentTrackingPreventionResultId(frameNode, std::move(onIntelligentTrackingPreventionResult));
+    WebModelStatic::SetIntelligentTrackingPreventionResultId(frameNode,
+                                                             std::move(onIntelligentTrackingPreventionResult));
 #endif // WEB_SUPPORTED
 }
 void JavaScriptOnDocumentStartImpl(Ark_NativePointer node,
@@ -1810,7 +1828,7 @@ void JavaScriptOnDocumentStartImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::JavaScriptOnDocumentStart(frameNode, *convValue);
+    WebModelStatic::JavaScriptOnDocumentStart(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void JavaScriptOnDocumentEndImpl(Ark_NativePointer node,
@@ -1824,7 +1842,7 @@ void JavaScriptOnDocumentEndImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::JavaScriptOnDocumentEnd(frameNode, *convValue);
+    WebModelStatic::JavaScriptOnDocumentEnd(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void LayoutModeImpl(Ark_NativePointer node,
@@ -1834,7 +1852,7 @@ void LayoutModeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<WebLayoutMode>(*value);
-    WebModelNG::SetLayoutMode(frameNode, convValue);
+    WebModelStatic::SetLayoutMode(frameNode, convValue);
 #endif // WEB_SUPPORTED
 }
 void NestedScrollImpl(Ark_NativePointer node,
@@ -1844,7 +1862,7 @@ void NestedScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<NestedScrollOptionsExt>(*value);
-    WebModelNG::SetNestedScrollExt(frameNode, convValue);
+    WebModelStatic::SetNestedScrollExt(frameNode, convValue);
 #endif // WEB_SUPPORTED
 }
 void EnableNativeEmbedModeImpl(Ark_NativePointer node,
@@ -1858,7 +1876,7 @@ void EnableNativeEmbedModeImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetNativeEmbedModeEnabled(frameNode, *convValue);
+    WebModelStatic::SetNativeEmbedModeEnabled(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void OnNativeEmbedLifecycleChangeImpl(Ark_NativePointer node,
@@ -1873,10 +1891,11 @@ void OnNativeEmbedLifecycleChangeImpl(Ark_NativePointer node,
         return;
     }
     auto instanceId = Container::CurrentId();
-    auto onNativeEmbedLifecycleChange = [callback = CallbackHelper(*optValue), instanceId](const BaseEventInfo* info) {
+    auto onNativeEmbedLifecycleChange = [callback = CallbackHelper(*optValue), instanceId](
+        const BaseEventInfo* info) {
         OnNativeEmbedDataInfo(callback, instanceId, info);
     };
-    WebModelNG::SetNativeEmbedLifecycleChangeId(frameNode, onNativeEmbedLifecycleChange);
+    WebModelStatic::SetNativeEmbedLifecycleChangeId(frameNode, onNativeEmbedLifecycleChange);
 #endif // WEB_SUPPORTED
 }
 void OnNativeEmbedVisibilityChangeImpl(Ark_NativePointer node,
@@ -1891,10 +1910,11 @@ void OnNativeEmbedVisibilityChangeImpl(Ark_NativePointer node,
         return;
     }
     auto instanceId = Container::CurrentId();
-    auto onNativeEmbedVisibilityChange = [callback = CallbackHelper(*optValue), instanceId](const BaseEventInfo* info) {
+    auto onNativeEmbedVisibilityChange = [callback = CallbackHelper(*optValue), instanceId](
+        const BaseEventInfo* info) {
         OnNativeEmbedVisibilityChange(callback, instanceId, info);
     };
-    WebModelNG::SetNativeEmbedVisibilityChangeId(frameNode, onNativeEmbedVisibilityChange);
+    WebModelStatic::SetNativeEmbedVisibilityChangeId(frameNode, onNativeEmbedVisibilityChange);
 #endif // WEB_SUPPORTED
 }
 void OnNativeEmbedGestureEventImpl(Ark_NativePointer node,
@@ -1909,10 +1929,11 @@ void OnNativeEmbedGestureEventImpl(Ark_NativePointer node,
         return;
     }
     auto instanceId = Container::CurrentId();
-    auto onNativeEmbedGestureEvent = [callback = CallbackHelper(*optValue), instanceId](const BaseEventInfo* info) {
+    auto onNativeEmbedGestureEvent = [callback = CallbackHelper(*optValue), instanceId](
+        const BaseEventInfo* info) {
         OnNativeEmbedTouchInfo(callback, instanceId, info);
     };
-    WebModelNG::SetNativeEmbedGestureEventId(frameNode, onNativeEmbedGestureEvent);
+    WebModelStatic::SetNativeEmbedGestureEventId(frameNode, onNativeEmbedGestureEvent);
 #endif // WEB_SUPPORTED
 }
 void CopyOptionsImpl(Ark_NativePointer node,
@@ -1922,7 +1943,7 @@ void CopyOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<CopyOptions>(*value);
-    WebModelNG::SetCopyOptionMode(frameNode, convValue);
+    WebModelStatic::SetCopyOptionMode(frameNode, convValue);
 #endif // WEB_SUPPORTED
 }
 void OnOverrideUrlLoadingImpl(Ark_NativePointer node,
@@ -1942,7 +1963,7 @@ void OnOverrideUrlLoadingImpl(Ark_NativePointer node,
         const BaseEventInfo* info) -> bool {
         return OnOverrideUrlLoading(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnOverrideUrlLoading(frameNode, std::move(onOverrideUrlLoading));
+    WebModelStatic::SetOnOverrideUrlLoading(frameNode, std::move(onOverrideUrlLoading));
 #endif // WEB_SUPPORTED
 }
 void TextAutosizingImpl(Ark_NativePointer node,
@@ -1956,7 +1977,7 @@ void TextAutosizingImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetTextAutosizing(frameNode, *convValue);
+    WebModelStatic::SetTextAutosizing(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void EnableNativeMediaPlayerImpl(Ark_NativePointer node,
@@ -1972,7 +1993,7 @@ void EnableNativeMediaPlayerImpl(Ark_NativePointer node,
     }
     auto enable = Converter::Convert<bool>(optValue->enable);
     auto shouldOverlay = Converter::Convert<bool>(optValue->shouldOverlay);
-    WebModelNG::SetNativeVideoPlayerConfig(frameNode, enable, shouldOverlay);
+    WebModelStatic::SetNativeVideoPlayerConfig(frameNode, enable, shouldOverlay);
 #endif // WEB_SUPPORTED
 }
 void OnRenderProcessNotRespondingImpl(Ark_NativePointer node,
@@ -1992,7 +2013,7 @@ void OnRenderProcessNotRespondingImpl(Ark_NativePointer node,
         const BaseEventInfo* info) {
         OnRenderProcessNotResponding(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetRenderProcessNotRespondingId(frameNode, onRenderProcessNotResponding);
+    WebModelStatic::SetRenderProcessNotRespondingId(frameNode, onRenderProcessNotResponding);
 #endif // WEB_SUPPORTED
 }
 void OnRenderProcessRespondingImpl(Ark_NativePointer node,
@@ -2012,7 +2033,7 @@ void OnRenderProcessRespondingImpl(Ark_NativePointer node,
         const BaseEventInfo* info) {
         OnRenderProcessResponding(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetRenderProcessRespondingId(frameNode, onRenderProcessResponding);
+    WebModelStatic::SetRenderProcessRespondingId(frameNode, onRenderProcessResponding);
 #endif // WEB_SUPPORTED
 }
 void SelectionMenuOptionsImpl(Ark_NativePointer node,
@@ -2044,7 +2065,7 @@ void SelectionMenuOptionsImpl(Ark_NativePointer node,
         option.action = std::move(action);
         optionParam.menuOption.push_back(option);
     }
-    WebModelNG::SetSelectionMenuOptions(frameNode, optionParam);
+    WebModelStatic::SetSelectionMenuOptions(frameNode, optionParam);
 #endif // WEB_SUPPORTED
 }
 void OnViewportFitChangedImpl(Ark_NativePointer node,
@@ -2064,7 +2085,7 @@ void OnViewportFitChangedImpl(Ark_NativePointer node,
         const BaseEventInfo* info) {
         OnViewportFitChanged(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetViewportFitChangedId(frameNode, onViewportFitChanged);
+    WebModelStatic::SetViewportFitChangedId(frameNode, onViewportFitChanged);
 #endif // WEB_SUPPORTED
 }
 void OnInterceptKeyboardAttachImpl(Ark_NativePointer node,
@@ -2084,7 +2105,7 @@ void OnInterceptKeyboardAttachImpl(Ark_NativePointer node,
         const BaseEventInfo* info) -> WebKeyboardOption {
         return OnWebKeyboard(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetOnInterceptKeyboardAttach(frameNode, std::move(onInterceptKeyboardAttach));
+    WebModelStatic::SetOnInterceptKeyboardAttach(frameNode, std::move(onInterceptKeyboardAttach));
 #endif // WEB_SUPPORTED
 }
 void OnAdsBlockedImpl(Ark_NativePointer node,
@@ -2100,10 +2121,11 @@ void OnAdsBlockedImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onAdsBlocked = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+    auto onAdsBlocked = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
         OnAdsBlocked(callback, weakNode, instanceId, info);
     };
-    WebModelNG::SetAdsBlockedEventId(frameNode, onAdsBlocked);
+    WebModelStatic::SetAdsBlockedEventId(frameNode, onAdsBlocked);
 #endif // WEB_SUPPORTED
 }
 void KeyboardAvoidModeImpl(Ark_NativePointer node,
@@ -2113,7 +2135,7 @@ void KeyboardAvoidModeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<WebKeyboardAvoidMode>(*value);
-    WebModelNG::SetKeyboardAvoidMode(frameNode, convValue);
+    WebModelStatic::SetKeyboardAvoidMode(frameNode, convValue);
 #endif // WEB_SUPPORTED
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
@@ -2143,7 +2165,7 @@ void EditMenuOptionsImpl(Ark_NativePointer node,
                 Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
             return Converter::Convert<bool>(arkResult);
         };
-    WebModelNG::SetEditMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    WebModelStatic::SetEditMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 #endif // WEB_SUPPORTED
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
@@ -2157,64 +2179,99 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::SetEnabledHapticFeedback(frameNode, *convValue);
+    WebModelStatic::SetEnabledHapticFeedback(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void OptimizeParserBudgetImpl(Ark_NativePointer node,
                               const Opt_Boolean* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //WebModelNG::SetOptimizeParserBudget(frameNode, convValue);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    WebModelStatic::SetOptimizeParserBudgetEnabled(frameNode, convValue);
+#endif
 }
 void EnableFollowSystemFontWeightImpl(Ark_NativePointer node,
                                       const Opt_Boolean* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //WebModelNG::SetEnableFollowSystemFontWeight(frameNode, convValue);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    WebModelStatic::SetEnableFollowSystemFontWeight(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void EnableWebAVSessionImpl(Ark_NativePointer node,
                             const Opt_Boolean* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //WebModelNG::SetEnableWebAVSession(frameNode, convValue);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    WebModelStatic::SetWebMediaAVSessionEnabled(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void RunJavaScriptOnDocumentStartImpl(Ark_NativePointer node,
                                       const Opt_Array_ScriptItem* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //WebModelNG::SetRunJavaScriptOnDocumentStart(frameNode, convValue);
+    auto convValue = Converter::OptConvert<ScriptItems>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    WebModelStatic::JavaScriptOnDocumentStart(frameNode, *convValue);
+#endif // WEB_SUPPORTED
 }
 void RunJavaScriptOnDocumentEndImpl(Ark_NativePointer node,
                                     const Opt_Array_ScriptItem* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //WebModelNG::SetRunJavaScriptOnDocumentEnd(frameNode, convValue);
+    auto convValue = Converter::OptConvert<ScriptItems>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    WebModelStatic::JavaScriptOnDocumentEnd(frameNode, *convValue);
+#endif // WEB_SUPPORTED
 }
 void RunJavaScriptOnHeadEndImpl(Ark_NativePointer node,
                                 const Opt_Array_ScriptItem* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //WebModelNG::SetRunJavaScriptOnHeadEnd(frameNode, convValue);
+    auto convValue = Converter::OptConvert<ScriptItems>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    WebModelStatic::JavaScriptOnHeadEnd(frameNode, *convValue);
+#endif // WEB_SUPPORTED
 }
 void NativeEmbedOptionsImpl(Ark_NativePointer node,
                             const Opt_EmbedOptions* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //WebModelNG::SetNativeEmbedOptions(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Ark_EmbedOptions>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto supportDefaultIntrinsicSize = Converter::OptConvert<bool>(convValue.value().supportDefaultIntrinsicSize);
+    if (!supportDefaultIntrinsicSize) {
+        // TODO: Reset value
+        return;
+    }
+    WebModelStatic::SetNativeEmbedOptions(frameNode, *supportDefaultIntrinsicSize);
+#endif // WEB_SUPPORTED
 }
 void RegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                  const Opt_String* tag,
@@ -2233,7 +2290,7 @@ void RegisterNativeEmbedRuleImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    WebModelNG::RegisterNativeEmbedRule(frameNode, *convValueTag, *convValueType);
+    WebModelStatic::RegisterNativeEmbedRule(frameNode, *convValueTag, *convValueType);
 #endif // WEB_SUPPORTED
 }
 void InitCallbackParams_(FrameNode* frameNode, MenuParam& dst, const Opt_Callback_Void& onAppear,
@@ -2271,7 +2328,7 @@ std::function<void(const std::shared_ptr<WebPreviewSelectionMenuParam>&)> GetPre
                     NG::ViewStackProcessor::GetInstance()->Push(uiNode);
                 };
                 param->previewBuilder = previewNodeBuilder;
-                WebModelNG::SetPreviewSelectionMenu(frameNode, param);
+                WebModelStatic::SetPreviewSelectionMenu(frameNode, param);
                 }, node);
         };
     return previewHandler;
@@ -2311,7 +2368,7 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     menuParam.isShow = true;
-    WebModelNG::SetNewDragStyle(frameNode, true);
+    WebModelStatic::SetNewDragStyle(frameNode, true);
     auto optContent = Converter::GetOptPtr(content);
     if (!optContent) {
         // TODO: Reset value
@@ -2327,7 +2384,7 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
         if (previewHandler) {
             previewHandler(previewSelectionMenuParam);
         } else {
-            WebModelNG::SetPreviewSelectionMenu(frameNode, previewSelectionMenuParam);
+            WebModelStatic::SetPreviewSelectionMenu(frameNode, previewSelectionMenuParam);
         }
         }, node);
 #endif // WEB_SUPPORTED
@@ -2471,3 +2528,4 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
 }
 
 }
+

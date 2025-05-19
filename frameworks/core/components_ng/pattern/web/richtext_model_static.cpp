@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/web/richtext_model_ng.h"
+#include "core/components_ng/pattern/web/richtext_model_static.h"
 
 #include "core/components_ng/base/node_flag.h"
 
@@ -26,62 +26,42 @@
 #include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
 #endif
 #endif // ARKUI_CAPI_UNITTEST
+
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-void RichTextModelNG::Create(const std::string& webData)
+RefPtr<NG::FrameNode> RichTextModelStatic::CreateFrameNode(int32_t nodeId)
 {
-    auto* stack = ViewStackProcessor::GetInstance();
-    CHECK_NULL_VOID(stack);
-    auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::WEB_ETS_TAG, nodeId);
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
     frameNode->AddFlag(NodeFlag::WEB_TAG);
-    stack->Push(frameNode);
-
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    CHECK_NULL_VOID(webPattern);
-#ifdef ANDROID_PLATFORM
-    webPattern->RichTextInit();
-#endif
-    webPattern->SetWebData(webData);
-    isDataEmpty_ = webData.empty();
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddWindowStateChangedCallback(nodeId);
-    pipeline->AddWindowSizeChangeCallback(nodeId);
+    return frameNode;
 }
 
-void RichTextModelNG::SetOnPageStart(std::function<void(const BaseEventInfo*)>&& onPageStarted)
+void RichTextModelStatic::SetRichTextOptions(FrameNode *frameNode, const std::string& options)
 {
-#ifdef IOS_PLATFORM
-    if (isDataEmpty_) {
-        return;
-    }
-#endif
-    auto func = onPageStarted;
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetWebData(options);
+}
+void RichTextModelStatic::SetOnPageStart(FrameNode *frameNode, std::function<void(const BaseEventInfo*)>&& onStarted)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto func = onStarted;
     auto onPageStartedEvent = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto stackProcessor = ViewStackProcessor::GetInstance();
-    CHECK_NULL_VOID(stackProcessor);
-    auto webEventHub = stackProcessor->GetMainFrameNodeEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnPageStartedEvent(std::move(onPageStartedEvent));
 }
-
-void RichTextModelNG::SetOnPageFinish(std::function<void(const BaseEventInfo*)>&& onPageFinish)
+void RichTextModelStatic::SetOnPageFinish(FrameNode *frameNode, std::function<void(const BaseEventInfo*)>&& onFinish)
 {
-#ifdef IOS_PLATFORM
-    if (isDataEmpty_) {
-        return;
-    }
-#endif
-    auto func = onPageFinish;
+    CHECK_NULL_VOID(frameNode);
+    auto func = onFinish;
     auto onPageFinishEvent = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto stackProcessor = ViewStackProcessor::GetInstance();
-    CHECK_NULL_VOID(stackProcessor);
-    auto webEventHub = stackProcessor->GetMainFrameNodeEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnPageFinishedEvent(std::move(onPageFinishEvent));
 }
