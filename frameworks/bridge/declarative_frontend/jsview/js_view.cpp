@@ -1032,15 +1032,17 @@ void JSViewPartialUpdate::CreateRecycle(const JSCallbackInfo& info)
     }
     auto recycle = params[PARAM_IS_RECYCLE]->ToBoolean();
     auto nodeName = params[PARAM_NODE_NAME]->ToString();
-    auto jsRecycleUpdateFunc =
-        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(params[PARAM_RECYCLE_UPDATE_FUNC]));
-    auto recycleUpdateFunc = [weak = AceType::WeakClaim(view), execCtx = info.GetExecutionContext(),
-                                 func = std::move(jsRecycleUpdateFunc)]() -> void {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+
+    auto vm = info.GetVm();
+    auto jsRecycleUpdateFunc = JSRef<JSFunc>::Cast(params[PARAM_RECYCLE_UPDATE_FUNC]);
+    auto func = jsRecycleUpdateFunc->GetLocalHandle();
+    auto recycleUpdateFunc = [weak = AceType::WeakClaim(view), vm, func = panda::CopyableGlobal(vm, func)]() -> void {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch tryCatch(vm);
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         jsView->SetIsRecycleRerender(true);
-        func->ExecuteJS();
+        func->Call(vm, func.ToLocal(), nullptr, 0);
         jsView->SetIsRecycleRerender(false);
     };
 
