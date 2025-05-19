@@ -20,7 +20,7 @@ import { int32, int64, float32 } from "@koalaui/common"
 import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
 import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
+import { PeerNode, RootPeerType } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
@@ -40,7 +40,7 @@ export class ArkRootPeer extends PeerNode {
 }
 export class ArkComponentRootPeer extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
-        super(peerPtr, id, name, flags)
+        super(peerPtr, id, name, flags, RootPeerType)
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkComponentRootPeer {
         const peerId  = PeerNode.nextId()
