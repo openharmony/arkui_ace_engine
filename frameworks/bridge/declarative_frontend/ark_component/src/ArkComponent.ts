@@ -170,6 +170,9 @@ const SAFE_AREA_EDGE_ALL = 15;
 
 const SAFE_AREA_TYPE_LIMIT = 3;
 const SAFE_AREA_EDGE_LIMIT = 4;
+const SAFE_AREA_LOWER_LIMIT = 0;
+const LAYOUT_SAFE_AREA_TYPE_LIMIT = 2;
+const LAYOUT_SAFE_AREA_EDGE_LIMIT = 6;
 const DIRECTION_RANGE = 3;
 
 type KNode = number | null
@@ -2445,6 +2448,24 @@ class SafeAreaPaddingModifier extends ModifierWithKey<ArkPadding> {
   }
 }
 
+class IgnoreLayoutSafeAreaCommonModifier extends ModifierWithKey<ArkSafeAreaExpandOpts | undefined> {
+  constructor(value: ArkSafeAreaExpandOpts | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('ignoreLayoutSafeAreaCommon');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetIgnoreLayoutSafeArea(node);
+    } else {
+      getUINativeModule().common.setIgnoreLayoutSafeArea(node, this.value.type, this.value.edges);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.type, this.value.type) ||
+      !isBaseOrResourceEqual(this.stageValue.edges, this.value.edges);
+  }
+}
+
 class VisibilityModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -4050,6 +4071,48 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       modifierWithKey(this._modifiersWithKeys, SafeAreaPaddingModifier.identity, SafeAreaPaddingModifier, arkValue);
     } else {
       modifierWithKey(this._modifiersWithKeys, SafeAreaPaddingModifier.identity, SafeAreaPaddingModifier, undefined);
+    }
+    return this;
+  }
+
+  ignoreLayoutSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
+    let opts = new ArkSafeAreaExpandOpts();
+    if (types && types.length >= 0) {
+      let safeAreaType: string | number = '';
+      for (let param of types) {
+        if (!isNumber(param) || param > LAYOUT_SAFE_AREA_TYPE_LIMIT || param < SAFE_AREA_LOWER_LIMIT) {
+          safeAreaType = undefined;
+          break;
+        }
+        if (safeAreaType) {
+          safeAreaType += '|';
+          safeAreaType += param.toString();
+        } else {
+          safeAreaType += param.toString();
+        }
+      }
+      opts.type = safeAreaType;
+    }
+    if (edges && edges.length >= 0) {
+      let safeAreaEdge: string | number = '';
+      for (let param of edges) {
+        if (!isNumber(param) || param > LAYOUT_SAFE_AREA_EDGE_LIMIT || param < SAFE_AREA_LOWER_LIMIT) {
+          safeAreaEdge = undefined;
+          break;
+        }
+        if (safeAreaEdge) {
+          safeAreaEdge += '|';
+          safeAreaEdge += param.toString();
+        } else {
+          safeAreaEdge += param.toString();
+        }
+      }
+      opts.edges = safeAreaEdge;
+    }
+    if (opts.type === undefined && opts.edges === undefined) {
+      modifierWithKey(this._modifiersWithKeys, IgnoreLayoutSafeAreaCommonModifier.identity, IgnoreLayoutSafeAreaCommonModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, IgnoreLayoutSafeAreaCommonModifier.identity, IgnoreLayoutSafeAreaCommonModifier, opts);
     }
     return this;
   }

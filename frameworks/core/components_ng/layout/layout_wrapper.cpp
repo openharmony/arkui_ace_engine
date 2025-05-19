@@ -413,10 +413,10 @@ bool LayoutWrapper::AccumulateExpandCacheHit(ExpandEdges& totalExpand, const Pad
 }
 
 ExpandEdges LayoutWrapper::GetAccumulatedSafeAreaExpand(
-    bool includingSelf, IgnoreLayoutSafeAreaOpts options, bool fromMarginRect)
+    bool includingSelf, IgnoreLayoutSafeAreaOpts options, IgnoreStrategy strategy)
 {
     StartPoint startPoint = StartPoint::NORMAL;
-    if (fromMarginRect) {
+    if (strategy == IgnoreStrategy::FROM_MARGIN) {
         startPoint = StartPoint::FROM_MARGIN;
     } else if (includingSelf) {
         startPoint = StartPoint::INCLUDING_SELF;
