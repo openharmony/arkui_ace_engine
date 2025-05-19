@@ -33977,6 +33977,33 @@ class ArkCommonShapeComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  resetCommonShapeOptions() {
+    modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+      CommonShapeWidthModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+      CommonShapeHeightModifier, undefined);
+  }
+  initialize(value) {
+    if (value[0] === undefined || value[0] === null) {
+      this.resetCommonShapeOptions();
+      return this;
+    }
+    if (value[0].width !== undefined && value[0].width !== null) {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+        CommonShapeWidthModifier, value[0].width);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+        CommonShapeWidthModifier, undefined);
+    }
+    if (value[0].height !== undefined && value[0].height !== null) {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+        CommonShapeHeightModifier, value[0].height);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+        CommonShapeHeightModifier, undefined);
+    }
+    return this;
+  }
   viewPort(value) {
     throw new Error('Method not implemented.');
   }
@@ -34481,6 +34508,42 @@ class ArkPathComponent extends ArkCommonShapeComponent {
     modifierWithKey(this._modifiersWithKeys, CommandsModifier.identity, CommandsModifier, value);
     return this;
   }
+  resetPathOptions() {
+    modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+      CommonShapeWidthModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+      CommonShapeHeightModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, CommandsModifier.identity,
+      CommandsModifier, undefined);
+  }
+  initialize(value) {
+    if (value[0] === undefined || value[0] === null) {
+      this.resetPathOptions();
+      return this;
+    }
+    if (value[0].width !== undefined && value[0].width !== null) {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+        CommonShapeWidthModifier, value[0].width);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+        CommonShapeWidthModifier, undefined);
+    }
+    if (value[0].height !== undefined && value[0].height !== null) {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+        CommonShapeHeightModifier, value[0].height);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+        CommonShapeHeightModifier, undefined);
+    }
+    if (value[0].commands !== undefined && value[0].commands !== null) {
+      modifierWithKey(this._modifiersWithKeys, CommandsModifier.identity,
+        CommandsModifier, value[0].commands);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, CommandsModifier.identity,
+        CommandsModifier, undefined);
+    }
+    return this;
+  }
 }
 class CommandsModifier extends ModifierWithKey {
   constructor(value) {
@@ -34573,6 +34636,70 @@ class ArkRectComponent extends ArkCommonShapeComponent {
     modifierWithKey(this._modifiersWithKeys, RectRadiusModifier.identity, RectRadiusModifier, value);
     return this;
   }
+  resetRectOptions() {
+    modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+      CommonShapeWidthModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+      CommonShapeHeightModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, RectRadiusModifier.identity,
+      RectRadiusModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, RectRadiusWidthModifier.identity,
+      RectRadiusWidthModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, RectRadiusHeightModifier.identity,
+      RectRadiusHeightModifier, undefined);
+  }
+  initializeRoundedRectOptions(value) {
+    if (value === undefined || value === null) {
+      return;
+    }
+    if ((value[0].radiusWidth === undefined || value[0].radiusWidth === null) &&
+          (value[0].radiusHeight === undefined || value[0].radiusHeight === null)) {
+        modifierWithKey(this._modifiersWithKeys, RectRadiusModifier.identity,
+          RectRadiusModifier, undefined);
+        return;
+    }
+    if (value[0].radiusWidth !== undefined && value[0].radiusWidth !== null) {
+      modifierWithKey(this._modifiersWithKeys, RectRadiusWidthModifier.identity,
+        RectRadiusWidthModifier, value[0].radiusWidth);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, RectRadiusWidthModifier.identity,
+        RectRadiusWidthModifier, undefined);
+    }
+    if (value[0].radiusHeight !== undefined && value[0].radiusHeight !== null) {
+      modifierWithKey(this._modifiersWithKeys, RectRadiusHeightModifier.identity,
+        RectRadiusHeightModifier, value[0].radiusHeight);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, RectRadiusHeightModifier.identity,
+        RectRadiusHeightModifier, undefined);
+    }
+  }
+  initialize(value) {
+    if (value[0] === undefined || value[0] === null) {
+      this.resetRectOptions();
+      return this;
+    }
+    if (value[0].width !== undefined && value[0].width !== null) {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+        CommonShapeWidthModifier, value[0].width);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+        CommonShapeWidthModifier, undefined);
+    }
+    if (value[0].height !== undefined && value[0].height !== null) {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+        CommonShapeHeightModifier, value[0].height);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+        CommonShapeHeightModifier, undefined);
+    }
+    if (value[0].radius !== undefined && value[0].radius !== null) {
+      modifierWithKey(this._modifiersWithKeys, RectRadiusModifier.identity,
+        RectRadiusModifier, value[0].radius);
+    } else {
+      this.initializeRoundedRectOptions(value);
+    }
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.Rect !== undefined) {
@@ -34658,6 +34785,20 @@ class ShapeWidthModifier extends ModifierWithKey {
   }
 }
 ShapeWidthModifier.identity = Symbol('shapeWidth');
+class ShapeInitializeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().shape.resetShapeInitialize(node);
+    } else {
+      getUINativeModule().shape.setShapeInitialize(node, this.value);
+    }
+  }
+}
+ShapeInitializeModifier.identity = Symbol('shapeInitialize');
 class ArkShapeComponent extends ArkCommonShapeComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -34685,6 +34826,16 @@ class ArkShapeComponent extends ArkCommonShapeComponent {
   }
   width(value) {
     modifierWithKey(this._modifiersWithKeys, ShapeWidthModifier.identity, ShapeWidthModifier, value);
+    return this;
+  }
+  initialize(value) {
+    if (value[0] !== undefined && value[0] !== null) {
+      modifierWithKey(this._modifiersWithKeys, ShapeInitializeModifier.identity,
+        ShapeInitializeModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, ShapeInitializeModifier.identity,
+        ShapeInitializeModifier, undefined);
+    }
     return this;
   }
 }
