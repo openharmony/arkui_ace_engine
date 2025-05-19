@@ -15,31 +15,79 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H
 
+#include <vector>
+
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/components_ng/base/frame_node.h"
 #include "base/memory/referenced.h"
+#include "interfaces/inner_api/ace_kit/include/ui/base/referenced.h"
 
 struct FrameNodePeer {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> node;
+
+    OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode> weakNode;
+    int32_t nodeId_ = -1;
+    static std::map<int32_t, FrameNodePeer> peerMap_;
 
     static FrameNodePeer *Create(Ark_UIContext uiContext)
     {
         return new FrameNodePeer;
     }
 
-    static FrameNodePeer *Create(const OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>& src)
+    static FrameNodePeer* Create(const OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>& src)
     {
-        return new FrameNodePeer{src};
+        auto it = peerMap_.find(src->GetId());
+        if (it != peerMap_.end()) {
+            return &(it->second);
+        }
+        auto frameNode = new FrameNodePeer;
+        if (src->IsArkTsFrameNode()) {
+            frameNode->node = src;
+        } else {
+            frameNode->weakNode = OHOS::Ace::WeakPtr(src);
+        }
+        peerMap_.emplace(src->GetId(), *frameNode);
+        return frameNode;
     }
 
-    static FrameNodePeer *Create(OHOS::Ace::NG::FrameNode* src)
+    static FrameNodePeer* Create(OHOS::Ace::NG::FrameNode* src)
     {
-        return new FrameNodePeer{OHOS::Ace::Referenced::Claim<OHOS::Ace::NG::FrameNode>(src)};
+        auto it = peerMap_.find(src->GetId());
+        if (it != peerMap_.end()) {
+            return &(it->second);
+        }
+        auto frameNode = new FrameNodePeer;
+        if (src->IsArkTsFrameNode()) {
+            frameNode->node = src;
+        } else {
+            frameNode->weakNode = OHOS::Ace::AceType::WeakClaim(src);
+        }
+        peerMap_.emplace(src->GetId(), *frameNode);
+        return frameNode;
     }
 
-    static void Destroy(FrameNodePeer *peer)
+    static void Destroy(FrameNodePeer* peer)
     {
+        auto currentNode = OHOS::Ace::AceType::DynamicCast<OHOS::Ace::NG::FrameNode>(peer->node);
+        if (currentNode) {
+            auto nodeId = currentNode->GetId();
+            peerMap_.erase(nodeId);
+        }
         delete peer;
+    }
+
+    static OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> GetFrameNodeByPeer(FrameNodePeer* peer)
+    {
+        if (peer == nullptr) {
+            return nullptr;
+        }
+        if (peer->node) {
+            return peer->node;
+        } else if (peer->weakNode.Upgrade()) {
+            return peer->weakNode.Upgrade();
+        } else {
+            return nullptr;
+        }
     }
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H

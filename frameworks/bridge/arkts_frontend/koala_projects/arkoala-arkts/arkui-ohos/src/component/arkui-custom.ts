@@ -29,7 +29,6 @@ import { Resource } from "global/resource"
 import { SourceTool, AnimateParam, SheetOptions, KeyEvent } from "./common"
 import { Callback_Void } from "./abilityComponent"
 import { TextPickerDialogOptions } from "./textPicker"
-import { FrameNode, FrameNodeInternal } from "./arkui-framenode"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Frame } from "./arkui-graphics"
 
@@ -188,15 +187,6 @@ export class SystemOps {
         SystemOps.EndFrame_serialize(root_casted)
         return
     }
-    public static syncInstanceId(instanceId: int32): void {
-        const instanceId_casted = instanceId as (int32)
-        SystemOps.syncInstanceId_serialize(instanceId_casted)
-        return
-    }
-    public static restoreInstanceId(): void {
-        SystemOps.restoreInstanceId_serialize()
-        return
-    }
     public static getResourceId(bundleName: string, moduleName: string, params: Array<string>): int32 {
         const bundleName_casted = bundleName as (string)
         const moduleName_casted = moduleName as (string)
@@ -209,12 +199,6 @@ export class SystemOps {
     }
     private static EndFrame_serialize(root: KPointer): void {
         ArkUIGeneratedNativeModule._SystemOps_EndFrame(root)
-    }
-    private static syncInstanceId_serialize(instanceId: int32): void {
-        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(instanceId)
-    }
-    private static restoreInstanceId_serialize(): void {
-        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId()
     }
     private static getResourceId_serialize(bundleName: string, moduleName: string, params: Array<string>): int32 {
         const thisSerializer : Serializer = Serializer.hold()

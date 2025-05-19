@@ -33831,11 +33831,12 @@ void impl_FrameNode_clearChildren(Ark_NativePointer thisPtr) {
         GetAccessors()->getFrameNodeAccessor()->clearChildren(self);
 }
 KOALA_INTEROP_DIRECT_V1(FrameNode_clearChildren, Ark_NativePointer)
-Ark_NativePointer impl_FrameNode_getChild(Ark_NativePointer thisPtr, KInteropNumber index) {
+Ark_NativePointer impl_FrameNode_getChild(Ark_NativePointer thisPtr, KInteropNumber index, KInteropNumber expandMode) {
         Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
-        return GetAccessors()->getFrameNodeAccessor()->getChild(self, (const Ark_Number*) (&index));
+        return GetAccessors()->getFrameNodeAccessor()->getChild(
+            self, (const Ark_Number*)(&index), (const Ark_Number*)(&expandMode));
 }
-KOALA_INTEROP_DIRECT_2(FrameNode_getChild, Ark_NativePointer, Ark_NativePointer, KInteropNumber)
+KOALA_INTEROP_DIRECT_3(FrameNode_getChild, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KInteropNumber)
 Ark_NativePointer impl_FrameNode_getFirstChild(Ark_NativePointer thisPtr) {
         Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
         return GetAccessors()->getFrameNodeAccessor()->getFirstChild(self);
@@ -33883,6 +33884,39 @@ Ark_NativePointer impl_FrameNode_getFrameNodeByKey(const KStringPtr& name) {
         return GetAccessors()->getFrameNodeAccessor()->getFrameNodeByKey((const Ark_String*) (&name));
 }
 KOALA_INTEROP_1(FrameNode_getFrameNodeByKey, Ark_NativePointer, KStringPtr)
+Ark_Number impl_FrameNode_getIdByFrameNode(Ark_NativePointer thisPtr, Ark_NativePointer node){
+    Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+    return GetAccessors()->getFrameNodeAccessor()->getIdByFrameNode(self, static_cast<Ark_FrameNode>(node));
+}
+KOALA_INTEROP_DIRECT_2(FrameNode_getIdByFrameNode, KInteropNumber, Ark_NativePointer, Ark_NativePointer)
+void impl_FrameNode_moveTo(Ark_NativePointer thisPtr, Ark_NativePointer targetParent, KInteropNumber index){
+    Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+    GetAccessors()->getFrameNodeAccessor()->moveTo(
+        self, static_cast<Ark_FrameNode>(targetParent), (const Ark_Number*)(&index));
+}
+KOALA_INTEROP_DIRECT_V3(FrameNode_moveTo, Ark_NativePointer, Ark_NativePointer, KInteropNumber)
+Ark_Number impl_FrameNode_getFirstChildIndexWithoutExpand(Ark_NativePointer thisPtr){
+    Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+    return GetAccessors()->getFrameNodeAccessor()->getFirstChildIndexWithoutExpand(self);
+}
+KOALA_INTEROP_DIRECT_1(FrameNode_getFirstChildIndexWithoutExpand, KInteropNumber, Ark_NativePointer)
+Ark_Number impl_FrameNode_getLastChildIndexWithoutExpand(Ark_NativePointer thisPtr){
+    Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+    return GetAccessors()->getFrameNodeAccessor()->getLastChildIndexWithoutExpand(self);
+}
+KOALA_INTEROP_DIRECT_1(FrameNode_getLastChildIndexWithoutExpand, KInteropNumber, Ark_NativePointer)
+Ark_NativePointer impl_FrameNode_getAttachedFrameNodeById(const KStringPtr& id) {
+    return GetAccessors()->getFrameNodeAccessor()->getAttachedFrameNodeById((const Ark_String*) (&id));
+}
+KOALA_INTEROP_1(FrameNode_getAttachedFrameNodeById, Ark_NativePointer, KStringPtr)
+Ark_NativePointer impl_FrameNode_getFrameNodeById(KInteropNumber id) {
+    return GetAccessors()->getFrameNodeAccessor()->getFrameNodeById((const Ark_Number*) (&id));
+}
+KOALA_INTEROP_DIRECT_1(FrameNode_getFrameNodeById, Ark_NativePointer, KInteropNumber)
+Ark_NativePointer impl_FrameNode_getFrameNodeByUniqueId(KInteropNumber id) {
+    return GetAccessors()->getFrameNodeAccessor()->getFrameNodeByUniqueId((const Ark_Number*) (&id));
+}
+KOALA_INTEROP_DIRECT_1(FrameNode_getFrameNodeByUniqueId, Ark_NativePointer, KInteropNumber)
 Ark_NativePointer impl_LengthMetrics_ctor() {
         return GetAccessors()->getLengthMetricsAccessor()->ctor();
 }
