@@ -55,6 +55,18 @@ void PushDestination0Impl(Ark_VMContext vmContext,
                           const Opt_Boolean* animated,
                           const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(info);
+    auto navStack = peer->GetNavPathStack();
+    if (!navStack) {
+        LOGE("NavPathStackAccessor::PushDestination0Impl. Navigation Stack isn't bound to a component.");
+        return;
+    }
+    auto navInfo = info->data;
+    Ark_NavigationOptions options;
+    options.animated = *animated;
+    auto navOptions = Converter::Convert<NavigationOptions>(options);
+    navStack->NavigationContext::PathStack::PushDestination(navInfo, navOptions);
 }
 void PushDestination1Impl(Ark_VMContext vmContext,
                           Ark_AsyncWorkerPtr asyncWorker,
@@ -63,6 +75,16 @@ void PushDestination1Impl(Ark_VMContext vmContext,
                           const Opt_NavigationOptions* options,
                           const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(info);
+    auto navStack = peer->GetNavPathStack();
+    if (!navStack) {
+        LOGE("NavPathStackAccessor::PushDestination1Impl. Navigation Stack isn't bound to a component.");
+        return;
+    }
+    auto navInfo = info->data;
+    auto navOptions = Converter::Convert<NavigationOptions>(options->value);
+    navStack->NavigationContext::PathStack::PushDestination(navInfo, navOptions);
 }
 void PushPathByName0Impl(Ark_NavPathStack peer,
                          const Ark_String* name,
@@ -199,12 +221,26 @@ Ark_Number RemoveByIndexesImpl(Ark_NavPathStack peer,
 Ark_Number RemoveByNameImpl(Ark_NavPathStack peer,
                             const Ark_String* name)
 {
-    return {};
+    auto invalidVal = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, invalidVal);
+    CHECK_NULL_RETURN(name, invalidVal);
+    auto removeName = Converter::Convert<std::string>(*name);
+    auto navStack = peer->GetNavPathStack();
+    CHECK_NULL_RETURN(navStack, invalidVal);
+    auto size = navStack->RemoveByName(removeName);
+    return Converter::ArkValue<Ark_Number>(size);
 }
 Ark_Boolean RemoveByNavDestinationIdImpl(Ark_NavPathStack peer,
                                          const Ark_String* navDestinationId)
 {
-    return {};
+    auto invalidVal = Converter::ArkValue<Ark_Boolean>(0);
+    CHECK_NULL_RETURN(peer, invalidVal);
+    CHECK_NULL_RETURN(navDestinationId, invalidVal);
+    auto removeId = Converter::Convert<std::string>(*navDestinationId);
+    auto navStack = peer->GetNavPathStack();
+    CHECK_NULL_RETURN(navStack, invalidVal);
+    auto size = navStack->RemoveByNavDestinationId(removeId);
+    return Converter::ArkValue<Ark_Boolean>(size);
 }
 Opt_NavPathInfo Pop0Impl(Ark_NavPathStack peer,
                          const Opt_Boolean* animated)
@@ -259,6 +295,13 @@ void MoveIndexToTopImpl(Ark_NavPathStack peer,
                         const Ark_Number* index,
                         const Opt_Boolean* animated)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(index);
+    auto navStack = peer->GetNavPathStack();
+    CHECK_NULL_VOID(navStack);
+    auto indexNum = Converter::Convert<std::uint32_t>(*index);
+    bool isAnimated = Converter::OptConvert<bool>(*animated).value_or(true);
+    navStack->NavigationContext::PathStack::MoveIndexToTop(indexNum, isAnimated);
 }
 void ClearImpl(Ark_NavPathStack peer,
                const Opt_Boolean* animated)

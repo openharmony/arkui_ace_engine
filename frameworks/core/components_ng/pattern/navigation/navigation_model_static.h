@@ -32,6 +32,11 @@ class ACE_EXPORT NavigationModelStatic {
 public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetNavBarWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetMinNavBarWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetMaxNavBarWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetNavBarPosition(FrameNode* frameNode, const std::optional<NG::NavBarPosition>& mode);
+    static void SetMinContentWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetSystemBarStyle(FrameNode* frameNode, const Color& contentColor);
     static void SetUsrNavigationMode(FrameNode* frameNode, const std::optional<NavigationMode>& mode);
     static void SetBackButtonIcon(FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
         const std::string& src, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
@@ -58,6 +63,9 @@ public:
     static void SetCustomMenu(FrameNode* frameNode, const RefPtr<UINode>& customNode);
     static void SetIsCustomAnimation(FrameNode* frameNode, bool isCustom);
     static void SetCustomTransition(FrameNode* frameNode, NavigationTransitionEvent&& customTransition);
+    static void SetCustomTitle(FrameNode* frameNode, const RefPtr<UINode>& customNode);
+    static void SetCustomToolBar(FrameNode* frameNode, const RefPtr<UINode>& customNode);
+    static void SetTitleHeight(FrameNode* frameNode, const Dimension& height, bool isValid = true);
 
 private:
     static bool navBarWidthDoubleBind_;

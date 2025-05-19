@@ -70,14 +70,57 @@ void NavBarWidthImpl(Ark_NativePointer node,
 void NavBarPositionImpl(Ark_NativePointer node,
                         const Opt_NavBarPosition* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    Opt_NavBarPosition def;
+    def.value = ARK_NAV_BAR_POSITION_START;
+    auto barDef = static_cast<NG::NavBarPosition>(def.value);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        NavigationModelStatic::SetNavBarPosition(frameNode, barDef);
+        return;
+    }
+    auto barPosition = static_cast<NG::NavBarPosition>(value->value);
+    NavigationModelStatic::SetNavBarPosition(frameNode, barPosition);
 }
 void NavBarWidthRangeImpl(Ark_NativePointer node,
                           const Opt_Tuple_Dimension_Dimension* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        NavigationModelStatic::SetMinNavBarWidth(frameNode, NG::DEFAULT_MIN_NAV_BAR_WIDTH);
+        NavigationModelStatic::SetMaxNavBarWidth(frameNode, NG::DEFAULT_MAX_NAV_BAR_WIDTH);
+        return;
+    }
+    auto min = Converter::Convert<CalcDimension>(value->value.value0);
+    auto max = Converter::Convert<CalcDimension>(value->value.value1);
+
+    if (LessNotEqual(min.Value(), 0.0)) {
+        min.SetValue(0);
+    }
+    NavigationModelStatic::SetMinNavBarWidth(frameNode, min);
+    if (LessNotEqual(max.Value(), 0.0)) {
+        max.SetValue(0);
+    }
+    NavigationModelStatic::SetMaxNavBarWidth(frameNode, max);
 }
 void MinContentWidthImpl(Ark_NativePointer node,
                          const Opt_Length* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        NavigationModelStatic::SetMinContentWidth(frameNode, DEFAULT_MIN_CONTENT_WIDTH);
+        return;
+    }
+    auto mincontent = Converter::Convert<CalcDimension>(value->value);
+
+    if (LessNotEqual(mincontent.Value(), 0.0)) {
+        mincontent = DEFAULT_MIN_CONTENT_WIDTH;
+    }
+
+    NavigationModelStatic::SetMinContentWidth(frameNode, mincontent);
 }
 void ModeImpl(Ark_NativePointer node,
               const Opt_NavigationMode* value)
@@ -113,6 +156,8 @@ void BackButtonIcon0Impl(Ark_NativePointer node, const Opt_Union_String_PixelMap
         switch (valueType) {
             case stringType: {
                 src = Converter::Convert<std::string>(value->value.value0);
+                imageOption.noPixMap = true;
+                imageOption.isValidImage = true;
                 break;
             }
             case pixelType: {
@@ -122,6 +167,8 @@ void BackButtonIcon0Impl(Ark_NativePointer node, const Opt_Union_String_PixelMap
             case resourceType: {
                 Converter::ResourceConverter converter(value->value.value2);
                 src = converter.ToString().value_or("");
+                imageOption.noPixMap = true;
+                imageOption.isValidImage = true;
                 break;
             }
             case symbolType: {
@@ -131,6 +178,8 @@ void BackButtonIcon0Impl(Ark_NativePointer node, const Opt_Union_String_PixelMap
                 break;
         }
     }
+    nameList.emplace_back(bundleName);
+    nameList.emplace_back(moduleName);
     NavigationModelStatic::SetBackButtonIcon(frameNode, iconSymbol, src, imageOption, pixMap, nameList);
 }
 void BackButtonIcon1Impl(Ark_NativePointer node,
@@ -159,6 +208,8 @@ void BackButtonIcon1Impl(Ark_NativePointer node,
         switch (valueType) {
             case stringType: {
                 src = Converter::Convert<std::string>(icon->value.value0);
+                imageOption.noPixMap = true;
+                imageOption.isValidImage = true;
                 break;
             }
             case pixelType: {
@@ -168,6 +219,8 @@ void BackButtonIcon1Impl(Ark_NativePointer node,
             case resourceType: {
                 Converter::ResourceConverter converter(icon->value.value2);
                 src = converter.ToString().value_or("");
+                imageOption.noPixMap = true;
+                imageOption.isValidImage = true;
                 break;
             }
             case symbolType: {
@@ -186,6 +239,8 @@ void BackButtonIcon1Impl(Ark_NativePointer node,
             backButtonAccessibilityText = converter.ToString().value_or("");
         }
     }
+    nameList.emplace_back(bundleName);
+    nameList.emplace_back(moduleName);
     NavigationModelStatic::SetBackButtonIcon(
         frameNode, iconSymbol, src, imageOption, pixMap, nameList, true, backButtonAccessibilityText);
 }
@@ -406,7 +461,17 @@ void CustomNavContentTransitionImpl(
     NavigationModelStatic::SetIsCustomAnimation(frameNode, true);
     NavigationModelStatic::SetCustomTransition(frameNode, std::move(onNavigationAnimation));
 }
-void SystemBarStyleImpl(Ark_NativePointer node, const Opt_SystemBarStyle* value) {}
+void SystemBarStyleImpl(Ark_NativePointer node, const Opt_SystemBarStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    auto contentColor = Converter::Convert<Color>(value->value.statusBarContentColor.value);
+    NavigationModelStatic::SetSystemBarStyle(frameNode, contentColor);
+}
 void RecoverableImpl(Ark_NativePointer node, const Opt_Boolean* value) {}
 void EnableDragBarImpl(Ark_NativePointer node, const Opt_Boolean* value) {}
 void EnableModeChangeAnimationImpl(Ark_NativePointer node, const Opt_Boolean* value) {}
@@ -438,6 +503,18 @@ void TitleImpl(Ark_NativePointer node, const Opt_Type_NavigationAttribute_title_
         NavigationModelStatic::ParseCommonTitle(frameNode, info);
         return;
     }
+    const int8_t customTitleSelector = 1;
+    if (selector == customTitleSelector) {
+        CallbackHelper(value->value.value1)
+            .BuildAsync(
+                [frameNode](const RefPtr<UINode>& uiNode) {
+                    CalcDimension titleHeight;
+                    NavigationModelStatic::SetTitleHeight(frameNode, titleHeight, false);
+                    NavigationModelStatic::SetCustomTitle(frameNode, uiNode);
+                },
+                node);
+        return;
+    }
     const int8_t commonTitleSelector = 2;
     if (selector == commonTitleSelector) {
         info.title = Converter::OptConvert<std::string>(value->value.value2.main).value_or("");
@@ -445,6 +522,31 @@ void TitleImpl(Ark_NativePointer node, const Opt_Type_NavigationAttribute_title_
         info.hasSubTitle = true;
         info.hasMainTitle = true;
         NavigationModelStatic::ParseCommonTitle(frameNode, info);
+    }
+    const int8_t navigationCustomTitleSelector = 3;
+    if (selector == navigationCustomTitleSelector) {
+        auto titleHeightSelector = value->value.value3.height.selector;
+        const int8_t titleHeightType = 0;
+        const int8_t lengthType = 1;
+        if (titleHeightSelector == titleHeightType) {
+            auto titleWithSub = static_cast<uint32_t>(value->value.value3.height.value0);
+            if (titleWithSub == 0) {
+                NavigationModelStatic::SetTitleHeight(frameNode, NG::SINGLE_LINE_TITLEBAR_HEIGHT);
+            } else if (titleWithSub == 1) {
+                NavigationModelStatic::SetTitleHeight(frameNode, NG::DOUBLE_LINE_TITLEBAR_HEIGHT);
+            }
+        } else if (titleHeightSelector == lengthType) {
+            CalcDimension length = Converter::Convert<CalcDimension>(value->value.value3.height.value1);
+            if (length.Value() < 0) {
+                NavigationModelStatic::SetTitleHeight(frameNode, Dimension());
+            } else {
+                NavigationModelStatic::SetTitleHeight(frameNode, length);
+            }
+        }
+        CallbackHelper(value->value.value3.builder)
+            .BuildAsync(
+                [frameNode](const RefPtr<UINode>& uiNode) { NavigationModelStatic::SetCustomTitle(frameNode, uiNode); },
+                node);
     }
 }
 void ToolbarConfigurationImpl(Ark_NativePointer node,
@@ -469,6 +571,11 @@ void ToolbarConfigurationImpl(Ark_NativePointer node,
             auto toolbarItemArray = Converter::Convert<std::vector<NG::BarItem>>(items->value.value0);
             NavigationModelStatic::SetToolbarConfiguration(frameNode, std::move(toolbarItemArray));
         } else if (typeValue == 1) {
+            CallbackHelper(items->value.value1)
+                .BuildAsync(
+                    [frameNode](
+                        const RefPtr<UINode>& uiNode) { NavigationModelStatic::SetCustomToolBar(frameNode, uiNode); },
+                    node);
         }
     }
 

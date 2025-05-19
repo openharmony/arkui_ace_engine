@@ -31818,7 +31818,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Boolean GetIsEntryImpl(Ark_NavPathInfo peer)
+    Ark_Boolean GetIsEntryImpl(Ark_NavPathInfo peer)
     {
         if (!needGroupedLog(1))
             return {};
@@ -31838,7 +31838,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_String GetNavDestinationIdImpl(Ark_NavPathInfo peer)
+    Ark_String GetNavDestinationIdImpl(Ark_NavPathInfo peer)
     {
         if (!needGroupedLog(1))
             return {};
@@ -36777,7 +36777,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_String GetNavDestinationIdImpl(Ark_NavDestinationContext peer)
+    Ark_String GetNavDestinationIdImpl(Ark_NavDestinationContext peer)
     {
         if (!needGroupedLog(1))
             return {};

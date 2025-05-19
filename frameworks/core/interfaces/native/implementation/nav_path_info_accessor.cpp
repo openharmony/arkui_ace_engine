@@ -108,11 +108,11 @@ void SetOnPopImpl(Ark_NavPathInfo peer,
     CHECK_NULL_VOID(onPop);
     peer->data.onPop_ = CallbackHelper(*onPop);
 }
-Opt_Boolean GetIsEntryImpl(Ark_NavPathInfo peer)
+Ark_Boolean GetIsEntryImpl(Ark_NavPathInfo peer)
 {
-    auto invalid = Converter::ArkValue<Opt_Boolean>();
+    auto invalid = Converter::ArkValue<Ark_Boolean>(false);
     CHECK_NULL_RETURN(peer, invalid);
-    return ArkValue<Opt_Boolean>(peer->data.isEntry_);
+    return ArkValue<Ark_Boolean>(peer->data.isEntry_);
 }
 void SetIsEntryImpl(Ark_NavPathInfo peer,
                     Ark_Boolean isEntry)
@@ -120,11 +120,11 @@ void SetIsEntryImpl(Ark_NavPathInfo peer,
     CHECK_NULL_VOID(peer);
     peer->data.isEntry_ = Convert<bool>(isEntry);
 }
-Opt_String GetNavDestinationIdImpl(Ark_NavPathInfo peer)
+Ark_String GetNavDestinationIdImpl(Ark_NavPathInfo peer)
 {
-    auto invalidVal = Converter::ArkValue<Opt_String>("", Converter::FC);
+    auto invalidVal = Converter::ArkValue<Ark_String>("", Converter::FC);
     CHECK_NULL_RETURN(peer, invalidVal);
-    return Converter::ArkValue<Opt_String>(peer->data.navDestinationId_.value_or(""), Converter::FC);
+    return Converter::ArkValue<Ark_String>(peer->data.navDestinationId_.value_or(""), Converter::FC);
 }
 void SetNavDestinationIdImpl(Ark_NavPathInfo peer,
                              const Ark_String* navDestinationId)

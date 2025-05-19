@@ -5097,11 +5097,11 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _NavPathInfo_setOnPop(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
-    native static _NavPathInfo_getIsEntry(ptr: KPointer): KInteropReturnBuffer
+    native static _NavPathInfo_getIsEntry(ptr: KPointer): boolean
     @ani.unsafe.Direct
     native static _NavPathInfo_setIsEntry(ptr: KPointer, isEntry: KInt): void
     @ani.unsafe.Quick
-    native static _NavPathInfo_getNavDestinationId(ptr: KPointer): KInteropReturnBuffer
+    native static _NavPathInfo_getNavDestinationId(ptr: KPointer): string
     @ani.unsafe.Quick
     native static _NavPathInfo_setNavDestinationId(ptr: KPointer, navDestinationId: KStringPtr): void
     @ani.unsafe.Direct
@@ -5871,7 +5871,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _NavDestinationContext_setPathStack(ptr: KPointer, pathStack: KPointer): void
     @ani.unsafe.Quick
-    native static _NavDestinationContext_getNavDestinationId(ptr: KPointer): KInteropReturnBuffer
+    native static _NavDestinationContext_getNavDestinationId(ptr: KPointer): string
     @ani.unsafe.Quick
     native static _NavDestinationContext_setNavDestinationId(ptr: KPointer, navDestinationId: KStringPtr): void
     @ani.unsafe.Direct

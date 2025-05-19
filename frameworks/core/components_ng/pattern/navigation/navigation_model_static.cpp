@@ -367,6 +367,67 @@ void NavigationModelStatic::SetNavBarWidth(FrameNode* frameNode, const Dimension
     }
 }
 
+void NavigationModelStatic::SetMinNavBarWidth(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    if (navBarWidthDoubleBind_ && navigationPattern->GetIsInDividerDrag()) {
+        return;
+    }
+    navigationPattern->SetIfNeedInit(true);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, MinNavBarWidth, value, frameNode);
+}
+
+void NavigationModelStatic::SetMaxNavBarWidth(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    if (navBarWidthDoubleBind_ && navigationPattern->GetIsInDividerDrag()) {
+        return;
+    }
+    navigationPattern->SetIfNeedInit(true);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, MaxNavBarWidth, value, frameNode);
+}
+
+void NavigationModelStatic::SetNavBarPosition(FrameNode* frameNode, const std::optional<NG::NavBarPosition>& mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (mode) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavBarPosition, mode.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavBarPosition, frameNode);
+    }
+}
+
+void NavigationModelStatic::SetMinContentWidth(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto minContentWidth = value.IsNonPositive() ? DEFAULT_MIN_CONTENT_WIDTH : value;
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    navigationPattern->SetIfNeedInit(true);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, MinContentWidth, minContentWidth, frameNode);
+}
+
+void NavigationModelStatic::SetSystemBarStyle(FrameNode* frameNode, const Color& contentColor)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<SystemBarStyle> style = SystemBarStyle::CreateStyleFromColor(contentColor.GetValue());
+    pattern->SetSystemBarStyle(style);
+}
+
 void NavigationModelStatic::SetUsrNavigationMode(FrameNode* frameNode, const std::optional<NavigationMode>& mode)
 {
     if (mode) {
@@ -392,9 +453,6 @@ void NavigationModelStatic::SetBackButtonIcon(FrameNode* frameNode,
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
     ImageSourceInfo imageSourceInfo(src, nameList[0], nameList[1]);
-    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NoPixMap, imageOption.noPixMap);
-    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, ImageSource, imageSourceInfo);
-    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, PixelMap, pixMap);
     titleBarLayoutProperty->UpdateImageSource(imageSourceInfo);
     titleBarLayoutProperty->UpdateNoPixMap(imageOption.noPixMap);
     titleBarLayoutProperty->UpdatePixelMap(pixMap);
@@ -810,5 +868,69 @@ void NavigationModelStatic::SetCustomTransition(FrameNode* frameNode, Navigation
     auto pattern = frameNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetNavigationTransition(std::move(customTransition));
+}
+
+void NavigationModelStatic::SetCustomTitle(FrameNode* frameNode, const RefPtr<UINode>& customNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(customNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    navBarNode->UpdatePrevTitleIsCustom(true);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    if (!navBarNode->GetPrevTitleIsCustomValue(false)) {
+        titleBarNode->RemoveChild(titleBarNode->GetTitle());
+        titleBarNode->RemoveChild(titleBarNode->GetSubtitle());
+        titleBarNode->SetTitle(nullptr);
+        titleBarNode->SetSubtitle(nullptr);
+    }
+    auto currentTitle = titleBarNode->GetTitle();
+    if (currentTitle && customNode->GetId() == currentTitle->GetId()) {
+        // do nothing
+        return;
+    }
+    // update custom title
+    titleBarNode->RemoveChild(currentTitle);
+    titleBarNode->SetTitle(customNode);
+    titleBarNode->AddChild(customNode);
+    titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void NavigationModelStatic::SetCustomToolBar(FrameNode* frameNode, const RefPtr<UINode>& customNode)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    NavigationToolbarUtil::SetCustomToolBar(navBarNode, customNode);
+}
+
+void NavigationModelStatic::SetTitleHeight(FrameNode* frameNode, const Dimension& height, bool isValid)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    if (!isValid) {
+        titleBarLayoutProperty->ResetTitleHeight();
+        return;
+    }
+    titleBarLayoutProperty->UpdateTitleHeight(height);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    if (!navBarLayoutProperty->HasHideBackButton() || navBarLayoutProperty->GetHideBackButtonValue() != true) {
+        auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+        CHECK_NULL_VOID(titleBarPattern);
+        titleBarPattern->SetNeedResetMainTitleProperty(true);
+        titleBarPattern->SetNeedResetSubTitleProperty(true);
+    }
+    navBarLayoutProperty->UpdateHideBackButton(true);
+    navBarLayoutProperty->UpdateTitleMode(static_cast<NG::NavigationTitleMode>(NavigationTitleMode::MINI));
 }
 } // namespace OHOS::Ace::NG

@@ -15703,7 +15703,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                       const Callback_PopInfo_Void* onPop)
     {
     }
-    Opt_Boolean GetIsEntryImpl(Ark_NavPathInfo peer)
+    Ark_Boolean GetIsEntryImpl(Ark_NavPathInfo peer)
     {
         return {};
     }
@@ -15711,7 +15711,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         Ark_Boolean isEntry)
     {
     }
-    Opt_String GetNavDestinationIdImpl(Ark_NavPathInfo peer)
+    Ark_String GetNavDestinationIdImpl(Ark_NavPathInfo peer)
     {
         return {};
     }
@@ -17895,7 +17895,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                           Ark_NavPathStack pathStack)
     {
     }
-    Opt_String GetNavDestinationIdImpl(Ark_NavDestinationContext peer)
+    Ark_String GetNavDestinationIdImpl(Ark_NavDestinationContext peer)
     {
         return {};
     }

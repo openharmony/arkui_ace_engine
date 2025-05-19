@@ -127,7 +127,7 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
     }
     private getNavDestinationId_serialize(): string | undefined {
         const retval  = ArkUIGeneratedNativeModule._NavDestinationContext_getNavDestinationId(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        return retval
     }
     private setNavDestinationId_serialize(navDestinationId: string): void {
         ArkUIGeneratedNativeModule._NavDestinationContext_setNavDestinationId(this.peer!.ptr, navDestinationId)
@@ -412,7 +412,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._NavDestinationAttribute_menus1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    onReadyAttribute(value: ((parameter: NavDestinationContext) => void) | undefined): void {
+    onReadyAttribute(value: Callback<NavDestinationContext> | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -820,7 +820,7 @@ export interface NavDestinationAttribute extends CommonMethod {
     mode(value: NavDestinationMode | undefined): this
     backButtonIcon(icon: ResourceStr | PixelMap | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this
     menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this
-    onReady(value: ((parameter: NavDestinationContext) => void) | undefined): this
+    onReady(value: Callback<NavDestinationContext> | undefined): this
     onWillAppear(value: Callback<void> | undefined): this
     onWillDisappear(value: Callback<void> | undefined): this
     onWillShow(value: Callback<void> | undefined): this
@@ -862,7 +862,7 @@ export interface UINavDestinationAttribute extends UICommonMethod {
     /** @memo */
     menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this
     /** @memo */
-    onReady(value: ((parameter: NavDestinationContext) => void) | undefined): this
+    onReady(value: Callback<NavDestinationContext> | undefined): this
     /** @memo */
     onWillAppear(value: Callback<void> | undefined): this
     /** @memo */
@@ -915,7 +915,7 @@ export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavD
     mode_value?: NavDestinationMode | undefined
     backButtonIcon_value?: ResourceStr | PixelMap | SymbolGlyphModifier | undefined
     menus_value?: Array<NavigationMenuItem> | CustomBuilder | undefined
-    onReady_value?: ((parameter: NavDestinationContext) => void) | undefined
+    onReady_value?: Callback<NavDestinationContext> | undefined
     onWillAppear_value?: Callback<void> | undefined
     onWillDisappear_value?: Callback<void> | undefined
     onWillShow_value?: Callback<void> | undefined
@@ -958,7 +958,7 @@ export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavD
     public menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this {
         return this
     }
-    public onReady(value: ((parameter: NavDestinationContext) => void) | undefined): this {
+    public onReady(value: Callback<NavDestinationContext> | undefined): this {
         return this
     }
     public onWillAppear(value: Callback<void> | undefined): this {
@@ -1155,9 +1155,9 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         return this
     }
     /** @memo */
-    public onReady(value: ((parameter: NavDestinationContext) => void) | undefined): this {
+    public onReady(value: Callback<NavDestinationContext> | undefined): this {
         if (this.checkPriority("onReady")) {
-            const value_casted = value as (((parameter: NavDestinationContext) => void) | undefined)
+            const value_casted = value as (Callback<NavDestinationContext> | undefined)
             this.getPeer()?.onReadyAttribute(value_casted)
             return this
         }

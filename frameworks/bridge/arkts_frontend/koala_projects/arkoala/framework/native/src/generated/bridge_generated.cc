@@ -36901,39 +36901,21 @@ void impl_NavPathInfo_setOnPop(Ark_NativePointer thisPtr, KSerializerBuffer this
         GetAccessors()->getNavPathInfoAccessor()->setOnPop(self, (const Callback_PopInfo_Void*)&onPop_value);
 }
 KOALA_INTEROP_DIRECT_V3(NavPathInfo_setOnPop, Ark_NativePointer, KSerializerBuffer, int32_t)
-KInteropReturnBuffer impl_NavPathInfo_getIsEntry(Ark_NativePointer thisPtr) {
+Ark_Boolean impl_NavPathInfo_getIsEntry(Ark_NativePointer thisPtr) {
         Ark_NavPathInfo self = reinterpret_cast<Ark_NavPathInfo>(thisPtr);
-        const auto &retValue = GetAccessors()->getNavPathInfoAccessor()->getIsEntry(self);
-        Serializer _retSerializer {};
-        Ark_Int32 retValue_type = INTEROP_RUNTIME_UNDEFINED;
-        retValue_type = runtimeType(retValue);
-        _retSerializer.writeInt8(retValue_type);
-        if ((INTEROP_RUNTIME_UNDEFINED) != (retValue_type)) {
-            const auto retValue_value = retValue.value;
-            _retSerializer.writeBoolean(retValue_value);
-        }
-        return _retSerializer.toReturnBuffer();
+        return GetAccessors()->getNavPathInfoAccessor()->getIsEntry(self);
 }
-KOALA_INTEROP_1(NavPathInfo_getIsEntry, KInteropReturnBuffer, Ark_NativePointer)
+KOALA_INTEROP_1(NavPathInfo_getIsEntry, Ark_Boolean, Ark_NativePointer)
 void impl_NavPathInfo_setIsEntry(Ark_NativePointer thisPtr, Ark_Boolean isEntry) {
         Ark_NavPathInfo self = reinterpret_cast<Ark_NavPathInfo>(thisPtr);
         GetAccessors()->getNavPathInfoAccessor()->setIsEntry(self, isEntry);
 }
 KOALA_INTEROP_DIRECT_V2(NavPathInfo_setIsEntry, Ark_NativePointer, Ark_Boolean)
-KInteropReturnBuffer impl_NavPathInfo_getNavDestinationId(Ark_NativePointer thisPtr) {
+Ark_String impl_NavPathInfo_getNavDestinationId(Ark_NativePointer thisPtr) {
         Ark_NavPathInfo self = reinterpret_cast<Ark_NavPathInfo>(thisPtr);
-        const auto &retValue = GetAccessors()->getNavPathInfoAccessor()->getNavDestinationId(self);
-        Serializer _retSerializer {};
-        Ark_Int32 retValue_type = INTEROP_RUNTIME_UNDEFINED;
-        retValue_type = runtimeType(retValue);
-        _retSerializer.writeInt8(retValue_type);
-        if ((INTEROP_RUNTIME_UNDEFINED) != (retValue_type)) {
-            const auto retValue_value = retValue.value;
-            _retSerializer.writeString(retValue_value);
-        }
-        return _retSerializer.toReturnBuffer();
+        return GetAccessors()->getNavPathInfoAccessor()->getNavDestinationId(self);
 }
-KOALA_INTEROP_1(NavPathInfo_getNavDestinationId, KInteropReturnBuffer, Ark_NativePointer)
+KOALA_INTEROP_1(NavPathInfo_getNavDestinationId, KStringPtr, Ark_NativePointer)
 void impl_NavPathInfo_setNavDestinationId(Ark_NativePointer thisPtr, const KStringPtr& navDestinationId) {
         Ark_NavPathInfo self = reinterpret_cast<Ark_NavPathInfo>(thisPtr);
         GetAccessors()->getNavPathInfoAccessor()->setNavDestinationId(self, (const Ark_String*) (&navDestinationId));
@@ -40223,20 +40205,11 @@ void impl_NavDestinationContext_setPathStack(Ark_NativePointer thisPtr, Ark_Nati
         GetAccessors()->getNavDestinationContextAccessor()->setPathStack(self, static_cast<Ark_NavPathStack>(pathStack));
 }
 KOALA_INTEROP_DIRECT_V2(NavDestinationContext_setPathStack, Ark_NativePointer, Ark_NativePointer)
-KInteropReturnBuffer impl_NavDestinationContext_getNavDestinationId(Ark_NativePointer thisPtr) {
+Ark_String impl_NavDestinationContext_getNavDestinationId(Ark_NativePointer thisPtr) {
         Ark_NavDestinationContext self = reinterpret_cast<Ark_NavDestinationContext>(thisPtr);
-        const auto &retValue = GetAccessors()->getNavDestinationContextAccessor()->getNavDestinationId(self);
-        Serializer _retSerializer {};
-        Ark_Int32 retValue_type = INTEROP_RUNTIME_UNDEFINED;
-        retValue_type = runtimeType(retValue);
-        _retSerializer.writeInt8(retValue_type);
-        if ((INTEROP_RUNTIME_UNDEFINED) != (retValue_type)) {
-            const auto retValue_value = retValue.value;
-            _retSerializer.writeString(retValue_value);
-        }
-        return _retSerializer.toReturnBuffer();
+        return GetAccessors()->getNavDestinationContextAccessor()->getNavDestinationId(self);
 }
-KOALA_INTEROP_1(NavDestinationContext_getNavDestinationId, KInteropReturnBuffer, Ark_NativePointer)
+KOALA_INTEROP_1(NavDestinationContext_getNavDestinationId, KStringPtr, Ark_NativePointer)
 void impl_NavDestinationContext_setNavDestinationId(Ark_NativePointer thisPtr, const KStringPtr& navDestinationId) {
         Ark_NavDestinationContext self = reinterpret_cast<Ark_NavDestinationContext>(thisPtr);
         GetAccessors()->getNavDestinationContextAccessor()->setNavDestinationId(self, (const Ark_String*) (&navDestinationId));

@@ -135,8 +135,7 @@ export class NavPathInfo implements MaterializedBase {
         ArkUIGeneratedNativeModule._NavPathInfo_setIsEntry(this.peer!.ptr, isEntry ? 1 : 0)
     }
     private getNavDestinationId_serialize(): string | undefined {
-        const retval  = ArkUIGeneratedNativeModule._NavPathInfo_getNavDestinationId(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        return ArkUIGeneratedNativeModule._NavPathInfo_getNavDestinationId(this.peer!.ptr)
     }
     private setNavDestinationId_serialize(navDestinationId: string): void {
         ArkUIGeneratedNativeModule._NavPathInfo_setNavDestinationId(this.peer!.ptr, navDestinationId)
@@ -168,7 +167,7 @@ export class NavPathStack implements MaterializedBase {
     public pushPath(info: NavPathInfo, animated?: boolean | undefined): void {
         PathStackUtils.pushPath(this, info, animated)
     }
-    public pushDestination(info: NavPathInfo, animated?: boolean | undefined | NavigationOptions | undefined): Promise<void> {
+    public pushDestination(info: NavPathInfo, animated?: boolean | undefined): Promise<void> {
         const info_type = runtimeType(info)
         const animated_type = runtimeType(animated)
         if ((RuntimeType.BOOLEAN == animated_type) || (RuntimeType.UNDEFINED == animated_type)) {
@@ -183,20 +182,21 @@ export class NavPathStack implements MaterializedBase {
         }
         throw new Error("Can not select appropriate overload")
     }
-    public pushPathByName(name: string, param: Object, onPop: Callback<PopInfo>, animated?: boolean): void {
+    public pushPathByName(name: string, param: Object, onPop: Callback<PopInfo>, animated?: boolean | undefined): void {
         PathStackUtils.pushPathByName(this, name, param, onPop, animated)
     }
-    public pushDestinationByName(name: string, param: Object, onPop?: boolean | undefined | ((parameter: PopInfo) => void), animated?: boolean): Promise<void> {
+    public pushDestinationByName(name: string, param: Object, onPop: ((parameter: PopInfo) => void), animated?: boolean): Promise<void> {
         const name_type = runtimeType(name)
         const param_type = runtimeType(param)
         const onPop_type = runtimeType(onPop)
         const animated_type = runtimeType(animated)
-        if (((RuntimeType.BOOLEAN == onPop_type) || (RuntimeType.UNDEFINED == onPop_type)) && (RuntimeType.UNDEFINED == animated_type)) {
-            const name_casted = name as (string)
-            const param_casted = param as (Object)
-            const animated_casted = onPop as (boolean | undefined)
-            return this.pushDestinationByName0_serialize(name_casted, param_casted, animated_casted)
-        }
+        // if (((RuntimeType.BOOLEAN == onPop_type) || (RuntimeType.UNDEFINED == onPop_type)) && (RuntimeType.UNDEFINED == animated_type)) {
+        //     const name_casted = name as (string)
+        //     const param_casted = param as (Object)
+        //     const animated_unknown = onPop as (unknown)
+        //     const animated_casted = animated_unknown as (boolean | undefined)
+        //     return this.pushDestinationByName0_serialize(name_casted, param_casted, animated_casted)
+        // }
         if ((RuntimeType.FUNCTION == onPop_type) && ((RuntimeType.BOOLEAN == animated_type) || (RuntimeType.UNDEFINED == animated_type))) {
             const name_casted = name as (string)
             const param_casted = param as (Object)
