@@ -14,6 +14,10 @@
  */
 
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
+#include "core/components_ng/manager/event/json_child_report.h"
+#include "core/common/reporter/reporter.h"
+#include "core/components_ng/manager/event/json_report.h"
+#include "core/components_ng/event/event_constants.h"
 
 #include "core/components_ng/gestures/recognizers/gestures_extra_handler.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -207,6 +211,8 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             if (firstInputTime_.has_value()) {
                 inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
             }
+            inputTime_ = overTime - inputTime;
+            SendCallbackMsg(onActionEnd_, false, GestureCallbackType::END);
             if (SystemProperties::GetTraceInputEventEnabled()) {
                 ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:LongPressGesture",
                     static_cast<long long>(inputTime), static_cast<long long>(overTime));
@@ -421,10 +427,27 @@ void LongPressRecognizer::SendCallbackMsg(
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
+        HandleReports(info, type);
         if (type == GestureCallbackType::START && longPressRecorder_ && *longPressRecorder_) {
             (*longPressRecorder_)(info);
         }
     }
+}
+
+void LongPressRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
+{
+    if (type != GestureCallbackType::END) {
+        return;
+    }
+    auto frameNode = GetAttachedNode().Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    LongPressJsonReport longPressReport;
+    longPressReport.SetCallbackType(type);
+    longPressReport.SetGestureType(GetRecognizerType());
+    longPressReport.SetId(frameNode->GetId());
+    longPressReport.SetDuration(inputTime_);
+    longPressReport.SetPoint(info.GetGlobalPoint());
+    Reporter::GetInstance().HandleUISessionReporting(longPressReport);
 }
 
 void LongPressRecognizer::OnResetStatus()

@@ -34,6 +34,7 @@ build_component_ng("manager_ng") {
     "drag_drop/drag_drop_manager.cpp",
     "drag_drop/drag_drop_proxy.cpp",
     "drag_drop/utils/drag_animation_helper.cpp",
+    "event/json_child_report.cpp",
     "focus/focus_manager.cpp",
     "focus/focus_view.cpp",
     "form_event/form_event_manager.cpp",
