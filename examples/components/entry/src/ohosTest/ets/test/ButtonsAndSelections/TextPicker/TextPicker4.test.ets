@@ -26,8 +26,8 @@ import {
 } from '../../../utils';
 import { TextPickerStart } from './TextPicker';
 
-export default function TimePicker4() {
-  describe('TimePicker4', () => {
+export default function TextPicker4() {
+  describe('TextPicker4', () => {
 
     beforeAll(async (done: Function) => {
       await TextPickerStart(done)
