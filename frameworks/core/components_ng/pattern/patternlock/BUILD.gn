@@ -19,6 +19,7 @@ build_component_ng("patternlock_pattern_ng") {
   sources = [
     "patternlock_layout_algorithm.cpp",
     "patternlock_model_ng.cpp",
+    "patternlock_model_static.cpp",
     "patternlock_modifier.cpp",
     "patternlock_paint_method.cpp",
     "patternlock_pattern.cpp",
@@ -31,6 +32,7 @@ build_component_plugin("patternlock_source") {
     "pattern_lock_controller.cpp",
     "patternlock_layout_algorithm.cpp",
     "patternlock_model_ng.cpp",
+    "patternlock_model_static.cpp",
     "patternlock_modifier.cpp",
     "patternlock_napi.cpp",
     "patternlock_paint_method.cpp",

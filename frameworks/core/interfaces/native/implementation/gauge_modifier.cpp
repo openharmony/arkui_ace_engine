@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
+#include "core/components_ng/pattern/gauge/gauge_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -143,9 +144,9 @@ void SetGaugeOptionsImpl(Ark_NativePointer node,
     if (value && ((min && LessNotEqual(*value, *min)) || (max && GreatNotEqual(*value, *max)))) {
         value = min;
     }
-    GaugeModelNG::SetValue(frameNode, value);
-    GaugeModelNG::SetMin(frameNode, min);
-    GaugeModelNG::SetMax(frameNode, max);
+    GaugeModelStatic::SetValue(frameNode, value);
+    GaugeModelStatic::SetMin(frameNode, min);
+    GaugeModelStatic::SetMax(frameNode, max);
     GaugeModelNG::SetIsShowLimitValue(frameNode, min || max);
 }
 } // GaugeInterfaceModifier
@@ -155,7 +156,7 @@ void ValueImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    GaugeModelNG::SetValue(frameNode, Converter::OptConvert<float>(*value));
+    GaugeModelStatic::SetValue(frameNode, Converter::OptConvert<float>(*value));
 }
 void StartAngleImpl(Ark_NativePointer node,
                     const Opt_Number* value)
@@ -237,7 +238,7 @@ void StrokeWidthImpl(Ark_NativePointer node,
     auto strokeWidth = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(strokeWidth);
     Validator::ValidateNonPercent(strokeWidth);
-    GaugeModelNG::SetGaugeStrokeWidth(frameNode, strokeWidth);
+    GaugeModelStatic::SetGaugeStrokeWidth(frameNode, strokeWidth);
 }
 void DescriptionImpl(Ark_NativePointer node,
                      const Opt_CustomNodeBuilder* value)
@@ -278,7 +279,7 @@ void IndicatorImpl(Ark_NativePointer node,
         }
         Validator::ValidateNonNegative(indicator->space);
         Validator::ValidateNonPercent(indicator->space);
-        GaugeModelNG::SetIndicatorSpace(frameNode, indicator->space);
+        GaugeModelStatic::SetIndicatorSpace(frameNode, indicator->space);
     } else {
         GaugeModelNG::SetIsShowIndicator(frameNode, false);
     }
@@ -289,7 +290,7 @@ void PrivacySensitiveImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     const auto sensitive = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
-    GaugeModelNG::SetPrivacySensitive(frameNode, sensitive);
+    GaugeModelStatic::SetPrivacySensitive(frameNode, sensitive);
 }
 void ContentModifierImpl(Ark_NativePointer node,
                          const Opt_ContentModifier* value)
