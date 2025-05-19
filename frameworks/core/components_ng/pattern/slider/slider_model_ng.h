@@ -66,6 +66,11 @@ public:
     void SetValidSlideRange(float fromValue, float toValue) override;
     void SetPrefix(const RefPtr<UINode>& content, const NG::SliderPrefixOptions& options) override;
     void SetSuffix(const RefPtr<UINode>& content, const NG::SliderSuffixOptions& options) override;
+    void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
+        const SliderColorType sliderColorType) override;
+    void CreateWithMediaResourceObj(const RefPtr<ResourceObject>& resObj,
+        const std::string bundleName, const std::string moduleName) override;
+    void CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj, const bool isShowTips) override;
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) override;
 #endif
@@ -178,6 +183,7 @@ public:
 
 private:
     void SetSliderValue(float value);
+    std::string ColorTypeToString(const SliderColorType sliderColorType);
 };
 
 } // namespace OHOS::Ace::NG

@@ -191,6 +191,20 @@ public:
 
     bool IsDynamicSwitchButtonStyle(const BorderWidthProperty& width, RefPtr<ButtonTheme>& buttonTheme);
 
+    void UpdateComponentColor(const Color& color, const ButtonColorType buttonColorType);
+
+    void UpdateComponentString(const std::string& value, const ButtonStringType buttonStringType);
+
+    void UpdateComponentDimension(const CalcDimension value, const ButtonDimensionType buttonDimensionType);
+
+    void UpdateComponentDouble(const double value, const ButtonDoubleType buttonDoubleType);
+
+    void UpdateComponentFamilies(const std::vector<std::string>& value, const ButtonStringType buttonStringType);
+
+    std::string VectorToString(const std::vector<std::string>& vec, const std::string& delimiter = " ");
+    
+    std::vector<std::string> StringToVector(const std::string& str, char delimiter = ' ');
+
 protected:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;

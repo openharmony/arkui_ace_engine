@@ -253,6 +253,10 @@ public:
         return sliderContentModifier_;
     }
 
+    void UpdateSliderComponentColor(const Color& color, const SliderColorType sliderColorType, const Gradient& value);
+    void UpdateSliderComponentMedia();
+    void UpdateSliderComponentString(const bool isShowTips, const std::string& value);
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
