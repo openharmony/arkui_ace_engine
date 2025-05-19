@@ -121,6 +121,21 @@ RefPtr<NavigationStack> GetNavigationStackByNode(ArkUINodeHandle node)
     CHECK_NULL_RETURN(result, nullptr);
     return result->pathStack.Upgrade();
 }
+
+void SetDebugBoundary(ArkUINodeHandle node)
+{
+    UINode* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    RefPtr<UINode> refNode = Ace::AceType::Claim<UINode>(uiNode);
+    CHECK_NULL_VOID(refNode);
+    auto frameNode = Ace::AceType::DynamicCast<FrameNode>(refNode);
+    if (frameNode) {
+        auto renderContext = frameNode->GetRenderContext();
+        if (renderContext) {
+            renderContext->SetNeedDebugBoundary(true);
+        }
+    }
+}
 } // namespace
 
 ArkUI_Int64 GetUIState(ArkUINodeHandle node)
@@ -222,6 +237,7 @@ ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 flags)
         if (uiNode) {
             uiNode->setIsCNode(true);
         }
+        SetDebugBoundary(node);
     } else {
         node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
     }
