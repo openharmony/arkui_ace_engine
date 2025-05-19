@@ -1467,21 +1467,21 @@ void CalendarPickerPattern::UpdateTextStyle(const PickerTextStyle& textStyle)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(calendarTheme);
     auto pickerProperty = host->GetPaintProperty<CalendarPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
 
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-
     if (pipelineContext->IsSystmColorChange()) {
-        if (textStyle.textColor.has_value()) {
-            pickerProperty->UpdateColor(textStyle.textColor.value());
-        }
+        pickerProperty->UpdateColor(textStyle.textColor.value_or(calendarTheme->GetEntryFontColor()));
 
-        if (textStyle.fontSize.has_value()) {
-            Dimension fontSize = textStyle.fontSize.value();
-            pickerProperty->UpdateFontSize(fontSize);
+        Dimension fontSize = calendarTheme->GetEntryFontSize();
+        if (textStyle.fontSize.has_value() && textStyle.fontSize->IsValid()) {
+            fontSize = textStyle.fontSize.value();
         }
+        pickerProperty->UpdateFontSize(fontSize);
     }
 
     if (host->GetRerenderable()) {

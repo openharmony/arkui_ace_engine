@@ -606,6 +606,13 @@ private:
     int32_t CalculateIndex(RefPtr<FrameNode>& frameNode);
     Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
 
+    void UpdateTextStyleCommon(
+        const PickerTextStyle& textStyle,
+        const TextStyle& defaultTextStyle,
+        std::function<void(const Color&)> updateTextColorFunc,
+        std::function<void(const Dimension&)> updateFontSizeFunc,
+        std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc);
+
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
     double defaultPickerItemHeight_ = 0.0;

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 
+#include <functional>
 #include <stdint.h>
 #include <string>
 #include <utility>
@@ -61,6 +62,7 @@ const int32_t MONTH_DECEMBER = 12;
 constexpr int32_t RATIO_ZERO = 0;
 constexpr int32_t RATIO_ONE = 1;
 constexpr int32_t SECOND_PAGE = 1;
+constexpr float PICKER_MAXFONTSCALE = 1.0f;
 } // namespace
 bool DatePickerPattern::inited_ = false;
 const std::string DatePickerPattern::empty_;
@@ -3014,7 +3016,35 @@ bool DatePickerPattern::CurrentIsLunar()
     return rowLayoutProperty->GetLunarValue(false);
 }
 
-void DatePickerPattern::UpdateDisappearTextStyle(const PickerTextStyle& textStyle)
+Dimension DatePickerPattern::ConvertFontScaleValue(const Dimension& fontSizeValue)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, fontSizeValue);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, fontSizeValue);
+
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
+    auto follow = pipeline->IsFollowSystem();
+    float fontScale = pipeline->GetFontScale();
+    if (NearZero(fontScale) || (fontSizeValue.Unit() == DimensionUnit::VP)) {
+        return fontSizeValue;
+    }
+    if (GreatOrEqualCustomPrecision(fontScale, PICKER_MAXFONTSCALE) && follow) {
+        fontScale = std::clamp(fontScale, 0.0f, maxAppFontScale);
+        if (!NearZero(fontScale)) {
+            return Dimension(fontSizeValue / fontScale);
+        }
+    }
+    return fontSizeValue;
+}
+
+void DatePickerPattern::UpdateTextStyleCommon(
+    const PickerTextStyle& textStyle,
+    const TextStyle& defaultTextStyle,
+    std::function<void(const Color&)> updateTextColorFunc,
+    std::function<void(const Dimension&)> updateFontSizeFunc,
+    std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc
+)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -3025,83 +3055,79 @@ void DatePickerPattern::UpdateDisappearTextStyle(const PickerTextStyle& textStyl
     CHECK_NULL_VOID(pipelineContext);
 
     if (pipelineContext->IsSystmColorChange()) {
-        if (textStyle.textColor.has_value()) {
-            pickerProperty->UpdateDisappearColor(textStyle.textColor.value());
-        }
+        updateTextColorFunc(textStyle.textColor.value_or(defaultTextStyle.GetTextColor()));
 
-        if (textStyle.fontSize.has_value()) {
-            Dimension fontSize = textStyle.fontSize.value();
-            pickerProperty->UpdateDisappearFontSize(fontSize);
+        Dimension fontSize = defaultTextStyle.GetFontSize();
+        if (textStyle.fontSize.has_value() && textStyle.fontSize->IsValid()) {
+            fontSize = textStyle.fontSize.value();
         }
+        updateFontSizeFunc(ConvertFontScaleValue(fontSize));
 
-        if (textStyle.fontFamily.has_value()) {
-            pickerProperty->UpdateDisappearFontFamily(textStyle.fontFamily.value());
-        }
+        updateFontFamilyFunc(textStyle.fontFamily.value_or(defaultTextStyle.GetFontFamilies()));
     }
 
     if (host->GetRerenderable()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+}
+
+void DatePickerPattern::UpdateDisappearTextStyle(const PickerTextStyle& textStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(pickerTheme);
+    auto defaultTextStyle = pickerTheme->GetDisappearOptionStyle();
+    auto pickerProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    UpdateTextStyleCommon(
+        textStyle,
+        defaultTextStyle,
+        [&](const Color& color) { pickerProperty->UpdateDisappearColor(color); },
+        [&](const Dimension& fontSize) { pickerProperty->UpdateDisappearFontSize(fontSize); },
+        [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateDisappearFontFamily(fontFamily); }
+    );
 }
 
 void DatePickerPattern::UpdateNormalTextStyle(const PickerTextStyle& textStyle)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(pickerTheme);
+    auto defaultTextStyle = pickerTheme->GetOptionStyle(false, false);
     auto pickerProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
-
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-
-    if (pipelineContext->IsSystmColorChange()) {
-        if (textStyle.textColor.has_value()) {
-            pickerProperty->UpdateColor(textStyle.textColor.value());
-        }
-
-        if (textStyle.fontSize.has_value()) {
-            Dimension fontSize = textStyle.fontSize.value();
-            pickerProperty->UpdateFontSize(fontSize);
-        }
-
-        if (textStyle.fontFamily.has_value()) {
-            pickerProperty->UpdateFontFamily(textStyle.fontFamily.value());
-        }
-    }
-
-    if (host->GetRerenderable()) {
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
+    UpdateTextStyleCommon(
+        textStyle,
+        defaultTextStyle,
+        [&](const Color& color) { pickerProperty->UpdateColor(color); },
+        [&](const Dimension& fontSize) { pickerProperty->UpdateFontSize(fontSize); },
+        [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateFontFamily(fontFamily); }
+    );
 }
 
 void DatePickerPattern::UpdateSelectedTextStyle(const PickerTextStyle& textStyle)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(pickerTheme);
+    auto defaultTextStyle = pickerTheme->GetOptionStyle(true, false);
     auto pickerProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
-
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-
-    if (pipelineContext->IsSystmColorChange()) {
-        if (textStyle.textColor.has_value()) {
-            pickerProperty->UpdateSelectedColor(textStyle.textColor.value());
-        }
-
-        if (textStyle.fontSize.has_value()) {
-            Dimension fontSize = textStyle.fontSize.value();
-            pickerProperty->UpdateSelectedFontSize(fontSize);
-        }
-
-        if (textStyle.fontFamily.has_value()) {
-            pickerProperty->UpdateSelectedFontFamily(textStyle.fontFamily.value());
-        }
-    }
-
-    if (host->GetRerenderable()) {
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
+    UpdateTextStyleCommon(
+        textStyle,
+        defaultTextStyle,
+        [&](const Color& color) { pickerProperty->UpdateSelectedColor(color); },
+        [&](const Dimension& fontSize) { pickerProperty->UpdateSelectedFontSize(fontSize); },
+        [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateSelectedFontFamily(fontFamily); }
+    );
 }
-
 } // namespace OHOS::Ace::NG

@@ -57,6 +57,9 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     void SetChangeEvent(DateChangeEvent&& onChange) override;
     void SetDigitalCrownSensitivity(int32_t crownSensitivity) override;
+    void ParseDisappearTextStyleResObj(const PickerTextStyle& textStyleOpt) override;
+    void ParseSelectedTextStyleResObj(const PickerTextStyle& textStyleOpt) override;
+    void ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt) override;
     static void SetSelectedTextStyle(
         FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
     static void SetNormalTextStyle(
@@ -86,6 +89,8 @@ private:
     void createMonthOrDayColumnNode(const RefPtr<FrameNode>& columnNode,
         const RefPtr<FrameNode>& dateNode, Color buttonBackgroundColor);
     void createYearColumnNode(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& dateNode);
+    void ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
+        std::function<void(const PickerTextStyle&)> updateTextStyleFunc);
     std::string dateOrder = "";
     std::string dateTimeOrder = "";
 };

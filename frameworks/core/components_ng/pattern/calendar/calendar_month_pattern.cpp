@@ -363,6 +363,8 @@ void CalendarMonthPattern::OnColorConfigurationUpdate()
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateTextColor(theme->GetCalendarTheme().weekColor);
     }
+    rowNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void CalendarMonthPattern::OnLanguageConfigurationUpdate()
