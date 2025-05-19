@@ -335,6 +335,7 @@ napi_modules = [
           "promptaction",
           "router",
           "animator",
+          "overlay",
         ]
       },
     ]
