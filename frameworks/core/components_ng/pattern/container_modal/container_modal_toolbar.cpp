@@ -91,6 +91,7 @@ void ContainerModalToolBar::SetToolbarBuilder(const RefPtr<FrameNode>& parent, s
 {
     CHECK_NULL_VOID(parent);
     RemoveToolbarItem(parent);
+    UpdateTitleLayout();
     CHECK_NULL_VOID(builder);
     auto nodes = builder();
     CHECK_NULL_VOID(nodes);
@@ -108,6 +109,7 @@ void ContainerModalToolBar::SetToolbarBuilder(const RefPtr<FrameNode>& parent, s
         auto frameNode = frame.Upgrade();
         CHECK_NULL_VOID(frameNode);
         toolbar->RemoveToolbarItem(frameNode);
+        toolbar->UpdateTitleLayout();
     };
     parent->SetRemoveToolbarItemCallback(
         isFloating_ ? FLOATING_TITLE_MGR_CALLBACK_ID : TITLE_MGR_CALLBACK_ID, std::move(callback));
@@ -225,6 +227,12 @@ void ContainerModalToolBar::RemoveToolbarItem(const RefPtr<FrameNode>& frameNode
     }
     list.clear();
     itemsOnTree_.erase(frameNode);
+}
+
+void ContainerModalToolBar::UpdateTitleLayout()
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
     UpdateTitleAfterRemove();
     toolbarItemMaxHeight_ = 0.0f;
     for (auto it = itemsOnTree_.begin(); it != itemsOnTree_.end(); it++) {
@@ -240,9 +248,11 @@ void ContainerModalToolBar::RemoveToolbarItem(const RefPtr<FrameNode>& frameNode
             }
         }
     }
-    RemoveToolbarRowContainers();
-    OnToolBarLayoutChange();
-    AdjustContainerModalTitleHeight();
+    if (!isTitleShow_ || customTitleShow_) {
+        RemoveToolbarRowContainers();
+        OnToolBarLayoutChange();
+        AdjustContainerModalTitleHeight();
+    }
 }
 
 void ContainerModalToolBar::AddToolbarItemToContainer()
@@ -303,18 +313,19 @@ bool ContainerModalToolBar::AddToolbarItemToSpecificRow(ItemPlacementType placeM
             TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Unknown placement");
             return false;
     }
-
-    auto overlayTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->AdjustContainerModalTitleHeight();
-    };
     auto containermodal = pattern_.Upgrade();
     CHECK_NULL_RETURN(containermodal, ref);
     containermodal->SetIsHaveToolBar(true);
-    auto pipeline = containermodal->GetContext();
-    CHECK_NULL_RETURN(pipeline, true);
-    pipeline->AddAfterRenderTask(overlayTask);
+    if (!isTitleShow_ || customTitleShow_) {
+        auto pipeline = containermodal->GetContext();
+        CHECK_NULL_RETURN(pipeline, true);
+        auto overlayTask = [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->AdjustContainerModalTitleHeight();
+        };
+        pipeline->AddAfterRenderTask(overlayTask);
+    }
     return ref;
 }
 
@@ -580,18 +591,23 @@ void ContainerModalToolBar::AdjustTitleNodeWidth()
 
     auto titleNode = AceType::DynamicCast<FrameNode>(title_->GetChildren().front());
     CHECK_NULL_VOID(titleNode);
-
     auto titleNodeProperty = titleNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(titleNodeProperty);
     titleNodeProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
 
+    if (itemsOnTree_.empty()) {
+        titleNodeProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::PERCENT)));
+        titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+        return;
+    }
+
     auto renderContext = titleNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetClipToFrame(true);
-
     titleNodeProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(titleNodeWidth), CalcLength(1.0, DimensionUnit::PERCENT)));
-    titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void ContainerModalToolBar::AdjustNavbarRowWidth()
@@ -688,6 +704,20 @@ void ContainerModalToolBar::AdjustNavDestRowWidth()
         navDestbarRow_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         navDestbarRowProperty->UpdateVisibility(
             NearEqual(navDestInfo.width, 0.0f) ? VisibleType::INVISIBLE : VisibleType::VISIBLE);
+    }
+}
+
+void ContainerModalToolBar::UpdateToolbarShow(bool isTitleShow, bool customTitleSettedShow)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    isTitleShow_ = isTitleShow;
+    customTitleShow_ = customTitleSettedShow;
+
+    if (!isTitleShow || customTitleSettedShow) {
+        UpdateTitleLayout();
+    } else if (!customTitleSettedShow) {
+        pattern->SetControlButtonsRowHeight(CONTAINER_TITLE_HEIGHT);
     }
 }
 

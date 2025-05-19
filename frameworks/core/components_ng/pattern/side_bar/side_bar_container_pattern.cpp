@@ -981,24 +981,30 @@ void SideBarContainerPattern::UpdateSideBarStatus()
     CHECK_NULL_VOID(layoutProperty);
     auto frameSize = geometryNode->GetFrameSize();
     bool showSideBar = true;
-    switch (sideBarStatus_) {
-        case SideBarStatus::SHOW: {
-            showSideBar = true;
-            break;
-        }
-        case SideBarStatus::HIDDEN: {
-            showSideBar = false;
-            break;
-        }
-        case SideBarStatus::CHANGING: {
-            if (inAnimation_) {
-                showSideBar = !showSideBar_;
+    if (type_ == SideBarContainerType::OVERLAY) {
+        showSideBar = false;
+    } else if (autoHide_) {
+        showSideBar = false;
+    } else {
+        switch (sideBarStatus_) {
+            case SideBarStatus::SHOW: {
+                showSideBar = true;
+                break;
             }
-            break;
-        }
-        default: {
-            showSideBar = layoutProperty->GetShowSideBar().value_or(true);
-            break;
+            case SideBarStatus::HIDDEN: {
+                showSideBar = false;
+                break;
+            }
+            case SideBarStatus::CHANGING: {
+                if (inAnimation_) {
+                    showSideBar = !showSideBar_;
+                }
+                break;
+            }
+            default: {
+                showSideBar = layoutProperty->GetShowSideBar().value_or(true);
+                break;
+            }
         }
     }
     SetSideBarWidthToolBarManager(
@@ -1157,10 +1163,7 @@ void SideBarContainerPattern::FireSideBarWidthChangeEvent()
     Dimension usrSetUnitWidth = DimensionUnit::PERCENT == userSetDimensionUnit ?
         ConvertPxToPercent(realSideBarWidthPx) :
         Dimension(realSideBarWidth_.GetNativeValue(userSetDimensionUnit), userSetDimensionUnit);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto frameSize = geometryNode->GetFrameSize();
-    SetSideBarWidthToolBarManager(true, usrSetUnitWidth.ConvertToPxWithSize(frameSize.Width()), realDividerWidth_);
+    UpdateSideBarStatus();
     eventHub->FireSideBarWidthChangeEvent(usrSetUnitWidth);
 }
 

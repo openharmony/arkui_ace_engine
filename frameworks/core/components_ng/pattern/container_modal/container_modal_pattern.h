@@ -177,6 +177,8 @@ public:
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
     bool GetContainerModalTitleVisible(bool isImmersive);
     virtual void SetContainerModalTitleHeight(int32_t height);
+    void SetContainerModalTitleWithoutButtonsHeight(Dimension height);
+    void SetControlButtonsRowHeight(Dimension height);
     int32_t GetContainerModalTitleHeight();
     virtual bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
     void SubscribeContainerModalButtonsRectChange(
@@ -240,6 +242,7 @@ public:
     bool IsContainerModalTransparent() const;
 
     Dimension titleHeight_ = CONTAINER_TITLE_HEIGHT;
+
     RefPtr<ContainerModalToolBar> GetTitleManager()
     {
         return titleMgr_;

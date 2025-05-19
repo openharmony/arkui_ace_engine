@@ -676,8 +676,11 @@ HWTEST_F(ContainerModelToolBarTestNg, AdjustTitleNodeWidth, TestSize.Level1)
     auto customTitleRow = pattern_->GetCustomTitleRow();
     ASSERT_NE(customTitleRow, nullptr);
 
-    auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
-    titleMgr_->AddToolbarItemToNavBarStart(toolbarItem);
+    auto parentNode = FrameNode::CreateFrameNode(V2::NAVBAR_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto toolbarItem =
+        FrameNode::CreateFrameNode(V2::TOOLBARITEM_ETS_TAG, 2, AceType::MakeRefPtr<ToolBarItemPattern>());
+    parentNode->AddChild(toolbarItem);
+    titleMgr_->itemsOnTree_[parentNode].push_back(toolbarItem);
     titleMgr_->AdjustTitleNodeWidth();
 
     // Checking the width of the titleNode

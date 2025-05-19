@@ -46,6 +46,7 @@ public:
     void SetToolbarBuilder(const RefPtr<FrameNode>& parent, std::function<RefPtr<UINode>()>& builder);
     void OnToolBarLayoutChange();
     void AdjustNavDestRowWidth();
+    void UpdateToolbarShow(bool isTitleShow, bool customTitleSettedShow);
     void AdjustContainerModalTitleHeight();
 
     bool GetNavOrSideBarNodes();
@@ -60,6 +61,7 @@ public:
 protected:
     void UpdateTitleAfterRemove();
     void RemoveToolbarItem(const RefPtr<FrameNode>& frameNode);
+    void UpdateTitleLayout();
 
 private:
     void ParsePlacementType();
@@ -129,6 +131,8 @@ private:
 
     bool hasSetUpdateSideTitleBgColor_ = false;
     bool isUpdateTargetNode_ = false;
+    bool isTitleShow_ = true;
+    bool customTitleShow_ = true;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_TOOLBAR_H
