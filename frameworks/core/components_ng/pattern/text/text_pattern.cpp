@@ -1776,15 +1776,17 @@ void TextPattern::TriggerSpansOnHover(const HoverInfo& info, const PointF& textO
         int32_t end = isSpanStringMode_ && item->position == -1 ? item->interval.second : item->position;
         int32_t start = end - item->content.length();
         auto selectedRects = GetSelectedRects(start, end);
+        bool isOnHover = false;
         for (auto&& rect : selectedRects) {
-            bool isOnHover = rect.IsInRegion(textOffset);
-            if (!isOnHover && item->isOnHover != isOnHover) {
-                exitItem = item;
-                break;
-            } else if (isOnHover && item->isOnHover != isOnHover) {
-                enterItem = item;
+            isOnHover = rect.IsInRegion(textOffset);
+            if (isOnHover) {
                 break;
             }
+        }
+        if (!isOnHover && item->isOnHover != isOnHover) {
+            exitItem = item;
+        } else if (isOnHover && item->isOnHover != isOnHover) {
+            enterItem = item;
         }
         if (exitItem && enterItem) {
             break;
