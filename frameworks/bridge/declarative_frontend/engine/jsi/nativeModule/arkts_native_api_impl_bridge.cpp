@@ -6069,6 +6069,10 @@ void ArkUINativeModule::RegisterBadgeAttributes(Local<panda::ObjectRef> object, 
 void ArkUINativeModule::RegisterScrollBarAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto ScrollBar = panda::ObjectRef::New(vm);
+    ScrollBar->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollBarScrollBarColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBarBridge::SetScrollBarScrollBarColor));
+    ScrollBar->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollBarScrollBarColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBarBridge::ResetScrollBarScrollBarColor));
     ScrollBar->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollBarEnableNestedScroll"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBarBridge::SetScrollBarEnableNestedScroll));
     ScrollBar->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollBarEnableNestedScroll"),

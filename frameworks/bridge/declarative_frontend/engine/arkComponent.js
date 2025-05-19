@@ -27975,6 +27975,22 @@ if (globalThis.RichText !== undefined) {
   };
 }
 
+class ScrollBarScrollBarColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().ScrollBar.resetScrollBarScrollBarColor(node);
+    } else {
+      getUINativeModule().ScrollBar.setScrollBarScrollBarColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ScrollBarScrollBarColorModifier.identity = Symbol('scrollbarcolor');
 class ScrollBarEnableNestedScrollModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
@@ -27994,6 +28010,11 @@ class ArkScrollBarComponent extends ArkComponent {
   enableNestedScroll(value) {
     modifierWithKey(this._modifiersWithKeys, ScrollBarEnableNestedScrollModifier.identity,
       ScrollBarEnableNestedScrollModifier, value);
+    return this;
+  }
+  scrollBarColor(value) {
+    modifierWithKey(this._modifiersWithKeys, ScrollBarScrollBarColorModifier.identity,
+      ScrollBarScrollBarColorModifier, value);
     return this;
   }
 }

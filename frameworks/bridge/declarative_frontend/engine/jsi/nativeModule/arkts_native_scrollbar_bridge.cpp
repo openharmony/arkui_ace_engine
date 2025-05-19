@@ -49,4 +49,53 @@ ArkUINativeModuleValue ScrollBarBridge::ResetScrollBarEnableNestedScroll(ArkUIRu
     GetArkUINodeModifiers()->getScrollBarModifier()->resetScrollBarEnableNestedScroll(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue ScrollBarBridge::SetScrollBarScrollBarColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    if (!firstArg->IsNativePointer(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Color color;
+    if (!ParseColorMetricsToColor(vm, secondArg, color)) {
+        GetArkUINodeModifiers()->getScrollBarModifier()->resetScrollBarScrollBarColor(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getScrollBarModifier()->setScrollBarScrollBarColor(nativeNode, color.GetValue());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollBarBridge::ResetScrollBarScrollBarColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsNativePointer(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    GetArkUINodeModifiers()->getScrollBarModifier()->resetScrollBarScrollBarColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+bool ScrollBarBridge::ParseColorMetricsToColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue, Color& result)
+{
+    if (!jsValue->IsObject(vm)) {
+        return false;
+    }
+    auto obj = jsValue->ToObject(vm);
+    auto toNumericProp = obj->Get(vm, "toNumeric");
+    if (toNumericProp->IsFunction(vm)) {
+        panda::Local<panda::FunctionRef> func = toNumericProp;
+        auto colorVal = func->Call(vm, obj, nullptr, 0);
+        result.SetValue(colorVal->Uint32Value(vm));
+        return true;
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG

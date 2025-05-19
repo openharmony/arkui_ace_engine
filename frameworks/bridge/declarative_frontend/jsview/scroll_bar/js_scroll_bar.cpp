@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 
+#include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/models/scroll_bar_model_impl.h"
 #include "core/common/container.h"
@@ -63,6 +64,7 @@ void JSScrollBar::JSBind(BindingTarget globalObj)
     JSClass<JSScrollBar>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSScrollBar>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSScrollBar>::StaticMethod("enableNestedScroll", &JSScrollBar::JsSetEnableNestedScroll);
+    JSClass<JSScrollBar>::StaticMethod("scrollBarColor", &JSScrollBar::JsSetScrollBarColor);
 
     JSClass<JSScrollBar>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -111,4 +113,12 @@ void JSScrollBar::JsSetEnableNestedScroll(const JSCallbackInfo& args)
     ScrollBarModel::GetInstance()->SetEnableNestedScroll(args[0]->ToBoolean());
 }
 
+void JSScrollBar::JsSetScrollBarColor(const JSCallbackInfo& args)
+{
+    Color color;
+    if (!JSViewAbstract::ParseColorMetricsToColor(args[0], color)) {
+        ScrollBarModel::GetInstance()->ResetScrollBarColor();
+    }
+    ScrollBarModel::GetInstance()->SetScrollBarColor(color);
+}
 } // namespace OHOS::Ace::Framework

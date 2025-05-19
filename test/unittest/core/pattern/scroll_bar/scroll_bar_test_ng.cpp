@@ -1162,4 +1162,27 @@ HWTEST_F(ScrollBarTestNg, SetEnableNestedScroll008, TestSize.Level1)
     scrollBarModel.SetEnableNestedScroll(frameNode, false);
     ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
 }
+
+/**
+ * @tc.name: SetScrollBarColorTest001
+ * @tc.desc: Test SetScrollBarColor and GetBarColor method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, SetScrollBarColorTest, TestSize.Level1)
+{
+    ScrollBarModelNG scrollBarModel;
+    auto scrollBarProxy = scrollBarModel.GetScrollBarProxy(nullptr);
+    scrollBarModel.Create(scrollBarProxy, true, true, static_cast<int>(Axis::VERTICAL), static_cast<int>( DisplayMode::ON));
+    scrollBarModel.SetScrollBarColor(Color::FromString(SCROLLBAR_COLOR_BLUE));
+    GetScrollBar();
+    CreateScrollBarChild();
+    CreateDone();
+    auto paintProperty = pattern_->GetPaintProperty<ScrollBarPaintProperty>();
+    /**
+     * @tc.steps: step1. Set ScrollBarColor to blue
+     * @tc.expected: ScrollablePaintProperty ScrollBarColor is updated to blue
+     */
+    // scrollBarModel.SetScrollBarColor(Color::FromString(SCROLLBAR_COLOR_BLUE));
+    EXPECT_EQ(paintProperty->GetScrollBarColor()->GetValue(), Color::FromString(SCROLLBAR_COLOR_BLUE).GetValue());
+}
 } // namespace OHOS::Ace::NG

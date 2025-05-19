@@ -24,6 +24,23 @@ class ScrollBarEnableNestedScrollModifier extends ModifierWithKey<boolean> {
     }
   }
 }
+class ScrollBarScrollBarColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('scrollbarcolor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().video.resetScrollBarScrollBarColor(node);
+    } else {
+      getUINativeModule().video.setScrollBarScrollBarColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
 class ArkScrollBarComponent extends ArkComponent implements ScrollBarAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -31,6 +48,11 @@ class ArkScrollBarComponent extends ArkComponent implements ScrollBarAttribute {
   enableNestedScroll(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ScrollBarEnableNestedScrollModifier.identity,
       ScrollBarEnableNestedScrollModifier, value);
+    return this;
+  }
+  scrollBarColor(value: ResourceColor): this {
+    modifierWithKey(this._modifiersWithKeys, ScrollBarScrollBarColorModifier.identity,
+      ScrollBarScrollBarColorModifier, value);
     return this;
   }
 }
