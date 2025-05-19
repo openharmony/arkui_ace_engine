@@ -23715,7 +23715,8 @@ typedef struct GENERATED_ArkUIFrameNodeAccessor {
                         Ark_FrameNode node);
     void (*clearChildren)(Ark_FrameNode peer);
     Ark_FrameNode (*getChild)(Ark_FrameNode peer,
-                              const Ark_Number* index);
+                              const Ark_Number* index,
+                              const Ark_Number* expandMode);
     Ark_FrameNode (*getFirstChild)(Ark_FrameNode peer);
     Ark_FrameNode (*getNextSibling)(Ark_FrameNode peer);
     Ark_FrameNode (*getPreviousSibling)(Ark_FrameNode peer);
@@ -23725,6 +23726,16 @@ typedef struct GENERATED_ArkUIFrameNodeAccessor {
     Ark_Number (*getOpacity)(Ark_FrameNode peer);
     Ark_Position (*getPositionToWindowWithTransform)(Ark_FrameNode peer);
     Ark_FrameNode (*getFrameNodeByKey)(const Ark_String* name);
+    Ark_Number (*getIdByFrameNode)(Ark_FrameNode peer,
+                                   Ark_FrameNode node);
+    void (*moveTo)(Ark_FrameNode peer,
+                   Ark_FrameNode targetParent,
+                   const Ark_Number* index);
+    Ark_Number (*getFirstChildIndexWithoutExpand)(Ark_FrameNode peer);
+    Ark_Number (*getLastChildIndexWithoutExpand)(Ark_FrameNode peer);
+    Ark_FrameNode (*getAttachedFrameNodeById)(const Ark_String* id);
+    Ark_FrameNode (*getFrameNodeById)(const Ark_Number* id);
+    Ark_FrameNode (*getFrameNodeByUniqueId)(const Ark_Number* id);
 } GENERATED_ArkUIFrameNodeAccessor;
 
 typedef struct GENERATED_ArkUILengthMetricsAccessor {

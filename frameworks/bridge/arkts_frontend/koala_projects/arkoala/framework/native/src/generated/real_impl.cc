@@ -13403,7 +13403,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     Ark_FrameNode GetChildImpl(Ark_FrameNode peer,
-                               const Ark_Number* index)
+                               const Ark_Number* index,
+                               const Ark_Number* expandMode)
     {
         return {};
     }
@@ -13439,6 +13440,36 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     Ark_FrameNode GetFrameNodeByKeyImpl(const Ark_String* name)
+    {
+        return {};
+    }
+    Ark_Number GetIdByFrameNodeImpl(Ark_FrameNode peer,
+                                    Ark_FrameNode node)
+    {
+        return {};
+    }
+    void MoveToImpl(Ark_FrameNode peer,
+                    Ark_FrameNode targetParent,
+                    const Ark_Number* index)
+    {
+    }
+    Ark_Number GetFirstChildIndexWithoutExpandImpl(Ark_FrameNode peer)
+    {
+        return {};
+    }
+    Ark_Number GetLastChildIndexWithoutExpandImpl(Ark_FrameNode peer)
+    {
+        return {};
+    }
+    Ark_FrameNode GetAttachedFrameNodeByIdImpl(const Ark_String* id)
+    {
+        return {};
+    }
+    Ark_FrameNode GetFrameNodeByIdImpl(const Ark_Number* id)
+    {
+        return {};
+    }
+    Ark_FrameNode GetFrameNodeByUniqueIdImpl(const Ark_Number* id)
     {
         return {};
     }
@@ -21279,6 +21310,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeAccessor::GetOpacityImpl,
             FrameNodeAccessor::GetPositionToWindowWithTransformImpl,
             FrameNodeAccessor::GetFrameNodeByKeyImpl,
+            FrameNodeAccessor::GetIdByFrameNodeImpl,
+            FrameNodeAccessor::MoveToImpl,
+            FrameNodeAccessor::GetFirstChildIndexWithoutExpandImpl,
+            FrameNodeAccessor::GetLastChildIndexWithoutExpandImpl,
+            FrameNodeAccessor::GetAttachedFrameNodeByIdImpl,
+            FrameNodeAccessor::GetFrameNodeByIdImpl,
+            FrameNodeAccessor::GetFrameNodeByUniqueIdImpl,
         };
         return &FrameNodeAccessorImpl;
     }

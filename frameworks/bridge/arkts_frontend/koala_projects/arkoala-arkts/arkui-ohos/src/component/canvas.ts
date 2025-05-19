@@ -35,7 +35,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { VoidCallback } from "./units"
 import { ImageAIOptions, ImageAnalyzerConfig } from "./imageCommon"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { FrameNode, FrameNodeInternal } from "./arkui-framenode"
+import { FrameNode, FrameNodeInternal } from "../FrameNode"
 
 import { Callback_Void } from "./abilityComponent"
 export class CanvasGradientInternal {

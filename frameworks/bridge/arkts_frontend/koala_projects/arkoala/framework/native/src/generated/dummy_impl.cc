@@ -26639,7 +26639,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     Ark_FrameNode GetChildImpl(Ark_FrameNode peer,
-                               const Ark_Number* index)
+                               const Ark_Number* index,
+                               const Ark_Number* expandMode)
     {
         if (!needGroupedLog(1))
             return (Ark_FrameNode) 300;
@@ -26734,6 +26735,84 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return (Ark_FrameNode) 300;
         string out("getFrameNodeByKey(");
         WriteToString(&out, name);
+        out.append(") \n");
+        out.append("[return (Ark_FrameNode) 300] \n");
+        appendGroupedLog(1, out);
+        return (Ark_FrameNode) 300;
+    }
+    Ark_Number GetIdByFrameNodeImpl(Ark_FrameNode peer,
+                                        Ark_FrameNode node)
+    {
+        if (!needGroupedLog(1))
+            return {42};
+        string out("getIdByFrameNode(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        out.append("[return {42}] \n");
+        appendGroupedLog(1, out);
+        return {42};
+    }
+    void MoveToImpl(Ark_FrameNode peer,
+                    Ark_FrameNode targetParent,
+                    const Ark_Number* index)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("moveTo(");
+        WriteToString(&out, targetParent);
+        out.append(", ");
+        WriteToString(&out, index);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_Number GetFirstChildIndexWithoutExpandImpl(Ark_FrameNode peer)
+    {
+        if (!needGroupedLog(1))
+            return {42};
+        string out("getFirstChildIndexWithoutExpand(");
+        out.append(") \n");
+        out.append("[return {42}] \n");
+        appendGroupedLog(1, out);
+        return {42};
+    }
+    Ark_Number GetLastChildIndexWithoutExpandImpl(Ark_FrameNode peer)
+    {
+        if (!needGroupedLog(1))
+            return {42};
+        string out("getLastChildIndexWithoutExpand(");
+        out.append(") \n");
+        out.append("[return {42}] \n");
+        appendGroupedLog(1, out);
+        return {42};
+    }
+    Ark_FrameNode GetAttachedFrameNodeByIdImpl(const Ark_String* id)
+    {
+        if (!needGroupedLog(1))
+            return (Ark_FrameNode) 300;
+        string out("getAttachedFrameNodeById(");
+        WriteToString(&out, id);
+        out.append(") \n");
+        out.append("[return (Ark_FrameNode) 300] \n");
+        appendGroupedLog(1, out);
+        return (Ark_FrameNode) 300;
+    }
+    Ark_FrameNode GetFrameNodeByIdImpl(const Ark_Number* id)
+    {
+        if (!needGroupedLog(1))
+            return (Ark_FrameNode) 300;
+        string out("getFrameNodeById(");
+        WriteToString(&out, id);
+        out.append(") \n");
+        out.append("[return (Ark_FrameNode) 300] \n");
+        appendGroupedLog(1, out);
+        return (Ark_FrameNode) 300;
+    }
+    Ark_FrameNode GetFrameNodeByUniqueIdImpl(const Ark_Number* id)
+    {
+        if (!needGroupedLog(1))
+            return (Ark_FrameNode) 300;
+        string out("getFrameNodeByUniqueId(");
+        WriteToString(&out, id);
         out.append(") \n");
         out.append("[return (Ark_FrameNode) 300] \n");
         appendGroupedLog(1, out);
@@ -43427,6 +43506,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeAccessor::GetOpacityImpl,
             FrameNodeAccessor::GetPositionToWindowWithTransformImpl,
             FrameNodeAccessor::GetFrameNodeByKeyImpl,
+            FrameNodeAccessor::GetIdByFrameNodeImpl,
+            FrameNodeAccessor::MoveToImpl,
+            FrameNodeAccessor::GetFirstChildIndexWithoutExpandImpl,
+            FrameNodeAccessor::GetLastChildIndexWithoutExpandImpl,
+            FrameNodeAccessor::GetAttachedFrameNodeByIdImpl,
+            FrameNodeAccessor::GetFrameNodeByIdImpl,
+            FrameNodeAccessor::GetFrameNodeByUniqueIdImpl,
         };
         return &FrameNodeAccessorImpl;
     }

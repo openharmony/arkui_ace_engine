@@ -68,7 +68,7 @@ import { EventTargetInfo, GestureControl, GestureType, GestureGroupInterface, Ge
 import { Filter, TileMode, WaterRippleMode, FlyMode, VisualEffect, BrightnessBlender } from "./../arkui-uieffect"
 import { FocusPriority, KeyProcessingMode, FocusBoxStyle } from "./../focus"
 import { FormDimension, FormRenderingMode, FormShape, FormCallbackInfo, Literal_Number_errcode_String_msg, FormInfo } from "./../formComponent"
-import { FrameNode } from "./../arkui-framenode"
+import { FrameNode } from "../../FrameNode"
 import { FrictionMotion, ScrollMotion, SpringProp, SpringMotion } from "./../animator"
 import { FullscreenInfo, PlaybackInfo, PlaybackSpeed, PreparedInfo, SeekMode, VideoController, PosterOptions, VideoOptions } from "./../video"
 import { GridAttribute, Callback_Number_Number_ComputedBarAttribute, ComputedBarAttribute, Callback_Number_Number_Void, GridDirection, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, GridItemAlignment, Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain, GridLayoutOptions, Callback_Number_Tuple_Number_Number, Callback_Number_Tuple_Number_Number_Number_Number, Tuple_Number_Number_Number_Number } from "./../grid"

@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { FrameNode, FrameNodeInternal } from "./src/FrameNode"
+import { FrameNode, FrameNodeInternal, FrameNodeUtils } from "./src/FrameNode"
 import { GlobalScope_ohos_font } from "./src/component/arkui-external"
 import { GlobalScope_ohos_measure_utils } from "./src/component/arkui-external"
 import { UIContextDispatchKeyEvent, UIContextAtomicServiceBar } from "./src/component/arkui-custom"
@@ -47,20 +47,20 @@ export class Font {
         this.instanceId_ = instanceId;
     }
     public registerFont(options: FontOptions) : void {
-        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         GlobalScope_ohos_font.registerFont(options);
-        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
     public getSystemFontList() : Array<string> {
-        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let arrayResult_ = GlobalScope_ohos_font.getSystemFontList();
-        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        ArkUIAniModule._Common_Restore_InstanceId();
         return new Array<string>();
     }
     public getFontByName(fontName : string) : FontInfo {
-        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let fontInfo : FontInfo = GlobalScope_ohos_font.getFontByName(fontName);
-        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        ArkUIAniModule._Common_Restore_InstanceId();
         return fontInfo;
     }
 }
@@ -71,15 +71,15 @@ export class MeasureUtils {
         this.instanceId_ = instanceId;
     }
     public measureText(options: MeasureOptions) : number {
-        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let width = GlobalScope_ohos_measure_utils.measureText(options);
-        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        ArkUIAniModule._Common_Restore_InstanceId();
         return 0;
     }
     public measureTextSize(options: MeasureOptions) : SizeOptions {
-        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let sizeOptions = GlobalScope_ohos_measure_utils.measureTextSize(options);
-        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        ArkUIAniModule._Common_Restore_InstanceId();
         return {};
     }
 }
@@ -110,9 +110,9 @@ export class AtomicServiceBarInternal implements AtomicServiceBar {
         this.instanceId_ = instanceId;
     }
     public getBarRect(): Frame {
-        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let frame = UIContextAtomicServiceBar.getBarRect();
-        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        ArkUIAniModule._Common_Restore_InstanceId();
         return frame;
     }
 }
@@ -123,9 +123,9 @@ export class ComponentUtils {
     }
 
     public getRectangleById(id: string): componentUtils.ComponentInfo {
-       ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
        let componentInformation = componentUtils.getRectangleById(id);
-       ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+       ArkUIAniModule._Common_Restore_InstanceId();
        return componentInformation;
     }
 }
@@ -138,32 +138,32 @@ export class FocusController {
     }
 
     public clearFocus(): void {
-        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         focusController.clearFocus();
-        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public requestFocus(key: string): void {
-        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         focusController.requestFocus(key);
-        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public activate(isActive: boolean, autoInactive?: boolean): void {
-        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         focusController.activate(isActive, autoInactive);
-        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public setAutoFocusTransfer(isAutoFocusTransfer: boolean): void {
-        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         focusController.setAutoFocusTransfer(isAutoFocusTransfer);
-        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
     public setKeyProcessingMode(mode: KeyProcessingMode): void {
-        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         focusController.setKeyProcessingMode(mode);
-        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 }
 
@@ -191,15 +191,60 @@ export class UIContext {
     }
     public getFrameNodeById(id: string): FrameNode | null {
         const id_casted = id as (string);
-        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeByKey(id_casted);
-        if (retval != nullptr) {
-            const obj : FrameNode = FrameNodeInternal.fromPtr(retval);
-            ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
-            return obj;
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeByKey(id_casted);
+        if (retval == nullptr) {
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return null;
         }
-        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
-        return null;
+        let node = FrameNodeUtils.searchNodeInRegisterProxy(retval);
+        if (!node) {
+            node = FrameNodeUtils.createFrameNode(this, retval);
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return node;
+    }
+    getAttachedFrameNodeById(id: string): FrameNode | null {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getAttachedFrameNodeById(id);
+        if (retval == nullptr) {
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return null;
+        }
+        let node = FrameNodeUtils.searchNodeInRegisterProxy(retval);
+        if (node) {
+            node = FrameNodeUtils.createFrameNode(this, retval);
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return node;
+    }
+    getFrameNodeByNodeId(id: number): FrameNode | null {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeById(id);
+        if (retval == nullptr) {
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return null;
+        }
+        let node = FrameNodeUtils.searchNodeInRegisterProxy(retval);
+        if (node) {
+            node = FrameNodeUtils.createFrameNode(this, retval);
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return node;
+    }
+    getFrameNodeByUniqueId(id: number): FrameNode | null {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeByUniqueId(id);
+        if (retval == nullptr) {
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return null;
+        }
+        let node = FrameNodeUtils.searchNodeInRegisterProxy(retval);
+        if (node) {
+            node = FrameNodeUtils.createFrameNode(this, retval);
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return node;
     }
     getHostContext(): Context | undefined {
         return ArkUIAniModule._Common_GetHostContext();
@@ -210,9 +255,9 @@ export class UIContext {
     }
 
     public dispatchKeyEvent(node: number | string, event: KeyEvent): boolean {
-        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let result = UIContextDispatchKeyEvent.dispatchKeyEvent(node, event);
-        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        ArkUIAniModule._Common_Restore_InstanceId();
         return result;
     }
 
@@ -232,15 +277,15 @@ export class UIContext {
     }
 
     public animateTo(param: AnimateParam, event: (() => void)): void {
-        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
         _animateTo(param, event);
-        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public createAnimator(options: AnimatorOptions): AnimatorResult {
-        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
         let animatorRet = Animator.create(options);
-        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        ArkUIAniModule._Common_Restore_InstanceId();
         return animatorRet;
     }
     public setFrameCallback(onFrameCallback: ((index: number) => void), onIdleCallback: ((index: number) => void),

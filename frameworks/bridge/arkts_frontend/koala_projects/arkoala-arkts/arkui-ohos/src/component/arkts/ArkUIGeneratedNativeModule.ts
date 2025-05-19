@@ -3789,13 +3789,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SystemOps_EndFrame(root: KPointer): void
     @ani.unsafe.Direct
-    native static _SystemOps_syncInstanceId(instanceId: KInt): void
-    @ani.unsafe.Direct
     native static _SystemOps_resourceManagerReset(): void
     @ani.unsafe.Direct
     native static _SystemOps_setFrameCallback(thisArray: KSerializerBuffer, thisLength: int32, delayTime: number): void
-    @ani.unsafe.Direct
-    native static _SystemOps_restoreInstanceId(): void
     @ani.unsafe.Quick
     native static _SystemOps_getResourceId(bundleName: KStringPtr, moduleName: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): int32
     @ani.unsafe.Direct
@@ -4184,7 +4180,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _FrameNode_clearChildren(ptr: KPointer): void
     @ani.unsafe.Direct
-    native static _FrameNode_getChild(ptr: KPointer, index: number): KPointer
+    native static _FrameNode_getChild(ptr: KPointer, index: number, expandMode: number): KPointer
     @ani.unsafe.Direct
     native static _FrameNode_getFirstChild(ptr: KPointer): KPointer
     @ani.unsafe.Direct
@@ -4203,6 +4199,20 @@ export class ArkUIGeneratedNativeModule {
     native static _FrameNode_getPositionToWindowWithTransform(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _FrameNode_getFrameNodeByKey(name: KStringPtr): KPointer
+    @ani.unsafe.Direct
+    native static _FrameNode_getIdByFrameNode(ptr: KPointer, node: KPointer): number
+    @ani.unsafe.Direct
+    native static _FrameNode_moveTo(ptr: KPointer, targetParent: KPointer, index: number): void
+    @ani.unsafe.Direct
+    native static _FrameNode_getFirstChildIndexWithoutExpand(ptr: KPointer): number
+    @ani.unsafe.Direct
+    native static _FrameNode_getLastChildIndexWithoutExpand(ptr: KPointer): number
+    @ani.unsafe.Quick
+    native static _FrameNode_getAttachedFrameNodeById(id: KStringPtr): KPointer
+    @ani.unsafe.Direct
+    native static _FrameNode_getFrameNodeById(id: number): KPointer
+    @ani.unsafe.Direct
+    native static _FrameNode_getFrameNodeByUniqueId(id: number): KPointer
     @ani.unsafe.Direct
     native static _LengthMetrics_ctor(): KPointer
     @ani.unsafe.Direct

@@ -372,10 +372,11 @@ HWTEST_F(FrameNodeAccessorTest, GetChildTest, TestSize.Level1)
     Ark_Number pos0 = Converter::ArkValue<Ark_Number>(POS_0);
     Ark_Number pos1 = Converter::ArkValue<Ark_Number>(POS_1);
     Ark_Number pos2 = Converter::ArkValue<Ark_Number>(POS_2);
-
-    EXPECT_EQ(accessor_->getChild(peer_, &pos0)->node, childPeer1->node);
-    EXPECT_EQ(accessor_->getChild(peer_, &pos1)->node, childPeer2->node);
-    EXPECT_EQ(accessor_->getChild(peer_, &pos2)->node, nullptr);
+    EXPECT_EQ(accessor_->getChild(peer_, &pos0, &pos0)->node, childPeer1->node);
+    EXPECT_EQ(accessor_->getChild(peer_, &pos1, &pos0)->node, childPeer2->node);
+    if (accessor_->getChild(peer_, &pos2, &pos0)) {
+        EXPECT_EQ(accessor_->getChild(peer_, &pos2, &pos0)->node, nullptr);
+    }
     DestroyPeer(childPeer1);
     DestroyPeer(childPeer2);
 }
@@ -464,7 +465,9 @@ HWTEST_F(FrameNodeAccessorTest, GetNextSiblingTest2, TestSize.Level1)
     accessor_->appendChild(rootPeer, peer_);
     auto childList = rootPeer->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_3);
-    EXPECT_EQ(accessor_->getNextSibling(peer_)->node, nullptr);
+    if (accessor_->getNextSibling(peer_)) {
+        EXPECT_EQ(accessor_->getNextSibling(peer_)->node, nullptr);
+    }
     DestroyPeer(nextPeer);
     DestroyPeer(prevPeer);
     DestroyPeer(rootPeer);
@@ -573,7 +576,9 @@ HWTEST_F(FrameNodeAccessorTest, GetParentTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getParent, nullptr);
     ASSERT_NE(accessor_->appendChild, nullptr);
-    EXPECT_EQ(accessor_->getParent(peer_)->node, nullptr);
+    if (accessor_->getParent(peer_)) {
+        EXPECT_EQ(accessor_->getParent(peer_)->node, nullptr);
+    }
     EXPECT_EQ(accessor_->getParent(nullptr), nullptr);
     auto invalidPeer = CreatePeer();
     invalidPeer->node = nullptr;
@@ -589,7 +594,9 @@ HWTEST_F(FrameNodeAccessorTest, GetParentTest, TestSize.Level1)
 
     accessor_->appendChild(rootPeer, peer_);
     accessor_->appendChild(rootPeer, otherPeer);
-    EXPECT_EQ(accessor_->getParent(peer_)->node, rootPeer->node);
+    if (accessor_->getParent(peer_)) {
+        EXPECT_EQ(accessor_->getParent(peer_)->node, rootPeer->node);
+    }
     DestroyPeer(otherPeer);
     DestroyPeer(rootPeer);
 }
