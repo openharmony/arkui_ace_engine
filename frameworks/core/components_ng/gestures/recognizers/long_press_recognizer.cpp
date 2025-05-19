@@ -541,7 +541,8 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
     CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
     auto gestureRecognizerJudgeFunc = targetComponent->GetOnGestureRecognizerJudgeBegin();
     auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
-    if (!callback && !gestureRecognizerJudgeFunc) {
+    auto callbackNative = targetComponent->GetOnGestureJudgeNativeBeginCallback();
+    if (!callback && !callbackNative && !gestureRecognizerJudgeFunc) {
         return GestureJudgeResult::CONTINUE;
     }
     auto info = std::make_shared<LongPressGestureEvent>();
@@ -569,10 +570,19 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
         info->SetRollAngle(trackPoint.rollAngle.value());
     }
     info->SetSourceTool(trackPoint.sourceTool);
-    if (gestureRecognizerJudgeFunc) {
-        return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
+    if (gestureRecognizerJudgeFunc &&
+        gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_) == GestureJudgeResult::REJECT) {
+        return GestureJudgeResult::REJECT;
     }
-    return callback(gestureInfo_, info);
+    if (!gestureRecognizerJudgeFunc && callback && callback(gestureInfo_, info) == GestureJudgeResult::REJECT) {
+        // If outer callback exits, prioritize checking outer callback. If outer reject, return reject.
+        return GestureJudgeResult::REJECT;
+    }
+    if (callbackNative && callbackNative(gestureInfo_, info) == GestureJudgeResult::REJECT) {
+        // If outer callback doesn't exit or accept, check inner callback. If inner reject, return reject.
+        return GestureJudgeResult::REJECT;
+    }
+    return GestureJudgeResult::CONTINUE;
 }
 
 RefPtr<DragEventActuator> LongPressRecognizer::GetDragEventActuator()
