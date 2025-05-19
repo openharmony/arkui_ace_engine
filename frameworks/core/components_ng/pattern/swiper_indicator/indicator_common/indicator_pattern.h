@@ -244,6 +244,8 @@ public:
     {
         return swiperParameters_;
     }
+    std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters();
+    void OnColorModeChange(uint32_t colorMode) override;
 
     int32_t currentIndexInSingleMode_ = 0;
     int32_t hasSetInitialIndex_ = false;
@@ -259,7 +261,6 @@ protected:
 
 private:
     std::shared_ptr<SwiperParameters> GetSwiperParameters();
-    std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters();
     void SaveDotIndicatorProperty();
     void SaveDigitIndicatorProperty();
     void UpdatePaintProperty();

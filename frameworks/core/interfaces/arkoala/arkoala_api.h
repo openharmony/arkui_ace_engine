@@ -3187,7 +3187,7 @@ struct ArkUIIndicatorComponentModifier {
     void (*resetCount)(ArkUINodeHandle node);
     void (*setOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnChange)(ArkUINodeHandle node);
-    void (*setStyle)(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr);
+    void (*setStyle)(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr, const void* resObjs);
     void (*resetStyle)(ArkUINodeHandle node);
     void (*setLoop)(ArkUINodeHandle node, ArkUI_Bool loop);
     void (*resetLoop)(ArkUINodeHandle node);
