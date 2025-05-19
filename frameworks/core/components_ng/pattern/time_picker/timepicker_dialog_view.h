@@ -109,11 +109,6 @@ private:
         const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
     static void UpdateCancelButtonTextLayoutProperty(
         const RefPtr<TextLayoutProperty>& textCancelLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
-    static void ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
-        std::function<void(const PickerTextStyle&)> updateTextStyleFunc);
-    static void AddTextPropertiesResourceObj(const PickerTextProperties& properties,
-        const RefPtr<TimePickerRowPattern>& pickerPattern);
-
     static thread_local bool switchFlag_;
     static thread_local Dimension selectedTextStyleFont_;
     static thread_local Dimension normalTextStyleFont_;

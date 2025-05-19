@@ -152,10 +152,6 @@ private:
     static void SetDefaultTextStyle(const NG::PickerTextStyle& value);
     static void SetSelectedBackgroundStyle(const RefPtr<PickerTheme>& pickerTheme,
         const PickerBackgroundStyle& pickerBgStyle);
-    static void ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
-        std::function<void(const PickerTextStyle&)> updateTextStyleFunc);
-    static void AddTextPropertiesResourceObj(const PickerTextProperties& properties,
-        const RefPtr<TextPickerPattern>& pickerPattern);
 
     static WeakPtr<FrameNode> dialogNode_;
     static uint32_t dialogNodePage_;

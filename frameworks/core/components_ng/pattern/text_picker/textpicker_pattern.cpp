@@ -2016,8 +2016,6 @@ void TextPickerPattern::UpdateDefaultTextStyle(const PickerTextStyle& textStyle)
     auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
 
-    
-
     UpdateTextStyleCommon(
         textStyle,
         defaultTextStyle,

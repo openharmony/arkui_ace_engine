@@ -180,11 +180,6 @@ private:
         const std::map<std::string, NG::DialogEvent>& dialogEvent);
     static void ToggleTitleDisplay(
         RefPtr<DatePickerPattern>& datePickerPattern, RefPtr<DatePickerPattern>& monthDaysPickerPattern);
-    static void ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
-        std::function<void(const PickerTextStyle&)> updateTextStyleFunc);
-    static void AddTextPropertiesResourceObj(const PickerTextProperties& properties,
-        const RefPtr<DatePickerPattern>& pickerPattern);
-
     static bool switchTimePickerFlag_;
     static bool switchDatePickerFlag_;
     static bool isShowTime_;
