@@ -912,10 +912,14 @@ void UIObserverListener::AddTapLocationInfo(napi_value objTapGestureEventInfo, c
 {
     napi_handle_scope scope = nullptr;
     auto status = napi_open_handle_scope(env_, &scope);
-    if (status != napi_ok || gestureEventInfo.GetFingerList().size() == 0) {
+    if (status != napi_ok) {
         return;
     }
 
+    if (gestureEventInfo.GetFingerList().size() == 0) {
+        napi_close_handle_scope(env_, scope);
+        return;
+    }
     double scale = Dimension(1.0, DimensionUnit::VP).ConvertToPx();
     if (NearZero(scale)) {
         scale = 1.0;
