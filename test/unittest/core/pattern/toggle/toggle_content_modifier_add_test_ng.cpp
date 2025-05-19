@@ -41,6 +41,11 @@ constexpr bool IS_ON = true;
 constexpr int BIG_INT = 100000000;
 constexpr int NEGATIVE_BIG_INT = -100000000;
 constexpr int CHILD_NODE_ID = 100;
+constexpr float ZERO_FLOAT = 0.0f;
+constexpr float ONE_FLOAT = 1.0f;
+constexpr float TWO_FLOAT = 2.0f;
+constexpr double ONE_DOUBLE = 1.0;
+constexpr double TWO_DOUBLE = 2.0;
 constexpr Color SELECTED_COLOR = Color(0XFFFF0000);
 constexpr Color SWITCH_POINT_COLOR = Color(0XFFFFFF00);
 const std::vector<NG::ToggleType> TOGGLE_TYPE = { ToggleType::CHECKBOX, ToggleType::BUTTON, ToggleType::SWITCH };
@@ -1258,5 +1263,20 @@ HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg034, Test
      */
     auto paintProperty = switchFrameNode->GetPaintProperty<SwitchPaintProperty>();
     EXPECT_EQ(paintProperty, nullptr);
+}
+
+/**
+ * @tc.name: ToggleContentModifierAddTestNg035
+ * @tc.desc: Test CalcActualWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg035, TestSize.Level1)
+{
+    SizeF size;
+    OffsetF offset;
+    Color boardColor;
+    Color pointColor;
+    SwitchModifier switchModifier(size, offset, ZERO_FLOAT, IS_ON, boardColor, pointColor, ZERO_FLOAT);
+    EXPECT_EQ(switchModifier.CalcActualWidth(ONE_FLOAT, TWO_FLOAT, ONE_DOUBLE, TWO_DOUBLE), 3);
 }
 } // namespace OHOS::Ace::NG
