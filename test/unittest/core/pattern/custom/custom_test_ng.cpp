@@ -29,7 +29,6 @@
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
-#include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;

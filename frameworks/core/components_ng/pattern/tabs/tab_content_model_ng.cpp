@@ -15,10 +15,12 @@
 
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include <optional>
+#include <string>
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -532,6 +534,156 @@ void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabConten
     CHECK_NULL_VOID(tabsNode);
     tabsNode->RemoveBuilderByContentId(tabContentNode->GetId());
     tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+template<typename T>
+void ParseType(const RefPtr<ResourceObject>& resObj, T& result)
+{
+    if constexpr (std::is_same_v<T, Color>) {
+        ResourceParseUtils::ParseResColor(resObj, result);
+    } else if constexpr (std::is_same_v<T, CalcDimension>) {
+        ResourceParseUtils::ParseResDimensionNG(resObj, result, DimensionUnit::PX);
+    } else if constexpr (std::is_same_v<T, Dimension>) {
+        ResourceParseUtils::ParseResDimensionFpNG(resObj, result);
+    } else if constexpr (std::is_same_v<T, std::vector<std::string>>) {
+        ResourceParseUtils::ParseResFontFamilies(resObj, result);
+    } else if constexpr (std::is_same_v<T, std::string>) {
+        ResourceParseUtils::ParseResString(resObj, result);
+    }
+}
+
+#define REGISTER_RESOURCE_UPDATE_ATTR_FUNC(caseType, attrType, name, resObj, resultType)      \
+    case caseType:                                                                            \
+        do {                                                                                  \
+            auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();           \
+            CHECK_NULL_VOID(frameNode);                                                       \
+            auto pattern = frameNode->GetPattern<TabContentPattern>();                        \
+            CHECK_NULL_VOID(pattern);                                                         \
+            auto&& updateFunc = [pattern](const RefPtr<ResourceObject>& resObj) {             \
+                resultType result;                                                            \
+                ParseType(resObj, result);                                                    \
+                auto attrs = pattern->Get##attrType();                                        \
+                attrs.name = result;                                                          \
+                pattern->Set##attrType(attrs);                                                \
+            };                                                                                \
+            pattern->AddResObj("tabContent." #attrType #name, resObj, std::move(updateFunc)); \
+        } while (false);                                                                      \
+        break
+
+#define UPDATE_VALUE(type, name, resObj, resultType)                                  \
+    case type:                                                                        \
+        do {                                                                          \
+            auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();   \
+            CHECK_NULL_VOID(frameNode);                                               \
+            auto pattern = frameNode->GetPattern<IndexerPattern>();                   \
+            CHECK_NULL_VOID(pattern);                                                 \
+            auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {   \
+                resultType result;                                                    \
+                ParseType(resObj, result);                                            \
+                IndexerModelNG::Set##name(frameNode, result);                         \
+            };                                                                        \
+            pattern->AddResObj("indexer." #name, resObj, std::move(updateFunc));      \
+        } while (false);                                                              \
+        break
+
+#define REGISTER_RESOURCE_UPDATE_FONT_FUNC(caseType, fontType, name, resObj, resultType)                \
+    case caseType:                                                                                      \
+        do {                                                                                            \
+            auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();                     \
+            CHECK_NULL_VOID(frameNode);                                                                 \
+            auto pattern = frameNode->GetPattern<IndexerPattern>();                                     \
+            CHECK_NULL_VOID(pattern);                                                                   \
+            auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {                     \
+                resultType result;                                                                      \
+                ParseType(resObj, result);                                                              \
+                TextStyle textStyle;                                                                    \
+                ACE_GET_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, fontType, textStyle, frameNode);    \
+                textStyle.SetFont##name(result);                                                        \
+                ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, fontType, textStyle, frameNode); \
+            };                                                                                          \
+            pattern->AddResObj("indexer." #fontType #name, resObj, std::move(updateFunc));              \
+        } while (false);                                                                                \
+        break
+
+void TabContentModelNG::CreateWithResourceObj(TabContentJsType jsType, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(resObj);
+    switch (jsType) {
+        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(TabContentJsType::INDICATOR_COLOR, IndicatorStyle, color, resObj, Color);
+        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(TabContentJsType::FONT_SIZE, LabelStyle, fontSize, resObj, CalcDimension);
+        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
+            TabContentJsType::FONT_FAMILY, LabelStyle, fontFamily, resObj, std::vector<std::string>);
+        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
+            TabContentJsType::MIN_FONT_SIZE, LabelStyle, minFontSize, resObj, CalcDimension);
+        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
+            TabContentJsType::MAX_FONT_SIZE, LabelStyle, maxFontSize, resObj, CalcDimension);
+        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
+            TabContentJsType::LABEL_SELECT_COLOR, LabelStyle, selectedColor, resObj, Color);
+        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
+            TabContentJsType::LABEL_UNSELECT_COLOR, LabelStyle, unselectedColor, resObj, Color);
+        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
+            TabContentJsType::ICON_SELECT_COLOR, IconStyle, selectedColor, resObj, Color);
+        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
+            TabContentJsType::ICON_UNSELECT_COLOR, IconStyle, unselectedColor, resObj, Color);
+        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
+            TabContentJsType::BORDER_RADIUS, BoardStyle, borderRadius, resObj, CalcDimension);
+        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
+            TabContentJsType::INDICATOR_HEIGHT, IndicatorStyle, height, resObj, CalcDimension);
+        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
+            TabContentJsType::INDICATOR_WIDTH, IndicatorStyle, width, resObj, CalcDimension);
+        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
+            TabContentJsType::INDICATOR_RADIUS, IndicatorStyle, borderRadius, resObj, CalcDimension);
+        REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
+            TabContentJsType::INDICATOR_MARGIN_TOP, IndicatorStyle, marginTop, resObj, CalcDimension);
+        case TabContentJsType::PADDING: {
+            auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            CHECK_NULL_VOID(frameNode);
+            auto pattern = frameNode->GetPattern<TabContentPattern>();
+            CHECK_NULL_VOID(pattern);
+            auto&& updateFunc = [pattern, frameNode](const RefPtr<ResourceObject>& resObj) {
+                CalcDimension result;
+                ResourceParseUtils::ParseResDimensionNG(resObj, result, DimensionUnit::PX);
+                NG::PaddingProperty padding;
+                padding.left = NG::CalcLength(result);
+                padding.right = NG::CalcLength(result);
+                padding.top = NG::CalcLength(result);
+                padding.bottom = NG::CalcLength(result);
+                pattern->SetPadding(padding);
+            };
+            pattern->AddResObj("tabContent.tabBarPadding", resObj, std::move(updateFunc));
+            break;
+        }
+        case TabContentJsType::TEXT_CONTENT: {
+            auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            CHECK_NULL_VOID(frameNode);
+            auto pattern = frameNode->GetPattern<TabContentPattern>();
+            CHECK_NULL_VOID(pattern);
+            auto&& updateFunc = [pattern, frameNode](const RefPtr<ResourceObject>& resObj) {
+                std::string result;
+                ResourceParseUtils::ParseResString(resObj, result);
+                ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, Icon, result, frameNode);
+                pattern->UpdateTabBarParamText(result);
+            };
+            pattern->AddResObj("tabContent.tabBarParamText", resObj, std::move(updateFunc));
+            break;
+        }
+        case TabContentJsType::ICON: {
+            auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            CHECK_NULL_VOID(frameNode);
+            auto pattern = frameNode->GetPattern<TabContentPattern>();
+            CHECK_NULL_VOID(pattern);
+            auto&& updateFunc = [pattern, frameNode](const RefPtr<ResourceObject>& resObj) {
+                std::string result;
+                ResourceParseUtils::ParseResString(resObj, result);
+                ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, Text, result, frameNode);
+                pattern->UpdateTabBarParamIcon(result);
+            };
+            pattern->AddResObj("tabContent.tabBarParamIcon", resObj, std::move(updateFunc));
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 void TabContentModelNG::SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
