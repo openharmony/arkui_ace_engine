@@ -1101,4 +1101,52 @@ RefPtr<ResourceAdapter> ResourceAdapterImplV2::GetOverrideResourceAdapter(
     auto overrideResMgr = sysResourceManager_->GetOverrideResourceManager(overrideResConfig);
     return AceType::MakeRefPtr<ResourceAdapterImplV2>(overrideResMgr);
 }
+
+bool ResourceAdapterImplV2::ExistDarkResById(const std::string& resourceId)
+{
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, false);
+    auto resId = StringUtils::StringToUintCheck(resourceId, UINT32_MAX);
+    if (resId == UINT32_MAX) {
+        return false;
+    }
+    auto colorMode = GetResourceColorMode();
+    bool colorChanged = false;
+    if (colorMode == ColorMode::LIGHT) {
+        UpdateColorMode(ColorMode::DARK);
+        colorChanged = true;
+    }
+    auto appResCfg = Global::Resource::CreateResConfig();
+    auto state = manager->GetResConfigById(resId, *appResCfg);
+    if (colorChanged) {
+        UpdateColorMode(ColorMode::LIGHT);
+    }
+    return (state == Global::Resource::SUCCESS) &&
+        (appResCfg->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK);
+}
+
+bool ResourceAdapterImplV2::ExistDarkResByName(const std::string& resourceName, const std::string& resourceType)
+{
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, false);
+    auto resType = StringUtils::StringToUintCheck(resourceType, UINT32_MAX);
+    if (resType < OHOS::Global::Resource::ResType::VALUES ||
+        resType > OHOS::Global::Resource::ResType::MAX_RES_TYPE) {
+        return false;
+    }
+    auto type = static_cast<OHOS::Global::Resource::ResType>(resType);
+    auto colorMode = GetResourceColorMode();
+    bool colorChanged = false;
+    if (colorMode == ColorMode::LIGHT) {
+        UpdateColorMode(ColorMode::DARK);
+        colorChanged = true;
+    }
+    auto appResCfg = Global::Resource::CreateResConfig();
+    auto state = manager->GetResConfigByName(resourceName, type, *appResCfg);
+    if (colorChanged) {
+        UpdateColorMode(ColorMode::LIGHT);
+    }
+    return (state == Global::Resource::SUCCESS) &&
+        (appResCfg->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK);
+}
 } // namespace OHOS::Ace
