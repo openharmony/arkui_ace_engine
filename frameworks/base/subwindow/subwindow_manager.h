@@ -262,6 +262,7 @@ private:
     RefPtr<Subwindow> currentDialogSubwindow_;
     Rect uiExtensionWindowRect_;
     bool isSuperFoldDisplayDevice_ = false;
+    bool expandDisplay_ = false;
 
     std::mutex maskSubwindowMutex_;
     std::unordered_map<int32_t, RefPtr<Subwindow>> maskSubWindowMap_;
