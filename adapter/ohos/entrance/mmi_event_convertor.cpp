@@ -603,6 +603,7 @@ void ConvertAxisEventToTouchEvent(const std::shared_ptr<MMI::PointerEvent>& poin
         .SetDeviceId(pointerEvent->GetDeviceId())
         .SetTargetDisplayId(pointerEvent->GetTargetDisplayId())
         .SetTouchEventId(pointerEvent->GetId())
+        .SetOriginInputEventType(InputEventType::AXIS)
         .SetPointerEvent(pointerEvent);
 
     touchEvt.pointers.emplace_back(std::move(touchPoint));
