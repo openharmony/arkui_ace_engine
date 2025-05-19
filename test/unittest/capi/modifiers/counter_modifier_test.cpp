@@ -203,20 +203,23 @@ HWTEST_F(CounterModifierTest, setOnDecTest, TestSize.Level1)
  */
 HWTEST_F(CounterModifierTest, setBackgroundColorTest, TestSize.Level1)
 {
-    using OneTestStep = std::pair<Ark_ResourceColor, std::string>;
+    using OneTestStep = std::pair<Opt_ResourceColor, std::string>;
     static const std::string PROP_NAME("backgroundColor");
     static auto resName = NamedResourceId("aa.bb.cc", Converter::ResourceType::COLOR);
     static auto resId = IntResourceId(1234, Converter::ResourceType::COLOR);
     static const std::string EXPECTED_RESOURCE_COLOR =
         Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
     static const std::vector<OneTestStep> testPlan = {
-        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-        { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
-        { ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), "#00000000" },
-        { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
-        { ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
-        { CreateResourceUnion<Ark_ResourceColor>(resName), EXPECTED_RESOURCE_COLOR },
-        { CreateResourceUnion<Ark_ResourceColor>(resId), EXPECTED_RESOURCE_COLOR },
+        { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)),
+             "#FFFFFFFF" },
+        { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456)), "#FF123456" },
+        { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f)), "#00000000" },
+        { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")), "#11223344" },
+        { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_String>("65535")), "#FF00FFFF" },
+        { Converter::ArkValue<Opt_ResourceColor>(CreateResourceUnion<Ark_ResourceColor>(resName)),
+             EXPECTED_RESOURCE_COLOR },
+        { Converter::ArkValue<Opt_ResourceColor>(CreateResourceUnion<Ark_ResourceColor>(resId)),
+             EXPECTED_RESOURCE_COLOR },
     };
 
     ASSERT_NE(commonModifier_->setBackgroundColor0, nullptr);
@@ -225,8 +228,7 @@ HWTEST_F(CounterModifierTest, setBackgroundColorTest, TestSize.Level1)
     EXPECT_EQ(checkInitial, Color::TRANSPARENT.ToString());
 
     for (const auto &[arkResColor, expected]: testPlan) {
-        auto optResColor = Converter::ArkValue<Opt_ResourceColor>(arkResColor);
-        commonModifier_->setBackgroundColor0(node_, &optResColor);
+        commonModifier_->setBackgroundColor0(node_, &arkResColor);
         auto checkColor = GetAttrValue<std::string>(node_, PROP_NAME);
         EXPECT_EQ(checkColor, expected);
     }
@@ -264,9 +266,8 @@ HWTEST_F(CounterModifierTest, setWidth0TestValidValues, TestSize.Level1)
     };
 
     for (const auto &[arkLength, expected]: testPlan) {
-        Ark_Length inputValue = Converter::ArkValue<Ark_Length>(arkLength);
-        auto optValue = Converter::ArkValue<Opt_Length>(inputValue);
-        commonModifier_->setWidth0(node_, &optValue);
+        auto inputValue = Converter::ArkValue<Opt_Length>(arkLength);
+        commonModifier_->setWidth0(node_, &inputValue);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
         EXPECT_EQ(strResult, expected);
     }
@@ -279,19 +280,18 @@ HWTEST_F(CounterModifierTest, setWidth0TestValidValues, TestSize.Level1)
  */
 HWTEST_F(CounterModifierTest, DISABLED_setWidth0TestInvalidValues, TestSize.Level1)
 {
-    static const std::vector<Ark_Length> testPlan = {
-        Converter::ArkValue<Ark_Length>(-2.45f),
-        Converter::ArkValue<Ark_Length>(-5.0_px),
-        Converter::ArkValue<Ark_Length>(-22.35_px),
-        Converter::ArkValue<Ark_Length>(-7.0_vp),
-        Converter::ArkValue<Ark_Length>(-1.65_vp),
-        Converter::ArkValue<Ark_Length>(-65.0_fp),
-        Converter::ArkValue<Ark_Length>(-4.3_fp),
+    static const std::vector<Opt_Length> testPlan = {
+        Converter::ArkValue<Opt_Length>(-2.45f),
+        Converter::ArkValue<Opt_Length>(-5.0_px),
+        Converter::ArkValue<Opt_Length>(-22.35_px),
+        Converter::ArkValue<Opt_Length>(-7.0_vp),
+        Converter::ArkValue<Opt_Length>(-1.65_vp),
+        Converter::ArkValue<Opt_Length>(-65.0_fp),
+        Converter::ArkValue<Opt_Length>(-4.3_fp),
     };
 
     for (const auto &arkLength : testPlan) {
-        auto inputValue = Converter::ArkValue<Opt_Length>(arkLength);
-        commonModifier_->setWidth0(node_, &inputValue);
+        commonModifier_->setWidth0(node_, &arkLength);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
         EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
     }
