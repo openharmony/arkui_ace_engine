@@ -685,7 +685,8 @@ void ConvertForegroundPaint(const TextStyle& textStyle, double width, double hei
     txtStyle.foregroundBrush = brush;
 }
 
-Rosen::SymbolColor ConvertToNativeSymbolColor(const std::vector<SymbolGradient>& intermediate) {
+Rosen::SymbolColor ConvertToNativeSymbolColor(const std::vector<SymbolGradient>& intermediate)
+{
     Rosen::SymbolColor symbolColor;
     symbolColor.colorType = Rosen::SymbolColorType::GRADIENT_TYPE;
     for (const auto& grad : intermediate) {
@@ -817,34 +818,35 @@ std::optional<Rosen::SymbolShadow> ConvertToNativeSymbolShadow(const SymbolShado
 
     rosenShadow.offset = Rosen::Drawing::Point(
         shadow.offset.first,
-        shadow.offset.second
-    );
+        shadow.offset.second);
 
     rosenShadow.blurRadius = shadow.radius;
 
     return rosenShadow;
 }
 
-std::shared_ptr<Rosen::SymbolGradient> CreateNativeGradient(const SymbolGradient& grad) {
+std::shared_ptr<Rosen::SymbolGradient> CreateNativeGradient(const SymbolGradient& grad)
+{
     switch (grad.type) {
         case SymbolGradientType::COLOR_SHADER: {
             auto gradient = std::make_shared<Rosen::SymbolGradient>();
             gradient->SetColors(ConvertColors(grad.symbolColor));
             return gradient;
         }
-        case SymbolGradientType::RADIAL_GRADIENT: {
-            auto gradient = std::make_shared<Rosen::SymbolLineGradient>(grad.angle);
+        case SymbolGradientType::LINEAR_GRADIENT: {
+            auto gradient = std::make_shared<Rosen::SymbolLineGradient>(grad.angle.value());
             gradient->SetColors(ConvertColors(grad.symbolColor));
-            gradient->SetPositions(grad.positions);
+            gradient->SetPositions(grad.symbolOpacities);
             gradient->SetTileMode(grad.repeating ?
                 Rosen::Drawing::TileMode::REPEAT : Rosen::Drawing::TileMode::CLAMP);
             return gradient;
         }
-        case SymbolGradientType::LINEAR_GRADIENT: {
+        case SymbolGradientType::RADIAL_GRADIENT: {
             Rosen::Drawing::Point centerPt(grad.center.x, grad.center.y);
             auto gradient = std::make_shared<Rosen::SymbolRadialGradient>(centerPt, grad.radius);
+            gradient->SetRadius(grad.radius);
             gradient->SetColors(ConvertColors(grad.symbolColor));
-            gradient->SetPositions(grad.positions);
+            gradient->SetPositions(grad.symbolOpacities);
             gradient->SetTileMode(grad.repeating ?
                 Rosen::Drawing::TileMode::REPEAT : Rosen::Drawing::TileMode::CLAMP);
             return gradient;

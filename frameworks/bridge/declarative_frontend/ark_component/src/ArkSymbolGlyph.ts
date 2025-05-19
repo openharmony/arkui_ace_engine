@@ -98,8 +98,8 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
     }
   }
 
-  class SymbolShadowModifier extends ModifierWithKey<object> {
-    constructor(value: object) {
+  class SymbolShadowModifier extends ModifierWithKey<Optional<ShadowOptions>> {
+    constructor(value: Optional<ShadowOptions>) {
       super(value);
     }
     static identity: Symbol = Symbol('symbolGlyphSymbolShadow');
@@ -112,8 +112,8 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
     }
   }
 
-  class ShaderStyleModifier extends ModifierWithKey<object> {
-    constructor(value: object) {
+  class ShaderStyleModifier extends ModifierWithKey<ShaderStyle> {
+    constructor(value: ShaderStyle) {
       super(value);
     }
     static identity: Symbol = Symbol('symbolGlyphShaderStyle');

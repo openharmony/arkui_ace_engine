@@ -38544,7 +38544,7 @@ class SymbolShadowModifier extends ModifierWithKey {
       if (reset) {
         getUINativeModule().symbolGlyph.resetSymbolShadow(node);
       } else {
-        getUINativeModule().symbolGlyph.setSymbolShadow(node, this.value.SymbolShadow, this.value.action);
+        getUINativeModule().symbolGlyph.setSymbolShadow(node, this.value);
       }
     }
   }
@@ -38558,7 +38558,7 @@ class SymbolShadowModifier extends ModifierWithKey {
       if (reset) {
         getUINativeModule().symbolGlyph.resetShaderStyle(node);
       } else {
-        getUINativeModule().symbolGlyph.setShaderStyle(node, this.value.ShaderStyle, this.value.action);
+        getUINativeModule().symbolGlyph.setShaderStyle(node, this.value);
       }
     }
   }

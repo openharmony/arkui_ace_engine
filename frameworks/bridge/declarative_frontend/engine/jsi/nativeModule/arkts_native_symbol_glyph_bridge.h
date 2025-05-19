@@ -43,7 +43,6 @@ public:
     static ArkUINativeModuleValue ResetSymbolShadow(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetShaderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetShaderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
-
 };
 } // namespace OHOS::Ace::NG
 

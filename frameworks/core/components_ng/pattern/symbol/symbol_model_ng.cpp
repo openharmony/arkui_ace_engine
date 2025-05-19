@@ -232,17 +232,21 @@ void SymbolModelNG::UpdateSymbolEffect(FrameNode* frameNode, const std::uint32_t
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void SymbolModelNG::SetSymbolShadow(const SymbolShadow symbolShadow)
+void SymbolModelNG::SetSymbolShadow(const SymbolShadow& symbolShadow)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolShadow, symbolShadow);
 }
-void SymbolModelNG::SetSymbolShadow(FrameNode* frameNode, const SymbolShadow symbolShadow)
+
+void SymbolModelNG::SetSymbolShadow(FrameNode* frameNode, const SymbolShadow& symbolShadow)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolShadow, symbolShadow, frameNode);
 }
-void SymbolModelNG::SetShaderStyle(const std::vector<SymbolGradient>& shaderStyle){
+
+void SymbolModelNG::SetShaderStyle(const std::vector<SymbolGradient>& shaderStyle)
+{
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, ShaderStyle, shaderStyle);
 }
+
 void SymbolModelNG::SetShaderStyle(FrameNode* frameNode, const std::vector<SymbolGradient>& shaderStyle)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ShaderStyle, shaderStyle, frameNode);

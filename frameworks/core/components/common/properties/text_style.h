@@ -777,6 +777,8 @@ public:
 
     // for Symbol
     ACE_DEFINE_SYMBOL_STYLE(RenderColors, std::vector<Color>, SymbolStyleAttribute::COLOR_LIST);
+    ACE_DEFINE_SYMBOL_STYLE(SymbolShadowProp, SymbolShadow, SymbolStyleAttribute::SYMBOL_SHADOW);
+    ACE_DEFINE_SYMBOL_STYLE(GradientColorProp, std::vector<SymbolGradient>, SymbolStyleAttribute::GRADIENT_COLOR);
     ACE_DEFINE_SYMBOL_STYLE_WITH_DEFAULT_VALUE(RenderStrategy, int32_t, 0, SymbolStyleAttribute::RENDER_MODE);
     ACE_DEFINE_SYMBOL_STYLE_WITH_DEFAULT_VALUE(EffectStrategy, int32_t, 0, SymbolStyleAttribute::EFFECT_STRATEGY);
     ACE_DEFINE_SYMBOL_STYLE_WITH_DEFAULT_VALUE(
@@ -1109,24 +1111,31 @@ public:
         symbolUid_ = symbolUid;
     }
 
-    void SetSymbolShadow(const SymbolShadow symbolShadow)
+    void SetSymbolShadow(const SymbolShadow& symbolShadow)
     {
-        SymbolShadow_ = symbolShadow;
+        if (propSymbolShadowProp_ == symbolShadow) {
+            return;
+        }
+        propSymbolShadowProp_ = symbolShadow;
+        reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::SYMBOL_SHADOW));
     }
 
     SymbolShadow GetSymbolShadow() const
     {
-        return SymbolShadow_;
+        return propSymbolShadowProp_;
     }
 
     void SetShaderStyle(const std::vector<SymbolGradient>& shaderStyle)
     {
-        ShaderStyle_ = shaderStyle;
+        if (propGradientColorProp_ != shaderStyle) {
+            propGradientColorProp_ = shaderStyle;
+            reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::GRADIENT_COLOR));
+        }
     }
 
     std::vector<SymbolGradient> GetShaderStyle() const
     {
-        return ShaderStyle_;
+        return propGradientColorProp_;
     }
 
     void SetGradient(const std::optional<Gradient>& gradient)
@@ -1170,8 +1179,6 @@ private:
     bool adaptHeight_ = false; // whether adjust text size with height.
     // for Symbol
     std::optional<NG::SymbolEffectOptions> symbolEffectOptions_;
-    SymbolShadow SymbolShadow_;
-    std::vector<SymbolGradient> ShaderStyle_;
 };
 
 namespace StringUtils {
