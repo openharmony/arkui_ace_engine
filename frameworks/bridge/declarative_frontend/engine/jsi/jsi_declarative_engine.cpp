@@ -547,6 +547,7 @@ void JsiDeclarativeEngineInstance::InitAceModule()
 {
     if (isUnique_ == false) {
         PreloadStateManagement(runtime_);
+        LOGI("preload js enums in InitAceModule");
         PreloadJsEnums(runtime_);
         PreloadArkComponent(runtime_);
         PreloadArkTheme(runtime_);
@@ -663,6 +664,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     PreloadRequireNative(arkRuntime, global);
 
     // preload js enums
+    LOGI("preload js enums in PreloadAceModule");
     bool jsEnumStyleResult = PreloadJsEnums(arkRuntime);
     if (!jsEnumStyleResult) {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
