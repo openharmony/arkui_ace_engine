@@ -42,6 +42,20 @@ public:
     }
 };
 
+using OneColorStep = std::tuple<Ark_ResourceColor, std::string>;
+const std::vector<OneColorStep> COLOR_TEST_PLAN = {
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
+    { { .selector = 1, .value1 = Converter::ArkValue<Ark_Number>(0x123456) }, "#FF123456" },
+    { { .selector = 1, .value1 = Converter::ArkValue<Ark_Number>(0.5f) }, "#00000000" },
+    { { .selector = 2, .value2 = Converter::ArkValue<Ark_String>("#11223344") }, "#11223344" },
+    { { .selector = 2, .value2 = Converter::ArkValue<Ark_String>("65535") }, "#FF00FFFF" },
+    { CreateResourceUnion<Ark_ResourceColor>(NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR}),
+        "#FFFF0000" },
+    { CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR}), "#FFFF0000" },
+    { CreateResourceUnion<Ark_ResourceColor>(NamedResourceId{"incorrect_color", Converter::ResourceType::STRING}),
+        "#FFFF0000" },
+};
+
 /**
  * @tc.name: DividerModifierTest001
  * @tc.desc: Check the functionality of DividerModifier.setColor
@@ -52,61 +66,19 @@ HWTEST_F(DividerModifierTest, DividerModifierTest001, TestSize.Level1)
     static const std::string PROP_NAME("color");
     ASSERT_NE(modifier_->setColor, nullptr);
 
-    auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal1, "#FF000000");
-    Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
-    auto optValue = Converter::ArkValue<Opt_ResourceColor>(color);
-    modifier_->setColor(node_, &optValue);
-    auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal2, "#FFFFFFFF");
+    auto checkVal = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal, "#FF000000");
 
-    Ark_ResourceColor numberInt = { .selector = 1, .value1 = Converter::ArkValue<Ark_Number>(0x123456) };
-    optValue = Converter::ArkValue<Opt_ResourceColor>(numberInt);
-    modifier_->setColor(node_, &optValue);
-    auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal3, "#FF123456");
+    for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
+        auto color = Converter::ArkValue<Opt_ResourceColor>(value);
+        modifier_->setColor(node_, &color);
+        auto fullJson = GetJsonValue(node_);
+        checkVal = GetStringAttribute(node_, PROP_NAME);
+        EXPECT_EQ(checkVal, expectVal);
+    }
 
-    Ark_ResourceColor numberFlt = { .selector = 1, .value1 = Converter::ArkValue<Ark_Number>(0.5f) };
-    optValue = Converter::ArkValue<Opt_ResourceColor>(numberFlt);
-    modifier_->setColor(node_, &optValue);
-    auto checkVal4 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal4, "#00000000");
-
-    Ark_ResourceColor strColor = { .selector = 2, .value2 = Converter::ArkValue<Ark_String>("#11223344") };
-    optValue = Converter::ArkValue<Opt_ResourceColor>(strColor);
-    modifier_->setColor(node_, &optValue);
-    auto checkVal5 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal5, "#11223344");
-
-    Ark_ResourceColor strNumber = { .selector = 2, .value2 = Converter::ArkValue<Ark_String>("65535") };
-    optValue = Converter::ArkValue<Opt_ResourceColor>(strNumber);
-    modifier_->setColor(node_, &optValue);
-    auto checkVal6 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal6, "#FF00FFFF");
-
-    auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
-        NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR});
-    optValue = Converter::ArkValue<Opt_ResourceColor>(resNameColor);
-    modifier_->setColor(node_, &optValue);
-    auto checkVal7 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
-
-    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
-    optValue = Converter::ArkValue<Opt_ResourceColor>(resIdColor);
-    modifier_->setColor(node_, &optValue);
-    auto checkVal8 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
-
-    resNameColor = CreateResourceUnion<Ark_ResourceColor>(
-        NamedResourceId{"incorrect_color", Converter::ResourceType::STRING});
-    optValue = Converter::ArkValue<Opt_ResourceColor>(resNameColor);
-    modifier_->setColor(node_, &optValue);
-    auto checkVal9 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal9, "#FFFF0000"); // Should be Color::RED, but converter from Resource works incorrect now.
-                                       // So modifier pass Color::BLACK to divider component int this case
-
-    strNumber = { .selector = 2, .value2 = Converter::ArkValue<Ark_String>("incorrect_color") };
-    optValue = Converter::ArkValue<Opt_ResourceColor>(strNumber);
+    Ark_ResourceColor strNumber = { .selector = 2, .value2 = Converter::ArkValue<Ark_String>("incorrect_color") };
+    auto optValue = Converter::ArkValue<Opt_ResourceColor>(strNumber);
     modifier_->setColor(node_, &optValue);
     auto checkVal10 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal10, "#FF000000");
@@ -235,6 +207,19 @@ HWTEST_F(DividerModifierTest, DividerModifierTest004, TestSize.Level1)
     EXPECT_EQ(checkVal6, DEFAULT_STROKE_WIDTH);
 }
 
+using OneWidthStep = std::tuple<Ark_Union_Number_String, std::string>;
+const std::vector<OneWidthStep> WIDTH_TEST_PLAN = {
+    { { .selector = 0, .value0 = Converter::ArkValue<Ark_Number>(-123) }, "-123.00vp" },
+    { { .selector = 0, .value0 = Converter::ArkValue<Ark_Number>(-1.23f) }, "-1.23vp" },
+    { { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("-4.5px") }, "-4.50px" },
+    { { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("-56vp") }, "-56.00vp" },
+    { { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("undefVal") }, "0.00fp" },
+    { { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("-10%") }, DEFAULT_STROKE_WIDTH},
+    { { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("") }, "0.00fp" },
+    { { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("qw111vp") }, "0.00vp" },
+    { { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("qw111") }, "0.00fp" },
+};
+
 /**
  * @tc.name: DividerModifierTest005
  * @tc.desc: Check the functionality of DividerModifier.setStrokeWidth for negative values
@@ -245,61 +230,15 @@ HWTEST_F(DividerModifierTest, DividerModifierTest005, TestSize.Level1)
     static const std::string PROP_NAME("strokeWidth");
     ASSERT_NE(modifier_->setStrokeWidth, nullptr);
 
-    auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal1, DEFAULT_STROKE_WIDTH);
+    auto checkVal = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal, DEFAULT_STROKE_WIDTH);
 
-    Ark_Union_Number_String intNegVal = { .selector = 0, .value0 = Converter::ArkValue<Ark_Number>(-123) };
-    auto optValue = Converter::ArkValue<Opt_Union_Number_String>(intNegVal);
-    modifier_->setStrokeWidth(node_, &optValue);
-    auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal2, "-123.00vp");
-
-    Ark_Union_Number_String floatNegVal = { .selector = 0, .value0 = Converter::ArkValue<Ark_Number>(-1.23f) };
-    optValue = Converter::ArkValue<Opt_Union_Number_String>(floatNegVal);
-    modifier_->setStrokeWidth(node_, &optValue);
-    auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal3, "-1.23vp");
-
-    Ark_Union_Number_String pxNegVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("-4.5px") };
-    optValue = Converter::ArkValue<Opt_Union_Number_String>(pxNegVal);
-    modifier_->setStrokeWidth(node_, &optValue);
-    auto checkVal4 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal4, "-4.50px");
-
-    Ark_Union_Number_String vpNegVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("-56vp") };
-    optValue = Converter::ArkValue<Opt_Union_Number_String>(vpNegVal);
-    modifier_->setStrokeWidth(node_, &optValue);
-    auto checkVal5 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal5, "-56.00vp");
-
-    Ark_Union_Number_String undefVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("undefVal") };
-    optValue = Converter::ArkValue<Opt_Union_Number_String>(undefVal);
-    modifier_->setStrokeWidth(node_, &optValue);
-    auto checkVal6 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal6, "0.00fp");
-
-    Ark_Union_Number_String percentNegVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("-10%") };
-    optValue = Converter::ArkValue<Opt_Union_Number_String>(percentNegVal);
-    modifier_->setStrokeWidth(node_, &optValue);
-    auto checkVal7 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal7, DEFAULT_STROKE_WIDTH);
-
-    Ark_Union_Number_String emptyVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("") };
-    optValue = Converter::ArkValue<Opt_Union_Number_String>(emptyVal);
-    modifier_->setStrokeWidth(node_, &optValue);
-    auto checkVal8 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal8, "0.00fp");
-
-    Ark_Union_Number_String invalidVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("qw111vp") };
-    optValue = Converter::ArkValue<Opt_Union_Number_String>(invalidVal);
-    modifier_->setStrokeWidth(node_, &optValue);
-    auto checkVal9 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal9, "0.00vp");
-
-    Ark_Union_Number_String invalidVal2 = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("qw111") };
-    optValue = Converter::ArkValue<Opt_Union_Number_String>(invalidVal2);
-    modifier_->setStrokeWidth(node_, &optValue);
-    auto checkVal10 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal10, "0.00fp");
+    for (const auto& [value, expectVal] : WIDTH_TEST_PLAN) {
+        auto width = Converter::ArkValue<Opt_Union_Number_String>(value);
+        modifier_->setStrokeWidth(node_, &width);
+        auto fullJson = GetJsonValue(node_);
+        checkVal = GetStringAttribute(node_, PROP_NAME);
+        EXPECT_EQ(checkVal, expectVal);
+    }
 }
 } // namespace OHOS::Ace::NG

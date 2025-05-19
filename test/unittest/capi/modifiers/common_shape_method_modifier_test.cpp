@@ -59,9 +59,9 @@ static const std::vector<OneTestColorStep> TEST_COLOR_PLAN = {
     { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")), "#11223344" },
     { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_String>("65535")), "#FF00FFFF" },
     { Converter::ArkValue<Opt_ResourceColor>(CreateResourceUnion<Ark_ResourceColor>(RES_NAME)),
-         EXPECTED_RESOURCE_COLOR },
+        EXPECTED_RESOURCE_COLOR },
     { Converter::ArkValue<Opt_ResourceColor>(CreateResourceUnion<Ark_ResourceColor>(RES_ID)),
-         EXPECTED_RESOURCE_COLOR },
+        EXPECTED_RESOURCE_COLOR },
 };
 } // namespace
 
@@ -138,7 +138,7 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeLineCapTestValidValues, TestSiz
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-   
+
     // Initial setup
     auto inputValueStrokeLineCap = Converter::ArkValue<Opt_LineCapStyle>(ARK_LINE_CAP_STYLE_BUTT);
 
