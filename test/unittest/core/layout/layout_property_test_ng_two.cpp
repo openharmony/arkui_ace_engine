@@ -25,6 +25,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 
 #undef private
 #undef protected
@@ -34,6 +35,15 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+LayoutConstraintF layoutConstraintF = {
+    .minSize = {1, 1},
+    .maxSize = {10, 10},
+    .percentReference = {5, 5},
+    .parentIdealSize = {2, 2},
+};
+constexpr Dimension WIDTH = 1.0_vp;
+constexpr Dimension HEIGHT = 2.0_vp;
+const CalcSize CALC_SIZE = {CalcLength(WIDTH), CalcLength(HEIGHT)};
 } // namespace
 
 class LayoutPropertyTestNgTwo : public testing::Test {
@@ -1150,5 +1160,61 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageOutset004, TestSize.L
     borderImage1->SetEdgeWidth(BorderImageDirection::START, widthDimension);
     layoutProperty->CheckLocalizedBorderImageOutset(textDirection);
     EXPECT_EQ(borderImage1->GetBorderImageEdge(BorderImageDirection::LEFT).GetBorderImageOutset(), outsetDimension);
+}
+
+HWTEST_F(LayoutPropertyTestNgTwo, UpdateLayoutConstraint001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1 Create a layoutProperty and constraint.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    MeasureProperty constraint;
+    constraint.maxSize = CALC_SIZE;
+    constraint.minSize = CALC_SIZE;
+    constraint.selfIdealSize = CALC_SIZE;
+    layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>(constraint);
+    layoutProperty->magicItemProperty_.UpdateAspectRatio(1.0);
+    layoutProperty->measureType_ = MeasureType::MATCH_PARENT;
+    auto frameNode = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto customMeasureLayoutNode = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(2, V2::TEXT_ETS_TAG);
+    ASSERT_NE(customMeasureLayoutNode, nullptr);
+    frameNode->parent_ = customMeasureLayoutNode;
+    layoutProperty->SetHost(frameNode);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    layoutProperty->UpdateLayoutConstraint(std::move(layoutConstraintF));
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->maxSize.value(), CALC_SIZE);
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->minSize.value(), CALC_SIZE);
+}
+
+HWTEST_F(LayoutPropertyTestNgTwo, UpdateLayoutConstraint002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1 Create a layoutProperty and constraint.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    MeasureProperty constraint;
+    constraint.maxSize = CALC_SIZE;
+    constraint.minSize = CALC_SIZE;
+    constraint.selfIdealSize = CALC_SIZE;
+    layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>(constraint);
+    layoutProperty->magicItemProperty_.UpdateAspectRatio(1.0);
+    layoutProperty->measureType_ = MeasureType::MATCH_PARENT;
+    auto frameNode = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto customMeasureLayoutNode = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(2, V2::TEXT_ETS_TAG);
+    ASSERT_NE(customMeasureLayoutNode, nullptr);
+    frameNode->parent_ = customMeasureLayoutNode;
+    layoutProperty->SetHost(frameNode);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    layoutProperty->UpdateLayoutConstraint(std::move(layoutConstraintF));
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->maxSize.value(), CALC_SIZE);
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->minSize.value(), CALC_SIZE);
 }
 }
