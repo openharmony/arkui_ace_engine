@@ -618,13 +618,9 @@ void DialogPattern::BuildCustomChild(const DialogProperties& props, const RefPtr
     AddExtraMaskNode(props);
 }
 
-bool isAlertDialog(const DialogProperties& dialogProperties)
+bool IsAlertDialog(const DialogProperties& props)
 {
-    bool isAlertDialogRes = false;
-    if (dialogProperties.type == DialogType::ALERT_DIALOG && dialogProperties.isAlertDialog) {
-        isAlertDialogRes = true;
-    }
-    return isAlertDialogRes;
+    return props.type == DialogType::ALERT_DIALOG && props.isAlertDialog;
 }
 
 RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogProperties)
@@ -677,10 +673,10 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     titleRowProps->UpdateMainAxisAlign(
         dialogTheme_->GetTextAlignTitle() == TEXT_ALIGN_TITLE_CENTER ? FlexAlign::CENTER : FlexAlign::FLEX_START);
     titleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (isAlertDialog(dialogProperties)) {
+    if (IsAlertDialog(dialogProperties)) {
         titleProp->UpdateFontWeight(FontWeight::BOLD);
         titleProp->UpdateTextAlign(TextAlign::CENTER);
-        titleProp->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+        titleProp->UpdateAdaptMinFontSize(dialogTheme_->GetTitleTextStyle().GetFontSize());
         titleRowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     }
     title->MountToParent(titleRow);
@@ -728,9 +724,9 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     subtitleRowProps->UpdateMainAxisAlign(
         dialogTheme_->GetTextAlignTitle() == TEXT_ALIGN_TITLE_CENTER ? FlexAlign::CENTER : FlexAlign::FLEX_START);
     subtitleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (isAlertDialog(dialogProperties)) {
+    if (IsAlertDialog(dialogProperties)) {
         titleProp->UpdateTextAlign(TextAlign::CENTER);
-        titleProp->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+        titleProp->UpdateAdaptMinFontSize(titleStyle.GetFontSize());
         subtitleRowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     }
     subtitle->MountToParent(subtitleRow);
@@ -787,7 +783,7 @@ RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
     contentPadding.right = CalcLength(contentPaddingInTheme.Right());
     contentPadding.bottom = CalcLength(contentPaddingInTheme.Bottom());
     contentProp->UpdatePadding(contentPadding);
-    if (isAlertDialog(props)) {
+    if (IsAlertDialog(props)) {
         contentProp->UpdateTextAlign(TextAlign::CENTER);
         auto contentRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(false));
