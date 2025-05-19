@@ -286,7 +286,7 @@ HWTEST_F(GaugeModifierTest, setValueTestValidValues, TestSize.Level1)
     inputValueValue = initValueValue;
     for (auto&& value: valueValueValidValues) {
         inputValueValue = std::get<1>(value);
-        auto optInputValueValue = Converter::ArkValue<Opt_Number>(inputValueValue);    
+        auto optInputValueValue = Converter::ArkValue<Opt_Number>(inputValueValue);
         modifier_->setValue(node_, &optInputValueValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
@@ -384,7 +384,7 @@ HWTEST_F(GaugeModifierTest, setEndAngleTestValidValues, TestSize.Level1)
     inputValueEndAngleAngle = initValueEndAngleAngle;
     for (auto&& value: angleValidValues) {
         inputValueEndAngleAngle = std::get<1>(value);
-        auto optInputValueEndAngleAngle = Converter::ArkValue<Opt_Number>(inputValueEndAngleAngle);    
+        auto optInputValueEndAngleAngle = Converter::ArkValue<Opt_Number>(inputValueEndAngleAngle);
         modifier_->setEndAngle(node_, &optInputValueEndAngleAngle);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_END_ANGLE_ANGLE_NAME);
@@ -708,7 +708,7 @@ HWTEST_F(GaugeModifierTest, setDescriptionTest_CustomNodeBuilder, TestSize.Level
     int callsCount = 0;
     CustomNodeBuilderTestHelper<GaugeModifierTest> builderHelper(this, frameNode);
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
-    auto optBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);        
+    auto optBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
     modifier_->setDescription(node_, &optBuilder);
     EXPECT_EQ(builderHelper.GetCallsCountAsync(), ++callsCount);
 }

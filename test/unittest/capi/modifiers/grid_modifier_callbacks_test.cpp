@@ -77,9 +77,7 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTestInvalid, Te
 {
     // test is disabled because onScrollBarUpdate callback should return value
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    EXPECT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
-    EXPECT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;
@@ -100,8 +98,7 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTestInvalid, Te
         }
     };
 
-    auto optOnScrollBarUpdate =
-        Converter::ArkValue<Opt_Callback_Number_Number_ComputedBarAttribute>(onScrollBarUpdate);
+    auto optOnScrollBarUpdate = Converter::ArkValue<Opt_Callback_Number_Number_ComputedBarAttribute>(onScrollBarUpdate);
     modifier_->setOnScrollBarUpdate(node_, &optOnScrollBarUpdate);
 
     // index: 11, offset: 12 invalid

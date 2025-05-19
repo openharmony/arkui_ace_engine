@@ -1567,15 +1567,13 @@ HWTEST_F(GridModifierTest, setNestedScrollTestDefaultValues, TestSize.Level1)
 HWTEST_F(GridModifierTest, setNestedScrollTestValidValues, TestSize.Level1)
 {
     std::string strResult;
-    Ark_NestedScrollOptions inputValue;
     NestedScrollOptions nestedScrollOptions;
 
     nestedScrollOptions = {
         .forward = NestedScrollMode::SELF_FIRST,
         .backward = NestedScrollMode::PARALLEL,
     };
-    inputValue = Converter::ArkValue<Ark_NestedScrollOptions>(nestedScrollOptions);
-    auto optInputValue = Converter::ArkValue<Opt_NestedScrollOptions>(inputValue);
+    auto optInputValue = Converter::ArkValue<Opt_NestedScrollOptions>(nestedScrollOptions);
     modifier_->setNestedScroll(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_NESTED_SCROLL_NAME);
     std::string strScrollForward = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCROLL_FORWARD_NAME);
@@ -1587,8 +1585,7 @@ HWTEST_F(GridModifierTest, setNestedScrollTestValidValues, TestSize.Level1)
         .forward = NestedScrollMode::PARENT_FIRST,
         .backward = NestedScrollMode::SELF_ONLY,
     };
-    inputValue = Converter::ArkValue<Ark_NestedScrollOptions>(nestedScrollOptions);
-    optInputValue = Converter::ArkValue<Opt_NestedScrollOptions>(inputValue);
+    optInputValue = Converter::ArkValue<Opt_NestedScrollOptions>(nestedScrollOptions);
     modifier_->setNestedScroll(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_NESTED_SCROLL_NAME);
     strScrollForward = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCROLL_FORWARD_NAME);
@@ -1600,8 +1597,7 @@ HWTEST_F(GridModifierTest, setNestedScrollTestValidValues, TestSize.Level1)
         .forward = NestedScrollMode::PARALLEL,
         .backward = NestedScrollMode::PARENT_FIRST,
     };
-    inputValue = Converter::ArkValue<Ark_NestedScrollOptions>(nestedScrollOptions);
-    optInputValue = Converter::ArkValue<Opt_NestedScrollOptions>(inputValue);
+    optInputValue = Converter::ArkValue<Opt_NestedScrollOptions>(nestedScrollOptions);
     modifier_->setNestedScroll(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_NESTED_SCROLL_NAME);
     strScrollForward = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCROLL_FORWARD_NAME);
@@ -1613,8 +1609,7 @@ HWTEST_F(GridModifierTest, setNestedScrollTestValidValues, TestSize.Level1)
         .forward = NestedScrollMode::SELF_ONLY,
         .backward = NestedScrollMode::SELF_FIRST,
     };
-    inputValue = Converter::ArkValue<Ark_NestedScrollOptions>(nestedScrollOptions);
-    optInputValue = Converter::ArkValue<Opt_NestedScrollOptions>(inputValue);
+    optInputValue = Converter::ArkValue<Opt_NestedScrollOptions>(nestedScrollOptions);
     modifier_->setNestedScroll(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_NESTED_SCROLL_NAME);
     strScrollForward = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCROLL_FORWARD_NAME);
