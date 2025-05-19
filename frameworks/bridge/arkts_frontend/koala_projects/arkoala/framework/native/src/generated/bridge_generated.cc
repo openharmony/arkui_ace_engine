@@ -34743,6 +34743,14 @@ Ark_NativePointer impl_TabsOps_registerBarBackgroundBlurStyle(Ark_NativePointer 
         return GetAccessors()->getTabsOpsAccessor()->registerBarBackgroundBlurStyle(node, (const Opt_BlurStyle*)&style_value, (const Opt_BackgroundBlurStyleOptions*)&options_value);
 }
 KOALA_INTEROP_DIRECT_3(TabsOps_registerBarBackgroundBlurStyle, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_UIContextImp_freezeUINode0(const KStringPtr& id, Ark_Boolean isFrozen) {
+        GetAccessors()->getUIContextImpAccessor()->freezeUINode0((const Ark_String*) (&id), isFrozen);
+}
+KOALA_INTEROP_V2(UIContextImp_freezeUINode0, KStringPtr, Ark_Boolean)
+void impl_UIContextImp_freezeUINode1(KInteropNumber id, Ark_Boolean isFrozen) {
+        GetAccessors()->getUIContextImpAccessor()->freezeUINode1((const Ark_Number*) (&id), isFrozen);
+}
+KOALA_INTEROP_DIRECT_V2(UIContextImp_freezeUINode1, KInteropNumber, Ark_Boolean)
 Ark_NativePointer impl_GridItemOps_registerSelectedCallback(Ark_NativePointer node, Ark_Boolean value, KSerializerBuffer thisArray, int32_t thisLength) {
     Deserializer thisDeserializer(thisArray, thisLength);
     SelectedCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_SelectedCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_SelectedCallback))))};;

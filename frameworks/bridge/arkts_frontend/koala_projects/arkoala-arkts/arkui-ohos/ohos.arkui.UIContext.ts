@@ -336,6 +336,20 @@ export class UIContext {
         }
         return this.observer_ as UIObserver;
     }
+
+    // @ts-ignore
+    public freezeUINode(id: number, isFrozen: boolean): void {
+        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        ArkUIGeneratedNativeModule._UIContextImp_freezeUINode1(id, isFrozen ? 1 : 0);
+        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+    }
+
+    // @ts-ignore
+    public freezeUINode(id: string, isFrozen: boolean): void {
+        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        ArkUIGeneratedNativeModule._UIContextImp_freezeUINode0(id, isFrozen ? 1 : 0);
+        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+    }
 }
 export abstract class FrameCallback {
     onFrame(frameTimeInNano: number): void {}

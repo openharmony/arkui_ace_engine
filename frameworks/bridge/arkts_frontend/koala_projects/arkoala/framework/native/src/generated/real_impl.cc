@@ -14034,6 +14034,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // TabsOpsAccessor
+    namespace UIContextImpAccessor {
+    void FreezeUINode0Impl(const Ark_String* id,
+                           Ark_Boolean isFrozen)
+    {
+    }
+    void FreezeUINode1Impl(const Ark_Number* id,
+                           Ark_Boolean isFrozen)
+    {
+    }
+    } // UIContextImpAccessor
     namespace GridItemOpsAccessor {
     Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
                                                     Ark_Boolean value,
@@ -21525,6 +21535,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &TabsOpsAccessorImpl;
     }
+    const GENERATED_ArkUIUIContextImpAccessor* GetUIContextImpAccessor()
+    {
+        static const GENERATED_ArkUIUIContextImpAccessor UIContextImpAccessorImpl {
+            UIContextImpAccessor::FreezeUINode0Impl,
+            UIContextImpAccessor::FreezeUINode1Impl,
+        };
+        return &UIContextImpAccessorImpl;
+    }
 
     const GENERATED_ArkUIGridItemOpsAccessor* GetGridItemOpsAccessor()
     {
@@ -24484,6 +24502,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetPixelMapAccessor,
             GetRenderNodeAccessor,
             GetTabsOpsAccessor,
+            GetUIContextImpAccessor,
             GetGridItemOpsAccessor,
             GetFilterAccessor,
             GetVisualEffectAccessor,
