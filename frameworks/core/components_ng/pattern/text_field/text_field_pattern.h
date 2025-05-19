@@ -1868,8 +1868,6 @@ private:
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     void HandleCountStyle();
     void HandleDeleteOnCounterScene();
-    bool ParseFillContentJsonValue(const std::unique_ptr<JsonValue>& jsonObject,
-        std::unordered_map<std::string, std::variant<std::string, bool, int32_t>>& map);
     void HandleContentSizeChange(const RectF& textRect);
     void UpdatePreviewIndex(int32_t start, int32_t end)
     {
@@ -1920,6 +1918,8 @@ private:
     void OnReportPasteEvent(const RefPtr<FrameNode>& frameNode);
     void OnReportSubmitEvent(const RefPtr<FrameNode>& frameNode);
     void BeforeAutoFillAnimation(const std::u16string& content, const AceAutoFillType& type);
+    void RemoveFillContentMap();
+    bool NeedsSendFillContent();
     void UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);
 
     RectF frameRect_;
@@ -2086,7 +2086,6 @@ private:
     std::string autoFillUserName_;
     std::string autoFillNewPassword_;
     uint32_t autoFillSessionId_ = 0;
-    std::unordered_map<std::string, std::variant<std::string, bool, int32_t>> fillContentMap_;
     bool autoFillOtherAccount_ = false;
 
     bool textInputBlurOnSubmit_ = true;
