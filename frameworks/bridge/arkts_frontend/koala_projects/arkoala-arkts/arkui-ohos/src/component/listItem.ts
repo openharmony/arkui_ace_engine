@@ -359,7 +359,7 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements UI
 export function ListItem(
     /** @memo */
     style: ((attributes: UIListItemAttribute) => void) | undefined,
-    value?: ListItemOptions | string,
+    value?: ListItemOptions | undefined,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
