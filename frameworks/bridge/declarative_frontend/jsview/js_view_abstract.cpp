@@ -12953,4 +12953,101 @@ bool JSViewAbstract::GetBorderWidthFromResource(const JSRef<JSVal>& args, NG::Bo
     }
     return false;
 }
+
+bool JSViewAbstract::ParseJsColorArray(const JSRef<JSVal>& jsValue, SymbolGradient& gradient)
+{
+     if (!jsValue->IsArray()) {
+        return false;
+     }
+
+     JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
+     for (size_t i = 0; i < array->Length(); i++) {
+        JSRef<JSVal> value = array->GetValueAt(i);
+        float opacity;
+        Color color;
+
+        JSRef<JSArray> nestedArray = JSRef<JSArray>::Cast(value);
+        if (nestedArray->Length() != 2) return false;
+
+        JSRef<JSVal> colorVal = nestedArray->GetValueAt(0);
+        JSRef<JSVal> opacityVal = nestedArray->GetValueAt(1);
+        if (!opacityVal->IsNumber()) return false;
+
+        opacity = static_cast<float>(opacityVal->ToNumber<double>());
+        if (!ParseJsColor(colorVal, color)) {
+            return false;
+        }
+
+        gradient.symbolColor.emplace_back(color);
+        gradient.positions.emplace_back(opacity);
+    }
+
+    return true;
+}
+
+bool JSViewAbstract::ParseGradientCenter(const JSRef<JSArray>& centerArray, SymbolGradient& gradient)
+{
+    if (centerArray->Length() < 2) return false;
+    gradient.center.x = static_cast<float>(ParseJsValueToDouble(centerArray->GetValueAt(0)));
+    gradient.center.y = static_cast<float>(ParseJsValueToDouble(centerArray->GetValueAt(1)));
+    return true;
+}
+
+double JSViewAbstract::ParseJsValueToDouble(const JSRef<JSVal>& jsValue)
+{
+    if (jsValue->IsNumber()) {
+        return jsValue->ToNumber<double>();
+    }
+
+    if (jsValue->IsString()) {
+        std::string valueStr = jsValue->ToString();
+        std::regex numRegex(R"((\d+\.?\d*)(%|px|vp|deg|rad)?)");
+        std::smatch match;
+
+        if (std::regex_match(valueStr, match, numRegex)) {
+            double num = std::stod(match[1].str());
+            std::string unit = match[2].str();
+
+            std::transform(unit.begin(), unit.end(), unit.begin(), ::tolower);
+
+            if (unit == "deg") {
+                return num * (M_PI / 180.0);
+            }
+            if (unit == "%") {
+                return num / 100.0;
+            }
+            return num;
+        }
+    }
+
+    return 0.0;
+}
+
+bool JSViewAbstract::ParseCommonGradientOptions(const JSRef<JSObject>& optionsObj, SymbolGradient& gradient)
+{
+    auto colorsValue = optionsObj->GetProperty("colors");
+    if (!ParseJsColorArray(colorsValue, gradient)) {
+        return false;
+    }
+
+    gradient.repeating = optionsObj->GetProperty("repeating")->ToBoolean();
+    return true;
+}
+
+float JSViewAbstract::DirectionToAngle(const JsiRef<JsiValue>& directionValue)
+{
+    if (!directionValue->IsNumber()) {
+        return 180.0f;
+    }
+
+    int32_t dirValue = 0;
+    if (!ParseJsInt32(directionValue, dirValue)) {
+        return 180.0f;
+    }
+
+    auto dir = static_cast<SDKGradientDirection>(dirValue);
+    auto it = GRADIENT_DIRECTION_TO_ANGLE.find(dir);
+
+    return (it != GRADIENT_DIRECTION_TO_ANGLE.end()) ? it->second : 180.0f;
+}
 } // namespace OHOS::Ace::Framework

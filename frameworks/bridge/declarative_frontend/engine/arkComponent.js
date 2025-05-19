@@ -38536,6 +38536,34 @@ class SymbolEffectModifier extends ModifierWithKey {
 }
 SymbolEffectModifier.identity = Symbol('symbolEffect');
 
+class SymbolShadowModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().symbolGlyph.resetSymbolShadow(node);
+      } else {
+        getUINativeModule().symbolGlyph.setSymbolShadow(node, this.value.SymbolShadow, this.value.action);
+      }
+    }
+  }
+  SymbolShadowModifier.identity = Symbol('symbolShadow');
+
+  class ShaderStyleModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().symbolGlyph.resetShaderStyle(node);
+      } else {
+        getUINativeModule().symbolGlyph.setShaderStyle(node, this.value.ShaderStyle, this.value.action);
+      }
+    }
+  }
+  ShaderStyleModifier.identity = Symbol('shaderStyle');
+
 class SymbolMinFontScaleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -38609,6 +38637,14 @@ class ArkSymbolGlyphComponent extends ArkComponent {
     symbolEffect.symbolEffect = effect;
     symbolEffect.action = action;
     modifierWithKey(this._modifiersWithKeys, SymbolEffectModifier.identity, SymbolEffectModifier, symbolEffect);
+    return this;
+  }
+  shaderStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, ShaderStyleModifier.identity, ShaderStyleModifier, value);
+    return this;
+  }
+  symbolShadow(value) {
+    modifierWithKey(this._modifiersWithKeys, SymbolShadowModifier.identity, SymbolShadowModifier, value);
     return this;
   }
   minFontScale(value) {

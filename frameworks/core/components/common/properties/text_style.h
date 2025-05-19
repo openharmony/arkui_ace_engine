@@ -1109,6 +1109,26 @@ public:
         symbolUid_ = symbolUid;
     }
 
+    void SetSymbolShadow(const SymbolShadow symbolShadow)
+    {
+        SymbolShadow_ = symbolShadow;
+    }
+
+    SymbolShadow GetSymbolShadow() const
+    {
+        return SymbolShadow_;
+    }
+
+    void SetShaderStyle(const std::vector<SymbolGradient>& shaderStyle)
+    {
+        ShaderStyle_ = shaderStyle;
+    }
+
+    std::vector<SymbolGradient> GetShaderStyle() const
+    {
+        return ShaderStyle_;
+    }
+
     void SetGradient(const std::optional<Gradient>& gradient)
     {
         gradient_ = gradient;
@@ -1150,6 +1170,8 @@ private:
     bool adaptHeight_ = false; // whether adjust text size with height.
     // for Symbol
     std::optional<NG::SymbolEffectOptions> symbolEffectOptions_;
+    SymbolShadow SymbolShadow_;
+    std::vector<SymbolGradient> ShaderStyle_;
 };
 
 namespace StringUtils {

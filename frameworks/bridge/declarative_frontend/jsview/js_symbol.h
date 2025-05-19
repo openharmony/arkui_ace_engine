@@ -37,6 +37,10 @@ public:
     static void parseSymbolSwitch(const JSRef<JSVal> jsVal, NG::SymbolEffectOptions& symbolEffectOptions);
     static void SetMinFontScale(const JSCallbackInfo& info);
     static void SetMaxFontScale(const JSCallbackInfo& info);
+    static void SetSymbolShadow(const JSCallbackInfo& info);
+    static void SetShaderStyle(const JSCallbackInfo& info);
+    static void ParseShaderStyle(const JSRef<JSObject> shaderStyleObj, SymbolGradient& shaderStyle);
+    static void ParseSymbolShadow(const JSRef<JSObject> symbolShadowObj, SymbolShadow& symbolShadow);
 };
 
 } // namespace OHOS::Ace::Framework

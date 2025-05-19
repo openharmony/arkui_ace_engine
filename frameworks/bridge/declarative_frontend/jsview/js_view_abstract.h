@@ -792,6 +792,12 @@ public:
     static bool ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector<Color>& result,
         bool enableResourceUpdate = false,
         std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr = DEFAULT_RESOURCE_PAIR_ARRAY);
+    static bool ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector<Color>& result);
+    static bool ParseJsColorArray(const JSRef<JSVal>& jsValue, SymbolGradient& gradient);
+    static bool ParseGradientCenter(const JSRef<JSArray>& centerArray, SymbolGradient& gradient);
+    static double ParseJsValueToDouble(const JSRef<JSVal>& jsValue);
+    static bool ParseCommonGradientOptions(const JSRef<JSObject>& optionsObj, SymbolGradient& gradient);
+    static float DirectionToAngle(const JsiRef<JsiValue>& directionValue);
     static bool ParseBorderWidthProps(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty);
     static bool ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty);
     static bool ParseBorderStyleProps(const JSRef<JSVal>& args, NG::BorderStyleProperty& borderStyleProperty);

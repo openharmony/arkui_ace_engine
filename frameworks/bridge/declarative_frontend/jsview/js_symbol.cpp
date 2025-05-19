@@ -51,6 +51,12 @@ const std::map<std::string, Ace::SymbolEffectType> SYMBOL_EFFECT_TYPE_MAP = {
     { "DisableSymbolEffect", SymbolEffectType::Disable },
 };
 
+const std::map<std::string, Ace::SymbolGradientType> SYMBOL_SHADER_TYPE_MAP = {
+    { "ColorShaderStyle", SymbolGradientType::COLOR_SHADER },
+    { "RadialGradientStyle", SymbolGradientType::RADIAL_GRADIENT },
+    { "LinearGradientStyle", SymbolGradientType::LINEAR_GRADIENT },
+};
+
 void JSSymbol::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSymbol>::Declare("SymbolGlyph");
@@ -71,6 +77,8 @@ void JSSymbol::JSBind(BindingTarget globalObj)
     JSClass<JSSymbol>::StaticMethod("symbolEffect", &JSSymbol::SetSymbolEffectOptions, opt);
     JSClass<JSSymbol>::StaticMethod("minFontScale", &JSSymbol::SetMinFontScale);
     JSClass<JSSymbol>::StaticMethod("maxFontScale", &JSSymbol::SetMaxFontScale);
+    JSClass<JSSymbol>::StaticMethod("symbolShadow", &JSSymbol::SetSymbolShadow, opt);
+    JSClass<JSSymbol>::StaticMethod("shaderStyle", &JSSymbol::SetShaderStyle, opt);
     JSClass<JSSymbol>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -282,5 +290,106 @@ void JSSymbol::parseSymbolSwitch(const JSRef<JSVal> jsVal, NG::SymbolEffectOptio
         ParseJsInteger(jsVal, triggerValue);
         symbolEffectOptions.SetTriggerNum(triggerValue);
     }
+}
+
+void JSSymbol::SetSymbolShadow(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
+
+    auto symbolShadowObj = JSRef<JSObject>::Cast(info[0]);
+    SymbolShadow symbolShadow;
+    ParseSymbolShadow(symbolShadowObj, symbolShadow);
+
+    SymbolModel::GetInstance()->SetSymbolShadow(symbolShadow);
+}
+
+void JSSymbol::SetShaderStyle(const JSCallbackInfo& info)
+{
+
+    if (info.Length() < 1 || !info[0]->IsArray()) {
+        return;
+    }
+
+    JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(info[0]);
+
+    std::vector<SymbolGradient> gradients;
+    gradients.reserve(jsArray->Length());
+
+    for (size_t i = 0; i < jsArray->Length(); ++i) {
+        JSRef<JSObject> jsGradientObj = JSRef<JSObject>::Cast(jsArray->GetValueAt(i));
+        SymbolGradient gradient;
+        ParseShaderStyle(jsGradientObj, gradient);
+        gradients.emplace_back(std::move(gradient));
+    }
+
+    SymbolModel::GetInstance()->SetShaderStyle(gradients);
+}
+
+void JSSymbol::ParseShaderStyle(const JSRef<JSObject> shaderStyleObj, SymbolGradient& gradient)
+{
+    auto typeParam = shaderStyleObj->GetProperty("type");
+    if (!typeParam->IsString()) return;
+
+    auto type = typeParam->ToString();
+    auto iter = SYMBOL_SHADER_TYPE_MAP.find(type);
+    if (iter == SYMBOL_SHADER_TYPE_MAP.end()) return;
+
+    gradient.type = iter->second;
+    switch (gradient.type) {
+        case SymbolGradientType::COLOR_SHADER: {
+            auto colorValue = shaderStyleObj->GetProperty("color");
+            if (colorValue->IsNull()) {
+                break;
+            }
+            Color color;
+            if (ParseJsColor(colorValue, color)) {
+                gradient.symbolColor.push_back(color);
+            }
+            break;
+        }
+        case SymbolGradientType::RADIAL_GRADIENT:
+        case SymbolGradientType::LINEAR_GRADIENT: {
+            auto optionsValue = shaderStyleObj->GetProperty("options");
+            if (!optionsValue->IsObject())
+            {
+                break;
+            }
+            auto optionsObj = JSRef<JSObject>::Cast(optionsValue);
+            ParseCommonGradientOptions(optionsObj, gradient);
+            if (gradient.type == SymbolGradientType::RADIAL_GRADIENT) {
+                auto centerValue = optionsObj->GetProperty("center");
+                if (centerValue->IsArray()) {
+                    ParseGradientCenter(JSRef<JSArray>::Cast(centerValue), gradient);
+                }
+                gradient.radius = static_cast<float>(ParseJsValueToDouble(optionsObj->GetProperty("radius")));
+            } else {
+                auto angleProperty = optionsObj->GetProperty("angle");
+                if (!angleProperty->IsEmpty() && !angleProperty->IsNull() && !angleProperty->IsUndefined()) {
+                    gradient.angle = static_cast<float>(ParseJsValueToDouble(angleProperty));
+                } else {
+                    auto directionValue = optionsObj->GetProperty("direction");
+                    gradient.angle = DirectionToAngle(JsiRef<JsiValue>(directionValue));
+                }
+            }
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void JSSymbol::ParseSymbolShadow(const JSRef<JSObject> symbolShadowObj, SymbolShadow& symbolShadow)
+{
+    auto colorValue = symbolShadowObj->GetProperty("color");
+    Color color;
+    if (ParseJsColor(colorValue, color)) {
+        symbolShadow.color = color;
+    }
+
+    symbolShadow.radius = ParseJsValueToDouble(symbolShadowObj->GetProperty("radius"));
+    symbolShadow.offset.first = static_cast<float>(ParseJsValueToDouble(symbolShadowObj->GetProperty("offsetX")));
+    symbolShadow.offset.second = static_cast<float>(ParseJsValueToDouble(symbolShadowObj->GetProperty("offsetY")));
 }
 } // namespace OHOS::Ace::Framework
