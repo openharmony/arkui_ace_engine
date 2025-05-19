@@ -1474,6 +1474,70 @@ HWTEST_F(ScrollableTestNg, SetEdgeEffect001, TestSize.Level1)
     EXPECT_FALSE(scrollable->IsSpringMotionRunning());
 }
 
+/**
+ * @tc.name: OnTouchTestDone001
+ * @tc.desc: Test OnTouchTestDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, OnTouchTestDone001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize baseGestureEvent and activeRecognizers.
+     */
+    auto baseGestureEvent = std::make_shared<BaseGestureEvent>();
+    baseGestureEvent->SetSourceDevice(SourceType::TOUCH);
+    std::list<FingerInfo> fingerInfos;
+    FingerInfo fingerInfo;
+    fingerInfos.emplace_back(fingerInfo);
+    baseGestureEvent->SetFingerList(fingerInfos);
+    std::list<RefPtr<NGGestureRecognizer>> activeRecognizers;
+    RefPtr<NGGestureRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    clickRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(mockScroll_)));
+    clickRecognizer->SetRecognizerType(GestureTypeName::CLICK);
+    activeRecognizers.emplace_back(clickRecognizer);
+    RefPtr<LongPressRecognizer> longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(false, false);
+    longPressRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(mockScroll_)));
+    longPressRecognizer->SetRecognizerType(GestureTypeName::LONG_PRESS_GESTURE);
+    activeRecognizers.emplace_back(longPressRecognizer);
+    RefPtr<NGGestureRecognizer> tapRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    tapRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(mockScroll_)));
+    tapRecognizer->SetRecognizerType(GestureTypeName::TAP_GESTURE);
+    activeRecognizers.emplace_back(tapRecognizer);
+    PanDirection panDirection;
+    panDirection.type = PanDirection::VERTICAL;
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 5, false);
+    panRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(mockScroll_)));
+    panRecognizer->SetRecognizerType(GestureTypeName::PAN_GESTURE);
+    activeRecognizers.emplace_back(panRecognizer);
+
+    /**
+     * @tc.steps: step2. currentVelocity_ is less than 200 and state_ is IDLE.
+     * @tc.expected: isHitTestBlock_ is false.
+     */
+    auto scrollablePattern = scroll_->GetPattern<PartiallyMockedScrollable>();
+    scrollablePattern->OnTouchTestDone(baseGestureEvent, activeRecognizers);
+    EXPECT_FALSE(scrollablePattern->isHitTestBlock_);
+    EXPECT_FALSE(clickRecognizer->IsPreventDefault());
+    EXPECT_FALSE(longPressRecognizer->IsPreventDefault());
+    EXPECT_FALSE(tapRecognizer->IsPreventDefault());
+    EXPECT_FALSE(panRecognizer->IsPreventDefault());
+
+    /**
+     * @tc.steps: step3. currentVelocity_ is greater than 200 and state_ is SPRING.
+     * @tc.expected: isHitTestBlock_ is true.
+     */
+    RefPtr<Scrollable> scrollable = scrollablePattern->GetScrollable();
+    EXPECT_NE(scrollable, nullptr);
+    scrollable->currentVelocity_ = 300;
+    scrollable->state_ = Scrollable::AnimationState::SPRING;
+    scrollablePattern->OnTouchTestDone(baseGestureEvent, activeRecognizers);
+    EXPECT_TRUE(scrollablePattern->isHitTestBlock_);
+    EXPECT_TRUE(clickRecognizer->IsPreventDefault());
+    EXPECT_TRUE(longPressRecognizer->IsPreventDefault());
+    EXPECT_TRUE(tapRecognizer->IsPreventDefault());
+    EXPECT_FALSE(panRecognizer->IsPreventDefault());
+}
+
 #ifdef SUPPORT_DIGITAL_CROWN
 /**
  * @tc.name: ListenDigitalCrownEvent001
