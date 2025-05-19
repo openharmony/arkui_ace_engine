@@ -36,7 +36,7 @@ struct DeviceConfig {
     DeviceType deviceType { DeviceType::PHONE };
     double fontRatio { 1.0 };
     ColorMode colorMode { ColorMode::LIGHT };
-    static DeviceType realDeviceType;
+    const static DeviceType realDeviceType;
 };
 
 struct DeviceResourceInfo {
