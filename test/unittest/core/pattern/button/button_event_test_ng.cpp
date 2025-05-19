@@ -55,9 +55,24 @@ const std::string CREATE_VALUE = "Hello World";
 const Dimension BORDER_RADIUS = 5.0_vp;
 const Color FONT_COLOR = Color(0XFFFF0000);
 const Dimension DEFAULT_HEIGTH = 40.0_vp;
+const Dimension MIN_FONT_SIZE = 10.0_vp;
+const Dimension MAX_FONT_SIZE = 25.0_vp;
+const Dimension FONT_SIZE = 16.0_vp;
+const Dimension BORDER_WIDTH = 15.0_vp;
+const Dimension BORDER_WIDTH_SMALL = 20.0_vp;
+const Dimension PADDING_TEXT = 5.0_vp;
 const float START_OPACITY = 0.0f;
 const float END_OPACITY = 0.1f;
 const int32_t DURATION = 100;
+const int32_t INVALID_VALUE = 999;
+const uint32_t MAX_LINES = 10;
+constexpr uint8_t NUM1 = 1;
+constexpr uint8_t NUM55 = 55;
+constexpr uint8_t NUM155 = 155;
+constexpr uint8_t NUM255 = 255;
+const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
+constexpr Dimension BORDER_ITEM = 50.0_vp;
+const BorderRadiusProperty& BORDER_RADIUS_PROPERTY = BorderRadiusProperty(BORDER_ITEM);
 
 struct CreateWithPara createWithPara = { std::make_optional(true), std::make_optional(CREATE_VALUE),
     std::make_optional(true), std::make_optional(ButtonType::CAPSULE), std::make_optional(true), std::nullopt,
@@ -717,5 +732,226 @@ HWTEST_F(ButtonEventTestNg, ButtonEventTest010, TestSize.Level1)
     gesture->AddClickEvent(clickEvent);
     buttonPattern->FireBuilder();
     buttonPattern->SetButtonPress(1.0, 1.0);
+}
+
+/**
+ * @tc.name: ButtonEventTest011
+ * @tc.desc: Test DumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonEventTestNg, ButtonEventTest011, TestSize.Level1)
+{
+    TestProperty testProperty;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto node = AceType::MakeRefPtr<FrameNode>("Button", 1, AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(node, nullptr);
+    auto buttonLayoutProperty = AceType::MakeRefPtr<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    node->layoutProperty_ = buttonLayoutProperty;
+    ASSERT_NE(node->layoutProperty_, nullptr);
+    buttonPattern->frameNode_ = std::move(node);
+    buttonPattern->DumpInfo();
+    EXPECT_FALSE(buttonLayoutProperty->HasType());
+    EXPECT_FALSE(buttonLayoutProperty->HasButtonStyle());
+    EXPECT_FALSE(buttonLayoutProperty->HasControlSize());
+    buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
+    buttonLayoutProperty->UpdateButtonStyle(ButtonStyleMode::NORMAL);
+    buttonLayoutProperty->UpdateControlSize(ControlSize::NORMAL);
+    buttonLayoutProperty->UpdateButtonRole(ButtonRole::NORMAL);
+    buttonLayoutProperty->UpdateCreateWithLabel(true);
+    buttonLayoutProperty->UpdateLabel("Button");
+    buttonLayoutProperty->UpdateTextOverflow(TextOverflow::CLIP);
+    buttonLayoutProperty->UpdateMaxLines(MAX_LINES);
+    buttonLayoutProperty->UpdateMinFontSize(MIN_FONT_SIZE);
+    buttonLayoutProperty->UpdateMaxFontSize(MAX_FONT_SIZE);
+    buttonLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    node->layoutProperty_ = buttonLayoutProperty;
+    buttonPattern->DumpInfo();
+    EXPECT_TRUE(buttonLayoutProperty->HasType());
+    EXPECT_TRUE(buttonLayoutProperty->HasButtonStyle());
+    EXPECT_TRUE(buttonLayoutProperty->HasControlSize());
+}
+
+/**
+ * @tc.name: ButtonEventTest012
+ * @tc.desc: Test DumpSubInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonEventTestNg, ButtonEventTest012, TestSize.Level1)
+{
+    TestProperty testProperty;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto buttonLayoutProperty = AceType::MakeRefPtr<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    buttonPattern->DumpSubInfo(buttonLayoutProperty);
+    EXPECT_FALSE(buttonLayoutProperty->HasFontSize());
+    EXPECT_FALSE(buttonLayoutProperty->HasFontWeight());
+    EXPECT_FALSE(buttonLayoutProperty->HasFontStyle());
+    buttonLayoutProperty->UpdateFontSize(FONT_SIZE);
+    buttonLayoutProperty->UpdateFontWeight(FontWeight::NORMAL);
+    buttonLayoutProperty->UpdateFontStyle(Ace::FontStyle::NORMAL);
+    buttonLayoutProperty->UpdateFontFamily(FONT_FAMILY_VALUE);
+    buttonLayoutProperty->UpdateFontColor(Color::FromARGB(NUM1, NUM55, NUM155, NUM255));
+    buttonLayoutProperty->UpdateBorderRadius(BORDER_RADIUS_PROPERTY);
+    buttonPattern->DumpSubInfo(buttonLayoutProperty);
+    EXPECT_TRUE(buttonLayoutProperty->HasFontSize());
+    EXPECT_TRUE(buttonLayoutProperty->HasFontWeight());
+    EXPECT_TRUE(buttonLayoutProperty->HasFontStyle());
+    EXPECT_TRUE(buttonLayoutProperty->HasFontFamily());
+    EXPECT_TRUE(buttonLayoutProperty->HasFontColor());
+    EXPECT_TRUE(buttonLayoutProperty->HasBorderRadius());
+}
+
+/**
+ * @tc.name: ButtonEventTest013
+ * @tc.desc: Test ConvertButtonRoleToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonEventTestNg, ButtonEventTest013, TestSize.Level1)
+{
+    TestProperty testProperty;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    ButtonRole buttonRole = ButtonRole::NORMAL;
+    auto result = buttonPattern->ConvertButtonRoleToString(buttonRole);
+    EXPECT_EQ(result, "ButtonRole.NORMAL");
+    buttonRole = ButtonRole::ERROR;
+    result = buttonPattern->ConvertButtonRoleToString(buttonRole);
+    EXPECT_EQ(result, "ButtonRole.ERROR");
+    ButtonRole role = static_cast<ButtonRole>(INVALID_VALUE);
+    result = buttonPattern->ConvertButtonRoleToString(role);
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: ButtonEventTest014
+ * @tc.desc: Test ConvertButtonTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonEventTestNg, ButtonEventTest014, TestSize.Level1)
+{
+    TestProperty testProperty;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    ButtonType buttonType = ButtonType::NORMAL;
+    auto result = buttonPattern->ConvertButtonTypeToString(buttonType);
+    EXPECT_EQ(result, "ButtonType.Normal");
+    buttonType = ButtonType::CAPSULE;
+    result = buttonPattern->ConvertButtonTypeToString(buttonType);
+    EXPECT_EQ(result, "ButtonType.Capsule");
+    buttonType = ButtonType::CIRCLE;
+    result = buttonPattern->ConvertButtonTypeToString(buttonType);
+    EXPECT_EQ(result, "ButtonType.Circle");
+    buttonType = ButtonType::ROUNDED_RECTANGLE;
+    result = buttonPattern->ConvertButtonTypeToString(buttonType);
+    EXPECT_EQ(result, "ButtonType.ROUNDED_RECTANGLE");
+    buttonType = static_cast<ButtonType>(INVALID_VALUE);
+    result = buttonPattern->ConvertButtonTypeToString(buttonType);
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: ButtonEventTest015
+ * @tc.desc: Test ConvertButtonStyleToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonEventTestNg, ButtonEventTest015, TestSize.Level1)
+{
+    TestProperty testProperty;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    ButtonStyleMode buttonStyle = ButtonStyleMode::NORMAL;
+    auto result = buttonPattern->ConvertButtonStyleToString(buttonStyle);
+    EXPECT_EQ(result, "ButtonStyleMode.NORMAL");
+    buttonStyle = ButtonStyleMode::EMPHASIZE;
+    result = buttonPattern->ConvertButtonStyleToString(buttonStyle);
+    EXPECT_EQ(result, "ButtonStyleMode.EMPHASIZED");
+    buttonStyle = ButtonStyleMode::TEXT;
+    result = buttonPattern->ConvertButtonStyleToString(buttonStyle);
+    EXPECT_EQ(result, "ButtonStyleMode.TEXTUAL");
+    buttonStyle = static_cast<ButtonStyleMode>(INVALID_VALUE);
+    result = buttonPattern->ConvertButtonStyleToString(buttonStyle);
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: ButtonEventTest016
+ * @tc.desc: Test ConvertControlSizeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonEventTestNg, ButtonEventTest016, TestSize.Level1)
+{
+    TestProperty testProperty;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    ControlSize controlSize = ControlSize::SMALL;
+    auto result = buttonPattern->ConvertControlSizeToString(controlSize);
+    EXPECT_EQ(result, "ControlSize.SMALL");
+    controlSize = ControlSize::NORMAL;
+    result = buttonPattern->ConvertControlSizeToString(controlSize);
+    EXPECT_EQ(result, "ControlSize.NORMAL");
+    controlSize = static_cast<ControlSize>(INVALID_VALUE);
+    result = buttonPattern->ConvertControlSizeToString(controlSize);
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: ButtonEventTest017
+ * @tc.desc: Test IsDynamicSwitchButtonStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonEventTestNg, ButtonEventTest017, TestSize.Level1)
+{
+    TestProperty testProperty;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    RefPtr<ButtonTheme> buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    BorderColorProperty color;
+    buttonTheme->borderColor_ = Color::RED;
+    color.SetColor(buttonTheme->GetBorderColor());
+    EXPECT_TRUE(buttonPattern->IsDynamicSwitchButtonStyle(color, buttonTheme));
+    buttonTheme->borderColorSmall_ = Color::GREEN;
+    color.SetColor(buttonTheme->GetBorderColorSmall());
+    EXPECT_TRUE(buttonPattern->IsDynamicSwitchButtonStyle(color, buttonTheme));
+    color.SetColor(Color());
+    EXPECT_TRUE(buttonPattern->IsDynamicSwitchButtonStyle(color, buttonTheme));
+    buttonTheme->textBackgroundFocus_ = Color::BLUE;
+    color.SetColor(buttonTheme->GetTextBackgroundFocus());
+    EXPECT_FALSE(buttonPattern->IsDynamicSwitchButtonStyle(color, buttonTheme));
+}
+
+/**
+ * @tc.name: ButtonEventTest018
+ * @tc.desc: Test IsDynamicSwitchButtonStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonEventTestNg, ButtonEventTest018, TestSize.Level1)
+{
+    TestProperty testProperty;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    RefPtr<ButtonTheme> buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    BorderWidthProperty width;
+    buttonTheme->borderWidth_ = BORDER_WIDTH;
+    width.SetBorderWidth(buttonTheme->GetBorderWidth());
+    EXPECT_TRUE(buttonPattern->IsDynamicSwitchButtonStyle(width, buttonTheme));
+    buttonTheme->borderWidthSmall_ = BORDER_WIDTH_SMALL;
+    width.SetBorderWidth(buttonTheme->GetBorderWidthSmall());
+    EXPECT_TRUE(buttonPattern->IsDynamicSwitchButtonStyle(width, buttonTheme));
+    width.SetBorderWidth(Dimension());
+    EXPECT_TRUE(buttonPattern->IsDynamicSwitchButtonStyle(width, buttonTheme));
+    buttonTheme->paddingText_ = PADDING_TEXT;
+    width.SetBorderWidth(buttonTheme->GetPaddingText());
+    EXPECT_FALSE(buttonPattern->IsDynamicSwitchButtonStyle(width, buttonTheme));
 }
 } // namespace OHOS::Ace::NG
