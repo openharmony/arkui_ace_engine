@@ -1461,8 +1461,10 @@ void MenuPattern::ShowMenuAppearAnimation()
         previewMode_ == MenuPreviewMode::NONE) {
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        auto offset = GetTransformCenter();
-        renderContext->UpdateTransformCenter(DimensionOffset(offset));
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
         auto menuPosition = host->GetPaintRectOffset(false, true);
         if (IsSelectOverlayExtensionMenu() && !isExtensionMenuShow_) {
             menuPosition = GetEndOffset();
@@ -1470,12 +1472,16 @@ void MenuPattern::ShowMenuAppearAnimation()
         if (IsSelectOverlayExtensionMenu()) {
             SetEndOffset(menuPosition);
         }
-
-        renderContext->UpdateTransformScale(VectorF(MENU_ORIGINAL_SCALE, MENU_ORIGINAL_SCALE));
+        renderContext->UpdateTransformScale(VectorF(theme->GetMenuAnimationScale(), theme->GetMenuAnimationScale()));
         renderContext->UpdateOpacity(0.0f);
-
         AnimationOption option = AnimationOption();
-        option.SetCurve(MAIN_MENU_ANIMATION_CURVE);
+        if (theme->GetMenuAnimationDuration()) {
+            option.SetDuration(theme->GetMenuAnimationDuration());
+            renderContext->UpdateTransformCenter(DimensionOffset(Offset()));
+        } else {
+            renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
+        }
+        option.SetCurve(theme->GetMenuAnimationCurve());
         AnimationUtils::Animate(option, [this, renderContext, menuPosition]() {
             CHECK_NULL_VOID(renderContext);
             if (IsSelectOverlayExtensionMenu()) {

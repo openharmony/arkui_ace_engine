@@ -40,6 +40,9 @@
 
 constexpr int32_t DEFAULT_CLICK_DISTANCE = 15;
 constexpr uint32_t MAX_SEARCH_DEPTH = 5;
+constexpr double MENU_ANIMATION_MAX_SCALE = 1.0f;
+constexpr double MENU_ANIMATION_MIN_OPACITY = 0.0f;
+constexpr double MENU_ANIMATION_MAX_OPACITY = 1.0f;
 namespace OHOS::Ace::NG {
 
 struct SelectProperties {
