@@ -133,9 +133,11 @@ HWTEST_F(RichEditorDragTestNg, RichEditorDragTest001, TestSize.Level1)
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
     EXPECT_EQ(pattern->status_, Status::DRAGGING);
     eventHub->FireOnDragMove(event, "");
+    pattern->isMousePressed_ = true;
     auto onDragEnd = eventHub->GetOnDragEnd();
     onDragEnd(event);
     EXPECT_EQ(pattern->status_, Status::NONE);
+    EXPECT_FALSE(pattern->isMousePressed_);
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
