@@ -1097,7 +1097,7 @@ void NavigationGroupNode::TransitionWithReplace(
     int32_t curAnimationId = TriggerNavDestinationTransition(
         DynamicCast<NavDestinationGroupNode>(curNode), NavigationOperation::REPLACE, true);
     auto curUseCustomTransition = true;
-    if (curAnimationId != INVALID_ANIMATION_ID) {
+    if (curAnimationId == INVALID_ANIMATION_ID) {
         curAnimationId = replaceAnimationId;
         curUseCustomTransition = false;
     }
