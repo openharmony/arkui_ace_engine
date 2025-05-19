@@ -388,6 +388,16 @@ void AutoFillController::ResetAutoFillAnimationStatus()
     if (autoFillParagraph_) {
         autoFillParagraph_ = nullptr;
     }
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textFieldPattern);
+    auto textFieldContentModifier = textFieldPattern->GetContentModifier();
+    CHECK_NULL_VOID(textFieldContentModifier);
+    textFieldContentModifier->SetAutoFillTranslationOffset(0.0f);
+    textFieldContentModifier->SetAutoFillTextScrollOffset(0.0f);
+    textFieldContentModifier->SetAutoFillEmphasizeCharIndex(0.0f);
+    textFieldContentModifier->SetAutoFillDefaultCharIndex(0.0f);
 }
 
 float AutoFillController::GetSpringAnimationResponse(const AutoFillContentLengthMode& mode)
