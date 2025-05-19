@@ -74,14 +74,7 @@ void PointsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    std::optional<ShapePoints> points;
-    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        std::vector<ShapePoint> shapePointArray;
-        for (int32_t i = 0; i < value->value.length; ++i) {
-            shapePointArray.emplace_back(Converter::Convert<ShapePoint>(value->value.array[i]));
-        }
-        points = std::make_optional<ShapePoints>(shapePointArray);
-    }
+    auto points = Converter::OptConvert<ShapePoints>(*value);
     if (points && points->size() < POINTS_NUMBER_MIN) {
         points.reset();
     }

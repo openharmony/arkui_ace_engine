@@ -205,21 +205,19 @@ void CustomDialogControllerPeerImpl::SetDismiss(Opt_Callback_DismissDialogAction
     AddOnWillDismiss(dialogProperties_, onWillDismiss);
 }
 
-void CustomDialogControllerPeerImpl::SetWidth(Opt_Length width)
+void CustomDialogControllerPeerImpl::SetWidth(std::optional<Dimension> width)
 {
-    auto result = Converter::OptConvert<Dimension>(width);
-    Validator::ValidateNonNegative(result);
-    if (result) {
-        dialogProperties_.width = result.value();
+    Validator::ValidateNonNegative(width);
+    if (width) {
+        dialogProperties_.width = *width;
     }
 }
 
-void CustomDialogControllerPeerImpl::SetHeight(Opt_Length height)
+void CustomDialogControllerPeerImpl::SetHeight(std::optional<Dimension> height)
 {
-    auto result = Converter::OptConvert<Dimension>(height);
-    Validator::ValidateNonNegative(result);
-    if (result) {
-        dialogProperties_.height = result.value();
+    Validator::ValidateNonNegative(height);
+    if (height) {
+        dialogProperties_.height = *height;
     }
 }
 

@@ -59,7 +59,7 @@ RefPtr<PixelMap> ImageAttachmentAccessorTest::CreatePixelMap(std::string& src)
 
 namespace {
 const CalcLength TEST_CALC_LENGTH(123.0_vp);
-const auto TEST_DIMENSION = TEST_CALC_LENGTH.GetDimension();
+const auto TEST_DIMENSION = "123vp";
 
 inline const std::vector<float> EMPTY_VECTOR = {};
 inline std::vector<float> INVALID_MATRIX_LESS = { 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 };
@@ -90,7 +90,7 @@ const MarginProperty MARGIN_PADDING_PROPERTY = { .left = TEST_CALC_LENGTH,
     .right = TEST_CALC_LENGTH,
     .top = TEST_CALC_LENGTH,
     .bottom = TEST_CALC_LENGTH };
-const BorderRadiusProperty BORDER_RADIUES_PROPERTY(TEST_DIMENSION);
+const BorderRadiusProperty BORDER_RADIUES_PROPERTY(Dimension::FromString(TEST_DIMENSION));
 
 Opt_ImageAttachmentLayoutStyle getImageLayoutStyleFilled()
 {
@@ -115,7 +115,7 @@ Opt_ImageAttachmentLayoutStyle getImageLayoutStyleFilled()
 }
 Opt_ImageAttachmentLayoutStyle getImageLayoutStyleLengthMetrics()
 {
-    const Ark_LengthMetrics lengthMetrics = ArkValue<Ark_LengthMetrics>(TEST_DIMENSION);
+    const Ark_LengthMetrics lengthMetrics = ArkValue<Ark_LengthMetrics>(Dimension::FromString(TEST_DIMENSION));
     const Ark_ImageAttachmentLayoutStyle imageLayoutStyle {
         .margin = ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_LengthMetrics>(lengthMetrics),
         .padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_LengthMetrics>(lengthMetrics),
@@ -198,11 +198,15 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestSize, TestSize.Level1)
         if (expected.IsNonNegative()) {
             ASSERT_TRUE(peer->span->GetImageAttribute()->size->width);
             ASSERT_TRUE(peer->span->GetImageAttribute()->size->height);
-            EXPECT_EQ(peer->span->GetImageAttribute()->size->width->ToString(), expected.ToString());
-            EXPECT_EQ(peer->span->GetImageAttribute()->size->height->ToString(), expected.ToString());
+            EXPECT_EQ(peer->span->GetImageAttribute()->size->width->ToString(), expected.ToString())
+                << "Input value: " << input;
+            EXPECT_EQ(peer->span->GetImageAttribute()->size->height->ToString(), expected.ToString())
+                << "Input value: " << input;
         } else {
-            ASSERT_FALSE(peer->span->GetImageAttribute()->size->width);
-            ASSERT_FALSE(peer->span->GetImageAttribute()->size->height);
+            ASSERT_FALSE(peer->span->GetImageAttribute()->size->width)
+                << "Input value: " << input;
+            ASSERT_FALSE(peer->span->GetImageAttribute()->size->height)
+                << "Input value: " << input;
         }
         accessor_->destroyPeer(peer);
     }
@@ -218,10 +222,10 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestSizeResources, TestSize.Level1)
     for (auto& [num_id, str_id, expected] : resourceInitTable) {
         auto expectPointer = std::get_if<Dimension>(&expected);
         ASSERT_TRUE(expectPointer);
-        auto sizeResource = ArkValue<Ark_Length>(Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = num_id });
+        auto sizeResource = ArkValue<Opt_Length>(num_id);
         Ark_SizeOptions size {
-            .width = ArkValue<Opt_Length>(sizeResource),
-            .height = ArkValue<Opt_Length>(sizeResource),
+            .width = sizeResource,
+            .height = sizeResource,
         };
         Ark_ImageAttachmentInterface value {
             .size = ArkValue<Opt_SizeOptions>(size),

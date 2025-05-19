@@ -132,19 +132,20 @@ void StrokeDashArrayImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto dashArray = Converter::OptConvert<std::vector<Dimension>>(*value);
-    if (!dashArray) {
+    auto optValue = Converter::OptConvert<std::vector<std::optional<Dimension>>>(*value);
+    if (!optValue) {
         // TODO: Reset value
         return;
     }
+    auto dashArray = Converter::Squash(*optValue);
     // if odd,add twice
-    auto length = dashArray->size();
+    auto length = dashArray.size();
     if (length & 1) {
         for (int32_t i = 0; i < length; i++) {
-            dashArray->emplace_back((*dashArray)[i]);
+            dashArray.emplace_back(dashArray[i]);
         }
     }
-    ShapeModelNG::SetStrokeDashArray(frameNode, std::move(*dashArray));
+    ShapeModelNG::SetStrokeDashArray(frameNode, std::move(dashArray));
 }
 } // CommonShapeMethodModifier
 const GENERATED_ArkUICommonShapeMethodModifier* GetCommonShapeMethodModifier()

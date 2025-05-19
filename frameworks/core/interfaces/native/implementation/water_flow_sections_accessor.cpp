@@ -55,14 +55,14 @@ std::vector<WaterFlowSections::Section> Convert(const Array_SectionOptions& src)
     }
     return dst;
 }
-void AssignArkValue(Ark_SectionOptions& dst, const WaterFlowSections::Section& src)
+void AssignArkValue(Ark_SectionOptions& dst, const WaterFlowSections::Section& src, ConvContext *ctx)
 {
     dst.itemsCount = Converter::ArkValue<Ark_Number>(src.itemsCount);
     dst.crossCount = Converter::ArkValue<Opt_Number>(src.crossCount);
     LOGE("CallbackKeeper does not support callback with parameters, dst.onGetItemMainSizeByIndex isn't converted");
-    dst.columnsGap = Converter::ArkValue<Opt_Length>(src.columnsGap);
-    dst.rowsGap = Converter::ArkValue<Opt_Length>(src.rowsGap);
-    dst.margin = Converter::ArkUnion<Opt_Union_Margin_Dimension, Ark_Padding>(src.margin);
+    dst.columnsGap = Converter::ArkValue<Opt_Dimension>(src.columnsGap, ctx);
+    dst.rowsGap = Converter::ArkValue<Opt_Dimension>(src.rowsGap, ctx);
+    dst.margin = Converter::ArkUnion<Opt_Union_Margin_Dimension, Ark_Padding>(src.margin, ctx);
 }
 }
 

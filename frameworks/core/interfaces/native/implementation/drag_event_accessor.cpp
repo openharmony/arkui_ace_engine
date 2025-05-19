@@ -52,12 +52,12 @@ namespace OHOS::Ace::NG::Converter {
         }
     }
 
-    void AssignArkValue(Ark_Rectangle& dst, const Rect& src)
+    void AssignArkValue(Ark_Rectangle& dst, const Rect& src, ConvContext *ctx)
     {
-        dst.x = ArkValue<Opt_Length>(src.Left());
-        dst.y = ArkValue<Opt_Length>(src.Top());
-        dst.width = ArkValue<Opt_Length>(src.Width());
-        dst.height = ArkValue<Opt_Length>(src.Height());
+        dst.x = ArkValue<Opt_Length>(src.Left(), ctx);
+        dst.y = ArkValue<Opt_Length>(src.Top(), ctx);
+        dst.width = ArkValue<Opt_Length>(src.Width(), ctx);
+        dst.height = ArkValue<Opt_Length>(src.Height(), ctx);
     }
 } // namespace Converter
 
@@ -170,7 +170,7 @@ Ark_Rectangle GetPreviewRectImpl(Ark_DragEvent peer)
     CHECK_NULL_RETURN(peer, {});
     auto info = peer->dragInfo;
     CHECK_NULL_RETURN(info, {});
-    return ArkValue<Ark_Rectangle>(info->GetPreviewRect());
+    return ArkValue<Ark_Rectangle>(info->GetPreviewRect(), Converter::FC);
 }
 Ark_Number GetVelocityXImpl(Ark_DragEvent peer)
 {

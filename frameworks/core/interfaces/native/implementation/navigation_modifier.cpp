@@ -93,8 +93,8 @@ void NavBarWidthRangeImpl(Ark_NativePointer node,
         NavigationModelStatic::SetMaxNavBarWidth(frameNode, NG::DEFAULT_MAX_NAV_BAR_WIDTH);
         return;
     }
-    auto min = Converter::Convert<CalcDimension>(value->value.value0);
-    auto max = Converter::Convert<CalcDimension>(value->value.value1);
+    auto min = Converter::OptConvert<CalcDimension>(value->value.value0).value_or(Dimension());
+    auto max = Converter::OptConvert<CalcDimension>(value->value.value1).value_or(Dimension());
 
     if (LessNotEqual(min.Value(), 0.0)) {
         min.SetValue(0);
@@ -110,11 +110,12 @@ void MinContentWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+    auto convValue = Converter::OptConvert<CalcDimension>(*value);
+    if (!convValue) {
         NavigationModelStatic::SetMinContentWidth(frameNode, DEFAULT_MIN_CONTENT_WIDTH);
         return;
     }
-    auto mincontent = Converter::Convert<CalcDimension>(value->value);
+    auto mincontent = *convValue;
 
     if (LessNotEqual(mincontent.Value(), 0.0)) {
         mincontent = DEFAULT_MIN_CONTENT_WIDTH;
@@ -127,11 +128,12 @@ void ModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
         NavigationModelStatic::SetUsrNavigationMode(frameNode, NavigationMode::AUTO);
         return;
     }
-    auto navigationMode = static_cast<NavigationMode>(value->value);
+    auto navigationMode = static_cast<NavigationMode>(*optValue);
     NavigationModelStatic::SetUsrNavigationMode(frameNode, navigationMode);
 }
 void BackButtonIcon0Impl(Ark_NativePointer node, const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* value)
@@ -536,7 +538,7 @@ void TitleImpl(Ark_NativePointer node, const Opt_Type_NavigationAttribute_title_
                 NavigationModelStatic::SetTitleHeight(frameNode, NG::DOUBLE_LINE_TITLEBAR_HEIGHT);
             }
         } else if (titleHeightSelector == lengthType) {
-            CalcDimension length = Converter::Convert<CalcDimension>(value->value.value3.height.value1);
+            CalcDimension length = Converter::OptConvert<CalcDimension>(value->value.value3.height.value1).value_or(Dimension());
             if (length.Value() < 0) {
                 NavigationModelStatic::SetTitleHeight(frameNode, Dimension());
             } else {

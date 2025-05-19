@@ -28,7 +28,19 @@ using BorderRadiusesType = std::variant<std::optional<Dimension>, BorderRadiusPr
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-BorderRadiusesType Convert(const Ark_Length& src)
+BorderRadiusesType Convert(const Ark_Number& src)
+{
+    return Converter::OptConvert<Dimension>(src);
+}
+
+template<>
+BorderRadiusesType Convert(const Ark_String& src)
+{
+    return Converter::OptConvert<Dimension>(src);
+}
+
+template<>
+BorderRadiusesType Convert(const Ark_Resource& src)
 {
     return Converter::OptConvert<Dimension>(src);
 }

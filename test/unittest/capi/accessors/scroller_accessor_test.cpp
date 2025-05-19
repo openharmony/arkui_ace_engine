@@ -342,30 +342,28 @@ HWTEST_F(ScrollerAccessorTest, scrollByXTest, TestSize.Level1)
     static const std::vector<OneTestStep> testPlan = {
         { Converter::ArkValue<Ark_Length>(2.5f), 2.5 },
         { Converter::ArkValue<Ark_Length>(-2.5f), -2.5 },
-        { Converter::ArkValue<Ark_Length>(5.0_px), 5 },
-        { Converter::ArkValue<Ark_Length>(-5.0_px), -5 },
-        { Converter::ArkValue<Ark_Length>(22.5_px), 22.5 },
-        { Converter::ArkValue<Ark_Length>(-22.5_px), -22.5 },
-        { Converter::ArkValue<Ark_Length>(7.0_vp), 7 },
-        { Converter::ArkValue<Ark_Length>(-7.0_vp), -7 },
-        { Converter::ArkValue<Ark_Length>(1.5_vp), 1.5 },
-        { Converter::ArkValue<Ark_Length>(-1.5_vp), -1.5 },
-        { Converter::ArkValue<Ark_Length>(65.0_fp), 65 },
-        { Converter::ArkValue<Ark_Length>(-65.0_fp), -65 },
-        { Converter::ArkValue<Ark_Length>(4.5_fp), 4.5 },
-        { Converter::ArkValue<Ark_Length>(-4.5_fp), -4.5 },
-        { Converter::ArkValue<Ark_Length>(0.12_pct), 0 },
-        { Converter::ArkValue<Ark_Length>(-0.12_pct), 0 },
+        { Converter::ArkValue<Ark_Length>("5.0px"), 5 },
+        { Converter::ArkValue<Ark_Length>("-5.0px"), -5 },
+        { Converter::ArkValue<Ark_Length>("22.5px"), 22.5 },
+        { Converter::ArkValue<Ark_Length>("-22.5px"), -22.5 },
+        { Converter::ArkValue<Ark_Length>("7.0vp"), 7 },
+        { Converter::ArkValue<Ark_Length>("-7.0vp"), -7 },
+        { Converter::ArkValue<Ark_Length>("1.5vp"), 1.5 },
+        { Converter::ArkValue<Ark_Length>("-1.5vp"), -1.5 },
+        { Converter::ArkValue<Ark_Length>("65.0fp"), 65 },
+        { Converter::ArkValue<Ark_Length>("-65.0fp"), -65 },
+        { Converter::ArkValue<Ark_Length>("4.5fp"), 4.5 },
+        { Converter::ArkValue<Ark_Length>("-4.5fp"), -4.5 },
+        { Converter::ArkValue<Ark_Length>("12%"), 0 },
+        { Converter::ArkValue<Ark_Length>("-12%"), 0 },
         { RES_ARK_LENGTH, 10 },
     };
 
     Ark_Length arkDy = Converter::ArkValue<Ark_Length>(0._px);
-    Opt_Length opt1 = Converter::ArkValue<Opt_Length>(arkDy);
 
     for (const auto &[arkLength, expected]: testPlan) {
         EXPECT_CALL(*mockScrollerController_, ScrollBy(expected, 0, false)).Times(1);
-        Opt_Length optArkLength = Converter::ArkValue<Opt_Length>(arkLength);
-        accessor_->scrollBy(peer_, &optArkLength, &opt1);
+        accessor_->scrollBy(peer_, &arkLength, &arkDy);
     }
 }
 
@@ -382,30 +380,28 @@ HWTEST_F(ScrollerAccessorTest, scrollByYTest, TestSize.Level1)
     static const std::vector<OneTestStep> testPlan = {
         { Converter::ArkValue<Ark_Length>(2.5f), 2.5 },
         { Converter::ArkValue<Ark_Length>(-2.5f), -2.5 },
-        { Converter::ArkValue<Ark_Length>(5.0_px), 5 },
-        { Converter::ArkValue<Ark_Length>(-5.0_px), -5 },
-        { Converter::ArkValue<Ark_Length>(22.5_px), 22.5 },
-        { Converter::ArkValue<Ark_Length>(-22.5_px), -22.5 },
-        { Converter::ArkValue<Ark_Length>(7.0_vp), 7 },
-        { Converter::ArkValue<Ark_Length>(-7.0_vp), -7 },
-        { Converter::ArkValue<Ark_Length>(1.5_vp), 1.5 },
-        { Converter::ArkValue<Ark_Length>(-1.5_vp), -1.5 },
-        { Converter::ArkValue<Ark_Length>(65.0_fp), 65 },
-        { Converter::ArkValue<Ark_Length>(-65.0_fp), -65 },
-        { Converter::ArkValue<Ark_Length>(4.5_fp), 4.5 },
-        { Converter::ArkValue<Ark_Length>(-4.5_fp), -4.5 },
-        { Converter::ArkValue<Ark_Length>(0.12_pct), 0 },
-        { Converter::ArkValue<Ark_Length>(-0.12_pct), 0 },
+        { Converter::ArkValue<Ark_Length>("5.0px"), 5 },
+        { Converter::ArkValue<Ark_Length>("-5.0px"), -5 },
+        { Converter::ArkValue<Ark_Length>("22.5px"), 22.5 },
+        { Converter::ArkValue<Ark_Length>("-22.5px"), -22.5 },
+        { Converter::ArkValue<Ark_Length>("7.0vp"), 7 },
+        { Converter::ArkValue<Ark_Length>("-7.0vp"), -7 },
+        { Converter::ArkValue<Ark_Length>("1.5vp"), 1.5 },
+        { Converter::ArkValue<Ark_Length>("-1.5vp"), -1.5 },
+        { Converter::ArkValue<Ark_Length>("65.0fp"), 65 },
+        { Converter::ArkValue<Ark_Length>("-65.0fp"), -65 },
+        { Converter::ArkValue<Ark_Length>("4.5fp"), 4.5 },
+        { Converter::ArkValue<Ark_Length>("-4.5fp"), -4.5 },
+        { Converter::ArkValue<Ark_Length>("12%"), 0 },
+        { Converter::ArkValue<Ark_Length>("-12%"), 0 },
         { RES_ARK_LENGTH, 10 },
     };
 
-    Ark_Length arkDx = Converter::ArkValue<Ark_Length>(0._px);
-    Opt_Length opt1 = Converter::ArkValue<Opt_Length>(arkDx);
+    Ark_Length arkDx = Converter::ArkValue<Ark_Length>("0px");
 
     for (const auto &[arkLength, expected]: testPlan) {
         EXPECT_CALL(*mockScrollerController_, ScrollBy(0, expected, false)).Times(1);
-        Opt_Length optArkLength = Converter::ArkValue<Opt_Length>(arkLength);
-        accessor_->scrollBy(peer_, &opt1, &optArkLength);
+        accessor_->scrollBy(peer_, &arkDx, &arkLength);
     }
 }
 

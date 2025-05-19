@@ -145,15 +145,14 @@ FrameNode* GetChildNode(RefPtr<FrameNode> nodeRef, int32_t index, int32_t expand
     }
 }
 Ark_FrameNode GetChildImpl(Ark_FrameNode peer,
-                           const Ark_Number* index,
-                           const Ark_Number* expandMode)
+                           const Ark_Number* index)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(peerNode, nullptr);
     CHECK_NULL_RETURN(index, nullptr);
     auto indexInt = Converter::Convert<int32_t>(*index);
     CHECK_NULL_RETURN(indexInt > -1, nullptr);
-    auto expandModeInt = Converter::Convert<int32_t>(*expandMode);
+    auto expandModeInt = 0; //Converter::Convert<int32_t>(*expandMode);
     auto child = GetChildNode(peerNode, indexInt, expandModeInt);
     CHECK_NULL_RETURN(child, nullptr);
     return FrameNodePeer::Create(child);
@@ -372,7 +371,6 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
         FrameNodeAccessor::DestroyPeerImpl,
         FrameNodeAccessor::CtorImpl,
         FrameNodeAccessor::GetFinalizerImpl,
-        // FrameNodeAccessor::CtorFrameNodeImpl,
         FrameNodeAccessor::IsModifiableImpl,
         FrameNodeAccessor::AppendChildImpl,
         FrameNodeAccessor::InsertChildAfterImpl,
@@ -388,13 +386,6 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
         FrameNodeAccessor::GetOpacityImpl,
         FrameNodeAccessor::GetPositionToWindowWithTransformImpl,
         FrameNodeAccessor::GetFrameNodeByKeyImpl,
-        FrameNodeAccessor::GetIdByFrameNodeImpl,
-        FrameNodeAccessor::MoveToImpl,
-        FrameNodeAccessor::GetFirstChildIndexWithoutExpandImpl,
-        FrameNodeAccessor::GetLastChildIndexWithoutExpandImpl,
-        FrameNodeAccessor::GetAttachedFrameNodeByIdImpl,
-        FrameNodeAccessor::GetFrameNodeByIdImpl,
-        FrameNodeAccessor::GetFrameNodeByUniqueIdImpl,
     };
     return &FrameNodeAccessorImpl;
 }

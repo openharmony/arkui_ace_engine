@@ -33,7 +33,8 @@ void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
     auto navigationStack = stack->GetNavPathStack();
     CHECK_NULL_VOID(navigationStack);
     auto updater = [callback = CallbackHelper(*callback)]() {
-        callback.Invoke();
+        Ark_String name{};
+        callback.Invoke(name);
     };
     navigationStack->SetOnStateChangedCallback(std::move(updater));
 }
@@ -251,15 +252,6 @@ const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
         NavExtenderAccessor::SetTitleModeImpl,
         NavExtenderAccessor::TitleImpl,
         NavExtenderAccessor::SubTitleImpl,
-        NavExtenderAccessor::PushPathImpl,
-        NavExtenderAccessor::ReplacePathImpl,
-        NavExtenderAccessor::PopImpl,
-        NavExtenderAccessor::GetIdByIndexImpl,
-        NavExtenderAccessor::GetIdByNameImpl,
-        NavExtenderAccessor::SetOnPopCallbackImpl,
-        NavExtenderAccessor::GetNavDestinationIdImpl,
-        NavExtenderAccessor::PopToIndexImpl,
-        NavExtenderAccessor::PopToNameImpl,
     };
     return &NavExtenderAccessorImpl;
 }

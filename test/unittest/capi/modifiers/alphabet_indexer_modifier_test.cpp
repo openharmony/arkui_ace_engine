@@ -270,23 +270,23 @@ const std::vector<AlignTestStep> ALIGN_TEST_PLAN = {
 
 const std::vector<OptLengthTestStep> POPUP_HORIZONTAL_OFFSET_TEST_PLAN = {
     { Converter::ArkValue<Opt_Length>(15.4f), "15.40vp" },
-    { Converter::ArkValue<Opt_Length>(22.11_px), "22.11px" },
+    { Converter::ArkValue<Opt_Length>("22.11px"), "22.11px" },
     { Converter::ArkValue<Opt_Length>("99.00%"), "99.00%" },
-    { Converter::ArkValue<Opt_Length>(13.0_vp), "13.00vp" },
+    { Converter::ArkValue<Opt_Length>("13.0vp"), "13.00vp" },
     { Converter::ArkValue<Opt_Length>("-55.00%"), ATTRIBUTE_POPUP_HORIZONTAL_SPACE_DEFAULT_VALUE },
     { Converter::ArkValue<Opt_Length>("55.00%"), "55.00%" },
-    { Converter::ArkValue<Opt_Length>(-3.12_px), ATTRIBUTE_POPUP_HORIZONTAL_SPACE_DEFAULT_VALUE }
+    { Converter::ArkValue<Opt_Length>("-3.12px"), ATTRIBUTE_POPUP_HORIZONTAL_SPACE_DEFAULT_VALUE }
 };
 
 typedef std::pair<Ark_Length, std::string> PopupPositionTestStep;
 static const std::vector<PopupPositionTestStep> POPUP_POSITION_TEST_PLAN = {
     { Converter::ArkValue<Ark_Length>(15.4f), "15.40vp" },
-    { Converter::ArkValue<Ark_Length>(22.11_px), "22.11px" },
+    { Converter::ArkValue<Ark_Length>("22.11px"), "22.11px" },
     { Converter::ArkValue<Ark_Length>("99.00%"), "99.00%" },
-    { Converter::ArkValue<Ark_Length>(13.0_vp), "13.00vp" },
+    { Converter::ArkValue<Ark_Length>("13.0vp"), "13.00vp" },
     { Converter::ArkValue<Ark_Length>("-55.00%"), "-55.00%" },
     { Converter::ArkValue<Ark_Length>("55.00%"), "55.00%" },
-    { Converter::ArkValue<Ark_Length>(-3.12_px), "-3.12px" }
+    { Converter::ArkValue<Ark_Length>("-3.12px"), "-3.12px" }
 };
 
 typedef std::pair<Ark_BlurStyle, std::string> BlurStyleTestStep;

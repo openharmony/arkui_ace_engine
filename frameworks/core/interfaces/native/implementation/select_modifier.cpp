@@ -108,7 +108,6 @@ namespace SelectAttributeModifier {
     void Space1Impl(Ark_NativePointer node, const Opt_Length* value);
     void OptionWidth1Impl(Ark_NativePointer node,
         const Opt_Union_Dimension_OptionWidthMode* value);
-    void OptionHeight1Impl(Ark_NativePointer node, const Opt_Length* value);
     void MenuBackgroundBlurStyle1Impl(Ark_NativePointer node, const Opt_BlurStyle* value);
     void MenuAlign1Impl(Ark_NativePointer node, const Opt_MenuAlignType* alignType, const Opt_Offset* offset);
 }
@@ -368,7 +367,7 @@ void OptionWidth1Impl(Ark_NativePointer node,
         return;
     }
     Converter::VisitUnion(arkUnion.value(),
-        [frameNode](const Ark_Length& value) {
+        [frameNode](const Ark_Dimension& value) {
             auto width = Converter::OptConvert<Dimension>(value);
             Validator::ValidateNonNegative(width);
             Validator::ValidateNonPercent(width);
@@ -386,16 +385,16 @@ void OptionWidth1Impl(Ark_NativePointer node,
 void OptionHeight0Impl(Ark_NativePointer node,
                        const Opt_Dimension* value)
 {
-    OptionHeight1Impl(node, value);
-}
-void OptionHeight1Impl(Ark_NativePointer node,
-                       const Opt_Dimension* value)
-{
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
     Validator::ValidatePositive(convValue);
     SelectModelStatic::SetOptionHeight(frameNode, convValue);
+}
+void OptionHeight1Impl(Ark_NativePointer node,
+                       const Opt_Dimension* value)
+{
+    OptionHeight0Impl(node, value);
 }
 void MenuBackgroundColor0Impl(Ark_NativePointer node,
                               const Opt_ResourceColor* value)

@@ -627,7 +627,7 @@ void AssignCast(std::optional<EllipsisMode>& dst, const Ark_EllipsisMode& src)
 {
     switch (src) {
         case ARK_ELLIPSIS_MODE_START: dst = EllipsisMode::HEAD; break;
-        case ARK_ELLIPSIS_MODE_CENTER: dst = EllipsisMode::MIDDLE; break;
+        case ARK_ELLIPSIS_MODE_MIDDLE: dst = EllipsisMode::MIDDLE; break;
         case ARK_ELLIPSIS_MODE_END: dst = EllipsisMode::TAIL; break;
         default: LOGE("Unexpected enum value in Ark_EllipsisMode: %{public}d", src);
     }

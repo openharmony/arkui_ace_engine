@@ -59,16 +59,29 @@ PaddingPropertyT<Dimension> Convert(const Ark_Padding& src)
     padding.bottom = Converter::OptConvert<Dimension>(src.bottom);
     return padding;
 }
-template<>
-PaddingPropertyT<Dimension> Convert(const Ark_Length& src)
+static PaddingPropertyT<Dimension> PaddingPropertyFromDimension(const std::optional<Dimension>& value)
 {
     PaddingPropertyT<Dimension> padding;
-    auto value = Converter::Convert<Dimension>(src);
     padding.left = value;
     padding.top = value;
     padding.right = value;
     padding.bottom = value;
     return padding;
+}
+template<>
+PaddingPropertyT<Dimension> Convert(const Ark_Number& src)
+{
+    return PaddingPropertyFromDimension(OptConvert<Dimension>(src));
+}
+template<>
+PaddingPropertyT<Dimension> Convert(const Ark_String& src)
+{
+    return PaddingPropertyFromDimension(OptConvert<Dimension>(src));
+}
+template<>
+PaddingPropertyT<Dimension> Convert(const Ark_Resource& src)
+{
+    return PaddingPropertyFromDimension(OptConvert<Dimension>(src));
 }
 } //namespace OHOS::Ace::NG::Converter
 

@@ -52,6 +52,25 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
+namespace OHOS::Ace {
+namespace Converter = OHOS::Ace::NG::Converter;
+void AssignArkValue(Ark_NativeEmbedInfo& dst, const EmbedInfo& src, Converter::ConvContext *ctx)
+{
+    dst.width = Converter::ArkValue<Opt_Number>(src.width);
+    dst.height = Converter::ArkValue<Opt_Number>(src.height);
+    dst.id = Converter::ArkValue<Opt_String>(src.id, ctx);
+    dst.src = Converter::ArkValue<Opt_String>(src.src, ctx);
+    dst.tag = Converter::ArkValue<Opt_String>(src.tag, ctx);
+    dst.type = Converter::ArkValue<Opt_String>(src.type, ctx);
+    dst.url = Converter::ArkValue<Opt_String>(src.url, ctx);
+    Ark_Position position;
+    position.x = Converter::ArkValue<Opt_Length>(src.x, ctx);
+    position.y = Converter::ArkValue<Opt_Length>(src.y, ctx);
+    dst.position = Converter::ArkValue<Opt_Position>(position, ctx);
+}
+
+} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier {
 
 void OnPageEnd(const CallbackHelper<Callback_OnPageEndEvent_Void>& arkCallback,
@@ -1044,11 +1063,12 @@ void OnIntelligentTrackingPrevention(const CallbackHelper<OnIntelligentTrackingP
 void OnNativeEmbedDataInfo(const CallbackHelper<Callback_NativeEmbedDataInfo_Void>& arkCallback,
     int32_t instanceId, const BaseEventInfo* info)
 {
+    Converter::ConvContext ctx;
     ContainerScope scope(instanceId);
     auto* eventInfo = TypeInfoHelper::DynamicCast<NativeEmbedDataInfo>(info);
     CHECK_NULL_VOID(eventInfo);
     Ark_NativeEmbedDataInfo parameter;
-    parameter.embedId = Converter::ArkValue<Opt_String>(eventInfo->GetEmbedId());
+    parameter.embedId = Converter::ArkValue<Opt_String>(eventInfo->GetEmbedId(), &ctx);
     auto emebdInfo = eventInfo->GetEmebdInfo();
     Map_String_String map;
     map.size = static_cast<Ark_Int32>(emebdInfo.params.size());
@@ -1065,11 +1085,11 @@ void OnNativeEmbedDataInfo(const CallbackHelper<Callback_NativeEmbedDataInfo_Voi
     Converter::ArkArrayHolder<Array_String> vecValueHolder(value);
     auto arkValues = vecValueHolder.ArkValue();
     map.values = arkValues.array;
-    Ark_NativeEmbedInfo arkInfo = Converter::ArkValue<Ark_NativeEmbedInfo>(emebdInfo);
+    Ark_NativeEmbedInfo arkInfo = Converter::ArkValue<Ark_NativeEmbedInfo>(emebdInfo, &ctx);
     arkInfo.params = Converter::ArkValue<Opt_Map_String_String>(map);
-    parameter.info = Converter::ArkValue<Opt_NativeEmbedInfo>(arkInfo);
+    parameter.info = Converter::ArkValue<Opt_NativeEmbedInfo>(arkInfo, &ctx);
     parameter.status = Converter::ArkValue<Opt_NativeEmbedStatus>(eventInfo->GetStatus());
-    parameter.surfaceId = Converter::ArkValue<Opt_String>(eventInfo->GetSurfaceId());
+    parameter.surfaceId = Converter::ArkValue<Opt_String>(eventInfo->GetSurfaceId(), &ctx);
     arkCallback.Invoke(parameter);
 }
 

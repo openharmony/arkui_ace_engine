@@ -128,7 +128,7 @@ auto g_setBottomTabBarStyle = [](FrameNode* frameNode, const Ark_BottomTabBarSty
         [&optPadding](const Ark_Padding& arkPadding) {
             optPadding = Converter::OptConvert<PaddingProperty>(arkPadding);
         },
-        [&optPadding](const Ark_Length& arkLength) {
+        [&optPadding](const Ark_Dimension& arkLength) {
             optPadding = Converter::OptConvert<PaddingProperty>(arkLength);
         },
         [&optPadding, &useLocalizedPadding](const Ark_LocalizedPadding& arkLocalizedPadding) {
@@ -215,7 +215,7 @@ void AssignCast(std::optional<LayoutMode>& dst, const Ark_LayoutMode& src)
 }
 
 template<>
-void AssignCast(std::optional<IndicatorStyle>& dst, const Ark_SubTabBarIndicatorStyle& src)
+void AssignCast(std::optional<IndicatorStyle>& dst, const Ark_IndicatorStyle& src)
 {
     dst = IndicatorStyle();
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
@@ -257,7 +257,7 @@ void AssignCast(std::optional<IndicatorStyle>& dst, const Ark_SubTabBarIndicator
 }
 
 template<>
-void AssignCast(std::optional<LabelStyle>& dst, const Ark_TabBarLabelStyle& src)
+void AssignCast(std::optional<LabelStyle>& dst, const Ark_LabelStyle& src)
 {
     dst = LabelStyle();
     dst->textOverflow = Converter::OptConvert<TextOverflow>(src.overflow);

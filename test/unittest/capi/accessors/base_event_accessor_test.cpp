@@ -99,8 +99,8 @@ HWTEST_F(BaseEventAccessorTest, GetTargetTest, TestSize.Level1)
     baseEvent_->SetTarget(target);
     auto result = accessor_->getTarget(peer_);
 
-    EXPECT_EQ(Converter::Convert<Dimension>(result.area.height), height);
-    EXPECT_EQ(Converter::Convert<Dimension>(result.area.width), width);
+    EXPECT_EQ(Converter::OptConvert<Dimension>(result.area.height), height);
+    EXPECT_EQ(Converter::OptConvert<Dimension>(result.area.width), width);
 
     auto optOffsetX = Converter::OptConvert<Dimension>(result.area.position.x);
     ASSERT_TRUE(optOffsetX.has_value());

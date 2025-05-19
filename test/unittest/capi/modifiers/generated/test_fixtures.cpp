@@ -1503,39 +1503,6 @@ std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureOpaci
         "1.000000" },
 };
 
-// Fixture 'FixtureNavBarWidthRange' for type 'Ark_Tuple_Dimension_Dimension'
-std::vector<std::tuple<std::string, Ark_Tuple_Dimension_Dimension, std::string>>
-    testFixtureFixtureNavBarWidthRangeValidValues = {
-        { "std::pair<const Dimension, Dimension>{0.1_fp, 10.0_vp}",
-            Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(
-                std::pair<const Dimension, Dimension> { 0.1_fp, 10.0_vp }),
-            "0.10fp, 10.00vp" },
-        { "std::pair<const Dimension, Dimension>{0.1_px, 112.0_vp}",
-            Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(
-                std::pair<const Dimension, Dimension> { 0.1_px, 112.0_vp }),
-            "0.10px, 112.00vp" },
-        { "std::pair<const Dimension, Dimension>{5, 6}",
-            Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<const Dimension, Dimension> { 5, 6 }),
-            "5.00px, 6.00px" },
-        { "std::pair<const Dimension, Dimension>{0.5_pct, 100}",
-            Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<const Dimension, Dimension> { 0.5_pct, 100 }),
-            "50.00%, 100.00px" },
-    };
-
-std::vector<std::tuple<std::string, Ark_Tuple_Dimension_Dimension>> testFixtureFixtureNavBarWidthRangeInvalidValues = {
-    { "std::pair<const Dimension, Dimension>{0, 0}",
-        Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<const Dimension, Dimension> { 0, 0 }) },
-    { "std::pair<const Dimension, Dimension>{-0.1f, INT_MIN}",
-        Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<const Dimension, Dimension> { -0.1f, INT_MIN }) },
-    { "std::pair<const Dimension, Dimension>{-123._px, 0._fp}",
-        Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<const Dimension, Dimension> { -123._px, 0._fp }) },
-    { "std::pair<const Dimension, Dimension>{0, -0.15_pct}",
-        Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<const Dimension, Dimension> { 0, -0.15_pct }) },
-    { "std::pair<const Dimension, Dimension>{0._px, -432.01_vp}",
-        Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(
-            std::pair<const Dimension, Dimension> { 0._px, -432.01_vp }) },
-};
-
 // Fixture 'TextInputBarState' for type 'Ark_BarState'
 std::vector<std::tuple<std::string, Ark_BarState, std::string>> testFixtureTextInputBarStateValidValues = {
     { "ARK_BAR_STATE_OFF", Converter::ArkValue<Ark_BarState>(ARK_BAR_STATE_OFF), "BarState.OFF" },

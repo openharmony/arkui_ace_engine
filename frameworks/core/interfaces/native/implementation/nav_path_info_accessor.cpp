@@ -57,13 +57,16 @@ void DestroyPeerImpl(Ark_NavPathInfo peer)
 {
     delete peer;
 }
-Ark_NavPathInfo CtorImpl(const Ark_String* name, Ark_Boolean isEntry)
+Ark_NavPathInfo CtorImpl(const Ark_String* name,
+                         const Ark_Object* param,
+                         const Opt_Callback_PopInfo_Void* onPop,
+                         const Opt_Boolean* isEntry)
 {
     CHECK_NULL_RETURN(name, nullptr);
     auto peer = new NavPathInfoPeer();
     CHECK_NULL_RETURN(peer, nullptr);
     peer->data.name_ = Convert<std::string>(*name);
-    peer->data.isEntry_ = Converter::Convert<bool>(isEntry);
+    peer->data.isEntry_ = Converter::OptConvert<bool>(*isEntry).value_or(peer->data.isEntry_);
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -108,11 +111,11 @@ void SetOnPopImpl(Ark_NavPathInfo peer,
     CHECK_NULL_VOID(onPop);
     peer->data.onPop_ = CallbackHelper(*onPop);
 }
-Ark_Boolean GetIsEntryImpl(Ark_NavPathInfo peer)
+Opt_Boolean GetIsEntryImpl(Ark_NavPathInfo peer)
 {
-    auto invalid = Converter::ArkValue<Ark_Boolean>(false);
+    auto invalid = Converter::ArkValue<Opt_Boolean>(false);
     CHECK_NULL_RETURN(peer, invalid);
-    return ArkValue<Ark_Boolean>(peer->data.isEntry_);
+    return ArkValue<Opt_Boolean>(peer->data.isEntry_);
 }
 void SetIsEntryImpl(Ark_NavPathInfo peer,
                     Ark_Boolean isEntry)
@@ -120,11 +123,11 @@ void SetIsEntryImpl(Ark_NavPathInfo peer,
     CHECK_NULL_VOID(peer);
     peer->data.isEntry_ = Convert<bool>(isEntry);
 }
-Ark_String GetNavDestinationIdImpl(Ark_NavPathInfo peer)
+Opt_String GetNavDestinationIdImpl(Ark_NavPathInfo peer)
 {
-    auto invalidVal = Converter::ArkValue<Ark_String>("", Converter::FC);
+    auto invalidVal = Converter::ArkValue<Opt_String>("", Converter::FC);
     CHECK_NULL_RETURN(peer, invalidVal);
-    return Converter::ArkValue<Ark_String>(peer->data.navDestinationId_.value_or(""), Converter::FC);
+    return Converter::ArkValue<Opt_String>(peer->data.navDestinationId_, Converter::FC);
 }
 void SetNavDestinationIdImpl(Ark_NavPathInfo peer,
                              const Ark_String* navDestinationId)

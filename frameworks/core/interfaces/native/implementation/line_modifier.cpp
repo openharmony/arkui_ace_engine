@@ -41,6 +41,19 @@ LineOptions Convert(const Ark_LineOptions& src)
     return options;
 }
 
+template<>
+ShapePoint Convert(const Array_Length& src)
+{
+    ShapePoint point = {0.0_vp, 0.0_vp};
+    if (src.length < SHAPE_POINT_DIM) {
+        return point;
+    }
+    auto x = Converter::OptConvert<Dimension>(src.array[0]);
+    auto y = Converter::OptConvert<Dimension>(src.array[1]);
+    point.first = x.value_or(0.0_vp);
+    point.second = y.value_or(0.0_vp);
+    return point;
+}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -74,7 +87,7 @@ void SetLineOptionsImpl(Ark_NativePointer node,
 } // LineInterfaceModifier
 namespace LineAttributeModifier {
 void StartPointImpl(Ark_NativePointer node,
-                    const Opt_ShapePoint* value)
+                    const Opt_Array_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -86,7 +99,7 @@ void StartPointImpl(Ark_NativePointer node,
     LineModelNG::StartPoint(frameNode, *convValue);
 }
 void EndPointImpl(Ark_NativePointer node,
-                  const Opt_ShapePoint* value)
+                  const Opt_Array_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

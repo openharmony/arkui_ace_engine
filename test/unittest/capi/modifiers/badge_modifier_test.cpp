@@ -260,7 +260,7 @@ HWTEST_F(BadgeModifierTest, DISABLED_setBadgeOptions0TestValidValues, TestSize.L
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#FF00FF00")),
         .borderColor =
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xFF0000FF)),
-        .borderWidth = Converter::ArkValue<Opt_Length>(Dimension(2.45f, DimensionUnit::VP)),
+        .borderWidth = Converter::ArkValue<Opt_Length>("2.45vp"),
         .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(
             Converter::ArkValue<Ark_FontWeight>(FontWeight::MEDIUM)),
     };
@@ -314,8 +314,8 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions0TestInvalidValues, TestSize.Level1)
     InitNumberOptions(inputValueOptions);
 
     Ark_Position position;
-    position.x = Converter::ArkValue<Opt_Length>(Dimension(-12.00));
-    position.y = Converter::ArkValue<Opt_Length>(Dimension(-14.00));
+    position.x = Converter::ArkValue<Opt_Length>(-12.00);
+    position.y = Converter::ArkValue<Opt_Length>(-14.00);
 
     inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_Position>(position);
     inputValueOptions.style = {
@@ -327,7 +327,7 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions0TestInvalidValues, TestSize.Level1)
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("-100 color")),
         .borderColor =
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("no color")),
-        .borderWidth = Converter::ArkValue<Opt_Length>(Dimension(-2.45f, DimensionUnit::VP)),
+        .borderWidth = Converter::ArkValue<Opt_Length>("-2.45vp"),
         .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(
             Converter::ArkValue<Ark_FontWeight>(static_cast<FontWeight>(-100))),
     };
@@ -490,8 +490,8 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions1TestInvalidValues, TestSize.Level1)
     InitStringOptions(inputValueOptions);
 
     Ark_Position position;
-    position.x = Converter::ArkValue<Opt_Length>(Dimension(-12.00, DimensionUnit::PX));
-    position.y = Converter::ArkValue<Opt_Length>(Dimension(-10.00, DimensionUnit::PX));
+    position.x = Converter::ArkValue<Opt_Length>("-12.00px");
+    position.y = Converter::ArkValue<Opt_Length>("-10.00px");
 
     inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_Position>(position);
     inputValueOptions.style = {
@@ -503,7 +503,7 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions1TestInvalidValues, TestSize.Level1)
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("no color")),
         .borderColor =
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("blue color")),
-        .borderWidth = Converter::ArkValue<Opt_Length>(Dimension(0.55f, DimensionUnit::PERCENT)),
+        .borderWidth = Converter::ArkValue<Opt_Length>("55%"),
         .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(-100),
     };
     inputValueOptions.value = Converter::ArkValue<Ark_String>("");

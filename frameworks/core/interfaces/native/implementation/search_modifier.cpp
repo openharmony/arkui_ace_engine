@@ -484,10 +484,7 @@ void MinFontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<Dimension> optValue = std::nullopt;
-    if (value->tag != INTEROP_TAG_UNDEFINED) {
-        optValue = Converter::OptConvertFromArkNumStrRes(value->value);
-    }
+    auto optValue = Converter::OptConvert<Dimension>(*value);
     resetNegative(optValue);
     resetPercent(optValue);
     SearchModelStatic::SetAdaptMinFontSize(frameNode, optValue);
@@ -497,10 +494,7 @@ void MaxFontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<Dimension> optValue = std::nullopt;
-    if (value->tag != INTEROP_TAG_UNDEFINED) {
-        optValue = Converter::OptConvertFromArkNumStrRes(value->value);
-    }
+    auto optValue = Converter::OptConvert<Dimension>(*value);
     resetNegative(optValue);
     resetPercent(optValue);
     SearchModelStatic::SetAdaptMaxFontSize(frameNode, optValue);

@@ -79,25 +79,13 @@ RefPtr<ImageSpan> Convert(const Ark_ImageAttachmentInterface& value)
     return AceType::MakeRefPtr<ImageSpan>(imageOptions);
 }
 
-void AssignArkValue(Ark_ImageAttachmentLayoutStyle& dst, const ImageSpanAttribute& src)
+void AssignArkValue(Ark_ImageAttachmentLayoutStyle& dst, const ImageSpanAttribute& src, ConvContext *ctx)
 {
     Ark_ImageAttachmentLayoutStyle style = {
-        .margin = ArkUnion<Opt_Union_LengthMetrics_Margin>(Ark_Empty()),
-        .padding = ArkUnion<Opt_Union_LengthMetrics_Padding>(Ark_Empty()),
-        .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses>(Ark_Empty()),
+        .margin = ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_Padding>(src.marginProp, ctx),
+        .padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(src.paddingProp, ctx),
+        .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_BorderRadiuses>(src.borderRadius, ctx),
     };
-    if (src.marginProp) {
-        auto arkMargin = ArkValue<Ark_Padding>(*(src.marginProp));
-        style.margin = ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_Padding>(arkMargin);
-    }
-    if (src.paddingProp) {
-        auto arkPadding = ArkValue<Ark_Padding>(*(src.paddingProp));
-        style.padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(arkPadding);
-    }
-    if (src.borderRadius) {
-        auto arkBorder = ArkValue<Ark_BorderRadiuses>(*src.borderRadius);
-        style.borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_BorderRadiuses>(arkBorder);
-    }
     dst = style;
 }
 } // namespace Converter
@@ -147,8 +135,8 @@ Opt_SizeOptions GetSizeImpl(Ark_ImageAttachment peer)
     CHECK_NULL_RETURN(peer->span->GetImageAttribute(), invalid);
     CHECK_NULL_RETURN(peer->span->GetImageAttribute()->size, invalid);
     Ark_SizeOptions size;
-    size.width = ArkValue<Opt_Length>(peer->span->GetImageAttribute()->size->width);
-    size.height = ArkValue<Opt_Length>(peer->span->GetImageAttribute()->size->height);
+    size.width = ArkValue<Opt_Length>(peer->span->GetImageAttribute()->size->width, Converter::FC);
+    size.height = ArkValue<Opt_Length>(peer->span->GetImageAttribute()->size->height, Converter::FC);
     return Converter::ArkValue<Opt_SizeOptions>(size);
 }
 Opt_ImageSpanAlignment GetVerticalAlignImpl(Ark_ImageAttachment peer)
@@ -171,7 +159,7 @@ Opt_ImageAttachmentLayoutStyle GetLayoutStyleImpl(Ark_ImageAttachment peer)
     auto invalid = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>();
     CHECK_NULL_RETURN(peer, invalid);
     CHECK_NULL_RETURN(peer->span, invalid);
-    return ArkValue<Opt_ImageAttachmentLayoutStyle>(peer->span->GetImageAttribute());
+    return ArkValue<Opt_ImageAttachmentLayoutStyle>(peer->span->GetImageAttribute(), Converter::FC);
 }
 Opt_ColorFilterType GetColorFilterImpl(Ark_ImageAttachment peer)
 {

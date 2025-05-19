@@ -1132,12 +1132,12 @@ HWTEST_F(ButtonModifierTest, setFontSizeTestValidValues, TestSize.Level1)
     static const std::vector<OneTestStep> testPlan = {
         { ArkValue<Opt_Length>(1.0f),  "1.00vp" },
         { ArkValue<Opt_Length>(2.45f), "2.45vp" },
-        { ArkValue<Opt_Length>(5.0_px), "5.00px" },
-        { ArkValue<Opt_Length>(22.35_px), "22.35px" },
-        { ArkValue<Opt_Length>(7.0_vp), "7.00vp" },
-        { ArkValue<Opt_Length>(1.65_vp), "1.65vp" },
-        { ArkValue<Opt_Length>(65.0_fp), "65.00fp" },
-        { ArkValue<Opt_Length>(4.3_fp), "4.30fp" },
+        { ArkValue<Opt_Length>("5.0px"), "5.00px" },
+        { ArkValue<Opt_Length>("22.35px"), "22.35px" },
+        { ArkValue<Opt_Length>("7.0vp"), "7.00vp" },
+        { ArkValue<Opt_Length>("1.65vp"), "1.65vp" },
+        { ArkValue<Opt_Length>("65.0fp"), "65.00fp" },
+        { ArkValue<Opt_Length>("4.3fp"), "4.30fp" },
     };
 
     for (const auto &[optLength, expected]: testPlan) {
@@ -1162,7 +1162,7 @@ HWTEST_F(ButtonModifierTest, setFontSizeTestInvalidValues, TestSize.Level1)
     static const std::vector<OneTestStep> testPlan = {
         { ArkValue<Opt_Length>("23.00%"), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
         { ArkValue<Opt_Length>(-0.1f), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
-        { ArkValue<Opt_Length>(-5.0_px), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
+        { ArkValue<Opt_Length>("-5.0px"), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
     };
 
     for (const auto &[optLength, expected]: testPlan) {
@@ -1643,12 +1643,12 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontSizeValidValues, TestSize.Leve
     static const std::vector<OneTestStep> testPlanValid = {
         { ArkValue<Opt_Length>(1.0f),  "1.00vp" },
         { ArkValue<Opt_Length>(2.45f), "2.45vp" },
-        { ArkValue<Opt_Length>(5.0_px), "5.00px" },
-        { ArkValue<Opt_Length>(22.35_px), "22.35px" },
-        { ArkValue<Opt_Length>(7.0_vp), "7.00vp" },
-        { ArkValue<Opt_Length>(1.65_vp), "1.65vp" },
-        { ArkValue<Opt_Length>(65.0_fp), "65.00fp" },
-        { ArkValue<Opt_Length>(4.3_fp), "4.30fp" },
+        { ArkValue<Opt_Length>("5.0px"), "5.00px" },
+        { ArkValue<Opt_Length>("22.35px"), "22.35px" },
+        { ArkValue<Opt_Length>("7.0vp"), "7.00vp" },
+        { ArkValue<Opt_Length>("1.65vp"), "1.65vp" },
+        { ArkValue<Opt_Length>("65.0fp"), "65.00fp" },
+        { ArkValue<Opt_Length>("4.3fp"), "4.30fp" },
     };
 
     for (const auto &[value, expectValue]: testPlanValid) {
@@ -1680,7 +1680,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontSizeInvalidValues, TestSize.Le
     static const std::vector<OneTestStep> testPlanInvalid = {
         { ArkValue<Opt_Length>("23.00%"), "0.00px" },
         { ArkValue<Opt_Length>(-0.1f), "0.00px"},
-        { ArkValue<Opt_Length>(-5.0_px), "0.00px" },
+        { ArkValue<Opt_Length>("-5.0px"), "0.00px" },
     };
     for (const auto &[value, expectValue]: testPlanInvalid) {
         fontLabel.size = value;
@@ -1810,7 +1810,7 @@ HWTEST_F(ButtonModifierTest, DISABLED_setMinFontScaleTestInvalidValues, TestSize
     initValueMinFontScale = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(2.1));
         auto checkValue = [this, &initValueMinFontScale](const std::string& input,  const std::string& expectedStr,
                                                          const Ark_Union_Number_Resource& value) {
-       
+
         auto optInputValueMinFontScale = Converter::ArkValue<Opt_Union_Number_Resource>(initValueMinFontScale);
         modifier_->setMinFontScale(node_, &optInputValueMinFontScale);
         optInputValueMinFontScale = Converter::ArkValue<Opt_Union_Number_Resource>(value);

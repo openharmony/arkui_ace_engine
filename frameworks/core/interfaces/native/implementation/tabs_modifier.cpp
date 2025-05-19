@@ -38,7 +38,7 @@ template<>
 TabsItemDivider Convert(const Ark_DividerStyle& src)
 {
     auto dst = TabsItemDivider{}; // this struct is initialized by default
-    dst.strokeWidth = Convert<Dimension>(src.strokeWidth);
+    dst.strokeWidth = OptConvert<Dimension>(src.strokeWidth).value_or(dst.strokeWidth);
     auto colorOpt = OptConvert<Color>(src.color);
     if (colorOpt.has_value()) {
         dst.color = colorOpt.value();

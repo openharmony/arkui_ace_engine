@@ -137,12 +137,12 @@ void SetOnTouchEventImpl(Ark_NativePointer self, const Opt_Callback_TouchEvent_V
 {
     auto frameNode = reinterpret_cast<FrameNode *>(self);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
-        ViewAbstract::DisableOnTouch(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
         return;
     }
-    auto onEvent = [callback = CallbackHelper(value->value)](TouchEventInfo& info) {
+    auto onEvent = [callback = CallbackHelper(*optValue)](TouchEventInfo& info) {
         const auto event = Converter::ArkTouchEventSync(info);
         callback.Invoke(event.ArkValue());
     };
@@ -154,13 +154,6 @@ const GENERATED_ArkUINodeContainerModifier* GetNodeContainerModifier()
     static const GENERATED_ArkUINodeContainerModifier ArkUINodeContainerModifierImpl {
         NodeContainerModifier::ConstructImpl,
         NodeContainerInterfaceModifier::SetNodeContainerOptionsImpl,
-        NodeContainerInterfaceModifier::AddNodeContainerRootNodeImpl,
-        NodeContainerInterfaceModifier::SetAboutToAppearImpl,
-        NodeContainerInterfaceModifier::SetAboutToDisappearImpl,
-        NodeContainerInterfaceModifier::SetAboutToResizeImpl,
-        NodeContainerInterfaceModifier::SetOnAttachImpl,
-        NodeContainerInterfaceModifier::SetOnDetachImpl,
-        NodeContainerInterfaceModifier::SetOnTouchEventImpl,
     };
     return &ArkUINodeContainerModifierImpl;
 }

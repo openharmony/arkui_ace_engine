@@ -70,7 +70,7 @@ constexpr int TEST_START_PSST = TEST_START_URL + TEST_LENGTH + 1;
 constexpr int TEST_START_PSPM = TEST_START_PSST + TEST_LENGTH + 1;
 constexpr auto STRING_TEST_VALUE = "This is a test string for styled text, and more text to test it out.\n";
 
-
+static Converter::ConvContext s_ctx;
 PixelMapPeer* CreatePixelMap()
 {
     static PixelMapPeer pixelMapPeer;
@@ -142,9 +142,9 @@ const std::tuple<Ace::WordBreak, Ark_WordBreak> TEST_PSST_WORD_BREAK = {
 const std::tuple<std::string, Dimension> TEST_PSST_LEADING_MARGIN = { "width: 2.00vp height: 2.00vp", 2.0_vp };
 const std::tuple<std::string, Ark_Tuple_Dimension_Dimension> TEST_TUPLE_DIMENSION_DIMENSION = {
     "width: 0.10fp height: 10.00vp",
-    Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<const Dimension, Dimension> {
+    Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<const Dimension, const Dimension> {
         0.1_fp, 10.0_vp
-    })};
+    }, &s_ctx)};
 const Ark_LeadingMarginPlaceholder TEST_PSPM_LEADING_MARGIN {
     .pixelMap = TEST_PIXELMAP,
     .size = std::get<1>(TEST_TUPLE_DIMENSION_DIMENSION)
@@ -330,7 +330,7 @@ private:
         Ark_TextBackgroundStyle textBackgroundStyle = {
             .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(TEST_BGCL_COLOR)),
             .radius = Converter::ArkUnion<
-                Opt_Union_Dimension_BorderRadiuses, Ark_Length>(std::get<1>(TEST_BGCL_RADIUS))
+                Opt_Union_Dimension_BorderRadiuses, Ark_Dimension>(std::get<1>(TEST_BGCL_RADIUS))
         };
         peerBackgroundColorStyle = GeneratedModifier::GetBackgroundColorStyleAccessor()->ctor(&textBackgroundStyle);
         styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_BackgroundColorStyle>(peerBackgroundColorStyle);

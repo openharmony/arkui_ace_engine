@@ -117,21 +117,6 @@ MenuOptionsParam Convert(const Ark_ExpandedMenuItemOptions& src)
     return menuOption;
 }
 
-void AssignArkValue(Ark_NativeEmbedInfo& dst, const EmbedInfo& src)
-{
-    dst.width = Converter::ArkValue<Opt_Number>(src.width);
-    dst.height = Converter::ArkValue<Opt_Number>(src.height);
-    dst.id = Converter::ArkValue<Opt_String>(src.id);
-    dst.src = Converter::ArkValue<Opt_String>(src.src);
-    dst.tag = Converter::ArkValue<Opt_String>(src.tag);
-    dst.type = Converter::ArkValue<Opt_String>(src.type);
-    dst.url = Converter::ArkValue<Opt_String>(src.url);
-    Ark_Position position;
-    position.x = Converter::ArkValue<Opt_Length>(src.x);
-    position.y = Converter::ArkValue<Opt_Length>(src.y);
-    dst.position = Converter::ArkValue<Opt_Position>(position);
-}
-
 void AssignArkValue(Ark_WebNavigationType& dst, const NavigationType& src)
 {
     switch (src) {

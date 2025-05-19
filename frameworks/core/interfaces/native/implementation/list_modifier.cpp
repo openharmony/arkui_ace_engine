@@ -58,7 +58,7 @@ namespace OHOS::Ace::NG::Converter {
     V2::ItemDivider Convert(const Ark_ListDividerOptions& src)
     {
         auto dst = V2::ItemDivider{}; // this struct is initialized by default
-        dst.strokeWidth = Convert<Dimension>(src.strokeWidth);
+        dst.strokeWidth = OptConvert<Dimension>(src.strokeWidth).value_or(dst.strokeWidth);
         auto colorOpt = OptConvert<Color>(src.color);
         if (colorOpt.has_value()) {
             dst.color = colorOpt.value();
@@ -78,8 +78,8 @@ namespace OHOS::Ace::NG::Converter {
     ChainAnimationOptions Convert(const Ark_ChainAnimationOptions& src)
     {
         auto options = ChainAnimationOptions{}; // this struct is initialized by default
-        options.minSpace = Convert<Dimension>(src.minSpace);
-        options.maxSpace = Convert<Dimension>(src.maxSpace);
+        options.minSpace = OptConvert<Dimension>(src.minSpace).value_or(options.minSpace);
+        options.maxSpace = OptConvert<Dimension>(src.maxSpace).value_or(options.maxSpace);
 
         auto intensity = Converter::OptConvert<float>(src.intensity);
         if (intensity.has_value()) {
@@ -127,14 +127,6 @@ namespace OHOS::Ace::NG::Converter {
             .initialIndex = OptConvert<int>(src.initialIndex),
             .space = OptConvert<Dimension>(src.space),
             .scroller = OptConvert<Ark_Scroller>(src.scroller)
-        };
-    }
-
-    template<>
-    ScrollFrameResult Convert<ScrollFrameResult>(const Ark_ScrollResult& src)
-    {
-        return {
-            .offset = Convert<Dimension>(src.offsetRemain)
         };
     }
 }
@@ -652,50 +644,6 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
     };
     ListModelNG::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameBegin));
 }
-void OnWillScrollImpl(Ark_NativePointer node,
-                      const Opt_OnWillScrollCallback* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::optional<OnWillScrollCallback> arkCallback;
-    if (value) {
-        arkCallback = Converter::OptConvert<OnWillScrollCallback>(*value);
-    }
-    if (arkCallback) {
-        auto modelCallback = [callback = CallbackHelper(arkCallback.value())]
-            (const Dimension& scrollOffset, const ScrollState& scrollState, const ScrollSource& scrollSource) ->
-                ScrollFrameResult {
-            auto arkScrollOffset = Converter::ArkValue<Ark_Number>(scrollOffset);
-            auto arkScrollState = Converter::ArkValue<Ark_ScrollState>(scrollState);
-            auto arkScrollSource = Converter::ArkValue<Ark_ScrollSource>(scrollSource);
-            auto resultOpt =
-                callback.InvokeWithOptConvertResult<ScrollFrameResult, Ark_ScrollResult, Callback_ScrollResult_Void>(
-                    arkScrollOffset, arkScrollState, arkScrollSource);
-            return resultOpt.value_or(ScrollFrameResult());
-        };
-        ScrollableModelStatic::SetOnWillScroll(frameNode, std::move(modelCallback));
-    } else {
-        ScrollableModelStatic::SetOnWillScroll(frameNode, nullptr);
-    }
-}
-void OnDidScrollImpl(Ark_NativePointer node,
-                     const Opt_OnScrollCallback* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto callValue = Converter::OptConvert<OnScrollCallback>(*value);
-    if (!callValue.has_value()) {
-        return;
-    }
-    auto onDidScroll = [arkCallback = CallbackHelper(callValue.value())](
-        Dimension oIn, ScrollState stateIn) {
-            auto state = Converter::ArkValue<Ark_ScrollState>(stateIn);
-            auto scrollOffset = Converter::ArkValue<Ark_Number>(oIn);
-            arkCallback.Invoke(scrollOffset, state);
-    };
-    ScrollableModelStatic::SetOnDidScroll(frameNode, std::move(onDidScroll));
-}
 void LanesImpl(Ark_NativePointer node,
                const Opt_Union_Number_LengthConstrain* value,
                const Opt_Dimension* gutter)
@@ -780,8 +728,6 @@ const GENERATED_ArkUIListModifier* GetListModifier()
         ListAttributeModifier::OnItemDragLeaveImpl,
         ListAttributeModifier::OnItemDropImpl,
         ListAttributeModifier::OnScrollFrameBeginImpl,
-        ListAttributeModifier::OnWillScrollImpl,
-        ListAttributeModifier::OnDidScrollImpl,
         ListAttributeModifier::LanesImpl,
         ListAttributeModifier::EdgeEffectImpl,
     };

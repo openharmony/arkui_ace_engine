@@ -118,7 +118,7 @@ template<>
 DividerOptions Convert(const Ark_DividerStyle& src)
 {
     DividerOptions divider;
-    divider.strokeWidth = Convert<Dimension>(src.strokeWidth);
+    divider.strokeWidth = OptConvert<Dimension>(src.strokeWidth);
     Validator::ValidateNonNegative(divider.strokeWidth);
     divider.startMargin = OptConvert<Dimension>(src.startMargin);
     divider.endMargin = OptConvert<Dimension>(src.endMargin);

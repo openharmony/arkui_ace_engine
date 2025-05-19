@@ -199,12 +199,13 @@ void SetOnSizeChangeImpl(Ark_UICommonEvent peer,
     if (arkOnSizeChanged) {
         onSizeChanged = [arkCallback = CallbackHelper(arkOnSizeChanged.value())]
             (const RectF& oldRect, const RectF& rect) {
+            Converter::ConvContext ctx;
             Ark_SizeOptions oldValue;
-            oldValue.height = Converter::ArkValue<Opt_Length>(oldRect.Height());
-            oldValue.width = Converter::ArkValue<Opt_Length>(oldRect.Width());
+            oldValue.height = Converter::ArkValue<Opt_Length>(oldRect.Height(), &ctx);
+            oldValue.width = Converter::ArkValue<Opt_Length>(oldRect.Width(), &ctx);
             Ark_SizeOptions newValue;
-            newValue.height = Converter::ArkValue<Opt_Length>(rect.Height());
-            newValue.width = Converter::ArkValue<Opt_Length>(rect.Width());
+            newValue.height = Converter::ArkValue<Opt_Length>(rect.Height(), &ctx);
+            newValue.width = Converter::ArkValue<Opt_Length>(rect.Width(), &ctx);
             arkCallback.Invoke(oldValue, newValue);
         };
     }

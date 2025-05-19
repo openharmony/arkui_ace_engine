@@ -37,7 +37,7 @@ public:
     Ark_OffsetResult TriggerCurrentOffset();
     void TriggerScrollToIndex(const Ark_Number* value, const Opt_Boolean* smooth,
         const Opt_ScrollAlign* align, const Opt_ScrollToIndexOptions* options);
-    void TriggerScrollBy(const Opt_Length* dx, const Opt_Length* dy);
+    void TriggerScrollBy(const Dimension& xOffset, const Dimension& yOffset);
     Ark_Boolean TriggerIsAtEnd();
     Ark_RectResult TriggerGetItemRect(const Ark_Number* index);
     Ark_Int32 TriggerGetItemIndex(const Ark_Number* x, const Ark_Number* y);

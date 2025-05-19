@@ -51,8 +51,8 @@ Ark_CustomDialogController CtorImpl(const Ark_CustomDialogControllerOptions* val
     peer->SetCornerRadius(value->cornerRadius);
     peer->SetIsModal(value->isModal);
     peer->SetDismiss(value->onWillDismiss);
-    peer->SetWidth(value->width);
-    peer->SetHeight(value->height);
+    peer->SetWidth(Converter::OptConvert<Dimension>(value->width));
+    peer->SetHeight(Converter::OptConvert<Dimension>(value->height));
     peer->SetBorderWidth(value->borderWidth);
     peer->SetBorderColor(value->borderColor);
     peer->SetBorderStyle(value->borderStyle);

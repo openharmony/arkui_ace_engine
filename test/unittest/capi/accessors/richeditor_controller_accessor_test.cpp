@@ -135,7 +135,7 @@ void AssignArkValue(Ark_RichEditorTextStyle& dst, const OHOS::Ace::TextStyle& st
     Converter::ConvContext *ctx)
 {
     dst.fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(style.GetTextColor(), ctx);
-    dst.fontSize = Converter::ArkUnion<Opt_Union_Length_Number, Ark_Length>(style.GetFontSize());
+    dst.fontSize = Converter::ArkUnion<Opt_Union_String_Number_Resource, Ark_String>(style.GetFontSize(), ctx);
     dst.fontStyle = Converter::ArkValue<Opt_FontStyle>(style.GetFontStyle());
     dst.fontWeight = Converter::ArkUnion<
         Opt_Union_Number_FontWeight_String, Ark_FontWeight>(style.GetFontWeight());
@@ -212,7 +212,7 @@ Ark_RichEditorTextStyle GetEmptyTextStyle()
 {
     Ark_RichEditorTextStyle style = {
         .fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr),
-        .fontSize = Converter::ArkUnion<Opt_Union_Length_Number, Ark_Empty>(nullptr),
+        .fontSize = Converter::ArkUnion<Opt_Union_String_Number_Resource, Ark_Empty>(nullptr),
         .fontStyle = Converter::ArkValue<Opt_FontStyle>(),
         .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Empty>(nullptr),
         .fontFamily = Converter::ArkUnion<Opt_ResourceStr, Ark_Empty>(nullptr),
@@ -838,7 +838,7 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestTextBackgroundStyle, T
     WriteTo(WriteTo(textBackgroundStyle).color) =
         Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#FF101520");
     WriteTo(WriteTo(textBackgroundStyle).radius) =
-        Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Length>(12.5_vp);
+        Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Dimension>("12.5vp");
 
     WriteTo(WriteTo(inputValueOptions).style).textBackgroundStyle = textBackgroundStyle;
     accessor_->addTextSpan(peer_, &inputValueValue, &inputValueOptions);

@@ -55,7 +55,7 @@ HWTEST_F(BackgroundColorStyleAccessorTest, CtorTest, TestSize.Level1)
     for (auto& value : TEST_PLAN) {
         Ark_TextBackgroundStyle arkValue;
         arkValue.color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(value.first, &ctx);
-        auto radiusUnion = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Length>(value.second);
+        auto radiusUnion = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Dimension>(value.second, &ctx);
         arkValue.radius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(radiusUnion);
         peer_ = accessor_->ctor(&arkValue);
         ASSERT_NE(peer_, nullptr);
@@ -97,7 +97,7 @@ HWTEST_F(BackgroundColorStyleAccessorTest, GetTextBackgroundStyleTest, TestSize.
     for (auto& value : TEST_PLAN) {
         Ark_TextBackgroundStyle arkValue;
         arkValue.color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(value.first, &ctx);
-        auto radiusUnion = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Length>(value.second);
+        auto radiusUnion = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Dimension>(value.second, &ctx);
         arkValue.radius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(radiusUnion);
         peer_ = accessor_->ctor(&arkValue);
         ASSERT_NE(peer_, nullptr);

@@ -577,6 +577,40 @@ void ValidateByRange(std::optional<InvertVariant>& value, const float& left, con
 
 namespace Converter {
 template<>
+SheetHeight Convert(const Ark_SheetSize& src)
+{
+    SheetHeight detent;
+    detent.sheetMode = OptConvert<SheetMode>(src);
+    return detent;
+}
+
+static SheetHeight SheetHeightFromDimension(std::optional<Dimension> src)
+{
+    SheetHeight detent;
+    Validator::ValidateNonNegative(src);
+    detent.height = src;
+    return detent;
+}
+
+template<>
+SheetHeight Convert(const Ark_String& src)
+{
+    return SheetHeightFromDimension(OptConvert<Dimension>(src));
+}
+
+template<>
+SheetHeight Convert(const Ark_Number& src)
+{
+    return SheetHeightFromDimension(OptConvert<Dimension>(src));
+}
+
+template<>
+SheetHeight Convert(const Ark_Resource& src)
+{
+    return SheetHeightFromDimension(OptConvert<Dimension>(src));
+}
+
+template<>
 ChainWeightPair Convert(const Ark_ChainWeightOptions& src)
 {
     return ChainWeightPair(
@@ -734,17 +768,15 @@ Gradient Convert(const Ark_RadialGradientOptions& src)
     gradient.CreateGradientWithType(NG::GradientType::RADIAL);
 
     // center
-    auto centerX = Converter::Convert<Dimension>(src.center.value0);
-    if (centerX.Unit() == DimensionUnit::PERCENT) {
-        centerX = centerX * PERCENT_100;
+    auto centerX = Converter::OptConvert<Dimension>(src.center.value0);
+    if (centerX) {
+        gradient.GetRadialGradient()->radialCenterX = IsPercent(*centerX) ? *centerX * PERCENT_100 : *centerX;
     }
-    gradient.GetRadialGradient()->radialCenterX = centerX;
 
-    auto centerY = Converter::Convert<Dimension>(src.center.value1);
-    if (centerY.Unit() == DimensionUnit::PERCENT) {
-        centerY = centerY * PERCENT_100;
+    auto centerY = Converter::OptConvert<Dimension>(src.center.value1);
+    if (centerY) {
+        gradient.GetRadialGradient()->radialCenterY = IsPercent(*centerY) ? *centerY * PERCENT_100 : *centerY;
     }
-    gradient.GetRadialGradient()->radialCenterY = centerY;
 
     // radius
     std::optional<Dimension> radiusOpt = Converter::OptConvert<Dimension>(src.radius);
@@ -1098,7 +1130,7 @@ void AssignCast(std::optional<VerticalAlign>& dst, const Ark_VerticalAlign& src)
 }
 
 template<>
-AlignRule Convert(const Ark_HorizontalAlignOptions& src)
+AlignRule Convert(const Ark_Literal_String_anchor_HorizontalAlign_align& src)
 {
     AlignRule rule;
     rule.anchor = Convert<std::string>(src.anchor);
@@ -1122,7 +1154,7 @@ AlignRule Convert(const Ark_LocalizedHorizontalAlignParam& src)
 }
 
 template<>
-AlignRule Convert(const Ark_VerticalAlignOptions& src)
+AlignRule Convert(const Ark_Literal_String_anchor_VerticalAlign_align& src)
 {
     AlignRule rule;
     rule.anchor = Convert<std::string>(src.anchor);
@@ -3509,33 +3541,35 @@ void OnAreaChangeImpl(Ark_NativePointer node,
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onEvent = [arkCallback = CallbackHelper(*optValue), node = weakNode](
         const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin) {
+        ConvContext ctx;
         PipelineContext::SetCallBackNode(node);
 
         auto previousOffset = oldRect.GetOffset();
         Ark_Area previous;
-        previous.width = Converter::ArkValue<Ark_Length>(PipelineBase::Px2VpWithCurrentDensity(oldRect.Width()));
-        previous.height = Converter::ArkValue<Ark_Length>(PipelineBase::Px2VpWithCurrentDensity(oldRect.Height()));
+        previous.width = Converter::ArkValue<Ark_Length>(PipelineBase::Px2VpWithCurrentDensity(oldRect.Width()), &ctx);
+        previous.height = Converter::ArkValue<Ark_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(oldRect.Height()), &ctx);
         previous.position.x = Converter::ArkValue<Opt_Length>(
-            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetX()));
+            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetX()), &ctx);
         previous.position.y = Converter::ArkValue<Opt_Length>(
-            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetY()));
+            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetY()), &ctx);
         previous.globalPosition.x = Converter::ArkValue<Opt_Length>(
-            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetX() + oldOrigin.GetX()));
+            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetX() + oldOrigin.GetX()), &ctx);
         previous.globalPosition.y = Converter::ArkValue<Opt_Length>(
-            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetY() + oldOrigin.GetY()));
+            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetY() + oldOrigin.GetY()), &ctx);
 
         auto currentOffset = rect.GetOffset();
         Ark_Area current;
-        current.width = Converter::ArkValue<Ark_Length>(PipelineBase::Px2VpWithCurrentDensity(rect.Width()));
-        current.height = Converter::ArkValue<Ark_Length>(PipelineBase::Px2VpWithCurrentDensity(rect.Height()));
+        current.width = Converter::ArkValue<Ark_Length>(PipelineBase::Px2VpWithCurrentDensity(rect.Width()), &ctx);
+        current.height = Converter::ArkValue<Ark_Length>(PipelineBase::Px2VpWithCurrentDensity(rect.Height()), &ctx);
         current.position.x = Converter::ArkValue<Opt_Length>(
-            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetX()));
+            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetX()), &ctx);
         current.position.y = Converter::ArkValue<Opt_Length>(
-            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetY()));
+            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetY()), &ctx);
         current.globalPosition.x = Converter::ArkValue<Opt_Length>(
-            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetX() + origin.GetX()));
+            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetX() + origin.GetX()), &ctx);
         current.globalPosition.y = Converter::ArkValue<Opt_Length>(
-            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetY() + origin.GetY()));
+            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetY() + origin.GetY()), &ctx);
 
         arkCallback.Invoke(previous, current);
     };
@@ -4864,12 +4898,13 @@ void OnSizeChangeImpl(Ark_NativePointer node,
         return;
     }
     auto onSizeChange = [callback = CallbackHelper(*optValue)](const RectF &oldRect, const RectF &newRect) {
+        Converter::ConvContext ctx;
         Ark_SizeOptions oldSize;
-        oldSize.width = Converter::ArkValue<Opt_Length>(oldRect.Width());
-        oldSize.height = Converter::ArkValue<Opt_Length>(oldRect.Height());
+        oldSize.width = Converter::ArkValue<Opt_Length>(oldRect.Width(), &ctx);
+        oldSize.height = Converter::ArkValue<Opt_Length>(oldRect.Height(), &ctx);
         Ark_SizeOptions newSize;
-        newSize.width = Converter::ArkValue<Opt_Length>(newRect.Width());
-        newSize.height = Converter::ArkValue<Opt_Length>(newRect.Height());
+        newSize.width = Converter::ArkValue<Opt_Length>(newRect.Width(), &ctx);
+        newSize.height = Converter::ArkValue<Opt_Length>(newRect.Height(), &ctx);
         callback.Invoke(oldSize, newSize);
     };
     ViewAbstract::SetOnSizeChanged(frameNode, std::move(onSizeChange));
@@ -5356,13 +5391,9 @@ void BindPopupImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(popup);
-    if (popup->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
-        return;
-    }
     RefPtr<UINode> customNode = nullptr;
     RefPtr<PopupParam> popupParam = nullptr;
-    Converter::VisitUnion(popup->value,
+    Converter::VisitUnionPtr(popup,
         [&popupParam](const Ark_PopupOptions& value) {
             popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
             CHECK_NULL_VOID(popupParam);

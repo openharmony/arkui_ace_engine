@@ -50,10 +50,7 @@ void FontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<Dimension> optValue = std::nullopt;
-    if (value->tag != INTEROP_TAG_UNDEFINED) {
-        optValue = Converter::OptConvertFromArkNumStrRes(value->value);
-    }
+    auto optValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(optValue);
     Validator::ValidateNonPercent(optValue);
     SymbolSpanModelNG::SetFontSize(frameNode, optValue);

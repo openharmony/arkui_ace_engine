@@ -50,17 +50,6 @@ inline bool Convert(const Ark_EdgeEffectOptions& value)
     return Converter::Convert<bool>(value.alwaysEnabled);
 }
 template<>
-void AssignTo(std::optional<std::vector<std::optional<Dimension>>>& dst, const Ark_Length& from)
-{
-    dst.reset();
-}
-template<>
-void AssignTo(std::optional<Dimension>& dst, const Array_Length& from)
-{
-    dst.reset();
-}
-
-template<>
 void AssignTo(std::optional<ScrollFrameResult>& dst, const Ark_OnScrollFrameBeginHandlerResult& from)
 {
     ScrollFrameResult ret;
@@ -362,9 +351,17 @@ void ScrollSnapImpl(Ark_NativePointer node,
     auto enableSnapToStart = Converter::OptConvert<bool>(optValue->enableSnapToStart);
     auto enableSnapToEnd = Converter::OptConvert<bool>(optValue->enableSnapToEnd);
 
-    auto paginationParamsOpt = Converter::OptConvert<std::vector<std::optional<Dimension>>>(optValue->snapPagination);
+    std::optional<std::vector<std::optional<Dimension>>> paginationParamsOpt;
+    std::optional<Dimension> intervalSize;
+    Converter::VisitUnion(optValue->snapPagination,
+        [&paginationParamsOpt](const Array_Dimension& src) {
+            paginationParamsOpt = Converter::Convert<std::vector<std::optional<Dimension>>>(src);
+        },
+        [&intervalSize](const auto& src) {
+            intervalSize = Converter::OptConvert<Dimension>(src);
+        },
+        []() {});
     auto paginationParams = ValidateDimensionArray(paginationParamsOpt);
-    auto intervalSize = Converter::OptConvert<Dimension>(optValue->snapPagination);
     Validator::ValidateNonNegative(intervalSize);
     ScrollModelStatic::SetScrollSnap(
         frameNode,

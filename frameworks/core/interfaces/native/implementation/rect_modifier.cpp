@@ -41,43 +41,17 @@ namespace {
 }
 namespace OHOS::Ace::NG::Converter {
 template<>
-RectRadius Convert(const Ark_RadiusItem & src)
-{
-    RectRadius radiusStruct;
-    Dimension radiusWidthValue = Converter::Convert<Dimension>(src.value0);
-    Dimension radiusHeightValue = Converter::Convert<Dimension>(src.value1);
-    radiusStruct.radiusWidth = radiusWidthValue;
-    radiusStruct.radiusHeight = radiusHeightValue;
-    return radiusStruct;
-}
-
-template<>
 RectOptions Convert(const Ark_RectOptions& src)
 {
     RectOptions rectOptions;
     rectOptions.width = Converter::OptConvert<Dimension>(src.width);
     rectOptions.height = Converter::OptConvert<Dimension>(src.height);
-    if (src.radius.tag == InteropTag::INTEROP_TAG_UNDEFINED) {
-        rectOptions.radiusWidth = std::make_optional<Dimension>(Dimension(0));
-        rectOptions.radiusHeight = std::make_optional<Dimension>(Dimension(0));
-    } else {
-        Converter::VisitUnion(
-            src.radius.value,
-            [&rectOptions](const Ark_Length& value) {
-                Dimension radiusValue = Converter::Convert<Dimension>(value);
-                rectOptions.radiusWidth = std::make_optional<Dimension>(radiusValue);
-                rectOptions.radiusHeight = std::make_optional<Dimension>(radiusValue);
-            },
-            [&rectOptions](const Array_RadiusItem& value) {
-                CHECK_NULL_VOID(value.array);
-                int32_t length = value.length;
-                length = std::min(length, MAX_RADIUS_ITEM_COUNT);
-                for (int32_t i = 0; i < length; ++i) {
-                    rectOptions.cornerRadius.emplace_back(Converter::Convert<RectRadius>(value.array[i]));
-                }
-            },
-            []() {}
-        );
+    auto radius = Converter::OptConvert<RectRadius>(src.radius);
+    if (radius->radiusWidth) {
+        rectOptions.radiusWidth = radius->radiusWidth;
+    }
+    if (radius->radiusHeight) {
+        rectOptions.radiusHeight = radius->radiusHeight;
     }
     return rectOptions;
 }
@@ -115,8 +89,11 @@ template<>
 RectRadius Convert(const Array_Union_Number_String& src)
 {
     RectRadius radiusStruct;
-    radiusStruct.radiusWidth = std::make_optional<Dimension>(Dimension(0));
-    radiusStruct.radiusHeight = std::make_optional<Dimension>(Dimension(0));
+    auto vec = Convert<std::vector<std::optional<Dimension>>>(src);
+    if (vec.size() > 1) {
+        radiusStruct.radiusWidth = vec[0];
+        radiusStruct.radiusHeight = vec[1];
+    }
     return radiusStruct;
 }
 } // namespace OHOS::Ace::NG::Converter

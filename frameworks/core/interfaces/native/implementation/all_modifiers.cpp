@@ -799,7 +799,6 @@ const GENERATED_ArkUIFullNodeAPI* GENERATED_GetFullAPI()
 }
 
 void setLogger(const ServiceLogger* logger) {
-    SetDummyLogger(reinterpret_cast<const GroupLogger*>(logger));
 }
 
 

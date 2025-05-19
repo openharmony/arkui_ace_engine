@@ -33,11 +33,9 @@ namespace OHOS::Ace::NG {
     };
 }
 namespace OHOS::Ace::NG::Converter {
-    template<>
-    GridRowSizeOption Convert(const Ark_Length& value)
+    static GridRowSizeOption GridRowSizeOptionFromDimension(const std::optional<Dimension>& optValue)
     {
         GridRowSizeOption toValue;
-        auto optValue = std::optional<Dimension>(Converter::Convert<Dimension>(value));
         toValue.xs = optValue;
         toValue.sm = optValue;
         toValue.md = optValue;
@@ -45,6 +43,21 @@ namespace OHOS::Ace::NG::Converter {
         toValue.xl = optValue;
         toValue.xxl = optValue;
         return toValue;
+    }
+    template<>
+    GridRowSizeOption Convert(const Ark_Number& value)
+    {
+        return GridRowSizeOptionFromDimension(OptConvert<Dimension>(value));
+    }
+    template<>
+    GridRowSizeOption Convert(const Ark_String& value)
+    {
+        return GridRowSizeOptionFromDimension(OptConvert<Dimension>(value));
+    }
+    template<>
+    GridRowSizeOption Convert(const Ark_Resource& value)
+    {
+        return GridRowSizeOptionFromDimension(OptConvert<Dimension>(value));
     }
     template<>
     GridRowSizeOption Convert(const Ark_GridRowSizeOption& value)
@@ -59,9 +72,25 @@ namespace OHOS::Ace::NG::Converter {
         return toValue;
     }
     template<>
-    V2::Gutter Convert(const Ark_Length& value)
+    V2::Gutter Convert(const Ark_Number& value)
     {
         return V2::Gutter(Converter::Convert<Dimension>(value));
+    }
+    template<>
+    void AssignCast(std::optional<V2::Gutter>& dst, const Ark_Resource& value)
+    {
+        auto dim = Converter::OptConvert<Dimension>(value);
+        if (dim) {
+            dst = V2::Gutter(*dim);
+        }
+    }
+    template<>
+    void AssignCast(std::optional<V2::Gutter>& dst, const Ark_String& value)
+    {
+        auto dim = Converter::OptConvert<Dimension>(value);
+        if (dim) {
+            dst = V2::Gutter(*dim);
+        }
     }
     template<>
     V2::Gutter Convert(const Ark_GutterOption& value)

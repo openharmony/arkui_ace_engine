@@ -83,11 +83,15 @@ void ScrollToIndexImpl(Ark_Scroller peer,
     peer->TriggerScrollToIndex(value, smooth, align, options);
 }
 void ScrollByImpl(Ark_Scroller peer,
-                  const Opt_Length* dx,
-                  const Opt_Length* dy)
+                  const Ark_Length* dx,
+                  const Ark_Length* dy)
 {
     CHECK_NULL_VOID(peer);
-    peer->TriggerScrollBy(dx, dy);
+    CHECK_NULL_VOID(dx);
+    CHECK_NULL_VOID(dy);
+    auto xOffset = Converter::OptConvert<Dimension>(*dx).value_or(Dimension());
+    auto yOffset = Converter::OptConvert<Dimension>(*dy).value_or(Dimension());
+    peer->TriggerScrollBy(xOffset, yOffset);
 }
 Ark_Boolean IsAtEndImpl(Ark_Scroller peer)
 {

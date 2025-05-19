@@ -26,7 +26,9 @@ namespace OHOS::Ace::NG::Converter {
 template<>
 LeadingMarginSize Convert(const Ark_Tuple_Dimension_Dimension& src)
 {
-    return LeadingMarginSize(Convert<Dimension>(src.value0), Convert<Dimension>(src.value1));
+    return LeadingMarginSize(
+        OptConvert<Dimension>(src.value0).value_or(Dimension()),
+        OptConvert<Dimension>(src.value1).value_or(Dimension()));
 }
 template<>
 OHOS::Ace::SpanParagraphStyle Convert(const Ark_ParagraphStyleInterface& src)
@@ -125,7 +127,7 @@ Opt_Union_Number_LeadingMarginPlaceholder GetLeadingMarginImpl(Ark_ParagraphStyl
     CHECK_NULL_RETURN(peer->span, invalid);
     auto style = peer->span->GetParagraphStyle();
     return Converter::ArkUnion<Opt_Union_Number_LeadingMarginPlaceholder,
-        Ark_LeadingMarginPlaceholder>(style.leadingMargin);
+        Ark_LeadingMarginPlaceholder>(style.leadingMargin, Converter::FC);
 }
 Opt_Number GetParagraphSpacingImpl(Ark_ParagraphStyle peer)
 {

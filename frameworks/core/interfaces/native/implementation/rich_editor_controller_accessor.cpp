@@ -54,7 +54,7 @@ TextDecorationStruct Convert(const Ark_DecorationStyleInterface& src)
     return ret;
 }
 
-void ConvertionPart2(TextStyle& ret, const Ark_RichEditorTextStyle& src)
+void ConversionPart2(TextStyle& ret, const Ark_RichEditorTextStyle& src)
 {
     if (auto shadowList = Converter::OptConvert<std::vector<Shadow>>(src.textShadow)) {
         ret.SetTextShadows(shadowList.value());
@@ -117,7 +117,7 @@ TextStyle Convert(const Ark_RichEditorTextStyle& src)
         }
     }
 
-    ConvertionPart2(ret, src);
+    ConversionPart2(ret, src);
 
     return ret;
 }
@@ -154,15 +154,37 @@ LeadingMargin Convert(const Ark_LeadingMarginPlaceholder& src)
     return leadingMargin;
 }
 
-template<>
-LeadingMargin Convert(const Ark_Length& src)
+LeadingMargin LeadingMarginFromDimension(const Dimension& width)
 {
-    auto width = Converter::Convert<Dimension>(src);
     LeadingMargin leadingMargin = {
         .pixmap = nullptr,
         .size = NG::LeadingMarginSize(width, Dimension(0.0, width.Unit()))
     };
     return leadingMargin;
+}
+
+template<>
+LeadingMargin Convert(const Ark_Number& src)
+{
+    return LeadingMarginFromDimension(Convert<Dimension>(src));
+}
+
+template<>
+void AssignCast(std::optional<LeadingMargin>& dst, const Ark_String& src)
+{
+    auto value = OptConvert<Dimension>(src);
+    if (value) {
+        dst = LeadingMarginFromDimension(*value);
+    }
+}
+
+template<>
+void AssignCast(std::optional<LeadingMargin>& dst, const Ark_Resource& src)
+{
+    auto value = OptConvert<Dimension>(src);
+    if (value) {
+        dst = LeadingMarginFromDimension(*value);
+    }
 }
 
 template<>

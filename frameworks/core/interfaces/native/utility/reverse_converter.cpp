@@ -38,11 +38,6 @@
 
 namespace OHOS::Ace {
 namespace {
-constexpr int32_t NUM_0 = 0;
-constexpr int32_t NUM_1 = 1;
-constexpr int32_t NUM_2 = 2;
-constexpr int32_t NUM_3 = 3;
-constexpr int32_t NUM_4 = 4;
 const std::string YEAR = "year";
 const std::string MONTH = "month";
 const std::string DAY = "day";
@@ -93,18 +88,18 @@ void AssignArkValue(Ark_String& dst, const std::u16string& src, ConvContext *ctx
     AssignArkValue(dst, StringUtils::Str16ToStr8(src), ctx);
 }
 
-void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src)
+void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src, ConvContext *ctx)
 {
     const auto& localOffset = src.GetTarget().area.GetOffset();
     const auto& origin = src.GetTarget().origin;
-    dst.position.x = Converter::ArkValue<Opt_Length>(localOffset.GetX().ConvertToVp());
-    dst.position.y = Converter::ArkValue<Opt_Length>(localOffset.GetY().ConvertToVp());
+    dst.position.x = Converter::ArkValue<Opt_Length>(localOffset.GetX().ConvertToVp(), ctx);
+    dst.position.y = Converter::ArkValue<Opt_Length>(localOffset.GetY().ConvertToVp(), ctx);
     dst.globalPosition.x = Converter::ArkValue<Opt_Length>(
-        origin.GetX().ConvertToVp() + localOffset.GetX().ConvertToVp());
+        origin.GetX().ConvertToVp() + localOffset.GetX().ConvertToVp(), ctx);
     dst.globalPosition.y = Converter::ArkValue<Opt_Length>(
-        origin.GetY().ConvertToVp() + localOffset.GetY().ConvertToVp());
-    dst.width = Converter::ArkValue<Ark_Length>(src.GetTarget().area.GetWidth().ConvertToVp());
-    dst.height = Converter::ArkValue<Ark_Length>(src.GetTarget().area.GetHeight().ConvertToVp());
+        origin.GetY().ConvertToVp() + localOffset.GetY().ConvertToVp(), ctx);
+    dst.width = Converter::ArkValue<Ark_Length>(src.GetTarget().area.GetWidth().ConvertToVp(), ctx);
+    dst.height = Converter::ArkValue<Ark_Length>(src.GetTarget().area.GetHeight().ConvertToVp(), ctx);
 }
 
 void AssignArkValue(Ark_BaseGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src)
@@ -200,10 +195,10 @@ void AssignArkValue(Ark_RectResult& dst, const OHOS::Ace::Rect& src)
     dst.height = ArkValue<Ark_Number>(src.Height());
 }
 
-void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Dimension, const Dimension>& src)
+void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Dimension, const Dimension>& src, ConvContext *ctx)
 {
-    dst.value0 = ArkValue<Ark_Length>(src.first);
-    dst.value1 = ArkValue<Ark_Length>(src.second);
+    dst.value0 = ArkValue<Ark_Dimension>(src.first, ctx);
+    dst.value1 = ArkValue<Ark_Dimension>(src.second, ctx);
 }
 
 void AssignArkValue(Ark_Tuple_Number_Number& dst, const Point& src)
@@ -235,39 +230,83 @@ void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src)
     dst.alwaysEnabled = src;
 }
 
-void AssignArkValue(Ark_LeadingMarginPlaceholder& dst, const LeadingMargin& src)
+void AssignArkValue(Ark_LeadingMarginPlaceholder& dst, const LeadingMargin& src, ConvContext *ctx)
 {
     std::pair<const Dimension, const Dimension> pair = {src.size.Width(), src.size.Height()};
-    dst.size = Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(pair);
+    dst.size = Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(pair, ctx);
     if (src.pixmap) {
         dst.pixelMap = PixelMapPeer::Create(src.pixmap);
     }
 }
 
-void AssignArkValue(Ark_Length& dst, const double& src)
+void AssignArkValue(Ark_String& dst, const Dimension& src, ConvContext *ctx)
 {
-    dst.type = INTEROP_RUNTIME_NUMBER;
-    dst.value = src;
-    dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::VP);
+    dst = ArkValue<Ark_String>(src.ToString(), ctx);
 }
 
-void AssignArkValue(Ark_Length& dst, const Dimension& src)
+void AssignArkValue(Ark_String& dst, const CalcDimension& src, ConvContext *ctx)
 {
-    dst.type = INTEROP_RUNTIME_NUMBER;
-    dst.value = src.Unit() == DimensionUnit::PERCENT ? src.Value() * 100.f : src.Value();
-    dst.unit = static_cast<int32_t>(src.Unit());
+    dst = ArkValue<Ark_String>(src.ToString(), ctx);
+}
+
+void AssignArkValue(Ark_Length& dst, const double& src)
+{
+    dst = ArkUnion<Ark_Length, Ark_Number>(src);
+}
+
+void AssignArkValue(Ark_Length& dst, const Dimension& src, ConvContext *ctx)
+{
+    dst = ArkUnion<Ark_Length, Ark_String>(src.ToString(), ctx);
+}
+
+void AssignArkValue(Ark_Dimension& dst, const Dimension& src, ConvContext *ctx)
+{
+    dst = ArkUnion<Ark_Dimension, Ark_String>(src.ToString(), ctx);
+}
+
+void AssignArkValue(Ark_Length& dst, const CalcDimension& src, ConvContext *ctx)
+{
+    dst = ArkUnion<Ark_Length, Ark_String>(src.ToString(), ctx);
+}
+
+void AssignArkValue(Ark_Length& dst, const CalcLength& src, ConvContext *ctx)
+{
+    dst = ArkUnion<Ark_Length, Ark_String>(src.ToString(), ctx);
 }
 
 void AssignArkValue(Ark_Length& dst, const float& src)
 {
-    dst.type = INTEROP_RUNTIME_NUMBER;
-    dst.value = src;
-    dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::VP);
+    dst = ArkUnion<Ark_Length, Ark_Number>(src);
 }
 
-void AssignArkValue(Ark_Length& dst, const CalcLength& src)
+void AssignArkValue(Ark_Dimension& dst, const float& src)
 {
-    dst = ArkValue<Ark_Length>(src.GetDimension());
+    dst = ArkUnion<Ark_Dimension, Ark_Number>(src);
+}
+
+void AssignArkValue(Ark_Length& dst, const std::string& src, ConvContext *ctx)
+{
+    dst = ArkUnion<Ark_Length, Ark_String>(src, ctx);
+}
+
+void AssignArkValue(Ark_Dimension& dst, const std::string& src, ConvContext *ctx)
+{
+    dst = ArkUnion<Ark_Dimension, Ark_String>(src, ctx);
+}
+
+void AssignArkValue(Ark_Length& dst, const char* src)
+{
+    dst = ArkUnion<Ark_Length, Ark_String>(src);
+}
+
+void AssignArkValue(Ark_Dimension& dst, const char* src)
+{
+    dst = ArkUnion<Ark_Dimension, Ark_String>(src);
+}
+
+void AssignArkValue(Ark_Length& dst, const int& id)
+{
+    dst = ArkUnion<Ark_Length, Ark_Resource>(ArkCreate<Ark_Resource>(id, ResourceType::FLOAT));
 }
 
 void AssignArkValue(Ark_Number& dst, const int32_t& src)
@@ -308,13 +347,13 @@ void AssignArkValue(Ark_Number& dst, const double& src)
     dst.f32 = static_cast<float>(src);
 }
 
-void AssignArkValue(Ark_Padding& dst, const PaddingProperty& src)
+void AssignArkValue(Ark_Padding& dst, const PaddingProperty& src, ConvContext *ctx)
 {
     Ark_Padding arkPadding = {
-        .top = ArkValue<Opt_Length>(src.top),
-        .right = ArkValue<Opt_Length>(src.right),
-        .bottom = ArkValue<Opt_Length>(src.bottom),
-        .left = ArkValue<Opt_Length>(src.left),
+        .top = ArkValue<Opt_Length>(src.top, ctx),
+        .right = ArkValue<Opt_Length>(src.right, ctx),
+        .bottom = ArkValue<Opt_Length>(src.bottom, ctx),
+        .left = ArkValue<Opt_Length>(src.left, ctx),
     };
     dst = arkPadding;
 }
@@ -323,12 +362,6 @@ void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, ConvContext *c
 {
     dst.offset = ArkValue<Ark_Number>(src.offset);
     dst.value = ArkValue<Ark_String>(src.value, ctx);
-}
-
-void AssignArkValue(Ark_Length& dst, const int& id)
-{
-    dst.type = INTEROP_TAG_RESOURCE;
-    dst.resource = id;
 }
 
 void AssignArkValue(Ark_Number& dst, const Dimension& src)
@@ -397,21 +430,21 @@ void AssignArkValue(Ark_DatePickerResult& dst, const std::string& src)
     };
 }
 
-void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src)
+void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src, ConvContext *ctx)
 {
     Ark_Area area;
-    area.width = Converter::ArkValue<Ark_Length>(src.area.GetWidth());
-    area.height = Converter::ArkValue<Ark_Length>(src.area.GetHeight());
+    area.width = Converter::ArkValue<Ark_Length>(src.area.GetWidth(), ctx);
+    area.height = Converter::ArkValue<Ark_Length>(src.area.GetHeight(), ctx);
     Ark_Position position;
-    position.x = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetX());
-    position.y = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetY());
+    position.x = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetX(), ctx);
+    position.y = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetY(), ctx);
     area.position = Converter::ArkValue<Ark_Position>(position);
     Ark_Position globPosition;
-    globPosition.x = Converter::ArkValue<Opt_Length>(src.origin.GetX());
-    globPosition.y = Converter::ArkValue<Opt_Length>(src.origin.GetY());
+    globPosition.x = Converter::ArkValue<Opt_Length>(src.origin.GetX(), ctx);
+    globPosition.y = Converter::ArkValue<Opt_Length>(src.origin.GetY(), ctx);
     area.globalPosition = Converter::ArkValue<Ark_Position>(globPosition);
     dst.area = area;
-    dst.id = Converter::ArkValue<Opt_String>(src.id);
+    dst.id = Converter::ArkValue<Opt_String>(src.id, ctx);
 }
 
 void AssignArkValue(Ark_Header& dst, const Header& src, ConvContext *ctx)
@@ -432,16 +465,16 @@ Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value)
     return LengthMetricsPeer::Create(Dimension(value, du));
 }
 
-void AssignArkValue(Ark_Position& dst, const OffsetF& src)
+void AssignArkValue(Ark_Position& dst, const OffsetF& src, ConvContext *ctx)
 {
-    dst.x = Converter::ArkValue<Opt_Length>(src.GetX());
-    dst.y = Converter::ArkValue<Opt_Length>(src.GetY());
+    dst.x = Converter::ArkValue<Opt_Length>(src.GetX(), ctx);
+    dst.y = Converter::ArkValue<Opt_Length>(src.GetY(), ctx);
 }
 
-void AssignArkValue(Ark_OffsetResult& dst, const Offset& src)
+void AssignArkValue(Ark_OffsetResult& dst, const Offset& src, ConvContext *ctx)
 {
-    dst.xOffset = ArkValue<Ark_Number>(src.GetX());
-    dst.yOffset = ArkValue<Ark_Number>(src.GetY());
+    dst.xOffset = ArkValue<Ark_Number>(src.GetX(), ctx);
+    dst.yOffset = ArkValue<Ark_Number>(src.GetY(), ctx);
 }
 
 void AssignArkValue(Ark_RectResult& dst, const RectF& src)
@@ -551,20 +584,20 @@ void AssignArkValue(Ark_String& dst, const Color& src, ConvContext *ctx)
     dst = ArkValue<Ark_String>(src.ToString(), ctx);
 }
 
-void AssignArkValue(Ark_BorderRadiuses& dst, const BorderRadiusProperty& src)
+void AssignArkValue(Ark_BorderRadiuses& dst, const BorderRadiusProperty& src, ConvContext *ctx)
 {
     Ark_BorderRadiuses arkBorder = {
-        .topLeft = ArkValue<Opt_Length>(src.radiusTopLeft),
-        .topRight = ArkValue<Opt_Length>(src.radiusTopRight),
-        .bottomLeft = ArkValue<Opt_Length>(src.radiusBottomLeft),
-        .bottomRight = ArkValue<Opt_Length>(src.radiusBottomRight),
+        .topLeft = ArkValue<Opt_Length>(src.radiusTopLeft, ctx),
+        .topRight = ArkValue<Opt_Length>(src.radiusTopRight, ctx),
+        .bottomLeft = ArkValue<Opt_Length>(src.radiusBottomLeft, ctx),
+        .bottomRight = ArkValue<Opt_Length>(src.radiusBottomRight, ctx),
     };
     dst = arkBorder;
 }
 
 void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src, ConvContext *ctx)
 {
-    dst.radius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(src.backgroundRadius);
+    dst.radius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(src.backgroundRadius, ctx);
     dst.color = ArkUnion<Opt_ResourceColor, Ark_String>(src.backgroundColor, ctx);
 }
 
@@ -572,33 +605,6 @@ void AssignArkValue(Ark_TextRange& dst, const SelectionInfo& src)
 {
     dst.start = ArkValue<Opt_Number>(src.GetSelection().selection[0]);
     dst.end = ArkValue<Opt_Number>(src.GetSelection().selection[1]);
-}
-
-void AssignArkValue(Ark_Length& dst, const std::string& src)
-{
-    char *suffixPtr = nullptr;
-    dst.type = INTEROP_TAG_FLOAT32;
-    dst.value = std::strtof(src.c_str(), &suffixPtr);
-    dst.unit = -NUM_1;
-    if (!suffixPtr || suffixPtr == src.c_str()) { return; }
-    if (suffixPtr[NUM_0] == '\0' || (suffixPtr[NUM_0] == 'v' && suffixPtr[NUM_1] == 'p')) {
-        dst.unit = NUM_1;
-    } else if (suffixPtr[NUM_0] == '%') {
-        dst.unit = NUM_3;
-    } else if (suffixPtr[NUM_0] == 'p' && suffixPtr[NUM_1] == 'x') {
-        dst.unit = NUM_0;
-    } else if (suffixPtr[NUM_0] == 'l' && suffixPtr[NUM_1] == 'p' && suffixPtr[NUM_2] == 'x') {
-        dst.unit = NUM_4;
-    } else if (suffixPtr[NUM_0] == 'f' && suffixPtr[NUM_1] == 'p') {
-        dst.unit = NUM_2;
-    }
-}
-
-void AssignArkValue(Ark_Resource& dst, const Ark_Length& src)
-{
-    dst.id = ArkValue<Ark_Number>(src.resource);
-    dst.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(ResourceType::FLOAT));
-    dst.params = ArkValue<Opt_Array_String>();
 }
 
 void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& src)
@@ -639,7 +645,7 @@ void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& sr
     dst.y.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
     dst.y.f32 = static_cast<float>(
         PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
-    
+
     dst.pressedTime.tag = Ark_Tag::INTEROP_TAG_OBJECT;
     dst.pressedTime.value.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
     dst.pressedTime.value.f32 = static_cast<float>(
@@ -715,10 +721,10 @@ void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *c
     dst.type = Converter::ArkValue<Opt_Number>(src.GetType());
 }
 
-void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const ImageStyleResult& src)
+void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const ImageStyleResult& src, ConvContext *ctx)
 {
-    dst.margin = ArkUnion<Opt_Union_Dimension_Margin, Ark_Length>(src.margin);
-    dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_Length>(src.borderRadius);
+    dst.margin = ArkUnion<Opt_Union_Dimension_Margin, Ark_Dimension>(src.margin, ctx);
+    dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_Dimension>(src.borderRadius, ctx);
 }
 
 void AssignArkValue(Ark_RichEditorImageSpanStyleResult& dst, const ImageStyleResult& src)
@@ -785,5 +791,30 @@ void AssignArkValue(Ark_NavigationMode& dst, NG::NavigationMode& src)
 void AssignArkValue(Ark_NavigationOperation& dst, const NG::NavigationOperation& src)
 {
     dst = static_cast<Ark_NavigationOperation>(src);
+}
+
+template<>
+Ark_Resource ArkCreate(int32_t id, ResourceType type)
+{
+    return {
+        .id = ArkValue<Ark_Number>(id),
+        .type = ArkValue<Opt_Number>(static_cast<uint32_t>(type)),
+        .moduleName = ArkValue<Ark_String>(""),
+        .bundleName = ArkValue<Ark_String>(""),
+        .params = ArkValue<Opt_Array_String>(),
+    };
+}
+
+template<>
+Ark_Resource ArkCreate(std::string name, ResourceType type, ConvContext *ctx)
+{
+    std::vector<Ark_String> params = { ArkValue<Ark_String>(name, ctx) };
+    return {
+        .id = ArkValue<Ark_Number>(-1),
+        .type = ArkValue<Opt_Number>(static_cast<uint32_t>(type)),
+        .moduleName = ArkValue<Ark_String>(""),
+        .bundleName = ArkValue<Ark_String>(""),
+        .params = ArkValue<Opt_Array_String>(params, ctx),
+    };
 }
 } // namespace OHOS::Ace::NG::Converter

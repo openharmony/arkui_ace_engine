@@ -189,7 +189,7 @@ HWTEST_F(FrameNodeAccessorTest, InsertChildAfterTest2, TestSize.Level1)
     EXPECT_EQ(childList.size(), CHILD_COUNT_1);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef1), POS_0);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef2), POS_INVALID);
-    
+
     accessor_->insertChildAfter(peer_, childPeer3, childPeer2);
     childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_2);
@@ -372,10 +372,10 @@ HWTEST_F(FrameNodeAccessorTest, GetChildTest, TestSize.Level1)
     Ark_Number pos0 = Converter::ArkValue<Ark_Number>(POS_0);
     Ark_Number pos1 = Converter::ArkValue<Ark_Number>(POS_1);
     Ark_Number pos2 = Converter::ArkValue<Ark_Number>(POS_2);
-    EXPECT_EQ(accessor_->getChild(peer_, &pos0, &pos0)->node, childPeer1->node);
-    EXPECT_EQ(accessor_->getChild(peer_, &pos1, &pos0)->node, childPeer2->node);
-    if (accessor_->getChild(peer_, &pos2, &pos0)) {
-        EXPECT_EQ(accessor_->getChild(peer_, &pos2, &pos0)->node, nullptr);
+    EXPECT_EQ(accessor_->getChild(peer_, &pos0)->node, childPeer1->node);
+    EXPECT_EQ(accessor_->getChild(peer_, &pos1)->node, childPeer2->node);
+    if (accessor_->getChild(peer_, &pos2)) {
+        EXPECT_EQ(accessor_->getChild(peer_, &pos2)->node, nullptr);
     }
     DestroyPeer(childPeer1);
     DestroyPeer(childPeer2);
@@ -610,7 +610,7 @@ HWTEST_F(FrameNodeAccessorTest, DisposeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getParent, nullptr);
     ASSERT_NE(accessor_->dispose, nullptr);
-    
+
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peer_->node);
 
     auto rootPeer = CreatePeer();

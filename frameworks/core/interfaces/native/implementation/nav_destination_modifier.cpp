@@ -519,7 +519,8 @@ void TitleImpl(Ark_NativePointer node,
                 NavDestinationModelStatic::SetTitleHeight(frameNode, NG::DOUBLE_LINE_TITLEBAR_HEIGHT);
             }
         } else if (titleHeightSelector == lengthType) {
-            CalcDimension length = Converter::Convert<CalcDimension>(value->value.value3.height.value1);
+            CalcDimension length = Converter::OptConvert<CalcDimension>(value->value.value3.height.value1)
+                .value_or(Dimension());
             if (length.Value() < 0) {
                 NavDestinationModelStatic::SetTitleHeight(frameNode, Dimension());
             } else {

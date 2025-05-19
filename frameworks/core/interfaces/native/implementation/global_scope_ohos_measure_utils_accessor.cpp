@@ -213,8 +213,8 @@ Ark_SizeOptions MeasureTextSizeImpl(const Ark_MeasureOptions* options)
     // context.wordBreak = Converter::OptConvert<WordBreak>(options->wordBreak).value_or(WordBreak::BREAK_WORD);
     // auto textSize = MeasureUtil::MeasureTextSize(context);
     // return {
-    //     .width = Converter::ArkValue<Opt_Length>(textSize.Width()),
-    //     .height = Converter::ArkValue<Opt_Length>(textSize.Height())
+    //     .width = Converter::ArkValue<Opt_Length>(textSize.Width(), ctx),
+    //     .height = Converter::ArkValue<Opt_Length>(textSize.Height(), ctx)
     // };
     return {};
 }

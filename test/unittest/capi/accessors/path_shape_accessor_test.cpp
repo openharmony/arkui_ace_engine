@@ -26,10 +26,10 @@
 
 
 namespace OHOS::Ace::NG {
- 
+
 using namespace testing;
 using namespace testing::ext;
- 
+
 namespace Converter {
     template<>
     void AssignArkValue(Ark_PathShapeOptions& dst, const PathShapeOptions& src, ConvContext *ctx)
@@ -38,7 +38,7 @@ namespace Converter {
         dst.commands = commands;
     }
 }
- 
+
 class PathShapeAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUIPathShapeAccessor,
     &GENERATED_ArkUIAccessors::getPathShapeAccessor, PathShapePeer> {
 public:
@@ -49,7 +49,7 @@ public:
         return accessor_->ctor(&options);
     }
 };
- 
+
 /**
  * @tc.name: OffsetTest
  * @tc.desc:
@@ -66,16 +66,17 @@ HWTEST_F(PathShapeAccessorTest, OffsetTest, TestSize.Level1)
     Opt_Length optX, optY;
     Ark_Position arkOffset{};
     DimensionOffset peerOffset;
+    Converter::ConvContext ctx;
 
     for (const auto &[x, y]: OFFSET_TEST_PLAN) {
-        optX = Converter::ArkValue<Opt_Length>(Dimension(x));
-        optY = Converter::ArkValue<Opt_Length>(Dimension(y));
+        optX = Converter::ArkValue<Opt_Length>(Dimension(x), &ctx);
+        optY = Converter::ArkValue<Opt_Length>(Dimension(y), &ctx);
         arkOffset = {optX, optY};
 
         accessor_->offset(peer_, &arkOffset);
         peerOffset = peer_->shape->GetOffset();
-        EXPECT_EQ(peerOffset.GetX(), Dimension(x));
-        EXPECT_EQ(peerOffset.GetY(), Dimension(y));
+        EXPECT_EQ(peerOffset.GetX().ToString(), Dimension(x).ToString());
+        EXPECT_EQ(peerOffset.GetY().ToString(), Dimension(y).ToString());
     }
 }
 
@@ -95,16 +96,17 @@ HWTEST_F(PathShapeAccessorTest, PositionTest, TestSize.Level1)
     Opt_Length optX, optY;
     Ark_Position arkPosition{};
     DimensionOffset peerPosition;
+    Converter::ConvContext ctx;
 
     for (const auto &[x, y]: POSITION_TEST_PLAN) {
-        optX = Converter::ArkValue<Opt_Length>(Dimension(x));
-        optY = Converter::ArkValue<Opt_Length>(Dimension(y));
+        optX = Converter::ArkValue<Opt_Length>(Dimension(x), &ctx);
+        optY = Converter::ArkValue<Opt_Length>(Dimension(y), &ctx);
         arkPosition = {optX, optY};
 
         accessor_->position(peer_, &arkPosition);
         peerPosition = peer_->shape->GetPosition();
-        EXPECT_EQ(peerPosition.GetX(), Dimension(x));
-        EXPECT_EQ(peerPosition.GetY(), Dimension(y));
+        EXPECT_EQ(peerPosition.GetX().ToString(), Dimension(x).ToString());
+        EXPECT_EQ(peerPosition.GetY().ToString(), Dimension(y).ToString());
     }
 }
 

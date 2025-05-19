@@ -98,8 +98,6 @@ const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
         SystemOpsAccessor::SyncInstanceIdImpl,
         SystemOpsAccessor::RestoreInstanceIdImpl,
         SystemOpsAccessor::GetResourceIdImpl,
-        SystemOpsAccessor::ResourceManagerResetImpl,
-        SystemOpsAccessor::SetFrameCallbackImpl,
     };
     return &SystemOpsAccessorImpl;
 }

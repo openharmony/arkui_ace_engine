@@ -48,8 +48,8 @@ Ark_CustomDialogControllerOptions GetEmptyOptions()
     options.cornerRadius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(Ark_Empty());
     options.isModal = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     options.onWillDismiss = Converter::ArkValue<Opt_Callback_DismissDialogAction_Void>(Ark_Empty());
-    options.width = Converter::ArkValue<Opt_Length>(Ark_Empty());
-    options.height = Converter::ArkValue<Opt_Length>(Ark_Empty());
+    options.width = Converter::ArkValue<Opt_Dimension>(Ark_Empty());
+    options.height = Converter::ArkValue<Opt_Dimension>(Ark_Empty());
     options.borderWidth = Converter::ArkValue<Opt_Union_Dimension_EdgeWidths>(Ark_Empty());
     options.borderColor = Converter::ArkValue<Opt_Union_ResourceColor_EdgeColors>(Ark_Empty());
     options.borderStyle = Converter::ArkValue<Opt_Union_BorderStyle_EdgeStyles>(Ark_Empty());
@@ -205,18 +205,18 @@ HWTEST_F(CustomDialogControllerAccessorTest, alignmentTest, TestSize.Level1)
 static const std::vector<std::pair<Ark_Length, Dimension>> OFFSET_TEST_PLAN = {
     { Converter::ArkValue<Ark_Length>(2.5f), Dimension(2.5, DimensionUnit::VP) },
     { Converter::ArkValue<Ark_Length>(-2.5f), Dimension(-2.5, DimensionUnit::VP) },
-    { Converter::ArkValue<Ark_Length>(5.0_px), Dimension(5, DimensionUnit::PX) },
-    { Converter::ArkValue<Ark_Length>(-5.0_px), Dimension(-5, DimensionUnit::PX) },
-    { Converter::ArkValue<Ark_Length>(22.5_px), Dimension(22.5, DimensionUnit::PX) },
-    { Converter::ArkValue<Ark_Length>(-22.5_px), Dimension(-22.5, DimensionUnit::PX) },
-    { Converter::ArkValue<Ark_Length>(7.0_vp), Dimension(7, DimensionUnit::VP) },
-    { Converter::ArkValue<Ark_Length>(-7.0_vp), Dimension(-7, DimensionUnit::VP) },
-    { Converter::ArkValue<Ark_Length>(1.5_vp), Dimension(1.5, DimensionUnit::VP) },
-    { Converter::ArkValue<Ark_Length>(-1.5_vp), Dimension(-1.5, DimensionUnit::VP) },
-    { Converter::ArkValue<Ark_Length>(65.0_fp), Dimension(65, DimensionUnit::FP) },
-    { Converter::ArkValue<Ark_Length>(-65.0_fp), Dimension(-65, DimensionUnit::FP) },
-    { Converter::ArkValue<Ark_Length>(4.5_fp), Dimension(4.5, DimensionUnit::FP) },
-    { Converter::ArkValue<Ark_Length>(-4.5_fp), Dimension(-4.5, DimensionUnit::FP) },
+    { Converter::ArkValue<Ark_Length>("5.0px"), Dimension(5, DimensionUnit::PX) },
+    { Converter::ArkValue<Ark_Length>("-5.0px"), Dimension(-5, DimensionUnit::PX) },
+    { Converter::ArkValue<Ark_Length>("22.5px"), Dimension(22.5, DimensionUnit::PX) },
+    { Converter::ArkValue<Ark_Length>("-22.5px"), Dimension(-22.5, DimensionUnit::PX) },
+    { Converter::ArkValue<Ark_Length>("7.0vp"), Dimension(7, DimensionUnit::VP) },
+    { Converter::ArkValue<Ark_Length>("-7.0vp"), Dimension(-7, DimensionUnit::VP) },
+    { Converter::ArkValue<Ark_Length>("1.5vp"), Dimension(1.5, DimensionUnit::VP) },
+    { Converter::ArkValue<Ark_Length>("-1.5vp"), Dimension(-1.5, DimensionUnit::VP) },
+    { Converter::ArkValue<Ark_Length>("65.0fp"), Dimension(65, DimensionUnit::FP) },
+    { Converter::ArkValue<Ark_Length>("-65.0fp"), Dimension(-65, DimensionUnit::FP) },
+    { Converter::ArkValue<Ark_Length>("4.5fp"), Dimension(4.5, DimensionUnit::FP) },
+    { Converter::ArkValue<Ark_Length>("-4.5fp"), Dimension(-4.5, DimensionUnit::FP) },
 };
 
 /**
@@ -233,7 +233,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, offsetTest, TestSize.Level1)
 
     for (const auto& [value, expectVal] : OFFSET_TEST_PLAN) {
         offset.dx = value;
-        offset.dy = Converter::ArkValue<Ark_Length>(0._px);
+        offset.dy = Converter::ArkValue<Ark_Length>("0px");
         options.offset = Converter::ArkValue<Opt_Offset>(offset);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
@@ -245,7 +245,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, offsetTest, TestSize.Level1)
 
     for (const auto& [value, expectVal] : OFFSET_TEST_PLAN) {
         offset.dy = value;
-        offset.dx = Converter::ArkValue<Ark_Length>(0._px);
+        offset.dx = Converter::ArkValue<Ark_Length>("0px");
         options.offset = Converter::ArkValue<Opt_Offset>(offset);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
@@ -438,22 +438,42 @@ HWTEST_F(CustomDialogControllerAccessorTest, isModalTest, TestSize.Level1)
 
 static const std::vector<std::pair<Ark_Length, Dimension>> SIZE_TEST_PLAN = {
     { Converter::ArkValue<Ark_Length>(2.5f), Dimension(2.5, DimensionUnit::VP) },
-    { Converter::ArkValue<Ark_Length>(5.0_px), Dimension(5, DimensionUnit::PX) },
-    { Converter::ArkValue<Ark_Length>(22.5_px), Dimension(22.5, DimensionUnit::PX) },
-    { Converter::ArkValue<Ark_Length>(7.0_vp), Dimension(7, DimensionUnit::VP) },
-    { Converter::ArkValue<Ark_Length>(1.5_vp), Dimension(1.5, DimensionUnit::VP) },
-    { Converter::ArkValue<Ark_Length>(65.0_fp), Dimension(65, DimensionUnit::FP) },
-    { Converter::ArkValue<Ark_Length>(4.5_fp), Dimension(4.5, DimensionUnit::FP) },
+    { Converter::ArkValue<Ark_Length>("5.0px"), Dimension(5, DimensionUnit::PX) },
+    { Converter::ArkValue<Ark_Length>("22.5px"), Dimension(22.5, DimensionUnit::PX) },
+    { Converter::ArkValue<Ark_Length>("7.0vp"), Dimension(7, DimensionUnit::VP) },
+    { Converter::ArkValue<Ark_Length>("1.5vp"), Dimension(1.5, DimensionUnit::VP) },
+    { Converter::ArkValue<Ark_Length>("65.0fp"), Dimension(65, DimensionUnit::FP) },
+    { Converter::ArkValue<Ark_Length>("4.5fp"), Dimension(4.5, DimensionUnit::FP) },
 };
 
 static const std::vector<Ark_Length> SIZE_INVALID_TEST_PLAN = {
     { Converter::ArkValue<Ark_Length>(-2.5f) },
-    { Converter::ArkValue<Ark_Length>(-5.0_px) },
-    { Converter::ArkValue<Ark_Length>(-22.5_px) },
-    { Converter::ArkValue<Ark_Length>(-7.0_vp) },
-    { Converter::ArkValue<Ark_Length>(-1.5_vp) },
-    { Converter::ArkValue<Ark_Length>(-65.0_fp) },
-    { Converter::ArkValue<Ark_Length>(-4.5_fp) },
+    { Converter::ArkValue<Ark_Length>("-5.0px") },
+    { Converter::ArkValue<Ark_Length>("-22.5px") },
+    { Converter::ArkValue<Ark_Length>("-7.0vp") },
+    { Converter::ArkValue<Ark_Length>("-1.5vp") },
+    { Converter::ArkValue<Ark_Length>("-65.0fp") },
+    { Converter::ArkValue<Ark_Length>("-4.5fp") },
+};
+
+static const std::vector<std::pair<Ark_Dimension, Dimension>> SIZE_TEST_PLAN_DIM = {
+    { Converter::ArkValue<Ark_Dimension>(2.5f), Dimension(2.5, DimensionUnit::VP) },
+    { Converter::ArkValue<Ark_Dimension>("5.0px"), Dimension(5, DimensionUnit::PX) },
+    { Converter::ArkValue<Ark_Dimension>("22.5px"), Dimension(22.5, DimensionUnit::PX) },
+    { Converter::ArkValue<Ark_Dimension>("7.0vp"), Dimension(7, DimensionUnit::VP) },
+    { Converter::ArkValue<Ark_Dimension>("1.5vp"), Dimension(1.5, DimensionUnit::VP) },
+    { Converter::ArkValue<Ark_Dimension>("65.0fp"), Dimension(65, DimensionUnit::FP) },
+    { Converter::ArkValue<Ark_Dimension>("4.5fp"), Dimension(4.5, DimensionUnit::FP) },
+};
+
+static const std::vector<Ark_Dimension> SIZE_INVALID_TEST_PLAN_DIM = {
+    { Converter::ArkValue<Ark_Dimension>(-2.5f) },
+    { Converter::ArkValue<Ark_Dimension>("-5.0px") },
+    { Converter::ArkValue<Ark_Dimension>("-22.5px") },
+    { Converter::ArkValue<Ark_Dimension>("-7.0vp") },
+    { Converter::ArkValue<Ark_Dimension>("-1.5vp") },
+    { Converter::ArkValue<Ark_Dimension>("-65.0fp") },
+    { Converter::ArkValue<Ark_Dimension>("-4.5fp") },
 };
 
 /**
@@ -467,8 +487,8 @@ HWTEST_F(CustomDialogControllerAccessorTest, widthTest, TestSize.Level1)
     DialogProperties dialogProperties;
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
-    for (const auto& [value, expectVal] : SIZE_TEST_PLAN) {
-        options.width = Converter::ArkValue<Opt_Length>(value);
+    for (const auto& [value, expectVal] : SIZE_TEST_PLAN_DIM) {
+        options.width = Converter::ArkValue<Opt_Dimension>(value);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -489,8 +509,8 @@ HWTEST_F(CustomDialogControllerAccessorTest, widthInvalidTest, TestSize.Level1)
     DialogProperties dialogProperties;
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
-    for (const auto& value : SIZE_INVALID_TEST_PLAN) {
-        options.width = Converter::ArkValue<Opt_Length>(value);
+    for (const auto& value : SIZE_INVALID_TEST_PLAN_DIM) {
+        options.width = Converter::ArkValue<Opt_Dimension>(value);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -510,8 +530,8 @@ HWTEST_F(CustomDialogControllerAccessorTest, heightTest, TestSize.Level1)
     DialogProperties dialogProperties;
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
-    for (const auto& [value, expectVal] : SIZE_TEST_PLAN) {
-        options.height = Converter::ArkValue<Opt_Length>(value);
+    for (const auto& [value, expectVal] : SIZE_TEST_PLAN_DIM) {
+        options.height = Converter::ArkValue<Opt_Dimension>(value);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -532,8 +552,8 @@ HWTEST_F(CustomDialogControllerAccessorTest, heightInvalidTest, TestSize.Level1)
     DialogProperties dialogProperties;
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
-    for (const auto& value : SIZE_INVALID_TEST_PLAN) {
-        options.height = Converter::ArkValue<Opt_Length>(value);
+    for (const auto& value : SIZE_INVALID_TEST_PLAN_DIM) {
+        options.height = Converter::ArkValue<Opt_Dimension>(value);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -553,8 +573,8 @@ HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusTest, TestSize.Level1)
     DialogProperties dialogProperties;
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
-    for (const auto& [value, expectVal] : SIZE_TEST_PLAN) {
-        auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Length>(value);
+    for (const auto& [value, expectVal] : SIZE_TEST_PLAN_DIM) {
+        auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Dimension>(value);
         options.cornerRadius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
@@ -580,8 +600,8 @@ HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusInvalidTest, TestSize.L
     DialogProperties dialogProperties;
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
-    for (const auto& value : SIZE_INVALID_TEST_PLAN) {
-        auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Length>(value);
+    for (const auto& value : SIZE_INVALID_TEST_PLAN_DIM) {
+        auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Dimension>(value);
         options.cornerRadius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
@@ -767,8 +787,8 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderWidthTest, TestSize.Level1)
     DialogProperties dialogProperties;
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
-    for (const auto& [value, expectVal] : SIZE_TEST_PLAN) {
-        auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_EdgeWidths, Ark_Length>(value);
+    for (const auto& [value, expectVal] : SIZE_TEST_PLAN_DIM) {
+        auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_EdgeWidths, Ark_Dimension>(value);
         options.borderWidth = Converter::ArkValue<Opt_Union_Dimension_EdgeWidths>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
@@ -794,8 +814,8 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderWidthInvalidTest, TestSize.Le
     DialogProperties dialogProperties;
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
-    for (const auto& value : SIZE_INVALID_TEST_PLAN) {
-        auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_EdgeWidths, Ark_Length>(value);
+    for (const auto& value : SIZE_INVALID_TEST_PLAN_DIM) {
+        auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_EdgeWidths, Ark_Dimension>(value);
         options.borderWidth = Converter::ArkValue<Opt_Union_Dimension_EdgeWidths>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);

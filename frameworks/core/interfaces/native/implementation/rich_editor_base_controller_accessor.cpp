@@ -85,29 +85,23 @@ void AssignArkValue(Ark_DecorationStyleInterface& dst, const UpdateSpanStyle& sr
 
 void AssignArkValue(Ark_RichEditorTextStyle& dst, const UpdateSpanStyle& src, Converter::ConvContext *ctx)
 {
-    auto color = src.updateTextColor.value_or(Color::BLACK);
-    auto strColor = Converter::ArkValue<Ark_String>(color.ToString(), ctx);
-    dst.fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(strColor);
-    dst.fontSize = Converter::ArkUnion<Opt_Union_Length_Number,
-        Ark_Length>(src.updateFontSize.value_or(CalcDimension()));
+    dst.fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(src.updateTextColor, ctx);
+    dst.fontSize = Converter::ArkUnion<Opt_Union_String_Number_Resource,
+        Ark_String>(src.updateFontSize, ctx);
     dst.fontStyle = Converter::ArkValue<Opt_FontStyle>(src.updateItalicFontStyle);
-    auto arkFontWeight = Converter::ArkValue<Ark_FontWeight>(src.updateFontWeight.value_or(FontWeight::NORMAL));
     dst.fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String,
-        Ark_FontWeight>(arkFontWeight);
-    Ark_String fontFamilies = {};
+        Ark_FontWeight>(src.updateFontWeight);
+    std::optional<Ark_String> fontFamilies;
     if (src.updateFontFamily && !src.updateFontFamily->empty()) {
         auto families = src.updateFontFamily.value();
         fontFamilies = Converter::ArkValue<Ark_String>(families[0], ctx);
     }
     dst.fontFamily = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(fontFamilies);
     dst.decoration = Converter::ArkValue<Opt_DecorationStyleInterface>(src, ctx);
-    auto shadowVec = src.updateTextShadows.value_or(std::vector<Shadow>());
-    auto array = Converter::ArkValue<Array_ShadowOptions>(shadowVec, ctx);
-    dst.textShadow = Converter::ArkUnion<Opt_Union_ShadowOptions_Array_ShadowOptions, Array_ShadowOptions>(array);
-    auto str = Converter::ArkValue<Ark_String>(src.updateLetterSpacing.value_or(CalcDimension()).ToString(), ctx);
-    dst.letterSpacing = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(str);
-    str = Converter::ArkValue<Ark_String>(src.updateLineHeight.value_or(CalcDimension()).ToString(), ctx);
-    dst.lineHeight = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(str);
+    dst.textShadow = Converter::ArkUnion<Opt_Union_ShadowOptions_Array_ShadowOptions,
+        Array_ShadowOptions>(src.updateTextShadows, ctx);
+    dst.letterSpacing = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(src.updateLetterSpacing, ctx);
+    dst.lineHeight = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(src.updateLineHeight, ctx);
     dst.fontFeature = Converter::ArkValue<Opt_String>(src.updateFontFeature, ctx);
 }
 

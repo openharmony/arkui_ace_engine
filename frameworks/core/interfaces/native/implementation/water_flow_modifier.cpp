@@ -308,50 +308,6 @@ void OnScrollIndexImpl(Ark_NativePointer node,
 
     WaterFlowModelNG::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
 }
-void OnWillScrollImpl(Ark_NativePointer node,
-                      const Opt_OnWillScrollCallback* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::optional<OnWillScrollCallback> arkCallback;
-    if (value) {
-        arkCallback = Converter::OptConvert<OnWillScrollCallback>(*value);
-    }
-    if (arkCallback) {
-        auto modelCallback = [callback = CallbackHelper(arkCallback.value())]
-            (const Dimension& scrollOffset, const ScrollState& scrollState, const ScrollSource& scrollSource) ->
-                ScrollFrameResult {
-            auto arkScrollOffset = Converter::ArkValue<Ark_Number>(scrollOffset);
-            auto arkScrollState = Converter::ArkValue<Ark_ScrollState>(scrollState);
-            auto arkScrollSource = Converter::ArkValue<Ark_ScrollSource>(scrollSource);
-            auto resultOpt =
-                callback.InvokeWithOptConvertResult<ScrollFrameResult, Ark_ScrollResult, Callback_ScrollResult_Void>(
-                    arkScrollOffset, arkScrollState, arkScrollSource);
-            return resultOpt.value_or(ScrollFrameResult());
-        };
-        ScrollableModelStatic::SetOnWillScroll(frameNode, std::move(modelCallback));
-    } else {
-        ScrollableModelStatic::SetOnWillScroll(frameNode, nullptr);
-    }
-}
-void OnDidScrollImpl(Ark_NativePointer node,
-                     const Opt_OnScrollCallback* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto callValue = Converter::OptConvert<OnScrollCallback>(*value);
-    if (!callValue.has_value()) {
-        return;
-    }
-    auto onDidScroll = [arkCallback = CallbackHelper(callValue.value())](
-        Dimension oIn, ScrollState stateIn) {
-            auto state = Converter::ArkValue<Ark_ScrollState>(stateIn);
-            auto scrollOffset = Converter::ArkValue<Ark_Number>(oIn);
-            arkCallback.Invoke(scrollOffset, state);
-    };
-    ScrollableModelStatic::SetOnDidScroll(frameNode, std::move(onDidScroll));
-}
 } // WaterFlowAttributeModifier
 const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier()
 {
@@ -373,8 +329,6 @@ const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier()
         WaterFlowAttributeModifier::OnReachEndImpl,
         WaterFlowAttributeModifier::OnScrollFrameBeginImpl,
         WaterFlowAttributeModifier::OnScrollIndexImpl,
-        WaterFlowAttributeModifier::OnWillScrollImpl,
-        WaterFlowAttributeModifier::OnDidScrollImpl,
     };
     return &ArkUIWaterFlowModifierImpl;
 }

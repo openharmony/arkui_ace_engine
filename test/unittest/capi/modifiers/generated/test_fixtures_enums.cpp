@@ -678,7 +678,7 @@ std::vector<std::tuple<std::string, Ark_EffectType>> testFixtureEnumEffectTypeIn
 
 std::vector<std::tuple<std::string, Ark_EllipsisMode, std::string>> testFixtureEnumEllipsisModeValidValues = {
     { "ARK_ELLIPSIS_MODE_START", ARK_ELLIPSIS_MODE_START, "EllipsisMode.START" },
-    { "ARK_ELLIPSIS_MODE_CENTER", ARK_ELLIPSIS_MODE_CENTER, "EllipsisMode.CENTER" },
+    { "ARK_ELLIPSIS_MODE_MIDDLE", ARK_ELLIPSIS_MODE_MIDDLE, "EllipsisMode.CENTER" },
     { "ARK_ELLIPSIS_MODE_END", ARK_ELLIPSIS_MODE_END, "EllipsisMode.END" },
 };
 
