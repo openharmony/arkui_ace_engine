@@ -15,15 +15,23 @@
 
 #include "bridge/declarative_frontend/jsview/js_richtext.h"
 
+#include <optional>
 #include <string>
 
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/richtext_model_impl.h"
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/richtext_model_ng.h"
 
 namespace OHOS::Ace {
+const std::string RAWFILE_PREFIX = "resource://RAWFILE/";
+const std::string BUNDLE_NAME_PREFIX = "bundleName:";
+const std::string MODULE_NAME_PREFIX = "moduleName:";
 std::unique_ptr<RichTextModel> RichTextModel::instance_ = nullptr;
 std::mutex RichTextModel::mutex_;
 RichTextModel* RichTextModel::GetInstance()
@@ -54,9 +62,15 @@ void JSRichText::Create(const JSCallbackInfo& info)
     }
 
     std::string data;
-
+    std::string webSrc;
+    std::optional<std::string> dstSrc;
     if (ParseJsString(info[0], data)) {
         RichTextModel::GetInstance()->Create(data);
+    } else if (ParseJsMedia(info[0], webSrc)) {
+        ParseRawfileWebSrc(info[0], webSrc);
+        int np = static_cast<int>(webSrc.find_first_of("/"));
+        dstSrc = np < 0 ? webSrc : webSrc.erase(np, 1);
+        RichTextModel::GetInstance()->Create(dstSrc.value());
     } else {
         TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "richtext component failed to parse data");
     }
@@ -105,6 +119,24 @@ void JSRichText::OnComplete(const JSCallbackInfo& info)
         };
 
         RichTextModel::GetInstance()->SetOnPageFinish(onCompleteEvent);
+    }
+}
+
+void JSRichText::ParseRawfileWebSrc(const JSRef<JSVal>& srcValue, std::string& webSrc)
+{
+    if (!srcValue->IsObject() || webSrc.substr(0, RAWFILE_PREFIX.size()) != RAWFILE_PREFIX) {
+        return;
+    }
+    std::string bundleName;
+    std::string moduleName;
+    GetJsMediaBundleInfo(srcValue, bundleName, moduleName);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if ((!bundleName.empty() && !moduleName.empty()) &&
+        (bundleName != AceApplicationInfo::GetInstance().GetPackageName() ||
+        moduleName != container->GetModuleName())) {
+        webSrc = RAWFILE_PREFIX + BUNDLE_NAME_PREFIX + bundleName + "/" + MODULE_NAME_PREFIX + moduleName + "/" +
+            webSrc.substr(RAWFILE_PREFIX.size());
     }
 }
 } // namespace OHOS::Ace::Framework
