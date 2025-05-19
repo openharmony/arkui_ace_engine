@@ -35,6 +35,30 @@ namespace {
 const std::string NAVIGATION_ID1 = "Navigation1";
 const std::string PAGE1 = "Page1";
 const std::string PARAM1 = "Param1";
+constexpr char INTENT_PARAM_KEY[] = "ohos.insightIntent.executeParam.param";
+constexpr char INTENT_NAVIGATION_ID_KEY[] = "ohos.insightIntent.pageParam.navigationId";
+constexpr char INTENT_NAVDESTINATION_NAME_KEY[] = "ohos.insightIntent.pageParam.navDestinationName";
+
+RefPtr<NavigationManager> GetNavigationManager()
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    return pipeline ? pipeline->GetNavigationManager() : nullptr;
+}
+
+std::string BuildSerializedIntentInfo(
+    const std::string& navigationInspectorId, const std::string& navDestinationName, const std::string& param)
+{
+    const char mockPlaceholder[] = "0";
+    auto navigationIdJson = JsonUtil::Create(false);
+    navigationIdJson->Put(mockPlaceholder, navigationInspectorId.c_str());
+    auto navDestinationNameJson = JsonUtil::Create(false);
+    navDestinationNameJson->Put(mockPlaceholder, navDestinationName.c_str());
+    auto intentJson = JsonUtil::Create(true);
+    intentJson->Put(INTENT_PARAM_KEY, JsonUtil::ParseJsonString(param));
+    intentJson->Put(INTENT_NAVIGATION_ID_KEY, navigationIdJson);
+    intentJson->Put(INTENT_NAVDESTINATION_NAME_KEY, navDestinationNameJson);
+    return intentJson->ToString();
+}
 } // namespace
 
 class NavigationManagerTestNg : public testing::Test {
@@ -596,5 +620,36 @@ HWTEST_F(NavigationManagerTestNg, CheckNodeNeedCacheTest006, TestSize.Level1)
      */
     ASSERT_NE(navigationManager, nullptr);
     ASSERT_EQ(navigationManager->CheckNodeNeedCache(navigationGroupNode), false);
+}
+
+/**
+ * @tc.name: ParseNavigationIntentInfo001
+ * @tc.desc: Branch: if serializedIntentInfo is valid
+ * @tc.expect: can parse serializedIntentInfo properly
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(NavigationManagerTestNg, ParseNavigationIntentInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get navigation manager.
+     */
+    auto navigationManager = GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    /**
+     * @tc.steps: step2. build serialized intent info.
+     */
+    const std::string navigationInspectorId = "navigation";
+    const std::string navDestinationName = "name";
+    const std::string param = "{\"param\":\"\"}";
+    const std::string serializedIntentInfo =
+        BuildSerializedIntentInfo(navigationInspectorId, navDestinationName, param);
+    /**
+     * @tc.steps: step3. parse target serialized intentInfo and do verify.
+     */
+    NavigationIntentInfo intentInfo = navigationManager->ParseNavigationIntentInfo(serializedIntentInfo);
+    ASSERT_EQ(intentInfo.navigationInspectorId, navigationInspectorId);
+    ASSERT_EQ(intentInfo.navDestinationName, navDestinationName);
+    ASSERT_EQ(intentInfo.param, param);
 }
 } // namespace OHOS::Ace::NG
