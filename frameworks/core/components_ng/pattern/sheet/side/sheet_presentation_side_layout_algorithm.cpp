@@ -77,20 +77,8 @@ void SheetPresentationSideLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (LessNotEqual(width, 0.0f) || width > sheetMaxWidth_) {
         width = defaultWidth;
     }
-    // height
-    float height = sheetMaxHeight_;
-    if (sheetStyle.sheetHeight.height.has_value()) {
-        if (sheetStyle.sheetHeight.height->Unit() == DimensionUnit::PERCENT) {
-            height = sheetStyle.sheetHeight.height->ConvertToPxWithSize(sheetMaxHeight_);
-        } else {
-            height = sheetStyle.sheetHeight.height->ConvertToPx();
-        }
-    }
-    if (LessNotEqual(height, 0.0f) || height > sheetMaxHeight_) {
-        height = sheetMaxHeight_;
-    }
-
-    sheetHeight_ = height;
+    // The height attribute only takes effect at the full-screen size
+    sheetHeight_ = sheetMaxHeight_;
     sheetWidth_ = width;
 
     auto padding = sheetPattern->GetSheetObject()->GetSheetSafeAreaPadding();
