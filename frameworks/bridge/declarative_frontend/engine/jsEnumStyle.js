@@ -1576,6 +1576,30 @@ class PulseSymbolEffect extends SymbolEffect {
   }
 }
 
+class DisableSymbolEffect extends SymbolEffect {
+  constructor(scope) {
+    super();
+    this.type = 'DisableSymbolEffect';
+    this.scope = scope;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+}
+
+class QuickReplaceSymbolEffect extends SymbolEffect {
+  constructor(scope) {
+    super();
+    this.type = 'QuickReplaceSymbolEffect';
+    this.scope = scope;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+}
+
 let RichEditorSpanType;
 (function (RichEditorSpanType) {
   RichEditorSpanType[RichEditorSpanType.TEXT = 0] = 'TEXT';
