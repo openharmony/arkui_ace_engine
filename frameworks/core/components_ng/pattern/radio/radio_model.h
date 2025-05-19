@@ -19,10 +19,15 @@
 #include <functional>
 #include <mutex>
 
+#include "core/common/resource/resource_object.h"
 #include "core/components_ng/pattern/radio/radio_event_hub.h"
 
 namespace OHOS::Ace {
-
+enum class RadioColorType {
+    CHECKED_BACKGROUND_COLOR,
+    UNCHECKED_BORDER_COLOR,
+    INDICATOR_COLOR
+};
 class ACE_FORCE_EXPORT RadioModel {
 public:
     static RadioModel* GetInstance();
@@ -43,6 +48,8 @@ public:
     virtual void SetOnClickEvent(std::function<void()>&& onClick) {};
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) {};
     virtual void SetHoverEffect(HoverEffectType hoverEffect) {};
+    virtual void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
+        const RadioColorType radioColorType) {};
 
 private:
     static std::unique_ptr<RadioModel> instance_;

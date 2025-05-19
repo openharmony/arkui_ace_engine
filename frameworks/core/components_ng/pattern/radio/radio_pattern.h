@@ -178,6 +178,8 @@ public:
         isUserSetUncheckBorderColor_ = isUserSet;
     }
 
+    void UpdateRadioComponentColor(const Color& color, const RadioColorType radioColorType);
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

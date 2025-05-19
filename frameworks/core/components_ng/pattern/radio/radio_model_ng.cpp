@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
@@ -297,5 +298,43 @@ void RadioModelNG::SetRadioOptions(FrameNode* frameNode, const std::string& valu
     eventHub->SetValue(value);
     eventHub->SetGroup(group);
     ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator, frameNode);
+}
+
+void RadioModelNG::CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
+    const RadioColorType radioColorType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    std::string key = "radio" + ColorTypeToString(radioColorType);
+    auto&& updateFunc = [pattern, key, radioColorType](const RefPtr<ResourceObject>& resObj) {
+        std::string color = pattern->GetResCacheMapByKey(key);
+        Color result;
+        if (color.empty()) {
+            ResourceParseUtils::ParseResColor(resObj, result);
+            pattern->AddResCache(key, result.ColorToString());
+        } else {
+            result = Color::ColorFromString(color);
+        }
+        pattern->UpdateRadioComponentColor(result, radioColorType);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+std::string RadioModelNG::ColorTypeToString(const RadioColorType radioColorType)
+{
+    switch (radioColorType) {
+        case RadioColorType::CHECKED_BACKGROUND_COLOR:
+            return "CheckedBackgroundColor";
+        case RadioColorType::UNCHECKED_BORDER_COLOR:
+            return "UncheckedBorderColor";
+        case RadioColorType::INDICATOR_COLOR:
+            return "IndicatorColor";
+    }
+    return "Unknown";
 }
 } // namespace OHOS::Ace::NG
