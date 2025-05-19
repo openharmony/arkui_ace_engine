@@ -2843,7 +2843,6 @@ bool TextFieldPattern::CheckAutoFillType(const AceAutoFillType& autoFillType, bo
     CHECK_NULL_RETURN(container, false);
     auto isTriggerPassword = IsTriggerAutoFillPassword();
     if (autoFillType == AceAutoFillType::ACE_UNSPECIFIED && !isTriggerPassword) {
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "CheckAutoFillType :autoFillType is ACE_UNSPECIFIED.");
         return false;
     } else if (isTriggerPassword) {
         auto tempAutoFillType = IsAutoFillUserName(autoFillType) ? AceAutoFillType::ACE_USER_NAME : autoFillType;
@@ -3332,6 +3331,17 @@ void TextFieldPattern::ProcessSelection()
     needToRefreshSelectOverlay_ = false;
 }
 
+void TextFieldPattern::UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme)
+{
+    CHECK_NULL_VOID(textFieldTheme);
+    auto container = Container::Current();
+    if (container && container->IsSceneBoardWindow()) {
+        return;
+    }
+    selectOverlay_->SetMenuTranslateIsSupport(textFieldTheme->GetTranslateIsSupport());
+    selectOverlay_->SetIsSupportMenuSearch(textFieldTheme->GetIsSupportSearch());
+}
+
 void TextFieldPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -3413,8 +3423,7 @@ void TextFieldPattern::OnModifyDone()
         UpdateTextFieldInfo();
     }
     TriggerAvoidWhenCaretGoesDown();
-    selectOverlay_->SetMenuTranslateIsSupport(IsShowTranslate());
-    selectOverlay_->SetIsSupportMenuSearch(IsShowSearch());
+    UpdateSelectOverlay(textFieldTheme);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     SetIsEnableSubWindowMenu();
     isModifyDone_ = true;
@@ -10777,7 +10786,9 @@ void TextFieldPattern::SetIsEnableSubWindowMenu()
     if (selectOverlay_) {
         auto enable = !IsNeedProcessAutoFill() || !CheckAutoFill();
         selectOverlay_->SetIsHostNodeEnableSubWindowMenu(enable);
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetIsEnableSubWindowMenu enable=%{public}d", enable);
+        if (!enable) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetIsEnableSubWindowMenu not enable");
+        }
     }
 }
 
