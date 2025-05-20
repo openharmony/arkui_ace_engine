@@ -2369,16 +2369,16 @@ void HandleDidClickAccept(RefPtr<NG::FrameNode>& frameNode)
 
 bool ActClick(RefPtr<NG::FrameNode>& frameNode)
 {
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
-    CHECK_NULL_RETURN(eventHub, false);
-    auto gesture = eventHub->GetGestureEventHub();
-    CHECK_NULL_RETURN(gesture, false);
     auto interceptResult =
         NG::AccessibilityFunctionUtils::HandleAccessibilityActionIntercept(
             frameNode, AccessibilityInterfaceAction::ACCESSIBILITY_CLICK);
     if (interceptResult == AccessibilityActionInterceptResult::ACTION_INTERCEPT) {
         return true;
     }
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    CHECK_NULL_RETURN(eventHub, false);
+    auto gesture = eventHub->GetGestureEventHub();
+    CHECK_NULL_RETURN(gesture, false);
     HandleWillClickAccept(frameNode);
     bool result = gesture->ActClick();
     HandleDidClickAccept(frameNode);
@@ -4117,8 +4117,8 @@ bool DumpProcessInjectActionParameters(
 
 void JsAccessibilityManager::DumpInjectActionTest(const std::vector<std::string>& params)
 {
-    int64_t nodeId;
-    int32_t result;
+    int64_t nodeId = 0;
+    int32_t result = 0;
     InjectActionType actionType = InjectActionType::UNDEFINED_ACTION;
 
     if (!DumpProcessInjectActionParameters(params, nodeId, result, actionType)) {

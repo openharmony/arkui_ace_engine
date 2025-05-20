@@ -138,6 +138,7 @@ public:
     MOCK_METHOD0(GenerateAccessibilityWorkMode, AccessibilityWorkMode());
     MOCK_METHOD1(HandleWillClickAccept, void(RefPtr<NG::FrameNode>& frameNode));
     MOCK_METHOD1(HandleDidClickAccept, void(RefPtr<NG::FrameNode>& frameNode));
+    MOCK_METHOD1(ActClick, bool(RefPtr<NG::FrameNode>& frameNode));
 };
 
 /**
@@ -2086,5 +2087,32 @@ HWTEST_F(JsAccessibilityManagerTest, IsSendAccessibilityEventTest001, TestSize.L
     EXPECT_EQ(result, false);
 
     container->SetUIExtensionSubWindow(IsUIExtensionWindowBackup);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager039
+ * @tc.desc: ActClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager039, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct mockJsManger
+    */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    MockJsAccessibilityManager mockJsManger;
+    mockJsManger.SetPipelineContext(context);
+    mockJsManger.Register(true);
+    /** 
+    * @tc.steps: step2. test 
+    */
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetGestureEventHub(nullptr);
+    EXPECT_CALL(mockJsManger, ActClick(_)).Times(0).WillOnce(Return(false));
 }
 } // namespace OHOS::Ace::NG
