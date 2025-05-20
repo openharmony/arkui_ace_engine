@@ -1352,6 +1352,20 @@ void WebModelNG::SetWebMediaAVSessionEnabled(bool isEnabled)
     webPattern->UpdateWebMediaAVSessionEnabled(isEnabled);
 }
 
+void WebModelNG::SetEnableDataDetector(bool isEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnableDataDetector(isEnabled);
+}
+
+void WebModelNG::SetDataDetectorConfig(const TextDetectConfig& config)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateDataDetectorConfig(config);
+}
+
 void WebModelNG::SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();

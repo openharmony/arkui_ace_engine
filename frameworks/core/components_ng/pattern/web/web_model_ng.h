@@ -230,6 +230,8 @@ public:
     void SetEnabledHapticFeedback(bool isEnabled) override;
     void SetOptimizeParserBudgetEnabled(bool enable) override;
     void SetWebMediaAVSessionEnabled(bool isEnabled) override;
+    void SetEnableDataDetector(bool isEnabled) override;
+    void SetDataDetectorConfig(const TextDetectConfig& config) override;
     void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) override;
 
     static void SetJsEnabled(FrameNode* frameNode, bool isJsEnabled);

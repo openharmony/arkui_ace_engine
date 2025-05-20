@@ -205,6 +205,8 @@ public:
     virtual void SetEnabledHapticFeedback(bool isEnabled) {}
     virtual void SetOptimizeParserBudgetEnabled(bool enable) = 0;
     virtual void SetWebMediaAVSessionEnabled(bool isEnabled) {};
+    virtual void SetEnableDataDetector(bool isEnabled) {};
+    virtual void SetDataDetectorConfig(const TextDetectConfig& config) {};
     virtual void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) {};
 private:
     static std::unique_ptr<WebModel> instance_;
