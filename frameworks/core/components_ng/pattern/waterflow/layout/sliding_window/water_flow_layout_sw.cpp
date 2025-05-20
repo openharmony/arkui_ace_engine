@@ -785,6 +785,10 @@ void WaterFlowLayoutSW::LayoutSection(
             } else {
                 child->GetHostNode()->ForceSyncGeometryNode();
             }
+            auto frameNode = AceType::DynamicCast<FrameNode>(child);
+            if (frameNode) {
+                frameNode->MarkAndCheckNewOpIncNode(axis_);
+            }
         }
         if (!rtl) {
             crossPos += itemsCrossSize_[idx][i] + crossGaps_[idx];

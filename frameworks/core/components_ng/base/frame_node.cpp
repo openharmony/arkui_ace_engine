@@ -82,7 +82,9 @@ constexpr uint8_t SUGGEST_OPINC_CHECKED_THROUGH = 1 << 4;
 // Node has rendergroup marked.
 constexpr uint8_t APP_RENDER_GROUP_MARKED_MASK = 1 << 7;
 // OPINC max ratio for scroll scope(height);
-constexpr float HIGHT_RATIO_LIMIT = 0.8;
+constexpr float HIGHT_RATIO_LIMIT = 0.8f;
+// OPINC max ratio for scroll scope(width);
+constexpr float WIDTH_RATIO_LIMIT = 1.0f;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
 } // namespace
@@ -6008,44 +6010,41 @@ bool FrameNode::GetOpIncCheckedOnce()
 bool FrameNode::MarkSuggestOpIncGroup(bool suggest, bool calc)
 {
     CHECK_NULL_RETURN(renderContext_, false);
-    if (!GetSuggestOpIncMarked() && GetCanSuggestOpInc()) {
-        renderContext_->SuggestOpIncNode(suggest, calc);
-        SetSuggestOpIncMarked(true);
-    }
+    renderContext_->SuggestOpIncNode(suggest, calc);
+    SetSuggestOpIncMarked(suggest);
     return true;
 }
 
-OPINC_TYPE_E FrameNode::IsOpIncValidNode(const SizeF& boundary, int32_t childNumber)
+OPINC_TYPE_E FrameNode::IsOpIncValidNode(const SizeF& boundary, Axis axis, int32_t childNumber)
 {
-    auto ret = GetPattern()->OpIncType();
-    switch (ret) {
-        case OPINC_NODE:
-            SetCanSuggestOpInc(true);
-            break;
-        case OPINC_PARENT_POSSIBLE:
-            break;
-        case OPINC_NODE_POSSIBLE: {
-            int32_t height = static_cast<int>(GetGeometryNode()->GetFrameSize().Height());
-            int32_t width = static_cast<int>(GetGeometryNode()->GetFrameSize().Width());
-            int32_t heightBoundary = static_cast<int>(boundary.Height() * HIGHT_RATIO_LIMIT);
-            int32_t area = height * width;
-            if (area >= MIN_OPINC_AREA && height <= heightBoundary) {
-                SetCanSuggestOpInc(true);
-                ret = OPINC_NODE;
-            } else if (height > heightBoundary) {
-                ret = OPINC_PARENT_POSSIBLE;
-            } else {
-                ret = OPINC_SUGGESTED_OR_EXCLUDED;
-            }
-            break;
-        }
-        default:
-            break;
+    int32_t height = static_cast<int>(GetGeometryNode()->GetFrameSize().Height());
+    int32_t width = static_cast<int>(GetGeometryNode()->GetFrameSize().Width());
+    int32_t heightBoundary = static_cast<int>(boundary.Height() * HIGHT_RATIO_LIMIT);
+    int32_t widthBoundary = static_cast<int>(boundary.Width() * WIDTH_RATIO_LIMIT);
+    int32_t area = height * width;
+    if (area >= MIN_OPINC_AREA &&
+        ((axis == Axis::VERTICAL && height <= heightBoundary) ||
+        (axis == Axis::HORIZONTAL && width <= widthBoundary)) &&
+        HasMultipleChild()) {
+        return OPINC_NODE;
     }
-    return ret;
+    return OPINC_INVALID;
 }
 
-OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth)
+bool FrameNode::HasMultipleChild()
+{
+    if (GetChildren().empty()) {
+        return false;
+    }
+    if (GetChildren().size() > 1) {
+        return true;
+    }
+    auto child = AceType::DynamicCast<FrameNode>(GetChildByIndex(0));
+    CHECK_NULL_RETURN(child, false);
+    return child->HasMultipleChild();
+}
+
+OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth, Axis axis)
 {
     if (GetSuggestOpIncActivatedOnce()) {
         return OPINC_SUGGESTED_OR_EXCLUDED;
@@ -6055,7 +6054,7 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
     if (GetApplicationRenderGroupMarked()) {
         return OPINC_INVALID;
     }
-    auto status = IsOpIncValidNode(boundary);
+    auto status = IsOpIncValidNode(boundary, axis);
     if (SystemProperties::GetDebugEnabled()) {
         const auto& hostTag = GetHostTag();
         path = path + " --> " + hostTag;
@@ -6073,7 +6072,7 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
         GenerateOneDepthVisibleFrame(childrens);
         for (auto& child : childrens) {
             if (child) {
-                status = child->FindSuggestOpIncNode(path, boundary, depth + 1);
+                status = child->FindSuggestOpIncNode(path, boundary, depth + 1, axis);
             }
             if (status == OPINC_INVALID) {
                     return OPINC_INVALID;
@@ -6086,22 +6085,18 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
     return OPINC_SUGGESTED_OR_EXCLUDED;
 }
 
-void FrameNode::MarkAndCheckNewOpIncNode()
+void FrameNode::MarkAndCheckNewOpIncNode(Axis axis)
 {
+    if (!IsActive() || GetSuggestOpIncActivatedOnce() || GetApplicationRenderGroupMarked()) {
+        return;
+    }
     auto parent = GetAncestorNodeOfFrame(true);
     CHECK_NULL_VOID(parent);
-    if (parent->GetSuggestOpIncActivatedOnce() && !GetSuggestOpIncActivatedOnce()) {
+    if (parent->GetSuggestOpIncActivatedOnce()) {
         SetSuggestOpIncActivatedOnce();
-        if (!parent->GetOpIncCheckedOnce()) {
-            parent->SetOpIncCheckedOnce();
-            auto status = IsOpIncValidNode(parent->GetGeometryNode()->GetFrameSize());
-            if (status == OPINC_NODE) {
-                parent->SetOpIncGroupCheckedThrough(true);
-            } else {
-                parent->SetOpIncGroupCheckedThrough(false);
-            }
-        }
-        if (parent->GetOpIncGroupCheckedThrough()) {
+        auto status = IsOpIncValidNode(parent->GetGeometryNode()->GetFrameSize(), axis);
+        ACE_SCOPED_TRACE("MarkAndCheckNewOpIncNode id:%d, tag:%s, status: %d", GetId(), GetTag().c_str(), status);
+        if (status == OPINC_NODE) {
             SetCanSuggestOpInc(true);
             MarkSuggestOpIncGroup(true, true);
         }

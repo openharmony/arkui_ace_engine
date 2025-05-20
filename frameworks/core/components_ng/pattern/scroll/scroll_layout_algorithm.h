@@ -77,6 +77,7 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
     void UpdateOverlay(LayoutWrapper* layoutWrapper);
+    void MarkAndCheckNewOpIncNode(const RefPtr<LayoutWrapper>& layoutWrapper, Axis axis);
 
 private:
     void UseInitialOffset(Axis axis, SizeF selfSize, LayoutWrapper* layoutWrapper);
