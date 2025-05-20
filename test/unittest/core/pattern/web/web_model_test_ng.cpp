@@ -36,6 +36,11 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+constexpr int32_t DEFAULT_MINFONT_SIZE = 8;
+constexpr int32_t DEFAULT_DEFAULTFONT_SIZE = 16;
+constexpr int32_t DEFAULT_DEFAULTFIXEDFONT_SIZE = 13;
+constexpr int32_t DEFAULT_MINLOGICALFONT_SIZE = 8;
+
 class MockBaseEventInfo : public BaseEventInfo {
 public:
     MockBaseEventInfo() : BaseEventInfo("MockEvent") {}
@@ -2640,5 +2645,335 @@ HWTEST_F(WebModelTestNg, SetOnScroll001, TestSize.Level1)
     EXPECT_TRUE(callbackCalled);
 #endif
 }
+
+/**
+ * @tc.name: SetGeolocationAccessEnabled002
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetGeolocationAccessEnabled002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetGeolocationAccessEnabled(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckGeolocationAccessEnabled(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetDatabaseAccessEnabled001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetDatabaseAccessEnabled001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetDatabaseAccessEnabled(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckDatabaseAccessEnabled(true), true);
+#endif
+}
+
+
+HWTEST_F(WebModelTestNg, SetOverviewModeAccessEnabled001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetOverviewModeAccessEnabled(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckOverviewModeAccessEnabled(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetForceDarkAccess001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetForceDarkAccess001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetForceDarkAccess(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckForceDarkAccess(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetPinchSmoothModeEnabled001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetPinchSmoothModeEnabled001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetPinchSmoothModeEnabled(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckPinchSmoothModeEnabled(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetMetaViewport023
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetMetaViewport023, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetMetaViewport(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckMetaViewport(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetEnableFollowSystemFontWeight002
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetEnableFollowSystemFontWeight002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetEnableFollowSystemFontWeight(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckEnableFollowSystemFontWeight(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetNativeEmbedModeEnabled008
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetNativeEmbedModeEnabled008, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetNativeEmbedModeEnabled(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckNativeEmbedModeEnabled(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetMinFontSize001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetMinFontSize001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetMinFontSize(AccessibilityManager::RawPtr(frameNode), DEFAULT_MINFONT_SIZE);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckMinFontSize(DEFAULT_MINFONT_SIZE), true);
+#endif
+}
+
+/**
+ * @tc.name: SetDefaultFontSize001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetDefaultFontSize001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetDefaultFontSize(AccessibilityManager::RawPtr(frameNode), DEFAULT_DEFAULTFONT_SIZE);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckDefaultFontSize(DEFAULT_DEFAULTFONT_SIZE), true);
+#endif
+}
+
+/**
+ * @tc.name: SetDefaultFixedFontSize001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetDefaultFixedFontSize001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetDefaultFixedFontSize(AccessibilityManager::RawPtr(frameNode), DEFAULT_DEFAULTFIXEDFONT_SIZE);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckDefaultFixedFontSize(DEFAULT_DEFAULTFIXEDFONT_SIZE), true);
+#endif
+}
+
+/**
+ * @tc.name: SetWebSansSerifFont001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetWebSansSerifFont001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetWebSansSerifFont(AccessibilityManager::RawPtr(frameNode), "test");
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckWebSansSerifFont("test"), true);
+#endif
+}
+
+/**
+ * @tc.name: SetWebSerifFont001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetWebSerifFont001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetWebSerifFont(AccessibilityManager::RawPtr(frameNode), "test");
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckWebSerifFont("test"), true);
+#endif
+}
+
+/**
+ * @tc.name: SetWebStandardFont001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetWebStandardFont001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetWebStandardFont(AccessibilityManager::RawPtr(frameNode), "test");
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckWebStandardFont("test"), true);
+#endif
+}
+
+/**
+ * @tc.name: SetMinLogicalFontSize001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+ HWTEST_F(WebModelTestNg, SetMinLogicalFontSize001, TestSize.Level1)
+ {
+ #ifdef OHOS_STANDARD_SYSTEM
+ 
+     auto* stack = ViewStackProcessor::GetInstance();
+     auto nodeId = stack->ClaimNodeId();
+     auto frameNode =
+         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+     ASSERT_NE(frameNode, nullptr);
+     stack->Push(frameNode);
+     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+ 
+     WebModelNG webModelNG;
+     webModelNG.SetMinLogicalFontSize(AccessibilityManager::RawPtr(frameNode), DEFAULT_MINLOGICALFONT_SIZE);
+     EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckMinLogicalFontSize(DEFAULT_MINLOGICALFONT_SIZE), true);
+ #endif
+ }
 
 } // namespace OHOS::Ace::NG

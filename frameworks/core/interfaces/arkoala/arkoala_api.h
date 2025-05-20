@@ -4395,6 +4395,36 @@ struct ArkUIWebModifier {
     void (*resetOnRequestSelectedCallBack)(ArkUINodeHandle node);
     void (*setOnContextMenuHideCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnContextMenuHideCallBack)(ArkUINodeHandle node);
+    void (*setGeolocationAccess)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetGeolocationAccess)(ArkUINodeHandle node);
+    void (*setDatabaseAccess)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetDatabaseAccess)(ArkUINodeHandle node);
+    void (*setOverviewModeAccess)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetOverviewModeAccess)(ArkUINodeHandle node);
+    void (*setForceDarkAccess)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetForceDarkAccess)(ArkUINodeHandle node);
+    void (*setPinchSmooth)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetPinchSmooth)(ArkUINodeHandle node);
+    void (*setMetaViewport)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetMetaViewport)(ArkUINodeHandle node);
+    void (*setEnableFollowSystemFontWeight)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableFollowSystemFontWeight)(ArkUINodeHandle node);
+    void (*setEnableNativeEmbedMode)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableNativeEmbedMode)(ArkUINodeHandle node);
+    void (*setMinFontSize)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetMinFontSize)(ArkUINodeHandle node);
+    void (*setDefaultFontSize)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetDefaultFontSize)(ArkUINodeHandle node);
+    void (*setDefaultFixedFontSize)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetDefaultFixedFontSize)(ArkUINodeHandle node);
+    void (*setMinLogicalFontSize)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetMinLogicalFontSize)(ArkUINodeHandle node);
+    void (*setWebStandardFont)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetWebStandardFont)(ArkUINodeHandle node);
+    void (*setWebSerifFont)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetWebSerifFont)(ArkUINodeHandle node);
+    void (*setWebSansSerifFont)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetWebSansSerifFont)(ArkUINodeHandle node);
 };
 
 struct ArkUIBlankModifier {

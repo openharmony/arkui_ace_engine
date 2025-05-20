@@ -1535,4 +1535,124 @@ void WebModelNG::InitialScale(FrameNode* frameNode, float scale)
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateInitialScale(scale);
 }
+void WebModelNG::SetGeolocationAccessEnabled(FrameNode* frameNode, bool isGeolocationAccessEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateGeolocationAccessEnabled(isGeolocationAccessEnabled);
+}
+
+void WebModelNG::SetDatabaseAccessEnabled(FrameNode* frameNode, bool isDatabaseAccessEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateDatabaseAccessEnabled(isDatabaseAccessEnabled);
+}
+
+void WebModelNG::SetOverviewModeAccessEnabled(FrameNode* frameNode, bool isOverviewModeAccessEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateOverviewModeAccessEnabled(isOverviewModeAccessEnabled);
+}
+
+void WebModelNG::SetForceDarkAccess(FrameNode* frameNode, bool isForceDarkAccess)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateForceDarkAccess(isForceDarkAccess);
+}
+
+void WebModelNG::SetPinchSmoothModeEnabled(FrameNode* frameNode, bool isPinchSmoothModeEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdatePinchSmoothModeEnabled(isPinchSmoothModeEnabled);
+}
+
+void WebModelNG::SetMetaViewport(FrameNode* frameNode, bool isMetaViewport)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateMetaViewport(isMetaViewport);
+}
+
+void WebModelNG::SetEnableFollowSystemFontWeight(FrameNode* frameNode, bool isEnableFollowSystemFontWeight)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnableFollowSystemFontWeight(isEnableFollowSystemFontWeight);
+}
+
+void WebModelNG::SetNativeEmbedModeEnabled(FrameNode* frameNode, bool isNativeEmbedModeEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateNativeEmbedModeEnabled(isNativeEmbedModeEnabled);
+}
+
+void WebModelNG::SetMinFontSize(FrameNode* frameNode, int32_t minFontSize)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateMinFontSize(minFontSize); 
+}
+
+void WebModelNG::SetDefaultFontSize(FrameNode* frameNode, int32_t defaultFontSize)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateDefaultFontSize(defaultFontSize);
+}
+
+void WebModelNG::SetDefaultFixedFontSize(FrameNode* frameNode, int32_t defaultFixedFontSize)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateDefaultFixedFontSize(defaultFixedFontSize);
+}
+
+void WebModelNG::SetMinLogicalFontSize(FrameNode* frameNode, int32_t minLogicalFontSize)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateMinLogicalFontSize(minLogicalFontSize);
+}
+
+void WebModelNG::SetWebStandardFont(FrameNode* frameNode, const std::string& standardFontFamily)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebStandardFont(standardFontFamily);
+}
+
+void WebModelNG::SetWebSerifFont(FrameNode* frameNode, const std::string& serifFontFamily)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebSerifFont(serifFontFamily);
+}
+
+void WebModelNG::SetWebSansSerifFont(FrameNode* frameNode, const std::string& sansSerifFontFamily)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebSansSerifFont(sansSerifFontFamily);
+}
+
 } // namespace OHOS::Ace::NG

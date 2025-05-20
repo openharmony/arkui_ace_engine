@@ -252,6 +252,22 @@ public:
     static void SetOnScaleChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetOnRequestFocus(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetOnContextMenuHide(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetGeolocationAccessEnabled(FrameNode* frameNode, bool isGeolocationAccessEnabled);
+    static void SetDatabaseAccessEnabled(FrameNode* frameNode, bool isDatabaseAccessEnabled);
+    static void SetOverviewModeAccessEnabled(FrameNode* frameNode, bool isOverviewModeAccessEnabled);
+    static void SetForceDarkAccess(FrameNode* frameNode, bool isForceDarkAccess);
+    static void SetPinchSmoothModeEnabled(FrameNode* frameNode, bool isPinchSmoothModeEnabled);
+    static void SetMetaViewport(FrameNode* frameNode, bool isMetaViewport);
+    static void SetEnableFollowSystemFontWeight(FrameNode* frameNode, bool isEnableFollowSystemFontWeight);
+    static void SetNativeEmbedModeEnabled(FrameNode* frameNode, bool isNativeEmbedModeEnabled);
+    static void SetMinFontSize(FrameNode* frameNode, int32_t minFontSize);
+    static void SetDefaultFontSize(FrameNode* frameNode, int32_t defaultFontSize);
+    static void SetDefaultFixedFontSize(FrameNode* frameNode, int32_t defaultFixedFontSize);
+    static void SetMinLogicalFontSize(FrameNode* frameNode, int32_t minLogicalFontSize);
+    static void SetWebStandardFont(FrameNode* frameNode, const std::string& standardFontFamily);
+    static void SetWebSerifFont(FrameNode* frameNode, const std::string& serifFontFamily);
+    static void SetWebSansSerifFont(FrameNode* frameNode, const std::string& sansSerifFontFamily);
+    
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H
