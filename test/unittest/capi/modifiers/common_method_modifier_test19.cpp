@@ -870,6 +870,36 @@ HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle1TestInvalidValues6, 
     EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
 }
 
+
+/*
+ * @tc.name: setOnBlurTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setOnBlurTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnBlur, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    struct CheckEvent {
+        int32_t nodeId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onBlurFunc = [](const Ark_Int32 resourceId) {
+        checkEvent = { .nodeId = Converter::Convert<int32_t>(resourceId) };
+    };
+    auto onBlurCallback = Converter::ArkValue<Callback_Void>(onBlurFunc, frameNode->GetId());
+    modifier_->setOnBlur(node_, &onBlurCallback);
+    EXPECT_FALSE(checkEvent);
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_TRUE(focusHub);
+    auto onBlur = focusHub->GetOnBlurCallback();
+    ASSERT_TRUE(onBlur);
+    onBlur();
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId()) << "Passed id is: " << frameNode->GetId();
+}
+
 /*
  * @tc.name: setMaskShape1TestValidValues1
  * @tc.desc:
@@ -1273,6 +1303,71 @@ HWTEST_F(CommonMethodModifierTest19, setOnVisibleAreaApproximateChangeTest3, Tes
     auto cbInfo2 = eventHub->GetThrottledVisibleAreaCallback();
     EXPECT_NE(cbInfo2.callback, nullptr);
     EXPECT_EQ(static_cast<int32_t>(cbInfo2.period), DEFAULT_PERIOD);
+}
+
+const float OLD_X_VALUE = 10.9f;
+const float OLD_Y_VALUE = 11.0f;
+const float OLD_WIDTH = 400.0f;
+const float OLD_HEIGHT = 400.0f;
+const RectF OLD_RECT = RectF(OLD_X_VALUE, OLD_Y_VALUE, OLD_WIDTH, OLD_HEIGHT);
+const OffsetF OLD_ORIGIN = OffsetF(OLD_WIDTH, OLD_HEIGHT);
+
+const float NEW_X_VALUE = 15.9f;
+const float NEW_Y_VALUE = 15.0f;
+const float NEW_WIDTH = 500.0f;
+const float NEW_HEIGHT = 500.0f;
+const RectF NEW_RECT = RectF(NEW_X_VALUE, NEW_Y_VALUE, NEW_WIDTH, NEW_HEIGHT);
+const OffsetF NEW_ORIGIN = OffsetF(NEW_WIDTH, NEW_HEIGHT);
+
+/*
+ * @tc.name: setOnAreaChangeTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setOnAreaChangeTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnAreaChange, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        RectF tempOldRect;
+        OffsetF tempOldOrigin;
+        RectF tempNewRect;
+        OffsetF tempNewOrigin;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto onAreaChangeFunc = [](const Ark_Int32 resourceId, const Ark_Area oldValue, const Ark_Area newValue) {
+        checkEvent = {
+            .nodeId = Converter::Convert<int32_t>(resourceId),
+            .tempOldRect = RectF(Converter::OptConvert<Dimension>(oldValue.position.x).value_or(Dimension(0.0)).Value(),
+                Converter::OptConvert<Dimension>(oldValue.position.y).value_or(Dimension(0.0)).Value(),
+                Converter::OptConvert<Dimension>(oldValue.width).value_or(Dimension(0.0)).Value(),
+                Converter::OptConvert<Dimension>(oldValue.height).value_or(Dimension(0.0)).Value()),
+            .tempOldOrigin = OffsetF(Converter::OptConvert<Dimension>(oldValue.width).value_or(Dimension(0.0)).Value(),
+                Converter::OptConvert<Dimension>(oldValue.height).value_or(Dimension(0.0)).Value()),
+            .tempNewRect = RectF(Converter::OptConvert<Dimension>(newValue.position.x).value_or(Dimension(0.0)).Value(),
+                Converter::OptConvert<Dimension>(newValue.position.y).value_or(Dimension(0.0)).Value(),
+                Converter::OptConvert<Dimension>(newValue.width).value_or(Dimension(0.0)).Value(),
+                Converter::OptConvert<Dimension>(newValue.height).value_or(Dimension(0.0)).Value()),
+            .tempNewOrigin = OffsetF(Converter::OptConvert<Dimension>(newValue.width).value_or(Dimension(0.0)).Value(),
+                Converter::OptConvert<Dimension>(newValue.height).value_or(Dimension(0.0)).Value())
+        };
+    };
+    auto onAreaChangeCallback = Converter::ArkValue<Callback_Area_Area_Void>(onAreaChangeFunc, frameNode->GetId());
+
+    modifier_->setOnAreaChange(node_, &onAreaChangeCallback);
+    EXPECT_FALSE(checkEvent);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    eventHub->FireOnAreaChanged(OLD_RECT, OLD_ORIGIN, NEW_RECT, NEW_ORIGIN);
+    EXPECT_TRUE(eventHub->HasOnAreaChanged());
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId()) << "Passed id is: " << frameNode->GetId();
+    EXPECT_EQ(checkEvent->tempOldRect, OLD_RECT);
+    EXPECT_EQ(checkEvent->tempOldOrigin, OLD_ORIGIN);
+    EXPECT_EQ(checkEvent->tempNewRect, NEW_RECT);
+    EXPECT_EQ(checkEvent->tempNewOrigin, NEW_ORIGIN);
 }
 
 } // namespace OHOS::Ace::NG
