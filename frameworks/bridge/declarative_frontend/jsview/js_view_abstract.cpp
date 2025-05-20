@@ -77,6 +77,9 @@
 #include "interfaces/native/node/resource.h"
 
 #include "core/common/card_scope.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_wrapper.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/common/resource/resource_configuration.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -2383,8 +2386,19 @@ void JSViewAbstract::JsAlignSelf(const JSCallbackInfo& info)
 void JSViewAbstract::JsBackgroundColor(const JSCallbackInfo& info)
 {
     Color backgroundColor;
-    if (!ParseJsColor(info[0], backgroundColor)) {
-        backgroundColor = Color::TRANSPARENT;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> backgroundColorResObj;
+        if (!ParseJsColor(info[0], backgroundColor, backgroundColorResObj)) {
+            backgroundColor = Color::TRANSPARENT;
+        }
+        if (backgroundColorResObj) {
+            ViewAbstractModel::GetInstance()->SetBackgroundColorWithResourceObj(backgroundColorResObj);
+            return;
+        }
+    } else {
+        if (!ParseJsColor(info[0], backgroundColor)) {
+            backgroundColor = Color::TRANSPARENT;
+        }
     }
 
     ViewAbstractModel::GetInstance()->SetBackgroundColor(backgroundColor);
@@ -2403,12 +2417,17 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
     bool syncMode = false;
     ParseBackgroundImageOption(info, repeatIndex, syncMode);
     ViewAbstractModel::GetInstance()->SetBackgroundImageSyncMode(syncMode);
+    RefPtr<ResourceObject> backgroundImageResObj;
     if (jsBackgroundImage->IsString()) {
         src = jsBackgroundImage->ToString();
         ViewAbstractModel::GetInstance()->SetBackgroundImage(
             ImageSourceInfo { src, bundle, module }, GetThemeConstants());
-    } else if (ParseJsMediaWithBundleName(jsBackgroundImage, src, bundle, module, resId)) {
-        ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { src, bundle, module }, nullptr);
+    } else if (ParseJsMediaWithBundleName(jsBackgroundImage, src, bundle, module, resId, backgroundImageResObj)) {
+        if (!SystemProperties::ConfigChangePerform() || !backgroundImageResObj) {
+            ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo{src, bundle, module}, nullptr);
+        } else {
+            ViewAbstractModel::GetInstance()->SetBackgroundImageWithResourceObj(backgroundImageResObj, bundle, module, nullptr);
+        }
     } else {
 #if defined(PIXEL_MAP_SUPPORTED)
         if (IsDrawable(jsBackgroundImage)) {
@@ -2821,6 +2840,39 @@ void JSViewAbstract::JsLightUpEffect(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetLightUpEffect(std::clamp(radio, 0.0, 1.0));
 }
 
+void SetBackgroundImageSizeUpdateFunc(
+    BackgroundImageSize& bgImgSize, const RefPtr<ResourceObject>& resObjWidth, const RefPtr<ResourceObject>& resObjHeight)
+{
+    CHECK_NULL_VOID(resObjWidth);
+    auto&& updateFuncWidth = [](const RefPtr<ResourceObject>& resObj, BackgroundImageSize& bgImgSize) {
+        CalcDimension width;
+        ResourceParseUtils::ParseResDimensionVp(resObj, width);
+        double valueWidth = width.ConvertToPx();
+        BackgroundImageSizeType typeWidth = BackgroundImageSizeType::LENGTH;
+        if (width.Unit() == DimensionUnit::PERCENT) {
+            typeWidth = BackgroundImageSizeType::PERCENT;
+            valueWidth = width.Value() * FULL_DIMENSION;
+        }
+        bgImgSize.SetSizeTypeX(typeWidth);
+        bgImgSize.SetSizeValueX(valueWidth);
+    };
+    bgImgSize.AddResource("backgroundImageSizeWidth", resObjWidth, std::move(updateFuncWidth));
+    CHECK_NULL_VOID(resObjHeight);
+    auto&& updateFuncHeight = [](const RefPtr<ResourceObject>& resObj, BackgroundImageSize& bgImgSize) {
+        CalcDimension height;
+        ResourceParseUtils::ParseResDimensionVp(resObj, height);
+        double valueHeight = height.ConvertToPx();
+        BackgroundImageSizeType typeHeight = BackgroundImageSizeType::LENGTH;
+        if (height.Unit() == DimensionUnit::PERCENT) {
+            typeHeight = BackgroundImageSizeType::PERCENT;
+            valueHeight = height.Value() * FULL_DIMENSION;
+        }
+        bgImgSize.SetSizeTypeY(typeHeight);
+        bgImgSize.SetSizeValueY(valueHeight);
+    };
+    bgImgSize.AddResource("backgroundImageSizeHeight", resObjHeight, std::move(updateFuncHeight));
+}
+
 void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
 {
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
@@ -2844,8 +2896,11 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
         CalcDimension width;
         CalcDimension height;
         JSRef<JSObject> object = JSRef<JSObject>::Cast(jsVal);
-        ParseJsDimensionVp(object->GetProperty("width"), width);
-        ParseJsDimensionVp(object->GetProperty("height"), height);
+        RefPtr<ResourceObject> resObjWidth;
+        RefPtr<ResourceObject> resObjHeight;
+        ParseJsDimensionVp(object->GetProperty("width"), width, resObjWidth);
+        ParseJsDimensionVp(object->GetProperty("height"), height, resObjHeight);
+        SetBackgroundImageSizeUpdateFunc(bgImgSize, resObjWidth, resObjHeight);
         double valueWidth = width.ConvertToPx();
         double valueHeight = height.ConvertToPx();
         BackgroundImageSizeType typeWidth = BackgroundImageSizeType::LENGTH;
@@ -2879,6 +2934,45 @@ void SetBgImgPositionWithAlign(BackgroundImagePosition& bgImgPosition, int32_t a
         DimensionUnit::PERCENT, DimensionUnit::PERCENT, vec[align].first, vec[align].second, bgImgPosition);
 }
 
+void SetBackgroundImagePositionUpdateFunc(
+    BackgroundImagePosition& bgImgPosition, const RefPtr<ResourceObject>& resObjX, const RefPtr<ResourceObject>& resObjY)
+{
+    CHECK_NULL_VOID(resObjX);
+    auto&& updateFuncX = [](const RefPtr<ResourceObject>& resObj, BackgroundImagePosition& position) {
+        CalcDimension x;
+        ResourceParseUtils::ParseResDimensionVp(resObj, x);
+        double valueX = x.Value();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            valueX = x.ConvertToPx();
+        }
+        DimensionUnit typeX = DimensionUnit::PX;
+        if (x.Unit() == DimensionUnit::PERCENT) {
+            valueX = x.Value();
+            typeX = DimensionUnit::PERCENT;
+        }
+        AnimationOption option = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
+        position.SetSizeX(AnimatableDimension(valueX, typeX, option));
+    };
+    bgImgPosition.AddResource("backgroundImagePositionX", resObjX, std::move(updateFuncX));
+    CHECK_NULL_VOID(resObjY);
+    auto&& updateFuncY = [](const RefPtr<ResourceObject>& resObj, BackgroundImagePosition& position) {
+        CalcDimension y;
+        ResourceParseUtils::ParseResDimensionVp(resObj, y);
+        double valueY = y.Value();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            valueY = y.ConvertToPx();
+        }
+        DimensionUnit typeY = DimensionUnit::PX;
+        if (y.Unit() == DimensionUnit::PERCENT) {
+            valueY = y.Value();
+            typeY = DimensionUnit::PERCENT;
+        }
+        AnimationOption option = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
+        position.SetSizeY(AnimatableDimension(valueY, typeY, option));
+    };
+    bgImgPosition.AddResource("backgroundImagePositionY", resObjY, std::move(updateFuncY));
+}
+
 void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
 {
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
@@ -2897,8 +2991,11 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
         CalcDimension x;
         CalcDimension y;
         JSRef<JSObject> object = JSRef<JSObject>::Cast(jsVal);
-        ParseJsDimensionVp(object->GetProperty("x"), x);
-        ParseJsDimensionVp(object->GetProperty("y"), y);
+        RefPtr<ResourceObject> resObjX;
+        RefPtr<ResourceObject> resObjY;
+        ParseJsDimensionVp(object->GetProperty("x"), x, resObjX);
+        ParseJsDimensionVp(object->GetProperty("y"), y, resObjY);
+        SetBackgroundImagePositionUpdateFunc(bgImgPosition, resObjX, resObjY);
         double valueX = x.Value();
         double valueY = y.Value();
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -9555,6 +9652,26 @@ void JSViewAbstract::JsGestureModifier(const JSCallbackInfo& info)
     func->Call(vm, thisObj, params, 1);
 }
 
+void SetBackgroundImageResizableUpdateFunc(
+    ImageResizableSlice& sliceResult, const RefPtr<ResourceObject>& resObj, std::string direction)
+{
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [direction](const RefPtr<ResourceObject>& resObj, ImageResizableSlice& sliceResult) {
+        CalcDimension sliceDimension;
+        ResourceParseUtils::ParseResDimensionVp(resObj, sliceDimension);
+        if (direction == "Left") {
+            sliceResult.left = sliceDimension;
+        } else if (direction == "Right") {
+            sliceResult.right = sliceDimension;
+        } else if (direction == "Top") {
+            sliceResult.top = sliceDimension;
+        } else if (direction == "Bottom") {
+            sliceResult.bottom = sliceDimension;
+        }
+    };
+    sliceResult.AddResource("backgroundImageResizable" + direction, resObj, std::move(updateFunc));
+}
+
 void JSViewAbstract::JsBackgroundImageResizable(const JSCallbackInfo& info)
 {
     auto infoObj = info[0];
@@ -9577,10 +9694,13 @@ void JSViewAbstract::JsBackgroundImageResizable(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetBackgroundImageResizableSlice(sliceResult);
         return;
     }
+    std::vector<RefPtr<ResourceObject>> bgImageResizableResObjArray;
     for (uint32_t i = 0; i < SLICE_KEYS.size(); i++) {
         auto sliceSize = sliceObj->GetProperty(SLICE_KEYS.at(i).c_str());
         CalcDimension sliceDimension;
-        if (!ParseJsDimensionVp(sliceSize, sliceDimension)) {
+        RefPtr<ResourceObject> resObj;
+        bgImageResizableResObjArray.push_back(resObj);
+        if (!ParseJsDimensionVp(sliceSize, sliceDimension, resObj)) {
             continue;
         }
         if (!sliceDimension.IsValid()) {
@@ -9589,15 +9709,19 @@ void JSViewAbstract::JsBackgroundImageResizable(const JSCallbackInfo& info)
         switch (static_cast<BorderImageDirection>(i)) {
             case BorderImageDirection::LEFT:
                 sliceResult.left = sliceDimension;
+                SetBackgroundImageResizableUpdateFunc(sliceResult, resObj, "Left");
                 break;
             case BorderImageDirection::RIGHT:
                 sliceResult.right = sliceDimension;
+                SetBackgroundImageResizableUpdateFunc(sliceResult, resObj, "Right");
                 break;
             case BorderImageDirection::TOP:
                 sliceResult.top = sliceDimension;
+                SetBackgroundImageResizableUpdateFunc(sliceResult, resObj, "Top");
                 break;
             case BorderImageDirection::BOTTOM:
                 sliceResult.bottom = sliceDimension;
+                SetBackgroundImageResizableUpdateFunc(sliceResult, resObj, "Bottom");
                 break;
             default:
                 break;

@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <stddef.h>
+#include <vector>
 
 /*
  * ATTENTION. Keep this file self contained.
@@ -1964,7 +1965,7 @@ struct EventBindingInfo {
 };
 
 struct ArkUICommonModifier {
-    void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* bgColorRawPtr);
     void (*resetBackgroundColor)(ArkUINodeHandle node);
     void (*setWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
     void (*resetWidth)(ArkUINodeHandle node);
@@ -2052,13 +2053,13 @@ struct ArkUICommonModifier {
         ArkUI_Bool isLocalizedBorderColor, ArkUI_Bool isLocalizedBorderRadius);
     void (*resetBorder)(ArkUINodeHandle node);
     void (*setBackgroundImagePosition)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* types,
-        ArkUI_Bool isAlign, ArkUI_Int32 size);
+        ArkUI_Bool isAlign, ArkUI_Int32 size, void* bgImageXRawPtr, void* bgImageYRawPtr);
     void (*resetBackgroundImagePosition)(ArkUINodeHandle node);
     void (*setBackgroundImageSize)(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
-        ArkUI_Int32 typeWidth, ArkUI_Int32 typeHeight);
+        ArkUI_Int32 typeWidth, ArkUI_Int32 typeHeight, void* bgImageSizeWidthRawPtr, void* bgImageSizeHeightRawPtr);
     void (*resetBackgroundImageSize)(ArkUINodeHandle node);
-    void (*setBackgroundImage)(
-        ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundle, ArkUI_CharPtr module, ArkUI_Int32 repeatIndex);
+    void (*setBackgroundImage)(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundle,
+        ArkUI_CharPtr module, ArkUI_Int32 repeatIndex, void* bgImageRawPtr);
     void (*resetBackgroundImage)(ArkUINodeHandle node);
     void (*setBackgroundImageSyncMode)(ArkUINodeHandle node, ArkUI_Bool syncMode);
     void (*resetBackgroundImageSyncMode)(ArkUINodeHandle node);
@@ -2376,7 +2377,8 @@ struct ArkUICommonModifier {
     ArkUIMoveTransitionType (*getMoveTransition)(ArkUINodeHandle node);
     void (*resetMask)(ArkUINodeHandle node);
     ArkUI_Float32 (*getAspectRatio)(ArkUINodeHandle node);
-    void (*setBackgroundImageResizable)(ArkUINodeHandle node, ArkUIStringAndFloat* options);
+    void (*setBackgroundImageResizable)(
+        ArkUINodeHandle node, ArkUIStringAndFloat* options, std::vector<void*>& bgImageResizableArray);
     ArkUIImageResizableSlice (*getBackgroundImageResizable)(ArkUINodeHandle node);
     void (*resetBackgroundImageResizable)(ArkUINodeHandle node);
     void (*setBackgroundImageSizeWithUnit)(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,

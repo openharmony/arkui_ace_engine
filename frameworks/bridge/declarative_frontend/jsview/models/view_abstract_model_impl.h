@@ -47,10 +47,13 @@ public:
     void ResetMaxSize(bool resetWidth) override {};
 
     void SetBackgroundColor(const Color& color) override;
+    void SetBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj) override {};
     void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) override;
+    void SetBackgroundImageWithResourceObj(const RefPtr<ResourceObject> &resObj, std::string &bundleName,
+        std::string &moduleName, RefPtr<ThemeConstants> themeConstant) override{};
     void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) override;
-    void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) override;
-    void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) override;
+    void SetBackgroundImageSize(BackgroundImageSize& bgImgSize) override;
+    void SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosition) override;
     void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions) override;
     void SetPadding(const CalcDimension& value) override;
     void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
@@ -379,7 +382,7 @@ public:
     void EnableDropDisallowedBadge(bool dragEventStrictReportingEnabled) override {};
     int32_t CancelDataLoading(const std::string& key) override { return 0; };
     void SetDisableDataPrefetch(bool disableDataPrefetch) override {};
-    void SetBackgroundImageResizableSlice(const ImageResizableSlice& Slice) override {};
+    void SetBackgroundImageResizableSlice(ImageResizableSlice& Slice) override {};
     // global light
     void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) override {};

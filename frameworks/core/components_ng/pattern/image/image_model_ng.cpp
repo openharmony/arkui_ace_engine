@@ -697,12 +697,12 @@ void ImageModelNG::ResetAutoResize(FrameNode* frameNode)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AutoResize, defaultAutoResize, frameNode);
 }
 
-void ImageModelNG::SetResizableSlice(const ImageResizableSlice& slice)
+void ImageModelNG::SetResizableSlice(ImageResizableSlice& slice)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableSlice, slice);
 }
 
-void ImageModelNG::SetResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice)
+void ImageModelNG::SetResizableSlice(FrameNode* frameNode, ImageResizableSlice& slice)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableSlice, slice, frameNode);
 }

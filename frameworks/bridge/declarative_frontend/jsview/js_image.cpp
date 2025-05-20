@@ -562,7 +562,8 @@ void JSImage::JsImageResizable(const JSCallbackInfo& info)
     }
     auto infoObj = info[0];
     if (!infoObj->IsObject()) {
-        ImageModel::GetInstance()->SetResizableSlice(ImageResizableSlice());
+        auto slice = ImageResizableSlice();
+        ImageModel::GetInstance()->SetResizableSlice(slice);
         return;
     }
     JSRef<JSObject> resizableObject = JSRef<JSObject>::Cast(infoObj);
