@@ -1039,7 +1039,7 @@ void SetTextAreaAutoCapitalizationMode(ArkUINodeHandle node, ArkUI_Int32 value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetAutoCapitalizationMode(frameNode, static_cast<AutoCapitalizationMode>(value));
+    TextFieldModelNG::SetAutoCapitalizationMode(frameNode, CastToAutoCapitalizationMode(value));
 }
 
 void ResetTextAreaAutoCapitalizationMode(ArkUINodeHandle node)

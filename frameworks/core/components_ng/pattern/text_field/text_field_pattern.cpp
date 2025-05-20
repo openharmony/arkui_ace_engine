@@ -4721,7 +4721,8 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)keyboard_,
         .enterKeyType = (int32_t)GetTextInputActionValue(GetDefaultTextInputAction()),
         .isTextPreviewSupported = hasSupportedPreviewText_,
-        .immersiveMode = static_cast<int32_t>(keyboardAppearance_)};
+        .immersiveMode = static_cast<int32_t>(keyboardAppearance_),
+        .capitalizeMode = static_cast<MiscServices::CapitalizeMode>(GetAutoCapitalizationModeValue(AutoCapitalizationMode::NONE)) };
     MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
         .cursorInfo = cursorInfo,
         .range = { .start = selectController_->GetStartIndex(), .end = selectController_->GetEndIndex() },
