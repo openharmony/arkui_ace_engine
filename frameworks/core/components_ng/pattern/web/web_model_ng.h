@@ -241,6 +241,17 @@ public:
     static void SetDarkMode(FrameNode* frameNode, WebDarkMode mode);
     static void SetMultiWindowAccessEnabled(FrameNode* frameNode, bool isMultiWindowAccessEnable);
     static void SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod);
+    static void SetKeyboardAvoidMode(FrameNode* frameNode, const WebKeyboardAvoidMode& mode);
+    static void SetOnControllerAttached(FrameNode* frameNode, std::function<void()>&& callback);
+    static void SetVerticalScrollBarAccessEnabled(FrameNode* frameNode, bool isVerticalScrollBarAccessEnabled);
+    static void SetHorizontalScrollBarAccessEnabled(FrameNode* frameNode, bool isHorizontalScrollBarAccessEnabled);
+    static void SetTextZoomRatio(FrameNode* frameNode, int32_t textZoomRatioNum);
+    static void InitialScale(FrameNode* frameNode, float scale);
+    static void SetOnScroll(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnOverScroll(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnScaleChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnRequestFocus(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnContextMenuHide(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

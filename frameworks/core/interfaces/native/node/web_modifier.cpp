@@ -28,6 +28,11 @@ constexpr WebCacheMode DEFAULT_CACHE_MODE = WebCacheMode::DEFAULT;
 constexpr WebDarkMode DEFAULT_DARK_MODE = WebDarkMode::Off;
 constexpr int32_t DEFAULT_MULTIWINDOW_ACCESS_ENABLED = false;
 constexpr int32_t DEFAULT_ALLOW_WINDOWOPEN_METHOD = false;
+constexpr WebKeyboardAvoidMode DEFAULT_KEYBOAED_AVIOD_MODE = WebKeyboardAvoidMode::RESIZE_CONTENT;
+constexpr bool DEFAULT_VERTICALSCROLL_BAR_ACCESS_ENABLED = true;
+constexpr bool DEFAULT_HORIZONTALSCROLL_BAR_ACCESS_ENABLED = true;
+constexpr int32_t DEFAULT_TEXT_ZOOM_RATIO = 100;
+constexpr float DEFAULT_INITIAL_SCALE = 100.0f;
 } // namespace
 
 void SetJavaScriptAccess(ArkUINodeHandle node, ArkUI_Bool value)
@@ -168,6 +173,215 @@ void ResetAllowWindowOpenMethod(ArkUINodeHandle node)
     WebModelNG::SetAllowWindowOpenMethod(frameNode, DEFAULT_ALLOW_WINDOWOPEN_METHOD);
 }
 
+void SetKeyboardAvoidMode(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetKeyboardAvoidMode(frameNode, WebKeyboardAvoidMode(value));
+}
+
+void ResetKeyboardAvoidMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetKeyboardAvoidMode(frameNode, DEFAULT_KEYBOAED_AVIOD_MODE);
+}
+
+void SetOnControllerAttached(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onControllerAttached = reinterpret_cast<std::function<void()>*>(extraParam);
+        WebModelNG::SetOnControllerAttached(frameNode, std::move(*onControllerAttached));
+    } else {
+        WebModelNG::SetOnControllerAttached(frameNode, nullptr);
+    }
+}
+
+void ResetOnControllerAttached(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnControllerAttached(frameNode, nullptr);
+}
+
+void SetVerticalScrollBarAccessEnabled(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetVerticalScrollBarAccessEnabled(frameNode, value);
+}
+
+void ResetVerticalScrollBarAccessEnabled(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetVerticalScrollBarAccessEnabled(frameNode, DEFAULT_VERTICALSCROLL_BAR_ACCESS_ENABLED);
+}
+
+void SetHorizontalScrollBarAccessEnabled(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetHorizontalScrollBarAccessEnabled(frameNode, value);
+}
+
+void ResetHorizontalScrollBarAccessEnabled(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetHorizontalScrollBarAccessEnabled(frameNode, DEFAULT_HORIZONTALSCROLL_BAR_ACCESS_ENABLED);
+}
+
+void SetTextZoomRatio(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetTextZoomRatio(frameNode, value);
+}
+
+void ResetTextZoomRatio(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetTextZoomRatio(frameNode, DEFAULT_TEXT_ZOOM_RATIO);
+}
+
+void SetInitialScale(ArkUINodeHandle node, ArkUI_Float32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::InitialScale(frameNode, value);
+}
+
+void ResetInitialScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::InitialScale(frameNode, DEFAULT_INITIAL_SCALE);
+}
+
+void SetOnScrollCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* onScrollPtr = reinterpret_cast<std::function<void(WebOnScrollEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(onScrollPtr);
+        auto callback = [onScrollCallback = *onScrollPtr](const BaseEventInfo* event) {
+            if (auto scrollEvent = static_cast<const WebOnScrollEvent*>(event)) {
+                auto& nonConstEvent = const_cast<WebOnScrollEvent&>(*scrollEvent);
+                onScrollCallback(nonConstEvent);
+            }
+        };
+        WebModelNG::SetOnScroll(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnScroll(frameNode, nullptr);
+    }
+}
+
+void ResetOnScrollCallBack(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnScroll(frameNode, nullptr);
+}
+
+void SetOnOverScrollCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* onOverScrollkPtr = reinterpret_cast<std::function<void(WebOnOverScrollEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(onOverScrollkPtr);
+        auto callback = [onOverScrollkCallback = *onOverScrollkPtr](const BaseEventInfo* event) {
+            if (auto overScrollEvent = static_cast<const WebOnOverScrollEvent*>(event)) {
+                auto& nonConstEvent = const_cast<WebOnOverScrollEvent&>(*overScrollEvent);
+                onOverScrollkCallback(nonConstEvent);
+            }
+        };
+        WebModelNG::SetOnOverScroll(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnOverScroll(frameNode, nullptr);
+    }
+}
+
+void ResetOnOverScrollCallBack(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnOverScroll(frameNode, nullptr);
+}
+
+void SetOnScaleChangeCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* scaleChangePtr = reinterpret_cast<std::function<void(ScaleChangeEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(scaleChangePtr);
+        auto callback = [scaleChangeCallback = *scaleChangePtr](const BaseEventInfo* event) {
+            if (auto scaleChangeEvent = static_cast<const ScaleChangeEvent*>(event)) {
+                auto& nonConstEvent = const_cast<ScaleChangeEvent&>(*scaleChangeEvent);
+                scaleChangeCallback(nonConstEvent);
+            }
+        };
+        WebModelNG::SetOnScaleChange(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnScaleChange(frameNode, nullptr);
+    }
+}
+
+void ResetOnScaleChangeCallBack(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnScaleChange(frameNode, nullptr);
+}
+
+void SetOnRequestSelectedCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* originalCallbackPtr = reinterpret_cast<std::function<void()>*>(extraParam);
+        CHECK_NULL_VOID(originalCallbackPtr);
+        auto callback = [originalCallback = *originalCallbackPtr](const BaseEventInfo*) { originalCallback(); };
+        WebModelNG::SetOnRequestFocus(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnRequestFocus(frameNode, nullptr);
+    }
+}
+
+void ResetOnRequestSelectedCallBack(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnRequestFocus(frameNode, nullptr);
+}
+
+void SetOnContextMenuHideCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* originalCallbackPtr = reinterpret_cast<std::function<void()>*>(extraParam);
+        CHECK_NULL_VOID(originalCallbackPtr);
+        auto callback = [originalCallback = *originalCallbackPtr](const BaseEventInfo*) { originalCallback(); };
+        WebModelNG::SetOnContextMenuHide(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnContextMenuHide(frameNode, nullptr);
+    }
+}
+
+void ResetOnContextMenuHideCallBack(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnContextMenuHide(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUIWebModifier* GetWebModifier()
 {
@@ -195,6 +409,28 @@ const ArkUIWebModifier* GetWebModifier()
         .resetMultiWindowAccessEnabled = ResetMultiWindowAccessEnabled,
         .setAllowWindowOpenMethod = SetAllowWindowOpenMethod,
         .resetAllowWindowOpenMethod = ResetAllowWindowOpenMethod,
+        .setKeyboardAvoidMode = SetKeyboardAvoidMode,
+        .resetKeyboardAvoidMode = ResetKeyboardAvoidMode,
+        .setOnControllerAttached = SetOnControllerAttached,
+        .resetOnControllerAttached = ResetOnControllerAttached,
+        .setVerticalScrollBarAccessEnabled = SetVerticalScrollBarAccessEnabled,
+        .resetVerticalScrollBarAccessEnabled = ResetVerticalScrollBarAccessEnabled,
+        .setHorizontalScrollBarAccessEnabled = SetHorizontalScrollBarAccessEnabled,
+        .resetHorizontalScrollBarAccessEnabled = ResetHorizontalScrollBarAccessEnabled,
+        .setTextZoomRatio = SetTextZoomRatio,
+        .resetTextZoomRatio = ResetTextZoomRatio,
+        .setInitialScale = SetInitialScale,
+        .resetInitialScale = ResetInitialScale,
+        .setOnScrollCallBack = SetOnScrollCallBack,
+        .resetOnScrollCallBack = ResetOnScrollCallBack,
+        .setOnOverScrollCallBack = SetOnOverScrollCallBack,
+        .resetOnOverScrollCallBack = ResetOnOverScrollCallBack,
+        .setOnScaleChangeCallBack = SetOnScaleChangeCallBack,
+        .resetOnScaleChangeCallBack = ResetOnScaleChangeCallBack,
+        .setOnRequestSelectedCallBack = SetOnRequestSelectedCallBack,
+        .resetOnRequestSelectedCallBack = ResetOnRequestSelectedCallBack,
+        .setOnContextMenuHideCallBack= SetOnContextMenuHideCallBack,
+        .resetOnContextMenuHideCallBack= ResetOnContextMenuHideCallBack,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -226,6 +462,28 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetMultiWindowAccessEnabled = ResetMultiWindowAccessEnabled,
         .setAllowWindowOpenMethod = SetAllowWindowOpenMethod,
         .resetAllowWindowOpenMethod = ResetAllowWindowOpenMethod,
+        .setKeyboardAvoidMode = SetKeyboardAvoidMode,
+        .resetKeyboardAvoidMode = ResetKeyboardAvoidMode,
+        .setOnControllerAttached = SetOnControllerAttached,
+        .resetOnControllerAttached = ResetOnControllerAttached,
+        .setVerticalScrollBarAccessEnabled = SetVerticalScrollBarAccessEnabled,
+        .resetVerticalScrollBarAccessEnabled = ResetVerticalScrollBarAccessEnabled,
+        .setHorizontalScrollBarAccessEnabled = SetHorizontalScrollBarAccessEnabled,
+        .resetHorizontalScrollBarAccessEnabled = ResetHorizontalScrollBarAccessEnabled,
+        .setTextZoomRatio = SetTextZoomRatio,
+        .resetTextZoomRatio = ResetTextZoomRatio,
+        .setInitialScale = SetInitialScale,
+        .resetInitialScale = ResetInitialScale,
+        .setOnScrollCallBack = SetOnScrollCallBack,
+        .resetOnScrollCallBack = ResetOnScrollCallBack,
+        .setOnOverScrollCallBack = SetOnOverScrollCallBack,
+        .resetOnOverScrollCallBack = ResetOnOverScrollCallBack,
+        .setOnScaleChangeCallBack = SetOnScaleChangeCallBack,
+        .resetOnScaleChangeCallBack = ResetOnScaleChangeCallBack,
+        .setOnRequestSelectedCallBack = SetOnRequestSelectedCallBack,
+        .resetOnRequestSelectedCallBack = ResetOnRequestSelectedCallBack,
+        .setOnContextMenuHideCallBack= SetOnContextMenuHideCallBack,
+        .resetOnContextMenuHideCallBack= ResetOnContextMenuHideCallBack,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
