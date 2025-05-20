@@ -854,4 +854,14 @@ int32_t TabsPattern::OnInjectionEvent(const std::string& command)
     tabBarPattern->ChangeIndex(targetIndex);
     return RET_SUCCESS;
 }
+
+void TabsPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
 } // namespace OHOS::Ace::NG
