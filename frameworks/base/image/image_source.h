@@ -23,7 +23,7 @@
 namespace OHOS::Ace {
 class PixelMap;
 
-class ACE_EXPORT ImageSource : public AceType {
+class ACE_FORCE_EXPORT ImageSource : public AceType {
     DECLARE_ACE_TYPE(ImageSource, AceType)
 
 public:

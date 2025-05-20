@@ -20,6 +20,7 @@
 #include "movingphoto_utils.h"
 
 #include "base/image/pixel_map.h"
+#include "base/image/image_source.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -41,6 +42,11 @@ const std::string THUMBNAIL_MEDIUM_JOINT = "?&oper=thumbnail&width=-1&height=-1&
 const std::string COVER_POSITION = "cover_positon";
 const std::string IMAGE_URI = "uri";
 const std::string VIDEO_SCALE = "video_scale_type";
+const std::string IMAGE_LENGTH = "ImageLength";
+const std::string IMAGE_WIDTH = "ImageWidth";
+const std::string HW_MNOTE_XMAGE_MODE = "HwMnoteXmageMode";
+const std::string HW_MNOTE_XMAGE_BOTTOM = "HwMnoteXmageBottom";
+const std::string DEFAULT_EXIF_VALUE = "default_exif_value";
 constexpr int32_t ANALYZER_DELAY_TIME = 100;
 constexpr int32_t ANALYZER_CAPTURE_DELAY_TIME = 1000;
 constexpr int32_t AVERAGE_VALUE = 2;
@@ -73,16 +79,16 @@ void MovingPhotoPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    static RenderContext::ContextParam cParam = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface",
+                                                  RenderContext::PatternType::DEFAULT };
+    columnRenderContext_->InitContext(false, cParam);
+    columnRenderContext_->UpdateBackgroundColor(Color::TRANSPARENT);
     static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface",
                                                  RenderContext::PatternType::VIDEO };
     renderContextForMediaPlayer_->InitContext(false, param);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::TRANSPARENT);
     renderContext->SetClipToBounds(true);
-
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->AddWindowStateChangedCallback(host->GetId());
 
     CHECK_NULL_VOID(controller_);
     ContainerScope scope(instanceId_);
@@ -149,6 +155,11 @@ void MovingPhotoPattern::OnRebuildFrame()
     CHECK_NULL_VOID(host);
     auto movingPhotoNode = AceType::DynamicCast<MovingPhotoNode>(host);
     CHECK_NULL_VOID(movingPhotoNode);
+    auto column = AceType::DynamicCast<FrameNode>(movingPhotoNode->GetColumn());
+    CHECK_NULL_VOID(column);
+    auto columnRenderContext = column->GetRenderContext();
+    columnRenderContext->AddChild(columnRenderContext_, 0);
+    columnRenderContext->SetClipToBounds(true);
     auto video = AceType::DynamicCast<FrameNode>(movingPhotoNode->GetVideo());
     CHECK_NULL_VOID(video);
     auto renderContext = video->GetRenderContext();
@@ -729,30 +740,18 @@ bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto movingPhotoNodeSize = geometryNode->GetContentSize();
     auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    auto videoFrameSize = MeasureContentLayout(movingPhotoNodeSize, layoutProperty);
-    if (renderContextForMediaPlayer_) {
-        renderContextForMediaPlayer_->SetBounds((movingPhotoNodeSize.Width() - videoFrameSize.Width()) / HALF,
-            (movingPhotoNodeSize.Height() - videoFrameSize.Height()) / HALF, videoFrameSize.Width(),
-            videoFrameSize.Height());
+    SizeF videoFrameSize;
+    if (isXmageMode_) {
+        videoFrameSize = MeasureModeContentLayout(movingPhotoNodeSize, layoutProperty);
+    } else {
+        videoFrameSize = MeasureContentLayout(movingPhotoNodeSize, layoutProperty);
     }
+    SetRenderContextBounds(movingPhotoNodeSize, videoFrameSize);
 
     if (IsSupportImageAnalyzer() && isEnableAnalyzer_ && autoAndRepeatLevel_ == PlaybackMode::NONE) {
         if (imageAnalyzerManager_ && !GetAnalyzerState()) {
             StartImageAnalyzer();
         } else {
-            Rect tmpRect;
-            auto padding = layoutProperty->CreatePaddingAndBorder();
-            auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
-            if (imageFit == ImageFit::COVER || imageFit == ImageFit::NONE) {
-                tmpRect = Rect(padding.left.value_or(0), padding.top.value_or(0),
-                               movingPhotoNodeSize.Width(), movingPhotoNodeSize.Height());
-            } else {
-                tmpRect = Rect(
-                    (movingPhotoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE + padding.left.value_or(0),
-                    (movingPhotoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE + padding.top.value_or(0),
-                    videoFrameSize.Width(), videoFrameSize.Height());
-            }
-            contentRect_ = tmpRect;
             UpdateAnalyzerUIConfig(geometryNode);
         }
     }
@@ -770,6 +769,38 @@ bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     CHECK_NULL_RETURN(video, false);
     video->GetRenderContext()->SetClipToBounds(true);
     return false;
+}
+
+void MovingPhotoPattern::SetRenderContextBounds(const SizeF& movingPhotoNodeSize, const SizeF& videoFrameSize)
+{
+    auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    float xmageHeight = 0;
+    float ratio = 0;
+    if (layoutProperty->HasXmageHeight()) {
+        xmageHeight = layoutProperty->GetXmageHeight().value();
+        ratio = CalculateRatio(movingPhotoNodeSize);
+    }
+    if (columnRenderContext_) {
+        if (isXmageMode_) {
+            columnRenderContext_->SetBounds((movingPhotoNodeSize.Width() - videoFrameSize.Width()) / HALF, 0,
+                videoFrameSize.Width(), videoFrameSize.Height() - xmageHeight * ratio);
+        } else {
+            columnRenderContext_->SetBounds((movingPhotoNodeSize.Width() - videoFrameSize.Width()) / HALF,
+                (movingPhotoNodeSize.Height() - videoFrameSize.Height()) / HALF,
+                videoFrameSize.Width(), videoFrameSize.Height());
+        }
+    }
+    if (renderContextForMediaPlayer_) {
+        if (isXmageMode_) {
+            renderContextForMediaPlayer_->SetBounds((movingPhotoNodeSize.Width() - videoFrameSize.Width()) / HALF, 0,
+                videoFrameSize.Width(), videoFrameSize.Height() - xmageHeight * ratio);
+        } else {
+            renderContextForMediaPlayer_->SetBounds((movingPhotoNodeSize.Width() - videoFrameSize.Width()) / HALF,
+                (movingPhotoNodeSize.Height() - videoFrameSize.Height()) / HALF,
+                videoFrameSize.Width(), videoFrameSize.Height());
+        }
+    }
 }
 
 SizeF MovingPhotoPattern::CalculateFitContain(const SizeF& rawSize, const SizeF& layoutSize)
@@ -806,7 +837,7 @@ SizeF MovingPhotoPattern::CalculateFitCover(const SizeF& rawSize, const SizeF& l
     } else {
         ratio = static_cast<float>(layoutSize.Height() / rawSize.Height());
     }
-    return { rawSize.Width() * ratio, rawSize.Height() * ratio};
+    return { rawSize.Width() * ratio, rawSize.Height() * ratio };
 }
 
 SizeF MovingPhotoPattern::CalculateFitNone(const SizeF& rawSize)
@@ -840,6 +871,98 @@ SizeF MovingPhotoPattern::CalculateFitAuto(const SizeF& rawSize, const SizeF& la
     }
 }
 
+SizeF MovingPhotoPattern::CalculateModeFitContain(const SizeF& rawSize, const SizeF& layoutSize)
+{
+    if (NearZero(rawSize.Height()) || NearZero(rawSize.Width()) || NearZero(layoutSize.Height())) {
+        return layoutSize;
+    }
+    double sourceRatio = rawSize.Width() / rawSize.Height();
+    double layoutRatio = layoutSize.Width() / layoutSize.Height();
+    if (sourceRatio < layoutRatio) {
+        float ratio = layoutSize.Height() / rawSize.Height();
+        return { rawSize.Width() * ratio, layoutSize.Height() };
+    } else {
+        float ratio = layoutSize.Width() / rawSize.Width();
+        return { layoutSize.Width(), rawSize.Height() * ratio };
+    }
+}
+
+SizeF MovingPhotoPattern::CalculateModeFitFill(const SizeF& layoutSize)
+{
+    return layoutSize;
+}
+
+SizeF MovingPhotoPattern::CalculateModeFitCover(const SizeF& rawSize, const SizeF& layoutSize)
+{
+    if (NearZero(rawSize.Height()) || NearZero(rawSize.Width()) || NearZero(layoutSize.Height())) {
+        return layoutSize;
+    }
+    double sourceRatio = rawSize.Width() / rawSize.Height();
+    double layoutRatio = layoutSize.Width() / layoutSize.Height();
+    float ratio = 1.0;
+    if (sourceRatio < layoutRatio) {
+        ratio = static_cast<float>(layoutSize.Width() / rawSize.Width());
+    } else {
+        ratio = static_cast<float>(layoutSize.Height() / rawSize.Height());
+    }
+    return { rawSize.Width() * ratio, rawSize.Height() * ratio };
+}
+
+SizeF MovingPhotoPattern::CalculateModeFitNone(const SizeF& rawSize)
+{
+    return rawSize;
+}
+
+SizeF MovingPhotoPattern::CalculateModeFitScaleDown(const SizeF& rawSize, const SizeF& layoutSize)
+{
+    if ((rawSize.Width() <= layoutSize.Width()) && (rawSize.Height() <= layoutSize.Height())) {
+        return CalculateModeFitNone(rawSize);
+    } else {
+        return CalculateModeFitContain(rawSize, layoutSize);
+    }
+}
+
+SizeF MovingPhotoPattern::CalculateModeFitAuto(const SizeF& rawSize, const SizeF& layoutSize)
+{
+    if (NearZero(rawSize.Width()) || NearZero(rawSize.Height())) {
+        return layoutSize;
+    }
+    if ((rawSize.Width() <= layoutSize.Width()) && (rawSize.Height() <= layoutSize.Height())) {
+        double widthRatio = layoutSize.Width() / rawSize.Width();
+        double heightRatio = layoutSize.Height() / rawSize.Height();
+        float ratio = static_cast<float>(std::min(widthRatio, heightRatio));
+        return { rawSize.Width() * ratio, rawSize.Height() * ratio };
+    } else if ((rawSize.Width() > layoutSize.Width()) && (rawSize.Height() <= layoutSize.Height())) {
+        return CalculateModeFitContain(rawSize, layoutSize);
+    } else {
+        return CalculateModeFitCover(rawSize, layoutSize);
+    }
+}
+
+float MovingPhotoPattern::CalculateRatio(SizeF layoutSize)
+{
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto calculateRatio layoutSize.%{public}f, %{public}f",
+        layoutSize.Width(), layoutSize.Height());
+    auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0);
+    if (!layoutProperty->HasImageSize()) {
+        TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto imageSize is null.");
+        return 0;
+    }
+    SizeF rawSize = layoutProperty->GetImageSize().value();
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto calculateRatio rawSize.%{public}f, %{public}f",
+        rawSize.Width(), rawSize.Height());
+    double sourceRatio = rawSize.Width() / rawSize.Height();
+    double layoutRatio = layoutSize.Width() / layoutSize.Height();
+    float ratio = 0;
+    if (sourceRatio > layoutRatio) {
+        ratio = static_cast<float>(layoutSize.Width() / rawSize.Width());
+    } else {
+        ratio = static_cast<float>(layoutSize.Height() / rawSize.Height());
+    }
+    return ratio;
+}
+
 SizeF MovingPhotoPattern::GetRawImageSize()
 {
     auto host = GetHost();
@@ -851,6 +974,74 @@ SizeF MovingPhotoPattern::GetRawImageSize()
     auto imagePattern = image->GetPattern<ImagePattern>();
     CHECK_NULL_RETURN(image, SizeF(-1, -1));
     return imagePattern->GetRawImageSize();
+}
+
+int32_t MovingPhotoPattern::GetImageFd() const
+{
+    if (!isPlayWithMask_) {
+        TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto GetImageFd.%{public}d", isPlayWithMask_);
+        return -1;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, -1);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, -1);
+    auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(pipeline->GetDataProviderManager());
+    CHECK_NULL_RETURN(dataProvider, -1);
+
+    if (!layoutProperty->HasMovingPhotoUri()) {
+        TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto GetImageFd uri is null");
+        return -1;
+    }
+    std::string uriValue = layoutProperty->GetMovingPhotoUri().value();
+    int32_t fd = dataProvider->GetDataProviderFile(uriValue, "r");
+    return fd;
+}
+
+void MovingPhotoPattern::GetXmageHeight()
+{
+    int32_t fd = GetImageFd();
+    CHECK_NULL_VOID(fd >= 0);
+    auto imageSrc = ImageSource::Create(fd);
+    close(fd);
+    CHECK_NULL_VOID(imageSrc);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto imageLength = imageSrc->GetProperty(IMAGE_LENGTH);
+    auto imageWidth = imageSrc->GetProperty(IMAGE_WIDTH);
+    if (imageLength.empty() || imageWidth.empty() || imageLength == DEFAULT_EXIF_VALUE ||
+        imageWidth == DEFAULT_EXIF_VALUE) {
+        TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto imageLength or imageWidth is null");
+        return;
+    }
+
+    float imageW = StringUtils::StringToFloat(imageWidth);
+    float imageL = StringUtils::StringToFloat(imageLength);
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto imageW.%{public}f, imageL %{public}f",
+             imageW, imageL);
+
+    std::string modeValue = imageSrc->GetProperty(HW_MNOTE_XMAGE_MODE);
+    SizeF imageSize = SizeF(-1, -1);
+    if (!modeValue.empty() && modeValue != DEFAULT_EXIF_VALUE) {
+        isXmageMode_ = true;
+        std::string bottomValue = imageSrc->GetProperty(HW_MNOTE_XMAGE_BOTTOM);
+        if (bottomValue.empty() || bottomValue == DEFAULT_EXIF_VALUE) {
+            TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto bottomValue is null");
+            return;
+        }
+        float bottomV = StringUtils::StringToFloat(bottomValue);
+        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto bottomV.%{public}f", bottomV);
+        imageSize = SizeF(imageW, bottomV);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, XmageHeight, imageL - bottomV, host);
+        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto XmageHeight.%{public}f", imageL - bottomV);
+    } else {
+        imageSize = SizeF(imageW, imageL);
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSize, imageSize, host);
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto imageSize imageW.%{public}f, imageL %{public}f",
+             imageSize.Width(), imageSize.Height());
 }
 
 SizeF MovingPhotoPattern::MeasureContentLayout(const SizeF& layoutSize,
@@ -883,6 +1074,43 @@ SizeF MovingPhotoPattern::MeasureContentLayout(const SizeF& layoutSize,
             contentSize = CalculateFitAuto(rawImageSize, layoutSize);
     }
 
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto MeasureContentLayout.%{public}f, %{public}f",
+        contentSize.Width(), contentSize.Height());
+    return contentSize;
+}
+
+SizeF MovingPhotoPattern::MeasureModeContentLayout(const SizeF& layoutSize,
+    const RefPtr<MovingPhotoLayoutProperty>& layoutProperty)
+{
+    if (!layoutProperty || !layoutProperty->HasVideoSize()) {
+        return layoutSize;
+    }
+
+    auto rawImageSize = GetRawImageSize();
+    auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
+    SizeF contentSize = { 0.0, 0.0 };
+    switch (imageFit) {
+        case ImageFit::CONTAIN:
+            contentSize = CalculateModeFitContain(rawImageSize, layoutSize);
+            break;
+        case ImageFit::FILL:
+            contentSize = CalculateModeFitFill(layoutSize);
+            break;
+        case ImageFit::COVER:
+            contentSize = CalculateModeFitCover(rawImageSize, layoutSize);
+            break;
+        case ImageFit::NONE:
+            contentSize = CalculateModeFitNone(rawImageSize);
+            break;
+        case ImageFit::SCALE_DOWN:
+            contentSize = CalculateModeFitScaleDown(rawImageSize, layoutSize);
+            break;
+        default:
+            contentSize = CalculateModeFitAuto(rawImageSize, layoutSize);
+    }
+
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto MeasureModeContentLayout.%{public}f, %{public}f",
+        contentSize.Width(), contentSize.Height());
     return contentSize;
 }
 
@@ -936,7 +1164,7 @@ void MovingPhotoPattern::OnMediaPlayerStatusChanged(PlaybackStatus status)
 void MovingPhotoPattern::OnMediaPlayerInitialized()
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer OnMediaPlayerInitialized.");
-    if (!isSetAutoPlayPeriod_ && autoAndRepeatLevel_ == PlaybackMode::AUTO && !isAutoChangePlayMode_) {
+    if (!isSetAutoPlayPeriod_ && autoAndRepeatLevel_ == PlaybackMode::AUTO) {
         isSetAutoPlayPeriod_ = true;
         SetAutoPlayPeriod(autoPlayPeriodStartTime_, autoPlayPeriodEndTime_);
     }
@@ -1060,12 +1288,6 @@ void MovingPhotoPattern::StartPlayback()
 
 void MovingPhotoPattern::StartAnimation()
 {
-    if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
-        if (!isFirstRepeatPlay_) {
-            return;
-        }
-        isFirstRepeatPlay_ = false;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
@@ -1078,8 +1300,15 @@ void MovingPhotoPattern::StartAnimation()
     CHECK_NULL_VOID(video);
     auto videoRsContext = video->GetRenderContext();
     CHECK_NULL_VOID(videoRsContext);
+    if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
+        if (!isFirstRepeatPlay_) {
+            videoRsContext->UpdateOpacity(1.0);
+            return;
+        }
+        isFirstRepeatPlay_ = false;
+    }
 
-    imageRsContext->UpdateOpacity(1.0);
+    videoRsContext->UpdateOpacity(0.0);
     imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
     videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
     auto movingPhotoPattern = WeakClaim(this);
@@ -1095,12 +1324,11 @@ void MovingPhotoPattern::StartAnimation()
             || !movingPhoto->startAnimationFlag_) {
             return;
         }
-        movingPhoto->HideImageNode();
     });
     startAnimationFlag_ = true;
     AnimationUtils::Animate(animationOption,
         [imageRsContext, videoRsContext, flag = autoAndRepeatLevel_, movingPhotoPattern]() {
-            imageRsContext->UpdateOpacity(0.0);
+            videoRsContext->UpdateOpacity(1.0);
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             movingPhoto->RsContextUpdateTransformScale(imageRsContext, videoRsContext, flag);
@@ -1112,13 +1340,18 @@ void MovingPhotoPattern::RsContextUpdateTransformScale(const RefPtr<RenderContex
 {
     if (playbackMode == PlaybackMode::REPEAT) {
         videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
-        imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+        imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
     } else if (playbackMode == PlaybackMode::AUTO) {
         videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
         imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
     } else {
-        videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-        imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+        if (isXmageMode_) {
+            videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+            imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
+        } else {
+            videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+            imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+        }
     }
 }
 
@@ -1201,6 +1434,12 @@ void MovingPhotoPattern::RefreshMovingPhotoSceneManager()
         historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
         isRepeatChangePlayMode_ = true;
         Pause();
+        auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
+        CHECK_NULL_VOID(movingPhoto);
+        auto video = AceType::DynamicCast<FrameNode>(movingPhoto->GetVideo());
+        CHECK_NULL_VOID(video);
+        video->GetRenderContext()->SetClipToBounds(true);
+        video->GetRenderContext()->UpdateOpacity(0.0);
     } else if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
         autoAndRepeatLevel_ = PlaybackMode::AUTO;
         isAutoChangePlayMode_ = true;
@@ -1232,8 +1471,7 @@ void MovingPhotoPattern::StopAnimation()
     auto videoRsContext = video->GetRenderContext();
     CHECK_NULL_VOID(videoRsContext);
 
-    imageLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-    imageRsContext->UpdateOpacity(0.0);
+    videoRsContext->UpdateOpacity(1.0);
     RsContextUpdateTransformScale(imageRsContext, videoRsContext, autoAndRepeatLevel_);
     image->MarkModifyDone();
     video->MarkModifyDone();
@@ -1247,7 +1485,7 @@ void MovingPhotoPattern::StopAnimation()
         movingPhoto->StopAnimationCallback();
     });
     AnimationUtils::Animate(option, [imageRsContext, videoRsContext]() {
-            imageRsContext->UpdateOpacity(1.0);
+            videoRsContext->UpdateOpacity(0.0);
             imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
             videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
         }, option.GetOnFinishEvent());
@@ -1545,6 +1783,7 @@ void MovingPhotoPattern::OnAreaChangedInner()
         transformRelativeOffset.GetY() + (videoNodeSize.Height() - videoFrameSize.Height()) / HALF,
         videoFrameSize.Width(), videoFrameSize.Height());
     if (renderSurface_ && (rect != lastBoundsRect_)) {
+        columnSurface_->SetExtSurfaceBounds(rect.Left(), rect.Top(), rect.Width(), rect.Height());
         renderSurface_->SetExtSurfaceBounds(rect.Left(), rect.Top(), rect.Width(), rect.Height());
         lastBoundsRect_ = rect;
     }
@@ -1589,6 +1828,15 @@ void MovingPhotoPattern::OnWindowShow()
     if (autoAndRepeatLevel_ == PlaybackMode::REPEAT && currentPlayStatus_ == PlaybackStatus::STOPPED) {
         mediaPlayer_->PrepareAsync();
     }
+}
+
+void MovingPhotoPattern::AddWindowStateChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowStateChangedCallback(host->GetId());
 }
 
 void MovingPhotoPattern::RegisterVisibleAreaChange()
@@ -1796,6 +2044,23 @@ void MovingPhotoPattern::UpdateAnalyzerOverlay()
 void MovingPhotoPattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto UpdateAnalyzerUIConfig");
+    auto movingPhotoNodeSize = geometryNode->GetContentSize();
+    auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto videoFrameSize = MeasureContentLayout(movingPhotoNodeSize, layoutProperty);
+    Rect tmpRect;
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
+    if (imageFit == ImageFit::COVER || imageFit == ImageFit::NONE) {
+        tmpRect = Rect(padding.left.value_or(0), padding.top.value_or(0),
+                       movingPhotoNodeSize.Width(), movingPhotoNodeSize.Height());
+    } else {
+        tmpRect = Rect(
+            (movingPhotoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE + padding.left.value_or(0),
+            (movingPhotoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE + padding.top.value_or(0),
+            videoFrameSize.Width(), videoFrameSize.Height());
+    }
+    contentRect_ = tmpRect;
     if (IsSupportImageAnalyzer()) {
         auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
