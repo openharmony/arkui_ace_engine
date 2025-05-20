@@ -325,11 +325,13 @@ ArkUINativeModuleValue SpanBridge::SetDecoration(ArkUIRuntimeCallInfo *runtimeCa
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     int32_t textDecoration = static_cast<int32_t>(TextDecoration::NONE);
     Color color = DEFAULT_DECORATION_COLOR;
     int32_t style = static_cast<int32_t>(DEFAULT_DECORATION_STYLE);
+    double lineThicknessScale = 1.0;
     if (secondArg->IsInt()) {
         textDecoration = secondArg->Int32Value(vm);
     }
@@ -339,7 +341,12 @@ ArkUINativeModuleValue SpanBridge::SetDecoration(ArkUIRuntimeCallInfo *runtimeCa
     if (fourthArg->IsInt()) {
         style = fourthArg->Int32Value(vm);
     }
-    GetArkUINodeModifiers()->getSpanModifier()->setSpanDecoration(nativeNode, textDecoration, color.GetValue(), style);
+    if (!ArkTSUtils::ParseJsDouble(vm, fifthArg, lineThicknessScale)) {
+        lineThicknessScale = 1.0;
+    }
+    lineThicknessScale = lineThicknessScale < 0 ? 1.0 : lineThicknessScale;
+    GetArkUINodeModifiers()->getSpanModifier()->setSpanDecoration(
+        nativeNode, textDecoration, color.GetValue(), style, static_cast<float>(lineThicknessScale));
     return panda::JSValueRef::Undefined(vm);
 }
 

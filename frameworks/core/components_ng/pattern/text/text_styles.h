@@ -199,6 +199,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolType, SymbolType);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeWidth, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeColor, Color);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LineThicknessScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontForegroudGradiantColor, FontForegroudGradiantColor);
 
     void UpdateColorByResourceId();
