@@ -215,6 +215,10 @@ OH_NativeXComponent_KeyEvent XComponentUtils::ConvertNativeXComponentKeyEvent(co
     nativeKeyEvent.sourceType = ConvertNativeXComponentEventSourceType(event.sourceType);
     nativeKeyEvent.deviceId = event.deviceId;
     nativeKeyEvent.timestamp = event.timeStamp.time_since_epoch().count();
+    nativeKeyEvent.modifierKeyStates = CalculateModifierKeyState(event.pressedCodes);
+    nativeKeyEvent.isNumLockOn = event.numLock;
+    nativeKeyEvent.isCapsLockOn = event.enableCapsLock;
+    nativeKeyEvent.isScrollLockOn = event.scrollLock;
     return nativeKeyEvent;
 }
 

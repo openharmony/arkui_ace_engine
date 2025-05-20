@@ -1161,7 +1161,9 @@ void XComponentPattern::HandleMouseEvent(const MouseInfo& info)
     mouseEventPoint.action = XComponentUtils::ConvertNativeXComponentMouseEventAction(info.GetAction());
     mouseEventPoint.button = XComponentUtils::ConvertNativeXComponentMouseEventButton(info.GetButton());
     mouseEventPoint.timestamp = info.GetTimeStamp().time_since_epoch().count();
-    NativeXComponentDispatchMouseEvent(mouseEventPoint);
+    OH_NativeXComponent_ExtraMouseEventInfo extraMouseEventInfo;
+    extraMouseEventInfo.modifierKeyStates = CalculateModifierKeyState(info.GetPressedKeyCodes());
+    NativeXComponentDispatchMouseEvent(mouseEventPoint, extraMouseEventInfo);
 }
 
 void XComponentPattern::HandleAxisEvent(const AxisInfo& info)
@@ -1181,12 +1183,14 @@ void XComponentPattern::HandleMouseHoverEvent(bool isHover)
     callback->DispatchHoverEvent(nativeXComponent_.get(), isHover);
 }
 
-void XComponentPattern::NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent)
+void XComponentPattern::NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent,
+    const OH_NativeXComponent_ExtraMouseEventInfo& extraMouseEventInfo)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(nativeXComponent_);
     CHECK_NULL_VOID(nativeXComponentImpl_);
     nativeXComponentImpl_->SetMouseEvent(mouseEvent);
+    nativeXComponentImpl_->SetExtraMouseEventInfo(extraMouseEventInfo);
     auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
     const auto* callback = nativeXComponentImpl_->GetMouseEventCallback();
     CHECK_NULL_VOID(callback);

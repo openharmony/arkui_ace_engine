@@ -369,3 +369,12 @@ int32_t OH_NativeXComponent::GetAccessibilityProvider(ArkUI_AccessibilityProvide
     (*handle) = xcomponentImpl_->GetAccessbilityProvider().get();
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
+
+int32_t OH_NativeXComponent::GetExtraMouseEventInfo(OH_NativeXComponent_ExtraMouseEventInfo** extraMouseEventInfo)
+{
+    if (xcomponentImpl_ == nullptr || extraMouseEventInfo == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    (*extraMouseEventInfo) = xcomponentImpl_->GetExtraMouseEventInfo();
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
