@@ -3554,6 +3554,12 @@ void JSWeb::NativeEmbedOptions(const JSCallbackInfo& args)
         enable = enableJsValue->ToBoolean();
         WebModel::GetInstance()->SetIntrinsicSizeEnabled(*enable);
     }
+
+    auto cssDisplayChangeObj = paramObject->GetProperty("supportCssDisplayChange");
+    if (cssDisplayChangeObj->IsBoolean()) {
+        bool cssDisplayChange = cssDisplayChangeObj->ToBoolean();
+        WebModel::GetInstance()->SetCssDisplayChangeEnabled(cssDisplayChange);
+    }
 }
 
 void JSWeb::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
