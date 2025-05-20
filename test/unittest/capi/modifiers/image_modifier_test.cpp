@@ -507,7 +507,7 @@ HWTEST_F(ImageModifierTest, setDraggableTestDraggableValidValues, TestSize.Level
         Ark_Boolean inputValueDraggable = initValueDraggable;
 
         inputValueDraggable = value;
-        auto optInputValueDraggable = Converter::ArkValue<Opt_Boolean>(inputValueDraggable);    
+        auto optInputValueDraggable = Converter::ArkValue<Opt_Boolean>(inputValueDraggable);
         modifier_->setDraggable(node_, &optInputValueDraggable);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
@@ -565,7 +565,7 @@ HWTEST_F(ImageModifierTest, setSourceSizeTestSourceSizeWidthValues, TestSize.Lev
         Ark_ImageSourceSize inputValueSourceSize = initValueSourceSize;
 
         inputValueSourceSize.width = value;
-        auto optInputValueSourceSize = Converter::ArkValue<Opt_ImageSourceSize>(inputValueSourceSize);    
+        auto optInputValueSourceSize = Converter::ArkValue<Opt_ImageSourceSize>(inputValueSourceSize);
         modifier_->setSourceSize(node_, &optInputValueSourceSize);
         std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
         auto resultSourceSize = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SOURCE_SIZE_NAME);
@@ -605,7 +605,7 @@ HWTEST_F(ImageModifierTest, setSourceSizeTestSourceSizeHeightValues, TestSize.Le
         Ark_ImageSourceSize inputValueSourceSize = initValueSourceSize;
 
         inputValueSourceSize.height = value;
-        auto optInputValueSourceSize = Converter::ArkValue<Opt_ImageSourceSize>(inputValueSourceSize);    
+        auto optInputValueSourceSize = Converter::ArkValue<Opt_ImageSourceSize>(inputValueSourceSize);
         modifier_->setSourceSize(node_, &optInputValueSourceSize);
         std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
         auto resultSourceSize = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SOURCE_SIZE_NAME);
@@ -1477,7 +1477,7 @@ HWTEST_F(ImageModifierTest, setEnhancedImageQualityValues, TestSize.Level1)
     };
 
     for (auto& tv : testMap) {
-        auto optResQuality = Converter::ArkValue<Opt_ResolutionQuality>(tv.second);    
+        auto optResQuality = Converter::ArkValue<Opt_ResolutionQuality>(tv.second);
         modifier_->setEnhancedImageQuality(frameNode, &optResQuality);
         auto json = GetJsonValue(node_);
         ASSERT_TRUE(json);
