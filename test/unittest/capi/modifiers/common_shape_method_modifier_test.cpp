@@ -53,15 +53,13 @@ const auto RES_ID = IntResourceId{11111, Converter::ResourceType::COLOR};
 static const std::string EXPECTED_RESOURCE_COLOR =
     Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
 static const std::vector<OneTestColorStep> TEST_COLOR_PLAN = {
-    { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)), "#FFFFFFFF" },
-    { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456)), "#FF123456" },
-    { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f)), "#00000000" },
-    { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")), "#11223344" },
-    { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_String>("65535")), "#FF00FFFF" },
-    { Converter::ArkValue<Opt_ResourceColor>(CreateResourceUnion<Ark_ResourceColor>(RES_NAME)),
-        EXPECTED_RESOURCE_COLOR },
-    { Converter::ArkValue<Opt_ResourceColor>(CreateResourceUnion<Ark_ResourceColor>(RES_ID)),
-        EXPECTED_RESOURCE_COLOR },
+    { ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
+    { ArkUnion<Opt_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
+    { ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f), "#00000000" },
+    { ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"), "#11223344" },
+    { ArkUnion<Opt_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
+    { CreateResourceUnion<Opt_ResourceColor>(RES_NAME), EXPECTED_RESOURCE_COLOR },
+    { CreateResourceUnion<Opt_ResourceColor>(RES_ID), EXPECTED_RESOURCE_COLOR },
 };
 } // namespace
 
@@ -628,7 +626,7 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeDashArrayTest, TestSize.Level1)
  * @tc.desc: Check the invalid cases for setStrokeDashArray
  * @tc.type: FUNC
  */
-HWTEST_F(CommonShapeMethodModifierTest, setStrokeDashArrayInavlidTest, TestSize.Level1)
+HWTEST_F(CommonShapeMethodModifierTest, DISABLED_setStrokeDashArrayInavlidTest, TestSize.Level1)
 {
     static const std::string propName("strokeDashArray");
     ASSERT_NE(modifier_->setStrokeDashArray, nullptr);

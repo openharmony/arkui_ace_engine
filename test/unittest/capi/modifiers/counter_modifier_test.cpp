@@ -356,7 +356,6 @@ HWTEST_F(CounterModifierTest, DISABLED_setHeight0TestInvalidValues, TestSize.Lev
     };
 
     for (const auto &arkLength : testPlan) {
-        //auto inputValue = Converter::ArkValue<Opt_Length>(arkLength);
         commonModifier_->setHeight0(node_, &arkLength);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
         EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);

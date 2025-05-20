@@ -45,10 +45,10 @@ public:
 using OneColorStep = std::tuple<Ark_ResourceColor, std::string>;
 const std::vector<OneColorStep> COLOR_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-    { { .selector = 1, .value1 = Converter::ArkValue<Ark_Number>(0x123456) }, "#FF123456" },
-    { { .selector = 1, .value1 = Converter::ArkValue<Ark_Number>(0.5f) }, "#00000000" },
-    { { .selector = 2, .value2 = Converter::ArkValue<Ark_String>("#11223344") }, "#11223344" },
-    { { .selector = 2, .value2 = Converter::ArkValue<Ark_String>("65535") }, "#FF00FFFF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(Converter::ArkValue<Ark_Number>(0x123456)), "#FF123456" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(Converter::ArkValue<Ark_Number>(0.5f)), "#00000000" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(Converter::ArkValue<Ark_String>("#11223344")), "#11223344" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(Converter::ArkValue<Ark_String>("65535")), "#FF00FFFF" },
     { CreateResourceUnion<Ark_ResourceColor>(NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR}),
         "#FFFF0000" },
     { CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR}), "#FFFF0000" },
@@ -209,15 +209,17 @@ HWTEST_F(DividerModifierTest, DividerModifierTest004, TestSize.Level1)
 
 using OneWidthStep = std::tuple<Ark_Union_Number_String, std::string>;
 const std::vector<OneWidthStep> WIDTH_TEST_PLAN = {
-    { { .selector = 0, .value0 = Converter::ArkValue<Ark_Number>(-123) }, "-123.00vp" },
-    { { .selector = 0, .value0 = Converter::ArkValue<Ark_Number>(-1.23f) }, "-1.23vp" },
-    { { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("-4.5px") }, "-4.50px" },
-    { { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("-56vp") }, "-56.00vp" },
-    { { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("undefVal") }, "0.00fp" },
-    { { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("-10%") }, DEFAULT_STROKE_WIDTH},
-    { { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("") }, "0.00fp" },
-    { { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("qw111vp") }, "0.00vp" },
-    { { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("qw111") }, "0.00fp" },
+    { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(-123)), "-123.00vp" },
+    { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(-1.23f)), "-1.23vp" },
+    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("-4.5px")), "-4.50px" },
+    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("-56vp")), "-56.00vp" },
+    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("undefVal")),
+        "0.00fp" },
+    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("-10%")),
+        DEFAULT_STROKE_WIDTH },
+    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("")), "0.00fp" },
+    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("qw111vp")), "0.00vp" },
+    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("qw111")), "0.00fp" },
 };
 
 /**

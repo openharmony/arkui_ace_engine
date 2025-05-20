@@ -79,7 +79,7 @@ public:
  * @tc.desc: check setStrokeWidth from resource
  * @tc.type: FUNC
  */
-HWTEST_F(CommonShapeMethodModifierResourcesTest, DISABLED_setStrokeWidthTestResources, TestSize.Level1)
+HWTEST_F(CommonShapeMethodModifierResourcesTest, setStrokeWidthTestResources, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     double result;
@@ -91,6 +91,7 @@ HWTEST_F(CommonShapeMethodModifierResourcesTest, DISABLED_setStrokeWidthTestReso
 
     for (const auto &[arkLength, expected]: testPlan) {
         modifier_->setStrokeWidth(node_, &arkLength);
+        jsonValue = GetJsonValue(node_);
         result = GetAttrValue<double>(jsonValue, ATTRIBUTE_STROKE_WIDTH_NAME);
         EXPECT_NEAR(result, expected, FLT_EPSILON);
     }
@@ -104,9 +105,9 @@ HWTEST_F(CommonShapeMethodModifierResourcesTest, DISABLED_setStrokeWidthTestReso
 HWTEST_F(CommonShapeMethodModifierResourcesTest, setFillOpacityTestResources, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    Opt_Union_Number_String_Resource res;
+
     for (const auto &[value, expectVal]: UNION_NUM_STR_RES_RESOURECES_TEST_PLAN) {
-        res = Converter::ArkValue<Opt_Union_Number_String_Resource>(value);
+        auto res = Converter::ArkValue<Opt_Union_Number_String_Resource>(value);
         modifier_->setFillOpacity(node_, &res);
         jsonValue = GetJsonValue(node_);
         auto checkVal = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_OPACITY_NAME);
