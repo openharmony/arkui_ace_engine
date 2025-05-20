@@ -314,7 +314,7 @@ export struct SubHeader {
   updateFontScale(): number {
     try {
       let uiContext: UIContext = this.getUIContext();
-      let systemFontScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+      let systemFontScale = (uiContext?.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
       if (!this.isFollowingSystemFontScale) {
         return 1;
       }
@@ -540,7 +540,7 @@ export struct SubHeader {
 
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions): SizeResult {
     let result: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
-    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+    let context = this.getUIContext()?.getHostContext() as common.UIAbilityContext;
     this.fontSize = this.updateFontScale();
     if (this.isSuitableAging()) {
       this.ageing = true;
