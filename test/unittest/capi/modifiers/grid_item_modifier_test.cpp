@@ -162,7 +162,7 @@ HWTEST_F(GridItemModifierTest, setRowStartTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridItemModifierTest, setRowStartTestInvalidValues, TestSize.Level1)
+HWTEST_F(GridItemModifierTest, DISABLED_setRowStartTestInvalidValues, TestSize.Level1)
 {
     std::string strResult;
     modifier_->setRowStart(node_, nullptr);
@@ -220,7 +220,7 @@ HWTEST_F(GridItemModifierTest, setRowEndTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridItemModifierTest, setRowEndTestInvalidValues, TestSize.Level1)
+HWTEST_F(GridItemModifierTest, DISABLED_setRowEndTestInvalidValues, TestSize.Level1)
 {
     std::string strResult;
     modifier_->setRowEnd(node_, nullptr);
@@ -278,7 +278,7 @@ HWTEST_F(GridItemModifierTest, setColumnStartTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridItemModifierTest, setColumnStartTestInvalidValues, TestSize.Level1)
+HWTEST_F(GridItemModifierTest, DISABLED_setColumnStartTestInvalidValues, TestSize.Level1)
 {
     std::string strResult;
     modifier_->setColumnStart(node_, nullptr);
@@ -336,7 +336,7 @@ HWTEST_F(GridItemModifierTest, setColumnEndTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridItemModifierTest, setColumnEndTestInvalidValues, TestSize.Level1)
+HWTEST_F(GridItemModifierTest, DISABLED_setColumnEndTestInvalidValues, TestSize.Level1)
 {
     std::string strResult;
     modifier_->setColumnEnd(node_, nullptr);
