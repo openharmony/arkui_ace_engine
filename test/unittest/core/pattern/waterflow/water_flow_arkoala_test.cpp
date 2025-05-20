@@ -110,9 +110,6 @@ HWTEST_F(WaterFlowArkoalaTest, Jump001, TestSize.Level1)
     InitMockLazy(100);
     CreateDone();
     IncrementAndLayout(__LINE__);
-    if (pattern_->layoutInfo_->Mode() == WaterFlowLayoutMode::TOP_DOWN) {
-        return; // currently doesn't support direct jump
-    }
     pattern_->ScrollToIndex(90);
     FlushUITasks(frameNode_);
     IncrementAndLayout(__LINE__);
@@ -120,6 +117,27 @@ HWTEST_F(WaterFlowArkoalaTest, Jump001, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 90);
     EXPECT_EQ(GetChildRect(frameNode_, 93).ToString(), "RectT (240.00, 194.00) - [240.00 x 119.00]");
     EXPECT_EQ(GetChildRect(frameNode_, 94).ToString(), "RectT (240.00, 313.00) - [240.00 x 159.00]");
+}
+
+/**
+ * @tc.name: LargeDelta001
+ * @tc.desc: Test large delta on WaterFlow with MockKoala
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowArkoalaTest, LargeDelta001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    InitMockLazy(100);
+    CreateDone();
+    IncrementAndLayout(__LINE__);
+    pattern_->UpdateCurrentOffset(-3000.0f, SCROLL_FROM_UPDATE);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(30, 38));
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 30);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 38);
+    EXPECT_EQ(GetChildRect(frameNode_, 30).ToString(), "RectT (0.00, 0.00) - [240.00 x 234.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 38).ToString(), "RectT (0.00, 757.00) - [240.00 x 139.00]");
 }
 
 /**

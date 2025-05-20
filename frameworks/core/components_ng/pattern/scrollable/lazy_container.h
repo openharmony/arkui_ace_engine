@@ -37,6 +37,16 @@ public:
 
     ScrollWindowAdapter* GetOrCreateScrollWindowAdapter() final;
 
+    /**
+     * @brief Converts a large delta to a jump index
+     *
+     * @return item index to jump to. Return -1 if conversion fails.
+     */
+    virtual int32_t ConvertLargeDelta(float delta)
+    {
+        return -1;
+    }
+
 protected:
     void ResetAdapter()
     {

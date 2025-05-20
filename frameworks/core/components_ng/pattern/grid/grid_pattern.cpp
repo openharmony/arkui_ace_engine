@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
+#include "irregular/grid_large_delta_converter.h"
+
 #include "base/log/dump_log.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -1697,5 +1699,15 @@ RefPtr<FillAlgorithm> GridPattern::CreateFillAlgorithm()
         return nullptr;
     }
     return MakeRefPtr<GridFillAlgorithm>(*props, info_);
+}
+int32_t GridPattern::ConvertLargeDelta(float delta)
+{
+    auto converter = GridLargeDeltaConverter(info_, GetHost().GetRawPtr());
+    int32_t res = converter.Convert(delta);
+
+    if (res == info_.childrenCount_ - 1) {
+        res = res - (info_.endIndex_ - info_.startIndex_); // estimate first item in the viewport
+    }
+    return res;
 }
 } // namespace OHOS::Ace::NG

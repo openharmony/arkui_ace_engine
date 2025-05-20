@@ -213,6 +213,8 @@ public:
 
     SizeF GetChildrenExpandedSize() override;
 
+    int32_t ConvertLargeDelta(float delta) final;
+
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override
     {

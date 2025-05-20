@@ -13,23 +13,22 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_DELTA_CONVERTER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_DELTA_CONVERTER_H
 
-#include <cstdint>
+#include "core/components_ng/pattern/scrollable/large_delta_converter.h"
+
 namespace OHOS::Ace::NG {
-class LargeDeltaConverter {
+class WaterFlowLayoutInfoSW;
+class WaterFlowLargeDeltaConverter : public LargeDeltaConverter {
 public:
-    LargeDeltaConverter() = default;
-    virtual ~LargeDeltaConverter() = default;
+    explicit WaterFlowLargeDeltaConverter(const WaterFlowLayoutInfoSW& info) : info_(info) {}
 
-    /**
-     * @brief Converts a large delta to a jump index
-     *
-     * @return item index to jump to. Return -1 if conversion fails.
-     */
-    virtual int32_t Convert(float delta)
-    {
-        return -1;
-    }
+    int32_t Convert(float delta) override;
+
+private:
+    const WaterFlowLayoutInfoSW& info_;
 };
+
 } // namespace OHOS::Ace::NG
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_DELTA_CONVERTER_H
