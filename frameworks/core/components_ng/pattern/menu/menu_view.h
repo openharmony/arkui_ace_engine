@@ -73,7 +73,7 @@ public:
         const RefPtr<FrameNode>& parent, const RefPtr<FrameNode>& child = nullptr,
         const std::optional<Dimension>& symbolUserDefinedIdealFontSize = std::nullopt);
     static void UpdateMenuNodePosition(const PreparedInfoForDrag& data);
-    static void ExcuteMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode, const PreparedInfoForDrag& data);
+    static void ExecuteMenuDisappearAnimation(const PreparedInfoForDrag& data);
     static void SetHasCustomOutline(
         const RefPtr<FrameNode>& menuWrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
 

@@ -1928,8 +1928,9 @@ RefPtr<FrameNode> MenuView::CreateSelectOption(const SelectParam& param, int32_t
     return option;
 }
 
-void MenuView::ExcuteMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode, const PreparedInfoForDrag& data)
+void MenuView::ExecuteMenuDisappearAnimation(const PreparedInfoForDrag& data)
 {
+    auto menuNode = data.menuNode;
     CHECK_NULL_VOID(menuNode);
     RefPtr<Curve> menuOpacityCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.2f, 0.0f, 0.2f, 1.0f);
     RefPtr<Curve> menuScaleCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.4f, 0.0f, 1.0f, 1.0f);
@@ -1960,6 +1961,14 @@ void MenuView::UpdateMenuNodePosition(const PreparedInfoForDrag& data)
     stackNode->UpdateInspectorId("__stack__");
     auto menuNode = data.menuNode;
     CHECK_NULL_VOID(menuNode);
+    auto scrollNode = data.scrollNode;
+    CHECK_NULL_VOID(scrollNode);
+    auto menuUINode = scrollNode->GetParent();
+    CHECK_NULL_VOID(menuUINode);
+    menuUINode->RemoveChild(scrollNode);
+    menuUINode->RebuildRenderContextTree();
+    menuUINode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    menuNode->AddChild(scrollNode);
     auto menuNodeLayoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(menuNodeLayoutProperty);
     auto biasMenuLeft = (data.menuPositionLeft - data.menuPositionRight) / HALF_NUMBER;

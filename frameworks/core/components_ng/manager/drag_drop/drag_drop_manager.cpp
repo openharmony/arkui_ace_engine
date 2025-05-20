@@ -2147,6 +2147,7 @@ void DragDropManager::CopyPreparedInfoForDrag(DragPreviewInfo& dragPreviewInfo, 
     dragPreviewInfo.relativeContainerNode = data.relativeContainerNode;
     dragPreviewInfo.stackNode = data.stackNode;
     dragPreviewInfo.sizeChangeEffect = data.sizeChangeEffect;
+    dragPreviewInfo.menuNode = data.menuNode;
 }
 
 bool DragDropManager::IsNeedDoDragMoveAnimate(const DragPointerEvent& pointerEvent)
@@ -2382,9 +2383,18 @@ void DragDropManager::DragMoveTransitionAnimation(const RefPtr<OverlayManager>& 
     option.SetCurve(DRAG_TRANSITION_ANIMATION_CURVE);
     auto renderContext = info_.imageNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto offset = OffsetF(point.GetX(), point.GetY());
+    auto menuWrapperNode = GetMenuWrapperNodeFromDrag();
+    CHECK_NULL_VOID(overlayManager);
+    auto menuPosition = overlayManager->CalculateMenuPosition(menuWrapperNode, offset);
+    auto menuRenderContext = GetMenuRenderContextFromMenuWrapper(menuWrapperNode);
     AnimationUtils::Animate(
         option,
-        [overlayManager, info, newOffset]() {
+        [overlayManager, info, newOffset, menuRenderContext, menuPosition]() {
+            if (menuRenderContext && !menuPosition.NonOffset() && !info.menuNode) {
+                menuRenderContext->UpdatePosition(
+                    OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
+            }
             CHECK_NULL_VOID(overlayManager);
             auto relativeContainerNodeRenderContext = info.relativeContainerNode->GetRenderContext();
             CHECK_NULL_VOID(relativeContainerNodeRenderContext);
