@@ -87,6 +87,7 @@ void IconLayoutElement::Init(const RefPtr<SecurityComponentLayoutProperty>& prop
     propHeight.emplace(Dimension(Dimension(height_).ConvertToVp(), DimensionUnit::VP));
     auto iconNode = iconWrap_->GetHostNode();
     auto iconLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(iconLayoutProperty);
     iconLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(propWidth, propHeight));
 }
 
