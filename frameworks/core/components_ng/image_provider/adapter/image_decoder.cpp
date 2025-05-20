@@ -135,7 +135,7 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(
         TAG_LOGE(AceLogTag::ACE_IMAGE, "ImageSouce Create Fail, %{private}s-%{public}s.", src.c_str(),
             imageDfxConfig.ToStringWithoutSrc().c_str());
         errorInfo = { ImageErrorCode::MAKE_CANVAS_IMAGE_SOURCE_CREATE_FAILED,
-            "ErrorCode: " + std::to_string(mediaErrorCode) + ", ImageSouce Create Fail." };
+            "ErrorCode: " + std::to_string(mediaErrorCode) + ", image source create failed." };
         return nullptr;
     }
 
@@ -164,7 +164,7 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(
         TAG_LOGE(AceLogTag::ACE_IMAGE, "PixelMap Create Fail, src = %{private}s-%{public}s.", src.c_str(),
             imageDfxConfig.ToStringWithoutSrc().c_str());
         errorInfo = { ImageErrorCode::MAKE_CANVAS_IMAGE_PIXELMAP_FAILED,
-            "ErrorCode: " + std::to_string(mediaErrorCode) + ", PixelMap Create Fail." };
+            "ErrorCode: " + std::to_string(mediaErrorCode) + ", pixelmap create failed." };
         return nullptr;
     }
 
