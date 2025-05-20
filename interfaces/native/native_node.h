@@ -6331,7 +6331,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .string: A string of dates.\n
      *
-     * @since 16
+     * @since 19
      */
     NODE_CALENDAR_PICKER_DISABLED_DATE_RANGE = 16006,
     /**
@@ -6344,7 +6344,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: whether to the calendar picker marks today.
      *
-     * @since 16
+     * @since 19
      */
     NODE_CALENDAR_PICKER_MARK_TODAY = 16007,
 
