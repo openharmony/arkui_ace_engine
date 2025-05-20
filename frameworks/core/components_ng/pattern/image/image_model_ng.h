@@ -30,6 +30,7 @@ class ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
 public:
     void Create(const RefPtr<DrawableDescriptor>& drawable) override;
     void Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap) override;
+    void CreateWithResourceObj(ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject) override;
     void ResetImage() override;
     void CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) override;
     bool GetIsAnimation() override;
