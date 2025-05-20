@@ -73,7 +73,7 @@ public:
         const RefPtr<FrameNode>& parent, const RefPtr<FrameNode>& child = nullptr,
         const std::optional<Dimension>& symbolUserDefinedIdealFontSize = std::nullopt);
     static void UpdateMenuNodePosition(const PreparedInfoForDrag& data);
-    static void ExcuteMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode, const PreparedInfoForDrag& data);
+    static void ExecuteMenuDisappearAnimation(const PreparedInfoForDrag& data);
     static void SetHasCustomOutline(
         const RefPtr<FrameNode>& menuWrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
 
@@ -113,6 +113,8 @@ private:
     static void UpdateMenuNodePositionLeft(MarginProperty& menuNodeMargin,
         std::map<AlignDirection, AlignRule>& menuNodeAlignRules, const PreparedInfoForDrag& data, float biasMenuLeft,
         std::map<std::string, AlignRule>& alignMap);
+    static void UpdateMenuOutlineWithArrow(
+        const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam);
 };
 } // namespace OHOS::Ace::NG
 

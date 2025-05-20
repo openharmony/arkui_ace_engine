@@ -5166,6 +5166,29 @@ ArkUINativeModuleValue CommonBridge::ResetGridSpan(ArkUIRuntimeCallInfo *runtime
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue CommonBridge::SetIgnoreLayoutSafeArea(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    LayoutSafeAreaType layoutSafeAreaType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM;
+    LayoutSafeAreaEdge layoutSafeAreaEdge = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
+    GetArkUINodeModifiers()->getCommonModifier()->setIgnoreLayoutSafeArea(
+        nativeNode, layoutSafeAreaType, layoutSafeAreaEdge);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetIgnoreLayoutSafeArea(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetIgnoreLayoutSafeArea(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue CommonBridge::SetExpandSafeArea(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -6879,6 +6902,34 @@ Local<panda::ObjectRef> CommonBridge::CreateGestureEventInfo(
     }
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "fingerList"), fingerArr);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "target"), CreateEventTargetObject(vm, info));
+    CreateFingerInfosInfo(vm, info, obj);
+    return obj;
+}
+
+Local<panda::ObjectRef> CommonBridge::CreateFingerInfosInfo(
+    EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info, Local<panda::ObjectRef>& obj)
+{
+    auto fingerArr = panda::ArrayRef::New(vm);
+    const std::list<FingerInfo>& fingerList = info->GetFingerList();
+    std::list<FingerInfo> notTouchFingerList;
+    std::vector<Local<panda::ObjectRef>> validFingers;
+    for (const FingerInfo& fingerInfo : fingerList) {
+        auto element = CreateFingerInfo(vm, fingerInfo);
+        if (fingerInfo.sourceType_ == SourceType::TOUCH && fingerInfo.sourceTool_ == SourceTool::FINGER) {
+            validFingers.emplace_back(element);
+        } else {
+            notTouchFingerList.emplace_back(fingerInfo);
+        }
+    }
+    for (size_t i = 0; i < validFingers.size(); ++i) {
+        fingerArr->SetValueAt(vm, fingerArr, i, validFingers[i]);
+    }
+    auto idx = validFingers.size();
+    for (const FingerInfo& fingerInfo : notTouchFingerList) {
+        auto element = CreateFingerInfo(vm, fingerInfo);
+        fingerArr->SetValueAt(vm, fingerArr, idx++, element);
+    }
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "fingerInfos"), fingerArr);
     return obj;
 }
 
@@ -7409,8 +7460,8 @@ Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, G
         panda::NumberRef::New(vm, info.GetVelocity().GetVelocityX() / density),
         panda::NumberRef::New(vm, info.GetVelocity().GetVelocityY() / density),
         panda::NumberRef::New(vm, info.GetVelocity().GetVelocityValue() / density),
-        panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
-        panda::NumberRef::New(vm, info.GetDeviceId()) };
+        panda::NumberRef::New(vm, info.GetDeviceId()),
+        panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value_or(0.0f))));
@@ -7420,6 +7471,8 @@ Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, G
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetRollAngle().value_or(0.0f))));
     auto fingerArr = CreateFingerListArray(vm, info);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "fingerList"), fingerArr);
+    auto fingerInfoArr = CreateFingerInfosArray(vm, info);
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "fingerInfos"), fingerInfoArr);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "target"), FrameNodeBridge::CreateEventTargetObject(vm, info));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, info.GetVerticalAxis()));
     obj->Set(
@@ -7454,6 +7507,31 @@ Local<panda::ArrayRef> CommonBridge::CreateFingerListArray(EcmaVM* vm, GestureEv
         }
     }
     auto idx = maxFingerId + 1;
+    for (const FingerInfo& fingerInfo : notTouchFingerList) {
+        auto element = CreateFingerInfo(vm, fingerInfo);
+        fingerArr->SetValueAt(vm, fingerArr, idx++, element);
+    }
+    return fingerArr;
+}
+
+Local<panda::ArrayRef> CommonBridge::CreateFingerInfosArray(EcmaVM* vm, GestureEvent& info)
+{
+    auto fingerArr = panda::ArrayRef::New(vm);
+    const std::list<FingerInfo>& fingerList = info.GetFingerList();
+    std::list<FingerInfo> notTouchFingerList;
+    std::vector<Local<panda::ObjectRef>> validFingers;
+    for (const FingerInfo& fingerInfo : fingerList) {
+        auto element = CreateFingerInfo(vm, fingerInfo);
+        if (fingerInfo.sourceType_ == SourceType::TOUCH && fingerInfo.sourceTool_ == SourceTool::FINGER) {
+            validFingers.emplace_back(element);
+        } else {
+            notTouchFingerList.emplace_back(fingerInfo);
+        }
+    }
+    for (size_t i = 0; i < validFingers.size(); ++i) {
+        fingerArr->SetValueAt(vm, fingerArr, i, validFingers[i]);
+    }
+    auto idx = validFingers.size();
     for (const FingerInfo& fingerInfo : notTouchFingerList) {
         auto element = CreateFingerInfo(vm, fingerInfo);
         fingerArr->SetValueAt(vm, fingerArr, idx++, element);

@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 
+#include "bridge/common/utils/utils.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -203,5 +205,102 @@ RefPtr<Referenced> TextTimerModelNG::GetJSTextTimerController(FrameNode* frameNo
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetJSTextTimerController();
+}
+
+void TextTimerModelNG::HandleTextColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    std::string key = "textTimer.textColor";
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        Color result;
+        if (!ResourceParseUtils::ParseResColor(resObj, result)) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto theme = pipeline->GetTheme<TextTheme>();
+            CHECK_NULL_VOID(theme);
+            result = theme->GetTextStyle().GetTextColor();
+        }
+        pattern->UpdateTextColor(result, true);
+    };
+    updateFunc(resObj, true);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TextTimerModelNG::HandleFontWeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    std::string key = "textTimer.fontWeight";
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        std::string fontWeightStr;
+        ResourceParseUtils::ParseResString(resObj, fontWeightStr);
+        pattern->UpdateFontWeight(ConvertStrToFontWeight(fontWeightStr), isFirstLoad);
+    };
+    updateFunc(resObj, true);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TextTimerModelNG::HandleFontSize(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    std::string key = "textTimer.fontSize";
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        CalcDimension fontSize;
+        if (!ResourceParseUtils::ParseResDimensionFp(resObj, fontSize) || fontSize.IsNegative() ||
+            fontSize.Unit() == DimensionUnit::PERCENT) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto theme = pipeline->GetTheme<TextTheme>();
+            CHECK_NULL_VOID(theme);
+            fontSize = theme->GetTextStyle().GetFontSize();
+        }
+        pattern->UpdateFontSize(fontSize, isFirstLoad);
+    };
+
+    updateFunc(resObj, true);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TextTimerModelNG::HandleFontFamily(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    std::string key = "textTimer.fontFamily";
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        std::vector<std::string> fontFamilies;
+        if (!ResourceParseUtils::ParseResFontFamilies(resObj, fontFamilies)) {
+            return;
+        }
+        pattern->UpdateFontFamily(fontFamilies, isFirstLoad);
+    };
+    updateFunc(resObj, true);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TextTimerModelNG::CreateWithResourceObj(
+    JsTextTimerResourceType jsResourceType, const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (resObj) {
+        switch (jsResourceType) {
+            case JsTextTimerResourceType::TEXTCOLOR:
+                HandleTextColor(frameNode, resObj);
+                break;
+            case JsTextTimerResourceType::FONTWEIGHT:
+                HandleFontWeight(frameNode, resObj);
+                break;
+            case JsTextTimerResourceType::FONTSIZE:
+                HandleFontSize(frameNode, resObj);
+                break;
+            case JsTextTimerResourceType::FONTFAMILY:
+                HandleFontFamily(frameNode, resObj);
+                break;
+            default:
+                return;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

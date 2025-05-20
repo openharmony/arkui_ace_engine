@@ -14,6 +14,10 @@
  */
 
 #include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
+#include "core/components_ng/event/event_constants.h"
+#include "core/common/reporter/reporter.h"
+#include "core/components_ng/manager/event/json_child_report.h"
+#include "core/components_ng/manager/event/json_report.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -62,7 +66,10 @@ void RotationRecognizer::OnAccepted()
     }
     localMatrix_ = NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false,
         isPostEventResult_, touchPoint.postEventNodeId);
-    SendCallbackMsg(onActionStart_);
+    {
+        ACE_SCOPED_TRACE("RotationRecognizer onActionStart, resultAngle_: %f", resultAngle_);
+        SendCallbackMsg(onActionStart_, GestureCallbackType::START);
+    }
     isNeedResetVoluntarily_ = false;
 }
 
@@ -151,7 +158,10 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
     if (refereeState_ == RefereeState::SUCCEED &&
         static_cast<int32_t>(activeFingers_.size()) == DEFAULT_ROTATION_FINGERS) {
-        SendCallbackMsg(onActionEnd_);
+        {
+            ACE_SCOPED_TRACE("RotationRecognizer onActionEnd");
+            SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
+        }
         int64_t overTime = GetSysTimestamp();
         int64_t inputTime = overTime;
         if (firstInputTime_.has_value()) {
@@ -180,7 +190,10 @@ void RotationRecognizer::HandleTouchUpEvent(const AxisEvent& event)
         return;
     }
     if (refereeState_ == RefereeState::SUCCEED) {
-        SendCallbackMsg(onActionEnd_);
+        {
+            ACE_SCOPED_TRACE("RotationRecognizer onActionEnd");
+            SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
+        }
         int64_t overTime = GetSysTimestamp();
         int64_t inputTime = overTime;
         if (firstInputTime_.has_value()) {
@@ -246,7 +259,10 @@ void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         if (static_cast<int32_t>(touchPoints_.size()) > fingers_ && isLimitFingerCount_) {
             return;
         }
-        SendCallbackMsg(onActionUpdate_);
+        {
+            ACE_SCOPED_TRACE("RotationRecognizer onActionUpdate, resultAngle_: %f", resultAngle_);
+            SendCallbackMsg(onActionUpdate_, GestureCallbackType::UPDATE);
+        }
     }
 }
 
@@ -272,7 +288,8 @@ void RotationRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
         }
     } else if (refereeState_ == RefereeState::SUCCEED) {
         resultAngle_ = ChangeValueRange(currentAngle_ - initialAngle_);
-        SendCallbackMsg(onActionUpdate_);
+        ACE_SCOPED_TRACE("RotationRecognizer onActionUpdate, resultAngle_: %f", resultAngle_);
+        SendCallbackMsg(onActionUpdate_, GestureCallbackType::UPDATE);
     }
 }
 
@@ -289,7 +306,8 @@ void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
     if (refereeState_ == RefereeState::SUCCEED &&
         static_cast<int32_t>(activeFingers_.size()) == DEFAULT_ROTATION_FINGERS) {
-        SendCallbackMsg(onActionCancel_);
+        ACE_SCOPED_TRACE("RotationRecognizer onActionCancel");
+        SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
         lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
     } else if (refereeState_ == RefereeState::SUCCEED) {
@@ -306,7 +324,8 @@ void RotationRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
-        SendCallbackMsg(onActionCancel_);
+        ACE_SCOPED_TRACE("RotationRecognizer onActionCancel");
+        SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
     }
 }
 
@@ -349,7 +368,7 @@ void RotationRecognizer::OnResetStatus()
     localMatrix_.clear();
 }
 
-void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
+void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type)
 {
     if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
         return;
@@ -392,7 +411,24 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
+        HandleReports(info, type);
     }
+}
+
+void RotationRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
+{
+    if (type == GestureCallbackType::ACTION || type == GestureCallbackType::UPDATE) {
+        return;
+    }
+    auto frameNode = GetAttachedNode().Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    RotationJsonReport rotationReport;
+    rotationReport.SetCallbackType(type);
+    rotationReport.SetGestureType(GetRecognizerType());
+    rotationReport.SetId(frameNode->GetId());
+    rotationReport.SetFingerList(info.GetFingerList());
+    rotationReport.SetAngle(info.GetAngle());
+    Reporter::GetInstance().HandleUISessionReporting(rotationReport);
 }
 
 GestureJudgeResult RotationRecognizer::TriggerGestureJudgeCallback()
@@ -447,7 +483,8 @@ bool RotationRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recogn
     if (curr->fingers_ != fingers_ || !NearEqual(curr->angle_, angle_) || curr->priorityMask_ != priorityMask_) {
         if (refereeState_ == RefereeState::SUCCEED &&
             static_cast<int32_t>(activeFingers_.size()) == DEFAULT_ROTATION_FINGERS) {
-            SendCallbackMsg(onActionCancel_);
+            ACE_SCOPED_TRACE("RotationRecognizer onActionCancel");
+            SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
         }
         ResetStatus();
         return false;

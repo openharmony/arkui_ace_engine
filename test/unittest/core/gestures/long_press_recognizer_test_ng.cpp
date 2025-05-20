@@ -2076,4 +2076,22 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerInjectEventsTest002, Test
         EXPECT_EQ(longPressRecognizer->refereeState_, mockLongPressRecognizerCases[i].expectedRefereeState);
     }
 }
+
+/**
+ * @tc.name: LongPressRecognizerTypeTest001
+ * @tc.desc: Test LongPressRecognizerType
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerTypeTest001, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    longPressRecognizer->AttachFrameNode(frameNode);
+    longPressRecognizer->SetRecognizerType(GestureTypeName::LONG_PRESS_GESTURE);
+    
+    GestureEvent info;
+    longPressRecognizer->HandleReports(info, GestureCallbackType::END);
+    EXPECT_EQ(longPressRecognizer->GetRecognizerType(), GestureTypeName::LONG_PRESS_GESTURE);
+}
 } // namespace OHOS::Ace::NG

@@ -2445,9 +2445,7 @@ void TextFieldModelNG::ResetStrokeColor(FrameNode* frameNode)
 
 void TextFieldModelNG::SetEnableAutoSpacing(bool enabled)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EnableAutoSpacing, enabled, frameNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EnableAutoSpacing, enabled);
 }
 
 void TextFieldModelNG::SetEnableAutoSpacing(FrameNode* frameNode, bool enabled)

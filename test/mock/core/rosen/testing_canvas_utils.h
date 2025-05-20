@@ -21,17 +21,26 @@
 struct NativeWindow;
 typedef struct NativeWindow OHNativeWindow;
 namespace OHOS::Ace::Testing {
-static std::unordered_map<TestingCanvas*, OHNativeWindow*> canvasWindow_;
 class TestingCanvasUtils {
 public:
     static TestingCanvas* CreateLockCanvas(OHNativeWindow* nativeWindow)
     {
-        return new TestingCanvas();
+        if (lockCanvas == nullptr) {
+            lockCanvas = new TestingCanvas();
+            return lockCanvas;
+        }
+        return nullptr;
     }
     static bool UnlockCanvas(TestingCanvas* canvas, OHNativeWindow* nativeWindow)
     {
-        return false;
+        if (lockCanvas == nullptr) {
+            return false;
+        }
+        delete lockCanvas;
+        lockCanvas = nullptr;
+        return true;
     }
+    static TestingCanvas* lockCanvas;
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_CANVAS_UTILS_H

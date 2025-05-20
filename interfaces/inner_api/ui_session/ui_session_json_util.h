@@ -42,6 +42,7 @@ public:
     bool Put(const char* key, bool value);
     bool Put(const char* key, const std::unique_ptr<InspectorJsonValue>& value);
     bool Put(const std::unique_ptr<InspectorJsonValue>& value);
+    bool Put(double value);
     bool Replace(const char* key, const char* value);
     // serialize
     std::string ToString();
@@ -68,7 +69,7 @@ public:
     InspectorJsonUtil() = delete;
     ~InspectorJsonUtil() = delete;
     static std::shared_ptr<InspectorJsonValue> Create(bool isRoot = true);
-    static std::shared_ptr<InspectorJsonValue> CreateArray(bool isRoot = true);
+    static std::unique_ptr<InspectorJsonValue> CreateArray(bool isRoot = true);
     static std::unique_ptr<InspectorJsonValue> CreateObject(bool isRoot = true);
     static std::unique_ptr<InspectorJsonValue> ParseJsonData(const char* data, const char** parseEnd = nullptr);
     static std::unique_ptr<InspectorJsonValue> ParseJsonString(

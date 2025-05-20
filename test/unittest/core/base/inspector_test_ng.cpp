@@ -58,6 +58,28 @@ const char INSPECTOR_ATTRS[] = "$attrs";
 const char INSPECTOR_CHILDREN[] = "$children";
 }; // namespace
 
+class MockStageManager : public StageManager {
+public:
+    explicit MockStageManager(const RefPtr<FrameNode>& stage)
+        : StageManager(stage)
+    {}
+
+    ~MockStageManager() override = default;
+
+    MOCK_METHOD(RefPtr<FrameNode>, GetLastPage, (), (const));
+};
+
+class MockOverlayManager : public OverlayManager {
+public:
+    explicit MockOverlayManager(const RefPtr<FrameNode>& rootNode)
+        : OverlayManager(rootNode)
+    {}
+
+    ~MockOverlayManager() override = default;
+
+    MOCK_METHOD(const WeakPtr<UINode>, GetRootNode, (), (const));
+};
+
 class InspectorTestNg : public testing::Test {
 public:
     static void SetUpTestSuite()
@@ -1135,5 +1157,326 @@ HWTEST_F(InspectorTestNg, InspectorTestNg026, TestSize.Level1)
     Inspector::GetRectangleById(inspectorId, rect);
     EXPECT_NE(rect.translate.x, x.ConvertToVp());
     EXPECT_NE(rect.translate.y, y.ConvertToVp());
+}
+
+/**
+ * @tc.name: InspectorInvalid001
+ * @tc.desc: Test the SendEventByKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorInvalid001, TestSize.Level1)
+{
+    // 设置PipelineContext返回空指针
+    RefPtr<MockPipelineContext> pipeline_bak = MockPipelineContext::pipeline_;
+    MockPipelineContext::pipeline_ = nullptr;
+    bool result = Inspector::SendEventByKey("testKey", 0, "");
+    MockPipelineContext::pipeline_ = pipeline_bak;
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: InspectorInvalid002
+ * @tc.desc: Test the SendEventByKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorInvalid002, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    auto rootNode = context->rootNode_;
+    context->rootNode_ = nullptr;
+    bool result = Inspector::SendEventByKey("testKey", 0, "");
+    context->rootNode_ = rootNode;
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: InspectorInvalid003
+ * @tc.desc: Test the operation of GetInspectorNodeByKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorInvalid003, TestSize.Level1)
+{
+    // 设置PipelineContext返回空指针
+    RefPtr<MockPipelineContext> pipeline_bak = MockPipelineContext::pipeline_;
+    MockPipelineContext::pipeline_ = nullptr;
+    std::string result = Inspector::GetInspectorNodeByKey("testKey");
+    MockPipelineContext::pipeline_ = pipeline_bak;
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: InspectorInvalid004
+ * @tc.desc: Test the operation of GetInspectorNodeByKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorInvalid004, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    auto rootNode = context->rootNode_;
+    context->rootNode_ = nullptr;
+    std::string result = Inspector::GetInspectorNodeByKey("testKey");
+    context->rootNode_ = rootNode;
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: InspectorInvalid005
+ * @tc.desc: Test the operation of GetRectangleById
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorInvalid005, TestSize.Level1)
+{
+    // 设置PipelineContext返回空指针
+    RefPtr<MockPipelineContext> pipeline_bak = MockPipelineContext::pipeline_;
+    MockPipelineContext::pipeline_ = nullptr;
+    OHOS::Ace::NG::Rectangle rect;
+    Inspector::GetRectangleById("testKey", rect);
+    MockPipelineContext::pipeline_ = pipeline_bak;
+    EXPECT_EQ(rect.screenRect.height_, 0.0);
+    EXPECT_EQ(rect.screenRect.width_, 0.0);
+    EXPECT_EQ(rect.screenRect.x_, 0.0);
+    EXPECT_EQ(rect.screenRect.y_, 0.0);
+}
+
+/**
+ * @tc.name: InspectorInvalid006
+ * @tc.desc: Test the operation of GetRectangleById
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorInvalid006, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    auto rootNode = context->rootNode_;
+    context->rootNode_ = nullptr;
+    OHOS::Ace::NG::Rectangle rect;
+    Inspector::GetRectangleById("testKey", rect);
+    context->rootNode_ = rootNode;
+    EXPECT_EQ(rect.screenRect.height_, 0.0);
+    EXPECT_EQ(rect.screenRect.width_, 0.0);
+    EXPECT_EQ(rect.screenRect.x_, 0.0);
+    EXPECT_EQ(rect.screenRect.y_, 0.0);
+}
+
+/**
+ * @tc.name: InspectorInvalid007
+ * @tc.desc: Test the operation of GetInspector
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorInvalid007, TestSize.Level1)
+{
+    // 设置PipelineContext返回空指针
+    RefPtr<MockPipelineContext> pipeline_bak = MockPipelineContext::pipeline_;
+    MockPipelineContext::pipeline_ = nullptr;
+    auto result = Inspector::GetInspector(false);
+    MockPipelineContext::pipeline_ = pipeline_bak;
+    EXPECT_EQ(result, "{\"$type\":\"root\"}");
+}
+
+/**
+ * @tc.name: InspectorInvalid008
+ * @tc.desc: Test the operation of GetInspector
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorInvalid008, TestSize.Level1)
+{
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto context = MockPipelineContext::GetCurrentContext();
+    RefPtr<MockStageManager> stageManager = AceType::MakeRefPtr<MockStageManager>(stageNode);
+    auto stageManagerBak = context->stageManager_;
+    context->stageManager_ = stageManager;
+    RefPtr<FrameNode> nullNode = nullptr;
+    EXPECT_CALL(*stageManager, GetLastPage()).Times(1).WillOnce(Return(nullNode));
+    auto result = Inspector::GetInspector(false);
+    context->stageManager_ = stageManagerBak;
+    EXPECT_EQ(result, "{\"$type\":\"root\",\"width\":\"720.000000\",\"height\":\"1280.000000\",\"$resolution\":\"1.000000\"}");
+}
+
+/**
+ * @tc.name: InspectorInvalid009
+ * @tc.desc: Test the operation of GetInspectorOfNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorInvalid009, TestSize.Level1)
+{
+    // 设置PipelineContext返回空指针
+    RefPtr<MockPipelineContext> pipeline_bak = MockPipelineContext::pipeline_;
+    MockPipelineContext::pipeline_ = nullptr;
+    auto frameNode = FrameNode::CreateFrameNode("button", 102, AceType::MakeRefPtr<Pattern>(), true);
+    auto result = Inspector::GetInspectorOfNode(frameNode);
+    MockPipelineContext::pipeline_ = pipeline_bak;
+    EXPECT_EQ(result, "{}");
+}
+
+/**
+ * @tc.name: InspectorInvalid010
+ * @tc.desc: Test the operation of GetInspectorOfNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorInvalid010, TestSize.Level1)
+{
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto context = MockPipelineContext::GetCurrentContext();
+    RefPtr<MockStageManager> stageManager = AceType::MakeRefPtr<MockStageManager>(stageNode);
+    auto stageManagerBak = context->stageManager_;
+    context->stageManager_ = stageManager;
+    RefPtr<FrameNode> nullNode = nullptr;
+    EXPECT_CALL(*stageManager, GetLastPage()).Times(1).WillOnce(Return(nullNode));
+    auto frameNode = FrameNode::CreateFrameNode("button", 102, AceType::MakeRefPtr<Pattern>(), true);
+    auto result = Inspector::GetInspectorOfNode(frameNode);
+    context->stageManager_ = stageManagerBak;
+    EXPECT_EQ(result, "{\"width\":\"720.000000\",\"height\":\"1280.000000\",\"$resolution\":\"1.000000\"}");
+}
+
+/**
+ * @tc.name: InspectorInvalid011
+ * @tc.desc: Test the operation of GetInspectorOfNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorInvalid011, TestSize.Level1)
+{
+    auto result = Inspector::GetInspectorOfNode(nullptr);
+    EXPECT_EQ(result, "{\"width\":\"720.000000\",\"height\":\"1280.000000\",\"$resolution\":\"1.000000\"}");
+}
+
+/**
+ * @tc.name: InspectorInvalid012
+ * @tc.desc: Test the operation of GetSubWindowInspector
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorInvalid012, TestSize.Level1)
+{
+    // 设置PipelineContext返回空指针
+    RefPtr<MockPipelineContext> pipeline_bak = MockPipelineContext::pipeline_;
+    MockPipelineContext::pipeline_ = nullptr;
+    auto result = Inspector::GetSubWindowInspector();
+    MockPipelineContext::pipeline_ = pipeline_bak;
+    EXPECT_EQ(result, "{\"$type\":\"root\"}");
+}
+
+/**
+ * @tc.name: InspectorInvalid013
+ * @tc.desc: Test the operation of GetSubWindowInspector
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorInvalid013, TestSize.Level1)
+{
+    // auto rootNode = FrameNode::CreateFrameNode(
+    //     V2::OVERLAY_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto context = MockPipelineContext::GetCurrentContext();
+    RefPtr<MockOverlayManager> overlayManager = AceType::MakeRefPtr<MockOverlayManager>(nullptr);
+    overlayManager->rootNodeWeak_ = nullptr;
+    auto overlayManagerBak = context->overlayManager_;
+    context->overlayManager_ = overlayManager;
+    auto result = Inspector::GetSubWindowInspector();
+    context->overlayManager_ = overlayManagerBak;
+    EXPECT_EQ(result, "{\"$type\":\"root\",\"width\":\"720.000000\",\"height\":\"1280.000000\",\"$resolution\":\"1.000000\"}");
+}
+
+/**
+ * @tc.name: InspectorInvalid014
+ * @tc.desc: Test the operation of GetInspectorTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorInvalid014, TestSize.Level1)
+{
+    // 设置PipelineContext返回空指针
+    RefPtr<MockPipelineContext> pipeline_bak = MockPipelineContext::pipeline_;
+    MockPipelineContext::pipeline_ = nullptr;
+    NG::InspectorTreeMap treesInfos;
+    Inspector::GetInspectorTree(treesInfos);
+    EXPECT_TRUE(treesInfos.empty());
+    MockPipelineContext::pipeline_ = pipeline_bak;
+}
+
+/**
+ * @tc.name: InspectorInvalid015
+ * @tc.desc: Test the operation of GetInspectorTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorInvalid015, TestSize.Level1)
+{
+    // 设置StageManager返回空指针
+    auto context = MockPipelineContext::GetCurrentContext();
+    auto stageManagerBak = context->stageManager_;
+    context->stageManager_ = nullptr;
+    NG::InspectorTreeMap treesInfos;
+    Inspector::GetInspectorTree(treesInfos);
+    EXPECT_TRUE(treesInfos.empty());
+    context->stageManager_ = stageManagerBak;
+}
+
+/**
+ * @tc.name: InspectorInvalid016
+ * @tc.desc: Test the operation of GetInspectorTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorInvalid016, TestSize.Level1)
+{
+    // 设置StageManager GetLastPage方法返回空指针
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto context = MockPipelineContext::GetCurrentContext();
+    RefPtr<MockStageManager> stageManager = AceType::MakeRefPtr<MockStageManager>(stageNode);
+    auto stageManagerBak = context->stageManager_;
+    context->stageManager_ = stageManager;
+    RefPtr<FrameNode> nullNode = nullptr;
+    EXPECT_CALL(*stageManager, GetLastPage()).Times(1).WillOnce(Return(nullNode));
+    NG::InspectorTreeMap treesInfos;
+    Inspector::GetInspectorTree(treesInfos);
+    EXPECT_TRUE(treesInfos.empty());
+    context->stageManager_ = stageManagerBak;
+}
+
+/**
+ * @tc.name: InspectorInvalid017
+ * @tc.desc: Test the operation of GetInspectorTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorInvalid017, TestSize.Level1)
+{
+    // 设置PipelineContext返回空指针
+    RefPtr<MockPipelineContext> pipeline_bak = MockPipelineContext::pipeline_;
+    MockPipelineContext::pipeline_ = nullptr;
+    NG::InspectorTreeMap treesInfos;
+    Inspector::GetRecordAllPagesNodes(treesInfos);
+    EXPECT_TRUE(treesInfos.empty());
+    MockPipelineContext::pipeline_ = pipeline_bak;
+}
+
+/**
+ * @tc.name: InspectorInvalid018
+ * @tc.desc: Test the operation of GetInspectorTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorInvalid018, TestSize.Level1)
+{
+    // 设置StageManager返回空指针
+    auto context = MockPipelineContext::GetCurrentContext();
+    auto stageManagerBak = context->stageManager_;
+    context->stageManager_ = nullptr;
+    NG::InspectorTreeMap treesInfos;
+    Inspector::GetRecordAllPagesNodes(treesInfos);
+    EXPECT_TRUE(treesInfos.empty());
+    context->stageManager_ = stageManagerBak;
+}
+
+/**
+ * @tc.name: InspectorInvalid019
+ * @tc.desc: Test the operation of GetInspectorTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorInvalid019, TestSize.Level1)
+{
+    // 设置StageManager GetStageNode方法返回空指针
+    auto context = MockPipelineContext::GetCurrentContext();
+    RefPtr<MockStageManager> stageManager = AceType::MakeRefPtr<MockStageManager>(nullptr);
+    auto stageManagerBak = context->stageManager_;
+    context->stageManager_ = stageManager;
+    NG::InspectorTreeMap treesInfos;
+    Inspector::GetInspectorTree(treesInfos);
+    EXPECT_TRUE(treesInfos.empty());
+    context->stageManager_ = stageManagerBak;
 }
 } // namespace OHOS::Ace::NG

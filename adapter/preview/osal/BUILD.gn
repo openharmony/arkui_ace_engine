@@ -132,7 +132,7 @@ ohos_source_set("preview_osal_source") {
         "graphic_2d:drawing_napi_impl",
       ]
     }
-
+    include_dirs = [ ability_runtime_path ]
     configs = [ "$ace_root:ace_config" ]
 
     if (is_ohos_standard_system) {

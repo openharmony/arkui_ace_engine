@@ -758,6 +758,8 @@ void TextPattern::EncodeTlvFontStyleNoChild(std::vector<uint8_t>& buff)
     WRITE_TLV_INHERIT(fontStyle, AdaptMinFontSize, TLV_SPAN_FONT_STYLE_ADPATMINFONTSIZE, Dimension, AdaptMinFontSize);
     WRITE_TLV_INHERIT(fontStyle, AdaptMaxFontSize, TLV_SPAN_FONT_STYLE_ADPATMAXFONTSIZE, Dimension, AdaptMaxFontSize);
     WRITE_TLV_INHERIT(fontStyle, LetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension, LetterSpacing);
+    WRITE_TLV_INHERIT(fontStyle, LineThicknessScale, TLV_SPAN_FONT_STYLE_LineThicknessScale, Float,
+        LineThicknessScale);
 }
 
 void TextPattern::EncodeTlvTextLineStyleNoChild(std::vector<uint8_t>& buff)
@@ -1776,15 +1778,17 @@ void TextPattern::TriggerSpansOnHover(const HoverInfo& info, const PointF& textO
         int32_t end = isSpanStringMode_ && item->position == -1 ? item->interval.second : item->position;
         int32_t start = end - item->content.length();
         auto selectedRects = GetSelectedRects(start, end);
+        bool isOnHover = false;
         for (auto&& rect : selectedRects) {
-            bool isOnHover = rect.IsInRegion(textOffset);
-            if (!isOnHover && item->isOnHover != isOnHover) {
-                exitItem = item;
-                break;
-            } else if (isOnHover && item->isOnHover != isOnHover) {
-                enterItem = item;
+            isOnHover = rect.IsInRegion(textOffset);
+            if (isOnHover) {
                 break;
             }
+        }
+        if (!isOnHover && item->isOnHover != isOnHover) {
+            exitItem = item;
+        } else if (isOnHover && item->isOnHover != isOnHover) {
+            enterItem = item;
         }
         if (exitItem && enterItem) {
             break;
@@ -3017,6 +3021,7 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     textStyle.decorationType = static_cast<int32_t>(node->GetTextDecorationValue(TextDecoration::NONE));
     textStyle.decorationColor = node->GetTextDecorationColorValue(Color::BLACK).ColorToString();
     textStyle.decorationStyle = static_cast<int32_t>(node->GetTextDecorationStyleValue(TextDecorationStyle::SOLID));
+    textStyle.lineThicknessScale = node->GetLineThicknessScaleValue(1.0f);
     textStyle.textAlign = static_cast<int32_t>(node->GetTextAlignValue(TextAlign::START));
     auto lm = node->GetLeadingMarginValue({});
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -4847,9 +4852,14 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
         return paintMethod;
     }
     CHECK_NULL_RETURN(pManager_, paintMethod);
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    auto thickness = textLayoutProperty->GetLineThicknessScale().value_or(1.0f);
     RectF boundsRect = overlayMod_->GetBoundsRect();
     auto boundsWidth = contentRect_.GetX() + std::ceil(pManager_->GetLongestLineWithIndent());
     auto boundsHeight = contentRect_.GetY() + static_cast<float>(pManager_->GetHeight() + std::fabs(baselineOffset_));
+    if (GreatNotEqual(thickness, 1.0f)) {
+        boundsHeight += thickness;
+    }
     boundsRect.SetWidth(boundsWidth);
     boundsRect.SetHeight(boundsHeight);
     SetResponseRegion(frameSize, boundsRect.GetSize());

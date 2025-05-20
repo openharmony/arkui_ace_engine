@@ -35,6 +35,7 @@ public:
     static void DestructorCallback(JSCustomDialogController* instance);
     void JsOpenDialog(const JSCallbackInfo& info);
     void JsCloseDialog(const JSCallbackInfo& info);
+    void JsGetState(const JSCallbackInfo& info);
 
 private:
     static bool ParseAnimation(
@@ -42,6 +43,7 @@ private:
     JSView* ownerView_ = nullptr;
     bool isShown_ = false;
     bool pending_ = false;
+    bool hasBind_ = false;
 
     // NG
     std::vector<WeakPtr<AceType>> dialogs_;

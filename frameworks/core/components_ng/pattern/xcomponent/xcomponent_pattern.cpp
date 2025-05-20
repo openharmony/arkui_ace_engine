@@ -42,10 +42,11 @@
 #else
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #endif
-#ifdef ENABLE_ROSEN_BACKEND
-#include "feature/anco_manager/rs_ext_node_operation.h"
 
+#ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "feature/anco_manager/rs_ext_node_operation.h"
+#include "transaction/rs_interfaces.h"
 #endif
 #ifdef RENDER_EXTRACT_SUPPORTED
 #include "core/components_ng/render/adapter/render_surface_impl.h"
@@ -1378,6 +1379,12 @@ void XComponentPattern::HandleSetExpectedRateRangeEvent()
     FrameRateRange frameRateRange;
     frameRateRange.Set(range->min, range->max, range->expected);
     displaySync_->SetExpectedFrameRateRange(frameRateRange);
+#ifdef ENABLE_ROSEN_BACKEND
+    if (frameRateRange.preferred_ != lastFrameRateRange_.preferred_) {
+        Rosen::RSInterfaces::GetInstance().NotifyXComponentExpectedFrameRate(GetId(), frameRateRange.preferred_);
+    }
+    lastFrameRateRange_.Set(range->min, range->max, range->expected);
+#endif
     TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " SetExpectedFrameRateRange"
         "{%{public}d, %{public}d, %{public}d}", displaySync_->GetId(), range->min, range->max, range->expected);
 }

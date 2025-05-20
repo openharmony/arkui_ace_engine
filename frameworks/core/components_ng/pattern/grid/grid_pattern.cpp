@@ -365,7 +365,7 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEv
     auto finalOffset = info_.currentHeight_ - info_.prevHeight_;
     if (!NearZero(finalOffset)) {
         bool scrollDownToEnd =
-            LessOrEqual(info_.prevHeight_, endHeight_) && GreatOrEqual(info_.currentHeight_, endHeight_);
+            LessNotEqual(info_.prevHeight_, endHeight_) && GreatOrEqual(info_.currentHeight_, endHeight_);
         bool scrollUpToEnd =
             GreatNotEqual(info_.prevHeight_, endHeight_) && LessOrEqual(info_.currentHeight_, endHeight_);
         if (scrollDownToEnd || scrollUpToEnd) {

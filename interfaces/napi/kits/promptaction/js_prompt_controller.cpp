@@ -46,6 +46,31 @@ napi_value JSPromptController::CloseDialog(napi_env env, napi_callback_info info
     return thisArg;
 }
 
+napi_value JSPromptController::GetState(napi_env env, napi_callback_info info)
+{
+    size_t argc = 1;
+    napi_value argv[1] = { nullptr };
+    napi_value thisArg = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisArg, nullptr));
+    if (argc < 1) {
+        NapiThrow(env, "The number of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+
+    PromptDialogController* controller = nullptr;
+    napi_status status = napi_unwrap(env, argv[0], reinterpret_cast<void**>(&controller));
+    if (status != napi_ok || !controller) {
+        return nullptr;
+    }
+    auto state = controller->GetState();
+    napi_value dialogState;
+    napi_status createStatus = napi_create_int32(env, static_cast<int32_t>(state), &dialogState);
+    if (createStatus != napi_ok) {
+        return nullptr;
+    }
+    return dialogState;
+}
+
 void JSPromptController::DialogControllerDestructor(napi_env env, void* data, void* hint)
 {
     PromptDialogController* controller = reinterpret_cast<PromptDialogController*>(data);
@@ -85,6 +110,9 @@ napi_status JSPromptController::Define(napi_env env, napi_value exports)
     napi_value closeDialogFunc = nullptr;
     napi_create_function(env, "closeDialog", NAPI_AUTO_LENGTH, CloseDialog, nullptr, &closeDialogFunc);
     napi_set_named_property(env, promptController, "closeDialog", closeDialogFunc);
+    napi_value getStateFunc = nullptr;
+    napi_create_function(env, "getState", NAPI_AUTO_LENGTH, GetState, nullptr, &getStateFunc);
+    napi_set_named_property(env, promptController, "getState", getStateFunc);
 
     napi_set_named_property(env, exports, "PromptController", promptController);
     return napi_ok;

@@ -148,7 +148,7 @@ void CanvasDrawOutline(RSCanvas& canvas, const RSPen& paint, const RSPath& rsPat
 }
 
 void MenuWrapperPaintMethod::PaintEdgeOuterBorder(
-    const MenuPathParams& params, RSCanvas& canvas, const MenuParam& menuParam, const RSPath& rsPath)
+    const MenuPathParams& params, RSCanvas& canvas, const MenuParam& menuParam)
 {
     RSPath rsPathTop;
     RSPath rsPathRight;
@@ -156,12 +156,14 @@ void MenuWrapperPaintMethod::PaintEdgeOuterBorder(
     RSPath rsPathLeft;
     RSPen paint;
     paint.SetAntiAlias(true);
-
+    auto maxWidth =
+        std::max({ menuParam.outlineWidth->leftDimen->ConvertToPx(), menuParam.outlineWidth->topDimen->ConvertToPx(),
+            menuParam.outlineWidth->rightDimen->ConvertToPx(), menuParam.outlineWidth->bottomDimen->ConvertToPx() });
+    paint.SetWidth(maxWidth * BORDER_MULTIPLES);
     rsPathTop.MoveTo(
         params.childOffset.GetX() + params.radiusTopLeftPx - params.radiusTopLeftPx / sqrt(RADIUS_MIDPOINT),
         params.childOffset.GetY() + params.radiusTopLeftPx - params.radiusTopLeftPx / sqrt(RADIUS_MIDPOINT));
     BuildTopLinePath(rsPathTop, params);
-    paint.SetWidth(menuParam.outlineWidth->topDimen->ConvertToPx() * BORDER_MULTIPLES);
     paint.SetColor(menuParam.outlineColor->topColor->GetValue());
     CanvasDrawOutline(canvas, paint, rsPathTop);
 
@@ -169,7 +171,6 @@ void MenuWrapperPaintMethod::PaintEdgeOuterBorder(
                            params.radiusTopRightPx / sqrt(RADIUS_MIDPOINT),
         params.childOffset.GetY() + params.radiusTopRightPx - params.radiusTopRightPx / sqrt(RADIUS_MIDPOINT));
     BuildRightLinePath(rsPathRight, params);
-    paint.SetWidth(menuParam.outlineWidth->rightDimen->ConvertToPx() * BORDER_MULTIPLES);
     paint.SetColor(menuParam.outlineColor->rightColor->GetValue());
     CanvasDrawOutline(canvas, paint, rsPathRight);
 
@@ -178,7 +179,6 @@ void MenuWrapperPaintMethod::PaintEdgeOuterBorder(
         params.childOffset.GetY() + params.frameSize.Height() - params.radiusBottomRightPx +
             params.radiusBottomRightPx / sqrt(RADIUS_MIDPOINT));
     BuildBottomLinePath(rsPathBottom, params);
-    paint.SetWidth(menuParam.outlineWidth->bottomDimen->ConvertToPx() * BORDER_MULTIPLES);
     paint.SetColor(menuParam.outlineColor->bottomColor->GetValue());
     CanvasDrawOutline(canvas, paint, rsPathBottom);
 
@@ -187,7 +187,6 @@ void MenuWrapperPaintMethod::PaintEdgeOuterBorder(
         params.childOffset.GetY() + params.frameSize.Height() - params.radiusBottomLeftPx +
             params.radiusBottomLeftPx / sqrt(RADIUS_MIDPOINT));
     BuildLeftLinePath(rsPathLeft, params);
-    paint.SetWidth(menuParam.outlineWidth->leftDimen->ConvertToPx() * BORDER_MULTIPLES);
     paint.SetColor(menuParam.outlineColor->leftColor->GetValue());
     CanvasDrawOutline(canvas, paint, rsPathLeft);
 }
@@ -216,9 +215,30 @@ void MenuWrapperPaintMethod::PaintOuterBorderAndClipSinglePath(
         CanvasDrawOutline(canvas, paint, rsPath);
     } else {
         canvas.Save();
+        auto rsOutlinePath = BuildOutlinePath(params, menuParam);
+        canvas.ClipPath(rsOutlinePath, RSClipOp::INTERSECT, true);
         canvas.ClipPath(rsPath, RSClipOp::DIFFERENCE, true);
-        PaintEdgeOuterBorder(params, canvas, menuParam, rsPath);
+        PaintEdgeOuterBorder(params, canvas, menuParam);
     }
+}
+
+RSPath MenuWrapperPaintMethod::BuildOutlinePath(const MenuPathParams& params, const MenuParam& menuParam)
+{
+    auto rsOutlineParam = params;
+    rsOutlineParam.childOffset.SetX(params.childOffset.GetX() - menuParam.outlineWidth->leftDimen->ConvertToPx());
+    rsOutlineParam.childOffset.SetY(params.childOffset.GetY() - menuParam.outlineWidth->topDimen->ConvertToPx());
+    rsOutlineParam.frameSize.SetWidth(params.frameSize.Width() + menuParam.outlineWidth->leftDimen->ConvertToPx() +
+                                      menuParam.outlineWidth->rightDimen->ConvertToPx());
+    rsOutlineParam.frameSize.SetHeight(params.frameSize.Height() + menuParam.outlineWidth->topDimen->ConvertToPx() +
+                                       menuParam.outlineWidth->bottomDimen->ConvertToPx());
+    arrowOutlineOffset_.top = menuParam.outlineWidth->topDimen->ConvertToPx();
+    arrowOutlineOffset_.left = menuParam.outlineWidth->leftDimen->ConvertToPx();
+    arrowOutlineOffset_.right = menuParam.outlineWidth->rightDimen->ConvertToPx();
+    arrowOutlineOffset_.bottom = menuParam.outlineWidth->bottomDimen->ConvertToPx();
+    RSPath rsOutlinePath;
+    BuildCompletePath(rsOutlinePath, rsOutlineParam);
+    arrowOutlineOffset_.Reset();
+    return rsOutlinePath;
 }
 
 void MenuWrapperPaintMethod::BuildCompletePath(RSPath& rsPath, const MenuPathParams& params)
@@ -325,37 +345,53 @@ void MenuWrapperPaintMethod::BuildLeftLinePath(RSPath& rsPath, const MenuPathPar
 
 void MenuWrapperPaintMethod::BuildBottomArrowPath(RSPath& rsPath, float arrowX, float arrowY)
 {
-    rsPath.LineTo(arrowX - ARROW_P1_OFFSET_X.ConvertToPx(), arrowY + ARROW_P1_OFFSET_Y.ConvertToPx()); //P1
-    rsPath.LineTo(arrowX - ARROW_P2_OFFSET_X.ConvertToPx(), arrowY + ARROW_P2_OFFSET_Y.ConvertToPx()); //P2
+    rsPath.LineTo(arrowX - ARROW_P1_OFFSET_X.ConvertToPx(),
+        arrowY + ARROW_P1_OFFSET_Y.ConvertToPx() - arrowOutlineOffset_.top); // P1
+    rsPath.LineTo(arrowX - ARROW_P2_OFFSET_X.ConvertToPx(),
+        arrowY + ARROW_P2_OFFSET_Y.ConvertToPx() - arrowOutlineOffset_.top); // P2
     rsPath.ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, RSPathDirection::CW_DIRECTION,
-        arrowX + ARROW_P2_OFFSET_X.ConvertToPx(), arrowY + ARROW_P2_OFFSET_Y.ConvertToPx()); //P4
-    rsPath.LineTo(arrowX + ARROW_P1_OFFSET_X.ConvertToPx(), arrowY + ARROW_P1_OFFSET_Y.ConvertToPx()); //P5
+        arrowX + ARROW_P2_OFFSET_X.ConvertToPx(),
+        arrowY + ARROW_P2_OFFSET_Y.ConvertToPx() - arrowOutlineOffset_.top); // P4
+    rsPath.LineTo(arrowX + ARROW_P1_OFFSET_X.ConvertToPx(),
+        arrowY + ARROW_P1_OFFSET_Y.ConvertToPx() - arrowOutlineOffset_.top); // P5
 }
 
 void MenuWrapperPaintMethod::BuildTopArrowPath(RSPath& rsPath, float arrowX, float arrowY)
 {
-    rsPath.LineTo(arrowX + ARROW_P1_OFFSET_X.ConvertToPx(), arrowY - ARROW_P1_OFFSET_Y.ConvertToPx()); //P1
-    rsPath.LineTo(arrowX + ARROW_P2_OFFSET_X.ConvertToPx(), arrowY - ARROW_P2_OFFSET_Y.ConvertToPx()); //P2
+    rsPath.LineTo(arrowX + ARROW_P1_OFFSET_X.ConvertToPx(),
+        arrowY - ARROW_P1_OFFSET_Y.ConvertToPx() + arrowOutlineOffset_.bottom); // P1
+    rsPath.LineTo(arrowX + ARROW_P2_OFFSET_X.ConvertToPx(),
+        arrowY - ARROW_P2_OFFSET_Y.ConvertToPx() + arrowOutlineOffset_.bottom); // P2
     rsPath.ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, RSPathDirection::CW_DIRECTION,
-        arrowX - ARROW_P2_OFFSET_X.ConvertToPx(), arrowY - ARROW_P2_OFFSET_Y.ConvertToPx()); //P4
-    rsPath.LineTo(arrowX - ARROW_P1_OFFSET_X.ConvertToPx(), arrowY - ARROW_P1_OFFSET_Y.ConvertToPx()); //P5
+        arrowX - ARROW_P2_OFFSET_X.ConvertToPx(),
+        arrowY - ARROW_P2_OFFSET_Y.ConvertToPx() + arrowOutlineOffset_.bottom); // P4
+    rsPath.LineTo(arrowX - ARROW_P1_OFFSET_X.ConvertToPx(),
+        arrowY - ARROW_P1_OFFSET_Y.ConvertToPx() + arrowOutlineOffset_.bottom); // P5
 }
 
 void MenuWrapperPaintMethod::BuildRightArrowPath(RSPath& rsPath, float arrowX, float arrowY)
 {
-    rsPath.LineTo(arrowX + ARROW_P1_OFFSET_Y.ConvertToPx(), arrowY + ARROW_P1_OFFSET_X.ConvertToPx()); //P1
-    rsPath.LineTo(arrowX + ARROW_P2_OFFSET_Y.ConvertToPx(), arrowY + ARROW_P2_OFFSET_X.ConvertToPx()); //P2
+    rsPath.LineTo(arrowX + ARROW_P1_OFFSET_Y.ConvertToPx() - arrowOutlineOffset_.left,
+        arrowY + ARROW_P1_OFFSET_X.ConvertToPx()); // P1
+    rsPath.LineTo(arrowX + ARROW_P2_OFFSET_Y.ConvertToPx() - arrowOutlineOffset_.left,
+        arrowY + ARROW_P2_OFFSET_X.ConvertToPx()); // P2
     rsPath.ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, RSPathDirection::CW_DIRECTION,
-        arrowX + ARROW_P2_OFFSET_Y.ConvertToPx(), arrowY - ARROW_P2_OFFSET_X.ConvertToPx()); //P4
-    rsPath.LineTo(arrowX + ARROW_P1_OFFSET_Y.ConvertToPx(), arrowY - ARROW_P1_OFFSET_X.ConvertToPx()); //P5
+        arrowX + ARROW_P2_OFFSET_Y.ConvertToPx() - arrowOutlineOffset_.left,
+        arrowY - ARROW_P2_OFFSET_X.ConvertToPx()); // P4
+    rsPath.LineTo(arrowX + ARROW_P1_OFFSET_Y.ConvertToPx() - arrowOutlineOffset_.left,
+        arrowY - ARROW_P1_OFFSET_X.ConvertToPx()); // P5
 }
 
 void MenuWrapperPaintMethod::BuildLeftArrowPath(RSPath& rsPath, float arrowX, float arrowY)
 {
-    rsPath.LineTo(arrowX - ARROW_P1_OFFSET_Y.ConvertToPx(), arrowY - ARROW_P1_OFFSET_X.ConvertToPx()); //P1
-    rsPath.LineTo(arrowX - ARROW_P2_OFFSET_Y.ConvertToPx(), arrowY - ARROW_P2_OFFSET_X.ConvertToPx()); //P2
+    rsPath.LineTo(arrowX - ARROW_P1_OFFSET_Y.ConvertToPx() + arrowOutlineOffset_.right,
+        arrowY - ARROW_P1_OFFSET_X.ConvertToPx()); // P1
+    rsPath.LineTo(arrowX - ARROW_P2_OFFSET_Y.ConvertToPx() + arrowOutlineOffset_.right,
+        arrowY - ARROW_P2_OFFSET_X.ConvertToPx()); // P2
     rsPath.ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, RSPathDirection::CW_DIRECTION,
-        arrowX - ARROW_P2_OFFSET_Y.ConvertToPx(), arrowY + ARROW_P2_OFFSET_X.ConvertToPx()); //P4
-    rsPath.LineTo(arrowX - ARROW_P1_OFFSET_Y.ConvertToPx(), arrowY + ARROW_P1_OFFSET_X.ConvertToPx()); //P5
+        arrowX - ARROW_P2_OFFSET_Y.ConvertToPx() + arrowOutlineOffset_.right,
+        arrowY + ARROW_P2_OFFSET_X.ConvertToPx()); // P4
+    rsPath.LineTo(arrowX - ARROW_P1_OFFSET_Y.ConvertToPx() + arrowOutlineOffset_.right,
+        arrowY + ARROW_P1_OFFSET_X.ConvertToPx()); // P5
 }
 } // namespace OHOS::Ace::NG

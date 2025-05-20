@@ -223,6 +223,11 @@ protected:
     static void SetPaintMethodModifier(TextPaintMethod& textPaintMethod);
     static void UpdateTextLayoutProperty(RefPtr<TextLayoutProperty> textLayoutProperty);
 };
+
+class TextPatternTestNg : public TestNG {
+    void SetUp() override;
+    void TearDown() override;
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_TEXTFIELD_TEXTINPUT_TEST_NG_H

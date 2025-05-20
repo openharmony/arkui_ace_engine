@@ -164,7 +164,8 @@ static const std::unordered_set<std::string> stringAttrs = {
     "general_ai_menu_date",
     "general_ai_menu_email",
     "general_ai_menu_phone_number",
-    "general_ai_menu_url"
+    "general_ai_menu_url",
+    "menu_animation_curve",
 };
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)

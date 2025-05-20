@@ -33,6 +33,8 @@ constexpr float SCROLL_HEIGHT = 800.f;
 constexpr float CONTENT_MAIN_SIZE = 1000.f;
 constexpr float SCROLL_BAR_CHILD_WIDTH = 20.f;
 constexpr float SCROLL_BAR_CHILD_HEIGHT = 160.f;
+constexpr char SCROLLBAR_COLOR_BLUE[] = "#FF0000FF";
+constexpr char SCROLLBAR_COLOR_RED[] = "#FF0000";
 
 class ScrollBarTestNg : public TestNG {
 public:

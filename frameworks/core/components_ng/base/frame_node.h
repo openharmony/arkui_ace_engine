@@ -75,10 +75,13 @@ struct DirtySwapConfig;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
+    OffsetF innerWindowOffset = OffsetF();
     RectF visibleRect = RectF();
     RectF innerVisibleRect = RectF();
     VectorF cumulativeScale = {1.0f, 1.0f};
+    VectorF innerCumulativeScale = {1.0f, 1.0f};
     RectF frameRect = RectF();
+    RectF innerFrameRect = RectF();
     RectF innerBoundaryRect = RectF();
 };
 
@@ -237,7 +240,7 @@ public:
     RefPtr<LayoutWrapperNode> UpdateLayoutWrapper(
         RefPtr<LayoutWrapperNode> layoutWrapper, bool forceMeasure = false, bool forceLayout = false);
 
-    void CreateLayoutTask(bool forceUseMainThread = false);
+    void CreateLayoutTask(bool forceUseMainThread = false, LayoutType layoutTaskType = LayoutType::NONE);
 
     std::optional<UITask> CreateRenderTask(bool forceUseMainThread = false);
 
@@ -1160,9 +1163,9 @@ public:
     bool GetOpIncGroupCheckedThrough();
     void SetOpIncCheckedOnce();
     bool GetOpIncCheckedOnce();
-    void MarkAndCheckNewOpIncNode();
+    void MarkAndCheckNewOpIncNode(Axis axis);
     ChildrenListWithGuard GetAllChildren();
-    OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth);
+    OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth, Axis axis);
     void GetInspectorValue() override;
     void NotifyWebPattern(bool isRegister) override;
 
@@ -1377,6 +1380,8 @@ public:
         }
     }
 
+    bool HasMultipleChild();
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1387,7 +1392,7 @@ protected:
 private:
     void MarkDirtyNode(
         bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
-    OPINC_TYPE_E IsOpIncValidNode(const SizeF& boundary, int32_t childNumber = 0);
+    OPINC_TYPE_E IsOpIncValidNode(const SizeF& boundary, Axis axis, int32_t childNumber = 0);
     static int GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t thresh);
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
@@ -1508,7 +1513,8 @@ private:
     CacheVisibleRectResult GetCacheVisibleRect(uint64_t timestamp, bool logFlag = false);
 
     CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
-        const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp);
+        const RefPtr<FrameNode>& parentUi, RectF& rectToParent, const std::pair<VectorF, VectorF>& pairScale,
+        uint64_t timestamp);
 
     void NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange);
 

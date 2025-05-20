@@ -452,6 +452,7 @@ protected:
     virtual void HandleTouchUpEvent(const TouchEvent& event) = 0;
     virtual void HandleTouchMoveEvent(const TouchEvent& event) = 0;
     virtual void HandleTouchCancelEvent(const TouchEvent& event) = 0;
+    virtual void HandleReports(const GestureEvent& info, GestureCallbackType type) {};
     virtual void HandleTouchDownEvent(const AxisEvent& event) {}
     virtual void HandleTouchUpEvent(const AxisEvent& event) {}
     virtual void HandleTouchMoveEvent(const AxisEvent& event) {}
@@ -500,6 +501,7 @@ protected:
     SourceType deviceType_ = SourceType::NONE;
     SourceTool deviceTool_ = SourceTool::UNKNOWN;
     InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
+    InputEventType originInputEventType_ = InputEventType::TOUCH_SCREEN;
     int32_t transId_ = 0;
 
     int32_t currentFingers_ = 0;

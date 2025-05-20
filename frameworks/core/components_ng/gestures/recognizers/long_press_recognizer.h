@@ -24,6 +24,7 @@
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
+#include "core/components_ng/event/event_constants.h"
 
 namespace OHOS::Ace::NG {
 using OnAccessibilityEventFunc = std::function<void(AccessibilityEventType)>;
@@ -141,6 +142,7 @@ private:
     void DoRepeat();
     void StartRepeatTimer();
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, GestureCallbackType type);
+    void HandleReports(const GestureEvent& info, GestureCallbackType type) override;
     GestureJudgeResult TriggerGestureJudgeCallback();
     void OnResetStatus() override;
     double ConvertPxToVp(double offset) const;
@@ -156,6 +158,7 @@ private:
     TouchEvent lastTouchEvent_;
     WeakPtr<GestureEventHub> gestureHub_;
     int32_t thumbnailDeadline = 150;
+    long long inputTime_;
     TimeStamp time_;
     bool useCatchMode_ = true;
     Point globalPoint_;

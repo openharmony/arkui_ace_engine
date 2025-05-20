@@ -479,6 +479,10 @@ private:
     OffsetF globalPosition_;
     RefPtr<UIDisplaySync> displaySync_ = AceType::MakeRefPtr<UIDisplaySync>(UIObjectType::DISPLAYSYNC_XCOMPONENT);
 
+#ifdef ENABLE_ROSEN_BACKEND
+    FrameRateRange lastFrameRateRange_;
+#endif
+
     std::optional<float> selfIdealSurfaceWidth_;
     std::optional<float> selfIdealSurfaceHeight_;
     std::optional<float> selfIdealSurfaceOffsetX_;

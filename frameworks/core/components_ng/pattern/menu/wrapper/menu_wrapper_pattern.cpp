@@ -289,6 +289,47 @@ void MenuWrapperPattern::HideSubMenu()
         HideStackExpandMenu(subMenu);
     } else {
         UpdateMenuAnimation(host);
+        ShowSubMenuDisappearAnimation(host, subMenu);
+    }
+}
+
+void MenuWrapperPattern::ShowSubMenuDisappearAnimation(const RefPtr<FrameNode>& host, const RefPtr<UINode>& subMenu)
+{
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(subMenu);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    if (theme->GetMenuAnimationDuration()) {
+        auto animationOption = AnimationOption();
+        animationOption.SetDuration(theme->GetMenuAnimationDuration());
+        animationOption.SetCurve(theme->GetMenuAnimationCurve());
+        double scale = theme->GetMenuAnimationScale();
+        AnimationUtils::Animate(
+            animationOption,
+            [weak = WeakClaim(RawPtr(subMenu)), scale]() {
+                auto subMenuNode = weak.Upgrade();
+                CHECK_NULL_VOID(subMenuNode);
+                auto subMenu = AceType::DynamicCast<FrameNode>(subMenuNode);
+                CHECK_NULL_VOID(subMenu);
+                auto renderContext = subMenu->GetRenderContext();
+                CHECK_NULL_VOID(renderContext);
+                renderContext->UpdateTransformScale(VectorF(scale, scale));
+                renderContext->UpdateOpacity(MENU_ANIMATION_MIN_OPACITY);
+            },
+            [hostWeak = WeakClaim(RawPtr(host)), subMenuWeak = WeakClaim(RawPtr(subMenu))]() {
+                auto host = hostWeak.Upgrade();
+                CHECK_NULL_VOID(host);
+                auto subMenu = subMenuWeak.Upgrade();
+                CHECK_NULL_VOID(subMenu);
+                auto wrapperPattern = host->GetPattern<MenuWrapperPattern>();
+                CHECK_NULL_VOID(wrapperPattern);
+                wrapperPattern->SendToAccessibility(subMenu, false);
+                host->RemoveChild(subMenu);
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+            });
+    } else {
         SendToAccessibility(subMenu, false);
         host->RemoveChild(subMenu);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
@@ -709,15 +750,32 @@ void MenuWrapperPattern::StartShowAnimation()
     CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
     if (GetPreviewMode() == MenuPreviewMode::NONE) {
         context->UpdateOffset(GetAnimationOffset());
         context->UpdateOpacity(0.0);
     }
-
+    auto menu = GetMenu();
+    CHECK_NULL_VOID(menu);
+    auto menuGeometryNode = menu->GetGeometryNode();
+    CHECK_NULL_VOID(menuGeometryNode);
+    auto offset = menuGeometryNode->GetFrameOffset();
+    if (theme->GetMenuAnimationDuration()) {
+        context->UpdateTransformCenter(DimensionOffset(Dimension(offset.GetX()), Dimension(offset.GetY())));
+        context->UpdateTransformScale(VectorF(theme->GetMenuAnimationScale(), theme->GetMenuAnimationScale()));
+        context->UpdateOpacity(MENU_ANIMATION_MIN_OPACITY);
+    }
     AnimationUtils::Animate(
         animationOption_,
-        [context, weak = WeakClaim(this)]() {
+        [context, weak = WeakClaim(this), theme]() {
             if (context) {
+                CHECK_NULL_VOID(theme);
+                if (theme->GetMenuAnimationDuration()) {
+                    context->UpdateTransformScale(VectorF(MENU_ANIMATION_MAX_SCALE, MENU_ANIMATION_MAX_SCALE));
+                }
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 if (pattern->GetPreviewMode() == MenuPreviewMode::NONE) {

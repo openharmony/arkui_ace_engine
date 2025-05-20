@@ -82,6 +82,7 @@ public:
     void SetHalfLeading(bool halfLeading) override;
     void SetEnableHapticFeedback(bool state) override {};
     void SetEnableAutoSpacing(bool enabled) override {};
+    void SetLineThicknessScale(float value) override {};
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

@@ -1503,13 +1503,14 @@ HWTEST_F(DialogPatternTestNg, CustomDialogControllerModelNGTest001, TestSize.Lev
     auto dialogComponent = AceType::MakeRefPtr<AceType>();
     auto customDialog = AceType::MakeRefPtr<AceType>();
     std::list<DialogOperation> dialogOperation;
+    bool hasBind = false;
 
     /**
      * @tc.steps: step2. execute SetOpenDialog and SetCloseDialog
      * @tc.expected: prop is set as expected
      */
     controllerModel.SetOpenDialog(props, controller, dialogs, pending, isShown,
-        []() {}, []() {}, dialogComponent, customDialog, dialogOperation);
+        []() {}, []() {}, dialogComponent, customDialog, dialogOperation, hasBind);
     props.onStatusChanged(true);
     props.onStatusChanged(false);
     controllerModel.SetCloseDialog(props, controller, dialogs, pending, isShown,
@@ -1518,7 +1519,7 @@ HWTEST_F(DialogPatternTestNg, CustomDialogControllerModelNGTest001, TestSize.Lev
     props.isShowInSubWindow = true;
     props.isModal = false;
     controllerModel.SetOpenDialog(props, controller, dialogs, pending, isShown,
-        []() {}, []() {}, dialogComponent, customDialog, dialogOperation);
+        []() {}, []() {}, dialogComponent, customDialog, dialogOperation, hasBind);
     controllerModel.SetCloseDialog(props, controller, dialogs, pending, isShown,
         []() {}, dialogComponent, customDialog, dialogOperation);
     EXPECT_TRUE(props.isShowInSubWindow);

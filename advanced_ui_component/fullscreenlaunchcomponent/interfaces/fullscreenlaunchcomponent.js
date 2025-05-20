@@ -21,6 +21,7 @@ const abilityManager = requireNapi('app.ability.abilityManager');
 const commonEventManager = requireNapi('commonEventManager');
 const t = 100014;
 const u = 801;
+const requestComponentTerminateKey = 'ohos.param.key.requestComponentTerminate';
 const atomicServiceDataTag = "ohos.atomicService.window";
 
 export class FullScreenLaunchComponent extends ViewPU {
@@ -234,6 +235,9 @@ export class FullScreenLaunchComponent extends ViewPU {
                         }
                     }
                     this.onReceive(atomicServiceData);
+                }
+                if (data[requestComponentTerminateKey]) {
+                    this.isShow = false;
                 }
             });
         }, UIExtensionComponent);

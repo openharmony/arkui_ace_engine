@@ -82,7 +82,9 @@ constexpr uint8_t SUGGEST_OPINC_CHECKED_THROUGH = 1 << 4;
 // Node has rendergroup marked.
 constexpr uint8_t APP_RENDER_GROUP_MARKED_MASK = 1 << 7;
 // OPINC max ratio for scroll scope(height);
-constexpr float HIGHT_RATIO_LIMIT = 0.8;
+constexpr float HIGHT_RATIO_LIMIT = 0.8f;
+// OPINC max ratio for scroll scope(width);
+constexpr float WIDTH_RATIO_LIMIT = 1.0f;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
 } // namespace
@@ -719,6 +721,10 @@ void FrameNode::DumpSafeAreaInfo()
     if (opts) {
         DumpLog::GetInstance().AddDesc(
             opts->ToString().append(",hostPageId: ").append(std::to_string(GetPageId()).c_str()));
+    }
+    auto&& ignoreLayoutSafeAreaOpts = layoutProperty_->GetIgnoreLayoutSafeAreaOpts();
+    if (ignoreLayoutSafeAreaOpts) {
+        DumpLog::GetInstance().AddDesc(ignoreLayoutSafeAreaOpts->ToString());
     }
     if (layoutProperty_->GetSafeAreaInsets()) {
         DumpLog::GetInstance().AddDesc(layoutProperty_->GetSafeAreaInsets()->ToString());
@@ -1945,7 +1951,7 @@ void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceD
     SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::VISIBLE_AREA_CHANGE);
     if (hasInnerCallback) {
         if (isCalculateInnerVisibleRectClip_) {
-            ProcessVisibleAreaChangeEvent(visibleResult.innerVisibleRect, visibleResult.frameRect,
+            ProcessVisibleAreaChangeEvent(visibleResult.innerVisibleRect, visibleResult.innerFrameRect,
                 visibleAreaInnerRatios, visibleAreaInnerCallback, false);
         } else {
             ProcessVisibleAreaChangeEvent(visibleResult.visibleRect, visibleResult.frameRect, visibleAreaInnerRatios,
@@ -2167,9 +2173,9 @@ void FrameNode::SetNodeFreeze(bool isFreeze)
     }
 }
 
-void FrameNode::CreateLayoutTask(bool forceUseMainThread)
+void FrameNode::CreateLayoutTask(bool forceUseMainThread, LayoutType layoutTaskType)
 {
-    if (!isLayoutDirtyMarked_) {
+    if (!isLayoutDirtyMarked_ && (layoutTaskType == LayoutType::NONE)) {
         return;
     }
     SetRootMeasureNode(true);
@@ -2180,20 +2186,29 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread)
         Measure(std::nullopt);
         Layout();
     } else {
-        {
+        if (layoutTaskType != LayoutType::LAYOUT_FOR_IGNORE) {
             auto layoutConstraint = GetLayoutConstraint();
             ACE_SCOPED_TRACE_COMMERCIAL("CreateTaskMeasure[%s][self:%d][parent:%d][layoutConstraint:%s]"
                              "[layoutPriority:%d][pageId:%d][depth:%d]",
                 GetTag().c_str(), GetId(), GetAncestorNodeOfFrame(false) ? GetAncestorNodeOfFrame(false)->GetId() : 0,
                 layoutConstraint.ToString().c_str(), GetLayoutPriority(), GetPageId(), GetDepth());
+            SetIgnoreLayoutProcess(layoutTaskType == LayoutType::MEASURE_FOR_IGNORE);
             Measure(layoutConstraint);
+            ResetIgnoreLayoutProcess();
+        } else {
+            TAG_LOGI(ACE_LAYOUT,
+                "LayoutTask for postponed layouting on ignoreLayoutSafeArea-container [%s][self:%d], should skip "
+                "measuring.",
+                GetTag().c_str(), GetId());
         }
         {
             ACE_SCOPED_TRACE_COMMERCIAL("CreateTaskLayout[%s][self:%d][parent:%d][layoutPriority:%d]"
                              "[pageId:%d][depth:%d]",
                 GetTag().c_str(), GetId(), GetAncestorNodeOfFrame(false) ? GetAncestorNodeOfFrame(false)->GetId() : 0,
                 GetLayoutPriority(), GetPageId(), GetDepth());
+            SetIgnoreLayoutProcess(layoutTaskType == LayoutType::LAYOUT_FOR_IGNORE);
             Layout();
+            ResetIgnoreLayoutProcess();
         }
     }
     SetRootMeasureNode(false);
@@ -4600,7 +4615,7 @@ void FrameNode::Layout()
             }
         }
     }
-    if (CheckNeedLayout(layoutProperty_->GetPropertyChangeFlag())) {
+    if (CheckNeedLayout(layoutProperty_->GetPropertyChangeFlag()) || GetIgnoreLayoutProcess()) {
         if (!layoutProperty_->GetLayoutConstraint()) {
             const auto& parentLayoutConstraint = geometryNode_->GetParentLayoutConstraint();
             if (layoutProperty_->GetLayoutRect()) {
@@ -5771,25 +5786,29 @@ CacheVisibleRectResult FrameNode::GetCacheVisibleRect(uint64_t timestamp, bool l
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(true);
     auto rectToParent = GetPaintRectWithTransform();
     auto scale = GetTransformScale();
+    auto innerScale = scale;
     if (renderContext_) {
         auto matrix4 = renderContext_->GetTransformMatrixValue(Matrix4());
-        scale = { scale.x * static_cast<float>(matrix4.GetScaleX()),
-            scale.y * static_cast<float>(matrix4.GetScaleY()) };
+        innerScale = { innerScale.x * static_cast<float>(matrix4.GetScaleX()),
+            innerScale.y * static_cast<float>(matrix4.GetScaleY()) };
     }
 
     if (!parentUi || IsWindowBoundary()) {
-        cachedVisibleRectResult_ = {timestamp,
-            {rectToParent.GetOffset(), rectToParent, rectToParent, scale, rectToParent, rectToParent}};
+        cachedVisibleRectResult_ = { timestamp,
+            { rectToParent.GetOffset(), rectToParent.GetOffset(), rectToParent, rectToParent, scale, innerScale,
+                rectToParent, rectToParent, rectToParent } };
         return cachedVisibleRectResult_.second;
     }
 
     CacheVisibleRectResult result;
     if (parentUi->cachedVisibleRectResult_.first == timestamp) {
         auto parentCacheVisibleRectResult = parentUi->cachedVisibleRectResult_.second;
-        result = CalculateCacheVisibleRect(parentCacheVisibleRectResult, parentUi, rectToParent, scale, timestamp);
+        result = CalculateCacheVisibleRect(
+            parentCacheVisibleRectResult, parentUi, rectToParent, { scale, innerScale }, timestamp);
     } else {
         CacheVisibleRectResult parentCacheVisibleRectResult = parentUi->GetCacheVisibleRect(timestamp, logFlag);
-        result = CalculateCacheVisibleRect(parentCacheVisibleRectResult, parentUi, rectToParent, scale, timestamp);
+        result = CalculateCacheVisibleRect(
+            parentCacheVisibleRectResult, parentUi, rectToParent, { scale, innerScale }, timestamp);
     }
     if (logFlag) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT,
@@ -5803,32 +5822,51 @@ CacheVisibleRectResult FrameNode::GetCacheVisibleRect(uint64_t timestamp, bool l
 }
 
 CacheVisibleRectResult FrameNode::CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
-    const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp)
+    const RefPtr<FrameNode>& parentUi, RectF& rectToParent, const std::pair<VectorF, VectorF>& pairScale,
+    uint64_t timestamp)
 {
     auto parentRenderContext = parentUi->GetRenderContext();
     OffsetF windowOffset;
+    OffsetF innerWindowOffset;
     auto offset = rectToParent.GetOffset();
-    offset = OffsetF(offset.GetX() * parentCacheVisibleRect.cumulativeScale.x,
-        offset.GetY() * parentCacheVisibleRect.cumulativeScale.y);
+    auto innerOffset = rectToParent.GetOffset();
+    if (parentRenderContext && parentRenderContext->GetTransformScale()) {
+        auto parentScale = parentRenderContext->GetTransformScale();
+        offset = OffsetF(offset.GetX() * parentScale.value().x, offset.GetY() * parentScale.value().y);
+    }
     windowOffset = parentCacheVisibleRect.windowOffset + offset;
+
+    innerOffset = OffsetF(innerOffset.GetX() * parentCacheVisibleRect.innerCumulativeScale.x,
+        innerOffset.GetY() * parentCacheVisibleRect.innerCumulativeScale.y);
+    innerWindowOffset = parentCacheVisibleRect.innerWindowOffset + innerOffset;
 
     RectF rect;
     rect.SetOffset(windowOffset);
     rect.SetWidth(rectToParent.Width() * parentCacheVisibleRect.cumulativeScale.x);
     rect.SetHeight(rectToParent.Height() * parentCacheVisibleRect.cumulativeScale.y);
 
+    RectF innerRect;
+    innerRect.SetOffset(innerWindowOffset);
+    innerRect.SetWidth(rectToParent.Width() * parentCacheVisibleRect.innerCumulativeScale.x);
+    innerRect.SetHeight(rectToParent.Height() * parentCacheVisibleRect.innerCumulativeScale.y);
+
     auto visibleRect = rect.Constrain(parentCacheVisibleRect.visibleRect);
-    auto innerVisibleRect = rect;
+    auto innerVisibleRect = innerRect;
     auto innerBoundaryRect = parentCacheVisibleRect.innerBoundaryRect;
     if (parentRenderContext && parentRenderContext->GetClipEdge().value_or(false)) {
         innerBoundaryRect = parentCacheVisibleRect.innerVisibleRect.Constrain(innerBoundaryRect);
     }
-    innerVisibleRect = rect.Constrain(innerBoundaryRect);
+    innerVisibleRect = innerRect.Constrain(innerBoundaryRect);
 
-    scale = {scale.x * parentCacheVisibleRect.cumulativeScale.x, scale.y * parentCacheVisibleRect.cumulativeScale.y};
+    VectorF cumulativeScale = { pairScale.first.x * parentCacheVisibleRect.cumulativeScale.x,
+        pairScale.first.y * parentCacheVisibleRect.cumulativeScale.y };
+    VectorF innerCumulativeScale = { pairScale.second.x * parentCacheVisibleRect.innerCumulativeScale.x,
+        pairScale.second.y * parentCacheVisibleRect.innerCumulativeScale.y };
     cachedVisibleRectResult_ = { timestamp,
-        { windowOffset, visibleRect, innerVisibleRect, scale, rect, innerBoundaryRect } };
-    return {windowOffset, visibleRect, innerVisibleRect, scale, rect, innerBoundaryRect};
+        { windowOffset, innerWindowOffset, visibleRect, innerVisibleRect, cumulativeScale, innerCumulativeScale, rect,
+            innerRect, innerBoundaryRect } };
+    return { windowOffset, innerWindowOffset, visibleRect, innerVisibleRect, cumulativeScale, innerCumulativeScale,
+        rect, innerRect, innerBoundaryRect };
 }
 
 bool FrameNode::IsContextTransparent()
@@ -5972,44 +6010,41 @@ bool FrameNode::GetOpIncCheckedOnce()
 bool FrameNode::MarkSuggestOpIncGroup(bool suggest, bool calc)
 {
     CHECK_NULL_RETURN(renderContext_, false);
-    if (!GetSuggestOpIncMarked() && GetCanSuggestOpInc()) {
-        renderContext_->SuggestOpIncNode(suggest, calc);
-        SetSuggestOpIncMarked(true);
-    }
+    renderContext_->SuggestOpIncNode(suggest, calc);
+    SetSuggestOpIncMarked(suggest);
     return true;
 }
 
-OPINC_TYPE_E FrameNode::IsOpIncValidNode(const SizeF& boundary, int32_t childNumber)
+OPINC_TYPE_E FrameNode::IsOpIncValidNode(const SizeF& boundary, Axis axis, int32_t childNumber)
 {
-    auto ret = GetPattern()->OpIncType();
-    switch (ret) {
-        case OPINC_NODE:
-            SetCanSuggestOpInc(true);
-            break;
-        case OPINC_PARENT_POSSIBLE:
-            break;
-        case OPINC_NODE_POSSIBLE: {
-            int32_t height = static_cast<int>(GetGeometryNode()->GetFrameSize().Height());
-            int32_t width = static_cast<int>(GetGeometryNode()->GetFrameSize().Width());
-            int32_t heightBoundary = static_cast<int>(boundary.Height() * HIGHT_RATIO_LIMIT);
-            int32_t area = height * width;
-            if (area >= MIN_OPINC_AREA && height <= heightBoundary) {
-                SetCanSuggestOpInc(true);
-                ret = OPINC_NODE;
-            } else if (height > heightBoundary) {
-                ret = OPINC_PARENT_POSSIBLE;
-            } else {
-                ret = OPINC_SUGGESTED_OR_EXCLUDED;
-            }
-            break;
-        }
-        default:
-            break;
+    int32_t height = static_cast<int>(GetGeometryNode()->GetFrameSize().Height());
+    int32_t width = static_cast<int>(GetGeometryNode()->GetFrameSize().Width());
+    int32_t heightBoundary = static_cast<int>(boundary.Height() * HIGHT_RATIO_LIMIT);
+    int32_t widthBoundary = static_cast<int>(boundary.Width() * WIDTH_RATIO_LIMIT);
+    int32_t area = height * width;
+    if (area >= MIN_OPINC_AREA &&
+        ((axis == Axis::VERTICAL && height <= heightBoundary) ||
+        (axis == Axis::HORIZONTAL && width <= widthBoundary)) &&
+        HasMultipleChild()) {
+        return OPINC_NODE;
     }
-    return ret;
+    return OPINC_INVALID;
 }
 
-OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth)
+bool FrameNode::HasMultipleChild()
+{
+    if (GetChildren().empty()) {
+        return false;
+    }
+    if (GetChildren().size() > 1) {
+        return true;
+    }
+    auto child = AceType::DynamicCast<FrameNode>(GetChildByIndex(0));
+    CHECK_NULL_RETURN(child, false);
+    return child->HasMultipleChild();
+}
+
+OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth, Axis axis)
 {
     if (GetSuggestOpIncActivatedOnce()) {
         return OPINC_SUGGESTED_OR_EXCLUDED;
@@ -6019,7 +6054,7 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
     if (GetApplicationRenderGroupMarked()) {
         return OPINC_INVALID;
     }
-    auto status = IsOpIncValidNode(boundary);
+    auto status = IsOpIncValidNode(boundary, axis);
     if (SystemProperties::GetDebugEnabled()) {
         const auto& hostTag = GetHostTag();
         path = path + " --> " + hostTag;
@@ -6037,7 +6072,7 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
         GenerateOneDepthVisibleFrame(childrens);
         for (auto& child : childrens) {
             if (child) {
-                status = child->FindSuggestOpIncNode(path, boundary, depth + 1);
+                status = child->FindSuggestOpIncNode(path, boundary, depth + 1, axis);
             }
             if (status == OPINC_INVALID) {
                     return OPINC_INVALID;
@@ -6050,22 +6085,18 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
     return OPINC_SUGGESTED_OR_EXCLUDED;
 }
 
-void FrameNode::MarkAndCheckNewOpIncNode()
+void FrameNode::MarkAndCheckNewOpIncNode(Axis axis)
 {
+    if (!IsActive() || GetSuggestOpIncActivatedOnce() || GetApplicationRenderGroupMarked()) {
+        return;
+    }
     auto parent = GetAncestorNodeOfFrame(true);
     CHECK_NULL_VOID(parent);
-    if (parent->GetSuggestOpIncActivatedOnce() && !GetSuggestOpIncActivatedOnce()) {
+    if (parent->GetSuggestOpIncActivatedOnce()) {
         SetSuggestOpIncActivatedOnce();
-        if (!parent->GetOpIncCheckedOnce()) {
-            parent->SetOpIncCheckedOnce();
-            auto status = IsOpIncValidNode(parent->GetGeometryNode()->GetFrameSize());
-            if (status == OPINC_NODE) {
-                parent->SetOpIncGroupCheckedThrough(true);
-            } else {
-                parent->SetOpIncGroupCheckedThrough(false);
-            }
-        }
-        if (parent->GetOpIncGroupCheckedThrough()) {
+        auto status = IsOpIncValidNode(parent->GetGeometryNode()->GetFrameSize(), axis);
+        ACE_SCOPED_TRACE("MarkAndCheckNewOpIncNode id:%d, tag:%s, status: %d", GetId(), GetTag().c_str(), status);
+        if (status == OPINC_NODE) {
             SetCanSuggestOpInc(true);
             MarkSuggestOpIncGroup(true, true);
         }

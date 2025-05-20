@@ -7192,6 +7192,13 @@ void WebDelegate::OnScrollStart(const float x, const float y)
     webPattern->OnScrollStart(x, y);
 }
 
+void WebDelegate::EnableSecurityLayer(bool isNeedSecurityLayer)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->EnableSecurityLayer(isNeedSecurityLayer);
+}
+
 void WebDelegate::OnRootLayerChanged(int width, int height)
 {
     auto webPattern = webPattern_.Upgrade();

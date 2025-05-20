@@ -363,6 +363,16 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     RequestFrame();
 }
 
+void PipelineContext::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle)
+{
+    CHECK_RUN_ON(UI);
+    if (IsDestroyed()) {
+        LOGW("Cannot add ignoreSafeArea bundle as the pipeline context is destroyed.");
+        return;
+    }
+    taskScheduler_->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
+}
+
 void PipelineContext::AddLayoutNode(const RefPtr<FrameNode>& layoutNode)
 {
     taskScheduler_->AddLayoutNode(layoutNode);
@@ -6106,7 +6116,7 @@ void PipelineContext::FlushMouseEventForHover()
         eventManager_->MouseTest(event, rootNode_, touchRestrict);
     }
     eventManager_->DispatchMouseHoverEventNG(event);
-    eventManager_->DispatchMouseHoverAnimationNG(event);
+    eventManager_->DispatchMouseHoverAnimationNG(event, true);
 }
 
 void PipelineContext::HandleTouchHoverOut(const TouchEvent& point)

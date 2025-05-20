@@ -22,6 +22,7 @@ import Base from '@ohos.base';
 
 const errCodeAbnormal: number = 100014;
 const errCodeCapabilityNotSupported: number = 801;
+const requestComponentTerminateKey: string = 'ohos.param.key.requestComponentTerminate';
 const atomicServiceDataTag: string = "ohos.atomicService.window";
 @Component
 export struct FullScreenLaunchComponent {
@@ -189,6 +190,9 @@ export struct FullScreenLaunchComponent {
                 }
             }
             this.onReceive(atomicServiceData);
+        }
+        if (data[requestComponentTerminateKey]) {
+          this.isShow = false;
         }
       })
   }

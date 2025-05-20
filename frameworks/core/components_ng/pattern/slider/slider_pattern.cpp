@@ -616,9 +616,6 @@ void SliderPattern::SetStepPointsAccessibilityVirtualNodeEvent(
             CHECK_NULL_VOID(pattern);
             pattern->FireChangeEvent(SliderChangeMode::Begin);
             auto offsetStep = index - pattern->GetCurrentStepIndex();
-            if (offsetStep > 0) {
-                offsetStep += 1;
-            }
             pattern->MoveStep(offsetStep);
             pattern->FireChangeEvent(SliderChangeMode::End);
             if (pattern->showTips_) {

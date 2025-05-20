@@ -138,7 +138,7 @@ public:
     void UpdatePenHoverMoveNode(const TouchEvent& event, const TouchTestResult& testResult);
     void UpdateHoverNode(const MouseEvent& event, const TouchTestResult& testResult);
     bool DispatchMouseEventNG(const MouseEvent& event);
-    void DispatchMouseHoverAnimationNG(const MouseEvent& event);
+    void DispatchMouseHoverAnimationNG(const MouseEvent& event, bool isMockEvent = false);
     bool DispatchMouseHoverEventNG(const MouseEvent& event);
     void DispatchHoverEffectEvent(const MouseEvent& event);
     void DispatchAccessibilityHoverEventNG(const TouchEvent& event);

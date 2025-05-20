@@ -49,6 +49,12 @@ void UITaskScheduler::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     dirtyLayoutNodes_.emplace_back(dirty);
 }
 
+void UITaskScheduler::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle)
+{
+    CHECK_RUN_ON(UI);
+    ignoreLayoutSafeAreaBundles_.emplace_back(std::move(bundle));
+}
+
 void UITaskScheduler::AddLayoutNode(const RefPtr<FrameNode>& layoutNode)
 {
     CHECK_RUN_ON(UI);
@@ -148,6 +154,11 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
             frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
         }
     }
+
+    while (!ignoreLayoutSafeAreaBundles_.empty()) {
+        FlushPostponedLayoutTask(forceUseMainThread);
+    }
+
     FlushSyncGeometryNodeTasks();
 #ifdef FFRT_EXISTS
     if (is64BitSystem_) {
@@ -157,6 +168,21 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 #endif
 
     isLayouting_ = false;
+}
+
+void UITaskScheduler::FlushPostponedLayoutTask(bool forceUseMainThread)
+{
+    auto ignoreLayoutSafeAreaBundles = std::move(ignoreLayoutSafeAreaBundles_);
+    for (auto&& bundle = ignoreLayoutSafeAreaBundles.rbegin(); bundle != ignoreLayoutSafeAreaBundles.rend();
+        ++bundle) {
+        for (auto&& node : bundle->first) {
+            if (!node || node->IsInDestroying()) {
+                continue;
+            }
+            node->CreateLayoutTask(forceUseMainThread, LayoutType::MEASURE_FOR_IGNORE);
+        }
+        bundle->second->CreateLayoutTask(forceUseMainThread, LayoutType::LAYOUT_FOR_IGNORE);
+    }
 }
 
 void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)

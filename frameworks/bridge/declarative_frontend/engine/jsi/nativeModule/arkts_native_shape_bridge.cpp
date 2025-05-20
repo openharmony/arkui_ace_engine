@@ -13,6 +13,15 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_shape_bridge.h"
+#include "base/image/pixel_map.h"
+#include "base/memory/referenced.h"
+#include "base/utils/utils.h"
+#include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -107,6 +116,36 @@ ArkUINativeModuleValue ShapeBridge::ResetMesh(ArkUIRuntimeCallInfo* runtimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getShapeModifier()->resetShapeMesh(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ShapeBridge::SetShapeInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    RefPtr<PixelMap> pixMap = nullptr;
+#if defined(PIXEL_MAP_SUPPORTED)
+    if (info.Length() == NUM_2 && info[NUM_1]->IsObject()) {
+        pixMap = Framework::CreatePixelMapFromNapiValue(info[NUM_1]);
+    }
+#endif
+    ShapeModelNG::InitBox(reinterpret_cast<FrameNode*>(nativeNode), pixMap);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ShapeBridge::ResetShapeInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    ShapeModelNG::InitBox(reinterpret_cast<FrameNode*>(nativeNode), nullptr);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

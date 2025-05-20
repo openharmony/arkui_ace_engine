@@ -65,6 +65,52 @@ typedef enum {
 } ArkUI_ImmersiveMode;
 
 /**
+* @brief Enumerates the state of dialog.
+*
+* @syscap SystemCapability.ArkUI.ArkUI.Full
+*
+* @since 20
+*/
+typedef enum {
+    /**
+     * @brief Uninitialized.
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @since 20
+     */
+    DIALOG_UNINITIALIZED = 0,
+    /**
+     * @brief Initialized.
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @since 20
+     */
+    DIALOG_INITIALIZED,
+    /**
+     * @brief Appearing.
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @since 20
+     */
+    DIALOG_APPEARING,
+    /**
+     * @brief Appeared.
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @since 20
+     */
+    DIALOG_APPEARED,
+    /**
+     * @brief Disappearing.
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @since 20
+     */
+    DIALOG_DISAPPEARING,
+    /**
+     * @brief Disappeared.
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @since 20
+     */
+    DIALOG_DISAPPEARED,
+} ArkUI_DialogState;
+
+/**
  * @brief Invoked when the dialog box is closed.
  *
  * @since 12
@@ -1086,6 +1132,18 @@ int32_t OH_ArkUI_CustomDialog_RegisterOnWillDisappearCallback(
  */
 int32_t OH_ArkUI_CustomDialog_RegisterOnDidDisappearCallback(
     ArkUI_CustomDialogOptions* options, void* userData, void (*callback)(void* userData));
+
+/**
+ * @brief Get state of dialog.
+ *
+ * @param handle Indicates the pointer to the custom dialog box controller.
+ * @param state Dialog state object.
+ * @return Returns the error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ */
+int32_t OH_ArkUI_CustomDialog_GetState(ArkUI_NativeDialogHandle handle, ArkUI_DialogState* state);
 
 /**
  * @brief Sets the background blur effect for a dialog box.

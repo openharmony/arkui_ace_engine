@@ -155,6 +155,11 @@ common_bin = [
     part_name = "resource_management"
   },
   {
+    label = "//base/global/resource_management/interfaces/js/innerkits/core:resmgr_napi_core_preview"
+    subsystem_name = "global"
+    part_name = "resource_management"
+  },
+  {
     label = label_hilog
     subsystem_name = "hiviewdfx"
     part_name = "hilog"
@@ -304,6 +309,18 @@ napi_modules = [
         lib_names = [ "previewer_window_napi" ]
       },
       {
+        label = "//base/global/resource_management/interfaces/js/kits:resourcemanager_preview"
+        subsystem_name = "global"
+        part_name = "resource_management"
+        lib_names = [ "resourcemanager" ]
+      },
+      {
+        label = "//base/global/resource_management/interfaces/js/kits:sendableresourcemanager_preview"
+        subsystem_name = "global"
+        part_name = "resource_management"
+        lib_names = [ "sendableresourcemanager" ]
+      },
+      {
         label = "//foundation/arkui/ace_engine/interfaces/napi/kits:napi_group"
         subsystem_name = "arkui"
         part_name = "ace_engine"
@@ -318,6 +335,7 @@ napi_modules = [
           "promptaction",
           "router",
           "animator",
+          "overlay",
         ]
       },
     ]

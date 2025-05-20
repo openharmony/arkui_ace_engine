@@ -119,6 +119,23 @@ void MenuModelNG::SetExpandingMode(FrameNode* frameNode, const SubMenuExpandingM
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ExpandingMode, expandingMode, frameNode);
 }
 
+void MenuModelNG::SetExpandSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& expandSymbol)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto menuProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
+    menuProperty->SetExpandSymbol(expandSymbol);
+}
+
+void MenuModelNG::SetExpandSymbol(FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& expandSymbol)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto menuProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
+    menuProperty->SetExpandSymbol(expandSymbol);
+}
+
 void MenuModelNG::SetItemDivider(const V2::ItemDivider& divider, const DividerMode& mode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDivider, divider);

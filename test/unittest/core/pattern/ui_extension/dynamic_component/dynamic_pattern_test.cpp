@@ -846,7 +846,7 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest023, TestSize.Level1)
      * @tc.steps: step1. Create AnimationOption and set value.
      */
     AnimationOption animationOption;
-    animationOption.SetDuration(50);
+    animationOption.SetDuration(100);
     animationOption.SetCurve(Curves::FRICTION);
     animationOption.SetOnFinishEvent([]() {
     });

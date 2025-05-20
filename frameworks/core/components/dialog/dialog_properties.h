@@ -372,6 +372,15 @@ enum class UECHostMaskType {
     BIND_SHEET,
 };
 
+enum class PromptActionCommonState {
+    UNINITIALIZED = 0,
+    INITIALIZED = 1,
+    APPEARING = 2,
+    APPEARED = 3,
+    DISAPPEARING = 4,
+    DISAPPEARED  = 5,
+};
+
 struct UECHostMaskInfo {
     std::string uuid;
     int32_t instanceId = -1;

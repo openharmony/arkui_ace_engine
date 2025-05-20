@@ -1177,6 +1177,10 @@ void ListItemGroupLayoutAlgorithm::LayoutListItem(LayoutWrapper* layoutWrapper,
         } else {
             SyncGeometry(wrapper);
         }
+        auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
+        if (frameNode) {
+            frameNode->MarkAndCheckNewOpIncNode(axis_);
+        }
     }
 }
 

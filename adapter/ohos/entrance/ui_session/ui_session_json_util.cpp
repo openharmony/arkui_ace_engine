@@ -41,6 +41,16 @@ bool InspectorJsonValue::IsObject() const
     return cJSON_IsObject(object_);
 }
 
+bool InspectorJsonValue::Put(double value)
+{
+    cJSON* child = cJSON_CreateNumber(value);
+    if (child == nullptr) {
+        return false;
+    }
+    cJSON_AddItemToArray(object_, child);
+    return true;
+}
+
 bool InspectorJsonValue::Put(const char* key, const char* value)
 {
     if (!value || !key) {
@@ -234,6 +244,11 @@ bool InspectorJsonValue::IsNumber() const
 std::shared_ptr<InspectorJsonValue> InspectorJsonUtil::Create(bool isRoot)
 {
     return std::make_shared<InspectorJsonValue>(cJSON_CreateObject(), isRoot);
+}
+
+std::unique_ptr<InspectorJsonValue> InspectorJsonUtil::CreateArray(bool isRoot)
+{
+    return std::make_unique<InspectorJsonValue>(cJSON_CreateArray(), isRoot);
 }
 
 std::unique_ptr<InspectorJsonValue> InspectorJsonUtil::CreateObject(bool isRoot)

@@ -710,6 +710,10 @@ void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& f
     draggedFrameNode_ = preTargetFrameNode_;
     preMovePoint_ = point;
     parentHitNodes_.emplace(frameNode->GetId());
+    DragDropBehaviorReporter::GetInstance().UpdateFrameNodeId(frameNode->GetId());
+    DragDropBehaviorReporter::GetInstance().UpdateStartPoint(point);
+    DragDropBehaviorReporter::GetInstance().UpdateLongPressDurationEnd(GetSysTimestamp());
+    DragDropBehaviorReporter::GetInstance().UpdateDropResult(DropResult::DROP_FAIL);
 
     // Reset hover status when drag start.
     auto pipeline = frameNode->GetContextRefPtr();
@@ -1160,6 +1164,7 @@ void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std:
 {
     RemoveDeadlineTimer();
     Point point = pointerEvent.GetPoint();
+    DragDropBehaviorReporter::GetInstance().UpdateEndPoint(point);
     dragDropPointerEvent_ = pointerEvent;
     auto preTargetFrameNode = preTargetFrameNode_;
     DoDragReset();
@@ -1372,6 +1377,7 @@ void DragDropManager::OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefP
     UpdateDragEvent(event, pointerEvent);
     auto extraParams = eventHub->GetDragExtraParams(extraInfo_, point, DragEventType::DROP);
     DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
+    DragDropBehaviorReporter::GetInstance().UpdateDropResult(DropResult::DROP_SUCCESS);
     eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, event, extraParams);
     if (event->IsDragEndPending() && event->GetRequestIdentify() != -1) {
         if (PostStopDrag(dragFrameNode, pointerEvent, event, extraParams)) {
@@ -2141,6 +2147,7 @@ void DragDropManager::CopyPreparedInfoForDrag(DragPreviewInfo& dragPreviewInfo, 
     dragPreviewInfo.relativeContainerNode = data.relativeContainerNode;
     dragPreviewInfo.stackNode = data.stackNode;
     dragPreviewInfo.sizeChangeEffect = data.sizeChangeEffect;
+    dragPreviewInfo.menuNode = data.menuNode;
 }
 
 bool DragDropManager::IsNeedDoDragMoveAnimate(const DragPointerEvent& pointerEvent)
@@ -2376,9 +2383,18 @@ void DragDropManager::DragMoveTransitionAnimation(const RefPtr<OverlayManager>& 
     option.SetCurve(DRAG_TRANSITION_ANIMATION_CURVE);
     auto renderContext = info_.imageNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto offset = OffsetF(point.GetX(), point.GetY());
+    auto menuWrapperNode = GetMenuWrapperNodeFromDrag();
+    CHECK_NULL_VOID(overlayManager);
+    auto menuPosition = overlayManager->CalculateMenuPosition(menuWrapperNode, offset);
+    auto menuRenderContext = GetMenuRenderContextFromMenuWrapper(menuWrapperNode);
     AnimationUtils::Animate(
         option,
-        [overlayManager, info, newOffset]() {
+        [overlayManager, info, newOffset, menuRenderContext, menuPosition]() {
+            if (menuRenderContext && !menuPosition.NonOffset() && !info.menuNode) {
+                menuRenderContext->UpdatePosition(
+                    OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
+            }
             CHECK_NULL_VOID(overlayManager);
             auto relativeContainerNodeRenderContext = info.relativeContainerNode->GetRenderContext();
             CHECK_NULL_VOID(relativeContainerNodeRenderContext);

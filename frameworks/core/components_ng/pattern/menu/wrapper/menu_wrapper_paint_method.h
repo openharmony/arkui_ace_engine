@@ -40,6 +40,20 @@ struct MenuPathParams {
     bool didNeedArrow = false;
 };
 
+struct ArrowOutlineOffset {
+    float top = 0.0f;
+    float bottom = 0.0f;
+    float left = 0.0f;
+    float right = 0.0f;
+    void Reset()
+    {
+        top = 0.0f;
+        bottom = 0.0f;
+        left = 0.0f;
+        right = 0.0f;
+    }
+};
+
 class ACE_EXPORT MenuWrapperPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(MenuWrapperPaintMethod, NodePaintMethod)
 public:
@@ -61,10 +75,11 @@ private:
     void BuildTopArrowPath(RSPath& rsPath, float arrowX, float arrowY);
     void BuildRightArrowPath(RSPath& rsPath, float arrowX, float arrowY);
     void BuildLeftArrowPath(RSPath& rsPath, float arrowX, float arrowY);
-    void PaintEdgeOuterBorder(
-        const MenuPathParams& params, RSCanvas& canvas, const MenuParam& menuParam, const RSPath& rsPath);
+    void PaintEdgeOuterBorder(const MenuPathParams& params, RSCanvas& canvas, const MenuParam& menuParam);
+    RSPath BuildOutlinePath(const MenuPathParams& params, const MenuParam& menuParam);
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPaintMethod);
 
+    ArrowOutlineOffset arrowOutlineOffset_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_MENU_PAINT_METHOD_H

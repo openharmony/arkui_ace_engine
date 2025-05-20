@@ -143,6 +143,7 @@ struct TextStyleResult {
     std::string leadingMarginSize[2] = { "0.00px", "0.00px" };
     std::vector<Shadow> textShadows;
     std::optional<TextBackgroundStyle> textBackgroundStyle;
+    float lineThicknessScale = 1.0f;
 };
 
 struct ImageStyleResult {

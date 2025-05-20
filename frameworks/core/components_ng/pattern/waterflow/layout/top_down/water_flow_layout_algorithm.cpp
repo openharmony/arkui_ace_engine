@@ -293,7 +293,7 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
             auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
             if (frameNode) {
-                frameNode->MarkAndCheckNewOpIncNode();
+                frameNode->MarkAndCheckNewOpIncNode(axis_);
             }
         }
     }

@@ -696,4 +696,72 @@ HWTEST_F(ParticleTestNg, ParticleToJsonValue008, TestSize.Level1)
     EXPECT_EQ(velocityJson->ToString(), "{\"speed\":\"[0.000000,0.000000]\","
                                         "\"angle\":\"[0.000000,0.000000]\"}");
 }
+
+/**
+ * @tc.name: ParticleTestAnnulus001
+ * @tc.desc: Test Particle Pattern, when shape is annulus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParticleTestNg, ParticleTestAnnulus001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create particle frameNode and get particle pattern.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PARTICLE_ETS_TAG, 1, [count = 1]() { return AceType::MakeRefPtr<ParticlePattern>(count); });
+    auto particlePattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    EXPECT_NE(particlePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. create emitterProperty.
+     */
+    EmitterProperty emitter;
+    emitter.index = 0;
+    emitter.position = { 3, 7 };
+    emitter.size = { 140, 300 };
+    emitter.emitRate = 5;
+    auto defaultCenterValue = CalcDimension(0.5, DimensionUnit::PERCENT);
+    std::pair<CalcDimension, CalcDimension> center = {
+        defaultCenterValue, defaultCenterValue
+    };
+    CalcDimension innerRadiusValue = CalcDimension(30, DimensionUnit::VP);
+    CalcDimension outerRadiusValue = CalcDimension(50, DimensionUnit::VP);
+    auto startAngle = 90;
+    auto endAngle = 270;
+    emitter.annulusRegion = {
+        center, innerRadiusValue, outerRadiusValue, startAngle, endAngle
+    };
+    std::vector<EmitterProperty> emitterVector;
+    emitterVector.push_back(emitter);
+
+    /**
+     * @tc.steps: step2. call the function.
+     */
+    for (auto it = emitterVector.begin(); it != emitterVector.end(); it++) {
+        const EmitterProperty& emitterProperty = *it;
+        uint32_t index = emitterProperty.index;
+        EXPECT_EQ(index, 0);
+        if (emitterProperty.position) {
+            EXPECT_EQ(emitterProperty.position->x, 3);
+            EXPECT_EQ(emitterProperty.position->y, 7);
+        }
+        if (emitterProperty.size) {
+            EXPECT_EQ(emitterProperty.size->x, 140);
+            EXPECT_EQ(emitterProperty.size->y, 300);
+        }
+        if (emitterProperty.emitRate) {
+            EXPECT_EQ(emitterProperty.emitRate, 5);
+        }
+        if (emitterProperty.annulusRegion) {
+            EXPECT_EQ(emitterProperty.annulusRegion->center_.first.Value(), 0.5);
+            EXPECT_EQ(emitterProperty.annulusRegion->center_.second.Value(), 0.5);
+            EXPECT_EQ(emitterProperty.annulusRegion->innerRadius_.Value(), 30);
+            EXPECT_EQ(emitterProperty.annulusRegion->outerRadius_.Value(), 50);
+            EXPECT_EQ(emitterProperty.annulusRegion->startAngle_, 90);
+            EXPECT_EQ(emitterProperty.annulusRegion->endAngle_, 270);
+        }
+    }
+    particlePattern->updateEmitterPosition(emitterVector);
+    EXPECT_EQ(particlePattern->GetEmitterProperty().size(), 1);
+}
 } // namespace OHOS::Ace::NG

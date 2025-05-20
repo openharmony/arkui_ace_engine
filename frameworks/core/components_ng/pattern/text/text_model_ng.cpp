@@ -374,6 +374,16 @@ void TextModelNG::SetTextDecorationStyle(FrameNode* frameNode, TextDecorationSty
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecorationStyle, value, frameNode);
 }
 
+void TextModelNG::SetLineThicknessScale(float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineThicknessScale, value);
+}
+
+void TextModelNG::SetLineThicknessScale(FrameNode* frameNode, float value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineThicknessScale, value, frameNode);
+}
+
 void TextModelNG::SetBaselineOffset(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, BaselineOffset, value);
@@ -1285,9 +1295,7 @@ size_t TextModelNG::GetLineCount(FrameNode* frameNode)
 
 void TextModelNG::SetEnableAutoSpacing(bool enabled)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EnableAutoSpacing, enabled, frameNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, EnableAutoSpacing, enabled);
 }
 
 void TextModelNG::SetEnableAutoSpacing(FrameNode* frameNode, bool enabled)

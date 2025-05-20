@@ -109,6 +109,13 @@ public:
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
+    void UpdateSelectedColor(const Color& color, bool isFristLoad = false);
+    void UpdatePathColor(const Color& color, bool isFristLoad = false);
+    void UpdateActiveColor(const Color& color, bool isFristLoad = false);
+    void UpdateRegularColor(const Color& color, bool isFristLoad = false);
+    void UpdateCircleRadius(const CalcDimension& radius, bool isFristLoad = false);
+    void UpdateSideLength(const CalcDimension& sideLength, bool isFristLoad = false);
+    void UpdateActiveCircleColor(const Color& color, bool isFristLoad = false);
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;

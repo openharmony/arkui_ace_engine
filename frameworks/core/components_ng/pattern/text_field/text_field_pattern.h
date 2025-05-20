@@ -1920,6 +1920,7 @@ private:
     void OnReportPasteEvent(const RefPtr<FrameNode>& frameNode);
     void OnReportSubmitEvent(const RefPtr<FrameNode>& frameNode);
     void BeforeAutoFillAnimation(const std::u16string& content, const AceAutoFillType& type);
+    void UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);
 
     RectF frameRect_;
     RectF textRect_;

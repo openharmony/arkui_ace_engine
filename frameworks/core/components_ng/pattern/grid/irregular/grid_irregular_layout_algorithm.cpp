@@ -465,6 +465,10 @@ std::pair<int32_t, int32_t> GridIrregularLayoutAlgorithm::LayoutChildren(float m
             } else {
                 child->GetHostNode()->ForceSyncGeometryNode();
             }
+            auto frameNode = DynamicCast<FrameNode>(child);
+            if (frameNode) {
+                frameNode->MarkAndCheckNewOpIncNode(info.axis_);
+            }
         }
         // add mainGap below the item
         mainOffset += lineHeightIt->second + mainGap_;

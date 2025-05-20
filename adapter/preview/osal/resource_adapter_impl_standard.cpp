@@ -15,12 +15,15 @@
 
 #include "adapter/preview/osal/resource_adapter_impl_standard.h"
 
+#include "adapter/preview/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_theme_style.h"
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/osal/resource_convertor.h"
 #include "base/log/log.h"
 #include "core/common/container.h"
 #include "core/components/theme/theme_attributes.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/simulator/ability_simulator/include/ability_context.h"
 
 namespace OHOS::Ace {
 
@@ -163,14 +166,41 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
     packagePathStr_ = appResPath;
 }
 
+void ResourceAdapterImpl::SetAppHasDarkRes(bool hasDarkRes)
+{
+    appHasDarkRes_ = hasDarkRes;
+}
+
 RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
     const std::string& bundleName, const std::string& moduleName)
 {
-    TAG_LOGW(AceLogTag::ACE_RESOURCE,
-        "Cannot preview the component from the %{public}s module, because it contains a resource reference. Preview it "
-        "in the %{public}s module instead.",
-        moduleName.c_str(), moduleName.c_str());
-    return nullptr;
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    CHECK_NULL_RETURN(aceContainer, nullptr);
+    
+    RefPtr<ResourceAdapter> newResourceAdapter = nullptr;
+    auto context = aceContainer->GetAbilityContextByModule(bundleName, moduleName);
+    if (context) {
+        auto resourceManager = context->GetResourceManager();
+        auto resourceAdapterImpl = AceType::MakeRefPtr<ResourceAdapterImpl>(resourceManager);
+        resourceAdapterImpl->SetAppHasDarkRes(aceContainer->GetResourceConfiguration().GetAppHasDarkRes());
+        newResourceAdapter = resourceAdapterImpl;
+    } else {
+        newResourceAdapter = ResourceAdapter::Create();
+        auto resourceInfo = aceContainer->GetResourceInfo();
+        newResourceAdapter->Init(resourceInfo);
+    }
+
+    auto resConfig = aceContainer->GetResourceConfiguration();
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    if (pipelineContext && pipelineContext->GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED) {
+        auto localColorMode = pipelineContext->GetLocalColorMode();
+        resConfig.SetColorMode(localColorMode);
+    }
+    newResourceAdapter->UpdateConfig(resConfig);
+
+    return newResourceAdapter;
 }
 
 void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config, bool themeFlag)

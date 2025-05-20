@@ -404,4 +404,75 @@ void TextTimerPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("format", textTimerLayoutProperty->GetFormat().value_or(DEFAULT_FORMAT).c_str());
     json->Put("elapsedTime", std::to_string(GetFormatDuration(elapsedTime_)).c_str());
 }
+
+void TextTimerPattern::UpdateTextColor(const Color& color, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+        layoutProperty->UpdateTextColor(color);
+        renderContext->UpdateForegroundColor(color);
+        renderContext->ResetForegroundColorStrategy();
+        renderContext->UpdateForegroundColorFlag(true);
+    }
+}
+
+void TextTimerPattern::UpdateFontWeight(const FontWeight& value, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+        layoutProperty->UpdateFontWeight(value);
+    }
+}
+
+void TextTimerPattern::UpdateFontSize(const Dimension& value, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+        layoutProperty->UpdateFontSize(value);
+    }
+}
+
+void TextTimerPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (host->GetRerenderable()) {
+        host->MarkModifyDone();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void TextTimerPattern::UpdateFontFamily(const std::vector<std::string>& fontFamilies, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto layoutProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+        layoutProperty->UpdateFontFamily(fontFamilies);
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -296,7 +296,7 @@ SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutProcess() const
     return scbSafeArea;
 }
 
-PaddingPropertyF SafeAreaManager::SafeAreaToPadding(bool withoutProcess)
+PaddingPropertyF SafeAreaManager::SafeAreaToPadding(bool withoutProcess, LayoutSafeAreaType ignoreType)
 {
     if (!withoutProcess) {
 #ifdef PREVIEW

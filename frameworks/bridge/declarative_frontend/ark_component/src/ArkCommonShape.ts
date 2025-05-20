@@ -14,6 +14,10 @@
  */
 
 /// <reference path='./import.ts' />
+interface CommonShapeOptionsParam {
+  width?: Length;
+  height?: Length;
+}
 class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<ShapeAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -86,6 +90,34 @@ class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<
   foregroundColor(value: string | number | Resource | Color): this {
     modifierWithKey(
       this._modifiersWithKeys, CommonShapeForegroundColorModifier.identity, CommonShapeForegroundColorModifier, value);
+    return this;
+  }
+  resetCommonShapeOptions(): void {
+    modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+      CommonShapeWidthModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+      CommonShapeHeightModifier, undefined);
+  }
+  initialize(value: Object[]): this {
+    if (isUndefined(value[0]) || isNull(value[0])) {
+      this.resetCommonShapeOptions();
+      return this;
+    }
+    const value_casted = value[0] as CommonShapeOptionsParam;
+    if (!isUndefined(value_casted.width) && !isNull(value_casted.width)) {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+        CommonShapeWidthModifier, value_casted.width);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+        CommonShapeWidthModifier, undefined);
+    }
+    if (!isUndefined(value_casted.height) && !isNull(value_casted.height)) {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+        CommonShapeHeightModifier, value_casted.height);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+        CommonShapeHeightModifier, undefined);
+    }
     return this;
   }
 }

@@ -2165,6 +2165,9 @@ struct ArkUICommonModifier {
     void (*resetGridSpan)(ArkUINodeHandle node);
     void (*setExpandSafeArea)(ArkUINodeHandle node, ArkUI_Uint32 typeStr, ArkUI_Uint32 edgesStr);
     void (*resetExpandSafeArea)(ArkUINodeHandle node);
+    void (*setIgnoreLayoutSafeArea)(
+        ArkUINodeHandle node, ArkUI_Uint32 layoutSafeAreaType, ArkUI_Uint32 layoutSafeAreaEdge);
+    void (*resetIgnoreLayoutSafeArea)(ArkUINodeHandle node);
     void (*setFlexBasis)(ArkUINodeHandle node, const struct ArkUIStringAndFloat* flexBasisValue);
     void (*resetFlexBasis)(ArkUINodeHandle node);
     void (*setAlignRules)(ArkUINodeHandle node, char** anchors, const ArkUI_Int32* direction, ArkUI_Int32 length);
@@ -2559,7 +2562,8 @@ struct ArkUITextModifier {
     void (*resetTextLineHeight)(ArkUINodeHandle node);
     void (*setTextOverflow)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextOverflow)(ArkUINodeHandle node);
-    void (*setTextDecoration)(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style);
+    void (*setTextDecoration)(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
+                              ArkUI_Int32 style, ArkUI_Float32 lineThicknessScale);
     void (*resetTextDecoration)(ArkUINodeHandle node);
     void (*setTextCase)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextCase)(ArkUINodeHandle node);
@@ -3531,6 +3535,8 @@ struct ArkUIScrollBarModifier {
     void (*setScrollBarScroller)(ArkUINodeHandle node, ArkUINodeHandle controller);
     void (*setScrollBarEnableNestedScroll)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetScrollBarEnableNestedScroll)(ArkUINodeHandle node);
+    void (*setScrollBarScrollBarColor)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetScrollBarScrollBarColor)(ArkUINodeHandle node);
 };
 
 struct ArkUIScrollerModifier {
@@ -4507,6 +4513,8 @@ struct ArkUIMenuModifier {
     void (*resetMenuItemGroupDivider)(ArkUINodeHandle node);
     void (*setSubMenuExpandingMode)(ArkUINodeHandle node, ArkUI_Int32 modeParam);
     void (*resetSubMenuExpandingMode)(ArkUINodeHandle node);
+    void (*setSubMenuExpandSymbol)(ArkUINodeHandle node, void* symbolFunction);
+    void (*resetSubMenuExpandSymbol)(ArkUINodeHandle node);
     void (*setMenuFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetMenuFontSize)(ArkUINodeHandle node);
 };
@@ -5347,8 +5355,8 @@ struct ArkUISpanModifier {
     void (*resetSpanFontSize)(ArkUINodeHandle node);
     void (*setSpanFontFamily)(ArkUINodeHandle node, ArkUI_CharPtr* fontFamilies, ArkUI_Uint32 length);
     void (*resetSpanFontFamily)(ArkUINodeHandle node);
-    void (*setSpanDecoration)(
-        ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, const ArkUI_Int32 style);
+    void (*setSpanDecoration)(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
+                              const ArkUI_Int32 style, ArkUI_Float32 lineThicknessScale);
     void (*resetSpanDecoration)(ArkUINodeHandle node);
     void (*setSpanFontColor)(ArkUINodeHandle node, ArkUI_Uint32 textColor);
     void (*resetSpanFontColor)(ArkUINodeHandle node);
@@ -6347,6 +6355,7 @@ struct ArkUIDialogAPI {
     ArkUI_Int32 (*registerOnWillDismiss)(ArkUIDialogHandle handle, bool (*eventHandler)(ArkUI_Int32));
     ArkUI_Int32 (*registerOnWillDismissWithUserData)(
         ArkUIDialogHandle handler, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event));
+    ArkUI_Int32 (*getState)(ArkUIDialogHandle handle, ArkUI_Int32* dialogState);
     ArkUI_Int32 (*setKeyboardAvoidDistance)(ArkUIDialogHandle handle, float distance, ArkUI_Int32 unit);
     ArkUI_Int32 (*setLevelMode)(ArkUIDialogHandle handle, ArkUI_Int32 mode);
     ArkUI_Int32 (*setLevelUniqueId)(ArkUIDialogHandle handle, ArkUI_Int32 uniqueId);

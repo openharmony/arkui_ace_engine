@@ -15,6 +15,10 @@
 
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
 
+#include "core/common/reporter/reporter.h"
+#include "core/components_ng/event/event_constants.h"
+#include "core/components_ng/manager/event/json_child_report.h"
+#include "core/components_ng/manager/event/json_report.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -74,7 +78,10 @@ void SwipeRecognizer::OnAccepted()
     }
     localMatrix_ = NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false,
         isPostEventResult_, touchPoint.postEventNodeId);
-    SendCallbackMsg(onAction_);
+    {
+        ACE_SCOPED_TRACE("SwipeRecognizer onAction, result speed: %f", resultSpeed_);
+        SendCallbackMsg(onAction_, GestureCallbackType::ACTION);
+    }
     int64_t overTime = GetSysTimestamp();
     if (SystemProperties::GetTraceInputEventEnabled()) {
         ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:SwipeGesture",
@@ -328,7 +335,8 @@ void SwipeRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
-        SendCallbackMsg(onActionCancel_);
+        ACE_SCOPED_TRACE("SwipeRecognizer onActionCancel");
+        SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
     }
 }
 
@@ -340,7 +348,8 @@ void SwipeRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
-        SendCallbackMsg(onActionCancel_);
+        ACE_SCOPED_TRACE("SwipeRecognizer onActionCancel");
+        SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
     }
 }
 
@@ -384,7 +393,7 @@ void SwipeRecognizer::OnResetStatus()
     localMatrix_.clear();
 }
 
-void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
+void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type)
 {
     if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
         return;
@@ -427,7 +436,27 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
+        HandleReports(info, type);
     }
+}
+
+void SwipeRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
+{
+    if (type != GestureCallbackType::ACTION) {
+        return;
+    }
+    auto frameNode = GetAttachedNode().Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    SwipeJsonReport swipeReport;
+    swipeReport.SetCallbackType(type);
+    swipeReport.SetGestureType(GetRecognizerType());
+    swipeReport.SetId(frameNode->GetId());
+    swipeReport.SetSwipeDirection(static_cast<int32_t>(direction_.type));
+    swipeReport.SetTouchEvents(downEvents_);
+    swipeReport.SetSpeed(speed_);
+    swipeReport.SetActualSpeed(resultSpeed_);
+    swipeReport.SetFingerList(info.GetFingerList());
+    Reporter::GetInstance().HandleUISessionReporting(swipeReport);
 }
 
 GestureJudgeResult SwipeRecognizer::TriggerGestureJudgeCallback()

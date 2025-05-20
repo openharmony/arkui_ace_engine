@@ -33,4 +33,21 @@ void PromptDialogController::Close()
     overlayManager->CloseDialog(dialogNode);
 }
 
+PromptActionCommonState PromptDialogController::GetState()
+{
+    PromptActionCommonState state = PromptActionCommonState::UNINITIALIZED;
+    if (node_.Invalid()) {
+        if (hasBind_) {
+            return PromptActionCommonState::DISAPPEARED;
+        }
+        return state;
+    }
+    auto dialogNode = node_.Upgrade();
+    CHECK_NULL_RETURN(dialogNode, state);
+    auto pattern = dialogNode->GetPattern<NG::DialogPattern>();
+    CHECK_NULL_RETURN(pattern, state);
+    state = pattern->GetState();
+    return state;
+}
+
 } // namespace OHOS::Ace::Napi

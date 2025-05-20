@@ -60,6 +60,8 @@ public:
                 return theme;
             }
             theme->symbolId_ = themeConstants->GetSymbolByName("sys.symbol.checkmark");
+            theme->embeddedExpandIconId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_down");
+            theme->stackExpandIconId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_right");
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -404,6 +406,16 @@ public:
         return menuHapticFeedback_;
     }
 
+    uint32_t GetEmbeddedExpandIconId() const
+    {
+        return embeddedExpandIconId_;
+    }
+
+    uint32_t GetStackExpandIconId() const
+    {
+        return stackExpandIconId_;
+    }
+
 protected:
     MenuTheme() = default;
 
@@ -460,6 +472,8 @@ private:
     ShadowStyle menuShadowStyle_ = ShadowStyle::OuterDefaultMD;
     int menuBackGroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
     std::string menuHapticFeedback_;
+    uint32_t embeddedExpandIconId_ = 0;
+    uint32_t stackExpandIconId_ = 0;
 };
 
 } // namespace OHOS::Ace::NG

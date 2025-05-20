@@ -806,6 +806,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetExpandSafeArea));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetExpandSafeArea"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetExpandSafeArea));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setIgnoreLayoutSafeArea"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetIgnoreLayoutSafeArea));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIgnoreLayoutSafeArea"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetIgnoreLayoutSafeArea));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlignRules"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAlignRules));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlignRules"),
@@ -4509,6 +4513,10 @@ void ArkUINativeModule::RegisterMenuAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetSubMenuExpandingMode));
     menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSubMenuExpandingMode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetSubMenuExpandingMode));
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSubMenuExpandSymbol"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetSubMenuExpandSymbol));
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSubMenuExpandSymbol"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetSubMenuExpandSymbol));
     menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontSize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetFontSize));
     menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontSize"),
@@ -5463,6 +5471,10 @@ void ArkUINativeModule::RegisterShapeAttributes(Local<panda::ObjectRef> object, 
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ShapeBridge::SetMesh));
     shape->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShapeMesh"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ShapeBridge::ResetMesh));
+    shape->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShapeInitialize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ShapeBridge::SetShapeInitialize));
+    shape->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShapeInitialize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ShapeBridge::ResetShapeInitialize));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "shape"), shape);
 }
 
@@ -6085,6 +6097,10 @@ void ArkUINativeModule::RegisterBadgeAttributes(Local<panda::ObjectRef> object, 
 void ArkUINativeModule::RegisterScrollBarAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto ScrollBar = panda::ObjectRef::New(vm);
+    ScrollBar->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollBarScrollBarColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBarBridge::SetScrollBarScrollBarColor));
+    ScrollBar->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollBarScrollBarColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBarBridge::ResetScrollBarScrollBarColor));
     ScrollBar->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollBarEnableNestedScroll"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBarBridge::SetScrollBarEnableNestedScroll));
     ScrollBar->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollBarEnableNestedScroll"),

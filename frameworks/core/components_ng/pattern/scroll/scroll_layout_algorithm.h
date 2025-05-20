@@ -77,10 +77,12 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
     void UpdateOverlay(LayoutWrapper* layoutWrapper);
+    void MarkAndCheckNewOpIncNode(const RefPtr<LayoutWrapper>& layoutWrapper, Axis axis);
 
 private:
     void UseInitialOffset(Axis axis, SizeF selfSize, LayoutWrapper* layoutWrapper);
     bool UnableOverScroll(LayoutWrapper* layoutWrapper) const;
+    void OnSurfaceChanged(LayoutWrapper* layoutWrapper, float contentMainSize);
 
     float currentOffset_ = 0.0f;
     float scrollableDistance_ = 0.0f;

@@ -1336,14 +1336,10 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
 {
     CHECK_NULL_VOID(menuNode);
     CHECK_NULL_VOID(wrapperNode);
-    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
         UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
     } else {
-        if (menuWrapperPattern->GetHasCustomOutlineWidth()) {
-            menuWrapperPattern->SetMenuParam(menuParam);
-        }
+        UpdateMenuOutlineWithArrow(menuNode, wrapperNode, menuParam);
     }
     menuNode->MarkModifyDone();
 
@@ -1932,8 +1928,9 @@ RefPtr<FrameNode> MenuView::CreateSelectOption(const SelectParam& param, int32_t
     return option;
 }
 
-void MenuView::ExcuteMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode, const PreparedInfoForDrag& data)
+void MenuView::ExecuteMenuDisappearAnimation(const PreparedInfoForDrag& data)
 {
+    auto menuNode = data.menuNode;
     CHECK_NULL_VOID(menuNode);
     RefPtr<Curve> menuOpacityCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.2f, 0.0f, 0.2f, 1.0f);
     RefPtr<Curve> menuScaleCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.4f, 0.0f, 1.0f, 1.0f);
@@ -1964,6 +1961,14 @@ void MenuView::UpdateMenuNodePosition(const PreparedInfoForDrag& data)
     stackNode->UpdateInspectorId("__stack__");
     auto menuNode = data.menuNode;
     CHECK_NULL_VOID(menuNode);
+    auto scrollNode = data.scrollNode;
+    CHECK_NULL_VOID(scrollNode);
+    auto menuUINode = scrollNode->GetParent();
+    CHECK_NULL_VOID(menuUINode);
+    menuUINode->RemoveChild(scrollNode);
+    menuUINode->RebuildRenderContextTree();
+    menuUINode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    menuNode->AddChild(scrollNode);
     auto menuNodeLayoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(menuNodeLayoutProperty);
     auto biasMenuLeft = (data.menuPositionLeft - data.menuPositionRight) / HALF_NUMBER;
@@ -2178,5 +2183,26 @@ void MenuView::UpdateMenuNodeByAnimation(const RefPtr<FrameNode>& menuNode, cons
     }
     menuNodeRenderContext->UpdateTransformCenter(DimensionOffset(Offset(x, y)));
     menuNodeRenderContext->UpdateTransformScale({ 0.4f, 0.4f });
+}
+
+void MenuView::UpdateMenuOutlineWithArrow(
+    const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(wrapperNode);
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    if (!menuWrapperPattern->GetHasCustomOutlineWidth()) {
+        return;
+    }
+    CHECK_NULL_VOID(menuNode);
+    auto renderContext = menuNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    BorderWidthProperty outerWidthProp;
+    outerWidthProp.SetBorderWidth(Dimension(0));
+    renderContext->SetOuterBorderWidth(outerWidthProp);
+    BorderColorProperty outerColorProp;
+    outerColorProp.SetColor(Color::TRANSPARENT);
+    renderContext->SetOuterBorderColor(outerColorProp);
+    menuWrapperPattern->SetMenuParam(menuParam);
 }
 } // namespace OHOS::Ace::NG

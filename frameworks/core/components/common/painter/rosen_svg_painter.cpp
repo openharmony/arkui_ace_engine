@@ -39,7 +39,7 @@ sk_sp<SkTypeface> RosenSvgPainter::fontTypeChinese_;
 sk_sp<SkTypeface> RosenSvgPainter::fontTypeNormal_;
 #endif
 #else
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(CROSS_PLATFORM)
 const char FONT_TYPE_HWCHINESE[] = "/system/fonts/HwChinese-Medium.ttf";
 const char FONT_TYPE_DROIDSANS[] = "/system/fonts/DroidSans.ttf";
 std::shared_ptr<RSTypeface> RosenSvgPainter::fontTypeChinese_ = RSTypeface::MakeFromFile(FONT_TYPE_HWCHINESE);

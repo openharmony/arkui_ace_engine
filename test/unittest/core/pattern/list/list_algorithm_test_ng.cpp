@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-#include <optional>
 #include <cstdint>
+#include <optional>
 
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
+#include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_v2/list/list_properties.h"
@@ -1621,5 +1622,121 @@ HWTEST_F(ListAlgorithmTestNg, PredictBuildItem002, TestSize.Level1)
     layoutConstraint.viewPosRef = viewPosRef;
     auto result = listLayoutAlgorithm->PredictBuildItem(layoutWrapper, layoutConstraint);
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckAndUpdateCurOffset001
+ * @tc.desc: Test ListItemLayoutAlgorithm CheckAndUpdateCurOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAlgorithmTestNg, CheckAndUpdateCurOffset001, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    RefPtr<ListItemLayoutAlgorithm> listItemLayoutAlgorithm = AceType::MakeRefPtr<ListItemLayoutAlgorithm>(2, 4, 3);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    GeometryProperty geometryProperty;
+    RectT rect(20.0f, 20.0f, 80.0f, 80.0f);
+    geometryProperty.rect_ = rect;
+    geometryNode->frame_ = geometryProperty;
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapper.geometryNode_ = geometryNode;
+    layoutWrapper.hostNode_ = frameNode;
+    listItemLayoutAlgorithm->isCurOffsetUpdated_ = false;
+    listItemLayoutAlgorithm->canUpdateCurOffset_ = true;
+    listItemLayoutAlgorithm->curOffset_ = 2.0f;
+    listItemLayoutAlgorithm->CheckAndUpdateCurOffset(&layoutWrapper);
+    EXPECT_TRUE(listItemLayoutAlgorithm->isCurOffsetUpdated_);
+    EXPECT_EQ(listItemLayoutAlgorithm->curOffset_, 80.0f);
+}
+
+/**
+ * @tc.name: CheckAndUpdateCurOffset002
+ * @tc.desc: Test ListItemLayoutAlgorithm CheckAndUpdateCurOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAlgorithmTestNg, CheckAndUpdateCurOffset002, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    RefPtr<ListItemLayoutAlgorithm> listItemLayoutAlgorithm = AceType::MakeRefPtr<ListItemLayoutAlgorithm>(-1, 4, 3);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    GeometryProperty geometryProperty;
+    RectT rect(20.0f, 20.0f, 80.0f, 80.0f);
+    geometryProperty.rect_ = rect;
+    geometryNode->frame_ = geometryProperty;
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapper.geometryNode_ = geometryNode;
+    layoutWrapper.hostNode_ = frameNode;
+    listItemLayoutAlgorithm->isCurOffsetUpdated_ = false;
+    listItemLayoutAlgorithm->canUpdateCurOffset_ = true;
+    listItemLayoutAlgorithm->curOffset_ = 2.0f;
+    listItemLayoutAlgorithm->CheckAndUpdateCurOffset(&layoutWrapper);
+    EXPECT_TRUE(listItemLayoutAlgorithm->isCurOffsetUpdated_);
+    EXPECT_EQ(listItemLayoutAlgorithm->curOffset_, 2.0f);
+}
+
+/**
+ * @tc.name: CheckAndUpdateCurOffset003
+ * @tc.desc: Test ListItemLayoutAlgorithm CheckAndUpdateCurOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAlgorithmTestNg, CheckAndUpdateCurOffset003, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    RefPtr<ListItemLayoutAlgorithm> listItemLayoutAlgorithm = AceType::MakeRefPtr<ListItemLayoutAlgorithm>(2, 4, 3);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    GeometryProperty geometryProperty;
+    RectT rect(20.0f, 20.0f, 80.0f, 80.0f);
+    geometryProperty.rect_ = rect;
+    geometryNode->frame_ = geometryProperty;
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapper.geometryNode_ = geometryNode;
+    layoutWrapper.hostNode_ = frameNode;
+    listItemLayoutAlgorithm->isCurOffsetUpdated_ = false;
+    listItemLayoutAlgorithm->canUpdateCurOffset_ = true;
+    listItemLayoutAlgorithm->curOffset_ = -2.0f;
+    listItemLayoutAlgorithm->CheckAndUpdateCurOffset(&layoutWrapper);
+    EXPECT_TRUE(listItemLayoutAlgorithm->isCurOffsetUpdated_);
+    EXPECT_EQ(listItemLayoutAlgorithm->curOffset_, -80.0f);
+}
+
+/**
+ * @tc.name: CheckAndUpdateCurOffset004
+ * @tc.desc: Test ListItemLayoutAlgorithm CheckAndUpdateCurOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAlgorithmTestNg, CheckAndUpdateCurOffset004, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    RefPtr<ListItemLayoutAlgorithm> listItemLayoutAlgorithm = AceType::MakeRefPtr<ListItemLayoutAlgorithm>(-2, -4, 3);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    GeometryProperty geometryProperty;
+    RectT rect(20.0f, 20.0f, 80.0f, 80.0f);
+    geometryProperty.rect_ = rect;
+    geometryNode->frame_ = geometryProperty;
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapper.geometryNode_ = geometryNode;
+    layoutWrapper.hostNode_ = frameNode;
+    listItemLayoutAlgorithm->isCurOffsetUpdated_ = false;
+    listItemLayoutAlgorithm->canUpdateCurOffset_ = true;
+    listItemLayoutAlgorithm->curOffset_ = -2.0f;
+    listItemLayoutAlgorithm->CheckAndUpdateCurOffset(&layoutWrapper);
+    EXPECT_TRUE(listItemLayoutAlgorithm->isCurOffsetUpdated_);
+    EXPECT_EQ(listItemLayoutAlgorithm->curOffset_, -2.0f);
 }
 } // namespace OHOS::Ace::NG

@@ -31,6 +31,8 @@
 #ifndef ACE_UNITTEST
 #include "core/components_ng/base/view_abstract.h"
 #endif
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1105,6 +1107,87 @@ void ImageModelNG::SetOrientation(FrameNode* frameNode, ImageRotateOrientation o
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOrientation(orientation);
+}
+
+void HandleSrcResource(const RefPtr<ResourceObject>& resObj, const RefPtr<ImagePattern>& pattern)
+{
+    auto updateFunc = [pattern](const RefPtr<ResourceObject>& resObj) {
+        std::string src =
+            ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj)->GetMediaPath(resObj->GetId());
+        if (src.empty() && pattern->GetIsAnimation()) {
+            pattern->SetSrcUndefined(true);
+            return;
+        }
+        RefPtr<PixelMap> pixmap = nullptr;
+        auto srcInfo = CreateSourceInfo(src, pixmap, resObj->GetBundleName(), resObj->GetModuleName());
+        srcInfo.SetIsUriPureNumber(resObj->GetId() == -1);
+        pattern->UpdateImageSourceinfo(srcInfo);
+        pattern->OnConfigurationUpdate();
+    };
+    pattern->AddResObj("image.src", resObj, std::move(updateFunc));
+}
+
+void HandleAltResource(const RefPtr<ResourceObject>& resObj, const RefPtr<ImagePattern>& pattern)
+{
+    auto updateFunc = [pattern](const RefPtr<ResourceObject>& resObj) {
+        std::string src =
+            ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj)->GetMediaPath(resObj->GetId());
+        if (src.empty() && pattern->GetIsAnimation()) {
+            pattern->SetSrcUndefined(true);
+            return;
+        }
+        RefPtr<PixelMap> pixmap = nullptr;
+        auto srcInfo = CreateSourceInfo(src, pixmap, resObj->GetBundleName(), resObj->GetModuleName());
+        pattern->UpdateImageAlt(srcInfo);
+        pattern->OnConfigurationUpdate();
+    };
+    pattern->AddResObj("image.alt", resObj, std::move(updateFunc));
+}
+
+void HandleFillColorResource(const RefPtr<ResourceObject>& resObj, const RefPtr<ImagePattern>& pattern)
+{
+    auto updateFunc = [pattern](const RefPtr<ResourceObject>& resObj) {
+        Color color;
+        bool status = ResourceParseUtils::ParseResColor(resObj, color);
+        if (!status) {
+            if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
+                return;
+            }
+            auto pipelineContext = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto theme = pipelineContext->GetTheme<ImageTheme>();
+            CHECK_NULL_VOID(theme);
+            color = theme->GetFillColor();
+        }
+        pattern->UpdateImageFill(color);
+    };
+    pattern->AddResObj("image.fillcolor", resObj, std::move(updateFunc));
+}
+
+void ImageModelNG::CreateWithResourceObj(ImageResourceType resourceType, const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+
+    if (!resObj) {
+        return;
+    }
+
+    switch (resourceType) {
+        case ImageResourceType::SRC:
+            HandleSrcResource(resObj, pattern);
+            break;
+        case ImageResourceType::FILL_COLOR:
+            HandleFillColorResource(resObj, pattern);
+            break;
+        case ImageResourceType::ALT:
+            HandleAltResource(resObj, pattern);
+            break;
+        default:
+            break;
+    }
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

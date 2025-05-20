@@ -768,7 +768,6 @@ bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto video = AceType::DynamicCast<FrameNode>(movingPhoto->GetVideo());
     CHECK_NULL_RETURN(video, false);
     video->GetRenderContext()->SetClipToBounds(true);
-    video->GetRenderContext()->UpdateOpacity(0.0);
     return false;
 }
 
@@ -1165,7 +1164,7 @@ void MovingPhotoPattern::OnMediaPlayerStatusChanged(PlaybackStatus status)
 void MovingPhotoPattern::OnMediaPlayerInitialized()
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer OnMediaPlayerInitialized.");
-    if (!isSetAutoPlayPeriod_ && autoAndRepeatLevel_ == PlaybackMode::AUTO && !isAutoChangePlayMode_) {
+    if (!isSetAutoPlayPeriod_ && autoAndRepeatLevel_ == PlaybackMode::AUTO) {
         isSetAutoPlayPeriod_ = true;
         SetAutoPlayPeriod(autoPlayPeriodStartTime_, autoPlayPeriodEndTime_);
     }
