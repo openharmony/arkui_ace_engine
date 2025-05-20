@@ -43,20 +43,6 @@ CanvasDrawFunction TextPickerPaintMethod::GetContentDrawFunction(PaintWrapper* p
     auto layoutProperty = pickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     auto children = pickerNode->GetChildren();
-    if (theme->IsCircleDial()) {
-        if (!circleUtils_) {
-            circleUtils_ = new PickerPaintMethodCircleUtils();
-            CHECK_NULL_RETURN(circleUtils_, nullptr);
-        }
-        CanvasDrawFunction drawFun =
-            circleUtils_->GetContentDrawFunctionL<TextPickerLayoutProperty>(paintWrapper, pipeline);
-        CHECK_NULL_RETURN(drawFun, nullptr);
-        return [weak = WeakClaim(this), drawFun](RSCanvas& canvas) {
-            auto picker = weak.Upgrade();
-            CHECK_NULL_VOID(picker);
-            drawFun(canvas);
-        };
-    }
 
     return [weak = WeakClaim(this), layoutProperty, pattern = pattern_, children](RSCanvas& canvas) {
             auto picker = weak.Upgrade();
