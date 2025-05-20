@@ -666,7 +666,7 @@ HWTEST_F(ImageModifierTest, setOnCompleteTest, TestSize.Level1)
 
     EXPECT_FALSE(checkEvent);
     auto optCallback =
-        Converter::ArkValue<Opt_Callback_Type_ImageAttribute_onComplete_callback_event_Void>(arkCallback);    
+        Converter::ArkValue<Opt_Callback_Type_ImageAttribute_onComplete_callback_event_Void>(arkCallback);
     modifier_->setOnComplete(node_, &optCallback);
     eventHub->FireCompleteEvent(info);
     ASSERT_TRUE(checkEvent);
