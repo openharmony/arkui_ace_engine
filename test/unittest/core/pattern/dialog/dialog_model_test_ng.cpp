@@ -102,7 +102,7 @@ void DialogModelTestNg::TearDownTestCase()
 
 /**
  * @tc.name: DialogModelTestNg001
- * @tc.desc: Test DialogEventHub's GetOrCreateGestureEventHub
+ * @tc.desc: Test DialogEventHub's GetOrCreateGestureEventHub.
  * @tc.type: FUNC
  */
 HWTEST_F(DialogModelTestNg, DialogModelTestNg001, TestSize.Level1)
