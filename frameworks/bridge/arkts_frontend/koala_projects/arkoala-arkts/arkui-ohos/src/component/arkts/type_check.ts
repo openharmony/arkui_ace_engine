@@ -154,7 +154,6 @@ import { RoundedRectOptions, RectOptions } from "./../rect"
 import { RowOptions, RowOptionsV2 } from "./../row"
 import { StackOptions } from "./../stack"
 import { TransformationMatrix } from "./../arkui-common"
-import { VirtualScrollOptions } from "./../repeat"
 import { Want } from "./../ohos.app.ability"
 import { FlexSpaceOptions, FlexOptions } from "./../flex"
 import { ImageFrameInfo } from "./../imageAnimator"
@@ -3336,9 +3335,6 @@ export class TypeChecker {
     }
     static isViewportRect(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof ViewportRect
-    }
-    static isVirtualScrollOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
-        return value instanceof VirtualScrollOptions
     }
     static isVisibility(value: Object | string | number | undefined): boolean {
         return value instanceof Visibility
