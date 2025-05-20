@@ -644,6 +644,8 @@ private:
     void SetExitAnimation(const RefPtr<FrameNode>& host);
     void SendToAccessibility(const RefPtr<UINode>& subMenu, bool isShow);
     bool CheckPointInMenuZone(const RefPtr<FrameNode>& node, const PointF& point);
+    bool IsTouchWithinParentMenuZone(std::list<RefPtr<UINode>>::reverse_iterator& child,
+        const std::list<RefPtr<UINode>>& children, const PointF& position);
     RefPtr<FrameNode> GetParentMenu(const RefPtr<UINode>& subMenu);
     void MenuFocusViewShow(const RefPtr<FrameNode>& menuNode);
     std::function<void()> onAppearCallback_ = nullptr;

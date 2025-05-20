@@ -501,6 +501,7 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
         // Record the latest touch finger ID. If other fingers are pressed, the latest one prevails
         fingerId_ = touch.GetFingerId();
         TAG_LOGD(AceLogTag::ACE_MENU, "record newest finger ID %{public}d", fingerId_);
+        bool lastMenu = true;
         for (auto child = children.rbegin(); child != children.rend(); ++child) {
             // get child frame node of menu wrapper
             auto menuWrapperChildNode = DynamicCast<FrameNode>(*child);
@@ -512,9 +513,11 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
             }
             // if DOWN-touched outside the menu region, then hide menu
             auto menuPattern = menuWrapperChildNode->GetPattern<MenuPattern>();
-            if (!menuPattern) {
-                continue;
+            CHECK_NULL_CONTINUE(menuPattern);
+            if (IsTouchWithinParentMenuZone(child, children, position) && lastMenu) {
+                return;
             }
+            lastMenu = false;
             TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu due to touch down");
             HideMenu(menuPattern, menuWrapperChildNode, position, HideMenuType::WRAPPER_TOUCH_DOWN);
         }
@@ -525,6 +528,26 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
         return;
     }
     ChangeTouchItem(info, touch.GetTouchType());
+}
+
+bool MenuWrapperPattern::IsTouchWithinParentMenuZone(std::list<RefPtr<UINode>>::reverse_iterator& child,
+    const std::list<RefPtr<UINode>>& children, const PointF& position)
+{
+    auto menuIterator = child;
+    menuIterator++;
+    while (menuIterator != children.rend()) {
+        auto parentMenuNode = DynamicCast<FrameNode>(*menuIterator);
+        CHECK_NULL_RETURN(parentMenuNode, false);
+        if (parentMenuNode->GetTag() != V2::MENU_ETS_TAG) {
+            menuIterator++;
+            continue;
+        }
+        if (CheckPointInMenuZone(parentMenuNode, position)) {
+            return true;
+        }
+        return false;
+    }
+    return false;
 }
 
 void MenuWrapperPattern::ChangeTouchItem(const TouchEventInfo& info, TouchType touchType)
