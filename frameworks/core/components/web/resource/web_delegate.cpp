@@ -1296,7 +1296,11 @@ bool WebDelegate::LoadDataWithRichText()
                     return;
                 }
                 if (delegate->nweb_) {
-                    delegate->nweb_->LoadWithDataAndBaseUrl("resource://rawfile", data, "", "", "");
+                    if (data.find("resource:/") == 0) {
+                        delegate->nweb_->Load(data);
+                    } else {
+                        delegate->nweb_->LoadWithDataAndBaseUrl("resource://rawfile", data, "", "", "");
+                    }
                 }
             },
             TaskExecutor::TaskType::PLATFORM, "ArkUIWebLoadDataWithRichText");
@@ -1316,7 +1320,11 @@ bool WebDelegate::LoadDataWithRichText()
                 return;
             }
             if (delegate->nweb_) {
-                delegate->nweb_->LoadWithDataAndBaseUrl("resource://rawfile", data, "", "", "");
+                if (data.find("resource:/") == 0) {
+                    delegate->nweb_->Load(data);
+                } else {
+                    delegate->nweb_->LoadWithDataAndBaseUrl("resource://rawfile", data, "", "", "");
+                }
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebLoadDataWithRichText");
