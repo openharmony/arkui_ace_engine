@@ -1443,7 +1443,7 @@ HWTEST_F(SpanTestNg, SpanOnHoverEvent001, TestSize.Level1)
 
     EXPECT_EQ(textPattern->HasSpanOnHoverEvent(), true);
     textPattern->InitSpanMouseEvent();
-    textPattern->TriggerSpansOnHover(HoverInfo(), PointF());
+    textPattern->TriggerSpansOnHover(HoverInfo(), PointF(0.0f, 0.0f));
     textPattern->ExitSpansForOnHoverEvent(HoverInfo());
     EXPECT_EQ(textPattern->spanMouseEventInitialized_, false);
 }
