@@ -548,7 +548,8 @@ NavigationIntentInfo NavigationManager::ParseNavigationIntentInfo(const std::str
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "error, intent info is an invalid json object!");
         return intentInfo;
     }
-    intentInfo.param = GetJsonIntentInfo(intentJson->GetObject(INTENT_PARAM_KEY));
+    auto paramJson = intentJson->GetObject(INTENT_PARAM_KEY);
+    intentInfo.param = paramJson == nullptr ? "" : paramJson->ToString();
     intentInfo.navigationInspectorId = GetJsonIntentInfo(intentJson->GetObject(INTENT_NAVIGATION_ID_KEY));
     intentInfo.navDestinationName = GetJsonIntentInfo(intentJson->GetObject(INTENT_NAVDESTINATION_NAME_KEY));
     return intentInfo;

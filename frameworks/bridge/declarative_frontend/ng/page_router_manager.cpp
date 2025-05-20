@@ -2461,7 +2461,8 @@ RouterIntentInfo PageRouterManager::ParseRouterIntentInfo(const std::string& int
     intentInfo.bundleName = GetJsonIntentInfo(intentJson->GetObject(INTENT_BUNDLE_NAME_KEY));
     intentInfo.moduleName = GetJsonIntentInfo(intentJson->GetObject(INTENT_MODULE_NAME_KEY));
     intentInfo.pagePath = ParseUrlNameFromOhmUrl(GetJsonIntentInfo(intentJson->GetObject(INTENT_PAGE_PATH_KEY)));
-    intentInfo.param = GetJsonIntentInfo(intentJson->GetObject(INTENT_PARAM_KEY));
+    auto paramJson = intentJson->GetObject(INTENT_PARAM_KEY);
+    intentInfo.param = paramJson == nullptr ? "" : paramJson->ToString();
     return intentInfo;
 }
 
