@@ -195,6 +195,9 @@ void MenuItemPattern::OnAttachToFrameNode()
     RegisterOnPress();
     RegisterOnHover();
     CreateBottomDivider();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    MenuView::RegisterAccessibilityChildActionNotify(host);
 }
 
 void CustomMenuItemPattern::OnAttachToFrameNode()

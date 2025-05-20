@@ -4138,10 +4138,11 @@ void JsAccessibilityManager::DumpInjectActionTest(const std::vector<std::string>
         auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_VOID(accessibilityProperty);
         int64_t nodeId = frameNode->GetAccessibilityId();
-        accessibilityProperty->SetNotifyChildAction([nodeId, result] (NotifyChildActionType childActionType) {
-            TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "onNotifyChildAction callback: nodeid %{public}" \
-                PRId64 " result %{public}d", nodeId, result);
-            return static_cast<AccessibilityActionResult>(result);
+        accessibilityProperty->SetNotifyChildAction([nodeId, result] (const RefPtr<NG::FrameNode>& node,
+            NotifyChildActionType childActionType) {
+                TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "onNotifyChildAction callback: nodeid %{public}" \
+                    PRId64 " result %{public}d", nodeId, result);
+                return static_cast<AccessibilityActionResult>(result);
         });
     }
     DumpLog::GetInstance().Print(std::string("Result: inject action done"));

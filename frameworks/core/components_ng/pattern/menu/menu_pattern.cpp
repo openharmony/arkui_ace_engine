@@ -176,6 +176,7 @@ void MenuPattern::OnAttachToFrameNode()
     RegisterOnTouch();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    MenuView::RegisterAccessibilityChildActionNotify(host);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     RegisterOnKeyEvent(focusHub);

@@ -93,7 +93,8 @@ HWTEST_F(AccessibilityActionFunctionUtilsTest, AccessibilityActionFunctionUtilsT
     processType2_ = -1;
     auto accessibilityProperty2 = frameNode2->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty2);
-    accessibilityProperty2->SetNotifyChildAction([this] (NotifyChildActionType childActionType) {
+    accessibilityProperty2->SetNotifyChildAction([this] (const RefPtr<FrameNode>& node,
+        NotifyChildActionType childActionType) {
             this->processFlag1_ = true;
             this->processType1_ = static_cast<int32_t>(childActionType);
             return AccessibilityActionResult::ACTION_OK;
@@ -140,7 +141,8 @@ HWTEST_F(AccessibilityActionFunctionUtilsTest, AccessibilityActionFunctionUtilsT
     processType2_ = -1;
     auto accessibilityProperty2 = frameNode2->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty2);
-    accessibilityProperty2->SetNotifyChildAction([this] (NotifyChildActionType childActionType) {
+    accessibilityProperty2->SetNotifyChildAction([this] (const RefPtr<FrameNode>& node,
+        NotifyChildActionType childActionType) {
             this->processFlag1_ = true;
             this->processType1_ = static_cast<int32_t>(childActionType);
             return AccessibilityActionResult::ACTION_RISE;
@@ -149,7 +151,8 @@ HWTEST_F(AccessibilityActionFunctionUtilsTest, AccessibilityActionFunctionUtilsT
 
     auto accessibilityProperty0 = frameNode0->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty0);
-    accessibilityProperty0->SetNotifyChildAction([this] (NotifyChildActionType childActionType) {
+    accessibilityProperty0->SetNotifyChildAction([this] (const RefPtr<FrameNode>& node,
+        NotifyChildActionType childActionType) {
             this->processFlag2_ = true;
             this->processType2_ = static_cast<int32_t>(childActionType);
             return AccessibilityActionResult::ACTION_OK;

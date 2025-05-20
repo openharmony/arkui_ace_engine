@@ -76,6 +76,9 @@ public:
     static void ExecuteMenuDisappearAnimation(const PreparedInfoForDrag& data);
     static void SetHasCustomOutline(
         const RefPtr<FrameNode>& menuWrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
+    static void RegisterAccessibilityChildActionNotify(const RefPtr<FrameNode>& menuNode);
+    static void TouchEventGernerator(const RefPtr<FrameNode>& actionNode, TouchEvent& event);
+    static void TouchPointGernerator(const RefPtr<FrameNode>& actionNode, TouchPoint& point);
 
 private:
     static void UpdateMenuPaintProperty(
