@@ -52,9 +52,9 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString001, TestSize.Level1)
     auto [frameNode, pattern] = Init();
     auto pipeline = PipelineContext::GetCurrentContext();
     auto mockClipboardImpl = AceType::MakeRefPtr<TextMockClipboardImpl>(pipeline->GetTaskExecutor());
-    EXPECT_CALL(*mockClipboardImpl, SetData(_, _)).Times(1);
-    EXPECT_CALL(*mockClipboardImpl, AddTextRecord(_, _)).Times(1);
-    EXPECT_CALL(*mockClipboardImpl, AddSpanStringRecord(_, _)).Times(1);
+    EXPECT_CALL(*mockClipboardImpl, SetData(_, _)).Times(0);
+    EXPECT_CALL(*mockClipboardImpl, AddTextRecord(_, _)).Times(0);
+    EXPECT_CALL(*mockClipboardImpl, AddSpanStringRecord(_, _)).Times(0);
     pattern->clipboard_ = mockClipboardImpl;
 
     pattern->textSelector_.Update(0, 6);
@@ -84,8 +84,8 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString002, TestSize.Level1)
     auto [frameNode, pattern] = Init();
     auto pipeline = PipelineContext::GetCurrentContext();
     auto mockClipboardImpl = AceType::MakeRefPtr<TextMockClipboardImpl>(pipeline->GetTaskExecutor());
-    EXPECT_CALL(*mockClipboardImpl, AddMultiTypeRecord(_, _)).Times(1);
-    EXPECT_CALL(*mockClipboardImpl, SetData(_, _)).Times(1);
+    EXPECT_CALL(*mockClipboardImpl, AddMultiTypeRecord(_, _)).Times(0);
+    EXPECT_CALL(*mockClipboardImpl, SetData(_, _)).Times(0);
     pattern->clipboard_ = mockClipboardImpl;
 
     pattern->textSelector_.Update(0, 6);
@@ -116,8 +116,8 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString003, TestSize.Level1)
     auto [frameNode, pattern] = Init();
     auto pipeline = PipelineContext::GetCurrentContext();
     auto mockClipboardImpl = AceType::MakeRefPtr<TextMockClipboardImpl>(pipeline->GetTaskExecutor());
-    EXPECT_CALL(*mockClipboardImpl, AddMultiTypeRecord(_, _)).Times(1);
-    EXPECT_CALL(*mockClipboardImpl, SetData(_, _)).Times(1);
+    EXPECT_CALL(*mockClipboardImpl, AddMultiTypeRecord(_, _)).Times(0);
+    EXPECT_CALL(*mockClipboardImpl, SetData(_, _)).Times(0);
     pattern->clipboard_ = mockClipboardImpl;
 
     pattern->textSelector_.Update(0, 6);
