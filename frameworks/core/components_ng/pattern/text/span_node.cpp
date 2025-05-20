@@ -461,8 +461,9 @@ void SpanItem::UpdateReLayoutTextStyle(
     UPDATE_SPAN_TEXT_STYLE(fontStyle, AdaptMinFontSize, AdaptMinFontSize);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, AdaptMaxFontSize, AdaptMaxFontSize);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, LetterSpacing, LetterSpacing);
-
-    UPDATE_SPAN_TEXT_STYLE(fontStyle, TextColor, TextColor);
+    if (!urlOnRelease || (fontStyle && fontStyle->propTextColor.has_value())) {
+        UPDATE_SPAN_TEXT_STYLE(fontStyle, TextColor, TextColor);
+    }
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextShadow, TextShadows);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, ItalicFontStyle, FontStyle);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, FontWeight, FontWeight);
@@ -851,6 +852,7 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
     if (backgroundStyle.has_value()) {
         sameSpan->backgroundStyle = backgroundStyle;
     }
+    sameSpan->urlAddress = urlAddress;
     sameSpan->urlOnRelease = urlOnRelease;
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
@@ -887,7 +889,7 @@ bool SpanItem::EncodeTlv(std::vector<uint8_t>& buff)
     TLVUtil::WriteUint8(buff, TLV_SPANITEM_TAG);
     TLVUtil::WriteInt32(buff, interval.first);
     TLVUtil::WriteInt32(buff, interval.second);
-    TLVUtil::WriteString(buff, UtfUtils::Str16DebugToStr8(content));
+    TLVUtil::WriteU16String(buff, content);
     EncodeFontStyleTlv(buff);
     EncodeTextLineStyleTlv(buff);
     if (backgroundStyle.has_value()) {
@@ -904,6 +906,10 @@ bool SpanItem::EncodeTlv(std::vector<uint8_t>& buff)
     }
     WRITE_TLV_INHERIT(textLineStyle, ParagraphSpacing, TLV_SPAN_TEXT_LINE_STYLE_PARAGRAPH_SPACING, Dimension,
         ParagraphSpacing);
+    if (urlAddress.has_value()) {
+        TLVUtil::WriteUint8(buff, TLV_SPAN_URL_CONTENT);
+        TLVUtil::WriteU16String(buff, GetUrlAddress());
+    }
     TLVUtil::WriteUint8(buff, TLV_SPANITEM_END_TAG);
     return true;
 };
@@ -1019,12 +1025,24 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             }
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateParagraphSpacing,
                 TLV_SPAN_TEXT_LINE_STYLE_PARAGRAPH_SPACING, Dimension);
+            case TLV_SPAN_URL_CONTENT: {
+                std::string address = TLVUtil::ReadString(buff, cursor);
+                sameSpan->urlAddress = UtfUtils::Str8DebugToStr16(address);
+                auto urlOnRelease = [address]() {
+                    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+                    CHECK_NULL_VOID(pipelineContext);
+                    pipelineContext->HyperlinkStartAbility(address);
+                };
+                sameSpan->SetUrlOnReleaseEvent(std::move(urlOnRelease));
+            }
             default:
                 break;
         }
     }
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
         sameSpan->textLineStyle->ResetParagraphSpacing();
+        sameSpan->urlAddress = std::nullopt;
+        sameSpan->urlOnRelease = nullptr;
     }
     return sameSpan;
 }
@@ -1063,14 +1081,14 @@ bool ImageSpanItem::EncodeTlv(std::vector<uint8_t>& buff)
         TLVUtil::WriteUint8(buff, TLV_SPANITEM_TAG);
         TLVUtil::WriteInt32(buff, interval.first);
         TLVUtil::WriteInt32(buff, interval.second);
-        TLVUtil::WriteString(buff, UtfUtils::Str16DebugToStr8(content));
+        TLVUtil::WriteU16String(buff, content);
         TLVUtil::WriteUint8(buff, TLV_SPANITEM_END_TAG);
         return true;
     }
     TLVUtil::WriteUint8(buff, TLV_IMAGESPANITEM_TAG);
     TLVUtil::WriteInt32(buff, interval.first);
     TLVUtil::WriteInt32(buff, interval.second);
-    TLVUtil::WriteString(buff, UtfUtils::Str16DebugToStr8(content));
+    TLVUtil::WriteU16String(buff, content);
     if (options.offset.has_value()) {
         TLVUtil::WriteUint8(buff, TLV_IMAGESPANOPTION_OFFSET_TAG);
         TLVUtil::WriteInt32(buff, options.offset.value());

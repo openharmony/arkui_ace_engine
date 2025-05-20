@@ -697,6 +697,10 @@ HWTEST_F(RichEditorStyleTestNg, GetChangeSpanStyle002, TestSize.Level1)
     std::optional<std::u16string> urlAddress;
     richEditorPattern->GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, urlAddress, spanNode, spanIndex);
     EXPECT_FALSE(spanTextStyle.has_value());
+    CHECK_NULL_VOID(richEditorPattern->spans_.empty());
+    auto firstSpanItem = richEditorPattern->spans_.front();
+    CHECK_NULL_VOID(firstSpanItem);
+    EXPECT_FALSE(firstSpanItem->urlAddress.has_value());
 }
 
 /**

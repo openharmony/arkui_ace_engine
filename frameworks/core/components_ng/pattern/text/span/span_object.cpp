@@ -1116,6 +1116,7 @@ RefPtr<SpanBase> UrlSpan::GetSubSpan(int32_t start, int32_t end)
 void UrlSpan::AddUrlStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
     auto address = urlAddress_;
+    spanItem->urlAddress = UtfUtils::Str8DebugToStr16(address);
     auto urlOnRelease = [address]() {
         auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
@@ -1126,6 +1127,7 @@ void UrlSpan::AddUrlStyle(const RefPtr<NG::SpanItem>& spanItem) const
 
 void UrlSpan::RemoveUrlStyle(const RefPtr<NG::SpanItem>& spanItem)
 {
+    spanItem->urlAddress = std::nullopt;
     spanItem->urlOnRelease = nullptr;
 }
 

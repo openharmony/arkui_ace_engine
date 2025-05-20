@@ -145,6 +145,8 @@ constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_PARAGRAPH_SPACING = 0x98;
 constexpr uint8_t TLV_SPAN_FONT_STYLE_LineThicknessScale = 0x9A;
 constexpr uint8_t TLV_FLOAT_TAG = 0x9B;
 
+constexpr uint8_t TLV_SPAN_URL_CONTENT = 0X9C;
+
 #define TLV_DEFINE_ENUM_TYPE(type, tag) \
 public:                                                                     \
     static void Write##type(std::vector<uint8_t>& buff, type value)         \
@@ -219,6 +221,8 @@ public:
 
     static void WriteString(std::vector<uint8_t>& buff, const std::string& value);
     static std::string ReadString(std::vector<uint8_t>& buff, int32_t& cursor);
+    static void WriteU16String(std::vector<uint8_t>& buff, const std::u16string& value);
+    static std::u16string ReadU16String(std::vector<uint8_t>& buff, int32_t& cursor);
     static void WriteDouble(std::vector<uint8_t>& buff, double value);
     static double ReadDouble(std::vector<uint8_t>& buff, int32_t& cursor);
     static void WriteColor(std::vector<uint8_t>& buff, Color& value);

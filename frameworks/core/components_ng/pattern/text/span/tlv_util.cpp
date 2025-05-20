@@ -13,6 +13,7 @@
 * limitations under the License.
 */
 
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/text/span/tlv_util.h"
 
 
@@ -44,6 +45,16 @@ std::string TLVUtil::ReadString(std::vector<uint8_t>& buff, int32_t& cursor)
         ss << static_cast<char>(chVal);
     }
     return ss.str();
+}
+
+void TLVUtil::WriteU16String(std::vector<uint8_t>& buff, const std::u16string& value)
+{
+    WriteString(buff, UtfUtils::Str16DebugToStr8(value));
+}
+
+std::u16string TLVUtil::ReadU16String(std::vector<uint8_t>& buff, int32_t& cursor)
+{
+    return UtfUtils::Str8DebugToStr16(ReadString(buff, cursor));
 }
 
 void TLVUtil::WriteDouble(std::vector<uint8_t>& buff, double value)
