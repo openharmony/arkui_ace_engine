@@ -995,4 +995,9 @@ void ViewAbstractModelStatic::SetMaxHeight(FrameNode* frameNode, const CalcDimen
     }
 }
 
+void ViewAbstractModelStatic::SetDisplayIndex(FrameNode* frameNode, int32_t value)
+{
+    ViewAbstract::SetDisplayIndex(frameNode, value);
+}
+
 } // namespace OHOS::Ace::NG

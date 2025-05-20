@@ -1996,7 +1996,7 @@ void ChainWeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto chainWeight = Converter::OptConvert<ChainWeightPair>(*value).value_or(ChainWeightPair{});
-    ViewAbstractModelNG::SetChainWeight(frameNode, chainWeight);
+    ViewAbstractModelStatic::SetChainWeight(frameNode, chainWeight);
 }
 void PaddingImpl(Ark_NativePointer node,
                  const Opt_Union_Padding_Length_LocalizedPadding* value)
@@ -3613,7 +3613,7 @@ void DisplayPriorityImpl(Ark_NativePointer node,
     auto result = Converter::OptConvert<int>(*value);
     if (result) {
         // TODO: Reset value
-        ViewAbstract::SetDisplayIndex(frameNode, result.value());
+        ViewAbstractModelStatic::SetDisplayIndex(frameNode, result.value());
     }
 }
 void ZIndexImpl(Ark_NativePointer node,
@@ -5232,7 +5232,7 @@ void ChainModeImpl(Ark_NativePointer node,
         .direction = Converter::OptConvert<LineDirection>(*direction),
         .style = Converter::OptConvert<ChainStyle>(*style)
     };
-    ViewAbstractModelNG::SetChainStyle(frameNode, chainInfo);
+    ViewAbstractModelStatic::SetChainStyle(frameNode, chainInfo);
 }
 void DragPreviewOptionsImpl(Ark_NativePointer node,
                             const Opt_DragPreviewOptions* value,
