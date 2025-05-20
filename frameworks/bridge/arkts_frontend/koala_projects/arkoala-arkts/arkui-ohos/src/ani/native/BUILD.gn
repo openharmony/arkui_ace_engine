@@ -26,6 +26,7 @@ ohos_shared_library("arkoala_native_ani") {
     "./",
     "common/",
     "web/",
+    "content_slot/",
   ]
 
   sources = [
@@ -34,6 +35,7 @@ ohos_shared_library("arkoala_native_ani") {
     "module.cpp",
     "web/web_module_methods.cpp",
     "utils/convert_utils.cpp",
+    "content_slot/content_slot_module.cpp",
   ]
 
   external_deps = [

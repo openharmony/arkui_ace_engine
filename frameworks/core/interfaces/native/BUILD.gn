@@ -132,6 +132,7 @@ template("ace_core_interfaces_native_node") {
 
     sources += [
       "ani/common_ani_modifier.cpp",
+      "ani/content_slot_ani_modifier.cpp",
       "ani/image_ani_modifier.cpp",
       "ani/node_ani_modifier.cpp",
       "ani/web_ani_modifier.cpp",
@@ -149,6 +150,7 @@ template("ace_core_interfaces_native_node") {
       ]
     }
     include_dirs = [
+      "${ace_root}/frameworks/core/interfaces/native/generated/interface",
       "${ace_root}/interfaces/inner_api/ace",
       "${ace_root}/interfaces/native",
       "${ace_root}/interfaces/native/node",

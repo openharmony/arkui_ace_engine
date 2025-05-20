@@ -13,21 +13,14 @@
  * limitations under the License.
  */
 
-#include "common_ani_modifier.h"
-#include "content_slot_ani_modifier.h"
-#include "image_ani_modifier.h"
-#include "web_ani_modifier.h"
+#ifndef KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_CONTENT_SLOT_CONTENT_SLOT_MODULE
+#define KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_CONTENT_SLOT_CONTENT_SLOT_MODULE
 
-extern "C" {
-const ArkUIAniModifiers* GetArkUIAniModifiers()
-{
-    static const ArkUIAniModifiers impl = {
-        .version = ARKUI_ANI_API_VERSION,
-        .getImageAniModifier = OHOS::Ace::NG::GetImageAniModifier,
-        .getWebAniModifier = OHOS::Ace::NG::GetWebAniModifier,
-        .getCommonAniModifier = OHOS::Ace::NG::GetCommonAniModifier,
-        .getContentSlotAniModifier = OHOS::Ace::NG::GetContentSlotAniModifier,
-    };
-    return &impl;
-}
-}
+#include "ani.h"
+
+namespace OHOS::Ace::Ani {
+ani_long ContentSlotConstruct(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id);
+void SetContentSlotOptions(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long slot, ani_long content);
+} // namespace OHOS::Ace::Ani
+
+#endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_CONTENT_SLOT_CONTENT_SLOT_MODULE

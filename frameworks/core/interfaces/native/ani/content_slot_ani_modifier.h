@@ -13,21 +13,13 @@
  * limitations under the License.
  */
 
-#include "common_ani_modifier.h"
-#include "content_slot_ani_modifier.h"
-#include "image_ani_modifier.h"
-#include "web_ani_modifier.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_CONTENT_SLOT_ANI_MODIFIER
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_CONTENT_SLOT_ANI_MODIFIER
 
-extern "C" {
-const ArkUIAniModifiers* GetArkUIAniModifiers()
-{
-    static const ArkUIAniModifiers impl = {
-        .version = ARKUI_ANI_API_VERSION,
-        .getImageAniModifier = OHOS::Ace::NG::GetImageAniModifier,
-        .getWebAniModifier = OHOS::Ace::NG::GetWebAniModifier,
-        .getCommonAniModifier = OHOS::Ace::NG::GetCommonAniModifier,
-        .getContentSlotAniModifier = OHOS::Ace::NG::GetContentSlotAniModifier,
-    };
-    return &impl;
-}
-}
+#include "core/interfaces/ani/ani_api.h"
+
+namespace OHOS::Ace::NG {
+const ArkUIAniContentSlotModifier* GetContentSlotAniModifier();
+} // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_CONTENT_SLOT_ANI_MODIFIER
