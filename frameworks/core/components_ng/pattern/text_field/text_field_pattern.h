@@ -1699,7 +1699,7 @@ private:
     void InitCancelButtonMouseEvent();
     void InitPasswordButtonMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
-    void OnHover(bool isHover);
+    void OnHover(bool isHover, const HoverInfo& info);
     void UpdateHoverStyle(bool isHover);
     void UpdatePressStyle(bool isPressed);
     void PlayAnimationHoverAndPress(const Color& color);
