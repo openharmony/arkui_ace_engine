@@ -79,6 +79,7 @@ struct UpdateSpanStyle {
         updateTextDecoration.reset();
         updateTextDecorationColor.reset();
         updateTextDecorationStyle.reset();
+        updateLineThicknessScale.reset();
         updateTextShadows.reset();
         updateFontFeature.reset();
         updateTextBackgroundStyle.reset();
@@ -111,6 +112,7 @@ struct UpdateSpanStyle {
     std::optional<TextDecoration> updateTextDecoration = std::nullopt;
     std::optional<Color> updateTextDecorationColor = std::nullopt;
     std::optional<TextDecorationStyle> updateTextDecorationStyle = std::nullopt;
+    std::optional<float> updateLineThicknessScale = std::nullopt;
     std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
     std::optional<NG::FONT_FEATURES_LIST> updateFontFeature = std::nullopt;
     std::optional<TextBackgroundStyle> updateTextBackgroundStyle = std::nullopt;
@@ -167,6 +169,7 @@ struct UpdateSpanStyle {
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateTextDecoration);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, updateTextDecorationColor);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateTextDecorationStyle);
+        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateLineThicknessScale);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateSymbolRenderingStrategy);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateSymbolEffectStrategy);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, updateImageWidth);
