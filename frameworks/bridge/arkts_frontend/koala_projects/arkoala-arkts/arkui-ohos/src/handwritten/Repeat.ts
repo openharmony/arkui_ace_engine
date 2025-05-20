@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 
 // HANDWRITTEN, DO NOT REGENERATE
 
-import { __context, __id, remember, NodeAttach } from "@koalaui/runtime"
-import { RepeatDataNode, UIRepeatAttributeImpl } from "../Repeat"
+import { __context, __id } from '@koalaui/runtime';
+import { RepeatImpl } from './RepeatImpl';
 
 export interface RepeatItem<T> {
     readonly item: T;
@@ -42,15 +42,13 @@ export interface TemplateOptions {
 
 export interface UIRepeatAttribute<T> {
     /** @memo */
-    setRepeatOptions(): void;
-    /** @memo */
     each(
         /** @memo */
         itemGenerator: (repeatItem: RepeatItem<T>) => void): UIRepeatAttribute<T>;
     /** @memo */
-    key(keyGenerator: (item: T, index?: number) => string): UIRepeatAttribute<T>;
+    key(keyGenerator: (item: T, index: number) => string): UIRepeatAttribute<T>;
     /** @memo */
-    virtualScroll(virtualScrollOptions?: VirtualScrollOptions): UIRepeatAttribute<T>;
+    virtualScroll(options?: VirtualScrollOptions): UIRepeatAttribute<T>;
     /** @memo */
     template(type: string,
         /** @memo */
@@ -67,15 +65,6 @@ export function Repeat<T>(
     /** @memo */
     style: ((attributes: UIRepeatAttribute<T>) => void) | undefined,
     arr: RepeatArray<T>
-) {
-    const receiver = remember(() => {
-        return new UIRepeatAttributeImpl<T>(arr);
-    });
-    NodeAttach<RepeatDataNode<T>>((): RepeatDataNode<T> => {
-        return new RepeatDataNode<T>();
-    }, (_: RepeatDataNode<T>) => {
-        receiver.setRepeatOptions();
-        style?.(receiver);
-        receiver.render();
-    });
+): void {
+    RepeatImpl<T>(style, arr);
 }

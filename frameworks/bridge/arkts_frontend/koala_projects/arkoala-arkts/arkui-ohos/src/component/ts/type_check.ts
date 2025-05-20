@@ -152,7 +152,6 @@ import { RoundedRectOptions, RectOptions, RadiusItem } from "./../rect"
 import { RowOptions, RowOptionsV2 } from "./../row"
 import { StackOptions } from "./../stack"
 import { TransformationMatrix } from "./../arkui-common"
-import { VirtualScrollOptions } from "./../repeat"
 import { Want } from "./../ohos.app.ability"
 import { FlexSpaceOptions, FlexOptions } from "./../flex"
 import { ImageFrameInfo } from "./../imageAnimator"
@@ -18431,17 +18430,6 @@ export class TypeChecker {
         }
         else {
             throw new Error("Can not discriminate value typeof ViewportRect")
-        }
-    }
-    static isVirtualScrollOptions(value: Object | string | number | undefined | boolean, duplicated_totalCount: boolean, duplicated_reusable: boolean): boolean {
-        if ((!duplicated_totalCount) && (value?.hasOwnProperty("totalCount"))) {
-            return true
-        }
-        else if ((!duplicated_reusable) && (value?.hasOwnProperty("reusable"))) {
-            return true
-        }
-        else {
-            throw new Error("Can not discriminate value typeof VirtualScrollOptions")
         }
     }
     static isVisibility(value: Object | string | number | undefined | boolean): boolean {
