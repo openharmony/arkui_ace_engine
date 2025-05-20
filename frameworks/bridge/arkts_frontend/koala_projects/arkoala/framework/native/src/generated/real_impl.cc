@@ -12206,6 +12206,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_NativePointer CreatePanGestureWithPanGestureOptionsImpl(Ark_NativePointer panGestureOptions)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(panGestureOptions);
+        //auto convValue = Converter::OptConvert<type>(panGestureOptions); // for enums
+        //undefinedModelNG::SetCreatePanGestureWithPanGestureOptions(frameNode, convValue);
+        return {};
+    }
     Ark_NativePointer CreatePinchGestureImpl(const Ark_Number* fingers,
                                              const Ark_Number* distance,
                                              Ark_Boolean isFingerCountLimited)
@@ -20785,6 +20794,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GestureOpsAccessor::CreateTapGestureImpl,
             GestureOpsAccessor::CreateLongPressGestureImpl,
             GestureOpsAccessor::CreatePanGestureImpl,
+            GestureOpsAccessor::CreatePanGestureWithPanGestureOptionsImpl,
             GestureOpsAccessor::CreatePinchGestureImpl,
             GestureOpsAccessor::CreateRotationGestureImpl,
             GestureOpsAccessor::CreateSwipeGestureImpl,

@@ -3801,6 +3801,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _GestureOps_createPanGesture(fingers: number, direction: KInt, distance: number, isFingerCountLimited: KInt): KPointer
     @ani.unsafe.Direct
+    native static _GestureOps_createPanGestureWithPanGestureOptions(panGestureOptions: KPointer): KPointer
+    @ani.unsafe.Direct
     native static _GestureOps_createPinchGesture(fingers: number, distance: number, isFingerCountLimited: KInt): KPointer
     @ani.unsafe.Direct
     native static _GestureOps_createRotationGesture(fingers: number, angle: number, isFingerCountLimited: KInt): KPointer
@@ -4840,8 +4842,8 @@ export class ArkUIGeneratedNativeModule {
     native static _TouchEvent_getChangedTouches(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _TouchEvent_setChangedTouches(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _TouchEvent_getStopPropagation(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _TouchEvent_getStopPropagation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _TouchEvent_setStopPropagation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct

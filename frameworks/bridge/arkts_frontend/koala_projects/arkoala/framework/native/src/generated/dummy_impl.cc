@@ -24088,6 +24088,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return nullptr;
     }
+    Ark_NativePointer CreatePanGestureWithPanGestureOptionsImpl(Ark_NativePointer panGestureOptions)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("createPanGestureWithPanGestureOptions(");
+        WriteToString(&out, panGestureOptions);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
     Ark_NativePointer CreatePinchGestureImpl(const Ark_Number* fingers,
                                              const Ark_Number* distance,
                                              Ark_Boolean isFingerCountLimited)
@@ -42979,6 +42990,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GestureOpsAccessor::CreateTapGestureImpl,
             GestureOpsAccessor::CreateLongPressGestureImpl,
             GestureOpsAccessor::CreatePanGestureImpl,
+            GestureOpsAccessor::CreatePanGestureWithPanGestureOptionsImpl,
             GestureOpsAccessor::CreatePinchGestureImpl,
             GestureOpsAccessor::CreateRotationGestureImpl,
             GestureOpsAccessor::CreateSwipeGestureImpl,

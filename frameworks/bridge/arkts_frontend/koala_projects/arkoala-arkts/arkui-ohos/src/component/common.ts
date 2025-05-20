@@ -344,7 +344,7 @@ export interface BaseEvent {
     sourceTool: SourceTool
     deviceId?: number | undefined
     targetDisplayId?: number | undefined
-    getModifierKeyState(keys: Array<string>): boolean
+    getModifierKeyState?: ((keys: Array<string>) => boolean)
 }
 export class BaseEventInternal implements MaterializedBase,BaseEvent {
     peer?: Finalizable | undefined = undefined
@@ -428,6 +428,12 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         const targetDisplayId_NonNull  = (targetDisplayId as number)
         this.setTargetDisplayId(targetDisplayId_NonNull)
     }
+    get getModifierKeyState(): ((keys: Array<string>) => boolean) {
+        return this.getGetModifierKeyState();
+    }
+    set getModifierKeyState(getModifierKeyState: ((keys: Array<string>) => boolean) | undefined) {
+        // setter is not implemented
+    }
     static ctor_baseevent(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_ctor()
         return retval
@@ -439,9 +445,11 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._BaseEvent_getFinalizer()
     }
-    public getModifierKeyState(keys: Array<string>): boolean {
-        const keys_casted = keys as (Array<string>)
-        return this.getModifierKeyState_serialize(keys_casted)
+    private getGetModifierKeyState(): ((keys: Array<string>) => boolean) {
+        return (keys: Array<string>): boolean => {
+            const keys_casted = keys as (Array<string>)
+            return this.getModifierKeyState_serialize(keys_casted)
+        }
     }
     private getTarget(): EventTarget {
         return this.getTarget_serialize()
@@ -13506,7 +13514,7 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         this.setChangedTouches(changedTouches)
     }
     get stopPropagation(): (() => void) {
-        throw new Error("Not implemented")
+        return this.getStopPropagation();
     }
     set stopPropagation(stopPropagation: (() => void)) {
         this.setStopPropagation(stopPropagation)
@@ -13654,8 +13662,18 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         thisSerializer.release()
     }
     private getStopPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getStopPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getStopPropagation(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        
+        let returnResult = retvalDeserializer.readCallback_Void(true);
+        return returnResult;
     }
     private setStopPropagation_serialize(stopPropagation: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
