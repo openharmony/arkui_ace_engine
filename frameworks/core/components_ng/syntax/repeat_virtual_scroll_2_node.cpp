@@ -260,7 +260,10 @@ bool RepeatVirtualScroll2Node::RebuildL1(int32_t start, int32_t end, int32_t nSt
                 TAG_LOGD(AceLogTag::ACE_REPEAT,
                     "out of range: index %{public}d -> child nodeId %{public}d: SetActive(false)",
                     index, frameNode->GetId());
-                frameNode->SetActive(false);
+                // SetActive to false will remove node from RS tree, if the node is deleted by animateTo, then animation will not display
+                if (!AnimationUtils::IsImplicitAnimationOpen()) {
+                    frameNode->SetActive(false);
+                }
                 cacheItem->isActive_ = false;
             }
 
@@ -304,7 +307,10 @@ bool RepeatVirtualScroll2Node::ProcessActiveL2Nodes()
         // 2. Repeat.rerender
         auto frameNode = AceType::DynamicCast<FrameNode>(cacheItem->node_->GetFrameChildByIndex(0, true));
         if (frameNode && cacheItem->isActive_) {
-            frameNode->SetActive(false);
+            // SetActive to false will remove node from RS tree, if the node is deleted by animateTo, then animation will not display
+            if (!AnimationUtils::IsImplicitAnimationOpen()) {
+                frameNode->SetActive(false);
+            }
             cacheItem->isActive_ = false;
             needSync = true;
             TAG_LOGD(AceLogTag::ACE_REPEAT,
@@ -525,6 +531,8 @@ RefPtr<UINode> RepeatVirtualScroll2Node::GetFrameChildByIndexImpl(
     cacheItem4Index->node_->SetParent(WeakClaim(this));
     if (IsOnMainTree()) {
         cacheItem4Index->node_->AttachToMainTree(false, GetContext());
+        // node attached to main tree should not be in disappearing children
+        RemoveDisappearingChild(cacheItem4Index->node_);
     }
 
     MarkNeedSyncRenderTree();
