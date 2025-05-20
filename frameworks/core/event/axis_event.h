@@ -33,6 +33,7 @@ struct UIInputEvent {
     virtual ~UIInputEvent() = default;
     TimeStamp time;
     UIInputEventType eventType = UIInputEventType::NONE;
+    ConvertInfo convertInfo = { UIInputEventType::NONE, UIInputEventType::NONE };
 };
 
 struct PointerEvent : public UIInputEvent {
