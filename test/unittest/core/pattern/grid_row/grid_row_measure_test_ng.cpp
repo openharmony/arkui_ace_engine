@@ -930,6 +930,33 @@ HWTEST_F(GridRowMeasureTestNG, MeasureSelfTest, TestSize.Level1)
      * @tc.expected: gridRowHeight equal to selfHeight 60.0f when API >= 11
      */
     EXPECT_EQ(gridRowHeight, 60.f) << gridRowHeight;
+    
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+    algorithm.MeasureSelf(Referenced::RawPtr(gridRow), 90.f, 60.f);
+    /**
+     * @tc.expected: gridRowHeight equal to selfHeight 60.0f which is constrained by selfIdealSize
+     */
+    gridRowHeight = gridRow->GetGeometryNode()->GetFrameSize().Height();
+    EXPECT_EQ(gridRowHeight, 60.f) << gridRowHeight;
+
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+    algorithm.MeasureSelf(Referenced::RawPtr(gridRow), 90.f, 60.f);
+    /**
+     * @tc.expected: gridRowHeight equal to the childHeight, which ignores parent constraint
+     */
+    gridRowHeight = gridRow->GetGeometryNode()->GetFrameSize().Height();
+    EXPECT_EQ(gridRowHeight, 90.f) << gridRowHeight;
+
+    constraint.UpdateParentIdealSizeWithCheck({std::nullopt, 90.f});
+    layoutProperty->UpdateLayoutConstraint(constraint);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    layoutProperty->ClearUserDefinedIdealSize(true, true);
+    algorithm.MeasureSelf(Referenced::RawPtr(gridRow), 30.f, 90.f);
+    gridRowHeight = gridRow->GetGeometryNode()->GetFrameSize().Height();
+    /**
+     * @tc.expected: gridRow matchParent height = 90
+     */
+    EXPECT_EQ(gridRowHeight, 90.f) << gridRowHeight;
 }
 
 /**
@@ -1492,5 +1519,121 @@ HWTEST_F(GridRowMeasureTestNG, MeasureChildrenTest, TestSize.Level1)
         << gridCol4->GetGeometryNode()->GetFrameSize().ToString();
     EXPECT_EQ(gridCol5->GetGeometryNode()->GetFrameSize(), SizeF(50, 30))
         << gridCol5->GetGeometryNode()->GetFrameSize().ToString();
+}
+
+/**
+ * @tc.name: InsertIntoGridRowTableTest
+ * @tc.desc: Test InsertIntoGridRowTable function
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, InsertIntoGridRowTableTest, TestSize.Level1)
+{
+    int32_t currentPosition = 0;
+    GridRowLayoutAlgorithm algorithm;
+    NewLineOffset newLineOffset;
+    algorithm.columnNum_ = 12;
+    algorithm.InsertIntoGridRowTable(CreateGridColWithProperty(2, 0),
+        V2::GridSizeType::XS, currentPosition, newLineOffset);
+    EXPECT_EQ(currentPosition, 2);
+    algorithm.InsertIntoGridRowTable(CreateGridColWithProperty(4, 2),
+        V2::GridSizeType::XS, currentPosition, newLineOffset);
+    EXPECT_EQ(currentPosition, 8);
+    algorithm.InsertIntoGridRowTable(CreateGridColWithProperty(6, 26),
+        V2::GridSizeType::XS, currentPosition, newLineOffset);
+    /**
+     * @tc.expected: newLineOffset.newLineCount = (26 - 4) / 12 + 1 = 2, offset =  (26 - 4) % 12 = 10, childSpan = 6
+            but offset + childSpan > 12, so newLineCount = 3
+            currentPosition = 6
+     */
+    EXPECT_EQ(currentPosition, 6);
+    EXPECT_EQ(newLineOffset.newLineCount, 3);
+    EXPECT_EQ(algorithm.gridColChildrenRows_.size(), 1);
+    /**
+     * @tc.expected: prevLineCount = 0, the child number of last line is 2
+     */
+    EXPECT_EQ(algorithm.gridColChildrenRows_.back().size(), 2);
+    EXPECT_EQ(algorithm.gridColChildrenOfOneRow_.size(), 1);
+    algorithm.InsertIntoGridRowTable(CreateGridColWithProperty(6, 20),
+        V2::GridSizeType::XS, currentPosition, newLineOffset);
+    EXPECT_EQ(currentPosition, 8);
+    EXPECT_EQ(newLineOffset.newLineCount, 2);
+    EXPECT_EQ(algorithm.gridColChildrenRows_.size(), 2);
+    EXPECT_EQ(algorithm.gridColChildrenRows_.back().size(), 1);
+    EXPECT_EQ(algorithm.gridColChildrenOfOneRow_.size(), 1);
+}
+
+/**
+ * @tc.name: MeasureChildTest
+ * @tc.desc: MeasureChild should measure children correctly according to the layout constraint
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, MeasureChildTest, TestSize.Level1)
+{
+    RefPtr<FrameNode> gridCol1;
+    auto gridRow = CreateGridRow([this, &gridCol1](GridRowModelNG model) {
+        ViewAbstract::SetHeight(CalcLength(40.0f));
+        ViewAbstract::SetWidth(CalcLength(350.0f));
+        V2::Gutter gutter(Dimension(10));
+        ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, gutter);
+        gridCol1 = CreateGridCol([this](GridColModelNG model) {
+            CreateRow([this](RowModelNG model) {
+                ViewAbstract::SetHeight(CalcLength(30.0f));
+                ViewAbstract::SetWidth(CalcLength(10.0f));
+            });
+        });
+    });
+    GridRowLayoutAlgorithm algorithm;
+    algorithm.columnUnitWidth_ = 20.0f;
+    algorithm.columnNum_ = 12;
+    LayoutConstraintF parentConstraint;
+    auto layoutProperty = gridRow->GetLayoutProperty();
+    parentConstraint.maxSize = SizeF(100, 40.0f);
+    layoutProperty->UpdateLayoutConstraint(parentConstraint);
+    layoutProperty->UpdateContentConstraint();
+    auto childLayoutWrapper = AceType::DynamicCast<LayoutWrapper>(gridCol1);
+    algorithm.MeasureChild(Referenced::RawPtr(gridRow), childLayoutWrapper,
+        V2::GridSizeType::XS, 30.0f);
+    /**
+     * @tc.expected: child height is constrained by maxheight = 40 - totalheight(30) = 10
+     */
+    EXPECT_EQ(gridCol1->GetGeometryNode()->GetFrameSize(), SizeF(20, 10))
+        << gridCol1->GetGeometryNode()->GetFrameSize().ToString();
+}
+
+/**
+ * @tc.name: MeasureSelfByLayoutPolicyTest01
+ * @tc.desc: Test whether MeasureSelfByLayoutPolicy can return correct policySize
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, MeasureSelfByLayoutPolicyTest01, TestSize.Level1)
+{
+    auto frameNode = CreateGridRow([this](GridRowModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    GridRowLayoutAlgorithm algorithm;
+    
+    LayoutConstraintF layoutConstraint = {.parentIdealSize = {300, 350}};
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    auto selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), 90,
+        LayoutCalPolicy::MATCH_PARENT, LayoutCalPolicy::MATCH_PARENT);
+    EXPECT_EQ(selfSize, OptionalSizeF(300, 350)) << selfSize.ToString();
+
+    selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), 90,
+        LayoutCalPolicy::NO_MATCH, LayoutCalPolicy::NO_MATCH);
+    EXPECT_EQ(selfSize, OptionalSizeF(std::nullopt, std::nullopt));
+
+    selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), 90,
+        LayoutCalPolicy::WRAP_CONTENT, LayoutCalPolicy::WRAP_CONTENT);
+    EXPECT_EQ(selfSize, OptionalSizeF(std::nullopt, std::nullopt));
+    
+    selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), 90,
+        LayoutCalPolicy::FIX_AT_IDEAL_SIZE, LayoutCalPolicy::FIX_AT_IDEAL_SIZE);
+    EXPECT_EQ(selfSize, OptionalSizeF(std::nullopt, 90));
+
+    layoutProperty->UpdateCalcMaxSize(CalcSize(CalcLength(50), CalcLength(50)));
+    selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), 90,
+        LayoutCalPolicy::FIX_AT_IDEAL_SIZE, LayoutCalPolicy::FIX_AT_IDEAL_SIZE);
+    EXPECT_EQ(selfSize, OptionalSizeF(std::nullopt, 50));
 }
 } // namespace OHOS::Ace::NG
