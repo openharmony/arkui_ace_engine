@@ -652,30 +652,6 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc035, TestSize.Level1)
     pattern->RequestKeyboard(false, false, false);
 }
 
-HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc036, TestSize.Level1)
-{
-    CreateTextField();
-    auto frameId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
-        V2::TEXTINPUT_ETS_TAG, frameId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
-    ASSERT_NE(textFieldNode, nullptr);
-    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(pattern, nullptr);
-    pattern->showKeyBoardOnFocus_ = true;
-    pattern->customKeyboard_ = nullptr;
-    pattern->customKeyboardBuilder_ = nullptr;
-    pattern->isCustomKeyboardAttached_ = true;
-#define ENABLE_STANDARD_INPUT
-    auto contextPtr = pattern->GetHost()->GetContextRefPtr();
-    contextPtr->textFieldManager_ = nullptr;
-    std::unordered_map<std::string, std::variant<std::string, bool, int32_t>> fillContentMap_;
-    std::variant<std::string, bool, int32_t> contentVariant;
-    auto value = std::pair<std::string, std::variant<std::string, bool, int32_t>>("openharmony", contentVariant);
-    pattern->fillContentMap_.insert(value);
-    pattern->RequestKeyboard(false, false, false);
-    EXPECT_FALSE(pattern->fillContentMap_.empty());
-}
-
 HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc037, TestSize.Level1)
 {
     CreateTextField();

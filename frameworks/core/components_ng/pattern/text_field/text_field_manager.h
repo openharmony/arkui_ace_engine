@@ -43,6 +43,8 @@ struct LaterAvoidInfo {
     int32_t orientation = -1;
 };
 
+using FillContentMap = std::unordered_map<std::string, std::variant<std::string, bool, int32_t>>;
+
 class ACE_EXPORT TextFieldManagerNG : public ManagerInterface {
     DECLARE_ACE_TYPE(TextFieldManagerNG, ManagerInterface);
 
@@ -294,11 +296,15 @@ public:
         contextTriggerAvoidTaskOrientation_ = contextTriggerAvoidTaskOrientation;
     }
 
+    bool ParseFillContentJsonValue(const std::unique_ptr<JsonValue>& jsonObject);
+    FillContentMap GetFillContentMap(int32_t id);
+    void RemoveFillContentMap(int32_t id);
 
 private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
     RefPtr<FrameNode> FindNavNode(const RefPtr<FrameNode>& textField);
     bool IsAutoFillPasswordType(const TextFieldInfo& textFieldInfo);
+    void GenerateFillContentMap(const std::string& fillContent, FillContentMap& map);
 
     RefPtr<FrameNode> FindCorrectScrollNode(const SafeAreaInsets::Inset& bottomInset,
         bool isShowKeyboard);
@@ -331,6 +337,7 @@ private:
     std::unordered_map<int32_t, std::function<void()>> avoidSystemKeyboardCallbacks_;
     std::unordered_map<int32_t, std::function<void()>> avoidCustomKeyboardCallbacks_;
     float lastKeyboardOffset_ = 0.0f;
+    std::unordered_map<int32_t, FillContentMap> textFieldFillContentMaps_;
 };
 
 } // namespace OHOS::Ace::NG
