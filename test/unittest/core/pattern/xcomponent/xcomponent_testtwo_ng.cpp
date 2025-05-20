@@ -51,9 +51,7 @@
 
 using namespace testing;
 using namespace testing::ext;
-namespace OHOS::Ace::Testing {
-TestingCanvas* TestingCanvasUtils::lockCanvas = nullptr;
-}
+
 namespace OHOS::Ace::NG {
 struct TestProperty {
     std::optional<std::string> xcId = std::nullopt;
@@ -1787,9 +1785,9 @@ HWTEST_F(XComponentTestTwoNg, UnlockCanvasAndPostTest, TestSize.Level1)
     auto canvas = pattern->LockCanvas();
     EXPECT_TRUE(canvas);
     pattern->UnlockCanvasAndPost(canvas);
-    EXPECT_FALSE(Testing::TestingCanvasUtils::lockCanvas);
+    EXPECT_FALSE(Testing::TestingCanvasUtils::GetInstance()->lockCanvas);
     pattern->UnlockCanvasAndPost(canvas);
-    EXPECT_FALSE(Testing::TestingCanvasUtils::lockCanvas);
+    EXPECT_FALSE(Testing::TestingCanvasUtils::GetInstance()->lockCanvas);
 
     // clear variables on the stack to prevent memory leaks
     delete reinterpret_cast<int*>(pattern->nativeWindow_);

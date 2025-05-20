@@ -23,24 +23,38 @@ typedef struct NativeWindow OHNativeWindow;
 namespace OHOS::Ace::Testing {
 class TestingCanvasUtils {
 public:
+    static TestingCanvasUtils* GetInstance()
+    {
+        static TestingCanvasUtils canvasUtils;
+        return &canvasUtils;
+    }
     static TestingCanvas* CreateLockCanvas(OHNativeWindow* nativeWindow)
     {
-        if (lockCanvas == nullptr) {
-            lockCanvas = new TestingCanvas();
-            return lockCanvas;
+        auto canvasUtils = GetInstance();
+        if (canvasUtils->lockCanvas == nullptr) {
+            canvasUtils->lockCanvas = new TestingCanvas();
+            return canvasUtils->lockCanvas;
         }
         return nullptr;
     }
     static bool UnlockCanvas(TestingCanvas* canvas, OHNativeWindow* nativeWindow)
     {
-        if (lockCanvas == nullptr) {
+        auto canvasUtils = GetInstance();
+        if (canvasUtils->lockCanvas == nullptr) {
             return false;
         }
-        delete lockCanvas;
-        lockCanvas = nullptr;
+        delete canvasUtils->lockCanvas;
+        canvasUtils->lockCanvas = nullptr;
         return true;
     }
-    static TestingCanvas* lockCanvas;
+    ~TestingCanvasUtils()
+    {
+        if (lockCanvas != nullptr) {
+            delete lockCanvas;
+            lockCanvas = nullptr;
+        }
+    }
+    TestingCanvas* lockCanvas = nullptr;
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_CANVAS_UTILS_H
