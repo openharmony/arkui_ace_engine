@@ -2531,6 +2531,53 @@ void OverlayManager::HideAllPopups()
     }
 }
 
+void OverlayManager::HideAllPopupsWithoutAnimation()
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide all popup without animation enter");
+    auto tempPopupMap = popupMap_;
+    for (const auto& popup : tempPopupMap) {
+        auto targetId = popup.first;
+        auto popupNode = popup.second.popupNode;
+        CHECK_NULL_CONTINUE(popupNode);
+        auto popupPattern = popupNode->GetPattern<BubblePattern>();
+        CHECK_NULL_CONTINUE(popupPattern);
+        popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
+        popupPattern->CallDoubleBindCallback("false");
+        popupNode->GetOrCreateEventHub<BubbleEventHub>()->FireChangeEvent(false);
+        popupNode->GetRenderContext()->UpdateChainedTransition(nullptr);
+        ErasePopup(targetId);
+    }
+}
+
+void OverlayManager::HideAllMenusWithoutAnimation(bool showInSubwindow)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide all menu without animation enter");
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto tempMenuMap = menuMap_;
+    for (const auto& menu : tempMenuMap) {
+        auto targetId = menu.first;
+        auto menuNode = menu.second;
+        CHECK_NULL_CONTINUE(menuNode);
+        auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_CONTINUE(menuWrapperPattern);
+        menuWrapperPattern->CallMenuAboutToAppearCallback();
+        menuWrapperPattern->CallMenuDisappearCallback();
+        menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
+        menuWrapperPattern->SetOnMenuDisappear(false);
+        menuWrapperPattern->CallMenuStateChangeCallback("false");
+        auto containerId = menuWrapperPattern->GetContainerId();
+        RemoveChildWithService(rootNode, menuNode);
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "hide menu without animation, targetId: %{public}d", targetId);
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        if (showInSubwindow) {
+            SubwindowManager::GetInstance()->DeleteHotAreas(containerId, menuNode->GetId(), SubwindowType::TYPE_MENU);
+        }
+        RemoveMenuFilter(menuNode, false);
+        EraseMenuInfo(targetId);
+    }
+}
+
 void OverlayManager::ErasePopup(int32_t targetId)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "erase popup enter, targetId: %{public}d", targetId);
