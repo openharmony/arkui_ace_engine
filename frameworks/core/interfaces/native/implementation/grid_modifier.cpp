@@ -214,7 +214,6 @@ void ScrollBarColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     GridModelStatic::SetScrollBarColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void ScrollBarImpl(Ark_NativePointer node,
