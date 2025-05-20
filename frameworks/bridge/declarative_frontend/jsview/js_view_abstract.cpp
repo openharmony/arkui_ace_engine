@@ -1607,7 +1607,6 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
         return false;
     }
 
-    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
     if (LessNotEqual(value.Value(), 0.0)) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
@@ -1677,7 +1676,6 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
         return false;
     }
 
-    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
     if (LessNotEqual(value.Value(), 0.0)) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
