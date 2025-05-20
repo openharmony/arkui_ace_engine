@@ -385,9 +385,11 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
             info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
             info.SetSourceTool(lastAxisEvent_.sourceTool);
             info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
+            info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
         } else {
             info.SetSourceTool(touchPoint.sourceTool);
             info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
+            info.CopyConvertInfoFrom(touchPoint.convertInfo);
         }
         info.SetPointerEvent(lastPointEvent_);
         info.SetInputEventType(inputEventType_);

@@ -959,7 +959,7 @@ bool DragDropFuncWrapper::IsCurrentNodeStatusSuitableForDragging(
 
     if (gestureHub->IsDragForbidden() || (!frameNode->IsDraggable() && frameNode->IsCustomerSet()) ||
         touchRestrict.inputEventType == InputEventType::AXIS ||
-        touchRestrict.touchEvent.originInputEventType == InputEventType::AXIS) {
+        touchRestrict.touchEvent.convertInfo.first == UIInputEventType::AXIS) {
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "No need to collect drag gestures result, drag forbidden set is %{public}d,"
             "frameNode draggable is %{public}d, custom set is %{public}d",
