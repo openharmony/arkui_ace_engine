@@ -4447,6 +4447,10 @@ export class ArkUIGeneratedNativeModule {
     native static _RenderNode_getLengthMetricsUnit(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _RenderNode_setLengthMetricsUnit(ptr: KPointer, lengthMetricsUnit: KInt): void
+    @ani.unsafe.Quick
+    native static _UIContextImp_freezeUINode0(id: KStringPtr, isFrozen: KInt): void
+    @ani.unsafe.Direct
+    native static _UIContextImp_freezeUINode1(id: number, isFrozen: KInt): void
     @ani.unsafe.Direct
     native static _TabsOps_registerBarMode(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
