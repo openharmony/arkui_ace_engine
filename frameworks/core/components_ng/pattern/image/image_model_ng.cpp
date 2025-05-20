@@ -1168,6 +1168,12 @@ void ImageModelNG::CreateWithResourceObj(ImageResourceType resourceType, const R
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObj(frameNode , resourceType, resObj);
+}
+
+void ImageModelNG::CreateWithResourceObj(
+    FrameNode* frameNode, ImageResourceType resourceType, const RefPtr<ResourceObject>& resObj)
+{
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
 

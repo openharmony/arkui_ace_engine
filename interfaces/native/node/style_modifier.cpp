@@ -11625,7 +11625,7 @@ int32_t SetFillColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getImageModifier()->setFillColor(
-        node->uiNodeHandle, static_cast<ArkUI_Uint32>(item->value[0].u32));
+        node->uiNodeHandle, static_cast<ArkUI_Uint32>(item->value[0].u32), nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 

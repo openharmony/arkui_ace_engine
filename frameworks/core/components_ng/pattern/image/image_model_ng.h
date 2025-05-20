@@ -150,6 +150,8 @@ public:
     static void ResetImageAlt(FrameNode* frameNode);
     static void SetAltPixelMap(FrameNode* frameNode, void* pixelMap);
     static void SetAltResource(FrameNode* frameNode, void* resource);
+    static void CreateWithResourceObj(
+        FrameNode* frameNode, ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject);
 
 private:
     ImagePattern* GetImagePattern();

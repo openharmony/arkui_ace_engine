@@ -2811,13 +2811,20 @@ void ImagePattern::OnInActive()
 
 void ImagePattern::UpdateImageSourceinfo(const ImageSourceInfo& sourceInfo)
 {
-    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkModifyDone();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (pipelineContext->IsSystmColorChange()) {
+        auto imageCache = pipelineContext->GetImageCache();
+        CHECK_NULL_VOID(imageCache);
+        auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        ImageSourceInfo imageCacheSource = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+        imageCache->ClearCacheImgObj(imageCacheSource.GetKey());
+        imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
+        LoadImage(sourceInfo, imageLayoutProperty->GetPropertyChangeFlag());
+    }
 }
 
 void ImagePattern::UpdateImageFill(const Color& color)
@@ -2837,12 +2844,32 @@ void ImagePattern::UpdateImageFill(const Color& color)
 
 void ImagePattern::UpdateImageAlt(const ImageSourceInfo& sourceInfo)
 {
-    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    imageLayoutProperty->UpdateAlt(sourceInfo);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkModifyDone();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (pipelineContext->IsSystmColorChange()) {
+        auto imageCache = pipelineContext->GetImageCache();
+        CHECK_NULL_VOID(imageCache);
+        auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
+        imageCache->ClearCacheImgObj(altImageSourceInfo.GetKey());
+        imageLayoutProperty->UpdateAlt(sourceInfo);
+        LoadAltImage(sourceInfo);
+    }
+}
+
+void ImagePattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (host->GetRerenderable()) {
+        host->MarkModifyDone();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 } // namespace OHOS::Ace::NG
