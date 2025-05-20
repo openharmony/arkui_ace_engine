@@ -25,10 +25,9 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource } from "global/resource"
-import { LengthMetrics } from "../Graphics"
+import { LengthMetrics, ColorMetrics } from "../Graphics"
 import { OutlineStyle } from "./common"
 import { Color, FontWeight, FontStyle, BorderStyle, DividerMode } from "./enums"
-import { ColorMetrics } from "./arkui-external"
 export class ColorFilterInternal {
     public static fromPtr(ptr: KPointer): ColorFilter {
         const obj : ColorFilter = new ColorFilter(undefined)
