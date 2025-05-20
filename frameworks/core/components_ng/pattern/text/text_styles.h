@@ -171,6 +171,7 @@ struct ImageSpanOptions : SpanOptionBase {
 namespace OHOS::Ace::NG {
 class TextLayoutProperty;
 constexpr Dimension TEXT_DEFAULT_FONT_SIZE = 16.0_fp;
+constexpr Dimension TEXT_DEFAULT_STROKE_WIDTH = 0.0_fp;
 using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSize, Dimension);

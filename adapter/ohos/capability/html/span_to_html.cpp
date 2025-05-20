@@ -96,6 +96,18 @@ std::string SpanToHtml::FontFamilyToHtml(const std::optional<std::vector<std::st
     return ToHtmlStyleFormat("font-family", GetFontFamilyInJson(value));
 }
 
+std::string SpanToHtml::StrokeWidthToHtml(const std::optional<Dimension>& value)
+{
+    return ToHtmlStyleFormat("stroke-width", DimensionToString(value.value_or(TEXT_DEFAULT_STROKE_WIDTH)));
+}
+
+std::string SpanToHtml::StrokeColorToHtml(const std::optional<Color>& value)
+{
+    auto color = value.value_or(Color::BLACK).ColorToString();
+    ToHtmlColor(color);
+    return ToHtmlStyleFormat("stroke-color", color);
+}
+
 std::string SpanToHtml::TextDecorationToHtml(TextDecoration decoration)
 {
     static const LinearEnumMapNode<TextDecoration, std::string> decorationTable[] = {
@@ -444,6 +456,8 @@ std::string SpanToHtml::NormalStyleToHtml(
     style += FontWeightToHtml(fontStyle.GetFontWeight());
     style += ColorToHtml(fontStyle.GetTextColor());
     style += FontFamilyToHtml(fontStyle.GetFontFamily());
+    style += StrokeWidthToHtml(fontStyle.GetStrokeWidth());
+    style += StrokeColorToHtml(fontStyle.GetStrokeColor());
     style += DeclarationToHtml(fontStyle);
     style += ToHtml("vertical-align", textLineStyle.GetBaselineOffset());
     style += ToHtml("line-height", textLineStyle.GetLineHeight());

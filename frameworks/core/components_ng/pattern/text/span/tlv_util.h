@@ -144,6 +144,8 @@ constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_PARAGRAPH_SPACING = 0x98;
 
 constexpr uint8_t TLV_SPAN_FONT_STYLE_LineThicknessScale = 0x9A;
 constexpr uint8_t TLV_FLOAT_TAG = 0x9B;
+constexpr uint8_t TLV_SPAN_FONT_STYLE_STROKEWIDTH = 0x9E;
+constexpr uint8_t TLV_SPAN_FONT_STYLE_STROKECOLOR = 0x9F;
 
 #define TLV_DEFINE_ENUM_TYPE(type, tag) \
 public:                                                                     \
