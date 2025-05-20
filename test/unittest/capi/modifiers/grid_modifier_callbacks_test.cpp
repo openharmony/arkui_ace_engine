@@ -69,11 +69,11 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollBarUpdateTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: DISABLED_setOnScrollBarUpdateTestInvalid_1
+ * @tc.name: DISABLED_setOnScrollBarUpdateTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTestInvalid_1, TestSize.Level1)
+HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTestInvalid, TestSize.Level1)
 {
     // test is disabled because onScrollBarUpdate callback should return value
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -81,11 +81,7 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTestInvalid_1, 
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
-    struct CheckEvent {
-        int32_t nodeId;
-        int32_t index;
-        Dimension offset;
-    };
+    struct CheckEvent { int32_t nodeId; int32_t index; Dimension offset; };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     Callback_Number_Number_ComputedBarAttribute onScrollBarUpdate = {
         .resource = {.resourceId = frameNode->GetId()},
@@ -119,43 +115,7 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTestInvalid_1, 
     EXPECT_EQ(checkEvent->index, 13);
     EXPECT_EQ(checkEvent->offset.Value(), 0);
     EXPECT_EQ(checkEvent->offset.Unit(), DimensionUnit::VP);
-}
-
-/*
- * @tc.name: DISABLED_setOnScrollBarUpdateTestInvalid_2
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTestInvalid_2, TestSize.Level1)
-{
-    // test is disabled because onScrollBarUpdate callback should return value
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<GridEventHub>();
-    ASSERT_NE(eventHub, nullptr);
     
-    struct CheckEvent {
-        int32_t nodeId;
-        int32_t index;
-        Dimension offset;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_Number_Number_ComputedBarAttribute onScrollBarUpdate = {
-        .resource = {.resourceId = frameNode->GetId()},
-        .call = [](const Ark_Int32 resourceId,
-            const Ark_Number index, const Ark_Number offset, const Callback_ComputedBarAttribute_Void continuation)
-            {
-                checkEvent = {
-                    .nodeId = resourceId,
-                    .index = Converter::Convert<int32_t>(index),
-                    .offset = Converter::Convert<Dimension>(offset)
-                };
-        }
-    };
-
-    auto optOnScrollBarUpdate = Converter::ArkValue<Opt_Callback_Number_Number_ComputedBarAttribute>(onScrollBarUpdate);
-    modifier_->setOnScrollBarUpdate(node_, &optOnScrollBarUpdate);
-
     // index: 15, offset: 16 auto
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireOnScrollBarUpdate(15, Dimension(16, DimensionUnit::AUTO));
