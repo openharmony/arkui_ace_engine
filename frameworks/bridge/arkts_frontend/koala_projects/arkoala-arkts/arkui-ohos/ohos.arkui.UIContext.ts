@@ -339,16 +339,16 @@ export class UIContext {
 
     // @ts-ignore
     public freezeUINode(id: number, isFrozen: boolean): void {
-        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
         ArkUIGeneratedNativeModule._UIContextImp_freezeUINode1(id, isFrozen ? 1 : 0);
-        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        ArkUIAniModule._Common_Restore_InstanceId()
     }
 
     // @ts-ignore
     public freezeUINode(id: string, isFrozen: boolean): void {
-        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
         ArkUIGeneratedNativeModule._UIContextImp_freezeUINode0(id, isFrozen ? 1 : 0);
-        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        ArkUIAniModule._Common_Restore_InstanceId()
     }
 }
 export abstract class FrameCallback {
