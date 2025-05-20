@@ -33,6 +33,7 @@ export enum RuntimeNames {
     CONTEXT_TYPE = "__memo_context_type",
     CONTEXT_TYPE_DEFAULT_IMPORT = "@koalaui/runtime",
     GENSYM = "gensym%%_",
+    HASH = "__hash",
     ID = "__memo_id",
     ID_TYPE = "__memo_id_type",
     INTERNAL_PARAMETER_STATE = "param",
@@ -84,7 +85,7 @@ export class PositionalIdTracker {
         return `${PositionalIdTracker.callCount++}_${callName}_${fileName}`
     }
 
-    id(callName: string = ""): arkts.NumberLiteral | arkts.StringLiteral {
+    id(callName: string = ""): arkts.Expression {
 
         const fileName = this.stableForTests ?
             baseName(this.filename) :
@@ -96,7 +97,14 @@ export class PositionalIdTracker {
 
 
         return this.stableForTests
-            ? arkts.factory.createStringLiteral(positionId)
+            ? arkts.factory.createCallExpression(
+                arkts.factory.createIdentifier(RuntimeNames.HASH),
+                [arkts.factory.createStringLiteral(positionId)],
+                undefined,
+                false,
+                false,
+                undefined
+            )
             : arkts.factory.createNumberLiteral(parseInt(positionId, 16))
     }
 }
@@ -156,7 +164,7 @@ export function getMemoFunctionKind(node: MemoAnnotatable): MemoFunctionKind {
 }
 
 export function isWrappable(type: arkts.TypeNode | undefined, arg: arkts.Expression) {
-    return (type && correctFunctionParamType(type)) || correctObjectExpression(arg)
+    return (type && correctFunctionParamType(arg)) || correctObjectExpression(arg)
 }
 
 export function isTrackableParam(node: arkts.ETSParameterExpression, isLast: boolean) {
@@ -191,22 +199,24 @@ export function isSyntheticReturnStatement(node: arkts.AstNode) {
     ) || (
         arkts.isBlockStatement(node) &&
         node.statements.length === 2 &&
-        arkts.isMemberExpression(node.statements[0]) &&
-        arkts.isIdentifier(node.statements[0].object) &&
-        node.statements[0].object.name === RuntimeNames.SCOPE &&
-        arkts.isIdentifier(node.statements[0].property) &&
-        node.statements[0].property.name === RuntimeNames.INTERNAL_VALUE &&
+        arkts.isExpressionStatement(node.statements[0]) &&
+        arkts.isMemberExpression(node.statements[0].expression) &&
+        arkts.isIdentifier(node.statements[0].expression.object) &&
+        node.statements[0].expression.object.name === RuntimeNames.SCOPE &&
+        arkts.isIdentifier(node.statements[0].expression.property) &&
+        node.statements[0].expression.property.name === RuntimeNames.INTERNAL_VALUE &&
         arkts.isReturnStatement(node.statements[1]) &&
         node.statements[1].argument &&
         arkts.isThisExpression(node.statements[1].argument)
     ) || (
         arkts.isBlockStatement(node) &&
         node.statements.length === 2 &&
-        arkts.isMemberExpression(node.statements[0]) &&
-        arkts.isIdentifier(node.statements[0].object) &&
-        node.statements[0].object.name === RuntimeNames.SCOPE &&
-        arkts.isIdentifier(node.statements[0].property) &&
-        node.statements[0].property.name === RuntimeNames.INTERNAL_VALUE &&
+        arkts.isExpressionStatement(node.statements[0]) &&
+        arkts.isMemberExpression(node.statements[0].expression) &&
+        arkts.isIdentifier(node.statements[0].expression.object) &&
+        node.statements[0].expression.object.name === RuntimeNames.SCOPE &&
+        arkts.isIdentifier(node.statements[0].expression.property) &&
+        node.statements[0].expression.property.name === RuntimeNames.INTERNAL_VALUE &&
         arkts.isReturnStatement(node.statements[1]) &&
         node.statements[1].argument == undefined
     )
@@ -254,4 +264,11 @@ export function getDeclResolveGensym(node: arkts.AstNode): arkts.AstNode | undef
         }
     }
     return decl
+}
+
+export function moveToFront<T>(arr: T[], idx: number): T[] {
+    if (idx >= arr.length) {
+        throw new Error(`Invalid argument, size of array: ${arr.length}, idx: ${idx}`)
+    }
+    return [arr[idx], ...arr.slice(0, idx), ...arr.slice(idx + 1)]
 }

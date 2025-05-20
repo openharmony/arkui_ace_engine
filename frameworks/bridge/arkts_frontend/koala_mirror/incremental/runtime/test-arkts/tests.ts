@@ -26,8 +26,7 @@ import { __ARKTEST__ as state_basics } from "./states/state_basics.test"
 import { __ARKTEST__ as State } from "./states/State.test"
 import { __ARKTEST__ as TreeNode } from "./tree/TreeNode.test"
 import { __ARKTEST__ as TreePath } from "./tree/TreePath.test"
-import { __ARKTEST__ as basic_test } from "./exec/basic.test"
 
 suite("runtime", () => {
-    Array.of<string>(basic_test, Easing, MarkableQueue, bind, changeListener, contextLocal, remember, repeat, Journal, /* state_basics,  */State, TreeNode, TreePath)
+    Array.of<string>(Easing, MarkableQueue, bind, changeListener, contextLocal, remember, repeat, Journal, /* state_basics,  */State, TreeNode, TreePath)
 })

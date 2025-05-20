@@ -13,10 +13,31 @@
  * limitations under the License.
  */
 
-import { ClassProperty, Expression, TypeNode } from "../../generated"
+import { AnnotationUsage, ClassProperty, Expression, TypeNode } from "../../generated"
 import { Es2pandaModifierFlags } from "../../generated/Es2pandaEnums"
 import { isSameNativeObject } from "../peers/ArktsObject"
 import { updateNodeByNode } from "../utilities/private"
+
+export function createClassProperty(
+    key: Expression | undefined,
+    value: Expression | undefined,
+    typeAnnotation: TypeNode | undefined,
+    modifiers: Es2pandaModifierFlags,
+    isComputed: boolean,
+    annotations?: readonly AnnotationUsage[],
+): ClassProperty {
+    const res = ClassProperty.createClassProperty(
+        key,
+        value,
+        typeAnnotation,
+        modifiers,
+        isComputed,
+    )
+    if (annotations) {
+        res.setAnnotations(annotations)
+    }
+    return res
+}
 
 export function updateClassProperty(
     original: ClassProperty,
@@ -24,18 +45,20 @@ export function updateClassProperty(
     value: Expression | undefined,
     typeAnnotation: TypeNode | undefined,
     modifiers: Es2pandaModifierFlags,
-    isComputed: boolean
-) {
+    isComputed: boolean,
+    annotations?: readonly AnnotationUsage[],
+): ClassProperty {
     if (isSameNativeObject(key, original.key)
         && isSameNativeObject(value, original.value)
         && isSameNativeObject(typeAnnotation, original.typeAnnotation)
         && isSameNativeObject(modifiers, original.modifierFlags)
         && isSameNativeObject(isComputed, original.isComputed)
+        && isSameNativeObject(annotations, original.annotations)
     ) {
         return original
     }
     return updateNodeByNode(
-        ClassProperty.createClassProperty(key, value, typeAnnotation, modifiers, isComputed),
+        createClassProperty(key, value, typeAnnotation, modifiers, isComputed, annotations),
         original
     )
 }

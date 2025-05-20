@@ -14,20 +14,37 @@
  */
 
 import {
-    ETSFunctionType,
-    Expression,
-    FunctionSignature,
-    MethodDefinition,
     TSInterfaceDeclaration, TSInterfaceHeritage
 } from "../../generated"
 import {
-    Es2pandaMethodDefinitionKind,
     Es2pandaModifierFlags,
-    Es2pandaScriptFunctionFlags
 } from "../../generated/Es2pandaEnums"
 import { isSameNativeObject } from "../peers/ArktsObject"
 import { updateNodeByNode } from "../utilities/private"
 import { AstNode } from "../peers/AstNode"
+
+export function createTSInterfaceDeclaration(
+    _extends: readonly TSInterfaceHeritage[],
+    id: AstNode | undefined,
+    typeParams: AstNode | undefined,
+    body: AstNode | undefined,
+    isStatic: boolean,
+    isExternal: boolean,
+    modifierFlags?: Es2pandaModifierFlags,
+): TSInterfaceDeclaration {
+    const res = TSInterfaceDeclaration.createTSInterfaceDeclaration(
+        _extends,
+        id,
+        typeParams,
+        body,
+        isStatic,
+        isExternal
+    )
+    if (modifierFlags) {
+        res.modifierFlags = modifierFlags
+    }
+    return res
+}
 
 export function updateTSInterfaceDeclaration(
     original: TSInterfaceDeclaration,
@@ -36,25 +53,28 @@ export function updateTSInterfaceDeclaration(
     typeParams: AstNode | undefined,
     body: AstNode | undefined,
     isStatic: boolean,
-    isExternal: boolean
-) {
+    isExternal: boolean,
+    modifierFlags?: Es2pandaModifierFlags,
+): TSInterfaceDeclaration {
     if (isSameNativeObject(_extends, original.extends)
         && isSameNativeObject(id, original.id)
         && isSameNativeObject(typeParams, original.typeParams)
         && isSameNativeObject(body, original.body)
         && isSameNativeObject(isStatic, original.isStatic)
         && isSameNativeObject(isExternal, original.isFromExternal)
+        && isSameNativeObject(modifierFlags, original.modifierFlags)
     ) {
         return original
     }
     return updateNodeByNode(
-        TSInterfaceDeclaration.createTSInterfaceDeclaration(
+        createTSInterfaceDeclaration(
             _extends,
             id,
             typeParams,
             body,
             isStatic,
-            isExternal
+            isExternal,
+            modifierFlags,
         ),
         original
     )

@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 export class TSTypePredicate extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 120)
+        assertValidPeer(pointer, 121)
         super(pointer)
     }
     static createTSTypePredicate(parameterName: Expression | undefined, typeAnnotation: TypeNode | undefined, asserts: boolean): TSTypePredicate {

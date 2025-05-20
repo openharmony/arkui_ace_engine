@@ -33,7 +33,7 @@ import { Es2pandaTokenType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 export class UnaryExpression extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 147)
+        assertValidPeer(pointer, 148)
         super(pointer)
     }
     static createUnaryExpression(argument: Expression | undefined, unaryOperator: Es2pandaTokenType): UnaryExpression {

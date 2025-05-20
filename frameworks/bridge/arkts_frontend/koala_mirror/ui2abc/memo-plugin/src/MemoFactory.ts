@@ -30,12 +30,20 @@ export class factory {
             arkts.factory.createIdentifier(RuntimeNames.ID_TYPE, undefined),
         )
     }
-    static createContextTypesImportDeclaration(path?: string): arkts.ETSImportDeclaration {
-        return arkts.factory.createETSImportDeclaration(
+    static createHashImportSpecifier(): arkts.ImportSpecifier {
+        return arkts.factory.createImportSpecifier(
+            arkts.factory.createIdentifier(RuntimeNames.HASH, undefined),
+            arkts.factory.createIdentifier(RuntimeNames.HASH, undefined),
+        )
+    }
+
+    static createContextTypesImportDeclaration(program: arkts.Program, debug: boolean, path?: string) {
+        const mandatory = [factory.createContextTypeImportSpecifier(), factory.createIdTypeImportSpecifier()]
+        arkts.factory.createETSImportDeclaration(
             arkts.factory.createStringLiteral(path ?? RuntimeNames.CONTEXT_TYPE_DEFAULT_IMPORT),
-            [factory.createContextTypeImportSpecifier(), factory.createIdTypeImportSpecifier()],
+            debug ? [...mandatory, factory.createHashImportSpecifier()] : mandatory,
             arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL,
-            arkts.global.compilerContext.program,
+            program,
             arkts.Es2pandaImportFlags.IMPORT_FLAGS_DEFAULT_IMPORT
         )
     }
@@ -49,7 +57,8 @@ export class factory {
                     arkts.factory.createETSTypeReferencePart(
                         arkts.factory.createIdentifier(RuntimeNames.CONTEXT_TYPE, undefined),
                         undefined,
-                        undefined                    )
+                        undefined
+                    )
                 )
             ),
             false
@@ -77,22 +86,28 @@ export class factory {
     static createContextArgument(): arkts.Expression {
         return arkts.factory.createIdentifier(RuntimeNames.CONTEXT, undefined)
     }
-    static createIdArgument(hash: arkts.NumberLiteral | arkts.StringLiteral): arkts.Expression {
+    static createIdArgument(hash: arkts.Expression): arkts.Expression {
         return arkts.factory.createBinaryExpression(
             arkts.factory.createIdentifier(RuntimeNames.ID, undefined),
             hash,
             arkts.Es2pandaTokenType.TOKEN_TYPE_PUNCTUATOR_PLUS,
         )
     }
-    static createHiddenArguments(hash: arkts.NumberLiteral | arkts.StringLiteral): arkts.Expression[] {
+    static createHiddenArguments(hash: arkts.Expression): arkts.Expression[] {
         return [factory.createContextArgument(), factory.createIdArgument(hash)]
     }
 
     // Memo parameters
     static createMemoParameterIdentifier(name: string): arkts.Identifier {
+        if (name === "=t") {
+            return arkts.factory.createIdentifier(`${RuntimeNames.PARAMETER}_this`, undefined)
+        }
         return arkts.factory.createIdentifier(`${RuntimeNames.PARAMETER}_${name}`, undefined)
     }
     static createMemoParameterDeclarator(id: number, name: string): arkts.VariableDeclarator {
+        const original = (name == "this" || name == "=t") ?
+            arkts.factory.createThisExpression() :
+            arkts.factory.createIdentifier(name, undefined)
         return arkts.factory.createVariableDeclarator(
             arkts.Es2pandaVariableDeclaratorFlag.VARIABLE_DECLARATOR_FLAG_CONST,
             factory.createMemoParameterIdentifier(name),
@@ -106,7 +121,7 @@ export class factory {
                 ),
                 [
                     arkts.factory.createNumberLiteral(id),
-                    arkts.factory.createIdentifier(name, undefined),
+                    original,
                 ],
                 undefined,
             )
@@ -169,7 +184,7 @@ export class factory {
     }
 
     // Recache
-    static createScopeDeclaration(returnTypeAnnotation: arkts.TypeNode | undefined, hash: arkts.NumberLiteral | arkts.StringLiteral, cnt: number): arkts.VariableDeclaration {
+    static createScopeDeclaration(returnTypeAnnotation: arkts.TypeNode | undefined, hash: arkts.Expression, cnt: number): arkts.VariableDeclaration {
         return arkts.factory.createVariableDeclaration(
             arkts.Es2pandaVariableDeclarationKind.VARIABLE_DECLARATION_KIND_CONST,
             [
@@ -208,38 +223,41 @@ export class factory {
                 false
             ),
             arg ? [arg] : [],
-            undefined,
+            undefined
         )
     }
     static createReturnThis(): arkts.BlockStatement {
         return arkts.factory.createBlockStatement([
-            factory.createRecacheCall(),
+            arkts.factory.createExpressionStatement(
+                factory.createRecacheCall()
+            ),
             arkts.factory.createReturnStatement(
                 arkts.factory.createThisExpression()
             )
         ])
     }
+    static createCached(): arkts.Expression {
+        return arkts.factory.createMemberExpression(
+            arkts.factory.createIdentifier(RuntimeNames.SCOPE, undefined),
+            arkts.factory.createIdentifier(RuntimeNames.INTERNAL_VALUE, undefined),
+            arkts.Es2pandaMemberExpressionKind.MEMBER_EXPRESSION_KIND_PROPERTY_ACCESS,
+            false,
+            false,
+        )
+    }
     static createSyntheticReturnStatement(isVoidReturn: boolean, stableThis: boolean): arkts.ReturnStatement | arkts.BlockStatement {
         if (isVoidReturn) {
             return arkts.factory.createBlockStatement([
-                arkts.factory.createMemberExpression(
-                    arkts.factory.createIdentifier(RuntimeNames.SCOPE, undefined),
-                    arkts.factory.createIdentifier(RuntimeNames.INTERNAL_VALUE, undefined),
-                    arkts.Es2pandaMemberExpressionKind.MEMBER_EXPRESSION_KIND_NONE,
-                    false,
-                    false,
+                arkts.factory.createExpressionStatement(
+                    this.createCached()
                 ),
                 arkts.factory.createReturnStatement(undefined)
             ])
         }
         if (stableThis) {
             return arkts.factory.createBlockStatement([
-                arkts.factory.createMemberExpression(
-                    arkts.factory.createIdentifier(RuntimeNames.SCOPE, undefined),
-                    arkts.factory.createIdentifier(RuntimeNames.INTERNAL_VALUE, undefined),
-                    arkts.Es2pandaMemberExpressionKind.MEMBER_EXPRESSION_KIND_NONE,
-                    false,
-                    false,
+                arkts.factory.createExpressionStatement(
+                    this.createCached()
                 ),
                 arkts.factory.createReturnStatement(
                     arkts.factory.createThisExpression()
@@ -247,13 +265,7 @@ export class factory {
             ])
         }
         return arkts.factory.createReturnStatement(
-            arkts.factory.createMemberExpression(
-                arkts.factory.createIdentifier(RuntimeNames.SCOPE, undefined),
-                arkts.factory.createIdentifier(RuntimeNames.INTERNAL_VALUE, undefined),
-                arkts.Es2pandaMemberExpressionKind.MEMBER_EXPRESSION_KIND_NONE,
-                false,
-                false,
-            ),
+            this.createCached(),
         )
     }
     static createIfStatementWithSyntheticReturnStatement(syntheticReturnStatement: arkts.ReturnStatement | arkts.BlockStatement): arkts.IfStatement {
@@ -292,6 +304,43 @@ export class factory {
         )
     }
 
+    // All these deduce functions is a huge woraround for
+    // recheck incapable to infer proper return types on lambdas.
+    static deduceWrapperType(node: arkts.Expression): arkts.TypeNode|undefined {
+        if (arkts.isArrowFunctionExpression(node)) return factory.deduceArrowWrapperType(node)
+        if (arkts.isObjectExpression(node)) return factory.deduceObjectWrapperType(node)
+        if (arkts.isTSAsExpression(node)) return factory.deduceAsWrapperType(node)
+        return undefined
+    }
+    static deduceAsWrapperType(node: arkts.TSAsExpression): arkts.TypeNode|undefined {
+        return node.typeAnnotation
+    }
+    static deduceObjectWrapperType(node: arkts.Expression): arkts.TypeNode|undefined {
+        return undefined
+    }
+    static deduceArrowWrapperType(arrow: arkts.ArrowFunctionExpression): arkts.TypeNode|undefined {
+        const origType: arkts.TypeNode | undefined = arrow.function?.returnTypeAnnotation
+        if (origType == undefined) return undefined
+        const params = arrow.function?.params?.map(it => {
+            const param = it as arkts.ETSParameterExpression
+            return arkts.factory.createETSParameterExpression(
+                arkts.factory.createIdentifier(param.ident!.name),
+                param.isOptional,
+                undefined,
+                param.typeAnnotation,
+                undefined
+            )
+        }) ?? []
+        return arkts.factory.createETSFunctionType(
+            undefined,
+            params,
+            origType,
+            false,
+            arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_NONE,
+            undefined
+        )
+    }
+
     // Compute
     static createLambdaWrapper(node: arkts.Expression): arkts.ArrowFunctionExpression {
         return arkts.factory.createArrowFunctionExpression(
@@ -301,7 +350,7 @@ export class factory {
                 ]),
                 undefined,
                 [],
-                undefined,
+                factory.deduceWrapperType(node),
                 false,
                 arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_ARROW,
                 arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_NONE,
@@ -310,7 +359,7 @@ export class factory {
             )
         )
     }
-    static createComputeExpression(hash: arkts.NumberLiteral | arkts.StringLiteral, node: arkts.Expression): arkts.CallExpression {
+    static createComputeExpression(hash: arkts.Expression, node: arkts.Expression): arkts.CallExpression {
         return arkts.factory.createCallExpression(
             arkts.factory.createMemberExpression(
                 arkts.factory.createIdentifier(RuntimeNames.CONTEXT, undefined),

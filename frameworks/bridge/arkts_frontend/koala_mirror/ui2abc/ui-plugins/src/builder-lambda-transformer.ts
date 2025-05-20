@@ -165,7 +165,7 @@ function transformBuilderLambdaCall(node: arkts.CallExpression): arkts.CallExpre
 }
 
 // TODO: for now it all works, but it is unclear
-// if it will keep working under Rechek.
+// if it will keep working under Recheck.
 // in theory we don't add new files to import here,
 // only the new names from the same file,
 // to it should be okay.

@@ -250,7 +250,10 @@ class TimeAnimationImpl<Value> implements TimeAnimation<Value> {
 
     running: boolean = false
 
-    constructor(compute: (time: int64) => Value, initial: int64 = 0) {
+    constructor(
+        compute: (time: int64) => Value,
+        initial: int64 = 0
+    ) {
         this.lastState = initial
         this.lastValue = compute(initial)
         this.compute = compute
@@ -298,7 +301,12 @@ class PeriodicAnimationImpl<Value> implements TimeAnimation<Value> {
 
     running: boolean = false
 
-    constructor(delay: int32, period: uint32, compute: (count: int64) => Value, initial: int64 = 0) {
+    constructor(
+        delay: int32,
+        period: uint32,
+        compute: (count: int64) => Value,
+        initial: int64 = 0
+    ) {
         this.lastState = initial
         this.lastValue = compute(initial)
         this.compute = compute

@@ -1,0 +1,37 @@
+import * as arkts from "../../../../src/arkts-api"
+
+class ConstructorWithOverload extends arkts.AbstractVisitor {
+    visitor(beforeChildren: arkts.ETSModule): arkts.ETSModule
+    visitor(beforeChildren: arkts.AstNode): arkts.AstNode {
+        const node = this.visitEachChild(beforeChildren)
+        if (arkts.isScriptFunction(node) && node.id?.name == "constructor") {
+            return arkts.factory.updateScriptFunction(
+                node,
+                arkts.factory.createBlockStatement(
+                    [
+
+                        arkts.factory.createIfStatement(
+                            arkts.factory.createBooleanLiteral(true),
+                            arkts.factory.createReturnStatement(),
+                            undefined
+                        ),
+                        ...(arkts.isBlockStatement(node.body) ? node.body.statements : []),
+                    ]
+                ),
+                node.typeParams,
+                node.params,
+                node.returnTypeAnnotation,
+                node.hasReceiver,
+                node.flags,
+                node.modifierFlags,
+                node.id,
+                node.annotations
+            )
+        }
+        return node
+    }
+}
+
+export function constructorWithOverload(program: arkts.Program) {
+    return (new ConstructorWithOverload()).visitor(program.astNode)
+}

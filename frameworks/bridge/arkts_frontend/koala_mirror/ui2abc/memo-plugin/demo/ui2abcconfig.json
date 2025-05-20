@@ -12,9 +12,15 @@
         },
         "plugins": [
             {
-                "transform": "..",
-                "stage": "checked",
+                "transform": "@koalaui/memo-plugin/ParserTransformer",
+                "stage": "parsed",
                 "name": "memo"
+            },
+            {
+                "transform": "../lib/MemoTransformer",
+                "stage": "checked",
+                "name": "memo",
+                "manuallyDisableInsertingImport": true
             }
         ]
     },

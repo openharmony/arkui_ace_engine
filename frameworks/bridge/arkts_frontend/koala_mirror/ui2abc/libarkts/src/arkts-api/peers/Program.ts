@@ -16,7 +16,7 @@
 import { ArktsObject } from "./ArktsObject"
 import { global } from "../static/global"
 import { acceptNativeObjectArrayResult, unpackString } from "../utilities/private"
-import { KNativePointer } from "@koalaui/interop"
+import { KNativePointer, nullptr } from "@koalaui/interop"
 import { ETSModule } from "../../generated"
 
 export class Program extends ArktsObject {
@@ -25,7 +25,9 @@ export class Program extends ArktsObject {
     }
 
     get astNode(): ETSModule {
-        return new ETSModule(global.es2panda._ProgramAst(global.context, this.peer))
+        let program = global.es2panda._ProgramAst(global.context, this.peer)
+        if (program == nullptr) throw new Error(`astNode() cannt get AST`)
+        return new ETSModule(program)
     }
 
     get externalSources(): ExternalSource[] {

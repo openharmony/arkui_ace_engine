@@ -47,7 +47,9 @@ export class ReturnTransformer extends arkts.AbstractVisitor {
             }
             if (node.argument == undefined) {
                 return arkts.factory.createBlockStatement([
-                    factory.createRecacheCall(),
+                    arkts.factory.createExpressionStatement(
+                        factory.createRecacheCall()
+                    ),
                     node
                 ])
             }

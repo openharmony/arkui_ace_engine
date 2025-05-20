@@ -34,7 +34,7 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 export class TSPropertySignature extends AnnotatedAstNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 104)
+        assertValidPeer(pointer, 105)
         super(pointer)
     }
     static createTSPropertySignature(key: Expression | undefined, typeAnnotation: TypeNode | undefined, computed: boolean, optional_arg: boolean, readonly_arg: boolean): TSPropertySignature {

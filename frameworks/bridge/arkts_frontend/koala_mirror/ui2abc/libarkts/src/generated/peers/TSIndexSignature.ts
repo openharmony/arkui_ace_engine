@@ -35,7 +35,7 @@ import { TypeNode } from "./TypeNode"
 import { TypedAstNode } from "./TypedAstNode"
 export class TSIndexSignature extends TypedAstNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 135)
+        assertValidPeer(pointer, 136)
         super(pointer)
     }
     static createTSIndexSignature(param: Expression | undefined, typeAnnotation: TypeNode | undefined, readonly_arg: boolean): TSIndexSignature {

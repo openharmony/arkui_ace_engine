@@ -151,6 +151,7 @@ struct VMEntry {
     void* enter;
     void* emitEvent;
     void* restartWith;
+    void* loadView;
     ForeignVMContext foreignVMContext;
 };
 
@@ -483,6 +484,8 @@ struct AppInfo {
     const char* emitEventMethodSig;
     const char* restartWithMethodName;
     const char* restartWithMethodSig;
+    const char* loadViewMethodName;
+    const char* loadViewMethodSig;
 };
 
 #ifdef KOALA_JNI
@@ -496,6 +499,8 @@ const AppInfo javaAppInfo = {
     "(IIJ)Z",
     "emitEvent",
     "(IIII)Ljava/lang/String;",
+    "UNUSED",
+    "()V"
 };
 #endif
 
@@ -510,6 +515,8 @@ const AppInfo pandaAppInfo = {
     "IIJ:Z",
     "emitEvent",
     "IIII:Lstd/core/String;",
+    "UNUSED",
+    "I:I"
 };
 const AppInfo harnessAppInfo = {
         "@koalaui/ets-harness/src/EtsHarnessApplication/EtsHarnessApplication",
@@ -538,6 +545,8 @@ const AppInfo harnessAniAppInfo = {
         "IIII:Lstd/core/String;",
         "restartWith",
         "Lstd/core/String;:V",
+        "UNUSED",
+        "I:I"
 };
 const AppInfo aniAppInfo = {
     "L@ohos/arkui/Application/Application;",
@@ -549,6 +558,10 @@ const AppInfo aniAppInfo = {
     "IIJ:Z",
     "emitEvent",
     "IIII:Lstd/core/String;",
+    "UNUSED",
+    "I:I",
+    "loadView",
+    "Lstd/core/String;Lstd/core/String;:Lstd/core/String;",
 };
 #endif
 
@@ -627,11 +640,7 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
             }
             return nullptr;
         }
-#if defined (KOALA_OHOS_ARM64)
-        auto useNativeLog = true;
-#else
         auto useNativeLog = false;
-#endif
         auto app = etsEnv->NewGlobalRef(etsEnv->CallStaticObjectMethod(
             appClass, create,
             etsEnv->NewStringUTF(appUrl), etsEnv->NewStringUTF(appParams),
@@ -706,11 +715,7 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
             return nullptr;
         }
 
-#if defined (KOALA_OHOS_ARM64)
-        ani_boolean useNativeLog = ANI_TRUE;
-#else
         ani_boolean useNativeLog = ANI_FALSE;
-#endif
         ani_string appUrlString {};
         status = env->String_NewUTF8(appUrl, strlen(appUrl), &appUrlString);
         if (status != ANI_OK) {
@@ -762,12 +767,20 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
             return nullptr;
         }
         g_vmEntry.emitEvent = reinterpret_cast<void *>(emitEvent);
+        ani_method loadView {};
+        status = env->Class_FindMethod(appClass, appInfo->loadViewMethodName, appInfo->loadViewMethodSig, &loadView);
+        if (status != ANI_OK) {
+            LOGE("Cannot find `%" LOG_PUBLIC "s` method %" LOG_PUBLIC "s", appInfo->loadViewMethodName, appInfo->loadViewMethodSig);
+            ResetErrorIfExists(env);
+            return nullptr;
+        }
+        g_vmEntry.loadView = reinterpret_cast<void *>(loadView);
 
         if (isTestEnv) {
             ani_method restartWith {};
             status = env->Class_FindMethod(appClass, appInfo->restartWithMethodName, appInfo->restartWithMethodSig, &restartWith);
             if (status != ANI_OK) {
-                LOGE("Cannot find `restartWith` method %" LOG_PUBLIC "s", appInfo->restartWithMethodSig);
+                LOGE("Cannot find `restartWith` method sig=%" LOG_PUBLIC "s", appInfo->restartWithMethodSig);
                 ResetErrorIfExists(env);
                 return nullptr;
             }
@@ -1002,6 +1015,44 @@ extern "C" DLL_EXPORT void RestartWith(const char* page) {
         }
     }
 #endif
+}
+
+extern "C" DLL_EXPORT const char* LoadView(const char* className, const char* params) {
+#if defined(KOALA_ANI)
+    if (g_vmEntry.vmKind == PANDA_ANI_VM_KIND) {
+        ani_env *env = reinterpret_cast<ani_env *>(g_vmEntry.env);
+        if (!g_vmEntry.loadView) {
+            return strdup("Cannot find loadView() method");
+        }
+        ani_string classNameString {};
+        auto status = env->String_NewUTF8(className, strlen(className), &classNameString);
+        if (status != ANI_OK) {
+            return strdup("Cannot make ANI string");
+        }
+        ani_string paramsString {};
+        status = env->String_NewUTF8(params, strlen(params), &paramsString);
+        if (status != ANI_OK) {
+            ResetErrorIfExists(env);
+            return strdup("Cannot make ANI string");
+        }
+        ani_string resultString = nullptr;
+        status = env->Object_CallMethod_Ref(reinterpret_cast<ani_object>(g_vmEntry.app),
+            reinterpret_cast<ani_method>(g_vmEntry.loadView),
+            (ani_ref*)&resultString,
+            classNameString, paramsString);
+        if (status != ANI_OK) {
+            ResetErrorIfExists(env);
+            return strdup("Calling laodView() method gave an error");
+        }
+        ani_size resultStringLength = 0;
+        status = env->String_GetUTF8Size(resultString, &resultStringLength);
+        char* resultChars = (char*)malloc(resultStringLength);
+        status = env->String_GetUTF8(resultString, resultChars, resultStringLength, &resultStringLength);
+        return resultChars;
+
+    }
+#endif
+    return strdup("Unsupported");
 }
 
 namespace fs = std::filesystem;

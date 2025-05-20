@@ -18,11 +18,23 @@ import commonjs from '@rollup/plugin-commonjs'
 
 const ENABLE_SOURCE_MAPS = true;  // Enable for debugging
 
-/** @type {import("rollup").RollupOptions} */
-export default {
-    input: "./src/MemoTransformer.ts",
+export default [
+    buildPlugin({
+        src: "./src/ParserTransformer.ts",
+        dst: "./lib/ParserTransformer.js",
+    }),
+    buildPlugin({
+        src: "./src/MemoTransformer.ts",
+        dst: "./lib/MemoTransformer.js",
+    })
+]
+
+/** @return {import("rollup").RollupOptions} */
+function buildPlugin({ src, dst }) {
+  return {
+    input: src,
     output: {
-        file: "./lib/MemoTransformer.js",
+        file: dst,
         format: "commonjs",
         plugins: [
             // terser()
@@ -46,7 +58,8 @@ export default {
         nodeResolve({
             extensions: [".js", ".mjs", ".cjs", ".ts", ".cts", ".mts"]
         })
-    ],
+    ]
+  }
 }
 
 function APACHE_LICENSE_HEADER() {

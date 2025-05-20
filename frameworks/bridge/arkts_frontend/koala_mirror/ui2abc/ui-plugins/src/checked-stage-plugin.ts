@@ -14,7 +14,6 @@
  */
 
 import * as arkts from "@koalaui/libarkts"
-import { StructTransformer } from './struct-transformer'
 import { StyleTransformer } from "./style-transformer"
 import { EtsFirstArgTransformer } from "./ets-first-arg-transformer"
 import { BuilderLambdaTransformer } from "./builder-lambda-transformer"
@@ -27,11 +26,10 @@ export default function checkedTransformer(
     userPluginOptions?: TransformerOptions
 ) {
     console.log("CHECKED: ", userPluginOptions)
-    return (node: arkts.ETSModule) => [
+    return (program: arkts.Program) => [
         new EtsFirstArgTransformer(),
         new StyleTransformer(),
-        new BuilderLambdaTransformer(),
-        new StructTransformer()
+        new BuilderLambdaTransformer()
     ]
-        .reduce((node: arkts.AstNode, transformer) => transformer.visitor(node), node)
+        .reduce((node: arkts.AstNode, transformer) => transformer.visitor(node), program.astNode)
 }

@@ -21,6 +21,14 @@ class AnalysisVisitorOptions {
     applyMemo?: MemoFunctionKind
 }
 
+function isSetter(node: arkts.ScriptFunction) {
+    return node.flags & arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_SETTER
+}
+
+function isGetter(node: arkts.ScriptFunction) {
+    return node.flags & arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_GETTER
+}
+
 export class AnalysisVisitor extends arkts.AbstractVisitor {
     // TODO: migrate to wrappers instead of pointers
     constructor(
@@ -35,6 +43,9 @@ export class AnalysisVisitor extends arkts.AbstractVisitor {
     visitor(node: arkts.Expression, options?: AnalysisVisitorOptions): arkts.Expression
     visitor(node: arkts.AstNode, options?: AnalysisVisitorOptions): arkts.AstNode {
         if (arkts.isScriptFunction(node)) {
+            if (isSetter(node) || isGetter(node)) {
+                return this.visitEachChild(node, { applyMemo: options?.applyMemo ? options?.applyMemo : getMemoFunctionKind(node) })
+            }
             const kind = options?.applyMemo ? options?.applyMemo : getMemoFunctionKind(node)
             this.scriptFunctions.set(node.originalPeer, kind)
             return this.visitEachChild(node, { applyMemo: false })

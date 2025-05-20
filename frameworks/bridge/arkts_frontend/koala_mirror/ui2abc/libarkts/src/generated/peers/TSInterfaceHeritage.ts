@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 export class TSInterfaceHeritage extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 132)
+        assertValidPeer(pointer, 133)
         super(pointer)
     }
     static createTSInterfaceHeritage(expr?: TypeNode): TSInterfaceHeritage {

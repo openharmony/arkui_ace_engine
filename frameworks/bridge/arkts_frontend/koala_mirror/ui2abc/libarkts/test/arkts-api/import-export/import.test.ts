@@ -26,29 +26,24 @@ suite(util.basename(__filename), () => {
 
         let script = arkts.createETSModuleFromSource(sample_in)
 
-        script = arkts.updateETSModuleByStatements(
-            script,
+        arkts.factory.createETSImportDeclaration(
+            arkts.factory.createStringLiteral(
+                './variable'
+            ),
             [
-                arkts.factory.createETSImportDeclaration(
-                    arkts.factory.createStringLiteral(
-                        './variable'
+                arkts.factory.createImportSpecifier(
+                    arkts.factory.createIdentifier(
+                        'X'
                     ),
-                    [
-                        arkts.factory.createImportSpecifier(
-                            arkts.factory.createIdentifier(
-                                'X'
-                            ),
-                            arkts.factory.createIdentifier(
-                                'X'
-                            )
-                        )
-                    ],
-                    arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL,
-                    global.compilerContext.program,
-                    arkts.Es2pandaImportFlags.IMPORT_FLAGS_DEFAULT_IMPORT
+                    arkts.factory.createIdentifier(
+                        'X'
+                    )
                 )
-            ]
-            )
+            ],
+            arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL,
+            global.compilerContext.program,
+            arkts.Es2pandaImportFlags.IMPORT_FLAGS_DEFAULT_IMPORT
+        )
 
         util.ARKTS_TEST_ASSERTION(
             script,
@@ -68,31 +63,30 @@ suite(util.basename(__filename), () => {
         let script = arkts.createETSModuleFromSource(sample_in)
         const importDeclaration = script.statements[0] as arkts.ETSImportDeclaration
 
-        script = arkts.updateETSModuleByStatements(
-            script,
+        arkts.factory.createETSImportDeclaration(
+            arkts.factory.createStringLiteral(
+                './variable'
+            ),
             [
-                arkts.factory.updateETSImportDeclaration(
-                    importDeclaration,
-                    importDeclaration.source,
-                    [
-                        arkts.factory.createImportSpecifier(
-                            arkts.factory.createIdentifier(
-                                'X'
-                            ),
-                            arkts.factory.createIdentifier(
-                                'X'
-                            )
-                        )
-                    ],
-                    arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL,
+                arkts.factory.createImportSpecifier(
+                    arkts.factory.createIdentifier(
+                        'X'
+                    ),
+                    arkts.factory.createIdentifier(
+                        'X'
+                    )
                 )
-            ]
+            ],
+            arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL,
+            global.compilerContext.program,
+            arkts.Es2pandaImportFlags.IMPORT_FLAGS_DEFAULT_IMPORT
         )
 
         util.ARKTS_TEST_ASSERTION(
             script,
             `
             import { X } from "./variable"
+            import { Y } from "./variable"
             `,
             arkts.Es2pandaContextState.ES2PANDA_STATE_PARSED
         )
@@ -111,32 +105,30 @@ suite(util.basename(__filename), () => {
         let script = arkts.createETSModuleFromSource(sample_in)
         const importDeclaration = script.statements[0] as arkts.ETSImportDeclaration
 
-        script = arkts.updateETSModuleByStatements(
-            script,
+        arkts.factory.createETSImportDeclaration(
+            arkts.factory.createStringLiteral(
+                './variable'
+            ),
             [
-                arkts.factory.updateETSImportDeclaration(
-                    importDeclaration,
-                    importDeclaration.source,
-                    [
-                        arkts.factory.createImportSpecifier(
-                            arkts.factory.createIdentifier(
-                                'X'
-                            ),
-                            arkts.factory.createIdentifier(
-                                'X'
-                            )
-                        )
-                    ],
-                    arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL,
-                ),
-                script.statements[1]
-            ]
+                arkts.factory.createImportSpecifier(
+                    arkts.factory.createIdentifier(
+                        'X'
+                    ),
+                    arkts.factory.createIdentifier(
+                        'X'
+                    )
+                )
+            ],
+            arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL,
+            global.compilerContext.program,
+            arkts.Es2pandaImportFlags.IMPORT_FLAGS_DEFAULT_IMPORT
         )
 
         util.ARKTS_TEST_ASSERTION(
             script,
             `
             import { X } from "./variable"
+            import { Y } from "./variable"
 
             function main() {
                 console.log(X)

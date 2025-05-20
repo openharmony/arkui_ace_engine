@@ -23,7 +23,7 @@ export function updateVariableDeclarator(
     flag: Es2pandaVariableDeclaratorFlag,
     ident?: Expression,
     init?: Expression
-) {
+): VariableDeclarator {
     if (isSameNativeObject(flag, original.flag)
         && isSameNativeObject(ident, original.id)
         && isSameNativeObject(init, original.init)

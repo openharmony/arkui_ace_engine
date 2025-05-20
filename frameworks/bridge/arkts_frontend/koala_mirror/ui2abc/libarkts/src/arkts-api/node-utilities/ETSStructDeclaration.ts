@@ -20,7 +20,7 @@ import { updateNodeByNode } from "../utilities/private"
 export function updateETSStructDeclaration(
     original: ETSStructDeclaration,
     def?: ClassDefinition
-) {
+): ETSStructDeclaration {
     if (isSameNativeObject(def, original.definition)) {
         return original
     }

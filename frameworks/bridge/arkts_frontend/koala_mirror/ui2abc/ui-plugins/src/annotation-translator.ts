@@ -25,23 +25,6 @@ export class AnnotationsTransformer extends arkts.AbstractVisitor {
         this.program = arkts.global.compilerContext.program
     }
 
-    insertImport(what: string, where: string) {
-        const source: arkts.StringLiteral = arkts.factory.createStringLiteral(where)
-        const imported: arkts.Identifier = arkts.factory.createIdentifier(what, undefined)
-        const importDecl: arkts.ETSImportDeclaration = arkts.factory.createETSImportDeclaration(
-            source,
-            [
-                arkts.factory.createImportSpecifier(
-                    imported,
-                    imported
-                )
-            ],
-            arkts.Es2pandaImportKinds.IMPORT_KINDS_TYPES,
-            arkts.global.compilerContext.program,
-            arkts.Es2pandaImportFlags.IMPORT_FLAGS_DEFAULT_IMPORT
-        )
-        arkts.importDeclarationInsert(importDecl)
-    }
 
     inStruct = false
 
@@ -52,9 +35,6 @@ export class AnnotationsTransformer extends arkts.AbstractVisitor {
         // console.log(`builder transform ${node.dumpSrc()} ${arkts.isAnnotationUsage(node)}`)
         const node = this.visitEachChild(beforeVisit)
 
-        if (arkts.isETSModule(node)) {
-            this.insertImport("memo", "@koalaui/runtime/annotations")
-        }
         if (arkts.isFunctionDeclaration(node) && hasDecorator(node, DecoratorNames.BUILDER)) {
             return arkts.factory.updateFunctionDeclaration(node, node.function, [
                 annotation(InternalAnnotations.MEMO)], node.isAnonymous)

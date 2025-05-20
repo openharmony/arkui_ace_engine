@@ -33,7 +33,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 export class TSParameterProperty extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 121)
+        assertValidPeer(pointer, 122)
         super(pointer)
     }
     static createTSParameterProperty(accessibility: Es2pandaAccessibilityOption, parameter: Expression | undefined, readonly_arg: boolean, isStatic: boolean, isExport: boolean): TSParameterProperty {

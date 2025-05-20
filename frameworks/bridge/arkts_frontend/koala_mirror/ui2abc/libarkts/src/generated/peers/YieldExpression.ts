@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 export class YieldExpression extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 152)
+        assertValidPeer(pointer, 153)
         super(pointer)
     }
     static createYieldExpression(argument: Expression | undefined, isDelegate: boolean): YieldExpression {

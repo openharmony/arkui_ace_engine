@@ -19,7 +19,7 @@ function Stringer(
     @memo
     content?: () => void
 ): void {
-    NodeAttach(() => 
+    NodeAttach(():StringerNode => 
         new StringerNode(), (node: StringerNode): void => {
         node.data = arg
         console.log("I am recomputing with arg: ", arg)

@@ -51,18 +51,32 @@ export class Tags {
     static OBJECT = 107
 }
 
-export function runtimeType(value: Object|String|number|undefined|null): int32 {
-    let type = typeof value
-    if (type == "number") return RuntimeType.NUMBER
-    if (type == "string") return RuntimeType.STRING
-    if (type == "undefined") return RuntimeType.UNDEFINED
-    if (type == "object") return RuntimeType.OBJECT
-    if (type == "boolean") return RuntimeType.BOOLEAN
-    if (type == "bigint") return RuntimeType.BIGINT
-    if (type == "function") return RuntimeType.FUNCTION
-    if (type == "symbol") return RuntimeType.SYMBOL
+export function runtimeType<T>(value: T): int32 {
+    if (value === undefined)
+        return RuntimeType.UNDEFINED;
 
-    throw new Error(`bug: ${value} is ${type}`)
+    if (value === null)
+        return RuntimeType.OBJECT;
+
+    if (value instanceof String)
+        return RuntimeType.STRING
+
+    if (value instanceof Numeric)
+        return RuntimeType.NUMBER
+
+    if (value instanceof Boolean)
+        return RuntimeType.BOOLEAN
+
+    if (value instanceof BigInt)
+        return RuntimeType.BIGINT
+
+    if (value instanceof Function)
+        return RuntimeType.FUNCTION
+
+    if (value instanceof Object)
+        return RuntimeType.OBJECT
+
+    throw new Error(`bug: ${value} is ${typeof value}`)
 }
 
 export function registerCallback(value: object): int32 {
@@ -98,7 +112,7 @@ export abstract class CustomSerializer {
 
 class DateSerializer extends CustomSerializer {
     constructor() {
-        super(Array.of("Date" as string))
+        super(new Array<string>("Date" as string))
     }
 
     serialize(serializer: SerializerBase, value: object, kind: string): void {

@@ -15,12 +15,11 @@
 
 import { global } from "../static/global"
 import { NumberLiteral } from "../../generated"
-import { isSameNativeObject } from "../peers/ArktsObject"
 import { updateNodeByNode } from "../utilities/private"
 
 export function createNumberLiteral(
     value: number
-) {
+): NumberLiteral {
     return new NumberLiteral(
         global.es2panda._CreateNumberLiteral(
             global.context,
@@ -32,10 +31,7 @@ export function createNumberLiteral(
 export function updateNumberLiteral(
     original: NumberLiteral,
     value: number
-) {
-    if (isSameNativeObject(value.toString(), original.str)) {
-        return original
-    }
+): NumberLiteral {
     return updateNodeByNode(
         createNumberLiteral(value),
         original

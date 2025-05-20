@@ -38,3 +38,8 @@ export function __id(): KoalaCallsiteKey {
 export function __key(): KoalaCallsiteKey {
     throw new Error("All __key() references should have been transformed by the compiler plugin.")
 }
+
+export function __hash(value: string): KoalaCallsiteKey {
+    throw new Error("The __hash() function is only for source transformation tests.")
+}
+

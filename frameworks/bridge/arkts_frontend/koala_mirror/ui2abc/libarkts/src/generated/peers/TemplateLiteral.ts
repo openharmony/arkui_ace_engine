@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { TemplateElement } from "./TemplateElement"
 export class TemplateLiteral extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 142)
+        assertValidPeer(pointer, 143)
         super(pointer)
     }
     static createTemplateLiteral(quasis: readonly TemplateElement[], expressions: readonly Expression[], multilineString: string): TemplateLiteral {

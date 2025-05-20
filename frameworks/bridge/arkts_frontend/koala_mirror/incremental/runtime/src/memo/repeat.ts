@@ -16,6 +16,7 @@
 import { KoalaCallsiteKey, int32 } from "@koalaui/common"
 import { __context, __id } from "../internals"
 import { memoEntry1, memoEntry2 } from "./entry"
+import { __memo_context_type, __memo_id_type } from "../internals"
 
 /**
  * Sequentially repeats the {@link action}.
@@ -34,7 +35,7 @@ export function Repeat(
     count: int32,
     /** @memo */
     action: (index: int32) => void
-) {
+): void {
     for (let i = 0; i < count; i++) {
         memoEntry1<int32, void>(__context(), i, action, i)
     }
@@ -59,7 +60,7 @@ export function RepeatWithKey(
     key: (index: int32) => KoalaCallsiteKey,
     /** @memo */
     action: (index: int32) => void
-) {
+): void {
     for (let i = 0; i < count; i++) {
         memoEntry1<int32, void>(__context(), key(i), action, i)
     }
@@ -81,7 +82,7 @@ export function RepeatByArray<T>(
     key: (element: T, index: int32) => KoalaCallsiteKey,
     /** @memo */
     action: (element: T, index: int32) => void
-) {
+): void {
     const length = array.length
     for (let i = 0; i < length; i++) {
         const e: T = array[i]
@@ -106,7 +107,7 @@ export function RepeatRange<T>(
     key: (element: T, index: int32) => KoalaCallsiteKey,
     /** @memo */
     action: (element: T, index: int32) => void
-) {
+): void {
     for (let i: int32 = start; i < end; i++) {
         const e: T = element(i)
         memoEntry2<T, int32, void>(__context(), key(e, i), action, e, i)

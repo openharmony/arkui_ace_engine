@@ -1,9 +1,9 @@
 {
     "name": "@koalaui/fast-arktsc",
-    "version": "1.5.15+devel",
+    "version": "1.7.1+devel",
     "description": "",
-    "main": "lib/index.js",
-    "bin": "lib/index.js",
+    "main": "./index.js",
+    "bin": "./index.js",
     "scripts": {
         "clean": "rimraf out lib",
         "compile": "WEBPACK_NO_MINIMIZE=true webpack --config webpack.config.node.js"

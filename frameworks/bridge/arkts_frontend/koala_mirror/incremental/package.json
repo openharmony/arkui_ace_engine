@@ -5,7 +5,10 @@
         "build-common",
         "compat",
         "common",
-        "runtime"
+        "harness",
+        "runtime",
+        "demo-playground",
+        "compiler-plugin"
     ],
     "devDependencies": {
         "ts-node": "^10.7.0",
@@ -18,7 +21,8 @@
         "prepare": "cd node_modules/typescript && ts-patch install",
         "all:clean": "npm run clean --ws --if-present -s",
         "all:clean:unmemoized": "npm run clean:unmemoized --ws --if-present -s",
-        "compile": "npm run compile -w ./compat && npm run compile -w ./common && npm run compile -w ./runtime"
+        "compile": "npm run compile -w ./compat && npm run compile -w ./common && npm run compile -w ./harness && npm run compile -w ./runtime && npm run compile -w ./demo-playground && npm run compile -w ./compiler-plugin",
+        "build:incremental:gn": "npm run build:incremental:inc:ui2abc --prefix runtime"
     },
     "dependencies": {
         "@koalaui/fast-arktsc": "1.5.15",

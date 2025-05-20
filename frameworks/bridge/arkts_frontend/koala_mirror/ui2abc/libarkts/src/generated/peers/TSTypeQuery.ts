@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 export class TSTypeQuery extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 136)
+        assertValidPeer(pointer, 137)
         super(pointer)
     }
     static createTSTypeQuery(exprName?: Expression): TSTypeQuery {

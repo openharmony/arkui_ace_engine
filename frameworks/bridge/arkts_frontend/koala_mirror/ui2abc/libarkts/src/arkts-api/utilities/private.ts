@@ -21,8 +21,7 @@ import {
     KNativePointer,
     nullptr,
     withString,
-    withStringArray,
-    withStringResult
+    withStringArray
 } from "@koalaui/interop"
 import { NativePtrDecoder } from "./nativePtrDecoder"
 import { Es2pandaAstNodeType, Es2pandaModifierFlags, Es2pandaScriptFunctionFlags } from "../../generated/Es2pandaEnums"
@@ -117,9 +116,10 @@ export function unpackObject<T extends ArktsObject>(type: { new (peer: KNativePo
 }
 
 export function unpackString(peer: KNativePointer): string {
-    return withStringResult(peer) ?? throwError(`failed to unpack (peer shouldn't be NULLPTR)`)
+    return global.interop._RawUtf8ToString(peer)
 }
 
+// TODO: use direct string arguments instead.
 export function passString(str: string | undefined): string {
     if (str === undefined) {
         return ""
@@ -127,6 +127,8 @@ export function passString(str: string | undefined): string {
     return withString(str, (it: string) => it)
 }
 
+
+// TODO: use direct string arguments instead.
 export function passStringArray(strings: readonly string[]): string[] {
     return withStringArray(strings, (it: string[]) => it)
 }

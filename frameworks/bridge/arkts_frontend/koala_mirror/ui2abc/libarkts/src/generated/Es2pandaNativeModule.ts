@@ -28,9 +28,6 @@ import {
 export type KNativePointerArray = BigUint64Array
 
 export class Es2pandaNativeModule {
-    _NumberLiteralStrConst(context: KNativePointer, receiver: KNativePointer): KStringPtr {
-        throw new Error("This methods was not overloaded by native module initialization")
-    }
     _CreateNumberLiteral(context: KNativePointer, value: KInt): KNativePointer {
         throw new Error("This methods was not overloaded by native module initialization")
     }
@@ -1141,6 +1138,12 @@ export class Es2pandaNativeModule {
     _ScriptFunctionFormalParamsLengthConst(context: KNativePointer, receiver: KNativePointer): KUInt {
         throw new Error("This methods was not overloaded by native module initialization")
     }
+    _ScriptFunctionSetIsolatedDeclgenReturnType(context: KNativePointer, receiver: KNativePointer, type: KStringPtr): void {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _ScriptFunctionGetIsolatedDeclgenReturnTypeConst(context: KNativePointer, receiver: KNativePointer): KStringPtr {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
     _ScriptFunctionAnnotations(context: KNativePointer, receiver: KNativePointer): KNativePointer {
         throw new Error("This methods was not overloaded by native module initialization")
     }
@@ -1810,6 +1813,9 @@ export class Es2pandaNativeModule {
     _AstNodeDumpDeclConst(context: KNativePointer, receiver: KNativePointer): KStringPtr {
         throw new Error("This methods was not overloaded by native module initialization")
     }
+    _AstNodeIsolatedDumpDeclConst(context: KNativePointer, receiver: KNativePointer): KStringPtr {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
     _AstNodeDumpConst(context: KNativePointer, receiver: KNativePointer, dumper: KNativePointer): void {
         throw new Error("This methods was not overloaded by native module initialization")
     }
@@ -2173,6 +2179,18 @@ export class Es2pandaNativeModule {
     _ExportSpecifierExportedConst(context: KNativePointer, receiver: KNativePointer): KNativePointer {
         throw new Error("This methods was not overloaded by native module initialization")
     }
+    _ExportSpecifierSetDefault(context: KNativePointer, receiver: KNativePointer): void {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _ExportSpecifierIsDefaultConst(context: KNativePointer, receiver: KNativePointer): KBoolean {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _ExportSpecifierSetConstantExpression(context: KNativePointer, receiver: KNativePointer, constantExpression: KNativePointer): void {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _ExportSpecifierGetConstantExpressionConst(context: KNativePointer, receiver: KNativePointer): KNativePointer {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
     _CreateTSTupleType(context: KNativePointer, elementTypes: BigUint64Array, elementTypesSequenceLength: KUInt): KNativePointer {
         throw new Error("This methods was not overloaded by native module initialization")
     }
@@ -2452,6 +2470,15 @@ export class Es2pandaNativeModule {
     _UpdateEmptyStatement(context: KNativePointer, original: KNativePointer): KNativePointer {
         throw new Error("This methods was not overloaded by native module initialization")
     }
+    _CreateEmptyStatement1(context: KNativePointer, isBrokenStatement: KBoolean): KNativePointer {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _UpdateEmptyStatement1(context: KNativePointer, original: KNativePointer, isBrokenStatement: KBoolean): KNativePointer {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _EmptyStatementIsBrokenStatement(context: KNativePointer, receiver: KNativePointer): KBoolean {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
     _CreateWhileStatement(context: KNativePointer, test: KNativePointer, body: KNativePointer): KNativePointer {
         throw new Error("This methods was not overloaded by native module initialization")
     }
@@ -2702,6 +2729,9 @@ export class Es2pandaNativeModule {
         throw new Error("This methods was not overloaded by native module initialization")
     }
     _ExportNamedDeclarationSpecifiersConst(context: KNativePointer, receiver: KNativePointer): KNativePointer {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _ExportNamedDeclarationReplaceSpecifiers(context: KNativePointer, receiver: KNativePointer, specifiers: BigUint64Array, specifiersSequenceLength: KUInt): void {
         throw new Error("This methods was not overloaded by native module initialization")
     }
     _CreateETSParameterExpression(context: KNativePointer, identOrSpread: KNativePointer, isOptional: KBoolean): KNativePointer {
@@ -3268,7 +3298,7 @@ export class Es2pandaNativeModule {
     _CreateSrcDumper(context: KNativePointer, node: KNativePointer): KNativePointer {
         throw new Error("This methods was not overloaded by native module initialization")
     }
-    _CreateSrcDumper1(context: KNativePointer, node: KNativePointer, isDeclgen: KBoolean): KNativePointer {
+    _CreateSrcDumper1(context: KNativePointer, node: KNativePointer, isDeclgen: KBoolean, isIsolatedDeclgen: KBoolean): KNativePointer {
         throw new Error("This methods was not overloaded by native module initialization")
     }
     _SrcDumperAdd(context: KNativePointer, receiver: KNativePointer, str: KStringPtr): void {
@@ -3299,6 +3329,9 @@ export class Es2pandaNativeModule {
         throw new Error("This methods was not overloaded by native module initialization")
     }
     _SrcDumperIsDeclgenConst(context: KNativePointer, receiver: KNativePointer): KBoolean {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _SrcDumperIsIsolatedDeclgenConst(context: KNativePointer, receiver: KNativePointer): KBoolean {
         throw new Error("This methods was not overloaded by native module initialization")
     }
     _SrcDumperDumpNode(context: KNativePointer, receiver: KNativePointer, key: KStringPtr): void {

@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 export class TSIntersectionType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 112)
+        assertValidPeer(pointer, 113)
         super(pointer)
     }
     static createTSIntersectionType(types: readonly Expression[]): TSIntersectionType {

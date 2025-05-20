@@ -24,7 +24,7 @@ export function createCallExpression(
     optional_arg: boolean = false,
     trailingComma: boolean = false,
     trailingBlock: BlockStatement | undefined = undefined,
-) {
+): CallExpression {
     const res = CallExpression.createCallExpression(
         callee,
         _arguments,
@@ -46,7 +46,7 @@ export function updateCallExpression(
     optional_arg: boolean = false,
     trailingComma: boolean = false,
     trailingBlock: BlockStatement | undefined = undefined,
-) {
+): CallExpression {
     if (isSameNativeObject(callee, original.callee)
         && isSameNativeObject(_arguments, original.arguments)
         && isSameNativeObject(typeParams, original.typeParams)

@@ -39,7 +39,7 @@ KNativePointer impl_AnnotationAllowedAnnotations(KNativePointer contextPtr, KNat
     auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
     std::size_t params_len = 0;
     auto annotations = GetImpl()->AnnotationAllowedAnnotations(context, node, &params_len);
-    return new std::vector<void*>(annotations, annotations + params_len);
+    return StageArena::cloneVector(annotations, params_len);
 }
 KOALA_INTEROP_3(AnnotationAllowedAnnotations, KNativePointer, KNativePointer, KNativePointer, KNativePointer)
 
@@ -49,7 +49,7 @@ KNativePointer impl_AnnotationAllowedAnnotationsConst(KNativePointer contextPtr,
     auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
     std::size_t params_len = 0;
     auto annotations = GetImpl()->AnnotationAllowedAnnotationsConst(context, node, &params_len);
-    return new std::vector<void*>(annotations, annotations + params_len);
+    return StageArena::cloneVector(annotations, params_len);
 }
 KOALA_INTEROP_3(AnnotationAllowedAnnotationsConst, KNativePointer, KNativePointer, KNativePointer, KNativePointer)
 
@@ -151,7 +151,7 @@ KOALA_INTEROP_1(ContextProgram, KNativePointer, KNativePointer)
 
 KNativePointer impl_ProgramAst(KNativePointer contextPtr, KNativePointer programPtr)
 {
-    auto context = reinterpret_cast<es2panda_Context*>(programPtr);
+    auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
     auto program = reinterpret_cast<es2panda_Program*>(programPtr);
     return GetImpl()->ProgramAst(context, program);
 }
@@ -190,7 +190,7 @@ KNativePointer impl_ContextErrorMessage(KNativePointer contextPtr)
 {
     auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
 
-    return new string(GetImpl()->ContextErrorMessage(context));
+    return StageArena::strdup(GetImpl()->ContextErrorMessage(context));
 }
 KOALA_INTEROP_1(ContextErrorMessage, KNativePointer, KNativePointer)
 
@@ -228,15 +228,15 @@ static KNativePointer impl_ProgramExternalSources(KNativePointer contextPtr, KNa
     auto&& instance = reinterpret_cast<es2panda_Program *>(instancePtr);
     std::size_t source_len = 0;
     auto external_sources = GetImpl()->ProgramExternalSources(context, instance, &source_len);
-    return new std::vector<void*>(external_sources, external_sources + source_len);
+    return StageArena::cloneVector(external_sources, source_len);
 }
 KOALA_INTEROP_2(ProgramExternalSources, KNativePointer, KNativePointer, KNativePointer);
 
 static KNativePointer impl_ExternalSourceName(KNativePointer instance)
 {
     auto&& _instance_ = reinterpret_cast<es2panda_ExternalSource *>(instance);
-    auto&& _result_ = GetImpl()->ExternalSourceName(_instance_);
-    return new std::string(_result_);
+    auto&& result = GetImpl()->ExternalSourceName(_instance_);
+    return StageArena::strdup(result);
 }
 KOALA_INTEROP_1(ExternalSourceName, KNativePointer, KNativePointer);
 
@@ -245,7 +245,7 @@ static KNativePointer impl_ExternalSourcePrograms(KNativePointer instance)
     auto&& _instance_ = reinterpret_cast<es2panda_ExternalSource *>(instance);
     std::size_t program_len = 0;
     auto programs = GetImpl()->ExternalSourcePrograms(_instance_, &program_len);
-    return new std::vector<void*>(programs, programs + program_len);
+    return StageArena::cloneVector(programs, program_len);
 }
 KOALA_INTEROP_1(ExternalSourcePrograms, KNativePointer, KNativePointer);
 

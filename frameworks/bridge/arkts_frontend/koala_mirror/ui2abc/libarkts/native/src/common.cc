@@ -14,10 +14,55 @@
  */
 
 #include <common.h>
+#include <utility>
 
 using std::string, std::cout, std::endl, std::vector;
 
 static es2panda_Impl *impl = nullptr;
+
+static thread_local StageArena currentArena;
+
+StageArena* StageArena::instance() {
+    return &currentArena;
+}
+
+void StageArena::add(void* pointer) {
+    if (pointer)
+        allocated.push_back(pointer);
+}
+
+void StageArena::cleanup() {
+    if (totalSize > 0 && false)
+        printf("cleanup %d objects %d bytes\n", (int)allocated.size(), (int)totalSize);
+    for (auto it : allocated) {
+        free(it);
+    }
+    totalSize = 0;
+    allocated.clear();
+}
+
+StageArena::StageArena() {
+    totalSize = 0;
+}
+
+StageArena::~StageArena() {
+    cleanup();
+}
+
+char* StageArena::strdup(const char* string) {
+    auto* arena = StageArena::instance();
+    auto size = strlen(string) + 1;
+    char* memory = (char*)arena->alloc(size);
+    memcpy(memory, string, size);
+    return memory;
+}
+
+void* StageArena::alloc(size_t size) {
+    void* result = malloc(size);
+    totalSize += size;
+    add(result);
+    return result;
+}
 
 #ifdef KOALA_WINDOWS
     #include <windows.h>
@@ -58,12 +103,12 @@ es2panda_Impl *GetImpl() {
     }
     auto library = FindLibrary();
     if (!library) {
-        printf("No library (es2panda_lib.cc)");
+        printf("No library (es2panda_lib.cc)"); // TODO: dont use throw for ohos build
         abort();
     }
     auto symbol = findSymbol(library, "es2panda_GetImpl");
     if (!symbol) {
-        printf("No entry point");
+        printf("no entry point");
         abort();
     }
     impl = reinterpret_cast<es2panda_Impl *(*)(int)>(symbol)(ES2PANDA_LIB_VERSION);
@@ -80,7 +125,7 @@ string getString(KStringPtr ptr) {
 }
 
 char* getStringCopy(KStringPtr& ptr) {
-    return strdup(ptr.c_str());
+    return StageArena::strdup(ptr.c_str() ? ptr.c_str() : "");
 }
 
 inline KUInt unpackUInt(const KByte* bytes) {
@@ -93,7 +138,7 @@ inline KUInt unpackUInt(const KByte* bytes) {
     const KUInt BYTE_2_SHIFT = 16;
     const KUInt BYTE_3_SHIFT = 24;
     return (
-        bytes[BYTE_0] 
+        bytes[BYTE_0]
         | (bytes[BYTE_1] << BYTE_1_SHIFT)
         | (bytes[BYTE_2] << BYTE_2_SHIFT)
         | (bytes[BYTE_3] << BYTE_3_SHIFT)
@@ -103,13 +148,13 @@ inline KUInt unpackUInt(const KByte* bytes) {
 KNativePointer impl_CreateConfig(KInt argc, KStringArray argvPtr) {
     const std::size_t headerLen = 4;
 
-    const char** argv = new const char*[argc];
+    const char** argv = StageArena::allocArray<const char*>(argc);
     std::size_t position = headerLen;
     std::size_t strLen;
     for (std::size_t i = 0; i < static_cast<std::size_t>(argc); ++i) {
         strLen = unpackUInt(argvPtr + position);
         position += headerLen;
-        argv[i] = strdup(std::string(reinterpret_cast<const char*>(argvPtr + position), strLen).c_str());
+        argv[i] = StageArena::strdup(std::string(reinterpret_cast<const char*>(argvPtr + position), strLen).c_str());
         position += strLen;
     }
     return GetImpl()->CreateConfig(argc, argv);
@@ -126,6 +171,7 @@ KOALA_INTEROP_1(DestroyConfig, KNativePointer, KNativePointer)
 KNativePointer impl_DestroyContext(KNativePointer contextPtr) {
     auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
     GetImpl()->DestroyContext(context);
+    StageArena::instance()->cleanup();
     return nullptr;
 }
 KOALA_INTEROP_1(DestroyContext, KNativePointer, KNativePointer)
@@ -150,7 +196,7 @@ KNativePointer impl_UpdateCallExpression(
 
     auto nn = GetImpl()->CreateCallExpression(
         context, callee, arguments, argumentsLen, typeParams, optional, trailingComma
-    ); 
+    );
     GetImpl()->AstNodeSetOriginalNode(context, nn, node);
     return nn;
 }
@@ -224,7 +270,7 @@ KNativePointer impl_AstNodeChildren(
     cachedChildren.clear();
 
     GetImpl()->AstNodeIterateConst(context, node, visitChild);
-    return new std::vector(cachedChildren);
+    return StageArena::clone(cachedChildren);
 }
 KOALA_INTEROP_2(AstNodeChildren, KNativePointer, KNativePointer, KNativePointer)
 

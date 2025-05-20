@@ -15,7 +15,21 @@
 
 import * as arkts from "@koalaui/libarkts"
 import { factory } from "./MemoFactory"
-import { MemoFunctionKind } from "./utils"
+import {
+    MemoFunctionKind,
+    moveToFront,
+} from "./utils"
+import {
+    parametrizedNodeHasReceiver,
+} from "./api-utils"
+
+function extendParameters(params: readonly arkts.Expression[], hasReceiver: boolean) {
+    let newParams = [...factory.createHiddenParameters(), ...params]
+    if (hasReceiver) {
+        newParams = moveToFront(newParams, 2)
+    }
+    return newParams
+}
 
 export class SignatureTransformer extends arkts.AbstractVisitor {
     public modified = false
@@ -33,19 +47,16 @@ export class SignatureTransformer extends arkts.AbstractVisitor {
         if (arkts.isScriptFunction(node)) {
             const memo = this.scriptFunctions.get(node.originalPeer)
             const shouldTransform = memo == MemoFunctionKind.MEMO || memo == MemoFunctionKind.INTRINSIC
-            if (shouldTransform) {
-                this.modified = true
+            if (!shouldTransform) {
+                return node
             }
+            this.modified = true
             return arkts.factory.updateScriptFunction(
                 node,
                 node.body,
                 node.typeParams,
-                [...(shouldTransform ? factory.createHiddenParameters() : []), ...node.params],
-                node.returnTypeAnnotation
-                    ? node.returnTypeAnnotation
-                    : shouldTransform
-                        ? arkts.factory.createETSPrimitiveType(arkts.Es2pandaPrimitiveType.PRIMITIVE_TYPE_VOID)
-                        : undefined,
+                extendParameters(node.params, parametrizedNodeHasReceiver(node)),
+                node.returnTypeAnnotation,
                 node.hasReceiver,
                 node.flags,
                 node.modifierFlags,
@@ -55,16 +66,18 @@ export class SignatureTransformer extends arkts.AbstractVisitor {
         }
         if (arkts.isETSFunctionType(node)) {
             const memo = this.ETSFunctionTypes.get(node.originalPeer)
-            if (memo) {
-                this.modified = true
+            const shouldTransform = memo == MemoFunctionKind.MEMO || memo == MemoFunctionKind.INTRINSIC
+            if (!shouldTransform) {
+                return node
             }
+            this.modified = true
             return arkts.factory.updateETSFunctionType(
                 node,
-                undefined,
-                [...(memo ? factory.createHiddenParameters() : []), ...node.params],
+                node.typeParams,
+                extendParameters(node.params, parametrizedNodeHasReceiver(node)),
                 node.returnType,
-                false,
-                arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_ARROW,
+                node.isExtensionFunction,
+                node.flags,
                 node.annotations,
             )
         }

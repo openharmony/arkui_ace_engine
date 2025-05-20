@@ -20,7 +20,7 @@ import { nodeType, updateNodeByNode } from "../utilities/private"
 export function updateObjectExpression(
     original: ObjectExpression,
     properties: readonly Expression[]
-) {
+): ObjectExpression {
     if (isSameNativeObject(properties, original.properties)){
         return original
     }

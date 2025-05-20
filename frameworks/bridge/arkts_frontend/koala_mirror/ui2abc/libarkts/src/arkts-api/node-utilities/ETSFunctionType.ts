@@ -25,7 +25,7 @@ export function createETSFunctionType(
     hasReceiver: boolean,
     funcFlags: Es2pandaScriptFunctionFlags,
     annotations?: readonly AnnotationUsage[],
-) {
+): ETSFunctionType {
     const res = ETSFunctionType.createETSFunctionType(
         FunctionSignature.createFunctionSignature(
             typeParams,
@@ -49,7 +49,7 @@ export function updateETSFunctionType(
     hasReceiver: boolean,
     funcFlags: Es2pandaScriptFunctionFlags,
     annotations?: readonly AnnotationUsage[],
-) {
+): ETSFunctionType {
     if (isSameNativeObject(typeParams, original.typeParams)
         && isSameNativeObject(params, original.params)
         && isSameNativeObject(returnTypeAnnotation, original.returnType)
