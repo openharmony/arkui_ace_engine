@@ -2664,6 +2664,18 @@ OHOS::Ace::TextMetrics Convert(const Ark_TextMetrics& src)
 }
 
 template<>
+std::set<SourceTool> Convert(const Array_SourceTool& src)
+{
+    std::set<SourceTool> dst = {};
+    auto length = Converter::Convert<int>(src.length);
+    for (int i = 0; i < length; i++) {
+        auto sourceToolItem = *(src.array + i);
+        SourceTool item = Converter::Convert<std::optional<SourceTool>>(sourceToolItem).value_or(SourceTool::UNKNOWN);
+        dst.insert(item);
+    }
+    return dst;
+}
+template<>
 std::set<std::string> Convert(const Array_UniformDataType& src)
 {
     std::set<std::string> dst = {};

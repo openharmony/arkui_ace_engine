@@ -198,7 +198,12 @@ void SetGestureTagImpl(Ark_NativePointer gesture, const Ark_String* tag)
     CHECK_NULL_VOID(gestureObject);
     gestureObject->SetTag(Converter::Convert<std::string>(*tag));
 }
-void SetAllowedTypesImpl(Ark_NativePointer gesture, const Array_SourceTool* types) {}
+void SetAllowedTypesImpl(Ark_NativePointer gesture, const Array_SourceTool* types)
+{
+    auto* gestureObject = reinterpret_cast<Gesture*>(gesture);
+    CHECK_NULL_VOID(gestureObject);
+    gestureObject->SetAllowedTypes(Converter::Convert<std::set<SourceTool>>(*types));
+}
 void AddGestureToNodeImpl(Ark_NativePointer node, const Ark_Number* priority, Ark_GestureMask mask,
     Ark_NativePointer gesture, Ark_Boolean isModifier)
 {
