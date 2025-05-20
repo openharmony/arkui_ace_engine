@@ -121,8 +121,9 @@ RefPtr<MutableSpanString> RichEditorAccessibilityTestNg::CreateTextStyledString(
     auto styledString = AceType::MakeRefPtr<MutableSpanString>(content);
     auto length = styledString->GetLength();
     styledString->AddSpan(AceType::MakeRefPtr<FontSpan>(TEST_FONT, 0, length));
-    styledString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(TEXT_DECORATION_VALUE, TEXT_DECORATION_COLOR_VALUE,
-        TextDecorationStyle::WAVY, 0, length));
+    std::optional<TextDecorationOptions> options;
+    styledString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(std::vector<TextDecoration>({TEXT_DECORATION_VALUE}),
+        TEXT_DECORATION_COLOR_VALUE, TextDecorationStyle::WAVY, options, 0, length));
     styledString->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(TEST_BASELINE_OFFSET, 0, length));
     styledString->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(LETTER_SPACING, 0, length));
     styledString->AddSpan(AceType::MakeRefPtr<TextShadowSpan>(SHADOWS, 0, length));
@@ -243,7 +244,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos002, TestSize.Level1
     EXPECT_EQ(fontStyle->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(fontStyle->GetFontFamily(), FONT_FAMILY_VALUE);
     EXPECT_EQ(fontStyle->GetTextColor(), OHOS::Ace::Color::RED);
-    EXPECT_EQ(fontStyle->GetTextDecoration(), TEXT_DECORATION_VALUE);
+    EXPECT_EQ(fontStyle->GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
     EXPECT_EQ(fontStyle->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
     EXPECT_EQ(fontStyle->GetTextDecorationStyle(), TextDecorationStyle::WAVY);
     EXPECT_EQ(fontStyle->GetLetterSpacing(), LETTER_SPACING);
@@ -311,7 +312,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos003, TestSize.Level1
     EXPECT_EQ(fontStyle->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(fontStyle->GetFontFamily(), FONT_FAMILY_VALUE);
     EXPECT_EQ(fontStyle->GetTextColor(), OHOS::Ace::Color::RED);
-    EXPECT_EQ(fontStyle->GetTextDecoration(), TEXT_DECORATION_VALUE);
+    EXPECT_EQ(fontStyle->GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
     EXPECT_EQ(fontStyle->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
     EXPECT_EQ(fontStyle->GetTextDecorationStyle(), TextDecorationStyle::WAVY);
     EXPECT_EQ(fontStyle->GetLetterSpacing(), LETTER_SPACING);
@@ -426,7 +427,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, ExecSubComponent001, TestSize.Level1)
     EXPECT_EQ(fontStyle->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(fontStyle->GetFontFamily(), FONT_FAMILY_VALUE);
     EXPECT_EQ(fontStyle->GetTextColor(), OHOS::Ace::Color::RED);
-    EXPECT_EQ(fontStyle->GetTextDecoration(), TEXT_DECORATION_VALUE);
+    EXPECT_EQ(fontStyle->GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
     EXPECT_EQ(fontStyle->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
     EXPECT_EQ(fontStyle->GetTextDecorationStyle(), TextDecorationStyle::WAVY);
     EXPECT_EQ(fontStyle->GetLetterSpacing(), LETTER_SPACING);

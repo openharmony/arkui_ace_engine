@@ -647,14 +647,14 @@ public:
         const NG::InspectorFilter& filter);
 
     static std::string GetDeclarationString(
-        const std::optional<Color>& color, const std::optional<TextDecoration>& textDecoration,
+        const std::optional<Color>& color, const std::vector<TextDecoration>& textDecorations,
         const std::optional<TextDecorationStyle>& textDecorationStyle, const std::optional<float>& lineThicknessScale);
 
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         TextBaseline, TextBaseline, TextBaseline::ALPHABETIC, TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_DIMENSION_STYLE(BaselineOffset, TextStyleAttribute::BASELINE_SHIFT);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
-        TextDecoration, TextDecoration, TextDecoration::NONE, TextStyleAttribute::DECRATION);
+        TextDecoration, std::vector<TextDecoration>, { TextDecoration::NONE }, TextStyleAttribute::DECRATION);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         TextDecorationStyle, TextDecorationStyle, TextDecorationStyle::SOLID, TextStyleAttribute::DECORATION_STYLE);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
@@ -797,6 +797,18 @@ public:
         reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::HEIGHT_ONLY));
         lineHeight_ = newValue;
         hasHeightOverride_ = hasHeightOverride;
+    }
+
+    void SetTextDecoration(TextDecoration value)
+    {
+        std::vector<TextDecoration> array { value };
+        SetTextDecoration(array);
+    }
+
+    TextDecoration GetTextDecorationFirst() const
+    {
+        return GetTextDecoration().size() > 0 ?
+            GetTextDecoration()[0] : TextDecoration::NONE;
     }
 
     const Dimension& GetParagraphSpacing() const

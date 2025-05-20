@@ -215,7 +215,7 @@ void TextContentModifier::AddShadow(const Shadow& shadow)
 
 void TextContentModifier::SetDefaultTextDecoration(const TextStyle& textStyle)
 {
-    textDecoration_ = textStyle.GetTextDecoration();
+    textDecoration_ = textStyle.GetTextDecorationFirst();
     textDecorationColor_ = textStyle.GetTextDecorationColor();
     auto alpha = textDecoration_ == TextDecoration::NONE ? 0.0f : textDecorationColor_->GetAlpha();
     textDecorationColorAlpha_ = MakeRefPtr<AnimatablePropertyFloat>(alpha);

@@ -1347,7 +1347,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlConverter003, TestSize.Level1)
     std::list<RefPtr<NG::SpanItem>> spans = dstSpan->GetSpanItems();
     EXPECT_EQ(spans.size(), 1);
     auto it = spans.begin();
-    EXPECT_EQ((*it)->fontStyle->GetTextDecoration().value(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ((*it)->fontStyle->GetTextDecorationFirst(), TextDecoration::LINE_THROUGH);
 }
 
 /**
@@ -2197,21 +2197,21 @@ HWTEST_F(HtmlConvertTestNg, MultiHtmlConvert, TestSize.Level1)
      * @tc.expected: The first span item should have the `underline` text-decoration.
      */
     auto it = spans.begin();
-    EXPECT_EQ((*it)->fontStyle->GetTextDecoration().value(), TextDecoration::UNDERLINE);
+    EXPECT_EQ((*it)->fontStyle->GetTextDecorationFirst(), TextDecoration::UNDERLINE);
 
     /**
      * @tc.steps4: Verify that the second span item has the `line-through` text-decoration.
      * @tc.expected: The second span item should have the `line-through` text-decoration.
      */
     ++it;
-    EXPECT_EQ((*it)->fontStyle->GetTextDecoration().value(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ((*it)->fontStyle->GetTextDecorationFirst(), TextDecoration::LINE_THROUGH);
 
     /**
      * @tc.steps5: Verify that the third span item has the `overline` text-decoration.
      * @tc.expected: The third span item should have the `overline` text-decoration.
      */
     ++it;
-    EXPECT_EQ((*it)->fontStyle->GetTextDecoration().value(), TextDecoration::OVERLINE);
+    EXPECT_EQ((*it)->fontStyle->GetTextDecorationFirst(), TextDecoration::OVERLINE);
 }
 
 } // namespace OHOS::Ace::NG

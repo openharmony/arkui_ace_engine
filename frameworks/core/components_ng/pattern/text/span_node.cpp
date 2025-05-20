@@ -44,12 +44,12 @@ namespace {
 const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
 const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 
-std::string GetDeclaration(const std::optional<Color>& color, const std::optional<TextDecoration>& textDecoration,
+std::string GetDeclaration(const std::optional<Color>& color, const std::vector<TextDecoration>& textDecorations,
     const std::optional<TextDecorationStyle>& textDecorationStyle)
 {
     auto jsonSpanDeclaration = JsonUtil::Create(true);
     jsonSpanDeclaration->Put(
-        "type", V2::ConvertWrapTextDecorationToStirng(textDecoration.value_or(TextDecoration::NONE)).c_str());
+        "type", V2::ConvertWrapTextDecorationToStirng(textDecorations).c_str());
     jsonSpanDeclaration->Put("color", (color.value_or(Color::BLACK).ColorToString()).c_str());
     jsonSpanDeclaration->Put("style",
         V2::ConvertWrapTextDecorationStyleToString(textDecorationStyle.value_or(TextDecorationStyle::SOLID))
@@ -107,7 +107,8 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
         json->PutExtAttr("font", GetFont().c_str(), filter);
         json->PutExtAttr("fontSize", textPattern->GetFontSizeWithThemeInJson(fontStyle->GetFontSize()).c_str(), filter);
         json->PutExtAttr("decoration", GetDeclaration(fontStyle->GetTextDecorationColor(),
-            fontStyle->GetTextDecoration(), fontStyle->GetTextDecorationStyle()).c_str(), filter);
+            fontStyle->GetTextDecoration().value_or(std::vector<TextDecoration>({TextDecoration::NONE})),
+            fontStyle->GetTextDecorationStyle()).c_str(), filter);
         json->PutExtAttr("letterSpacing",
             fontStyle->GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
         json->PutExtAttr("textCase",
@@ -339,14 +340,14 @@ void SpanItem::SpanDumpInfoAdvance()
     dumpLog.AddDesc(std::string("WordSpacing: ")
                         .append(textStyle->GetWordSpacing().ToString())
                         .append(" Decoration: ")
-                        .append(StringUtils::ToString(textStyle->GetTextDecoration()))
+                        .append(StringUtils::ToString(textStyle->GetTextDecorationFirst()))
                         .append(" ")
                         .append(StringUtils::ToString(textStyle->GetTextDecorationStyle()))
                         .append(" ")
                         .append(textStyle->GetTextDecorationColor().ColorToString())
                         .append(" self: ")
                         .append(fontStyle && fontStyle->HasTextDecoration()
-                                    ? StringUtils::ToString(fontStyle->GetTextDecorationValue())
+                                    ? StringUtils::ToString(fontStyle->GetTextDecorationFirst())
                                     : "Na")
                         .append(" ")
                         .append(fontStyle && fontStyle->HasTextDecorationStyle()
@@ -917,7 +918,6 @@ void SpanItem::EncodeFontStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TLV_INHERIT(fontStyle, FontWeight, TLV_SPAN_FONT_STYLE_FONTWEIGHT, FontWeight, FontWeight);
     WRITE_TLV_INHERIT(fontStyle, FontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily, FontFamilies);
     WRITE_TLV_INHERIT(fontStyle, FontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature, FontFeatures);
-    WRITE_TLV_INHERIT(fontStyle, TextDecoration, TLV_SPAN_FONT_STYLE_TEXTDECORATION, TextDecoration, TextDecoration);
     WRITE_TLV_INHERIT(
         fontStyle, TextDecorationColor, TLV_SPAN_FONT_STYLE_TEXTDECORATIONCOLOR, Color, TextDecorationColor);
     WRITE_TLV_INHERIT(fontStyle, TextDecorationStyle, TLV_SPAN_FONT_STYLE_TEXTDECORATIONSTYLE, TextDecorationStyle,
@@ -928,6 +928,11 @@ void SpanItem::EncodeFontStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TLV_INHERIT(fontStyle, LetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension, LetterSpacing);
     WRITE_TLV_INHERIT(fontStyle, LineThicknessScale, TLV_SPAN_FONT_STYLE_LineThicknessScale, Float,
         LineThicknessScale);
+    if (fontStyle->HasTextDecoration()) {
+        TLVUtil::WriteTextDecorations(buff, fontStyle->GetTextDecoration().value());
+    } else if (textStyle_.has_value()) {
+        TLVUtil::WriteTextDecorations(buff, textStyle_->GetTextDecoration());
+    }
 }
 
 void SpanItem::EncodeTextLineStyleTlv(std::vector<uint8_t>& buff) const
@@ -973,7 +978,6 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             READ_TEXT_STYLE_TLV(fontStyle, UpdateFontWeight, TLV_SPAN_FONT_STYLE_FONTWEIGHT, FontWeight);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateFontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateFontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature);
-            READ_TEXT_STYLE_TLV(fontStyle, UpdateTextDecoration, TLV_SPAN_FONT_STYLE_TEXTDECORATION, TextDecoration);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateTextDecorationColor, TLV_SPAN_FONT_STYLE_TEXTDECORATIONCOLOR, Color);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateTextDecorationStyle,
                 TLV_SPAN_FONT_STYLE_TEXTDECORATIONSTYLE, TextDecorationStyle);
@@ -982,6 +986,15 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             READ_TEXT_STYLE_TLV(fontStyle, UpdateAdaptMaxFontSize, TLV_SPAN_FONT_STYLE_ADPATMAXFONTSIZE, Dimension);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateLetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateLineThicknessScale, TLV_SPAN_FONT_STYLE_LineThicknessScale, Float);
+            case TLV_SPAN_FONT_STYLE_TEXTDECORATION: {
+                sameSpan->fontStyle->UpdateTextDecoration(TLVUtil::ReadTextDecorations(buff, cursor));
+                auto types = sameSpan->fontStyle->GetTextDecoration().value();
+                std::cout << "DecodeTlv TextDecorations:" << types.size() << std::endl;
+                for (TextDecoration value : types) {
+                    std::cout << "DecodeTlv TextDecoration:" << static_cast<int32_t>(value) << std::endl;
+                }
+                break;
+            }
 
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateLineHeight, TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHT, Dimension);
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateLineSpacing, TLV_SPAN_TEXT_LINE_STYLE_LINESPACING, Dimension);

@@ -1353,7 +1353,7 @@ HWTEST_F(SearchTestTwoNg, TextDecoration001, TestSize.Level1)
     /**
      * @tc.step: step3. test decoration
      */
-    EXPECT_EQ(textFieldLayoutProperty->GetTextDecoration(), Ace::TextDecoration::UNDERLINE);
+    EXPECT_EQ(textFieldLayoutProperty->GetTextDecorationFirst(), Ace::TextDecoration::UNDERLINE);
     EXPECT_EQ(textFieldLayoutProperty->GetTextDecorationColor(), Color::BLUE);
     EXPECT_EQ(textFieldLayoutProperty->GetTextDecorationStyle(), Ace::TextDecorationStyle::DASHED);
 }
@@ -1700,7 +1700,7 @@ HWTEST_F(SearchTestTwoNg, SetTextFont, TestSize.Level1)
     searchModelInstance.SetOnPasteWithEvent(frameNode, [](const std::u16string& title, NG::TextCommonEvent& event) {});
     searchModelInstance.SetPlaceholder(frameNode, PLACEHOLDER);
     searchModelInstance.SetTextDecoration(frameNode, Ace::TextDecoration::UNDERLINE);
-    EXPECT_EQ(textFieldLayoutProperty->GetTextDecoration(), Ace::TextDecoration::UNDERLINE);
+    EXPECT_EQ(textFieldLayoutProperty->GetTextDecorationFirst(), Ace::TextDecoration::UNDERLINE);
     searchModelInstance.SetTextDecorationColor(frameNode, Color::BLUE);
     EXPECT_EQ(textFieldLayoutProperty->GetTextDecorationColor(), Color::BLUE);
     searchModelInstance.SetTextDecorationStyle(frameNode, Ace::TextDecorationStyle::DASHED);
@@ -2800,8 +2800,9 @@ HWTEST_F(SearchTestTwoNg, searchCalculateTextFieldWidthTest, TestSize.Level1)
     EXPECT_EQ(buttonEventHub->IsEnabled(), false);
 
     auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>(frameNode->GetThemeScopeId());
+    ASSERT_NE(pipeline, nullptr);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    ASSERT_NE(searchTheme, nullptr);
 
     layoutAlgorithm->CalculateTextFieldWidth(AccessibilityManager::RawPtr(layoutWrapper), 10, searchTheme);
     layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));

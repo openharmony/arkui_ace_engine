@@ -1740,7 +1740,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     json->PutExtAttr("halfLeading", textFieldLayoutProperty->GetHalfLeading().value_or(false), filter);
     auto jsonDecoration = JsonUtil::Create(true);
     std::string type = V2::ConvertWrapTextDecorationToStirng(
-        textFieldLayoutProperty->GetTextDecoration().value_or(TextDecoration::NONE));
+        textFieldLayoutProperty->GetTextDecoration().value_or(std::vector<TextDecoration>({TextDecoration::NONE})));
     jsonDecoration->Put("type", type.c_str());
     jsonDecoration->Put(
         "color", textFieldLayoutProperty->GetTextDecorationColor().value_or(Color::BLACK).ColorToString().c_str());
