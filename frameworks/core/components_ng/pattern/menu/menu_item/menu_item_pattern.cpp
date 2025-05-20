@@ -672,9 +672,7 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
 void MenuItemPattern::ShowSubMenuWithAnimation(const RefPtr<FrameNode>& subMenu)
 {
     CHECK_NULL_VOID(subMenu);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
+    auto pipeline = subMenu->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(menuTheme);

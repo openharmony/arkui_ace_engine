@@ -324,8 +324,9 @@ void MenuWrapperPattern::ShowSubMenuDisappearAnimation(const RefPtr<FrameNode>& 
                 auto subMenu = subMenuWeak.Upgrade();
                 CHECK_NULL_VOID(subMenu);
                 auto wrapperPattern = host->GetPattern<MenuWrapperPattern>();
-                CHECK_NULL_VOID(wrapperPattern);
-                wrapperPattern->SendToAccessibility(subMenu, false);
+                if (wrapperPattern) {
+                    wrapperPattern->SendToAccessibility(subMenu, false);
+                }
                 host->RemoveChild(subMenu);
                 host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
             });
@@ -758,13 +759,13 @@ void MenuWrapperPattern::StartShowAnimation()
         context->UpdateOffset(GetAnimationOffset());
         context->UpdateOpacity(0.0);
     }
-    auto menu = GetMenu();
-    CHECK_NULL_VOID(menu);
-    auto menuGeometryNode = menu->GetGeometryNode();
-    CHECK_NULL_VOID(menuGeometryNode);
-    auto offset = menuGeometryNode->GetFrameOffset();
-    if (theme->GetMenuAnimationDuration()) {
-        context->UpdateTransformCenter(DimensionOffset(Dimension(offset.GetX()), Dimension(offset.GetY())));
+    if (theme->GetMenuAnimationDuration() && GetPreviewMode() == MenuPreviewMode::NONE) {
+        auto menu = GetMenu();
+        auto menuGeometryNode = menu ? menu->GetGeometryNode() : nullptr;
+        if (menuGeometryNode) {
+            auto offset = menuGeometryNode->GetFrameOffset();
+            context->UpdateTransformCenter(DimensionOffset(Dimension(offset.GetX()), Dimension(offset.GetY())));
+        }
         context->UpdateTransformScale(VectorF(theme->GetMenuAnimationScale(), theme->GetMenuAnimationScale()));
         context->UpdateOpacity(MENU_ANIMATION_MIN_OPACITY);
     }
@@ -772,15 +773,15 @@ void MenuWrapperPattern::StartShowAnimation()
         animationOption_,
         [context, weak = WeakClaim(this), theme]() {
             if (context) {
-                CHECK_NULL_VOID(theme);
-                if (theme->GetMenuAnimationDuration()) {
-                    context->UpdateTransformScale(VectorF(MENU_ANIMATION_MAX_SCALE, MENU_ANIMATION_MAX_SCALE));
-                }
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 if (pattern->GetPreviewMode() == MenuPreviewMode::NONE) {
                     context->UpdateOffset(OffsetT<Dimension>());
                     context->UpdateOpacity(1.0);
+                }
+                CHECK_NULL_VOID(theme);
+                if (theme->GetMenuAnimationDuration() && pattern->GetPreviewMode() == MenuPreviewMode::NONE) {
+                    context->UpdateTransformScale(VectorF(MENU_ANIMATION_MAX_SCALE, MENU_ANIMATION_MAX_SCALE));
                 }
             }
         },
