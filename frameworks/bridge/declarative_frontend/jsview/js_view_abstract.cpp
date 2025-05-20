@@ -459,7 +459,7 @@ bool ParseLocationPropsEdges(const JSRef<JSObject>& edgesObj, EdgesParam& edges)
 
 decltype(JSViewAbstract::ParseJsLengthMetricsVp)* ParseJsLengthMetrics = JSViewAbstract::ParseJsLengthMetricsVp;
 
-void ParseJsLengthMetricsToDimension(const JSRef<JSObject>& obj, Dimension& result)
+void ParseJsLengthMetricsToDimension(const JSRef<JSObject>& obj, Dimension& result, RefPtr<ResourceObject>& resourceObj)
 {
     auto value = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
     if (!value->IsNumber()) {
@@ -472,6 +472,13 @@ void ParseJsLengthMetricsToDimension(const JSRef<JSObject>& obj, Dimension& resu
     }
     CalcDimension dimension(value->ToNumber<double>(), unit);
     result = dimension;
+    auto jsRes = obj->GetProperty("res");
+    if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() &&
+        !jsRes->IsNull() && !jsRes->IsObject()) {
+        JSRef<JSObject> resObj = JSRef<JSObject>::Cast(jsRes);
+        JSViewAbstract::CompleteResourceObject(resObj);
+        resourceObj = JSViewAbstract::GetResourceObject(resObj);
+    }
     return;
 }
 
@@ -4446,6 +4453,13 @@ bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimensi
 bool JSViewAbstract::ParseJsLengthNG(
     const JSRef<JSVal>& jsValue, NG::CalcLength& result, DimensionUnit defaultUnit, bool isSupportPercent)
 {
+    RefPtr<ResourceObject> resourceObj;
+    return ParseJsLengthNG(jsValue, result, defaultUnit, resourceObj, isSupportPercent);
+}
+
+bool JSViewAbstract::ParseJsLengthNG(const JSRef<JSVal>& jsValue, NG::CalcLength& result, DimensionUnit defaultUnit,
+    RefPtr<ResourceObject>& resourceObj, bool isSupportPercent)
+{
     if (jsValue->IsNumber()) {
         if (std::isnan(jsValue->ToNumber<double>())) {
             return false;
@@ -4467,6 +4481,13 @@ bool JSViewAbstract::ParseJsLengthNG(
             unit = static_cast<DimensionUnit>(jsUnit->ToNumber<int32_t>());
         }
         result = NG::CalcLength(value->ToNumber<double>(), unit);
+        auto jsRes = jsObj->GetProperty("res");
+        if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() &&
+            !jsRes->IsNull() && !jsRes->IsObject()) {
+            JSRef<JSObject> resObj = JSRef<JSObject>::Cast(jsRes);
+            JSViewAbstract::CompleteResourceObject(resObj);
+            resourceObj = JSViewAbstract::GetResourceObject(resObj);
+        }
         return true;
     }
 
@@ -4475,8 +4496,15 @@ bool JSViewAbstract::ParseJsLengthNG(
 
 bool JSViewAbstract::ParseJsLengthVpNG(const JSRef<JSVal>& jsValue, NG::CalcLength& result, bool isSupportPercent)
 {
+    RefPtr<ResourceObject> resObj;
+    return ParseJsLengthNG(jsValue, result, DimensionUnit::VP, resObj, isSupportPercent);
+}
+
+bool JSViewAbstract::ParseJsLengthVpNG(const JSRef<JSVal>& jsValue, NG::CalcLength& result,
+    RefPtr<ResourceObject>& resObj, bool isSupportPercent)
+{
     // 'vp' -> the value varies with pixel density of device.
-    return ParseJsLengthNG(jsValue, result, DimensionUnit::VP, isSupportPercent);
+    return ParseJsLengthNG(jsValue, result, DimensionUnit::VP, resObj, isSupportPercent);
 }
 
 bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit)
@@ -4574,6 +4602,13 @@ bool JSViewAbstract::ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimen
 
 bool JSViewAbstract::ParseJsLengthMetricsVp(const JSRef<JSObject>& jsObj, CalcDimension& result)
 {
+    RefPtr<ResourceObject> resourceObj;
+    return ParseJsLengthMetricsVpWithResObj(jsObj, result, resourceObj);
+}
+
+bool JSViewAbstract::ParseJsLengthMetricsVpWithResObj(const JSRef<JSObject>& jsObj, CalcDimension& result,
+    RefPtr<ResourceObject>& resourceObj)
+{
     auto value = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
     if (!value->IsNumber()) {
         return false;
@@ -4585,6 +4620,13 @@ bool JSViewAbstract::ParseJsLengthMetricsVp(const JSRef<JSObject>& jsObj, CalcDi
     }
     CalcDimension dimension(value->ToNumber<double>(), unit);
     result = dimension;
+    auto jsRes = jsObj->GetProperty("res");
+    if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() &&
+        !jsRes->IsNull() && !jsRes->IsObject()) {
+        JSRef<JSObject> resObj = JSRef<JSObject>::Cast(jsRes);
+        JSViewAbstract::CompleteResourceObject(resObj);
+        resourceObj = JSViewAbstract::GetResourceObject(resObj);
+    }
     return true;
 }
 
@@ -5490,33 +5532,44 @@ bool JSViewAbstract::ParseJsInteger(const JSRef<JSVal>& jsValue, int32_t& result
 bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result)
 {
     RefPtr<ResourceObject> resObj;
-    return ParseJsIntegerArray(jsValue, result, resObj);
+    std::vector<RefPtr<ResourceObject>> resObjArray;
+    return ParseJsIntegerArray(jsValue, result, resObj, resObjArray);
+}
+
+bool JSViewAbstract::ParseJsIntegerArrayInternal(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result,
+    std::vector<RefPtr<ResourceObject>>& resObjArray)
+{
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
+    for (size_t i = 0; i < array->Length(); i++) {
+        RefPtr<ResourceObject> resObj;
+        JSRef<JSVal> value = array->GetValueAt(i);
+        if (value->IsNumber()) {
+            result.emplace_back(value->ToNumber<uint32_t>());
+        } else if (value->IsObject()) {
+            uint32_t singleResInt;
+            if (ParseJsInteger(value, singleResInt, resObj)) {
+                result.emplace_back(singleResInt);
+            } else {
+                resObjArray.clear();
+                return false;
+            }
+        } else {
+            resObjArray.clear();
+            return false;
+        }
+        resObjArray.emplace_back(resObj);
+    }
+    return true;
 }
 
 bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result,
-    RefPtr<ResourceObject>& resObj)
+    RefPtr<ResourceObject>& resObj, std::vector<RefPtr<ResourceObject>>& resObjArray)
 {
     if (!jsValue->IsArray() && !jsValue->IsObject()) {
         return false;
     }
     if (jsValue->IsArray()) {
-        JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
-        for (size_t i = 0; i < array->Length(); i++) {
-            JSRef<JSVal> value = array->GetValueAt(i);
-            if (value->IsNumber()) {
-                result.emplace_back(value->ToNumber<uint32_t>());
-            } else if (value->IsObject()) {
-                uint32_t singleResInt;
-                if (ParseJsInteger(value, singleResInt)) {
-                    result.emplace_back(singleResInt);
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        }
-        return true;
+        return ParseJsIntegerArrayInternal(jsValue, result, resObjArray);
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
@@ -5561,33 +5614,44 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
 bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<std::string>& result)
 {
     RefPtr<ResourceObject> resObj;
-    return ParseJsStrArray(jsValue, result, resObj);
+    std::vector<RefPtr<ResourceObject>> resObjArray;
+    return ParseJsStrArray(jsValue, result, resObj, resObjArray);
+}
+
+bool JSViewAbstract::ParseJsStrArrayInternal(const JSRef<JSVal>& jsValue, std::vector<std::string>& result,
+    std::vector<RefPtr<ResourceObject>>& resObjArray)
+{
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
+    for (size_t i = 0; i < array->Length(); i++) {
+        RefPtr<ResourceObject> resObj;
+        JSRef<JSVal> value = array->GetValueAt(i);
+        if (value->IsString()) {
+            result.emplace_back(value->ToString());
+        } else if (value->IsObject()) {
+            std::string singleResStr;
+            if (ParseJsString(value, singleResStr)) {
+                result.emplace_back(singleResStr);
+            } else {
+                resObjArray.clear();
+                return false;
+            }
+        } else {
+            resObjArray.clear();
+            return false;
+        }
+        resObjArray.emplace_back(resObj);
+    }
+    return true;
 }
 
 bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<std::string>& result,
-    RefPtr<ResourceObject>& resObj)
+    RefPtr<ResourceObject>& resObj, std::vector<RefPtr<ResourceObject>>& resObjArray)
 {
     if (!jsValue->IsArray() && !jsValue->IsObject()) {
         return false;
     }
     if (jsValue->IsArray()) {
-        JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
-        for (size_t i = 0; i < array->Length(); i++) {
-            JSRef<JSVal> value = array->GetValueAt(i);
-            if (value->IsString()) {
-                result.emplace_back(value->ToString());
-            } else if (value->IsObject()) {
-                std::string singleResStr;
-                if (ParseJsString(value, singleResStr)) {
-                    result.emplace_back(singleResStr);
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        }
-        return true;
+        return ParseJsStrArrayInternal(jsValue, result, resObjArray);
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
@@ -5631,13 +5695,22 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
 
 bool JSViewAbstract::ParseJsLengthMetricsArray(const JSRef<JSVal>& jsValue, std::vector<Dimension>& result)
 {
+    std::vector<RefPtr<ResourceObject>> resObjArray;
+    return ParseJsLengthMetricsArray(jsValue, result, resObjArray);
+}
+
+bool JSViewAbstract::ParseJsLengthMetricsArray(const JSRef<JSVal>& jsValue, std::vector<Dimension>& result,
+    std::vector<RefPtr<ResourceObject>>& resObjArray)
+{
     if (jsValue->IsArray()) {
         JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
         for (size_t i = 0; i < array->Length(); i++) {
+            RefPtr<ResourceObject> resObj;
             JSRef<JSVal> value = array->GetValueAt(i);
             Dimension calc;
-            ParseJsLengthMetricsToDimension(value, calc);
+            ParseJsLengthMetricsToDimension(value, calc, resObj);
             result.emplace_back(calc);
+            resObjArray.emplace_back(resObj);
         }
         return true;
     }

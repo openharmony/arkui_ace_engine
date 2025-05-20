@@ -1826,7 +1826,7 @@ var LengthMetricsUnit;
     LengthMetricsUnit[LengthMetricsUnit["PX"] = 1] = "PX";
 })(LengthMetricsUnit || (LengthMetricsUnit = {}));
 class LengthMetrics {
-    constructor(value, unit) {
+    constructor(value, unit, res) {
         if (unit in LengthUnit) {
             this.unit = unit;
             this.value = value;
@@ -1835,6 +1835,7 @@ class LengthMetrics {
             this.unit = LengthUnit.VP;
             this.value = unit === undefined ? value : 0;
         }
+        this.res = res === undefined ? undefined : res;
     }
     static px(value) {
         return new LengthMetrics(value, LengthUnit.PX);
@@ -1853,7 +1854,7 @@ class LengthMetrics {
     }
     static resource(res) {
         let length = getUINativeModule().nativeUtils.resoureToLengthMetrics(res);
-        return new LengthMetrics(length[0], length[1]);
+        return new LengthMetrics(length[0], length[1], res);
     }
 }
 const MAX_CHANNEL_VALUE = 0xFF;
