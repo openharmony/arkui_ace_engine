@@ -903,7 +903,7 @@ void SetSearchAutoCapitalizationMode(ArkUINodeHandle node, ArkUI_Int32 value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetAutoCapitalizationMode(frameNode, static_cast<AutoCapitalizationMode>(value));
+    SearchModelNG::SetAutoCapitalizationMode(frameNode, CastToAutoCapitalizationMode(value));
 }
 
 void ResetSearchAutoCapitalizationMode(ArkUINodeHandle node)
