@@ -28,7 +28,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { LengthMetrics } from "../Graphics"
-import { ColorMetrics } from "./arkui-external"
+import { ColorMetrics } from "../Graphics"
 
 export class LinearIndicatorControllerInternal {
     public static fromPtr(ptr: KPointer): LinearIndicatorController {

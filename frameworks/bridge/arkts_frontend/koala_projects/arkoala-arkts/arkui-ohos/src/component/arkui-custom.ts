@@ -30,7 +30,7 @@ import { SourceTool, AnimateParam, SheetOptions, KeyEvent } from "./common"
 import { Callback_Void } from "./abilityComponent"
 import { TextPickerDialogOptions } from "./textPicker"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { Frame } from "./arkui-graphics"
+import { Frame } from "../Graphics"
 
 export class BaseContextInternal {
     public static fromPtr(ptr: KPointer): BaseContext {
@@ -932,8 +932,16 @@ export class UIContextAtomicServiceBar {
         return UIContextAtomicServiceBar.getBarRect_serialize()
     }
     private static getBarRect_serialize(): Frame {
-        const retval  = ArkUIGeneratedNativeModule._UIContextAtomicServiceBar_getBarRect()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._UIContextAtomicServiceBar_getBarRect() as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : Frame = retvalDeserializer.readFrame()
         return returnResult
     }

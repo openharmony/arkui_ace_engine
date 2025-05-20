@@ -13,4 +13,4 @@
  * limitations under the License.
  */
 
-export { ColorMetrics } from './component/arkui-external'
+export { ColorMetrics } from './Graphics'

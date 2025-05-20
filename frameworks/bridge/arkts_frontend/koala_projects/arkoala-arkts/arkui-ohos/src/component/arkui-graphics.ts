@@ -288,12 +288,6 @@ export type Matrix4 = [
     number,
     number
 ]
-export interface Frame {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-}
 export interface Edges {
     top?: Dimension;
     left?: Dimension;
