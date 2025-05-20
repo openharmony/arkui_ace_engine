@@ -1640,29 +1640,33 @@ void PipelineContext::PostKeyboardAvoidTask()
             TaskExecutor::TaskType::UI, "ArkUICustomKeyboardAvoid");
         return;
     }
-    CHECK_NULL_VOID(textFieldManager->GetLaterAvoid());
     auto container = Container::Current();
+    int32_t orientation = -1;
     if (container) {
         auto displayInfo = container->GetDisplayInfo();
-        if (displayInfo && textFieldManager->GetLaterOrientation() != (int32_t)displayInfo->GetRotation()) {
+        orientation = displayInfo ? (int32_t)displayInfo->GetRotation() : -1;
+        if (textFieldManager->GetLaterAvoid() && textFieldManager->GetLaterOrientation() != orientation) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "orientation not match, clear laterAvoid");
             textFieldManager->SetLaterAvoid(false);
             return;
         }
     }
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "after rotation set root, trigger avoid now");
     taskExecutor_->PostTask(
-        [weakContext = WeakClaim(this), weakManager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
+        [weakContext = WeakClaim(this), weakManager = WeakPtr<TextFieldManagerNG>(textFieldManager), orientation] {
             auto manager = weakManager.Upgrade();
             CHECK_NULL_VOID(manager);
+            if (!manager->GetLaterAvoid()) {
+                manager->SetContextTriggerAvoidTaskOrientation(orientation);
+                return;
+            }
             auto context = weakContext.Upgrade();
             CHECK_NULL_VOID(context);
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "after rotation set root, trigger avoid now");
             auto keyboardRect = manager->GetLaterAvoidKeyboardRect();
             auto positionY = manager->GetLaterAvoidPositionY();
             auto height = manager->GetLaterAvoidHeight();
             context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, nullptr, true);
             manager->SetLaterAvoid(false);
-            manager->SetFocusFieldAlreadyTriggerWsCallback(false);
         },
         TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
 }
