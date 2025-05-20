@@ -584,7 +584,9 @@ void VideoPattern::OnTextureRefresh(void* surface)
 
 void VideoPattern::OnCurrentTimeChange(uint32_t currentPos)
 {
-    isInitialState_ = isInitialState_ ? currentPos == 0 : false;
+    if (isPrepared_) {
+        isInitialState_ = isInitialState_ ? currentPos == 0 : false;
+    }
     if (currentPos == currentPos_ || isStop_) {
         return;
     }
