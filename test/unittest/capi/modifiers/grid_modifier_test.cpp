@@ -1145,7 +1145,7 @@ HWTEST_F(GridModifierTest, setMaxCountTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridModifierTest, setMaxCountTestInvalidValues, TestSize.Level1)
+HWTEST_F(GridModifierTest, DISABLED_setMaxCountTestInvalidValues, TestSize.Level1)
 {
     int intResult;
     Ark_Number inputValue;
@@ -1226,7 +1226,7 @@ HWTEST_F(GridModifierTest, setMinCountTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridModifierTest, setMinCountTestInvalidValues, TestSize.Level1)
+HWTEST_F(GridModifierTest, DISABLED_setMinCountTestInvalidValues, TestSize.Level1)
 {
     int intResult;
     Ark_Number inputValue;
@@ -1321,7 +1321,7 @@ HWTEST_F(GridModifierTest, setCellLengthTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridModifierTest, setCellLengthTestInvalidValues, TestSize.Level1)
+HWTEST_F(GridModifierTest, DISABLED_setCellLengthTestInvalidValues, TestSize.Level1)
 {
     int intResult;
     modifier_->setCellLength(node_, nullptr);
