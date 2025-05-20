@@ -382,13 +382,14 @@ void DatePickerPattern::OnModifyDone()
         isHapticChanged_ = false;
     }
     if (isFiredDateChange_ && !isForceUpdate_ && (lunar_ == datePickerRowLayoutProperty->GetLunar().value_or(false)) &&
-        !isDateOrderChange_) {
+        !isDateOrderChange_ && (isLoop_ == datePickerRowLayoutProperty->GetCanLoopValue(true))) {
         isFiredDateChange_ = false;
         return;
     }
     ClearFocus();
     isForceUpdate_ = false;
     isDateOrderChange_ = false;
+    isLoop_ = datePickerRowLayoutProperty->GetCanLoopValue(true);
     InitDisabled();
     if (ShowMonthDays()) {
         FlushMonthDaysColumn();

@@ -2718,6 +2718,9 @@ struct CJUIDatePickerModifier {
     ArkUI_Bool (*getEnableHapticFeedback)(ArkUINodeHandle node);
     void (*setEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Bool enableHapticFeedback);
     void (*resetEnableHapticFeedback)(ArkUINodeHandle node);
+    ArkUI_Bool (*getCanLoop)(ArkUINodeHandle node);
+    void (*setCanLoop)(ArkUINodeHandle node, ArkUI_Bool isLoop);
+    void (*resetCanLoop)(ArkUINodeHandle node);
 };
 
 struct CJUISpanModifier {

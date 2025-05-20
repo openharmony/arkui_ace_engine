@@ -33,6 +33,7 @@ public:
 
     static void JSBind(BindingTarget globalObj);
     static void SetLunar(bool isLunar);
+    static void SetCanLoop(const JSCallbackInfo& info);
     static void OnChange(const JSCallbackInfo& info);
     static void OnDateChange(const JSCallbackInfo& info);
     static void PickerBackgroundColor(const JSCallbackInfo& info);

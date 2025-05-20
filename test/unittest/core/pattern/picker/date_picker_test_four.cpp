@@ -197,10 +197,10 @@ HWTEST_F(DatePickerTestFour, DateTimeAnimationControllerTest001, TestSize.Level1
      */
     DatePickerSettingData settingData = CreateDatePickerSettingData();
     auto dateNode = DatePickerDialogView::CreateDateNode(ElementRegister::GetInstance()->MakeUniqueId(),
-        settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
+        settingData, false);
     ASSERT_NE(dateNode, nullptr);
     auto monthDaysNode = DatePickerDialogView::CreateDateNode(ElementRegister::GetInstance()->MakeUniqueId(),
-        settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+        settingData, true);
     ASSERT_NE(monthDaysNode, nullptr);
     auto timeNode = DatePickerDialogView::CreateTimeNode(
         settingData.timePickerProperty, settingData.properties, settingData.useMilitary);
@@ -279,10 +279,10 @@ HWTEST_F(DatePickerTestFour, DateTimeAnimationControllerTest002, TestSize.Level1
     settingData.isLunar = false;
     settingData.showTime = true;
     auto dateNode = DatePickerDialogView::CreateDateNode(ElementRegister::GetInstance()->MakeUniqueId(),
-        settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
+        settingData, false);
     ASSERT_NE(dateNode, nullptr);
     auto monthDaysNode = DatePickerDialogView::CreateDateNode(ElementRegister::GetInstance()->MakeUniqueId(),
-        settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+        settingData, true);
     ASSERT_NE(monthDaysNode, nullptr);
     auto timeNode = DatePickerDialogView::CreateTimeNode(
         settingData.timePickerProperty, settingData.properties, settingData.useMilitary);
@@ -1585,8 +1585,7 @@ HWTEST_F(DatePickerTestFour, CreateSingleDateNode001, TestSize.Level1)
     MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     DatePickerSettingData settingData;
     auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto datePickerNode = DatePickerDialogView::CreateDateNode(
-        dateNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+    auto datePickerNode = DatePickerDialogView::CreateDateNode(dateNodeId, settingData, true);
     EXPECT_NE(datePickerNode, nullptr);
 }
 

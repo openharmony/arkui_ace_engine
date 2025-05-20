@@ -599,7 +599,9 @@ void DatePickerColumnPattern::FlushCurrentOptions(
     if (!isUpateTextContentOnly) {
         animationProperties_.clear();
     }
-    for (uint32_t index = 0; index < showOptionCount; index++) {
+    bool isLoop_ = dataPickerRowLayoutProperty->GetCanLoopValue(true);
+    auto actualOptionCount = showOptionCount < child.size() ? showOptionCount : child.size();
+    for (uint32_t index = 0; index < actualOptionCount; index++) {
         currentChildIndex_ = static_cast<int32_t>(index);
         uint32_t optionIndex = (totalOptionCount + currentIndex + index - selectedIndex) % totalOptionCount;
 
@@ -614,7 +616,7 @@ void DatePickerColumnPattern::FlushCurrentOptions(
         int32_t diffIndex = static_cast<int32_t>(index) - static_cast<int32_t>(selectedIndex);
         int32_t virtualIndex = static_cast<int32_t>(currentIndex) + diffIndex;
         bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
-        if (NotLoopOptions() && !virtualIndexValidate) {
+        if ((NotLoopOptions() || !isLoop_) && !virtualIndexValidate) {
             textLayoutProperty->UpdateContent(u"");
             textNode->MarkModifyDone();
             textNode->MarkDirtyNode();
@@ -1012,7 +1014,9 @@ void DatePickerColumnPattern::HandleDragStart(const GestureEvent& event)
 
 void DatePickerColumnPattern::HandleDragMove(const GestureEvent& event)
 {
-    if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
+    if (event.GetInputEventType() == InputEventType::AXIS && 
+    event.GetSourceTool() == SourceTool::MOUSE && 
+    CanMove(LessNotEqual(event.GetDelta().GetY(), 0.0))) {
         InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0), true);
         return;
     }
@@ -1064,7 +1068,7 @@ void DatePickerColumnPattern::HandleDragEnd()
     auto shiftDistance = (dir == DatePickerScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
                                                                 : optionProperties_[middleIndex].nextDistance;
     auto shiftThreshold = shiftDistance / 2;
-    if (std::abs(scrollDelta_) >= std::abs(shiftThreshold)) {
+    if (GreatOrEqual(static_cast<double>(std::abs(scrollDelta_)), std::abs(shiftThreshold))) {
         InnerHandleScroll(LessNotEqual(scrollDelta_, 0.0), true, false);
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == DatePickerScrollDirection::UP ? -1 : 1);
     }
@@ -1351,8 +1355,19 @@ void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 {
     int32_t dragDelta = offsetY - yLast_;
     yLast_ = offsetY;
-    if (!CanMove(LessNotEqual(dragDelta, 0))) {
-        return;
+    DatePickerScrollDirection dir = dragDelta > 0.0 ? DatePickerScrollDirection::DOWN : DatePickerScrollDirection::UP;
+    if (!CanMove(LessNotEqual(static_cast<double>(dragDelta), 0.0))) {
+        auto currentIndex = GetCurrentIndex();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto options = GetOptions();
+        auto it = options.find(host);
+        CHECK_NULL_VOID(it != options.end());
+        auto totalCount = options[host].size();
+        if ((currentIndex == 0 && dir == DatePickerScrollDirection::DOWN && GreatOrEqual(yOffset_, 0.0)) ||
+            (currentIndex == totalCount - 1 && dir == DatePickerScrollDirection::UP && LessOrEqual(yOffset_, 0.0))) {
+            return;
+        }
     }
     if (hapticController_ && isShow_) {
         if (isEnableHaptic_ && !stopHaptic_ && !isHapticPlayOnce_) {
@@ -1361,15 +1376,22 @@ void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     }
     offsetCurSet_ = 0.0;
     auto midIndex = GetShowCount() / 2;
-    DatePickerScrollDirection dir = dragDelta > 0.0 ? DatePickerScrollDirection::DOWN : DatePickerScrollDirection::UP;
     auto shiftDistance = (dir == DatePickerScrollDirection::UP) ? optionProperties_[midIndex].prevDistance
                                                                 : optionProperties_[midIndex].nextDistance;
     // the abs of drag delta is less than jump interval.
     dragDelta = dragDelta + yOffset_;
-    if (GreatOrEqual(std::abs(dragDelta), std::abs(shiftDistance))) {
+    bool isJump = GreatOrEqual(static_cast<double>(std::abs(dragDelta)), std::abs(shiftDistance));
+    if (isJump) {
         InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true, false);
-        dragDelta = dragDelta % static_cast<int>(std::abs(shiftDistance));
+        dragDelta %= (static_cast<int32_t>(shiftDistance) != 0 ? static_cast<int32_t>(shiftDistance) : 1);
+        if (!NearZero(static_cast<double>(dragDelta)) && !CanMove(LessNotEqual(static_cast<double>(dragDelta), 0.0))) {
+            dragDelta = 0;
+            if (hapticController_) {
+                hapticController_->Stop();
+            }
+        }
     }
+
     // update selected option
     ScrollOption(dragDelta);
     offsetCurSet_ = dragDelta;
@@ -1392,9 +1414,20 @@ void DatePickerColumnPattern::ShiftOptionProp(RefPtr<FrameNode> curNode, RefPtr<
 
 bool DatePickerColumnPattern::CanMove(bool isDown) const
 {
-    CHECK_NULL_RETURN(NotLoopOptions(), true);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_RETURN(blendNode, false);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_RETURN(stackNode, false);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_RETURN(parentNode, false);
+    auto dataPickerRowLayoutProperty = parentNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    // When CanLoop is true and NotLoopOptions is false(which means LoopOptions are satisfied), CanMove returns true;
+    // otherwise, validate the index legality.
+    if (dataPickerRowLayoutProperty->GetCanLoopValue(true) && !NotLoopOptions()) {
+        return true;
+    }
     auto options = GetOptions();
     int totalOptionCount = static_cast<int>(options[host].size());
 
@@ -1494,7 +1527,7 @@ void DatePickerColumnPattern::PlayRestAnimation()
     double shiftDistance = (dir == DatePickerScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
                                                                   : optionProperties_[middleIndex].nextDistance;
     double shiftThreshold = shiftDistance / 2;
-    if (std::abs(scrollDelta_) >= std::abs(shiftThreshold)) {
+    if (GreatOrEqual(static_cast<double>(std::abs(scrollDelta_)), std::abs(shiftThreshold))) {
         InnerHandleScroll(LessNotEqual(scrollDelta_, 0.0), true, false);
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == DatePickerScrollDirection::UP ? -1 : 1);
     }
@@ -1755,7 +1788,7 @@ void DatePickerColumnPattern::HandleCrownEndEvent(const CrownEvent& event)
     auto shiftDistance = (dir == DatePickerScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
                                                                 : optionProperties_[middleIndex].nextDistance;
     auto shiftThreshold = shiftDistance / 2;
-    if (std::abs(scrollDelta_) >= std::abs(shiftThreshold)) {
+    if (GreatOrEqual(static_cast<double>(std::abs(scrollDelta_)), std::abs(shiftThreshold))) {
         InnerHandleScroll(LessNotEqual(scrollDelta_, 0.0), true, false);
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == DatePickerScrollDirection::UP ? -1 : 1);
     }
