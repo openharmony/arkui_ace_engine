@@ -26,7 +26,7 @@
  namespace OHOS::Ace::NG {
  
  class ScrollBarPaintProperty : public PaintProperty {
-     DECLARE_ACE_TYPE(ScrollBarPaintProperty, PaintProperty)
+     DECLARE_ACE_TYPE(ScrollBarPaintProperty, PaintProperty);
  
  public:
  ScrollBarPaintProperty() = default;
@@ -37,6 +37,7 @@
          auto paintProperty = MakeRefPtr<ScrollBarPaintProperty>();
          paintProperty->UpdatePaintProperty(this);
          paintProperty->propScrollBarColor_ = CloneScrollBarColor();
+         paintProperty->SetDefaultScrollBarColor(DefaultScrollBarColor);
          return paintProperty;
      }
  

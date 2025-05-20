@@ -31,9 +31,9 @@ class ScrollBarScrollBarColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('scrollbarcolor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().video.resetScrollBarScrollBarColor(node);
+      getUINativeModule().ScrollBar.resetScrollBarScrollBarColor(node);
     } else {
-      getUINativeModule().video.setScrollBarScrollBarColor(node, this.value);
+      getUINativeModule().ScrollBar.setScrollBarScrollBarColor(node, this.value);
     }
   }
 
