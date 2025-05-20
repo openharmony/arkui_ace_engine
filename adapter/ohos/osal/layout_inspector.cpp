@@ -36,8 +36,9 @@
 namespace OHOS::Ace {
 
 namespace {
-constexpr int32_t SNAP_PARTITION_SIZE = 100;
+constexpr size_t SNAP_PARTITION_SIZE = 100;
 constexpr int64_t FIND_RSNODE_ERROR = -1;
+constexpr int32_t PNG_ENCODE_QUALITY = 100;
 sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap)
 {
     return SkColorSpace::MakeSRGB();
@@ -361,7 +362,7 @@ void LayoutInspector::BuildInfoForIDE(uint64_t id, const std::shared_ptr<Media::
     sk_sp<SkImage> image;
     image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(acePixelMap));
     CHECK_NULL_VOID(image);
-    auto data = image->encodeToData(SkEncodedImageFormat::kPNG, 100);
+    auto data = image->encodeToData(SkEncodedImageFormat::kPNG, PNG_ENCODE_QUALITY);
     CHECK_NULL_VOID(data);
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     CHECK_NULL_VOID(defaultDisplay);
@@ -391,16 +392,48 @@ int64_t LayoutInspector::RsNodeIdToFrameNodeId(uint64_t rsNodeId)
     return rsNode->GetFrameNodeId();
 }
 
+std::vector<PixelMapPair> LayoutInspector::Filter3DSnapshot(const std::vector<PixelMapPair>& snapinfos)
+{
+    std::vector<PixelMapPair> infos;
+    for (const auto& snapInfo : snapinfos) {
+        if (snapInfo.second) {
+            infos.emplace_back(snapInfo);
+        }
+    }
+    return infos;
+}
+
+void LayoutInspector::SendEmpty3DSnapJson()
+{
+    TAG_LOGI(AceLogTag::ACE_LAYOUT_INSPECTOR, "SendEmpty3DSnapJson");
+    auto message = JsonUtil::Create(true);
+    CHECK_NULL_VOID(message);
+    auto contentMessage = JsonUtil::CreateArray(true);
+    CHECK_NULL_VOID(contentMessage);
+    message->Put("type", "3DLayers");
+    message->Put("totalParts", 1);
+    message->Put("partNum", 1);
+    message->Put("LayersCount", 0);
+    message->PutRef("content", std::move(contentMessage));
+    auto sendTask = [jsonSnapshotStr = message->ToString()]() {
+        WebSocketManager::SendMessage(jsonSnapshotStr);
+    };
+    BackgroundTaskExecutor::GetInstance().PostTask(std::move(sendTask));
+}
+
 void LayoutInspector::Get3DSnapshotJson(const RefPtr<NG::FrameNode>& node)
 {
     std::vector<PixelMapPair> snapInfos = NG::ComponentSnapshot::GetSoloNode(node);
-    if (snapInfos.size() == 0) {
+    TAG_LOGI(AceLogTag::ACE_LAYOUT_INSPECTOR, "3d snapInfos size:%{public}zu", snapInfos.size());
+    auto filterSnapInfos = Filter3DSnapshot(snapInfos);
+    TAG_LOGI(AceLogTag::ACE_LAYOUT_INSPECTOR, "3d snapInfos after filter size:%{public}zu", filterSnapInfos.size());
+    if (filterSnapInfos.empty()) {
+        SendEmpty3DSnapJson();
         return;
     }
-
-    int totalParts = (snapInfos.size() + SNAP_PARTITION_SIZE - 1) / SNAP_PARTITION_SIZE;
+    int totalParts = (filterSnapInfos.size() + SNAP_PARTITION_SIZE - 1) / SNAP_PARTITION_SIZE;
     int partNum = 1;
-    for (int32_t i = 0; i < snapInfos.size(); i += SNAP_PARTITION_SIZE) {
+    for (size_t i = 0; i < filterSnapInfos.size(); i += SNAP_PARTITION_SIZE) {
         auto message = JsonUtil::Create(true);
         CHECK_NULL_VOID(message);
         auto contentMessage = JsonUtil::CreateArray(true);
@@ -408,10 +441,10 @@ void LayoutInspector::Get3DSnapshotJson(const RefPtr<NG::FrameNode>& node)
         message->Put("type", "3DLayers");
         message->Put("totalParts", totalParts);
         message->Put("partNum", partNum++);
-        message->Put("LayersCount", snapInfos.size());
+        message->Put("LayersCount", filterSnapInfos.size());
 
-        for (int32_t j = i; j < i + SNAP_PARTITION_SIZE && j < snapInfos.size(); j++) {
-            auto snapInfo = snapInfos[j];
+        for (size_t j = i; j < i + SNAP_PARTITION_SIZE && j < filterSnapInfos.size(); j++) {
+            auto snapInfo = filterSnapInfos[j];
             auto snapPixelMap = snapInfo.second;
             if (snapPixelMap) {
                 auto snapInfoJson = JsonUtil::Create(true);

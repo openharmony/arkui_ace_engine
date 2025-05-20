@@ -67,6 +67,8 @@ public:
     using SetArkUICallback = void (*)(const std::function<void(const char*)>& arkuiCallback);
 
 private:
+    static void SendEmpty3DSnapJson();
+    static std::vector<PixelMapPair> Filter3DSnapshot(const std::vector<PixelMapPair>& snapinfos);
     static void Get3DSnapshotJson(const RefPtr<NG::FrameNode>& node);
     static void BuildInfoForIDE(uint64_t id, const std::shared_ptr<Media::PixelMap>& pixelMap,
         std::unique_ptr<JsonValue>& message);
