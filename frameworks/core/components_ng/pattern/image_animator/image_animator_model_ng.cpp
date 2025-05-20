@@ -22,9 +22,6 @@
 namespace OHOS::Ace::NG {
 namespace {
     constexpr int32_t DEFAULT_DURATION { 1000 };
-    constexpr int32_t DEFAULT_STATUS { static_cast<int32_t>(ControlledAnimator::ControlStatus::IDLE) };
-    constexpr int32_t DEFAULT_FILL_MODE  { static_cast<int32_t>(FillMode::FORWARDS) };
-    constexpr int32_t DEFAULT_ITERATIONS { 1 };
 }
 
 void ImageAnimatorModelNG::Create()
@@ -187,17 +184,16 @@ void ImageAnimatorModelNG::SetIsReverse(FrameNode* frameNode, bool isReverse)
     GetImageAnimatorPattern(frameNode)->SetIsReverse(isReverse);
 }
 
-void ImageAnimatorModelNG::SetDuration(FrameNode* frameNode, const std::optional<int32_t>& duration)
+void ImageAnimatorModelNG::SetDuration(FrameNode* frameNode, int32_t duration)
 {
     CHECK_NULL_VOID(frameNode);
-    GetImageAnimatorPattern(frameNode)->SetDuration(duration.value_or(DEFAULT_DURATION));
+    GetImageAnimatorPattern(frameNode)->SetDuration(duration);
 }
 
-void ImageAnimatorModelNG::SetState(FrameNode* frameNode, const std::optional<int32_t>& state)
+void ImageAnimatorModelNG::SetState(FrameNode* frameNode, int32_t state)
 {
     CHECK_NULL_VOID(frameNode);
-    GetImageAnimatorPattern(frameNode)->SetStatus(
-        static_cast<ControlledAnimator::ControlStatus>(state.value_or(DEFAULT_STATUS)));
+    GetImageAnimatorPattern(frameNode)->SetStatus(static_cast<ControlledAnimator::ControlStatus>(state));
 }
 
 void ImageAnimatorModelNG::SetFixedSize(FrameNode* frameNode, bool fixedSize)
@@ -206,16 +202,16 @@ void ImageAnimatorModelNG::SetFixedSize(FrameNode* frameNode, bool fixedSize)
     GetImageAnimatorPattern(frameNode)->SetFixedSize(fixedSize);
 }
 
-void ImageAnimatorModelNG::SetFillMode(FrameNode* frameNode, const std::optional<int32_t>& fillMode)
+void ImageAnimatorModelNG::SetFillMode(FrameNode* frameNode, int32_t fillMode)
 {
     CHECK_NULL_VOID(frameNode);
-    GetImageAnimatorPattern(frameNode)->SetFillMode(static_cast<FillMode>(fillMode.value_or(DEFAULT_FILL_MODE)));
+    GetImageAnimatorPattern(frameNode)->SetFillMode(static_cast<FillMode>(fillMode));
 }
 
-void ImageAnimatorModelNG::SetIteration(FrameNode* frameNode, const std::optional<int32_t>& iteration)
+void ImageAnimatorModelNG::SetIteration(FrameNode* frameNode, int32_t iteration)
 {
     CHECK_NULL_VOID(frameNode);
-    GetImageAnimatorPattern(frameNode)->SetIteration(iteration.value_or(DEFAULT_ITERATIONS));
+    GetImageAnimatorPattern(frameNode)->SetIteration(iteration);
 }
 
 void ImageAnimatorModelNG::SetAutoMonitorInvisibleArea(FrameNode* frameNode, bool autoMonitorInvisibleArea)

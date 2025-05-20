@@ -139,6 +139,23 @@
          ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, frameNode);
      }
  }
+
+ void ImageModelStatic::SetOrientation(FrameNode* frameNode, const std::optional<ImageRotateOrientation>& orientation)
+ {
+     const auto orientationValue = orientation.value_or(ImageRotateOrientation::UP);
+     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageRotateOrientation, orientationValue, frameNode);
+     auto pattern = frameNode->GetPattern<ImagePattern>();
+     CHECK_NULL_VOID(pattern);
+     pattern->SetOrientation(orientationValue);
+ }
+
+ void ImageModelStatic::SetEnhancedImageQuality(FrameNode* frameNode, const std::optional<AIImageQuality>& imageQuality)
+ {
+     CHECK_NULL_VOID(frameNode);
+     auto pattern = frameNode->GetPattern<ImagePattern>();
+     CHECK_NULL_VOID(pattern);
+     pattern->SetImageQuality(imageQuality.value_or(AIImageQuality::NONE));
+ }
  } // namespace OHOS::Ace::NG
  #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_STATIC_CPP
  
