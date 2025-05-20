@@ -37,7 +37,7 @@ import { Callback_Number_Number_Void } from "./grid"
 import { SelectionMenuOptions } from "./richEditor"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ArkTextNode } from "../handwritten/modifiers/ArkTextNode"
-import { ArkTextAttributeSet } from "../handwritten/modifiers/ArkTextModifier"
+import { ArkTextAttributeSet, TextModifier } from "../handwritten/modifiers/ArkTextModifier"
 import { CommonModifier } from "../CommonModifier"
 export class TextControllerInternal {
     public static fromPtr(ptr: KPointer): TextController {
@@ -1301,7 +1301,13 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         return this.getPeer()._attributeSet as ArkTextAttributeSet;
     }
     initAttributeSet<T>(modifier: AttributeModifier<T>): void {
-     
+        let isTextModifier: boolean = modifier instanceof TextModifier;
+        if (isTextModifier) {
+            let textModifier = modifier as object as TextModifier;
+            this.getPeer()._attributeSet = textModifier.attributeSet;
+        } else if (this.getPeer()._attributeSet == null) {
+            this.getPeer()._attributeSet = new ArkTextAttributeSet();
+        }
     }
 
     getPeer(): ArkTextPeer {

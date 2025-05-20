@@ -21,10 +21,30 @@ import { ArkCommonMethodPeer } from "../../component";
 import { ArkTextPeer } from "../../component";
 import { LengthMetrics } from "../../Graphics";
 import { Resource } from "global/resource"
+import { runtimeType, RuntimeType,  } from "@koalaui/interop"
+import { TextOptions } from "../../component/text";
 export class ArkTextNode extends ArkBaseNode  implements TextAttribute  {
-
-    constructParam(...param: Object[]): this {
-        InteropNativeModule._NativeLog("text constructParam enter")
+    
+    constructParam(...params: Object[]): this {
+        if (params.length > 2) {
+            throw new Error('more than 2 parameters')
+        }
+        let content_casted : string | Resource | undefined = undefined
+        let value_casted : TextOptions | undefined = undefined
+        if (params.length >= 1) {
+            if (typeof(params[0]) == "string") {
+                content_casted = params[0] as string
+            } else if (typeof(params[0]) == "object") {
+                content_casted = params[0] as string
+            }
+        }
+        if (params.length == 2) {
+            const param1_type = runtimeType(params[1])
+            if (RuntimeType.OBJECT == param1_type) {
+                value_casted = params[1] as TextOptions
+            }
+        }
+        this.getPeer().setTextOptionsAttribute(content_casted, value_casted)
         return this;
     }
     getPeer() : ArkTextPeer {
