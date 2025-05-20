@@ -1723,6 +1723,7 @@ HWTEST_F(ImageProviderTestNg, ImageProviderFailCallback001, TestSize.Level1)
 
     // Define the error message.
     auto errorMsg = "error";
+    // Define the error information.
     ImageErrorInfo errorInfo;
 
     // Invoke FailCallback to trigger the failure callback.
@@ -1768,6 +1769,7 @@ HWTEST_F(ImageProviderTestNg, ImageProviderFailCallback002, TestSize.Level1)
 
     // Define the error message.
     auto errorMsg = "error";
+    // Define the error information.
     ImageErrorInfo errorInfo;
 
     // Invoke FailCallback to trigger the failure callback.

@@ -483,7 +483,7 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(
             src.ToString().c_str(), static_cast<int32_t>(data->GetSize()), codec.imageSize.ToString().c_str(),
             codec.frameCount, imageDfxConfig.ToStringWithoutSrc().c_str());
         if (errorInfo.errorCode == ImageErrorCode::DEFAULT) {
-            errorInfo = { ImageErrorCode::BUILD_IMAGE_DATA_SIZE_INVALID, "Image Data is invalid." };
+            errorInfo = { ImageErrorCode::BUILD_IMAGE_DATA_SIZE_INVALID, "image data size is invalid." };
         }
         return nullptr;
     }
