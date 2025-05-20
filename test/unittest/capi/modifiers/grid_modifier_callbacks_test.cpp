@@ -115,7 +115,7 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTestInvalid, Te
     EXPECT_EQ(checkEvent->index, 13);
     EXPECT_EQ(checkEvent->offset.Value(), 0);
     EXPECT_EQ(checkEvent->offset.Unit(), DimensionUnit::VP);
-    
+
     // index: 15, offset: 16 auto
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireOnScrollBarUpdate(15, Dimension(16, DimensionUnit::AUTO));

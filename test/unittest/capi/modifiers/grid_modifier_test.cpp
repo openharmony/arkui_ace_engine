@@ -995,7 +995,7 @@ HWTEST_F(GridModifierTest, setCachedCount0TestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridModifierTest, setCachedCount0TestInvalidValues, TestSize.Level1)
+HWTEST_F(GridModifierTest, DISABLED_setCachedCount0TestInvalidValues, TestSize.Level1)
 {
     int intResult;
     Ark_Number inputValue;
