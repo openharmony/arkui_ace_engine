@@ -135,6 +135,8 @@ private:
     bool alignBottomScreen_ = false;
     Rect foldCreaseRect = Rect(0.0, 0.0, 0.0, 0.0);
     HoverModeAreaType hoverModeArea_ = HoverModeAreaType::BOTTOM_SCREEN;
+    OffsetF wrapperOffset_ = OffsetF(0.0, 0.0);
+    SizeF wrapperSize_ = SizeF(0.0, 0.0);
 
     KeyboardAvoidMode keyboardAvoidMode_ = KeyboardAvoidMode::DEFAULT;
     std::optional<Dimension> keyboardAvoidDistance_;

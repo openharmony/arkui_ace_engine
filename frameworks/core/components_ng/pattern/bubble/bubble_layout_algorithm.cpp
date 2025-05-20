@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -252,22 +253,29 @@ BubbleLayoutAlgorithm::BubbleLayoutAlgorithm(int32_t id, const std::string& tag,
         Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT };
 }
 
-void BubbleLayoutAlgorithm::FitAvaliableRect(LayoutWrapper* layoutWrapper, bool showInSubWindow)
+void BubbleLayoutAlgorithm::FitAvailableRect(LayoutWrapper* layoutWrapper, bool showInSubWindow)
 {
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);
     auto pipelineContext = bubbleNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
-    auto containerId = Container::CurrentId();
+    auto containerId = pipelineContext->GetInstanceId();
     auto container = AceEngine::Get().GetContainer(containerId);
-    if (containerId >= MIN_SUBCONTAINER_ID) {
+    CHECK_NULL_VOID(container);
+    if (container->IsSubContainer()) {
         auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
         container = AceEngine::Get().GetContainer(parentContainerId);
+        CHECK_NULL_VOID(container);
     }
-    CHECK_NULL_VOID(container);
     CHECK_EQUAL_VOID(expandDisplay_, false);
-    auto availableRect = OverlayManager::GetDisplayAvailableRect(bubbleNode,
-        static_cast<int32_t>(SubwindowType::TYPE_POPUP));
+    Rect availableRect;
+    // In superFoldDisplayDevice, the rect is the full screen's available rect when the displayId is 0.
+    if (SystemProperties::IsSuperFoldDisplayDevice() && container->GetDisplayId() == 0 && !showInSubWindow) {
+        availableRect = container->GetFoldExpandAvailableRect();
+    } else {
+        availableRect = OverlayManager::GetDisplayAvailableRect(bubbleNode,
+            static_cast<int32_t>(SubwindowType::TYPE_POPUP));
+    }
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "popup currentId: %{public}d, displayAvailableRect: %{public}s",
         containerId, availableRect.ToString().c_str());
     if (showInSubWindow) {
@@ -282,6 +290,7 @@ void BubbleLayoutAlgorithm::FitAvaliableRect(LayoutWrapper* layoutWrapper, bool 
                                     wrapperOffset.GetY() + displayWindowRect.Top(),
                                     wrapperSize_.Width(), wrapperSize_.Height());
         auto commonRect = availableRect.IntersectRect(realWrapperRect);
+        CHECK_EQUAL_VOID(commonRect.IsValid(), false);
         wrapperSize_.SetHeight(commonRect.Top() + commonRect.Height() - realWrapperRect.Top());
         wrapperSize_.SetWidth(commonRect.Left() + commonRect.Width() - realWrapperRect.Left());
         marginTop_ = std::max(marginTop_, static_cast<float>(commonRect.Top() -
@@ -304,7 +313,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     InitProps(bubbleProp, showInSubWindow, layoutWrapper);
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);
-    FitAvaliableRect(layoutWrapper, showInSubWindow);
+    FitAvailableRect(layoutWrapper, showInSubWindow);
     const auto& layoutConstraint = bubbleLayoutProperty->GetLayoutConstraint();
     if (!layoutConstraint) {
         LOGE("fail to measure bubble due to layoutConstraint is nullptr");
@@ -705,25 +714,11 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     showArrow_ = false;
     minHeight_ = popupTheme->GetMinHeight();
     maxColumns_ = popupTheme->GetMaxColumns();
-    expandDisplay_ = GetExpandDisplay();
+    expandDisplay_ = DialogManager::GetInstance().IfNeedAvoidDock(layoutWrapper->GetHostNode());
     InitWrapperRect(layoutWrapper, layoutProp);
     if (!useCustom_) {
         UpdateScrollHeight(layoutWrapper, showInSubWindow);
     }
-}
-
-bool BubbleLayoutAlgorithm::GetExpandDisplay()
-{
-    auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
-    auto containerId = Container::CurrentId();
-    auto container = AceEngine::Get().GetContainer(containerId);
-    if (containerId >= MIN_SUBCONTAINER_ID) {
-        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
-        container = AceEngine::Get().GetContainer(parentContainerId);
-    }
-    CHECK_NULL_RETURN(container, false);
-    auto isFreeMultiWindow = container->IsFreeMultiWindow();
-    return expandDisplay || isFreeMultiWindow;
 }
 
 void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow)

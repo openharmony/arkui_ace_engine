@@ -18,6 +18,8 @@
 
 #include "base/utils/singleton.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components/dialog/dialog_theme.h"
+#include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT DialogManager : public Singleton<DialogManager> {
@@ -48,6 +50,8 @@ public:
     {
         return dialogTag_;
     }
+
+    bool IfNeedAvoidDock(const RefPtr<FrameNode>& currentNode) const;
 
 private:
     int32_t dismissDialogId_ = 0;
