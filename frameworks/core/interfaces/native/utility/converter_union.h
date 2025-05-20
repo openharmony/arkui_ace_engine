@@ -316,6 +316,16 @@ void VisitUnion(const T& src, Fs... funcs)
     detail::UnionVisitor<T, UnionLastIndex<T>>::Visit(src, detail::Overloaded{funcs...});
 }
 
+template<typename T, typename... Fs, decltype(T().selector) = 0>
+void VisitUnionPtr(const T* src, Fs... funcs)
+{
+    if (src) {
+        detail::UnionVisitor<T, UnionLastIndex<T>>::Visit(*src, detail::Overloaded{funcs...});
+    } else {
+        detail::Overloaded{funcs...}();
+    }
+}
+
 template<typename T, typename... Fs, decltype(T().value.selector) = 0>
 void VisitUnion(const T& src, Fs... funcs)
 {

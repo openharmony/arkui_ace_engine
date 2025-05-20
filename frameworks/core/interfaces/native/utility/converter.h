@@ -236,6 +236,16 @@ namespace Converter {
     }
 
     template<typename To, typename From>
+    std::optional<To> OptConvertPtr(const From* value)
+    {
+        std::optional<To> opt;
+        if (value) {
+            AssignTo(opt, *value);
+        }
+        return std::move(opt);
+    }
+
+    template<typename To, typename From>
     To ConvertOrDefault(const From& value, To defaultValue)
     {
         return OptConvert<To, From>(value).value_or(defaultValue);
@@ -469,9 +479,9 @@ namespace Converter {
     template<> ButtonInfo Convert(const Ark_AlertDialogButtonOptions& src);
     template<> ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src);
     template<> CalcDimension Convert(const Ark_Length& src);
+    template<> CalcDimension Convert(const Ark_LengthMetrics& src);
     template<> CalcDimension Convert(const Ark_Number& src);
     template<> CalcDimension Convert(const Ark_String& src);
-    template<> CalcDimension Convert(const Ark_LengthMetrics& src);
     template<> CalcLength Convert(const Ark_Length& src);
     template<> CalcLength Convert(const Ark_LengthMetrics& src);
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
@@ -514,6 +524,12 @@ namespace Converter {
     template<> ListItemGroupIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> MenuOptionsParam Convert(const Ark_TextMenuItem& src);
+    template<> NG::NavToolbarItemStatus Convert(const Opt_ToolbarItemStatus& src);
+    template<> NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src);
+    template<> NG::NavigationBackgroundOptions Convert(const Ark_NavigationTitleOptions& src);
+    template<> NG::NavigationBackgroundOptions Convert(const Ark_NavigationToolbarOptions& src);
+    template<> NG::NavigationBarOptions Convert(const Ark_NavigationTitleOptions& src);
+    template<> NG::NavigationBarOptions Convert(const Ark_NavigationToolbarOptions& src);
     template<> NavigationOptions Convert(const Ark_NavigationOptions& src);
     template<> NestedScrollOptions Convert(const Ark_NestedScrollOptions& src);
     template<> OHOS::Ace::TextMetrics Convert(const Ark_TextMetrics& src);
@@ -546,7 +562,6 @@ namespace Converter {
     template<> RefPtr<BasicShape> Convert(const Ark_PathShape& src);
     template<> RefPtr<BasicShape> Convert(const Ark_RectShape& src);
     template<> RefPtr<ChainedTransitionEffect> Convert(const Ark_TransitionEffect& src);
-    template<> ScrollFrameResult Convert<ScrollFrameResult>(const Ark_ScrollResult& src);
     template<> RefPtr<Circle> Convert(const Ark_Circle& src);
     template<> RefPtr<Curve> Convert(const Ark_Curve& src);
     template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
@@ -563,6 +578,7 @@ namespace Converter {
     template<> RefPtr<ShapeRect> Convert(const Ark_Rect& src);
     template<> RefPtr<ShapeRect> Convert(const Ark_RoundRect& src);
     template<> ScaleOpt Convert(const Ark_ScaleOptions& src);
+    template<> ScrollFrameResult Convert<ScrollFrameResult>(const Ark_ScrollResult& src);
     template<> SelectionOptions Convert(const Ark_SelectionOptions& options);
     template<> Shadow Convert(const Ark_Int32& src);
     template<> Shadow Convert(const Ark_ShadowOptions& src);
@@ -581,14 +597,6 @@ namespace Converter {
     template<> TextRange Convert(const Ark_TextRange& src);
     template<> TranslateOptions Convert(const Ark_TranslateOptions& src);
     template<> bool Convert(const Ark_EdgeEffectOptions& src);
-    template<> uint32_t Convert(const Ark_LayoutSafeAreaEdge& src);
-    template<> uint32_t Convert(const Ark_LayoutSafeAreaType& src);
-    template<> NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src);
-    template<> NG::NavigationBackgroundOptions Convert(const Ark_NavigationTitleOptions& src);
-    template<> NG::NavigationBackgroundOptions Convert(const Ark_NavigationToolbarOptions& src);
-    template<> NG::NavigationBarOptions Convert(const Ark_NavigationTitleOptions& src);
-    template<> NG::NavigationBarOptions Convert(const Ark_NavigationToolbarOptions& src);
-    template<> NG::NavToolbarItemStatus Convert(const Opt_ToolbarItemStatus& src);
     template<> float Convert(const Ark_Float32& src);
     template<> std::map<std::string, std::string> Convert(const Map_String_String& src);
     template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src);
@@ -601,12 +609,14 @@ namespace Converter {
     template<> std::tuple<Ark_Float32, Ark_Int32> Convert(const Ark_String& src);
     template<> std::u16string Convert(const Ark_String& src);
     template<> std::vector<ImageAnalyzerType> Convert(const Array_ImageAnalyzerType& src);
-    template<> std::vector<Shadow> Convert(const Ark_ShadowOptions& src);
-    template<> std::vector<uint32_t> Convert(const Ark_Buffer& src);
-    template<> std::vector<uint32_t> Convert(const Array_LayoutSafeAreaType& src);
-    template<> std::vector<uint32_t> Convert(const Array_LayoutSafeAreaEdge& src);
     template<> std::vector<NG::BarItem> Convert(const Array_NavigationMenuItem& src);
     template<> std::vector<NG::BarItem> Convert(const Array_ToolbarItem& src);
+    template<> std::vector<Shadow> Convert(const Ark_ShadowOptions& src);
+    template<> std::vector<uint32_t> Convert(const Ark_Buffer& src);
+    template<> std::vector<uint32_t> Convert(const Array_LayoutSafeAreaEdge& src);
+    template<> std::vector<uint32_t> Convert(const Array_LayoutSafeAreaType& src);
+    template<> uint32_t Convert(const Ark_LayoutSafeAreaEdge& src);
+    template<> uint32_t Convert(const Ark_LayoutSafeAreaType& src);
 
     // SORTED_SECTION: No multiline declarations, please!
     template<> void AssignCast(std::optional<AIImageQuality>& dst, const Ark_ResolutionQuality& src);
@@ -681,6 +691,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<InputStyle>& dst, const Ark_TextContentStyle& src);
     template<> void AssignCast(std::optional<InputStyle>& dst, const Ark_TextInputStyle& src);
     template<> void AssignCast(std::optional<KeyboardAppearance>& dst, const Ark_KeyboardAppearance& src);
+    template<> void AssignCast(std::optional<LaunchMode>& dst, const Ark_LaunchMode& src);
     template<> void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src);
     template<> void AssignCast(std::optional<LineBreakStrategy>& dst, const Ark_LineBreakStrategy& src);
     template<> void AssignCast(std::optional<LineCap>& dst, const Ark_LineCapStyle& src);
@@ -694,12 +705,12 @@ namespace Converter {
     template<> void AssignCast(std::optional<MixedModeContent>& dst, const Ark_MixedMode& src);
     template<> void AssignCast(std::optional<ModalTransition>& dst, const Ark_ModalTransition& src);
     template<> void AssignCast(std::optional<ModifierKey>& dst, const Ark_ModifierKey& src);
+    template<> void AssignCast(std::optional<NG::NavigationTransition>& dst, const Opt_NavigationAnimatedTransition& src);
     template<> void AssignCast(std::optional<NavDestinationMode>& dst, const Ark_NavDestinationMode& src);
     template<> void AssignCast(std::optional<NavRouteMode>& dst, const Ark_NavRouteMode& src);
+    template<> void AssignCast(std::optional<NavigationOptions>& dst, const Ark_NavigationOptions& src);
     template<> void AssignCast(std::optional<NavigationTitlebarOptions>& dst, const Ark_NavigationTitleOptions& src);
     template<> void AssignCast(std::optional<NavigationType>& dst, const Ark_WebNavigationType& src);
-    template<> void AssignCast(std::optional<LaunchMode>& dst, const Ark_LaunchMode& src);
-    template<> void AssignCast(std::optional<NavigationOptions>& dst, const Ark_NavigationOptions& src);
     template<> void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_NestedScrollMode& src);
     template<> void AssignCast(std::optional<OHOS::Ace::CommonSubType>& dst, const Ark_EffectDirection& src);
     template<> void AssignCast(std::optional<OHOS::Ace::FillStyle>& dst, const Ark_EffectFillStyle& src);
@@ -787,7 +798,6 @@ namespace Converter {
     template<> void AssignCast(std::optional<std::string>& dst, const Ark_UniformDataType& src);
     template<> void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src);
     template<> void AssignCast(std::optional<uint32_t>& dst, const Ark_Number& src);
-    template<> void AssignCast(std::optional<NG::NavigationTransition>& dst, const Opt_NavigationAnimatedTransition& src);
 
     template<> void AssignCast(
         std::optional<RenderProcessNotRespondingReason>& dst, const Ark_RenderProcessNotRespondingReason& src);
