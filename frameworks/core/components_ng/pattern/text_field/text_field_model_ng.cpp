@@ -2452,4 +2452,24 @@ void TextFieldModelNG::ResetStrokeColor(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeColor, frameNode);
 }
+
+void TextFieldModelNG::SetEnableAutoSpacing(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EnableAutoSpacing, enabled);
+}
+
+void TextFieldModelNG::SetEnableAutoSpacing(FrameNode* frameNode, bool enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EnableAutoSpacing, enabled, frameNode);
+}
+
+bool TextFieldModelNG::GetEnableAutoSpacing(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, EnableAutoSpacing, value, frameNode, value);
+    return value;
+}
 } // namespace OHOS::Ace::NG

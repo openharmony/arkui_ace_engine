@@ -3290,4 +3290,40 @@ HWTEST_F(TextTestFiveNg, TextShiftMultipleSelection001, TestSize.Level1)
 
     EXPECT_EQ(pattern->IsSelected(), false);
 }
+
+/**
+ * @tc.name: TextEnableAutoSpacing
+ * @tc.desc: Test the enable or disable the EnableAutoSpacing attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, TextEnableAutoSpacing, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    textModelNG.SetEnableAutoSpacing(true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.expected: Get EnableAutoSpacing Value
+     */
+    EXPECT_EQ(textLayoutProperty->GetEnableAutoSpacing(), true);
+    EXPECT_EQ(TextModelNG::GetEnableAutoSpacing(frameNode), true);
+    /**
+     * @tc.expected: Set EnableAutoSpacing False
+     */
+    TextModelNG::SetEnableAutoSpacing(frameNode, false);
+    /**
+     * @tc.expected: Get EnableAutoSpacing Value
+     */
+    EXPECT_EQ(textLayoutProperty->GetEnableAutoSpacing(), false);
+    EXPECT_EQ(TextModelNG::GetEnableAutoSpacing(frameNode), false);
+}
 } // namespace OHOS::Ace::NG

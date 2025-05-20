@@ -1486,6 +1486,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetOnMarqueeStateChange));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnMarqueeStateChange"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetOnMarqueeStateChange));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableAutoSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetEnableAutoSpacing));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableAutoSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetEnableAutoSpacing));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "text"), text);
 
     auto search = panda::ObjectRef::New(vm);
@@ -1697,6 +1701,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetStrokeColor));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStrokeColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetStrokeColor));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableAutoSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetEnableAutoSpacing));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableAutoSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetEnableAutoSpacing));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "search"), search);
 
     auto stack = panda::ObjectRef::New(vm);
@@ -2337,6 +2345,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetStrokeColor));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStrokeColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetStrokeColor));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableAutoSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetEnableAutoSpacing));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableAutoSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetEnableAutoSpacing));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textArea"), textArea);
     
     RegisterVideoAttributes(object, vm);
@@ -2744,6 +2756,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetStrokeColor));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStrokeColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetStrokeColor));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableAutoSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetEnableAutoSpacing));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableAutoSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetEnableAutoSpacing));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textInput"), textInput);
 
     auto navDestination = panda::ObjectRef::New(vm);

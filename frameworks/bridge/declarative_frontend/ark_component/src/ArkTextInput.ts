@@ -1518,6 +1518,24 @@ class TextInputStrokeColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
+class TextInputEnableAutoSpacingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputEnableAutoSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetEnableAutoSpacing(node);
+    }
+    else {
+      getUINativeModule().textInput.setEnableAutoSpacing(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -2060,6 +2078,10 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   strokeColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, TextInputStrokeColorModifier.identity, TextInputStrokeColorModifier, value);
+    return this;
+  }
+  enableAutoSpacing(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoSpacingModifier.identity, TextInputEnableAutoSpacingModifier, value);
     return this;
   }
 }

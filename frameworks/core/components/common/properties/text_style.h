@@ -700,6 +700,7 @@ public:
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
         TextDirection, TextDirection, TextDirection::AUTO, ParagraphStyleAttribute::DIRECTION);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(HeightOnly, bool, false, TextStyleAttribute::RE_CREATE);
+    ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(EnableAutoSpacing, bool, false, ParagraphStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(LineThicknessScale, float, 1.0f, TextStyleAttribute::RE_CREATE);
 
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(

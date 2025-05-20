@@ -1274,6 +1274,20 @@ void ResetOnMarqueeStateChange(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetOnMarqueeStateChange(frameNode, nullptr);
 }
+
+void SetEnableAutoSpacing(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetEnableAutoSpacing(frameNode, static_cast<bool>(enableAutoSpacing));
+}
+
+void ResetEnableAutoSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetEnableAutoSpacing(frameNode, false);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1412,6 +1426,8 @@ const ArkUITextModifier* GetTextModifier()
         .resetOnMarqueeStateChange = ResetOnMarqueeStateChange,
         .setImmutableFontWeight = SetImmutableFontWeight,
         .getLineCount = GetLineCount,
+        .setEnableAutoSpacing = SetEnableAutoSpacing,
+        .resetEnableAutoSpacing = ResetEnableAutoSpacing,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

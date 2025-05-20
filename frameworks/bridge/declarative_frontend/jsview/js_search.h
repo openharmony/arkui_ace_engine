@@ -107,6 +107,7 @@ public:
     static void SetOnWillChange(const JSCallbackInfo& info);
     static void SetStrokeWidth(const JSCallbackInfo& info);
     static void SetStrokeColor(const JSCallbackInfo& info);
+    static void SetEnableAutoSpacing(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {

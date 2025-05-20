@@ -114,6 +114,7 @@ public:
     void SetStrokeWidth(const Dimension& value) override;
     void SetStrokeColor(const Color& value) override;
     void ResetStrokeColor() override;
+    void SetEnableAutoSpacing(bool enabled) override;
     static RefPtr<SearchNode> CreateFrameNode(int32_t nodeId);
     static void SetTextValue(FrameNode* frameNode, const std::optional<std::string>& value);
     static void SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder);
@@ -199,6 +200,8 @@ public:
     static void SetStrokeWidth(FrameNode* frameNode, const Dimension& value);
     static void SetStrokeColor(FrameNode* frameNode, const Color& value);
     static void ResetStrokeColor(FrameNode* frameNode);
+    static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
+    static bool GetEnableAutoSpacing(FrameNode* frameNode);
 
 private:
     static RefPtr<SearchTheme> GetTheme(const RefPtr<SearchNode>& frameNode);

@@ -256,6 +256,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SetCounter, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowHighlightBorder, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StopBackPress, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableAutoSpacing, bool, PROPERTY_UPDATE_MEASURE);
 
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
@@ -300,6 +301,7 @@ protected:
         value->propBundleName_ = CloneBundleName();
         value->propModuleName_ = CloneModuleName();
         value->propStopBackPress_ = CloneStopBackPress();
+        value->propEnableAutoSpacing_ = CloneEnableAutoSpacing();
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutProperty);

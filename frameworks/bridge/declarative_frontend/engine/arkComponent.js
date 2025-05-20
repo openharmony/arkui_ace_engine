@@ -10909,6 +10909,24 @@ class SearchStrokeColorModifier extends ModifierWithKey {
 }
 SearchStrokeColorModifier.identity = Symbol('searchStrokeColor');
 
+class SearchEnableAutoSpacingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetEnableAutoSpacing(node);
+    }
+    else {
+      getUINativeModule().search.setEnableAutoSpacing(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchEnableAutoSpacingModifier.identity = Symbol('searchEnableAutoSpacing');
+
 class ArkSearchComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -11154,6 +11172,10 @@ class ArkSearchComponent extends ArkComponent {
   }
   strokeColor(value) {
     modifierWithKey(this._modifiersWithKeys, SearchStrokeColorModifier.identity, SearchStrokeColorModifier, value);
+    return this;
+  }
+  enableAutoSpacing(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchEnableAutoSpacingModifier.identity, SearchEnableAutoSpacingModifier, value);
     return this;
   }
 }
@@ -13400,6 +13422,24 @@ class TextEnableHapticFeedbackModifier extends ModifierWithKey {
 }
 TextEnableHapticFeedbackModifier.identity = Symbol('textEnableHapticFeedback');
 
+class TextEnableAutoSpacingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetEnableAutoSpacing(node);
+    }
+    else {
+      getUINativeModule().text.setEnableAutoSpacing(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextEnableAutoSpacingModifier.identity = Symbol('textEnableAutoSpacing');
+
 class ArkTextComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -13629,6 +13669,10 @@ class ArkTextComponent extends ArkComponent {
   }
   enableHapticFeedback(value) {
     modifierWithKey(this._modifiersWithKeys, TextEnableHapticFeedbackModifier.identity, TextEnableHapticFeedbackModifier, value);
+    return this;
+  }
+  enableAutoSpacing(value) {
+    modifierWithKey(this._modifiersWithKeys, TextEnableAutoSpacingModifier.identity, TextEnableAutoSpacingModifier, value);
     return this;
   }
 }
@@ -14954,6 +14998,24 @@ class TextAreaStrokeColorModifier extends ModifierWithKey {
 }
 TextAreaStrokeColorModifier.identity = Symbol('textAreaStrokeColor');
 
+class TextAreaEnableAutoSpacingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetEnableAutoSpacing(node);
+    }
+    else {
+      getUINativeModule().textArea.setEnableAutoSpacing(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaEnableAutoSpacingModifier.identity = Symbol('textAreaEnableAutoSpacing');
+
 class ArkTextAreaComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -15324,6 +15386,10 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   strokeColor(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaStrokeColorModifier.identity, TextAreaStrokeColorModifier, value);
+    return this;
+  }
+  enableAutoSpacing(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaEnableAutoSpacingModifier.identity, TextAreaEnableAutoSpacingModifier, value);
     return this;
   }
 }
@@ -16868,6 +16934,24 @@ class TextInputStrokeColorModifier extends ModifierWithKey {
 }
 TextInputStrokeColorModifier.identity = Symbol('textInputStrokeColor');
 
+class TextInputEnableAutoSpacingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetEnableAutoSpacing(node);
+    }
+    else {
+      getUINativeModule().textInput.setEnableAutoSpacing(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputEnableAutoSpacingModifier.identity = Symbol('textInputEnableAutoSpacing');
+
 class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -17290,6 +17374,10 @@ class ArkTextInputComponent extends ArkComponent {
   }
   strokeColor(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputStrokeColorModifier.identity, TextInputStrokeColorModifier, value);
+    return this;
+  }
+  enableAutoSpacing(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoSpacingModifier.identity, TextInputEnableAutoSpacingModifier, value);
     return this;
   }
 }

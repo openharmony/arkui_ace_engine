@@ -841,6 +841,24 @@ class SearchStrokeColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
+class SearchEnableAutoSpacingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchEnableAutoSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetEnableAutoSpacing(node);
+    }
+    else {
+      getUINativeModule().search.setEnableAutoSpacing(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 interface SearchParam {
   value?: ResourceStr;
   placeholder?: ResourceStr;
@@ -1092,6 +1110,10 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   }
   strokeColor(value: ResourceColor):this {
     modifierWithKey(this._modifiersWithKeys, SearchStrokeColorModifier.identity, SearchStrokeColorModifier, value);
+    return this;
+  }
+  enableAutoSpacing(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, SearchEnableAutoSpacingModifier.identity, SearchEnableAutoSpacingModifier, value);
     return this;
   }
 }
