@@ -1123,9 +1123,92 @@ RefPtr<NG::NavigationStack> NavigationModelNG::GetNavigationStack()
     return pattern->GetNavigationStack();
 }
 
+RefPtr<NG::NavigationStack> NavigationModelNG::GetNavigationStack(FrameNode* frameNode)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_RETURN(navigationGroupNode, nullptr);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetNavigationStack();
+}
+
 void NavigationModelNG::SetMenuCount(int32_t menuCount)
 {
     return;
+}
+
+void NavigationModelNG::SetOnTitleModeChange(FrameNode* frameNode,
+    std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
+    std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto eventHub = navigationGroupNode->GetEventHub<NavigationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnTitleModeChange(std::move(eventInfo));
+}
+
+void NavigationModelNG::SetOnNavigationModeChange(FrameNode* frameNode,
+    std::function<void(NavigationMode)>&& modeChange)
+{
+    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navigationEventHub);
+    navigationEventHub->SetOnNavigationModeChange(std::move(modeChange));
+}
+
+void NavigationModelNG::SetIsCustomAnimation(FrameNode* frameNode, bool isCustom)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsCustomAnimation(isCustom);
+}
+
+void NavigationModelNG::SetToolBarItems(FrameNode* frameNode, std::vector<NG::BarItem>&& toolBarItems)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    if (navBarNode->GetPrevToolBarIsCustom().value_or(false)) {
+        navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
+    } else {
+        if (navBarNode->GetPreToolBarNode() &&
+            static_cast<int32_t>(navBarNode->GetPreToolBarNode()->GetChildren().size()) != 0) {
+            UpdateOldBarItems(navBarNode->GetPreToolBarNode(), toolBarItems);
+            navBarNode->SetToolBarNode(navBarNode->GetPreToolBarNode());
+            navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::NONE);
+            return;
+        }
+        navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
+    }
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
+    CHECK_NULL_VOID(toolBarNode);
+    auto rowProperty = toolBarNode->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(rowProperty);
+    rowProperty->UpdateMainAxisAlign(FlexAlign::SPACE_EVENLY);
+    for (const auto& toolBarItem : toolBarItems) {
+        int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
+        barItemNode->SetIsHideItemText(toolBarNode->IsHideItemText());
+        UpdateBarItemNodeWithItem(barItemNode, toolBarItem);
+        toolBarNode->AddChild(barItemNode);
+    }
+    bool hasValidContent = !toolBarNode->GetChildren().empty();
+    toolBarNode->SetHasValidContent(hasValidContent);
+    rowProperty->UpdateVisibility(hasValidContent ? VisibleType::VISIBLE : VisibleType::GONE);
+    navBarNode->SetToolBarNode(toolBarNode);
+    navBarNode->SetPreToolBarNode(toolBarNode);
+    navBarNode->UpdatePrevToolBarIsCustom(false);
+}
+
+void NavigationModelNG::SetOnNavBarStateChange(FrameNode* frameNode, std::function<void(bool)>&& onNavBarStateChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navigationEventHub);
+    navigationEventHub->SetOnNavBarStateChange(std::move(onNavBarStateChange));
 }
 
 void NavigationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated)
@@ -1874,14 +1957,13 @@ void NavigationModelNG::SetOnCoordScrollEndAction(FrameNode* frameNode, std::fun
     navBarEventHub->SetOnCoordScrollEndAction(std::move(onCoordScrollEnd));
 }
 
-void NavigationModelNG::SetSystemBarStyle(FrameNode* frameNode, const Color& contentColor)
+void NavigationModelNG::SetSystemBarStyle(FrameNode* frameNode, const RefPtr<SystemBarStyle>& style)
 {
     CHECK_NULL_VOID(frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(pattern);
-    RefPtr<SystemBarStyle> style = SystemBarStyle::CreateStyleFromColor(contentColor.GetValue());
     pattern->SetSystemBarStyle(style);
 }
 

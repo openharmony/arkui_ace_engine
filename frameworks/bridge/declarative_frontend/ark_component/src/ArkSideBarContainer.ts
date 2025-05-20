@@ -31,6 +31,20 @@ class SideBarContainerPositionModifier extends ModifierWithKey<number> {
   }
 }
 
+class SideBarContainerOnChangeModifier extends ModifierWithKey<((value: boolean) => void)> {
+  constructor(value: (value: boolean) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('sideBarContainerOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().sideBarContainer.resetOnChange(node);
+    } else {
+      getUINativeModule().sideBarContainer.setOnChange(node, this.value);
+    }
+  }
+}
+
 class SideBarContainerAutoHideModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -210,7 +224,9 @@ class ArkSideBarContainerComponent extends ArkComponent implements SideBarContai
     super(nativePtr, classType);
   }
   onChange(callback: (value: boolean) => void): SideBarContainerAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SideBarContainerOnChangeModifier.identity,
+      SideBarContainerOnChangeModifier, callback);
+    return this;
   }
   autoHide(value: boolean): SideBarContainerAttribute {
     modifierWithKey(this._modifiersWithKeys, SideBarContainerAutoHideModifier.identity, SideBarContainerAutoHideModifier, value);

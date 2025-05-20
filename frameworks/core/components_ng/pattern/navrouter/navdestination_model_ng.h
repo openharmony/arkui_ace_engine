@@ -91,9 +91,15 @@ public:
     static void SetOnCoordScrollStartAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollStart);
     static void SetOnCoordScrollUpdateAction(FrameNode* frameNode, std::function<void(float)>&& onCoordScrollUpdate);
     static void SetOnCoordScrollEndAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollEnd);
-    static void SetSystemBarStyle(FrameNode* frameNode, const Color& contentColor);
+    static void SetSystemBarStyle(FrameNode* frameNode, const RefPtr<SystemBarStyle>& style);
     static void SetOnShown(FrameNode* frameNode, std::function<void()>&& onShow);
     static void SetOnHidden(FrameNode* frameNode, std::function<void()>&& onHidden);
+    static void SetOnWillAppear(FrameNode* frameNode, std::function<void()>&& willAppear);
+    static void SetOnWillShow(FrameNode* frameNode, std::function<void()>&& willShow);
+    static void SetOnWillHide(FrameNode* frameNode, std::function<void()>&& willHide);
+    static void SetOnWillDisAppear(FrameNode* frameNode, std::function<void()>&& willDisAppear);
+    static void SetOnBackPressed(FrameNode* frameNode, std::function<bool()>&& onBackPressed);
+    static void SetOnReady(FrameNode* frameNode, std::function<void(RefPtr<NavDestinationContext>)>&& onReady);
     static void SetCustomBackButtonNode(FrameNode* frameNode, FrameNode* backButtonNode);
     void SetCustomTransition(NG::NavDestinationTransitionDelegate&& transitionDelegate) override;
     void SetOnNewParam(NG::NavDestinationOnNewParamCallback&& onNewParamCallback) override;

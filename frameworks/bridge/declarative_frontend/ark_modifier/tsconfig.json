@@ -67,6 +67,7 @@
         "src/span_modifier.ts",
         "src/stack_modifier.ts",
         "src/stepper_item_modifier.ts",
+        "src/stepper_modifier.ts",
         "src/swiper_modifier.ts",
         "src/tabs_modifier.ts",
         "src/tab_content_modifier.ts",
