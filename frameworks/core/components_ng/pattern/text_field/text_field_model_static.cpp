@@ -32,6 +32,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 const auto DEFAULT_KEYBOARD_APPERANCE = KeyboardAppearance::NONE_IMMERSIVE;
+constexpr uint32_t MAX_LINES = 3;
+constexpr double DEFAULT_OPACITY = 0.2;
+constexpr int32_t DEFAULT_ALPHA = 255;
 }
 
 void TextFieldModelStatic::SetShowUnit(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder)
@@ -159,7 +162,13 @@ void TextFieldModelStatic::SetPasswordIcon(FrameNode* frameNode, const std::opti
 void TextFieldModelStatic::SetSelectedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& colorOpt)
 {
     if (colorOpt) {
-        TextFieldModelNG::SetSelectedBackgroundColor(frameNode, colorOpt.value());
+        auto selectedColor = colorOpt.value();
+        // Alpha = 255 means opaque
+        if (selectedColor.GetAlpha() == DEFAULT_ALPHA) {
+            // Default setting of 20% opacity
+            selectedColor = selectedColor.ChangeOpacity(DEFAULT_OPACITY);
+        }
+        TextFieldModelNG::SetSelectedBackgroundColor(frameNode, selectedColor);
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor, frameNode);
     }
@@ -167,11 +176,12 @@ void TextFieldModelStatic::SetSelectedBackgroundColor(FrameNode* frameNode, cons
 
 void TextFieldModelStatic::SetMaxViewLines(FrameNode* frameNode, const std::optional<uint32_t>& valueOpt)
 {
-    if (valueOpt) {
-        TextFieldModelNG::SetMaxViewLines(frameNode, valueOpt.value());
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxViewLines, frameNode);
-    }
+    TextFieldModelNG::SetMaxViewLines(frameNode, valueOpt.value_or(MAX_LINES));
+}
+
+void TextFieldModelStatic::SetNormalMaxViewLines(FrameNode* frameNode, const std::optional<uint32_t>& valueOpt)
+{
+    TextFieldModelNG::SetNormalMaxViewLines(frameNode, valueOpt.value_or(Infinity<uint32_t>()));
 }
 
 void TextFieldModelStatic::SetType(FrameNode* frameNode, const std::optional<TextInputType>& valueOpt)
@@ -481,11 +491,7 @@ void TextFieldModelStatic::SetOnChangeEvent(FrameNode* frameNode, std::function<
 
 void TextFieldModelStatic::SetCleanNodeStyle(FrameNode* frameNode, const std::optional<CleanNodeStyle>& cleanNodeStyle)
 {
-    if (cleanNodeStyle) {
-        TextFieldModelNG::SetCleanNodeStyle(frameNode, cleanNodeStyle.value());
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CleanNodeStyle, frameNode);
-    }
+    TextFieldModelNG::SetCleanNodeStyle(frameNode, cleanNodeStyle.value_or(CleanNodeStyle::INPUT));
 }
 
 void TextFieldModelStatic::SetCancelIconSize(FrameNode* frameNode, const std::optional<CalcDimension>& iconSize)
@@ -497,13 +503,12 @@ void TextFieldModelStatic::SetCancelIconSize(FrameNode* frameNode, const std::op
     }
 }
 
-void TextFieldModelStatic::SetCanacelIconSrc(FrameNode* frameNode, const std::optional<std::string>& iconSrc)
+void TextFieldModelStatic::SetCanacelIconSrc(FrameNode* frameNode,
+    const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName)
 {
-    if (iconSrc) {
-        TextFieldModelNG::SetCanacelIconSrc(frameNode, iconSrc.value());
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSrc, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSrc, iconSrc, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, BundleName, bundleName, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ModuleName, moduleName, frameNode);
 }
 
 void TextFieldModelStatic::SetCancelIconColor(FrameNode* frameNode, const std::optional<Color>& iconColor)

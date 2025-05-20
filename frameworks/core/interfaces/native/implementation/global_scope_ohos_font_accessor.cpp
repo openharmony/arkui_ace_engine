@@ -19,19 +19,14 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
-struct TextFontFamilies {
-    std::string families;
-    std::string bundleName;
-    std::string moduleName;
-};
 template<>
-void AssignCast(std::optional<TextFontFamilies>& dst, const Ark_Resource& value)
+void AssignCast(std::optional<Ark_Resource_Simple>& dst, const Ark_Resource& src)
 {
-    ResourceConverter converter(value);
+    ResourceConverter converter(src);
     auto resourceString = converter.ToString();
     if (resourceString) {
-        TextFontFamilies temp;
-        temp.families = resourceString.value();
+        Ark_Resource_Simple temp;
+        temp.content = resourceString.value();
         temp.bundleName = converter.BundleName();
         temp.moduleName = converter.ModuleName();
         dst = temp;
@@ -41,12 +36,12 @@ void AssignCast(std::optional<TextFontFamilies>& dst, const Ark_Resource& value)
     }
 }
 template<>
-void AssignCast(std::optional<TextFontFamilies>& dst, const Ark_String& value)
+void AssignCast(std::optional<Ark_Resource_Simple>& dst, const Ark_String& src)
 {
-    std::string str = Converter::Convert<std::string>(value);
+    std::string str = Converter::Convert<std::string>(src);
     if (!str.empty()) {
-        TextFontFamilies temp;
-        temp.families = str;
+        Ark_Resource_Simple temp;
+        temp.content = str;
         dst = temp;
     }
 }
@@ -64,8 +59,9 @@ void RegisterFontImpl(const Ark_FontOptions* options)
     if (auto familyNameOpt = Converter::OptConvert<Converter::FontFamilies>(options->familyName); familyNameOpt) {
         familyName = !familyNameOpt->families.empty() ? familyNameOpt->families.front() : "";
     }
-    if (auto familySrcOpt = Converter::OptConvert<Converter::TextFontFamilies>(options->familySrc); familySrcOpt) {
-        familySrc = familySrcOpt->families;
+    if (auto familySrcOpt = Converter::OptConvert<Converter::Ark_Resource_Simple>(options->familySrc);
+        familySrcOpt) {
+        familySrc = familySrcOpt->content;
         bundleName = familySrcOpt->bundleName;
         moduleName = familySrcOpt->moduleName;
     }
