@@ -3286,18 +3286,29 @@ bool JsAccessibilityManager::IsSendAccessibilityEvent(const AccessibilityEvent& 
     if (!IsPageEvent(GetEventTypeByAccessibilityEvent(accessibilityEvent))) {
         return true;
     }
-    std::string componentType;
-    int32_t pageId = -1;
+    GetInfoByNodeId infoOfNode;
     auto pipelineContext = GetPipelineContext().Upgrade();
-    if (pipelineContext) {
-        GetComponentTypeAndPageIdByNodeId(accessibilityEvent.nodeId, pipelineContext, componentType, pageId);
-        auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
-        if (container != nullptr && container->IsUIExtensionWindow()) {
-            return IsSendAccessibilityEventForUEA(accessibilityEvent, componentType, pageId);
-        }
-        UpdatePageId(pipelineContext, pageId);
+    if (!pipelineContext) {
+        return IsSendAccessibilityEventForHost(accessibilityEvent, infoOfNode.componentType, infoOfNode.pageId);
     }
-    return IsSendAccessibilityEventForHost(accessibilityEvent, componentType, pageId);
+
+    GetComponentTypeAndPageIdByNodeId(accessibilityEvent.nodeId, pipelineContext, infoOfNode);
+    auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
+    if (container != nullptr && container->IsUIExtensionWindow()) {
+        if (!IsSendAccessibilityEventForUEA(accessibilityEvent, infoOfNode.componentType, infoOfNode.pageId)) {
+            return false;
+        }
+        pageController_.Update();
+        if (!pageController_.CheckEmpty(infoOfNode.nodeInstanceId)) {
+            UpdatePageId(pipelineContext, infoOfNode.pageId);
+            AccessibilityEvent event = accessibilityEvent;
+            event.componentType = infoOfNode.componentType;
+            pageIdEventMap_[infoOfNode.pageId] = event;
+            return false;
+        }
+    }
+    UpdatePageId(pipelineContext, infoOfNode.pageId);
+    return IsSendAccessibilityEventForHost(accessibilityEvent, infoOfNode.componentType, infoOfNode.pageId);
 }
 
 bool JsAccessibilityManager::IsSendAccessibilityEventForUEA(
@@ -3358,21 +3369,25 @@ bool JsAccessibilityManager::IsSendAccessibilityEventForHost(
     return true;
 }
 
-void JsAccessibilityManager::GetComponentTypeAndPageIdByNodeId(const int64_t nodeId,
-    const RefPtr<PipelineBase>& context, std::string& componentType, int32_t& pageId)
+void JsAccessibilityManager::GetComponentTypeAndPageIdByNodeId(
+    const int64_t nodeId,
+    const RefPtr<PipelineBase>& context,
+    GetInfoByNodeId& infoOfNode)
 {
     CHECK_NULL_VOID(context);
     if (AceType::InstanceOf<NG::PipelineContext>(context)) {
         RefPtr<NG::FrameNode> node;
-        FindPipelineByElementId(nodeId, node);
+        auto nodePipeline = FindPipelineByElementId(nodeId, node);
         CHECK_NULL_VOID(node);
-        componentType = node->GetTag();
-        pageId = node->GetPageId();
+        infoOfNode.componentType = node->GetTag();
+        infoOfNode.pageId = node->GetPageId();
+        infoOfNode.nodeInstanceId = nodePipeline ? nodePipeline->GetInstanceId() : -1;
     } else {
         auto node = GetAccessibilityNodeFromPage(nodeId);
         CHECK_NULL_VOID(node);
-        componentType = node->GetTag();
-        pageId = node->GetPageId();
+        infoOfNode.componentType = node->GetTag();
+        infoOfNode.pageId = node->GetPageId();
+        infoOfNode.nodeInstanceId = -1;
     }
 }
 

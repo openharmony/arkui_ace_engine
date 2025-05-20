@@ -129,6 +129,12 @@ struct DumpInfoArgument {
     int32_t eventId = -1;
 };
 
+struct GetInfoByNodeId {
+    std::string componentType;
+    int32_t pageId = -1;
+    int32_t nodeInstanceId = -1;
+};
+
 class JsAccessibilityManager : public AccessibilityNodeManager,
     public AccessibilityHoverManagerForThirdNG {
     DECLARE_ACE_TYPE(JsAccessibilityManager, AccessibilityNodeManager);
@@ -207,8 +213,10 @@ public:
         const AccessibilityEvent& accessibilityEvent, const std::string& componentType, const int32_t pageId);
     bool IsSendAccessibilityEventForHost(
         const AccessibilityEvent& accessibilityEvent, const std::string& componentType, const int32_t pageId);
-    void GetComponentTypeAndPageIdByNodeId(const int64_t nodeId, const RefPtr<PipelineBase>& context,
-        std::string& componentType, int32_t& pageId);
+    void GetComponentTypeAndPageIdByNodeId(
+        const int64_t nodeId,
+        const RefPtr<PipelineBase>& context,
+        GetInfoByNodeId& infoOfNode);
 
     void SendCacheAccessibilityEvent(int32_t instanceId);
     void SendCacheAccessibilityEventForHost(const int32_t pageId);
