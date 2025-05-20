@@ -244,6 +244,34 @@ void GridTestNg::CreateBigItem(
     ViewStackProcessor::GetInstance()->StopGetAccessRecording();
 }
 
+void GridTestNg::CreateFocusableBigItem(int32_t rowStart, int32_t rowEnd, int32_t colStart, int32_t colEnd)
+{
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    GridItemModelNG itemModel;
+    itemModel.Create(GridItemStyle::NONE);
+    if (rowStart != NULL_VALUE) {
+        itemModel.SetRowStart(rowStart);
+    }
+    if (rowEnd != NULL_VALUE) {
+        itemModel.SetRowEnd(rowEnd);
+    }
+    if (colStart != NULL_VALUE) {
+        itemModel.SetColumnStart(colStart);
+    }
+    if (colEnd != NULL_VALUE) {
+        itemModel.SetColumnEnd(colEnd);
+    }
+    {
+        ButtonModelNG buttonModelNG;
+        buttonModelNG.CreateWithLabel("label");
+        ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewAbstract::SetFocusable(true);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+}
+
 void GridTestNg::CreateBigColItem(int32_t colStart, int32_t colEnd)
 {
     CreateBigItem(NULL_VALUE, NULL_VALUE, colStart, colEnd, NULL_VALUE, ITEM_MAIN_SIZE);

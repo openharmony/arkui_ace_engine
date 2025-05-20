@@ -3718,6 +3718,10 @@ void ArkUINativeModule::RegisterGridAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetFriction));
     grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFriction"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetFriction));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFocusWrapMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetFocusWrapMode));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFocusWrapMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetFocusWrapMode));
     grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlignItems"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetAlignItems));
     grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlignItems"),

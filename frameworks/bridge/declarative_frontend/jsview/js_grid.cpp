@@ -392,6 +392,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("nestedScroll", &JSGrid::SetNestedScroll);
     JSClass<JSGrid>::StaticMethod("enableScrollInteraction", &JSGrid::SetScrollEnabled);
     JSClass<JSGrid>::StaticMethod("friction", &JSGrid::SetFriction);
+    JSClass<JSGrid>::StaticMethod("focusWrapMode", &JSGrid::SetFocusWrapMode);
     JSClass<JSGrid>::StaticMethod("alignItems", &JSGrid::SetAlignItems);
 
     JSClass<JSGrid>::StaticMethod("onScroll", &JSGrid::JsOnScroll);
@@ -666,6 +667,17 @@ void JSGrid::SetFriction(const JSCallbackInfo& info)
         friction = -1.0;
     }
     GridModel::GetInstance()->SetFriction(friction);
+}
+
+void JSGrid::SetFocusWrapMode(const JSCallbackInfo& args)
+{
+    auto focusWrapMode = static_cast<int32_t>(FocusWrapMode::DEFAULT);
+    if (!JSViewAbstract::ParseJsInt32(args[0], focusWrapMode) ||
+        focusWrapMode < static_cast<int32_t>(FocusWrapMode::DEFAULT) ||
+        focusWrapMode > static_cast<int32_t>(FocusWrapMode::WRAP_WITH_ARROW)) {
+        focusWrapMode = static_cast<int32_t>(FocusWrapMode::DEFAULT);
+    }
+    GridModel::GetInstance()->SetFocusWrapMode(static_cast<FocusWrapMode>(focusWrapMode));
 }
 
 void JSGrid::SetAlignItems(const JSCallbackInfo& info)

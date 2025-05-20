@@ -1175,6 +1175,8 @@ struct CJUIGridModifier {
     void (*resetEnableScroll)(ArkUINodeHandle node);
     void (*setFriction)(ArkUINodeHandle node, ArkUI_Float32 friction);
     void (*resetFriction)(ArkUINodeHandle node);
+    void (*setGridFocusWrapMode)(ArkUINodeHandle node, ArkUI_Int32 focusWrapMode);
+    void (*resetGridFocusWrapMode)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getGridColumnsTemplate)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getGridRowsTemplate)(ArkUINodeHandle node);
     ArkUI_Float32 (*getGridColumnsGap)(ArkUINodeHandle node);
