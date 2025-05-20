@@ -154,7 +154,8 @@ HWTEST_F(ImageSpanModifierTest, setAltTestValidValues, TestSize.Level1)
     RefPtr<PixelMap> pixelMap = CreatePixelMap(imagesSrc);
     PixelMapPeer pixelMapPeer;
     pixelMapPeer.pixelMap = pixelMap;
-    modifier_->setAlt(node_, &pixelMapPeer);
+    auto optPixelMap = Converter::ArkValue<Opt_PixelMap>(&pixelMapPeer);
+    modifier_->setAlt(node_, &optPixelMap);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -191,7 +192,8 @@ HWTEST_F(ImageSpanModifierTest, setColorFilterTest, TestSize.Level1)
         auto peer = accessor->ctor(&value);
         ASSERT_TRUE(peer);
         auto unionValue = Converter::ArkUnion<Ark_Union_ColorFilter_DrawingColorFilter, Ark_ColorFilter>(peer);
-        modifier_->setColorFilter(node_, &unionValue);
+        auto optUnionValue = Converter::ArkValue<Opt_Union_ColorFilter_DrawingColorFilter>(unionValue);
+        modifier_->setColorFilter(node_, &optUnionValue);
         jsonValue = GetJsonValue(node_);
         for (const auto& elem : expected) {
             expectedStream << std::fixed << elem << " ";
@@ -242,7 +244,9 @@ HWTEST_F(ImageSpanModifierTest, setOnCompleteTest, TestSize.Level1)
         },
         .call = onComplete
     };
-    modifier_->setOnComplete(node_, &func);
+    
+    auto optFunc = Converter::ArkValue<Opt_ImageCompleteCallback>(func);
+    modifier_->setOnComplete(node_, &optFunc);
 
     for (const auto& testValue : COMPLETE_EVENT_TEST_PLAN) {
         eventHub->FireCompleteEvent(testValue);
@@ -295,7 +299,8 @@ HWTEST_F(ImageSpanModifierTest, setOnErrorTest, TestSize.Level1)
         },
         .call = onError
     };
-    modifier_->setOnError(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_ImageErrorCallback>(func);
+    modifier_->setOnError(node_, &optFunc);
 
     for (const auto& testValue : ERROR_EVENT_TEST_PLAN) {
         eventHub->FireErrorEvent(testValue);

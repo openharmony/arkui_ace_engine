@@ -119,12 +119,12 @@ HWTEST_F(LineModifierTest, LineModifierStartPointTest, TestSize.Level1)
     auto* frameNode = reinterpret_cast<FrameNode*>(node_);
     Ark_Length x = Converter::ArkValue<Ark_Length>(P1_X);
     Ark_Length y = Converter::ArkValue<Ark_Length>(P1_Y);
-    Ark_Length arr[2] = {x, y};
-    Array_Length array;
-    array.length = 2;
-    array.array = arr;
-
-    modifier_->setStartPoint(frameNode, &array);
+    Ark_ShapePoint array;
+    array.value0 = x;
+    array.value1 = y;
+    
+    auto optArray = Converter::ArkValue<Opt_ShapePoint>(array);
+    modifier_->setStartPoint(frameNode, &optArray);
 
     std::string strResult;
     strResult = GetStringAttribute(node_, ATTRIBUTE_START_POINT_NAME);
@@ -141,12 +141,12 @@ HWTEST_F(LineModifierTest, LineModifierEndPointTest, TestSize.Level1)
     auto* frameNode = reinterpret_cast<FrameNode*>(node_);
     Ark_Length x = Converter::ArkValue<Ark_Length>(P2_X);
     Ark_Length y = Converter::ArkValue<Ark_Length>(P2_Y);
-    Ark_Length arr[2] = {x, y};
-    Array_Length array;
-    array.length = 2;
-    array.array = arr;
+    Ark_ShapePoint array;
+    array.value0 = x;
+    array.value1 = y;
 
-    modifier_->setEndPoint(frameNode, &array);
+    auto optArray = Converter::ArkValue<Opt_ShapePoint>(array);
+    modifier_->setEndPoint(frameNode, &optArray);
 
     std::string strResult;
     strResult = GetStringAttribute(node_, ATTRIBUTE_END_POINT_NAME);
