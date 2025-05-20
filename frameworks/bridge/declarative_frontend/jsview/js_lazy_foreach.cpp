@@ -251,10 +251,8 @@ void JSLazyForEach::OnMove(const JSCallbackInfo& info)
 }
 
 void JSLazyForEach::JsParseItemDragEventHandler(
-    const JsiExecutionContext& context, const JSRef<JSVal>& jsValue)
+    const JsiExecutionContext& context, const JSRef<JSObject>& itemDragEventObj)
 {
-    auto itemDragEventObj = JSRef<JSObject>::Cast(jsValue);
-
     auto onLongPress = itemDragEventObj->GetProperty("onLongPress");
     std::function<void(int32_t)> onLongPressCallback;
     if (onLongPress->IsFunction()) {

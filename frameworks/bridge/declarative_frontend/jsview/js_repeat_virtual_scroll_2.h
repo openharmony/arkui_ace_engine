@@ -36,7 +36,7 @@ public:
     static void OnMove(const JSCallbackInfo& info);
     static void SetCreateByTemplate(const JSCallbackInfo& info);
     static void JsParseItemDragEventHandler(
-        const JsiExecutionContext& context, const JSRef<JSVal>& jsValue, int32_t repeatElmtId);
+        const JsiExecutionContext& context, const JSRef<JSObject>& itemDragEventObj, int32_t repeatElmtId);
 };
 
 } // namespace OHOS::Ace::Framework
