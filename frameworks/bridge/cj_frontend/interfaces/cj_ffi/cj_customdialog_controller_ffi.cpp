@@ -314,7 +314,7 @@ void NativeCustomDialogController::OpenDialog()
         Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) ? true : false;
     CustomDialogControllerModel::GetInstance()->SetOpenDialog(dialogProperties_, AccessibilityManager::WeakClaim(this),
         dialogs_, pending_, isShown_, std::move(cancelTask), std::move(buildFunc), dialogComponent_, customDialog_,
-        dialogOperation_);
+        dialogOperation_, hasBind_);
     return;
 }
 

@@ -785,6 +785,21 @@ int32_t OH_ArkUI_DialogDismissEvent_GetDismissReason(ArkUI_DialogDismissEvent* e
     return event->reason;
 }
 
+int32_t OH_ArkUI_CustomDialog_GetState(ArkUI_NativeDialogHandle handle, ArkUI_DialogState* dialogState)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    int32_t tem = 1;
+    if (!impl || !handle || !dialogState) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *dialogState = static_cast<ArkUI_DialogState>(tem);
+    int32_t result = impl->getDialogAPI()->getState(handle->controller, &tem);
+    if (result == ARKUI_ERROR_CODE_NO_ERROR) {
+        *dialogState = static_cast<ArkUI_DialogState>(tem);
+    }
+    return result;
+}
+
 #ifdef __cplusplus
 };
 #endif

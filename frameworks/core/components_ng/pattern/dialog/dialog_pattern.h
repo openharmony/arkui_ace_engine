@@ -218,6 +218,8 @@ public:
         if (onDidAppearCallback_) {
             onDidAppearCallback_();
         }
+        SetState(PromptActionCommonState::APPEARED);
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "The current state of the dialog is APPEARED.");
     }
 
     void CallDialogDidDisappearCallback()
@@ -225,6 +227,8 @@ public:
         if (onDidDisappearCallback_) {
             onDidDisappearCallback_();
         }
+        SetState(PromptActionCommonState::DISAPPEARED);
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "The current state of the dialog is DISAPPEARED.");
     }
 
     void CallDialogWillAppearCallback()
@@ -232,6 +236,8 @@ public:
         if (onWillAppearCallback_) {
             onWillAppearCallback_();
         }
+        SetState(PromptActionCommonState::APPEARING);
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "The current state of the dialog is APPEARING.");
     }
 
     void CallDialogWillDisappearCallback()
@@ -239,6 +245,8 @@ public:
         if (onWillDisappearCallback_) {
             onWillDisappearCallback_();
         }
+        SetState(PromptActionCommonState::DISAPPEARING);
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "The current state of the dialog is DISAPPEARING.");
     }
 
     bool IsUIExtensionSubWindow() const
@@ -314,6 +322,16 @@ public:
     void SetIsDialogDisposed(bool isDialogDisposed)
     {
         isDialogDisposed_ = isDialogDisposed;
+    }
+
+    void SetState(PromptActionCommonState value)
+    {
+        state = value;
+    }
+
+    PromptActionCommonState GetState()
+    {
+        return state;
     }
 
     bool IsShowInFreeMultiWindow();
@@ -468,6 +486,7 @@ private:
     bool isSuitOldMeasure_ = false;
     bool isScrollHeightNegative_ = false;
     float fontScaleForElderly_ = 1.0f;
+    PromptActionCommonState state = PromptActionCommonState::UNINITIALIZED;
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
     RefPtr<FrameNode> titleContainer_;
     int32_t transitionNodeCount_ = 0;
