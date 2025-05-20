@@ -926,4 +926,18 @@ HWTEST_F(MenuLayoutPropertyTestNg, GetArrowPlacement001, TestSize.Level1)
     ASSERT_TRUE(property.GetArrowPlacement().has_value());
     EXPECT_EQ(property.GetArrowPlacement().value(), Placement::TOP);
 }
+
+/**
+ * @tc.name: ExpandSymbol001
+ * @tc.desc: Verify SetExpandSymbol and SetExpandSymbol.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayoutPropertyTestNg, ExpandSymbol001, TestSize.Level1)
+{
+    MenuLayoutProperty property;
+
+    EXPECT_EQ(property.GetExpandSymbol(), nullptr);
+    property.SetExpandSymbol([](WeakPtr<NG::FrameNode> weakPtr) {});
+    EXPECT_NE(property.GetExpandSymbol(), nullptr);
+}
 } // namespace OHOS::Ace::NG

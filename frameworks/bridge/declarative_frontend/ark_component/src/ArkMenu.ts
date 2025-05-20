@@ -196,6 +196,23 @@ class SubMenuExpandingModeModifier extends ModifierWithKey<number> {
   }
 }
 
+class SubMenuExpandSymbolModifier extends ModifierWithKey<SymbolGlyphModifier> {
+  constructor(value: SymbolGlyphModifier) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('subMenuExpandSymbol');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || !this.value) {
+      getUINativeModule().menu.resetSubMenuExpandSymbol(node);
+    } else {
+      getUINativeModule().menu.setSubMenuExpandSymbol(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkMenuComponent extends ArkComponent implements MenuAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -230,6 +247,10 @@ class ArkMenuComponent extends ArkComponent implements MenuAttribute {
   }
   subMenuExpandingMode(value: SubMenuExpandingMode): this {
     modifierWithKey(this._modifiersWithKeys, SubMenuExpandingModeModifier.identity, SubMenuExpandingModeModifier, value);
+    return this;
+  }
+  subMenuExpandSymbol(value: SymbolGlyphModifier): this {
+    modifierWithKey(this._modifiersWithKeys, SubMenuExpandSymbolModifier.identity, SubMenuExpandSymbolModifier, value);
     return this;
   }
 }

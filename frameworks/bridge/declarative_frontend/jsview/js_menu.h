@@ -36,6 +36,7 @@ public:
     static void SetWidth(const JSCallbackInfo& info);
     static void SetRadius(const JSCallbackInfo& info);
     static void SetExpandingMode(const JSCallbackInfo& info);
+    static void SetExpandSymbol(const JSCallbackInfo& info);
     static void SetItemDivider(const JSCallbackInfo& args);
     static void SetItemGroupDivider(const JSCallbackInfo& args);
 

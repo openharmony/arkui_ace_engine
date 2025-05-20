@@ -4506,6 +4506,8 @@ struct ArkUIMenuModifier {
     void (*resetMenuItemGroupDivider)(ArkUINodeHandle node);
     void (*setSubMenuExpandingMode)(ArkUINodeHandle node, ArkUI_Int32 modeParam);
     void (*resetSubMenuExpandingMode)(ArkUINodeHandle node);
+    void (*setSubMenuExpandSymbol)(ArkUINodeHandle node, void* symbolFunction);
+    void (*resetSubMenuExpandSymbol)(ArkUINodeHandle node);
     void (*setMenuFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetMenuFontSize)(ArkUINodeHandle node);
 };
