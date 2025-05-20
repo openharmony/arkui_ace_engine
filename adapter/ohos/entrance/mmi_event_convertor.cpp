@@ -530,7 +530,6 @@ static TouchType ConvertRawAxisActionToTouch(int32_t rawAxisAction)
             return TouchType::UP;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
             return TouchType::CANCEL;
-            break;
         default:
             return TouchType::UNKNOWN;
     }
