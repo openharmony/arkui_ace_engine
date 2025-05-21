@@ -31,6 +31,7 @@ struct UndoRedoRecord {
     TextRange selectionBefore;
     CaretAffinityPolicy caretAffinityBefore = CaretAffinityPolicy::DEFAULT;
     bool isOnlyStyleChange = false;
+    bool restoreBuilderSpan = false;
     std::unordered_set<SpanType> updateSpanTypes;
 
     void SetOperationBefore(TextRange range, const RefPtr<SpanString>& styledString, TextRange selection,
@@ -124,6 +125,7 @@ struct UndoRedoRecord {
         JSON_STRING_PUT_STRINGABLE(jsonValue, selectionBefore);
         JSON_STRING_PUT_INT(jsonValue, caretAffinityBefore);
         JSON_STRING_PUT_BOOL(jsonValue, isOnlyStyleChange);
+        JSON_STRING_PUT_BOOL(jsonValue, restoreBuilderSpan);
         return jsonValue->ToString();
     }
 };

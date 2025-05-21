@@ -525,8 +525,8 @@ public:
     void ProcessStyledRedo(const UndoRedoRecord& record);
     void ApplyRecordInStyledString(const UndoRedoRecord& record);
     void ApplyRecordInSpans(const UndoRedoRecord& record);
-    void ApplyOptions(const OptionsList& optionsList, bool isOnlyStyleChange);
-    void AddPlaceholderSpan(const BuilderSpanOptions& options, bool isOnlyStyleChang);
+    void ApplyOptions(const OptionsList& optionsList, bool restoreBuilderSpan);
+    void AddPlaceholderSpan(const BuilderSpanOptions& options, bool restoreBuilderSpan);
 
     void ResetBeforePaste();
     void ResetAfterPaste();
@@ -966,6 +966,7 @@ public:
     void AddSpansAndReplacePlaceholder(RefPtr<SpanString>& spanString);
     void ReplacePlaceholderWithRawSpans(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
     void SetSubSpansWithAIWrite(RefPtr<SpanString>& spanString, int32_t start, int32_t end);
+    struct UpdateParagraphStyle GetParagraphStyle(const RefPtr<SpanItem>& spanItem);
     TextSpanOptions GetTextSpanOptions(const RefPtr<SpanItem>& spanItem);
     SymbolSpanOptions GetSymbolSpanOptions(const RefPtr<SpanItem>& spanItem);
     bool IsShowTranslate();
