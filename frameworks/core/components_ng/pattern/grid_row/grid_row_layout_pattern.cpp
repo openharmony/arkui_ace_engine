@@ -15,21 +15,11 @@
 
 #include "core/components_ng/pattern/grid_row/grid_row_layout_pattern.h"
 
-#include "core/common/multi_thread_build_manager.h"
-
 namespace OHOS::Ace::NG {
 namespace {} // namespace
 
 void GridRowLayoutPattern::OnAttachToFrameNode()
 {
-    auto host = GetHost();
-    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnAttachToFrameNode();
-        })) {
-        return;
-    }
     Pattern::OnAttachToFrameNode();
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);

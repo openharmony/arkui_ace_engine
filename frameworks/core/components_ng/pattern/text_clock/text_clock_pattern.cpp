@@ -23,7 +23,6 @@
 #include "base/i18n/localization.h"
 #include "base/log/dump_log.h"
 #include "base/utils/system_properties.h"
-#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/event/time/time_event_proxy.h"
@@ -103,17 +102,11 @@ TextClockPattern::TextClockPattern()
 void TextClockPattern::OnAttachToFrameNode()
 {
     InitTextClockController();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->InitUpdateTimeTextCallBack();
-        auto* eventProxy = TimeEventProxy::GetInstance();
-        if (eventProxy) {
-            eventProxy->Register(weak);
-        }
-    });
+    InitUpdateTimeTextCallBack();
+    auto* eventProxy = TimeEventProxy::GetInstance();
+    if (eventProxy) {
+        eventProxy->Register(WeakClaim(this));
+    }
 }
 
 void TextClockPattern::OnDetachFromFrameNode(FrameNode* frameNode)

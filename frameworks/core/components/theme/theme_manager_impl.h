@@ -131,7 +131,6 @@ public:
 
 private:
     using ThemeWrappers = std::unordered_map<ThemeType, RefPtr<NG::TokenThemeWrapper>>;
-    mutable std::shared_mutex themeMutex_;
     std::unordered_map<ThemeType, RefPtr<Theme>> themes_;
     ThemeWrappers themeWrappersLight_;
     ThemeWrappers themeWrappersDark_;

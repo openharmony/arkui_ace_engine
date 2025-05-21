@@ -2855,6 +2855,14 @@ const RefPtr<NG::OverlayManager> DragDropManager::GetDragAnimationOverlayManager
     return subwindow->GetOverlayManager();
 }
 
+void DragDropManager::RemoveDragFrameNode(int32_t id)
+{
+    dragFrameNodes_.erase(id);
+    gridDragFrameNodes_.erase(id);
+    listDragFrameNodes_.erase(id);
+    textFieldDragFrameNodes_.erase(id);
+}
+
 void DragDropManager::SetIsDragged(bool isDragged)
 {
     if (isDragged && isDragged_ != isDragged && notifyInDraggedCallback_) {

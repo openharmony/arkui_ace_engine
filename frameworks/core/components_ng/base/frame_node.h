@@ -184,10 +184,8 @@ public:
     void InitializePatternAndContext();
 
     virtual void MarkModifyDone();
-    void MarkModifyDoneInner();
 
     void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override;
-    void MarkDirtyNodeInner(PropertyChangeFlag extraFlag);
 
     void ProcessFreezeNode();
 
@@ -1180,7 +1178,6 @@ public:
 
     void OnSyncGeometryFrameFinish(const RectF& paintRect);
     void AddFrameNodeChangeInfoFlag(FrameNodeChangeInfoFlag changeFlag = FRAME_NODE_CHANGE_INFO_NONE);
-    void AddFrameNodeChangeInfoFlagInner(FrameNodeChangeInfoFlag changeFlag);
     void RegisterNodeChangeListener();
     void UnregisterNodeChangeListener();
     void ProcessFrameNodeChangeFlag();

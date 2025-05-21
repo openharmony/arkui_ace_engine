@@ -14,7 +14,6 @@
  */
 
 #include "base/utils/string_expression.h"
-#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/layout/layout_property.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
@@ -1020,14 +1019,6 @@ void LayoutProperty::UpdateGeometryTransition(const std::string& id,
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host),
-        [weak = WeakClaim(this), id, followWithoutTransition, doRegisterSharedTransition]() {
-        auto layoutProperty = weak.Upgrade();
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->UpdateGeometryTransition(id, followWithoutTransition, doRegisterSharedTransition);
-    })) {
-        return;
-    }
 
     auto geometryTransitionOld = GetGeometryTransition();
     auto geometryTransitionNew =

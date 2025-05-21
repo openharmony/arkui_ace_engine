@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 
 #include "base/utils/utils.h"
-#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
 #include "base/display_manager/display_manager.h"
@@ -608,12 +607,8 @@ void XComponentModelNG::SetXComponentSurfaceRect(FrameNode* frameNode, float off
     xcPattern->SetIdealSurfaceWidth(surfaceWidth);
     xcPattern->SetIdealSurfaceHeight(surfaceHeight);
 
-    MultiThreadBuildManager::TryExecuteUnSafeTask(frameNode, [weak = WeakPtr(xcPattern)]() {
-        auto xcPattern = weak.Upgrade();
-        CHECK_NULL_VOID(xcPattern);
-        const auto& [offsetChanged, sizeChanged, needFireNativeEvent] = xcPattern->UpdateSurfaceRect();
-        xcPattern->HandleSurfaceChangeEvent(true, offsetChanged, sizeChanged, needFireNativeEvent);
-    });
+    const auto& [offsetChanged, sizeChanged, needFireNativeEvent] = xcPattern->UpdateSurfaceRect();
+    xcPattern->HandleSurfaceChangeEvent(true, offsetChanged, sizeChanged, needFireNativeEvent);
 }
 
 void XComponentModelNG::GetXComponentSurfaceRect(FrameNode* frameNode, float& offsetX, float& offsetY,

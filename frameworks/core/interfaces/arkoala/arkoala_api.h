@@ -6172,17 +6172,6 @@ struct ArkUIBasicAPI {
         void (*callback)(uint64_t nanoTimestamp, uint32_t frameCount, void* userData));
 };
 
-struct ArkUIMultiThreadManagerAPI {
-    void (*setIsThreadSafeScope)(ArkUI_Bool isThreadSafeScope);
-    ArkUI_Bool (*checkNodeOnValidThread)(ArkUINodeHandle node);
-    ArkUI_Bool (*checkOnUIThread)();
-    ArkUI_Bool (*isMultiThreadNode)(ArkUINodeHandle node);
-    ArkUI_Int32 (*postAsyncUITask)(ArkUI_Int32 contextId,
-        void* asyncUITaskData, void (*asyncUITask)(void* asyncUITaskData), void(*onFinish)(void* asyncUITaskData));
-    ArkUI_Int32 (*postUITask)(ArkUI_Int32 contextId, void* taskData, void(*task)(void* taskData));
-    ArkUI_Int32 (*postUITaskAndWait)(ArkUI_Int32 contextId, void* taskData, void(*task)(void* taskData));
-};
-
 struct ArkUIDialogAPI {
     ArkUIDialogHandle (*create)();
     void (*dispose)(ArkUIDialogHandle handle);
@@ -6406,7 +6395,6 @@ struct ArkUIFullNodeAPI {
     const ArkUIDragAdapterAPI* (*getDragAdapterAPI)();
     const ArkUIStyledStringAPI* (*getStyledStringAPI)();
     const ArkUISnapshotAPI* (*getSnapshotAPI)();
-    const ArkUIMultiThreadManagerAPI* (*getMultiThreadManagerAPI)();
 };
 
 struct ArkUIAnyAPI {
