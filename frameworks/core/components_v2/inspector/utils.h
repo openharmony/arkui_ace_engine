@@ -312,6 +312,19 @@ inline std::string ConvertWrapTextDecorationToStirng(TextDecoration decoration)
     return index < 0 ? "TextDecorationType.None" : decorationTable[index].value;
 }
 
+inline std::string ConvertWrapTextDecorationToStirng(std::vector<TextDecoration> decorations)
+{
+    if (decorations.size() == 0) {
+        return ConvertWrapTextDecorationToStirng(TextDecoration::NONE);
+    }
+    std::string ret = "";
+    for (TextDecoration decoration: decorations) {
+        ret += ConvertWrapTextDecorationToStirng(decoration) + ",";
+    }
+    ret.pop_back();
+    return ret;
+}
+
 inline std::string ConvertWrapTextDecorationStyleToString(TextDecorationStyle decorationStyle)
 {
     static const LinearEnumMapNode<TextDecorationStyle, std::string> decorationStyleTable[] = {
@@ -697,6 +710,38 @@ inline std::string ConvertSymbolColorToString(const std::vector<Color>& colors)
     return colorStr;
 }
 
+inline bool IsValidTextDecorations(const std::vector<TextDecoration>& decorations)
+{
+    if (decorations.size() <= 0) {
+        return false;
+    }
+    for (TextDecoration decoration : decorations) {
+        if (decoration != TextDecoration::NONE) {
+            return true;
+        }
+    }
+    return false;
+}
+
+inline bool HasTextDecoration(const std::vector<TextDecoration>& decorations, TextDecoration value)
+{
+    auto iter = std::find(decorations.begin(), decorations.end(), value);
+    return iter != decorations.end();
+}
+
+inline bool IsEqualTextDecorations(
+    const std::vector<TextDecoration>& left, const std::vector<TextDecoration>& right)
+{
+    if (left.size() != right.size()) {
+        return false;
+    }
+    for (int index = 0; index < static_cast<int>(left.size()); index++) {
+        if (!HasTextDecoration(right, left[index])) {
+            return false;
+        }
+    }
+    return true;
+}
 } // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_UTILS_H

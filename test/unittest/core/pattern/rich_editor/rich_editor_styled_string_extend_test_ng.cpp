@@ -475,13 +475,13 @@ HWTEST_F(RichEditorStyledStringExtendTestNg, HandleSelectFontStyle, TestSize.Lev
     auto decorationSpan =
         AceType::DynamicCast<DecorationSpan>(richEditorPattern->styledString_->GetSpan(2, 2, SpanType::Decoration));
     ASSERT_NE(decorationSpan, nullptr);
-    EXPECT_EQ(decorationSpan->GetTextDecorationType(), TextDecoration::UNDERLINE);
+    EXPECT_EQ(decorationSpan->GetTextDecorationFirst(), TextDecoration::UNDERLINE);
     richEditorPattern->textSelector_.Update(2, 6);
     richEditorPattern->HandleSelectFontStyle(keyCode);
     decorationSpan =
         AceType::DynamicCast<DecorationSpan>(richEditorPattern->styledString_->GetSpan(2, 4, SpanType::Decoration));
     ASSERT_NE(decorationSpan, nullptr);
-    EXPECT_EQ(decorationSpan->GetTextDecorationType(), TextDecoration::NONE);
+    EXPECT_EQ(decorationSpan->GetTextDecorationFirst(), TextDecoration::NONE);
 }
 
 /**

@@ -807,7 +807,7 @@ ArkUINativeModuleValue SearchBridge::SetDecoration(ArkUIRuntimeCallInfo* runtime
     auto theme = themeManager->GetTheme<SearchTheme>();
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
     Color color = theme->GetTextStyle().GetTextDecorationColor();
-    int32_t searchDecoration = static_cast<int32_t>(theme->GetTextStyle().GetTextDecoration());
+    int32_t searchDecoration = static_cast<int32_t>(theme->GetTextDecoration());
     if (secondArg->IsInt()) {
         searchDecoration = secondArg->Int32Value(vm);
     }

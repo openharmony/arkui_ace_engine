@@ -420,7 +420,7 @@ HWTEST_F(TextFieldUXTest, TextAreaTextDecoration001, TestSize.Level1)
     EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
     pattern_->PerformAction(textInputAction, false);
 
-    EXPECT_EQ(layoutProperty_->GetTextDecoration(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(layoutProperty_->GetTextDecorationFirst(), TextDecoration::LINE_THROUGH);
     EXPECT_EQ(layoutProperty_->GetTextDecorationColor(), Color::BLUE);
     EXPECT_EQ(layoutProperty_->GetTextDecorationStyle(), TextDecorationStyle::DOTTED);
 }

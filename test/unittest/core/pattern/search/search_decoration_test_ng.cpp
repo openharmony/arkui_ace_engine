@@ -154,7 +154,7 @@ HWTEST_F(SearchDecorationTestNg, TextDecorationPattern002, TestSize.Level1)
      */
     pattern->ToJsonValue(json, filter);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
-    EXPECT_EQ(textFieldLayoutProperty->GetTextDecoration(), Ace::TextDecoration::UNDERLINE);
+    EXPECT_EQ(textFieldLayoutProperty->GetTextDecorationFirst(), Ace::TextDecoration::UNDERLINE);
     EXPECT_EQ(textFieldLayoutProperty->GetTextDecorationColor(), Color::BLUE);
     EXPECT_EQ(textFieldLayoutProperty->GetTextDecorationStyle(), Ace::TextDecorationStyle::DASHED);
 }

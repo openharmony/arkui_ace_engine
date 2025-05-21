@@ -28,7 +28,7 @@ static std::string ToBriefString(const TextStyle& style, const ImageSpanAttribut
     IF_TRUE(opt.updateFontSize, ss << "FS" << style.GetFontSize().ConvertToFp() << ",");
     IF_TRUE(opt.updateItalicFontStyle, ss << StringUtils::ToString(style.GetFontStyle()) << ",");
     IF_TRUE(opt.updateFontWeight, ss << StringUtils::ToString(style.GetFontWeight()) << ",");
-    IF_TRUE(opt.updateTextDecoration, ss << StringUtils::ToString(style.GetTextDecoration()) << ",");
+    IF_TRUE(opt.updateTextDecoration, ss << StringUtils::ToString(style.GetTextDecorationFirst()) << ",");
     IF_TRUE(opt.updateLineHeight, ss << "LH" << style.GetLineHeight().ConvertToFp() << ",");
     IF_TRUE(opt.updateLetterSpacing, ss << "LS" << style.GetLetterSpacing().ConvertToFp() << ",");
     ss << "},";
@@ -60,7 +60,7 @@ static std::string ToBriefString(const TextStyle& style)
     ss << "FS" << style.GetFontSize().ConvertToFp() << ",";
     ss << StringUtils::ToString(style.GetFontStyle()) << ",";
     ss << StringUtils::ToString(style.GetFontWeight()) << ",";
-    ss << StringUtils::ToString(style.GetTextDecoration()) << ",";
+    ss << StringUtils::ToString(style.GetTextDecorationFirst()) << ",";
     ss << "LH" << style.GetLineHeight().ConvertToFp() << ",";
     ss << "LS" << style.GetLetterSpacing().ConvertToFp();
     ss << "}";

@@ -55,7 +55,7 @@ public:
 
     class DecorationSpanParam {
     public:
-        TextDecoration decorationType;
+        std::vector<TextDecoration> decorationType;
         Color color;
         TextDecorationStyle decorationSytle;
     };

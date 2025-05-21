@@ -37,7 +37,7 @@ private:
     static std::string StrokeWidthToHtml(const std::optional<Dimension>& value);
     static std::string StrokeColorToHtml(const std::optional<Color>& value);
     static std::string FontFamilyToHtml(const std::optional<std::vector<std::string>>& value);
-    static std::string TextDecorationToHtml(TextDecoration decoration);
+    static std::string TextDecorationToHtml(const std::vector<TextDecoration>& decoration);
     static std::string TextDecorationStyleToHtml(TextDecorationStyle decorationStyle);
     static std::string ToHtml(const std::string& key, const std::optional<Dimension>& value);
     static std::string DeclarationToHtml(const NG::FontStyle& fontStyle);

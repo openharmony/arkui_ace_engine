@@ -1778,4 +1778,55 @@ HWTEST_F(MutableSpanStringTestNg, SpanString129, TestSize.Level1)
     spanString->InsertString(2, u"X");
     EXPECT_EQ(spanString->GetU16string(), u"𝄞X𝄞");
 }
+
+/**
+ * @tc.name: MultiTypeDecorationSpanStringTest
+ * @tc.desc: Verify multi type decoration span string
+ */
+HWTEST_F(MutableSpanStringTestNg, MultiTypeDecorationSpanStringTest, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"1234567890");
+
+    std::optional<TextDecorationOptions> optionsTrue({true});
+    std::optional<TextDecorationOptions> optionsFalse({false});
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+            std::vector<TextDecoration>({TextDecoration::OVERLINE}),
+            Color::RED, TextDecorationStyle::WAVY, optionsTrue, 0, 3));
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+            std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}),
+            Color::RED, TextDecorationStyle::WAVY, optionsTrue, 0, 3));
+    auto subspan1 = spanString->GetSpan(0, 3, SpanType::Decoration);
+    auto subDecorationSpan1 = AceType::DynamicCast<DecorationSpan>(subspan1);
+    ASSERT_NE(subDecorationSpan1, nullptr);
+    auto decorationTypes1 = subDecorationSpan1->GetTextDecorationTypes();
+    EXPECT_EQ(subDecorationSpan1->GetTextDecorationFirst(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(decorationTypes1.size(), 2);
+
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({TextDecoration::OVERLINE}),
+        Color::RED, TextDecorationStyle::WAVY, optionsTrue, 4, 6));
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+            std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}),
+            Color::RED, TextDecorationStyle::WAVY, optionsFalse, 4, 6));
+    auto subspan2 = spanString->GetSpan(4, 2, SpanType::Decoration);
+    auto subDecorationSpan2 = AceType::DynamicCast<DecorationSpan>(subspan2);
+    ASSERT_NE(subDecorationSpan2, nullptr);
+    auto decorationTypes2 = subDecorationSpan2->GetTextDecorationTypes();
+    EXPECT_EQ(subDecorationSpan2->GetTextDecorationFirst(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(decorationTypes2.size(), 1);
+
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({TextDecoration::OVERLINE}),
+        Color::RED, TextDecorationStyle::WAVY, optionsFalse, 7, 9));
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+            std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}),
+            Color::RED, TextDecorationStyle::WAVY, optionsFalse, 7, 9));
+    auto subspan3 = spanString->GetSpan(7, 2, SpanType::Decoration);
+    auto subDecorationSpan3 = AceType::DynamicCast<DecorationSpan>(subspan3);
+    ASSERT_NE(subDecorationSpan3, nullptr);
+    auto decorationTypes3 = subDecorationSpan3->GetTextDecorationTypes();
+    EXPECT_EQ(subDecorationSpan3->GetTextDecorationFirst(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(decorationTypes3.size(), 1);
+    EXPECT_EQ(spanString->GetU16string(), u"1234567890");
+}
 } // namespace OHOS::Ace::NG

@@ -153,7 +153,7 @@ void SpanModelNG::ResetFontFamily()
 
 void SpanModelNG::SetTextDecoration(Ace::TextDecoration value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(TextDecoration, value);
+    ACE_UPDATE_SPAN_PROPERTY(TextDecoration, {value});
 }
 
 void SpanModelNG::SetTextDecorationStyle(Ace::TextDecorationStyle value)
@@ -368,7 +368,7 @@ void SpanModelNG::SetTextDecoration(UINode* uiNode, TextDecoration value)
 {
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
     CHECK_NULL_VOID(spanNode);
-    spanNode->UpdateTextDecoration(value);
+    spanNode->UpdateTextDecoration({value});
 }
 
 void SpanModelNG::ResetTextDecoration(UINode *uiNode)
@@ -518,7 +518,7 @@ Ace::TextDecoration SpanModelNG::GetTextDecoration(UINode* uiNode)
 {
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
     CHECK_NULL_RETURN(spanNode, TextDecoration::NONE);
-    return spanNode->GetTextDecoration().value_or(TextDecoration::NONE);
+    return spanNode->GetTextDecorationFirst();
 }
 
 Color SpanModelNG::GetTextDecorationColor(UINode* uiNode)

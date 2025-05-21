@@ -135,6 +135,7 @@ struct TextStyleResult {
     FONT_FEATURES_LIST fontFeature;
     std::string fontFamily;
     int32_t decorationType = 0;
+    std::vector<TextDecoration> decorationTypes;
     std::string decorationColor;
     int32_t decorationStyle = 0;
     int32_t textAlign = 0;

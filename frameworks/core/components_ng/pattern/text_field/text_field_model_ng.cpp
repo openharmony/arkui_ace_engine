@@ -1016,7 +1016,7 @@ void TextFieldModelNG::SetIsOnlyBetweenLines(bool isOnlyBetweenLines)
 
 void TextFieldModelNG::SetTextDecoration(Ace::TextDecoration value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, {value});
 }
 
 void TextFieldModelNG::SetTextDecorationColor(const Color& value)
@@ -1833,7 +1833,7 @@ void TextFieldModelNG::ResetTextInputPadding(FrameNode* frameNode)
 
 void TextFieldModelNG::SetTextDecoration(FrameNode* frameNode, TextDecoration value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, {value}, frameNode);
 }
 
 void TextFieldModelNG::SetTextDecorationColor(FrameNode* frameNode, const Color& value)
