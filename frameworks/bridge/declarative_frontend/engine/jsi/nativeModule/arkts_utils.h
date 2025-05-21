@@ -101,6 +101,8 @@ public:
         std::vector<std::string> &result, RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsLengthMetrics(
         const EcmaVM *vm, const Local<JSValueRef> &obj, CalcDimension &result);
+    static bool ParseJsLengthMetrics(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result,
+        RefPtr<ResourceObject>& resourceObj);
     static bool ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
         DimensionUnit defaultUnit, bool isSupportPercent = true, bool enableCheckInvalidvalue = true);
     static bool ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
@@ -142,10 +144,16 @@ public:
     static bool ParseJsStringFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
         RefPtr<ResourceObject>& resourceObject);
     static uint32_t parseShadowColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
+    static uint32_t parseShadowColorWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
+        RefPtr<ResourceObject>& resObj);
     static uint32_t parseShadowFill(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static uint32_t parseShadowType(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static double parseShadowRadius(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
+    static double parseShadowRadiusWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
+        RefPtr<ResourceObject>& resObj);
     static double parseShadowOffset(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
+    static double parseShadowOffsetWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
+        RefPtr<ResourceObject>& resObj);
     static bool ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::uint32_t& symbolId);
     static bool ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::uint32_t& symbolId,
         RefPtr<ResourceObject>& resourceObject);
@@ -177,6 +185,32 @@ public:
         for (int32_t i = 0; i < length; i++) {
             auto value = handle->GetValueAt(vm, arg, i);
             *(array + i) = getValue(vm, value);
+        }
+        return true;
+    }
+    template <class T>
+    static bool ParseArrayWithResObj(const EcmaVM *vm, const Local<JSValueRef> &arg, T *array, int32_t defaultLength,
+        std::function<T(const EcmaVM *, const Local<JSValueRef> &, const RefPtr<ResourceObject> &)> getValue,
+        std::vector<RefPtr<ResourceObject>>& resObjArray)
+    {
+        CHECK_NULL_RETURN(vm, false);
+        CHECK_NULL_RETURN(array, false);
+        if (defaultLength <= 0) {
+            return false;
+        }
+        auto handle = panda::CopyableGlobal<panda::ArrayRef>(vm, arg);
+        if (handle.IsEmpty() || handle->IsUndefined() || handle->IsNull()) {
+            return false;
+        }
+        int32_t length = static_cast<int32_t>(handle->Length(vm));
+        if (length != defaultLength) {
+            return false;
+        }
+        for (int32_t i = 0; i < length; i++) {
+            RefPtr<ResourceObject> resObj;
+            auto value = handle->GetValueAt(vm, arg, i);
+            *(array + i) = getValue(vm, value, resObj);
+            resObjArray.emplace_back(resObj);
         }
         return true;
     }

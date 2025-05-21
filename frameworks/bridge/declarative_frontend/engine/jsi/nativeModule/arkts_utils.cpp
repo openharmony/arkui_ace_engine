@@ -1107,6 +1107,13 @@ bool ArkTSUtils::ParseJsFontFamiliesFromResource(const EcmaVM *vm, const Local<J
 
 bool ArkTSUtils::ParseJsLengthMetrics(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result)
 {
+    RefPtr<ResourceObject> resourceObj;
+    return ParseJsLengthMetrics(vm, jsValue, result, resourceObj);
+}
+
+bool ArkTSUtils::ParseJsLengthMetrics(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result,
+    RefPtr<ResourceObject>& resourceObj)
+{
     if (!jsValue->IsObject(vm)) {
         return false;
     }
@@ -1122,6 +1129,13 @@ bool ArkTSUtils::ParseJsLengthMetrics(const EcmaVM* vm, const Local<JSValueRef>&
     }
     CalcDimension dimension(value->ToNumber(vm)->Value(), unit);
     result = dimension;
+    auto jsRes = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "res"));
+    if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() &&
+        !jsRes->IsNull() && !jsRes->IsObject(vm)) {
+        auto jsObjRes = jsRes->ToObject(vm);
+        CompleteResourceObject(vm, jsObjRes);
+        resourceObj = GetResourceObject(vm, jsObjRes);
+    }
     return true;
 }
 
@@ -1612,8 +1626,15 @@ bool ArkTSUtils::ParseResponseRegion(
 
 uint32_t ArkTSUtils::parseShadowColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
 {
+    RefPtr<ResourceObject> resObj;
+    return parseShadowColorWithResObj(vm, jsValue, resObj);
+}
+
+uint32_t ArkTSUtils::parseShadowColorWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
+    RefPtr<ResourceObject>& resObj)
+{
     Color color = DEFAULT_TEXT_SHADOW_COLOR;
-    if (!ParseJsColorAlpha(vm, jsValue, color)) {
+    if (!ParseJsColorAlpha(vm, jsValue, color, resObj)) {
         color = DEFAULT_TEXT_SHADOW_COLOR;
     }
     return color.GetValue();
@@ -1637,8 +1658,15 @@ uint32_t ArkTSUtils::parseShadowType(const EcmaVM* vm, const Local<JSValueRef>& 
 
 double ArkTSUtils::parseShadowRadius(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
 {
+    RefPtr<ResourceObject> resObj;
+    return parseShadowRadiusWithResObj(vm, jsValue, resObj);
+}
+
+double ArkTSUtils::parseShadowRadiusWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
+    RefPtr<ResourceObject>& resObj)
+{
     double radius = 0.0;
-    ArkTSUtils::ParseJsDouble(vm, jsValue, radius);
+    ArkTSUtils::ParseJsDouble(vm, jsValue, radius, resObj);
     if (LessNotEqual(radius, 0.0)) {
         radius = 0.0;
     }
@@ -1647,10 +1675,17 @@ double ArkTSUtils::parseShadowRadius(const EcmaVM* vm, const Local<JSValueRef>& 
 
 double ArkTSUtils::parseShadowOffset(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
 {
+    RefPtr<ResourceObject> resObj;
+    return parseShadowOffsetWithResObj(vm, jsValue, resObj);
+}
+
+double ArkTSUtils::parseShadowOffsetWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
+    RefPtr<ResourceObject>& resObj)
+{
     CalcDimension offset;
-    if (ArkTSUtils::ParseJsResource(vm, jsValue, offset)) {
+    if (ArkTSUtils::ParseJsResource(vm, jsValue, offset, resObj)) {
         return offset.Value();
-    } else if (ArkTSUtils::ParseJsDimensionVp(vm, jsValue, offset)) {
+    } else if (ArkTSUtils::ParseJsDimensionVp(vm, jsValue, offset, resObj)) {
         return offset.Value();
     }
     return 0.0;
