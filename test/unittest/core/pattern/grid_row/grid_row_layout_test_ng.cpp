@@ -22,6 +22,37 @@ namespace {
     constexpr double DEFAULT_CHILD_HEIGHT = 30.0f;
 } // namespace
 class GridRowLayoutTestNG : public GridRowBaseTestNG {
+public:
+    void CreateMeasureLayoutTask(RefPtr<FrameNode> &gridRow, std::optional<float> width = std::nullopt,
+        std::optional<float> height = std::nullopt)
+    {
+        LayoutConstraintF constraint;
+        if (width.has_value()) {
+            constraint.selfIdealSize.SetWidth(width.value());
+        }
+        if (height.has_value()) {
+            constraint.selfIdealSize.SetHeight(height.value());
+        }
+        auto layoutProperty = gridRow->GetLayoutProperty();
+        layoutProperty->UpdateLayoutConstraint(constraint);
+        layoutProperty->UpdateContentConstraint();
+        GridRowLayoutAlgorithm algorithm;
+        algorithm.Measure(Referenced::RawPtr(gridRow));
+        algorithm.Layout(Referenced::RawPtr(gridRow));
+    }
+
+    RefPtr<FrameNode> CreateGridColWithProperty(int32_t spanVal, int32_t offsetVal, float height = 0.0f,
+        FlexAlign flexAlign = FlexAlign::FLEX_START)
+    {
+        return CreateGridCol([this, spanVal, offsetVal, height, flexAlign](GridColModelNG model) {
+            V2::GridContainerSize span(spanVal);
+            V2::GridContainerSize offset(offsetVal);
+            model.SetSpan(span);
+            model.SetOffset(offset);
+            ViewAbstract::SetHeight(CalcLength(height));
+            ViewAbstract::SetAlignSelf(flexAlign);
+        });
+    }
 };
 
 /**
@@ -166,5 +197,150 @@ HWTEST_F(GridRowLayoutTestNG, IsRightToLeftTest, TestSize.Level1)
     layoutProperty = gridRow2->GetLayoutProperty();
     layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
     EXPECT_EQ(algorithm.IsRightToLeft(Referenced::RawPtr(gridRow2)), false);
+}
+
+/**
+ * @tc.name: LayoutWithMatchParentInfoTest01
+ * @tc.desc: Test LayoutWithMatchParentInfo func
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowLayoutTestNG, LayoutWithMatchParentInfoTest01, TestSize.Level1) {
+    RefPtr<FrameNode> gridCol1, gridCol2, gridCol3, gridCol4, gridCol5;
+    auto gridRow = CreateGridRow([this, &gridCol1, &gridCol2, &gridCol3, &gridCol4, &gridCol5](GridRowModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(370.0f));
+        ViewAbstract::SetHeight(CalcLength(70.0f));
+        ViewAbstract::SetPadding(CalcLength(10));
+        V2::Gutter gutter(Dimension(10));
+        ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, gutter);
+        gridCol1 = CreateGridColWithProperty(3, 0, 10, FlexAlign::CENTER);
+        gridCol2 = CreateGridColWithProperty(3, 0, 20, FlexAlign::FLEX_END);
+        gridCol3 = CreateGridColWithProperty(3, 0, 30);
+        gridCol4 = CreateGridColWithProperty(3, 0, 40, FlexAlign::STRETCH);
+        gridCol5 = CreateGridColWithProperty(3, 12, 30);
+    });
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetMinPlatformVersion(12);
+    gridCol3->GetLayoutProperty()->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    gridCol3->GetLayoutProperty()->ClearUserDefinedIdealSize(true, true);
+    CreateMeasureLayoutTask(gridRow, std::optional<int>(370), std::optional<int>(70));
+    /* @tc.expected: The matchParentHeight of gridCol3 should be 50 = 70(gridrow height) - 20(padding)
+     *               The gridCol5 is placed at the third line and
+     *               gridCol5.offsetY = 10(padding.top) + 2 * 50(matchParentHeight) + 10(gutter.y)
+     *               The first line is aligned with gridCol3.
+     *               Each gridCol has correct frameSize.
+     */
+    EXPECT_EQ(gridCol1->GetGeometryNode()->GetMarginFrameRect(), RectF(10, 30, 80, 10))
+        << "gridcol1:" << gridCol1->GetGeometryNode()->GetMarginFrameRect().ToString();
+    EXPECT_EQ(gridCol2->GetGeometryNode()->GetMarginFrameRect(), RectF(100, 40, 80, 20))
+        << "gridcol2:" << gridCol2->GetGeometryNode()->GetMarginFrameRect().ToString();
+    EXPECT_EQ(gridCol3->GetGeometryNode()->GetMarginFrameRect(), RectF(190, 10, 80, 50))
+        << "gridcol3:" << gridCol3->GetGeometryNode()->GetMarginFrameRect().ToString();
+    EXPECT_EQ(gridCol4->GetGeometryNode()->GetMarginFrameRect(), RectF(280, 10, 80, 50))
+        << "gridcol4:" << gridCol4->GetGeometryNode()->GetMarginFrameRect().ToString();
+    EXPECT_EQ(gridCol5->GetGeometryNode()->GetMarginFrameRect(), RectF(10, 120, 80, 30))
+        << "gridcol5:" << gridCol5->GetGeometryNode()->GetMarginFrameRect().ToString();
+}
+
+HWTEST_F(GridRowLayoutTestNG, LayoutWithMatchParentInfoTest02, TestSize.Level1) {
+    RefPtr<FrameNode> gridCol1, gridCol2, gridCol3, gridCol4, gridCol5;
+    auto gridRow = CreateGridRow([this, &gridCol1, &gridCol2, &gridCol3, &gridCol4, &gridCol5](GridRowModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(370.0f));
+        ViewAbstract::SetPadding(CalcLength(10));
+        V2::Gutter gutter(Dimension(10));
+        ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, gutter);
+        gridCol1 = CreateGridColWithProperty(3, 0, 10, FlexAlign::CENTER);
+        gridCol2 = CreateGridColWithProperty(3, 0, 20, FlexAlign::FLEX_END);
+        gridCol3 = CreateGridColWithProperty(3, 0, 30);
+        gridCol4 = CreateGridColWithProperty(3, 0, 40, FlexAlign::STRETCH);
+        gridCol5 = CreateGridColWithProperty(3, 12, 30);
+    });
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetMinPlatformVersion(12);
+    gridCol3->GetLayoutProperty()->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    gridCol3->GetLayoutProperty()->ClearUserDefinedIdealSize(true, true);
+    CreateMeasureLayoutTask(gridRow, std::optional<int>(370));
+    /* @tc.expected: the gridRow height is the total height of non-matchParent gridcols,
+     *               which is 40(first row height) + 40(skip row height) + 10(gutter.y) + 30 + 20 = 140
+     *               the matchParentHeight of gridCol3 should be 120 = 140(gridrow height) - 20(padding)
+     *               Each gridCol has correct frameSize.
+     */
+    EXPECT_EQ(gridCol1->GetGeometryNode()->GetMarginFrameRect(), RectF(10, 65, 80, 10))
+        << "gridcol1:" << gridCol1->GetGeometryNode()->GetMarginFrameRect().ToString();
+    EXPECT_EQ(gridCol2->GetGeometryNode()->GetMarginFrameRect(), RectF(100, 110, 80, 20))
+        << "gridcol2:" << gridCol2->GetGeometryNode()->GetMarginFrameRect().ToString();
+    EXPECT_EQ(gridCol3->GetGeometryNode()->GetMarginFrameRect(), RectF(190, 10, 80, 120))
+        << "gridcol3:" << gridCol3->GetGeometryNode()->GetMarginFrameRect().ToString();
+    EXPECT_EQ(gridCol4->GetGeometryNode()->GetMarginFrameRect(), RectF(280, 10, 80, 120))
+        << "gridcol4:" << gridCol4->GetGeometryNode()->GetMarginFrameRect().ToString();
+    EXPECT_EQ(gridCol5->GetGeometryNode()->GetMarginFrameRect(), RectF(10, 260, 80, 30))
+        << "gridcol5:" << gridCol5->GetGeometryNode()->GetMarginFrameRect().ToString();
+}
+
+/**
+ * @tc.name: LayoutWithMatchParentInfoTest03
+ * @tc.desc: Test LayoutWithMatchParentInfo func
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowLayoutTestNG, LayoutWithMatchParentInfoTest03, TestSize.Level1) {
+    RefPtr<FrameNode> gridCol1, gridCol2, gridCol3, gridCol4, gridCol5;
+    auto gridRow = CreateGridRow([this, &gridCol1, &gridCol2, &gridCol3, &gridCol4, &gridCol5](GridRowModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(370.0f));
+        ViewAbstract::SetHeight(CalcLength(70.0f));
+        ViewAbstract::SetPadding(CalcLength(10));
+        V2::Gutter gutter(Dimension(10));
+        ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, gutter);
+        gridCol1 = CreateGridColWithProperty(3, 0, 10, FlexAlign::CENTER);
+        gridCol2 = CreateGridColWithProperty(3, 0, 20, FlexAlign::FLEX_END);
+        gridCol3 = CreateGridColWithProperty(3, 0, 30, FlexAlign::STRETCH);
+        gridCol4 = CreateGridColWithProperty(3, 0, 100);
+        gridCol5 = CreateGridColWithProperty(3, 12, 30);
+    });
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetMinPlatformVersion(12);
+    gridCol3->GetLayoutProperty()->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    gridCol3->GetLayoutProperty()->ClearUserDefinedIdealSize(true, true);
+    CreateMeasureLayoutTask(gridRow, std::optional<int>(370), std::optional<int>(70));
+    /* @tc.expected: The matchParentHeight of gridCol3 should be 50 = 70(gridrow height) - 20(padding)
+     *               The gridCol5 is placed at the third line and
+     *               gridCol5.offsetY = 10(padding.top) + 2 * 100(first line hegiht) + 10(gutter.y)
+     *               The first line is aligned with gridCol4.
+     *               Each gridCol has correct frameSize.
+     */
+    EXPECT_EQ(gridCol1->GetGeometryNode()->GetMarginFrameRect(), RectF(10, 55, 80, 10))
+        << "gridcol1:" << gridCol1->GetGeometryNode()->GetMarginFrameRect().ToString();
+    EXPECT_EQ(gridCol2->GetGeometryNode()->GetMarginFrameRect(), RectF(100, 90, 80, 20))
+        << "gridcol2:" << gridCol2->GetGeometryNode()->GetMarginFrameRect().ToString();
+    EXPECT_EQ(gridCol3->GetGeometryNode()->GetMarginFrameRect(), RectF(190, 10, 80, 100))
+        << "gridcol3:" << gridCol3->GetGeometryNode()->GetMarginFrameRect().ToString();
+    EXPECT_EQ(gridCol4->GetGeometryNode()->GetMarginFrameRect(), RectF(280, 10, 80, 100))
+        << "gridcol4:" << gridCol4->GetGeometryNode()->GetMarginFrameRect().ToString();
+    EXPECT_EQ(gridCol5->GetGeometryNode()->GetMarginFrameRect(), RectF(10, 220, 80, 30))
+        << "gridcol5:" << gridCol5->GetGeometryNode()->GetMarginFrameRect().ToString();
+}
+
+/**
+ * @tc.name: GetPaddingOffsetTest
+ * @tc.desc: Test GetPaddingOffset func
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowLayoutTestNG, GetPaddingOffsetTest, TestSize.Level1)
+{
+    auto gridRow = CreateGridRow([this](GridRowModelNG model) {
+        PaddingProperty padding = {
+            .left = CalcLength(10),
+            .right = CalcLength(20),
+            .top = CalcLength(30),
+        };
+        ViewAbstract::SetPadding(padding);
+    });
+    GridRowLayoutAlgorithm algorithm;
+    OffsetF result;
+    result = algorithm.GetPaddingOffset(Referenced::RawPtr(gridRow), false);
+    EXPECT_EQ(result, OffsetF(10, 30));
+    result = algorithm.GetPaddingOffset(Referenced::RawPtr(gridRow), true);
+    EXPECT_EQ(result, OffsetF(-20, 30));
 }
 } // namespace OHOS::Ace::NG
