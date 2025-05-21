@@ -1505,6 +1505,17 @@ void FrameNode::NotifyVisibleChange(VisibleType preVisibility, VisibleType curre
     }
     pattern_->OnVisibleChange(currentVisibility == VisibleType::VISIBLE);
     UpdateChildrenVisible(preVisibility, currentVisibility);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto colorMode = pipeline->GetColorMode() == ColorMode::DARK ? 1 : 0;
+    if (SystemProperties::ConfigChangePerform() && (colorMode != CheckIsDarkMode())) {
+        auto parentNode = AceType::DynamicCast<FrameNode>(GetParent());
+        if (parentNode && parentNode->GetRerenderable()) {
+            pipeline->SetIsSystemColorChange(false);
+            SetRerenderable(true);
+            NotifyColorModeChange(colorMode);
+        }
+    }
 }
 
 void FrameNode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility)
