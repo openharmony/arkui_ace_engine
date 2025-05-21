@@ -24,43 +24,6 @@
 #include "base/error/error_code.h"
 #include "base/utils/utils.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-int32_t OH_ArkUI_PostAsyncUITask(ArkUI_ContextHandle context,
-    void* asyncUITaskData, void (*asyncUITask)(void* asyncUITaskData), void(*onFinish)(void* asyncUITaskData))
-{
-    if (!context || !asyncUITask) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
-    auto* contextPtr = reinterpret_cast<ArkUI_Context*>(context);
-    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    return impl->getMultiThreadManagerAPI()->postAsyncUITask(contextPtr->id, asyncUITaskData, asyncUITask, onFinish);
-}
-
-int32_t OH_ArkUI_PostUITask(ArkUI_ContextHandle context, void* taskData, void(*task)(void* taskData))
-{
-    if (!context || !task) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
-    auto* contextPtr = reinterpret_cast<ArkUI_Context*>(context);
-    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    return impl->getMultiThreadManagerAPI()->postUITask(contextPtr->id, taskData, task);
-}
-
-int32_t OH_ArkUI_PostUITaskAndWait(ArkUI_ContextHandle context, void* taskData, void(*task)(void* taskData))
-{
-    if (!context || !task) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
-    auto* contextPtr = reinterpret_cast<ArkUI_Context*>(context);
-    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    return impl->getMultiThreadManagerAPI()->postUITaskAndWait(contextPtr->id, taskData, task);
-}
-#ifdef __cplusplus
-};
-#endif
-
 namespace OHOS::Ace::NodeModel {
 namespace {
 #if defined(WINDOWS_PLATFORM)
@@ -161,43 +124,13 @@ struct ExtraData {
 };
 
 std::set<ArkUI_NodeHandle> g_nodeSet;
-std::mutex g_nodeSetMutex_;
-std::set<ArkUI_NodeHandle> g_nodeSetSafely;
 
 bool IsValidArkUINode(ArkUI_NodeHandle nodePtr)
 {
-    if (!nodePtr) {
+    if (!nodePtr || g_nodeSet.count(nodePtr) == 0) {
         return false;
     }
-    const auto* impl = GetFullImpl();
-    if (impl->getMultiThreadManagerAPI()->isMultiThreadNode(nodePtr->uiNodeHandle)) {
-        std::lock_guard<std::mutex> lock(g_nodeSetMutex_);
-        return nodePtr && g_nodeSetSafely.count(nodePtr) > 0;
-    } else {
-        return nodePtr && g_nodeSet.count(nodePtr) > 0;
-    }
-}
-
-void AddNodeSafely(ArkUI_NodeHandle nodePtr)
-{
-    const auto* impl = GetFullImpl();
-    if (impl->getMultiThreadManagerAPI()->isMultiThreadNode(nodePtr->uiNodeHandle)) {
-        std::lock_guard<std::mutex> lock(g_nodeSetMutex_);
-        g_nodeSetSafely.emplace(nodePtr);
-    } else {
-        g_nodeSet.emplace(nodePtr);
-    }
-}
-
-void RemoveNodeSafely(ArkUI_NodeHandle nodePtr)
-{
-    const auto* impl = GetFullImpl();
-    if (impl->getMultiThreadManagerAPI()->isMultiThreadNode(nodePtr->uiNodeHandle)) {
-        std::lock_guard<std::mutex> lock(g_nodeSetMutex_);
-        g_nodeSetSafely.erase(nodePtr);
-    } else {
-        g_nodeSet.erase(nodePtr);
-    }
+    return true;
 }
 
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
@@ -226,14 +159,8 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
     impl->getBasicAPI()->markDirty(uiNode, ARKUI_DIRTY_FLAG_ATTRIBUTE_DIFF);
     ArkUI_Node* arkUINode = new ArkUI_Node({ type, uiNode, true });
     impl->getExtendedAPI()->setAttachNodePtr(uiNode, reinterpret_cast<void*>(arkUINode));
-    AddNodeSafely(arkUINode);
+    g_nodeSet.emplace(arkUINode);
     return arkUINode;
-}
-
-ArkUI_NodeHandle CreateNodeSafely(ArkUI_NodeType type)
-{
-    ThreadSafeScope threadSafeScope;
-    return CreateNode(type);
 }
 
 void DisposeNativeSource(ArkUI_NodeHandle nativePtr)
@@ -275,22 +202,11 @@ void DisposeNode(ArkUI_NodeHandle nativePtr)
     }
     // already check in entry point.
     const auto* impl = GetFullImpl();
-    RemoveNodeSafely(nativePtr);
     impl->getBasicAPI()->disposeNode(nativePtr->uiNodeHandle);
     DisposeNativeSource(nativePtr);
+    g_nodeSet.erase(nativePtr);
     delete nativePtr;
     nativePtr = nullptr;
-}
-
-void DisposeNodeSafely(ArkUI_NodeHandle nativePtr)
-{
-    CHECK_NULL_VOID(nativePtr);
-    auto* impl = GetFullImpl();
-    if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(nativePtr->uiNodeHandle)) {
-        return;
-    }
-    ThreadSafeScope threadSafeScope;
-    DisposeNode(nativePtr);
 }
 
 int32_t AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
@@ -311,19 +227,6 @@ int32_t AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
     return ERROR_CODE_NO_ERROR;
 }
 
-int32_t AddChildSafely(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
-{
-    CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
-    auto* impl = GetFullImpl();
-    if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(parentNode->uiNodeHandle) ||
-        !impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(childNode->uiNodeHandle)) {
-        return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
-    }
-    ThreadSafeScope threadSafeScope;
-    return AddChild(parentNode, childNode);
-}
-
 int32_t RemoveChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
 {
     CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
@@ -339,19 +242,6 @@ int32_t RemoveChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
     impl->getBasicAPI()->removeChild(parentNode->uiNodeHandle, childNode->uiNodeHandle);
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
     return ERROR_CODE_NO_ERROR;
-}
-
-int32_t RemoveChildSafely(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
-{
-    CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
-    auto* impl = GetFullImpl();
-    if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(parentNode->uiNodeHandle) ||
-        !impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(childNode->uiNodeHandle)) {
-        return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
-    }
-    ThreadSafeScope threadSafeScope;
-    return RemoveChild(parentNode, childNode);
 }
 
 int32_t InsertChildAfter(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, ArkUI_NodeHandle siblingNode)
@@ -372,19 +262,6 @@ int32_t InsertChildAfter(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode
     return ERROR_CODE_NO_ERROR;
 }
 
-int32_t InsertChildAfterSafely(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, ArkUI_NodeHandle siblingNode)
-{
-    CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
-    auto* impl = GetFullImpl();
-    if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(parentNode->uiNodeHandle) ||
-        !impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(childNode->uiNodeHandle)) {
-        return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
-    }
-    ThreadSafeScope threadSafeScope;
-    return InsertChildAfter(parentNode, childNode, siblingNode);
-}
-
 int32_t InsertChildBefore(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, ArkUI_NodeHandle siblingNode)
 {
     CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
@@ -401,19 +278,6 @@ int32_t InsertChildBefore(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNod
         parentNode->uiNodeHandle, childNode->uiNodeHandle, siblingNode ? siblingNode->uiNodeHandle : nullptr);
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
     return ERROR_CODE_NO_ERROR;
-}
-
-int32_t InsertChildBeforeSafely(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, ArkUI_NodeHandle siblingNode)
-{
-    CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
-    auto* impl = GetFullImpl();
-    if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(parentNode->uiNodeHandle) ||
-        !impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(childNode->uiNodeHandle)) {
-        return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
-    }
-    ThreadSafeScope threadSafeScope;
-    return InsertChildBefore(parentNode, childNode, siblingNode);
 }
 
 int32_t InsertChildAt(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, int32_t position)
@@ -433,19 +297,6 @@ int32_t InsertChildAt(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, i
     return ERROR_CODE_NO_ERROR;
 }
 
-int32_t InsertChildAtSafely(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, int32_t position)
-{
-    CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
-    auto* impl = GetFullImpl();
-    if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(parentNode->uiNodeHandle) ||
-        !impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(childNode->uiNodeHandle)) {
-        return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
-    }
-    ThreadSafeScope threadSafeScope;
-    return InsertChildAt(parentNode, childNode, position);
-}
-
 void SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const char* value)
 {
     SetNodeAttribute(node, attribute, value);
@@ -462,17 +313,6 @@ int32_t SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, c
     return SetNodeAttribute(node, attribute, value);
 }
 
-int32_t SetAttributeSafely(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const ArkUI_AttributeItem* value)
-{
-    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
-    auto* impl = GetFullImpl();
-    if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(node->uiNodeHandle)) {
-        return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
-    }
-    ThreadSafeScope threadSafeScope;
-    return SetAttribute(node, attribute, value);
-}
-
 int32_t ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 {
     if (node == nullptr) {
@@ -484,34 +324,12 @@ int32_t ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
     return ResetNodeAttribute(node, attribute);
 }
 
-int32_t ResetAttributeSafely(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
-{
-    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
-    auto* impl = GetFullImpl();
-    if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(node->uiNodeHandle)) {
-        return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
-    }
-    ThreadSafeScope threadSafeScope;
-    return ResetAttribute(node, attribute);
-}
-
 const ArkUI_AttributeItem* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 {
     if (node == nullptr) {
         return nullptr;
     }
     return GetNodeAttribute(node, attribute);
-}
-
-const ArkUI_AttributeItem* GetAttributeSafely(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
-{
-    CHECK_NULL_RETURN(node, nullptr);
-    auto* impl = GetFullImpl();
-    if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(node->uiNodeHandle)) {
-        return nullptr;
-    }
-    ThreadSafeScope threadSafeScope;
-    return GetAttribute(node, attribute);
 }
 
 int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t targetId)
@@ -598,18 +416,6 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
     return ERROR_CODE_NO_ERROR;
 }
 
-int32_t RegisterNodeEventSafely(ArkUI_NodeHandle nodePtr,
-    ArkUI_NodeEventType eventType, int32_t targetId, void* userData)
-{
-    CHECK_NULL_RETURN(nodePtr, ERROR_CODE_PARAM_INVALID);
-    auto* impl = GetFullImpl();
-    if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(nodePtr->uiNodeHandle)) {
-        return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
-    }
-    ThreadSafeScope threadSafeScope;
-    return RegisterNodeEvent(nodePtr, eventType, targetId, userData);
-}
-
 void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType)
 {
     if (nodePtr == nullptr || !CheckIsCNode(nodePtr)) {
@@ -641,17 +447,6 @@ void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType
         nodePtr->uiNodeHandle, static_cast<ArkUIEventSubKind>(originEventType));
 }
 
-void UnregisterNodeEventSafely(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType)
-{
-    CHECK_NULL_VOID(nodePtr);
-    auto* impl = GetFullImpl();
-    if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(nodePtr->uiNodeHandle)) {
-        return;
-    }
-    ThreadSafeScope threadSafeScope;
-    UnregisterNodeEvent(nodePtr, eventType);
-}
-
 void (*g_compatibleEventReceiver)(ArkUI_CompatibleNodeEvent* event) = nullptr;
 void RegisterOnEvent(void (*eventReceiver)(ArkUI_CompatibleNodeEvent* event))
 {
@@ -664,25 +459,9 @@ void RegisterOnEvent(void (*eventReceiver)(ArkUI_NodeEvent* event))
     g_eventReceiver = eventReceiver;
 }
 
-void RegisterOnEventSafely(void (*eventReceiver)(ArkUI_NodeEvent* event))
-{
-    auto* impl = GetFullImpl();
-    if (impl->getMultiThreadManagerAPI()->checkOnUIThread()) {
-        RegisterOnEvent(eventReceiver);
-    }
-}
-
 void UnregisterOnEvent()
 {
     g_eventReceiver = nullptr;
-}
-
-void UnregisterOnEventSafely()
-{
-    auto* impl = GetFullImpl();
-    if (impl->getMultiThreadManagerAPI()->checkOnUIThread()) {
-        UnregisterOnEvent();
-    }
 }
 
 void HandleTouchEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
@@ -799,7 +578,7 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)
 {
     int32_t invalidType = -1;
     auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(innerEvent->extraParam);
-    if (!IsValidArkUINode(nodePtr)) {
+    if (!nodePtr || g_nodeSet.count(nodePtr) == 0) {
         return invalidType;
     }
     if (!nodePtr->extraData) {
@@ -905,27 +684,9 @@ int32_t SetUserData(ArkUI_NodeHandle node, void* userData)
     return ERROR_CODE_NO_ERROR;
 }
 
-int32_t SetUserDataSafely(ArkUI_NodeHandle node, void* userData)
-{
-    auto* impl = GetFullImpl();
-    if (impl->getMultiThreadManagerAPI()->checkOnUIThread()) {
-        return SetUserData(node, userData);
-    }
-    return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
-}
-
 void* GetUserData(ArkUI_NodeHandle node)
 {
     return node->userData;
-}
-
-void* GetUserDataSafely(ArkUI_NodeHandle node)
-{
-    auto* impl = GetFullImpl();
-    if (impl->getMultiThreadManagerAPI()->checkOnUIThread()) {
-        return GetUserData(node);
-    }
-    return nullptr;
 }
 
 int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit unit)
@@ -939,16 +700,6 @@ int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit uni
     }
     nodePtr->lengthMetricUnit = unit;
     return ERROR_CODE_NO_ERROR;
-}
-
-int32_t SetLengthMetricUnitSafely(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit unit)
-{
-    auto* impl = GetFullImpl();
-    if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(nodePtr->uiNodeHandle)) {
-        return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
-    }
-    ThreadSafeScope threadSafeScope;
-    return SetLengthMetricUnit(nodePtr, unit);
 }
 
 void ApplyModifierFinish(ArkUI_NodeHandle nodePtr)
@@ -990,14 +741,6 @@ void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag)
     impl->getBasicAPI()->markDirty(nodePtr->uiNodeHandle, flag);
 }
 
-void MarkDirtySafely(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag)
-{
-    auto* impl = GetFullImpl();
-    if (impl->getMultiThreadManagerAPI()->checkOnUIThread()) {
-        MarkDirty(nodePtr, dirtyFlag);
-    }
-}
-
 int32_t AddNodeEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceiver)(ArkUI_NodeEvent* event))
 {
     if (!nodePtr || !eventReceiver || !CheckIsCNode(nodePtr)) {
@@ -1012,17 +755,6 @@ int32_t AddNodeEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceiver)(Ark
     }
     eventListenersSet->emplace(eventReceiver);
     return ERROR_CODE_NO_ERROR;
-}
-
-int32_t AddNodeEventReceiverSafely(ArkUI_NodeHandle nodePtr, void (*eventReceiver)(ArkUI_NodeEvent* event))
-{
-    CHECK_NULL_RETURN(nodePtr, ERROR_CODE_PARAM_INVALID);
-    auto* impl = GetFullImpl();
-    if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(nodePtr->uiNodeHandle)) {
-        return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
-    }
-    ThreadSafeScope threadSafeScope;
-    return AddNodeEventReceiver(nodePtr, eventReceiver);
 }
 
 int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceiver)(ArkUI_NodeEvent* event))
@@ -1040,17 +772,6 @@ int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceiver)(
         nodePtr->eventListeners = nullptr;
     }
     return ERROR_CODE_NO_ERROR;
-}
-
-int32_t RemoveNodeEventReceiverSafely(ArkUI_NodeHandle nodePtr, void (*eventReceiver)(ArkUI_NodeEvent* event))
-{
-    CHECK_NULL_RETURN(nodePtr, ERROR_CODE_PARAM_INVALID);
-    auto* impl = GetFullImpl();
-    if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(nodePtr->uiNodeHandle)) {
-        return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
-    }
-    ThreadSafeScope threadSafeScope;
-    return RemoveNodeEventReceiver(nodePtr, eventReceiver);
 }
 
 void* GetParseJsMedia()

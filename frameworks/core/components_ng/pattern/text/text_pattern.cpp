@@ -36,7 +36,6 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
-#include "core/common/multi_thread_build_manager.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/common/vibrator/vibrator_utils.h"
@@ -100,11 +99,10 @@ void TextPattern::OnWindowShow()
     ResumeSymbolAnimation();
 }
 
-void TextPattern::OnAttachToFrameNodeInner()
+void TextPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    ACE_SCOPED_TRACE("OnAttachToFrameNodeInner %d", host->GetId());
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline_ = pipeline;
@@ -131,17 +129,6 @@ void TextPattern::OnAttachToFrameNodeInner()
     CHECK_NULL_VOID(theme);
     textLayoutProperty->UpdateTextAlign(theme->GetTextStyle().GetTextAlign());
     textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
-}
-
-void TextPattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->OnAttachToFrameNodeInner();
-    });
 }
 
 void TextPattern::OnDetachFromFrameNode(FrameNode* node)

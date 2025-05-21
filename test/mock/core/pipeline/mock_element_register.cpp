@@ -24,19 +24,10 @@ namespace OHOS::Ace {
 thread_local ElementRegister* ElementRegister::instance_ = nullptr;
 std::mutex ElementRegister::mutex_;
 
-ElementRegister* ElementRegister::GetGlobalInstance()
-{
-    if (!ElementRegister::instance_) {
-        ElementRegister::instance_ = new ElementRegister();
-    }
-    static ElementRegister* globalInstance = ElementRegister::instance_;
-    return globalInstance;
-}
-
 ElementRegister* ElementRegister::GetInstance()
 {
     if (ElementRegister::instance_ == nullptr) {
-        std::lock_guard<std::mutex> lock(ElementRegister::mutex_);
+        std::lock_guard<std::mutex> lock(mutex_);
         if (!ElementRegister::instance_) {
             ElementRegister::instance_ = new ElementRegister();
         }
@@ -245,7 +236,7 @@ void ElementRegister::AddFrameNodeByInspectorId(const std::string& key, const We
     }
 }
 
-void ElementRegister::RemoveFrameNodeByInspectorId(const std::string& key, int32_t nodeId, bool isMultiThreadNode)
+void ElementRegister::RemoveFrameNodeByInspectorId(const std::string& key, int32_t nodeId)
 {
     auto it = inspectorIdMap_.find(key);
     CHECK_NULL_VOID(it != inspectorIdMap_.end());

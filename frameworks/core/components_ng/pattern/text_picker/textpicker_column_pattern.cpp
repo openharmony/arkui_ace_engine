@@ -26,7 +26,6 @@
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
-#include "core/common/multi_thread_build_manager.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -78,11 +77,7 @@ void TextPickerColumnPattern::OnAttachToFrameNode()
     InitPanEvent(gestureHub);
     host->GetRenderContext()->SetClipToFrame(true);
     InitHapticController(host);
-    MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->RegisterWindowStateChangedCallback();
-    });
+    RegisterWindowStateChangedCallback();
 }
 
 void TextPickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -1521,24 +1516,15 @@ void TextPickerColumnPattern::HandleEnterSelectedArea(double scrollDelta, float 
         isDragReverse = true;
     }
     enterDelta_ = (NearEqual(scrollDelta, shiftDistance)) ? 0.0 : scrollDelta;
-    auto host = GetHost();
     if (GreatOrEqual(std::abs(scrollDelta), std::abs(shiftThreshold)) && GetEnterIndex() != currentEnterIndex &&
         !isOverScroll) {
         SetEnterIndex(currentEnterIndex);
-        MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->HandleEnterSelectedAreaEventCallback(true);
-        });
+        HandleEnterSelectedAreaEventCallback(true);
     }
     if (isDragReverse && LessOrEqual(std::abs(scrollDelta), std::abs(shiftThreshold)) &&
         GetEnterIndex() != GetCurrentIndex() && !isOverScroll) {
         SetEnterIndex(GetCurrentIndex());
-        MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->HandleEnterSelectedAreaEventCallback(true);
-        });
+        HandleEnterSelectedAreaEventCallback(true);
     }
 }
 

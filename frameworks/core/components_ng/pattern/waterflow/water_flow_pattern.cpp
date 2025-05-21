@@ -18,7 +18,6 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
-#include "core/common/multi_thread_build_manager.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
@@ -557,16 +556,6 @@ void WaterFlowPattern::ResetSections()
 
 void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host),
-        [weak = WeakClaim(this), index, smooth, align, extraOffset]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->ScrollToIndex(index, smooth, align, extraOffset);
-    })) {
-        return;
-    }
     SetScrollSource(SCROLL_FROM_JUMP);
     SetScrollAlign(align);
     StopAnimate();

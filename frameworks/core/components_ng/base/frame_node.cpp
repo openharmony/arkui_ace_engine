@@ -43,7 +43,6 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
-#include "core/common/multi_thread_build_manager.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -2382,14 +2381,6 @@ void FrameNode::RebuildRenderContextTree()
     if (!needSyncRenderTree_) {
         return;
     }
-    if (MultiThreadBuildManager::TryPostUnSafeTask(this,
-        [weak = WeakClaim(this)]() {
-        auto frameNode = weak.Upgrade();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->RebuildRenderContextTree();
-    })) {
-        return;
-    }
     auto pipeline = GetContextRefPtr();
     if (pipeline && !pipeline->CheckThreadSafe()) {
         LOGW("RebuildRenderContextTree doesn't run on UI thread!");
@@ -2422,7 +2413,7 @@ void FrameNode::RebuildRenderContextTree()
     needSyncRenderTree_ = false;
 }
 
-void FrameNode::MarkModifyDoneInner()
+void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
     auto pipeline = PipelineContext::GetCurrentContextSafely();
@@ -2467,15 +2458,6 @@ void FrameNode::MarkModifyDoneInner()
 #endif
 }
 
-void FrameNode::MarkModifyDone()
-{
-    MultiThreadBuildManager::TryExecuteUnSafeTask(this, [weak = WeakClaim(this)]() {
-        auto host = weak.Upgrade();
-        CHECK_NULL_VOID(host);
-        host->MarkModifyDoneInner();
-    });
-}
-
 [[deprecated("using AfterMountToParent")]] void FrameNode::OnMountToParentDone()
 {
     pattern_->OnMountToParentDone();
@@ -2493,7 +2475,7 @@ void FrameNode::FlushUpdateAndMarkDirty()
     MarkDirtyNode();
 }
 
-void FrameNode::MarkDirtyNodeInner(PropertyChangeFlag extraFlag)
+void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
 {
     if (IsFreeze()) {
         // store the flag.
@@ -2512,15 +2494,6 @@ void FrameNode::MarkDirtyNodeInner(PropertyChangeFlag extraFlag)
         return;
     }
     MarkDirtyNode(IsMeasureBoundary(), IsRenderBoundary(), extraFlag);
-}
-
-void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
-{
-    MultiThreadBuildManager::TryExecuteUnSafeTask(this, [weak = WeakClaim(this), extraFlag]() {
-        auto host = weak.Upgrade();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNodeInner(extraFlag);
-    });
 }
 
 void FrameNode::ProcessFreezeNode()
@@ -2615,12 +2588,7 @@ void FrameNode::MarkNeedRender(bool isRenderBoundary)
     }
     isRenderDirtyMarked_ = true;
     if (isRenderBoundary) {
-        MultiThreadBuildManager::TryExecuteUnSafeTask(this,
-            [weak = WeakClaim(this), instanceId = context->GetInstanceId()]() {
-            auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
-            CHECK_NULL_VOID(context);
-            context->AddDirtyRenderNode(weak.Upgrade());
-        });
+        context->AddDirtyRenderNode(Claim(this));
         return;
     }
     auto parent = GetAncestorNodeOfFrame(false);
@@ -5120,18 +5088,13 @@ void FrameNode::OnInspectorIdUpdate(const std::string& id)
     if (parent && parent->GetTag() == V2::RELATIVE_CONTAINER_ETS_TAG) {
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    if (!Recorder::EventRecorder::Get().IsExposureRecordEnable()) {
-        return;
-    }
-    if (exposureProcessor_) {
-        return;
-    }
-    auto* context = GetContext();
-    CHECK_NULL_VOID(context);
-    auto unsafeTask = [weak = WeakClaim(this), id, instanceId = context->GetInstanceId()]() {
-        auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
+    if (Recorder::EventRecorder::Get().IsExposureRecordEnable()) {
+        if (exposureProcessor_) {
+            return;
+        }
+        auto* context = GetContext();
         CHECK_NULL_VOID(context);
-        context->AddAfterRenderTask([weak, inspectorId = id]() {
+        context->AddAfterRenderTask([weak = WeakClaim(this), inspectorId = id]() {
             auto host = weak.Upgrade();
             CHECK_NULL_VOID(host);
             auto pageUrl = Recorder::GetPageUrlByNode(host);
@@ -5141,8 +5104,7 @@ void FrameNode::OnInspectorIdUpdate(const std::string& id)
             }
             host->RecordExposureInner();
         });
-    };
-    MultiThreadBuildManager::TryExecuteUnSafeTask(this, std::move(unsafeTask));
+    }
 }
 
 void FrameNode::OnAutoEventParamUpdate(const std::string& value)
@@ -6122,7 +6084,7 @@ void FrameNode::OnSyncGeometryFrameFinish(const RectF& paintRect)
     syncedFramePaintRect_ = paintRect;
 }
 
-void FrameNode::AddFrameNodeChangeInfoFlagInner(FrameNodeChangeInfoFlag changeFlag)
+void FrameNode::AddFrameNodeChangeInfoFlag(FrameNodeChangeInfoFlag changeFlag)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
@@ -6137,15 +6099,6 @@ void FrameNode::AddFrameNodeChangeInfoFlagInner(FrameNodeChangeInfoFlag changeFl
         context->SetIsTransFlag(true);
     }
     changeInfoFlag_ = changeInfoFlag_ | changeFlag;
-}
-
-void FrameNode::AddFrameNodeChangeInfoFlag(FrameNodeChangeInfoFlag changeFlag)
-{
-    MultiThreadBuildManager::TryExecuteUnSafeTask(this, [weak = WeakClaim(this), changeFlag]() {
-        auto host = weak.Upgrade();
-        CHECK_NULL_VOID(host);
-        host->AddFrameNodeChangeInfoFlagInner(changeFlag);
-    });
 }
 
 void FrameNode::RegisterNodeChangeListener()
@@ -6589,22 +6542,12 @@ void FrameNode::CleanVisibleAreaUserCallback(bool isApproximate)
         eventHub_->CleanVisibleAreaCallback(true, isApproximate);
         if (!hasInnerCallback && !hasUserCallback && pipeline) {
             throttledCallbackOnTheWay_ = false;
-            MultiThreadBuildManager::TryExecuteUnSafeTask(this,
-                [id = GetId(), instanceId = pipeline->GetInstanceId()]() {
-                auto pipeline = NG::PipelineContext::GetContextByContainerId(instanceId);
-                CHECK_NULL_VOID(pipeline);
-                pipeline->RemoveVisibleAreaChangeNode(id);
-            });
+            pipeline->RemoveVisibleAreaChangeNode(GetId());
         }
     } else {
         eventHub_->CleanVisibleAreaCallback(true, false);
         if (!hasInnerCallback && !throttledVisibleAreaCallback.callback && pipeline) {
-            MultiThreadBuildManager::TryExecuteUnSafeTask(this,
-                [id = GetId(), instanceId = pipeline->GetInstanceId()]() {
-                auto pipeline = NG::PipelineContext::GetContextByContainerId(instanceId);
-                CHECK_NULL_VOID(pipeline);
-                pipeline->RemoveVisibleAreaChangeNode(id);
-            });
+            pipeline->RemoveVisibleAreaChangeNode(GetId());
         }
     }
 }

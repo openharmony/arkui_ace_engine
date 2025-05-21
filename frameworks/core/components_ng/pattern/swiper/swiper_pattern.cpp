@@ -35,7 +35,6 @@
 #include "core/animation/curves.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/container_scope.h"
-#include "core/common/multi_thread_build_manager.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -122,11 +121,7 @@ void SwiperPattern::OnAttachToFrameNode()
     auto indicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(indicatorTheme);
     renderContext->UpdateClipEdge(indicatorTheme->GetClipEdge());
-    MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->InitSurfaceChangedCallback();
-    });
+    InitSurfaceChangedCallback();
 }
 
 void SwiperPattern::OnDetachFromFrameNode(FrameNode* node)
@@ -2125,15 +2120,6 @@ bool SwiperPattern::IsInFastAnimation() const
 
 void SwiperPattern::ChangeIndex(int32_t index, SwiperAnimationMode mode)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host), [weak = WeakClaim(this), index, mode]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->ChangeIndex(index, mode);
-    })) {
-        return;
-    }
     int32_t targetIndex = 0;
     if (!ComputeTargetIndex(index, targetIndex)) {
         return;
@@ -2180,14 +2166,6 @@ bool SwiperPattern::ComputeTargetIndex(int32_t index, int32_t& targetIndex) cons
 
 void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
 {
-    auto host = GetHost();
-    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host), [weak = WeakClaim(this), index, useAnimation]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->ChangeIndex(index, useAnimation);
-    })) {
-        return;
-    }
     int32_t targetIndex = 0;
     if (!ComputeTargetIndex(index, targetIndex)) {
         return;

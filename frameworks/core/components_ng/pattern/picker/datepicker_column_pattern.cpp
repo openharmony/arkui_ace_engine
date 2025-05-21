@@ -27,7 +27,6 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/font_manager.h"
-#include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_base_component.h"
@@ -87,11 +86,7 @@ void DatePickerColumnPattern::OnAttachToFrameNode()
     InitPanEvent(gestureHub);
     host->GetRenderContext()->SetClipToFrame(true);
     InitHapticController();
-    MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->RegisterWindowStateChangedCallback();
-    });
+    RegisterWindowStateChangedCallback();
 }
 
 void DatePickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
