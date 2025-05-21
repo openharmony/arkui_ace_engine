@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -109,11 +109,11 @@ sptr<CJEventTargetInfo> CJGestureRecognizer::getEventTargetInfo()
 {
     auto recognizer = recognizer_.Upgrade();
     if (!recognizer) {
-        return FFIData::Create<CJEventTargetInfo>();
+        return nullptr;
     }
-    auto attachNode = recognizer->GetAttachNode().Upgrade();
+    auto attachNode = recognizer->GetAttachedNode().Upgrade();
     if (!attachNode) {
-        return FFIData::Create<CJEventTargetInfo>();
+        return nullptr;
     }
     RefPtr<NG::Pattern> pattern;
     auto scrollablePattern = attachNode->GetPattern<NG::ScrollablePattern>();
@@ -212,7 +212,7 @@ bool FfiOHOSAceFrameworkGestureRecognizerIsValid(int64_t id)
 
 void FfiOHOSAceFrameworkGestureRecognizerSetEnabled(int64_t id, bool enabled)
 {
-    auto gestureRecognizer = FFIData::GetData<CJGestureRecognizer>(id)
+    auto gestureRecognizer = FFIData::GetData<CJGestureRecognizer>(id);
     if (gestureRecognizer == nullptr) {
         LOGE("FfiOHOSAceFrameworkGestureRecognizerSetEnabled: invalid id");
         return;
@@ -222,7 +222,7 @@ void FfiOHOSAceFrameworkGestureRecognizerSetEnabled(int64_t id, bool enabled)
 
 int32_t FfiOHOSAceFrameworkGestureRecognizerGetState(int64_t id)
 {
-    auto gestureRecognizer = FFIData::GetData<CJGestureRecognizer>(id);;
+    auto gestureRecognizer = FFIData::GetData<CJGestureRecognizer>(id);
     if (gestureRecognizer == nullptr) {
         LOGE("FfiOHOSAceFrameworkGestureRecognizerGestState: invalid id");
         return FFI_ERROR_CODE;
@@ -239,6 +239,10 @@ int64_t FfiOHOSAceFrameworkGestureRecognizerGetEventTargetInfo(int64_t id)
         return FFI_ERROR_CODE;
     }
     auto eventTargetInfo = gestureRecognizer->getEventTargetInfo();
+    if (eventTargetInfo == nullptr) {
+        LOGE("FfiOHOSAceFrameworkGestureRecognizerGetEventTargetInfo: invalid eventTargetInfo");
+        return FFI_ERROR_CODE;
+    }
     return eventTargetInfo->GetID();
 }
 
@@ -247,7 +251,7 @@ ExternalString FfiOHOSAceFrameworkEventTargetInfoGetId(int64_t id)
     auto eventTargetInfo = FFIData::GetData<CJEventTargetInfo>(id);
     if (eventTargetInfo == nullptr) {
         LOGE("FfiOHOSAceFrameworkEventTargetInfoGetId: invalid id");
-        return FFI_ERROR_CODE;
+        return {};
     }
     auto targetId = eventTargetInfo->getId();
     return ::Utils::MallocCString(targetId);
@@ -288,7 +292,7 @@ bool FfiOHOSAceFrameworkScrollableTargetInfoIsBegin(int64_t id)
 bool FfiOHOSAceFrameworkScrollableTargetInfoIsEnd(int64_t id)
 {
     auto scrollableTargetInfo = FFIData::GetData<CJScrollableTargetInfo>(id);
-    if (scrollabaleTargetInfo == nullptr) {
+    if (scrollableTargetInfo == nullptr) {
         LOGE("FfiOHOSAceFrameworkScrollableTargetInfoIsEnd: invalid id");
         return false;
     }

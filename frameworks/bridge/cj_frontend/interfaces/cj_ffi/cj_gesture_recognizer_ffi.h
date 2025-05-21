@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,7 @@ enum class CJGestureRecognizerState {
     FAILED = 5,
 };
 
+// used to determing the type of eventTargetInfo on the cangjie side
 enum class CJEventTargetInfoType {
     NORMAL = 0,
     SCROLLABLE = 1,
@@ -59,7 +60,6 @@ public:
     void setType(const CJEventTargetInfoType type)
     {
         type_ = type;
-
     }
 
     CJEventTargetInfoType getType()
@@ -89,8 +89,8 @@ private:
     WeakPtr<NG::Pattern> pattern_;
 };
 
-class CJGestureRecognizer : public OHOS::FFI::Data {
-DECL_TYPE(CJGestureRecognizer, OHOS::FFI::Data)
+class CJGestureRecognizer : public OHOS::FFI::FFIData {
+DECL_TYPE(CJGestureRecognizer, OHOS::FFI::FFIData)
 public:
     CJGestureRecognizer() : FFIData() {}
 
@@ -106,7 +106,7 @@ public:
 
     std::string getTag();
 
-    int32_t geType();
+    int32_t getType();
 
     int32_t getFingers();
 
@@ -167,7 +167,7 @@ public:
 
 class CJPanRecognizer : public CJMultiFingerRecognizer {
 public:
-    CJPanRecognize() : CJMultiFingerRecognizer() {}
+    CJPanRecognizer() : CJMultiFingerRecognizer() {}
 
     void update(const RefPtr<NG::PanRecognizer>& recognizer)
     {
@@ -176,7 +176,7 @@ public:
             recognizer->GetFingers(), recognizer->GetDistance(), recognizer->GetDirection());
     }
 
-    sptr<NativePanGestureOption> getPanGestureOptioins()
+    sptr<NativePanGestureOption> getPanGestureOptions()
     {
         PanDirection direction;
         auto panGestureOption = FFIData::Create<NativePanGestureOption>(0, direction, 0.0);
@@ -204,7 +204,7 @@ CJ_EXPORT bool FfiOHOSAceFrameworkGestureRecognizerIsBuiltIn(int64_t id);
 CJ_EXPORT bool FfiOHOSAceFrameworkGestureRecognizerIsEnabled(int64_t id);
 CJ_EXPORT void FfiOHOSAceFrameworkGestureRecognizerSetEnabled(int64_t id, bool enabled);
 CJ_EXPORT bool FfiOHOSAceFrameworkGestureRecognizerIsValid(int64_t id);
-CJ_EXPORT int32_t FfiOHOSAceFrameworkGestureRecognizerGestState(int64_t id);
+CJ_EXPORT int32_t FfiOHOSAceFrameworkGestureRecognizerGetState(int64_t id);
 CJ_EXPORT int64_t FfiOHOSAceFrameworkGestureRecognizerGetEventTargetInfo(int64_t id);
 CJ_EXPORT ExternalString FfiOHOSAceFrameworkEventTargetInfoGetId(int64_t id);
 CJ_EXPORT int64_t FfiOHOSAceFrameworkPanRecognizerGetPanGestureOptions(int64_t id);

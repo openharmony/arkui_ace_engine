@@ -259,6 +259,7 @@ std::function<void(const GestureEvent& event)> FormatGestureEvenFunctionV2(void 
         ffiGestureEvent.deviceId = event.GetDeviceId();
         ffiGestureEvent.baseEventInfoPtr = dynamic_cast<const BaseEventInfo*>(&event);
         ffiOnAction(ffiGestureEvent);
+        delete ffiGestureEvent.fingerList;
     };
     return result;
 }
@@ -302,6 +303,7 @@ std::function<void(const GestureEvent& event)> FormatGestureEvenFunction(void (*
         ffiGestureEvent.angle = event.GetAngle();
         ffiGestureEvent.speed = event.GetSpeed();
         ffiOnAction(ffiGestureEvent);
+        delete ffiGestureEvent.fingerList;
     };
     return result;
 }
@@ -985,12 +987,13 @@ void FfiOHOSAceFrameworkViewAbstractSetOnGestureJudgeBegin(int32_t (*callback)(C
         TransformNativeCJFingerInfo(baseGestureEvent.fingerList, fingerList);
         FormatGestureType(baseGestureEvent, info, gestureInfo->GetType());
         auto result = ffiCallback(cjGestureInfo, baseGestureEvent);
+        delete baseGestureEvent.fingerList;
         return static_cast<GestureJudgeResult>(result);
     };
     ViewAbstractModel::GetInstance()->SetOnGestureJudgeBegin(std::move(onGestureJudgeFunc));
 }
 
-void FfiOHOSAceFrameworkViewAbstractSetOnGestureRecognizerJudgeBegin(int32_t (*callback)(CJBaseGestureEvent, int64_t, VectorInt64Handle))
+void FfiOHOSAceFrameworkViewAbstractSetOnGestureRecognizerJudgeBegin(int32_t (*callback)(CJBaseGestureEvent, int64_t, VectorInt64Handle), bool exposeInnerGesture)
 {
     auto onGestureRecognizerJudgeFunc = [ffiCallback = CJLambda::Create(callback)](
                                             const std::shared_ptr<BaseGestureEvent>& info,
@@ -1050,12 +1053,13 @@ void FfiOHOSAceFrameworkViewAbstractSetOnGestureRecognizerJudgeBegin(int32_t (*c
             ids[i] = gestureRecognizerArray[i]->GetID();
         }
         auto result = ffiCallback(baseGestureEvent, currentObj->GetID(), &ids);
+        delete baseGestureEvent.fingerList;
         return static_cast<GestureJudgeResult>(result);
     };
-    ViewAbstractModel::GetInstance()->SetOnGestureRecognizerJudgeBegin(std::move(onGestureRecognizerJudgeFunc), false);
+    ViewAbstractModel::GetInstance()->SetOnGestureRecognizerJudgeBegin(std::move(onGestureRecognizerJudgeFunc), exposeInnerGesture);
 }
 
-void FfiOHOSAceFramworkViewAbstractShouldBuiltInRecognizerParallelWith(int64_t (*callback)(int64_t, VectorInt64Handle))
+void FfiOHOSAceFrameworkViewAbstractShouldBuiltInRecognizerParallelWith(int64_t (*callback)(int64_t, VectorInt64Handle))
 {
     auto shouldBuiltInRecognizerParallelWithFunc = [fficallback = CJLambda::Create(callback)](
         const RefPtr<NG::NGGestureRecognizer>& recognizer,
@@ -1069,11 +1073,15 @@ void FfiOHOSAceFramworkViewAbstractShouldBuiltInRecognizerParallelWith(int64_t (
         }
         auto id = gestureRecognizer->GetID();
         auto ids = std::vector<int64_t>(gestureRecognizerArray.size());
-        for (size_t i = 0; i < gestureRecognizer.size(); i++) {
+        for (size_t i = 0; i < gestureRecognizerArray.size(); i++) {
             ids[i] = gestureRecognizerArray[i]->GetID();
         }
         auto resultId = fficallback(id, &ids);
         auto result = FFIData::GetData<CJGestureRecognizer>(resultId);
+        if (result == nullptr) {
+            LOGE("FfiOHOSAceFrameworkViewAbstractShouldBuiltInRecognizerParallelWith: invalid id");
+            return FFIData::Create<CJGestureRecognizer>()->GetRecognizer().Upgrade();
+        }
         return result->GetRecognizer().Upgrade();
     };
     ViewAbstractModel::GetInstance()->SetShouldBuiltInRecognizerParallelWith(
