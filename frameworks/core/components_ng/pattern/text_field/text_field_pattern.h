@@ -1936,6 +1936,7 @@ private:
     void RemoveFillContentMap();
     bool NeedsSendFillContent();
     void UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);
+    void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
 
     RectF frameRect_;
     RectF textRect_;

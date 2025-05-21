@@ -467,4 +467,118 @@ HWTEST_F(RichEditorPatternTestSixNg, HandleKbVerticalSelection005, TestSize.Leve
     EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(false), 0);
 }
 
+/**
+ * @tc.name: CopyGestureOption002
+ * @tc.desc: test CopyGestureOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSixNg, CopyGestureOption002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RefPtr<SpanNode> source = OHOS::Ace::NG::SpanNode::CreateSpanNode(1);
+    RefPtr<SpanNode> target = OHOS::Ace::NG::SpanNode::CreateSpanNode(2);
+    GestureEventFunc func1 = [](GestureEvent& info) {};
+    OnHoverFunc func2 = [](bool, HoverInfo& info) {};
+    source->GetSpanItem()->SetOnClickEvent(std::move(func1));
+    source->GetSpanItem()->SetLongPressEvent(std::move(func1));
+    source->GetSpanItem()->SetDoubleClickEvent(std::move(func1));
+    source->GetSpanItem()->SetHoverEvent(std::move(func2));
+    richEditorPattern->CopyGestureOption(source, target);
+    EXPECT_TRUE(target->GetSpanItem()->onDoubleClick);
+    EXPECT_TRUE(target->GetSpanItem()->onHover);
+}
+
+/**
+ * @tc.name: GetSameSpanItem001
+ * @tc.desc: test GetSameSpanItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSixNg, GetSameSpanItem001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+    auto spanItem = AceType::MakeRefPtr<ImageSpanItem>();
+    spanItem->spanItemType = SpanItemType::IMAGE;
+    auto childNode = AceType::MakeRefPtr<ImageSpanNode>(V2::IMAGE_ETS_TAG, 2);
+    childNode->imageSpanItem_ = spanItem;
+    contentNode->children_.emplace_back(childNode);
+    auto image = AceType::MakeRefPtr<MockCanvasImage>();
+    auto imageNode = richEditorPattern->GetImageSpanNodeBySpanItem(spanItem);
+    auto pattern = imageNode->GetPattern<ImagePattern>();
+    pattern->image_ = image;
+    auto pixelMap = image->GetPixelMap();
+    richEditorPattern->GetSameSpanItem(spanItem);
+    EXPECT_FALSE(pixelMap);
+}
+
+/**
+ * @tc.name: GetSameSpanItem002
+ * @tc.desc: test GetSameSpanItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSixNg, GetSameSpanItem002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+    auto spanItem = AceType::MakeRefPtr<ImageSpanItem>();
+    spanItem->spanItemType = SpanItemType::IMAGE;
+    auto childNode = AceType::MakeRefPtr<ImageSpanNode>(V2::IMAGE_ETS_TAG, 2);
+    childNode->imageSpanItem_ = spanItem;
+    contentNode->children_.emplace_back(childNode);
+    auto image = AceType::MakeRefPtr<MockCanvasImage>();
+    image->needPixelMap = true;
+    auto imageNode = richEditorPattern->GetImageSpanNodeBySpanItem(spanItem);
+    auto pattern = imageNode->GetPattern<ImagePattern>();
+    pattern->image_ = image;
+    auto pixelMap = image->GetPixelMap();
+    richEditorPattern->GetSameSpanItem(spanItem);
+    EXPECT_TRUE(pixelMap);
+}
+
+/**
+ * @tc.name: ReportAfterContentChangeEvent001
+ * @tc.desc: Test ReportAfterContentChangeEvent non-span string mode with content added
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSixNg, ReportAfterContentChangeEvent001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ClearSpan();
+    std::string firstText = "abcd";
+    AddSpan(firstText);
+    std::string space = " ";
+    std::string secondText = "content";
+    AddSpan(space + secondText);
+    richEditorPattern->isSpanStringMode_ = false;
+    richEditorPattern->textCache_ = "abcd";
+    richEditorPattern->ReportAfterContentChangeEvent();
+    EXPECT_EQ(richEditorPattern->textCache_, "abcd content");
+}
+
+/**
+ * @tc.name: ReportAfterContentChangeEvent002
+ * @tc.desc: Test ReportAfterContentChangeEvent in span mode with content removed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSixNg, ReportAfterContentChangeEvent002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->textCache_ = "nihaodajia";
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(PREVIEW_TEXT_VALUE1);
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->ReportAfterContentChangeEvent();
+    EXPECT_EQ(richEditorPattern->textCache_, "nihao");
+}
 } // namespace OHOS::Ace::NG

@@ -1827,6 +1827,7 @@ void TextFieldPattern::HandleOnPaste()
             textfield->StartTwinkling();
             return;
         }
+        textfield->suppressAccessibilityEvent_ = false;
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnPaste len:%{public}d", static_cast<int32_t>(pasteData.length()));
         textfield->AddInsertCommand(pasteData, InputReason::PASTE);
     };
@@ -1944,6 +1945,7 @@ void TextFieldPattern::HandleOnCut()
     if (!IsSelected() || IsInPasswordMode()) {
         return;
     }
+    suppressAccessibilityEvent_ = false;
     UpdateEditingValueToRecord();
     auto selectedText = contentController_->GetSelectedValue(start, end);
     if (layoutProperty->GetCopyOptionsValue(CopyOptions::Local) != CopyOptions::None) {
@@ -3584,6 +3586,19 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     return true;
 }
 
+void GetTextDiffObscured(
+    const std::string& beforeText, const std::string& latestContent, std::string& addedText, std::string& removedText)
+{
+    int32_t changeLen = latestContent.length() - beforeText.length();
+    char16_t obscuring =
+        Localization::GetInstance()->GetLanguage() == "ar" ? OBSCURING_CHARACTER_FOR_AR : OBSCURING_CHARACTER;
+    if (changeLen > 0) {
+        addedText = UtfUtils::Str16DebugToStr8(std::u16string(changeLen, obscuring));
+    } else if (changeLen < 0) {
+        removedText = UtfUtils::Str16DebugToStr8(std::u16string(-changeLen, obscuring));
+    }
+}
+
 void TextFieldPattern::AddTextFireOnChange()
 {
     auto host = GetHost();
@@ -3616,6 +3631,29 @@ void TextFieldPattern::AddTextFireOnChange()
         eventHub->FireOnChange(changeValueInfo);
 
         pattern->RecordTextInputEvent();
+        auto newText_str = UtfUtils::Str16DebugToStr8(newText);
+        if(pattern->suppressAccessibilityEvent_){
+            std::string addedText, removedText;
+            if (pattern->IsInPasswordMode()) {
+                GetTextDiffObscured(pattern->textCache_, newText_str, addedText, removedText);
+            } else {
+                DetectTextDiff(pattern->textCache_, newText_str, addedText, removedText);
+            }
+            if (!addedText.empty() && removedText.empty()) {
+                TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+                    "textCache, in=%{public}s, newText=%{public}s, addedText=%{public}s", pattern->textCache_.c_str(),
+                    newText_str.c_str(), addedText.c_str());
+                pattern->OnAccessibilityEventTextChange(TextChangeType::ADD, addedText);
+            }
+            if (!removedText.empty() && addedText.empty()) {
+                TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+                    "textCache, in=%{public}s, newText=%{public}s, removedText=%{public}s", pattern->textCache_.c_str(),
+                    newText_str.c_str(), removedText.c_str());
+                pattern->OnAccessibilityEventTextChange(TextChangeType::REMOVE, removedText);
+            }
+        }
+        pattern->suppressAccessibilityEvent_ = true;
+        pattern->textCache_ = newText_str;
     });
 }
 
@@ -4037,6 +4075,7 @@ void TextFieldPattern::InitEditingValueText(std::u16string content)
     if (HasInputOperation()) {
         return;
     }
+    textCache_ = UtfUtils::Str16DebugToStr8(content);
     contentController_->SetTextValueOnly(std::move(content));
     selectController_->UpdateCaretIndex(GetTextUtf16Value().length());
     if (GetIsPreviewText() && GetTextUtf16Value().empty()) {
@@ -4054,6 +4093,7 @@ bool TextFieldPattern::InitValueText(std::u16string content)
     if (HasInputOperation() && content != u"") {
         return false;
     }
+    textCache_ = UtfUtils::Str16DebugToStr8(content);
     ChangeValueInfo changeValueInfo;
     changeValueInfo.oldContent = GetBodyTextValue();
     changeValueInfo.value = content;
@@ -11195,5 +11235,18 @@ bool TextFieldPattern::NeedsSendFillContent()
         return false;
     }
     return IsTriggerAutoFillPassword();
+}
+
+void TextFieldPattern::OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    AccessibilityEvent event;
+    event.type = AccessibilityEventType::TEXT_CHANGE;
+    event.nodeId = host->GetAccessibilityId();
+    event.extraEventInfo.insert({ changeType, changeString });
+    pipeline->SendEventToAccessibilityWithNode(event, GetHost());
 }
 } // namespace OHOS::Ace::NG

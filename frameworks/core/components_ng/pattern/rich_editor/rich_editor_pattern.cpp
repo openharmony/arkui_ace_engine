@@ -217,6 +217,7 @@ void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     ForceTriggerAvoidOnCaretChange();
     undoManager_->RecordOperation(record);
+    ReportAfterContentChangeEvent();
 }
 
 void RichEditorPattern::UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& spanItems)
@@ -528,6 +529,7 @@ void RichEditorPattern::AfterStyledStringChange(int32_t start, int32_t length, c
         eventHub->FireOnStyledStringDidChange(changeValue);
     }
     ForceTriggerAvoidOnCaretChange();
+    ReportAfterContentChangeEvent();
 }
 
 void RichEditorPattern::AfterStyledStringChange(const UndoRedoRecord& record, bool isUndo)
@@ -1595,6 +1597,38 @@ void RichEditorPattern::AfterContentChange(RichEditorChangeValue& changeValue)
         eventHub->FireOnDidChange(changeValue);
     }
     ForceTriggerAvoidOnCaretChange();
+    ReportAfterContentChangeEvent();
+}
+
+void RichEditorPattern::ReportAfterContentChangeEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    std::string currentContent;
+    if (isSpanStringMode_) {
+        CHECK_NULL_VOID(styledString_);
+        currentContent = styledString_->GetString();
+    } else {
+        std::u16string u16Str;
+        GetContentBySpans(u16Str);
+        currentContent = UtfUtils::Str16DebugToStr8(u16Str);
+    }
+    if(suppressAccessibilityEvent_){
+        std::string addedText, removedText;
+        DetectTextDiff(textCache_, currentContent, addedText, removedText);
+        if (!addedText.empty() && removedText.empty()) {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "textCache, in=%{public}s, newText=%{public}s, addedText=%{public}s",
+                textCache_.c_str(), currentContent.c_str(), addedText.c_str());
+            OnAccessibilityEventTextChange(TextChangeType::ADD, addedText);
+        } else if (!removedText.empty() && addedText.empty()) {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "textCache, in=%{public}s, newText=%{public}s, removedText=%{public}s",
+                textCache_.c_str(), currentContent.c_str(), removedText.c_str());
+            OnAccessibilityEventTextChange(TextChangeType::REMOVE, removedText);
+        }
+    }
+    suppressAccessibilityEvent_ = true;
+    textCache_ = currentContent;
 }
 
 void RichEditorPattern::SpanNodeFission(RefPtr<SpanNode>& spanNode, bool needLeadingMargin)
@@ -8444,6 +8478,7 @@ void RichEditorPattern::HandleOnPaste()
         return;
     }
     CHECK_NULL_VOID(clipboard_);
+    suppressAccessibilityEvent_ = false;
 #ifdef PREVIEW
     auto pasteCallback = [weak = WeakClaim(this)](const std::string& text) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "pasteCallback callback in previewer");
@@ -8529,6 +8564,7 @@ void RichEditorPattern::HandleOnCut()
     }
 
     caretUpdateType_ = CaretUpdateType::NONE;
+    suppressAccessibilityEvent_ = false;
     OnCopyOperation();
     DeleteBackward(1);
 }
@@ -12733,6 +12769,19 @@ const TextEditingValue& RichEditorPattern::GetInputEditingValue() const
 bool RichEditorPattern::IsSelectAll()
 {
     return textSelector_.GetTextStart() == 0 && textSelector_.GetTextEnd() == GetTextContentLength();
+}
+
+void RichEditorPattern::OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    AccessibilityEvent event;
+    event.type = AccessibilityEventType::TEXT_CHANGE;
+    event.nodeId = host->GetAccessibilityId();
+    event.extraEventInfo.insert({changeType, changeString});
+    pipeline->SendEventToAccessibilityWithNode(event, GetHost());
 }
 
 } // namespace OHOS::Ace::NG
