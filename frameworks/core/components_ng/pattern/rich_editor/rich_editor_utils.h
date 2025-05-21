@@ -84,6 +84,21 @@ static std::string ToBriefString(const TextSpanOptions& opts)
     return ss.str();
 }
 
+static std::string ToBriefString(const SymbolSpanOptions& opts)
+{
+    std::stringstream ss;
+    ss << "{";
+    ss << "index=" << opts.offset.value_or(-1) << ", ";
+    if (opts.style) {
+        ss << "ts=" << ToBriefString(opts.style.value()) << ", ";
+    }
+    if (opts.paraStyle) {
+        ss << "ps={" << opts.paraStyle->ToString() << "}, ";
+    }
+    ss << "}";
+    return ss.str();
+}
+
 }
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_UTILS_H

@@ -249,6 +249,7 @@ struct SymbolSpanOptions : SpanOptionBase {
     std::optional<int32_t> offset;
     uint32_t symbolId;
     std::optional<TextStyle> style;
+    std::optional<UpdateParagraphStyle> paraStyle;
     RefPtr<ResourceObject> resourceObject;
 
     std::string ToString() const
@@ -257,6 +258,7 @@ struct SymbolSpanOptions : SpanOptionBase {
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, offset);
         JSON_STRING_PUT_INT(jsonValue, symbolId);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, style);
+        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, paraStyle);
         return jsonValue->ToString();
     }
 };
