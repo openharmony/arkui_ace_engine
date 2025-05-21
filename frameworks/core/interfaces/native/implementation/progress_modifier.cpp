@@ -231,7 +231,7 @@ void ColorImpl(Ark_NativePointer node,
             ProgressModelStatic::SetColor(frameNode, colorOpt);
         },
         [frameNode](const Ark_LinearGradient& linearGradient) {
-            ProgressModelStatic::SetGradientColor(frameNode, Converter::Convert<Gradient>(linearGradient));
+            ProgressModelStatic::SetGradientColor(frameNode, Converter::OptConvert<Gradient>(linearGradient));
         },
         // TODO: Reset value
         []() {}

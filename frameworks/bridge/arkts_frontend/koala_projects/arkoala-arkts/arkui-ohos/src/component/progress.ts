@@ -69,38 +69,39 @@ export class ArkProgressPeer extends ArkCommonMethodPeer {
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if ((TypeChecker.isColor(value_value)) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as ResourceColor
-                let value_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_value_0_type = runtimeType(value_value_0)
-                if (TypeChecker.isColor(value_value_0)) {
-                    thisSerializer.writeInt8(0 as int32)
-                    const value_value_0_0  = value_value_0 as Color
-                    thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0_0))
-                }
-                else if (RuntimeType.NUMBER == value_value_0_type) {
-                    thisSerializer.writeInt8(1 as int32)
-                    const value_value_0_1  = value_value_0 as number
-                    thisSerializer.writeNumber(value_value_0_1)
-                }
-                else if (RuntimeType.STRING == value_value_0_type) {
-                    thisSerializer.writeInt8(2 as int32)
-                    const value_value_0_2  = value_value_0 as string
-                    thisSerializer.writeString(value_value_0_2)
-                }
-                else if (RuntimeType.OBJECT == value_value_0_type) {
-                    thisSerializer.writeInt8(3 as int32)
-                    const value_value_0_3  = value_value_0 as Resource
-                    thisSerializer.writeResource(value_value_0_3)
-                }
-            }
-            else if (TypeChecker.isLinearGradient(value_value)) {
+            if (TypeChecker.isLinearGradient(value_value)) {
                 thisSerializer.writeInt8(1 as int32)
                 const value_value_1  = value_value as LinearGradient
                 thisSerializer.writeLinearGradient(value_value_1)
+            } else {
+                let value_value_type : int32 = RuntimeType.UNDEFINED
+                value_value_type = runtimeType(value_value)
+                if ((TypeChecker.isColor(value_value)) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+                    thisSerializer.writeInt8(0 as int32)
+                    const value_value_0  = value_value as ResourceColor
+                    let value_value_0_type : int32 = RuntimeType.UNDEFINED
+                    value_value_0_type = runtimeType(value_value_0)
+                    if (TypeChecker.isColor(value_value_0)) {
+                        thisSerializer.writeInt8(0 as int32)
+                        const value_value_0_0  = value_value_0 as Color
+                        thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0_0))
+                    }
+                    else if (RuntimeType.NUMBER == value_value_0_type) {
+                        thisSerializer.writeInt8(1 as int32)
+                        const value_value_0_1  = value_value_0 as number
+                        thisSerializer.writeNumber(value_value_0_1)
+                    }
+                    else if (RuntimeType.STRING == value_value_0_type) {
+                        thisSerializer.writeInt8(2 as int32)
+                        const value_value_0_2  = value_value_0 as string
+                        thisSerializer.writeString(value_value_0_2)
+                    }
+                    else if (RuntimeType.OBJECT == value_value_0_type) {
+                        thisSerializer.writeInt8(3 as int32)
+                        const value_value_0_3  = value_value_0 as Resource
+                        thisSerializer.writeResource(value_value_0_3)
+                    }
+                }
             }
         }
         ArkUIGeneratedNativeModule._ProgressAttribute_color(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
