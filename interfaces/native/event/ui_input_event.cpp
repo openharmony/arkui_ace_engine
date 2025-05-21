@@ -67,16 +67,6 @@ int32_t OH_ArkUI_UIInputEvent_GetType(const ArkUI_UIInputEvent* event)
         case C_FOCUS_AXIS_EVENT_ID: {
             return 0;
         }
-        case C_TOUCH_EVENT_ID: {
-            const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
-            if (!touchEvent) {
-                return -1;
-            }
-            if (touchEvent->subKind == ON_HOVER_MOVE) {
-                return 0;
-            }
-            return event->inputType;
-        }
         case C_CLICK_EVENT_ID: {
             if (event->inputType == ARKUI_UIINPUTEVENT_TYPE_KEY) {
                 return 0;
