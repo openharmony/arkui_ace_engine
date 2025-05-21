@@ -328,6 +328,10 @@ public:
 
     void CallTimerCallback(const RefPtr<FrameNode>& frameNode);
     void SetExecTimerCallback(bool isExecCallback);
+
+protected:
+    DragEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
+
 private:
     void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);
     void UpdatePreviewOptionDefaultAttr(const RefPtr<FrameNode>& frameNode);
@@ -337,15 +341,17 @@ private:
     void HandleTextDragCallback(Offset offset);
     void HandleOnPanActionCancel();
 
+protected:
+    RefPtr<PanRecognizer> panRecognizer_;
+    RefPtr<LongPressRecognizer> longPressRecognizer_;
+    RefPtr<LongPressRecognizer> previewLongPressRecognizer_;
+    RefPtr<SequencedRecognizer> SequencedRecognizer_;
+
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     WeakPtr<FrameNode> itemParentNode_;
     RefPtr<DragEvent> userCallback_;
     RefPtr<DragEvent> customCallback_;
-    RefPtr<PanRecognizer> panRecognizer_;
-    RefPtr<LongPressRecognizer> longPressRecognizer_;
-    RefPtr<LongPressRecognizer> previewLongPressRecognizer_;
-    RefPtr<SequencedRecognizer> SequencedRecognizer_;
     RefPtr<FrameNode> gatherNode_;
     RefPtr<TouchEventImpl> touchListener_;
 
