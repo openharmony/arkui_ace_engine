@@ -2413,7 +2413,8 @@ void SubwindowOhos::SwitchFollowParentWindowLayout(bool freeMultiWindowEnable)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
         "subwindow switch followParentWindowLayout, enable: %{public}d", freeMultiWindowEnable);
-    if (NeedFollowParentWindowLayout() && !freeMultiWindowEnable) {
+    auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
+    if (NeedFollowParentWindowLayout() && !expandDisplay && !freeMultiWindowEnable) {
         SetFollowParentWindowLayoutEnabled(true);
     } else {
         SetFollowParentWindowLayoutEnabled(false);

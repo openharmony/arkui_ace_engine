@@ -1951,6 +1951,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest031, TestSize.Level1)
     ASSERT_NE(subTitleNode, nullptr);
     EXPECT_EQ(titleNode->GetTag(), V2::ROW_ETS_TAG);
     EXPECT_EQ(subTitleNode->GetTag(), V2::ROW_ETS_TAG);
+
     /**
      * @tc.steps: step2. get titleTextNode && subTitleTextNode.
      * @tc.expected: The text padding is equal to dialogTheme->GetPaddingTopTitle() when have title && subTitle.
