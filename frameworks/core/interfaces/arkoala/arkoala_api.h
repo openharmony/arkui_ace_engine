@@ -2692,6 +2692,9 @@ struct ArkUITextModifier {
     void (*setOnMarqueeStateChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnMarqueeStateChange)(ArkUINodeHandle node);
     void (*setImmutableFontWeight)(ArkUINodeHandle node, ArkUI_Int32 weight);
+    void (*setTextOptimizeTrailingSpace)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetTextOptimizeTrailingSpace)(ArkUINodeHandle node);
+    ArkUI_Bool (*getTextOptimizeTrailingSpace)(ArkUINodeHandle node);
     ArkUI_Int32 (*getLineCount)(ArkUINodeHandle node);
     void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
     void (*resetEnableAutoSpacing)(ArkUINodeHandle node);

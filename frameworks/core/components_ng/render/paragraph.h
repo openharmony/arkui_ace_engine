@@ -157,6 +157,7 @@ struct ParagraphStyle {
     Dimension paragraphSpacing;
     bool isEndAddParagraphSpacing = false;
     int32_t textStyleUid = 0;
+    bool optimizeTrailingSpace = false;
     bool isOnlyBetweenLines = false;
     bool isFirstParagraphLineSpacing = true;
     bool enableAutoSpacing = false;
