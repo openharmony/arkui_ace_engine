@@ -1475,6 +1475,38 @@ bool TextPickerModelNG::GetEnableHapticFeedback(FrameNode* frameNode)
     return textPickerPattern->GetIsEnableHaptic();
 }
 
+void TextPickerModelNG::SetSelectedBackgroundStyle(const NG::PickerBackgroundStyle& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBackgroundColor,
+        value.color.value());
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBorderRadius,
+        value.borderRadius.value());
+}
+
+void TextPickerModelNG::SetSelectedBackgroundStyle(FrameNode* frameNode, const NG::PickerBackgroundStyle& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBackgroundColor,
+        value.color.value(), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBorderRadius,
+        value.borderRadius.value(), frameNode);
+}
+
+PickerBackgroundStyle TextPickerModelNG::GetSelectedBackgroundStyle(FrameNode* frameNode)
+{
+    PickerBackgroundStyle pickerBgStyle;
+    CHECK_NULL_RETURN(frameNode, pickerBgStyle);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, pickerBgStyle);
+    auto theme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(theme, pickerBgStyle);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextPickerLayoutProperty, SelectedBackgroundColor,
+        pickerBgStyle.color, frameNode, theme->GetSelectedBackgroundColor());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextPickerLayoutProperty, SelectedBorderRadius,
+        pickerBgStyle.borderRadius, frameNode, theme->GetSelectedBorderRadius());
+    return pickerBgStyle;
+}
+
 bool TextPickerModelNG::IsCascade()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

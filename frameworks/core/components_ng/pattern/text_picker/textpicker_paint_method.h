@@ -79,6 +79,8 @@ private:
         const ItemDivider &divider, double dividerHeight);
     void PaintLine(const OffsetF& offset, const DividerInfo &info, RSCanvas& canvas);
     bool SetStrokeWidth(const ItemDivider &divider, double dividerHeight, DividerInfo& info);
+    void PaintSelectedBackgroundColor(RSCanvas& canvas, std::list<RefPtr<UINode>> children, Color color,
+        NG::BorderRadiusProperty borderRadius);
     PickerPaintMethodCircleUtils *circleUtils_ = NULL;
 };
 } // namespace OHOS::Ace::NG

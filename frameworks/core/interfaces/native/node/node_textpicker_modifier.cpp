@@ -38,6 +38,20 @@ const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NO
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
 
+enum GetValueArrayIndex {
+    GETCOLOR,
+    GETTOPLEFT,
+    GETTOPRIGHT,
+    GETBOTTOMLEFT,
+    GETBOTTOMRIGHT,
+};
+enum ValueArrayIndex {
+    TOPLEFT,
+    TOPRIGHT,
+    BOTTOMLEFT,
+    BOTTOMRIGHT,
+};
+
 void SetTextPickerBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -729,6 +743,66 @@ void ResetTextPickerOnScrollStop(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextPickerModelNG::SetOnScrollStop(frameNode, nullptr);
 }
+
+void SetTextPickerSelectedBackgroundStyle(ArkUINodeHandle node, ArkUI_Bool* getValue, ArkUI_Uint32 color,
+    ArkUI_Float32* value, ArkUI_Int32* unit, ArkUI_Int32 size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    PickerBackgroundStyle pickerBgStyle;
+    pickerBgStyle.color = theme->GetSelectedBackgroundColor();
+    pickerBgStyle.borderRadius = theme->GetSelectedBorderRadius();
+    if (getValue[GETCOLOR]) {
+        pickerBgStyle.color = Color(color);
+    }
+    if (getValue[GETTOPLEFT]) {
+        pickerBgStyle.borderRadius->radiusTopLeft = Dimension(
+            value[TOPLEFT], static_cast<DimensionUnit>(unit[TOPLEFT]));
+    }
+    if (getValue[GETTOPRIGHT]) {
+        pickerBgStyle.borderRadius->radiusTopRight = Dimension(
+            value[TOPRIGHT], static_cast<DimensionUnit>(unit[TOPRIGHT]));
+    }
+    if (getValue[GETBOTTOMLEFT]) {
+        pickerBgStyle.borderRadius->radiusBottomLeft = Dimension(
+            value[BOTTOMLEFT], static_cast<DimensionUnit>(unit[BOTTOMLEFT]));
+    }
+    if (getValue[GETBOTTOMRIGHT]) {
+        pickerBgStyle.borderRadius->radiusBottomRight = Dimension(
+            value[BOTTOMRIGHT], static_cast<DimensionUnit>(unit[BOTTOMRIGHT]));
+    }
+    TextPickerModelNG::SetSelectedBackgroundStyle(frameNode, pickerBgStyle);
+}
+
+void GetTextPickerSelectedBackgroundStyle(ArkUINodeHandle node, ArkUINumberValue* result, ArkUI_Int32 size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pickerBgStyle = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode);
+    result[GETCOLOR].u32 = pickerBgStyle.color->GetValue();
+    result[GETTOPLEFT].f32 = pickerBgStyle.borderRadius->radiusTopLeft->Value();
+    result[GETTOPRIGHT].f32 = pickerBgStyle.borderRadius->radiusTopRight->Value();
+    result[GETBOTTOMLEFT].f32 = pickerBgStyle.borderRadius->radiusBottomLeft->Value();
+    result[GETBOTTOMRIGHT].f32 = pickerBgStyle.borderRadius->radiusBottomRight->Value();
+}
+
+void ResetTextPickerSelectedBackgroundStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    PickerBackgroundStyle pickerBgStyle;
+    pickerBgStyle.color = theme->GetSelectedBackgroundColor();
+    pickerBgStyle.borderRadius = theme->GetSelectedBorderRadius();
+    TextPickerModelNG::SetSelectedBackgroundStyle(frameNode, pickerBgStyle);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -786,6 +860,9 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         .resetTextPickerOnScrollStop = ResetTextPickerOnScrollStop,
         .setTextPickerIconRangeStr = SetTextPickerIconRangeStr,
         .setTextCascadePickRangeContent = SetTextCascadePickRangeContent,
+        .setTextPickerSelectedBackgroundStyle = SetTextPickerSelectedBackgroundStyle,
+        .getTextPickerSelectedBackgroundStyle = GetTextPickerSelectedBackgroundStyle,
+        .resetTextPickerSelectedBackgroundStyle = ResetTextPickerSelectedBackgroundStyle,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
