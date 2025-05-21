@@ -1154,6 +1154,15 @@ int32_t OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex(
  */
 int32_t OH_ArkUI_PointerEvent_PostClonedEvent(ArkUI_NodeHandle node, const ArkUI_UIInputEvent* event);
 
+/**
+ * @brief Get Status Of Lastest Event
+ *
+ * @return Returns {@link ArkUI_ErrorCode} of the lastest interface.
+
+ * @since 20
+ */
+ArkUI_ErrorCode OH_ArkUI_GetLastestEventStatus();
+
 #ifdef __cplusplus
 };
 #endif

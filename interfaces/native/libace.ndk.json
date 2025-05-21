@@ -3385,6 +3385,10 @@
     },
     {
         "first_introduced": "20",
+        "name": "OH_ArkUI_GetLastestEventStatus"
+    },
+    {
+        "first_introduced": "20",
         "name": "OH_NativeXComponent_GetKeyEventScrollLockState"
     }
 ]

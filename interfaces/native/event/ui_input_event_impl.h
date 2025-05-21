@@ -22,6 +22,8 @@
 extern "C" {
 #endif
 
+extern ArkUI_ErrorCode latestEventStatus;
+
 typedef enum {
     AXIS_EVENT_ID = 0, // defined in ace_engine/frameworks/core/event/axis_event.h
     TOUCH_EVENT_ID = 1, // defined in ace_engine/frameworks/core/event/touch_event.h
