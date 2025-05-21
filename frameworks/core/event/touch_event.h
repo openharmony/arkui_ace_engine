@@ -56,6 +56,7 @@ struct TouchPoint final {
     int32_t height;
 
     void CovertId();
+    int32_t GetOriginalReCovertId() const;
 };
 
 /**
@@ -158,6 +159,7 @@ struct TouchEvent final : public PointerEvent {
     Offset GetScreenOffset() const;
     int32_t GetTargetDisplayId() const;
     void CovertId();
+    int32_t GetOriginalReCovertId() const;
     TouchEvent CreateScalePoint(float scale) const;
     TouchEvent UpdateScalePoint(float scale, float offsetX, float offsetY, int32_t pointId) const;
     TouchEvent UpdatePointers() const;
