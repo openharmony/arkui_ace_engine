@@ -2081,4 +2081,37 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage073, TestSi
     auto retDisplayId = dragEvent->GetDisplayId();
     EXPECT_EQ(retDisplayId, displayId);
 }
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage074
+ * @tc.desc: Test IsDropAllowed
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage074, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    frameNode->isDisallowDropForcedly_ = true;
+    auto ret = dragDropManager->IsDropAllowed(frameNode);
+    EXPECT_FALSE(ret);
+
+    frameNode->isDisallowDropForcedly_ = false;
+    frameNode->allowDrop_ = {"general.png-143"};
+    ret = dragDropManager->IsDropAllowed(frameNode);
+    EXPECT_TRUE(ret);
+    
+    dragDropManager->summaryMap_ = {{"general.png", 143}};
+    auto mockUdmfClient = static_cast<MockUdmfClient*>(UdmfClient::GetInstance());
+    EXPECT_CALL(*mockUdmfClient, IsBelongsTo(_, _)).WillOnce(testing::Return(true));
+    ret = dragDropManager->IsDropAllowed(frameNode);
+    EXPECT_TRUE(ret);
+
+    dragDropManager->summaryMap_ = {{"general.image", 143}};
+    mockUdmfClient = static_cast<MockUdmfClient*>(UdmfClient::GetInstance());
+    EXPECT_CALL(*mockUdmfClient, IsBelongsTo(_, _)).WillOnce(testing::Return(false));
+    ret = dragDropManager->IsDropAllowed(frameNode);
+    EXPECT_FALSE(ret);
+}
 } // namespace OHOS::Ace::NG
