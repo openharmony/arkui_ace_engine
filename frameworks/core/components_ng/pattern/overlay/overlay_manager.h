@@ -627,7 +627,7 @@ public:
         sheetHeight_ = height;
     }
 
-    float GetSheetHeight()
+    float GetSheetHeight() const
     {
         return sheetHeight_;
     }
