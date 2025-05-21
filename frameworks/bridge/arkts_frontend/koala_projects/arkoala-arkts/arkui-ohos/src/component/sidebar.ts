@@ -205,7 +205,7 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_sideBarPosition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    dividerAttribute(value: DividerStyle | undefined): void {
+    dividerAttribute(value: DividerStyle | null | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -272,7 +272,7 @@ export interface SideBarContainerAttribute extends CommonMethod {
     maxSideBarWidth(value: number | undefined): this
     autoHide(value: boolean | undefined): this
     sideBarPosition(value: SideBarPosition | undefined): this
-    divider(value: DividerStyle | undefined): this
+    divider(value: DividerStyle | null | undefined): this
     minContentWidth(value: Dimension | undefined): this
     _onChangeEvent_showSideBar(callback: ((select: boolean | undefined) => void)): void
 }
@@ -296,7 +296,7 @@ export interface UISideBarContainerAttribute extends UICommonMethod {
     /** @memo */
     sideBarPosition(value: SideBarPosition | undefined): this
     /** @memo */
-    divider(value: DividerStyle | undefined): this
+    divider(value: DividerStyle | null | undefined): this
     /** @memo */
     minContentWidth(value: Dimension | undefined): this
     /** @memo */
@@ -313,7 +313,7 @@ export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements Si
     maxSideBarWidth_value?: number | undefined
     autoHide_value?: boolean | undefined
     sideBarPosition_value?: SideBarPosition | undefined
-    divider_value?: DividerStyle | undefined
+    divider_value?: DividerStyle | null | undefined
     minContentWidth_value?: Dimension | undefined
     public showSideBar(value: boolean | undefined): this {
         return this
@@ -342,7 +342,7 @@ export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements Si
     public sideBarPosition(value: SideBarPosition | undefined): this {
         return this
     }
-    public divider(value: DividerStyle | undefined): this {
+    public divider(value: DividerStyle | null | undefined): this {
         return this
     }
     public minContentWidth(value: Dimension | undefined): this {
@@ -475,9 +475,9 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         return this
     }
     /** @memo */
-    public divider(value: DividerStyle | undefined): this {
+    public divider(value: DividerStyle | null | undefined): this {
         if (this.checkPriority("divider")) {
-            const value_casted = value as (DividerStyle | undefined)
+            const value_casted = value as (DividerStyle | null | undefined)
             this.getPeer()?.dividerAttribute(value_casted)
             return this
         }
