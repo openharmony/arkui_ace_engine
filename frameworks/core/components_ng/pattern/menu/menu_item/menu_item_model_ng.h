@@ -17,6 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_MODEL_NG_H
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/property/menu_property.h"
+#include "core/components/select/select_theme.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT MenuItemModelNG : public OHOS::Ace::MenuItemModel {
@@ -55,9 +58,11 @@ public:
     static void SetSelectIconSrc(FrameNode* frameNode, const std::string& src);
     static void SetSelectIconSymbol(FrameNode* frameNode, std::function<void(WeakPtr<NG::FrameNode>)>&& symbolApply);
     static void SetOnChange(FrameNode* frameNode, std::function<void(bool)>&& onChange);
+    static RefPtr<FrameNode> CreateMenuItem(OptionParam&& param, const MenuParam& menuParam);
 
 private:
     void UpdateMenuProperty(const RefPtr<NG::FrameNode>& menuItem, const MenuItemProperties& menuItemProps);
+    static void SetupMenuItemProperties(const RefPtr<FrameNode>& menuItem, const RefPtr<SelectTheme>& theme);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_MODEL_NG_H
