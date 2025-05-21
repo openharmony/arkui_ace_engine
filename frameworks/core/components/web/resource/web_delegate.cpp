@@ -783,8 +783,8 @@ void WebWindowFocusChangedListener::AfterFocused()
     TAG_LOGI(AceLogTag::ACE_WEB, "Dragdrop, AfterFocused, end attach ime, remove listener");
 }
 
-void WebAvoidAreaChangedListener::OnAvoidAreaChanged(
-    const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
+void WebAvoidAreaChangedListener::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea,
+    OHOS::Rosen::AvoidAreaType type, const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
 {
     auto context = context_.Upgrade();
     if (!context) {

@@ -753,7 +753,8 @@ void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
         case WindowSizeChangeReason::RESIZE:
         case WindowSizeChangeReason::DRAG_START:
         case WindowSizeChangeReason::DRAG:
-        case WindowSizeChangeReason::DRAG_END: {
+        case WindowSizeChangeReason::DRAG_END:
+        case WindowSizeChangeReason::OCCUPIED_AREA_CHANGE: {
             break;
         }
         default: {

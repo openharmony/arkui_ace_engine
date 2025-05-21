@@ -1622,7 +1622,7 @@ protected:
 
     std::function<void()> GetWrappedAnimationCallback(const AnimationOption& option,
         const std::function<void()>& finishCallback, const std::optional<int32_t>& count = std::nullopt);
-    
+
     bool MarkUpdateSubwindowKeyboardInsert(int32_t instanceId, double keyboardHeight, int32_t type);
 
     std::map<int32_t, configChangedCallback> configChangedCallback_;

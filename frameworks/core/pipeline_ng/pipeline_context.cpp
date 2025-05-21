@@ -1523,6 +1523,7 @@ const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
+    ACE_SCOPED_TRACE("PipelineContext::OnSurfaceChanged");
     CHECK_RUN_ON(UI);
     width_ = width;
     height_ = height;

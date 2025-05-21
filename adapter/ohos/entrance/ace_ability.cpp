@@ -198,10 +198,11 @@ bool AceWindowListener::OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axis
     return callbackOwner_->OnInputEvent(axisEvent);
 }
 
-void AceWindowListener::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
+void AceWindowListener::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type,
+    const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
 {
     CHECK_NULL_VOID(callbackOwner_);
-    return callbackOwner_->OnAvoidAreaChanged(avoidArea, type);
+    return callbackOwner_->OnAvoidAreaChanged(avoidArea, type, info);
 }
 
 AceAbility::AceAbility() = default;
@@ -881,7 +882,8 @@ uint32_t AceAbility::GetBackgroundColor()
     return bgColor;
 }
 
-void AceAbility::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea& avoidArea, OHOS::Rosen::AvoidAreaType type)
+void AceAbility::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea& avoidArea, OHOS::Rosen::AvoidAreaType type,
+    const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
 {
     auto container = Platform::AceContainer::GetContainer((abilityId_));
     CHECK_NULL_VOID(container);

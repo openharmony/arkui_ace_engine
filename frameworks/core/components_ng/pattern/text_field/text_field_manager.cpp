@@ -79,8 +79,11 @@ void TextFieldManagerNG::SetClickPosition(const Offset& position)
         return;
     }
     auto y = std::max(0.0, position.GetY());
-    position_ = {position.GetX(), y};
-    optionalPosition_ = position_;
+    Offset newPosition = { position.GetX(), y };
+    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "SetClickPosition from %{public}s to %{public}s",
+        position_.ToString().c_str(), newPosition.ToString().c_str());
+    position_ = newPosition;
+    optionalPosition_ = newPosition;
 }
 
 RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField)
@@ -284,9 +287,9 @@ bool TextFieldManagerNG::ScrollTextFieldToSafeArea()
         auto nowOrientation = static_cast<int32_t>(container->GetDisplayInfo()->GetRotation());
         if (nowOrientation != keyboardOrientation) {
             // When rotating the screen, sometimes we might get a keyboard height that in wrong
-            // orientation due to timeing issue. In this case, we ignore the illegal keyboard height.
-            TAG_LOGI(ACE_KEYBOARD, "Current Orientation not match keyboard orientation, ignore it");
-            isShowKeyboard = false;
+            // orientation due to timeing issue. In this case, we assume there is no keyboard.
+            TAG_LOGI(ACE_KEYBOARD, "Current Orientation can't match keyboard orientation");
+            keyboardInset = { .start = bottom, .end = bottom };
         }
     }
     if (isShowKeyboard) {

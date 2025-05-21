@@ -603,7 +603,8 @@ public:
         : webDelegate_(webDelegate), context_(context) {}
     ~WebAvoidAreaChangedListener() = default;
 
-    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override;
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type,
+        const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info) override;
 private:
     WeakPtr<WebDelegate> webDelegate_;
     WeakPtr<PipelineBase> context_;
