@@ -134,12 +134,6 @@ TouchEvent& TouchEvent::SetSourceTool(SourceTool sourceTool)
     return *this;
 }
 
-TouchEvent& TouchEvent::SetOriginInputEventType(InputEventType inputEventType)
-{
-    this->originInputEventType = inputEventType;
-    return *this;
-}
-
 TouchEvent& TouchEvent::SetTouchEventId(int32_t touchEventId)
 {
     this->touchEventId = touchEventId;
@@ -270,7 +264,7 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.width = width;
     event.height = height;
     event.pressedTime = pressedTime;
-    event.originInputEventType = originInputEventType;
+    event.convertInfo = convertInfo;
     return event;
 }
 

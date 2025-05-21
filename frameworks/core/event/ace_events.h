@@ -25,8 +25,11 @@
 #include "base/geometry/dimension_rect.h"
 #include "base/memory/type_info_base.h"
 #include "base/utils/type_definition.h"
+#include "core/components_ng/event/event_constants.h"
 
 namespace OHOS::Ace {
+
+using ConvertInfo = std::pair<UIInputEventType, UIInputEventType>;
 
 enum class KeyCode : int32_t;
 
@@ -241,6 +244,20 @@ public:
         operatingHand_ = operatingHand;
     }
 
+    void CopyConvertInfoFrom(const ConvertInfo& info)
+    {
+        convertInfo = info;
+    }
+
+    UIInputEventType GetOriginUIInputEventType() const
+    {
+        return convertInfo.first;
+    }
+
+    UIInputEventType GetCurrentUIInputEventType() const
+    {
+        return convertInfo.second;
+    }
 protected:
     // Event type like onTouchDown, onClick and so on.
     std::string type_;
@@ -264,6 +281,7 @@ protected:
     bool isPostEventResult_ = false;
     int32_t postEventNodeId_ = -1;
     int32_t operatingHand_ = 0;
+    ConvertInfo convertInfo = { UIInputEventType::NONE, UIInputEventType::NONE };
 };
 
 class PropagationEventInfo : public virtual TypeInfoBase {
