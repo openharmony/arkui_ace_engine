@@ -1325,12 +1325,12 @@ HWTEST_F(RadioTestNg, RadioAccessibilityPropertyTestNg002, TestSize.Level1)
     radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-
+    auto accessibility = frameNode->GetAccessibilityProperty<RadioAccessibilityProperty>();
+    ASSERT_NE(accessibility, nullptr);
+    EXPECT_FALSE(accessibility->IsChecked());
     auto paintProperty = frameNode->GetPaintProperty<NG::RadioPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
     paintProperty->UpdateRadioCheck(true);
-    auto accessibility = frameNode->GetAccessibilityProperty<RadioAccessibilityProperty>();
-    ASSERT_NE(accessibility, nullptr);
     EXPECT_TRUE(accessibility->IsChecked());
 
     paintProperty->UpdateRadioCheck(false);
