@@ -1581,7 +1581,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg038, TestSize.Level1)
         []() -> WindowMode { return WindowMode::WINDOW_MODE_FLOATING; });
 
     menuLayoutAlgorithm->InitTargetSizeAndPosition(layoutWrapper, true, menuPattern);
-    EXPECT_EQ(menuLayoutAlgorithm->targetOffset_, OffsetF(-CONTENT_PADDING.ConvertToPx(), 0.0f));
+    EXPECT_EQ(menuLayoutAlgorithm->targetOffset_, OffsetF(0.0f, 0.0f));
     delete layoutWrapper;
     layoutWrapper = nullptr;
 }
