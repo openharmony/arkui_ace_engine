@@ -84,12 +84,12 @@ HWTEST_F(CommonMethodModifierTest3, setBrightnessTestDefaultValues, TestSize.Lev
 HWTEST_F(CommonMethodModifierTest3, setBrightnessTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBrightness0, nullptr);
-    using OneTestStep = std::tuple<Ark_Number, std::string>;
+    using OneTestStep = std::tuple<Opt_Number, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_Number>(0.0), "0"},
-        {Converter::ArkValue<Ark_Number>(0.5), "0.5"},
-        {Converter::ArkValue<Ark_Number>(5.0), "5"},
-        {Converter::ArkValue<Ark_Number>(5.5), "5.5"},
+        {Converter::ArkValue<Opt_Number>(0.0), "0"},
+        {Converter::ArkValue<Opt_Number>(0.5), "0.5"},
+        {Converter::ArkValue<Opt_Number>(5.0), "5"},
+        {Converter::ArkValue<Opt_Number>(5.5), "5.5"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setBrightness0(node_, &inputValue);
@@ -107,10 +107,10 @@ HWTEST_F(CommonMethodModifierTest3, setBrightnessTestValidValues, TestSize.Level
 HWTEST_F(CommonMethodModifierTest3, setBrightnessTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBrightness0, nullptr);
-    using OneTestStep = std::tuple<Ark_Number, std::string>;
+    using OneTestStep = std::tuple<Opt_Number, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_Number>(-0.5), ATTRIBUTE_BRIGHTNESS_DEFAULT_VALUE},
-        {Converter::ArkValue<Ark_Number>(-5.0), ATTRIBUTE_BRIGHTNESS_DEFAULT_VALUE},
+        {Converter::ArkValue<Opt_Number>(-0.5), ATTRIBUTE_BRIGHTNESS_DEFAULT_VALUE},
+        {Converter::ArkValue<Opt_Number>(-5.0), ATTRIBUTE_BRIGHTNESS_DEFAULT_VALUE},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setBrightness0(node_, &inputValue);
@@ -139,12 +139,12 @@ HWTEST_F(CommonMethodModifierTest3, setContrastTestDefaultValues, TestSize.Level
 HWTEST_F(CommonMethodModifierTest3, setContrastTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setContrast0, nullptr);
-    using OneTestStep = std::tuple<Ark_Number, std::string>;
+    using OneTestStep = std::tuple<Opt_Number, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_Number>(0.0), "0"},
-        {Converter::ArkValue<Ark_Number>(0.5), "0.5"},
-        {Converter::ArkValue<Ark_Number>(5.0), "5"},
-        {Converter::ArkValue<Ark_Number>(5.5), "5.5"},
+        {Converter::ArkValue<Opt_Number>(0.0), "0"},
+        {Converter::ArkValue<Opt_Number>(0.5), "0.5"},
+        {Converter::ArkValue<Opt_Number>(5.0), "5"},
+        {Converter::ArkValue<Opt_Number>(5.5), "5.5"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setContrast0(node_, &inputValue);
@@ -162,10 +162,10 @@ HWTEST_F(CommonMethodModifierTest3, setContrastTestValidValues, TestSize.Level1)
 HWTEST_F(CommonMethodModifierTest3, setContrastTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setContrast0, nullptr);
-    using OneTestStep = std::tuple<Ark_Number, std::string>;
+    using OneTestStep = std::tuple<Opt_Number, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_Number>(-0.5), ATTRIBUTE_CONTRAST_DEFAULT_VALUE},
-        {Converter::ArkValue<Ark_Number>(-5.0), ATTRIBUTE_CONTRAST_DEFAULT_VALUE},
+        {Converter::ArkValue<Opt_Number>(-0.5), ATTRIBUTE_CONTRAST_DEFAULT_VALUE},
+        {Converter::ArkValue<Opt_Number>(-5.0), ATTRIBUTE_CONTRAST_DEFAULT_VALUE},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setContrast0(node_, &inputValue);
@@ -194,12 +194,12 @@ HWTEST_F(CommonMethodModifierTest3, setGrayScaleTestDefaultValues, TestSize.Leve
 HWTEST_F(CommonMethodModifierTest3, setGrayScaleTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setGrayscale0, nullptr);
-    using OneTestStep = std::tuple<Ark_Number, std::string>;
+    using OneTestStep = std::tuple<Opt_Number, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_Number>(0.0), "0"},
-        {Converter::ArkValue<Ark_Number>(0.5), "0.5"},
-        {Converter::ArkValue<Ark_Number>(5.0), "5"},
-        {Converter::ArkValue<Ark_Number>(5.5), "5.5"},
+        {Converter::ArkValue<Opt_Number>(0.0), "0"},
+        {Converter::ArkValue<Opt_Number>(0.5), "0.5"},
+        {Converter::ArkValue<Opt_Number>(5.0), "5"},
+        {Converter::ArkValue<Opt_Number>(5.5), "5.5"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setGrayscale0(node_, &inputValue);
@@ -217,10 +217,10 @@ HWTEST_F(CommonMethodModifierTest3, setGrayScaleTestValidValues, TestSize.Level1
 HWTEST_F(CommonMethodModifierTest3, setGrayScaleTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setGrayscale0, nullptr);
-    using OneTestStep = std::tuple<Ark_Number, std::string>;
+    using OneTestStep = std::tuple<Opt_Number, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_Number>(-0.5), ATTRIBUTE_GRAYSCALE_DEFAULT_VALUE},
-        {Converter::ArkValue<Ark_Number>(-5.0), ATTRIBUTE_GRAYSCALE_DEFAULT_VALUE},
+        {Converter::ArkValue<Opt_Number>(-0.5), ATTRIBUTE_GRAYSCALE_DEFAULT_VALUE},
+        {Converter::ArkValue<Opt_Number>(-5.0), ATTRIBUTE_GRAYSCALE_DEFAULT_VALUE},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setGrayscale0(node_, &inputValue);
@@ -249,12 +249,12 @@ HWTEST_F(CommonMethodModifierTest3, setSaturateTestDefaultValues, TestSize.Level
 HWTEST_F(CommonMethodModifierTest3, setSaturateTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSaturate0, nullptr);
-    using OneTestStep = std::tuple<Ark_Number, std::string>;
+    using OneTestStep = std::tuple<Opt_Number, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_Number>(0.0), "0"},
-        {Converter::ArkValue<Ark_Number>(0.5), "0.5"},
-        {Converter::ArkValue<Ark_Number>(5.0), "5"},
-        {Converter::ArkValue<Ark_Number>(5.5), "5.5"},
+        {Converter::ArkValue<Opt_Number>(0.0), "0"},
+        {Converter::ArkValue<Opt_Number>(0.5), "0.5"},
+        {Converter::ArkValue<Opt_Number>(5.0), "5"},
+        {Converter::ArkValue<Opt_Number>(5.5), "5.5"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setSaturate0(node_, &inputValue);
@@ -272,10 +272,10 @@ HWTEST_F(CommonMethodModifierTest3, setSaturateTestValidValues, TestSize.Level1)
 HWTEST_F(CommonMethodModifierTest3, setSaturateTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSaturate0, nullptr);
-    using OneTestStep = std::tuple<Ark_Number, std::string>;
+    using OneTestStep = std::tuple<Opt_Number, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_Number>(-0.5), ATTRIBUTE_SATURATE_DEFAULT_VALUE},
-        {Converter::ArkValue<Ark_Number>(-5.0), ATTRIBUTE_SATURATE_DEFAULT_VALUE},
+        {Converter::ArkValue<Opt_Number>(-0.5), ATTRIBUTE_SATURATE_DEFAULT_VALUE},
+        {Converter::ArkValue<Opt_Number>(-5.0), ATTRIBUTE_SATURATE_DEFAULT_VALUE},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setSaturate0(node_, &inputValue);
@@ -304,12 +304,12 @@ HWTEST_F(CommonMethodModifierTest3, setSepiaTestDefaultValues, TestSize.Level1)
 HWTEST_F(CommonMethodModifierTest3, setSepiaTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSepia0, nullptr);
-    using OneTestStep = std::tuple<Ark_Number, std::string>;
+    using OneTestStep = std::tuple<Opt_Number, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_Number>(0.0), "0"},
-        {Converter::ArkValue<Ark_Number>(0.5), "0.5"},
-        {Converter::ArkValue<Ark_Number>(5.0), "5"},
-        {Converter::ArkValue<Ark_Number>(5.5), "5.5"},
+        {Converter::ArkValue<Opt_Number>(0.0), "0"},
+        {Converter::ArkValue<Opt_Number>(0.5), "0.5"},
+        {Converter::ArkValue<Opt_Number>(5.0), "5"},
+        {Converter::ArkValue<Opt_Number>(5.5), "5.5"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setSepia0(node_, &inputValue);
@@ -327,10 +327,10 @@ HWTEST_F(CommonMethodModifierTest3, setSepiaTestValidValues, TestSize.Level1)
 HWTEST_F(CommonMethodModifierTest3, setSepiaTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSepia0, nullptr);
-    using OneTestStep = std::tuple<Ark_Number, std::string>;
+    using OneTestStep = std::tuple<Opt_Number, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_Number>(-0.5), ATTRIBUTE_SEPIA_DEFAULT_VALUE},
-        {Converter::ArkValue<Ark_Number>(-5.0), ATTRIBUTE_SEPIA_DEFAULT_VALUE},
+        {Converter::ArkValue<Opt_Number>(-0.5), ATTRIBUTE_SEPIA_DEFAULT_VALUE},
+        {Converter::ArkValue<Opt_Number>(-5.0), ATTRIBUTE_SEPIA_DEFAULT_VALUE},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setSepia0(node_, &inputValue);
@@ -359,13 +359,13 @@ HWTEST_F(CommonMethodModifierTest3, setUseShadowBatchingTestDefaultValues, TestS
 HWTEST_F(CommonMethodModifierTest3, setUseShadowBatchingTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setUseShadowBatching0, nullptr);
-    using OneTestStep = std::tuple<Ark_Boolean, std::string>;
+    using OneTestStep = std::tuple<Opt_Boolean, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_Boolean>(false), "false"},
-        {Converter::ArkValue<Ark_Boolean>(true), "true"},
+        {Converter::ArkValue<Opt_Boolean>(false), "false"},
+        {Converter::ArkValue<Opt_Boolean>(true), "true"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setUseShadowBatching0(node_, inputValue);
+        modifier_->setUseShadowBatching0(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_USE_SHADOW_BATCHING_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -499,9 +499,10 @@ HWTEST_F(CommonMethodModifierTest3, setMask1PartForProgressMaskValidValues, Test
  */
 HWTEST_F(CommonMethodModifierTest3, setFocusBoxTest, TestSize.Level1)
 {
-    Ark_FocusBoxStyle style;
-    style.margin = Converter::ArkCreate<Opt_LengthMetrics>(ARK_LENGTH_UNIT_PX, 10.f);
-    style.strokeWidth = Converter::ArkCreate<Opt_LengthMetrics>(ARK_LENGTH_UNIT_PX, 5.f);
+    auto style = Converter::ArkValue<Opt_FocusBoxStyle>(Ark_FocusBoxStyle {
+        .margin = Converter::ArkCreate<Opt_LengthMetrics>(ARK_LENGTH_UNIT_PX, 10.f),
+        .strokeWidth = Converter::ArkCreate<Opt_LengthMetrics>(ARK_LENGTH_UNIT_PX, 5.f),
+    });
     modifier_->setFocusBox(node_, &style);
     const auto json = GetJsonValue(node_);
     auto focusbox = json->GetValue("focusBox");

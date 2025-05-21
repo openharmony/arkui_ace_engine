@@ -5262,6 +5262,7 @@ void OverlayImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     OverlayOptions overlay { .align = Alignment::TOP_LEFT};
     if (options) {
         overlay = Converter::OptConvert<OverlayOptions>(*options).value_or(overlay);
