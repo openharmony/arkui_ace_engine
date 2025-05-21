@@ -354,10 +354,19 @@ void FfiOHOSAceFrameworkNavigationSetHideToolBar(bool isHide)
     NavigationModel::GetInstance()->SetHideToolBar(isHide);
 }
 
+void FfiOHOSAceFrameworkNavigationSetHideToolBarWithAnimated(bool isHide,bool animated){
+    NavigationModel::GetInstance()->SetHideToolBar(isHide,animated);
+}
+
 void FfiOHOSAceFrameworkNavigationSetHideTitleBar(bool isHide)
 {
     NavigationModel::GetInstance()->SetHideTitleBar(isHide);
 }
+
+void FfiOHOSAceFrameworkNavigationSetHideTitleBarWithAnimated(bool isHide,bool animated){
+    NavigationModel::GetInstance()->SetHideTitleBar(isHide,animated);
+}
+
 
 void FfiOHOSAceFrameworkNavigationSetHideBackButton(bool isHide)
 {
@@ -486,5 +495,17 @@ void FfiOHOSAceFrameworkNavigationSetOnTitleModeChanged(void (*callback)(int32_t
         func(static_cast<int32_t>(mode));
     };
     NavigationModel::GetInstance()->SetOnTitleModeChange(std::move(onTitleModeChange), std::move(eventInfoFunc));
+}
+
+void FfiOHOSAceFrameworkNavigationSetRecoverable(bool recoverable){
+    NavigationModel::GetInstance()->SetRecoverable(recoverable);
+}
+
+void FfiOHOSAceFrameworkNavigationSetEnableDragBar(bool isEnable){
+    NavigationModel::GetInstance()->SetEnableDragBar(isEnable);
+}
+
+void FfiOHOSAceFrameworkNavigationSetEnableModeChangeAnimtion(bool isEnable){
+    NavigationModel::GetInstance()->EnableModeChangeAnimtion(isEnable);
 }
 }

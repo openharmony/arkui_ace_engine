@@ -79,7 +79,9 @@ CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetToolBarWithOptions(
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetToolBarWithBuilderWithOptions(
     void (*builder)(), bool withOptions, CJNavigationToolbarOptions options);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetHideToolBar(bool isHide);
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetHideToolBarWithAnimated(bool isHide,bool animated);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetHideTitleBar(bool isHide);
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetHideTitleBarWithAnimated(bool isHide,bool animated)
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetHideBackButton(bool isHide);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetNavBarWidth(double width, int32_t widthUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetNavBarPosition(int32_t position);
@@ -94,6 +96,9 @@ CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetSystemBarStyle(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetOnTitleModeChanged(void (*callback)(int32_t));
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetOnNavBarStateChange(void (*callback)(bool));
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetOnNavigationModeChange(void (*callback)(int32_t));
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetRecoverable(bool recoverable);
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetEnableDragBar(bool isEnable);
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetEnableModeChangeAnimtion(bool isEnable);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_NAVIGATION_FFI_H
