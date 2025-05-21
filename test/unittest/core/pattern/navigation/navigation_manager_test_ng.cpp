@@ -48,15 +48,10 @@ RefPtr<NavigationManager> GetNavigationManager()
 std::string BuildSerializedIntentInfo(
     const std::string& navigationInspectorId, const std::string& navDestinationName, const std::string& param)
 {
-    const char mockPlaceholder[] = "0";
-    auto navigationIdJson = JsonUtil::Create(false);
-    navigationIdJson->Put(mockPlaceholder, navigationInspectorId.c_str());
-    auto navDestinationNameJson = JsonUtil::Create(false);
-    navDestinationNameJson->Put(mockPlaceholder, navDestinationName.c_str());
     auto intentJson = JsonUtil::Create(true);
     intentJson->Put(INTENT_PARAM_KEY, JsonUtil::ParseJsonString(param));
-    intentJson->Put(INTENT_NAVIGATION_ID_KEY, navigationIdJson);
-    intentJson->Put(INTENT_NAVDESTINATION_NAME_KEY, navDestinationNameJson);
+    intentJson->Put(INTENT_NAVIGATION_ID_KEY, navigationInspectorId.c_str());
+    intentJson->Put(INTENT_NAVDESTINATION_NAME_KEY, navDestinationName.c_str());
     return intentJson->ToString();
 }
 } // namespace
@@ -651,5 +646,33 @@ HWTEST_F(NavigationManagerTestNg, ParseNavigationIntentInfo001, TestSize.Level1)
     ASSERT_EQ(intentInfo.navigationInspectorId, navigationInspectorId);
     ASSERT_EQ(intentInfo.navDestinationName, navDestinationName);
     ASSERT_EQ(intentInfo.param, param);
+}
+
+/**
+ * @tc.name: ParseNavigationIntentInfo002
+ * @tc.desc: Branch: if serializedIntentInfo is invalid
+ * @tc.expect: no any cpp-crash
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(NavigationManagerTestNg, ParseNavigationIntentInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get navigation manager.
+     */
+    auto navigationManager = GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    /**
+     * @tc.steps: step2. build an empty serialized intent info.
+     */
+    const auto intentJson = JsonUtil::Create(true);
+    const std::string serializedIntentInfo = intentJson->ToString();
+    /**
+     * @tc.steps: step3. parse target serialized intentInfo and do verify.
+     */
+    NavigationIntentInfo intentInfo = navigationManager->ParseNavigationIntentInfo(serializedIntentInfo);
+    ASSERT_EQ(intentInfo.navigationInspectorId, "");
+    ASSERT_EQ(intentInfo.navDestinationName, "");
+    ASSERT_EQ(intentInfo.param, "");
 }
 } // namespace OHOS::Ace::NG
