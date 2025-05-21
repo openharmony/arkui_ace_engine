@@ -73,6 +73,8 @@ constexpr Dimension SELECT_SMALL_PADDING_VP = 4.0_vp;
 
 constexpr Dimension SELECT_MARGIN_VP = 8.0_vp;
 
+constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_COLOR = 1;
+
 static std::string ConvertControlSizeToString(ControlSize controlSize)
 {
     std::string result;
@@ -1216,6 +1218,7 @@ void SelectPattern::InitSpinner(
     spinnerLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo{symbolId});
     spinnerLayoutProperty->UpdateSymbolColorList({selectTheme->GetSpinnerSymbolColor()});
     spinnerLayoutProperty->UpdateFontSize(selectTheme->GetFontSize());
+    spinnerLayoutProperty->UpdateSymbolRenderingStrategy(RENDERINGSTRATEGY_MULTIPLE_COLOR);
 }
 
 // XTS inspector code

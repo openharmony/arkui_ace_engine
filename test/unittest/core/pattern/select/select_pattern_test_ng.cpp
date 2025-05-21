@@ -1956,4 +1956,39 @@ HWTEST_F(SelectPatternTestNg, SelectPatternTest002, TestSize.Level1)
         pattern->InitSelected();
     }
 }
+
+/**
+ * @tc.name: InitSpinner001
+ * @tc.desc: Test SelectPattern InitSpinner with valid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, InitSpinner001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Create a FrameNode with TextPattern to represent the Spinner control.
+     */
+    auto spinner = AceType::MakeRefPtr<FrameNode>("spinner", 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(spinner, nullptr);
+    /**
+     * @tc.steps: step2.Create a SelectTheme instance and set its font size to 16px.
+     */
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    selectTheme->SetFontSize(Dimension(16.0, DimensionUnit::PX));
+    /**
+     * @tc.steps: step3.Invoke the InitSpinner method of SelectPattern with the created FrameNode and SelectTheme
+     */
+    SelectPattern selectPattern;
+    selectPattern.InitSpinner(spinner, selectTheme);
+    auto spinnerLayoutProperty = spinner->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(spinnerLayoutProperty, nullptr);
+    /**
+     * @tc.steps: step4.Expecting the theme's font size and rendering strategy to be applied to layout properties.
+     */
+    auto fontSize = spinnerLayoutProperty->GetFontSize();
+    EXPECT_EQ(fontSize.value(), Dimension(16.0, DimensionUnit::PX));
+
+    auto renderingStrategy = spinnerLayoutProperty->GetSymbolRenderingStrategy();
+    EXPECT_EQ(renderingStrategy.value(), 1);
+}
 } // namespace OHOS::Ace::NG
