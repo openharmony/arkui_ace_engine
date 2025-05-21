@@ -1172,6 +1172,8 @@ HWTEST_F(UINodeTestNg, UINodeTestNg042, TestSize.Level1)
     parent->RemoveDisappearingChild(child);
     child->isDisappearing_ = true;
     parent->RemoveDisappearingChild(child);
+    child = nullptr;
+    parent->RemoveDisappearingChild(child);
     EXPECT_EQ(parent->disappearingChildren_.size(), 1);
 }
 
