@@ -29,7 +29,7 @@ namespace OHOS::Ace {
 class ACE_FORCE_EXPORT ExceptionHandler {
 public:
     static void HandleJsException(
-        const std::string& exceptionMsg, const JsErrorObject& errorInfo, bool isStageModel);
+        const std::string& exceptionMsg, const JsErrorObject& errorInfo);
 };
 } // namespace OHOS::Ace
 

@@ -576,10 +576,6 @@ public:
         isFormRender_ = isFormRender;
     }
 
-    void SetAppRunningUniqueId(const std::string& uniqueId) override;
-
-    const std::string& GetAppRunningUniqueId() const override;
-
     void InitializeSubContainer(int32_t parentContainerId);
     static void SetDialogCallback(int32_t instanceId, FrontendDialogCallback callback);
 
@@ -964,8 +960,6 @@ private:
     AbilityOnQueryCallback abilityOnQueryCallback_ = nullptr;
 
     std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;
-
-    std::string uniqueId_;
 
     // For custom drag event
     std::mutex pointerEventMutex_;
