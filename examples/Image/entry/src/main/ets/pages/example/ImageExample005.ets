@@ -14,7 +14,7 @@
  */
 
 /**
- * 拉伸图片
+ * 通过slice拉伸图片
  */
 @Entry
 @Component

@@ -14,50 +14,78 @@
  */
 
 /**
- * 为图像设置颜色滤镜效果
+ * 播放PixelMap数组动画
  */
-import { drawing, common2D } from '@kit.ArkGraphics2D';
+import {AnimationOptions, AnimatedDrawableDescriptor} from '@kit.ArkUI';
+import { image } from '@kit.ImageKit';
 
 @Entry
 @Component
-struct ImageExample3 {
-  private imageOne: Resource = $r('app.media.1');
-  private imageTwo: Resource = $r('app.media.2');
-  @State src: Resource = this.imageOne
-  @State src2: Resource = this.imageTwo
-  private colorFilterMatrix: number[] = [1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0]
-  private color: common2D.Color = { alpha: 255, red: 255, green: 0, blue: 0 };
-  @State drawingColorFilterFirst: ColorFilter | undefined = undefined
-  @State drawingColorFilterSecond: ColorFilter | undefined = undefined
-  @State drawingColorFilterThird: ColorFilter | undefined = undefined
+struct ImageExample {
+  pixelMaps: Array<PixelMap>  = [];
+  options: AnimationOptions = { iterations: 1 };
+  @State animated: AnimatedDrawableDescriptor | undefined = undefined;
+
+  async aboutToAppear() {
+    this.pixelMaps = await this.getPixelMaps();
+    this.animated = new AnimatedDrawableDescriptor(this.pixelMaps, this.options);
+  }
 
   build() {
     Column() {
-      Image(this.src)
-        .width(100)
-        .height(100)
-        .colorFilter(this.drawingColorFilterFirst)
-        .onClick(()=>{
-          this.drawingColorFilterFirst = 
-              drawing.ColorFilter.createBlendModeColorFilter(this.color, drawing.BlendMode.SRC_IN);
-        })
+      Row() {
+        Image(this.animated)
+          .width('500px').height('500px')
+          .onFinish(() => {
+            console.info("finish");
+          })
+      }.height('50%')
+      Row() {
+        Button('once').width(100).padding(5).onClick(() => {
+          this.options = { iterations: 1 };
+          this.animated = new AnimatedDrawableDescriptor(this.pixelMaps, this.options);
+        }).margin(5)
+        Button('infinite').width(100).padding(5).onClick(() => {
+          this.options = { iterations: -1 };
+          this.animated = new AnimatedDrawableDescriptor(this.pixelMaps, this.options);
+        }).margin(5)
+      }
+    }.width('50%')
+  }
 
-      Image(this.src2)
-        .width(100)
-        .height(100)
-        .colorFilter(this.drawingColorFilterSecond)
-        .onClick(()=>{
-          this.drawingColorFilterSecond = new ColorFilter(this.colorFilterMatrix);
-        })
+  private async getPixmapListFromMedia(resource: Resource) {
+    let unit8Array = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent({
+      bundleName: resource.bundleName,
+      moduleName: resource.moduleName,
+      id: resource.id
+    });
+    let imageSource = image.createImageSource(unit8Array?.buffer.slice(0, unit8Array.buffer.byteLength));
+    let createPixelMap: Array<image.PixelMap> = await imageSource.createPixelMapList({
+      desiredPixelFormat: image.PixelMapFormat.RGBA_8888
+    });
+    await imageSource.release();
+    return createPixelMap;
+  }
 
-      //当加载图片为SVG格式时
-      Image($r('app.media.test_self'))
-        .width(110).height(110).margin(15)
-        .colorFilter(this.drawingColorFilterThird)
-        .onClick(()=>{
-          this.drawingColorFilterThird = 
-              drawing.ColorFilter.createBlendModeColorFilter(this.color, drawing.BlendMode.SRC_IN);
-        })
-    }
+  private async getPixmapFromMedia(resource: Resource) {
+    let unit8Array = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent({
+      bundleName: resource.bundleName,
+      moduleName: resource.moduleName,
+      id: resource.id
+    });
+    let imageSource = image.createImageSource(unit8Array?.buffer.slice(0, unit8Array.buffer.byteLength));
+    let createPixelMap: image.PixelMap = await imageSource.createPixelMap({
+      desiredPixelFormat: image.PixelMapFormat.RGBA_8888
+    });
+    await imageSource.release();
+    return createPixelMap;
+  }
+
+  private async getPixelMaps() {
+    let myPixelMaps:Array<PixelMap> = await this.getPixmapListFromMedia($r('app.media.mountain')); //添加图片
+    myPixelMaps.push(await this.getPixmapFromMedia($r('app.media.sky')));
+    myPixelMaps.push(await this.getPixmapFromMedia($r('app.media.clouds')));
+    myPixelMaps.push(await this.getPixmapFromMedia($r('app.media.landscape')));
+    return myPixelMaps;
   }
 }

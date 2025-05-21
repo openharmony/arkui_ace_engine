@@ -14,40 +14,20 @@
  */
 
 /**
- * 设置SVG图片的填充颜色
+ * 通过objectRepeat设置图片的重复样式
  */
 @Entry
 @Component
 struct Index {
+  @State borderRadiusValue: number = 10;
   build() {
     Column() {
-      Text('不设置fillColor')
-      Image($r('app.media.svgExample'))
-        .height(100)
-        .width(100)
+      Image($r("app.media.sky"))
+        .objectRepeat(ImageRepeat.Y)
+        .height('90%')
+        .width('90%')
         .objectFit(ImageFit.Contain)
         .borderWidth(1)
-      Text('fillColor传入ColorContent.ORIGIN')
-      Image($r('app.media.svgExample'))
-        .height(100)
-        .width(100)
-        .objectFit(ImageFit.Contain)
-        .borderWidth(1)
-        .fillColor(ColorContent.ORIGIN)
-      Text('fillColor传入Color.Blue')
-      Image($r('app.media.svgExample'))
-        .height(100)
-        .width(100)
-        .objectFit(ImageFit.Contain)
-        .borderWidth(1)
-        .fillColor(Color.Blue)
-      Text('fillColor传入undefined')
-      Image($r('app.media.svgExample'))
-        .height(100)
-        .width(100)
-        .objectFit(ImageFit.Contain)
-        .borderWidth(1)
-        .fillColor(undefined)
     }
     .height('100%')
     .width('100%')

@@ -14,76 +14,40 @@
  */
 
 /**
- * 播放PixelMap数组动画
+ * 通过lattice拉伸图片
  */
-import {AnimationOptions, AnimatedDrawableDescriptor} from '@kit.ArkUI'
-import { image } from '@kit.ImageKit'
+import { drawing } from '@kit.ArkGraphics2D';
 
 @Entry
 @Component
-struct ImageExample {
-  pixelmaps: Array<PixelMap>  = [];
-  options: AnimationOptions = {duration:2000, iterations:1};
-  @State animated: AnimatedDrawableDescriptor | undefined = undefined;
-
-  async aboutToAppear() {
-    this.pixelmaps = await this.getPixelMaps();
-    this.animated = new AnimatedDrawableDescriptor(this.pixelmaps, this.options);
-  }
+struct drawingLatticeTest {
+  private xDivs: Array<number> = [1, 2, 200];
+  private yDivs: Array<number> = [1, 2, 200];
+  private fXCount: number = 3;
+  private fYCount: number = 3;
+  private DrawingLatticeFirst: DrawingLattice =
+    drawing.Lattice.createImageLattice(this.xDivs, this.yDivs, this.fXCount, this.fYCount);
 
   build() {
-    Column() {
-      Row() {
-        Image(this.animated)
-          .width('500px').height('500px')
-          .onFinish(() => {
-            console.info('finish')
-          })
-      }.height('50%')
-      Row() {
-        Button('once').width(100).padding(5).onClick(() => {
-          this.options = {duration:2000, iterations:1};
-          this.animated = new AnimatedDrawableDescriptor(this.pixelmaps, this.options);
-        }).margin(5)
-        Button('infinite').width(100).padding(5).onClick(() => {
-          this.options = {duration:2000, iterations:-1};
-          this.animated = new AnimatedDrawableDescriptor(this.pixelmaps, this.options);
-        }).margin(5)
-      }
-    }.width('50%')
-  }
+    Scroll() {
+      Column({ space: 10 }) {
+        Text('Original Image').fontSize(20).fontWeight(700)
+        Column({ space: 10 }) {
+          Image($r('app.media.mountain'))
+            .width(260).height(260)
+        }.width('100%')
 
-  private async getPixmapListFromMedia(resource: Resource) {
-    let unit8Array = await getContext(this)?.resourceManager?.getMediaContent({
-      bundleName: resource.bundleName,
-      moduleName: resource.moduleName,
-      id: resource.id
-    })
-    let imageSource = image.createImageSource(unit8Array.buffer.slice(0, unit8Array.buffer.byteLength))
-    let createPixelMap: Array<image.PixelMap> = await imageSource.createPixelMapList({
-      desiredPixelFormat: image.PixelMapFormat.RGBA_8888
-    })
-    await imageSource.release()
-    return createPixelMap
-  }
-
-  private async getPixmapFromMedia(resource: Resource) {
-    let unit8Array = await getContext(this)?.resourceManager?.getMediaContent({
-      bundleName: resource.bundleName,
-      moduleName: resource.moduleName,
-      id: resource.id
-    })
-    let imageSource = image.createImageSource(unit8Array.buffer.slice(0, unit8Array.buffer.byteLength))
-    let createPixelMap: image.PixelMap = await imageSource.createPixelMap({
-      desiredPixelFormat: image.PixelMapFormat.RGBA_8888
-    })
-    await imageSource.release()
-    return createPixelMap
-  }
-
-  private async getPixelMaps() {
-    let mypixelmaps:Array<PixelMap> = await this.getPixmapListFromMedia($r('app.media.view'))//gif图, 生成多张PixelMap
-    mypixelmaps.push(await this.getPixmapFromMedia($r('app.media.icon'))) //添加一张图片
-    return mypixelmaps;
+        Text('Resize by lattice').fontSize(20).fontWeight(700)
+        Column({ space: 10 }) {
+          Image($r('app.media.mountain'))
+            .objectRepeat(ImageRepeat.X)
+            .width(260)
+            .height(260)
+            .resizable({
+              lattice: this.DrawingLatticeFirst
+            })
+        }.width('100%')
+      }.width('100%')
+    }
   }
 }
