@@ -80,8 +80,7 @@ void JSTabContent::CreateForPartialUpdate(const JSCallbackInfo& info)
     }
 
     JSRef<JSVal> builderFunctionJS = info[0];
-    auto builderFunc = [context = info.GetExecutionContext(), builder = std::move(builderFunctionJS)]() {
-        JAVASCRIPT_EXECUTION_SCOPE(context)
+    auto builderFunc = [builder = std::move(builderFunctionJS)]() {
         JSRef<JSFunc>::Cast(builder)->Call(JSRef<JSObject>());
     };
     TabContentModel::GetInstance()->Create(std::move(builderFunc));
@@ -129,14 +128,14 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     }
     JSRef<JSVal> builderFuncParam = paramObject->GetProperty("builder");
     if (builderFuncParam->IsFunction()) {
-        auto tabBarBuilder = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builderFuncParam));
-        auto tabBarBuilderFunc = [execCtx = info.GetExecutionContext(),
-                                     tabBarBuilderFunc = std::move(tabBarBuilder)]() {
-            if (tabBarBuilderFunc) {
-                ACE_SCOPED_TRACE("JSTabContent::Execute TabBar builder");
-                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-                tabBarBuilderFunc->ExecuteJS();
-            }
+        auto vm = info.GetVm();
+        auto jsFunc = JSRef<JSFunc>::Cast(builderFuncParam);
+        auto func = jsFunc->GetLocalHandle();
+        auto tabBarBuilderFunc = [vm, func = panda::CopyableGlobal(vm, func)]() {
+            ACE_SCOPED_TRACE("JSTabContent::Execute TabBar builder");
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            func->Call(vm, func.ToLocal(), nullptr, 0);
         };
         TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
         TabContentModel::GetInstance()->SetTabBar(
@@ -744,8 +743,6 @@ void JSTabContent::JSBind(BindingTarget globalObj)
     JSClass<JSTabContent>::StaticMethod("width", &JSTabContent::SetTabContentWidth);
     JSClass<JSTabContent>::StaticMethod("height", &JSTabContent::SetTabContentHeight);
     JSClass<JSTabContent>::StaticMethod("size", &JSTabContent::SetTabContentSize);
-    JSClass<JSTabContent>::StaticMethod("onWillShow", &JSTabContent::SetOnWillShow);
-    JSClass<JSTabContent>::StaticMethod("onWillHide", &JSTabContent::SetOnWillHide);
     JSClass<JSTabContent>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSTabContent>::InheritAndBind<JSContainerBase>(globalObj);
 }

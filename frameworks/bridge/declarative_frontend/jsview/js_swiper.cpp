@@ -193,11 +193,6 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("nextMargin", &JSSwiper::SetNextMargin);
     JSClass<JSSwiper>::StaticMethod("cachedCount", &JSSwiper::SetCachedCount);
     JSClass<JSSwiper>::StaticMethod("curve", &JSSwiper::SetCurve);
-    JSClass<JSSwiper>::StaticMethod("onChange", &JSSwiper::SetOnChange);
-    JSClass<JSSwiper>::StaticMethod("onUnselected", &JSSwiper::SetOnUnselected);
-    JSClass<JSSwiper>::StaticMethod("onAnimationStart", &JSSwiper::SetOnAnimationStart);
-    JSClass<JSSwiper>::StaticMethod("onAnimationEnd", &JSSwiper::SetOnAnimationEnd);
-    JSClass<JSSwiper>::StaticMethod("onGestureSwipe", &JSSwiper::SetOnGestureSwipe);
     JSClass<JSSwiper>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSwiper>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSSwiper>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -216,11 +211,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("size", &JSSwiper::SetSize);
     JSClass<JSSwiper>::StaticMethod("displayArrow", &JSSwiper::SetDisplayArrow);
     JSClass<JSSwiper>::StaticMethod("nestedScroll", &JSSwiper::SetNestedScroll);
-    JSClass<JSSwiper>::StaticMethod("customContentTransition", &JSSwiper::SetCustomContentTransition);
-    JSClass<JSSwiper>::StaticMethod("onContentDidScroll", &JSSwiper::SetOnContentDidScroll);
     JSClass<JSSwiper>::StaticMethod("pageFlipMode", &JSSwiper::SetPageFlipMode);
-    JSClass<JSSwiper>::StaticMethod("onContentWillScroll", &JSSwiper::SetOnContentWillScroll);
-    JSClass<JSSwiper>::StaticMethod("onSelected", &JSSwiper::SetOnSelected);
     JSClass<JSSwiper>::StaticMethod("maintainVisibleContentPosition", &JSSwiper::SetMaintainVisibleContentPosition);
     JSClass<JSSwiper>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -367,19 +358,21 @@ void ParseSwiperIndexObject(const JSCallbackInfo& args, const JSRef<JSVal>& chan
 {
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto vm = args.GetVm();
+    auto jsFunc = JSRef<JSFunc>::Cast(changeEventVal);
+    auto func = jsFunc->GetLocalHandle();
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onIndex = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                       const BaseEventInfo* info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+    auto onIndex = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](const BaseEventInfo* info) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
         ACE_SCORING_EVENT("Swiper.onChangeEvent");
         PipelineContext::SetCallBackNode(node);
         const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
         if (!swiperInfo) {
             return;
         }
-        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(swiperInfo->GetIndex()));
-        func->ExecuteJS(1, &newJSVal);
+        panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, swiperInfo->GetIndex()) };
+        func->Call(vm, func.ToLocal(), params, 1);
     };
     SwiperModel::GetInstance()->SetOnChangeEvent(std::move(onIndex));
 }
@@ -1077,14 +1070,15 @@ void JSSwiper::SetCurve(const JSCallbackInfo& info)
         std::function<float(float)> customCallBack = nullptr;
         JSRef<JSVal> onCallBack = object->GetProperty("__curveCustomFunc");
         if (onCallBack->IsFunction()) {
-            RefPtr<JsFunction> jsFuncCallBack =
-                AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCallBack));
-            customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentId()](float time) -> float {
+            auto vm = info.GetVm();
+            auto jsFunc = JSRef<JSFunc>::Cast(onCallBack);
+            auto func = jsFunc->GetLocalHandle();
+            customCallBack = [vm, func = panda::CopyableGlobal(vm, func), id = Container::CurrentId()](
+                                 float time) -> float {
                 ContainerScope scope(id);
-                JSRef<JSVal> params[1];
-                params[0] = JSRef<JSVal>::Make(ToJSValue(time));
-                auto result = func->ExecuteJS(1, params);
-                auto resultValue = result->IsNumber() ? result->ToNumber<float>() : 1.0f;
+                panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, time) };
+                auto result = func->Call(vm, func.ToLocal(), params, 1);
+                auto resultValue = result->IsNumber() ? static_cast<float>(result->ToNumber(vm)->Value()) : 1.0f;
                 return resultValue;
             };
         }
@@ -1437,14 +1431,17 @@ void JSSwiperController::FinishAnimation(const JSCallbackInfo& args)
     }
 
     if (args.Length() > 0 && args[0]->IsFunction()) {
-        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+        auto vm = args.GetVm();
+        auto jsFunc = JSRef<JSFunc>::Cast(args[0]);
+        auto func = jsFunc->GetLocalHandle();
         auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        auto onFinish = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto onFinish = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode]() {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
             ACE_SCORING_EVENT("Swiper.finishAnimation");
             PipelineContext::SetCallBackNode(node);
             TAG_LOGD(AceLogTag::ACE_SWIPER, "SwiperController finishAnimation callback execute.");
-            func->Execute();
+            func->Call(vm, func.ToLocal(), nullptr, 0);
         };
 
         controller_->SetFinishCallback(onFinish);
@@ -1477,14 +1474,21 @@ void JSSwiperController::OldPreloadItems(const JSCallbackInfo& args)
         indexSet.emplace(index);
     }
 
-    RefPtr<JsSwiperFunction> jsFunc = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(args[1]));
-    auto onPreloadFinish =
-        [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](int32_t errorCode, std::string message) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Swiper.preloadItems");
-            TAG_LOGI(AceLogTag::ACE_SWIPER, "SwiperController preloadItems callback execute.");
-            func->Execute(errorCode);
-        };
+    auto vm = args.GetVm();
+    auto jsFunc = JSRef<JSFunc>::Cast(args[1]);
+    auto func = jsFunc->GetLocalHandle();
+    auto onPreloadFinish = [vm, func = panda::CopyableGlobal(vm, func)](int32_t errorCode, std::string message) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ACE_SCORING_EVENT("Swiper.preloadItems");
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "SwiperController preloadItems callback execute.");
+        JSRef<JSObject> obj = JSRef<JSObject>::New();
+        if (errorCode == ERROR_CODE_PARAM_INVALID) {
+            obj->SetProperty<int32_t>("code", errorCode);
+        }
+        panda::Local<panda::JSValueRef> params[1] = { obj->GetLocalHandle() };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
 
     controller_->SetPreloadFinishCallback(onPreloadFinish);
     controller_->PreloadItems(indexSet);

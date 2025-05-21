@@ -151,16 +151,19 @@ bool JSWaterFlowSections::ParseSectionOptions(
         return true;
     }
 
-    auto onGetItemMainSizeByIndex = [execCtx = args.GetExecutionContext(),
-                                        func = AceType::MakeRefPtr<JsFunction>(
-                                            JSRef<JSObject>(), JSRef<JSFunc>::Cast(getSizeByIndex))](int32_t index) {
-        JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
-        auto result = func->ExecuteJS(1, &itemIndex);
+    auto vm = args.GetVm();
+    auto jsFunc = JSRef<JSFunc>::Cast(getSizeByIndex);
+    auto func = jsFunc->GetLocalHandle();
+    auto onGetItemMainSizeByIndex = [vm, func = panda::CopyableGlobal(vm, func)](int32_t index) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, index) };
+        auto result = func->Call(vm, func.ToLocal(), params, 1);
         if (!result->IsNumber()) {
             return 0.0f;
         }
 
-        return result->ToNumber<float>();
+        return static_cast<float>(result->ToNumber(vm)->Value());
     };
     section.onGetItemMainSizeByIndex = std::move(onGetItemMainSizeByIndex);
     return true;

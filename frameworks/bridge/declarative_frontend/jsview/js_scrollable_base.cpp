@@ -121,8 +121,6 @@ void JSScrollableBase::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSScrollableBase>::Declare("JSContainerBase");
     JSClass<JSScrollableBase>::StaticMethod("flingSpeedLimit", &JSScrollableBase::JSFlingSpeedLimit, opt);
-    JSClass<JSScrollableBase>::StaticMethod("onWillScroll", &JSScrollableBase::JsOnWillScroll);
-    JSClass<JSScrollableBase>::StaticMethod("onDidScroll", &JSScrollableBase::JsOnDidScroll);
     JSClass<JSScrollableBase>::StaticMethod("fadingEdge", &JSScrollableBase::SetFadingEdge);
     JSClass<JSScrollableBase>::StaticMethod("clipContent", &JSScrollableBase::JSClipContent);
     JSClass<JSScrollableBase>::StaticMethod("digitalCrownSensitivity", &JSScrollableBase::SetDigitalCrownSensitivity);

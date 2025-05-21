@@ -491,7 +491,7 @@ void JSList::SetScrollEnabled(const JSCallbackInfo& args)
 void JSList::ScrollCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+        auto onScroll = [func = JSRef<JSFunc>::Cast(args[0])](
                             const CalcDimension& scrollOffset, const ScrollState& scrollState) {
             auto params = ConvertToJSValues(scrollOffset, scrollState);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
@@ -605,8 +605,7 @@ void JSList::ScrollStopCallback(const JSCallbackInfo& args)
 void JSList::ItemDeleteCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        auto onItemDelete = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                                int32_t index) -> bool {
+        auto onItemDelete = [func = JSRef<JSFunc>::Cast(args[0])](int32_t index) -> bool {
             auto params = ConvertToJSValues(index);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
             return true;
@@ -795,10 +794,9 @@ void JSList::SetMultiSelectable(bool multiSelectable)
 void JSList::ScrollBeginCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        auto onScrollBegin = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+        auto onScrollBegin = [func = JSRef<JSFunc>::Cast(args[0])](
                                  const CalcDimension& dx, const CalcDimension& dy) -> ScrollInfo {
             ScrollInfo scrollInfo { .dx = dx, .dy = dy };
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollInfo);
             auto params = ConvertToJSValues(dx, dy);
             auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
             if (result.IsEmpty()) {
@@ -883,16 +881,8 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("maintainVisibleContentPosition", &JSList::MaintainVisibleContentPosition);
     JSClass<JSList>::StaticMethod("stackFromEnd", &JSList::SetStackFromEnd);
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
-    JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);
-    JSClass<JSList>::StaticMethod("onReachEnd", &JSList::ReachEndCallback);
-    JSClass<JSList>::StaticMethod("onScrollStart", &JSList::ScrollStartCallback);
-    JSClass<JSList>::StaticMethod("onScrollStop", &JSList::ScrollStopCallback);
     JSClass<JSList>::StaticMethod("onItemDelete", &JSList::ItemDeleteCallback);
-    JSClass<JSList>::StaticMethod("onItemMove", &JSList::ItemMoveCallback);
-    JSClass<JSList>::StaticMethod("onScrollIndex", &JSList::ScrollIndexCallback);
-    JSClass<JSList>::StaticMethod("onScrollVisibleContentChange", &JSList::ScrollVisibleContentChangeCallback);
     JSClass<JSList>::StaticMethod("onScrollBegin", &JSList::ScrollBeginCallback);
-    JSClass<JSList>::StaticMethod("onScrollFrameBegin", &JSList::ScrollFrameBeginCallback);
     JSClass<JSList>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSList>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSList>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -903,11 +893,6 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSList>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
 
-    JSClass<JSList>::StaticMethod("onItemDragStart", &JSList::ItemDragStartCallback);
-    JSClass<JSList>::StaticMethod("onItemDragEnter", &JSList::ItemDragEnterCallback);
-    JSClass<JSList>::StaticMethod("onItemDragMove", &JSList::ItemDragMoveCallback);
-    JSClass<JSList>::StaticMethod("onItemDragLeave", &JSList::ItemDragLeaveCallback);
-    JSClass<JSList>::StaticMethod("onItemDrop", &JSList::ItemDropCallback);
     JSClass<JSList>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
     JSClass<JSList>::InheritAndBind<JSScrollableBase>(globalObj);
@@ -1078,14 +1063,14 @@ void JSListScroller::CloseAllSwipeActions(const JSCallbackInfo& args)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         auto onFinishProperty = obj->GetProperty("onFinish");
         if (onFinishProperty->IsFunction()) {
-            RefPtr<JsFunction> jsOnFinishFunc =
-                AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinishProperty));
-                onFinishCallBack = [execCtx = args.GetExecutionContext(),
-                                       func = std::move(jsOnFinishFunc)]() {
-                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                    func->Execute();
-                    return;
-                };
+            auto vm = args.GetVm();
+            auto jsFunc = JSRef<JSFunc>::Cast(onFinishProperty);
+            auto func = jsFunc->GetLocalHandle();
+            onFinishCallBack = [vm, func = panda::CopyableGlobal(vm, func)]() {
+                panda::LocalScope pandaScope(vm);
+                panda::TryCatch trycatch(vm);
+                func->Call(vm, func.ToLocal(), nullptr, 0);
+            };
         } else {
             JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "onFinish param must be function.");
             return;

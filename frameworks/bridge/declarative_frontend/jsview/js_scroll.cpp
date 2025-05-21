@@ -136,10 +136,9 @@ void JSScroll::SetScrollEnabled(const JSCallbackInfo& args)
 void JSScroll::OnScrollBeginCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        auto onScrollBegin = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+        auto onScrollBegin = [func = JSRef<JSFunc>::Cast(args[0])](
                                  const Dimension& dx, const Dimension& dy) -> ScrollInfo {
             ScrollInfo scrollInfo { .dx = dx, .dy = dy };
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollInfo);
             auto params = ConvertToJSValues(dx, dy);
             auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
             if (result.IsEmpty()) {
@@ -345,16 +344,6 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("create", &JSScroll::Create, opt);
     JSClass<JSScroll>::StaticMethod("scrollable", &JSScroll::SetScrollable, opt);
     JSClass<JSScroll>::StaticMethod("onScrollBegin", &JSScroll::OnScrollBeginCallback, opt);
-    JSClass<JSScroll>::StaticMethod("onScrollFrameBegin", &JSScroll::OnScrollFrameBeginCallback, opt);
-    JSClass<JSScroll>::StaticMethod("onScroll", &JSScroll::OnScrollCallback, opt);
-    JSClass<JSScroll>::StaticMethod("onWillScroll", &JSScroll::OnWillScrollCallback, opt);
-    JSClass<JSScroll>::StaticMethod("onDidScroll", &JSScroll::OnDidScrollCallback, opt);
-    JSClass<JSScroll>::StaticMethod("onScrollEdge", &JSScroll::OnScrollEdgeCallback, opt);
-    JSClass<JSScroll>::StaticMethod("onScrollEnd", &JSScroll::OnScrollEndCallback, opt);
-    JSClass<JSScroll>::StaticMethod("onScrollStart", &JSScroll::OnScrollStartCallback, opt);
-    JSClass<JSScroll>::StaticMethod("onScrollStop", &JSScroll::OnScrollStopCallback, opt);
-    JSClass<JSScroll>::StaticMethod("onReachStart", &JSScroll::ReachStartCallback);
-    JSClass<JSScroll>::StaticMethod("onReachEnd", &JSScroll::ReachEndCallback);
     JSClass<JSScroll>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSScroll>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSScroll>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

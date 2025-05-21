@@ -115,6 +115,7 @@ public:
     static ArkUINativeModuleValue AddFrameNodeToNodeContent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue RemoveFrameNodeFromNodeContent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetFirstUINode(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetStackTopNode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue TriggerOnReuse(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue TriggerOnRecycle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCrossLanguageOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);

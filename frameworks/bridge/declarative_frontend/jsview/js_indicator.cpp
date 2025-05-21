@@ -72,7 +72,6 @@ void JSIndicator::JSBind(BindingTarget globalObj)
     JSClass<JSIndicator>::StaticMethod("vertical", &JSIndicator::SetVertical, opt);
     JSClass<JSIndicator>::StaticMethod("style", &JSIndicator::SetStyle, opt);
     JSClass<JSIndicator>::StaticMethod("initialIndex", &JSIndicator::SetInitialIndex, opt);
-    JSClass<JSIndicator>::StaticMethod("onChange", &JSIndicator::SetOnChange);
     JSClass<JSIndicator>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

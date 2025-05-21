@@ -556,9 +556,9 @@ class TabsOnUnselectedModifier extends ModifierWithKey<Callback<number>> {
   static identity: Symbol = Symbol('tabOnUnselected');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().swiper.resetTabOnUnselected(node);
+      getUINativeModule().tabs.resetTabOnUnselected(node);
     } else {
-      getUINativeModule().swiper.setTabOnUnselected(node, this.value);
+      getUINativeModule().tabs.setTabOnUnselected(node, this.value);
     }
   }
 }
@@ -700,9 +700,9 @@ class TabsOnChangeModifier extends ModifierWithKey<(index: number) => void> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().tabs.resetOnChange(node);
+      getUINativeModule().tabs.resetTabsOnChange(node);
     } else {
-      getUINativeModule().tabs.setOnChange(node, this.value);
+      getUINativeModule().tabs.setTabsOnChange(node, this.value);
     }
   }
 }
@@ -715,9 +715,9 @@ class TabsOnTabBarClick extends ModifierWithKey<(index: number) => void> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().tabs.resetOnTabBarClick(node);
+      getUINativeModule().tabs.resetTabsOnTabBarClick(node);
     } else {
-      getUINativeModule().tabs.setOnTabBarClick(node, this.value);
+      getUINativeModule().tabs.setTabsOnTabBarClick(node, this.value);
     }
   }
 }
@@ -730,9 +730,9 @@ class TabsAnimationStartModifier extends ModifierWithKey<(index: number, targetI
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().tabs.resetOnAnimationStart(node);
+      getUINativeModule().tabs.resetTabsOnAnimationStart(node);
     } else {
-      getUINativeModule().tabs.setOnAnimationStart(node, this.value);
+      getUINativeModule().tabs.setTabsOnAnimationStart(node, this.value);
     }
   }
 }    
@@ -745,9 +745,9 @@ class TabsAnimationEndModifier extends ModifierWithKey<(index: number, event: Ta
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().tabs.resetOnAnimationEnd(node);
+      getUINativeModule().tabs.resetTabsOnAnimationEnd(node);
     } else {
-      getUINativeModule().tabs.setOnAnimationEnd(node, this.value);
+      getUINativeModule().tabs.setTabsOnAnimationEnd(node, this.value);
     }
   }
 }
@@ -760,9 +760,9 @@ class TabsGestureSwipeModifier extends ModifierWithKey<(index: number, event: Ta
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().tabs.resetOnGestureSwipe(node);
+      getUINativeModule().tabs.resetTabsOnGestureSwipe(node);
     } else {
-      getUINativeModule().tabs.setOnGestureSwipe(node, this.value);
+      getUINativeModule().tabs.setTabsOnGestureSwipe(node, this.value);
     }
   }
 }
@@ -775,9 +775,9 @@ class TabsOnContentWillChange extends ModifierWithKey<(currentIndex: number, tar
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().tabs.resetOnContentWillChange(node);
+      getUINativeModule().tabs.resetTabsOnContentWillChange(node);
     } else {
-      getUINativeModule().tabs.setOnContentWillChange(node, this.value);
+      getUINativeModule().tabs.setTabsOnContentWillChange(node, this.value);
     }
   }
 } 
@@ -790,9 +790,9 @@ class TabsCustomContentTransition extends ModifierWithKey<(from: number, to: num
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().tabs.resetCustomContentTransition(node);
+      getUINativeModule().tabs.resetTabsCustomContentTransition(node);
     } else {
-      getUINativeModule().tabs.setCustomContentTransition(node, this.value);
+      getUINativeModule().tabs.setTabsCustomContentTransition(node, this.value);
     }
   }
 } 
@@ -806,3 +806,40 @@ globalThis.Tabs.attributeModifier = function (modifier: ArkComponent): void {
     return new modifierJS.TabsModifier(nativePtr, classType);
   });
 };
+
+globalThis.Tabs.onChange = function (value: (index: number) => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().tabs.setTabsOnChange(nodePtr, value);
+}
+globalThis.Tabs.onTabBarClick = function (value: (index: number) => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().tabs.setTabsOnTabBarClick(nodePtr, value);
+}
+globalThis.Tabs.onSelected = function (value: Callback<number>): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().tabs.setTabsOnSelected(nodePtr, value);
+}
+globalThis.Tabs.onUnselected = function (value: Callback<number>): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().tabs.setTabOnUnselected(nodePtr, value);
+}
+globalThis.Tabs.onAnimationStart = function (value: (index: number, targetIndex: number, event: TabsAnimationEvent) => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().tabs.setTabsOnAnimationStart(nodePtr, value);
+}
+globalThis.Tabs.onAnimationEnd = function (value: (index: number, event: TabsAnimationEvent) => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().tabs.setTabsOnAnimationEnd(nodePtr, value);
+}
+globalThis.Tabs.onGestureSwipe = function (value: (index: number, event: TabsAnimationEvent) => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().tabs.setTabsOnGestureSwipe(nodePtr, value);
+}
+globalThis.Tabs.customContentTransition = function (value: (from: number, to: number) => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().tabs.setTabsCustomContentTransition(nodePtr, value);
+}
+globalThis.Tabs.onContentWillChange = function (value: (currentIndex: number, targetIndex: number) => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().tabs.setTabsOnContentWillChange(nodePtr, value);
+}

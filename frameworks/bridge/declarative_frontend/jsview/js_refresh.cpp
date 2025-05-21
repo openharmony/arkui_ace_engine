@@ -62,19 +62,21 @@ void ParseRefreshingObject(const JSCallbackInfo& info, const JSRef<JSVal>& chang
 {
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto vm = info.GetVm();
+    auto jsFunc = JSRef<JSFunc>::Cast(changeEventVal);
+    auto func = jsFunc->GetLocalHandle();
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                           const std::string& param) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+    auto changeEvent = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](const std::string& param) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
         if (param != "true" && param != "false") {
             return;
         }
         bool newValue = StringToBool(param);
         ACE_SCORING_EVENT("Refresh.ChangeEvent");
         PipelineContext::SetCallBackNode(node);
-        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
-        func->ExecuteJS(1, &newJSVal);
+        panda::Local<panda::JSValueRef> params[1] = { panda::BooleanRef::New(vm, newValue) };
+        func->Call(vm, func.ToLocal(), params, 1);
     };
     RefreshModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
 }
@@ -95,9 +97,6 @@ void JSRefresh::JSBind(BindingTarget globalObj)
     JSClass<JSRefresh>::StaticMethod("create", &JSRefresh::Create, opt);
     JSClass<JSRefresh>::StaticMethod("refreshOffset", &JSRefresh::JsRefreshOffset);
     JSClass<JSRefresh>::StaticMethod("pullToRefresh", &JSRefresh::SetPullToRefresh, opt);
-    JSClass<JSRefresh>::StaticMethod("onStateChange", &JSRefresh::OnStateChange);
-    JSClass<JSRefresh>::StaticMethod("onRefreshing", &JSRefresh::OnRefreshing);
-    JSClass<JSRefresh>::StaticMethod("onOffsetChange", &JSRefresh::OnOffsetChange);
     JSClass<JSRefresh>::StaticMethod("pullDownRatio", &JSRefresh::SetPullDownRatio);
     JSClass<JSRefresh>::StaticMethod("maxPullDownDistance", &JSRefresh::SetMaxPullDownDistance);
     JSClass<JSRefresh>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
@@ -250,8 +249,8 @@ bool JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
     if (builder->IsFunction()) {
         {
             NG::ScopedViewStackProcessor builderViewStackProcessor;
-            JsFunction Jsfunc(info.This(), JSRef<JSFunc>::Cast(builder));
-            Jsfunc.Execute();
+            auto jsFunc = JSRef<JSFunc>::Cast(builder);
+            jsFunc->Call(info.This());
             customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         }
         RefreshModel::GetInstance()->SetCustomBuilder(customNode);

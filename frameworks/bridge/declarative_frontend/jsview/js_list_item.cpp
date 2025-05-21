@@ -123,17 +123,17 @@ void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
             ListItemModel::GetInstance()->Create();
         }
     } else {
+        auto vm = args.GetVm();
         auto deepRenderFunc = JSRef<JSFunc>::Cast(arg0);
-        JSListItemTheme::ObtainDeepRenderFuncForThemeSupport(args.GetVm(), deepRenderFunc);
-        RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), deepRenderFunc);
-        auto listItemDeepRenderFunc = [execCtx = args.GetExecutionContext(),
-                                          jsDeepRenderFunc = std::move(jsDeepRender)](int32_t nodeId) {
+        JSListItemTheme::ObtainDeepRenderFuncForThemeSupport(vm, deepRenderFunc);
+        auto func = deepRenderFunc->GetLocalHandle();
+        auto listItemDeepRenderFunc = [vm, func = panda::CopyableGlobal(vm, func)](int32_t nodeId) {
             ACE_SCOPED_TRACE("JSListItem::ExecuteDeepRender");
-            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-            JSRef<JSVal> jsParams[2];
-            jsParams[0] = JSRef<JSVal>::Make(ToJSValue(nodeId));
-            jsParams[1] = JSRef<JSVal>::Make(ToJSValue(true));
-            jsDeepRenderFunc->ExecuteJS(2, jsParams);
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            panda::Local<panda::JSValueRef> params[2] = { panda::NumberRef::New(vm, nodeId),
+                panda::BooleanRef::New(vm, true) };
+            func->Call(vm, func.ToLocal(), params, 2);
         }; // listItemDeepRenderFunc lambda
         ListItemModel::GetInstance()->Create(std::move(listItemDeepRenderFunc), listItemStyle);
         ListItemModel::GetInstance()->SetIsLazyCreating(isLazy);
@@ -192,29 +192,30 @@ void JSListItem::SetSelected(const JSCallbackInfo& info)
     }
     ListItemModel::GetInstance()->SetSelected(select);
     if (changeEventVal->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+        auto vm = info.GetVm();
+        auto jsFunc = JSRef<JSFunc>::Cast(changeEventVal);
+        auto func = jsFunc->GetLocalHandle();
         auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                               bool param) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto changeEvent = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](bool param) {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
             ACE_SCORING_EVENT("ListItem.ChangeEvent");
-            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
             PipelineContext::SetCallBackNode(node);
-            func->ExecuteJS(1, &newJSVal);
+            panda::Local<panda::JSValueRef> params[1] = { panda::BooleanRef::New(vm, param) };
+            func->Call(vm, func.ToLocal(), params, 1);
         };
         ListItemModel::GetInstance()->SetSelectChangeEvent(std::move(changeEvent));
     }
 }
 
-void JSListItem::JsParseDeleteArea(const JsiExecutionContext& context, const JSRef<JSVal>& jsValue,
-    bool isStartArea, NG::FrameNode* node)
+void JSListItem::JsParseDeleteArea(const JSRef<JSVal>& jsValue, bool isStartArea, NG::FrameNode* node)
 {
     auto deleteAreaObj = JSRef<JSObject>::Cast(jsValue);
 
     auto onAction = deleteAreaObj->GetProperty("onAction");
     std::function<void()> onActionCallback;
     if (onAction->IsFunction()) {
-        onActionCallback = [execCtx = context, func = JSRef<JSFunc>::Cast(onAction)]() {
+        onActionCallback = [func = JSRef<JSFunc>::Cast(onAction)]() {
             func->Call(JSRef<JSObject>());
             return;
         };
@@ -222,8 +223,7 @@ void JSListItem::JsParseDeleteArea(const JsiExecutionContext& context, const JSR
     auto onEnterActionArea = deleteAreaObj->GetProperty("onEnterActionArea");
     std::function<void()> onEnterActionAreaCallback;
     if (onEnterActionArea->IsFunction()) {
-        onEnterActionAreaCallback = [execCtx = context,
-                                        func = JSRef<JSFunc>::Cast(onEnterActionArea)]() {
+        onEnterActionAreaCallback = [func = JSRef<JSFunc>::Cast(onEnterActionArea)]() {
             func->Call(JSRef<JSObject>());
             return;
         };
@@ -231,8 +231,7 @@ void JSListItem::JsParseDeleteArea(const JsiExecutionContext& context, const JSR
     auto onExitActionArea = deleteAreaObj->GetProperty("onExitActionArea");
     std::function<void()> onExitActionAreaCallback;
     if (onExitActionArea->IsFunction()) {
-        onExitActionAreaCallback = [execCtx = context,
-                                       func = JSRef<JSFunc>::Cast(onExitActionArea)]() {
+        onExitActionAreaCallback = [func = JSRef<JSFunc>::Cast(onExitActionArea)]() {
             func->Call(JSRef<JSObject>());
             return;
         };
@@ -246,9 +245,7 @@ void JSListItem::JsParseDeleteArea(const JsiExecutionContext& context, const JSR
     auto onStateChange = deleteAreaObj->GetProperty("onStateChange");
     std::function<void(SwipeActionState state)> onStateChangeCallback;
     if (onStateChange->IsFunction()) {
-        onStateChangeCallback = [execCtx = context,
-                                    func = JSRef<JSFunc>::Cast(onStateChange)](SwipeActionState state) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        onStateChangeCallback = [func = JSRef<JSFunc>::Cast(onStateChange)](SwipeActionState state) {
             auto params = ConvertToJSValues(state);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
             return;
@@ -267,22 +264,20 @@ void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-    ParseSwiperAction(obj, args.GetExecutionContext());
+    ParseSwiperAction(obj);
 }
 
-void JSListItem::ParseSwiperAction(const JSRef<JSObject>& obj, const JsiExecutionContext& context, NG::FrameNode* node)
+void JSListItem::ParseSwiperAction(const JSRef<JSObject>& obj, NG::FrameNode* node)
 {
     std::function<void()> startAction;
     auto startObject = obj->GetProperty("start");
     if (startObject->IsObject()) {
         if (startObject->IsFunction()) {
-            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(startObject));
-            startAction = [builderFunc]() { builderFunc->Execute(); };
-            ListItemModel::GetInstance()->SetDeleteArea(
-                std::move(startAction), nullptr, nullptr, nullptr, nullptr,
+            startAction = [jsFunc = JSRef<JSFunc>::Cast(startObject)]() { jsFunc->Call(JSRef<JSObject>()); };
+            ListItemModel::GetInstance()->SetDeleteArea(std::move(startAction), nullptr, nullptr, nullptr, nullptr,
                 Dimension(0, DimensionUnit::VP), true, node);
         } else {
-            JsParseDeleteArea(context, startObject, true, node);
+            JsParseDeleteArea(startObject, true, node);
         }
     } else {
         ListItemModel::GetInstance()->SetDeleteArea(
@@ -293,13 +288,11 @@ void JSListItem::ParseSwiperAction(const JSRef<JSObject>& obj, const JsiExecutio
     auto endObject = obj->GetProperty("end");
     if (endObject->IsObject()) {
         if (endObject->IsFunction()) {
-            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(endObject));
-            endAction = [builderFunc]() { builderFunc->Execute(); };
+            endAction = [jsFunc = JSRef<JSFunc>::Cast(endObject)]() { jsFunc->Call(JSRef<JSObject>()); };
             ListItemModel::GetInstance()->SetDeleteArea(
-                std::move(endAction), nullptr, nullptr, nullptr, nullptr,
-                Dimension(0, DimensionUnit::VP), false, node);
+                std::move(endAction), nullptr, nullptr, nullptr, nullptr, Dimension(0, DimensionUnit::VP), false, node);
         } else {
-            JsParseDeleteArea(context, endObject, false, node);
+            JsParseDeleteArea(endObject, false, node);
         }
     } else {
         ListItemModel::GetInstance()->SetDeleteArea(
@@ -315,9 +308,7 @@ void JSListItem::ParseSwiperAction(const JSRef<JSObject>& obj, const JsiExecutio
     auto onOffsetChangeFunc = obj->GetProperty("onOffsetChange");
     std::function<void(int32_t offset)> onOffsetChangeCallback;
     if (onOffsetChangeFunc->IsFunction()) {
-        onOffsetChangeCallback = [execCtx = context,
-                                     func = JSRef<JSFunc>::Cast(onOffsetChangeFunc)](int32_t offset) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        onOffsetChangeCallback = [func = JSRef<JSFunc>::Cast(onOffsetChangeFunc)](int32_t offset) {
             auto params = ConvertToJSValues(offset);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
             return;
@@ -344,8 +335,7 @@ void JSListItem::ParseBuilder(const JSRef<JSObject>& obj, OnDeleteEvent&& onDele
         std::function<void()> builderAction;
         auto builderObject = obj->GetProperty("builder");
         if (builderObject->IsFunction()) {
-            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builderObject));
-            builderAction = [builderFunc]() { builderFunc->Execute(); };
+            builderAction = [jsFunc = JSRef<JSFunc>::Cast(builderObject)]() { jsFunc->Call(JSRef<JSObject>()); };
         }
         ListItemModel::GetInstance()->SetDeleteArea(std::move(builderAction), std::move(onDelete),
             std::move(onEnterDeleteArea), std::move(onExitDeleteArea), std::move(onStateChange), length, isStartArea,
@@ -457,7 +447,6 @@ void JSListItem::JSBind(BindingTarget globalObj)
     JSClass<JSListItem>::StaticMethod("sticky", &JSListItem::SetSticky);
     JSClass<JSListItem>::StaticMethod("editable", &JSListItem::SetEditable);
     JSClass<JSListItem>::StaticMethod("selectable", &JSListItem::SetSelectable);
-    JSClass<JSListItem>::StaticMethod("onSelect", &JSListItem::SelectCallback);
     JSClass<JSListItem>::StaticMethod("borderRadius", &JSListItem::JsBorderRadius);
     JSClass<JSListItem>::StaticMethod("swipeAction", &JSListItem::SetSwiperAction);
     JSClass<JSListItem>::StaticMethod("selected", &JSListItem::SetSelected);
