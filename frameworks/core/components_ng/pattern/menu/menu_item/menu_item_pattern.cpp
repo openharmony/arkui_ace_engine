@@ -266,7 +266,7 @@ void MenuItemPattern::OnModifyDone()
 
         auto renderContext = host->GetRenderContext();
         if (renderContext) {
-            renderContext->SetClipToBounds(focusPadding_ == 0.0_vp);
+            renderContext->SetClipToBounds(true);
         }
         if (!longPressEvent_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             InitLongPressEvent();
@@ -318,8 +318,8 @@ void MenuItemPattern::NeedFocusEvent()
     CHECK_NULL_VOID(context);
     auto selectTheme = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
-    auto menuNeedFocus = selectTheme->GetMenuNeedFocus();
-    if (menuNeedFocus) {
+    auto menuItemNeedFocus = selectTheme->GetMenuItemNeedFocus();
+    if (menuItemNeedFocus) {
         InitFocusEvent();
     }
 }
@@ -462,6 +462,7 @@ void MenuItemPattern::HandleFocusEvent()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    renderContext->SetClipToBounds(focusPadding_ == 0.0_vp);
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto selectTheme = context->GetTheme<SelectTheme>();
@@ -498,6 +499,7 @@ void MenuItemPattern::HandleBlurEvent()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    renderContext->SetClipToBounds(true);
     if (isFocusBGColorSet_) {
         renderContext->ResetBackgroundColor();
         renderContext->SetBackgroundColor(Color::TRANSPARENT.GetValue());

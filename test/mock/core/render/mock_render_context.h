@@ -42,6 +42,7 @@ public:
     MOCK_METHOD1(SetHDRBrightness, void(float));
     MOCK_METHOD1(SetContentClip, void(const std::variant<RectF, RefPtr<ShapeRect>>&));
     MOCK_METHOD1(SetTransparentLayer, void(bool));
+    MOCK_METHOD1(SetClipToBounds, void(bool));
 
     void SetVisible(bool visible) override
     {
