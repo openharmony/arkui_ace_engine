@@ -56,8 +56,9 @@ export class PatternLockController implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._PatternLockController_getFinalizer()
     }
-    public reset(): undefined {
-        return this.reset_serialize()
+    public reset(): void {
+        this.reset_serialize();
+        return;
     }
     public setChallengeResult(result: PatternLockChallengeResult): void {
         const result_casted = result as (PatternLockChallengeResult)
