@@ -51,7 +51,7 @@ public:
     void SetImageRenderMode(ImageRenderMode imageRenderMode) override;
     bool IsSrcSvgImage() override;
     void SetAutoResize(bool autoResize) override;
-    void SetResizableSlice(const ImageResizableSlice& slice) override {};
+    void SetResizableSlice(ImageResizableSlice& slice) override {};
     void SetResizableLattice(const RefPtr<DrawingLattice>& lattice) override {};
     void ResetResizableLattice() override {};
     void SetSyncMode(bool syncMode) override;

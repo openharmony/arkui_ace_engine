@@ -1361,7 +1361,8 @@ bool ParseCalcDimension(const EcmaVM* vm,
 }
 
 void ParseResizableCalcDimensions(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t offset, uint32_t count,
-    std::vector<std::optional<CalcDimension>>& results, const CalcDimension& defValue)
+    std::vector<std::optional<CalcDimension>>& results, const CalcDimension& defValue,
+    std::vector<RefPtr<ResourceObject>>& bgImageResizableResObjArray)
 {
     auto end = offset + count;
     auto argsNumber = runtimeCallInfo->GetArgsNumber();
@@ -1374,11 +1375,13 @@ void ParseResizableCalcDimensions(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_
         auto arg = runtimeCallInfo->GetCallArgRef(index);
         std::optional<CalcDimension> optCalcDimension;
         CalcDimension dimension(defValue);
-        if (ArkTSUtils::ParseJsDimensionVp(vm, arg, dimension, false)) {
+        RefPtr<ResourceObject> resObj;
+        if (ArkTSUtils::ParseJsDimensionVp(vm, arg, dimension, resObj, false)) {
             optCalcDimension = dimension;
         } else {
             optCalcDimension = defaultDimension;
         }
+        bgImageResizableResObjArray.push_back(resObj);
         results.push_back(optCalcDimension);
     }
 }
@@ -1495,10 +1498,12 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *ru
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> backgroundColorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, backgroundColorResObj)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetBackgroundColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getCommonModifier()->setBackgroundColor(nativeNode, color.GetValue());
+        auto bgColorRawPtr = AceType::RawPtr(backgroundColorResObj);
+        GetArkUINodeModifiers()->getCommonModifier()->setBackgroundColor(nativeNode, color.GetValue(), bgColorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -3144,6 +3149,8 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImagePosition(ArkUIRuntimeCall
     DimensionUnit typeX = DimensionUnit::PX;
     DimensionUnit typeY = DimensionUnit::PX;
     bool isAlign = false;
+    RefPtr<ResourceObject> resObjX;
+    RefPtr<ResourceObject> resObjY;
 
     if (secondArg->IsNumber()) {
         int32_t align = secondArg->ToNumber(vm)->Value();
@@ -3152,8 +3159,8 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImagePosition(ArkUIRuntimeCall
     } else {
         CalcDimension x(0, DimensionUnit::VP);
         CalcDimension y(0, DimensionUnit::VP);
-        ArkTSUtils::ParseJsDimensionVp(vm, xArg, x);
-        ArkTSUtils::ParseJsDimensionVp(vm, yArg, y);
+        ArkTSUtils::ParseJsDimensionVp(vm, xArg, x, resObjX);
+        ArkTSUtils::ParseJsDimensionVp(vm, yArg, y, resObjY);
         valueX = x.ConvertToPx();
         valueY = y.ConvertToPx();
         if (x.Unit() == DimensionUnit::PERCENT) {
@@ -3173,8 +3180,10 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImagePosition(ArkUIRuntimeCall
     values[NUM_1] = static_cast<ArkUI_Float32>(valueY);
     types[NUM_1] = static_cast<int32_t>(typeY);
 
+    auto bgImageXRawPtr = AceType::RawPtr(resObjX);
+    auto bgImageYRawPtr = AceType::RawPtr(resObjY);
     GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImagePosition(nativeNode, values, types, isAlign,
-        SIZE_OF_TWO);
+        SIZE_OF_TWO, bgImageXRawPtr, bgImageYRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -3196,10 +3205,15 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImageResizable(ArkUIRuntimeCal
 
     std::vector<ArkUIStringAndFloat> options;
     std::vector<std::optional<CalcDimension>> sliceDimensions;
-    ParseResizableCalcDimensions(runtimeCallInfo, NUM_1, NUM_4, sliceDimensions, CalcDimension(0.0));
+    std::vector<void*> bgImageResizableArray;
+    std::vector<RefPtr<ResourceObject>> bgImageResizableResObjArray;
+    ParseResizableCalcDimensions(runtimeCallInfo, NUM_1, NUM_4, sliceDimensions, CalcDimension(0.0), bgImageResizableResObjArray);
+    for (unsigned int index = 0; index < NUM_4; index++) {
+        auto bgImageResizableRawPtr = AceType::RawPtr(bgImageResizableResObjArray[index]);
+        bgImageResizableArray.push_back(bgImageResizableRawPtr);
+    }
     PushDimensionsToVector(options, sliceDimensions);
-
-    GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImageResizable(nativeNode, options.data());
+    GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImageResizable(nativeNode, options.data(), bgImageResizableArray);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -3226,6 +3240,8 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImageSize(ArkUIRuntimeCallInfo
     double valueWidth = 0.0;
     OHOS::Ace::BackgroundImageSizeType typeHeight = OHOS::Ace::BackgroundImageSizeType::AUTO;
     double valueHeight = 0.0;
+    RefPtr<ResourceObject> resObjWidth;
+    RefPtr<ResourceObject> resObjHeight;
 
     if (imageSizeArg->IsNumber()) {
         auto sizeType = imageSizeArg->ToNumber(vm)->Value();
@@ -3238,8 +3254,8 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImageSize(ArkUIRuntimeCallInfo
     } else {
         CalcDimension width;
         CalcDimension height;
-        ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width);
-        ArkTSUtils::ParseJsDimensionVp(vm, heightArg, height);
+        ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width, resObjWidth);
+        ArkTSUtils::ParseJsDimensionVp(vm, heightArg, height, resObjHeight);
 
         valueWidth = width.ConvertToPx();
         valueHeight = height.ConvertToPx();
@@ -3254,8 +3270,11 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImageSize(ArkUIRuntimeCallInfo
             valueHeight = height.Value() * FULL_DIMENSION;
         }
     }
-    GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImageSize(
-        nativeNode, valueWidth, valueHeight, static_cast<int32_t>(typeWidth), static_cast<int32_t>(typeHeight));
+    auto bgImageSizeWidthRawPtr = AceType::RawPtr(resObjWidth);
+    auto bgImageSizeHeightRawPtr = AceType::RawPtr(resObjHeight);
+    GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImageSize(nativeNode, valueWidth, valueHeight,
+        static_cast<int32_t>(typeWidth), static_cast<int32_t>(typeHeight), bgImageSizeWidthRawPtr,
+        bgImageSizeHeightRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -3309,14 +3328,17 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImage(ArkUIRuntimeCallInfo *ru
     } else {
         GetArkUINodeModifiers()->getCommonModifier()->resetBackgroundImageSyncMode(nativeNode);
     }
+    RefPtr<ResourceObject> backgroundImageResObj;
+    auto bgImageRawPtr = AceType::RawPtr(backgroundImageResObj);
     if (srcArg->IsString(vm)) {
         src = srcArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImage(
-            nativeNode, src.c_str(), bundle.c_str(), module.c_str(), repeatIndex);
-    } else if (ArkTSUtils::ParseJsMedia(vm, srcArg, src)) {
+            nativeNode, src.c_str(), bundle.c_str(), module.c_str(), repeatIndex, bgImageRawPtr);
+    } else if (ArkTSUtils::ParseJsMedia(vm, srcArg, src, backgroundImageResObj)) {
         ArkTSUtils::GetJsMediaBundleInfo(vm, srcArg, bundle, module);
+        bgImageRawPtr = AceType::RawPtr(backgroundImageResObj);
         GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImage(
-            nativeNode, src.c_str(), bundle.c_str(), module.c_str(), repeatIndex);
+            nativeNode, src.c_str(), bundle.c_str(), module.c_str(), repeatIndex, bgImageRawPtr);
     } else {
 #if defined(PIXEL_MAP_SUPPORTED)
         if (ArkTSUtils::IsDrawable(vm, srcArg)) {

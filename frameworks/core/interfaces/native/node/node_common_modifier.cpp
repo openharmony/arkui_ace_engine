@@ -22,6 +22,9 @@
 #include "core/animation/animation_pub.h"
 #include "core/animation/curves.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_wrapper.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/color.h"
@@ -31,6 +34,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
@@ -106,6 +110,7 @@ const float ERROR_FLOAT_CODE = -1.0f;
 constexpr int32_t MAX_POINTS = 10;
 constexpr int32_t MAX_HISTORY_EVENT_COUNT = 20;
 constexpr int32_t ERROR_CODE_NO_ERROR = 0;
+constexpr double FULL_DIMENSION = 100.0;
 constexpr Dimension ARROW_ZERO_PERCENT = 0.0_pct;
 constexpr Dimension ARROW_HALF_PERCENT = 0.5_pct;
 constexpr Dimension ARROW_ONE_HUNDRED_PERCENT = 1.0_pct;
@@ -679,11 +684,17 @@ void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, Ar
     bgImgPosition.SetSizeY(animatableDimensionY);
 }
 
-void SetBackgroundColor(ArkUINodeHandle node, uint32_t color)
+void SetBackgroundColor(ArkUINodeHandle node, uint32_t color, void* bgColorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetBackgroundColor(frameNode, Color(color));
+    if (!SystemProperties::ConfigChangePerform() || !bgColorRawPtr) {
+        ViewAbstract::SetBackgroundColor(frameNode, Color(color));
+    } else {
+        auto* bgColor = reinterpret_cast<ResourceObject*>(bgColorRawPtr);
+        auto backgroundColorResObj = AceType::Claim(bgColor);
+        ViewAbstract::SetBackgroundColor(frameNode, Color(color), backgroundColorResObj);
+    }
 }
 
 void ResetBackgroundColor(ArkUINodeHandle node)
@@ -1910,8 +1921,52 @@ void ResetBorder(ArkUINodeHandle node)
     ViewAbstract::SetDashWidth(frameNode, Dimension(-1));
 }
 
-void SetBackgroundImagePosition(
-    ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* types, ArkUI_Bool isAlign, ArkUI_Int32 size)
+void SetBackgroundImagePositionUpdateFunc(
+    BackgroundImagePosition& bgImgPosition, void* bgImageXRawPtr, void* bgImageYRawPtr)
+{
+    CHECK_NULL_VOID(bgImageXRawPtr);
+    auto* bgImageX = reinterpret_cast<ResourceObject*>(bgImageXRawPtr);
+    auto resObjX = AceType::Claim(bgImageX);
+    auto&& updateFuncX = [](const RefPtr<ResourceObject>& resObj, BackgroundImagePosition& position) {
+        CalcDimension x;
+        double valueX;
+        DimensionUnit typeX;
+        ResourceParseUtils::ParseResDimensionVp(resObj, x);
+        if (x.Unit() == DimensionUnit::PERCENT) {
+            valueX = x.Value();
+            typeX = DimensionUnit::PERCENT;
+        } else {
+            valueX = x.ConvertToPx();
+            typeX = DimensionUnit::PX;
+        }
+        AnimationOption option = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
+        position.SetSizeX(AnimatableDimension(valueX, typeX, option));
+    };
+    bgImgPosition.AddResource("backgroundImagePositionX", resObjX, std::move(updateFuncX));
+
+    CHECK_NULL_VOID(bgImageYRawPtr);
+    auto* bgImageY = reinterpret_cast<ResourceObject*>(bgImageYRawPtr);
+    auto resObjY = AceType::Claim(bgImageY);
+    auto&& updateFuncY = [](const RefPtr<ResourceObject>& resObj, BackgroundImagePosition& position) {
+        CalcDimension y;
+        double valueY;
+        DimensionUnit typeY;
+        ResourceParseUtils::ParseResDimensionVp(resObj, y);
+        if (y.Unit() == DimensionUnit::PERCENT) {
+            valueY = y.Value();
+            typeY = DimensionUnit::PERCENT;
+        } else {
+            valueY = y.ConvertToPx();
+            typeY = DimensionUnit::PX;
+        }
+        AnimationOption option = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
+        position.SetSizeY(AnimatableDimension(valueY, typeY, option));
+    };
+    bgImgPosition.AddResource("backgroundImagePositionY", resObjY, std::move(updateFuncY));
+}
+
+void SetBackgroundImagePosition(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* types,
+    ArkUI_Bool isAlign, ArkUI_Int32 size, void* bgImageXRawPtr, void* bgImageYRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1919,6 +1974,7 @@ void SetBackgroundImagePosition(
         return;
     }
     BackgroundImagePosition bgImgPosition;
+    SetBackgroundImagePositionUpdateFunc(bgImgPosition, bgImageXRawPtr, bgImageYRawPtr);
     double valueX = values[NUM_0];
     double valueY = values[NUM_1];
     DimensionUnit typeX = static_cast<OHOS::Ace::DimensionUnit>(types[NUM_0]);
@@ -1937,7 +1993,61 @@ void ResetBackgroundImagePosition(ArkUINodeHandle node)
     ViewAbstract::SetBackgroundImagePosition(frameNode, bgImgPosition);
 }
 
-void SetResizableFromVec(ImageResizableSlice& resizable, const ArkUIStringAndFloat* options)
+void SetBackgroundImageResizableUpdateFunc(ImageResizableSlice& resizable, void* bgImageResizableRawPtr, ResizableOption direction)
+{
+    CHECK_NULL_VOID(bgImageResizableRawPtr);
+    auto* bgImageResizable = reinterpret_cast<ResourceObject*>(bgImageResizableRawPtr);
+    auto resObj = AceType::Claim(bgImageResizable);
+    auto&& updateFunc = [direction](const RefPtr<ResourceObject>& resObj, ImageResizableSlice& resizable) {
+        std::optional<CalcDimension> optDimension;
+        CalcDimension dimension(CalcDimension(0.0));
+        CalcDimension defaultDimension(CalcDimension(0.0));
+        if (ResourceParseUtils::ParseResDimensionVp(resObj, dimension)) {
+            optDimension = dimension;
+        } else {
+            optDimension = defaultDimension;
+        }
+
+        auto hasValue = optDimension.has_value();
+        DimensionUnit unit = DimensionUnit::PX;
+        ArkUIStringAndFloat value = { 0.0, nullptr };
+        if (hasValue) {
+            unit = optDimension.value().Unit();
+            if (unit == DimensionUnit::CALC) {
+                value.valueStr = optDimension.value().CalcValue().c_str();
+            } else {
+                value.value = optDimension.value().Value();
+            }
+        }
+        std::vector<ArkUIStringAndFloat> options;
+        options.push_back(ArkUIStringAndFloat { static_cast<double>(hasValue), nullptr });
+        options.push_back(value);
+        options.push_back(ArkUIStringAndFloat { static_cast<double>(unit), nullptr });
+        SetCalcDimension(optDimension, options.data(), NUM_4, NUM_0);
+        if (optDimension.has_value()) {
+            resizable.SetEdgeSlice(direction, optDimension.value());
+        }
+    };
+    switch (direction) {
+        case ResizableOption::LEFT:
+            resizable.AddResource("backgroundImageResizableLeft", resObj, std::move(updateFunc));
+            break;
+        case ResizableOption::RIGHT:
+            resizable.AddResource("backgroundImageResizableRight", resObj, std::move(updateFunc));
+            break;
+        case ResizableOption::TOP:
+            resizable.AddResource("backgroundImageResizableTop", resObj, std::move(updateFunc));
+            break;
+        case ResizableOption::BOTTOM:
+            resizable.AddResource("backgroundImageResizableBottom", resObj, std::move(updateFunc));
+            break;
+        default:
+            break;
+    }
+}
+
+void SetResizableFromVec(
+    ImageResizableSlice& resizable, const ArkUIStringAndFloat* options, std::vector<void*>& bgImageResizableArray)
 {
     std::vector<ResizableOption> directions = { ResizableOption::LEFT, ResizableOption::TOP, ResizableOption::RIGHT,
         ResizableOption::BOTTOM };
@@ -1946,17 +2056,21 @@ void SetResizableFromVec(ImageResizableSlice& resizable, const ArkUIStringAndFlo
         SetCalcDimension(optDimension, options, NUM_13, index);
         if (optDimension.has_value()) {
             auto direction = directions[index / NUM_3];
+            if ((index / NUM_3) < bgImageResizableArray.size()) {
+                SetBackgroundImageResizableUpdateFunc(resizable, bgImageResizableArray[index / NUM_3], direction);
+            }
             resizable.SetEdgeSlice(direction, optDimension.value());
         }
     }
 }
 
-void SetBackgroundImageResizable(ArkUINodeHandle node, ArkUIStringAndFloat* options)
+void SetBackgroundImageResizable(
+    ArkUINodeHandle node, ArkUIStringAndFloat* options, std::vector<void*>& bgImageResizableArray)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageResizableSlice resizable;
-    SetResizableFromVec(resizable, options);
+    SetResizableFromVec(resizable, options, bgImageResizableArray);
     ViewAbstract::SetBackgroundImageResizableSlice(frameNode, resizable);
 }
 
@@ -1982,11 +2096,49 @@ void ResetBackgroundImageResizable(ArkUINodeHandle node)
 }
 
 void SetBackgroundImageSize(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
-    ArkUI_Int32 typeWidth, ArkUI_Int32 typeHeight)
+    ArkUI_Int32 typeWidth, ArkUI_Int32 typeHeight, void* bgImageSizeWidthRawPtr, void* bgImageSizeHeightRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     BackgroundImageSize bgImgSize;
+    if (bgImageSizeWidthRawPtr) {
+        auto* bgImageSizeWidth = reinterpret_cast<ResourceObject*>(bgImageSizeWidthRawPtr);
+        auto resObjWidth = AceType::Claim(bgImageSizeWidth);
+        auto&& updateFuncWidth = [](const RefPtr<ResourceObject>& resObj, BackgroundImageSize& bgImgSize) {
+            CalcDimension width;
+            double valueWidth = 0.0;
+            OHOS::Ace::BackgroundImageSizeType typeWidth;
+            ResourceParseUtils::ParseResDimensionVp(resObj, width);
+            valueWidth = width.ConvertToPx();
+            typeWidth = BackgroundImageSizeType::LENGTH;
+            if (width.Unit() == DimensionUnit::PERCENT) {
+                typeWidth = BackgroundImageSizeType::PERCENT;
+                valueWidth = width.Value() * FULL_DIMENSION;
+            }
+            bgImgSize.SetSizeTypeX(static_cast<OHOS::Ace::BackgroundImageSizeType>(typeWidth));
+            bgImgSize.SetSizeValueX(valueWidth);
+        };
+        bgImgSize.AddResource("backgroundImageSizeWidth", resObjWidth, std::move(updateFuncWidth));
+    }
+    if (bgImageSizeHeightRawPtr) {
+        auto* bgImageSizeHeight = reinterpret_cast<ResourceObject*>(bgImageSizeHeightRawPtr);
+        auto resObjHeight = AceType::Claim(bgImageSizeHeight);
+        auto&& updateFuncHeight = [](const RefPtr<ResourceObject>& resObj, BackgroundImageSize& bgImgSize) {
+            CalcDimension height;
+            double valueHeight = 0.0;
+            OHOS::Ace::BackgroundImageSizeType typeHeight;
+            ResourceParseUtils::ParseResDimensionVp(resObj, height);
+            valueHeight = height.ConvertToPx();
+            typeHeight = BackgroundImageSizeType::LENGTH;
+            if (height.Unit() == DimensionUnit::PERCENT) {
+                typeHeight = BackgroundImageSizeType::PERCENT;
+                valueHeight = height.Value() * FULL_DIMENSION;
+            }
+            bgImgSize.SetSizeTypeY(static_cast<OHOS::Ace::BackgroundImageSizeType>(typeHeight));
+            bgImgSize.SetSizeValueY(valueHeight);
+        };
+        bgImgSize.AddResource("backgroundImageSizeHeight", resObjHeight, std::move(updateFuncHeight));
+    }
     bgImgSize.SetSizeTypeX(static_cast<OHOS::Ace::BackgroundImageSizeType>(typeWidth));
     bgImgSize.SetSizeValueX(valueWidth);
     bgImgSize.SetSizeTypeY(static_cast<OHOS::Ace::BackgroundImageSizeType>(typeHeight));
@@ -2034,15 +2186,22 @@ void ResetBackgroundImageSize(ArkUINodeHandle node)
     ViewAbstract::SetBackgroundImageSize(frameNode, bgImgSize);
 }
 
-void SetBackgroundImage(
-    ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundle, ArkUI_CharPtr module, ArkUI_Int32 repeatIndex)
+void SetBackgroundImage(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundle,
+    ArkUI_CharPtr module, ArkUI_Int32 repeatIndex, void* bgImageRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::string srcStr(src);
     std::string bundleStr(bundle);
     std::string moduleStr(module);
-    ViewAbstract::SetBackgroundImage(frameNode, OHOS::Ace::ImageSourceInfo { srcStr, bundleStr, moduleStr });
+    if (!SystemProperties::ConfigChangePerform() || !bgImageRawPtr) {
+        ViewAbstract::SetBackgroundImage(frameNode, OHOS::Ace::ImageSourceInfo { srcStr, bundleStr, moduleStr });
+    } else {
+        auto* bgImage = reinterpret_cast<ResourceObject*>(bgImageRawPtr);
+        auto backgroundImageResObj = AceType::Claim(bgImage);
+        ViewAbstract::SetBackgroundImage(
+            frameNode, OHOS::Ace::ImageSourceInfo{srcStr, bundleStr, moduleStr}, backgroundImageResObj);
+    }
     auto repeat = static_cast<ImageRepeat>(repeatIndex);
     if (repeat >= OHOS::Ace::ImageRepeat::NO_REPEAT && repeat <= OHOS::Ace::ImageRepeat::REPEAT) {
         ViewAbstract::SetBackgroundImageRepeat(frameNode, repeat);

@@ -26,6 +26,7 @@
 #include "base/geometry/rect.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS {
 
@@ -80,6 +81,11 @@ struct ImageResizableSlice {
     Dimension right;
     Dimension top;
     Dimension bottom;
+    struct ResourceUpdater {
+        RefPtr<ResourceObject> obj;
+        std::function<void(const RefPtr<ResourceObject>&, ImageResizableSlice&)> updateFunc;
+    };
+    std::unordered_map<std::string, ResourceUpdater> resMap_;
     std::string ToString() const
     {
         std::string result;
@@ -136,6 +142,23 @@ struct ImageResizableSlice {
                 break;
             default:
                 break;
+        }
+    }
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, ImageResizableSlice&)>&& updateFunc)
+    {
+        if (resObj && updateFunc) {
+            resMap_[key] = { resObj, std::move(updateFunc) };
+        }
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.obj, *this);
         }
     }
 };
