@@ -1455,6 +1455,8 @@ typedef struct NavDestinationTransitionDelegate NavDestinationTransitionDelegate
 typedef struct Opt_NavDestinationTransitionDelegate Opt_NavDestinationTransitionDelegate;
 typedef struct NavExtender_OnUpdateStack NavExtender_OnUpdateStack;
 typedef struct Opt_NavExtender_OnUpdateStack Opt_NavExtender_OnUpdateStack;
+typedef struct NodeContainer_AboutToResizeCallback NodeContainer_AboutToResizeCallback;
+typedef struct Opt_NodeContainer_AboutToResizeCallback Opt_NodeContainer_AboutToResizeCallback;
 typedef struct OnAdsBlockedCallback OnAdsBlockedCallback;
 typedef struct Opt_OnAdsBlockedCallback Opt_OnAdsBlockedCallback;
 typedef struct OnAlphabetIndexerPopupSelectCallback OnAlphabetIndexerPopupSelectCallback;
@@ -10766,6 +10768,15 @@ typedef struct Opt_NavExtender_OnUpdateStack {
     Ark_Tag tag;
     NavExtender_OnUpdateStack value;
 } Opt_NavExtender_OnUpdateStack;
+typedef struct NodeContainer_AboutToResizeCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Size size);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Size size);
+} NodeContainer_AboutToResizeCallback;
+typedef struct Opt_NodeContainer_AboutToResizeCallback {
+    Ark_Tag tag;
+    NodeContainer_AboutToResizeCallback value;
+} Opt_NodeContainer_AboutToResizeCallback;
 typedef struct OnAdsBlockedCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_AdsBlockedDetails details);
@@ -20902,7 +20913,7 @@ typedef struct GENERATED_ArkUINodeContainerModifier {
     void (*addNodeContainerRootNode)(Ark_NativePointer self, Ark_NativePointer value);
     void (*setAboutToAppear)(Ark_NativePointer self, const Callback_Void* value);
     void (*setAboutToDisappear)(Ark_NativePointer self, const Callback_Void* value);
-    void (*setAboutToResize)(Ark_NativePointer self, const Callback_Number_Number_Void* value);
+    void (*setAboutToResize)(Ark_NativePointer self, const NodeContainer_AboutToResizeCallback* value);
     void (*setOnAttach)(Ark_NativePointer self, const Callback_Void* value);
     void (*setOnDetach)(Ark_NativePointer self, const Callback_Void* value);
     void (*setOnTouchEvent)(Ark_NativePointer self, const Opt_Callback_TouchEvent_Void* value);

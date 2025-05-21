@@ -87,8 +87,8 @@ import { Matrix2D, Matrix2DInternal } from "./../matrix2d"
 import { ColorMode, LayoutDirection } from "./../stateManagement"
 import { Component3DAttribute, ModelType, SceneOptions } from "./../component3d"
 import { CustomDialogController, CustomDialogControllerInternal, CustomDialogControllerOptions } from "./../customDialogController"
-import { DrawContext, Rect, LengthMetricsUnit, LengthUnit, ShapeClip, ShapeClipInternal, RoundRect, Circle, CommandPath, ShapeMask, ShapeMaskInternal, Size, Vector2, Vector3, BorderRadiuses_graphics, CornerRadius, Edges, Matrix4 } from "./../arkui-graphics"
-import { LengthMetrics, LengthMetricsInternal, ColorMetrics, ColorMetricsInternal, Frame } from "../../Graphics"
+import { DrawContext, Rect, LengthMetricsUnit, LengthUnit, ShapeClip, ShapeClipInternal, RoundRect, Circle, CommandPath, ShapeMask, ShapeMaskInternal, Vector2, Vector3, BorderRadiuses_graphics, CornerRadius, Edges, Matrix4 } from "./../arkui-graphics"
+import { LengthMetrics, LengthMetricsInternal, ColorMetrics, ColorMetricsInternal, Frame, Size } from "../../Graphics"
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, LinearGradient, LinearGradientInternal, ColorStop, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
 import { DatePickerMode, Callback_DatePickerResult_Void, DatePickerResult, DatePickerOptions, LunarSwitchStyle, DatePickerDialogOptions } from "./../datePicker"
@@ -170,6 +170,7 @@ import { MenuItemGroupOptions } from "./../menuItemGroup"
 import { MenuItemOptions } from "./../menuItem"
 import { TextBackgroundStyle } from "./../span"
 import { DividerStyle as DividerStyle_sidebar } from "./../sidebar"
+import { NodeContainer_AboutToResizeCallback } from "./../nodeContainer"
 
 export class Deserializer extends DeserializerBase {
     constructor(data: KSerializerBuffer | KUint8ArrayPtr, length: int32) {
@@ -4507,6 +4508,20 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     (isSync) ? (InteropNativeModule._CallCallbackSync(-588228933, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-588228933, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readNodeContainer_AboutToResizeCallback(isSync: boolean = false): NodeContainer_AboutToResizeCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (size: Size):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeSize(size);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1817630617, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1817630617, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }

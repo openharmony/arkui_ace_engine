@@ -16,8 +16,8 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { Size, Vector2, Vector3, Matrix4, Edges, BorderRadiuses_graphics, ShapeMask, ShapeMaskInternal, ShapeClip, ShapeClipInternal, DrawContext } from "./arkui-graphics"
-import { LengthMetricsUnit, Frame } from "../Graphics"
+import { Vector2, Vector3, Matrix4, Edges, BorderRadiuses_graphics, ShapeMask, ShapeMaskInternal, ShapeClip, ShapeClipInternal, DrawContext } from "./arkui-graphics"
+import { LengthMetricsUnit, Frame, Size } from "../Graphics"
 import { Position, EdgeStyles } from "./units"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"

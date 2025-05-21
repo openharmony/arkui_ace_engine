@@ -4561,6 +4561,24 @@ void deserializeAndCallSyncNavExtender_OnUpdateStack(Ark_VMContext vmContext, KS
         reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointer());
     _callSync(vmContext, _resourceId);
 }
+void deserializeAndCallNodeContainer_AboutToResizeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Size size)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_Size size = thisDeserializer.readSize();
+    _call(_resourceId, size);
+}
+void deserializeAndCallSyncNodeContainer_AboutToResizeCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Size size)>(thisDeserializer.readPointer());
+    Ark_Size size = thisDeserializer.readSize();
+    _callSync(vmContext, _resourceId, size);
+}
 void deserializeAndCallOnAdsBlockedCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
@@ -6903,6 +6921,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case -614475458/*Kind_MenuOnAppearCallback*/: return deserializeAndCallMenuOnAppearCallback(thisArray, thisLength);
         case -1066063065/*Kind_NavDestinationTransitionDelegate*/: return deserializeAndCallNavDestinationTransitionDelegate(thisArray, thisLength);
         case -588228933/*Kind_NavExtender_OnUpdateStack*/: return deserializeAndCallNavExtender_OnUpdateStack(thisArray, thisLength);
+        case -1817630617/*Kind_NodeContainer_AboutToResizeCallback*/: return deserializeAndCallNodeContainer_AboutToResizeCallback(thisArray, thisLength);
         case 1572284740/*Kind_OnAdsBlockedCallback*/: return deserializeAndCallOnAdsBlockedCallback(thisArray, thisLength);
         case 726938390/*Kind_OnAlphabetIndexerPopupSelectCallback*/: return deserializeAndCallOnAlphabetIndexerPopupSelectCallback(thisArray, thisLength);
         case -1956514817/*Kind_OnAlphabetIndexerRequestPopupDataCallback*/: return deserializeAndCallOnAlphabetIndexerRequestPopupDataCallback(thisArray, thisLength);
@@ -7195,6 +7214,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case -614475458/*Kind_MenuOnAppearCallback*/: return deserializeAndCallSyncMenuOnAppearCallback(vmContext, thisArray, thisLength);
         case -1066063065/*Kind_NavDestinationTransitionDelegate*/: return deserializeAndCallSyncNavDestinationTransitionDelegate(vmContext, thisArray, thisLength);
         case -588228933/*Kind_NavExtender_OnUpdateStack*/: return deserializeAndCallSyncNavExtender_OnUpdateStack(vmContext, thisArray, thisLength);
+        case -1817630617/*Kind_NodeContainer_AboutToResizeCallback*/: return deserializeAndCallSyncNodeContainer_AboutToResizeCallback(vmContext, thisArray, thisLength);
         case 1572284740/*Kind_OnAdsBlockedCallback*/: return deserializeAndCallSyncOnAdsBlockedCallback(vmContext, thisArray, thisLength);
         case 726938390/*Kind_OnAlphabetIndexerPopupSelectCallback*/: return deserializeAndCallSyncOnAlphabetIndexerPopupSelectCallback(vmContext, thisArray, thisLength);
         case -1956514817/*Kind_OnAlphabetIndexerRequestPopupDataCallback*/: return deserializeAndCallSyncOnAlphabetIndexerRequestPopupDataCallback(vmContext, thisArray, thisLength);

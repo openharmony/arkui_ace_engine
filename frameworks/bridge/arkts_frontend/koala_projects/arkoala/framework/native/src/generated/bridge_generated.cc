@@ -10553,16 +10553,16 @@ void impl_NodeContainerInterface_setAboutToResize(
 {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
-        Callback_Number_Number_Void value_value = { thisDeserializer.readCallbackResource(),
-            reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_Number width, const Ark_Number height)>(
-                thisDeserializer.readPointerOrDefault(
-                    reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Number_Number_Void)))),
-            reinterpret_cast<void (*)(
-                Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number width, const Ark_Number height)>(
+        NodeContainer_AboutToResizeCallback callback_value = { thisDeserializer.readCallbackResource(),
+            reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_Size size)>(
                 thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(
-                    getManagedCallbackCallerSync(Kind_Callback_Number_Number_Void)))) };
+                    getManagedCallbackCaller(Kind_NodeContainer_AboutToResizeCallback)))),
+            reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Size size)>(
+                thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(
+                    getManagedCallbackCallerSync(Kind_NodeContainer_AboutToResizeCallback)))) };
+        ;
         GetNodeModifiers()->getNodeContainerModifier()->setAboutToResize(
-            self, (const Callback_Number_Number_Void*)&value_value);
+            self, (const NodeContainer_AboutToResizeCallback*)&callback_value);
 }
 KOALA_INTEROP_DIRECT_V3(NodeContainerInterface_setAboutToResize, Ark_NativePointer, KSerializerBuffer, Ark_Int32)
 void impl_NodeContainerInterface_setOnAttach(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength)
