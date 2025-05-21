@@ -1775,6 +1775,14 @@ bool TextFieldModelNG::GetShowCounter(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, ShowCounter, value, frameNode, value);
     return static_cast<int>(value);
 }
+
+uint32_t TextFieldModelNG::GetMinLines(FrameNode* frameNode)
+{
+    uint32_t value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, MinLines, value, frameNode, value);
+    return value;
+}
+
 int TextFieldModelNG::GetCounterType(FrameNode* frameNode)
 {
     int value = -1;
