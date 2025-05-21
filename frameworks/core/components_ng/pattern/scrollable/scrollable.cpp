@@ -1259,7 +1259,15 @@ void Scrollable::StartSpringMotion(
         GetSpringProperty();
     }
     springAnimationCount_++;
-    springOffsetProperty_->Set(mainPosition);
+    if (AnimationUtils::IsImplicitAnimationOpen()) {
+        AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this), mainPosition]() {
+            auto scrollable = weak.Upgrade();
+            CHECK_NULL_VOID(scrollable);
+            scrollable->springOffsetProperty_->Set(mainPosition);
+        });
+    } else {
+        springOffsetProperty_->Set(mainPosition);
+    }
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(springResponse_, DEFAULT_SPRING_DAMP, 0.0f);
     option.SetCurve(curve);
