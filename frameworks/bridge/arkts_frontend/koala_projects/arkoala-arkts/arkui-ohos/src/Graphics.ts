@@ -522,12 +522,7 @@ export interface Edges<T> {
     bottom?: T;
     right?: T;
 }
-export interface CornerRadius {
-    topLeft: Vector2;
-    topRight: Vector2;
-    bottomLeft: Vector2;
-    bottomRight: Vector2;
-}
+export type CornerRadius = Corners<Vector2>
 export interface Corners<T> {
     topLeft: T;
     topRight: T;

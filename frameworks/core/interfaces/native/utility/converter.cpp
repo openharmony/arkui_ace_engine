@@ -15,11 +15,13 @@
 
 #include <cerrno>
 #include <cstdint>
+#include "arkoala_api_generated.h"
 
 #include "converter.h"
 
 #include "bridge/common/utils/utils.h"
 #include "core/common/card_scope.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
@@ -2047,6 +2049,18 @@ BorderColorProperty Convert(const Ark_ResourceColor& src)
     if (auto borderColor = Converter::OptConvert<Color>(src); borderColor.has_value()) {
         dst.SetColor(borderColor.value());
     }
+    return dst;
+}
+
+template<>
+BorderColorProperty Convert(const Ark_EdgesNumber& src)
+{
+    BorderColorProperty dst;
+    dst.leftColor = OptConvert<Color>(src.left.value);
+    dst.topColor = OptConvert<Color>(src.top.value);
+    dst.rightColor = OptConvert<Color>(src.right.value);
+    dst.bottomColor = OptConvert<Color>(src.bottom.value);
+    dst.multiValued = true;
     return dst;
 }
 

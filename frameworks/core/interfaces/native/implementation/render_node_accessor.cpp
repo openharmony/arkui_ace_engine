@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <cstdint>
 #include <optional>
 
 #include "arkoala_api_generated.h"
@@ -24,7 +25,8 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG {
+namespace GeneratedModifier {
 namespace {
 constexpr int32_t ARK_UNION_UNDEFINED = 1;
 enum class LengthMetricsUnit : int32_t { DEFAULT = 0, PX };
@@ -174,7 +176,7 @@ void SetRectMaskImpl(Ark_RenderNode peer, const Ark_Rect* rect, const Ark_Number
     auto right = Converter::Convert<float>(rect->right);
     auto bottom = Converter::Convert<float>(rect->bottom);
     RectF rectF(left, top, right - left, bottom - top);
-    ShapeMaskProperty property { Converter::Convert<float>(*fillColor), Converter::Convert<float>(*strokeColor),
+    ShapeMaskProperty property { Converter::Convert<uint32_t>(*fillColor), Converter::Convert<uint32_t>(*strokeColor),
         Converter::Convert<float>(*strokeWidth) };
     renderContext->SetRectMask(rectF, property);
     renderContext->RequestNextFrame();
@@ -203,7 +205,7 @@ void SetCircleMaskImpl(Ark_RenderNode peer, const Ark_Circle* circle, const Ark_
     Dimension radius(radiusValue, DimensionUnit::PX);
     circleValue.SetRadius(radius);
 
-    ShapeMaskProperty property { Converter::Convert<float>(*fillColor), Converter::Convert<float>(*strokeColor),
+    ShapeMaskProperty property { Converter::Convert<uint32_t>(*fillColor), Converter::Convert<uint32_t>(*strokeColor),
         Converter::Convert<float>(*strokeWidth) };
 
     renderContext->SetCircleMask(circleValue, property);
@@ -241,7 +243,7 @@ void SetRoundRectMaskImpl(Ark_RenderNode peer, const Ark_RoundRect* roundRect, c
     RectF rectValue(left, top, right - left, bottom - top);
     roundRectInstance.SetRect(rectValue);
 
-    ShapeMaskProperty property { Converter::Convert<float>(*fillColor), Converter::Convert<float>(*strokeColor),
+    ShapeMaskProperty property { Converter::Convert<uint32_t>(*fillColor), Converter::Convert<uint32_t>(*strokeColor),
         Converter::Convert<float>(*strokeWidth) };
 
     renderContext->SetRoundRectMask(roundRectInstance, property);
@@ -265,7 +267,7 @@ void SetOvalMaskImpl(Ark_RenderNode peer, const Ark_Rect* rect, const Ark_Number
     auto bottom = Converter::Convert<float>(rect->bottom);
     RectF rectValue(left, top, right - left, bottom - top);
 
-    ShapeMaskProperty property { Converter::Convert<float>(*fillColor), Converter::Convert<float>(*strokeColor),
+    ShapeMaskProperty property { Converter::Convert<uint32_t>(*fillColor), Converter::Convert<uint32_t>(*strokeColor),
         Converter::Convert<float>(*strokeWidth) };
 
     renderContext->SetOvalMask(rectValue, property);
@@ -285,7 +287,7 @@ void SetPathImpl(Ark_RenderNode peer, const Ark_CommandPath* path, const Ark_Num
 
     auto pathValue = Converter::Convert<std::string>(*path);
 
-    ShapeMaskProperty property { Converter::Convert<float>(*fillColor), Converter::Convert<float>(*strokeColor),
+    ShapeMaskProperty property { Converter::Convert<uint32_t>(*fillColor), Converter::Convert<uint32_t>(*strokeColor),
         Converter::Convert<float>(*strokeWidth) };
 
     renderContext->SetCommandPathMask(pathValue, property);
@@ -669,14 +671,9 @@ void SetBorderStyleImpl(Ark_RenderNode peer, const Ark_EdgeStyles* borderStyle)
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    BorderStyleProperty borderStyleProperty { .styleLeft = static_cast<BorderStyle>(left),
-        .styleRight = static_cast<BorderStyle>(right),
-        .styleTop = static_cast<BorderStyle>(top),
-        .styleBottom = static_cast<BorderStyle>(bottom),
-        .multiValued = true };
-    renderContext->SetBorderStyle(borderStyleProperty);
+
+    auto borderStyleProperty = Converter::Convert<BorderStyleProperty>(*borderStyle);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderStyle, borderStyleProperty, frameNode);
 }
 Ark_EdgesNumber GetBorderWidthImpl(Ark_RenderNode peer)
 {
@@ -718,21 +715,21 @@ void SetBorderColorImpl(Ark_RenderNode peer, const Ark_EdgesNumber* borderColor)
         LOGW("This renderNode is nullptr when SetBorderColor !");
         return;
     }
-    auto left = Converter::Convert<Dimension>(borderColor->left.value);
-    auto right = Converter::Convert<Dimension>(borderColor->right.value);
-    auto top = Converter::Convert<Dimension>(borderColor->top.value);
-    auto bottom = Converter::Convert<Dimension>(borderColor->bottom.value);
+    auto left = Converter::Convert<uint32_t>(borderColor->left.value);
+    auto right = Converter::Convert<uint32_t>(borderColor->right.value);
+    auto top = Converter::Convert<uint32_t>(borderColor->top.value);
+    auto bottom = Converter::Convert<uint32_t>(borderColor->bottom.value);
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    BorderColorProperty borderColorProperty { .leftColor = Color(left.Value()),
-        .rightColor = Color(right.Value()),
-        .topColor = Color(top.Value()),
-        .bottomColor = Color(bottom.Value()),
+    BorderColorProperty borderColorProperty { .leftColor = Color(left),
+        .rightColor = Color(right),
+        .topColor = Color(top),
+        .bottomColor = Color(bottom),
         .multiValued = true };
-    renderContext->UpdateBorderColor(borderColorProperty);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColorProperty, frameNode);
 }
 Ark_BorderRadiuses_graphics GetBorderRadiusImpl(Ark_RenderNode peer)
 {
@@ -869,5 +866,5 @@ const GENERATED_ArkUIRenderNodeAccessor* GetRenderNodeAccessor()
     };
     return &RenderNodeAccessorImpl;
 }
-
-} // namespace OHOS::Ace::NG::GeneratedModifier
+} // namespace GeneratedModifier
+} // namespace OHOS::Ace::NG
