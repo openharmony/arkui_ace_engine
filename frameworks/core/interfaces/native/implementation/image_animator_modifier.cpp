@@ -65,7 +65,7 @@ ImageProperties Convert(const Ark_ImageFrameInfo& src)
                 options.bundleName = bundleName;
             }
         },
-        [&options](const Ark_PixelMap& srcArkPixelMap) {
+        [&options](const Ark_image_PixelMap& srcArkPixelMap) {
             options.pixelMap = Converter::Convert<RefPtr<PixelMap>>(srcArkPixelMap);
         },
         []() {}
@@ -150,14 +150,6 @@ void FixedSizeImpl(Ark_NativePointer node,
         return;
     }
     ImageAnimatorModelNG::SetFixedSize(frameNode, *convValue);
-}
-void PreDecodeImpl(Ark_NativePointer node,
-                   const Opt_Number* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ImageAnimatorModelNG::SetPreDecode(frameNode, convValue);
 }
 void FillModeImpl(Ark_NativePointer node,
                   const Opt_FillMode* value)
@@ -270,7 +262,6 @@ const GENERATED_ArkUIImageAnimatorModifier* GetImageAnimatorModifier()
         ImageAnimatorAttributeModifier::DurationImpl,
         ImageAnimatorAttributeModifier::ReverseImpl,
         ImageAnimatorAttributeModifier::FixedSizeImpl,
-        ImageAnimatorAttributeModifier::PreDecodeImpl,
         ImageAnimatorAttributeModifier::FillModeImpl,
         ImageAnimatorAttributeModifier::IterationsImpl,
         ImageAnimatorAttributeModifier::MonitorInvisibleAreaImpl,

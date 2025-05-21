@@ -32,10 +32,6 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void DummyForAccessorGenerateImpl(Ark_SymbolEffect peer)
-{
-    // Nothing to do.
-}
 } // SymbolEffectAccessor
 const GENERATED_ArkUISymbolEffectAccessor* GetSymbolEffectAccessor()
 {
@@ -43,7 +39,6 @@ const GENERATED_ArkUISymbolEffectAccessor* GetSymbolEffectAccessor()
         SymbolEffectAccessor::DestroyPeerImpl,
         SymbolEffectAccessor::CtorImpl,
         SymbolEffectAccessor::GetFinalizerImpl,
-        SymbolEffectAccessor::DummyForAccessorGenerateImpl,
     };
     return &SymbolEffectAccessorImpl;
 }

@@ -34,16 +34,15 @@ void DestroyPeerImpl(Ark_PanGestureInterface peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_PanGestureInterface CtorImpl(const Opt_Type_PanGestureInterface_callable0_value* value)
+Ark_PanGestureInterface CtorImpl(const Ark_Union_PanGestureInterface_Invoke_Literal_PanGestureOptions* value)
 {
     auto peer = PeerUtils::CreatePeer<PanGestureInterfacePeer>();
     int32_t fingers = DEFAULT_PAN_FINGERS;
     double distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
     PanDirection direction = DEFAULT_PAN_DIRECTION;
     if (true) {
-        Converter::VisitUnionPtr(value,
-            [&fingers, &distance, &direction, &peer](
-                const Ark_Literal_Number_distance_fingers_PanDirection_direction& value) {
+        Converter::VisitUnion(*value,
+            [&fingers, &distance, &direction, &peer](const Ark_PanGestureInterface_Invoke_Literal& value) {
                 fingers = Converter::OptConvert<int32_t>(value.fingers).value_or(DEFAULT_PAN_FINGERS);
                 fingers = fingers <= DEFAULT_PAN_FINGERS ? DEFAULT_PAN_FINGERS : fingers;
                 fingers = fingers > DEFAULT_MAX_PAN_FINGERS ? DEFAULT_PAN_FINGERS : fingers;

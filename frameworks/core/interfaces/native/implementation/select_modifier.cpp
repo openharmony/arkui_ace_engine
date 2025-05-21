@@ -336,21 +336,13 @@ void ControlSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetControlSize(frameNode, Converter::OptConvert<ControlSize>(*value));
 }
-void MenuItemContentModifier0Impl(Ark_NativePointer node,
-                                  const Opt_ContentModifier* value)
+void MenuItemContentModifierImpl(Ark_NativePointer node,
+                                 const Opt_ContentModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SelectModelNG::SetMenuItemContentModifier0(frameNode, convValue);
-}
-void MenuItemContentModifier1Impl(Ark_NativePointer node,
-                                  const Opt_ContentModifier* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SelectModelNG::SetMenuItemContentModifier1(frameNode, convValue);
+    //SelectModelNG::SetMenuItemContentModifier(frameNode, convValue);
 }
 void DividerImpl(Ark_NativePointer node,
                  const Opt_DividerOptions* value)
@@ -434,6 +426,7 @@ void MenuAlignImpl(Ark_NativePointer node,
     }
     SelectModelNG::SetMenuAlign(frameNode, menuAlign);
 }
+#ifdef WRONG_GEN
 void _onChangeEvent_selectedImpl(Ark_NativePointer node,
                                  const Callback_Opt_Union_Number_Resource_Void* callback)
 {
@@ -460,6 +453,7 @@ void _onChangeEvent_valueImpl(Ark_NativePointer node,
     };
     SelectModelStatic::SetValueChangeEvent(frameNode, std::move(onEvent));
 }
+#endif
 } // SelectAttributeModifier
 const GENERATED_ArkUISelectModifier* GetSelectModifier()
 {
@@ -467,43 +461,24 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
         SelectModifier::ConstructImpl,
         SelectInterfaceModifier::SetSelectOptionsImpl,
         SelectAttributeModifier::SelectedImpl,
-        SelectAttributeModifier::SelectedImpl,
-        SelectAttributeModifier::ValueImpl,
         SelectAttributeModifier::ValueImpl,
         SelectAttributeModifier::FontImpl,
-        SelectAttributeModifier::FontImpl,
-        SelectAttributeModifier::FontColorImpl,
         SelectAttributeModifier::FontColorImpl,
         SelectAttributeModifier::SelectedOptionBgColorImpl,
-        SelectAttributeModifier::SelectedOptionBgColorImpl,
-        SelectAttributeModifier::SelectedOptionFontImpl,
         SelectAttributeModifier::SelectedOptionFontImpl,
         SelectAttributeModifier::SelectedOptionFontColorImpl,
-        SelectAttributeModifier::SelectedOptionFontColorImpl,
-        SelectAttributeModifier::OptionBgColorImpl,
         SelectAttributeModifier::OptionBgColorImpl,
         SelectAttributeModifier::OptionFontImpl,
-        SelectAttributeModifier::OptionFontImpl,
         SelectAttributeModifier::OptionFontColorImpl,
-        SelectAttributeModifier::OptionFontColorImpl,
-        nullptr,
         SelectAttributeModifier::OnSelectImpl,
         SelectAttributeModifier::SpaceImpl,
-        SelectAttributeModifier::SpaceImpl,
-        SelectAttributeModifier::ArrowPositionImpl,
         SelectAttributeModifier::ArrowPositionImpl,
         SelectAttributeModifier::OptionWidthImpl,
-        SelectAttributeModifier::OptionWidthImpl,
-        SelectAttributeModifier::OptionHeightImpl,
         SelectAttributeModifier::OptionHeightImpl,
         SelectAttributeModifier::MenuBackgroundColorImpl,
-        SelectAttributeModifier::MenuBackgroundColorImpl,
-        SelectAttributeModifier::MenuBackgroundBlurStyleImpl,
         SelectAttributeModifier::MenuBackgroundBlurStyleImpl,
         SelectAttributeModifier::ControlSizeImpl,
-        SelectAttributeModifier::ControlSizeImpl,
-        SelectAttributeModifier::MenuItemContentModifier0Impl,
-        SelectAttributeModifier::MenuItemContentModifier1Impl,
+        SelectAttributeModifier::MenuItemContentModifierImpl,
         SelectAttributeModifier::DividerImpl,
         SelectAttributeModifier::TextModifierImpl,
         SelectAttributeModifier::ArrowModifierImpl,
@@ -513,9 +488,6 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
         SelectAttributeModifier::AvoidanceImpl,
         SelectAttributeModifier::MenuOutlineImpl,
         SelectAttributeModifier::MenuAlignImpl,
-        SelectAttributeModifier::MenuAlignImpl,
-        SelectAttributeModifier::_onChangeEvent_selectedImpl,
-        SelectAttributeModifier::_onChangeEvent_valueImpl,
     };
     return &ArkUISelectModifierImpl;
 }

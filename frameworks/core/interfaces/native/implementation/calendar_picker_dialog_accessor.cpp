@@ -91,6 +91,17 @@ std::vector<ButtonInfo> BuildButtonInfos(const Ark_CalendarDialogOptions options
     }
     return buttonInfos;
 }
+void DestroyPeerImpl(Ark_CalendarPickerDialog peer)
+{
+}
+Ark_CalendarPickerDialog CtorImpl()
+{
+    return nullptr;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
+}
 void ShowImpl(const Opt_CalendarDialogOptions* options)
 {
     CHECK_NULL_VOID(options);
@@ -135,6 +146,9 @@ void ShowImpl(const Opt_CalendarDialogOptions* options)
 const GENERATED_ArkUICalendarPickerDialogAccessor* GetCalendarPickerDialogAccessor()
 {
     static const GENERATED_ArkUICalendarPickerDialogAccessor CalendarPickerDialogAccessorImpl {
+        CalendarPickerDialogAccessor::DestroyPeerImpl,
+        CalendarPickerDialogAccessor::CtorImpl,
+        CalendarPickerDialogAccessor::GetFinalizerImpl,
         CalendarPickerDialogAccessor::ShowImpl,
     };
     return &CalendarPickerDialogAccessorImpl;

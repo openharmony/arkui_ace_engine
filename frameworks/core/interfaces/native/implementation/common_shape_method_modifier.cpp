@@ -128,8 +128,9 @@ void AntiAliasImpl(Ark_NativePointer node,
     ShapeModelNG::SetAntiAlias(frameNode, *convValue);
 }
 void StrokeDashArrayImpl(Ark_NativePointer node,
-                         const Opt_Array_Length* value)
+                         const Opt_Array_Object* value)
 {
+#ifdef WRONG_GEN
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::OptConvert<std::vector<std::optional<Dimension>>>(*value);
@@ -146,6 +147,7 @@ void StrokeDashArrayImpl(Ark_NativePointer node,
         }
     }
     ShapeModelNG::SetStrokeDashArray(frameNode, std::move(dashArray));
+#endif
 }
 } // CommonShapeMethodModifier
 const GENERATED_ArkUICommonShapeMethodModifier* GetCommonShapeMethodModifier()

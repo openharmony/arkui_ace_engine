@@ -30,7 +30,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Font GetFontImpl(Ark_UIContext peer)
+Ark_drawing_Font GetFontImpl(Ark_UIContext peer)
 {
     return {};
 }
@@ -111,7 +111,7 @@ Ark_Number Px2lpxImpl(Ark_UIContext peer,
 {
     return {};
 }
-Opt_Context GetHostContextImpl(Ark_UIContext peer)
+Opt_common_Context GetHostContextImpl(Ark_UIContext peer)
 {
     return {};
 }

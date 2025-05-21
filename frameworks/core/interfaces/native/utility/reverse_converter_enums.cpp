@@ -352,22 +352,6 @@ void AssignArkValue(Ark_ListItemStyle& dst, const V2::ListItemStyle& src)
     }
 }
 
-void AssignArkValue(Ark_LocationButtonOnClickResult& dst, const SecurityComponentHandleResult& src)
-{
-    switch (src) {
-        case SecurityComponentHandleResult::CLICK_SUCCESS:
-            dst = ARK_LOCATION_BUTTON_ON_CLICK_RESULT_SUCCESS;
-            break;
-        case SecurityComponentHandleResult::CLICK_GRANT_FAILED:
-            dst = ARK_LOCATION_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED;
-            break;
-        default:
-            dst = static_cast<Ark_LocationButtonOnClickResult>(-1);
-            LOGE("Unexpected enum value in SecurityComponentHandleResult: %{public}d", src);
-            break;
-    }
-}
-
 void AssignArkValue(Ark_MessageLevel& dst, const MessageLevel& src)
 {
     switch (src) {
@@ -593,17 +577,6 @@ void AssignArkValue(Ark_SheetType& dst, const SheetType& src)
         case SheetType::SHEET_POPUP: dst = ARK_SHEET_TYPE_POPUP; break;
         default: dst = static_cast<Ark_SheetType>(-1);
             LOGE("Unexpected enum value in SheetType: %{public}d", src);
-    }
-}
-
-void AssignArkValue(Ark_Sticky& dst, const V2::StickyMode& src)
-{
-    switch (src) {
-        case V2::StickyMode::NONE: dst = ARK_STICKY_NONE; break;
-        case V2::StickyMode::NORMAL: dst = ARK_STICKY_NORMAL; break;
-        case V2::StickyMode::OPACITY: dst = ARK_STICKY_OPACITY; break;
-        default: dst = static_cast<Ark_Sticky>(-1);
-            LOGE("Unexpected enum value in V2::StickyMode: %{public}d", src);
     }
 }
 

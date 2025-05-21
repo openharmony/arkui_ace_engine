@@ -23,10 +23,6 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScopeAccessor {
-Ark_ComponentInfo GetRectangleByIdImpl(const Ark_String* id)
-{
-    return {};
-}
 Ark_Edges EdgeColorsImpl(const Ark_Number* all)
 {
     return {};
@@ -35,28 +31,36 @@ Ark_Edges EdgeWidthsImpl(const Ark_Number* all)
 {
     return {};
 }
+Ark_Edges BorderStylesImpl(Ark_BorderStyle all)
+{
+    return {};
+}
 Ark_BorderRadiuses BorderRadiusesImpl(const Ark_Number* all)
 {
     return {};
 }
-Ark_WrappedBuilder WrapBuilderImpl(const Callback_WrappedBuilder_Args_Void* builder)
+void SetAppBgColorImpl(const Ark_String* value)
 {
-    return {};
+    CHECK_NULL_VOID(value);
+    auto backgroundColorStr = Converter::Convert<std::string>(*value);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetAppBgColor(Color::ColorFromString(backgroundColorStr));
 }
-Ark_Context GetContextImpl(const Opt_Object* component)
+void ArkUICompatibleImpl(const Callback_InteropComponent* init,
+                         const Callback_Number_ESObject_Void* update)
 {
-    return {};
 }
 void PostCardActionImpl(const Ark_Object* component,
                         const Ark_Object* action)
 {
 }
-Ark_Resource Dollar_rImpl(const Ark_String* value,
-                          const Array_Object* params)
+Ark_Resource $rImpl(const Ark_String* value,
+                    const Array_Object* params)
 {
     return {};
 }
-Ark_Resource Dollar_rawfileImpl(const Ark_String* value)
+Ark_Resource $rawfileImpl(const Ark_String* value)
 {
     return {};
 }
@@ -91,138 +95,38 @@ Ark_Number Px2vpImpl(const Ark_Number* value)
     double vpValue = pxValue / density;
     return Converter::ArkValue<Ark_Number>(vpValue);
 }
-Ark_Number Fp2pxImpl(const Ark_Number* value)
-{
-    auto invalid = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(value, invalid);
-    double density = PipelineBase::GetCurrentDensity();
-    double fpValue = Converter::Convert<double>(*value);
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, invalid);
-    auto pipelineContext = container->GetPipelineContext();
-    double fontScale = 1.0;
-    if (pipelineContext) {
-        fontScale = pipelineContext->GetFontScale();
-    }
-    double pxValue = fpValue * density * fontScale;
-    return Converter::ArkValue<Ark_Number>(pxValue);
-}
-Ark_Number Px2fpImpl(const Ark_Number* value)
-{
-    auto invalid = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(value, invalid);
-    double density = PipelineBase::GetCurrentDensity();
-    if (NearZero(density)) {
-        return Converter::ArkValue<Ark_Number>(0);
-    }
-    double pxValue = Converter::Convert<double>(*value);
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, invalid);
-    auto pipelineContext = container->GetPipelineContext();
-    double fontScale = 1.0;
-    if (pipelineContext) {
-        fontScale = pipelineContext->GetFontScale();
-    }
-    double ratio = density * fontScale;
-    double fpValue = pxValue / ratio;
-    return Converter::ArkValue<Ark_Number>(fpValue);
-}
-Ark_Number Lpx2pxImpl(const Ark_Number* value)
-{
-    auto invalid = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(value, invalid);
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, invalid);
-
-    auto pipelineContext = container->GetPipelineContext();
-#ifdef ARKUI_CAPI_UNITTEST
-    CHECK_NULL_RETURN(pipelineContext, invalid);
-    auto width = pipelineContext->GetCurrentWindowRect().Width();
-    static WindowConfig windowConfig;
-#else
-    auto window = container->GetWindow();
-    CHECK_NULL_RETURN(window, invalid);
-    auto width = window->GetCurrentWindowRect().Width();
-    auto frontend = container->GetFrontend();
-    CHECK_NULL_RETURN(frontend, invalid);
-    auto windowConfig = frontend->GetWindowConfig();
-#endif // ARKUI_CAPI_UNITTEST
-    if (pipelineContext && pipelineContext->IsContainerModalVisible()) {
-        int32_t multiplier = 2;
-        width -= multiplier * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
-    }
-    if (!windowConfig.autoDesignWidth) {
-        windowConfig.UpdateDesignWidthScale(width);
-    }
-    double lpxValue = Converter::Convert<double>(*value);
-    double pxValue = lpxValue * windowConfig.designWidthScale;
-    return Converter::ArkValue<Ark_Number>(pxValue);
-}
-Ark_Number Px2lpxImpl(const Ark_Number* value)
-{
-    auto invalid = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(value, invalid);
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, invalid);
-
-    auto pipelineContext = container->GetPipelineContext();
-#ifdef ARKUI_CAPI_UNITTEST
-    CHECK_NULL_RETURN(pipelineContext, invalid);
-    auto width = pipelineContext->GetCurrentWindowRect().Width();
-    static WindowConfig windowConfig;
-#else
-    auto window = container->GetWindow();
-    CHECK_NULL_RETURN(window, invalid);
-    auto width = window->GetCurrentWindowRect().Width();
-    auto frontend = container->GetFrontend();
-    CHECK_NULL_RETURN(frontend, invalid);
-    auto windowConfig = frontend->GetWindowConfig();
-#endif // ARKUI_CAPI_UNITTEST
-    if (pipelineContext && pipelineContext->IsContainerModalVisible()) {
-        int32_t multiplier = 2;
-        width -= multiplier * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
-    }
-    if (!windowConfig.autoDesignWidth) {
-        windowConfig.UpdateDesignWidthScale(width);
-    }
-    double pxValue = Converter::Convert<double>(*value);
-    double lpxValue = pxValue / windowConfig.designWidthScale;
-    return Converter::ArkValue<Ark_Number>(lpxValue);
-}
-Ark_Object GetInspectorNodesImpl()
+Ark_ComponentInfo GetRectangleByIdImpl(const Ark_String* id)
 {
     return {};
 }
-Ark_Object GetInspectorNodeByIdImpl(const Ark_Number* id)
+Ark_uiEffect_VisualEffect UiEffect_createEffectImpl()
 {
     return {};
 }
-void SetAppBgColorImpl(const Ark_String* value)
+Ark_uiEffect_BrightnessBlender UiEffect_createBrightnessBlenderImpl(const Ark_uiEffect_BrightnessBlenderParam* param)
 {
-    CHECK_NULL_VOID(value);
-    auto backgroundColorStr = Converter::Convert<std::string>(*value);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->SetAppBgColor(Color::ColorFromString(backgroundColorStr));
+    return {};
 }
-void Profiler_registerVsyncCallbackImpl(const Profiler_Callback_String_Void* callback_)
+void Text_getSystemFontFullNamesByTypeImpl(Ark_VMContext vmContext,
+                                           Ark_AsyncWorkerPtr asyncWorker,
+                                           Ark_text_SystemFontType fontType,
+                                           const Callback_Opt_Array_String_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    CHECK_NULL_VOID(callback_);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    auto onVsyncFunc = [arkCallback = CallbackHelper(*callback_)](const std::string& value) {
-        auto arkStringValue = Converter::ArkValue<Ark_String>(value);
-        arkCallback.Invoke(arkStringValue);
-    };
-    pipelineContext->SetOnVsyncProfiler(onVsyncFunc);
 }
-void Profiler_unregisterVsyncCallbackImpl()
+void Text_getFontDescriptorByFullNameImpl(Ark_VMContext vmContext,
+                                          Ark_AsyncWorkerPtr asyncWorker,
+                                          const Ark_String* fullName,
+                                          Ark_text_SystemFontType fontType,
+                                          const Callback_Opt_FontDescriptor_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->ResetOnVsyncProfiler();
 }
-void CursorControl_setCursorImpl(Ark_PointerStyle value)
+void Text_matchFontDescriptorsImpl(Ark_VMContext vmContext,
+                                   Ark_AsyncWorkerPtr asyncWorker,
+                                   const Ark_text_FontDescriptor* desc,
+                                   const Callback_Opt_Array_FontDescriptor_Opt_Array_String_Void* outputArgumentForReturningPromise)
+{
+}
+void CursorControl_setCursorImpl(Ark_pointer_PointerStyle value)
 {
     int32_t intValue = static_cast<int32_t>(value);
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -260,35 +164,51 @@ Ark_Boolean FocusControl_requestFocusImpl(const Ark_String* value)
         TaskExecutor::TaskType::UI, "ArkUIJsRequestFocus");
     return Converter::ArkValue<Ark_Boolean>(result);
 }
+void Profiler_registerVsyncCallbackImpl(const Profiler_Callback_String_Void* callback_)
+{
+    CHECK_NULL_VOID(callback_);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto onVsyncFunc = [arkCallback = CallbackHelper(*callback_)](const std::string& value) {
+        auto arkStringValue = Converter::ArkValue<Ark_String>(value);
+        arkCallback.Invoke(arkStringValue);
+    };
+    pipelineContext->SetOnVsyncProfiler(onVsyncFunc);
+}
+void Profiler_unregisterVsyncCallbackImpl()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->ResetOnVsyncProfiler();
+}
 } // GlobalScopeAccessor
 const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor()
 {
     static const GENERATED_ArkUIGlobalScopeAccessor GlobalScopeAccessorImpl {
-        GlobalScopeAccessor::GetRectangleByIdImpl,
         GlobalScopeAccessor::EdgeColorsImpl,
         GlobalScopeAccessor::EdgeWidthsImpl,
+        GlobalScopeAccessor::BorderStylesImpl,
         GlobalScopeAccessor::BorderRadiusesImpl,
-        GlobalScopeAccessor::WrapBuilderImpl,
-        GlobalScopeAccessor::GetContextImpl,
+        GlobalScopeAccessor::SetAppBgColorImpl,
+        GlobalScopeAccessor::ArkUICompatibleImpl,
         GlobalScopeAccessor::PostCardActionImpl,
-        GlobalScopeAccessor::Dollar_rImpl,
-        GlobalScopeAccessor::Dollar_rawfileImpl,
+        GlobalScopeAccessor::$rImpl,
+        GlobalScopeAccessor::$rawfileImpl,
         GlobalScopeAccessor::AnimateToImpl,
         GlobalScopeAccessor::AnimateToImmediatelyImpl,
         GlobalScopeAccessor::Vp2pxImpl,
         GlobalScopeAccessor::Px2vpImpl,
-        GlobalScopeAccessor::Fp2pxImpl,
-        GlobalScopeAccessor::Px2fpImpl,
-        GlobalScopeAccessor::Lpx2pxImpl,
-        GlobalScopeAccessor::Px2lpxImpl,
-        GlobalScopeAccessor::GetInspectorNodesImpl,
-        GlobalScopeAccessor::GetInspectorNodeByIdImpl,
-        GlobalScopeAccessor::SetAppBgColorImpl,
-        GlobalScopeAccessor::Profiler_registerVsyncCallbackImpl,
-        GlobalScopeAccessor::Profiler_unregisterVsyncCallbackImpl,
+        GlobalScopeAccessor::GetRectangleByIdImpl,
+        GlobalScopeAccessor::UiEffect_createEffectImpl,
+        GlobalScopeAccessor::UiEffect_createBrightnessBlenderImpl,
+        GlobalScopeAccessor::Text_getSystemFontFullNamesByTypeImpl,
+        GlobalScopeAccessor::Text_getFontDescriptorByFullNameImpl,
+        GlobalScopeAccessor::Text_matchFontDescriptorsImpl,
         GlobalScopeAccessor::CursorControl_setCursorImpl,
         GlobalScopeAccessor::CursorControl_restoreDefaultImpl,
         GlobalScopeAccessor::FocusControl_requestFocusImpl,
+        GlobalScopeAccessor::Profiler_registerVsyncCallbackImpl,
+        GlobalScopeAccessor::Profiler_unregisterVsyncCallbackImpl,
     };
     return &GlobalScopeAccessorImpl;
 }

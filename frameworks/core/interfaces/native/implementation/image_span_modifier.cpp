@@ -33,7 +33,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // ImageSpanModifier
 namespace ImageSpanInterfaceModifier {
 void SetImageSpanOptionsImpl(Ark_NativePointer node,
-                             const Ark_Union_ResourceStr_PixelMap* value)
+                             const Ark_Union_ResourceStr_Image_PixelMap* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -54,7 +54,7 @@ void VerticalAlignImpl(Ark_NativePointer node,
     ImageSpanView::SetVerticalAlign(frameNode, convValue);
 }
 void ColorFilterImpl(Ark_NativePointer node,
-                     const Opt_Union_ColorFilter_DrawingColorFilter* value)
+                     const Opt_Union_ColorFilter_Drawing_ColorFilter* value)
 {
     ImageCommonMethods::ApplyColorFilterValues(node, value);
 }
@@ -99,7 +99,7 @@ void OnErrorImpl(Ark_NativePointer node,
     ImageSpanView::SetOnError(frameNode, std::move(onError));
 }
 void AltImpl(Ark_NativePointer node,
-             const Opt_PixelMap* value)
+             const Opt_image_PixelMap* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -184,8 +184,7 @@ Ark_String GetStringImpl(Ark_StyledString peer)
     result = peer->spanString->GetString();
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
-Array_SpanStyle GetStylesImpl(Ark_VMContext vmContext,
-                              Ark_StyledString peer,
+Array_SpanStyle GetStylesImpl(Ark_StyledString peer,
                               const Ark_Number* start,
                               const Ark_Number* length,
                               const Opt_StyledStringKey* styledKey)
@@ -218,8 +217,7 @@ Ark_Boolean EqualsImpl(Ark_StyledString peer,
     CHECK_NULL_RETURN(other->spanString, false);
     return peer->spanString->IsEqualToSpanString(other->spanString);
 }
-Ark_StyledString SubStyledStringImpl(Ark_VMContext vmContext,
-                                     Ark_StyledString peer,
+Ark_StyledString SubStyledStringImpl(Ark_StyledString peer,
                                      const Ark_Number* start,
                                      const Opt_Number* length)
 {
@@ -293,8 +291,7 @@ void FromHtmlImpl(Ark_VMContext vmContext,
             TaskExecutor::TaskType::UI, "FromHtmlReturn", PriorityType::VIP);
         }, TaskExecutor::TaskType::BACKGROUND, "FromHtml", PriorityType::IMMEDIATE);
 }
-Ark_String ToHtmlImpl(Ark_VMContext vmContext,
-                      Ark_StyledString styledString)
+Ark_String ToHtmlImpl(Ark_StyledString styledString)
 {
     std::string result = "";
     CHECK_NULL_RETURN(styledString, Converter::ArkValue<Ark_String>(result, Converter::FC));
@@ -315,6 +312,13 @@ Ark_Buffer Marshalling0Impl(Ark_StyledString styledString,
     copy(tlvData.begin(), tlvData.end(), reinterpret_cast<uint8_t*>(result.data));
     return result;
 }
+void Unmarshalling0Impl(Ark_VMContext vmContext,
+                        Ark_AsyncWorkerPtr asyncWorker,
+                        const Ark_Buffer* buffer,
+                        const StyledStringUnmarshallCallback* callback_,
+                        const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
+{
+}
 Ark_Buffer Marshalling1Impl(Ark_StyledString styledString)
 {
     CHECK_NULL_RETURN(styledString, {});
@@ -324,13 +328,6 @@ Ark_Buffer Marshalling1Impl(Ark_StyledString styledString)
     Ark_Buffer result = BufferKeeper::Allocate(tlvData.size());
     copy(tlvData.begin(), tlvData.end(), reinterpret_cast<uint8_t*>(result.data));
     return result;
-}
-void Unmarshalling0Impl(Ark_VMContext vmContext,
-                        Ark_AsyncWorkerPtr asyncWorker,
-                        const Ark_Buffer* buffer,
-                        const StyledStringUnmarshallCallback* callback_,
-                        const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
-{
 }
 void Unmarshalling1Impl(Ark_VMContext vmContext,
                         Ark_AsyncWorkerPtr asyncWorker,
@@ -365,6 +362,10 @@ Ark_Number GetLengthImpl(Ark_StyledString peer)
     CHECK_NULL_RETURN(peer->spanString, errValue);
     return Converter::ArkValue<Ark_Number>(peer->spanString->GetLength());
 }
+void SetLengthImpl(Ark_StyledString peer,
+                   const Ark_Number* length)
+{
+}
 } // StyledStringAccessor
 const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
 {
@@ -379,10 +380,11 @@ const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
         StyledStringAccessor::FromHtmlImpl,
         StyledStringAccessor::ToHtmlImpl,
         StyledStringAccessor::Marshalling0Impl,
-        StyledStringAccessor::Marshalling1Impl,
         StyledStringAccessor::Unmarshalling0Impl,
+        StyledStringAccessor::Marshalling1Impl,
         StyledStringAccessor::Unmarshalling1Impl,
         StyledStringAccessor::GetLengthImpl,
+        StyledStringAccessor::SetLengthImpl,
     };
     return &StyledStringAccessorImpl;
 }

@@ -197,7 +197,7 @@ void SetWebOptionsImpl(Ark_NativePointer node,
             CHECK_NULL_VOID(peerImplPtr);
             WebModelStatic::SetWebController(frameNode, peerImplPtr->GetController());
         },
-        [frameNode](const Ark_WebviewController& controller) {
+        [frameNode](const Ark_webview_WebviewController& controller) {
             (void)controller;
         },
         []() {}
@@ -321,11 +321,6 @@ void JavaScriptProxyImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     LOGE("WebInterfaceModifier::JavaScriptProxyImpl method is not implemented");
 }
-void PasswordImpl(Ark_NativePointer node,
-                  const Opt_Boolean* value)
-{
-    // deprecated
-}
 void CacheModeImpl(Ark_NativePointer node,
                    const Opt_CacheMode* value)
 {
@@ -375,16 +370,6 @@ void MediaOptionsImpl(Ark_NativePointer node,
     WebModelStatic::SetAudioExclusive(frameNode, Converter::OptConvert<bool>(optValue->audioExclusive));
 #endif // WEB_SUPPORTED
 }
-void TableDataImpl(Ark_NativePointer node,
-                   const Opt_Boolean* value)
-{
-    // deprecated
-}
-void WideViewModeAccessImpl(Ark_NativePointer node,
-                            const Opt_Boolean* value)
-{
-    // deprecated
-}
 void OverviewModeAccessImpl(Ark_NativePointer node,
                             const Opt_Boolean* value)
 {
@@ -417,20 +402,6 @@ void BlurOnKeyboardHideModeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     // auto convValue = Converter::OptConvert<BlurOnKeyboardHideMode>(*value);
     // WebModelStatic::SetBlurOnKeyboardHideMode(frameNode, convValue);
-#endif // WEB_SUPPORTED
-}
-void TextZoomAtioImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
-{
-#ifdef WEB_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<int32_t>(*value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    WebModelStatic::SetTextZoomRatio(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void TextZoomRatioImpl(Ark_NativePointer node,
@@ -473,20 +444,6 @@ void InitialScaleImpl(Ark_NativePointer node,
         return;
     }
     WebModelStatic::InitialScale(frameNode, *convValue);
-#endif // WEB_SUPPORTED
-}
-void UserAgentImpl(Ark_NativePointer node,
-                   const Opt_String* value)
-{
-#ifdef WEB_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<std::string>(*value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    WebModelStatic::SetUserAgent(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
 void MetaViewportImpl(Ark_NativePointer node,
@@ -821,33 +778,8 @@ void OnRefreshAccessedHistoryImpl(Ark_NativePointer node,
     WebModelStatic::SetRefreshAccessedHistoryId(frameNode, onRefreshAccessedHistory);
 #endif // WEB_SUPPORTED
 }
-void OnUrlLoadInterceptImpl(Ark_NativePointer node,
-                            const Opt_Type_WebAttribute_onUrlLoadIntercept_callback* value)
-{
-#ifdef WEB_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto instanceId = Container::CurrentId();
-    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onUrlLoadIntercept = [callback = CallbackHelper(*optValue), weakNode, instanceId](
-        const BaseEventInfo* info) -> bool {
-        return OnUrlLoadIntercept(callback, weakNode, instanceId, info);
-    };
-    WebModelStatic::SetOnUrlLoadIntercept(frameNode, onUrlLoadIntercept);
-#endif // WEB_SUPPORTED
-}
-void OnSslErrorReceiveImpl(Ark_NativePointer node,
-                           const Opt_Callback_Literal_Function_handler_Object_error_Void* value)
-{
-    // deprecated
-}
-void OnRenderExited0Impl(Ark_NativePointer node,
-                         const Opt_Callback_OnRenderExitedEvent_Void* value)
+void OnRenderExitedImpl(Ark_NativePointer node,
+                        const Opt_Callback_OnRenderExitedEvent_Void* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -865,11 +797,6 @@ void OnRenderExited0Impl(Ark_NativePointer node,
     };
     WebModelStatic::SetRenderExitedId(frameNode, onRenderExited);
 #endif // WEB_SUPPORTED
-}
-void OnRenderExited1Impl(Ark_NativePointer node,
-                         const Opt_Callback_Literal_Object_detail_Boolean* value)
-{
-    // deprecated
 }
 void OnShowFileSelectorImpl(Ark_NativePointer node,
                             const Opt_Callback_OnShowFileSelectorEvent_Boolean* value)
@@ -890,11 +817,6 @@ void OnShowFileSelectorImpl(Ark_NativePointer node,
     };
     WebModelStatic::SetOnFileSelectorShow(frameNode, onShowFileSelector);
 #endif // WEB_SUPPORTED
-}
-void OnFileSelectorShowImpl(Ark_NativePointer node,
-                            const Opt_Type_WebAttribute_onFileSelectorShow_callback* value)
-{
-    // deprecated
 }
 void OnResourceLoadImpl(Ark_NativePointer node,
                         const Opt_Callback_OnResourceLoadEvent_Void* value)
@@ -2021,38 +1943,6 @@ void OnRenderProcessRespondingImpl(Ark_NativePointer node,
     WebModelStatic::SetRenderProcessRespondingId(frameNode, onRenderProcessResponding);
 #endif // WEB_SUPPORTED
 }
-void SelectionMenuOptionsImpl(Ark_NativePointer node,
-                              const Opt_Array_ExpandedMenuItemOptions* value)
-{
-#ifdef WEB_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<std::vector<Ark_ExpandedMenuItemOptions>>(*value)
-        .value_or(std::vector<Ark_ExpandedMenuItemOptions>{});
-    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    WebMenuOptionsParam optionParam;
-    for (auto menuOption : convValue) {
-        auto option = Converter::Convert<MenuOptionsParam>(menuOption);
-        auto action = [arkCallback = CallbackHelper(menuOption.action), weakNode](
-                const std::string selectInfo) {
-            auto webNode = weakNode.Upgrade();
-            CHECK_NULL_VOID(webNode);
-            ContainerScope scope(webNode->GetInstanceId());
-            auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-            if (pipelineContext) {
-                pipelineContext->UpdateCurrentActiveNode(weakNode);
-                pipelineContext->SetCallBackNode(weakNode);
-            }
-            Ark_Literal_String_plainText parameter;
-            parameter.plainText = Converter::ArkValue<Ark_String>(selectInfo);
-            arkCallback.Invoke(parameter);
-        };
-        option.action = std::move(action);
-        optionParam.menuOption.push_back(option);
-    }
-    WebModelStatic::SetSelectionMenuOptions(frameNode, optionParam);
-#endif // WEB_SUPPORTED
-}
 void OnViewportFitChangedImpl(Ark_NativePointer node,
                               const Opt_OnViewportFitChangedCallback* value)
 {
@@ -2389,21 +2279,16 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::ZoomAccessImpl,
         WebAttributeModifier::GeolocationAccessImpl,
         WebAttributeModifier::JavaScriptProxyImpl,
-        WebAttributeModifier::PasswordImpl,
         WebAttributeModifier::CacheModeImpl,
         WebAttributeModifier::DarkModeImpl,
         WebAttributeModifier::ForceDarkAccessImpl,
         WebAttributeModifier::MediaOptionsImpl,
-        WebAttributeModifier::TableDataImpl,
-        WebAttributeModifier::WideViewModeAccessImpl,
         WebAttributeModifier::OverviewModeAccessImpl,
         WebAttributeModifier::OverScrollModeImpl,
         WebAttributeModifier::BlurOnKeyboardHideModeImpl,
-        WebAttributeModifier::TextZoomAtioImpl,
         WebAttributeModifier::TextZoomRatioImpl,
         WebAttributeModifier::DatabaseAccessImpl,
         WebAttributeModifier::InitialScaleImpl,
-        WebAttributeModifier::UserAgentImpl,
         WebAttributeModifier::MetaViewportImpl,
         WebAttributeModifier::OnPageEndImpl,
         WebAttributeModifier::OnPageBeginImpl,
@@ -2421,12 +2306,8 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::OnHttpErrorReceiveImpl,
         WebAttributeModifier::OnDownloadStartImpl,
         WebAttributeModifier::OnRefreshAccessedHistoryImpl,
-        WebAttributeModifier::OnUrlLoadInterceptImpl,
-        WebAttributeModifier::OnSslErrorReceiveImpl,
-        WebAttributeModifier::OnRenderExited0Impl,
-        WebAttributeModifier::OnRenderExited1Impl,
+        WebAttributeModifier::OnRenderExitedImpl,
         WebAttributeModifier::OnShowFileSelectorImpl,
-        WebAttributeModifier::OnFileSelectorShowImpl,
         WebAttributeModifier::OnResourceLoadImpl,
         WebAttributeModifier::OnFullScreenExitImpl,
         WebAttributeModifier::OnFullScreenEnterImpl,
@@ -2492,7 +2373,6 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::EnableNativeMediaPlayerImpl,
         WebAttributeModifier::OnRenderProcessNotRespondingImpl,
         WebAttributeModifier::OnRenderProcessRespondingImpl,
-        WebAttributeModifier::SelectionMenuOptionsImpl,
         WebAttributeModifier::OnViewportFitChangedImpl,
         WebAttributeModifier::OnInterceptKeyboardAttachImpl,
         WebAttributeModifier::OnAdsBlockedImpl,

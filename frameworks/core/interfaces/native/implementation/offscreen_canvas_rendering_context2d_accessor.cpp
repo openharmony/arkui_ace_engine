@@ -36,7 +36,8 @@ void DestroyPeerImpl(Ark_OffscreenCanvasRenderingContext2D peer)
 }
 Ark_OffscreenCanvasRenderingContext2D CtorImpl(const Ark_Number* width,
                                                const Ark_Number* height,
-                                               const Opt_RenderingContextSettings* settings)
+                                               const Opt_RenderingContextSettings* settings,
+                                               const Opt_LengthMetricsUnit* unit)
 {
     auto peerImpl = Referenced::MakeRefPtr<OffscreenCanvasRenderingContext2DPeerImpl>();
     peerImpl->IncRefCount();
@@ -52,7 +53,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String ToDataURLImpl(Ark_OffscreenCanvasRenderingContext2D peer,
                          const Opt_String* type,
-                         const Opt_Float32* quality)
+                         const Opt_Number* quality)
 {
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<OffscreenCanvasRenderingContext2DPeerImpl*>(peer);

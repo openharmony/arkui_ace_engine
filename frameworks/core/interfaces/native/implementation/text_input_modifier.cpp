@@ -178,21 +178,6 @@ void CaretColorImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<Color>(*value);
     TextFieldModelStatic::SetCaretColor(frameNode, convValue);
 }
-void OnEditChangedImpl(Ark_NativePointer node,
-                       const Opt_Callback_Boolean_Void* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto onEditChanged = [arkCallback = CallbackHelper(*optValue)](const bool& boolValue) {
-        arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(boolValue));
-    };
-    TextFieldModelNG::SetOnEditChanged(frameNode, onEditChanged);
-}
 void OnEditChangeImpl(Ark_NativePointer node,
                       const Opt_Callback_Boolean_Void* value)
 {
@@ -558,8 +543,12 @@ void LineBreakStrategyImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<LineBreakStrategy>(*value);
     TextFieldModelStatic::SetLineBreakStrategy(frameNode, convValue);
 }
+void CancelButtonImpl(Ark_NativePointer node,
+                      const Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions* value)
+{
+}
 void CancelButton0Impl(Ark_NativePointer node,
-                       const Opt_CancelButtonOptions* value)
+                      const Opt_CancelButtonOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -986,6 +975,7 @@ void ShowCounterImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetCounterType(frameNode, counterOptions->thresholdPercentage);
     TextFieldModelStatic::SetShowCounterBorder(frameNode, counterOptions->highlightBorder);
 }
+#ifdef WRONG_GEN
 void _onChangeEvent_textImpl(Ark_NativePointer node,
                              const Callback_ResourceStr_Void* callback)
 {
@@ -999,6 +989,7 @@ void _onChangeEvent_textImpl(Ark_NativePointer node,
     };
     TextFieldModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
+#endif
 } // TextInputAttributeModifier
 const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
 {
@@ -1013,7 +1004,6 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::PlaceholderFontImpl,
         TextInputAttributeModifier::EnterKeyTypeImpl,
         TextInputAttributeModifier::CaretColorImpl,
-        TextInputAttributeModifier::OnEditChangedImpl,
         TextInputAttributeModifier::OnEditChangeImpl,
         TextInputAttributeModifier::OnSubmitImpl,
         TextInputAttributeModifier::OnChangeImpl,
@@ -1046,8 +1036,7 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::MaxLinesImpl,
         TextInputAttributeModifier::WordBreakImpl,
         TextInputAttributeModifier::LineBreakStrategyImpl,
-        TextInputAttributeModifier::CancelButton0Impl,
-        TextInputAttributeModifier::CancelButton1Impl,
+        TextInputAttributeModifier::CancelButtonImpl,
         TextInputAttributeModifier::SelectAllImpl,
         TextInputAttributeModifier::MinFontSizeImpl,
         TextInputAttributeModifier::MaxFontSizeImpl,
@@ -1078,7 +1067,6 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::InputFilterImpl,
         TextInputAttributeModifier::CustomKeyboardImpl,
         TextInputAttributeModifier::ShowCounterImpl,
-        TextInputAttributeModifier::_onChangeEvent_textImpl,
     };
     return &ArkUITextInputModifierImpl;
 }

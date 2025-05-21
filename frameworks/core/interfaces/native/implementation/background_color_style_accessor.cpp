@@ -48,6 +48,10 @@ Ark_TextBackgroundStyle GetTextBackgroundStyleImpl(Ark_BackgroundColorStyle peer
     auto textBgStyle = peer->span->GetBackgroundColor();
     return Converter::ArkValue<Ark_TextBackgroundStyle>(textBgStyle, Converter::FC);
 }
+void SetTextBackgroundStyleImpl(Ark_BackgroundColorStyle peer,
+                                const Ark_TextBackgroundStyle* textBackgroundStyle)
+{
+}
 } // BackgroundColorStyleAccessor
 const GENERATED_ArkUIBackgroundColorStyleAccessor* GetBackgroundColorStyleAccessor()
 {
@@ -56,6 +60,7 @@ const GENERATED_ArkUIBackgroundColorStyleAccessor* GetBackgroundColorStyleAccess
         BackgroundColorStyleAccessor::CtorImpl,
         BackgroundColorStyleAccessor::GetFinalizerImpl,
         BackgroundColorStyleAccessor::GetTextBackgroundStyleImpl,
+        BackgroundColorStyleAccessor::SetTextBackgroundStyleImpl,
     };
     return &BackgroundColorStyleAccessorImpl;
 }

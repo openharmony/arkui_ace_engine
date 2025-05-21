@@ -131,9 +131,9 @@ bool ParseSymbolEffectOptions(NG::SymbolEffectOptions& options, Ark_SymbolEffect
     }
     return true;
 }
-void SymbolEffect0Impl(Ark_NativePointer node,
-                       const Opt_SymbolEffect* symbolEffect,
-                       const Opt_Boolean* isActive)
+void SymbolEffectImpl(Ark_NativePointer node,
+                      const Opt_SymbolEffect* symbolEffect,
+                      const Opt_Union_Boolean_Number* triggerValue)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -142,34 +142,14 @@ void SymbolEffect0Impl(Ark_NativePointer node,
     if (optSymbolEffect.has_value()) {
         ParseSymbolEffectOptions(symbolEffectOptions, optSymbolEffect.value());
     }
-    if (isActive) {
-        auto optBool = Converter::OptConvert<bool>(*isActive);
-        if (optBool.has_value()) {
-            symbolEffectOptions.SetIsActive(optBool.value());
-        } else {
-            symbolEffectOptions.SetIsActive(false);
-        }
-    }
-    SymbolModelNG::SetSymbolEffectOptions(frameNode, symbolEffectOptions);
-}
-
-void SymbolEffect1Impl(Ark_NativePointer node,
-                       const Opt_SymbolEffect* symbolEffect,
-                       const Opt_Number* triggerValue)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optSymbolEffect = Converter::GetOptPtr(symbolEffect);
-    NG::SymbolEffectOptions symbolEffectOptions;
-    if (optSymbolEffect.has_value()) {
-        ParseSymbolEffectOptions(symbolEffectOptions, optSymbolEffect.value());
-    }
-    if (triggerValue) {
-        auto optTriggerNumb = Converter::OptConvert<int32_t>(*triggerValue);
-        if (optTriggerNumb.has_value()) {
-            symbolEffectOptions.SetTriggerNum(optTriggerNumb.value());
-        }
-    }
+    Converter::VisitUnionPtr(triggerValue,
+        [&symbolEffectOptions](const Ark_Boolean& src) {
+            symbolEffectOptions.SetIsActive(Converter::Convert<bool>(src));
+        },
+        [&symbolEffectOptions](const Ark_Number& src) {
+            symbolEffectOptions.SetTriggerNum(Converter::Convert<int32_t>(src));
+        },
+        []() {});
     SymbolModelNG::SetSymbolEffectOptions(frameNode, symbolEffectOptions);
 }
 } // SymbolGlyphAttributeModifier
@@ -185,8 +165,7 @@ const GENERATED_ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
         SymbolGlyphAttributeModifier::RenderingStrategyImpl,
         SymbolGlyphAttributeModifier::MinFontScaleImpl,
         SymbolGlyphAttributeModifier::MaxFontScaleImpl,
-        SymbolGlyphAttributeModifier::SymbolEffect0Impl,
-        SymbolGlyphAttributeModifier::SymbolEffect1Impl,
+        SymbolGlyphAttributeModifier::SymbolEffectImpl,
     };
     return &ArkUISymbolGlyphModifierImpl;
 }

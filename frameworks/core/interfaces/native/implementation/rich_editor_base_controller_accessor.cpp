@@ -200,15 +200,18 @@ Ark_LayoutManager GetLayoutManagerImpl(Ark_RichEditorBaseController peer)
     layoutManagerPeer->handler = peer->GetLayoutInfoInterface();
     return layoutManagerPeer;
 }
-Ark_PreviewText GetPreviewTextImpl(Ark_RichEditorBaseController peer)
+Opt_Callback_PreviewText GetGetPreviewTextImpl(Ark_RichEditorBaseController peer)
 {
+#ifdef WRONG_GEN
     CHECK_NULL_RETURN(peer, {});
     auto result = peer->GetPreviewText();
     return Converter::ArkValue<Ark_PreviewText>(result, Converter::FC);
-}
-Opt_RectResult GetCaretRectImpl(Ark_RichEditorBaseController peer)
-{
+#endif
     return {};
+}
+void SetGetPreviewTextImpl(Ark_RichEditorBaseController peer,
+                           const Opt_Callback_PreviewText* getPreviewText)
+{
 }
 } // RichEditorBaseControllerAccessor
 const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControllerAccessor()
@@ -226,8 +229,8 @@ const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControll
         RichEditorBaseControllerAccessor::IsEditingImpl,
         RichEditorBaseControllerAccessor::StopEditingImpl,
         RichEditorBaseControllerAccessor::GetLayoutManagerImpl,
-        RichEditorBaseControllerAccessor::GetPreviewTextImpl,
-        RichEditorBaseControllerAccessor::GetCaretRectImpl,
+        RichEditorBaseControllerAccessor::GetGetPreviewTextImpl,
+        RichEditorBaseControllerAccessor::SetGetPreviewTextImpl,
     };
     return &RichEditorBaseControllerAccessorImpl;
 }

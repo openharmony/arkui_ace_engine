@@ -154,26 +154,6 @@ void SelectedTextStyleImpl(Ark_NativePointer node,
     }
     DatePickerModelNG::SetSelectedTextStyle(frameNode, theme, *convValue);
 }
-void OnChangeImpl(Ark_NativePointer node,
-                  const Opt_Callback_DatePickerResult_Void* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto onChange = [arkCallback = CallbackHelper(*optValue)](const BaseEventInfo* event) {
-        CHECK_NULL_VOID(event);
-        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
-        CHECK_NULL_VOID(eventInfo);
-        auto selectedStr = eventInfo->GetSelectedStr();
-        auto result = Converter::ArkValue<Ark_DatePickerResult>(selectedStr);
-        arkCallback.Invoke(result);
-    };
-    DatePickerModelNG::SetOnChange(frameNode, std::move(onChange));
-}
 void OnDateChangeImpl(Ark_NativePointer node,
                       const Opt_Callback_Date_Void* value)
 {
@@ -213,6 +193,7 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //DatePickerModelNG::SetEnableHapticFeedback(frameNode, convValue);
 }
+#ifdef WRONG_GEN
 void _onChangeEvent_selectedImpl(Ark_NativePointer node,
                                  const Callback_Date_Void* callback)
 {
@@ -231,6 +212,7 @@ void _onChangeEvent_selectedImpl(Ark_NativePointer node,
     };
     DatePickerModelNG::SetChangeEvent(frameNode, std::move(onEvent));
 }
+#endif
 } // DatePickerAttributeModifier
 const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier()
 {
@@ -238,19 +220,12 @@ const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier()
         DatePickerModifier::ConstructImpl,
         DatePickerInterfaceModifier::SetDatePickerOptionsImpl,
         DatePickerAttributeModifier::LunarImpl,
-        DatePickerAttributeModifier::LunarImpl,
-        DatePickerAttributeModifier::DisappearTextStyleImpl,
         DatePickerAttributeModifier::DisappearTextStyleImpl,
         DatePickerAttributeModifier::TextStyleImpl,
-        DatePickerAttributeModifier::TextStyleImpl,
         DatePickerAttributeModifier::SelectedTextStyleImpl,
-        DatePickerAttributeModifier::SelectedTextStyleImpl,
-        DatePickerAttributeModifier::OnChangeImpl,
-        DatePickerAttributeModifier::OnDateChangeImpl,
         DatePickerAttributeModifier::OnDateChangeImpl,
         DatePickerAttributeModifier::DigitalCrownSensitivityImpl,
         DatePickerAttributeModifier::EnableHapticFeedbackImpl,
-        DatePickerAttributeModifier::_onChangeEvent_selectedImpl,
     };
     return &ArkUIDatePickerModifierImpl;
 }

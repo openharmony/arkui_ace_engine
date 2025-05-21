@@ -30,14 +30,6 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean GetStageModeImpl(Ark_BaseContext peer)
-{
-    return {};
-}
-void SetStageModeImpl(Ark_BaseContext peer,
-                      Ark_Boolean stageMode)
-{
-}
 } // BaseContextAccessor
 const GENERATED_ArkUIBaseContextAccessor* GetBaseContextAccessor()
 {
@@ -45,8 +37,6 @@ const GENERATED_ArkUIBaseContextAccessor* GetBaseContextAccessor()
         BaseContextAccessor::DestroyPeerImpl,
         BaseContextAccessor::CtorImpl,
         BaseContextAccessor::GetFinalizerImpl,
-        BaseContextAccessor::GetStageModeImpl,
-        BaseContextAccessor::SetStageModeImpl,
     };
     return &BaseContextAccessorImpl;
 }

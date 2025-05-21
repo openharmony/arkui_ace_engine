@@ -338,25 +338,6 @@ void OnRefreshAccessedHistory(const CallbackHelper<Callback_OnRefreshAccessedHis
     arkCallback.Invoke(parameter);
 }
 
-bool OnUrlLoadIntercept(const CallbackHelper<Type_WebAttribute_onUrlLoadIntercept_callback>& arkCallback,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
-{
-    const auto refNode = weakNode.Upgrade();
-    CHECK_NULL_RETURN(refNode, false);
-    ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    pipelineContext->UpdateCurrentActiveNode(weakNode);
-    auto* eventInfo = TypeInfoHelper::DynamicCast<UrlLoadInterceptEvent>(info);
-    CHECK_NULL_RETURN(eventInfo, false);
-    Ark_Literal_Union_String_WebResourceRequest_data parameter;
-    parameter.data = Converter::ArkUnion<Ark_Union_String_WebResourceRequest, Ark_String>(
-        Converter::ArkValue<Ark_String>(eventInfo->GetData()));
-    auto optParam = Converter::ArkValue<Opt_Literal_Union_String_WebResourceRequest_data>(parameter);
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(optParam);
-    return result.value_or(false);
-}
-
 void OnRenderExited(const CallbackHelper<Callback_OnRenderExitedEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
@@ -797,7 +778,7 @@ void OnFaviconReceived(const CallbackHelper<Callback_OnFaviconReceivedEvent_Void
         uint32_t stride = width << 2;
         uint64_t bufferSize = stride * height;
         pixelMap->WritePixels(static_cast<const uint8_t*>(data), bufferSize);
-        parameter.favicon = PeerUtils::CreatePeer<PixelMapPeer>();
+        parameter.favicon = PeerUtils::CreatePeer<image_PixelMapPeer>();
         CHECK_NULL_VOID(parameter.favicon);
         parameter.favicon->pixelMap = PixelMap::Create(std::move(pixelMap));
         CHECK_NULL_VOID(parameter.favicon->pixelMap);

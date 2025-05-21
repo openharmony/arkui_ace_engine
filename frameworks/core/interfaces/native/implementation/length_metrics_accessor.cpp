@@ -37,7 +37,8 @@ void DestroyPeerImpl(Ark_LengthMetrics peer)
 {
     LengthMetricsPeer::Destroy(peer);
 }
-Ark_LengthMetrics CtorImpl()
+Ark_LengthMetrics CtorImpl(const Ark_Number* value,
+                           Ark_LengthUnit unit)
 {
     return LengthMetricsPeer::Create({});
 }

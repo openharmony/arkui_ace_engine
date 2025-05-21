@@ -72,9 +72,6 @@ struct TextDecorationOptions {
     std::optional<Color> color;
     std::optional<TextDecorationStyle> textDecorationStyle;
 };
-struct ListItemOptions {
-    std::optional<V2::ListItemStyle> style;
-};
 
 struct AnimateParam {
     std::optional<int32_t> duration;

@@ -18,15 +18,15 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
 
-struct PixelMapPeer final {
+struct image_PixelMapPeer final {
     OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> pixelMap;
 
-    static PixelMapPeer *Create(const OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>& src)
+    static image_PixelMapPeer *Create(const OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>& src)
     {
-        return new PixelMapPeer{src};
+        return new image_PixelMapPeer{src};
     }
 
-    static void Destroy(PixelMapPeer *peer)
+    static void Destroy(image_PixelMapPeer *peer)
     {
         CHECK_NULL_VOID(peer);
         delete peer;

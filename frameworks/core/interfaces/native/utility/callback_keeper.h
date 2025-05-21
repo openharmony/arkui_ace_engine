@@ -103,7 +103,7 @@ public:
         Release(callback.resource.resourceId);
     }
 
-    template <typename CallbackType = Callback_Void>
+    template <typename CallbackType = VoidCallback>
     static AutoCallbackKeeper<CallbackType> Claim(ReverseHandler &&handler)
     {
         return AutoCallbackKeeper<CallbackType>(std::move(handler));

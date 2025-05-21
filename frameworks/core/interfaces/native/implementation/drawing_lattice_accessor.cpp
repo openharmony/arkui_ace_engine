@@ -34,8 +34,8 @@ Ark_DrawingLattice CreateImageLatticeImpl(const Array_Number* xDivs,
                                           const Array_Number* yDivs,
                                           const Ark_Number* fXCount,
                                           const Ark_Number* fYCount,
-                                          const Opt_Rect* fBounds,
-                                          const Opt_Array_RectType* fRectTypes,
+                                          const Opt_common2D_Rect* fBounds,
+                                          const Opt_Array_drawing_RectType* fRectTypes,
                                           const Opt_Array_Union_Color_Number* fColors)
 {
     return {};

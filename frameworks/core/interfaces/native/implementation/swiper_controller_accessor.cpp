@@ -20,9 +20,19 @@
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-inline void AssignCast(std::optional<Ark_Function>& dst, const Ark_Function& src)
+void AssignCast(std::optional<SwiperAnimationMode>& dst, const Ark_SwiperAnimationMode& src)
 {
-    dst = src;
+    switch (src) {
+        case ARK_SWIPER_ANIMATION_MODE_NO_ANIMATION: dst = SwiperAnimationMode::NO_ANIMATION; break;
+        case ARK_SWIPER_ANIMATION_MODE_DEFAULT_ANIMATION: dst = SwiperAnimationMode::DEFAULT_ANIMATION; break;
+        case ARK_SWIPER_ANIMATION_MODE_FAST_ANIMATION: dst = SwiperAnimationMode::FAST_ANIMATION; break;
+        default: LOGE("Unexpected enum value in Ark_SwiperAnimationMode: %{public}d", src);
+    }
+}
+template<>
+SwiperAnimationMode Convert(const Ark_Boolean& src)
+{
+    return src ? SwiperAnimationMode::DEFAULT_ANIMATION : SwiperAnimationMode::NO_ANIMATION;
 }
 } // namespace OHOS::Ace::NG::Converter
 
@@ -57,21 +67,16 @@ void ShowPreviousImpl(Ark_SwiperController peer)
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerShowPrevious();
 }
-void ChangeIndex0Impl(Ark_SwiperController peer,
-                      const Ark_Number* index,
-                      const Opt_Boolean* useAnimation)
+void ChangeIndexImpl(Ark_SwiperController peer,
+                     const Ark_Number* index,
+                     const Opt_Union_SwiperAnimationMode_Boolean* animationMode)
 {
     auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(index);
-    auto aceIdx = Converter::Convert<Ark_Int32>(*index);
-    auto aceUseAnim = useAnimation ? Converter::OptConvert<bool>(*useAnimation) : std::nullopt;
-    peerImpl->TriggerChangeIndex(aceIdx, aceUseAnim);
-}
-void ChangeIndex1Impl(Ark_SwiperController peer,
-                      const Ark_Number* index,
-                      const Opt_Union_SwiperAnimationMode_Boolean* animationMode)
-{
+    auto aceIdx = Converter::Convert<int32_t>(*index);
+    auto mode = animationMode ? Converter::OptConvert<SwiperAnimationMode>(*animationMode) : std::nullopt;
+    peerImpl->TriggerChangeIndex(aceIdx, mode.value_or(SwiperAnimationMode::NO_ANIMATION));
 }
 void FinishAnimationImpl(Ark_SwiperController peer,
                          const Opt_VoidCallback* callback_)
@@ -103,8 +108,7 @@ const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor()
         SwiperControllerAccessor::GetFinalizerImpl,
         SwiperControllerAccessor::ShowNextImpl,
         SwiperControllerAccessor::ShowPreviousImpl,
-        SwiperControllerAccessor::ChangeIndex0Impl,
-        SwiperControllerAccessor::ChangeIndex1Impl,
+        SwiperControllerAccessor::ChangeIndexImpl,
         SwiperControllerAccessor::FinishAnimationImpl,
         SwiperControllerAccessor::PreloadItemsImpl,
     };

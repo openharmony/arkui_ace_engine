@@ -65,20 +65,6 @@ Ark_Object GetXComponentContextImpl(Ark_XComponentController peer)
 #endif //XCOMPONENT_SUPPORTED
     return {};
 }
-void SetXComponentSurfaceSizeImpl(Ark_XComponentController peer,
-                                  const Ark_Literal_Number_surfaceHeight_surfaceWidth* value)
-{
-#ifdef XCOMPONENT_SUPPORTED
-    //This API is deprecated since API version 12. Should be used SetXComponentSurfaceRectImpl instead.
-    CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl->controller);
-    CHECK_NULL_VOID(value);
-    uint32_t surfaceWidth = static_cast<uint32_t>(Converter::Convert<int32_t>(value->surfaceWidth));
-    uint32_t surfaceHeight = static_cast<uint32_t>(Converter::Convert<int32_t>(value->surfaceHeight));
-    peerImpl->controller->ConfigSurface(surfaceWidth, surfaceHeight);
-#endif //XCOMPONENT_SUPPORTED
-}
 void SetXComponentSurfaceRectImpl(Ark_XComponentController peer,
                                   const Ark_SurfaceRect* rect)
 {
@@ -237,7 +223,6 @@ const GENERATED_ArkUIXComponentControllerAccessor* GetXComponentControllerAccess
         XComponentControllerAccessor::GetFinalizerImpl,
         XComponentControllerAccessor::GetXComponentSurfaceIdImpl,
         XComponentControllerAccessor::GetXComponentContextImpl,
-        XComponentControllerAccessor::SetXComponentSurfaceSizeImpl,
         XComponentControllerAccessor::SetXComponentSurfaceRectImpl,
         XComponentControllerAccessor::GetXComponentSurfaceRectImpl,
         XComponentControllerAccessor::SetXComponentSurfaceRotationImpl,

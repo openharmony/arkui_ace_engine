@@ -33,12 +33,12 @@ Ark_NativePointer GetFinalizerImpl()
 void InvalidateImpl(Ark_CustomSpan peer)
 {
 }
-AsyncCallback_CustomSpanMeasureInfo_CustomSpanMetrics GetOnMeasureImpl(Ark_CustomSpan peer)
+Callback_CustomSpanMeasureInfo_CustomSpanMetrics GetOnMeasureImpl(Ark_CustomSpan peer)
 {
     return {};
 }
 void SetOnMeasureImpl(Ark_CustomSpan peer,
-                      const AsyncCallback_CustomSpanMeasureInfo_CustomSpanMetrics* onMeasure)
+                      const Callback_CustomSpanMeasureInfo_CustomSpanMetrics* onMeasure)
 {
 }
 Callback_DrawContext_CustomSpanDrawInfo_Void GetOnDrawImpl(Ark_CustomSpan peer)

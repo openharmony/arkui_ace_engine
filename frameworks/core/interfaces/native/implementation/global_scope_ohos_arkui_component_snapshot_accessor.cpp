@@ -51,7 +51,7 @@ void GetImpl(const Ark_String* id,
             return;
         }
         RefPtr<PixelMap> pixelMapRef = PixelMap::CreatePixelMap(&mediaPixelMap);
-        static PixelMapPeer peer;
+        image_PixelMapPeer peer;
         peer.pixelMap = pixelMapRef;
         arkCallback.Invoke(&peer);
     };

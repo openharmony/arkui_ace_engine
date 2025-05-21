@@ -135,24 +135,6 @@ void SetWindowYImpl(Ark_ClickEvent peer,
     offset.SetY(y, animation);
     info->SetGlobalLocation(offset);
 }
-Ark_Number GetScreenXImpl(Ark_ClickEvent peer)
-{
-    return GetWindowXImpl(peer);
-}
-void SetScreenXImpl(Ark_ClickEvent peer,
-                    const Ark_Number* screenX)
-{
-    SetWindowXImpl(peer, screenX);
-}
-Ark_Number GetScreenYImpl(Ark_ClickEvent peer)
-{
-    return GetWindowYImpl(peer);
-}
-void SetScreenYImpl(Ark_ClickEvent peer,
-                    const Ark_Number* screenY)
-{
-    SetWindowYImpl(peer, screenY);
-}
 Ark_Number GetXImpl(Ark_ClickEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
@@ -244,10 +226,6 @@ const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
         ClickEventAccessor::SetWindowXImpl,
         ClickEventAccessor::GetWindowYImpl,
         ClickEventAccessor::SetWindowYImpl,
-        ClickEventAccessor::GetScreenXImpl,
-        ClickEventAccessor::SetScreenXImpl,
-        ClickEventAccessor::GetScreenYImpl,
-        ClickEventAccessor::SetScreenYImpl,
         ClickEventAccessor::GetXImpl,
         ClickEventAccessor::SetXImpl,
         ClickEventAccessor::GetYImpl,

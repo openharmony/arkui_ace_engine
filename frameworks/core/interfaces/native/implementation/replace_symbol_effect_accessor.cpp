@@ -44,10 +44,10 @@ Opt_EffectScope GetScopeImpl(Ark_ReplaceSymbolEffect peer)
     return Converter::ArkValue<Opt_EffectScope>(peer->scope);
 }
 void SetScopeImpl(Ark_ReplaceSymbolEffect peer,
-                  Ark_EffectScope scope)
+                  const Opt_EffectScope* scope)
 {
     CHECK_NULL_VOID(peer);
-    peer->scope = Converter::OptConvert<OHOS::Ace::ScopeType>(scope);
+    peer->scope = Converter::OptConvert<OHOS::Ace::ScopeType>(*scope);
 }
 } // ReplaceSymbolEffectAccessor
 const GENERATED_ArkUIReplaceSymbolEffectAccessor* GetReplaceSymbolEffectAccessor()

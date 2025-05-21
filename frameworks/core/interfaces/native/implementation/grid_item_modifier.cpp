@@ -113,18 +113,6 @@ void ColumnEndImpl(Ark_NativePointer node,
     }
     GridItemModelNG::SetColumnEnd(frameNode, *convValue);
 }
-void ForceRebuildImpl(Ark_NativePointer node,
-                      const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    GridItemModelNG::SetForceRebuild(frameNode, *convValue);
-}
 void SelectableImpl(Ark_NativePointer node,
                     const Opt_Boolean* value)
 {
@@ -164,6 +152,7 @@ void OnSelectImpl(Ark_NativePointer node,
     };
     GridItemModelStatic::SetOnSelect(frameNode, onSelect);
 }
+#ifdef WRONG_GEN
 void _onChangeEvent_selectedImpl(Ark_NativePointer node,
                                  const Callback_Opt_Boolean_Void* callback)
 {
@@ -177,6 +166,7 @@ void _onChangeEvent_selectedImpl(Ark_NativePointer node,
     };
     GridItemModelStatic::SetSelectChangeEvent(frameNode, std::move(onEvent));
 }
+#endif
 } // GridItemAttributeModifier
 const GENERATED_ArkUIGridItemModifier* GetGridItemModifier()
 {
@@ -187,11 +177,9 @@ const GENERATED_ArkUIGridItemModifier* GetGridItemModifier()
         GridItemAttributeModifier::RowEndImpl,
         GridItemAttributeModifier::ColumnStartImpl,
         GridItemAttributeModifier::ColumnEndImpl,
-        GridItemAttributeModifier::ForceRebuildImpl,
         GridItemAttributeModifier::SelectableImpl,
         GridItemAttributeModifier::SelectedImpl,
         GridItemAttributeModifier::OnSelectImpl,
-        GridItemAttributeModifier::_onChangeEvent_selectedImpl,
     };
     return &ArkUIGridItemModifierImpl;
 }

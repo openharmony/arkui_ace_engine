@@ -199,54 +199,6 @@ void SetWindowYImpl(Ark_MouseEvent peer,
     globalLocation.SetY(yConvert, animation);
     info->SetGlobalLocation(globalLocation);
 }
-Ark_Number GetScreenXImpl(Ark_MouseEvent peer)
-{
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer, errValue);
-    auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, errValue);
-    const auto& globalLocation = info->GetGlobalLocation();
-    const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
-    return Converter::ArkValue<Ark_Number>(value);
-}
-void SetScreenXImpl(Ark_MouseEvent peer,
-                    const Ark_Number* screenX)
-{
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(screenX);
-    auto info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    auto globalLocation = info->GetGlobalLocation();
-    const auto animation = globalLocation.GetXAnimationOption();
-    auto value = Converter::Convert<float>(*screenX);
-    auto xConvert = PipelineBase::Vp2PxWithCurrentDensity(value);
-    globalLocation.SetX(xConvert, animation);
-    info->SetGlobalLocation(globalLocation);
-}
-Ark_Number GetScreenYImpl(Ark_MouseEvent peer)
-{
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer, errValue);
-    auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, errValue);
-    const auto& globalLocation = info->GetGlobalLocation();
-    const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
-    return Converter::ArkValue<Ark_Number>(value);
-}
-void SetScreenYImpl(Ark_MouseEvent peer,
-                    const Ark_Number* screenY)
-{
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(screenY);
-    auto info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    auto globalLocation = info->GetGlobalLocation();
-    const auto animation = globalLocation.GetYAnimationOption();
-    auto value = Converter::Convert<float>(*screenY);
-    auto yConvert = PipelineBase::Vp2PxWithCurrentDensity(value);
-    globalLocation.SetY(yConvert, animation);
-    info->SetGlobalLocation(globalLocation);
-}
 Ark_Number GetXImpl(Ark_MouseEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
@@ -390,10 +342,6 @@ const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
         MouseEventAccessor::SetWindowXImpl,
         MouseEventAccessor::GetWindowYImpl,
         MouseEventAccessor::SetWindowYImpl,
-        MouseEventAccessor::GetScreenXImpl,
-        MouseEventAccessor::SetScreenXImpl,
-        MouseEventAccessor::GetScreenYImpl,
-        MouseEventAccessor::SetScreenYImpl,
         MouseEventAccessor::GetXImpl,
         MouseEventAccessor::SetXImpl,
         MouseEventAccessor::GetYImpl,

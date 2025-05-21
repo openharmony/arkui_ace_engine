@@ -63,8 +63,20 @@ void AssignCast(std::optional<ImageRotateOrientation>& dst, const Ark_ImageRotat
         default: LOGE("Unexpected enum value in Ark_ImageRotateOrientation: %{public}d", src);
     }
 }
+
 template<>
-void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_Union_String_Resource_PixelMap& src)
+void AssignCast(std::optional<Color>& dst, const Ark_ColorContent& src)
+{
+    // Currently ColorContent have only one value: ORIGIN
+    // which corresponds to default value. We reset to default value when optional is empty.
+    // So, all we need to do is reset optional.
+    // TODO: Check that ColorContent is indeed ORIGIN. There can be other types in future.
+    dst.reset();
+}
+
+/*
+template<>
+void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_Union_String_Resource_Image_PixelMap& src)
 {
     Converter::VisitUnion(src,
         [&dst](const Ark_String& val) {
@@ -73,7 +85,7 @@ void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_Union_String_Reso
         [&dst](const Ark_Resource& val) {
             dst = Converter::OptConvert<ImageSourceInfo>(val);
         },
-        [&dst](const Ark_PixelMap& val) {
+        [&dst](const Ark_image_PixelMap& val) {
             dst = std::nullopt;
             auto pixMapRefPtr = Converter::OptConvert<RefPtr<PixelMap>>(val).value_or(nullptr);
             if (pixMapRefPtr) {
@@ -83,6 +95,7 @@ void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_Union_String_Reso
         []() {}
     );
 }
+*/
 } // Converter
 } // OHOS::Ace::NG
 
@@ -100,7 +113,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // ImageModifier
 namespace ImageInterfaceModifier {
 void SetImageOptions0Impl(Ark_NativePointer node,
-                          const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor* src)
+                          const Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor* src)
 {
     CHECK_NULL_VOID(src);
     auto info = Converter::OptConvert<ImageSourceInfo>(*src);
@@ -111,7 +124,7 @@ void SetImageOptions0Impl(Ark_NativePointer node,
     }
 }
 void SetImageOptions1Impl(Ark_NativePointer node,
-                          const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src)
+                          const Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -130,7 +143,7 @@ void SetImageOptions1Impl(Ark_NativePointer node,
     }
 }
 void SetImageOptions2Impl(Ark_NativePointer node,
-                          const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor* src,
+                          const Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor* src,
                           const Ark_ImageAIOptions* imageAIOptions)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -143,7 +156,7 @@ void SetImageOptions2Impl(Ark_NativePointer node,
 } // ImageInterfaceModifier
 namespace ImageAttributeModifier {
 void AltImpl(Ark_NativePointer node,
-             const Opt_Union_String_Resource_PixelMap* value)
+             const Opt_Union_String_Resource_Image_PixelMap* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -179,20 +192,12 @@ void FitOriginalSizeImpl(Ark_NativePointer node,
     }
     ImageModelNG::SetFitOriginSize(frameNode, *convValue);
 }
-void FillColor0Impl(Ark_NativePointer node,
-                    const Opt_ResourceColor* value)
+void FillColorImpl(Ark_NativePointer node,
+                   const Opt_Union_ResourceColor_ColorContent* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelStatic::SetImageFill(frameNode, Converter::OptConvert<Color>(*value));
-}
-void FillColor1Impl(Ark_NativePointer node,
-                    const Opt_Union_ResourceColor_ColorContent* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ImageModelNG::SetFillColor1(frameNode, convValue);
 }
 void ObjectFitImpl(Ark_NativePointer node,
                    const Opt_ImageFit* value)
@@ -203,7 +208,7 @@ void ObjectFitImpl(Ark_NativePointer node,
     ImageModelStatic::SetImageFit(frameNode, fit);
 }
 void ImageMatrixImpl(Ark_NativePointer node,
-                     const Opt_Matrix4Transit* value)
+                     const Opt_matrix4_Matrix4Transit* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -271,7 +276,7 @@ void SyncLoadImpl(Ark_NativePointer node,
     ImageModelNG::SetSyncMode(frameNode, *convValue);
 }
 void ColorFilterImpl(Ark_NativePointer node,
-                     const Opt_Union_ColorFilter_DrawingColorFilter* value)
+                     const Opt_Union_ColorFilter_Drawing_ColorFilter* value)
 {
     ImageCommonMethods::ApplyColorFilterValues(node, value);
 }
@@ -340,7 +345,7 @@ void EdgeAntialiasingImpl(Ark_NativePointer node,
     ImageModelStatic::SetSmoothEdge(frameNode, convValue);
 }
 void OnCompleteImpl(Ark_NativePointer node,
-                    const Opt_Callback_Type_ImageAttribute_onComplete_callback_event_Void* value)
+                    const Opt_ImageOnCompleteCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -350,7 +355,7 @@ void OnCompleteImpl(Ark_NativePointer node,
         return;
     }
     auto onEvent = [callback = CallbackHelper(*optValue)](const LoadImageSuccessEvent& info) {
-        Ark_Type_ImageAttribute_onComplete_callback_event event;
+        Ark_ImageCompleteEvent event;
         event.width = Converter::ArkValue<Ark_Number>(info.GetWidth());
         event.height = Converter::ArkValue<Ark_Number>(info.GetHeight());
         event.componentWidth = Converter::ArkValue<Ark_Number>(info.GetComponentWidth());
@@ -360,7 +365,7 @@ void OnCompleteImpl(Ark_NativePointer node,
         event.contentOffsetY = Converter::ArkValue<Ark_Number>(info.GetContentOffsetY());
         event.contentWidth = Converter::ArkValue<Ark_Number>(info.GetContentWidth());
         event.contentHeight = Converter::ArkValue<Ark_Number>(info.GetContentHeight());
-        auto optEvent = Converter::ArkValue<Opt_Type_ImageAttribute_onComplete_callback_event>(event);
+        auto optEvent = Converter::ArkValue<Opt_ImageCompleteEvent>(event);
         callback.Invoke(optEvent);
     };
     ImageModelNG::SetOnComplete(frameNode, std::move(onEvent));
@@ -447,14 +452,6 @@ void PrivacySensitiveImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetPrivacySensitive(frameNode, Converter::OptConvert<bool>(*value));
 }
-void EnhancedImageQualityImpl(Ark_NativePointer node,
-                              const Opt_ResolutionQuality* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<AIImageQuality>(*value);
-    ImageModelNG::SetEnhancedImageQuality(frameNode, convValue);
-}
 void OrientationImpl(Ark_NativePointer node,
                      const Opt_ImageRotateOrientation* value)
 {
@@ -474,8 +471,7 @@ const GENERATED_ArkUIImageModifier* GetImageModifier()
         ImageAttributeModifier::AltImpl,
         ImageAttributeModifier::MatchTextDirectionImpl,
         ImageAttributeModifier::FitOriginalSizeImpl,
-        ImageAttributeModifier::FillColor0Impl,
-        ImageAttributeModifier::FillColor1Impl,
+        ImageAttributeModifier::FillColorImpl,
         ImageAttributeModifier::ObjectFitImpl,
         ImageAttributeModifier::ImageMatrixImpl,
         ImageAttributeModifier::ObjectRepeatImpl,
@@ -497,7 +493,6 @@ const GENERATED_ArkUIImageModifier* GetImageModifier()
         ImageAttributeModifier::AnalyzerConfigImpl,
         ImageAttributeModifier::ResizableImpl,
         ImageAttributeModifier::PrivacySensitiveImpl,
-        ImageAttributeModifier::EnhancedImageQualityImpl,
         ImageAttributeModifier::OrientationImpl,
     };
     return &ArkUIImageModifierImpl;

@@ -18,7 +18,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/web/web_event.h"
 
-struct WebviewControllerPeer : public OHOS::Ace::Referenced {
+struct webview_WebviewControllerPeer : public OHOS::Ace::Referenced {
     int nwebId;
     std::string hapPath;
 };

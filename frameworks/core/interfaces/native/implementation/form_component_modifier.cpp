@@ -100,7 +100,7 @@ void AssignCast(std::optional<int32_t>& dst, const Ark_FormRenderingMode& src)
     }
 }
 template<>
-LiteralDimension Convert(const Ark_SizeOptions& src)
+LiteralDimension Convert(const Ark_FormSize& src)
 {
     return LiteralDimension {
         .width = Converter::OptConvert<Dimension>(src.width).value_or(Dimension()),
@@ -158,7 +158,7 @@ void SetFormComponentOptionsImpl(Ark_NativePointer node,
 } // FormComponentInterfaceModifier
 namespace FormComponentAttributeModifier {
 void SizeImpl(Ark_NativePointer node,
-              const Opt_SizeOptions* value)
+              const Opt_FormSize* value)
 {
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -247,7 +247,9 @@ void OnAcquiredImpl(Ark_NativePointer node,
             }
         }
         Ark_FormCallbackInfo parameter = {
+#ifdef WRONG_GEN
             .id = Converter::ArkValue<Ark_Int64>(id),
+#endif
             .idString = Converter::ArkValue<Ark_String>(idString) };
         arkCallback.Invoke(parameter);
     };
@@ -255,7 +257,7 @@ void OnAcquiredImpl(Ark_NativePointer node,
 #endif // FORM_SUPPORTED
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 const Opt_Callback_Literal_Number_errcode_String_msg_Void* value)
+                 const Opt_Callback_FormError_Void* value)
 {
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -278,7 +280,7 @@ void OnErrorImpl(Ark_NativePointer node,
                 code =result;
             }
         }
-        Ark_Literal_Number_errcode_String_msg parameter = {
+        Ark_FormError parameter = {
             .errcode = Converter::ArkValue<Ark_Number>(code),
             .msg = Converter::ArkValue<Ark_String>(msg)
         };
@@ -288,7 +290,7 @@ void OnErrorImpl(Ark_NativePointer node,
 #endif // FORM_SUPPORTED
 }
 void OnRouterImpl(Ark_NativePointer node,
-                  const Opt_FormComponentAttribute_onRouter_callback_type* value)
+                  const Opt_Callback_Union_Object_Undefined_Void* value)
 {
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -322,7 +324,9 @@ void OnUninstallImpl(Ark_NativePointer node,
             }
         }
         Ark_FormCallbackInfo parameter = {
+#ifdef WRONG_GEN
             .id = Converter::ArkValue<Ark_Int64>(id),
+#endif
             .idString = Converter::ArkValue<Ark_String>(idString)
         };
         arkCallback.Invoke(parameter);

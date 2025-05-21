@@ -34,7 +34,7 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SetRectShapeImpl(Ark_ShapeClip peer,
-                      const Ark_Rect* rect)
+                      const Ark_common2D_Rect* rect)
 {
     if (peer && rect) {
         peer->SetRectShape(Converter::Convert<RefPtr<Ace::ShapeRect>>(*rect));
@@ -55,7 +55,7 @@ void SetCircleShapeImpl(Ark_ShapeClip peer,
     }
 }
 void SetOvalShapeImpl(Ark_ShapeClip peer,
-                      const Ark_Rect* oval)
+                      const Ark_common2D_Rect* oval)
 {
     if (peer && oval) {
         peer->SetOvalShape(Converter::Convert<RefPtr<Ace::ShapeRect>>(*oval));

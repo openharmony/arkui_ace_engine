@@ -100,7 +100,7 @@ Ark_Boolean SpliceImpl(Ark_WaterFlowSections peer,
     }
 }
 Ark_Boolean PushImpl(Ark_WaterFlowSections peer,
-                     const Ark_SectionOptions* section)
+                     Ark_SectionOptions section)
 {
     CHECK_NULL_RETURN(peer, false);
     CHECK_NULL_RETURN(peer->GetController(), false);
@@ -113,7 +113,7 @@ Ark_Boolean PushImpl(Ark_WaterFlowSections peer,
 }
 Ark_Boolean UpdateImpl(Ark_WaterFlowSections peer,
                        const Ark_Number* sectionIndex,
-                       const Ark_SectionOptions* section)
+                       Ark_SectionOptions section)
 {
     CHECK_NULL_RETURN(peer, false);
     CHECK_NULL_RETURN(peer->GetController(), false);

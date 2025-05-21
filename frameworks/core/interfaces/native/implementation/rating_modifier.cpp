@@ -140,23 +140,16 @@ void OnChangeImpl(Ark_NativePointer node,
     }
     RatingModelStatic::SetOnChange(frameNode, std::move(onChange));
 }
-void ContentModifier0Impl(Ark_NativePointer node,
-                          const Opt_ContentModifier* value)
+void ContentModifierImpl(Ark_NativePointer node,
+                         const Opt_ContentModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //RatingModelNG::SetContentModifier0(frameNode, convValue);
+    //RatingModelNG::SetContentModifier(frameNode, convValue);
     LOGE("ARKOALA RatingInterfaceModifier::ContentModifier is not implemented.");
 }
-void ContentModifier1Impl(Ark_NativePointer node,
-                          const Opt_ContentModifier* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //RatingModelNG::SetContentModifier1(frameNode, convValue);
-}
+#ifdef WRONG_GEN
 void _onChangeEvent_ratingImpl(Ark_NativePointer node,
                                const Callback_Number_Void* callback)
 {
@@ -171,6 +164,7 @@ void _onChangeEvent_ratingImpl(Ark_NativePointer node,
     };
     RatingModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
+#endif
 } // RatingAttributeModifier
 const GENERATED_ArkUIRatingModifier* GetRatingModifier()
 {
@@ -178,16 +172,10 @@ const GENERATED_ArkUIRatingModifier* GetRatingModifier()
         RatingModifier::ConstructImpl,
         RatingInterfaceModifier::SetRatingOptionsImpl,
         RatingAttributeModifier::StarsImpl,
-        RatingAttributeModifier::StarsImpl,
-        RatingAttributeModifier::StepSizeImpl,
         RatingAttributeModifier::StepSizeImpl,
         RatingAttributeModifier::StarStyleImpl,
-        RatingAttributeModifier::StarStyleImpl,
-        nullptr,
         RatingAttributeModifier::OnChangeImpl,
-        RatingAttributeModifier::ContentModifier0Impl,
-        RatingAttributeModifier::ContentModifier1Impl,
-        RatingAttributeModifier::_onChangeEvent_ratingImpl,
+        RatingAttributeModifier::ContentModifierImpl,
     };
     return &ArkUIRatingModifierImpl;
 }

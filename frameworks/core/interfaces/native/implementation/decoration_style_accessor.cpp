@@ -50,12 +50,20 @@ Ark_TextDecorationType GetTypeImpl(Ark_DecorationStyle peer)
     auto value = Converter::ArkValue<Ark_TextDecorationType>(peer->span->GetTextDecorationType());
     return value;
 }
+void SetTypeImpl(Ark_DecorationStyle peer,
+                 Ark_TextDecorationType type)
+{
+}
 Opt_ResourceColor GetColorImpl(Ark_DecorationStyle peer)
 {
     auto invalidValue = Converter::ArkValue<Opt_ResourceColor>();
     CHECK_NULL_RETURN(peer && peer->span, invalidValue);
     auto color = peer->span->GetColor();
     return Converter::ArkUnion<Opt_ResourceColor, Ark_String>(color, Converter::FC);
+}
+void SetColorImpl(Ark_DecorationStyle peer,
+                  const Opt_ResourceColor* color)
+{
 }
 Opt_TextDecorationStyle GetStyleImpl(Ark_DecorationStyle peer)
 {
@@ -65,6 +73,10 @@ Opt_TextDecorationStyle GetStyleImpl(Ark_DecorationStyle peer)
     auto optValue = peer->span->GetTextDecorationStyle();
     return Converter::ArkValue<Opt_TextDecorationStyle>(optValue);
 }
+void SetStyleImpl(Ark_DecorationStyle peer,
+                  const Opt_TextDecorationStyle* style)
+{
+}
 } // DecorationStyleAccessor
 const GENERATED_ArkUIDecorationStyleAccessor* GetDecorationStyleAccessor()
 {
@@ -73,8 +85,11 @@ const GENERATED_ArkUIDecorationStyleAccessor* GetDecorationStyleAccessor()
         DecorationStyleAccessor::CtorImpl,
         DecorationStyleAccessor::GetFinalizerImpl,
         DecorationStyleAccessor::GetTypeImpl,
+        DecorationStyleAccessor::SetTypeImpl,
         DecorationStyleAccessor::GetColorImpl,
+        DecorationStyleAccessor::SetColorImpl,
         DecorationStyleAccessor::GetStyleImpl,
+        DecorationStyleAccessor::SetStyleImpl,
     };
     return &DecorationStyleAccessorImpl;
 }

@@ -64,7 +64,7 @@ Ark_OffscreenCanvasRenderingContext2D GetContext2dImpl(Ark_OffscreenCanvas peer,
     CHECK_NULL_RETURN(options, {});
     auto width = Converter::ArkValue<Ark_Number>(static_cast<float>(peer->GetWidth()));
     auto height = Converter::ArkValue<Ark_Number>(static_cast<float>(peer->GetHeight()));
-    auto offscreenContext = GetOffscreenCanvasRenderingContext2DAccessor()->ctor(&width, &height, options);
+    auto offscreenContext = GetOffscreenCanvasRenderingContext2DAccessor()->ctor(&width, &height, options, nullptr);
     auto offscreenSettings = Converter::OptConvert<RenderingContextSettingsPeer*>(*options).value_or(nullptr);
     return peer->GetContext2D(offscreenContext, offscreenSettings);
 }

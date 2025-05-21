@@ -137,6 +137,7 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
     };
 }
 
+#ifdef WRONG_GEN
 void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src)
 {
     if (src.menuOptionsParam.content.has_value()) {
@@ -146,6 +147,7 @@ void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src)
     dst.id = PeerUtils::CreatePeer<TextMenuItemIdPeer>(src.menuOptionsParam.id);
     dst.labelInfo = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.menuOptionsParam.labelInfo);
 }
+#endif
 
 void AssignArkValue(Ark_TextMetrics& dst, const OHOS::Ace::TextMetrics& src)
 {
@@ -201,12 +203,6 @@ void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Di
     dst.value1 = ArkValue<Ark_Dimension>(src.second, ctx);
 }
 
-void AssignArkValue(Ark_Tuple_Number_Number& dst, const Point& src)
-{
-    dst.value0 = ArkValue<Ark_Number>(src.GetX());
-    dst.value1 = ArkValue<Ark_Number>(src.GetY());
-}
-
 void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, ConvContext* ctx)
 {
     dst.radius = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(src.GetBlurRadius());
@@ -235,7 +231,7 @@ void AssignArkValue(Ark_LeadingMarginPlaceholder& dst, const LeadingMargin& src,
     std::pair<const Dimension, const Dimension> pair = {src.size.Width(), src.size.Height()};
     dst.size = Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(pair, ctx);
     if (src.pixmap) {
-        dst.pixelMap = PixelMapPeer::Create(src.pixmap);
+        dst.pixelMap = image_PixelMapPeer::Create(src.pixmap);
     }
 }
 
@@ -415,6 +411,7 @@ void AssignArkValue(Ark_Date& dst, const std::string& src)
     dst = static_cast<Ark_Date>(milliseconds);
 }
 
+#ifdef WRONG_GEN
 void AssignArkValue(Ark_DatePickerResult& dst, const std::string& src)
 {
     auto json = JsonUtil::ParseJsonString(src);
@@ -429,6 +426,7 @@ void AssignArkValue(Ark_DatePickerResult& dst, const std::string& src)
         .day = Converter::ArkValue<Opt_Number>(date.GetDay())
     };
 }
+#endif
 
 void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src, ConvContext *ctx)
 {
@@ -500,7 +498,7 @@ void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
     dst.styledKey = Converter::ArkValue<Ark_StyledStringKey>(src->GetSpanType());
     switch (src->GetSpanType()) {
         case Ace::SpanType::Font:
-            CreateStylePeer<TextStyle_styled_stringPeer, OHOS::Ace::FontSpan>(dst, src);
+            CreateStylePeer<TextStylePeer, OHOS::Ace::FontSpan>(dst, src);
             break;
         case Ace::SpanType::Decoration:
             CreateStylePeer<DecorationStylePeer, OHOS::Ace::DecorationSpan>(dst, src);
@@ -623,13 +621,6 @@ void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& sr
     dst.id.tag = Ark_Tag::INTEROP_TAG_INT32;
     dst.id.i32 = static_cast<int32_t>(src.GetTouchDeviceId());
 
-    dst.screenX.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.screenX.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    dst.screenY.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.screenY.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
-
     dst.type = static_cast<Ark_TouchType>(src.GetTouchType());
 
     dst.windowX.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
@@ -672,7 +663,9 @@ void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo
     AssignArkValue(dst.touchObject, src);
     dst.size = ArkValue<Ark_Number>(src.GetSize());
     dst.force = ArkValue<Ark_Number>(src.GetForce());
+#ifdef WRONG_GEN
     dst.timestamp = src.GetTimeStamp().time_since_epoch().count();
+#endif
 }
 
 void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)

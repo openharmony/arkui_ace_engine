@@ -154,7 +154,7 @@ void FontFamilyImpl(Ark_NativePointer node,
     TextTimerModelStatic::SetFontFamily(frameNode, families);
 }
 void OnTimerImpl(Ark_NativePointer node,
-                 const Opt_TextTimerAttribute_onTimer_event_type* value)
+                 const Opt_Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

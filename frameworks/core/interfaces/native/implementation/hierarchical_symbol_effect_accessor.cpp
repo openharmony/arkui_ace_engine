@@ -52,10 +52,10 @@ Opt_EffectFillStyle GetFillStyleImpl(Ark_HierarchicalSymbolEffect peer)
     }
 }
 void SetFillStyleImpl(Ark_HierarchicalSymbolEffect peer,
-                      Ark_EffectFillStyle fillStyle)
+                      const Opt_EffectFillStyle* fillStyle)
 {
     CHECK_NULL_VOID(peer);
-    peer->fillStyle = Converter::OptConvert<OHOS::Ace::FillStyle>(fillStyle);
+    peer->fillStyle = Converter::OptConvert<OHOS::Ace::FillStyle>(*fillStyle);
 }
 } // HierarchicalSymbolEffectAccessor
 const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffectAccessor()

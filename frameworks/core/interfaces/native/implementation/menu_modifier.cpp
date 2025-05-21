@@ -96,13 +96,6 @@ void SetMenuOptionsImpl(Ark_NativePointer node)
 }
 } // MenuInterfaceModifier
 namespace MenuAttributeModifier {
-void FontSizeImpl(Ark_NativePointer node,
-                  const Opt_Length* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    MenuModelNG::SetFontSize(frameNode, Converter::OptConvert<Dimension>(*value));
-}
 void FontImpl(Ark_NativePointer node,
               const Opt_Font* value)
 {
@@ -178,7 +171,6 @@ const GENERATED_ArkUIMenuModifier* GetMenuModifier()
     static const GENERATED_ArkUIMenuModifier ArkUIMenuModifierImpl {
         MenuModifier::ConstructImpl,
         MenuInterfaceModifier::SetMenuOptionsImpl,
-        MenuAttributeModifier::FontSizeImpl,
         MenuAttributeModifier::FontImpl,
         MenuAttributeModifier::FontColorImpl,
         MenuAttributeModifier::RadiusImpl,

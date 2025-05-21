@@ -62,7 +62,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // XComponentModifier
 namespace XComponentInterfaceModifier {
 void SetXComponentOptions0Impl(Ark_NativePointer node,
-                               const Ark_Type_XComponentInterface_callable0_value* value)
+                               const Ark_XComponentParameter* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -90,34 +90,6 @@ void SetXComponentOptions0Impl(Ark_NativePointer node,
 #endif // XCOMPONENT_SUPPORTED
 }
 void SetXComponentOptions1Impl(Ark_NativePointer node,
-                               const Ark_Type_XComponentInterface_callable1_value* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-
-#ifdef XCOMPONENT_SUPPORTED
-    auto id = Converter::Convert<std::string>(value->id);
-    XComponentModelNG::SetXComponentId(frameNode, id);
-
-    auto type = Converter::OptConvert<XComponentType>(value->type);
-    XComponentModelNG::SetXComponentType(frameNode, type.value_or(XComponentType::UNKNOWN));
-
-    auto libraryName = Converter::OptConvert<std::string>(value->libraryname);
-    XComponentModelNG::SetXComponentLibraryname(frameNode, libraryName);
-
-    auto controllerOpt = Converter::OptConvert<Ark_XComponentController>(value->controller);
-    std::shared_ptr<InnerXComponentController> controller = nullptr;
-#ifdef WRONG_MERGE
-    if (controller) {
-        auto peerPtr = controllerOpt.value();
-        controller = peerPtr->controller;
-    }
-#endif
-    XComponentModelNG::SetXComponentController(frameNode, controller);
-#endif // XCOMPONENT_SUPPORTED
-}
-void SetXComponentOptions2Impl(Ark_NativePointer node,
                                const Ark_XComponentOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -142,14 +114,14 @@ void SetXComponentOptions2Impl(Ark_NativePointer node,
     XComponentModelNG::SetControllerOnDestroyed(frameNode, peerImpl->GetOnSurfaceDestroyedEvent());
 #endif // XCOMPONENT_SUPPORTED
 }
-void SetXComponentOptions3Impl(Ark_NativePointer node,
+void SetXComponentOptions2Impl(Ark_NativePointer node,
                                const Ark_NativeXComponentParameters* params)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(params);
     //auto convValue = Converter::OptConvert<type_name>(*params);
-    //XComponentModelNG::SetSetXComponentOptions3(frameNode, convValue);
+    //XComponentModelNG::SetSetXComponentOptions2(frameNode, convValue);
 }
 } // XComponentInterfaceModifier
 namespace XComponentAttributeModifier {
@@ -242,7 +214,6 @@ const GENERATED_ArkUIXComponentModifier* GetXComponentModifier()
         XComponentInterfaceModifier::SetXComponentOptions0Impl,
         XComponentInterfaceModifier::SetXComponentOptions1Impl,
         XComponentInterfaceModifier::SetXComponentOptions2Impl,
-        XComponentInterfaceModifier::SetXComponentOptions3Impl,
         XComponentAttributeModifier::OnLoadImpl,
         XComponentAttributeModifier::OnDestroyImpl,
         XComponentAttributeModifier::EnableAnalyzerImpl,

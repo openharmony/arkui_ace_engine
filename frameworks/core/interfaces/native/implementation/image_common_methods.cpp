@@ -16,7 +16,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 void ImageCommonMethods::ApplyColorFilterValues(
-    Ark_NativePointer node, const Opt_Union_ColorFilter_DrawingColorFilter* value)
+    Ark_NativePointer node, const Opt_Union_ColorFilter_Drawing_ColorFilter* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -31,7 +31,7 @@ void ImageCommonMethods::ApplyColorFilterValues(
                     return;
                 }
             },
-            [frameNode](const Ark_DrawingColorFilter& colorStrategy) {
+            [frameNode](const Ark_drawing_ColorFilter& colorStrategy) {
                 LOGE("Arkoala: Image.ColorFilterImpl - doesn't support DrawinColorFilter");
             },
             []() {});

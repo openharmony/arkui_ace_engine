@@ -19,67 +19,72 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG {
-namespace Converter {
+namespace OHOS::Ace {
+void AssignArkValue(Ark_matrix4_Matrix4TransformPoint& dst, const Point& src)
+{
+    dst.value0 = NG::Converter::ArkValue<Ark_Number>(src.GetX());
+    dst.value1 = NG::Converter::ArkValue<Ark_Number>(src.GetY());
+}
+namespace NG::Converter {
 template<>
-Point Convert(const Ark_Tuple_Number_Number& src)
+Point Convert(const Ark_matrix4_Matrix4TransformPoint& src)
 {
     auto x = Converter::Convert<double>(src.value0);
     auto y = Converter::Convert<double>(src.value1);
     return Point(x, y);
 }
-} // namespace Converter
-} // namespace OHOS::Ace::NG
+} // namespace NG::Converter
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Matrix4TransitAccessor {
-void DestroyPeerImpl(Ark_Matrix4Transit peer)
+namespace Matrix4_Matrix4TransitAccessor {
+void DestroyPeerImpl(Ark_matrix4_Matrix4Transit peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_Matrix4Transit CtorImpl()
+Ark_matrix4_Matrix4Transit CtorImpl()
 {
-    return PeerUtils::CreatePeer<Matrix4TransitPeer>();
+    return PeerUtils::CreatePeer<matrix4_Matrix4TransitPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Matrix4Transit CopyImpl(Ark_Matrix4Transit peer)
+Ark_matrix4_Matrix4Transit CopyImpl(Ark_matrix4_Matrix4Transit peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
-    auto result = PeerUtils::CreatePeer<Matrix4TransitPeer>();
+    auto result = PeerUtils::CreatePeer<matrix4_Matrix4TransitPeer>();
     result->matrix = peer->matrix;
     return result;
 }
-Ark_Matrix4Transit InvertImpl(Ark_Matrix4Transit peer)
+Ark_matrix4_Matrix4Transit InvertImpl(Ark_matrix4_Matrix4Transit peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
-    auto result = PeerUtils::CreatePeer<Matrix4TransitPeer>();
+    auto result = PeerUtils::CreatePeer<matrix4_Matrix4TransitPeer>();
     result->matrix = Matrix4::Invert(peer->matrix);
     return result;
 }
-Ark_Matrix4Transit CombineImpl(Ark_Matrix4Transit peer,
-                               Ark_Matrix4Transit options)
+Ark_matrix4_Matrix4Transit CombineImpl(Ark_matrix4_Matrix4Transit peer,
+                                       Ark_matrix4_Matrix4Transit options)
 {
     CHECK_NULL_RETURN(peer && options, nullptr);
-    auto result = PeerUtils::CreatePeer<Matrix4TransitPeer>();
+    auto result = PeerUtils::CreatePeer<matrix4_Matrix4TransitPeer>();
     result->matrix = options->matrix * peer->matrix;
     return result;
 }
-Ark_Matrix4Transit TranslateImpl(Ark_Matrix4Transit peer,
-                                 const Ark_TranslateOption* options)
+Ark_matrix4_Matrix4Transit TranslateImpl(Ark_matrix4_Matrix4Transit peer,
+                                         const Ark_TranslateOptions* options)
 {
     CHECK_NULL_RETURN(peer && options, nullptr);
-    auto result = PeerUtils::CreatePeer<Matrix4TransitPeer>();
+    auto result = PeerUtils::CreatePeer<matrix4_Matrix4TransitPeer>();
     auto x = Converter::ConvertOrDefault<double>(options->x, 0.0);
     auto y = Converter::ConvertOrDefault<double>(options->y, 0.0);
     auto z = Converter::ConvertOrDefault<double>(options->z, 0.0);
     result->matrix = Matrix4::CreateTranslate(x, y, z) * peer->matrix;
     return result;
 }
-Ark_Matrix4Transit ScaleImpl(Ark_Matrix4Transit peer,
-                             const Ark_ScaleOption* options)
+Ark_matrix4_Matrix4Transit ScaleImpl(Ark_matrix4_Matrix4Transit peer,
+                                     const Ark_ScaleOptions* options)
 {
     CHECK_NULL_RETURN(peer && options, nullptr);
     auto x = Converter::ConvertOrDefault<double>(options->x, 1.0);
@@ -96,27 +101,27 @@ Ark_Matrix4Transit ScaleImpl(Ark_Matrix4Transit peer,
         scaleMatrix = translate1 * scaleMatrix;
     }
 
-    auto result = PeerUtils::CreatePeer<Matrix4TransitPeer>();
+    auto result = PeerUtils::CreatePeer<matrix4_Matrix4TransitPeer>();
     result->matrix = scaleMatrix * peer->matrix;
     return result;
 }
-Ark_Matrix4Transit SkewImpl(Ark_Matrix4Transit peer,
-                            const Ark_Number* x,
-                            const Ark_Number* y)
+Ark_matrix4_Matrix4Transit SkewImpl(Ark_matrix4_Matrix4Transit peer,
+                                    const Ark_Number* x,
+                                    const Ark_Number* y)
 {
     CHECK_NULL_RETURN(peer && x && y, nullptr);
     auto convX = Converter::Convert<double>(*x);
     auto convY = Converter::Convert<double>(*y);
 
-    auto result = PeerUtils::CreatePeer<Matrix4TransitPeer>();
+    auto result = PeerUtils::CreatePeer<matrix4_Matrix4TransitPeer>();
     result->matrix = Matrix4::CreateFactorSkew(convX, convY) * peer->matrix;
     return result;
 }
-Ark_Matrix4Transit RotateImpl(Ark_Matrix4Transit peer,
-                              const Ark_RotateOption* options)
+Ark_matrix4_Matrix4Transit RotateImpl(Ark_matrix4_Matrix4Transit peer,
+                                      const Ark_RotateOptions* options)
 {
     CHECK_NULL_RETURN(peer && options, nullptr);
-    auto result = PeerUtils::CreatePeer<Matrix4TransitPeer>();
+    auto result = PeerUtils::CreatePeer<matrix4_Matrix4TransitPeer>();
 
     auto x = Converter::ConvertOrDefault<double>(options->x, 0.0);
     auto y = Converter::ConvertOrDefault<double>(options->y, 0.0);
@@ -136,38 +141,38 @@ Ark_Matrix4Transit RotateImpl(Ark_Matrix4Transit peer,
 
     return result;
 }
-Ark_Tuple_Number_Number TransformPointImpl(Ark_Matrix4Transit peer,
-                                           const Ark_Tuple_Number_Number* options)
+Ark_matrix4_Matrix4TransformPoint TransformPointImpl(Ark_matrix4_Matrix4Transit peer,
+                                                     const Ark_matrix4_Matrix4TransformPoint* options)
 {
     CHECK_NULL_RETURN(peer && options, {});
     auto point = Converter::Convert<Point>(*options);
     Point target = peer->matrix * point;
-    return Converter::ArkValue<Ark_Tuple_Number_Number>(target);
+    return Converter::ArkValue<Ark_matrix4_Matrix4TransformPoint>(target);
 }
-Ark_Matrix4Transit SetPolyToPolyImpl(Ark_Matrix4Transit peer,
-                                     const Ark_PolyToPolyOptions* options)
+Ark_matrix4_Matrix4Transit SetPolyToPolyImpl(Ark_matrix4_Matrix4Transit peer,
+                                             const Ark_matrix4_PolyToPolyOptions* options)
 {
     LOGE("Matrix4TransitAccessor.SetPolyToPolyImpl not implemented");
     return {};
 }
-} // Matrix4TransitAccessor
-const GENERATED_ArkUIMatrix4TransitAccessor* GetMatrix4TransitAccessor()
+} // Matrix4_Matrix4TransitAccessor
+const GENERATED_ArkUIMatrix4_Matrix4TransitAccessor* GetMatrix4_Matrix4TransitAccessor()
 {
-    static const GENERATED_ArkUIMatrix4TransitAccessor Matrix4TransitAccessorImpl {
-        Matrix4TransitAccessor::DestroyPeerImpl,
-        Matrix4TransitAccessor::CtorImpl,
-        Matrix4TransitAccessor::GetFinalizerImpl,
-        Matrix4TransitAccessor::CopyImpl,
-        Matrix4TransitAccessor::InvertImpl,
-        Matrix4TransitAccessor::CombineImpl,
-        Matrix4TransitAccessor::TranslateImpl,
-        Matrix4TransitAccessor::ScaleImpl,
-        Matrix4TransitAccessor::SkewImpl,
-        Matrix4TransitAccessor::RotateImpl,
-        Matrix4TransitAccessor::TransformPointImpl,
-        Matrix4TransitAccessor::SetPolyToPolyImpl,
+    static const GENERATED_ArkUIMatrix4_Matrix4TransitAccessor Matrix4_Matrix4TransitAccessorImpl {
+        Matrix4_Matrix4TransitAccessor::DestroyPeerImpl,
+        Matrix4_Matrix4TransitAccessor::CtorImpl,
+        Matrix4_Matrix4TransitAccessor::GetFinalizerImpl,
+        Matrix4_Matrix4TransitAccessor::CopyImpl,
+        Matrix4_Matrix4TransitAccessor::InvertImpl,
+        Matrix4_Matrix4TransitAccessor::CombineImpl,
+        Matrix4_Matrix4TransitAccessor::TranslateImpl,
+        Matrix4_Matrix4TransitAccessor::ScaleImpl,
+        Matrix4_Matrix4TransitAccessor::SkewImpl,
+        Matrix4_Matrix4TransitAccessor::RotateImpl,
+        Matrix4_Matrix4TransitAccessor::TransformPointImpl,
+        Matrix4_Matrix4TransitAccessor::SetPolyToPolyImpl,
     };
-    return &Matrix4TransitAccessorImpl;
+    return &Matrix4_Matrix4TransitAccessorImpl;
 }
 
 }

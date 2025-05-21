@@ -43,6 +43,10 @@ Ark_String GetUrlImpl(Ark_UrlStyle peer)
     CHECK_NULL_RETURN(peer && peer->span, {});
     return Converter::ArkValue<Ark_String>(peer->span->GetUrlSpanAddress(), Converter::FC);
 }
+void SetUrlImpl(Ark_UrlStyle peer,
+                const Ark_String* url)
+{
+}
 } // UrlStyleAccessor
 const GENERATED_ArkUIUrlStyleAccessor* GetUrlStyleAccessor()
 {
@@ -51,6 +55,7 @@ const GENERATED_ArkUIUrlStyleAccessor* GetUrlStyleAccessor()
         UrlStyleAccessor::CtorImpl,
         UrlStyleAccessor::GetFinalizerImpl,
         UrlStyleAccessor::GetUrlImpl,
+        UrlStyleAccessor::SetUrlImpl,
     };
     return &UrlStyleAccessorImpl;
 }

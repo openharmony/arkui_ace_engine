@@ -42,7 +42,7 @@ void BackToTodayImpl(Ark_CalendarController peer)
     peer->controller->BackToToday();
 }
 void GoToImpl(Ark_CalendarController peer,
-              const Ark_Literal_Number_day_month_year* value)
+              const Ark_DateOptions* value)
 {
     CHECK_NULL_VOID(peer && peer->controller);
     CHECK_NULL_VOID(value);

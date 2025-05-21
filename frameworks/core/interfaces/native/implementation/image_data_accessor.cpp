@@ -27,7 +27,8 @@ void DestroyPeerImpl(Ark_ImageData peer)
 }
 Ark_ImageData CtorImpl(const Ark_Number* width,
                        const Ark_Number* height,
-                       const Opt_Buffer* data)
+                       const Opt_Buffer* data,
+                       const Opt_LengthMetricsUnit* unit)
 {
     CHECK_NULL_RETURN(width && height, nullptr);
     auto widthConv = Converter::Convert<int32_t>(*width);
@@ -54,15 +55,27 @@ Ark_Buffer GetDataImpl(Ark_ImageData peer)
 {
     return {};
 }
+void SetDataImpl(Ark_ImageData peer,
+                 const Ark_Buffer* data)
+{
+}
 Ark_Number GetHeightImpl(Ark_ImageData peer)
 {
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
     return Converter::ArkValue<Ark_Number>(peer->value.dirtyHeight);
 }
+void SetHeightImpl(Ark_ImageData peer,
+                   const Ark_Number* height)
+{
+}
 Ark_Number GetWidthImpl(Ark_ImageData peer)
 {
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
     return Converter::ArkValue<Ark_Number>(peer->value.dirtyWidth);
+}
+void SetWidthImpl(Ark_ImageData peer,
+                  const Ark_Number* width)
+{
 }
 } // ImageDataAccessor
 const GENERATED_ArkUIImageDataAccessor* GetImageDataAccessor()
@@ -72,8 +85,11 @@ const GENERATED_ArkUIImageDataAccessor* GetImageDataAccessor()
         ImageDataAccessor::CtorImpl,
         ImageDataAccessor::GetFinalizerImpl,
         ImageDataAccessor::GetDataImpl,
+        ImageDataAccessor::SetDataImpl,
         ImageDataAccessor::GetHeightImpl,
+        ImageDataAccessor::SetHeightImpl,
         ImageDataAccessor::GetWidthImpl,
+        ImageDataAccessor::SetWidthImpl,
     };
     return &ImageDataAccessorImpl;
 }

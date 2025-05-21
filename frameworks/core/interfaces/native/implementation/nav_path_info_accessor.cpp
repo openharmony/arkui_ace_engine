@@ -58,7 +58,7 @@ void DestroyPeerImpl(Ark_NavPathInfo peer)
     delete peer;
 }
 Ark_NavPathInfo CtorImpl(const Ark_String* name,
-                         const Ark_Object* param,
+                         const Opt_Object* param,
                          const Opt_Callback_PopInfo_Void* onPop,
                          const Opt_Boolean* isEntry)
 {
@@ -105,11 +105,12 @@ Opt_Callback_PopInfo_Void GetOnPopImpl(Ark_NavPathInfo peer)
     return Converter::ArkValue<Opt_Callback_PopInfo_Void>(peer->data.onPop_.GetCallback());
 }
 void SetOnPopImpl(Ark_NavPathInfo peer,
-                  const Callback_PopInfo_Void* onPop)
+                  const Opt_Callback_PopInfo_Void* onPop)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(onPop);
-    peer->data.onPop_ = CallbackHelper(*onPop);
+    auto optVal = Converter::GetOptPtr(onPop);
+    CHECK_NULL_VOID(optVal);
+    peer->data.onPop_ = CallbackHelper(*optVal);
 }
 Opt_Boolean GetIsEntryImpl(Ark_NavPathInfo peer)
 {
@@ -118,10 +119,12 @@ Opt_Boolean GetIsEntryImpl(Ark_NavPathInfo peer)
     return ArkValue<Opt_Boolean>(peer->data.isEntry_);
 }
 void SetIsEntryImpl(Ark_NavPathInfo peer,
-                    Ark_Boolean isEntry)
+                    const Opt_Boolean* isEntry)
 {
     CHECK_NULL_VOID(peer);
-    peer->data.isEntry_ = Convert<bool>(isEntry);
+    auto convValue = Converter::OptConvert<bool>(*isEntry);
+    CHECK_NULL_VOID(convValue);
+    peer->data.isEntry_ = *convValue;
 }
 Opt_String GetNavDestinationIdImpl(Ark_NavPathInfo peer)
 {
@@ -130,12 +133,13 @@ Opt_String GetNavDestinationIdImpl(Ark_NavPathInfo peer)
     return Converter::ArkValue<Opt_String>(peer->data.navDestinationId_, Converter::FC);
 }
 void SetNavDestinationIdImpl(Ark_NavPathInfo peer,
-                             const Ark_String* navDestinationId)
+                             const Opt_String* navDestinationId)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(navDestinationId);
-    auto id = Converter::Convert<std::string>(*navDestinationId);
-    peer->data.navDestinationId_ = id;
+    auto id = Converter::OptConvert<std::string>(*navDestinationId);
+    CHECK_NULL_VOID(id);
+    peer->data.navDestinationId_ = *id;
 }
 } // NavPathInfoAccessor
 const GENERATED_ArkUINavPathInfoAccessor* GetNavPathInfoAccessor()

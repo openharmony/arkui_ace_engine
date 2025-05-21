@@ -70,7 +70,7 @@ void AssignCast(std::optional<SideBarContainerType>& dst, const Ark_SideBarConta
     }
 }
 
-ControlButtonStyleIcon GetIconStyle(const Ark_Union_String_PixelMap_Resource& src)
+ControlButtonStyleIcon GetIconStyle(const Ark_Union_String_Image_PixelMap_Resource& src)
 {
     ControlButtonStyleIcon ret = {};
     Converter::VisitUnion(src,
@@ -78,7 +78,7 @@ ControlButtonStyleIcon GetIconStyle(const Ark_Union_String_PixelMap_Resource& sr
             ret.iconStr = Converter::Convert<std::string>(value);
             ret.isPxMap = false;
         },
-        [&ret](const Ark_PixelMap& value) {
+        [&ret](const Ark_image_PixelMap& value) {
             ret.isPxMap = true;
             ret.iconPxMap = Convert<RefPtr<PixelMap>>(value);
         },
@@ -326,6 +326,7 @@ void MinContentWidthImpl(Ark_NativePointer node,
     Validator::ValidateNonNegative(width);
     SideBarContainerModelStatic::SetMinContentWidth(frameNode, width);
 }
+#ifdef WRONG_GEN
 void _onChangeEvent_showSideBarImpl(Ark_NativePointer node,
                                     const Callback_Opt_Boolean_Void* callback)
 {
@@ -339,6 +340,7 @@ void _onChangeEvent_showSideBarImpl(Ark_NativePointer node,
     };
     SideBarContainerModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
+#endif
 } // SideBarContainerAttributeModifier
 const GENERATED_ArkUISideBarContainerModifier* GetSideBarContainerModifier()
 {
@@ -359,7 +361,6 @@ const GENERATED_ArkUISideBarContainerModifier* GetSideBarContainerModifier()
         SideBarContainerAttributeModifier::SideBarPositionImpl,
         SideBarContainerAttributeModifier::DividerImpl,
         SideBarContainerAttributeModifier::MinContentWidthImpl,
-        SideBarContainerAttributeModifier::_onChangeEvent_showSideBarImpl,
     };
     return &ArkUISideBarContainerModifierImpl;
 }

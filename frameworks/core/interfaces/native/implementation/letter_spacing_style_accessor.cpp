@@ -47,6 +47,10 @@ Ark_Number GetLetterSpacingImpl(Ark_LetterSpacingStyle peer)
     auto value = Converter::ArkValue<Ark_Number>(peer->span->GetLetterSpacing().ConvertToVp());
     return value;
 }
+void SetLetterSpacingImpl(Ark_LetterSpacingStyle peer,
+                          const Ark_Number* letterSpacing)
+{
+}
 } // LetterSpacingStyleAccessor
 const GENERATED_ArkUILetterSpacingStyleAccessor* GetLetterSpacingStyleAccessor()
 {
@@ -55,6 +59,7 @@ const GENERATED_ArkUILetterSpacingStyleAccessor* GetLetterSpacingStyleAccessor()
         LetterSpacingStyleAccessor::CtorImpl,
         LetterSpacingStyleAccessor::GetFinalizerImpl,
         LetterSpacingStyleAccessor::GetLetterSpacingImpl,
+        LetterSpacingStyleAccessor::SetLetterSpacingImpl,
     };
     return &LetterSpacingStyleAccessorImpl;
 }

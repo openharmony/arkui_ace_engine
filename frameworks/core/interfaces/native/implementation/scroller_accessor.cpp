@@ -47,26 +47,17 @@ void ScrollEdgeImpl(Ark_Scroller peer,
     CHECK_NULL_VOID(peer);
     peer->TriggerScrollEdge(value, options);
 }
-void FlingImpl(Ark_VMContext vmContext,
-               Ark_Scroller peer,
+void FlingImpl(Ark_Scroller peer,
                const Ark_Number* velocity)
 {
     CHECK_NULL_VOID(peer);
     peer->TriggerFling(velocity);
 }
-void ScrollPage0Impl(Ark_Scroller peer,
-                     const Ark_ScrollPageOptions* value)
+void ScrollPageImpl(Ark_Scroller peer,
+                    const Ark_ScrollPageOptions* value)
 {
     CHECK_NULL_VOID(peer);
     peer->TriggerScrollPage0(value);
-}
-void ScrollPage1Impl(Ark_Scroller peer,
-                     const Ark_Literal_Boolean_next_Axis_direction* value)
-{
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(value);
-    bool next = Converter::Convert<bool>(value->next);
-    peer->TriggerScrollPage1(next);
 }
 Ark_OffsetResult CurrentOffsetImpl(Ark_Scroller peer)
 {
@@ -98,15 +89,13 @@ Ark_Boolean IsAtEndImpl(Ark_Scroller peer)
     CHECK_NULL_RETURN(peer, false); // need to fix default value
     return peer->TriggerIsAtEnd();
 }
-Ark_RectResult GetItemRectImpl(Ark_VMContext vmContext,
-                               Ark_Scroller peer,
+Ark_RectResult GetItemRectImpl(Ark_Scroller peer,
                                const Ark_Number* index)
 {
     CHECK_NULL_RETURN(peer, {}); // need to fix default value
     return peer->TriggerGetItemRect(index);
 }
-Ark_Number GetItemIndexImpl(Ark_VMContext vmContext,
-                            Ark_Scroller peer,
+Ark_Number GetItemIndexImpl(Ark_Scroller peer,
                             const Ark_Number* x,
                             const Ark_Number* y)
 {
@@ -125,8 +114,7 @@ const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor()
         ScrollerAccessor::ScrollToImpl,
         ScrollerAccessor::ScrollEdgeImpl,
         ScrollerAccessor::FlingImpl,
-        ScrollerAccessor::ScrollPage0Impl,
-        ScrollerAccessor::ScrollPage1Impl,
+        ScrollerAccessor::ScrollPageImpl,
         ScrollerAccessor::CurrentOffsetImpl,
         ScrollerAccessor::ScrollToIndexImpl,
         ScrollerAccessor::ScrollByImpl,

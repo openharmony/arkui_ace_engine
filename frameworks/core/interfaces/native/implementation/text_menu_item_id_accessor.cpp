@@ -52,11 +52,17 @@ Ark_TextMenuItemId GetCUTImpl()
     peer->id = "OH_DEFAULT_CUT";
     return peer;
 }
+void SetCUTImpl(Ark_TextMenuItemId CUT)
+{
+}
 Ark_TextMenuItemId GetCOPYImpl()
 {
     auto peer = CtorImpl();
     peer->id = "OH_DEFAULT_COPY";
     return peer;
+}
+void SetCOPYImpl(Ark_TextMenuItemId COPY)
+{
 }
 Ark_TextMenuItemId GetPASTEImpl()
 {
@@ -64,11 +70,17 @@ Ark_TextMenuItemId GetPASTEImpl()
     peer->id = "OH_DEFAULT_PASTE";
     return peer;
 }
+void SetPASTEImpl(Ark_TextMenuItemId PASTE)
+{
+}
 Ark_TextMenuItemId GetSELECT_ALLImpl()
 {
     auto peer = CtorImpl();
     peer->id = "OH_DEFAULT_SELECT_ALL";
     return peer;
+}
+void SetSELECT_ALLImpl(Ark_TextMenuItemId SELECT_ALL)
+{
 }
 Ark_TextMenuItemId GetCOLLABORATION_SERVICEImpl()
 {
@@ -76,11 +88,17 @@ Ark_TextMenuItemId GetCOLLABORATION_SERVICEImpl()
     peer->id = "OH_DEFAULT_COLLABORATION_SERVICE";
     return peer;
 }
+void SetCOLLABORATION_SERVICEImpl(Ark_TextMenuItemId COLLABORATION_SERVICE)
+{
+}
 Ark_TextMenuItemId GetCAMERA_INPUTImpl()
 {
     auto peer = CtorImpl();
     peer->id = "OH_DEFAULT_CAMERA_INPUT";
     return peer;
+}
+void SetCAMERA_INPUTImpl(Ark_TextMenuItemId CAMERA_INPUT)
+{
 }
 Ark_TextMenuItemId GetAI_WRITERImpl()
 {
@@ -88,11 +106,17 @@ Ark_TextMenuItemId GetAI_WRITERImpl()
     peer->id = "OH_DEFAULT_AI_WRITE";
     return peer;
 }
+void SetAI_WRITERImpl(Ark_TextMenuItemId AI_WRITER)
+{
+}
 Ark_TextMenuItemId GetTRANSLATEImpl()
 {
     auto peer = CtorImpl();
     peer->id = "OH_DEFAULT_TRANSLATE";
     return peer;
+}
+void SetTRANSLATEImpl(Ark_TextMenuItemId TRANSLATE)
+{
 }
 Ark_TextMenuItemId GetSEARCHImpl()
 {
@@ -100,11 +124,17 @@ Ark_TextMenuItemId GetSEARCHImpl()
     peer->id = "OH_DEFAULT_SEARCH";
     return peer;
 }
+void SetSEARCHImpl(Ark_TextMenuItemId SEARCH)
+{
+}
 Ark_TextMenuItemId GetSHAREImpl()
 {
     auto peer = CtorImpl();
     peer->id = "OH_DEFAULT_SHARE";
     return peer;
+}
+void SetSHAREImpl(Ark_TextMenuItemId SHARE)
+{
 }
 } // TextMenuItemIdAccessor
 const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()
@@ -116,15 +146,25 @@ const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()
         TextMenuItemIdAccessor::OfImpl,
         TextMenuItemIdAccessor::EqualsImpl,
         TextMenuItemIdAccessor::GetCUTImpl,
+        TextMenuItemIdAccessor::SetCUTImpl,
         TextMenuItemIdAccessor::GetCOPYImpl,
+        TextMenuItemIdAccessor::SetCOPYImpl,
         TextMenuItemIdAccessor::GetPASTEImpl,
+        TextMenuItemIdAccessor::SetPASTEImpl,
         TextMenuItemIdAccessor::GetSELECT_ALLImpl,
+        TextMenuItemIdAccessor::SetSELECT_ALLImpl,
         TextMenuItemIdAccessor::GetCOLLABORATION_SERVICEImpl,
+        TextMenuItemIdAccessor::SetCOLLABORATION_SERVICEImpl,
         TextMenuItemIdAccessor::GetCAMERA_INPUTImpl,
+        TextMenuItemIdAccessor::SetCAMERA_INPUTImpl,
         TextMenuItemIdAccessor::GetAI_WRITERImpl,
+        TextMenuItemIdAccessor::SetAI_WRITERImpl,
         TextMenuItemIdAccessor::GetTRANSLATEImpl,
+        TextMenuItemIdAccessor::SetTRANSLATEImpl,
         TextMenuItemIdAccessor::GetSEARCHImpl,
+        TextMenuItemIdAccessor::SetSEARCHImpl,
         TextMenuItemIdAccessor::GetSHAREImpl,
+        TextMenuItemIdAccessor::SetSHAREImpl,
     };
     return &TextMenuItemIdAccessorImpl;
 }

@@ -30,9 +30,6 @@ void AssignCast(std::optional<CanvasUnit>& dst, const Ark_LengthMetricsUnit& src
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
-const GENERATED_ArkUIDrawingCanvasAccessor* GetDrawingCanvasAccessor();
-
 namespace DrawingRenderingContextAccessor {
 void DestroyPeerImpl(Ark_DrawingRenderingContext peer)
 {
@@ -73,18 +70,26 @@ Ark_Size GetSizeImpl(Ark_DrawingRenderingContext peer)
     return {};
 #endif
 }
-Ark_DrawingCanvas GetCanvasImpl(Ark_DrawingRenderingContext peer)
+void SetSizeImpl(Ark_DrawingRenderingContext peer,
+                 const Ark_Size* size)
+{
+}
+Ark_drawing_Canvas GetCanvasImpl(Ark_DrawingRenderingContext peer)
 {
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<DrawingRenderingContextPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, {});
-    auto pixelMap = GetPixelMapAccessor()->ctor();
+    auto pixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     CHECK_NULL_RETURN(pixelMap, {});
-    auto drawingCanvas = GetDrawingCanvasAccessor()->ctor(pixelMap);
+    auto drawingCanvas = PeerUtils::CreatePeer<drawing_CanvasPeer>(pixelMap->pixelMap);
     CHECK_NULL_RETURN(drawingCanvas, {});
     auto canvas = peerImpl->GetCanvas();
     drawingCanvas->SetCanvas(canvas);
     return drawingCanvas;
+}
+void SetCanvasImpl(Ark_DrawingRenderingContext peer,
+                   Ark_drawing_Canvas canvas)
+{
 }
 } // DrawingRenderingContextAccessor
 const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContextAccessor()
@@ -95,7 +100,9 @@ const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContext
         DrawingRenderingContextAccessor::GetFinalizerImpl,
         DrawingRenderingContextAccessor::InvalidateImpl,
         DrawingRenderingContextAccessor::GetSizeImpl,
+        DrawingRenderingContextAccessor::SetSizeImpl,
         DrawingRenderingContextAccessor::GetCanvasImpl,
+        DrawingRenderingContextAccessor::SetCanvasImpl,
     };
     return &DrawingRenderingContextAccessorImpl;
 }

@@ -64,7 +64,7 @@ Opt_RenderNode GetPreviousSiblingImpl(Ark_RenderNode peer)
     return {};
 }
 void DrawImpl(Ark_RenderNode peer,
-              const Ark_DrawContext* context)
+              Ark_DrawContext context)
 {
 }
 void InvalidateImpl(Ark_RenderNode peer)
@@ -153,12 +153,12 @@ void SetRotationImpl(Ark_RenderNode peer,
                      const Ark_Vector3* rotation)
 {
 }
-Ark_Matrix4 GetTransformImpl(Ark_RenderNode peer)
+Ark_Tuple_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number GetTransformImpl(Ark_RenderNode peer)
 {
     return {};
 }
 void SetTransformImpl(Ark_RenderNode peer,
-                      const Ark_Matrix4* transform)
+                      const Ark_Tuple_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number_Number* transform)
 {
 }
 Ark_Number GetShadowColorImpl(Ark_RenderNode peer)

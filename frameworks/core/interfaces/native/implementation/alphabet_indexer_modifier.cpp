@@ -46,21 +46,6 @@ void SetAlphabetIndexerOptionsImpl(Ark_NativePointer node,
 }
 } // AlphabetIndexerInterfaceModifier
 namespace AlphabetIndexerAttributeModifier {
-void OnSelectedImpl(Ark_NativePointer node,
-                    const Opt_Callback_Number_Void* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto onEvent = [arkCallback = CallbackHelper(*optValue)](const int32_t value) {
-        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
-    };
-    IndexerModelNG::SetOnSelected(frameNode, std::move(onEvent));
-}
 void ColorImpl(Ark_NativePointer node,
                const Opt_ResourceColor* value)
 {
@@ -349,6 +334,7 @@ void AlignStyleImpl(Ark_NativePointer node,
         IndexerModelNG::SetPopupHorizontalSpace(frameNode, offsetDimension.value());
     }
 }
+#ifdef WRONG_GEN
 void _onChangeEvent_selectedImpl(Ark_NativePointer node,
                                  const Callback_Opt_Number_Void* callback)
 {
@@ -361,13 +347,13 @@ void _onChangeEvent_selectedImpl(Ark_NativePointer node,
 
     IndexerModelNG::SetCreatChangeEvent(frameNode, std::move(onEvent));
 }
+#endif
 } // AlphabetIndexerAttributeModifier
 const GENERATED_ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
 {
     static const GENERATED_ArkUIAlphabetIndexerModifier ArkUIAlphabetIndexerModifierImpl {
         AlphabetIndexerModifier::ConstructImpl,
         AlphabetIndexerInterfaceModifier::SetAlphabetIndexerOptionsImpl,
-        AlphabetIndexerAttributeModifier::OnSelectedImpl,
         AlphabetIndexerAttributeModifier::ColorImpl,
         AlphabetIndexerAttributeModifier::SelectedColorImpl,
         AlphabetIndexerAttributeModifier::PopupColorImpl,
@@ -394,7 +380,6 @@ const GENERATED_ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
         AlphabetIndexerAttributeModifier::PopupTitleBackgroundImpl,
         AlphabetIndexerAttributeModifier::EnableHapticFeedbackImpl,
         AlphabetIndexerAttributeModifier::AlignStyleImpl,
-        AlphabetIndexerAttributeModifier::_onChangeEvent_selectedImpl,
     };
     return &ArkUIAlphabetIndexerModifierImpl;
 }

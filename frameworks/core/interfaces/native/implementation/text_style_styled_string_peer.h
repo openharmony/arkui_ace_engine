@@ -19,7 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 
-struct TextStyle_styled_stringPeer {
+struct TextStylePeer {
     OHOS::Ace::RefPtr<OHOS::Ace::FontSpan> span;
 };
 

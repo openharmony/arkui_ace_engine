@@ -197,38 +197,6 @@ void ScrollableImpl(Ark_NativePointer node,
     }
     TabsModelNG::SetScrollable(frameNode, *convValue);
 }
-void BarMode1Impl(Ark_NativePointer node, const Opt_BarMode *value, const Opt_ScrollableBarModeOptions* options);
-void BarMode0Impl(Ark_NativePointer node,
-                  const Opt_BarMode* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    BarMode1Impl(node, value, nullptr);
-}
-void BarMode1Impl(Ark_NativePointer node,
-                  const Opt_BarMode* value,
-                  const Opt_ScrollableBarModeOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto mode = Converter::OptConvert<TabBarMode>(*value);
-    if (mode && *mode == TabBarMode::SCROLLABLE) {
-        ScrollableBarModeOptions barModeOptions;
-        auto defaultMargin = barModeOptions.margin;
-        if (options) {
-            auto optionsOpt = Converter::OptConvert<Ark_ScrollableBarModeOptions>(*options);
-            if (optionsOpt) {
-                auto marginOpt = Converter::OptConvert<Dimension>(optionsOpt.value().margin);
-                Validator::ValidateNonPercent(marginOpt);
-                auto styleOpt = Converter::OptConvert<LayoutStyle>(optionsOpt.value().nonScrollableLayoutStyle);
-                barModeOptions.margin = marginOpt.value_or(defaultMargin);
-                barModeOptions.nonScrollableLayoutStyle = styleOpt;
-            }
-        }
-        TabsModelNG::SetScrollableBarModeOptions(frameNode, barModeOptions);
-    }
-    TabsModelNG::SetTabBarMode(frameNode, mode);
-}
 void BarWidthImpl(Ark_NativePointer node,
                   const Opt_Length* value)
 {
@@ -587,13 +555,29 @@ void OnContentWillChangeImpl(Ark_NativePointer node,
     };
     TabsModelNG::SetOnContentWillChange(frameNode, std::move(callback));
 }
-void BarModeScrollableImpl(Ark_NativePointer node,
-                           const Opt_ScrollableBarModeOptions* options)
+void BarModeImpl(Ark_NativePointer node,
+                 const Opt_BarMode* value,
+                 const Opt_ScrollableBarModeOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto mode = Converter::ArkValue<Opt_BarMode>(ARK_BAR_MODE_SCROLLABLE);
-    BarMode1Impl(node, &mode, options);
+    auto mode = Converter::OptConvert<TabBarMode>(*value);
+    if (mode && *mode == TabBarMode::SCROLLABLE) {
+        ScrollableBarModeOptions barModeOptions;
+        auto defaultMargin = barModeOptions.margin;
+        if (options) {
+            auto optionsOpt = Converter::OptConvert<Ark_ScrollableBarModeOptions>(*options);
+            if (optionsOpt) {
+                auto marginOpt = Converter::OptConvert<Dimension>(optionsOpt.value().margin);
+                Validator::ValidateNonPercent(marginOpt);
+                auto styleOpt = Converter::OptConvert<LayoutStyle>(optionsOpt.value().nonScrollableLayoutStyle);
+                barModeOptions.margin = marginOpt.value_or(defaultMargin);
+                barModeOptions.nonScrollableLayoutStyle = styleOpt;
+            }
+        }
+        TabsModelNG::SetScrollableBarModeOptions(frameNode, barModeOptions);
+    }
+    TabsModelNG::SetTabBarMode(frameNode, mode);
 }
 void CachedMaxCountImpl(Ark_NativePointer node,
                         const Opt_Number* count,
@@ -605,6 +589,7 @@ void CachedMaxCountImpl(Ark_NativePointer node,
     auto modeValue = Converter::OptConvert<TabsCacheMode>(*mode);
     TabsModelNG::SetCachedMaxCount(frameNode, countValue, modeValue);
 }
+#ifdef WRONG_GEN
 void _onChangeEvent_indexImpl(Ark_NativePointer node,
                               const Callback_Number_Void* callback)
 {
@@ -620,6 +605,7 @@ void _onChangeEvent_indexImpl(Ark_NativePointer node,
     };
     TabsModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
+#endif
 } // TabsAttributeModifier
 const GENERATED_ArkUITabsModifier* GetTabsModifier()
 {
@@ -629,8 +615,6 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::VerticalImpl,
         TabsAttributeModifier::BarPositionImpl,
         TabsAttributeModifier::ScrollableImpl,
-        TabsAttributeModifier::BarMode0Impl,
-        TabsAttributeModifier::BarMode1Impl,
         TabsAttributeModifier::BarWidthImpl,
         TabsAttributeModifier::BarHeightImpl,
         TabsAttributeModifier::AnimationDurationImpl,
@@ -654,9 +638,8 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::BarBackgroundEffectImpl,
         TabsAttributeModifier::PageFlipModeImpl,
         TabsAttributeModifier::OnContentWillChangeImpl,
-        TabsAttributeModifier::BarModeScrollableImpl,
+        TabsAttributeModifier::BarModeImpl,
         TabsAttributeModifier::CachedMaxCountImpl,
-        TabsAttributeModifier::_onChangeEvent_indexImpl,
     };
     return &ArkUITabsModifierImpl;
 }

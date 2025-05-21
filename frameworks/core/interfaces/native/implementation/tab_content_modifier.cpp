@@ -215,7 +215,7 @@ void AssignCast(std::optional<LayoutMode>& dst, const Ark_LayoutMode& src)
 }
 
 template<>
-void AssignCast(std::optional<IndicatorStyle>& dst, const Ark_IndicatorStyle& src)
+void AssignCast(std::optional<IndicatorStyle>& dst, const Ark_SubTabBarIndicatorStyle& src)
 {
     dst = IndicatorStyle();
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
@@ -257,7 +257,7 @@ void AssignCast(std::optional<IndicatorStyle>& dst, const Ark_IndicatorStyle& sr
 }
 
 template<>
-void AssignCast(std::optional<LabelStyle>& dst, const Ark_LabelStyle& src)
+void AssignCast(std::optional<LabelStyle>& dst, const Ark_TabBarLabelStyle& src)
 {
     dst = LabelStyle();
     dst->textOverflow = Converter::OptConvert<TextOverflow>(src.overflow);
@@ -308,52 +308,8 @@ void SetTabContentOptionsImpl(Ark_NativePointer node)
 }
 } // TabContentInterfaceModifier
 namespace TabContentAttributeModifier {
-void TabBar0Impl(Ark_NativePointer node,
-                 const Opt_Union_String_Resource_CustomBuilder_TabBarOptions* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::optional<std::string> label = std::nullopt;
-    std::optional<std::string> icon = std::nullopt;
-    TabBarBuilderFunc builder = nullptr;
-    auto options = Converter::OptConvert<TabBarOptionsVariant>(*value);
-    if (auto arkText = std::get_if<Ark_String>(&options.value()); arkText) {
-        label = Converter::Convert<std::string>(*arkText);
-    } else if (auto arkText = std::get_if<Ark_Resource>(&options.value()); arkText) {
-        label = Converter::OptConvert<std::string>(*arkText);
-    } else if (auto arkText = std::get_if<CustomNodeBuilder>(&options.value()); arkText) {
-        builder = [callback = CallbackHelper(*arkText), node]() {
-            auto builderNode = callback.BuildSync(node);
-            NG::ViewStackProcessor::GetInstance()->Push(builderNode);
-        };
-    } else if (auto iconLabel = std::get_if<Ark_TabBarOptions>(&options.value()); iconLabel) {
-        if (auto tabBarOptions = Converter::OptConvert<TabBarOptions>(*iconLabel); tabBarOptions) {
-            label = tabBarOptions->text;
-            icon = tabBarOptions->icon;
-        }
-    } else {
-        LOGE("ARKOALA TabContentAttributeModifier.TabBar0Impl unknown value format.");
-    }
-    TabContentModelNG::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
-    TabContentModelNG::SetTabBar(frameNode, label, icon, std::move(builder));
-}
-void TabBar1Impl(Ark_NativePointer node,
-                 const Opt_Union_SubTabBarStyle_BottomTabBarStyle* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    Converter::VisitUnion(*value,
-        [frameNode](const Ark_SubTabBarStyle& style) {
-            g_setSubTabBarStyle(frameNode, style);
-        },
-        [frameNode](const Ark_BottomTabBarStyle& style) {
-            g_setBottomTabBarStyle(frameNode, style);
-        },
-        []() {}
-    );
-}
-void TabBar2Impl(Ark_NativePointer node,
-                 const Opt_Type_TabContentAttribute_tabBar_content* value)
+void TabBarImpl(Ark_NativePointer node,
+                const Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -434,9 +390,7 @@ const GENERATED_ArkUITabContentModifier* GetTabContentModifier()
     static const GENERATED_ArkUITabContentModifier ArkUITabContentModifierImpl {
         TabContentModifier::ConstructImpl,
         TabContentInterfaceModifier::SetTabContentOptionsImpl,
-        TabContentAttributeModifier::TabBar0Impl,
-        TabContentAttributeModifier::TabBar1Impl,
-        TabContentAttributeModifier::TabBar2Impl,
+        TabContentAttributeModifier::TabBarImpl,
         TabContentAttributeModifier::OnWillShowImpl,
         TabContentAttributeModifier::OnWillHideImpl,
     };

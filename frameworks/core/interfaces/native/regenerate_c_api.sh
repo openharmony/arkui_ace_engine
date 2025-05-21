@@ -32,18 +32,21 @@ fi
 DEST_DIR=$(realpath ${DEST_DIR_ARG:=.})
 TMP_DIR=${TMP_DIR_ARG:=${OHOS_DIR}/out/libace_c_api_generated}
 INT_INF="${TMP_DIR}/interface"
-DTS_DIR=${DTS_DIR_ARG:=${INT_INF}/api/@internal/component/ets,${INT_INF}/api/global}
+IDL_DIR="${TMP_DIR}/idl"
+ETS_DIR=${DTS_DIR_ARG:=${INT_INF}/api/arkui/component,${INT_INF}/api/global}
 BASE_DIR="${INT_INF}/api,${INT_INF}/kits,${INT_INF}/arkts"
 if [[ ! -d $IDLIZE_PATH ]]; then
 #    PREPROCESSOR="npx @idlizer/dtsgen@$IDLIZE_VER --run-preprocessor"
-    GENERATOR=${GENERATOR_ARG:=npx --yes @idlizer/arkgen@$IDLIZE_VER --dts2peer}
+    TOIDL="npx --yes @idlizer/etsgen@$IDLIZE_VER --ets2idl"
+    GENERATOR=${GENERATOR_ARG:=npx --yes @idlizer/arkgen@$IDLIZE_VER --idl2peer}
 else
     # Use the below to run generator from your idlize workspace
 #    PREPROCESSOR="node $IDLIZE_PATH/dtsgen --run-preprocessor"
-    GENERATOR=${GENERATOR_ARG:=node $IDLIZE_PATH/arkgen/lib/index.js --dts2peer}
+    TOIDL="node $IDLIZE_PATH/etsgen --ets2idl"
+    GENERATOR=${GENERATOR_ARG:=node $IDLIZE_PATH/arkgen/lib/index.js --idl2peer}
 fi
 
-PREPROCESSOR="node ${OHOS_DIR}/interface/sdk-js/build-tools/handleApiFiles.js --type ets"
+PREPROCESSOR1="node ${OHOS_DIR}/interface/sdk-js/build-tools/handleApiFiles.js --type ets2"
 
 API_VER=${API_VER:=99}
 
@@ -52,17 +55,25 @@ echo "Preprocessing SDK..."
 rm -rf ${TMP_DIR}
 mkdir -p ${TMP_DIR}
 
-${PREPROCESSOR} \
+${PREPROCESSOR1} \
     --path ${OHOS_DIR}/interface/sdk-js --output ${INT_INF}
 #    --input-dir ${OHOS_DIR}/interface/sdk-js --output-dir ${INT_INF}
 
-echo "Generating C API from ${DTS_DIR} to ${DEST_DIR} with ${GENERATOR}"
+pushd ${OHOS_DIR}/interface/sdk-js/build-tools/arkui_transformer
+npm run compile:arkui
+node . --input-dir ${INT_INF}/api/@internal/component/ets/ --target-dir ${INT_INF}/api/arkui/component/
+popd
+
+echo "Generating IDL..."
+${TOIDL} \
+    --base-dir ${INT_INF}/api --input-dir ${ETS_DIR} --output-dir ${IDL_DIR}
+
+echo "Generating C API from ${ETS_DIR} to ${DEST_DIR} with ${GENERATOR}"
 
 ${GENERATOR} \
-    --use-component-optional \
     --output-dir ${TMP_DIR} \
-    --base-dir ${BASE_DIR} \
-    --input-dir ${DTS_DIR} \
+    --base-dir ${IDL_DIR} \
+    --input-files $(find ${IDL_DIR} -type f) \
     --generator-target libace \
     --libace-destination ${DEST_DIR} \
     --api-version ${API_VER}

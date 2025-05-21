@@ -172,11 +172,24 @@ void ShowImpl(const Opt_TimePickerDialogOptions* options)
     MockTimePickerDialogView::SetCallbacks(dialogEvent, dialogCancelEvent);
 #endif
 }
+void DestroyPeerImpl(Ark_TimePickerDialog peer)
+{
+}
+Ark_TimePickerDialog CtorImpl()
+{
+    return nullptr;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
+}
 } // TimePickerDialogAccessor
 const GENERATED_ArkUITimePickerDialogAccessor* GetTimePickerDialogAccessor()
 {
     static const GENERATED_ArkUITimePickerDialogAccessor TimePickerDialogAccessorImpl {
-        TimePickerDialogAccessor::ShowImpl,
+        TimePickerDialogAccessor::DestroyPeerImpl,
+        TimePickerDialogAccessor::CtorImpl,
+        TimePickerDialogAccessor::GetFinalizerImpl,
     };
     return &TimePickerDialogAccessorImpl;
 }

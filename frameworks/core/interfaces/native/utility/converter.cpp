@@ -1162,7 +1162,7 @@ CheckboxSettingData Convert(const Ark_LunarSwitchStyle& src)
 }
 
 template<>
-void AssignCast(std::optional<DateTimeType>& dst, const Ark_DateTimeOptions& src)
+void AssignCast(std::optional<DateTimeType>& dst, const Ark_intl_DateTimeOptions& src)
 {
     const std::string TIMEPICKER_OPTIONS_NUMERIC_VAL = "numeric";
     const std::string TIMEPICKER_OPTIONS_TWO_DIGIT_VAL = "2-digit";
@@ -1437,7 +1437,7 @@ Rect Convert(const Ark_RectResult& src)
 }
 
 template<>
-ShapePoint Convert(const Ark_common2D_Point& src)
+ShapePoint Convert(const Ark_Point& src)
 {
     return ShapePoint(Converter::Convert<Dimension>(src.x), Converter::Convert<Dimension>(src.y));
 }
@@ -1497,8 +1497,14 @@ ItemDragInfo Convert(const Ark_ItemDragInfo& src)
 template<>
 void AssignCast(std::optional<FontWeight>& dst, const Ark_Number& src)
 {
-    auto intVal = src.tag == Ark_Tag::INTEROP_TAG_INT32 ? src.i32 : static_cast<int32_t>(src.f32);
-    if (intVal >= 0) {
+    auto intVal = Convert<Ark_Int32>(src);
+    AssignCast(dst, intVal);
+}
+
+template<>
+void AssignCast(std::optional<FontWeight>& dst, const Ark_Int32& src)
+{
+    if (src >= 0) {
         auto strVal = std::to_string(intVal);
         if (auto [parseOk, val] = StringUtils::ParseFontWeight(strVal); parseOk) {
             dst = val;
@@ -1509,7 +1515,8 @@ void AssignCast(std::optional<FontWeight>& dst, const Ark_Number& src)
 template<>
 void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src)
 {
-    if (auto [parseOk, val] = StringUtils::ParseFontWeight(src.chars); parseOk) {
+    auto value = Convert<std::string>(src);
+    if (auto [parseOk, val] = StringUtils::ParseFontWeight(value); parseOk) {
         dst = val;
     }
 }
@@ -1629,13 +1636,23 @@ RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src)
 }
 
 template<>
-RefPtr<PixelMap> Convert(const Ark_PixelMap& src)
+RefPtr<PixelMap> Convert(const Ark_image_PixelMapPeer& src)
 {
     return src ? src->pixelMap : nullptr;
 }
 
 template<>
 void AssignCast(std::optional<float>& dst, const Ark_String& src)
+{
+    auto value = Convert<std::string>(src);
+    double result;
+    if (StringUtils::StringToDouble(value, result)) {
+        dst = result;
+    }
+}
+
+template<>
+void AssignCast(std::optional<double>& dst, const Ark_String& src)
 {
     auto value = Convert<std::string>(src);
     double result;
@@ -2523,7 +2540,7 @@ std::set<std::string> Convert(const Array_UniformDataType& src)
 {
     std::set<std::string> dst = {};
     std::optional<std::string> convVal;
-    auto tmp = Converter::OptConvert<std::vector<Ark_UniformDataType>>(src);
+    auto tmp = Converter::OptConvert<std::vector<Ark_uniformTypeDescriptor_UniformDataType>>(src);
     if (!tmp.has_value()) return dst;
     for (Ark_UniformDataType arkVal : tmp.value()) {
         convVal = Converter::OptConvert<std::string>(arkVal);
@@ -2534,7 +2551,7 @@ std::set<std::string> Convert(const Array_UniformDataType& src)
     return dst;
 }
 template<>
-RefPtr<ShapeRect> Convert(const Ark_Rect& src)
+RefPtr<ShapeRect> Convert(const Ark_common2D_Rect& src)
 {
     auto dst = AceType::MakeRefPtr<ShapeRect>();
     float left = Converter::Convert<float>(src.left);
@@ -2648,4 +2665,14 @@ void AssignCast(std::optional<NG::NavigationTransition>& dst, const Ark_Navigati
     dst->transition = std::move(transitionCallback);
 }
 
+template<>
+void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_image_PixelMap& value)
+{
+    auto pixelMapPeer = value;
+    if (pixelMapPeer) {
+        dst = ImageSourceInfo(pixelMapPeer->pixelMap);
+    } else {
+        LOGE("Invalid peer value at Ark_image_PixelMap");
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

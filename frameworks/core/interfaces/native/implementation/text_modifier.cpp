@@ -308,33 +308,6 @@ void FontStyleImpl(Ark_NativePointer node,
     auto fontStyle = Converter::OptConvert<Ace::FontStyle>(*value);
     TextModelNG::SetItalicFontStyle(frameNode, fontStyle);
 }
-void FontWeight0Impl(Ark_NativePointer node,
-                     const Opt_Union_Number_FontWeight_String* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    Converter::FontWeightInt defaultWeight = {};
-    auto weight = Converter::OptConvert<Converter::FontWeightInt>(*value).value_or(defaultWeight);
-    TextModelNG::SetFontWeight(frameNode, weight.fixed);
-    TextModelNG::SetVariableFontWeight(frameNode, weight.variable);
-}
-void FontWeight1Impl(Ark_NativePointer node,
-                     const Opt_Union_Number_FontWeight_String* weight,
-                     const Opt_FontSettingOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    FontWeight0Impl(node, weight);
-
-    std::optional<bool> enableVariableFontWeight;
-    if (options) {
-        auto settings = Converter::OptConvert<Converter::FontSettingOptions>(*options);
-        if (settings) {
-            enableVariableFontWeight = settings->enableVariableFontWeight;
-        }
-    }
-    TextModelNG::SetEnableVariableFontWeight(frameNode, enableVariableFontWeight);
-}
 void LineSpacingImpl(Ark_NativePointer node,
                      const Opt_LengthMetrics* value)
 {
@@ -682,6 +655,23 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
     }
     TextModelNG::SetEnableHapticFeedback(frameNode, *convValue);
 }
+void FontWeightImpl(Ark_NativePointer node,
+                    const Opt_Union_Number_FontWeight_String* weight,
+                    const Opt_FontSettingOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    FontWeight0Impl(node, weight);
+
+    std::optional<bool> enableVariableFontWeight;
+    if (options) {
+        auto settings = Converter::OptConvert<Converter::FontSettingOptions>(*options);
+        if (settings) {
+            enableVariableFontWeight = settings->enableVariableFontWeight;
+        }
+    }
+    TextModelNG::SetEnableVariableFontWeight(frameNode, enableVariableFontWeight);
+}
 void SelectionImpl(Ark_NativePointer node,
                    const Opt_Number* selectionStart,
                    const Opt_Number* selectionEnd)
@@ -747,8 +737,6 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::MinFontScaleImpl,
         TextAttributeModifier::MaxFontScaleImpl,
         TextAttributeModifier::FontStyleImpl,
-        TextAttributeModifier::FontWeight0Impl,
-        TextAttributeModifier::FontWeight1Impl,
         TextAttributeModifier::LineSpacingImpl,
         TextAttributeModifier::TextAlignImpl,
         TextAttributeModifier::LineHeightImpl,
@@ -781,6 +769,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::EditMenuOptionsImpl,
         TextAttributeModifier::HalfLeadingImpl,
         TextAttributeModifier::EnableHapticFeedbackImpl,
+        TextAttributeModifier::FontWeightImpl,
         TextAttributeModifier::SelectionImpl,
         TextAttributeModifier::BindSelectionMenuImpl,
     };

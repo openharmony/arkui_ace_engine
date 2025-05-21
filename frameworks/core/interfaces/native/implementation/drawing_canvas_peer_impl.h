@@ -42,7 +42,7 @@ public:
         image.dirtyHeight = pixelmap->GetHeight();
         pattern_->PutImageData(image);
     }
-    virtual ~DrawingCanvasPeerImpl() {}
+    virtual ~DrawingCanvasPeerImpl() = default;
 
     void FillRect(const OHOS::Ace::Rect& rect)
     {
@@ -72,9 +72,9 @@ private:
     static constexpr int defaultSize = 1; // The canvas size should be at least 1x1
 };
 
-struct DrawingCanvasPeer : public DrawingCanvasPeerImpl {
-    explicit DrawingCanvasPeer(const OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>& pixelmap)
+struct drawing_CanvasPeer : public DrawingCanvasPeerImpl {
+    explicit drawing_CanvasPeer(const OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>& pixelmap)
         : DrawingCanvasPeerImpl(pixelmap) {}
-    ~DrawingCanvasPeer() override {}
+    ~drawing_CanvasPeer() override = default;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_DRAW_CANVAS_PEER_IMPL_H

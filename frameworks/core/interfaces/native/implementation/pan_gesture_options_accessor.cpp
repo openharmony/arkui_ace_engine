@@ -28,8 +28,7 @@ struct PanGestureOptionsInfo {
 
 namespace Converter {
 template<>
-void AssignCast(std::optional<PanGestureOptionsInfo>& dst,
-                const Ark_Literal_Number_distance_fingers_PanDirection_direction& src)
+void AssignCast(std::optional<PanGestureOptionsInfo>& dst, const Ark_PanGestureHandlerOptions& src)
 {
     PanGestureOptionsInfo result;
     result.fingers = Converter::OptConvert<int32_t>(src.fingers);
@@ -52,7 +51,7 @@ void DestroyPeerImpl(Ark_PanGestureOptions peer)
 {
     delete peer;
 }
-Ark_PanGestureOptions CtorImpl(const Opt_Literal_Number_distance_fingers_PanDirection_direction* value)
+Ark_PanGestureOptions CtorImpl(const Opt_PanGestureHandlerOptions* value)
 {
     auto peer = new PanGestureOptionsPeer();
     peer->handler = Referenced::MakeRefPtr<PanGestureOption>();

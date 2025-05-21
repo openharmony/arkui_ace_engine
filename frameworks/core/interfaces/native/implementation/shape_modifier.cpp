@@ -64,7 +64,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // ShapeModifier
 namespace ShapeInterfaceModifier {
 void SetShapeOptions0Impl(Ark_NativePointer node,
-                          Ark_PixelMap value)
+                          Ark_image_PixelMap value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -214,26 +214,26 @@ void AntiAliasImpl(Ark_NativePointer node,
     ShapeModelNG::SetAntiAlias(frameNode, *convValue);
 }
 void MeshImpl(Ark_NativePointer node,
-              const Array_Number* value,
-              const Ark_Number* column,
-              const Ark_Number* row)
+              const Opt_Array_Number* value,
+              const Opt_Number* column,
+              const Opt_Number* row)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     CHECK_NULL_VOID(column);
     CHECK_NULL_VOID(row);
-    std::vector<float> mesh;
-    auto columnValue = Converter::Convert<int32_t>(*column);
-    auto rowValue = Converter::Convert<int32_t>(*row);
-    auto meshSize = value->length;
+    auto mesh = Converter::OptConvert<std::vector<float>>(*value);
+    CHECK_NULL_VOID(mesh);
+    auto columnValue = Converter::OptConvert<int32_t>(*column).value_or(0);
+    auto rowValue = Converter::OptConvert<int32_t>(*row).value_or(0);
+    auto meshSize = mesh->size();
     auto tempMeshSize = static_cast<int64_t>(columnValue + 1) * (rowValue + 1) * 2;
     if (tempMeshSize != meshSize) {
-        ShapeModelNG::SetBitmapMesh(frameNode, std::move(mesh), 0, 0);
+        ShapeModelNG::SetBitmapMesh(frameNode, std::move(*mesh), 0, 0);
         return;
     }
-    mesh = Converter::Convert<std::vector<float>>(*value);
-    ShapeModelNG::SetBitmapMesh(frameNode, std::move(mesh), columnValue, rowValue);
+    ShapeModelNG::SetBitmapMesh(frameNode, std::move(*mesh), columnValue, rowValue);
 }
 } // ShapeAttributeModifier
 const GENERATED_ArkUIShapeModifier* GetShapeModifier()

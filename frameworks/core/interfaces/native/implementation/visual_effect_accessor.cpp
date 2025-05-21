@@ -18,11 +18,11 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace VisualEffectAccessor {
-void DestroyPeerImpl(Ark_VisualEffect peer)
+namespace UiEffect_VisualEffectAccessor {
+void DestroyPeerImpl(Ark_uiEffect_VisualEffect peer)
 {
 }
-Ark_VisualEffect CtorImpl()
+Ark_uiEffect_VisualEffect CtorImpl()
 {
     return nullptr;
 }
@@ -30,21 +30,21 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_VisualEffect BackgroundColorBlenderImpl(Ark_VisualEffect peer,
-                                            const Ark_BrightnessBlender* blender)
+Ark_uiEffect_VisualEffect BackgroundColorBlenderImpl(Ark_uiEffect_VisualEffect peer,
+                                                     const Ark_uiEffect_BrightnessBlender* blender)
 {
     return {};
 }
-} // VisualEffectAccessor
-const GENERATED_ArkUIVisualEffectAccessor* GetVisualEffectAccessor()
+} // UiEffect_VisualEffectAccessor
+const GENERATED_ArkUIUiEffect_VisualEffectAccessor* GetUiEffect_VisualEffectAccessor()
 {
-    static const GENERATED_ArkUIVisualEffectAccessor VisualEffectAccessorImpl {
-        VisualEffectAccessor::DestroyPeerImpl,
-        VisualEffectAccessor::CtorImpl,
-        VisualEffectAccessor::GetFinalizerImpl,
-        VisualEffectAccessor::BackgroundColorBlenderImpl,
+    static const GENERATED_ArkUIUiEffect_VisualEffectAccessor UiEffect_VisualEffectAccessorImpl {
+        UiEffect_VisualEffectAccessor::DestroyPeerImpl,
+        UiEffect_VisualEffectAccessor::CtorImpl,
+        UiEffect_VisualEffectAccessor::GetFinalizerImpl,
+        UiEffect_VisualEffectAccessor::BackgroundColorBlenderImpl,
     };
-    return &VisualEffectAccessorImpl;
+    return &UiEffect_VisualEffectAccessorImpl;
 }
 
 struct VisualEffectPeer {

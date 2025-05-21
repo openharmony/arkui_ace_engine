@@ -44,7 +44,7 @@ Ark_ColorMetrics NumericImpl(const Ark_Number* value)
 Ark_ColorMetrics RgbaImpl(const Ark_Number* red,
                           const Ark_Number* green,
                           const Ark_Number* blue,
-                          const Opt_Number* alpha)
+                          const Ark_Number* alpha)
 {
     auto* peer = new ColorMetricsPeer();
     CHECK_NULL_RETURN(peer, peer);
@@ -76,27 +76,27 @@ Ark_ColorMetrics BlendColorImpl(Ark_ColorMetrics peer,
     peer->colorValue.value = aceColor.BlendColor(aceOverlayColor).GetValue();
     return peer;
 }
-Ark_String GetColorImpl(Ark_ColorMetrics peer)
+Ark_String ColorImpl(Ark_ColorMetrics peer)
 {
     CHECK_NULL_RETURN(peer, {});
     return Converter::ArkValue<Ark_String>(Ace::Color(peer->colorValue.value).ToString(), Converter::FC);
 }
-Ark_Number GetRedImpl(Ark_ColorMetrics peer)
+Ark_Number RedImpl(Ark_ColorMetrics peer)
 {
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
     return Converter::ArkValue<Ark_Number>(peer->colorValue.argb.red);
 }
-Ark_Number GetGreenImpl(Ark_ColorMetrics peer)
+Ark_Number GreenImpl(Ark_ColorMetrics peer)
 {
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
     return Converter::ArkValue<Ark_Number>(peer->colorValue.argb.green);
 }
-Ark_Number GetBlueImpl(Ark_ColorMetrics peer)
+Ark_Number BlueImpl(Ark_ColorMetrics peer)
 {
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
     return Converter::ArkValue<Ark_Number>(peer->colorValue.argb.blue);
 }
-Ark_Number GetAlphaImpl(Ark_ColorMetrics peer)
+Ark_Number AlphaImpl(Ark_ColorMetrics peer)
 {
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0xff));
     return Converter::ArkValue<Ark_Number>(peer->colorValue.argb.alpha);
@@ -112,11 +112,11 @@ const GENERATED_ArkUIColorMetricsAccessor* GetColorMetricsAccessor()
         ColorMetricsAccessor::RgbaImpl,
         ColorMetricsAccessor::ResourceColorImpl,
         ColorMetricsAccessor::BlendColorImpl,
-        ColorMetricsAccessor::GetColorImpl,
-        ColorMetricsAccessor::GetRedImpl,
-        ColorMetricsAccessor::GetGreenImpl,
-        ColorMetricsAccessor::GetBlueImpl,
-        ColorMetricsAccessor::GetAlphaImpl,
+        ColorMetricsAccessor::ColorImpl,
+        ColorMetricsAccessor::RedImpl,
+        ColorMetricsAccessor::GreenImpl,
+        ColorMetricsAccessor::BlueImpl,
+        ColorMetricsAccessor::AlphaImpl,
     };
     return &ColorMetricsAccessorImpl;
 }

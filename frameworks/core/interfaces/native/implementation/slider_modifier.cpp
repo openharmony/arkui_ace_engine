@@ -93,7 +93,9 @@ SliderBlockStyle Convert(const Ark_SliderBlockStyle& src)
     return {
         .type = Converter::OptConvert<SliderModel::BlockStyleType>(src.type),
         .image = Converter::OptConvert<ImageSourceInfo>(src.image),
+#ifdef WRONG_GEN
         .shape = Converter::OptConvert<std::string>(src.shape)
+#endif
     };
 }
 }
@@ -164,16 +166,8 @@ void TrackColorImpl(Ark_NativePointer node,
         []() {}
     );
 }
-void SelectedColor0Impl(Ark_NativePointer node,
-                        const Opt_ResourceColor* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Color>(*value);
-    SliderModelStatic::SetSelectColor(frameNode, convValue);
-}
-void SelectedColor1Impl(Ark_NativePointer node,
-                        const Opt_Union_ResourceColor_LinearGradient* value)
+void SelectedColorImpl(Ark_NativePointer node,
+                       const Opt_Union_ResourceColor_LinearGradient* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -190,22 +184,6 @@ void SelectedColor1Impl(Ark_NativePointer node,
         },
         []() {}
     );
-}
-void MinLabelImpl(Ark_NativePointer node,
-                  const Opt_String* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
-    SliderModelStatic::SetMinLabel(frameNode, convValue);
-}
-void MaxLabelImpl(Ark_NativePointer node,
-                  const Opt_String* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
-    SliderModelStatic::SetMaxLabel(frameNode, convValue);
 }
 void ShowStepsImpl(Ark_NativePointer node,
                    const Opt_Boolean* value)
@@ -389,6 +367,7 @@ void ShowTipsImpl(Ark_NativePointer node,
     auto convContent = content ? Converter::OptConvert<std::string>(*content) : std::nullopt;
     SliderModelNG::SetShowTips(frameNode, *convValue, convContent);
 }
+#ifdef WRONG_GEN
 void _onChangeEvent_valueImpl(Ark_NativePointer node,
                               const Callback_Number_Void* callback)
 {
@@ -402,6 +381,7 @@ void _onChangeEvent_valueImpl(Ark_NativePointer node,
     };
     SliderModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
+#endif
 } // SliderAttributeModifier
 const GENERATED_ArkUISliderModifier* GetSliderModifier()
 {
@@ -410,10 +390,7 @@ const GENERATED_ArkUISliderModifier* GetSliderModifier()
         SliderInterfaceModifier::SetSliderOptionsImpl,
         SliderAttributeModifier::BlockColorImpl,
         SliderAttributeModifier::TrackColorImpl,
-        SliderAttributeModifier::SelectedColor0Impl,
-        SliderAttributeModifier::SelectedColor1Impl,
-        SliderAttributeModifier::MinLabelImpl,
-        SliderAttributeModifier::MaxLabelImpl,
+        SliderAttributeModifier::SelectedColorImpl,
         SliderAttributeModifier::ShowStepsImpl,
         SliderAttributeModifier::TrackThicknessImpl,
         SliderAttributeModifier::OnChangeImpl,
@@ -432,7 +409,6 @@ const GENERATED_ArkUISliderModifier* GetSliderModifier()
         SliderAttributeModifier::DigitalCrownSensitivityImpl,
         SliderAttributeModifier::EnableHapticFeedbackImpl,
         SliderAttributeModifier::ShowTipsImpl,
-        SliderAttributeModifier::_onChangeEvent_valueImpl,
     };
     return &ArkUISliderModifierImpl;
 }

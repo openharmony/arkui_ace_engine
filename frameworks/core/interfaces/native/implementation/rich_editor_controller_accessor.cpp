@@ -73,16 +73,20 @@ void ConversionPart2(TextStyle& ret, const Ark_RichEditorTextStyle& src)
         ret.SetLineHeight(lineHeight.value());
     }
 
+#ifdef WRONG_GEN
     if (auto halfLeading = Converter::OptConvert<bool>(src.halfLeading)) {
         ret.SetHalfLeading(halfLeading.value());
     }
+#endif
 
     if (auto fontFeatureSettings = Converter::OptConvert<std::string>(src.fontFeature)) {
         ret.SetFontFeatures(ParseFontFeatureSettings(fontFeatureSettings.value()));
     }
 
+#ifdef WRONG_GEN
     auto textBackgroundStyle = Converter::OptConvert<TextBackgroundStyle>(src.textBackgroundStyle);
     ret.SetTextBackgroundStyle(textBackgroundStyle);
+#endif
 }
 
 template<>
@@ -264,6 +268,7 @@ UserGestureOptions Convert(const Ark_RichEditorGesture& src)
             callback.InvokeSync(event.ArkValue());
         };
     }
+#ifdef WRONG_GEN
     const auto arkDoubleClickOpt = Converter::OptConvert<Callback_GestureEvent_Void>(src.onDoubleClick);
     if (arkDoubleClickOpt) {
         result.onDoubleClick = [callback = CallbackHelper(arkDoubleClickOpt.value())](OHOS::Ace::GestureEvent& info) {
@@ -271,6 +276,7 @@ UserGestureOptions Convert(const Ark_RichEditorGesture& src)
             callback.InvokeSync(event.ArkValue());
         };
     }
+#endif
     return result;
 }
 
@@ -443,9 +449,11 @@ void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const TextStyleResult& s
     dst.textShadow = ArkValue<Opt_Array_ShadowOptions>(src.textShadows, ctx);
     dst.letterSpacing = ArkValue<Opt_Number>(src.letterSpacing);
     dst.lineHeight = ArkValue<Opt_Number>(src.lineHeight);
-    dst.halfLeading = ArkValue<Opt_Boolean>(src.halfLeading);
     dst.fontFeature = ArkValue<Opt_String>(src.fontFeature, ctx);
+#ifdef WRONG_GEN
+    dst.halfLeading = ArkValue<Opt_Boolean>(src.halfLeading);
     dst.textBackgroundStyle = ArkValue<Opt_TextBackgroundStyle>(src.textBackgroundStyle, ctx);
+#endif
 }
 
 void AssignArkValue(Ark_RichEditorSpanPosition& dst, const SpanPosition& src)
@@ -472,7 +480,7 @@ void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const ResultObject& src, 
 void AssignArkValue(Ark_RichEditorImageSpanResult& dst, const ResultObject& src, ConvContext *ctx)
 {
     dst.spanPosition = ArkValue<Ark_RichEditorSpanPosition>(src.spanPosition);
-    dst.valuePixelMap = ArkValue<Opt_PixelMap>(PixelMapPeer::Create(src.valuePixelMap));
+    dst.valuePixelMap = ArkValue<Opt_image_PixelMap>(image_PixelMapPeer::Create(src.valuePixelMap));
     dst.valueResourceStr = ArkUnion<Opt_ResourceStr, Ark_String>(src.valueString, ctx);
     dst.imageStyle = ArkValue<Ark_RichEditorImageSpanStyleResult>(src.imageStyle);
     dst.offsetInSpan.value0 = ArkValue<Ark_Number>(src.offsetInSpan[0]);
@@ -536,7 +544,7 @@ Ark_Number AddTextSpanImpl(Ark_RichEditorController peer,
     return Converter::ArkValue<Ark_Number>(peerImpl->AddTextSpanImpl(locOptions));
 }
 Ark_Number AddImageSpanImpl(Ark_RichEditorController peer,
-                            const Ark_Union_PixelMap_ResourceStr* value,
+                            const Ark_Union_Image_PixelMap_ResourceStr* value,
                             const Opt_RichEditorImageSpanOptions* options)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
@@ -593,7 +601,7 @@ Ark_Number AddSymbolSpanImpl(Ark_RichEditorController peer,
     return Converter::ArkValue<Ark_Number>(peerImpl->AddSymbolSpanImpl(locOptions));
 }
 void UpdateSpanStyleImpl(Ark_RichEditorController peer,
-                         const Ark_Type_RichEditorController_updateSpanStyle_value* value)
+                         const Ark_Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions* value)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
@@ -663,8 +671,7 @@ Ark_RichEditorSelection GetSelectionImpl(Ark_RichEditorController peer)
     auto selectionInfo = peerImpl->GetSelectionImpl();
     return Converter::ArkValue<Ark_RichEditorSelection>(selectionInfo, Converter::FC);
 }
-Array_RichEditorSpan FromStyledStringImpl(Ark_VMContext vmContext,
-                                          Ark_RichEditorController peer,
+Array_RichEditorSpan FromStyledStringImpl(Ark_RichEditorController peer,
                                           Ark_StyledString value)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
@@ -682,8 +689,7 @@ Array_RichEditorSpan FromStyledStringImpl(Ark_VMContext vmContext,
     }
     return Converter::ArkValue<Array_RichEditorSpan>(values, Converter::FC);
 }
-Ark_StyledString ToStyledStringImpl(Ark_VMContext vmContext,
-                                    Ark_RichEditorController peer,
+Ark_StyledString ToStyledStringImpl(Ark_RichEditorController peer,
                                     const Ark_RichEditorRange* value)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl*>(peer);

@@ -118,14 +118,6 @@ void OnBackPressedImpl(Ark_NativePointer node,
     };
     NavDestinationModelStatic::SetOnBackPressed(frameNode, std::move(onBackPressedEvent));
 }
-void OnResultImpl(Ark_NativePointer node,
-                  const Opt_Callback_Object_Void* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // NavDestinationModelNG::SetOnResult(frameNode, convValue);
-}
 void ModeImpl(Ark_NativePointer node,
               const Opt_NavDestinationMode* value)
 {
@@ -135,7 +127,7 @@ void ModeImpl(Ark_NativePointer node,
     NavDestinationModelStatic::SetNavDestinationMode(frameNode, mode);
 }
 void BackButtonIcon0Impl(Ark_NativePointer node,
-                         const Opt_Union_ResourceStr_PixelMap_SymbolGlyphModifier* value)
+                         const Opt_Union_ResourceStr_Image_PixelMap_SymbolGlyphModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -183,7 +175,7 @@ void BackButtonIcon0Impl(Ark_NativePointer node,
     NavDestinationModelStatic::SetBackButtonIcon(frameNode, iconSymbol, src, imageOption, pixMap, nameList);
 }
 void BackButtonIcon1Impl(Ark_NativePointer node,
-                         const Opt_Union_ResourceStr_PixelMap_SymbolGlyphModifier* icon,
+                         const Opt_Union_ResourceStr_Image_PixelMap_SymbolGlyphModifier* icon,
                          const Opt_ResourceStr* accessibilityText)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -367,7 +359,7 @@ void OnWillHideImpl(Ark_NativePointer node,
     NavDestinationModelStatic::SetOnWillHide(frameNode, std::move(onWillHideEvent));
 }
 void SystemBarStyleImpl(Ark_NativePointer node,
-                        const Opt_SystemBarStyle* value)
+                        const Opt_window_SystemBarStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -434,7 +426,7 @@ void CustomTransitionImpl(Ark_NativePointer node,
     // NavDestinationModelNG::SetCustomTransition(frameNode, convValue);
 }
 void OnNewParamImpl(Ark_NativePointer node,
-                    const Opt_Callback_Object_Void* value)
+                    const Opt_Callback_Union_Object_Undefined_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -442,7 +434,7 @@ void OnNewParamImpl(Ark_NativePointer node,
     // NavDestinationModelNG::SetOnNewParam(frameNode, convValue);
 }
 void PreferredOrientationImpl(Ark_NativePointer node,
-                              const Opt_Orientation* value)
+                              const Opt_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -458,7 +450,7 @@ void EnableNavigationIndicatorImpl(Ark_NativePointer node,
     // NavDestinationModelNG::SetEnableNavigationIndicator(frameNode, convValue);
 }
 void TitleImpl(Ark_NativePointer node,
-               const Opt_Type_NavDestinationAttribute_title_value* value,
+               const Opt_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource* value,
                const Opt_NavigationTitleOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -659,7 +651,6 @@ const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()
         NavDestinationAttributeModifier::OnShownImpl,
         NavDestinationAttributeModifier::OnHiddenImpl,
         NavDestinationAttributeModifier::OnBackPressedImpl,
-        NavDestinationAttributeModifier::OnResultImpl,
         NavDestinationAttributeModifier::ModeImpl,
         NavDestinationAttributeModifier::BackButtonIcon0Impl,
         NavDestinationAttributeModifier::BackButtonIcon1Impl,

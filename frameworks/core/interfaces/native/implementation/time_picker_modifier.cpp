@@ -159,9 +159,9 @@ void DateTimeOptionsImpl(Ark_NativePointer node,
     }
 }
 void OnChangeImpl(Ark_NativePointer node,
-                   const Opt_OnTimePickerChangeCallback* value)
+                  const Opt_OnTimePickerChangeCallback* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
@@ -230,6 +230,7 @@ void EnableCascadeImpl(Ark_NativePointer node,
     }
     TimePickerModelNG::SetEnableCascade(frameNode, *convValue);
 }
+#ifdef WRONG_GEN
 void _onChangeEvent_selectedImpl(Ark_NativePointer node,
                                  const Callback_Date_Void* callback)
 {
@@ -248,6 +249,7 @@ void _onChangeEvent_selectedImpl(Ark_NativePointer node,
     };
     TimePickerModelNG::SetChangeEvent(frameNode, std::move(onEvent));
 }
+#endif
 } // TimePickerAttributeModifier
 const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier()
 {
@@ -255,25 +257,16 @@ const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier()
         TimePickerModifier::ConstructImpl,
         TimePickerInterfaceModifier::SetTimePickerOptionsImpl,
         TimePickerAttributeModifier::UseMilitaryTimeImpl,
-        TimePickerAttributeModifier::UseMilitaryTimeImpl,
-        TimePickerAttributeModifier::LoopImpl,
         TimePickerAttributeModifier::LoopImpl,
         TimePickerAttributeModifier::DisappearTextStyleImpl,
-        TimePickerAttributeModifier::DisappearTextStyleImpl,
-        TimePickerAttributeModifier::TextStyleImpl,
         TimePickerAttributeModifier::TextStyleImpl,
         TimePickerAttributeModifier::SelectedTextStyleImpl,
-        TimePickerAttributeModifier::SelectedTextStyleImpl,
         TimePickerAttributeModifier::DateTimeOptionsImpl,
-        TimePickerAttributeModifier::DateTimeOptionsImpl,
-        nullptr,
         TimePickerAttributeModifier::OnChangeImpl,
         TimePickerAttributeModifier::OnEnterSelectedAreaImpl,
         TimePickerAttributeModifier::EnableHapticFeedbackImpl,
-        TimePickerAttributeModifier::EnableHapticFeedbackImpl,
         TimePickerAttributeModifier::DigitalCrownSensitivityImpl,
         TimePickerAttributeModifier::EnableCascadeImpl,
-        TimePickerAttributeModifier::_onChangeEvent_selectedImpl,
     };
     return &ArkUITimePickerModifierImpl;
 }

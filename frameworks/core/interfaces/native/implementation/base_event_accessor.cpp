@@ -59,6 +59,16 @@ const Ark_Boolean DefaultValueBoolean = Converter::ArkValue<Ark_Boolean>(false);
 const Ark_Number DefaultValueArkNumber = Converter::ArkValue<Ark_Number>(0);
 }  // namespace
 
+Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
+                                    Ark_BaseEvent peer,
+                                    const Array_String* keys)
+{
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueBoolean);
+    CHECK_NULL_RETURN(keys, DefaultValueBoolean);
+    auto eventKeys = peer->GetBaseInfo()->GetPressedKeyCodes();
+    auto keysStr = Converter::Convert<std::vector<std::string>>(*keys);
+    return Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
+}
 void DestroyPeerImpl(Ark_BaseEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
@@ -70,16 +80,6 @@ Ark_BaseEvent CtorImpl()
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
-Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
-                                    Ark_BaseEvent peer,
-                                    const Array_String* keys)
-{
-    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueBoolean);
-    CHECK_NULL_RETURN(keys, DefaultValueBoolean);
-    auto eventKeys = peer->GetBaseInfo()->GetPressedKeyCodes();
-    auto keysStr = Converter::Convert<std::vector<std::string>>(*keys);
-    return Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
 }
 Ark_EventTarget GetTargetImpl(Ark_BaseEvent peer)
 {
@@ -93,22 +93,28 @@ void SetTargetImpl(Ark_BaseEvent peer,
     CHECK_NULL_VOID(target);
     peer->GetBaseInfo()->SetTarget(Converter::Convert<EventTarget>(*target));
 }
-Ark_Int64 GetTimestampImpl(Ark_BaseEvent peer)
+Ark_Number GetTimestampImpl(Ark_BaseEvent peer)
 {
+#ifdef WRONG_GEN
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), -1);
     auto tstamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
         peer->GetBaseInfo()->GetTimeStamp().time_since_epoch()).count();
     return Converter::ArkValue<Ark_Int64>(tstamp);
+#else
+    return {};
+#endif
 }
 void SetTimestampImpl(Ark_BaseEvent peer,
-                      Ark_Int64 timestamp)
+                      const Ark_Number* timestamp)
 {
+#ifdef WRONG_GEN
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(timestamp);
     int64_t value = Converter::Convert<int64_t>(timestamp);
     std::chrono::high_resolution_clock::duration duration = std::chrono::nanoseconds(value);
     std::chrono::time_point<std::chrono::high_resolution_clock> time_point(duration);
     peer->GetBaseInfo()->SetTimeStamp(time_point);
+#endif
 }
 Ark_SourceType GetSourceImpl(Ark_BaseEvent peer)
 {
@@ -216,6 +222,14 @@ void SetSourceToolImpl(Ark_BaseEvent peer,
         peer->GetBaseInfo()->SetSourceTool(*value);
     }
 }
+Opt_Callback_Array_String_Boolean GetGetModifierKeyStateImpl(Ark_BaseEvent peer)
+{
+    return {};
+}
+void SetGetModifierKeyStateImpl(Ark_BaseEvent peer,
+                                const Callback_Array_String_Boolean* getModifierKeyState)
+{
+}
 Opt_Number GetDeviceIdImpl(Ark_BaseEvent peer)
 {
     auto invalid = Converter::ArkValue<Opt_Number>();
@@ -254,7 +268,6 @@ const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
         BaseEventAccessor::DestroyPeerImpl,
         BaseEventAccessor::CtorImpl,
         BaseEventAccessor::GetFinalizerImpl,
-        BaseEventAccessor::GetModifierKeyStateImpl,
         BaseEventAccessor::GetTargetImpl,
         BaseEventAccessor::SetTargetImpl,
         BaseEventAccessor::GetTimestampImpl,
@@ -275,6 +288,8 @@ const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
         BaseEventAccessor::SetRollAngleImpl,
         BaseEventAccessor::GetSourceToolImpl,
         BaseEventAccessor::SetSourceToolImpl,
+        BaseEventAccessor::GetGetModifierKeyStateImpl,
+        BaseEventAccessor::SetGetModifierKeyStateImpl,
         BaseEventAccessor::GetDeviceIdImpl,
         BaseEventAccessor::SetDeviceIdImpl,
         BaseEventAccessor::GetTargetDisplayIdImpl,

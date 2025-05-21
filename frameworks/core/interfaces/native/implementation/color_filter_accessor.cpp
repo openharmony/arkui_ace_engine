@@ -45,6 +45,50 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 } // ColorFilterAccessor
+namespace Drawing_ColorFilterAccessor {
+void DestroyPeerImpl(Ark_drawing_ColorFilter peer)
+{
+}
+Ark_drawing_ColorFilter CtorImpl()
+{
+    return nullptr;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
+}
+Ark_drawing_ColorFilter CreateBlendModeColorFilter0Impl(const Ark_common2D_Color* color,
+                                                        Ark_drawing_BlendMode mode)
+{
+    return {};
+}
+Ark_drawing_ColorFilter CreateBlendModeColorFilter1Impl(const Ark_Number* color,
+                                                        Ark_drawing_BlendMode mode)
+{
+    return {};
+}
+Ark_drawing_ColorFilter CreateComposeColorFilterImpl(Ark_drawing_ColorFilter outer,
+                                                     Ark_drawing_ColorFilter inner)
+{
+    return {};
+}
+Ark_drawing_ColorFilter CreateLinearToSRGBGammaImpl()
+{
+    return {};
+}
+Ark_drawing_ColorFilter CreateSRGBGammaToLinearImpl()
+{
+    return {};
+}
+Ark_drawing_ColorFilter CreateLumaColorFilterImpl()
+{
+    return {};
+}
+Ark_drawing_ColorFilter CreateMatrixColorFilterImpl(const Array_Number* matrix)
+{
+    return {};
+}
+} // Drawing_ColorFilterAccessor
 const GENERATED_ArkUIColorFilterAccessor* GetColorFilterAccessor()
 {
     static const GENERATED_ArkUIColorFilterAccessor ColorFilterAccessorImpl {
@@ -54,4 +98,22 @@ const GENERATED_ArkUIColorFilterAccessor* GetColorFilterAccessor()
     };
     return &ColorFilterAccessorImpl;
 }
+
+const GENERATED_ArkUIDrawing_ColorFilterAccessor* GetDrawing_ColorFilterAccessor()
+{
+    static const GENERATED_ArkUIDrawing_ColorFilterAccessor Drawing_ColorFilterAccessorImpl {
+        Drawing_ColorFilterAccessor::DestroyPeerImpl,
+        Drawing_ColorFilterAccessor::CtorImpl,
+        Drawing_ColorFilterAccessor::GetFinalizerImpl,
+        Drawing_ColorFilterAccessor::CreateBlendModeColorFilter0Impl,
+        Drawing_ColorFilterAccessor::CreateBlendModeColorFilter1Impl,
+        Drawing_ColorFilterAccessor::CreateComposeColorFilterImpl,
+        Drawing_ColorFilterAccessor::CreateLinearToSRGBGammaImpl,
+        Drawing_ColorFilterAccessor::CreateSRGBGammaToLinearImpl,
+        Drawing_ColorFilterAccessor::CreateLumaColorFilterImpl,
+        Drawing_ColorFilterAccessor::CreateMatrixColorFilterImpl,
+    };
+    return &Drawing_ColorFilterAccessorImpl;
+}
+
 }

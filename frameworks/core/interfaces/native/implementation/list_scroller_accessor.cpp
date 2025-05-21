@@ -45,8 +45,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_RectResult GetItemRectInGroupImpl(Ark_VMContext vmContext,
-                                      Ark_ListScroller peer,
+Ark_RectResult GetItemRectInGroupImpl(Ark_ListScroller peer,
                                       const Ark_Number* index,
                                       const Ark_Number* indexInGroup)
 {
@@ -66,8 +65,7 @@ Ark_RectResult GetItemRectInGroupImpl(Ark_VMContext vmContext,
     auto rect = scrollController->GetItemRectInGroup(convIndex, convIndexInGroup);
     return Converter::ArkValue<Ark_RectResult>(rect);
 }
-void ScrollToItemInGroupImpl(Ark_VMContext vmContext,
-                             Ark_ListScroller peer,
+void ScrollToItemInGroupImpl(Ark_ListScroller peer,
                              const Ark_Number* index,
                              const Ark_Number* indexInGroup,
                              const Opt_Boolean* smooth,
@@ -90,8 +88,7 @@ void ScrollToItemInGroupImpl(Ark_VMContext vmContext,
     scrollController->JumpToItemInGroup(indexValue, indexInGroupValue,
         smoothValue.value_or(false), alignValue.value_or(ScrollAlign::NONE));
 }
-void CloseAllSwipeActionsImpl(Ark_VMContext vmContext,
-                              Ark_ListScroller peer,
+void CloseAllSwipeActionsImpl(Ark_ListScroller peer,
                               const Opt_CloseSwipeActionOptions* options)
 {
     CHECK_NULL_VOID(peer);
@@ -107,8 +104,7 @@ void CloseAllSwipeActionsImpl(Ark_VMContext vmContext,
         scrollController->CloseAllSwipeActions(std::move(func));
     }
 }
-Ark_VisibleListContentInfo GetVisibleListContentInfoImpl(Ark_VMContext vmContext,
-                                                         Ark_ListScroller peer,
+Ark_VisibleListContentInfo GetVisibleListContentInfoImpl(Ark_ListScroller peer,
                                                          const Ark_Number* x,
                                                          const Ark_Number* y)
 {

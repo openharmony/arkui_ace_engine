@@ -34,8 +34,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void ReplaceStringImpl(Ark_VMContext vmContext,
-                       Ark_MutableStyledString peer,
+void ReplaceStringImpl(Ark_MutableStyledString peer,
                        const Ark_Number* start,
                        const Ark_Number* length,
                        const Ark_String* other)
@@ -54,8 +53,7 @@ void ReplaceStringImpl(Ark_VMContext vmContext,
             convStart, convLength);
     }
 }
-void InsertStringImpl(Ark_VMContext vmContext,
-                      Ark_MutableStyledString peer,
+void InsertStringImpl(Ark_MutableStyledString peer,
                       const Ark_Number* start,
                       const Ark_String* other)
 {
@@ -73,8 +71,7 @@ void InsertStringImpl(Ark_VMContext vmContext,
             convStart, strLength);
     }
 }
-void RemoveStringImpl(Ark_VMContext vmContext,
-                      Ark_MutableStyledString peer,
+void RemoveStringImpl(Ark_MutableStyledString peer,
                       const Ark_Number* start,
                       const Ark_Number* length)
 {
@@ -91,8 +88,7 @@ void RemoveStringImpl(Ark_VMContext vmContext,
             convStart, convLength);
     }
 }
-void ReplaceStyleImpl(Ark_VMContext vmContext,
-                      Ark_MutableStyledString peer,
+void ReplaceStyleImpl(Ark_MutableStyledString peer,
                       const Ark_SpanStyle* spanStyle)
 {
     CHECK_NULL_VOID(peer && spanStyle);
@@ -110,8 +106,7 @@ void ReplaceStyleImpl(Ark_VMContext vmContext,
             convStart, convLength);
     }
 }
-void SetStyleImpl(Ark_VMContext vmContext,
-                  Ark_MutableStyledString peer,
+void SetStyleImpl(Ark_MutableStyledString peer,
                   const Ark_SpanStyle* spanStyle)
 {
     CHECK_NULL_VOID(peer && spanStyle);
@@ -134,8 +129,7 @@ void SetStyleImpl(Ark_VMContext vmContext,
             convStart, convLength);
     }
 }
-void RemoveStyleImpl(Ark_VMContext vmContext,
-                     Ark_MutableStyledString peer,
+void RemoveStyleImpl(Ark_MutableStyledString peer,
                      const Ark_Number* start,
                      const Ark_Number* length,
                      Ark_StyledStringKey styledKey)
@@ -150,8 +144,7 @@ void RemoveStyleImpl(Ark_VMContext vmContext,
     CHECK_NULL_VOID(type);
     mutableString->RemoveSpan(convStart, convLength, type.value());
 }
-void RemoveStylesImpl(Ark_VMContext vmContext,
-                      Ark_MutableStyledString peer,
+void RemoveStylesImpl(Ark_MutableStyledString peer,
                       const Ark_Number* start,
                       const Ark_Number* length)
 {
@@ -170,8 +163,7 @@ void ClearStylesImpl(Ark_MutableStyledString peer)
     CHECK_NULL_VOID(mutableString);
     mutableString->ClearAllSpans();
 }
-void ReplaceStyledStringImpl(Ark_VMContext vmContext,
-                             Ark_MutableStyledString peer,
+void ReplaceStyledStringImpl(Ark_MutableStyledString peer,
                              const Ark_Number* start,
                              const Ark_Number* length,
                              Ark_StyledString other)
@@ -191,8 +183,7 @@ void ReplaceStyledStringImpl(Ark_VMContext vmContext,
             convStart, convLength);
     }
 }
-void InsertStyledStringImpl(Ark_VMContext vmContext,
-                            Ark_MutableStyledString peer,
+void InsertStyledStringImpl(Ark_MutableStyledString peer,
                             const Ark_Number* start,
                             Ark_StyledString other)
 {

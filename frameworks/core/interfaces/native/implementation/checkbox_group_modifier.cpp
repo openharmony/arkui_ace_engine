@@ -124,6 +124,7 @@ void CheckboxShapeImpl(Ark_NativePointer node,
     CheckBoxGroupModelStatic::SetCheckboxGroupStyle(frameNode,
         value ? Converter::OptConvert<OHOS::Ace::CheckBoxStyle>(*value) : std::nullopt);
 }
+#ifdef WRONG_GEN
 void _onChangeEvent_selectAllImpl(Ark_NativePointer node,
                                   const Callback_Opt_Boolean_Void* callback)
 {
@@ -140,6 +141,7 @@ void _onChangeEvent_selectAllImpl(Ark_NativePointer node,
     };
     CheckBoxGroupModelStatic::SetChangeEvent(frameNode, std::move(onEvent));
 }
+#endif
 } // CheckboxGroupAttributeModifier
 const GENERATED_ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
 {
@@ -147,18 +149,11 @@ const GENERATED_ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
         CheckboxGroupModifier::ConstructImpl,
         CheckboxGroupInterfaceModifier::SetCheckboxGroupOptionsImpl,
         CheckboxGroupAttributeModifier::SelectAllImpl,
-        CheckboxGroupAttributeModifier::SelectAllImpl,
-        CheckboxGroupAttributeModifier::SelectedColorImpl,
         CheckboxGroupAttributeModifier::SelectedColorImpl,
         CheckboxGroupAttributeModifier::UnselectedColorImpl,
-        CheckboxGroupAttributeModifier::UnselectedColorImpl,
-        CheckboxGroupAttributeModifier::MarkImpl,
         CheckboxGroupAttributeModifier::MarkImpl,
         CheckboxGroupAttributeModifier::OnChangeImpl,
-        CheckboxGroupAttributeModifier::OnChangeImpl,
         CheckboxGroupAttributeModifier::CheckboxShapeImpl,
-        CheckboxGroupAttributeModifier::CheckboxShapeImpl,
-        CheckboxGroupAttributeModifier::_onChangeEvent_selectAllImpl,
     };
     return &ArkUICheckboxGroupModifierImpl;
 }

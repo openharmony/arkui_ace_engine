@@ -30,7 +30,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_PixelMap GetPixelMapImpl(Ark_DrawableDescriptor peer)
+Ark_image_PixelMap GetPixelMapImpl(Ark_DrawableDescriptor peer)
 {
     return {};
 }

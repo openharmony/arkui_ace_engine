@@ -37,21 +37,6 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void DrawBehindImpl(Ark_DrawModifier peer,
-                    const Ark_DrawContext* drawContext)
-{
-    LOGE("DrawModifierAccessor::DrawBehindImpl - is not implemented");
-}
-void DrawContentImpl(Ark_DrawModifier peer,
-                     const Ark_DrawContext* drawContext)
-{
-    LOGE("DrawModifierAccessor::DrawContentImpl - is not implemented");
-}
-void DrawFrontImpl(Ark_DrawModifier peer,
-                   const Ark_DrawContext* drawContext)
-{
-    LOGE("DrawModifierAccessor::DrawFrontImpl - is not implemented");
-}
 void InvalidateImpl(Ark_DrawModifier peer)
 {
     CHECK_NULL_VOID(peer);
@@ -65,6 +50,30 @@ void InvalidateImpl(Ark_DrawModifier peer)
         }
     }
 }
+Opt_Callback_DrawContext_Void GetDrawBehindImpl(Ark_DrawModifier peer)
+{
+    return {};
+}
+void SetDrawBehindImpl(Ark_DrawModifier peer,
+                       const Opt_Callback_DrawContext_Void* drawBehind)
+{
+}
+Opt_Callback_DrawContext_Void GetDrawContentImpl(Ark_DrawModifier peer)
+{
+    return {};
+}
+void SetDrawContentImpl(Ark_DrawModifier peer,
+                        const Opt_Callback_DrawContext_Void* drawContent)
+{
+}
+Opt_Callback_DrawContext_Void GetDrawFrontImpl(Ark_DrawModifier peer)
+{
+    return {};
+}
+void SetDrawFrontImpl(Ark_DrawModifier peer,
+                      const Opt_Callback_DrawContext_Void* drawFront)
+{
+}
 } // DrawModifierAccessor
 const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor()
 {
@@ -72,10 +81,13 @@ const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor()
         DrawModifierAccessor::DestroyPeerImpl,
         DrawModifierAccessor::CtorImpl,
         DrawModifierAccessor::GetFinalizerImpl,
-        DrawModifierAccessor::DrawBehindImpl,
-        DrawModifierAccessor::DrawContentImpl,
-        DrawModifierAccessor::DrawFrontImpl,
         DrawModifierAccessor::InvalidateImpl,
+        DrawModifierAccessor::GetDrawBehindImpl,
+        DrawModifierAccessor::SetDrawBehindImpl,
+        DrawModifierAccessor::GetDrawContentImpl,
+        DrawModifierAccessor::SetDrawContentImpl,
+        DrawModifierAccessor::GetDrawFrontImpl,
+        DrawModifierAccessor::SetDrawFrontImpl,
     };
     return &DrawModifierAccessorImpl;
 }

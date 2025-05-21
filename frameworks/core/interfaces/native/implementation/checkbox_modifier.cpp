@@ -135,22 +135,15 @@ void OnChangeImpl(Ark_NativePointer node,
     };
     CheckBoxModelNG::SetOnChange(frameNode, std::move(onEvent));
 }
-void ContentModifier0Impl(Ark_NativePointer node,
-                          const Opt_ContentModifier* value)
+void ContentModifierImpl(Ark_NativePointer node,
+                         const Opt_ContentModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CheckboxModelNG::SetContentModifier0(frameNode, convValue);
+    //CheckboxModelNG::SetContentModifier(frameNode, convValue);
 }
-void ContentModifier1Impl(Ark_NativePointer node,
-                          const Opt_ContentModifier* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CheckboxModelNG::SetContentModifier1(frameNode, convValue);
-}
+#ifdef WRONG_GEN
 void _onChangeEvent_selectImpl(Ark_NativePointer node,
                                const Callback_Opt_Boolean_Void* callback)
 {
@@ -164,6 +157,7 @@ void _onChangeEvent_selectImpl(Ark_NativePointer node,
     };
     CheckBoxModelStatic::SetChangeEvent(frameNode, std::move(onEvent));
 }
+#endif
 } // CheckboxAttributeModifier
 const GENERATED_ArkUICheckboxModifier* GetCheckboxModifier()
 {
@@ -171,20 +165,12 @@ const GENERATED_ArkUICheckboxModifier* GetCheckboxModifier()
         CheckboxModifier::ConstructImpl,
         CheckboxInterfaceModifier::SetCheckboxOptionsImpl,
         CheckboxAttributeModifier::SelectImpl,
-        CheckboxAttributeModifier::SelectImpl,
-        CheckboxAttributeModifier::SelectedColorImpl,
         CheckboxAttributeModifier::SelectedColorImpl,
         CheckboxAttributeModifier::ShapeImpl,
-        CheckboxAttributeModifier::ShapeImpl,
-        CheckboxAttributeModifier::UnselectedColorImpl,
         CheckboxAttributeModifier::UnselectedColorImpl,
         CheckboxAttributeModifier::MarkImpl,
-        CheckboxAttributeModifier::MarkImpl,
         CheckboxAttributeModifier::OnChangeImpl,
-        CheckboxAttributeModifier::OnChangeImpl,
-        CheckboxAttributeModifier::ContentModifier0Impl,
-        CheckboxAttributeModifier::ContentModifier1Impl,
-        CheckboxAttributeModifier::_onChangeEvent_selectImpl,
+        CheckboxAttributeModifier::ContentModifierImpl,
     };
     return &ArkUICheckboxModifierImpl;
 }

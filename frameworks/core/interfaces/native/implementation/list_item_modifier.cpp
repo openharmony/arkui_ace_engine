@@ -22,8 +22,6 @@
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
-using ListItemEditableType = std::variant<bool, uint32_t>;
-
 namespace {
 void AssignVoidCallback(std::function<void()>& dst, const Opt_Callback_Void& src)
 {
@@ -99,24 +97,15 @@ void SetDeleteArea(const Opt_Union_CustomBuilder_SwipeActionItem& arg, bool isSt
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::Converter {
+struct ListItemOptions {
+    std::optional<V2::ListItemStyle> style;
+};
 template<>
 inline Converter::ListItemOptions Convert(const Ark_ListItemOptions& src)
 {
     return {
         .style = OptConvert<V2::ListItemStyle>(src.style)
     };
-}
-
-template<>
-inline ListItemEditableType Convert(const Ark_Boolean& src)
-{
-    return Converter::Convert<bool>(src);
-}
-
-template<>
-inline ListItemEditableType Convert(const Ark_EditMode& src)
-{
-    return static_cast<uint32_t>(src);
 }
 }
 
@@ -132,8 +121,8 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // ListItemModifier
 namespace ListItemInterfaceModifier {
-void SetListItemOptions0Impl(Ark_NativePointer node,
-                             const Opt_ListItemOptions* value)
+void SetListItemOptionsImpl(Ark_NativePointer node,
+                            const Opt_ListItemOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -143,46 +132,8 @@ void SetListItemOptions0Impl(Ark_NativePointer node,
         ListItemModelNG::SetStyle(frameNode, options.value().style);
     }
 }
-void SetListItemOptions1Impl(Ark_NativePointer node,
-                             const Opt_String* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto optionsOpt = Converter::OptConvert<std::string>(*value);
-    if (optionsOpt.has_value()) {
-        LOGE("ListItemModifier::SetListItemOptions1Impl is not implemented yet!");
-    }
-}
 } // ListItemInterfaceModifier
 namespace ListItemAttributeModifier {
-void StickyImpl(Ark_NativePointer node,
-                const Opt_Sticky* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    ListItemModelNG::SetSticky(frameNode, Converter::OptConvert<V2::StickyMode>(*value));
-}
-void EditableImpl(Ark_NativePointer node,
-                  const Opt_Union_Boolean_EditMode* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    // V2::EditMode non-standard enum so set default values in modifier
-    auto editable = static_cast<uint32_t>(V2::EditMode::NONE);
-    if (value != nullptr) {
-        auto editableOpt = Converter::OptConvert<ListItemEditableType>(*value);
-        if (editableOpt.has_value()) {
-            if (editableOpt.value().index() == 0) {
-                editable = std::get<0>(editableOpt.value()) == true ?
-                    V2::EditMode::DELETABLE | V2::EditMode::MOVABLE : V2::EditMode::NONE;
-            } else if (editableOpt.value().index() == 1) {
-                editable = std::get<1>(editableOpt.value());
-            }
-        }
-    }
-    ListItemModelNG::SetEditMode(frameNode, editable);
-}
 void SelectableImpl(Ark_NativePointer node,
                     const Opt_Boolean* value)
 {
@@ -250,6 +201,7 @@ void OnSelectImpl(Ark_NativePointer node,
     };
     ListItemModelNG::SetSelectCallback(frameNode, onSelect);
 }
+#ifdef WRONG_GEN
 void _onChangeEvent_selectedImpl(Ark_NativePointer node,
                                  const Callback_Opt_Boolean_Void* callback)
 {
@@ -263,20 +215,17 @@ void _onChangeEvent_selectedImpl(Ark_NativePointer node,
     };
     ListItemModelNG::SetSelectChangeEvent(frameNode, std::move(onEvent));
 }
+#endif
 } // ListItemAttributeModifier
 const GENERATED_ArkUIListItemModifier* GetListItemModifier()
 {
     static const GENERATED_ArkUIListItemModifier ArkUIListItemModifierImpl {
         ListItemModifier::ConstructImpl,
-        ListItemInterfaceModifier::SetListItemOptions0Impl,
-        ListItemInterfaceModifier::SetListItemOptions1Impl,
-        ListItemAttributeModifier::StickyImpl,
-        ListItemAttributeModifier::EditableImpl,
+        ListItemInterfaceModifier::SetListItemOptionsImpl,
         ListItemAttributeModifier::SelectableImpl,
         ListItemAttributeModifier::SelectedImpl,
         ListItemAttributeModifier::SwipeActionImpl,
         ListItemAttributeModifier::OnSelectImpl,
-        ListItemAttributeModifier::_onChangeEvent_selectedImpl,
     };
     return &ArkUIListItemModifierImpl;
 }

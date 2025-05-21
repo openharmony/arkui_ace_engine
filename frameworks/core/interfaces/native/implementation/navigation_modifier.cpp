@@ -48,7 +48,7 @@ void SetNavigationOptions0Impl(Ark_NativePointer node)
 void SetNavigationOptions1Impl(Ark_NativePointer node,
                                Ark_NavPathStack pathInfos)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(pathInfos);
     auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
@@ -62,7 +62,7 @@ namespace NavigationAttributeModifier {
 void NavBarWidthImpl(Ark_NativePointer node,
                      const Opt_Length* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto result = Converter::OptConvert<Dimension>(*value);
     NavigationModelStatic::SetNavBarWidth(frameNode, result.value());
@@ -70,7 +70,7 @@ void NavBarWidthImpl(Ark_NativePointer node,
 void NavBarPositionImpl(Ark_NativePointer node,
                         const Opt_NavBarPosition* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     Opt_NavBarPosition def;
@@ -86,7 +86,7 @@ void NavBarPositionImpl(Ark_NativePointer node,
 void NavBarWidthRangeImpl(Ark_NativePointer node,
                           const Opt_Tuple_Dimension_Dimension* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
         NavigationModelStatic::SetMinNavBarWidth(frameNode, NG::DEFAULT_MIN_NAV_BAR_WIDTH);
@@ -108,7 +108,7 @@ void NavBarWidthRangeImpl(Ark_NativePointer node,
 void MinContentWidthImpl(Ark_NativePointer node,
                          const Opt_Dimension* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<CalcDimension>(*value);
     if (!convValue) {
@@ -126,7 +126,7 @@ void MinContentWidthImpl(Ark_NativePointer node,
 void ModeImpl(Ark_NativePointer node,
               const Opt_NavigationMode* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
@@ -136,9 +136,10 @@ void ModeImpl(Ark_NativePointer node,
     auto navigationMode = static_cast<NavigationMode>(*optValue);
     NavigationModelStatic::SetUsrNavigationMode(frameNode, navigationMode);
 }
-void BackButtonIcon0Impl(Ark_NativePointer node, const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* value)
+void BackButtonIcon0Impl(Ark_NativePointer node,
+                         const Opt_Union_String_Image_PixelMap_Resource_SymbolGlyphModifier* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     std::string src;
@@ -185,10 +186,10 @@ void BackButtonIcon0Impl(Ark_NativePointer node, const Opt_Union_String_PixelMap
     NavigationModelStatic::SetBackButtonIcon(frameNode, iconSymbol, src, imageOption, pixMap, nameList);
 }
 void BackButtonIcon1Impl(Ark_NativePointer node,
-                         const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* icon,
+                         const Opt_Union_String_Image_PixelMap_Resource_SymbolGlyphModifier* icon,
                          const Opt_ResourceStr* accessibilityText)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(icon);
     CHECK_NULL_VOID(accessibilityText);
@@ -249,15 +250,15 @@ void BackButtonIcon1Impl(Ark_NativePointer node,
 void HideNavBarImpl(Ark_NativePointer node,
                     const Opt_Boolean* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto isHide = Converter::OptConvert<bool>(*value).value_or(false);
     NavigationModelStatic::SetHideNavBar(frameNode, isHide);
 }
-void SubTitleImpl(Ark_NativePointer node, const Opt_String* value) {}
-void HideTitleBar0Impl(Ark_NativePointer node, const Opt_Boolean* value)
+void HideTitleBar0Impl(Ark_NativePointer node,
+                       const Opt_Boolean* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto hide = false;
     if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
@@ -269,7 +270,7 @@ void HideTitleBar1Impl(Ark_NativePointer node,
                        const Opt_Boolean* hide,
                        const Opt_Boolean* animated)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto isHide = false;
     if (hide->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
@@ -283,7 +284,7 @@ void HideTitleBar1Impl(Ark_NativePointer node,
 }
 void HideBackButtonImpl(Ark_NativePointer node, const Opt_Boolean* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto isHide = false;
     if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
@@ -294,7 +295,7 @@ void HideBackButtonImpl(Ark_NativePointer node, const Opt_Boolean* value)
 void TitleModeImpl(Ark_NativePointer node,
                    const Opt_NavigationTitleMode* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     NavigationTitleMode titleMode = NavigationTitleMode::FREE;
     if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
@@ -304,7 +305,7 @@ void TitleModeImpl(Ark_NativePointer node,
 }
 void Menus0Impl(Ark_NativePointer node, const Opt_Union_Array_NavigationMenuItem_CustomBuilder* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     NG::NavigationMenuOptions options;
@@ -325,7 +326,7 @@ void Menus1Impl(Ark_NativePointer node,
                 const Opt_Union_Array_NavigationMenuItem_CustomBuilder* items,
                 const Opt_NavigationMenuOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(items);
     CHECK_NULL_VOID(options);
@@ -349,14 +350,10 @@ void Menus1Impl(Ark_NativePointer node,
     }
     NavigationModelStatic::SetMenuOptions(frameNode, std::move(menuOptions));
 }
-void ToolBarImpl(Ark_NativePointer node,
-                 const Opt_CustomNodeBuilder* value)
-{
-}
 void HideToolBar0Impl(Ark_NativePointer node,
                       const Opt_Boolean* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto isHide = false;
     if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
@@ -366,7 +363,7 @@ void HideToolBar0Impl(Ark_NativePointer node,
 }
 void HideToolBar1Impl(Ark_NativePointer node, const Opt_Boolean* hide, const Opt_Boolean* animated)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto isHide = false;
     if (hide->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
@@ -385,7 +382,7 @@ void EnableToolBarAdaptationImpl(Ark_NativePointer node,
 void OnTitleModeChangeImpl(Ark_NativePointer node,
                            const Opt_Callback_NavigationTitleMode_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
         return;
@@ -411,7 +408,7 @@ void OnTitleModeChangeImpl(Ark_NativePointer node,
 }
 void OnNavBarStateChangeImpl(Ark_NativePointer node, const Opt_Callback_Boolean_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
         return;
@@ -427,7 +424,7 @@ void OnNavBarStateChangeImpl(Ark_NativePointer node, const Opt_Callback_Boolean_
 void OnNavigationModeChangeImpl(Ark_NativePointer node,
                                 const Opt_Callback_NavigationMode_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
         return;
@@ -440,11 +437,14 @@ void OnNavigationModeChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnNavigationModeChange(modeCallback);
 }
-void NavDestinationImpl(Ark_NativePointer node, const Opt_Callback_String_Opt_Object_Void* value) {}
-void CustomNavContentTransitionImpl(
-    Ark_NativePointer node, const Opt_Type_NavigationAttribute_customNavContentTransition_delegate* value)
+void NavDestinationImpl(Ark_NativePointer node,
+                        const Opt_PageMapBuilder* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+}
+void CustomNavContentTransitionImpl(Ark_NativePointer node,
+                                    const Opt_Type_NavigationAttribute_customNavContentTransition* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
         NavigationModelStatic::SetIsCustomAnimation(frameNode, false);
@@ -463,9 +463,10 @@ void CustomNavContentTransitionImpl(
     NavigationModelStatic::SetIsCustomAnimation(frameNode, true);
     NavigationModelStatic::SetCustomTransition(frameNode, std::move(onNavigationAnimation));
 }
-void SystemBarStyleImpl(Ark_NativePointer node, const Opt_SystemBarStyle* value)
+void SystemBarStyleImpl(Ark_NativePointer node,
+                        const Opt_window_SystemBarStyle* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
@@ -474,13 +475,35 @@ void SystemBarStyleImpl(Ark_NativePointer node, const Opt_SystemBarStyle* value)
     auto contentColor = Converter::Convert<Color>(value->value.statusBarContentColor.value);
     NavigationModelStatic::SetSystemBarStyle(frameNode, contentColor);
 }
-void RecoverableImpl(Ark_NativePointer node, const Opt_Boolean* value) {}
-void EnableDragBarImpl(Ark_NativePointer node, const Opt_Boolean* value) {}
-void EnableModeChangeAnimationImpl(Ark_NativePointer node, const Opt_Boolean* value) {}
-void TitleImpl(Ark_NativePointer node, const Opt_Type_NavigationAttribute_title_value* value,
-    const Opt_NavigationTitleOptions* options)
+void RecoverableImpl(Ark_NativePointer node,
+                     const Opt_Boolean* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //NavigationModelNG::SetRecoverable(frameNode, convValue);
+}
+void EnableDragBarImpl(Ark_NativePointer node,
+                       const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //NavigationModelNG::SetEnableDragBar(frameNode, convValue);
+}
+void EnableModeChangeAnimationImpl(Ark_NativePointer node,
+                                   const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //NavigationModelNG::SetEnableModeChangeAnimation(frameNode, convValue);
+}
+void TitleImpl(Ark_NativePointer node,
+               const Opt_Union_ResourceStr_CustomBuilder_NavigationCommonTitle_NavigationCustomTitle* value,
+               const Opt_NavigationTitleOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     NavigationTitlebarOptions titleOptions;
     if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
@@ -555,7 +578,7 @@ void ToolbarConfigurationImpl(Ark_NativePointer node,
                               const Opt_Union_Array_ToolbarItem_CustomBuilder* items,
                               const Opt_NavigationToolbarOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(items);
     NG::NavigationToolbarOptions toolbarOptions;
@@ -597,7 +620,7 @@ void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
                               const Opt_Array_LayoutSafeAreaType* types,
                               const Opt_Array_LayoutSafeAreaEdge* edges)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
     if (types->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
@@ -642,14 +665,12 @@ const GENERATED_ArkUINavigationModifier* GetNavigationModifier()
         NavigationAttributeModifier::BackButtonIcon0Impl,
         NavigationAttributeModifier::BackButtonIcon1Impl,
         NavigationAttributeModifier::HideNavBarImpl,
-        NavigationAttributeModifier::SubTitleImpl,
         NavigationAttributeModifier::HideTitleBar0Impl,
         NavigationAttributeModifier::HideTitleBar1Impl,
         NavigationAttributeModifier::HideBackButtonImpl,
         NavigationAttributeModifier::TitleModeImpl,
         NavigationAttributeModifier::Menus0Impl,
         NavigationAttributeModifier::Menus1Impl,
-        NavigationAttributeModifier::ToolBarImpl,
         NavigationAttributeModifier::HideToolBar0Impl,
         NavigationAttributeModifier::HideToolBar1Impl,
         NavigationAttributeModifier::EnableToolBarAdaptationImpl,

@@ -123,11 +123,8 @@ const GENERATED_ArkUICalendarPickerModifier* GetCalendarPickerModifier()
         CalendarPickerModifier::ConstructImpl,
         CalendarPickerInterfaceModifier::SetCalendarPickerOptionsImpl,
         CalendarPickerAttributeModifier::TextStyleImpl,
-        CalendarPickerAttributeModifier::TextStyleImpl,
-        CalendarPickerAttributeModifier::OnChangeImpl,
         CalendarPickerAttributeModifier::OnChangeImpl,
         CalendarPickerAttributeModifier::MarkTodayImpl,
-        CalendarPickerAttributeModifier::EdgeAlignImpl,
         CalendarPickerAttributeModifier::EdgeAlignImpl,
     };
     return &ArkUICalendarPickerModifierImpl;

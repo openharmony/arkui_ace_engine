@@ -18,6 +18,122 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace Common_ContextAccessor {
+void DestroyPeerImpl(Ark_common_Context peer)
+{
+}
+Ark_common_Context CtorImpl()
+{
+    return nullptr;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
+}
+Ark_common_Context CreateBundleContextImpl(Ark_VMContext vmContext,
+                                           Ark_common_Context peer,
+                                           const Ark_String* bundleName)
+{
+    return {};
+}
+Ark_common_Context CreateModuleContext0Impl(Ark_VMContext vmContext,
+                                            Ark_common_Context peer,
+                                            const Ark_String* moduleName)
+{
+    return {};
+}
+Ark_common_Context CreateModuleContext1Impl(Ark_VMContext vmContext,
+                                            Ark_common_Context peer,
+                                            const Ark_String* bundleName,
+                                            const Ark_String* moduleName)
+{
+    return {};
+}
+void GetGroupDir0Impl(Ark_VMContext vmContext,
+                      Ark_common_Context peer,
+                      const Ark_String* dataGroupID,
+                      const Context_getGroupDir_Callback* callback_)
+{
+}
+Ark_String GetGroupDir1Impl(Ark_VMContext vmContext,
+                            Ark_common_Context peer,
+                            const Ark_String* dataGroupID)
+{
+    return {};
+}
+Ark_String GetCacheDirImpl(Ark_common_Context peer)
+{
+    return {};
+}
+void SetCacheDirImpl(Ark_common_Context peer,
+                     const Ark_String* cacheDir)
+{
+}
+Ark_String GetTempDirImpl(Ark_common_Context peer)
+{
+    return {};
+}
+void SetTempDirImpl(Ark_common_Context peer,
+                    const Ark_String* tempDir)
+{
+}
+Ark_String GetFilesDirImpl(Ark_common_Context peer)
+{
+    return {};
+}
+void SetFilesDirImpl(Ark_common_Context peer,
+                     const Ark_String* filesDir)
+{
+}
+Ark_String GetDatabaseDirImpl(Ark_common_Context peer)
+{
+    return {};
+}
+void SetDatabaseDirImpl(Ark_common_Context peer,
+                        const Ark_String* databaseDir)
+{
+}
+Ark_String GetPreferencesDirImpl(Ark_common_Context peer)
+{
+    return {};
+}
+void SetPreferencesDirImpl(Ark_common_Context peer,
+                           const Ark_String* preferencesDir)
+{
+}
+Ark_String GetBundleCodeDirImpl(Ark_common_Context peer)
+{
+    return {};
+}
+void SetBundleCodeDirImpl(Ark_common_Context peer,
+                          const Ark_String* bundleCodeDir)
+{
+}
+Ark_String GetDistributedFilesDirImpl(Ark_common_Context peer)
+{
+    return {};
+}
+void SetDistributedFilesDirImpl(Ark_common_Context peer,
+                                const Ark_String* distributedFilesDir)
+{
+}
+Ark_String GetResourceDirImpl(Ark_common_Context peer)
+{
+    return {};
+}
+void SetResourceDirImpl(Ark_common_Context peer,
+                        const Ark_String* resourceDir)
+{
+}
+Ark_String GetCloudFileDirImpl(Ark_common_Context peer)
+{
+    return {};
+}
+void SetCloudFileDirImpl(Ark_common_Context peer,
+                         const Ark_String* cloudFileDir)
+{
+}
+} // Common_ContextAccessor
 namespace ContextAccessor {
 void DestroyPeerImpl(Ark_Context peer)
 {
@@ -30,139 +146,46 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Context CreateBundleContextImpl(Ark_VMContext vmContext,
-                                    Ark_Context peer,
-                                    const Ark_String* bundleName)
-{
-    return {};
-}
-Ark_Context CreateModuleContext0Impl(Ark_VMContext vmContext,
-                                     Ark_Context peer,
-                                     const Ark_String* moduleName)
-{
-    return {};
-}
-Ark_Context CreateModuleContext1Impl(Ark_VMContext vmContext,
-                                     Ark_Context peer,
-                                     const Ark_String* bundleName,
-                                     const Ark_String* moduleName)
-{
-    return {};
-}
-void GetGroupDir0Impl(Ark_VMContext vmContext,
-                      Ark_Context peer,
-                      const Ark_String* dataGroupID,
-                      const Context_getGroupDir_Callback* callback_)
-{
-}
-Ark_String GetGroupDir1Impl(Ark_VMContext vmContext,
-                            Ark_Context peer,
-                            const Ark_String* dataGroupID)
-{
-    return {};
-}
-Ark_String GetCacheDirImpl(Ark_Context peer)
-{
-    return {};
-}
-void SetCacheDirImpl(Ark_Context peer,
-                     const Ark_String* cacheDir)
-{
-}
-Ark_String GetTempDirImpl(Ark_Context peer)
-{
-    return {};
-}
-void SetTempDirImpl(Ark_Context peer,
-                    const Ark_String* tempDir)
-{
-}
-Ark_String GetFilesDirImpl(Ark_Context peer)
-{
-    return {};
-}
-void SetFilesDirImpl(Ark_Context peer,
-                     const Ark_String* filesDir)
-{
-}
-Ark_String GetDatabaseDirImpl(Ark_Context peer)
-{
-    return {};
-}
-void SetDatabaseDirImpl(Ark_Context peer,
-                        const Ark_String* databaseDir)
-{
-}
-Ark_String GetPreferencesDirImpl(Ark_Context peer)
-{
-    return {};
-}
-void SetPreferencesDirImpl(Ark_Context peer,
-                           const Ark_String* preferencesDir)
-{
-}
-Ark_String GetBundleCodeDirImpl(Ark_Context peer)
-{
-    return {};
-}
-void SetBundleCodeDirImpl(Ark_Context peer,
-                          const Ark_String* bundleCodeDir)
-{
-}
-Ark_String GetDistributedFilesDirImpl(Ark_Context peer)
-{
-    return {};
-}
-void SetDistributedFilesDirImpl(Ark_Context peer,
-                                const Ark_String* distributedFilesDir)
-{
-}
-Ark_String GetResourceDirImpl(Ark_Context peer)
-{
-    return {};
-}
-void SetResourceDirImpl(Ark_Context peer,
-                        const Ark_String* resourceDir)
-{
-}
-Ark_String GetCloudFileDirImpl(Ark_Context peer)
-{
-    return {};
-}
-void SetCloudFileDirImpl(Ark_Context peer,
-                         const Ark_String* cloudFileDir)
-{
-}
 } // ContextAccessor
+const GENERATED_ArkUICommon_ContextAccessor* GetCommon_ContextAccessor()
+{
+    static const GENERATED_ArkUICommon_ContextAccessor Common_ContextAccessorImpl {
+        Common_ContextAccessor::DestroyPeerImpl,
+        Common_ContextAccessor::CtorImpl,
+        Common_ContextAccessor::GetFinalizerImpl,
+        Common_ContextAccessor::CreateBundleContextImpl,
+        Common_ContextAccessor::CreateModuleContext0Impl,
+        Common_ContextAccessor::CreateModuleContext1Impl,
+        Common_ContextAccessor::GetGroupDir0Impl,
+        Common_ContextAccessor::GetGroupDir1Impl,
+        Common_ContextAccessor::GetCacheDirImpl,
+        Common_ContextAccessor::SetCacheDirImpl,
+        Common_ContextAccessor::GetTempDirImpl,
+        Common_ContextAccessor::SetTempDirImpl,
+        Common_ContextAccessor::GetFilesDirImpl,
+        Common_ContextAccessor::SetFilesDirImpl,
+        Common_ContextAccessor::GetDatabaseDirImpl,
+        Common_ContextAccessor::SetDatabaseDirImpl,
+        Common_ContextAccessor::GetPreferencesDirImpl,
+        Common_ContextAccessor::SetPreferencesDirImpl,
+        Common_ContextAccessor::GetBundleCodeDirImpl,
+        Common_ContextAccessor::SetBundleCodeDirImpl,
+        Common_ContextAccessor::GetDistributedFilesDirImpl,
+        Common_ContextAccessor::SetDistributedFilesDirImpl,
+        Common_ContextAccessor::GetResourceDirImpl,
+        Common_ContextAccessor::SetResourceDirImpl,
+        Common_ContextAccessor::GetCloudFileDirImpl,
+        Common_ContextAccessor::SetCloudFileDirImpl,
+    };
+    return &Common_ContextAccessorImpl;
+}
+
 const GENERATED_ArkUIContextAccessor* GetContextAccessor()
 {
     static const GENERATED_ArkUIContextAccessor ContextAccessorImpl {
         ContextAccessor::DestroyPeerImpl,
         ContextAccessor::CtorImpl,
         ContextAccessor::GetFinalizerImpl,
-        ContextAccessor::CreateBundleContextImpl,
-        ContextAccessor::CreateModuleContext0Impl,
-        ContextAccessor::CreateModuleContext1Impl,
-        ContextAccessor::GetGroupDir0Impl,
-        ContextAccessor::GetGroupDir1Impl,
-        ContextAccessor::GetCacheDirImpl,
-        ContextAccessor::SetCacheDirImpl,
-        ContextAccessor::GetTempDirImpl,
-        ContextAccessor::SetTempDirImpl,
-        ContextAccessor::GetFilesDirImpl,
-        ContextAccessor::SetFilesDirImpl,
-        ContextAccessor::GetDatabaseDirImpl,
-        ContextAccessor::SetDatabaseDirImpl,
-        ContextAccessor::GetPreferencesDirImpl,
-        ContextAccessor::SetPreferencesDirImpl,
-        ContextAccessor::GetBundleCodeDirImpl,
-        ContextAccessor::SetBundleCodeDirImpl,
-        ContextAccessor::GetDistributedFilesDirImpl,
-        ContextAccessor::SetDistributedFilesDirImpl,
-        ContextAccessor::GetResourceDirImpl,
-        ContextAccessor::SetResourceDirImpl,
-        ContextAccessor::GetCloudFileDirImpl,
-        ContextAccessor::SetCloudFileDirImpl,
     };
     return &ContextAccessorImpl;
 }

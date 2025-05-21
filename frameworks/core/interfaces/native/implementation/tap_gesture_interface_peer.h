@@ -16,8 +16,18 @@
 #pragma once
 
 #include "core/components_ng/gestures/tap_gesture.h"
- 
-struct TapGestureInterfacePeer final {
+#include "gesture_peer.h"
+
+struct TapGestureInterfacePeer : public GesturePeer {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::TapGesture> gesture;
+
+    inline OHOS::Ace::RefPtr<OHOS::Ace::NG::Gesture> GetGesture() override
+    {
+        return gesture;
+    }
+
+protected:
+    TapGestureInterfacePeer() = default;
+    ~TapGestureInterfacePeer() override = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };
- 

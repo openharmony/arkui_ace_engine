@@ -66,21 +66,6 @@ void FinishTransitionImpl(Ark_NavigationTransitionProxy peer)
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->FireFinishCallback();
 }
-void CancelTransitionImpl(Ark_NavigationTransitionProxy peer)
-{
-    CHECK_NULL_VOID(peer && peer->handler);
-    peer->handler->CancelInteractiveAnimation();
-}
-void UpdateTransitionImpl(Ark_NavigationTransitionProxy peer,
-                          const Ark_Number* progress)
-{
-    CHECK_NULL_VOID(peer && progress && peer->handler);
-    auto convProgress = Converter::OptConvert<float>(*progress);
-    Validator::ValidateByRange(convProgress, 0.0f, 1.0f);
-    if (convProgress.has_value()) {
-        peer->handler->UpdateTransition(convProgress.value());
-    }
-}
 Ark_NavContentInfo GetFromImpl(Ark_NavigationTransitionProxy peer)
 {
     return {};
@@ -115,6 +100,22 @@ void SetIsInteractiveImpl(Ark_NavigationTransitionProxy peer,
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->SetInteractive(Converter::Convert<bool>(isInteractive));
 }
+Opt_Callback_Void GetCancelTransitionImpl(Ark_NavigationTransitionProxy peer)
+{
+    return {};
+}
+void SetCancelTransitionImpl(Ark_NavigationTransitionProxy peer,
+                             const Callback_Void* cancelTransition)
+{
+}
+Opt_Callback_Number_Void GetUpdateTransitionImpl(Ark_NavigationTransitionProxy peer)
+{
+    return {};
+}
+void SetUpdateTransitionImpl(Ark_NavigationTransitionProxy peer,
+                             const Callback_Number_Void* updateTransition)
+{
+}
 } // NavigationTransitionProxyAccessor
 const GENERATED_ArkUINavigationTransitionProxyAccessor* GetNavigationTransitionProxyAccessor()
 {
@@ -123,14 +124,16 @@ const GENERATED_ArkUINavigationTransitionProxyAccessor* GetNavigationTransitionP
         NavigationTransitionProxyAccessor::CtorImpl,
         NavigationTransitionProxyAccessor::GetFinalizerImpl,
         NavigationTransitionProxyAccessor::FinishTransitionImpl,
-        NavigationTransitionProxyAccessor::CancelTransitionImpl,
-        NavigationTransitionProxyAccessor::UpdateTransitionImpl,
         NavigationTransitionProxyAccessor::GetFromImpl,
         NavigationTransitionProxyAccessor::SetFromImpl,
         NavigationTransitionProxyAccessor::GetToImpl,
         NavigationTransitionProxyAccessor::SetToImpl,
         NavigationTransitionProxyAccessor::GetIsInteractiveImpl,
         NavigationTransitionProxyAccessor::SetIsInteractiveImpl,
+        NavigationTransitionProxyAccessor::GetCancelTransitionImpl,
+        NavigationTransitionProxyAccessor::SetCancelTransitionImpl,
+        NavigationTransitionProxyAccessor::GetUpdateTransitionImpl,
+        NavigationTransitionProxyAccessor::SetUpdateTransitionImpl,
     };
     return &NavigationTransitionProxyAccessorImpl;
 }

@@ -474,22 +474,6 @@ void DefaultTextStyleImpl(Ark_NativePointer node,
     }
     TextPickerModelNG::SetDefaultTextStyle(frameNode, *convValue);
 }
-void OnAcceptImpl(Ark_NativePointer node,
-                  const Opt_Callback_String_Number_Void* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextPickerModelNG::SetOnAccept(frameNode, convValue);
-}
-void OnCancelImpl(Ark_NativePointer node,
-                  const Opt_Callback_Void* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextPickerModelNG::SetOnCancel(frameNode, convValue);
-}
 void OnChangeImpl(Ark_NativePointer node,
                   const Opt_OnTextPickerChangeCallback* value)
 {
@@ -637,6 +621,7 @@ void DigitalCrownSensitivityImpl(Ark_NativePointer node,
     auto convValue = value ? Converter::OptConvert<int32_t>(*value) : std::nullopt;
     TextPickerModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
 }
+#ifdef WRONG_GEN
 void _onChangeEvent_selectedImpl(Ark_NativePointer node,
                                  const Callback_Union_Number_Array_Number_Void* callback)
 {
@@ -681,6 +666,7 @@ void _onChangeEvent_valueImpl(Ark_NativePointer node,
     };
     TextPickerModelNG::SetOnValueChangeEvent(frameNode, std::move(onEvent));
 }
+#endif
 } // TextPickerAttributeModifier
 const GENERATED_ArkUITextPickerModifier* GetTextPickerModifier()
 {
@@ -688,34 +674,20 @@ const GENERATED_ArkUITextPickerModifier* GetTextPickerModifier()
         TextPickerModifier::ConstructImpl,
         TextPickerInterfaceModifier::SetTextPickerOptionsImpl,
         TextPickerAttributeModifier::DefaultPickerItemHeightImpl,
-        TextPickerAttributeModifier::DefaultPickerItemHeightImpl,
-        TextPickerAttributeModifier::CanLoopImpl,
         TextPickerAttributeModifier::CanLoopImpl,
         TextPickerAttributeModifier::DisappearTextStyleImpl,
-        TextPickerAttributeModifier::DisappearTextStyleImpl,
         TextPickerAttributeModifier::TextStyleImpl,
-        TextPickerAttributeModifier::TextStyleImpl,
-        TextPickerAttributeModifier::SelectedTextStyleImpl,
         TextPickerAttributeModifier::SelectedTextStyleImpl,
         TextPickerAttributeModifier::DisableTextStyleAnimationImpl,
         TextPickerAttributeModifier::DefaultTextStyleImpl,
-        TextPickerAttributeModifier::OnAcceptImpl,
-        TextPickerAttributeModifier::OnCancelImpl,
-        nullptr,
         TextPickerAttributeModifier::OnChangeImpl,
-        TextPickerAttributeModifier::OnScrollStopImpl,
         TextPickerAttributeModifier::OnScrollStopImpl,
         TextPickerAttributeModifier::OnEnterSelectedAreaImpl,
         TextPickerAttributeModifier::SelectedIndexImpl,
-        TextPickerAttributeModifier::SelectedIndexImpl,
         TextPickerAttributeModifier::DividerImpl,
-        TextPickerAttributeModifier::DividerImpl,
-        TextPickerAttributeModifier::GradientHeightImpl,
         TextPickerAttributeModifier::GradientHeightImpl,
         TextPickerAttributeModifier::EnableHapticFeedbackImpl,
         TextPickerAttributeModifier::DigitalCrownSensitivityImpl,
-        TextPickerAttributeModifier::_onChangeEvent_selectedImpl,
-        TextPickerAttributeModifier::_onChangeEvent_valueImpl,
     };
     return &ArkUITextPickerModifierImpl;
 }

@@ -49,10 +49,10 @@ Opt_EffectScope GetScopeImpl(Ark_ScaleSymbolEffect peer)
     return Converter::ArkValue<Opt_EffectScope>(peer->scope);
 }
 void SetScopeImpl(Ark_ScaleSymbolEffect peer,
-                  Ark_EffectScope scope)
+                  const Opt_EffectScope* scope)
 {
     CHECK_NULL_VOID(peer);
-    peer->scope = Converter::OptConvert<OHOS::Ace::ScopeType>(scope);
+    peer->scope = Converter::OptConvert<OHOS::Ace::ScopeType>(*scope);
 }
 Opt_EffectDirection GetDirectionImpl(Ark_ScaleSymbolEffect peer)
 {
@@ -61,10 +61,10 @@ Opt_EffectDirection GetDirectionImpl(Ark_ScaleSymbolEffect peer)
     return Converter::ArkValue<Opt_EffectDirection>(peer->direction);
 }
 void SetDirectionImpl(Ark_ScaleSymbolEffect peer,
-                      Ark_EffectDirection direction)
+                      const Opt_EffectDirection* direction)
 {
     CHECK_NULL_VOID(peer);
-    peer->direction = Converter::OptConvert<OHOS::Ace::CommonSubType>(direction);
+    peer->direction = Converter::OptConvert<OHOS::Ace::CommonSubType>(*direction);
 }
 } // ScaleSymbolEffectAccessor
 const GENERATED_ArkUIScaleSymbolEffectAccessor* GetScaleSymbolEffectAccessor()

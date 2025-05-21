@@ -30,13 +30,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_DrawingColorFilter CreateBlendModeColorFilter0Impl(Ark_Color color,
-                                                       Ark_BlendMode mode)
+Ark_DrawingColorFilter CreateBlendModeColorFilter0Impl(const Ark_common2D_Color* color,
+                                                       Ark_drawing_BlendMode mode)
 {
     return {};
 }
 Ark_DrawingColorFilter CreateBlendModeColorFilter1Impl(const Ark_Number* color,
-                                                       Ark_BlendMode mode)
+                                                       Ark_drawing_BlendMode mode)
 {
     return {};
 }

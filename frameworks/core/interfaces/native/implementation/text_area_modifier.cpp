@@ -179,6 +179,10 @@ void SelectedBackgroundColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     TextFieldModelStatic::SetSelectedBackgroundColor(frameNode, Converter::OptConvert<Color>(*value));
 }
+void OnSubmitImpl(Ark_NativePointer node,
+                  const Opt_Union_Callback_EnterKeyType_Void_TextAreaSubmitCallback* value)
+{
+}
 void OnSubmit0Impl(Ark_NativePointer node,
                    const Opt_Callback_EnterKeyType_Void* value)
 {
@@ -805,6 +809,7 @@ void CustomKeyboardImpl(Ark_NativePointer node,
             frameNode, AceType::RawPtr(customKeyboard), supportAvoidance);
         }, node);
 }
+#ifdef WRONG_GEN
 void _onChangeEvent_textImpl(Ark_NativePointer node,
                              const Callback_ResourceStr_Void* callback)
 {
@@ -818,6 +823,7 @@ void _onChangeEvent_textImpl(Ark_NativePointer node,
     };
     TextFieldModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
+#endif
 } // TextAreaAttributeModifier
 
 const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
@@ -839,8 +845,7 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::TextIndentImpl,
         TextAreaAttributeModifier::CaretStyleImpl,
         TextAreaAttributeModifier::SelectedBackgroundColorImpl,
-        TextAreaAttributeModifier::OnSubmit0Impl,
-        TextAreaAttributeModifier::OnSubmit1Impl,
+        TextAreaAttributeModifier::OnSubmitImpl,
         TextAreaAttributeModifier::OnChangeImpl,
         TextAreaAttributeModifier::OnTextSelectionChangeImpl,
         TextAreaAttributeModifier::OnContentScrollImpl,
@@ -886,7 +891,6 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::InputFilterImpl,
         TextAreaAttributeModifier::ShowCounterImpl,
         TextAreaAttributeModifier::CustomKeyboardImpl,
-        TextAreaAttributeModifier::_onChangeEvent_textImpl,
     };
     return &ArkUITextAreaModifierImpl;
 }

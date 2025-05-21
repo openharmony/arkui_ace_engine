@@ -54,11 +54,19 @@ Ark_Number GetHeightImpl(Ark_ImageBitmap peer)
     auto height = peer->OnGetHeight();
     return NG::Converter::ArkValue<Ark_Number>(static_cast<int32_t>(height));
 }
+void SetHeightImpl(Ark_ImageBitmap peer,
+                   const Ark_Number* height)
+{
+}
 Ark_Number GetWidthImpl(Ark_ImageBitmap peer)
 {
     CHECK_NULL_RETURN(peer, ARK_ERROR_VALUE);
     double width = peer->OnGetWidth();
     return NG::Converter::ArkValue<Ark_Number>(static_cast<int32_t>(width));
+}
+void SetWidthImpl(Ark_ImageBitmap peer,
+                  const Ark_Number* width)
+{
 }
 } // ImageBitmapAccessor
 const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor()
@@ -69,7 +77,9 @@ const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor()
         ImageBitmapAccessor::GetFinalizerImpl,
         ImageBitmapAccessor::CloseImpl,
         ImageBitmapAccessor::GetHeightImpl,
+        ImageBitmapAccessor::SetHeightImpl,
         ImageBitmapAccessor::GetWidthImpl,
+        ImageBitmapAccessor::SetWidthImpl,
     };
     return &ImageBitmapAccessorImpl;
 }

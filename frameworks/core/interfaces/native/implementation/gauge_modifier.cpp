@@ -183,7 +183,7 @@ void EndAngleImpl(Ark_NativePointer node,
     GaugeModelNG::SetEndAngle(frameNode, *convValue);
 }
 void ColorsImpl(Ark_NativePointer node,
-                const Opt_Type_GaugeAttribute_colors_colors* value)
+                const Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

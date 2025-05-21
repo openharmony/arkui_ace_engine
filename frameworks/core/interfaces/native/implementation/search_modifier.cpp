@@ -282,8 +282,12 @@ void EnterKeyTypeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     SearchModelStatic::SetSearchEnterKeyType(frameNode, Converter::OptConvert<TextInputAction>(*value));
 }
+void OnSubmitImpl(Ark_NativePointer node,
+                  const Opt_Union_Callback_String_Void_SearchSubmitCallback* value)
+{
+}
 void OnSubmit0Impl(Ark_NativePointer node,
-                   const Opt_Callback_String_Void* value)
+                  const Opt_Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -426,7 +430,7 @@ void OnPasteImpl(Ark_NativePointer node,
         NG::TextCommonEvent& event) -> void {
         Converter::ConvContext ctx;
         auto arkContent = Converter::ArkValue<Ark_String>(content, &ctx);
-        auto keeper = CallbackKeeper::Claim([&event]() {
+        auto keeper = CallbackKeeper::Claim<Callback_Void>([&event]() {
             event.SetPreventDefault(true);
         });
         Ark_PasteEvent arkEvent = {
@@ -661,6 +665,7 @@ void EditMenuOptionsImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
+#ifdef WRONG_GEN
     auto onCreateMenuCallback = [arkCreateMenu = CallbackHelper(optValue->onCreateMenu)](
         const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
             auto menuItems = Converter::ArkValue<Array_TextMenuItem>(systemMenuItems, Converter::FC);
@@ -678,6 +683,7 @@ void EditMenuOptionsImpl(Ark_NativePointer node,
             return Converter::Convert<bool>(arkResult);
         };
     SearchModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+#endif
 }
 void EnablePreviewTextImpl(Ark_NativePointer node,
                            const Opt_Boolean* value)
@@ -810,6 +816,7 @@ void CustomKeyboardImpl(Ark_NativePointer node,
         SearchModelStatic::SetCustomKeyboard(frameNode, std::move(customNodeBuilder), supportAvoidance);
         }, node);
 }
+#ifdef WRONG_GEN
 void _onChangeEvent_valueImpl(Ark_NativePointer node,
                               const Callback_String_Void* callback)
 {
@@ -823,6 +830,7 @@ void _onChangeEvent_valueImpl(Ark_NativePointer node,
     };
     SearchModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
+#endif
 } // SearchAttributeModifier
 const GENERATED_ArkUISearchModifier* GetSearchModifier()
 {
@@ -840,8 +848,7 @@ const GENERATED_ArkUISearchModifier* GetSearchModifier()
         SearchAttributeModifier::PlaceholderFontImpl,
         SearchAttributeModifier::TextFontImpl,
         SearchAttributeModifier::EnterKeyTypeImpl,
-        SearchAttributeModifier::OnSubmit0Impl,
-        SearchAttributeModifier::OnSubmit1Impl,
+        SearchAttributeModifier::OnSubmitImpl,
         SearchAttributeModifier::OnChangeImpl,
         SearchAttributeModifier::OnTextSelectionChangeImpl,
         SearchAttributeModifier::OnContentScrollImpl,
@@ -877,7 +884,6 @@ const GENERATED_ArkUISearchModifier* GetSearchModifier()
         SearchAttributeModifier::SearchButtonImpl,
         SearchAttributeModifier::InputFilterImpl,
         SearchAttributeModifier::CustomKeyboardImpl,
-        SearchAttributeModifier::_onChangeEvent_valueImpl,
     };
     return &ArkUISearchModifierImpl;
 }

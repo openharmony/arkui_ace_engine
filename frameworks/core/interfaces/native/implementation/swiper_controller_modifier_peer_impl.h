@@ -49,13 +49,12 @@ public:
         }
     }
 
-    void TriggerChangeIndex(int32_t index, const std::optional<bool> &useAnimationOpt)
+    void TriggerChangeIndex(int32_t index, SwiperAnimationMode mode)
     {
         index = index < 0 ? 0 : index;
-        bool useAnim = useAnimationOpt && *useAnimationOpt;
         for (auto &handler: handlers_) {
             if (auto controller = handler.Upgrade(); controller) {
-                controller->ChangeIndex(index, useAnim);
+                controller->ChangeIndex(index, mode);
             }
         }
     }

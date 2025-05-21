@@ -183,43 +183,6 @@ void LayoutDirectionImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<FlexDirection>(*value);
     WaterFlowModelNG::SetLayoutDirection(frameNode, convValue);
 }
-void NestedScrollImpl(Ark_NativePointer node,
-                      const Opt_NestedScrollOptions* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto forward = Converter::OptConvert<NestedScrollMode>(optValue->scrollForward);
-    auto backward = Converter::OptConvert<NestedScrollMode>(optValue->scrollBackward);
-    NestedScrollOptions options = {.forward = forward ? forward.value() : NestedScrollMode::SELF_ONLY,
-        .backward = backward ? backward.value() : NestedScrollMode::SELF_ONLY};
-    WaterFlowModelNG::SetNestedScroll(frameNode, options);
-}
-void EnableScrollInteractionImpl(Ark_NativePointer node,
-                                 const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    WaterFlowModelNG::SetScrollEnabled(frameNode, *convValue);
-}
-void FrictionImpl(Ark_NativePointer node,
-                  const Opt_Union_Number_Resource* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
-    Validator::ValidateNonNegative(convValue);
-    WaterFlowModelNG::SetFriction(frameNode, convValue);
-}
 void CachedCount0Impl(Ark_NativePointer node,
                       const Opt_Number* value)
 {
@@ -239,38 +202,8 @@ void CachedCount1Impl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(count); // for enums
     //WaterFlowModelNG::SetCachedCount1(frameNode, convValue);
 }
-void OnReachStartImpl(Ark_NativePointer node,
-                      const Opt_Callback_Void* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto onReachStart = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.Invoke();
-    };
-    WaterFlowModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
-}
-void OnReachEndImpl(Ark_NativePointer node,
-                    const Opt_Callback_Void* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto onReachEnd = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.Invoke();
-    };
-    WaterFlowModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
-}
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                            const Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain* value)
+                            const Opt_OnScrollFrameBeginCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -308,6 +241,22 @@ void OnScrollIndexImpl(Ark_NativePointer node,
 
     WaterFlowModelNG::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
 }
+void OnWillScrollImpl(Ark_NativePointer node,
+                      const Opt_OnWillScrollCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //WaterFlowModelNG::SetOnWillScroll(frameNode, convValue);
+}
+void OnDidScrollImpl(Ark_NativePointer node,
+                     const Opt_OnScrollCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //WaterFlowModelNG::SetOnDidScroll(frameNode, convValue);
+}
 } // WaterFlowAttributeModifier
 const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier()
 {
@@ -320,15 +269,12 @@ const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier()
         WaterFlowAttributeModifier::ColumnsGapImpl,
         WaterFlowAttributeModifier::RowsGapImpl,
         WaterFlowAttributeModifier::LayoutDirectionImpl,
-        WaterFlowAttributeModifier::NestedScrollImpl,
-        WaterFlowAttributeModifier::EnableScrollInteractionImpl,
-        WaterFlowAttributeModifier::FrictionImpl,
         WaterFlowAttributeModifier::CachedCount0Impl,
         WaterFlowAttributeModifier::CachedCount1Impl,
-        WaterFlowAttributeModifier::OnReachStartImpl,
-        WaterFlowAttributeModifier::OnReachEndImpl,
         WaterFlowAttributeModifier::OnScrollFrameBeginImpl,
         WaterFlowAttributeModifier::OnScrollIndexImpl,
+        WaterFlowAttributeModifier::OnWillScrollImpl,
+        WaterFlowAttributeModifier::OnDidScrollImpl,
     };
     return &ArkUIWaterFlowModifierImpl;
 }

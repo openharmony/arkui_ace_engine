@@ -38,12 +38,6 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
-                                    Ark_KeyEvent peer,
-                                    const Array_String* keys)
-{
-    return GetFullAPI()->getAccessors()->getBaseEventAccessor()->getModifierKeyState(vmContext, peer, keys);
-}
 Ark_KeyType GetTypeImpl(Ark_KeyEvent peer)
 {
     const auto errValue = static_cast<Ark_KeyType>(-1);
@@ -124,12 +118,12 @@ void SetMetaKeyImpl(Ark_KeyEvent peer,
     const auto convMetaKey = Converter::Convert<int32_t>(*metaKey);
     info->SetMetaKey(convMetaKey);
 }
-Ark_Int64 GetTimestampImpl(Ark_KeyEvent peer)
+Ark_Number GetTimestampImpl(Ark_KeyEvent peer)
 {
     return GetFullAPI()->getAccessors()->getBaseEventAccessor()->getTimestamp(peer);
 }
 void SetTimestampImpl(Ark_KeyEvent peer,
-                      Ark_Int64 timestamp)
+                      const Ark_Number* timestamp)
 {
     GetFullAPI()->getAccessors()->getBaseEventAccessor()->setTimestamp(peer, timestamp);
 }
@@ -161,6 +155,14 @@ void SetIntentionCodeImpl(Ark_KeyEvent peer,
 {
     LOGW("ARKOALA KeyEventAccessor::SetIntentionCodeImpl doesn't have sense.");
 }
+Opt_Callback_Array_String_Boolean GetGetModifierKeyStateImpl(Ark_KeyEvent peer)
+{
+    return {};
+}
+void SetGetModifierKeyStateImpl(Ark_KeyEvent peer,
+                                const Callback_Array_String_Boolean* getModifierKeyState)
+{
+}
 Opt_Number GetUnicodeImpl(Ark_KeyEvent peer)
 {
     auto invalid = Converter::ArkValue<Opt_Number>();
@@ -182,7 +184,6 @@ const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor()
         KeyEventAccessor::DestroyPeerImpl,
         KeyEventAccessor::CtorImpl,
         KeyEventAccessor::GetFinalizerImpl,
-        KeyEventAccessor::GetModifierKeyStateImpl,
         KeyEventAccessor::GetTypeImpl,
         KeyEventAccessor::SetTypeImpl,
         KeyEventAccessor::GetKeyCodeImpl,
@@ -201,6 +202,8 @@ const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor()
         KeyEventAccessor::SetStopPropagationImpl,
         KeyEventAccessor::GetIntentionCodeImpl,
         KeyEventAccessor::SetIntentionCodeImpl,
+        KeyEventAccessor::GetGetModifierKeyStateImpl,
+        KeyEventAccessor::SetGetModifierKeyStateImpl,
         KeyEventAccessor::GetUnicodeImpl,
         KeyEventAccessor::SetUnicodeImpl,
     };

@@ -60,6 +60,10 @@ Array_ShadowOptions GetTextShadowImpl(Ark_TextShadowStyle peer)
     CHECK_NULL_RETURN(peer && peer->span, {});
     return Converter::ArkValue<Array_ShadowOptions>(peer->span->GetTextShadow(), Converter::FC);
 }
+void SetTextShadowImpl(Ark_TextShadowStyle peer,
+                       const Array_ShadowOptions* textShadow)
+{
+}
 } // TextShadowStyleAccessor
 const GENERATED_ArkUITextShadowStyleAccessor* GetTextShadowStyleAccessor()
 {
@@ -68,6 +72,7 @@ const GENERATED_ArkUITextShadowStyleAccessor* GetTextShadowStyleAccessor()
         TextShadowStyleAccessor::CtorImpl,
         TextShadowStyleAccessor::GetFinalizerImpl,
         TextShadowStyleAccessor::GetTextShadowImpl,
+        TextShadowStyleAccessor::SetTextShadowImpl,
     };
     return &TextShadowStyleAccessorImpl;
 }

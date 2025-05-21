@@ -174,7 +174,7 @@ void FontStyleImpl(Ark_NativePointer node,
     SecurityComponentModelNG::SetFontStyle(frameNode, Converter::OptConvert<Ace::FontStyle>(*value));
 }
 void FontWeightImpl(Ark_NativePointer node,
-                    const Opt_Union_Number_FontWeight_String* value)
+                    const Opt_Union_I32_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -241,21 +241,13 @@ void BorderColorImpl(Ark_NativePointer node,
     auto color = Converter::OptConvert<Color>(*value);
     SecurityComponentModelNG::SetBackgroundBorderColor(frameNode, color);
 }
-void BorderRadius0Impl(Ark_NativePointer node,
-                       const Opt_Dimension* value)
+void BorderRadiusImpl(Ark_NativePointer node,
+                      const Opt_Dimension* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(convValue);
-    SecurityComponentModelNG::SetBackgroundBorderRadius(frameNode, convValue);
-}
-void BorderRadius1Impl(Ark_NativePointer node,
-                       const Opt_Union_Dimension_BorderRadiuses* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<BorderRadiusProperty>(*value);
     SecurityComponentModelNG::SetBackgroundBorderRadius(frameNode, convValue);
 }
 void PaddingImpl(Ark_NativePointer node,
@@ -336,6 +328,12 @@ void IdImpl(Ark_NativePointer node,
 {
     CommonMethodModifier::IdImpl(node, value);
 }
+void ChainModeImpl(Ark_NativePointer node,
+                   const Opt_Axis* direction,
+                   const Opt_ChainStyle* style)
+{
+    CommonMethodModifier::ChainModeImpl(node, direction, style);
+}
 void MinFontScaleImpl(Ark_NativePointer node,
                       const Opt_Union_Number_Resource* value)
 {
@@ -399,12 +397,6 @@ void EnabledImpl(Ark_NativePointer node,
 {
     CommonMethodModifier::EnabledImpl(node, value);
 }
-void ChainModeImpl(Ark_NativePointer node,
-                   const Opt_Axis* direction,
-                   const Opt_ChainStyle* style)
-{
-    CommonMethodModifier::ChainModeImpl(node, direction, style);
-}
 } // SecurityComponentMethodModifier
 const GENERATED_ArkUISecurityComponentMethodModifier* GetSecurityComponentMethodModifier()
 {
@@ -425,8 +417,7 @@ const GENERATED_ArkUISecurityComponentMethodModifier* GetSecurityComponentMethod
         SecurityComponentMethodModifier::BorderStyleImpl,
         SecurityComponentMethodModifier::BorderWidthImpl,
         SecurityComponentMethodModifier::BorderColorImpl,
-        SecurityComponentMethodModifier::BorderRadius0Impl,
-        SecurityComponentMethodModifier::BorderRadius1Impl,
+        SecurityComponentMethodModifier::BorderRadiusImpl,
         SecurityComponentMethodModifier::PaddingImpl,
         SecurityComponentMethodModifier::TextIconSpaceImpl,
         SecurityComponentMethodModifier::KeyImpl,
@@ -438,6 +429,7 @@ const GENERATED_ArkUISecurityComponentMethodModifier* GetSecurityComponentMethod
         SecurityComponentMethodModifier::AlignRules0Impl,
         SecurityComponentMethodModifier::AlignRules1Impl,
         SecurityComponentMethodModifier::IdImpl,
+        SecurityComponentMethodModifier::ChainModeImpl,
         SecurityComponentMethodModifier::MinFontScaleImpl,
         SecurityComponentMethodModifier::MaxFontScaleImpl,
         SecurityComponentMethodModifier::MaxLinesImpl,
@@ -445,7 +437,6 @@ const GENERATED_ArkUISecurityComponentMethodModifier* GetSecurityComponentMethod
         SecurityComponentMethodModifier::MaxFontSizeImpl,
         SecurityComponentMethodModifier::HeightAdaptivePolicyImpl,
         SecurityComponentMethodModifier::EnabledImpl,
-        SecurityComponentMethodModifier::ChainModeImpl,
     };
     return &ArkUISecurityComponentMethodModifierImpl;
 }

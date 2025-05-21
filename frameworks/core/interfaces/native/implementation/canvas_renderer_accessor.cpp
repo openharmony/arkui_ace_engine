@@ -34,7 +34,6 @@ const GENERATED_ArkUICanvasPatternAccessor* GetCanvasPatternAccessor();
 const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext2DAccessor();
 const GENERATED_ArkUIImageDataAccessor* GetImageDataAccessor();
 const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor();
-const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
 
 namespace CanvasRendererAccessor {
 void DestroyPeerImpl(Ark_CanvasRenderer peer)
@@ -79,7 +78,7 @@ void DrawImage0Impl(Ark_CanvasRenderer peer,
                 peerImpl->DrawImage(bitmap, params);
             }
         },
-        [&params, peerImpl](const Ark_PixelMap& pixelMap) {
+        [&params, peerImpl](const Ark_image_PixelMap& pixelMap) {
             CHECK_NULL_VOID(pixelMap);
             peerImpl->DrawPixelMap(pixelMap, params);
         },
@@ -116,7 +115,7 @@ void DrawImage1Impl(Ark_CanvasRenderer peer,
                 peerImpl->DrawImage(bitmap, params);
             }
         },
-        [&params, peerImpl](const Ark_PixelMap& pixelMap) {
+        [&params, peerImpl](const Ark_image_PixelMap& pixelMap) {
             CHECK_NULL_VOID(pixelMap);
             peerImpl->DrawPixelMap(pixelMap, params);
         },
@@ -165,7 +164,7 @@ void DrawImage2Impl(Ark_CanvasRenderer peer,
                 peerImpl->DrawImage(bitmap, params);
             }
         },
-        [&params, peerImpl](const Ark_PixelMap& pixelMap) {
+        [&params, peerImpl](const Ark_image_PixelMap& pixelMap) {
             CHECK_NULL_VOID(pixelMap);
             peerImpl->DrawPixelMap(pixelMap, params);
         },
@@ -355,7 +354,7 @@ Ark_ImageData CreateImageData0Impl(Ark_CanvasRenderer peer,
     auto optBuffer = Converter::ArkValue<Opt_Buffer>(interOpBuffer);
     auto arkWidth = Converter::ArkValue<Ark_Number>(width);
     auto arkHeight = Converter::ArkValue<Ark_Number>(height);
-    return GetImageDataAccessor()->ctor(&arkWidth, &arkHeight, &optBuffer);
+    return GetImageDataAccessor()->ctor(&arkWidth, &arkHeight, &optBuffer, nullptr);
 }
 Ark_ImageData CreateImageData1Impl(Ark_CanvasRenderer peer,
                                    Ark_ImageData imagedata)
@@ -375,7 +374,7 @@ Ark_ImageData CreateImageData1Impl(Ark_CanvasRenderer peer,
     auto optBuffer = Converter::ArkValue<Opt_Buffer>(interOpBuffer);
     auto arkWidth = Converter::ArkValue<Ark_Number>(width);
     auto arkHeight = Converter::ArkValue<Ark_Number>(height);
-    return GetImageDataAccessor()->ctor(&arkWidth, &arkHeight, &optBuffer);
+    return GetImageDataAccessor()->ctor(&arkWidth, &arkHeight, &optBuffer, nullptr);
 }
 Ark_ImageData GetImageDataImpl(Ark_CanvasRenderer peer,
                                const Ark_Number* sx,
@@ -407,13 +406,13 @@ Ark_ImageData GetImageDataImpl(Ark_CanvasRenderer peer,
     auto optBuffer = Converter::ArkValue<Opt_Buffer>(interOpBuffer);
     auto arkWidth = Converter::ArkValue<Ark_Number>(width);
     auto arkHeight = Converter::ArkValue<Ark_Number>(height);
-    return GetImageDataAccessor()->ctor(&arkWidth, &arkHeight, &optBuffer);
+    return GetImageDataAccessor()->ctor(&arkWidth, &arkHeight, &optBuffer, nullptr);
 }
-Ark_PixelMap GetPixelMapImpl(Ark_CanvasRenderer peer,
-                             const Ark_Number* sx,
-                             const Ark_Number* sy,
-                             const Ark_Number* sw,
-                             const Ark_Number* sh)
+Ark_image_PixelMap GetPixelMapImpl(Ark_CanvasRenderer peer,
+                                   const Ark_Number* sx,
+                                   const Ark_Number* sy,
+                                   const Ark_Number* sw,
+                                   const Ark_Number* sh)
 {
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -428,7 +427,7 @@ Ark_PixelMap GetPixelMapImpl(Ark_CanvasRenderer peer,
     auto height = static_cast<double>(Converter::Convert<float>(*sh));
     auto pixelMap = peerImpl->GetPixelMap(x, y, width, height);
     CHECK_NULL_RETURN(pixelMap, {});
-    auto pixelMapPeer = GetPixelMapAccessor()->ctor();
+    auto pixelMapPeer = PeerUtils::CreatePeer<image_PixelMapPeer>();
     CHECK_NULL_RETURN(pixelMapPeer, {});
     pixelMapPeer->pixelMap = pixelMap;
     return pixelMapPeer;
@@ -736,14 +735,14 @@ void TranslateImpl(Ark_CanvasRenderer peer,
     peerImpl->Translate(transX, transY);
 }
 void SetPixelMapImpl(Ark_CanvasRenderer peer,
-                     const Opt_PixelMap* value)
+                     const Opt_image_PixelMap* value)
 {
 #ifdef PIXEL_MAP_SUPPORTED
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(value);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto opt = Converter::OptConvert<Ark_PixelMap>(*value);
+    auto opt = Converter::OptConvert<Ark_image_PixelMap>(*value);
     CHECK_NULL_VOID(opt);
     auto pixelMapPeer = opt.value();
     CHECK_NULL_VOID(pixelMapPeer);

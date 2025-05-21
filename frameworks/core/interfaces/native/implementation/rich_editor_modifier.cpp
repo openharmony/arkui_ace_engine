@@ -37,9 +37,9 @@ void SetImageSpanResult(Union_Span_Result& dst, const ResultObject& src, Convert
     imageSpanResult.spanPosition.spanRange.value0 = Converter::ArkValue<Ark_Number>(src.spanPosition.spanRange[0]);
     imageSpanResult.spanPosition.spanRange.value1 = Converter::ArkValue<Ark_Number>(src.spanPosition.spanRange[1]);
 
-    Ark_PixelMap arkPixelMap = new PixelMapPeer();
+    Ark_image_PixelMap arkPixelMap = new image_PixelMapPeer();
     arkPixelMap->pixelMap = src.valuePixelMap;
-    imageSpanResult.valuePixelMap = Converter::ArkValue<Opt_PixelMap>(arkPixelMap);
+    imageSpanResult.valuePixelMap = Converter::ArkValue<Opt_image_PixelMap>(arkPixelMap);
 
     if (src.valueResource) {
         imageSpanResult.valueResourceStr =
@@ -214,9 +214,9 @@ void AssignArkValue(Ark_RichEditorImageSpanResult& dst, const RichEditorAbstract
     dst.spanPosition = Converter::ArkValue<Ark_RichEditorSpanPosition>(src);
 
     if (src.GetValuePixelMap()) {
-        Ark_PixelMap arkPixelMap = new PixelMapPeer();
+        Ark_image_PixelMap arkPixelMap = new image_PixelMapPeer();
         arkPixelMap->pixelMap = src.GetValuePixelMap();
-        dst.valuePixelMap = Converter::ArkValue<Opt_PixelMap>(arkPixelMap);
+        dst.valuePixelMap = Converter::ArkValue<Opt_image_PixelMap>(arkPixelMap);
     }
 
     if (!src.GetValueResourceStr().empty()) {

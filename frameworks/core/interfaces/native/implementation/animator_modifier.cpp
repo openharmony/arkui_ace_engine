@@ -94,7 +94,7 @@ void PlayModeImpl(Ark_NativePointer node,
     //AnimatorModelNG::SetPlayMode(frameNode, convValue);
 }
 void MotionImpl(Ark_NativePointer node,
-                const Opt_SpringMotion* value)
+                const Opt_Union_SpringMotion_FrictionMotion_ScrollMotion* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

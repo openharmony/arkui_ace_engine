@@ -41,10 +41,10 @@ Opt_Boolean GetAntialiasImpl(Ark_RenderingContextSettings peer)
     return Converter::ArkValue<Opt_Boolean>(peer->antialias);
 }
 void SetAntialiasImpl(Ark_RenderingContextSettings peer,
-                      Ark_Boolean antialias)
+                      const Opt_Boolean* antialias)
 {
     CHECK_NULL_VOID(peer);
-    auto value = Converter::Convert<bool>(antialias);
+    auto value = Converter::OptConvert<bool>(*antialias);
     peer->antialias = value;
 }
 } // RenderingContextSettingsAccessor

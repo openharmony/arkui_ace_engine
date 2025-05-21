@@ -26,12 +26,12 @@
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-void AssignCast(std::optional<AIImageQuality>& dst, const Ark_ResolutionQuality& src)
+void AssignCast(std::optional<AIImageQuality>& dst, const Ark_image_ResolutionQuality& src)
 {
     switch (src) {
-        case ARK_RESOLUTION_QUALITY_LOW: dst = AIImageQuality::LOW; break;
-        case ARK_RESOLUTION_QUALITY_MEDIUM: dst = AIImageQuality::NORMAL; break;
-        case ARK_RESOLUTION_QUALITY_HIGH: dst = AIImageQuality::HIGH; break;
+        case ARK_IMAGE_RESOLUTION_QUALITY_LOW: dst = AIImageQuality::LOW; break;
+        case ARK_IMAGE_RESOLUTION_QUALITY_MEDIUM: dst = AIImageQuality::NORMAL; break;
+        case ARK_IMAGE_RESOLUTION_QUALITY_HIGH: dst = AIImageQuality::HIGH; break;
         default: LOGE("Unexpected enum value in Ark_ResolutionQuality: %{public}d", src);
     }
 }
@@ -237,18 +237,6 @@ void AssignCast(std::optional<NavigationType>& dst, const Ark_WebNavigationType&
         case ARK_WEB_NAVIGATION_TYPE_NAVIGATION_TYPE_AUTO_SUBFRAME: dst =
             NavigationType::NAVIGATION_TYPE_AUTO_SUBFRAME; break;
         default: LOGE("Unexpected enum value in Ark_WebNavigationType: %{public}d", src);
-    }
-}
-
-// Convert Ark_NavRouteMode
-template<>
-void AssignCast(std::optional<NavRouteMode>& dst, const Ark_NavRouteMode& src)
-{
-    switch (src) {
-        case ARK_NAV_ROUTE_MODE_PUSH_WITH_RECREATE: dst = NavRouteMode::PUSH_WITH_RECREATE; break;
-        case ARK_NAV_ROUTE_MODE_PUSH: dst = NavRouteMode::PUSH; break;
-        case ARK_NAV_ROUTE_MODE_REPLACE: dst = NavRouteMode::REPLACE; break;
-        default: LOGE("Unexpected enum value in Ark_NavRouteMode: %{public}d", src);
     }
 }
 
@@ -474,16 +462,6 @@ void AssignCast(std::optional<TextDecorationStyle>& dst, const Ark_TextDecoratio
         default: LOGE("Unexpected enum value in Ark_TextDecorationStyle: %{public}d", src);
     }
 }
-template<>
-void AssignCast(std::optional<V2::StickyMode>& dst, const Ark_Sticky& src)
-{
-    switch (src) {
-        case ARK_STICKY_NONE: dst = V2::StickyMode::NONE; break;
-        case ARK_STICKY_NORMAL: dst = V2::StickyMode::NORMAL; break;
-        case ARK_STICKY_OPACITY: dst = V2::StickyMode::OPACITY; break;
-        default: LOGE("Unexpected enum value in Ark_Sticky: %{public}d", src);
-    }
-}
 
 template<>
 void AssignCast(std::optional<V2::ListItemAlign>& dst, const Ark_ListItemAlign& src)
@@ -627,7 +605,7 @@ void AssignCast(std::optional<EllipsisMode>& dst, const Ark_EllipsisMode& src)
 {
     switch (src) {
         case ARK_ELLIPSIS_MODE_START: dst = EllipsisMode::HEAD; break;
-        case ARK_ELLIPSIS_MODE_MIDDLE: dst = EllipsisMode::MIDDLE; break;
+        case ARK_ELLIPSIS_MODE_CENTER: dst = EllipsisMode::MIDDLE; break;
         case ARK_ELLIPSIS_MODE_END: dst = EllipsisMode::TAIL; break;
         default: LOGE("Unexpected enum value in Ark_EllipsisMode: %{public}d", src);
     }
@@ -770,7 +748,6 @@ void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src)
         case ARK_COPY_OPTIONS_NONE: dst = CopyOptions::None; break;
         case ARK_COPY_OPTIONS_IN_APP: dst = CopyOptions::InApp; break;
         case ARK_COPY_OPTIONS_LOCAL_DEVICE: dst = CopyOptions::Local; break;
-        case ARK_COPY_OPTIONS_CROSS_DEVICE: dst = CopyOptions::Distributed; break;
         default: LOGE("Unexpected enum value in Ark_CopyOptions: %{public}d", src);
     }
 }
@@ -1252,7 +1229,6 @@ void AssignCast(std::optional<XComponentType>& dst, const Ark_XComponentType& sr
     dst = XComponentType::UNKNOWN;
     switch (src) {
         case ARK_XCOMPONENT_TYPE_SURFACE: dst = XComponentType::SURFACE; break;
-        case ARK_XCOMPONENT_TYPE_COMPONENT: dst = XComponentType::COMPONENT; break;
         case ARK_XCOMPONENT_TYPE_TEXTURE: dst = XComponentType::TEXTURE; break;
         case ARK_XCOMPONENT_TYPE_NODE: dst = XComponentType::NODE; break;
         default: LOGE("Unexpected enum value in Ark_XComponentType: %{public}d", src);
@@ -1478,17 +1454,6 @@ void AssignCast(std::optional<OverScrollMode>& dst, const Ark_OverScrollMode& sr
 }
 
 template<>
-void AssignCast(std::optional<PanelMode>& dst, const Ark_PanelMode& src)
-{
-    switch (src) {
-        case ARK_PANEL_MODE_MINI: dst = PanelMode::MINI; break;
-        case ARK_PANEL_MODE_HALF: dst = PanelMode::HALF; break;
-        case ARK_PANEL_MODE_FULL: dst = PanelMode::FULL; break;
-        default: LOGE("Unexpected enum value in Ark_PanelMode: %{public}d", src);
-    }
-}
-
-template<>
 void AssignCast(std::optional<Axis>& dst, const Ark_ScrollBarDirection& src)
 {
     switch (src) {
@@ -1504,7 +1469,6 @@ void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src)
     switch (src) {
         case ARK_SCROLL_DIRECTION_VERTICAL: dst = Axis::VERTICAL; break;
         case ARK_SCROLL_DIRECTION_HORIZONTAL: dst = Axis::HORIZONTAL; break;
-        case ARK_SCROLL_DIRECTION_FREE: dst = Axis::FREE; break;
         case ARK_SCROLL_DIRECTION_NONE: dst = Axis::NONE; break;
         default: LOGE("Unexpected enum value in Ark_ScrollDirection: %{public}d", src);
     }
@@ -1717,15 +1681,19 @@ void AssignCast(std::optional<Placement>& dst, const Ark_Placement& src)
 }
 
 template<>
-void AssignCast(std::optional<RectHeightStyle>& dst, const Ark_RectHeightStyle& src)
+void AssignCast(std::optional<RectHeightStyle>& dst, const Ark_text_RectHeightStyle& src)
 {
     switch (src) {
-        case ARK_RECT_HEIGHT_STYLE_TIGHT: dst = RectHeightStyle::TIGHT; break;
-        case ARK_RECT_HEIGHT_STYLE_MAX: dst = RectHeightStyle::MAX; break;
-        case ARK_RECT_HEIGHT_STYLE_INCLUDE_LINE_SPACE_MIDDLE: dst = RectHeightStyle::INCLUDE_LINE_SPACE_MIDDLE; break;
-        case ARK_RECT_HEIGHT_STYLE_INCLUDE_LINE_SPACE_TOP: dst = RectHeightStyle::INCLUDE_LINE_SPACE_TOP; break;
-        case ARK_RECT_HEIGHT_STYLE_INCLUDE_LINE_SPACE_BOTTOM: dst = RectHeightStyle::INCLUDE_LINE_SPACE_BOTTOM; break;
-        case ARK_RECT_HEIGHT_STYLE_STRUT: dst = RectHeightStyle::STRUT; break;
+        case ARK_TEXT_RECT_HEIGHT_STYLE_TIGHT: dst = RectHeightStyle::TIGHT; break;
+        case ARK_TEXT_RECT_HEIGHT_STYLE_MAX: dst = RectHeightStyle::MAX; break;
+        case ARK_TEXT_RECT_HEIGHT_STYLE_INCLUDE_LINE_SPACE_MIDDLE:
+            dst = RectHeightStyle::INCLUDE_LINE_SPACE_MIDDLE;
+            break;
+        case ARK_TEXT_RECT_HEIGHT_STYLE_INCLUDE_LINE_SPACE_TOP: dst = RectHeightStyle::INCLUDE_LINE_SPACE_TOP; break;
+        case ARK_TEXT_RECT_HEIGHT_STYLE_INCLUDE_LINE_SPACE_BOTTOM:
+            dst = RectHeightStyle::INCLUDE_LINE_SPACE_BOTTOM;
+            break;
+        case ARK_TEXT_RECT_HEIGHT_STYLE_STRUT: dst = RectHeightStyle::STRUT; break;
         default: LOGE("Unexpected enum value in Ark_RectHeightStyle: %{public}d", src);
     }
 }
@@ -1770,11 +1738,11 @@ void AssignCast(std::optional<DialogButtonStyle>& dst, const Ark_DialogButtonSty
 }
 
 template<>
-void AssignCast(std::optional<RectWidthStyle>& dst, const Ark_RectWidthStyle& src)
+void AssignCast(std::optional<RectWidthStyle>& dst, const Ark_text_RectWidthStyle& src)
 {
     switch (src) {
-        case ARK_RECT_WIDTH_STYLE_TIGHT: dst = RectWidthStyle::TIGHT; break;
-        case ARK_RECT_WIDTH_STYLE_MAX: dst = RectWidthStyle::MAX; break;
+        case ARK_TEXT_RECT_WIDTH_STYLE_TIGHT: dst = RectWidthStyle::TIGHT; break;
+        case ARK_TEXT_RECT_WIDTH_STYLE_MAX: dst = RectWidthStyle::MAX; break;
         default: LOGE("Unexpected enum value in Ark_RectWidthStyle: %{public}d", src);
     }
 }
@@ -1959,186 +1927,254 @@ void AssignCast(std::optional<GestureMode>& dst, const Ark_GestureMode& src)
 }
 
 template<>
-void AssignCast(std::optional<std::string>& dst, const Ark_UniformDataType& src)
+void AssignCast(std::optional<std::string>& dst, const Ark_uniformTypeDescriptor_UniformDataType& src)
 {
     switch (src) {
-        case ARK_UNIFORM_DATA_TYPE_ENTITY: dst = "general.entity"; break;
-        case ARK_UNIFORM_DATA_TYPE_OBJECT: dst = "general.object"; break;
-        case ARK_UNIFORM_DATA_TYPE_COMPOSITE_OBJECT: dst = "general.composite-object"; break;
-        case ARK_UNIFORM_DATA_TYPE_TEXT: dst = "general.text"; break;
-        case ARK_UNIFORM_DATA_TYPE_PLAIN_TEXT: dst = "general.plain-text"; break;
-        case ARK_UNIFORM_DATA_TYPE_HTML: dst = "general.html"; break;
-        case ARK_UNIFORM_DATA_TYPE_HYPERLINK: dst = "general.hyperlink"; break;
-        case ARK_UNIFORM_DATA_TYPE_XML: dst = "general.xml"; break;
-        case ARK_UNIFORM_DATA_TYPE_XHTML: dst = "general.xhtml"; break;
-        case ARK_UNIFORM_DATA_TYPE_RSS: dst = "general.rss"; break;
-        case ARK_UNIFORM_DATA_TYPE_SMIL: dst = "com.real.smil"; break;
-        case ARK_UNIFORM_DATA_TYPE_SOURCE_CODE: dst = "general.source-code"; break;
-        case ARK_UNIFORM_DATA_TYPE_SCRIPT: dst = "general.script"; break;
-        case ARK_UNIFORM_DATA_TYPE_SHELL_SCRIPT: dst = "general.shell-script"; break;
-        case ARK_UNIFORM_DATA_TYPE_CSH_SCRIPT: dst = "general.csh-script"; break;
-        case ARK_UNIFORM_DATA_TYPE_PERL_SCRIPT: dst = "general.perl-script"; break;
-        case ARK_UNIFORM_DATA_TYPE_PHP_SCRIPT: dst = "general.php-script"; break;
-        case ARK_UNIFORM_DATA_TYPE_PYTHON_SCRIPT: dst = "general.python-script"; break;
-        case ARK_UNIFORM_DATA_TYPE_RUBY_SCRIPT: dst = "general.ruby-script"; break;
-        case ARK_UNIFORM_DATA_TYPE_TYPE_SCRIPT: dst = "general.type-script"; break;
-        case ARK_UNIFORM_DATA_TYPE_JAVA_SCRIPT: dst = "general.java-script"; break;
-        case ARK_UNIFORM_DATA_TYPE_CSS: dst = "general.css"; break;
-        case ARK_UNIFORM_DATA_TYPE_C_HEADER: dst = "general.c-header"; break;
-        case ARK_UNIFORM_DATA_TYPE_C_SOURCE: dst = "general.c-source"; break;
-        case ARK_UNIFORM_DATA_TYPE_C_PLUS_PLUS_HEADER: dst = "general.c-plus-plus-header"; break;
-        case ARK_UNIFORM_DATA_TYPE_C_PLUS_PLUS_SOURCE: dst = "general.c-plus-plus-source"; break;
-        case ARK_UNIFORM_DATA_TYPE_JAVA_SOURCE: dst = "general.java-source"; break;
-        case ARK_UNIFORM_DATA_TYPE_TEX: dst = "general.tex"; break;
-        case ARK_UNIFORM_DATA_TYPE_MARKDOWN: dst = "general.markdown"; break;
-        case ARK_UNIFORM_DATA_TYPE_ASC_TEXT: dst = "general.asc-text"; break;
-        case ARK_UNIFORM_DATA_TYPE_RICH_TEXT: dst = "general.rich-text"; break;
-        case ARK_UNIFORM_DATA_TYPE_DELIMITED_VALUES_TEXT: dst = "general.delimited-values-text"; break;
-        case ARK_UNIFORM_DATA_TYPE_COMMA_SEPARATED_VALUES_TEXT: dst = "general.comma-separated-values-text"; break;
-        case ARK_UNIFORM_DATA_TYPE_TAB_SEPARATED_VALUES_TEXT: dst = "general.tab-separated-values-text"; break;
-        case ARK_UNIFORM_DATA_TYPE_EBOOK: dst = "general.ebook"; break;
-        case ARK_UNIFORM_DATA_TYPE_EPUB: dst = "general.epub"; break;
-        case ARK_UNIFORM_DATA_TYPE_AZW: dst = "com.amazon.azw"; break;
-        case ARK_UNIFORM_DATA_TYPE_AZW3: dst = "com.amazon.azw3"; break;
-        case ARK_UNIFORM_DATA_TYPE_KFX: dst = "com.amazon.kfx"; break;
-        case ARK_UNIFORM_DATA_TYPE_MOBI: dst = "com.amazon.mobi"; break;
-        case ARK_UNIFORM_DATA_TYPE_MEDIA: dst = "general.media"; break;
-        case ARK_UNIFORM_DATA_TYPE_IMAGE: dst = "general.image"; break;
-        case ARK_UNIFORM_DATA_TYPE_JPEG: dst = "general.jpeg"; break;
-        case ARK_UNIFORM_DATA_TYPE_PNG: dst = "general.png"; break;
-        case ARK_UNIFORM_DATA_TYPE_RAW_IMAGE: dst = "general.raw-image"; break;
-        case ARK_UNIFORM_DATA_TYPE_TIFF: dst = "general.tiff"; break;
-        case ARK_UNIFORM_DATA_TYPE_BMP: dst = "com.microsoft.bmp"; break;
-        case ARK_UNIFORM_DATA_TYPE_ICO: dst = "com.microsoft.ico"; break;
-        case ARK_UNIFORM_DATA_TYPE_PHOTOSHOP_IMAGE: dst = "com.adobe.photoshop-image"; break;
-        case ARK_UNIFORM_DATA_TYPE_AI_IMAGE: dst = "com.adobe.illustrator.ai-image"; break;
-        case ARK_UNIFORM_DATA_TYPE_FAX: dst = "general.fax"; break;
-        case ARK_UNIFORM_DATA_TYPE_JFX_FAX: dst = "com.j2.jfx-fax"; break;
-        case ARK_UNIFORM_DATA_TYPE_EFX_FAX: dst = "com.js.efx-fax"; break;
-        case ARK_UNIFORM_DATA_TYPE_XBITMAP_IMAGE: dst = "general.xbitmap-image"; break;
-        case ARK_UNIFORM_DATA_TYPE_GIF: dst = "general.gif"; break;
-        case ARK_UNIFORM_DATA_TYPE_TGA_IMAGE: dst = "com.truevision.tga-image"; break;
-        case ARK_UNIFORM_DATA_TYPE_SGI_IMAGE: dst = "com.sgi.sgi-image"; break;
-        case ARK_UNIFORM_DATA_TYPE_OPENEXR_IMAGE: dst = "com.ilm.openexr-image"; break;
-        case ARK_UNIFORM_DATA_TYPE_FLASHPIX_IMAGE: dst = "com.kodak.flashpix.image"; break;
-        case ARK_UNIFORM_DATA_TYPE_WORD_DOC: dst = "com.microsoft.word.doc"; break;
-        case ARK_UNIFORM_DATA_TYPE_EXCEL: dst = "com.microsoft.excel.xls"; break;
-        case ARK_UNIFORM_DATA_TYPE_PPT: dst = "com.microsoft.powerpoint.ppt"; break;
-        case ARK_UNIFORM_DATA_TYPE_WORD_DOT: dst = "com.microsoft.word.dot"; break;
-        case ARK_UNIFORM_DATA_TYPE_POWERPOINT_PPS: dst = "com.microsoft.powerpoint.pps"; break;
-        case ARK_UNIFORM_DATA_TYPE_EXCEL_XLT: dst = "com.microsoft.excel.xlt"; break;
-        case ARK_UNIFORM_DATA_TYPE_POWERPOINT_POT: dst = "com.microsoft.powerpoint.pot"; break;
-        case ARK_UNIFORM_DATA_TYPE_VISIO_VSD: dst = "com.microsoft.visio.vsd"; break;
-        case ARK_UNIFORM_DATA_TYPE_PDF: dst = "com.adobe.pdf"; break;
-        case ARK_UNIFORM_DATA_TYPE_POSTSCRIPT: dst = "com.adobe.postscript"; break;
-        case ARK_UNIFORM_DATA_TYPE_ENCAPSULATED_POSTSCRIPT: dst = "com.adobe.encapsulated-postscript"; break;
-        case ARK_UNIFORM_DATA_TYPE_VIDEO: dst = "general.video"; break;
-        case ARK_UNIFORM_DATA_TYPE_AVI: dst = "general.avi"; break;
-        case ARK_UNIFORM_DATA_TYPE_MPEG: dst = "general.mpeg"; break;
-        case ARK_UNIFORM_DATA_TYPE_MPEG4: dst = "general.mpeg-4"; break;
-        case ARK_UNIFORM_DATA_TYPE_VIDEO_3GPP: dst = "general.3gpp"; break;
-        case ARK_UNIFORM_DATA_TYPE_VIDEO_3GPP2: dst = "general.3gpp2"; break;
-        case ARK_UNIFORM_DATA_TYPE_TS: dst = "general.ts"; break;
-        case ARK_UNIFORM_DATA_TYPE_MPEGURL_VIDEO: dst = "general.mpegurl-video"; break;
-        case ARK_UNIFORM_DATA_TYPE_WINDOWS_MEDIA_WM: dst = "com.microsoft.windows-media-wm"; break;
-        case ARK_UNIFORM_DATA_TYPE_WINDOWS_MEDIA_WMV: dst = "com.microsoft.windows-media-wmv"; break;
-        case ARK_UNIFORM_DATA_TYPE_WINDOWS_MEDIA_WMP: dst = "com.microsoft.windows-media-wmp"; break;
-        case ARK_UNIFORM_DATA_TYPE_WINDOWS_MEDIA_WVX: dst = "com.microsoft.windows-media-wvx"; break;
-        case ARK_UNIFORM_DATA_TYPE_WINDOWS_MEDIA_WMX: dst = "com.microsoft.windows-media-wmx"; break;
-        case ARK_UNIFORM_DATA_TYPE_REALMEDIA: dst = "com.real.realmedia"; break;
-        case ARK_UNIFORM_DATA_TYPE_MATROSKA_VIDEO: dst = "org.matroska.mkv"; break;
-        case ARK_UNIFORM_DATA_TYPE_FLASH: dst = "com.adobe.flash"; break;
-        case ARK_UNIFORM_DATA_TYPE_AUDIO: dst = "general.audio"; break;
-        case ARK_UNIFORM_DATA_TYPE_AAC: dst = "general.aac"; break;
-        case ARK_UNIFORM_DATA_TYPE_AIFF: dst = "general.aiff"; break;
-        case ARK_UNIFORM_DATA_TYPE_ALAC: dst = "general.alac"; break;
-        case ARK_UNIFORM_DATA_TYPE_FLAC: dst = "general.flac"; break;
-        case ARK_UNIFORM_DATA_TYPE_MP3: dst = "general.mp3"; break;
-        case ARK_UNIFORM_DATA_TYPE_OGG: dst = "general.ogg"; break;
-        case ARK_UNIFORM_DATA_TYPE_PCM: dst = "general.pcm"; break;
-        case ARK_UNIFORM_DATA_TYPE_WINDOWS_MEDIA_WMA: dst = "com.microsoft.windows-media-wma"; break;
-        case ARK_UNIFORM_DATA_TYPE_WAVEFORM_AUDIO: dst = "com.microsoft.waveform-audio"; break;
-        case ARK_UNIFORM_DATA_TYPE_WINDOWS_MEDIA_WAX: dst = "com.microsoft.windows-media-wax"; break;
-        case ARK_UNIFORM_DATA_TYPE_AU_AUDIO: dst = "general.au-audio"; break;
-        case ARK_UNIFORM_DATA_TYPE_AIFC_AUDIO: dst = "general.aifc-audio"; break;
-        case ARK_UNIFORM_DATA_TYPE_MPEGURL_AUDIO: dst = "general.mpegurl-audio"; break;
-        case ARK_UNIFORM_DATA_TYPE_MPEG_4_AUDIO: dst = "general.mpeg-4-audio"; break;
-        case ARK_UNIFORM_DATA_TYPE_MP2: dst = "general.mp2"; break;
-        case ARK_UNIFORM_DATA_TYPE_MPEG_AUDIO: dst = "general.mpeg-audio"; break;
-        case ARK_UNIFORM_DATA_TYPE_ULAW_AUDIO: dst = "general.ulaw-audio"; break;
-        case ARK_UNIFORM_DATA_TYPE_SD2_AUDIO: dst = "com.digidesign.sd2-audio"; break;
-        case ARK_UNIFORM_DATA_TYPE_REALAUDIO: dst = "com.real.realaudio"; break;
-        case ARK_UNIFORM_DATA_TYPE_MATROSKA_AUDIO: dst = "org.matroska.mka"; break;
-        case ARK_UNIFORM_DATA_TYPE_FILE: dst = "general.file"; break;
-        case ARK_UNIFORM_DATA_TYPE_DIRECTORY: dst = "general.directory"; break;
-        case ARK_UNIFORM_DATA_TYPE_FOLDER: dst = "general.folder"; break;
-        case ARK_UNIFORM_DATA_TYPE_SYMLINK: dst = "general.symlink"; break;
-        case ARK_UNIFORM_DATA_TYPE_ARCHIVE: dst = "general.archive"; break;
-        case ARK_UNIFORM_DATA_TYPE_BZ2_ARCHIVE: dst = "general.bz2-archive"; break;
-        case ARK_UNIFORM_DATA_TYPE_OPG: dst = "general.opg"; break;
-        case ARK_UNIFORM_DATA_TYPE_TAZ_ARCHIVE: dst = "general.taz-archive"; break;
-        case ARK_UNIFORM_DATA_TYPE_WEB_ARCHIVE: dst = "general.web-archive"; break;
-        case ARK_UNIFORM_DATA_TYPE_DISK_IMAGE: dst = "general.disk-image"; break;
-        case ARK_UNIFORM_DATA_TYPE_ISO: dst = "general.iso"; break;
-        case ARK_UNIFORM_DATA_TYPE_TAR_ARCHIVE: dst = "general.tar-archive"; break;
-        case ARK_UNIFORM_DATA_TYPE_ZIP_ARCHIVE: dst = "general.zip-archive"; break;
-        case ARK_UNIFORM_DATA_TYPE_JAVA_ARCHIVE: dst = "com.sun.java-archive"; break;
-        case ARK_UNIFORM_DATA_TYPE_GNU_TAR_ARCHIVE: dst = "org.gnu.gnu-tar-archive"; break;
-        case ARK_UNIFORM_DATA_TYPE_GNU_ZIP_ARCHIVE: dst = "org.gnu.gnu-zip-archive"; break;
-        case ARK_UNIFORM_DATA_TYPE_GNU_ZIP_TAR_ARCHIVE: dst = "org.gnu.gnu-zip-tar-archive"; break;
-        case ARK_UNIFORM_DATA_TYPE_OPENXML: dst = "org.openxmlformats.openxml"; break;
-        case ARK_UNIFORM_DATA_TYPE_WORDPROCESSINGML_DOCUMENT: dst = "org.openxmlformats.wordprocessingml.document"; break;
-        case ARK_UNIFORM_DATA_TYPE_SPREADSHEETML_SHEET: dst = "org.openxmlformats.spreadsheetml.sheet"; break;
-        case ARK_UNIFORM_DATA_TYPE_PRESENTATIONML_PRESENTATION: dst = "org.openxmlformats.presentationml.presentation"; break;
-        case ARK_UNIFORM_DATA_TYPE_DRAWINGML_VISIO: dst = "org.openxmlformats.drawingml.visio"; break;
-        case ARK_UNIFORM_DATA_TYPE_DRAWINGML_TEMPLATE: dst = "org.openxmlformats.drawingml.template"; break;
-        case ARK_UNIFORM_DATA_TYPE_WORDPROCESSINGML_TEMPLATE: dst = "org.openxmlformats.wordprocessingml.template"; break;
-        case ARK_UNIFORM_DATA_TYPE_PRESENTATIONML_TEMPLATE: dst = "org.openxmlformats.presentationml.template"; break;
-        case ARK_UNIFORM_DATA_TYPE_PRESENTATIONML_SLIDESHOW: dst = "org.openxmlformats.presentationml.slideshow"; break;
-        case ARK_UNIFORM_DATA_TYPE_SPREADSHEETML_TEMPLATE: dst = "org.openxmlformats.spreadsheetml.template"; break;
-        case ARK_UNIFORM_DATA_TYPE_OPENDOCUMENT: dst = "org.oasis.opendocument"; break;
-        case ARK_UNIFORM_DATA_TYPE_OPENDOCUMENT_TEXT: dst = "org.oasis.opendocument.text"; break;
-        case ARK_UNIFORM_DATA_TYPE_OPENDOCUMENT_SPREADSHEET: dst = "org.oasis.opendocument.spreadsheet"; break;
-        case ARK_UNIFORM_DATA_TYPE_OPENDOCUMENT_PRESENTATION: dst = "org.oasis.opendocument.presentation"; break;
-        case ARK_UNIFORM_DATA_TYPE_OPENDOCUMENT_GRAPHICS: dst = "org.oasis.opendocument.graphics"; break;
-        case ARK_UNIFORM_DATA_TYPE_OPENDOCUMENT_FORMULA: dst = "org.oasis.opendocument.formula"; break;
-        case ARK_UNIFORM_DATA_TYPE_STUFFIT_ARCHIVE: dst = "com.allume.stuffit-archive"; break;
-        case ARK_UNIFORM_DATA_TYPE_RAR_ARCHIVE: dst = "com.rarlab.rar-archive"; break;
-        case ARK_UNIFORM_DATA_TYPE_SEVEN_ZIP_ARCHIVE: dst = "org.7-zip.7-zip-archive"; break;
-        case ARK_UNIFORM_DATA_TYPE_CALENDAR: dst = "general.calendar"; break;
-        case ARK_UNIFORM_DATA_TYPE_VCS: dst = "general.vcs"; break;
-        case ARK_UNIFORM_DATA_TYPE_ICS: dst = "general.ics"; break;
-        case ARK_UNIFORM_DATA_TYPE_CONTACT: dst = "general.contact"; break;
-        case ARK_UNIFORM_DATA_TYPE_DATABASE: dst = "general.database"; break;
-        case ARK_UNIFORM_DATA_TYPE_MESSAGE: dst = "general.message"; break;
-        case ARK_UNIFORM_DATA_TYPE_EXECUTABLE: dst = "general.executable"; break;
-        case ARK_UNIFORM_DATA_TYPE_PORTABLE_EXECUTABLE: dst = "com.microsoft.portable-executable"; break;
-        case ARK_UNIFORM_DATA_TYPE_SUN_JAVA_CLASS: dst = "com.sun.java-class"; break;
-        case ARK_UNIFORM_DATA_TYPE_VCARD: dst = "general.vcard"; break;
-        case ARK_UNIFORM_DATA_TYPE_NAVIGATION: dst = "general.navigation"; break;
-        case ARK_UNIFORM_DATA_TYPE_LOCATION: dst = "general.location"; break;
-        case ARK_UNIFORM_DATA_TYPE_FONT: dst = "general.font"; break;
-        case ARK_UNIFORM_DATA_TYPE_TRUETYPE_FONT: dst = "general.truetype-font"; break;
-        case ARK_UNIFORM_DATA_TYPE_TRUETYPE_COLLECTION_FONT: dst = "general.truetype-collection-font"; break;
-        case ARK_UNIFORM_DATA_TYPE_OPENTYPE_FONT: dst = "general.opentype-font"; break;
-        case ARK_UNIFORM_DATA_TYPE_POSTSCRIPT_FONT: dst = "com.adobe.postscript-font"; break;
-        case ARK_UNIFORM_DATA_TYPE_POSTSCRIPT_PFB_FONT: dst = "com.adobe.postscript-pfb-font"; break;
-        case ARK_UNIFORM_DATA_TYPE_POSTSCRIPT_PFA_FONT: dst = "com.adobe.postscript-pfa-font"; break;
-        case ARK_UNIFORM_DATA_TYPE_OPENHARMONY_FORM: dst = "openharmony.form"; break;
-        case ARK_UNIFORM_DATA_TYPE_OPENHARMONY_APP_ITEM: dst = "openharmony.app-item"; break;
-        case ARK_UNIFORM_DATA_TYPE_OPENHARMONY_PIXEL_MAP: dst = "openharmony.pixel-map"; break;
-        case ARK_UNIFORM_DATA_TYPE_OPENHARMONY_ATOMIC_SERVICE: dst = "openharmony.atomic-service"; break;
-        case ARK_UNIFORM_DATA_TYPE_OPENHARMONY_PACKAGE: dst = "openharmony.package"; break;
-        case ARK_UNIFORM_DATA_TYPE_OPENHARMONY_HAP: dst = "openharmony.hap"; break;
-        case ARK_UNIFORM_DATA_TYPE_OPENHARMONY_HDOC: dst = "openharmony.hdoc"; break;
-        case ARK_UNIFORM_DATA_TYPE_OPENHARMONY_HINOTE: dst = "openharmony.hinote"; break;
-        case ARK_UNIFORM_DATA_TYPE_OPENHARMONY_STYLED_STRING: dst = "openharmony.styled-string"; break;
-        case ARK_UNIFORM_DATA_TYPE_OPENHARMONY_WANT: dst = "openharmony.want"; break;
-        case ARK_UNIFORM_DATA_TYPE_OFD: dst = "general.ofd"; break;
-        case ARK_UNIFORM_DATA_TYPE_CAD: dst = "general.cad"; break;
-        case ARK_UNIFORM_DATA_TYPE_OCTET_STREAM: dst = "general.octet-stream"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_ENTITY: dst = "general.entity"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OBJECT: dst = "general.object"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_COMPOSITE_OBJECT: dst = "general.composite-object"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_TEXT: dst = "general.text"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_PLAIN_TEXT: dst = "general.plain-text"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_HTML: dst = "general.html"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_HYPERLINK: dst = "general.hyperlink"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_XML: dst = "general.xml"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_XHTML: dst = "general.xhtml"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_RSS: dst = "general.rss"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_SMIL: dst = "com.real.smil"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_SOURCE_CODE: dst = "general.source-code"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_SCRIPT: dst = "general.script"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_SHELL_SCRIPT: dst = "general.shell-script"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_CSH_SCRIPT: dst = "general.csh-script"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_PERL_SCRIPT: dst = "general.perl-script"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_PHP_SCRIPT: dst = "general.php-script"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_PYTHON_SCRIPT: dst = "general.python-script"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_RUBY_SCRIPT: dst = "general.ruby-script"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_TYPE_SCRIPT: dst = "general.type-script"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_JAVA_SCRIPT: dst = "general.java-script"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_CSS: dst = "general.css"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_C_HEADER: dst = "general.c-header"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_C_SOURCE: dst = "general.c-source"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_C_PLUS_PLUS_HEADER:
+            dst = "general.c-plus-plus-header";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_C_PLUS_PLUS_SOURCE:
+            dst = "general.c-plus-plus-source";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_JAVA_SOURCE: dst = "general.java-source"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_TEX: dst = "general.tex"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_MARKDOWN: dst = "general.markdown"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_ASC_TEXT: dst = "general.asc-text"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_RICH_TEXT: dst = "general.rich-text"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_DELIMITED_VALUES_TEXT:
+            dst = "general.delimited-values-text";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_COMMA_SEPARATED_VALUES_TEXT:
+            dst = "general.comma-separated-values-text";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_TAB_SEPARATED_VALUES_TEXT:
+            dst = "general.tab-separated-values-text";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_EBOOK: dst = "general.ebook"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_EPUB: dst = "general.epub"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_AZW: dst = "com.amazon.azw"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_AZW3: dst = "com.amazon.azw3"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_KFX: dst = "com.amazon.kfx"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_MOBI: dst = "com.amazon.mobi"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_MEDIA: dst = "general.media"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_IMAGE: dst = "general.image"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_JPEG: dst = "general.jpeg"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_PNG: dst = "general.png"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_RAW_IMAGE: dst = "general.raw-image"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_TIFF: dst = "general.tiff"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_BMP: dst = "com.microsoft.bmp"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_ICO: dst = "com.microsoft.ico"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_PHOTOSHOP_IMAGE: dst = "com.adobe.photoshop-image"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_AI_IMAGE: dst = "com.adobe.illustrator.ai-image"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_FAX: dst = "general.fax"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_JFX_FAX: dst = "com.j2.jfx-fax"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_EFX_FAX: dst = "com.js.efx-fax"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_XBITMAP_IMAGE: dst = "general.xbitmap-image"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_GIF: dst = "general.gif"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_TGA_IMAGE: dst = "com.truevision.tga-image"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_SGI_IMAGE: dst = "com.sgi.sgi-image"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OPENEXR_IMAGE: dst = "com.ilm.openexr-image"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_FLASHPIX_IMAGE: dst = "com.kodak.flashpix.image"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_WORD_DOC: dst = "com.microsoft.word.doc"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_EXCEL: dst = "com.microsoft.excel.xls"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_PPT: dst = "com.microsoft.powerpoint.ppt"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_WORD_DOT: dst = "com.microsoft.word.dot"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_POWERPOINT_PPS: dst = "com.microsoft.powerpoint.pps"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_EXCEL_XLT: dst = "com.microsoft.excel.xlt"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_POWERPOINT_POT: dst = "com.microsoft.powerpoint.pot"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_VISIO_VSD: dst = "com.microsoft.visio.vsd"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_PDF: dst = "com.adobe.pdf"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_POSTSCRIPT: dst = "com.adobe.postscript"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_ENCAPSULATED_POSTSCRIPT:
+            dst = "com.adobe.encapsulated-postscript";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_VIDEO: dst = "general.video"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_AVI: dst = "general.avi"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_MPEG: dst = "general.mpeg"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_MPEG4: dst = "general.mpeg-4"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_VIDEO_3GPP: dst = "general.3gpp"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_VIDEO_3GPP2: dst = "general.3gpp2"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_TS: dst = "general.ts"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_MPEGURL_VIDEO: dst = "general.mpegurl-video"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_WINDOWS_MEDIA_WM:
+            dst = "com.microsoft.windows-media-wm";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_WINDOWS_MEDIA_WMV:
+            dst = "com.microsoft.windows-media-wmv";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_WINDOWS_MEDIA_WMP:
+            dst = "com.microsoft.windows-media-wmp";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_WINDOWS_MEDIA_WVX:
+            dst = "com.microsoft.windows-media-wvx";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_WINDOWS_MEDIA_WMX:
+            dst = "com.microsoft.windows-media-wmx";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_REALMEDIA: dst = "com.real.realmedia"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_MATROSKA_VIDEO: dst = "org.matroska.mkv"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_FLASH: dst = "com.adobe.flash"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_AUDIO: dst = "general.audio"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_AAC: dst = "general.aac"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_AIFF: dst = "general.aiff"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_ALAC: dst = "general.alac"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_FLAC: dst = "general.flac"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_MP3: dst = "general.mp3"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OGG: dst = "general.ogg"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_PCM: dst = "general.pcm"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_WINDOWS_MEDIA_WMA:
+            dst = "com.microsoft.windows-media-wma";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_WAVEFORM_AUDIO: dst = "com.microsoft.waveform-audio"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_WINDOWS_MEDIA_WAX:
+            dst = "com.microsoft.windows-media-wax";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_AU_AUDIO: dst = "general.au-audio"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_AIFC_AUDIO: dst = "general.aifc-audio"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_MPEGURL_AUDIO: dst = "general.mpegurl-audio"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_MPEG_4_AUDIO: dst = "general.mpeg-4-audio"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_MP2: dst = "general.mp2"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_MPEG_AUDIO: dst = "general.mpeg-audio"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_ULAW_AUDIO: dst = "general.ulaw-audio"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_SD2_AUDIO: dst = "com.digidesign.sd2-audio"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_REALAUDIO: dst = "com.real.realaudio"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_MATROSKA_AUDIO: dst = "org.matroska.mka"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_FILE: dst = "general.file"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_DIRECTORY: dst = "general.directory"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_FOLDER: dst = "general.folder"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_SYMLINK: dst = "general.symlink"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_ARCHIVE: dst = "general.archive"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_BZ2_ARCHIVE: dst = "general.bz2-archive"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OPG: dst = "general.opg"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_TAZ_ARCHIVE: dst = "general.taz-archive"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_WEB_ARCHIVE: dst = "general.web-archive"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_DISK_IMAGE: dst = "general.disk-image"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_ISO: dst = "general.iso"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_TAR_ARCHIVE: dst = "general.tar-archive"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_ZIP_ARCHIVE: dst = "general.zip-archive"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_JAVA_ARCHIVE: dst = "com.sun.java-archive"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_GNU_TAR_ARCHIVE: dst = "org.gnu.gnu-tar-archive"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_GNU_ZIP_ARCHIVE: dst = "org.gnu.gnu-zip-archive"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_GNU_ZIP_TAR_ARCHIVE:
+            dst = "org.gnu.gnu-zip-tar-archive";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OPENXML: dst = "org.openxmlformats.openxml"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_WORDPROCESSINGML_DOCUMENT:
+            dst = "org.openxmlformats.wordprocessingml.document";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_SPREADSHEETML_SHEET:
+            dst = "org.openxmlformats.spreadsheetml.sheet";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_PRESENTATIONML_PRESENTATION:
+            dst = "org.openxmlformats.presentationml.presentation";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_DRAWINGML_VISIO:
+            dst = "org.openxmlformats.drawingml.visio";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_DRAWINGML_TEMPLATE:
+            dst = "org.openxmlformats.drawingml.template";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_WORDPROCESSINGML_TEMPLATE:
+            dst = "org.openxmlformats.wordprocessingml.template";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_PRESENTATIONML_TEMPLATE:
+            dst = "org.openxmlformats.presentationml.template";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_PRESENTATIONML_SLIDESHOW:
+            dst = "org.openxmlformats.presentationml.slideshow";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_SPREADSHEETML_TEMPLATE:
+            dst = "org.openxmlformats.spreadsheetml.template";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OPENDOCUMENT: dst = "org.oasis.opendocument"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OPENDOCUMENT_TEXT:
+            dst = "org.oasis.opendocument.text";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OPENDOCUMENT_SPREADSHEET:
+            dst = "org.oasis.opendocument.spreadsheet";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OPENDOCUMENT_PRESENTATION:
+            dst = "org.oasis.opendocument.presentation";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OPENDOCUMENT_GRAPHICS:
+            dst = "org.oasis.opendocument.graphics";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OPENDOCUMENT_FORMULA:
+            dst = "org.oasis.opendocument.formula";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_STUFFIT_ARCHIVE: dst = "com.allume.stuffit-archive"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_RAR_ARCHIVE: dst = "com.rarlab.rar-archive"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_SEVEN_ZIP_ARCHIVE: dst = "org.7-zip.7-zip-archive"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_CALENDAR: dst = "general.calendar"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_VCS: dst = "general.vcs"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_ICS: dst = "general.ics"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_CONTACT: dst = "general.contact"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_DATABASE: dst = "general.database"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_MESSAGE: dst = "general.message"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_EXECUTABLE: dst = "general.executable"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_PORTABLE_EXECUTABLE:
+            dst = "com.microsoft.portable-executable";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_SUN_JAVA_CLASS: dst = "com.sun.java-class"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_VCARD: dst = "general.vcard"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_NAVIGATION: dst = "general.navigation"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_LOCATION: dst = "general.location"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_FONT: dst = "general.font"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_TRUETYPE_FONT: dst = "general.truetype-font"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_TRUETYPE_COLLECTION_FONT:
+            dst = "general.truetype-collection-font";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OPENTYPE_FONT: dst = "general.opentype-font"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_POSTSCRIPT_FONT: dst = "com.adobe.postscript-font"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_POSTSCRIPT_PFB_FONT:
+            dst = "com.adobe.postscript-pfb-font";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_POSTSCRIPT_PFA_FONT:
+            dst = "com.adobe.postscript-pfa-font";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OPENHARMONY_FORM: dst = "openharmony.form"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OPENHARMONY_APP_ITEM: dst = "openharmony.app-item"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OPENHARMONY_PIXEL_MAP: dst = "openharmony.pixel-map"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OPENHARMONY_ATOMIC_SERVICE:
+            dst = "openharmony.atomic-service";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OPENHARMONY_PACKAGE: dst = "openharmony.package"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OPENHARMONY_HAP: dst = "openharmony.hap"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OPENHARMONY_HDOC: dst = "openharmony.hdoc"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OPENHARMONY_HINOTE: dst = "openharmony.hinote"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OPENHARMONY_STYLED_STRING:
+            dst = "openharmony.styled-string";
+            break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OPENHARMONY_WANT: dst = "openharmony.want"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OFD: dst = "general.ofd"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_CAD: dst = "general.cad"; break;
+        case ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OCTET_STREAM: dst = "general.octet-stream"; break;
         default:
-            LOGE("Unexpected enum value in Ark_UniformDataType: %{public}d", src);
+            LOGE("Unexpected enum value in Ark_uniformTypeDescriptor_UniformDataType: %{public}d", src);
     }
 }
 

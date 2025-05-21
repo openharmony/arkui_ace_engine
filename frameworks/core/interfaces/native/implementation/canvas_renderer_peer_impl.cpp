@@ -174,7 +174,7 @@ void CanvasRendererPeerImpl::DrawSvgImage(ImageBitmapPeer* bitmap, const DrawIma
     imageInfo.imageFit = bitmap->GetImageFit();
     renderingContext2DModel_->DrawSvgImage(imageInfo);
 }
-void CanvasRendererPeerImpl::DrawPixelMap(PixelMapPeer* pixelMap, const DrawImageParam& params)
+void CanvasRendererPeerImpl::DrawPixelMap(image_PixelMapPeer* pixelMap, const DrawImageParam& params)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
     CHECK_NULL_VOID(pixelMap);

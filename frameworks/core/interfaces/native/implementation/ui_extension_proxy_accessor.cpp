@@ -42,8 +42,7 @@ void SendImpl(Ark_UIExtensionProxy peer,
 {
     LOGE("UIExtensionProxyAccessor::SendImpl - is not supported");
 }
-Map_String_Object SendSyncImpl(Ark_VMContext vmContext,
-                               Ark_UIExtensionProxy peer,
+Map_String_Object SendSyncImpl(Ark_UIExtensionProxy peer,
                                const Map_String_Object* data)
 {
     LOGE("UIExtensionProxyAccessor::SendSyncImpl - is not supported");

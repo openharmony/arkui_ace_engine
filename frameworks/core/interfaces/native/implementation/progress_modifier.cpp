@@ -123,9 +123,6 @@ ProgressOptions Convert(const Ark_ProgressOptions& src)
     }
     // type
     auto type = Converter::OptConvert<ProgressType>(src.type);
-    if (!type.has_value()) {
-        type = Converter::OptConvert<ProgressType>(src.style);
-    }
     if (type) {
         options.type = type.value();
     }

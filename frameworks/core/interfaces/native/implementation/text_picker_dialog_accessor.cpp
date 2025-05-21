@@ -295,11 +295,24 @@ void ShowImpl(const Opt_TextPickerDialogOptions* options)
     MockTextPickerDialogView::Show(dialogProps, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
 #endif
 }
+void DestroyPeerImpl(Ark_TextPickerDialog peer)
+{
+}
+Ark_TextPickerDialog CtorImpl()
+{
+    return nullptr;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
+}
 } // TextPickerDialogAccessor
 const GENERATED_ArkUITextPickerDialogAccessor* GetTextPickerDialogAccessor()
 {
     static const GENERATED_ArkUITextPickerDialogAccessor TextPickerDialogAccessorImpl {
-        TextPickerDialogAccessor::ShowImpl,
+        TextPickerDialogAccessor::DestroyPeerImpl,
+        TextPickerDialogAccessor::CtorImpl,
+        TextPickerDialogAccessor::GetFinalizerImpl,
     };
     return &TextPickerDialogAccessorImpl;
 }

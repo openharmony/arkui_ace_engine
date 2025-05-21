@@ -27,28 +27,16 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
 namespace OHOS::Ace::NG {
-using IndicatorVariantType = std::variant<SwiperParameters, SwiperDigitalParameters, bool>;
+using IndicatorVariantType = std::variant<SwiperParameters, SwiperDigitalParameters, bool, IndicatorComponentControllerPeer*>;
 using ArrowStyleVariantType = std::variant<SwiperArrowParameters, bool>;
 using DisplayCountVariantType = std::variant<int32_t, std::string, Ark_SwiperAutoFill>;
 }
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-SwiperParameters Convert(const Ark_IndicatorStyle& src)
+IndicatorVariantType Convert(const Ark_IndicatorComponentController& src)
 {
-    SwiperParameters p;
-    p.dimLeft = Converter::OptConvert<Dimension>(src.left);
-    p.dimTop = Converter::OptConvert<Dimension>(src.top);
-    p.dimRight = Converter::OptConvert<Dimension>(src.right);
-    p.dimBottom = Converter::OptConvert<Dimension>(src.bottom);
-
-    p.itemWidth = p.itemHeight = p.selectedItemWidth = p.selectedItemHeight =
-        Converter::OptConvert<Dimension>(src.size);
-
-    p.maskValue = Converter::OptConvert<bool>(src.mask);
-    p.colorVal = Converter::OptConvert<Color>(src.color);
-    p.selectedColorVal = Converter::OptConvert<Color>(src.selectedColor);
-    return p;
+    return src;
 }
 
 template<>
@@ -151,12 +139,8 @@ Ark_Function Convert(const Ark_Function& src)
 template<>
 inline void AssignCast(std::optional<SwiperDisplayMode>& dst, const Ark_SwiperDisplayMode& src)
 {
-    bool newSdk = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN);
     switch (src) {
-        case SELECTOR_ID_0: dst = SwiperDisplayMode::STRETCH; break;
-        case SELECTOR_ID_1: dst = SwiperDisplayMode::AUTO_LINEAR; break;
-        case SELECTOR_ID_2: newSdk ? dst = SwiperDisplayMode::STRETCH : dst = std::nullopt; break;
-        case SELECTOR_ID_3: newSdk ? dst = SwiperDisplayMode::AUTO_LINEAR : dst = std::nullopt; break;
+        case ARK_SWIPER_DISPLAY_MODE_STRETCH: dst = SwiperDisplayMode::STRETCH; break;
         default: LOGE("Unexpected enum value in Ark_SwiperDisplayMode: %{public}d", src);
     }
 }
@@ -165,10 +149,10 @@ template<>
 inline void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_SwiperNestedScrollMode& src)
 {
     switch (src) {
-        case static_cast<Ark_SwiperNestedScrollMode>(NestedScrollMode::SELF_ONLY):
+        case ARK_SWIPER_NESTED_SCROLL_MODE_SELF_ONLY:
             dst = NestedScrollMode::SELF_ONLY;
             break;
-        case static_cast<Ark_SwiperNestedScrollMode>(NestedScrollMode::SELF_FIRST):
+        case ARK_SWIPER_NESTED_SCROLL_MODE_SELF_FIRST:
             dst = NestedScrollMode::SELF_FIRST;
             break;
         default: LOGE("Unexpected enum value in Ark_SwiperNestedScrollMode: %{public}d", src);
@@ -279,37 +263,6 @@ void IndexImpl(Ark_NativePointer node,
     }
     SwiperModelNG::SetIndex(frameNode, *convValue < 0 ? OHOS::Ace::DEFAULT_SWIPER_CURRENT_INDEX : *convValue);
 }
-void AutoPlay0Impl(Ark_NativePointer node,
-                   const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    SwiperModelNG::SetAutoPlay(frameNode, *convValue);
-}
-void AutoPlay1Impl(Ark_NativePointer node,
-                   const Opt_Boolean* autoPlay,
-                   const Opt_AutoPlayOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto autoPlayConv = Converter::OptConvert<bool>(*autoPlay);
-    if (!autoPlayConv) {
-        // TODO: Reset value
-        return;
-    }
-    auto optionsConv = Converter::OptConvert<SwiperAutoPlayOptions>(*options);
-    if (!optionsConv) {
-        // TODO: Reset value
-        return;
-    }
-    SwiperModelNG::SetAutoPlay(frameNode, *autoPlayConv);
-    SwiperModelNG::SetAutoPlayOptions(frameNode, *optionsConv);
-}
 void IntervalImpl(Ark_NativePointer node,
                   const Opt_Number* value)
 {
@@ -322,8 +275,8 @@ void IntervalImpl(Ark_NativePointer node,
     }
     SwiperModelNG::SetAutoPlayInterval(frameNode, *convValue);
 }
-void Indicator0Impl(Ark_NativePointer node,
-                    const Opt_Union_DotIndicator_DigitIndicator_Boolean* value)
+void IndicatorImpl(Ark_NativePointer node,
+                   const Opt_Union_IndicatorComponentController_DotIndicator_DigitIndicator_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -351,14 +304,6 @@ void Indicator0Impl(Ark_NativePointer node,
         SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
     }
     SwiperModelNG::SetShowIndicator(frameNode, showIndicator);
-}
-void Indicator1Impl(Ark_NativePointer node,
-                    const Opt_Type_SwiperAttribute_indicator_indicator* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SwiperModelNG::SetIndicator1(frameNode, convValue);
 }
 void LoopImpl(Ark_NativePointer node,
               const Opt_Boolean* value)
@@ -507,21 +452,6 @@ void OnSelectedImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //SwiperModelNG::SetOnSelected(frameNode, convValue);
-}
-void IndicatorStyleImpl(Ark_NativePointer node,
-                        const Opt_IndicatorStyle* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    SwiperParameters params;
-    if (value) {
-        if (auto paramsOpt = Converter::OptConvert<SwiperParameters>(*value); paramsOpt) {
-            params = *paramsOpt;
-            CheckSwiperParameters(params);
-        }
-    }
-    SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
-    SwiperModelNG::SetDotIndicatorStyle(frameNode, params);
 }
 void OnUnselectedImpl(Ark_NativePointer node,
                       const Opt_Callback_Number_Void* value)
@@ -679,6 +609,25 @@ void OnContentWillScrollImpl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //SwiperModelNG::SetOnContentWillScroll(frameNode, convValue);
 }
+void AutoPlayImpl(Ark_NativePointer node,
+                  const Opt_Boolean* autoPlay,
+                  const Opt_AutoPlayOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto autoPlayConv = Converter::OptConvert<bool>(*autoPlay);
+    if (!autoPlayConv) {
+        // TODO: Reset value
+        return;
+    }
+    auto optionsConv = Converter::OptConvert<SwiperAutoPlayOptions>(*options);
+    if (!optionsConv) {
+        // TODO: Reset value
+        return;
+    }
+    SwiperModelNG::SetAutoPlay(frameNode, *autoPlayConv);
+    SwiperModelNG::SetAutoPlayOptions(frameNode, *optionsConv);
+}
 void DisplayArrowImpl(Ark_NativePointer node,
                       const Opt_Union_ArrowStyle_Boolean* value,
                       const Opt_Boolean* isHoverShow)
@@ -770,6 +719,7 @@ void NextMarginImpl(Ark_NativePointer node,
     auto optIgnore = ignoreBlank ? Converter::OptConvert<bool>(*ignoreBlank) : std::nullopt;
     SwiperModelNG::SetNextMargin(frameNode, *optMargin, optIgnore);
 }
+#ifdef WRONG_GEN
 void _onChangeEvent_indexImpl(Ark_NativePointer node,
                               const Callback_Opt_Number_Void* callback)
 {
@@ -785,6 +735,7 @@ void _onChangeEvent_indexImpl(Ark_NativePointer node,
     };
     SwiperModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
+#endif
 } // SwiperAttributeModifier
 const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
 {
@@ -792,11 +743,8 @@ const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
         SwiperModifier::ConstructImpl,
         SwiperInterfaceModifier::SetSwiperOptionsImpl,
         SwiperAttributeModifier::IndexImpl,
-        SwiperAttributeModifier::AutoPlay0Impl,
-        SwiperAttributeModifier::AutoPlay1Impl,
         SwiperAttributeModifier::IntervalImpl,
-        SwiperAttributeModifier::Indicator0Impl,
-        SwiperAttributeModifier::Indicator1Impl,
+        SwiperAttributeModifier::IndicatorImpl,
         SwiperAttributeModifier::LoopImpl,
         SwiperAttributeModifier::DurationImpl,
         SwiperAttributeModifier::VerticalImpl,
@@ -809,7 +757,6 @@ const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
         SwiperAttributeModifier::CurveImpl,
         SwiperAttributeModifier::OnChangeImpl,
         SwiperAttributeModifier::OnSelectedImpl,
-        SwiperAttributeModifier::IndicatorStyleImpl,
         SwiperAttributeModifier::OnUnselectedImpl,
         SwiperAttributeModifier::OnAnimationStartImpl,
         SwiperAttributeModifier::OnAnimationEndImpl,
@@ -820,11 +767,11 @@ const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
         SwiperAttributeModifier::IndicatorInteractiveImpl,
         SwiperAttributeModifier::PageFlipModeImpl,
         SwiperAttributeModifier::OnContentWillScrollImpl,
+        SwiperAttributeModifier::AutoPlayImpl,
         SwiperAttributeModifier::DisplayArrowImpl,
         SwiperAttributeModifier::DisplayCountImpl,
         SwiperAttributeModifier::PrevMarginImpl,
         SwiperAttributeModifier::NextMarginImpl,
-        SwiperAttributeModifier::_onChangeEvent_indexImpl,
     };
     return &ArkUISwiperModifierImpl;
 }

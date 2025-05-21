@@ -85,6 +85,10 @@ Opt_TextAlign GetTextAlignImpl(Ark_ParagraphStyle peer)
     CHECK_NULL_RETURN(peer->span, invalid);
     return Converter::ArkValue<Opt_TextAlign>(peer->span->GetParagraphStyle().align);
 }
+void SetTextAlignImpl(Ark_ParagraphStyle peer,
+                      const Opt_TextAlign* textAlign)
+{
+}
 Opt_Number GetTextIndentImpl(Ark_ParagraphStyle peer)
 {
     auto invalid = Converter::ArkValue<Opt_Number>();
@@ -96,6 +100,10 @@ Opt_Number GetTextIndentImpl(Ark_ParagraphStyle peer)
     }
     return invalid;
 }
+void SetTextIndentImpl(Ark_ParagraphStyle peer,
+                       const Opt_Number* textIndent)
+{
+}
 Opt_Number GetMaxLinesImpl(Ark_ParagraphStyle peer)
 {
     auto invalid = Converter::ArkValue<Opt_Number>();
@@ -103,6 +111,10 @@ Opt_Number GetMaxLinesImpl(Ark_ParagraphStyle peer)
     CHECK_NULL_RETURN(peer->span, invalid);
     auto style = peer->span->GetParagraphStyle();
     return Converter::ArkValue<Opt_Number>(style.maxLines);
+}
+void SetMaxLinesImpl(Ark_ParagraphStyle peer,
+                     const Opt_Number* maxLines)
+{
 }
 Opt_TextOverflow GetOverflowImpl(Ark_ParagraphStyle peer)
 {
@@ -112,6 +124,10 @@ Opt_TextOverflow GetOverflowImpl(Ark_ParagraphStyle peer)
     auto style = peer->span->GetParagraphStyle();
     return Converter::ArkValue<Opt_TextOverflow>(style.textOverflow);
 }
+void SetOverflowImpl(Ark_ParagraphStyle peer,
+                     const Opt_TextOverflow* overflow)
+{
+}
 Opt_WordBreak GetWordBreakImpl(Ark_ParagraphStyle peer)
 {
     auto invalid = Converter::ArkValue<Opt_WordBreak>();
@@ -119,6 +135,10 @@ Opt_WordBreak GetWordBreakImpl(Ark_ParagraphStyle peer)
     CHECK_NULL_RETURN(peer->span, invalid);
     auto style = peer->span->GetParagraphStyle();
     return Converter::ArkValue<Opt_WordBreak>(style.wordBreak);
+}
+void SetWordBreakImpl(Ark_ParagraphStyle peer,
+                      const Opt_WordBreak* wordBreak)
+{
 }
 Opt_Union_Number_LeadingMarginPlaceholder GetLeadingMarginImpl(Ark_ParagraphStyle peer)
 {
@@ -129,9 +149,17 @@ Opt_Union_Number_LeadingMarginPlaceholder GetLeadingMarginImpl(Ark_ParagraphStyl
     return Converter::ArkUnion<Opt_Union_Number_LeadingMarginPlaceholder,
         Ark_LeadingMarginPlaceholder>(style.leadingMargin, Converter::FC);
 }
+void SetLeadingMarginImpl(Ark_ParagraphStyle peer,
+                          const Opt_Union_Number_LeadingMarginPlaceholder* leadingMargin)
+{
+}
 Opt_Number GetParagraphSpacingImpl(Ark_ParagraphStyle peer)
 {
     return {};
+}
+void SetParagraphSpacingImpl(Ark_ParagraphStyle peer,
+                             const Opt_Number* paragraphSpacing)
+{
 }
 } // ParagraphStyleAccessor
 const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor()
@@ -141,12 +169,19 @@ const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor()
         ParagraphStyleAccessor::CtorImpl,
         ParagraphStyleAccessor::GetFinalizerImpl,
         ParagraphStyleAccessor::GetTextAlignImpl,
+        ParagraphStyleAccessor::SetTextAlignImpl,
         ParagraphStyleAccessor::GetTextIndentImpl,
+        ParagraphStyleAccessor::SetTextIndentImpl,
         ParagraphStyleAccessor::GetMaxLinesImpl,
+        ParagraphStyleAccessor::SetMaxLinesImpl,
         ParagraphStyleAccessor::GetOverflowImpl,
+        ParagraphStyleAccessor::SetOverflowImpl,
         ParagraphStyleAccessor::GetWordBreakImpl,
+        ParagraphStyleAccessor::SetWordBreakImpl,
         ParagraphStyleAccessor::GetLeadingMarginImpl,
+        ParagraphStyleAccessor::SetLeadingMarginImpl,
         ParagraphStyleAccessor::GetParagraphSpacingImpl,
+        ParagraphStyleAccessor::SetParagraphSpacingImpl,
     };
     return &ParagraphStyleAccessorImpl;
 }

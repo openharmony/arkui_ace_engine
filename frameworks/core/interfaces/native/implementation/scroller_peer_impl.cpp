@@ -49,11 +49,8 @@ inline void AssignCast(std::optional<ScrollEdgeType>& dst, const Ark_Edge& src)
 {
     switch (src) {
         case ARK_EDGE_TOP: dst = ScrollEdgeType::SCROLL_TOP; break;
-        case ARK_EDGE_CENTER: dst = ScrollEdgeType::SCROLL_NONE; break;
         case ARK_EDGE_BOTTOM: dst = ScrollEdgeType::SCROLL_BOTTOM; break;
-        case ARK_EDGE_BASELINE: dst = ScrollEdgeType::SCROLL_NONE; break;
         case ARK_EDGE_START: dst = ScrollEdgeType::SCROLL_TOP; break;
-        case ARK_EDGE_MIDDLE: dst = ScrollEdgeType::SCROLL_NONE; break;
         case ARK_EDGE_END: dst = ScrollEdgeType::SCROLL_BOTTOM; break;
         default: LOGE("Unexpected enum value in Ark_Edge: %{public}d", src);
     }

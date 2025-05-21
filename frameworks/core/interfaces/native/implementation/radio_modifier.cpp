@@ -119,8 +119,9 @@ void ContentModifierImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     LOGE("ARKOALA RadioAttributeModifier::ContentModifierImpl -> Method is not implemented.");
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //RadioModelNG::SetContentModifier0(frameNode, convValue);
+    //RadioModelNG::SetContentModifier(frameNode, convValue);
 }
+#ifdef WRONG_GEN
 void _onChangeEvent_checkedImpl(Ark_NativePointer node,
                                 const Callback_Opt_Boolean_Void* callback)
 {
@@ -134,6 +135,7 @@ void _onChangeEvent_checkedImpl(Ark_NativePointer node,
     };
     RadioModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
+#endif
 } // RadioAttributeModifier
 const GENERATED_ArkUIRadioModifier* GetRadioModifier()
 {
@@ -141,13 +143,9 @@ const GENERATED_ArkUIRadioModifier* GetRadioModifier()
         RadioModifier::ConstructImpl,
         RadioInterfaceModifier::SetRadioOptionsImpl,
         RadioAttributeModifier::CheckedImpl,
-        nullptr,
-        nullptr,
         RadioAttributeModifier::OnChangeImpl,
         RadioAttributeModifier::RadioStyleImpl,
         RadioAttributeModifier::ContentModifierImpl,
-        RadioAttributeModifier::ContentModifierImpl,
-        RadioAttributeModifier::_onChangeEvent_checkedImpl,
     };
     return &ArkUIRadioModifierImpl;
 }

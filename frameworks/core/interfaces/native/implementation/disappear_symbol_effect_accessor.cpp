@@ -44,10 +44,10 @@ Opt_EffectScope GetScopeImpl(Ark_DisappearSymbolEffect peer)
     return Converter::ArkValue<Opt_EffectScope>(peer->scope);
 }
 void SetScopeImpl(Ark_DisappearSymbolEffect peer,
-                  Ark_EffectScope scope)
+                  const Opt_EffectScope* scope)
 {
     CHECK_NULL_VOID(peer);
-    peer->scope = Converter::OptConvert<OHOS::Ace::ScopeType>(scope);
+    peer->scope = Converter::OptConvert<OHOS::Ace::ScopeType>(*scope);
 }
 } // DisappearSymbolEffectAccessor
 const GENERATED_ArkUIDisappearSymbolEffectAccessor* GetDisappearSymbolEffectAccessor()

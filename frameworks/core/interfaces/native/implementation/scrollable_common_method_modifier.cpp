@@ -88,6 +88,36 @@ void ScrollBarWidthImpl(Ark_NativePointer node,
     Validator::ValidateNonPercent(convValue);
     ScrollableModelStatic::SetScrollBarWidth(frameNode, convValue);
 }
+void EdgeEffectImpl(Ark_NativePointer node,
+                    const Opt_EdgeEffect* edgeEffect,
+                    const Opt_EdgeEffectOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convEdgeEffect = Converter::OptConvert<EdgeEffect>(*edgeEffect);
+    std::optional<bool> convOptions = options ? Converter::OptConvert<bool>(*options) : std::nullopt;
+    ScrollableModelStatic::SetEdgeEffect(frameNode, convEdgeEffect, convOptions);
+}
+void FadingEdgeImpl(Ark_NativePointer node,
+                    const Opt_Boolean* enabled,
+                    const Opt_FadingEdgeOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    std::optional<bool> fadingEdge;
+    if (enabled) {
+        fadingEdge = Converter::OptConvert<bool>(*enabled);
+    }
+
+    std::optional<Dimension> fadingEdgeLength;
+    if (options) {
+        fadingEdgeLength = Converter::OptConvert<Dimension>(*options);
+    }
+    Validator::ValidateNonNegative(fadingEdgeLength);
+
+    ScrollableModelStatic::SetFadingEdge(frameNode, fadingEdge, fadingEdgeLength);
+}
 void NestedScrollImpl(Ark_NativePointer node,
                       const Opt_NestedScrollOptions* value)
 {
@@ -133,53 +163,6 @@ void FrictionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<float>(*value);
     ScrollableModelStatic::SetFriction(frameNode, convValue);
-}
-void OnScrollImpl(Ark_NativePointer node,
-                  const Opt_Callback_Number_Number_Void* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ScrollableCommonMethodModelNG::SetOnScroll(frameNode, convValue);
-    LOGE("ScrollableCommonMethodModifier::OnScrollImpl is not implemented");
-}
-void OnWillScrollImpl(Ark_NativePointer node,
-                      const Opt_ScrollOnWillScrollCallback* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-
-    std::optional<ScrollOnWillScrollCallback> arkCallback;
-    if (value) {
-        arkCallback = Converter::OptConvert<ScrollOnWillScrollCallback>(*value);
-    }
-    if (arkCallback) {
-        auto modelCallback = [callback = CallbackHelper(*arkCallback)]
-            (const Dimension& scrollOffset, const ScrollState& scrollState, const ScrollSource& scrollSource) ->
-                ScrollFrameResult {
-            auto arkScrollOffset = Converter::ArkValue<Ark_Number>(scrollOffset);
-            auto arkScrollState = Converter::ArkValue<Ark_ScrollState>(scrollState);
-            auto arkScrollSource = Converter::ArkValue<Ark_ScrollSource>(scrollSource);
-            auto resultOpt =
-                callback.InvokeWithOptConvertResult<ScrollFrameResult, Ark_OffsetResult, Callback_OffsetResult_Void>(
-                    arkScrollOffset, arkScrollOffset, arkScrollState, arkScrollSource);
-            return resultOpt.value_or(ScrollFrameResult());
-        };
-        ScrollableModelStatic::SetOnWillScroll(frameNode, std::move(modelCallback));
-    } else {
-        ScrollableModelStatic::SetOnWillScroll(frameNode, nullptr);
-    }
-}
-
-void OnDidScrollImpl(Ark_NativePointer node,
-                     const ScrollOnScrollCallback* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollableCommonMethodModelNG::SetOnDidScroll(frameNode, convValue);
-    LOGE("ScrollableCommonMethodModifier::OnDidScrollImpl is not implemented");
 }
 void OnReachStartImpl(Ark_NativePointer node,
                       const Opt_Callback_Void* value)
@@ -297,36 +280,6 @@ void BackToTopImpl(Ark_NativePointer node,
     }
     ScrollableModelStatic::SetBackToTop(frameNode, *convValue);
 }
-void EdgeEffectImpl(Ark_NativePointer node,
-                    const Opt_EdgeEffect* edgeEffect,
-                    const Opt_EdgeEffectOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convEdgeEffect = Converter::OptConvert<EdgeEffect>(*edgeEffect);
-    std::optional<bool> convOptions = options ? Converter::OptConvert<bool>(*options) : std::nullopt;
-    ScrollableModelStatic::SetEdgeEffect(frameNode, convEdgeEffect, convOptions);
-}
-void FadingEdgeImpl(Ark_NativePointer node,
-                    const Opt_Boolean* enabled,
-                    const Opt_FadingEdgeOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-
-    std::optional<bool> fadingEdge;
-    if (enabled) {
-        fadingEdge = Converter::OptConvert<bool>(*enabled);
-    }
-
-    std::optional<Dimension> fadingEdgeLength;
-    if (options) {
-        fadingEdgeLength = Converter::OptConvert<Dimension>(*options);
-    }
-    Validator::ValidateNonNegative(fadingEdgeLength);
-
-    ScrollableModelStatic::SetFadingEdge(frameNode, fadingEdge, fadingEdgeLength);
-}
 } // ScrollableCommonMethodModifier
 const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodModifier()
 {
@@ -335,10 +288,11 @@ const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodMo
         ScrollableCommonMethodModifier::ScrollBarImpl,
         ScrollableCommonMethodModifier::ScrollBarColorImpl,
         ScrollableCommonMethodModifier::ScrollBarWidthImpl,
+        ScrollableCommonMethodModifier::EdgeEffectImpl,
+        ScrollableCommonMethodModifier::FadingEdgeImpl,
         ScrollableCommonMethodModifier::NestedScrollImpl,
         ScrollableCommonMethodModifier::EnableScrollInteractionImpl,
         ScrollableCommonMethodModifier::FrictionImpl,
-        ScrollableCommonMethodModifier::OnScrollImpl,
         ScrollableCommonMethodModifier::OnReachStartImpl,
         ScrollableCommonMethodModifier::OnReachEndImpl,
         ScrollableCommonMethodModifier::OnScrollStartImpl,
@@ -347,8 +301,6 @@ const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodMo
         ScrollableCommonMethodModifier::ClipContentImpl,
         ScrollableCommonMethodModifier::DigitalCrownSensitivityImpl,
         ScrollableCommonMethodModifier::BackToTopImpl,
-        ScrollableCommonMethodModifier::EdgeEffectImpl,
-        ScrollableCommonMethodModifier::FadingEdgeImpl,
     };
     return &ArkUIScrollableCommonMethodModifierImpl;
 }
