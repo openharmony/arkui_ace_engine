@@ -159,7 +159,7 @@ void DialogLayoutAlgorithm::AdjustHoverModeForWaterfall(const RefPtr<FrameNode>&
     auto dialogProp = DynamicCast<DialogLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(dialogProp);
     auto enableHoverMode = dialogProp->GetEnableHoverMode().value_or(false);
-    if (!pattern->IsWaterfallWindowMode()) {
+    if (!OverlayManager::IsNeedAvoidFoldCrease(frameNode, false, expandDisplay_, dialogProp->GetEnableHoverMode())) {
         return;
     }
     TAG_LOGI(AceLogTag::ACE_DIALOG, "enableHoverMode for waterfallMode, isShowInSubWindow: %{public}d",
