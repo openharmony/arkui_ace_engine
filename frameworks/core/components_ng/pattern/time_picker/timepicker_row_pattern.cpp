@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/time_picker/toss_animation_controller.h"
+#include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 

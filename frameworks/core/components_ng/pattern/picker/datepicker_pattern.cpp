@@ -312,7 +312,7 @@ void DatePickerPattern::ColumnPatternInitHapticController()
         if (!columnPattern) {
             continue;
         }
-        columnPattern->InitHapticController();
+        columnPattern->InitHapticController(columnNode);
     }
 }
 
@@ -325,7 +325,7 @@ void DatePickerPattern::ColumnPatternInitHapticController(const RefPtr<FrameNode
     isHapticChanged_ = false;
     auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
     CHECK_NULL_VOID(columnPattern);
-    columnPattern->InitHapticController();
+    columnPattern->InitHapticController(columnNode);
 }
 
 void DatePickerPattern::ColumnPatternStopHaptic()

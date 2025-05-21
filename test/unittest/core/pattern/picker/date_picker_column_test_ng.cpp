@@ -268,7 +268,7 @@ HWTEST_F(DatePickerColumnTest, DatePickerColumn001, TestSize.Level1)
      */
     auto childNode = AccessibilityManager::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
     auto childSize = static_cast<int32_t>(columnNode->GetChildren().size());
-    RefPtr<DatePickerEventParam> param = AccessibilityManager::MakeRefPtr<DatePickerEventParam>();
+    RefPtr<PickerEventParam> param = AccessibilityManager::MakeRefPtr<PickerEventParam>();
     param->instance_ = childNode;
     param->itemIndex_ = 0;
     param->itemTotalCounts_ = childSize;
@@ -304,7 +304,7 @@ HWTEST_F(DatePickerColumnTest, DatePickerColumn002, TestSize.Level1)
      */
     auto childNode = AccessibilityManager::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
     auto childSize = static_cast<int32_t>(columnNode->GetChildren().size());
-    RefPtr<DatePickerEventParam> param = AccessibilityManager::MakeRefPtr<DatePickerEventParam>();
+    RefPtr<PickerEventParam> param = AccessibilityManager::MakeRefPtr<PickerEventParam>();
     param->instance_ = childNode;
     param->itemIndex_ = 0;
     param->itemTotalCounts_ = childSize;
@@ -341,7 +341,7 @@ HWTEST_F(DatePickerColumnTest, DatePickerColumn003, TestSize.Level1)
      */
     auto childNode = AccessibilityManager::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
     auto childSize = static_cast<int32_t>(columnNode->GetChildren().size());
-    RefPtr<DatePickerEventParam> param = AccessibilityManager::MakeRefPtr<DatePickerEventParam>();
+    RefPtr<PickerEventParam> param = AccessibilityManager::MakeRefPtr<PickerEventParam>();
     param->instance_ = childNode;
     param->itemIndex_ = 0;
     param->itemTotalCounts_ = childSize;
