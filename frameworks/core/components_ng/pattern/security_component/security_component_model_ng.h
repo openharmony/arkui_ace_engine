@@ -32,7 +32,7 @@ struct SecurityComponentElementStyle {
     uint32_t symbolIcon;
 };
 
-class ACE_EXPORT SecurityComponentModelNG {
+class ACE_FORCE_EXPORT SecurityComponentModelNG {
 public:
     virtual ~SecurityComponentModelNG() = default;
     virtual void Create(int32_t text, int32_t icon,
