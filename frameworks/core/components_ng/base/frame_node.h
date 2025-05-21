@@ -1144,9 +1144,10 @@ public:
     bool GetOpIncGroupCheckedThrough();
     void SetOpIncCheckedOnce();
     bool GetOpIncCheckedOnce();
-    void MarkAndCheckNewOpIncNode();
+    void MarkAndCheckNewOpIncNode(Axis axis) override;
+    void SuggestOpIncGroup();
     ChildrenListWithGuard GetAllChildren();
-    OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth);
+    OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth, Axis axis);
     void GetInspectorValue() override;
     void NotifyWebPattern(bool isRegister) override;
 
@@ -1347,6 +1348,8 @@ public:
     ScrollWindowAdapter* GetScrollWindowAdapter() const;
     ScrollWindowAdapter* GetOrCreateScrollWindowAdapter();
 
+    bool HasMultipleChild();
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1357,7 +1360,7 @@ protected:
 private:
     void MarkDirtyNode(
         bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
-    OPINC_TYPE_E IsOpIncValidNode(const SizeF& boundary, int32_t childNumber = 0);
+    OPINC_TYPE_E IsOpIncValidNode(const SizeF& boundary, Axis axis, int32_t childNumber = 0);
     static int GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t thresh);
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;

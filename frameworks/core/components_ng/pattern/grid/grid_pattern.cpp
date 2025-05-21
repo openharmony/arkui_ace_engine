@@ -286,7 +286,9 @@ void GridPattern::FireOnScrollStart()
     ScrollablePattern::RecordScrollEvent(Recorder::EventType::SCROLL_START);
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
-    SuggestOpIncGroup(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SuggestOpIncGroup();
     PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;
@@ -309,8 +311,6 @@ void GridPattern::FireOnScrollStart()
     if (pipeline) {
         pipeline->GetFocusManager()->SetNeedTriggerScroll(std::nullopt);
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollStart = hub->GetOnScrollStart();

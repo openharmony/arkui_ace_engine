@@ -294,7 +294,10 @@ bool ScrollablePattern::OnScrollCallback(float offset, int32_t source)
         FireOnScrollStart();
         return true;
     }
-    SuggestOpIncGroup(true);
+    auto host = GetHost();
+    if (host) {
+        host->SuggestOpIncGroup();
+    }
     return UpdateCurrentOffset(offset, source);
 }
 
@@ -1751,7 +1754,10 @@ void ScrollablePattern::HandleDragStart(const GestureEvent& info)
     auto mouseOffsetY = static_cast<float>(info.GetRawGlobalLocation().GetY());
     mouseOffsetX -= info.GetOffsetX();
     mouseOffsetY -= info.GetOffsetY();
-    SuggestOpIncGroup(true);
+    auto host = GetHost();
+    if (host) {
+        host->SuggestOpIncGroup();
+    }
     if (!IsItemSelected(static_cast<float>(info.GetGlobalLocation().GetX()) - info.GetOffsetX(),
         static_cast<float>(info.GetGlobalLocation().GetY()) - info.GetOffsetY())) {
         ClearMultiSelect();
@@ -2771,7 +2777,7 @@ void ScrollablePattern::FireOnScrollStart()
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(hub);
-    SuggestOpIncGroup(true);
+    host->SuggestOpIncGroup();
     if (scrollStop_ && !GetScrollAbort()) {
         OnScrollStop(hub->GetOnScrollStop());
     }
@@ -2906,28 +2912,6 @@ void ScrollablePattern::FireObserverOnDidScroll(float finalOffset)
         }
     };
     FireOnScroll(finalOffset, onScroll);
-}
-
-void ScrollablePattern::SuggestOpIncGroup(bool flag)
-{
-    if (!SystemProperties::IsOpIncEnable()) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (host->GetSuggestOpIncActivatedOnce()) {
-        return;
-    }
-    flag = flag && isVertical();
-    if (flag) {
-        ACE_SCOPED_TRACE("SuggestOpIncGroup %s", host->GetHostTag().c_str());
-        auto parent = host->GetAncestorNodeOfFrame(false);
-        CHECK_NULL_VOID(parent);
-        parent->SetSuggestOpIncActivatedOnce();
-        // get 1st layer
-        std::string path("\\>");
-        host->FindSuggestOpIncNode(path, host->GetGeometryNode()->GetFrameSize(), 0);
-    }
 }
 
 void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)

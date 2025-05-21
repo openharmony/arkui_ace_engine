@@ -566,6 +566,7 @@ void WaterFlowSegmentedLayout::LayoutItem(int32_t idx, float crossPos, const Off
     } else {
         wrapper->GetHostNode()->ForceSyncGeometryNode();
     }
+    wrapper->MarkAndCheckNewOpIncNode(axis_);
 
     // recode restore info
     if (idx == info_->startIndex_) {

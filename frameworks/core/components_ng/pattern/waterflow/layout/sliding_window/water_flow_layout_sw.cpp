@@ -778,6 +778,7 @@ void WaterFlowLayoutSW::LayoutSection(
             } else {
                 child->GetHostNode()->ForceSyncGeometryNode();
             }
+            child->MarkAndCheckNewOpIncNode(axis_);
         }
         if (!rtl) {
             crossPos += itemsCrossSize_[idx][i] + crossGaps_[idx];

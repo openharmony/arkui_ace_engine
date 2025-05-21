@@ -1172,6 +1172,7 @@ void ListItemGroupLayoutAlgorithm::LayoutListItem(LayoutWrapper* layoutWrapper,
         } else {
             SyncGeometry(wrapper);
         }
+        wrapper->MarkAndCheckNewOpIncNode(axis_);
     }
 }
 
