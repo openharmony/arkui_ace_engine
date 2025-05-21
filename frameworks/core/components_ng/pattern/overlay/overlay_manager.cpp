@@ -3609,6 +3609,31 @@ bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackP
     return true;
 }
 
+bool OverlayManager::RemoveDialogWithContent(
+    const RefPtr<FrameNode>& overlay, const DialogProperties& props, bool isBackPressed, bool isPageRouter)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove dialog enter");
+    CHECK_NULL_RETURN(overlay, false);
+    if (overlay->IsRemoving()) {
+        return false;
+    }
+    if (FireBackPressEvent()) {
+        return true;
+    }
+    auto hub = overlay->GetEventHub<DialogEventHub>();
+    if (!isPageRouter && hub) {
+        hub->FireCancelEvent();
+    }
+    if (props.isMask) {
+        PopModalDialog(overlay->GetId());
+    }
+    CloseDialog(overlay);
+    if (isBackPressed) {
+        SetBackPressEvent(nullptr);
+    }
+    return true;
+}
+
 bool OverlayManager::PopupInteractiveDismiss(const RefPtr<FrameNode>& overlay)
 {
     auto bubblePattern = overlay->GetPattern<BubblePattern>();
@@ -3756,7 +3781,9 @@ int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, 
             OverlayDoDismiss(overlay, pattern);
             return OVERLAY_REMOVE;
         }
-        return RemoveDialog(overlay, isBackPressed, isPageRouter) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
+        return RemoveDialogWithContent(overlay, dialogPattern->GetDialogProperties(), isBackPressed, isPageRouter)
+                   ? OVERLAY_REMOVE
+                   : OVERLAY_EXISTS;
     }
     if (InstanceOf<BubblePattern>(pattern)) {
         return RemoveBubble(overlay) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
