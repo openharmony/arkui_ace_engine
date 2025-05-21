@@ -78,6 +78,7 @@ namespace OHOS::Ace::NG {
 using VsyncCallbackFun = std::function<void()>;
 using FrameCallbackFunc = std::function<void(uint64_t nanoTimestamp)>;
 using FrameCallbackFuncFromCAPI = std::function<void(uint64_t nanoTimestamp, uint32_t frameCount)>;
+using IdleCallbackFunc = std::function<void(uint64_t nanoTimestamp, uint32_t frameCount)>;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -1021,7 +1022,7 @@ public:
 
     void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) override;
 
-    void AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, FrameCallbackFunc&& idleCallbackFunc,
+    void AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, IdleCallbackFunc&& idleCallbackFunc,
         int64_t delayMillis);
 
     void FlushFrameCallback(uint64_t nanoTimestamp);
@@ -1510,8 +1511,8 @@ private:
     bool isDoKeyboardAvoidAnimate_ = true;
 
     std::list<FrameCallbackFuncFromCAPI> frameCallbackFuncsFromCAPI_;
+    std::list<IdleCallbackFunc> idleCallbackFuncs_;
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
-    std::list<FrameCallbackFunc> idleCallbackFuncs_;
     uint32_t transform_ = 0;
     std::list<WeakPtr<FrameNode>> changeInfoListeners_;
     std::list<WeakPtr<FrameNode>> changedNodes_;
