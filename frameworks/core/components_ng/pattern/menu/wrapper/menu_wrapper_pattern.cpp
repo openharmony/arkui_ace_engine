@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
 
 namespace OHOS::Ace::NG {
 void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu, const HideMenuType& reason)
@@ -167,6 +168,9 @@ void MenuWrapperPattern::ClearLastMenuItem()
 void MenuWrapperPattern::OnAttachToFrameNode()
 {
     RegisterOnTouch();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    MenuView::RegisterAccessibilityChildActionNotify(host);
 }
 
 void MenuWrapperPattern::OnDetachFromMainTree()

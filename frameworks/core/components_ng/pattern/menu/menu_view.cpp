@@ -2290,4 +2290,66 @@ void MenuView::UpdateMenuOutlineWithArrow(
     renderContext->SetOuterBorderColor(outerColorProp);
     menuWrapperPattern->SetMenuParam(menuParam);
 }
+
+void MenuView::TouchEventGernerator(const RefPtr<FrameNode>& actionNode, TouchEvent& event)
+{
+    CHECK_NULL_VOID(actionNode);
+    event.id = actionNode->GetId();
+    event.originalId = actionNode->GetId();
+    auto childOffset = actionNode->GetPaintRectOffset(false, true);
+    auto rectWithRender = actionNode->GetRectWithRender();
+    event.x = childOffset.GetX() + rectWithRender.Width() / HALF_DIVIDE;
+    event.y = childOffset.GetY() + rectWithRender.Height() / HALF_DIVIDE;
+    event.postEventNodeId = actionNode->GetId();
+    event.isInterpolated = true;
+    std::chrono::microseconds microseconds(GetMicroTickCount());
+    TimeStamp time(microseconds);
+    event.time = time;
+}
+
+void MenuView::TouchPointGernerator(const RefPtr<FrameNode>& actionNode, TouchPoint& point)
+{
+    CHECK_NULL_VOID(actionNode);
+    auto childOffset = actionNode->GetPaintRectOffset(false, true);
+    auto rectWithRender = actionNode->GetRectWithRender();
+    auto globalOffset = actionNode->GetPaintRectGlobalOffsetWithTranslate();
+    point.id = actionNode->GetId();
+    point.originalId = actionNode->GetId();
+    point.x = globalOffset.first.GetX() + rectWithRender.Width() / HALF_DIVIDE;
+    point.y = globalOffset.first.GetY() + rectWithRender.Height() / HALF_DIVIDE;
+    point.screenX = childOffset.GetX() + rectWithRender.Width() / HALF_DIVIDE;
+    point.screenY = childOffset.GetY() + rectWithRender.Height() / HALF_DIVIDE;
+    std::chrono::microseconds microseconds(GetMicroTickCount());
+    TimeStamp time(microseconds);
+    point.downTime = time;
+}
+
+void MenuView::RegisterAccessibilityChildActionNotify(const RefPtr<FrameNode>& menuNode)
+{
+    CHECK_NULL_VOID(menuNode);
+    auto accessibilityProperty = menuNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetNotifyChildAction(
+        [weak = WeakPtr<FrameNode>(menuNode)] (const RefPtr<FrameNode>& node, NotifyChildActionType childActionType) {
+            auto result = AccessibilityActionResult::ACTION_ERROR;
+            CHECK_NULL_RETURN(node, result);
+            auto menu = weak.Upgrade();
+            CHECK_NULL_RETURN(menu, result);
+            auto eventHub = menu->GetEventHub<NG::EventHub>();
+            CHECK_NULL_RETURN(eventHub, result);
+            auto gesture = eventHub->GetGestureEventHub();
+            CHECK_NULL_RETURN(gesture, result);
+            TouchEvent event;
+            event.type = TouchType::DOWN;
+            MenuView::TouchEventGernerator(node, event);
+            TouchPoint eventPoint;
+            MenuView::TouchPointGernerator(node, eventPoint);
+            event.pointers.push_back(eventPoint);
+            auto actionResult = gesture->TriggerTouchEvent(event);
+            event.type = TouchType::UP;
+            result = gesture->TriggerTouchEvent(event) && actionResult ?
+                AccessibilityActionResult::ACTION_RISE : AccessibilityActionResult::ACTION_ERROR;
+            return result;
+    });
+}
 } // namespace OHOS::Ace::NG

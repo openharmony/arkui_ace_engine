@@ -71,14 +71,16 @@ public:
         auto result = AccessibilityActionResult::ACTION_OK;
         CHECK_NULL_RETURN(node, result);
         RefPtr<FrameNode> parentNode = nullptr;
+        RefPtr<FrameNode> childNode = node;
         ActionNotifyChildAction func = nullptr;
-        if (CheckAncestorHasFunc(func, node, parentNode)) {
+        while (CheckAncestorHasFunc(func, childNode, parentNode)) {
             if (func) {
-                result = func(type);
+                result = func(node, type);
             }
-        }
-        if (result == AccessibilityActionResult::ACTION_RISE) {
-            result = HandleNotifyChildAction(parentNode, type);
+            if (result != AccessibilityActionResult::ACTION_RISE) {
+                break;
+            }
+            childNode = parentNode;
         }
         return result;
     }
