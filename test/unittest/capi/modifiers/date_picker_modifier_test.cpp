@@ -316,8 +316,8 @@ HWTEST_F(DatePickerModifierTest, setLunarTest, TestSize.Level1)
     EXPECT_EQ(initialValue, ATTRIBUTE_LUNAR_DEFAULT_VALUE);
 
     for (auto lunar : BOOL_TEST_PLAN) {
-        Ark_Boolean inputValue = Converter::ArkValue<Ark_Boolean>(lunar.first);
-        modifier_->setLunar0(node_, inputValue);
+        auto inputValue = Converter::ArkValue<Opt_Boolean>(lunar.first);
+        modifier_->setLunar0(node_, &inputValue);
         auto checkValue = GetAttrValue<std::string>(node_, ATTRIBUTE_LUNAR_NAME);
         EXPECT_EQ(checkValue, lunar.second);
     }
@@ -372,7 +372,8 @@ HWTEST_F(DatePickerModifierTest, setDisappearTexFontStyle, TestSize.Level1)
     for (auto style : FONT_STYLE_TEST_PLAN) {
         font.style = style.first;
         pickerStyle.font.value = font;
-        modifier_->setDisappearTextStyle0(node_, &pickerStyle);
+        auto optValue = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
+        modifier_->setDisappearTextStyle0(node_, &optValue);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -412,7 +413,8 @@ HWTEST_F(DatePickerModifierTest, setDisappearTexFontWeight, TestSize.Level1)
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
         font.weight = weight.first;
         pickerStyle.font.value = font;
-        modifier_->setDisappearTextStyle0(node_, &pickerStyle);
+        auto optValue = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
+        modifier_->setDisappearTextStyle0(node_, &optValue);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -429,7 +431,8 @@ HWTEST_F(DatePickerModifierTest, setDisappearTexFontWeight, TestSize.Level1)
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
         font.weight = weight.first;
         pickerStyle.font.value = font;
-        modifier_->setDisappearTextStyle0(node_, &pickerStyle);
+        auto optValue = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
+        modifier_->setDisappearTextStyle0(node_, &optValue);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -469,7 +472,8 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextFontFamily, TestSize.Level1)
     for (auto family : FONT_FAMILY_TEST_PLAN) {
         font.family = family.first;
         pickerStyle.font.value = font;
-        modifier_->setDisappearTextStyle0(node_, &pickerStyle);
+        auto optValue = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
+        modifier_->setDisappearTextStyle0(node_, &optValue);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -509,7 +513,8 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextFontSize, TestSize.Level1)
     for (auto size : FONT_SIZE_TEST_PLAN) {
         font.size = size.first;
         pickerStyle.font.value = font;
-        modifier_->setDisappearTextStyle0(node_, &pickerStyle);
+        auto optValue = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
+        modifier_->setDisappearTextStyle0(node_, &optValue);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -540,7 +545,8 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextColor, TestSize.Level1)
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         pickerStyle.color = value;
-        modifier_->setDisappearTextStyle0(node_, &pickerStyle);
+        auto optValue = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
+        modifier_->setDisappearTextStyle0(node_, &optValue);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
         checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
@@ -597,7 +603,8 @@ HWTEST_F(DatePickerModifierTest, setTexFontStyle, TestSize.Level1)
     for (auto style : FONT_STYLE_TEST_PLAN) {
         font.style = style.first;
         pickerStyle.font.value = font;
-        modifier_->setTextStyle0(node_, &pickerStyle);
+        auto optValue = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
+        modifier_->setTextStyle0(node_, &optValue);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -637,7 +644,8 @@ HWTEST_F(DatePickerModifierTest, setTexFontWeight, TestSize.Level1)
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
         font.weight = weight.first;
         pickerStyle.font.value = font;
-        modifier_->setTextStyle0(node_, &pickerStyle);
+        auto optValue = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
+        modifier_->setTextStyle0(node_, &optValue);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -654,7 +662,8 @@ HWTEST_F(DatePickerModifierTest, setTexFontWeight, TestSize.Level1)
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
         font.weight = weight.first;
         pickerStyle.font.value = font;
-        modifier_->setTextStyle0(node_, &pickerStyle);
+        auto optValue = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
+        modifier_->setTextStyle0(node_, &optValue);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -694,7 +703,8 @@ HWTEST_F(DatePickerModifierTest, setTextFontFamily, TestSize.Level1)
     for (auto family : FONT_FAMILY_TEST_PLAN) {
         font.family = family.first;
         pickerStyle.font.value = font;
-        modifier_->setTextStyle0(node_, &pickerStyle);
+        auto optValue = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
+        modifier_->setTextStyle0(node_, &optValue);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -734,7 +744,8 @@ HWTEST_F(DatePickerModifierTest, setTextFontSize, TestSize.Level1)
     for (auto size : FONT_SIZE_TEST_PLAN) {
         font.size = size.first;
         pickerStyle.font.value = font;
-        modifier_->setTextStyle0(node_, &pickerStyle);
+        auto optValue = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
+        modifier_->setTextStyle0(node_, &optValue);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -765,7 +776,8 @@ HWTEST_F(DatePickerModifierTest, setTextColor, TestSize.Level1)
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         pickerStyle.color = value;
-        modifier_->setTextStyle0(node_, &pickerStyle);
+        auto optValue = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
+        modifier_->setTextStyle0(node_, &optValue);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
@@ -822,7 +834,8 @@ HWTEST_F(DatePickerModifierTest, setSelectedTexFontStyle, TestSize.Level1)
     for (auto style : FONT_STYLE_TEST_PLAN) {
         font.style = style.first;
         pickerStyle.font.value = font;
-        modifier_->setSelectedTextStyle0(node_, &pickerStyle);
+        auto optValue = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
+        modifier_->setSelectedTextStyle0(node_, &optValue);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -862,7 +875,8 @@ HWTEST_F(DatePickerModifierTest, setSelectedTexFontWeight, TestSize.Level1)
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
         font.weight = weight.first;
         pickerStyle.font.value = font;
-        modifier_->setSelectedTextStyle0(node_, &pickerStyle);
+        auto optValue = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
+        modifier_->setSelectedTextStyle0(node_, &optValue);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -879,7 +893,8 @@ HWTEST_F(DatePickerModifierTest, setSelectedTexFontWeight, TestSize.Level1)
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
         font.weight = weight.first;
         pickerStyle.font.value = font;
-        modifier_->setSelectedTextStyle0(node_, &pickerStyle);
+        auto optValue = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
+        modifier_->setSelectedTextStyle0(node_, &optValue);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -919,7 +934,8 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextFontFamily, TestSize.Level1)
     for (auto family : FONT_FAMILY_TEST_PLAN) {
         font.family = family.first;
         pickerStyle.font.value = font;
-        modifier_->setSelectedTextStyle0(node_, &pickerStyle);
+        auto optValue = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
+        modifier_->setSelectedTextStyle0(node_, &optValue);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -959,7 +975,8 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextFontSize, TestSize.Level1)
     for (auto size : FONT_SIZE_TEST_PLAN) {
         font.size = size.first;
         pickerStyle.font.value = font;
-        modifier_->setSelectedTextStyle0(node_, &pickerStyle);
+        auto optValue = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
+        modifier_->setSelectedTextStyle0(node_, &optValue);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -990,7 +1007,8 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextColor, TestSize.Level1)
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         pickerStyle.color = value;
-        modifier_->setSelectedTextStyle0(node_, &pickerStyle);
+        auto optValue = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
+        modifier_->setSelectedTextStyle0(node_, &optValue);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
         checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
@@ -1033,7 +1051,8 @@ HWTEST_F(DatePickerModifierTest, setOnChangeTest, TestSize.Level1)
         };
     };
     auto arkCallback = Converter::ArkValue<Callback_DatePickerResult_Void>(onChange, frameNode->GetId());
-    modifier_->setOnChange(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_DatePickerResult_Void>(arkCallback);
+    modifier_->setOnChange(node_, &optCallback);
 
     for (const auto& testValue : CHANGE_EVENT_TEST_PLAN) {
         DatePickerChangeEvent event(testValue.first.ToString(true));
@@ -1123,8 +1142,9 @@ HWTEST_F(DatePickerModifierTest, setOnDateChangeTest, TestSize.Level1)
         },
         .call = onDateChange
     };
+    auto optFunc = Converter::ArkValue<Opt_Callback_Date_Void>(func);
 
-    modifier_->setOnDateChange0(node_, &func);
+    modifier_->setOnDateChange0(node_, &optFunc);
 
     for (const auto& testValue : CHANGE_EVENT_TEST_PLAN) {
         DatePickerChangeEvent event(testValue.first.ToString(true));

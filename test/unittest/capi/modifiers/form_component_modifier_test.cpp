@@ -182,7 +182,8 @@ HWTEST_F(FormComponentModifierTest, DISABLED_setSizeTestSizeWidthValidValues, Te
                           const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
         Ark_SizeOptions inputValueSize = initValueSize;
         inputValueSize.width = value;
-        modifier_->setSize(node_, &inputValueSize);
+        auto optValue = Converter::ArkValue<Opt_SizeOptions>(inputValueSize);
+        modifier_->setSize(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
         auto resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(resultConstructor, ATTRIBUTE_SIZE_NAME);
@@ -210,7 +211,8 @@ HWTEST_F(FormComponentModifierTest, DISABLED_setSizeTestSizeHeightValidValues, T
                           const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
         Ark_SizeOptions inputValueSize = initValueSize;
         inputValueSize.height = value;
-        modifier_->setSize(node_, &inputValueSize);
+        auto optValue = Converter::ArkValue<Opt_SizeOptions>(inputValueSize);
+        modifier_->setSize(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
         auto resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(resultConstructor, ATTRIBUTE_SIZE_NAME);
@@ -253,7 +255,8 @@ HWTEST_F(FormComponentModifierTest, setModuleNameTestModuleNameValidValues, Test
                           const std::string& input, const Ark_String& value, const std::string& expectedStr) {
         Ark_String inputValueModuleName = initValueModuleName;
         inputValueModuleName = value;
-        modifier_->setModuleName(node_, &inputValueModuleName);
+        auto optValue = Converter::ArkValue<Opt_String>(inputValueModuleName);
+        modifier_->setModuleName(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
         auto resultStr = GetAttrValue<std::string>(resultConstructor, ATTRIBUTE_MODULE_NAME_NAME);
@@ -294,7 +297,8 @@ HWTEST_F(FormComponentModifierTest, setAllowUpdateTestAllowUpdateValidValues, Te
                           const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
         Ark_Boolean inputValueAllowUpdate = initValueAllowUpdate;
         inputValueAllowUpdate = value;
-        modifier_->setAllowUpdate(node_, inputValueAllowUpdate);
+        auto optValue = Converter::ArkValue<Opt_Boolean>(inputValueAllowUpdate);
+        modifier_->setAllowUpdate(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
         auto resultStr = GetAttrValue<std::string>(resultConstructor, ATTRIBUTE_ALLOW_UPDATE_NAME);
@@ -335,8 +339,8 @@ HWTEST_F(FormComponentModifierTest, setDimensionTestDimensionValidValues, TestSi
                           const std::string& input, const Ark_FormDimension& value, const std::string& expectedStr) {
         Ark_FormDimension inputValueDimension = initValueDimension;
         inputValueDimension = value;
-
-        modifier_->setDimension(node_, inputValueDimension);
+        auto optValue = Converter::ArkValue<Opt_FormDimension>(inputValueDimension);
+        modifier_->setDimension(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
         auto resultStr = GetAttrValue<std::string>(resultConstructor, ATTRIBUTE_DIMENSION_NAME);
@@ -364,7 +368,8 @@ HWTEST_F(FormComponentModifierTest, setDimensionTestDimensionInvalidValues, Test
         Ark_FormDimension inputValueDimension = initValueDimension;
 
         inputValueDimension = value;
-        modifier_->setDimension(node_, inputValueDimension);
+        auto optValue = Converter::ArkValue<Opt_FormDimension>(inputValueDimension);
+        modifier_->setDimension(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
         auto resultStr = GetAttrValue<std::string>(resultConstructor, ATTRIBUTE_DIMENSION_NAME);
@@ -405,8 +410,8 @@ HWTEST_F(FormComponentModifierTest, setVisibilityTestVisibilityValidValues, Test
                           const std::string& input, const Ark_Visibility& value, const std::string& expectedStr) {
         Ark_Visibility inputValueVisibility = initValueVisibility;
         inputValueVisibility = value;
-
-        modifier_->setVisibility(node_, inputValueVisibility);
+        auto optValue = Converter::ArkValue<Opt_Visibility>(inputValueVisibility);
+        modifier_->setVisibility(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VISIBILITY_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -433,7 +438,8 @@ HWTEST_F(FormComponentModifierTest, setVisibilityTestVisibilityInvalidValues, Te
         Ark_Visibility inputValueVisibility = initValueVisibility;
 
         inputValueVisibility = value;
-        modifier_->setVisibility(node_, inputValueVisibility);
+        auto optValue = Converter::ArkValue<Opt_Visibility>(inputValueVisibility);
+        modifier_->setVisibility(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VISIBILITY_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_VISIBILITY_DEFAULT_VALUE) <<
@@ -473,7 +479,8 @@ HWTEST_F(FormComponentModifierTest, setOnAcquiredTest, TestSize.Level1)
         },
         .call = onAcquired
     };
-    modifier_->setOnAcquired(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_Callback_FormCallbackInfo_Void>(func);
+    modifier_->setOnAcquired(node_, &optFunc);
     for (const auto& [actual, expectedNum, expectedStr] : testFixtureFormOnAcquiredCallbackTestValues) {
         formInfo = std::nullopt;
         auto testValue = ToJson(actual);
@@ -512,7 +519,8 @@ HWTEST_F(FormComponentModifierTest, setOnErrorTest, TestSize.Level1)
         },
         .call = onError
     };
-    modifier_->setOnError(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_Callback_Literal_Number_errcode_String_msg_Void>(func);
+    modifier_->setOnError(node_, &optFunc);
     for (const auto& [code, msg, expected] : testFixtureFormOnErrorCallbackTestValues) {
         formInfo = std::nullopt;
         auto testValue = ToJson(code, msg);
@@ -553,7 +561,8 @@ HWTEST_F(FormComponentModifierTest, setOnUninstallTest, TestSize.Level1)
         },
         .call = onUninstall
     };
-    modifier_->setOnUninstall(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_Callback_FormCallbackInfo_Void>(func);
+    modifier_->setOnUninstall(node_, &optFunc);
     for (const auto& [actual, expectedNum, expectedStr] : testFixtureFormOnAcquiredCallbackTestValues) {
         formInfo = std::nullopt;
         auto testValue = ToJson(actual);
@@ -592,7 +601,8 @@ HWTEST_F(FormComponentModifierTest, setOnLoadTest, TestSize.Level1)
         },
         .call = onLoad
     };
-    modifier_->setOnLoad(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_Callback_Void>(func);
+    modifier_->setOnLoad(node_, &optFunc);
     formInfo = std::nullopt;
     eventHub->FireOnLoad(FORM_EMPTY_STRING);
     EXPECT_TRUE(formInfo.has_value());
