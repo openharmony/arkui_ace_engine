@@ -645,7 +645,7 @@ ArkUI_Uint32 GetTextAreaMinLines(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
-    return TextFieldModelNG::GetMaxLength(frameNode);
+    return TextFieldModelNG::GetMinLines(frameNode);
 }
 
 void SetTextAreaDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style)
