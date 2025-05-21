@@ -181,6 +181,11 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto listLayoutAlgorithm = DynamicCast<ListLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(listLayoutAlgorithm, false);
+    prevMeasureBreak_ = listLayoutAlgorithm->MeasureInNextFrame();
+    if (!prevMeasureBreak_) {
+        jumpIndexInGroup_.reset();
+        jumpIndex_.reset();
+    }
     itemPosition_ = listLayoutAlgorithm->GetItemPosition();
     cachedItemPosition_ = listLayoutAlgorithm->GetCachedItemPosition();
     laneIdx4Divider_ = listLayoutAlgorithm->GetLaneIdx4Divider();
@@ -249,45 +254,51 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     startMainPos_ = listLayoutAlgorithm->GetStartPosition();
     endMainPos_ = listLayoutAlgorithm->GetEndPosition();
     crossMatchChild_ = listLayoutAlgorithm->IsCrossMatchChild();
-    auto endOffset = endMainPos_ - contentMainSize_ + contentEndOffset_;
-    CheckScrollable();
-    if (centerIndex_ != listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty))) {
-        OnMidIndexChanged();
-    }
-    bool indexChanged = false;
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (isNeedUpdateIndex) {
+    if (!prevMeasureBreak_) {
+        auto endOffset = endMainPos_ - contentMainSize_ + contentEndOffset_;
+        CheckScrollable();
+        if (centerIndex_ != listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty))) {
+            OnMidIndexChanged();
+        }
+        bool indexChanged = false;
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            if (isNeedUpdateIndex) {
+                indexChanged = (startIndex_ != listLayoutAlgorithm->GetStartIndex()) ||
+                            (endIndex_ != listLayoutAlgorithm->GetEndIndex()) ||
+                            (centerIndex_ != listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty)));
+            }
+        } else {
             indexChanged = (startIndex_ != listLayoutAlgorithm->GetStartIndex()) ||
-                           (endIndex_ != listLayoutAlgorithm->GetEndIndex()) ||
-                           (centerIndex_ != listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty)));
+                (endIndex_ != listLayoutAlgorithm->GetEndIndex());
         }
+        startIndexChanged_ = startIndex_ != listLayoutAlgorithm->GetStartIndex();
+        endIndexChanged_ = endIndex_ != listLayoutAlgorithm->GetEndIndex();
+        if (indexChanged) {
+            startIndex_ = listLayoutAlgorithm->GetStartIndex();
+            endIndex_ = listLayoutAlgorithm->GetEndIndex();
+            centerIndex_ = listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty));
+        }
+        ProcessEvent(indexChanged, relativeOffset, isJump);
+        HandleScrollBarOutBoundary();
+        UpdateScrollBarOffset();
+        if (config.frameSizeChange) {
+            if (GetScrollBar() != nullptr) {
+                GetScrollBar()->ScheduleDisappearDelayTask();
+            }
+        }
+        bool sizeDiminished =
+            !chainAnimation_ && IsOutOfBoundary(false) && (endOffset + relativeOffset - prevEndOffset_ < -0.1f);
+        CheckRestartSpring(sizeDiminished);
+        isInitialized_ = true;
     } else {
-        indexChanged =
-            (startIndex_ != listLayoutAlgorithm->GetStartIndex()) || (endIndex_ != listLayoutAlgorithm->GetEndIndex());
+        ACE_SCOPED_TRACE("List MeasureInNextFrame");
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    startIndexChanged_ = startIndex_ != listLayoutAlgorithm->GetStartIndex();
-    endIndexChanged_ = endIndex_ != listLayoutAlgorithm->GetEndIndex();
-    if (indexChanged) {
-        startIndex_ = listLayoutAlgorithm->GetStartIndex();
-        endIndex_ = listLayoutAlgorithm->GetEndIndex();
-        centerIndex_ = listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty));
-    }
-    ProcessEvent(indexChanged, relativeOffset, isJump);
-    HandleScrollBarOutBoundary();
-    UpdateScrollBarOffset();
-    if (config.frameSizeChange) {
-        if (GetScrollBar() != nullptr) {
-            GetScrollBar()->ScheduleDisappearDelayTask();
-        }
-    }
-    bool sizeDiminished =
-        !chainAnimation_ && IsOutOfBoundary(false) && (endOffset + relativeOffset - prevEndOffset_ < -0.1f);
-    CheckRestartSpring(sizeDiminished);
-
     DrivenRender(dirty);
 
     SetScrollSource(SCROLL_FROM_NONE);
-    isInitialized_ = true;
     MarkSelectedItems();
     UpdateListDirectionInCardStyle();
     snapTrigByScrollBar_ = false;
@@ -683,7 +694,6 @@ void ListPattern::SetLayoutAlgorithmParams(
     }
     if (jumpIndexInGroup_) {
         listLayoutAlgorithm->SetIndexInGroup(jumpIndexInGroup_.value());
-        jumpIndexInGroup_.reset();
     }
     if (targetIndexInGroup_) {
         listLayoutAlgorithm->SetTargetIndexInGroup(targetIndexInGroup_.value());
@@ -705,6 +715,7 @@ void ListPattern::SetLayoutAlgorithmParams(
         SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
         SetChainAnimationToPosMap();
     }
+    listLayoutAlgorithm->SetPrevMeasureBreak(prevMeasureBreak_);
 }
 
 void ListPattern::SetChainAnimationToPosMap()
@@ -764,7 +775,6 @@ void ListPattern::SetLayoutAlgorithmJumpAlign(
     if (jumpIndex_) {
         listLayoutAlgorithm->SetIndex(jumpIndex_.value());
         listLayoutAlgorithm->SetIndexAlignment(scrollAlign_);
-        jumpIndex_.reset();
     }
 }
 
@@ -1781,6 +1791,9 @@ void ListPattern::ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool 
             jumpIndex_ = index;
             jumpIndexInGroup_ = indexInGroup;
             scrollAlign_ = align;
+            if (align == ScrollAlign::AUTO && !isInitialized_) {
+                scrollAlign_ = ScrollAlign::END;
+            }
         }
         MarkDirtyNodeSelf();
     }
@@ -2225,6 +2238,9 @@ bool ListPattern::CalculateJumpOffset()
 
 float ListPattern::UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, bool isJump)
 {
+    if (prevMeasureBreak_) {
+        return 0;
+    }
     float relativeOffset = listLayoutAlgorithm->GetCurrentOffset();
     float prevOffset = currentOffset_;
     if (childrenSize_) {

@@ -65,6 +65,7 @@ public:
     virtual void SetFriction(double friction) = 0;
     virtual void SetMaintainVisibleContentPosition(bool enabled) = 0;
     virtual void SetStackFromEnd(bool enabled) = 0;
+    virtual void SetSyncLoad(bool enabled) = 0;
     virtual void SetOnScroll(OnScrollEvent&& onScroll) = 0;
     virtual void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) = 0;
     virtual void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) = 0;

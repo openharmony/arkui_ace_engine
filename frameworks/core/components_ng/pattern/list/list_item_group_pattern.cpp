@@ -106,6 +106,7 @@ RefPtr<LayoutAlgorithm> ListItemGroupPattern::CreateLayoutAlgorithm()
     layoutAlgorithm->SetLayoutedItemInfo(layoutedItemInfo_);
     layoutAlgorithm->SetPrevTotalItemCount(itemTotalCount_);
     layoutAlgorithm->SetPrevTotalMainSize(mainSize_);
+    layoutAlgorithm->SetPrevMeasureBreak(prevMeasureBreak_);
     if (childrenSize_ && ListChildrenSizeExist()) {
         if (!posMap_) {
             posMap_ = MakeRefPtr<ListPositionMap>();
@@ -176,6 +177,7 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     adjustRefPos_ = layoutAlgorithm->GetAdjustReferenceDelta();
     adjustTotalSize_ = layoutAlgorithm->GetAdjustTotalSize();
     listContentSize_ = layoutAlgorithm->GetListContentSize();
+    prevMeasureBreak_ = layoutAlgorithm->MeasureInNextFrame();
     layouted_ = true;
     CheckListDirectionInCardStyle();
     auto host = GetHost();

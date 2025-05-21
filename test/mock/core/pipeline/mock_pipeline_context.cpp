@@ -1124,6 +1124,11 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
 
 void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) {}
 
+bool PipelineBase::ReachResponseDeadline() const
+{
+    return false;
+}
+
 void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) {}
 
 void PipelineBase::OnActionEvent(const std::string& action) {}

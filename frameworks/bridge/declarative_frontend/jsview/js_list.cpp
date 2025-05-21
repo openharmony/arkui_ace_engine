@@ -531,6 +531,16 @@ void JSList::SetStackFromEnd(const JSCallbackInfo& args)
     ListModel::GetInstance()->SetStackFromEnd(enabled);
 }
 
+void JSList::SetSyncLoad(const JSCallbackInfo& args)
+{
+    bool enabled = true;
+    JSRef<JSVal> arg0 = args[0];
+    if (arg0->IsBoolean()) {
+        enabled = arg0->ToBoolean();
+    }
+    ListModel::GetInstance()->SetSyncLoad(enabled);
+}
+
 void JSList::ItemDeleteCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
@@ -621,6 +631,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("friction", &JSList::SetFriction);
     JSClass<JSList>::StaticMethod("maintainVisibleContentPosition", &JSList::MaintainVisibleContentPosition);
     JSClass<JSList>::StaticMethod("stackFromEnd", &JSList::SetStackFromEnd);
+    JSClass<JSList>::StaticMethod("syncLoad", &JSList::SetSyncLoad);
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onItemDelete", &JSList::ItemDeleteCallback);
     JSClass<JSList>::StaticMethod("onScrollBegin", &JSList::ScrollBeginCallback);

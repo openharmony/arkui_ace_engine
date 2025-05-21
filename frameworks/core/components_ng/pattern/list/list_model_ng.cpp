@@ -292,6 +292,11 @@ void ListModelNG::SetStackFromEnd(bool enabled)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, StackFromEnd, enabled);
 }
 
+void ListModelNG::SetSyncLoad(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, SyncLoad, enabled);
+}
+
 void ListModelNG::SetOnScroll(OnScrollEvent&& onScroll)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

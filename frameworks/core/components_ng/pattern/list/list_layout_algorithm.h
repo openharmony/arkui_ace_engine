@@ -466,6 +466,25 @@ public:
         isRoundingMode_ = true;
     }
 
+    bool MeasureInNextFrame() const
+    {
+        return measureInNextFrame_;
+    }
+
+    void SetPrevMeasureBreak(bool value)
+    {
+        prevMeasureBreak_ = value;
+    }
+
+    bool GetPrevMeasureBreak() const
+    {
+        return prevMeasureBreak_;
+    }
+
+    bool IsNeedSyncLoad(const RefPtr<ListLayoutProperty>& property) const;
+
+    void CheckGroupMeasureBreak(const RefPtr<LayoutWrapper>& layoutWrapper);
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -667,10 +686,12 @@ private:
     bool backwardFeature_ = false;
     bool isNeedCheckOffset_ = false;
     bool isRoundingMode_ = false;
+    bool measureInNextFrame_ = false;
+    bool syncLoad_ = false;
+    bool prevMeasureBreak_ = false;
 
     V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::START;
 
-    bool isSnapCenter_ = false;
     float laneGutter_ = 0.0f;
 
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;

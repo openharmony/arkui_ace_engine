@@ -1328,6 +1328,8 @@ public:
         vsyncTime_ = time;
     }
 
+    bool ReachResponseDeadline() const;
+
     virtual void UpdateCurrentActiveNode(const WeakPtr<NG::FrameNode>& node) {}
 
     virtual std::string GetCurrentExtraInfo() { return ""; }
@@ -1734,6 +1736,7 @@ protected:
 
     uint64_t compensationValue_ = 0;
     int64_t recvTime_ = 0;
+    int64_t currRecvTime_ = -1;
     std::once_flag displaySyncFlag_;
     RefPtr<UIDisplaySyncManager> uiDisplaySyncManager_;
 
