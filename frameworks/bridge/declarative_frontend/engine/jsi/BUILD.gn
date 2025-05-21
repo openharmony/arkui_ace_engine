@@ -297,6 +297,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_span_bridge.cpp",
       "nativeModule/arkts_native_stack_bridge.cpp",
       "nativeModule/arkts_native_stepper_item_bridge.cpp",
+      "nativeModule/arkts_native_stepper_bridge.cpp",
       "nativeModule/arkts_native_swiper_bridge.cpp",
       "nativeModule/arkts_native_symbol_glyph_bridge.cpp",
       "nativeModule/arkts_native_symbol_span_bridge.cpp",

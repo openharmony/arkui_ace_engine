@@ -127,7 +127,6 @@ const std::string SHOW_PASSWORD_SVG = "SYS_SHOW_PASSWORD_SVG";
 const std::string HIDE_PASSWORD_SVG = "SYS_HIDE_PASSWORD_SVG";
 const std::string AUTO_FILL_PARAMS_USERNAME = "com.autofill.params.userName";
 const std::string AUTO_FILL_PARAMS_NEWPASSWORD = "com.autofill.params.newPassword";
-constexpr int32_t MAX_FILL_CONTENT_SIZE = 5;
 constexpr int32_t DEFAULT_MODE = -1;
 constexpr int32_t PREVIEW_TEXT_RANGE_DEFAULT = -1;
 const std::string PREVIEW_STYLE_NORMAL = "normal";
@@ -4638,17 +4637,17 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     attachOptions.requestKeyboardReason =
         static_cast<OHOS::MiscServices::RequestKeyboardReason>(static_cast<int32_t>(sourceType));
     auto ret = inputMethod->Attach(textChangeListener_, attachOptions, textConfig);
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_RETURN(textFieldManager, false);
     if (ret == MiscServices::ErrorCode::NO_ERROR) {
-        auto pipeline = GetContext();
-        CHECK_NULL_RETURN(pipeline, false);
-        auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
-        CHECK_NULL_RETURN(textFieldManager, false);
         textFieldManager->SetIsImeAttached(true);
     }
     UpdateCaretInfoToController(true);
-    if (!fillContentMap_.empty()) {
-        inputMethod->SendPrivateCommand(fillContentMap_);
-        fillContentMap_.clear();
+    auto fillContentMap = textFieldManager->GetFillContentMap(tmpHost->GetId());
+    if (!fillContentMap.empty() && NeedsSendFillContent()) {
+        inputMethod->SendPrivateCommand(fillContentMap);
     }
 #else
     ok = RequestKeyboardCrossPlatForm(isFocusViewChanged);
@@ -4721,7 +4720,8 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)keyboard_,
         .enterKeyType = (int32_t)GetTextInputActionValue(GetDefaultTextInputAction()),
         .isTextPreviewSupported = hasSupportedPreviewText_,
-        .immersiveMode = static_cast<int32_t>(keyboardAppearance_)};
+        .immersiveMode = static_cast<int32_t>(keyboardAppearance_),
+        .capitalizeMode = static_cast<MiscServices::CapitalizeMode>(GetAutoCapitalizationModeValue(AutoCapitalizationMode::NONE)) };
     MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
         .cursorInfo = cursorInfo,
         .range = { .start = selectController_->GetStartIndex(), .end = selectController_->GetEndIndex() },
@@ -8140,40 +8140,11 @@ void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWra
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "Set last auto fill text value.");
         lastAutoFillTextValue_ = nodeWrap->GetValue();
     }
-
     if (!contentController_ || contentController_->GetTextValue() == nodeWrap->GetValue()) {
         return;
     }
-
+    RemoveFillContentMap();
     BeforeAutoFillAnimation(UtfUtils::Str8DebugToStr16(nodeWrap->GetValue()), type);
-}
-
-bool TextFieldPattern::ParseFillContentJsonValue(const std::unique_ptr<JsonValue>& jsonObject,
-    std::unordered_map<std::string, std::variant<std::string, bool, int32_t>>& map)
-{
-    if (!jsonObject->IsValid() || jsonObject->IsArray() || !jsonObject->IsObject()) {
-        TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "fillContent format is not right");
-        return false;
-    }
-    auto child = jsonObject->GetChild();
-
-    while (child && child->IsValid()) {
-        if (!child->IsObject() && child->IsString()) {
-            std::string strKey = child->GetKey();
-            std::string strVal = child->GetString();
-            if (strKey.empty()) {
-                continue;
-            }
-            if (map.size() < MAX_FILL_CONTENT_SIZE) {
-                map.insert(std::pair<std::string, std::variant<std::string, bool, int32_t> >(strKey, strVal));
-            } else {
-                TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "fillContent is more than 5");
-                break;
-            }
-        }
-        child = child->GetNext();
-    }
-    return true;
 }
 
 void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent, bool isPopup)
@@ -8187,8 +8158,13 @@ void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::strin
         if (!fillContent.empty() && IsTriggerAutoFillPassword()) {
             auto jsonObject = JsonUtil::ParseJsonString(fillContent);
             CHECK_NULL_VOID(jsonObject);
-            fillContentMap_.clear();
-            ParseFillContentJsonValue(jsonObject, fillContentMap_);
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            auto context = host->GetContext();
+            CHECK_NULL_VOID(context);
+            auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+            CHECK_NULL_VOID(textFieldManager);
+            textFieldManager->ParseFillContentJsonValue(jsonObject);
         }
     }
     if (!isPopup || (isPopup && errCode == AUTO_FILL_CANCEL)) {
@@ -10140,6 +10116,7 @@ void TextFieldPattern::OnDetachFromMainTree()
 {
     isDetachFromMainTree_ = true;
     RemoveTextFieldInfo();
+    RemoveFillContentMap();
 }
 
 TextFieldInfo TextFieldPattern::GenerateTextFieldInfo()
@@ -11140,5 +11117,29 @@ void TextFieldPattern::BeforeAutoFillAnimation(const std::u16string& content, co
     } else {
         onFinishCallback();
     }
+}
+
+void TextFieldPattern::RemoveFillContentMap()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    auto nodeId = host->GetId();
+    textFieldManager->RemoveFillContentMap(nodeId);
+}
+
+bool TextFieldPattern::NeedsSendFillContent()
+{
+    CHECK_NULL_RETURN(IsNeedProcessAutoFill(), false);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    bool isEnableAutoFill = layoutProperty->GetEnableAutoFillValue(true);
+    if (!isEnableAutoFill) {
+        return false;
+    }
+    return IsTriggerAutoFillPassword();
 }
 } // namespace OHOS::Ace::NG

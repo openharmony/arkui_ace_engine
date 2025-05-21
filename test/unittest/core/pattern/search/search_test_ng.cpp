@@ -2512,4 +2512,40 @@ HWTEST_F(SearchTestNg, UpdateFontFeatureWithStroke001, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetStrokeColor(), STORKE_COLOR_VALUE_1);
 }
 
+/**
+ * @tc.name: SearchEnableAutoSpacing
+ * @tc.desc: Test the enable or disable the EnableAutoSpacing attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SearchEnableAutoSpacing, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    searchModelInstance.SetEnableAutoSpacing(true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+
+    /**
+     * @tc.expected: Get EnableAutoSpacing Value
+     */
+    EXPECT_EQ(textFieldLayoutProperty->GetEnableAutoSpacing(), true);
+    EXPECT_EQ(SearchModelNG::GetEnableAutoSpacing(frameNode), true);
+    /**
+     * @tc.expected: Set EnableAutoSpacing False
+     */
+    SearchModelNG::SetEnableAutoSpacing(frameNode, false);
+    /**
+     * @tc.expected: Get EnableAutoSpacing Value
+     */
+    EXPECT_EQ(textFieldLayoutProperty->GetEnableAutoSpacing(), false);
+    EXPECT_EQ(SearchModelNG::GetEnableAutoSpacing(frameNode), false);
+}
+
 } // namespace OHOS::Ace::NG

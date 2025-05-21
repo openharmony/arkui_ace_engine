@@ -1263,9 +1263,9 @@ class TextAreaEllipsisModeModifier extends ModifierWithKey<EllipsisMode> {
   static identity: Symbol = Symbol('textAreaEllipsisMode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().text.resetEllipsisMode(node);
+      getUINativeModule().textArea.resetEllipsisMode(node);
     } else {
-      getUINativeModule().text.setEllipsisMode(node, this.value!);
+      getUINativeModule().textArea.setEllipsisMode(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -1302,6 +1302,24 @@ class TextAreaStrokeColorModifier extends ModifierWithKey<ResourceColor> {
       getUINativeModule().textArea.resetStrokeColor(node);
     } else {
       getUINativeModule().textArea.setStrokeColor(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaEnableAutoSpacingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaEnableAutoSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetEnableAutoSpacing(node);
+    }
+    else {
+      getUINativeModule().textArea.setEnableAutoSpacing(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -1764,6 +1782,10 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   strokeColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaStrokeColorModifier.identity, TextAreaStrokeColorModifier, value);
+    return this;
+  }
+  enableAutoSpacing(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaEnableAutoSpacingModifier.identity, TextAreaEnableAutoSpacingModifier, value);
     return this;
   }
 }

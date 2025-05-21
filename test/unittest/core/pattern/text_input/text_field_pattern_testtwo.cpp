@@ -1168,44 +1168,6 @@ HWTEST_F(TextFieldPatternTestTwo, NotifyFillRequestSuccess001, TestSize.Level0)
 }
 
 /**
- * @tc.name: ParseFillContentJsonValue001
- * @tc.desc: test testInput text ParseFillContentJsonValue
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestTwo, ParseFillContentJsonValue001, TestSize.Level0)
-{
-    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
-    ASSERT_NE(textFieldNode, nullptr);
-    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /* Construct JSON object */
-    auto jsonObject = JsonUtil::Create(true);
-    auto childJsonObject = JsonUtil::Create(true);
-    std::unordered_map<std::string, std::variant<std::string, bool, int32_t>> map;
-
-    childJsonObject->Put("name", "textfieldtest");
-    jsonObject->Put("child0", childJsonObject);
-    jsonObject->Put("child1", "child1");
-    jsonObject->Put("child2", "child2");
-    jsonObject->Put("child3", "child3");
-    jsonObject->Put("child4", "child4");
-    jsonObject->Put("child5", "child5");
-    jsonObject->Put("child6", "child6");
-    jsonObject->Put("child7", "child7");
-
-    EXPECT_EQ(pattern->ParseFillContentJsonValue(jsonObject, map), true);
-    EXPECT_EQ(pattern->ParseFillContentJsonValue(jsonObject->GetChild()->GetNext(), map), false);
-
-    /* Construct an array JSON object */
-    auto arrayJsonObject = JsonUtil::CreateArray(true);
-    arrayJsonObject->Put("name", "textfieldtest");
-
-    EXPECT_EQ(pattern->ParseFillContentJsonValue(arrayJsonObject, map), false);
-}
-
-/**
  * @tc.name: GetDragUpperLeftCoordinates001
  * @tc.desc: test testInput text GetDragUpperLeftCoordinates
  * @tc.type: FUNC

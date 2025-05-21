@@ -29,6 +29,8 @@
 #include "ui/resource/resource_configuration.h"
 #include "ui/view/layout/layout_info.h"
 
+typedef struct _ArkUINode* ArkUINodeHandle;
+
 namespace OHOS::Ace::NG {
 class LayoutProperty;
 template<class T>
@@ -51,6 +53,8 @@ class FrameNode : public AceType {
 public:
     FrameNode() = default;
     virtual ~FrameNode() = default;
+
+    static RefPtr<FrameNode> GetFrameNode(ArkUINodeHandle node);
 
     virtual void InitializePatternAndContext() = 0;
     virtual void Reset() = 0;

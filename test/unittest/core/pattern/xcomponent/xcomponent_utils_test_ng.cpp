@@ -586,6 +586,10 @@ HWTEST_F(XComponentUtilsTestNg, ConvertNativeXComponentKeyEventTest, TestSize.Le
     event.sourceType = SourceType::KEYBOARD;
     event.deviceId = 123;
     event.timeStamp = std::chrono::high_resolution_clock::now();
+    event.pressedCodes = {};
+    event.numLock = true;
+    event.enableCapsLock = true;
+    event.scrollLock = true;
 
     /**
      * @tc.step2: Call ConvertNativeXComponentKeyEvent Func
@@ -597,6 +601,10 @@ HWTEST_F(XComponentUtilsTestNg, ConvertNativeXComponentKeyEventTest, TestSize.Le
     EXPECT_EQ(nativeKeyEvent.sourceType, XComponentUtils::ConvertNativeXComponentEventSourceType(event.sourceType));
     EXPECT_EQ(nativeKeyEvent.deviceId, event.deviceId);
     EXPECT_EQ(nativeKeyEvent.timestamp, event.timeStamp.time_since_epoch().count());
+    EXPECT_EQ(nativeKeyEvent.modifierKeyStates, 0);
+    EXPECT_EQ(nativeKeyEvent.isNumLockOn, true);
+    EXPECT_EQ(nativeKeyEvent.isCapsLockOn, true);
+    EXPECT_EQ(nativeKeyEvent.isScrollLockOn, true);
 }
 
 /**

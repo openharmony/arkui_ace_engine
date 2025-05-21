@@ -1175,6 +1175,8 @@ struct CJUIGridModifier {
     void (*resetEnableScroll)(ArkUINodeHandle node);
     void (*setFriction)(ArkUINodeHandle node, ArkUI_Float32 friction);
     void (*resetFriction)(ArkUINodeHandle node);
+    void (*setGridFocusWrapMode)(ArkUINodeHandle node, ArkUI_Int32 focusWrapMode);
+    void (*resetGridFocusWrapMode)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getGridColumnsTemplate)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getGridRowsTemplate)(ArkUINodeHandle node);
     ArkUI_Float32 (*getGridColumnsGap)(ArkUINodeHandle node);
@@ -1903,6 +1905,28 @@ struct CJUIWebModifier {
     void (*resetMultiWindowAccessEnabled)(ArkUINodeHandle node);
     void (*setAllowWindowOpenMethod)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetAllowWindowOpenMethod)(ArkUINodeHandle node);
+    void (*setKeyboardAvoidMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetKeyboardAvoidMode)(ArkUINodeHandle node);
+    void (*setOnControllerAttached)(ArkUINodeHandle node, void* callback);
+    void (*resetOnControllerAttached)(ArkUINodeHandle node);
+    void (*setVerticalScrollBarAccessEnabled)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetVerticalScrollBarAccessEnabled)(ArkUINodeHandle node);
+    void (*setHorizontalScrollBarAccessEnabled)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetHorizontalScrollBarAccessEnabled)(ArkUINodeHandle node);
+    void (*setTextZoomRatio)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetTextZoomRatio)(ArkUINodeHandle node);
+    void (*setInitialScale)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*resetInitialScale)(ArkUINodeHandle node);
+    void (*setOnScrollCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnScrollCallBack)(ArkUINodeHandle node);
+    void (*setOnOverScrollCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnOverScrollCallBack)(ArkUINodeHandle node);
+    void (*setOnScaleChangeCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnScaleChangeCallBack)(ArkUINodeHandle node);
+    void (*setOnRequestSelectedCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnRequestSelectedCallBack)(ArkUINodeHandle node);
+    void (*setOnContextMenuHideCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnContextMenuHideCallBack)(ArkUINodeHandle node);
 };
 
 struct CJUIBlankModifier {
@@ -2694,6 +2718,9 @@ struct CJUIDatePickerModifier {
     ArkUI_Bool (*getEnableHapticFeedback)(ArkUINodeHandle node);
     void (*setEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Bool enableHapticFeedback);
     void (*resetEnableHapticFeedback)(ArkUINodeHandle node);
+    ArkUI_Bool (*getCanLoop)(ArkUINodeHandle node);
+    void (*setCanLoop)(ArkUINodeHandle node, ArkUI_Bool isLoop);
+    void (*resetCanLoop)(ArkUINodeHandle node);
 };
 
 struct CJUISpanModifier {

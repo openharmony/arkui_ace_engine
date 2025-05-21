@@ -309,7 +309,7 @@ std::shared_ptr<RSData> AssetImageLoader::LoadImageData(
     auto imageDfxConfig = imageSourceInfo.GetImageDfxConfig();
     if (src.empty()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "image src is empty. %{public}s.", imageDfxConfig.ToStringWithoutSrc().c_str());
-        errorInfo = { ImageErrorCode::GET_IMAGE_ASSET_URI_INVALID, "image src is empty." };
+        errorInfo = { ImageErrorCode::GET_IMAGE_ASSET_URI_INVALID, "uri is invalid." };
         return nullptr;
     }
 
@@ -599,7 +599,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
         return drawingData;
     }
     TAG_LOGW(AceLogTag::ACE_IMAGE, "load image data failed, as uri is invalid:%{private}s", uri.c_str());
-    errorInfo = { ImageErrorCode::GET_IMAGE_RESOURCE_URI_INVALID, "load image data failed, as uri is invalid." };
+    errorInfo = { ImageErrorCode::GET_IMAGE_RESOURCE_URI_INVALID, "uri is invalid." };
     return nullptr;
 }
 
@@ -730,7 +730,7 @@ std::shared_ptr<RSData> SharedMemoryImageLoader::LoadImageData(
         if (status == std::cv_status::timeout) {
             TAG_LOGW(AceLogTag::ACE_IMAGE, "load SharedMemoryImage timeout! %{private}s,  %{public}s.",
                 imageDfxConfig.GetImageSrc().c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
-            errorInfo = { ImageErrorCode::GET_IMAGE_SHARED_MEMORY_LOAD_TIMEOUT, "load SharedMemoryImage timeout." };
+            errorInfo = { ImageErrorCode::GET_IMAGE_SHARED_MEMORY_LOAD_TIMEOUT, "load shared memory image data timeout." };
             return nullptr;
         }
     }

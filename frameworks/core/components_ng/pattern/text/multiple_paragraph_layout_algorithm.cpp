@@ -110,6 +110,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
         contentModifier->SetFontReady(false);
     }
     textStyle.SetHalfLeading(textLayoutProperty->GetHalfLeadingValue(pipeline->GetHalfLeading()));
+    textStyle.SetEnableAutoSpacing(textLayoutProperty->GetEnableAutoSpacingValue(false));
     SetAdaptFontSizeStepToTextStyle(textStyle, textLayoutProperty->GetAdaptFontSizeStep());
     FontRegisterCallback(frameNode, textStyle); // Register callback for fonts.
     textStyle.SetTextDirection(GetTextDirection(content, layoutWrapper));
@@ -475,7 +476,8 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(const TextSty
         .indent = textStyle.GetTextIndent(),
         .halfLeading = textStyle.GetHalfLeading(),
         .paragraphSpacing = textStyle.GetParagraphSpacing(),
-        .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines()
+        .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines(),
+        .enableAutoSpacing = textStyle.GetEnableAutoSpacing()
         };
 }
 

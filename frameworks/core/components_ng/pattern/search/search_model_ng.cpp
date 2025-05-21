@@ -2364,4 +2364,32 @@ void SearchModelNG::ResetStrokeColor(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, StrokeColor, frameNode);
 }
+
+void SearchModelNG::SetEnableAutoSpacing(bool enabled)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EnableAutoSpacing, enabled, textFieldChild);
+}
+
+void SearchModelNG::SetEnableAutoSpacing(FrameNode* frameNode, bool enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EnableAutoSpacing, enabled, textFieldChild);
+}
+
+bool SearchModelNG::GetEnableAutoSpacing(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_RETURN(textFieldChild, false);
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, EnableAutoSpacing, value, textFieldChild, value);
+    return value;
+}
 } // namespace OHOS::Ace::NG

@@ -2223,6 +2223,7 @@ void JSViewAbstract::ParseContentMenuCommonParam(
     if (!menuParam.placement.has_value()) {
         MenuDefaultParam(menuParam);
     }
+    JSViewPopups::GetMenuShowInSubwindow(menuParam);
     CHECK_EQUAL_VOID(menuObj->IsEmpty(), true);
     JSViewPopups::ParseMenuParam(info, menuObj, menuParam);
     JSViewPopups::ParseMenuShowInSubWindowParam(menuObj, menuParam, false);

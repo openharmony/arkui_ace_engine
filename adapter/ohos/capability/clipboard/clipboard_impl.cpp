@@ -208,7 +208,11 @@ void ClipboardImpl::AddMultiTypeRecord(
         multiTypeDataMap[SPAN_STRING_TAG] =
             std::make_shared<OHOS::MiscServices::EntryValue>(multiTypeRecordImpl->GetSpanStringBuffer());
     }
-
+    if (!multiTypeRecordImpl->GetHtmlText().empty()) {
+        multiTypeDataMap[OHOS::MiscServices::MIMETYPE_TEXT_HTML] =
+            std::make_shared<OHOS::MiscServices::EntryValue>(multiTypeRecordImpl->GetHtmlText());
+    }
+    
     auto entry =
         std::make_shared<std::map<std::string, std::shared_ptr<OHOS::MiscServices::EntryValue>>>(multiTypeDataMap);
     peData->GetPasteDataData()->AddRecord(
@@ -221,6 +225,9 @@ const std::string ClipboardImpl::GetMimeType(
     std::map<std::string, std::shared_ptr<OHOS::MiscServices::EntryValue>> multiTypeDataMap)
 {
     std::string mimeType;
+    if (multiTypeDataMap.find(OHOS::MiscServices::MIMETYPE_TEXT_HTML) != multiTypeDataMap.end()) {
+        mimeType = OHOS::MiscServices::MIMETYPE_TEXT_HTML;
+    }
     if (multiTypeDataMap.find(SPAN_STRING_TAG) != multiTypeDataMap.end()) {
         mimeType = SPAN_STRING_TAG;
     }
@@ -249,6 +256,10 @@ void MultiTypeRecordImpl::SetPixelMap(RefPtr<PixelMap> pixelMap)
 {
     pixelMap_ = pixelMap;
 }
+void MultiTypeRecordImpl::SetHtmlText(const std::string& htmlText)
+{
+    htmlText_ = htmlText;
+}
 const RefPtr<PixelMap> MultiTypeRecordImpl::GetPixelMap()
 {
     return pixelMap_;
@@ -260,6 +271,10 @@ const std::string MultiTypeRecordImpl::GetPlainText()
 const std::string MultiTypeRecordImpl::GetUri()
 {
     return uri_;
+}
+const std::string MultiTypeRecordImpl::GetHtmlText()
+{
+    return htmlText_;
 }
 std::vector<uint8_t>& MultiTypeRecordImpl::GetSpanStringBuffer()
 {

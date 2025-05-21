@@ -460,13 +460,11 @@ HWTEST_F(DatePickerColumnTest, DatePickerDialogView001, TestSize.Level1)
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto datePickerNode = DatePickerDialogView::CreateDateNode(
-        dateNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
+    auto datePickerNode = DatePickerDialogView::CreateDateNode(dateNodeId, settingData, false);
     ASSERT_NE(datePickerNode, nullptr);
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto monthDaysNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto monthDaysNode = DatePickerDialogView::CreateDateNode(
-        monthDaysNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+    auto monthDaysNode = DatePickerDialogView::CreateDateNode(monthDaysNodeId, settingData, true);
     datePickerNode->MountToParent(pickerStack);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
@@ -522,13 +520,11 @@ HWTEST_F(DatePickerColumnTest, DatePickerDialogView002, TestSize.Level1)
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto datePickerNode = DatePickerDialogView::CreateDateNode(
-        dateNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
+    auto datePickerNode = DatePickerDialogView::CreateDateNode(dateNodeId, settingData, false);
     ASSERT_NE(datePickerNode, nullptr);
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto monthDaysNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto monthDaysNode = DatePickerDialogView::CreateDateNode(
-        monthDaysNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+    auto monthDaysNode = DatePickerDialogView::CreateDateNode(monthDaysNodeId, settingData, true);
     datePickerNode->MountToParent(pickerStack);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
@@ -743,13 +739,11 @@ HWTEST_F(DatePickerColumnTest, DatePickerDialogView006, TestSize.Level1)
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto datePickerNode = DatePickerDialogView::CreateDateNode(
-        dateNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
+    auto datePickerNode = DatePickerDialogView::CreateDateNode(dateNodeId, settingData, false);
     ASSERT_NE(datePickerNode, nullptr);
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto monthDaysNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto monthDaysNode = DatePickerDialogView::CreateDateNode(
-        monthDaysNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+    auto monthDaysNode = DatePickerDialogView::CreateDateNode(monthDaysNodeId, settingData, true);
     datePickerNode->MountToParent(pickerStack);
     auto pickerRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
@@ -805,13 +799,11 @@ HWTEST_F(DatePickerColumnTest, DatePickerDialogView007, TestSize.Level1)
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto datePickerNode = DatePickerDialogView::CreateDateNode(
-        dateNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
+    auto datePickerNode = DatePickerDialogView::CreateDateNode(dateNodeId, settingData, false);
     ASSERT_NE(datePickerNode, nullptr);
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto monthDaysNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto monthDaysNode = DatePickerDialogView::CreateDateNode(
-        monthDaysNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+    auto monthDaysNode = DatePickerDialogView::CreateDateNode(monthDaysNodeId, settingData, true);
     datePickerNode->MountToParent(pickerStack);
     auto pickerRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
@@ -964,13 +956,11 @@ HWTEST_F(DatePickerColumnTest, DatePickerPatternTest003, TestSize.Level1)
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto datePickerNode = DatePickerDialogView::CreateDateNode(
-        dateNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
+    auto datePickerNode = DatePickerDialogView::CreateDateNode(dateNodeId, settingData, false);
     ASSERT_NE(datePickerNode, nullptr);
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto monthDaysNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto monthDaysNode = DatePickerDialogView::CreateDateNode(
-        monthDaysNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+    auto monthDaysNode = DatePickerDialogView::CreateDateNode(monthDaysNodeId, settingData, true);
     datePickerNode->MountToParent(pickerStack);
     auto pickerRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));

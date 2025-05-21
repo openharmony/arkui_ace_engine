@@ -328,6 +328,42 @@ ArkUINativeModuleValue DatePickerBridge::ResetDigitalCrownSensitivity(ArkUIRunti
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue DatePickerBridge::SetCanLoop(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> canLoopArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::NativePointerRef::New(vm, nullptr));
+    auto datePickerModifier = nodeModifiers->getDatePickerModifier();
+    CHECK_NULL_RETURN(datePickerModifier, panda::NativePointerRef::New(vm, nullptr));
+    if (canLoopArg->IsBoolean()) {
+        bool value = canLoopArg->ToBoolean(vm)->Value();
+        datePickerModifier->setCanLoop(nativeNode, value);
+    } else {
+        datePickerModifier->resetCanLoop(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue DatePickerBridge::ResetCanLoop(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::NativePointerRef::New(vm, nullptr));
+    auto datePickerModifier = nodeModifiers->getDatePickerModifier();
+    CHECK_NULL_RETURN(datePickerModifier, panda::NativePointerRef::New(vm, nullptr));
+    datePickerModifier->resetCanLoop(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 double GetMSByDateToDouble(const std::string& date)
 {
     auto json = JsonUtil::ParseJsonString(date);

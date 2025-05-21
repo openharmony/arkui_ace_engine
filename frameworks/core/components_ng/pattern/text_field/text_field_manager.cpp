@@ -28,6 +28,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension RESERVE_BOTTOM_HEIGHT = 24.0_vp;
+constexpr int32_t MAX_FILL_CONTENT_SIZE = 5;
 } // namespace
 
 void TextFieldManagerNG::ClearOnFocusTextField()
@@ -566,5 +567,81 @@ void TextFieldManagerNG::OnAfterAvoidKeyboard(bool isCustomKeyboard)
 TextFieldManagerNG::~TextFieldManagerNG()
 {
     textFieldInfoMap_.clear();
+    textFieldFillContentMaps_.clear();
+}
+
+bool TextFieldManagerNG::ParseFillContentJsonValue(const std::unique_ptr<JsonValue>& jsonObject)
+{
+    if (!jsonObject->IsValid() || !jsonObject->IsArray()) {
+        TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "fillContent list format is invalid");
+        return false;
+    }
+
+    for (int32_t i = 0; i < jsonObject->GetArraySize(); ++i) {
+        auto item = jsonObject->GetArrayItem(i);
+        if (!item) {
+            continue;
+        }
+        auto nodeId = item->GetInt("id", -1);
+        if (nodeId == -1) {
+            continue;
+        }
+        FillContentMap fillContentMap;
+        auto fillContent = item->GetValue("fillContent");
+        if (!fillContent) {
+            continue;
+        }
+        GenerateFillContentMap(fillContent->GetString(), fillContentMap);
+        if (!fillContentMap.empty()) {
+            textFieldFillContentMaps_[nodeId] = fillContentMap;
+        }
+    }
+    return true;
+}
+
+void TextFieldManagerNG::GenerateFillContentMap(const std::string& fillContent, FillContentMap& map)
+{
+    auto jsonObject = JsonUtil::ParseJsonString(fillContent);
+    CHECK_NULL_VOID(jsonObject);
+    if (!jsonObject->IsValid() || jsonObject->IsArray() || !jsonObject->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "fillContent format is invalid");
+        return;
+    }
+    auto child = jsonObject->GetChild();
+    while (child && child->IsValid()) {
+        if (!child->IsObject() && child->IsString()) {
+            std::string strKey = child->GetKey();
+            std::string strVal = child->GetString();
+            if (strKey.empty()) {
+                child = child->GetNext();
+                continue;
+            }
+            if (map.size() < MAX_FILL_CONTENT_SIZE) {
+                map.insert(std::pair<std::string, std::variant<std::string, bool, int32_t>>(strKey, strVal));
+            } else {
+                TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "fillContent is more than 5");
+                break;
+            }
+        }
+        child = child->GetNext();
+    }
+}
+
+FillContentMap TextFieldManagerNG::GetFillContentMap(int32_t id)
+{
+    std::unordered_map<std::string, std::variant<std::string, bool, int32_t>> fillContentMap;
+    auto fillContentMapIter = textFieldFillContentMaps_.find(id);
+    if (fillContentMapIter != textFieldFillContentMaps_.end()) {
+        fillContentMap = fillContentMapIter->second;
+    }
+    return fillContentMap;
+}
+
+void TextFieldManagerNG::RemoveFillContentMap(int32_t id)
+{
+    auto fillContentMapIter = textFieldFillContentMaps_.find(id);
+    if (fillContentMapIter != textFieldFillContentMaps_.end()) {
+        textFieldFillContentMaps_.erase(fillContentMapIter);
+    }
 }
 } // namespace OHOS::Ace::NG

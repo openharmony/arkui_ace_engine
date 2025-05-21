@@ -225,6 +225,18 @@ public:
         return lunar_;
     }
 
+    void SetCanLoop(bool value)
+    {
+        isLoop_ = value;
+    }
+
+    bool GetCanLoop() const
+    {
+        auto datePickerRowLayoutProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
+        CHECK_NULL_RETURN(datePickerRowLayoutProperty, isLoop_);
+        return datePickerRowLayoutProperty->GetCanLoopValue(true);
+    }
+
     void SetShowMonthDaysFlag(bool value)
     {
         showMonthDays_ = value;
@@ -843,6 +855,7 @@ private:
     std::string dateOrder_ = "";
     std::vector<WeakPtr<FrameNode>> datePickerColumns_;
     bool lunar_ = false;
+    bool isLoop_ = true;
     bool showMonthDays_ = false;
     bool showTime_ = false;
     bool showLunarSwitch_ = false;

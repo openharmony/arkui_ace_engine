@@ -366,6 +366,7 @@ void JSViewAbstract::JsOnAccessibilityActionIntercept(const JSCallbackInfo& info
         node = frameNode](AccessibilityInterfaceAction action) -> AccessibilityActionInterceptResult {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, AccessibilityActionInterceptResult::ACTION_CONTINUE);
         ACE_SCORING_EVENT("onAccessibilityActionIntercept");
+        PipelineContext::SetCallBackNode(node);
         return func->Execute(action);
     };
     ViewAbstractModel::GetInstance()->SetOnAccessibilityActionIntercept(std::move(onAccessibilityActionIntercept));

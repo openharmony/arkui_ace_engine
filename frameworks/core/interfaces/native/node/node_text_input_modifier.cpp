@@ -495,7 +495,7 @@ void SetTextInputAutoCapitalizationMode(ArkUINodeHandle node, ArkUI_Int32 value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetAutoCapitalizationMode(frameNode, static_cast<AutoCapitalizationMode>(value));
+    TextFieldModelNG::SetAutoCapitalizationMode(frameNode, CastToAutoCapitalizationMode(value));
 }
 
 void ResetTextInputAutoCapitalizationMode(ArkUINodeHandle node)
@@ -2019,6 +2019,20 @@ ArkUI_Uint32 GetTextInputStrokeColor(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
     return TextFieldModelNG::GetStrokeColor(frameNode).GetValue();
 }
+
+void SetEnableAutoSpacing(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnableAutoSpacing(frameNode, static_cast<bool>(enableAutoSpacing));
+}
+
+void ResetEnableAutoSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnableAutoSpacing(frameNode, false);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUITextInputModifier* GetTextInputModifier()
@@ -2243,6 +2257,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .setTextInputStrokeColor = SetTextInputStrokeColor,
         .resetTextInputStrokeColor = ResetTextInputStrokeColor,
         .getTextInputStrokeColor = GetTextInputStrokeColor,
+        .setEnableAutoSpacing = SetEnableAutoSpacing,
+        .resetEnableAutoSpacing = ResetEnableAutoSpacing,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

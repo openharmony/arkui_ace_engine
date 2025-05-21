@@ -400,6 +400,7 @@ public:
     virtual void SetStrokeWidth(const Dimension& value) {};
     virtual void SetStrokeColor(const Color& value) {};
     virtual void ResetStrokeColor() {};
+    virtual void SetEnableAutoSpacing(bool enabled) = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

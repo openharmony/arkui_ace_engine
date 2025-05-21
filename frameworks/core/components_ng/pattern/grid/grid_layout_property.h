@@ -41,6 +41,7 @@ public:
         value->propCachedCount_ = CloneCachedCount();
         value->propShowCachedItems_ = CloneShowCachedItems();
         value->propGridDirection_ = CloneGridDirection();
+        value->propFocusWrapMode_ = CloneFocusWrapMode();
         value->propMaxCount_ = CloneMaxCount();
         value->propMinCount_ = CloneMinCount();
         value->propCellLength_ = CloneCellLength();
@@ -59,6 +60,7 @@ public:
         ResetCachedCount();
         ResetShowCachedItems();
         ResetGridDirection();
+        ResetFocusWrapMode();
         ResetMaxCount();
         ResetMinCount();
         ResetCellLength();
@@ -121,6 +123,9 @@ public:
         ResetGridLayoutInfoAndMeasure();
     }
 
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(FocusWrapMode, FocusWrapMode);
+    void OnFocusWrapModeUpdate(FocusWrapMode /* focusWrapMode */) const {}
+
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(MaxCount, int32_t);
     void OnMaxCountUpdate(int32_t /* maxCount */) const
     {
@@ -163,6 +168,7 @@ private:
     void ResetPositionFlags() const;
     std::string GetBarStateString() const;
     std::string GetGridDirectionStr() const;
+    std::string GetFocusWrapModeStr() const;
     Color GetBarColor() const;
     Dimension GetBarWidth() const;
 

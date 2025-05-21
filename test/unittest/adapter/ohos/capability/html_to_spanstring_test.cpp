@@ -711,7 +711,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert005, TestSize.Level1)
     // Convert to TLV format
     std::vector<uint8_t> buff;
     spanString->EncodeTlv(buff);
-    EXPECT_EQ(buff.size(), 13);
+    EXPECT_EQ(buff.size(), 16);
 
     /**
      * @tc.steps2: Convert the TLV buffer to HTML.
@@ -1649,8 +1649,9 @@ HWTEST_F(HtmlConvertTestNg, HtmlConverter012, TestSize.Level1)
     std::string result =
         "<div ><p style=\"text-align: center;text-indent: 23.00px;word-break: break_all;text-overflow: ellipsis;\">"
         "<span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;font-family: "
-        "HarmonyOS Sans;\">段落标题</span></p><span style=\"font-size: 16.00px;font-style: normal;font-weight: "
-        "normal;color: #000000FF;font-family: HarmonyOS Sans;\">正文第一段开始</span></div>";
+        "HarmonyOS Sans;stroke-width: 0.00px;stroke-color: #000000FF;\">段落标题</span></p><span "
+        "style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;"
+        "font-family: HarmonyOS Sans;stroke-width: 0.00px;stroke-color: #000000FF;\">正文第一段开始</span></div>";
     EXPECT_EQ(out, result);
 }
 
@@ -1670,10 +1671,11 @@ HWTEST_F(HtmlConvertTestNg, HtmlConverter013, TestSize.Level1)
     auto out = convert.ToHtml(*spanString);
     std::string result =
         "<div ><span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;font-family: "
-        "HarmonyOS Sans;vertical-align: 20.00px;\">向上到顶</span><span style=\"font-size: 16.00px;font-style: "
-        "normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;vertical-align: "
+        "HarmonyOS Sans;stroke-width: 0.00px;stroke-color: #000000FF;vertical-align: 20.00px;\">向上到顶</span>"
+        "<span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;"
+        "font-family: HarmonyOS Sans;stroke-width: 0.00px;stroke-color: #000000FF;vertical-align: "
         "10.00px;\">适中</span><span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: "
-        "#000000FF;font-family: HarmonyOS Sans;\">向下到底</span></div>";
+        "#000000FF;font-family: HarmonyOS Sans;stroke-width: 0.00px;stroke-color: #000000FF;\">向下到底</span></div>";
     EXPECT_EQ(out, result);
 }
 

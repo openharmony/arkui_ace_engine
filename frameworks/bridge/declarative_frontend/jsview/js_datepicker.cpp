@@ -308,6 +308,7 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSDatePicker>::StaticMethod("create", &JSDatePicker::Create, opt);
     JSClass<JSDatePicker>::StaticMethod("lunar", &JSDatePicker::SetLunar);
+    JSClass<JSDatePicker>::StaticMethod("canLoop", &JSDatePicker::SetCanLoop);
     JSClass<JSDatePicker>::StaticMethod("onChange", &JSDatePicker::OnChange);
     JSClass<JSDatePicker>::StaticMethod("onDateChange", &JSDatePicker::OnDateChange);
     JSClass<JSDatePicker>::StaticMethod("backgroundColor", &JSDatePicker::PickerBackgroundColor);
@@ -368,6 +369,15 @@ void JSDatePicker::Create(const JSCallbackInfo& info)
 void JSDatePicker::SetLunar(bool isLunar)
 {
     DatePickerModel::GetInstance()->SetShowLunar(isLunar);
+}
+
+void JSDatePicker::SetCanLoop(const JSCallbackInfo& info)
+{
+    bool value = true;
+    if (info.Length() >= 1 && info[0]->IsBoolean()) {
+        value = info[0]->ToBoolean();
+    }
+    DatePickerModel::GetInstance()->SetCanLoop(value);
 }
 
 void JSDatePicker::UseMilitaryTime(bool isUseMilitaryTime)
@@ -1081,6 +1091,12 @@ void JSDatePickerDialog::UpdateDatePickerSettingData(
         }
     }
     settingData.mode = datePickerMode;
+    auto isLoop = paramObject->GetProperty("canLoop");
+    if (isLoop->IsBoolean()) {
+        settingData.canLoop = isLoop->ToBoolean();
+    } else {
+        settingData.canLoop = true;
+    }
 
     auto dateTimeOptionsValue = paramObject->GetProperty("dateTimeOptions");
     if (dateTimeOptionsValue->IsObject()) {

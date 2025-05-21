@@ -34,6 +34,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/core/pipeline/container_window_manager.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",
     "$ace_root/frameworks/core/pipeline_ng/pipeline_context.cpp",
+    "$ace_root/test/mock/adapter/mock_image_packer_ohos.cpp",
     "$ace_root/test/mock/adapter/mock_input_manager.cpp",
     "$ace_root/test/mock/adapter/mock_modal_ui_extension.cpp",
     "$ace_root/test/mock/adapter/mock_ui_session_manager.cpp",

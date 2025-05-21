@@ -42,7 +42,30 @@ ohos_unittest("container_test") {
   ]
 }
 
+ohos_unittest("layout_inspector_test") {
+  module_out_path = adapter_test_output_path
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+  sources = [
+    "layout_inspector_test.cpp",
+    "$ace_root/adapter/ohos/osal/layout_inspector.cpp"
+  ]
+
+  external_deps = [
+     "ability_runtime:abilitykit_native",
+     "ability_runtime:connect_server_manager",
+     "graphic_2d:librender_service_client",
+     "image_framework:image_native",
+     "napi:ace_napi",
+     "resource_management:global_resmgr",
+     "skia:skia_canvaskit",
+     "window_manager:libwm",
+  ]
+}
+
 group("entrance_unittest") {
   testonly = true
-  deps = [ ":container_test" ]
+  deps = [
+     ":container_test" ,
+     ":layout_inspector_test"
+  ]
 }

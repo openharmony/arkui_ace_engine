@@ -34,6 +34,7 @@ public:
     void SetSelectedDate(const PickerDate& value) override;
     void SetMode(const DatePickerMode& value) override;
     void SetShowLunar(bool lunar) override;
+    void SetCanLoop(bool isLoop) override;
     void SetOnChange(DateChangeEvent&& onChange) override;
     void SetOnDateChange(DateChangeEvent&& onChange) override;
     void SetSelectedTime(const PickerTime& selectedTime) override {};
@@ -78,6 +79,8 @@ public:
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
     static bool GetEnableHapticFeedback(FrameNode* frameNode);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
+    static bool GetCanLoop(FrameNode* frameNode);
+    static void SetCanLoop(FrameNode* frameNode, bool isLoop);
     static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
 private:
     static RefPtr<FrameNode> CreateStackNode();

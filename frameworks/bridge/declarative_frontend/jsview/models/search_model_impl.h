@@ -96,6 +96,7 @@ public:
     void SetEnablePreviewText(bool enablePreviewText) override {};
     void SetEnableHapticFeedback(bool state) override {};
     void SetKeyboardAppearance(KeyboardAppearance value) override {};
+    void SetEnableAutoSpacing(bool enabled) override {};
 
 private:
     void InitializeDefaultValue(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

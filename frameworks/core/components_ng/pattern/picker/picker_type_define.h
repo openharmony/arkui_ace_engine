@@ -97,6 +97,7 @@ struct CheckboxSettingData {
 struct DatePickerSettingData {
     bool isLunar;
     bool lunarswitch;
+    bool canLoop = true;
     CheckboxSettingData checkboxSettingData;
     bool showTime;
     bool useMilitary;

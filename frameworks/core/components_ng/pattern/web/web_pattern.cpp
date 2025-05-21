@@ -48,7 +48,6 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine_ext.h"
-#include "core/common/ai/data_detector_mgr.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/container.h"
 #include "core/common/ime/input_method_manager.h"
@@ -747,6 +746,16 @@ void WebPattern::OnAttachToMainTree()
     InitSlideUpdateListener();
     // report component is in foreground.
     delegate_->OnRenderToForeground();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frontend = pipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->AddToPageEventController(host);
 }
 
 void WebPattern::OnDetachFromMainTree()
@@ -808,11 +817,6 @@ void WebPattern::OnAttachToFrameNode()
     pipeline->RegisterListenerForTranslate(WeakClaim(RawPtr(host)));
     EventRecorder::Get().OnAttachWeb(host);
 #endif
-    auto frontend = pipeline->GetFrontend();
-    CHECK_NULL_VOID(frontend);
-    auto accessibilityManager = frontend->GetAccessibilityManager();
-    CHECK_NULL_VOID(accessibilityManager);
-    accessibilityManager->AddToPageEventController(host);
 }
 
 void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -4063,6 +4067,14 @@ void WebPattern::UpdateEditMenuOptions(
     };
 }
 
+void WebPattern::UpdateDataDetectorConfig(const TextDetectConfig& config)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::UpdateDataDetectorConfig");
+    auto adapter = GetDataDetectorAdapter();
+    CHECK_NULL_VOID(adapter);
+    adapter->SetDataDetectorConfig(config);
+}
+
 void WebPattern::HideHandleAndQuickMenuIfNecessary(bool hide, bool isScroll)
 {
     if (webSelectOverlay_) {
@@ -4090,6 +4102,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     }
     if (webSelectOverlay_->RunQuickMenu(params, callback)) {
         DestroyAnalyzerOverlay();
+        CloseDataDetectorMenu();
         return true;
     }
     return false;
@@ -5452,6 +5465,7 @@ void WebPattern::OnVisibleAreaChange(bool isVisible)
         CloseSelectOverlay();
         SelectCancel();
         DestroyAnalyzerOverlay();
+        CloseDataDetectorMenu();
         OnTooltip("");
         isDragEndMenuShow_ = false;
         if (isVisibleActiveEnable_ && (!isDialogNested || !isFocus_)) {
@@ -7052,6 +7066,7 @@ bool WebPattern::OnAccessibilityChildTreeDeregister()
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_RETURN(accessibilityManager, false);
     if (treeId_ == 0) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "OnAccessibilityChildTreeDeregister: treeId is 0.");
         return false;
     }
     return accessibilityManager->DeregisterWebInteractionOperationAsChildTree(treeId_);
@@ -7176,6 +7191,14 @@ void WebPattern::OnWebMediaAVSessionEnabledUpdate(bool enable)
     if (delegate_) {
         delegate_->UpdateWebMediaAVSessionEnabled(enable);
     }
+}
+
+void WebPattern::OnEnableDataDetectorUpdate(bool enable)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnEnableDataDetectorUpdate enable:%{public}d", enable);
+    auto adapter = GetDataDetectorAdapter();
+    CHECK_NULL_VOID(adapter);
+    adapter->SetDataDetectorEnable(enable);
 }
 
 void WebPattern::PushOverlayInfo(float x, float y, int32_t id)
@@ -7426,5 +7449,34 @@ void WebPattern::RecoverToTopLeft()
     if (renderContextForSurface_) {
         renderContextForSurface_->SetRenderFit(RenderFit::TOP_LEFT);
     }
+}
+
+RefPtr<WebDataDetectorAdapter> WebPattern::GetDataDetectorAdapter()
+{
+    if (!webDataDetectorAdapter_) {
+        webDataDetectorAdapter_ = AceType::MakeRefPtr<WebDataDetectorAdapter>(WeakClaim(this));
+    }
+    return webDataDetectorAdapter_;
+}
+
+bool WebPattern::GetDataDetectorEnable()
+{
+    if (!webDataDetectorAdapter_) {
+        return false;
+    }
+    return webDataDetectorAdapter_->GetDataDetectorEnable();
+}
+
+void WebPattern::InitDataDetector()
+{
+    CHECK_NULL_VOID(webDataDetectorAdapter_);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::InitDataDetector");
+    webDataDetectorAdapter_->Init();
+}
+
+void WebPattern::CloseDataDetectorMenu()
+{
+    CHECK_NULL_VOID(webDataDetectorAdapter_);
+    webDataDetectorAdapter_->CloseAIMenu();
 }
 } // namespace OHOS::Ace::NG

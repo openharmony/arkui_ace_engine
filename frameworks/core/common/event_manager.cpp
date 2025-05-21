@@ -1483,7 +1483,7 @@ bool EventManager::DispatchMouseEventInGreatOrEqualAPI13(const MouseEvent& event
         }
     }
     auto result = DispatchMouseEventToCurResults(event, handledResults, isStopPropagation);
-    if (event.action == MouseAction::RELEASE) {
+    if (event.action == MouseAction::RELEASE || event.action == MouseAction::CANCEL) {
         DoSingleMouseActionRelease(event.button);
     }
     return result;

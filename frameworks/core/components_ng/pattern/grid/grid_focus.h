@@ -52,7 +52,11 @@ public:
     void HandleFocusEvent(const WeakPtr<FocusHub>& child);
 
     WeakPtr<FocusHub> GetNextFocusSimplified(FocusStep step, const RefPtr<FocusHub>& current); // focus algo rewritten
-    WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
+    WeakPtr<FocusHub> GetNextFocusNode(
+        FocusStep step, const WeakPtr<FocusHub>& currentFocusNode, bool isMainSkip = false);
+    bool GetCurrentFocusInfo(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
+    WeakPtr<FocusHub> HandleFocusSteps(
+        FocusStep step, const WeakPtr<FocusHub>& currentFocusNode, std::pair<FocusStep, FocusStep> focusSteps);
 
     void ResetFocusIndex()
     {
@@ -69,12 +73,17 @@ private:
     void FireFocus();
     std::pair<int32_t, int32_t> GetNextIndexByStep(
         int32_t curMainIndex, int32_t curCrossIndex, int32_t curMainSpan, int32_t curCrossSpan, FocusStep step);
+    WeakPtr<FocusHub> SearchBigItemFocusableChildInCross(
+        int32_t tarMainIndex, int32_t tarCrossIndex, FocusStep step = FocusStep::NONE, bool isMainSkip = false);
+    bool CheckIsCrossDirectionFocus(FocusStep step);
+    bool CheckStepDirection(FocusStep step, bool isNext);
     WeakPtr<FocusHub> SearchFocusableChildInCross(int32_t tarMainIndex, int32_t tarCrossIndex, int32_t maxCrossCount,
         int32_t curMainIndex = -1, int32_t curCrossIndex = -1);
     WeakPtr<FocusHub> SearchIrregularFocusableChild(int32_t tarMainIndex, int32_t tarCrossIndex);
     std::unordered_set<int32_t> GetFocusableChildCrossIndexesAt(int32_t tarMainIndex);
     std::pair<bool, bool> IsFirstOrLastFocusableChild(int32_t curMainIndex, int32_t curCrossIndex);
     std::pair<FocusStep, FocusStep> GetFocusSteps(int32_t curMainIndex, int32_t curCrossIndex, FocusStep step);
+    FocusWrapMode GetFocusWrapMode();
     int32_t GetIndexByFocusHub(const WeakPtr<FocusHub>& focusNode);
     void ResetAllDirectionsStep();
     int32_t CalcIntersectAreaInTargetDirectionShadow(GridItemIndexInfo itemIndexInfo, bool isFindInMainAxis);
@@ -88,6 +97,7 @@ private:
     GridPattern& grid_;
     const GridLayoutInfo& info_;
 
+    bool isTab_ = false;
     bool isLeftStep_ = false;
     bool isRightStep_ = false;
     bool isUpStep_ = false;
