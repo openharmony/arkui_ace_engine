@@ -57,11 +57,13 @@ export class TextClockController implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._TextClockController_getFinalizer()
     }
-    public start(): undefined {
-        return this.start_serialize()
+    public start(): void {
+        this.start_serialize();
+        return;
     }
-    public stop(): undefined {
-        return this.stop_serialize()
+    public stop(): void {
+        this.stop_serialize();
+        return;
     }
     private start_serialize(): undefined {
         const retval  = ArkUIGeneratedNativeModule._TextClockController_start(this.peer!.ptr)
