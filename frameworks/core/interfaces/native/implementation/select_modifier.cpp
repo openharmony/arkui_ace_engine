@@ -133,13 +133,8 @@ void SetSelectOptionsImpl(Ark_NativePointer node,
 }
 } // SelectInterfaceModifier
 namespace SelectAttributeModifier {
-void Selected0Impl(Ark_NativePointer node,
-                   const Opt_Union_Number_Resource* value)
-{
-    Selected1Impl(node, value);
-}
-void Selected1Impl(Ark_NativePointer node,
-                   const Opt_Union_Number_Resource* value)
+void SelectedImpl(Ark_NativePointer node,
+                  const Opt_Union_Number_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -148,26 +143,16 @@ void Selected1Impl(Ark_NativePointer node,
     Validator::ValidateNonNegative(convVal);
     SelectModelStatic::SetSelected(frameNode, convVal);
 }
-void Value0Impl(Ark_NativePointer node,
-                const Opt_ResourceStr* value)
+void ValueImpl(Ark_NativePointer node,
+               const Opt_ResourceStr* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::OptConvert<std::string>(*value);
     SelectModelStatic::SetValue(frameNode, optValue);
 }
-void Value1Impl(Ark_NativePointer node,
-                const Opt_ResourceStr* value)
-{
-    Value0Impl(node, value);
-}
-void Font0Impl(Ark_NativePointer node,
-               const Opt_Font* value)
-{
-    Font1Impl(node, value);
-}
-void Font1Impl(Ark_NativePointer node,
-               const Opt_Font* value)
+void FontImpl(Ark_NativePointer node,
+              const Opt_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -184,37 +169,22 @@ void Font1Impl(Ark_NativePointer node,
         SelectModelStatic::SetItalicFontStyle(frameNode, std::nullopt);
     }
 }
-void FontColor0Impl(Ark_NativePointer node,
-                    const Opt_ResourceColor* value)
+void FontColorImpl(Ark_NativePointer node,
+                   const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelStatic::SetFontColor(frameNode, Converter::OptConvert<Color>(*value));
 }
-void FontColor1Impl(Ark_NativePointer node,
-                    const Opt_ResourceColor* value)
-{
-    FontColor0Impl(node, value);
-}
-void SelectedOptionBgColor0Impl(Ark_NativePointer node,
-                                const Opt_ResourceColor* value)
+void SelectedOptionBgColorImpl(Ark_NativePointer node,
+                               const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelStatic::SetSelectedOptionBgColor(frameNode, Converter::OptConvert<Color>(*value));
 }
-void SelectedOptionBgColor1Impl(Ark_NativePointer node,
-                                const Opt_ResourceColor* value)
-{
-    SelectedOptionBgColor0Impl(node, value);
-}
-void SelectedOptionFont0Impl(Ark_NativePointer node,
-                             const Opt_Font* value)
-{
-    SelectedOptionFont1Impl(node, value);
-}
-void SelectedOptionFont1Impl(Ark_NativePointer node,
-                             const Opt_Font* value)
+void SelectedOptionFontImpl(Ark_NativePointer node,
+                            const Opt_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -232,37 +202,22 @@ void SelectedOptionFont1Impl(Ark_NativePointer node,
         SelectModelStatic::SetItalicFontStyle(frameNode, std::nullopt);
     }
 }
-void SelectedOptionFontColor0Impl(Ark_NativePointer node,
-                                  const Opt_ResourceColor* value)
+void SelectedOptionFontColorImpl(Ark_NativePointer node,
+                                 const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelStatic::SetSelectedOptionFontColor(frameNode, Converter::OptConvert<Color>(*value));
 }
-void SelectedOptionFontColor1Impl(Ark_NativePointer node,
-                                  const Opt_ResourceColor* value)
-{
-    SelectedOptionFontColor0Impl(node, value);
-}
-void OptionBgColor0Impl(Ark_NativePointer node,
-                        const Opt_ResourceColor* value)
+void OptionBgColorImpl(Ark_NativePointer node,
+                       const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelStatic::SetOptionBgColor(frameNode, Converter::OptConvert<Color>(*value));
 }
-void OptionBgColor1Impl(Ark_NativePointer node,
-                        const Opt_ResourceColor* value)
-{
-    OptionBgColor0Impl(node, value);
-}
-void OptionFont0Impl(Ark_NativePointer node,
-                     const Opt_Font* value)
-{
-    OptionFont1Impl(node, value);
-}
-void OptionFont1Impl(Ark_NativePointer node,
-                     const Opt_Font* value)
+void OptionFontImpl(Ark_NativePointer node,
+                    const Opt_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -279,20 +234,15 @@ void OptionFont1Impl(Ark_NativePointer node,
         SelectModelStatic::SetItalicFontStyle(frameNode, std::nullopt);
     }
 }
-void OptionFontColor0Impl(Ark_NativePointer node,
-                          const Opt_ResourceColor* value)
+void OptionFontColorImpl(Ark_NativePointer node,
+                         const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelStatic::SetOptionFontColor(frameNode, Converter::OptConvert<Color>(*value));
 }
-void OptionFontColor1Impl(Ark_NativePointer node,
-                          const Opt_ResourceColor* value)
-{
-    OptionFontColor0Impl(node, value);
-}
-void OnSelect0Impl(Ark_NativePointer node,
-                   const Opt_Callback_Number_String_Void* value)
+void OnSelectImpl(Ark_NativePointer node,
+                  const Opt_OnSelectCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -307,29 +257,8 @@ void OnSelect0Impl(Ark_NativePointer node,
     }
     SelectModelNG::SetOnSelect(frameNode, std::move(onSelect));
 }
-void OnSelect1Impl(Ark_NativePointer node,
-                   const Opt_OnSelectCallback* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    SelectEvent onSelect = {};
-    auto optValue = Converter::GetOptPtr(value);
-    if (optValue) {
-        onSelect = [arkCallback = CallbackHelper(*optValue)](int32_t index, const std::string& value) {
-            auto arkIndex = Converter::ArkValue<Ark_Number>(index);
-            auto arkValue = Converter::ArkValue<Ark_String>(value);
-            arkCallback.Invoke(arkIndex, arkValue);
-        };
-    }
-    SelectModelNG::SetOnSelect(frameNode, std::move(onSelect));
-}
-void Space0Impl(Ark_NativePointer node,
-                const Opt_Length* value)
-{
-    Space1Impl(node, value);
-}
-void Space1Impl(Ark_NativePointer node,
-                const Opt_Length* value)
+void SpaceImpl(Ark_NativePointer node,
+               const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -338,25 +267,15 @@ void Space1Impl(Ark_NativePointer node,
     Validator::ValidateNonPercent(convValue);
     SelectModelStatic::SetSpace(frameNode, convValue);
 }
-void ArrowPosition0Impl(Ark_NativePointer node,
-                        const Opt_ArrowPosition* value)
+void ArrowPositionImpl(Ark_NativePointer node,
+                       const Opt_ArrowPosition* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelStatic::SetArrowPosition(frameNode, Converter::OptConvert<ArrowPosition>(*value));
 }
-void ArrowPosition1Impl(Ark_NativePointer node,
-                        const Opt_ArrowPosition* value)
-{
-    ArrowPosition0Impl(node, value);
-}
-void OptionWidth0Impl(Ark_NativePointer node,
-                      const Opt_Union_Dimension_OptionWidthMode* value)
-{
-    OptionWidth1Impl(node, value);
-}
-void OptionWidth1Impl(Ark_NativePointer node,
-                      const Opt_Union_Dimension_OptionWidthMode* value)
+void OptionWidthImpl(Ark_NativePointer node,
+                     const Opt_Union_Dimension_OptionWidthMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -382,8 +301,8 @@ void OptionWidth1Impl(Ark_NativePointer node,
         []() {}
     );
 }
-void OptionHeight0Impl(Ark_NativePointer node,
-                       const Opt_Dimension* value)
+void OptionHeightImpl(Ark_NativePointer node,
+                      const Opt_Dimension* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -391,30 +310,15 @@ void OptionHeight0Impl(Ark_NativePointer node,
     Validator::ValidatePositive(convValue);
     SelectModelStatic::SetOptionHeight(frameNode, convValue);
 }
-void OptionHeight1Impl(Ark_NativePointer node,
-                       const Opt_Dimension* value)
-{
-    OptionHeight0Impl(node, value);
-}
-void MenuBackgroundColor0Impl(Ark_NativePointer node,
-                              const Opt_ResourceColor* value)
+void MenuBackgroundColorImpl(Ark_NativePointer node,
+                             const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelStatic::SetMenuBackgroundColor(frameNode, Converter::OptConvert<Color>(*value));
 }
-void MenuBackgroundColor1Impl(Ark_NativePointer node,
-                              const Opt_ResourceColor* value)
-{
-    MenuBackgroundColor0Impl(node, value);
-}
-void MenuBackgroundBlurStyle0Impl(Ark_NativePointer node,
-                                  const Opt_BlurStyle* value)
-{
-    MenuBackgroundBlurStyle1Impl(node, value);
-}
-void MenuBackgroundBlurStyle1Impl(Ark_NativePointer node,
-                                  const Opt_BlurStyle* value)
+void MenuBackgroundBlurStyleImpl(Ark_NativePointer node,
+                                 const Opt_BlurStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -425,17 +329,12 @@ void MenuBackgroundBlurStyle1Impl(Ark_NativePointer node,
     }
     SelectModelNG::SetMenuBackgroundBlurStyle(frameNode, option);
 }
-void ControlSize0Impl(Ark_NativePointer node,
-                      const Opt_ControlSize* value)
+void ControlSizeImpl(Ark_NativePointer node,
+                     const Opt_ControlSize* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetControlSize(frameNode, Converter::OptConvert<ControlSize>(*value));
-}
-void ControlSize1Impl(Ark_NativePointer node,
-                      const Opt_ControlSize* value)
-{
-    ControlSize0Impl(node, value);
 }
 void MenuItemContentModifier0Impl(Ark_NativePointer node,
                                   const Opt_ContentModifier* value)
@@ -518,15 +417,9 @@ void MenuOutlineImpl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //SelectModelNG::SetMenuOutline(frameNode, convValue);
 }
-void MenuAlign0Impl(Ark_NativePointer node,
-                    const Opt_MenuAlignType* alignType,
-                    const Opt_Offset* offset)
-{
-    MenuAlign1Impl(node, alignType, offset);
-}
-void MenuAlign1Impl(Ark_NativePointer node,
-                    const Opt_MenuAlignType* alignType,
-                    const Opt_Offset* offset)
+void MenuAlignImpl(Ark_NativePointer node,
+                   const Opt_MenuAlignType* alignType,
+                   const Opt_Offset* offset)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -573,42 +466,42 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
     static const GENERATED_ArkUISelectModifier ArkUISelectModifierImpl {
         SelectModifier::ConstructImpl,
         SelectInterfaceModifier::SetSelectOptionsImpl,
-        SelectAttributeModifier::Selected0Impl,
-        SelectAttributeModifier::Selected1Impl,
-        SelectAttributeModifier::Value0Impl,
-        SelectAttributeModifier::Value1Impl,
-        SelectAttributeModifier::Font0Impl,
-        SelectAttributeModifier::Font1Impl,
-        SelectAttributeModifier::FontColor0Impl,
-        SelectAttributeModifier::FontColor1Impl,
-        SelectAttributeModifier::SelectedOptionBgColor0Impl,
-        SelectAttributeModifier::SelectedOptionBgColor1Impl,
-        SelectAttributeModifier::SelectedOptionFont0Impl,
-        SelectAttributeModifier::SelectedOptionFont1Impl,
-        SelectAttributeModifier::SelectedOptionFontColor0Impl,
-        SelectAttributeModifier::SelectedOptionFontColor1Impl,
-        SelectAttributeModifier::OptionBgColor0Impl,
-        SelectAttributeModifier::OptionBgColor1Impl,
-        SelectAttributeModifier::OptionFont0Impl,
-        SelectAttributeModifier::OptionFont1Impl,
-        SelectAttributeModifier::OptionFontColor0Impl,
-        SelectAttributeModifier::OptionFontColor1Impl,
-        SelectAttributeModifier::OnSelect0Impl,
-        SelectAttributeModifier::OnSelect1Impl,
-        SelectAttributeModifier::Space0Impl,
-        SelectAttributeModifier::Space1Impl,
-        SelectAttributeModifier::ArrowPosition0Impl,
-        SelectAttributeModifier::ArrowPosition1Impl,
-        SelectAttributeModifier::OptionWidth0Impl,
-        SelectAttributeModifier::OptionWidth1Impl,
-        SelectAttributeModifier::OptionHeight0Impl,
-        SelectAttributeModifier::OptionHeight1Impl,
-        SelectAttributeModifier::MenuBackgroundColor0Impl,
-        SelectAttributeModifier::MenuBackgroundColor1Impl,
-        SelectAttributeModifier::MenuBackgroundBlurStyle0Impl,
-        SelectAttributeModifier::MenuBackgroundBlurStyle1Impl,
-        SelectAttributeModifier::ControlSize0Impl,
-        SelectAttributeModifier::ControlSize1Impl,
+        SelectAttributeModifier::SelectedImpl,
+        SelectAttributeModifier::SelectedImpl,
+        SelectAttributeModifier::ValueImpl,
+        SelectAttributeModifier::ValueImpl,
+        SelectAttributeModifier::FontImpl,
+        SelectAttributeModifier::FontImpl,
+        SelectAttributeModifier::FontColorImpl,
+        SelectAttributeModifier::FontColorImpl,
+        SelectAttributeModifier::SelectedOptionBgColorImpl,
+        SelectAttributeModifier::SelectedOptionBgColorImpl,
+        SelectAttributeModifier::SelectedOptionFontImpl,
+        SelectAttributeModifier::SelectedOptionFontImpl,
+        SelectAttributeModifier::SelectedOptionFontColorImpl,
+        SelectAttributeModifier::SelectedOptionFontColorImpl,
+        SelectAttributeModifier::OptionBgColorImpl,
+        SelectAttributeModifier::OptionBgColorImpl,
+        SelectAttributeModifier::OptionFontImpl,
+        SelectAttributeModifier::OptionFontImpl,
+        SelectAttributeModifier::OptionFontColorImpl,
+        SelectAttributeModifier::OptionFontColorImpl,
+        nullptr,
+        SelectAttributeModifier::OnSelectImpl,
+        SelectAttributeModifier::SpaceImpl,
+        SelectAttributeModifier::SpaceImpl,
+        SelectAttributeModifier::ArrowPositionImpl,
+        SelectAttributeModifier::ArrowPositionImpl,
+        SelectAttributeModifier::OptionWidthImpl,
+        SelectAttributeModifier::OptionWidthImpl,
+        SelectAttributeModifier::OptionHeightImpl,
+        SelectAttributeModifier::OptionHeightImpl,
+        SelectAttributeModifier::MenuBackgroundColorImpl,
+        SelectAttributeModifier::MenuBackgroundColorImpl,
+        SelectAttributeModifier::MenuBackgroundBlurStyleImpl,
+        SelectAttributeModifier::MenuBackgroundBlurStyleImpl,
+        SelectAttributeModifier::ControlSizeImpl,
+        SelectAttributeModifier::ControlSizeImpl,
         SelectAttributeModifier::MenuItemContentModifier0Impl,
         SelectAttributeModifier::MenuItemContentModifier1Impl,
         SelectAttributeModifier::DividerImpl,
@@ -619,8 +512,8 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
         SelectAttributeModifier::DividerStyleImpl,
         SelectAttributeModifier::AvoidanceImpl,
         SelectAttributeModifier::MenuOutlineImpl,
-        SelectAttributeModifier::MenuAlign0Impl,
-        SelectAttributeModifier::MenuAlign1Impl,
+        SelectAttributeModifier::MenuAlignImpl,
+        SelectAttributeModifier::MenuAlignImpl,
         SelectAttributeModifier::_onChangeEvent_selectedImpl,
         SelectAttributeModifier::_onChangeEvent_valueImpl,
     };

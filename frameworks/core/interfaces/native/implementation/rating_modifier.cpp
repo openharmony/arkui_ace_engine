@@ -88,13 +88,8 @@ void SetRatingOptionsImpl(Ark_NativePointer node,
 }
 } // RatingInterfaceModifier
 namespace RatingAttributeModifier {
-void Stars0Impl(Ark_NativePointer node,
-                const Opt_Number* value)
-{
-    Stars1Impl(node, value);
-}
-void Stars1Impl(Ark_NativePointer node,
-                const Opt_Number* value)
+void StarsImpl(Ark_NativePointer node,
+               const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -104,13 +99,8 @@ void Stars1Impl(Ark_NativePointer node,
     auto optdVal = FloatToDouble(convVal);
     RatingModelStatic::SetStars(frameNode,  optdVal);
 }
-void StepSize0Impl(Ark_NativePointer node,
-                   const Opt_Number* value)
-{
-    StepSize1Impl(node, value);
-}
-void StepSize1Impl(Ark_NativePointer node,
-                   const Opt_Number* value)
+void StepSizeImpl(Ark_NativePointer node,
+                  const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -121,13 +111,8 @@ void StepSize1Impl(Ark_NativePointer node,
     auto optdVal = FloatToDouble(convVal);
     RatingModelStatic::SetStepSize(frameNode,  optdVal);
 }
-void StarStyle0Impl(Ark_NativePointer node,
-                    const Opt_StarStyleOptions* value)
-{
-    StarStyle1Impl(node, value);
-}
-void StarStyle1Impl(Ark_NativePointer node,
-                    const Opt_StarStyleOptions* value)
+void StarStyleImpl(Ark_NativePointer node,
+                   const Opt_StarStyleOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -140,23 +125,8 @@ void StarStyle1Impl(Ark_NativePointer node,
     RatingModelNG::SetForegroundSrc(frameNode, options.foregroundUri, options.foregroundUri.empty());
     RatingModelNG::SetSecondarySrc(frameNode, options.secondaryUri, options.secondaryUri.empty());
 }
-void OnChange0Impl(Ark_NativePointer node,
-                   const Opt_Callback_Number_Void* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    RatingChangeEvent onChange = {};
-    auto optValue = Converter::GetOptPtr(value);
-    if (optValue) {
-        onChange = [arkCallback = CallbackHelper(*optValue)](const std::string& value) {
-            Ark_Number convValue = Converter::ArkValue<Ark_Number>(std::stof(value));
-            arkCallback.Invoke(convValue);
-        };
-    }
-    RatingModelStatic::SetOnChange(frameNode, std::move(onChange));
-}
-void OnChange1Impl(Ark_NativePointer node,
-                   const Opt_OnRatingChangeCallback* value)
+void OnChangeImpl(Ark_NativePointer node,
+                  const Opt_OnRatingChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -207,14 +177,14 @@ const GENERATED_ArkUIRatingModifier* GetRatingModifier()
     static const GENERATED_ArkUIRatingModifier ArkUIRatingModifierImpl {
         RatingModifier::ConstructImpl,
         RatingInterfaceModifier::SetRatingOptionsImpl,
-        RatingAttributeModifier::Stars0Impl,
-        RatingAttributeModifier::Stars1Impl,
-        RatingAttributeModifier::StepSize0Impl,
-        RatingAttributeModifier::StepSize1Impl,
-        RatingAttributeModifier::StarStyle0Impl,
-        RatingAttributeModifier::StarStyle1Impl,
-        RatingAttributeModifier::OnChange0Impl,
-        RatingAttributeModifier::OnChange1Impl,
+        RatingAttributeModifier::StarsImpl,
+        RatingAttributeModifier::StarsImpl,
+        RatingAttributeModifier::StepSizeImpl,
+        RatingAttributeModifier::StepSizeImpl,
+        RatingAttributeModifier::StarStyleImpl,
+        RatingAttributeModifier::StarStyleImpl,
+        nullptr,
+        RatingAttributeModifier::OnChangeImpl,
         RatingAttributeModifier::ContentModifier0Impl,
         RatingAttributeModifier::ContentModifier1Impl,
         RatingAttributeModifier::_onChangeEvent_ratingImpl,

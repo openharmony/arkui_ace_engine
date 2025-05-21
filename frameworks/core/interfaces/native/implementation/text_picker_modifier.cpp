@@ -382,24 +382,16 @@ void SetTextPickerOptionsImpl(Ark_NativePointer node,
 }
 } // TextPickerInterfaceModifier
 namespace TextPickerAttributeModifier {
-void DefaultPickerItemHeight0Impl(Ark_NativePointer node,
-                                  const Opt_Union_Number_String* value)
+void DefaultPickerItemHeightImpl(Ark_NativePointer node,
+                                 const Opt_Union_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto height = Converter::OptConvert<Dimension>(*value);
     TextPickerModelNG::SetDefaultPickerItemHeight(frameNode, height);
 }
-void DefaultPickerItemHeight1Impl(Ark_NativePointer node,
-                                  const Opt_Union_Number_String* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextPickerModelNG::SetDefaultPickerItemHeight1(frameNode, convValue);
-}
-void CanLoop0Impl(Ark_NativePointer node,
-                  const Opt_Boolean* value)
+void CanLoopImpl(Ark_NativePointer node,
+                 const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -410,16 +402,8 @@ void CanLoop0Impl(Ark_NativePointer node,
     }
     TextPickerModelNG::SetCanLoop(frameNode, *convValue);
 }
-void CanLoop1Impl(Ark_NativePointer node,
-                  const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextPickerModelNG::SetCanLoop1(frameNode, convValue);
-}
-void DisappearTextStyle0Impl(Ark_NativePointer node,
-                             const Opt_PickerTextStyle* value)
+void DisappearTextStyleImpl(Ark_NativePointer node,
+                            const Opt_PickerTextStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -434,16 +418,8 @@ void DisappearTextStyle0Impl(Ark_NativePointer node,
     }
     TextPickerModelNG::SetDisappearTextStyle(frameNode, theme, *convValue);
 }
-void DisappearTextStyle1Impl(Ark_NativePointer node,
-                             const Opt_PickerTextStyle* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextPickerModelNG::SetDisappearTextStyle1(frameNode, convValue);
-}
-void TextStyle0Impl(Ark_NativePointer node,
-                    const Opt_PickerTextStyle* value)
+void TextStyleImpl(Ark_NativePointer node,
+                   const Opt_PickerTextStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -458,16 +434,8 @@ void TextStyle0Impl(Ark_NativePointer node,
     }
     TextPickerModelNG::SetNormalTextStyle(frameNode, theme, *convValue);
 }
-void TextStyle1Impl(Ark_NativePointer node,
-                    const Opt_PickerTextStyle* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextPickerModelNG::SetTextStyle1(frameNode, convValue);
-}
-void SelectedTextStyle0Impl(Ark_NativePointer node,
-                            const Opt_PickerTextStyle* value)
+void SelectedTextStyleImpl(Ark_NativePointer node,
+                           const Opt_PickerTextStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -481,14 +449,6 @@ void SelectedTextStyle0Impl(Ark_NativePointer node,
         return;
     }
     TextPickerModelNG::SetSelectedTextStyle(frameNode, theme, *convValue);
-}
-void SelectedTextStyle1Impl(Ark_NativePointer node,
-                            const Opt_PickerTextStyle* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextPickerModelNG::SetSelectedTextStyle1(frameNode, convValue);
 }
 void DisableTextStyleAnimationImpl(Ark_NativePointer node,
                                    const Opt_Boolean* value)
@@ -530,8 +490,8 @@ void OnCancelImpl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //TextPickerModelNG::SetOnCancel(frameNode, convValue);
 }
-void OnChange0Impl(Ark_NativePointer node,
-                   const Opt_Type_TextPickerAttribute_onChange_callback* value)
+void OnChangeImpl(Ark_NativePointer node,
+                  const Opt_OnTextPickerChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -558,16 +518,8 @@ void OnChange0Impl(Ark_NativePointer node,
     };
     TextPickerModelNG::SetOnCascadeChange(frameNode, std::move(onChange));
 }
-void OnChange1Impl(Ark_NativePointer node,
-                   const Opt_OnTextPickerChangeCallback* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextPickerModelNG::SetOnChange1(frameNode, convValue);
-}
-void OnScrollStop0Impl(Ark_NativePointer node,
-                       const Opt_TextPickerScrollStopCallback* value)
+void OnScrollStopImpl(Ark_NativePointer node,
+                      const Opt_TextPickerScrollStopCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -589,14 +541,6 @@ void OnScrollStop0Impl(Ark_NativePointer node,
         arkCallback.Invoke(value, index);
     };
     TextPickerModelNG::SetOnScrollStop(frameNode, std::move(onScrollStop));
-}
-void OnScrollStop1Impl(Ark_NativePointer node,
-                       const Opt_TextPickerScrollStopCallback* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextPickerModelNG::SetOnScrollStop1(frameNode, convValue);
 }
 void OnEnterSelectedAreaImpl(Ark_NativePointer node,
                              const Opt_TextPickerEnterSelectedAreaCallback* value)
@@ -622,8 +566,8 @@ void OnEnterSelectedAreaImpl(Ark_NativePointer node,
     };
     TextPickerModelNG::SetOnEnterSelectedArea(frameNode, std::move(onEnterSelectedArea));
 }
-void SelectedIndex0Impl(Ark_NativePointer node,
-                        const Opt_Union_Number_Array_Number* value)
+void SelectedIndexImpl(Ark_NativePointer node,
+                       const Opt_Union_Number_Array_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -633,13 +577,8 @@ void SelectedIndex0Impl(Ark_NativePointer node,
         TextPickerInterfaceModifier::SetMultiRange(frameNode, value);
     }
 }
-void SelectedIndex1Impl(Ark_NativePointer node,
-                        const Opt_Union_Number_Array_Number* value)
-{
-    SelectedIndex0Impl(node, value);
-}
-void Divider0Impl(Ark_NativePointer node,
-                  const Opt_DividerOptions* value)
+void DividerImpl(Ark_NativePointer node,
+                 const Opt_DividerOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -670,13 +609,8 @@ void Divider0Impl(Ark_NativePointer node,
 
     TextPickerModelNG::SetDivider(frameNode, divider);
 }
-void Divider1Impl(Ark_NativePointer node,
-                  const Opt_DividerOptions* value)
-{
-    Divider0Impl(node, value);
-}
-void GradientHeight0Impl(Ark_NativePointer node,
-                         const Opt_Dimension* value)
+void GradientHeightImpl(Ark_NativePointer node,
+                        const Opt_Dimension* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -686,11 +620,6 @@ void GradientHeight0Impl(Ark_NativePointer node,
         heightDimension.reset();
     }
     TextPickerModelNG::SetGradientHeight(frameNode, heightDimension);
-}
-void GradientHeight1Impl(Ark_NativePointer node,
-                         const Opt_Dimension* value)
-{
-    GradientHeight0Impl(node, value);
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
                               const Opt_Boolean* value)
@@ -758,31 +687,31 @@ const GENERATED_ArkUITextPickerModifier* GetTextPickerModifier()
     static const GENERATED_ArkUITextPickerModifier ArkUITextPickerModifierImpl {
         TextPickerModifier::ConstructImpl,
         TextPickerInterfaceModifier::SetTextPickerOptionsImpl,
-        TextPickerAttributeModifier::DefaultPickerItemHeight0Impl,
-        TextPickerAttributeModifier::DefaultPickerItemHeight1Impl,
-        TextPickerAttributeModifier::CanLoop0Impl,
-        TextPickerAttributeModifier::CanLoop1Impl,
-        TextPickerAttributeModifier::DisappearTextStyle0Impl,
-        TextPickerAttributeModifier::DisappearTextStyle1Impl,
-        TextPickerAttributeModifier::TextStyle0Impl,
-        TextPickerAttributeModifier::TextStyle1Impl,
-        TextPickerAttributeModifier::SelectedTextStyle0Impl,
-        TextPickerAttributeModifier::SelectedTextStyle1Impl,
+        TextPickerAttributeModifier::DefaultPickerItemHeightImpl,
+        TextPickerAttributeModifier::DefaultPickerItemHeightImpl,
+        TextPickerAttributeModifier::CanLoopImpl,
+        TextPickerAttributeModifier::CanLoopImpl,
+        TextPickerAttributeModifier::DisappearTextStyleImpl,
+        TextPickerAttributeModifier::DisappearTextStyleImpl,
+        TextPickerAttributeModifier::TextStyleImpl,
+        TextPickerAttributeModifier::TextStyleImpl,
+        TextPickerAttributeModifier::SelectedTextStyleImpl,
+        TextPickerAttributeModifier::SelectedTextStyleImpl,
         TextPickerAttributeModifier::DisableTextStyleAnimationImpl,
         TextPickerAttributeModifier::DefaultTextStyleImpl,
         TextPickerAttributeModifier::OnAcceptImpl,
         TextPickerAttributeModifier::OnCancelImpl,
-        TextPickerAttributeModifier::OnChange0Impl,
-        TextPickerAttributeModifier::OnChange1Impl,
-        TextPickerAttributeModifier::OnScrollStop0Impl,
-        TextPickerAttributeModifier::OnScrollStop1Impl,
+        nullptr,
+        TextPickerAttributeModifier::OnChangeImpl,
+        TextPickerAttributeModifier::OnScrollStopImpl,
+        TextPickerAttributeModifier::OnScrollStopImpl,
         TextPickerAttributeModifier::OnEnterSelectedAreaImpl,
-        TextPickerAttributeModifier::SelectedIndex0Impl,
-        TextPickerAttributeModifier::SelectedIndex1Impl,
-        TextPickerAttributeModifier::Divider0Impl,
-        TextPickerAttributeModifier::Divider1Impl,
-        TextPickerAttributeModifier::GradientHeight0Impl,
-        TextPickerAttributeModifier::GradientHeight1Impl,
+        TextPickerAttributeModifier::SelectedIndexImpl,
+        TextPickerAttributeModifier::SelectedIndexImpl,
+        TextPickerAttributeModifier::DividerImpl,
+        TextPickerAttributeModifier::DividerImpl,
+        TextPickerAttributeModifier::GradientHeightImpl,
+        TextPickerAttributeModifier::GradientHeightImpl,
         TextPickerAttributeModifier::EnableHapticFeedbackImpl,
         TextPickerAttributeModifier::DigitalCrownSensitivityImpl,
         TextPickerAttributeModifier::_onChangeEvent_selectedImpl,

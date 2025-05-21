@@ -69,55 +69,37 @@ void SetCheckboxOptionsImpl(Ark_NativePointer node,
 }
 } // CheckboxInterfaceModifier
 namespace CheckboxAttributeModifier {
-void Select0Impl(Ark_NativePointer node,
-                 const Opt_Boolean* value)
+void SelectImpl(Ark_NativePointer node,
+                const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxModelStatic::SetSelect(frameNode, value ? Converter::OptConvert<bool>(*value) : std::nullopt);
 }
-void Select1Impl(Ark_NativePointer node,
-                 const Opt_Boolean* value)
-{
-    Select0Impl(node, value);
-}
-void SelectedColor0Impl(Ark_NativePointer node,
-                        const Opt_ResourceColor* value)
+void SelectedColorImpl(Ark_NativePointer node,
+                       const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxModelStatic::SetSelectedColor(frameNode, value ? Converter::OptConvert<Color>(*value) : std::nullopt);
 }
-void SelectedColor1Impl(Ark_NativePointer node,
-                        const Opt_ResourceColor* value)
-{
-    SelectedColor0Impl(node, value);
-}
-void Shape0Impl(Ark_NativePointer node, const Opt_CheckBoxShape* value)
+void ShapeImpl(Ark_NativePointer node,
+               const Opt_CheckBoxShape* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxModelStatic::SetCheckboxStyle(
         frameNode, value ? Converter::OptConvert<CheckBoxStyle>(*value) : std::nullopt);
 }
-void Shape1Impl(Ark_NativePointer node, const Opt_CheckBoxShape* value)
-{
-    Shape0Impl(node, value);
-}
-void UnselectedColor0Impl(Ark_NativePointer node,
-                          const Opt_ResourceColor* value)
+void UnselectedColorImpl(Ark_NativePointer node,
+                         const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxModelStatic::SetUnSelectedColor(frameNode, value ? Converter::OptConvert<Color>(*value) : std::nullopt);
 }
-void UnselectedColor1Impl(Ark_NativePointer node,
-                          const Opt_ResourceColor* value)
-{
-    UnselectedColor0Impl(node, value);
-}
-void Mark0Impl(Ark_NativePointer node,
-               const Opt_MarkStyle* value)
+void MarkImpl(Ark_NativePointer node,
+              const Opt_MarkStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -141,13 +123,8 @@ void Mark0Impl(Ark_NativePointer node,
         CheckBoxModelStatic::SetCheckMarkWidth(frameNode, width.value());
     }
 }
-void Mark1Impl(Ark_NativePointer node,
-               const Opt_MarkStyle* value)
-{
-    Mark0Impl(node, value);
-}
-void OnChange0Impl(Ark_NativePointer node,
-                   const Opt_OnCheckboxChangeCallback* value)
+void OnChangeImpl(Ark_NativePointer node,
+                  const Opt_OnCheckboxChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -157,11 +134,6 @@ void OnChange0Impl(Ark_NativePointer node,
         arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(value));
     };
     CheckBoxModelNG::SetOnChange(frameNode, std::move(onEvent));
-}
-void OnChange1Impl(Ark_NativePointer node,
-                   const Opt_OnCheckboxChangeCallback* value)
-{
-    OnChange0Impl(node, value);
 }
 void ContentModifier0Impl(Ark_NativePointer node,
                           const Opt_ContentModifier* value)
@@ -198,18 +170,18 @@ const GENERATED_ArkUICheckboxModifier* GetCheckboxModifier()
     static const GENERATED_ArkUICheckboxModifier ArkUICheckboxModifierImpl {
         CheckboxModifier::ConstructImpl,
         CheckboxInterfaceModifier::SetCheckboxOptionsImpl,
-        CheckboxAttributeModifier::Select0Impl,
-        CheckboxAttributeModifier::Select1Impl,
-        CheckboxAttributeModifier::SelectedColor0Impl,
-        CheckboxAttributeModifier::SelectedColor1Impl,
-        CheckboxAttributeModifier::Shape0Impl,
-        CheckboxAttributeModifier::Shape1Impl,
-        CheckboxAttributeModifier::UnselectedColor0Impl,
-        CheckboxAttributeModifier::UnselectedColor1Impl,
-        CheckboxAttributeModifier::Mark0Impl,
-        CheckboxAttributeModifier::Mark1Impl,
-        CheckboxAttributeModifier::OnChange0Impl,
-        CheckboxAttributeModifier::OnChange1Impl,
+        CheckboxAttributeModifier::SelectImpl,
+        CheckboxAttributeModifier::SelectImpl,
+        CheckboxAttributeModifier::SelectedColorImpl,
+        CheckboxAttributeModifier::SelectedColorImpl,
+        CheckboxAttributeModifier::ShapeImpl,
+        CheckboxAttributeModifier::ShapeImpl,
+        CheckboxAttributeModifier::UnselectedColorImpl,
+        CheckboxAttributeModifier::UnselectedColorImpl,
+        CheckboxAttributeModifier::MarkImpl,
+        CheckboxAttributeModifier::MarkImpl,
+        CheckboxAttributeModifier::OnChangeImpl,
+        CheckboxAttributeModifier::OnChangeImpl,
         CheckboxAttributeModifier::ContentModifier0Impl,
         CheckboxAttributeModifier::ContentModifier1Impl,
         CheckboxAttributeModifier::_onChangeEvent_selectImpl,

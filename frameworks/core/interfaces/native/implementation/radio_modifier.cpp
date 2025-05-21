@@ -73,36 +73,16 @@ void SetRadioOptionsImpl(Ark_NativePointer node,
 }
 } // RadioInterfaceModifier
 namespace RadioAttributeModifier {
-void Checked0Impl(Ark_NativePointer node,
-                  const Opt_Boolean* value)
+void CheckedImpl(Ark_NativePointer node,
+                 const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto isChecked = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
     RadioModelStatic::SetChecked(frameNode, isChecked);
 }
-void Checked1Impl(Ark_NativePointer node,
-                  const Opt_Boolean* value)
-{
-    Checked0Impl(node, value);
-}
-void OnChange0Impl(Ark_NativePointer node,
-                   const Opt_Callback_Boolean_Void* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    ChangeEvent onEvent{};
-    if (optValue) {
-        onEvent = [arkCallback = CallbackHelper(*optValue)](const bool param) {
-            auto arkValue = Converter::ArkValue<Ark_Boolean>(param);
-            arkCallback.Invoke(arkValue);
-        };
-    }
-    RadioModelNG::SetOnChange(frameNode, std::move(onEvent));
-}
-void OnChange1Impl(Ark_NativePointer node,
-                   const Opt_OnRadioChangeCallback* value)
+void OnChangeImpl(Ark_NativePointer node,
+                  const Opt_OnRadioChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -132,22 +112,14 @@ void RadioStyleImpl(Ark_NativePointer node,
         RadioModelStatic::SetIndicatorColor(frameNode, std::nullopt);
     }
 }
-void ContentModifier0Impl(Ark_NativePointer node,
-                          const Opt_ContentModifier* value)
+void ContentModifierImpl(Ark_NativePointer node,
+                         const Opt_ContentModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     LOGE("ARKOALA RadioAttributeModifier::ContentModifierImpl -> Method is not implemented.");
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //RadioModelNG::SetContentModifier0(frameNode, convValue);
-}
-void ContentModifier1Impl(Ark_NativePointer node,
-                          const Opt_ContentModifier* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //RadioModelNG::SetContentModifier1(frameNode, convValue);
 }
 void _onChangeEvent_checkedImpl(Ark_NativePointer node,
                                 const Callback_Opt_Boolean_Void* callback)
@@ -168,13 +140,13 @@ const GENERATED_ArkUIRadioModifier* GetRadioModifier()
     static const GENERATED_ArkUIRadioModifier ArkUIRadioModifierImpl {
         RadioModifier::ConstructImpl,
         RadioInterfaceModifier::SetRadioOptionsImpl,
-        RadioAttributeModifier::Checked0Impl,
-        RadioAttributeModifier::Checked1Impl,
-        RadioAttributeModifier::OnChange0Impl,
-        RadioAttributeModifier::OnChange1Impl,
+        RadioAttributeModifier::CheckedImpl,
+        nullptr,
+        nullptr,
+        RadioAttributeModifier::OnChangeImpl,
         RadioAttributeModifier::RadioStyleImpl,
-        RadioAttributeModifier::ContentModifier0Impl,
-        RadioAttributeModifier::ContentModifier1Impl,
+        RadioAttributeModifier::ContentModifierImpl,
+        RadioAttributeModifier::ContentModifierImpl,
         RadioAttributeModifier::_onChangeEvent_checkedImpl,
     };
     return &ArkUIRadioModifierImpl;
