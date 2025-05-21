@@ -40,6 +40,7 @@ public:
     void SetTitleMode(NG::NavigationTitleMode mode) override;
     void SetSubtitle(const std::string& subtitle) override;
     void SetEnableModeChangeAnimation(bool isEnable) override;
+    void SetSplitPlaceholder(const RefPtr<NG::UINode>& splitPlaceholder) override;
     void SetHideTitleBar(bool hideTitleBar, bool animated = false) override;
     void SetHideNavBar(bool hideNavBar) override;
     void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const std::string& src,
@@ -78,11 +79,14 @@ public:
     void SetIsCustomAnimation(bool isCustom) override;
     void SetRecoverable(bool recoverable) override;
     void SetEnableDragBar(bool enableDragBar) override;
+    void ResetSplitPlaceholder() override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetNavigationStack(FrameNode* frameNode);
     static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated);
     static void SetEnableModeChangeAnimation(FrameNode* frameNode, bool isEnable);
+    static void SetSplitPlaceholder(FrameNode* frameNode, FrameNode* splitPlaceholder);
+    static void ResetSplitPlaceholder(FrameNode* frameNode);
     static void SetMinContentWidth(FrameNode* frameNode, const Dimension& value);
     static void SetMinNavBarWidth(FrameNode* frameNode, const Dimension& value);
     static void SetMaxNavBarWidth(FrameNode* frameNode, const Dimension& value);

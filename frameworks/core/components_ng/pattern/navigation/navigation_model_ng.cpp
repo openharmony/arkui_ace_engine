@@ -710,6 +710,46 @@ void NavigationModelNG::SetEnableModeChangeAnimation(bool isEnable)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, EnableModeChangeAnimation, isEnable, navigationGroupNode);
 }
 
+void NavigationModelNG::SetSplitPlaceholder(const RefPtr<NG::UINode>& splitPlaceholder)
+{
+    CHECK_NULL_VOID(splitPlaceholder);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    if (!navigationGroupNode->GetPlaceholderContentNode()) {
+        int32_t placeholderContentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto placeholderContentNode = FrameNode::GetOrCreateFrameNode(V2::SPLIT_PLACEHOLDER_CONTENT_ETS_TAG,
+            placeholderContentNodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+        placeholderContentNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+            .edges = SAFE_AREA_EDGE_ALL };
+        placeholderContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+        const auto& eventHub = placeholderContentNode->GetOrCreateEventHub<EventHub>();
+        if (eventHub) {
+            eventHub->SetEnabled(false);
+        }
+        auto focusHub = placeholderContentNode->GetOrCreateFocusHub();
+        if (focusHub) {
+            focusHub->SetFocusable(false);
+        }
+        auto renderContext = placeholderContentNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->SetClipToBounds(true);
+        renderContext->UpdateZIndex(-1);
+        navigationGroupNode->AddChild(placeholderContentNode);
+        navigationGroupNode->SetPlaceholderContentNode(placeholderContentNode);
+    }
+    navigationGroupNode->SetSplitPlaceholder(splitPlaceholder);
+}
+
+void NavigationModelNG::ResetSplitPlaceholder()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    navigationGroupNode->ResetSplitPlaceholder();
+}
+
 void NavigationModelNG::SetHideTitleBar(bool hideTitleBar, bool animated)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1361,6 +1401,48 @@ void NavigationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar,
     CHECK_NULL_VOID(navBarLayoutProperty);
     navBarLayoutProperty->UpdateHideTitleBar(hideTitleBar);
     navBarLayoutProperty->UpdateIsAnimatedTitleBar(animated);
+}
+
+void NavigationModelNG::SetSplitPlaceholder(FrameNode* frameNode, FrameNode* splitPlaceholder)
+{
+    CHECK_NULL_VOID(splitPlaceholder);
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    if (!navigationGroupNode->GetPlaceholderContentNode()) {
+        int32_t placeholderContentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto placeholderContentNode = FrameNode::GetOrCreateFrameNode(V2::SPLIT_PLACEHOLDER_CONTENT_ETS_TAG,
+            placeholderContentNodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+        placeholderContentNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+            .edges = SAFE_AREA_EDGE_ALL };
+        placeholderContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+        const auto& eventHub = placeholderContentNode->GetEventHub<EventHub>();
+        if (eventHub) {
+            eventHub->SetEnabled(false);
+        }
+        auto focusHub = placeholderContentNode->GetOrCreateFocusHub();
+        if (focusHub) {
+            focusHub->SetFocusable(false);
+        }
+        auto renderContext = placeholderContentNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->SetClipToBounds(true);
+        renderContext->UpdateZIndex(-1);
+        navigationGroupNode->AddChild(placeholderContentNode);
+        navigationGroupNode->SetPlaceholderContentNode(placeholderContentNode);
+    }
+    auto splitPlaceholderNode = AceType::Claim<UINode>(splitPlaceholder);
+    CHECK_NULL_VOID(splitPlaceholderNode);
+    navigationGroupNode->SetSplitPlaceholder(splitPlaceholderNode);
+}
+
+void NavigationModelNG::ResetSplitPlaceholder(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    navigationGroupNode->ResetSplitPlaceholder();
 }
 
 void NavigationModelNG::SetSubtitle(FrameNode* frameNode, const std::string& subtitle)

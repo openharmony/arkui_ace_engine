@@ -154,6 +154,7 @@ ACE_EXPORT extern const char BACK_BUTTON_ETS_TAG[];
 ACE_EXPORT extern const char BACK_BUTTON_IMAGE_ETS_TAG[];
 ACE_EXPORT extern const char NAVBAR_CONTENT_ETS_TAG[];
 ACE_EXPORT extern const char NAVBAR_ETS_TAG[];
+ACE_EXPORT extern const char SPLIT_PLACEHOLDER_CONTENT_ETS_TAG[];
 
 // navRouter view
 ACE_EXPORT extern const char NAVROUTER_VIEW_ETS_TAG[];
