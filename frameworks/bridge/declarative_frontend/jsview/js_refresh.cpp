@@ -261,61 +261,6 @@ bool JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
     }
 }
 
-void JSRefresh::OnStateChange(const JSCallbackInfo& args)
-{
-    if (!args[0]->IsFunction()) {
-        return;
-    }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onStateChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                             const int32_t& value) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("Refresh.OnStateChange");
-        PipelineContext::SetCallBackNode(node);
-        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
-        func->ExecuteJS(1, &newJSVal);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Refresh.OnStateChange");
-    };
-    RefreshModel::GetInstance()->SetOnStateChange(std::move(onStateChange));
-}
-
-void JSRefresh::OnRefreshing(const JSCallbackInfo& args)
-{
-    if (!args[0]->IsFunction()) {
-        return;
-    }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onRefreshing = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("Refresh.OnRefreshing");
-        PipelineContext::SetCallBackNode(node);
-        auto newJSVal = JSRef<JSVal>::Make();
-        func->ExecuteJS(1, &newJSVal);
-    };
-    RefreshModel::GetInstance()->SetOnRefreshing(std::move(onRefreshing));
-}
-
-void JSRefresh::OnOffsetChange(const JSCallbackInfo& args)
-{
-    if (!args[0]->IsFunction()) {
-        RefreshModel::GetInstance()->ResetOnOffsetChange();
-        return;
-    }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto offsetChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                            const float& value) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("Refresh.OnOffsetChange");
-        PipelineContext::SetCallBackNode(node);
-        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
-        func->ExecuteJS(1, &newJSVal);
-    };
-    RefreshModel::GetInstance()->SetOnOffsetChange(std::move(offsetChange));
-}
-
 void JSRefresh::ParsFrictionData(const JsiRef<JsiValue>& friction)
 {
     int32_t frictionNumber = DEFAULT_FRICTION;

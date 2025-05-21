@@ -239,61 +239,6 @@ void JSIndexer::SetFont(const JSCallbackInfo& args)
     IndexerModel::GetInstance()->SetFont(fontSize, fontWeight, fontFamily, fontStyle);
 }
 
-void JSIndexer::JsOnSelected(const JSCallbackInfo& args)
-{
-    if (args[0]->IsFunction()) {
-        auto onSelected = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                              const int32_t selected) {
-            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-            auto params = ConvertToJSValues(selected);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-        };
-        IndexerModel::GetInstance()->SetOnSelected(onSelected);
-    }
-}
-
-void JSIndexer::JsOnRequestPopupData(const JSCallbackInfo& args)
-{
-    if (args[0]->IsFunction()) {
-        auto requestPopupData = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                                    const int32_t selected) {
-            std::vector<std::string> popupData;
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, popupData);
-            auto params = ConvertToJSValues(selected);
-            JSRef<JSArray> result = func->Call(JSRef<JSObject>(), params.size(), params.data());
-            if (result.IsEmpty()) {
-                return popupData;
-            }
-
-            if (!result->IsArray()) {
-                return popupData;
-            }
-
-            for (size_t i = 0; i < result->Length(); i++) {
-                if (result->GetValueAt(i)->IsString()) {
-                    auto item = result->GetValueAt(i);
-                    popupData.emplace_back(item->ToString());
-                }
-            }
-            return popupData;
-        };
-        IndexerModel::GetInstance()->SetOnRequestPopupData(requestPopupData);
-    }
-}
-
-void JSIndexer::JsOnPopupSelected(const JSCallbackInfo& args)
-{
-    if (args[0]->IsFunction()) {
-        auto onPopupSelected = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                                   const int32_t selected) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(selected);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-        };
-        IndexerModel::GetInstance()->SetOnPopupSelected(onPopupSelected);
-    }
-}
-
 void JSIndexer::GetFontContent(const JSCallbackInfo& args, std::optional<Dimension>& fontSize,
     std::optional<FontWeight>& fontWeight, std::optional<std::vector<std::string>>& fontFamily,
     std::optional<FontStyle>& fontStyle)

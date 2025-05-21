@@ -313,4 +313,4 @@ globalThis.IndicatorComponent.attributeModifier = function (modifier: ArkCompone
 globalThis.IndicatorComponent.onChange = function (value: Callback<number>): void {
   let nodePtr = getUINativeModule().frameNode.getStackTopNode();
   getUINativeModule().indicatorComponent.setOnChange(nodePtr, value);
-}
+};
