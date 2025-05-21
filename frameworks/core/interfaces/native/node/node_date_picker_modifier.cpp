@@ -290,6 +290,20 @@ void SetDatePickerBackgroundColor(ArkUINodeHandle node, uint32_t color)
     DatePickerModelNG::SetBackgroundColor(frameNode, Color(color));
 }
 
+void SetDatePickerBackgroundColorWithColorSpace(
+    ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color backgroundColor { color };
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::DISPLAY_P3);
+    } else {
+        backgroundColor.SetColorSpace(ColorSpace::SRGB);
+    }
+    DatePickerModelNG::SetBackgroundColor(frameNode, backgroundColor);
+}
+
 void ResetDatePickerBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -523,6 +537,7 @@ const ArkUIDatePickerModifier* GetDatePickerModifier()
         .resetSelectedDate = ResetSelectedDate,
         .getDatePickerBackgroundColor = GetDatePickerBackgroundColor,
         .setDatePickerBackgroundColor = SetDatePickerBackgroundColor,
+        .setDatePickerBackgroundColorWithColorSpace = SetDatePickerBackgroundColorWithColorSpace,
         .resetDatePickerBackgroundColor = ResetDatePickerBackgroundColor,
         .getDatePickerMode = GetDatePickerMode,
         .setDatePickerMode = SetDatePickerMode,
@@ -572,6 +587,7 @@ const CJUIDatePickerModifier* GetCJUIDatePickerModifier()
         .resetSelectedDate = ResetSelectedDate,
         .getDatePickerBackgroundColor = GetDatePickerBackgroundColor,
         .setDatePickerBackgroundColor = SetDatePickerBackgroundColor,
+        .setDatePickerBackgroundColorWithColorSpace = SetDatePickerBackgroundColorWithColorSpace,
         .resetDatePickerBackgroundColor = ResetDatePickerBackgroundColor,
         .getDatePickerMode = GetDatePickerMode,
         .setDatePickerMode = SetDatePickerMode,

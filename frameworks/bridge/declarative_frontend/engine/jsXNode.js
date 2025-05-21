@@ -1890,6 +1890,15 @@ class ColorMetrics {
     static rgba(red, green, blue, alpha = MAX_ALPHA_VALUE) {
         return new ColorMetrics(red, green, blue, alpha * MAX_CHANNEL_VALUE);
     }
+    static colorWithSpace(colorSpace, red, green, blue, alpha = MAX_ALPHA_VALUE) {
+        let redInt = Math.round(red * MAX_CHANNEL_VALUE);
+        let greenInt = Math.round(green * MAX_CHANNEL_VALUE);
+        let blueInt = Math.round(blue * MAX_CHANNEL_VALUE);
+        let alphaInt = Math.round(alpha * MAX_CHANNEL_VALUE);
+        const colorMetrics = new ColorMetrics(redInt, greenInt, blueInt, alphaInt);
+        colorMetrics.setColorSpace(colorSpace);
+        return colorMetrics;
+    }
     static rgbOrRGBA(format) {
         const rgbPattern = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i;
         const rgbaPattern = /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+(\.\d+)?)\s*\)$/i;
@@ -2019,6 +2028,14 @@ class ColorMetrics {
     }
     getResourceId() {
         return this.resourceId_;
+    }
+    setColorSpace(colorSpace) {
+        if (ColorSpace.DISPLAY_P3 == colorSpace || ColorSpace.SRGB == colorSpace) {
+            this.colorSpace_ = colorSpace;
+        }
+    }
+    getColorSpace() {
+        return this.colorSpace_;
     }
 }
 class BaseShape {

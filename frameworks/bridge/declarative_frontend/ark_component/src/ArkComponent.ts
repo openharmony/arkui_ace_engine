@@ -944,12 +944,12 @@ class RadialGradientModifier extends ModifierWithKey<{ center: Array<any>; radiu
 class SweepGradientModifier extends ModifierWithKey<{
   center: Array<any>; start?: number |
   string; end?: number | string; rotation?: number | string;
-  colors: Array<any>; repeating?: boolean;
+  colors: Array<any>; metricsColors?: Array<any>; repeating?: boolean;
 }> {
   constructor(value: {
     center: Array<any>;
     start?: number | string; end?: number | string;
-    rotation?: number | string; colors: Array<any>; repeating?: boolean;
+    rotation?: number | string; colors: Array<any>; metricsColors?: Array<any>; repeating?: boolean;
   }) {
     super(value);
   }
@@ -961,7 +961,7 @@ class SweepGradientModifier extends ModifierWithKey<{
       getUINativeModule().common.setSweepGradient(node,
         this.value.center,
         this.value.start, this.value.end, this.value.rotation,
-        this.value.colors, this.value.repeating);
+        this.value.colors, this.value.metricsColors, this.value.repeating);
     }
   }
   checkObjectDiff(): boolean {
@@ -970,6 +970,7 @@ class SweepGradientModifier extends ModifierWithKey<{
       (this.stageValue.end === this.value.end) &&
       (this.stageValue.rotation === this.value.rotation) &&
       (this.stageValue.colors === this.value.colors) &&
+      (this.stageValue.metricsColors === this.value.metricsColors) &&
       (this.stageValue.repeating === this.value.repeating));
   }
 }
@@ -5208,6 +5209,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     end?: number | string;
     rotation?: number | string;
     colors: Array<any>;
+    metricsColors?: Array<any>; 
     repeating?: boolean;
   }): this {
     modifierWithKey(this._modifiersWithKeys, SweepGradientModifier.identity, SweepGradientModifier, value);

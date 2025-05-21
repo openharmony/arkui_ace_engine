@@ -45,6 +45,11 @@ union ColorParam {
     uint32_t value;
 };
 
+enum ColorSpace {
+    SRGB = 0,
+    DISPLAY_P3 = 1,
+};
+
 // A color value present by 32 bit.
 class ACE_FORCE_EXPORT Color {
 public:
@@ -92,6 +97,16 @@ public:
         return colorValue_.value;
     }
 
+    void SetColorSpace(ColorSpace colorSpace)
+    {
+        colorSpace_ = colorSpace;
+    }
+
+    ColorSpace GetColorSpace() const
+    {
+        return colorSpace_;
+    }
+
     void SetResourceId(uint32_t id)
     {
         resourceId_ = id;
@@ -126,7 +141,7 @@ public:
 
     bool operator==(const Color& color) const
     {
-        return colorValue_.value == color.GetValue();
+        return colorValue_.value == color.GetValue() && colorSpace_ == color.GetColorSpace();
     }
 
     bool operator!=(const Color& color) const
@@ -173,6 +188,7 @@ private:
     float CalculateBlend(float alphaLeft, float alphaRight, float valueLeft, float valueRight) const;
     ColorParam colorValue_ { .value = 0xff000000 };
     uint32_t resourceId_ = 0;
+    ColorSpace colorSpace_ = ColorSpace::SRGB;
 };
 
 } // namespace OHOS::Ace

@@ -50,6 +50,14 @@ constexpr int32_t FULL_ROTATION_F = 360;
 constexpr double FULL_ROTATION_F = 360.0f;
 constexpr int32_t MIN_COLOR_STOPS = 2;
 constexpr int32_t MIN_COLOR_SIZE = 2;
+constexpr uint32_t COLOR_MASK_ALPHA = 0xFF000000;
+constexpr uint32_t COLOR_MASK_RED = 0x00FF0000;
+constexpr uint32_t COLOR_MASK_GREEN = 0x0000FF00;
+constexpr uint32_t COLOR_MASK_BLUE = 0x000000FF;
+constexpr float COLOR_DIVISOR = 255.0f;
+constexpr uint32_t ALPHA_SHIFT = 24;
+constexpr uint32_t RED_SHIFT = 16;
+constexpr uint32_t GREEN_SHIFT = 8;
 
 template<typename T>
 class Evaluator : public AceType {
@@ -217,6 +225,41 @@ protected:
         if (pos.back() < 1.0f) {
             pos.push_back(1.0f);
             colors.push_back(colors.back());
+        }
+    }
+
+    static SKColor4f SkColorToSKColor4f(SkColor color)
+    {
+        uint32_t alpha = (color & COLOR_MASK_ALPHA) >> ALPHA_SHIFT;
+        uint32_t red = (color & COLOR_MASK_RED) >> RED_SHIFT;
+        uint32_t green = (color & COLOR_MASK_GREEN) >> GREEN_SHIFT;
+        uint32_t blue = color & COLOR_MASK_BLUE;
+        RSColor4f color4f;
+        color4f.alphaF_ = alpha / COLOR_DIVISOR;
+        color4f.redF_ = red / COLOR_DIVISOR;
+        color4f.greenF_ = green / COLOR_DIVISOR;
+        color4f.blueF_ = blue / COLOR_DIVISOR;
+        return color4f;
+    }
+
+    void ToSKColor4fVector(std::vector<SkScalar>& pos, std::vector<SKColor4f>& color4fs) const
+    {
+        if (colorStops_.empty()) {
+            pos.push_back(0.0f);
+            color4fs.push_back(SkColorToSKColor4f(SK_Color::TRANSPARENT));
+        } else if (colorStops_.front().offset > 0.0f) {
+            pos.push_back(0.0f);
+            color4fs.push_back(SkColorToSKColor4f(SkColor(colorStops_.front().color)));
+        }
+
+        for (const auto& stop : colorStops_) {
+            pos.push_back(stop.offset);
+            color4fs.push_back(SkColorToSKColor4f(stop.color));
+        }
+
+        if (pos.back() < 1.0f) {
+            pos.push_back(1.0f);
+            color4fs.push_back(color4fs.back());
         }
     }
 
@@ -624,14 +667,24 @@ public:
         }
 
         std::vector<SkScalar> pos;
-        std::vector<SkColor> colors;
-        ToSkColors(pos, colors);
+        std::vector<SKColor4f> color4fs;
+        sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
+        if (!colorStops_.empty()) {
+            if (ColorSpace::DISPLAY_P3 == colorStops_.front().colorSpace) {
+                colorSpace = SkColorSpace::MakeRGB(
+                    Rosen::Drawing::CMSTransferFuncType::SRGB, Rosen::Drawing::CMSMatrixType::DCIP3);
+            } else {
+                colorSpace = SkColorSpace::MakeRGB(
+                    Rosen::Drawing::CMSTransferFuncType::SRGB, Rosen::Drawing::CMSMatrixType::SRGB);
+            }
+        }
+        ToSKColor4fVector(pos, color4fs);
         SkTileMode tileMode = SkTileMode::kClamp;
         if (isRepeat_) {
             tileMode = SkTileMode::kRepeat;
         }
-        return SkGradientShader::MakeSweep(
-            center_.fX, center_.fY, &colors[0], &pos[0], colors.size(), tileMode, startAngle_, endAngle_, 0, &matrix);
+        return SkGradientShader::MakeSweep(center_.fX, center_.fY, &color4fs[0], colorSpace,
+            &pos[0], color4fs.size(), tileMode, startAngle_, endAngle_, 0, &matrix);
     }
 
     static std::unique_ptr<GradientShader> CreateSweepGradient(const NG::Gradient& gradient, const SkSize& size)

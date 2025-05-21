@@ -136,6 +136,52 @@ bool ParseJsDouble(const EcmaVM *vm, const Local<JSValueRef> &value, double &res
     return false;
 }
 
+void ParseGradientColorStopsWithColorSpace(const EcmaVM *vm, const Local<JSValueRef> &value, std::vector<ArkUIInt32orFloat32> &colors, std::optional<ColorSpace> &colorSpace)
+{
+    if (!value->IsArray(vm)) {
+        return;
+    }
+    auto array = panda::Local<panda::ArrayRef>(value);
+    auto length = array->Length(vm);
+    bool isValid = true;
+    for (uint32_t index = 0; index < length; index++) {
+        auto item = panda::ArrayRef::GetValueAt(vm, array, index);
+        if (!item->IsArray(vm)) {
+            continue;
+        }
+        auto itemArray = panda::Local<panda::ArrayRef>(item);
+        auto itemLength = itemArray->Length(vm);
+        if (itemLength < NUM_1) {
+            continue;
+        }
+        Color color;
+        auto colorParams = panda::ArrayRef::GetValueAt(vm, itemArray, NUM_0);
+        if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color)) {
+            continue;
+        }
+        // is valid
+        if (!colorSpace.has_value()) {
+            colorSpace = color.GetColorSpace();
+        } else if (color.GetColorSpace() != colorSpace.value()) {
+            isValid = false;
+            colors.clear();
+            colorSpace = ColorSpace::SRGB;
+            break;
+        }
+        bool hasDimension = false;
+        double dimension = 0.0;
+        if (itemLength > NUM_1) {
+            auto stopDimension = panda::ArrayRef::GetValueAt(vm, itemArray, NUM_1);
+            if (ArkTSUtils::ParseJsDouble(vm, stopDimension, dimension)) {
+                hasDimension = true;
+            }
+        }
+        colors.push_back({.u32 = static_cast<ArkUI_Uint32>(color.GetValue())});
+        colors.push_back({.i32 = static_cast<ArkUI_Int32>(hasDimension)});
+        colors.push_back({.f32 = static_cast<ArkUI_Float32>(dimension)});
+    }
+}
+
 bool ParseJsShadowColorStrategy(const EcmaVM *vm, const Local<JSValueRef> &value, ShadowColorStrategy& strategy)
 {
     if (value->IsString(vm)) {
@@ -1440,7 +1486,8 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *ru
         GetArkUINodeModifiers()->getCommonModifier()->resetBackgroundColor(nativeNode);
     } else {
         auto bgColorRawPtr = AceType::RawPtr(backgroundColorResObj);
-        GetArkUINodeModifiers()->getCommonModifier()->setBackgroundColor(nativeNode, color.GetValue(), bgColorRawPtr);
+        GetArkUINodeModifiers()->getCommonModifier()->setBackgroundColorWithColorSpace(
+            nativeNode, color.GetValue(), color.GetColorSpace(), bgColorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -2652,7 +2699,8 @@ ArkUINativeModuleValue CommonBridge::SetSweepGradient(ArkUIRuntimeCallInfo *runt
     auto endArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto rotationArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     auto colorsArg = runtimeCallInfo->GetCallArgRef(NUM_5);
-    auto repeatingArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    auto metricsColorsArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    auto repeatingArg = runtimeCallInfo->GetCallArgRef(NUM_7);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::vector<ArkUIInt32orFloat32> values;
     ArkTSUtils::ParseGradientCenter(vm, centerArg, values);
@@ -2660,11 +2708,19 @@ ArkUINativeModuleValue CommonBridge::SetSweepGradient(ArkUIRuntimeCallInfo *runt
     ArkTSUtils::ParseGradientAngle(vm, endArg, values);
     ArkTSUtils::ParseGradientAngle(vm, rotationArg, values);
     std::vector<ArkUIInt32orFloat32> colors;
-    ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors);
+    std::optional<ColorSpace> colorSpace;
+    if (metricsColorsArg->IsArray(vm)) {
+        ParseGradientColorStopsWithColorSpace(vm, metricsColorsArg, colors, colorSpace);
+    } else {
+        ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors);
+    }
+    if (!colorSpace.has_value()) {
+        colorSpace = ColorSpace::SRGB;
+    }
     auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
     values.push_back({.i32 = static_cast<ArkUI_Int32>(repeating)});
     GetArkUINodeModifiers()->getCommonModifier()->setSweepGradient(nativeNode, values.data(), values.size(),
-        colors.data(), colors.size());
+        colors.data(), colors.size(), colorSpace.value());
     return panda::JSValueRef::Undefined(vm);
 }
 

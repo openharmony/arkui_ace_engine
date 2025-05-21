@@ -786,7 +786,7 @@ class SweepGradientModifier extends ModifierWithKey {
     }
     else {
       getUINativeModule().common.setSweepGradient(node, this.value.center, this.value.start,
-        this.value.end, this.value.rotation, this.value.colors, this.value.repeating);
+        this.value.end, this.value.rotation, this.value.colors, this.value.metricsColors, this.value.repeating);
     }
   }
   checkObjectDiff() {
@@ -795,6 +795,7 @@ class SweepGradientModifier extends ModifierWithKey {
       (this.stageValue.end === this.value.end) &&
       (this.stageValue.rotation === this.value.rotation) &&
       (this.stageValue.colors === this.value.colors) &&
+      (this.stageValue.metricsColors === this.value.metricsColors) &&
       (this.stageValue.repeating === this.value.repeating));
   }
 }
@@ -18449,12 +18450,13 @@ class ArkLinearGradient {
   }
 }
 class ArkSweepGradient {
-  constructor(center, start, end, rotation, colors, repeating) {
+  constructor(center, start, end, rotation, colors, metricsColors, repeating) {
     this.center = center;
     this.start = start;
     this.end = end;
     this.rotation = rotation;
     this.colors = colors;
+    this.metricsColors = metricsColors;
     this.repeating = repeating;
   }
   isEqual(another) {
@@ -18463,6 +18465,7 @@ class ArkSweepGradient {
       this.end === another.end &&
       this.rotation === another.rotation &&
       deepCompareArrays(this.colors, another.colors) &&
+      deepCompareArrays(this.metricsColors, another.metricsColors) &&
       this.repeating === another.repeating);
   }
 }

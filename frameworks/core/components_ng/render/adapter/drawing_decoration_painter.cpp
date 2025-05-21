@@ -48,6 +48,7 @@ public:
         float offset { 0.0f };
         bool hasValue { false };
         bool isLength { false };
+        ColorSpace colorSpace { ColorSpace::SRGB };
     };
 
     explicit GradientShader(const NG::Gradient& gradient)
@@ -55,6 +56,7 @@ public:
         for (auto& stop : gradient.GetColors()) {
             ColorStop colorStop;
             colorStop.color = stop.GetColor().GetValue();
+            colorStop.colorSpace = stop.GetColor().GetColorSpace();
             colorStop.hasValue = stop.GetHasValue();
             if (colorStop.hasValue) {
                 colorStop.isLength = stop.GetDimension().Unit() != DimensionUnit::PERCENT;
@@ -189,6 +191,33 @@ protected:
         if (pos.back() < 1.0f) {
             pos.push_back(1.0f);
             colors.push_back(colors.back());
+        }
+    }
+
+    static RSColor4f RSColorQuadToRSColor4f(RSColorQuad colorQuad)
+    {
+        Rosen::Drawing::Color color { colorQuad };
+        return color.GetColor4f();
+    }
+
+    void ToRSColor4fVector(std::vector<RSScalar>& pos, std::vector<RSColor4f>& color4fs)
+    {
+        if (colorStops_.empty()) {
+            pos.push_back(0.0f);
+            color4fs.push_back(RSColorQuadToRSColor4f(RSColor::COLOR_TRANSPARENT));
+        } else if (colorStops_.front().offset > 0.0f) {
+            pos.push_back(0.0f);
+            color4fs.push_back(RSColorQuadToRSColor4f(colorStops_.front().color));
+        }
+
+        for (const auto& stop : colorStops_) {
+            pos.push_back(stop.offset);
+            color4fs.push_back(RSColorQuadToRSColor4f(stop.color));
+        }
+
+        if (pos.back() < 1.0f) {
+            pos.push_back(1.0f);
+            color4fs.push_back(color4fs.back());
         }
     }
 
@@ -599,14 +628,21 @@ public:
         }
 
         std::vector<RSScalar> pos;
-        std::vector<RSColorQuad> colors;
-        ToRSColors(pos, colors);
+        std::vector<RSColor4f> color4fs;
+        std::shared_ptr<RSColorSpace> colorSpace = RSColorSpace::CreateSRGB();
+        if (!colorStops_.empty()) {
+            if (ColorSpace::DISPLAY_P3 == colorStops_.back().colorSpace) {
+                colorSpace = RSColorSpace::CreateRGB(
+                    Rosen::Drawing::CMSTransferFuncType::SRGB, Rosen::Drawing::CMSMatrixType::DCIP3);
+            }
+        }
+        ToRSColor4fVector(pos, color4fs);
         RSTileMode tileMode = RSTileMode::CLAMP;
         if (isRepeat_) {
             tileMode = RSTileMode::REPEAT;
         }
         return RSRecordingShaderEffect::CreateSweepGradient(
-            center_, colors, pos, tileMode, startAngle_, endAngle_, &matrix);
+            center_, color4fs, colorSpace, pos, tileMode, startAngle_, endAngle_, &matrix);
     }
 
     static std::unique_ptr<GradientShader> CreateSweepGradient(const NG::Gradient& gradient, const RSSize& size)

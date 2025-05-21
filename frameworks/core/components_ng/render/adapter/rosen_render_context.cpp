@@ -774,10 +774,22 @@ void RosenRenderContext::PaintDebugBoundary(bool flag)
     }
 }
 
+void RosenRenderContext::ColorToRSColor(const Color& color, OHOS::Rosen::RSColor& rsColor)
+{
+    rsColor = OHOS::Rosen::RSColor::FromArgbInt(color.GetValue());
+    GraphicColorGamut colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB;
+    if (ColorSpace::DISPLAY_P3 == color.GetColorSpace()) {
+        colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DISPLAY_P3;
+    }
+    rsColor.SetColorSpace(colorSpace);
+}
+
 void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetBackgroundColor(value.GetValue());
+    OHOS::Rosen::RSColor rsColor;
+    ColorToRSColor(value, rsColor);
+    rsNode_->SetBackgroundColor(rsColor);
     RequestNextFrame();
 }
 

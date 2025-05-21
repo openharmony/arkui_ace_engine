@@ -1087,10 +1087,19 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest043, TestSize.Level1)
     const Color value = Color::RED;
     rosenRenderContext->OnBackgroundColorUpdate(value);
     ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
-    rosenRenderContext->rsNode_->SetBackgroundColor(value.GetValue());
+    OHOS::Rosen::RSColor rsColor = OHOS::Rosen::RSColor::FromArgbInt(value.GetValue());
+    GraphicColorGamut colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB;
+    if (ColorSpace::DISPLAY_P3 == value.GetColorSpace()) {
+        colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DISPLAY_P3;
+    }
+    rsColor.SetColorSpace(colorSpace);
+    rosenRenderContext->rsNode_->SetBackgroundColor(rsColor);
     rosenRenderContext->PaintBackground();
     auto backgroundColorVal = rosenRenderContext->rsNode_->GetStagingProperties().GetBackgroundColor();
-    EXPECT_EQ(backgroundColorVal, OHOS::Rosen::RSColor::FromArgbInt(value.GetValue()));
+    EXPECT_EQ(backgroundColorVal.GetRed(), rsColor.GetRed());
+    EXPECT_EQ(backgroundColorVal.GetGreen(), rsColor.GetGreen());
+    EXPECT_EQ(backgroundColorVal.GetBlue(), rsColor.GetBlue());
+    EXPECT_EQ(backgroundColorVal.GetAlpha(), rsColor.GetAlpha());
 }
 
 /**
