@@ -27,9 +27,13 @@ extern "C" {
 #define ARKUI_ANI_MODIFIER_FUNCTION_NAME "GetArkUIAniModifiers"
 
 struct _ArkUINode;
+struct _ArkUIContentSlot;
+struct _ArkUINodeContent;
 typedef class __ani_ref* ani_ref;
 typedef _ArkUINode* ArkUINodeHandle;
 typedef int ArkUI_Int32;
+typedef _ArkUIContentSlot* ArkUIContentSlot;
+typedef _ArkUINodeContent* ArkUINodeContent;
 
 struct ArkUIAniImageModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
@@ -45,11 +49,16 @@ struct ArkUIAniCommonModifier {
     void (*syncInstanceId)(ArkUI_Int32 id);
     void (*restoreInstanceId)();
 };
+struct ArkUIAniContentSlotModifier {
+    ArkUIContentSlot (*construct)(ArkUI_Int32 id);
+    void (*setContentSlotOptions)(ArkUIContentSlot node, ArkUINodeContent value);
+};
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
     const ArkUIAniWebModifier* (*getWebAniModifier)();
     const ArkUIAniCommonModifier* (*getCommonAniModifier)();
+    const ArkUIAniContentSlotModifier* (*getContentSlotAniModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

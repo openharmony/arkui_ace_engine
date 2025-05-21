@@ -35,4 +35,8 @@ export class ArkUIAniModule {
 
     native static _Common_Sync_InstanceId(id: KInt): void
     native static _Common_Restore_InstanceId(): void
+
+    native static _ContentSlot_construct(id: KInt): KPointer
+
+    native static _ContentSlotInterface_setContentSlotOptions(slot: KPointer, content: KPointer): void
 }
