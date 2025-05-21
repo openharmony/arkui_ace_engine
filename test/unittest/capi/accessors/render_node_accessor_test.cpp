@@ -822,7 +822,7 @@ HWTEST_F(RenderNodeAccessorTest, SetLengthMetricsUnitTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RenderNodeAccessorTest, DISABLED_GetShapeClipTest, TestSize.Level1)
+HWTEST_F(RenderNodeAccessorTest, GetShapeClipTest, TestSize.Level1)
 {
     // default value
     ASSERT_NE(accessor_->getShapeClip, nullptr);
@@ -852,7 +852,7 @@ HWTEST_F(RenderNodeAccessorTest, DISABLED_SetShapeClipTest, TestSize.Level1)
     ASSERT_NE(accessor_->setShapeClip, nullptr);
 
     auto basicShape = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::BasicShape>();
-    auto clipPeer = PeerUtils::CreatePeer<ShapeClipPeer>();
+    auto clipPeer = PeerUtils::CreatePeer<ShapeClipPeer>(basicShape);
     accessor_->setShapeClip(peer_, clipPeer);
 
     auto fnode = Referenced::RawPtr(peer_->node);
@@ -871,7 +871,7 @@ HWTEST_F(RenderNodeAccessorTest, DISABLED_SetShapeClipTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RenderNodeAccessorTest, DISABLED_GetShapeMaskTest, TestSize.Level1)
+HWTEST_F(RenderNodeAccessorTest, GetShapeMaskTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getShapeMask, nullptr);
     // default value
@@ -896,12 +896,12 @@ HWTEST_F(RenderNodeAccessorTest, DISABLED_GetShapeMaskTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RenderNodeAccessorTest, DISABLED_SetShapeMaskTest, TestSize.Level1)
+HWTEST_F(RenderNodeAccessorTest, SetShapeMaskTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setShapeMask, nullptr);
 
     auto basicShape = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::BasicShape>();
-    auto clipPeer = PeerUtils::CreatePeer<ShapeMaskPeer>();
+    auto clipPeer = PeerUtils::CreatePeer<ShapeMaskPeer>(basicShape);
     accessor_->setShapeMask(peer_, clipPeer);
 
     auto fnode = Referenced::RawPtr(peer_->node);
