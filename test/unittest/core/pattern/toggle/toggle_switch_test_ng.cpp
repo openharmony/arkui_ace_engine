@@ -38,6 +38,8 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t NODE_ID = 1;
+constexpr int32_t THEME_SCOPEID = 0;
 constexpr bool IS_ON = true;
 constexpr float CONTAINER_WIDTH = 200.0f;
 constexpr float CONTAINER_HEIGHT = 100.0f;
@@ -1532,5 +1534,147 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest006, TestSize.Level1)
     EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (0.00, 0.00) - [100.00 x 0.00]");
 
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: ToggleSwitchPatternTest007
+ * @tc.desc: Test HandleEnabled and OnClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest007, TestSize.Level1)
+{
+    SwitchPattern switchPattern;
+    switchPattern.contentModifierNode_ =
+        FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, NODE_ID, AceType::MakeRefPtr<SwitchPattern>());
+    switchPattern.HandleEnabled();
+    switchPattern.OnClick();
+    EXPECT_TRUE(switchPattern.UseContentModifier());
+}
+
+/**
+ * @tc.name: ToggleSwitchPatternTest008
+ * @tc.desc: Test MarkIsSelected.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest008, TestSize.Level1)
+{
+    SwitchPattern switchPattern;
+    switchPattern.isOn_ = true;
+    switchPattern.MarkIsSelected(true);
+    EXPECT_TRUE(switchPattern.isOn_);
+}
+
+/**
+ * @tc.name: ToggleSwitchPatternTest009
+ * @tc.desc: Test OnTouchDown and OnTouchUp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest009, TestSize.Level1)
+{
+    SwitchPattern switchPattern;
+    switchPattern.contentModifierNode_ =
+        FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, NODE_ID, AceType::MakeRefPtr<SwitchPattern>());
+    switchPattern.OnTouchDown();
+    switchPattern.OnTouchUp();
+    EXPECT_TRUE(switchPattern.UseContentModifier());
+}
+
+/**
+ * @tc.name: ToggleSwitchPatternTest010
+ * @tc.desc: Test BuildContentModifierNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest010, TestSize.Level1)
+{
+    SwitchPattern switchPattern;
+    EXPECT_EQ(switchPattern.BuildContentModifierNode(), nullptr);
+    SwitchMakeCallback callback = [](const ToggleConfiguration& toggleConfiguration) -> RefPtr<FrameNode> {
+        return FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, NODE_ID, AceType::MakeRefPtr<SwitchPattern>());
+    };
+    switchPattern.makeFunc_ = callback;
+    auto framnode = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, NODE_ID, AceType::MakeRefPtr<SwitchPattern>());
+    ASSERT_NE(framnode, nullptr);
+    framnode->paintProperty_ = AceType::MakeRefPtr<SwitchPaintProperty>();
+    framnode->eventHub_ = framnode->pattern_->CreateEventHub();
+    switchPattern.frameNode_ = std::move(framnode);
+    switchPattern.isOn_.reset();
+    EXPECT_NE(switchPattern.BuildContentModifierNode(), nullptr);
+}
+
+/**
+ * @tc.name: ToggleSwitchPatternTest011
+ * @tc.desc: Test FireBuilder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest011, TestSize.Level1)
+{
+    SwitchPattern switchPattern;
+    auto framnode = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, NODE_ID, AceType::MakeRefPtr<SwitchPattern>());
+    ASSERT_NE(framnode, nullptr);
+    auto childrenOne = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, -1, AceType::MakeRefPtr<SwitchPattern>());
+    ASSERT_NE(childrenOne, nullptr);
+    auto childrenTwo = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, NODE_ID, AceType::MakeRefPtr<SwitchPattern>());
+    ASSERT_NE(childrenTwo, nullptr);
+    framnode->children_.push_back(childrenOne);
+    framnode->children_.push_back(childrenTwo);
+    switchPattern.frameNode_ = std::move(framnode);
+    switchPattern.FireBuilder();
+    EXPECT_FALSE(switchPattern.makeFunc_.has_value());
+    SwitchMakeCallback callback = [](const ToggleConfiguration& toggleConfiguration) -> RefPtr<FrameNode> {
+        return FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, NODE_ID, AceType::MakeRefPtr<SwitchPattern>());
+    };
+    switchPattern.makeFunc_ = callback;
+    switchPattern.contentModifierNode_ = switchPattern.BuildContentModifierNode();
+    switchPattern.FireBuilder();
+    switchPattern.contentModifierNode_.Reset();
+    switchPattern.FireBuilder();
+    EXPECT_NE(switchPattern.contentModifierNode_, switchPattern.BuildContentModifierNode());
+}
+
+/**
+ * @tc.name: ToggleSwitchPatternTest012
+ * @tc.desc: Test DumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest012, TestSize.Level1)
+{
+    SwitchPattern switchPattern;
+    auto framnode = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, NODE_ID, AceType::MakeRefPtr<SwitchPattern>());
+    ASSERT_NE(framnode, nullptr);
+    auto paintProperty = AceType::MakeRefPtr<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    framnode->paintProperty_ = paintProperty;
+    switchPattern.frameNode_ = std::move(framnode);
+    switchPattern.DumpInfo();
+    EXPECT_NE(switchPattern.GetPaintProperty<SwitchPaintProperty>(), nullptr);
+    paintProperty->UpdateIsOn(true);
+    paintProperty->UpdateSelectedColor(Color::RED);
+    paintProperty->UpdateUnselectedColor(Color::GREEN);
+    paintProperty->UpdateSwitchPointColor(Color::BLUE);
+    paintProperty->UpdatePointRadius(5.0_vp);
+    paintProperty->UpdateTrackBorderRadius(2.0_vp);
+    switchPattern.DumpInfo();
+    EXPECT_TRUE(paintProperty->HasIsOn());
+}
+
+/**
+ * @tc.name: ToggleSwitchPatternTest013
+ * @tc.desc: Test OnThemeScopeUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest013, TestSize.Level1)
+{
+    SwitchPattern switchPattern;
+    auto framnode = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, NODE_ID, AceType::MakeRefPtr<SwitchPattern>());
+    ASSERT_NE(framnode, nullptr);
+    auto paintProperty = AceType::MakeRefPtr<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    framnode->paintProperty_ = paintProperty;
+    switchPattern.frameNode_ = std::move(framnode);
+    EXPECT_TRUE(switchPattern.OnThemeScopeUpdate(THEME_SCOPEID));
+    paintProperty->UpdateSelectedColor(Color::RED);
+    EXPECT_TRUE(switchPattern.OnThemeScopeUpdate(THEME_SCOPEID));
+    paintProperty->UpdateSwitchPointColor(Color::BLUE);
+    EXPECT_FALSE(switchPattern.OnThemeScopeUpdate(THEME_SCOPEID));
 }
 } // namespace OHOS::Ace::NG
