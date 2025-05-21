@@ -1327,7 +1327,14 @@ void TextFieldPattern::HandleSelect(CaretMoveIntent direction)
             HandleSelectionEnd();
             break;
         }
-        // SelectionParagraghBegin/SelectionParagraghEnd not supported yet
+        case CaretMoveIntent::ParagraghBegin: {
+            HandleSelectionParagraghBegin();
+            break;
+        }
+        case CaretMoveIntent::ParagraghEnd: {
+            HandleSelectionParagraghEnd();
+            break;
+        }
         default: {
             TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Unsupported select operation for text field");
         }
@@ -6529,6 +6536,26 @@ void TextFieldPattern::HandleSelectionHome()
     AfterSelection();
 }
 
+void TextFieldPattern::HandleSelectionParagraghBegin()
+{
+    CHECK_NULL_VOID(selectController_);
+    if (selectController_->GetCaretIndex() == 0) {
+        return;
+    }
+    auto originCaretPosition = selectController_->GetCaretIndex();
+    auto newPos = GetLineBeginPosition(originCaretPosition, false);
+    if (newPos == originCaretPosition && originCaretPosition > 0) {
+        newPos = GetLineBeginPosition(originCaretPosition - 1, false);
+    }
+    if (!IsSelected()) {
+        UpdateSelection(selectController_->GetCaretIndex());
+        selectController_->MoveSecondHandleByKeyBoard(newPos);
+    } else {
+        selectController_->MoveSecondHandleByKeyBoard(newPos);
+    }
+    AfterSelection();
+}
+
 void TextFieldPattern::HandleSelectionRight()
 {
     // if currently not in select mode, reset baseOffset and move destinationOffset and caret position
@@ -6603,6 +6630,26 @@ void TextFieldPattern::HandleSelectionEnd()
         selectController_->MoveSecondHandleByKeyBoard(endPos);
     } else {
         selectController_->MoveSecondHandleByKeyBoard(endPos);
+    }
+    AfterSelection();
+}
+
+void TextFieldPattern::HandleSelectionParagraghEnd()
+{
+    CHECK_NULL_VOID(selectController_);
+    if (selectController_->GetCaretIndex() == static_cast<int32_t>(contentController_->GetTextUtf16Value().length())) {
+        return;
+    }
+    auto originCaretPosition = selectController_->GetCaretIndex();
+    auto newPos = GetLineEndPosition(originCaretPosition, false);
+    if (newPos == originCaretPosition && originCaretPosition > 0) {
+        newPos = GetLineEndPosition(originCaretPosition + 1, false);
+    }
+    if (!IsSelected()) {
+        UpdateSelection(selectController_->GetCaretIndex());
+        selectController_->MoveSecondHandleByKeyBoard(newPos);
+    } else {
+        selectController_->MoveSecondHandleByKeyBoard(newPos);
     }
     AfterSelection();
 }
