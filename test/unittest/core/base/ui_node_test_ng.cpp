@@ -1137,6 +1137,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg040, TestSize.Level1)
     ZERO->onMainTree_ = true;
     ZERO->context_ = AceType::RawPtr(context);
     ZERO->DoAddChild(it, ONE, false);
+    EXPECT_EQ(ZERO->children_.size(), 1);
     ZERO->DoAddChild(it, TWO, true);
     EXPECT_EQ(ZERO->children_.size(), 2);
     ZERO->onMainTree_ = false;
