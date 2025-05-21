@@ -3869,9 +3869,9 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     }
     modalNode->AddChild(builder);
     auto modalNodeParent = modalNode->GetParent();
-     if (!modalNodeParent) {
+    if (!modalNodeParent) {
         TAG_LOGE(AceLogTag::ACE_SHEET, "ModalPage MountToParent error");
-           return;
+        return;
     }
     modalStack_.push(WeakClaim(RawPtr(modalNode)));
     modalList_.emplace_back(WeakClaim(RawPtr(modalNode)));
