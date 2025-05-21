@@ -1952,4 +1952,164 @@ HWTEST_F(DragEventTestNg, GetThumbnailPixelMap, TestSize.Level1)
     dragEventActuator->GetThumbnailPixelMap(true);
     EXPECT_FALSE(dragEventActuator->isOnBeforeLiftingAnimation_);
 }
+
+/**
+ * @tc.name: DragEventTextPixelMapNullTest001
+ * @tc.desc: Test SetTextPixelMap clears and applies textPixelMap_ correctly to avoid reuse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventTextPixelMapNullTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode, EventHub, GestureEventHub and DragEventActuator, and set up dragNode.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto dragNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(dragNode, nullptr);
+    textPattern->dragNode_ = dragNode;
+
+    /**
+     * @tc.steps: step2. Set initial textPixelMap_ and call SetTextPixelMap.
+     * @tc.expected: The pixel map is applied to gestureHub and internal pointer is cleared.
+     */
+    auto textPixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    ASSERT_NE(textPixelMap, nullptr);
+    dragEventActuator->textPixelMap_ = textPixelMap;
+    dragEventActuator->SetTextPixelMap(gestureHub);
+    EXPECT_EQ(gestureHub->GetPixelMap(), textPixelMap);
+    EXPECT_EQ(dragEventActuator->textPixelMap_, nullptr);
+
+    /**
+     * @tc.steps: step2. Call SetTextPixelMap again after textPixelMap_ is cleared.
+     * @tc.expected: gestureHub pixel map is set to nullptr.
+     */
+    dragEventActuator->SetTextPixelMap(gestureHub);
+    EXPECT_EQ(gestureHub->GetPixelMap(), nullptr);
+
+    /**
+     * @tc.steps: step5. Set renderContext to dragNode and call again.
+     * @tc.expected: gestureHub pixel map remains nullptr due to GetThumbnailPixelMap returning null.
+     */
+    dragNode->renderContext_ = AceType::MakeRefPtr<RenderContext>();
+    dragEventActuator->SetTextPixelMap(gestureHub);
+    EXPECT_EQ(gestureHub->GetPixelMap(), nullptr);
+}
+
+/**
+ * @tc.name: DragEventSetDragDampStartPointInfoTest001
+ * @tc.desc: Test SetDragDampStartPointInfo resets drag positions and sets correct start point and pointer ID.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventSetDragDampStartPointInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode, EventHub, GestureEventHub, and DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+
+    /**
+     * @tc.steps: step2. Get PipelineContext and DragDropManager.
+     * @tc.expected: DragDropManager is not null.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetDragDampStartPointInfo with testPoint and pointerId.
+     * @tc.expected: All previous drag positions are reset; new start point and pointer ID are recorded.
+     */
+    Point testPoint(POINT_X, POINT_Y);
+    int32_t testPointerId = POINTER_ID;
+    dragEventActuator->SetDragDampStartPointInfo(testPoint, testPointerId);
+
+    EXPECT_EQ(dragDropManager->dragMovePosition_, OffsetF());
+    EXPECT_EQ(dragDropManager->lastDragMovePosition_, OffsetF());
+    EXPECT_EQ(dragDropManager->dragTotalMovePosition_, OffsetF());
+    EXPECT_EQ(dragDropManager->dragDampStartPoint_.GetX(), testPoint.GetX());
+    EXPECT_EQ(dragDropManager->dragDampStartPoint_.GetY(), testPoint.GetY());
+    EXPECT_EQ(dragDropManager->currentPointerId_, testPointerId);
+}
+
+/**
+ * @tc.name: DragEventTryTriggerThumbnailCallbackTest001
+ * @tc.desc: Test TryTriggerThumbnailCallback handles different conditions to prevent incorrect thumbnail generation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventTryTriggerThumbnailCallbackTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode, EventHub, GestureEventHub and DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+    dragEventActuator->gestureEventHub_ = AceType::WeakClaim(AceType::RawPtr(gestureEventHub));
+
+    /**
+     * @tc.steps: step2. Test early return when isThumbnailCallbackTriggered_ is already true.
+     * @tc.expected: isThumbnailCallbackTriggered_ remains true.
+     */
+    dragEventActuator->isThumbnailCallbackTriggered_ = true;
+    dragEventActuator->TryTriggerThumbnailCallback();
+    EXPECT_TRUE(dragEventActuator->isThumbnailCallbackTriggered_);
+
+    /**
+     * @tc.steps: step3. Test early return when FrameNode tag is WEB_ETS_TAG.
+     * @tc.expected: isThumbnailCallbackTriggered_ remains false.
+     */
+    frameNode->tag_ = V2::WEB_ETS_TAG;
+    dragEventActuator->isThumbnailCallbackTriggered_ = false;
+    dragEventActuator->TryTriggerThumbnailCallback();
+    EXPECT_FALSE(dragEventActuator->isThumbnailCallbackTriggered_);
+    frameNode->tag_ = V2::TEXT_ETS_TAG;
+
+    /**
+     * @tc.steps: step4. Test early return when text is marked as draggable.
+     * @tc.expected: isThumbnailCallbackTriggered_ remains false.
+     */
+    gestureEventHub->SetTextDraggable(true);
+    dragEventActuator->isThumbnailCallbackTriggered_ = false;
+    dragEventActuator->TryTriggerThumbnailCallback();
+    EXPECT_FALSE(dragEventActuator->isThumbnailCallbackTriggered_);
+    gestureEventHub->SetTextDraggable(false);
+
+    /**
+     * @tc.steps: step5. Test successful path when none of the early-return conditions are met.
+     * @tc.expected: isThumbnailCallbackTriggered_ is set to true.
+     */
+    dragEventActuator->isThumbnailCallbackTriggered_ = false;
+    dragEventActuator->TryTriggerThumbnailCallback();
+    EXPECT_TRUE(dragEventActuator->isThumbnailCallbackTriggered_);
+}
 } // namespace OHOS::Ace::NG
