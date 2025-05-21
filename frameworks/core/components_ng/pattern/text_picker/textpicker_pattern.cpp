@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 
 #include <cstdint>
+#include <functional>
 #include <securec.h>
 
 #include "base/i18n/localization.h"
@@ -48,6 +49,7 @@ const Dimension LINE_WIDTH = 1.5_vp;
 constexpr float DISABLE_ALPHA = 0.6f;
 constexpr float MAX_PERCENT = 100.0f;
 const int32_t UNOPTION_COUNT = 2;
+constexpr float PICKER_MAXFONTSCALE = 1.0f;
 } // namespace
 
 void TextPickerPattern::OnAttachToFrameNode()
@@ -1637,16 +1639,19 @@ void TextPickerPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(pickerTheme);
-    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
-    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
-    auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
-    auto pickerProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
-    CHECK_NULL_VOID(pickerProperty);
-    pickerProperty->UpdateColor(GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
-    pickerProperty->UpdateDisappearColor(
-        GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
-    pickerProperty->UpdateSelectedColor(
-        GetTextProperties().selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
+    if (!SystemProperties::ConfigChangePerform()) {
+        auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
+        auto normalStyle = pickerTheme->GetOptionStyle(false, false);
+        auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
+        auto pickerProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
+        CHECK_NULL_VOID(pickerProperty);
+        pickerProperty->UpdateColor(
+            GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+        pickerProperty->UpdateDisappearColor(
+            GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+        pickerProperty->UpdateSelectedColor(
+            GetTextProperties().selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
+    }
     if (isPicker_) {
         return;
     }
@@ -1881,5 +1886,161 @@ std::string TextPickerPattern::GetTextPickerRange() const
         }
     }
     return result;
+}
+
+Dimension TextPickerPattern::ConvertFontScaleValue(const Dimension& fontSizeValue)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, fontSizeValue);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, fontSizeValue);
+
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
+    auto follow = pipeline->IsFollowSystem();
+    float fontScale = pipeline->GetFontScale();
+    if (NearZero(fontScale) || (fontSizeValue.Unit() == DimensionUnit::VP)) {
+        return fontSizeValue;
+    }
+    if (GreatOrEqualCustomPrecision(fontScale, PICKER_MAXFONTSCALE) && follow) {
+        fontScale = std::clamp(fontScale, 0.0f, maxAppFontScale);
+        if (!NearZero(fontScale)) {
+            return Dimension(fontSizeValue / fontScale);
+        }
+    }
+    return fontSizeValue;
+}
+
+void TextPickerPattern::UpdateTextStyleCommon(
+    const PickerTextStyle& textStyle,
+    const TextStyle& defaultTextStyle,
+    std::function<void(const Color&)> updateTextColorFunc,
+    std::function<void(const Dimension&)> updateFontSizeFunc,
+    std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc
+)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        updateTextColorFunc(textStyle.textColor.value_or(defaultTextStyle.GetTextColor()));
+
+        Dimension fontSize = defaultTextStyle.GetFontSize();
+        if (textStyle.fontSize.has_value() && textStyle.fontSize->IsValid()) {
+            fontSize = textStyle.fontSize.value();
+        }
+            updateFontSizeFunc(ConvertFontScaleValue(fontSize));
+
+        updateFontFamilyFunc(textStyle.fontFamily.value_or(defaultTextStyle.GetFontFamilies()));
+    }
+
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void TextPickerPattern::UpdateDisappearTextStyle(const PickerTextStyle& textStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(pickerTheme);
+    auto defaultTextStyle = pickerTheme->GetDisappearOptionStyle();
+    auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    UpdateTextStyleCommon(
+        textStyle,
+        defaultTextStyle,
+        [&](const Color& color) { pickerProperty->UpdateDisappearColor(color); },
+        [&](const Dimension& fontSize) { pickerProperty->UpdateDisappearFontSize(fontSize); },
+        [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateDisappearFontFamily(fontFamily); }
+    );
+}
+
+void TextPickerPattern::UpdateNormalTextStyle(const PickerTextStyle& textStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(pickerTheme);
+    auto defaultTextStyle = pickerTheme->GetOptionStyle(false, false);
+    auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    UpdateTextStyleCommon(
+        textStyle,
+        defaultTextStyle,
+        [&](const Color& color) { pickerProperty->UpdateColor(color); },
+        [&](const Dimension& fontSize) { pickerProperty->UpdateFontSize(fontSize); },
+        [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateFontFamily(fontFamily); }
+    );
+}
+
+void TextPickerPattern::UpdateSelectedTextStyle(const PickerTextStyle& textStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(pickerTheme);
+    auto defaultTextStyle = pickerTheme->GetOptionStyle(true, false);
+    auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    UpdateTextStyleCommon(
+        textStyle,
+        defaultTextStyle,
+        [&](const Color& color) { pickerProperty->UpdateSelectedColor(color); },
+        [&](const Dimension& fontSize) { pickerProperty->UpdateSelectedFontSize(fontSize); },
+        [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateSelectedFontFamily(fontFamily); }
+    );
+}
+
+void TextPickerPattern::UpdateDefaultTextStyle(const PickerTextStyle& textStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto textTheme = pipelineContext->GetTheme<TextTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(textTheme);
+    auto defaultTextStyle = textTheme->GetTextStyle();
+    auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+
+    UpdateTextStyleCommon(
+        textStyle,
+        defaultTextStyle,
+        [&](const Color& color) { pickerProperty->UpdateDefaultColor(color); },
+        [&](const Dimension& fontSize) { pickerProperty->UpdateDefaultFontSize(fontSize); },
+        [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateDefaultFontFamily(fontFamily); }
+    );
+
+    if (pipelineContext->IsSystmColorChange()) {
+        if (textStyle.minFontSize.has_value() && textStyle.minFontSize->IsValid()) {
+            Dimension minFontSize = textStyle.minFontSize.value();
+            pickerProperty->UpdateDefaultMinFontSize(ConvertFontScaleValue(minFontSize));
+        } else {
+            pickerProperty->UpdateDefaultMinFontSize(Dimension());
+        }
+
+        if (textStyle.maxFontSize.has_value() && textStyle.maxFontSize->IsValid()) {
+            Dimension maxFontSize = textStyle.maxFontSize.value();
+            pickerProperty->UpdateDefaultMaxFontSize(ConvertFontScaleValue(maxFontSize));
+        } else {
+            pickerProperty->UpdateDefaultMaxFontSize(Dimension());
+        }
+    }
+
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 } // namespace OHOS::Ace::NG
