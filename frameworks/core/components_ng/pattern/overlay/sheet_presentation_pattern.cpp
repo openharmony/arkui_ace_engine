@@ -3759,10 +3759,8 @@ void SheetPresentationPattern::SendMessagesBeforeFirstTransitionIn(bool isFirstT
         host->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN,
             WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     }
-    auto pipelineContext = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->UpdateOcclusionCullingStatus(true, host);
     ACE_SCOPED_TRACE("Sheet BeforeFirstTransitionIn end");
+    host->AddToOcclusionMap(true);
 }
 
 /**
@@ -3781,9 +3779,6 @@ void SheetPresentationPattern::SendMessagesAfterFirstTransitionIn(bool isFirstTr
     CHECK_NULL_VOID(context);
     context->UpdateRenderGroup(false, false, true);
     TAG_LOGD(AceLogTag::ACE_SHEET, "UpdateRenderGroup finished");
-    auto pipelineContext = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->UpdateOcclusionCullingStatus(false, nullptr);
     ACE_SCOPED_TRACE("Sheet AfterFirstTransitionIn end");
 }
 
@@ -3797,9 +3792,6 @@ void SheetPresentationPattern::SendMessagesBeforeTransitionOut()
     CHECK_NULL_VOID(host);
     host->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-    auto pipelineContext = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->UpdateOcclusionCullingStatus(true, host);
     // supports Gesture durring transition
     auto sheetParent = DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_VOID(sheetParent);
@@ -3818,10 +3810,8 @@ void SheetPresentationPattern::SendMessagesAfterTransitionOut(FrameNode* sheetNo
     CHECK_NULL_VOID(sheetNode);
     // WindowMaximize
     SetWindowUseImplicitAnimation(sheetNode, false);
-    auto pipelineContext = sheetNode->GetContextWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->UpdateOcclusionCullingStatus(false, nullptr);
     ACE_SCOPED_TRACE("Sheet AfterTransitionOut end");
+    sheetNode->AddToOcclusionMap(false);
 }
 
 void SheetPresentationPattern::UpdateSheetType()

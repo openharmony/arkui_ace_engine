@@ -6784,20 +6784,15 @@ void RosenRenderContext::OnAttractionEffectUpdate(const AttractionEffect& effect
     RequestNextFrame();
 }
 
-void RosenRenderContext::UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& KeyOcclusionNode)
+void RosenRenderContext::UpdateOcclusionCullingStatus(bool enable)
 {
     CHECK_NULL_VOID(rsNode_);
-    auto rsRootNode = rsNode_->ReinterpretCastTo<Rosen::RSRootNode>();
-    CHECK_NULL_VOID(rsRootNode);
-    if (KeyOcclusionNode == nullptr) {
-        rsRootNode->UpdateOcclusionCullingStatus(enable, 0);
-        return;
-    }
-    auto rosenRenderContext = DynamicCast<RosenRenderContext>(KeyOcclusionNode->renderContext_);
-    CHECK_NULL_VOID(rosenRenderContext);
-    auto keyRsNode = rosenRenderContext->GetRSNode();
-    CHECK_NULL_VOID(keyRsNode);
-    rsRootNode->UpdateOcclusionCullingStatus(enable, keyRsNode->GetId());
+    const auto keyOcclusionNodeId = rsNode_->GetId();
+    LOGD("RosenRenderContext::UpdateOcclusionCullingStatus enable %{public}d, "
+        "keyOcclusionId %{public}" PRIu64, enable, keyOcclusionNodeId);
+    ACE_SCOPED_TRACE("RosenRenderContext::UpdateOcclusionCullingStatus"
+        "enable %d, keyOcclusionId %" PRIu64, enable, keyOcclusionNodeId);
+    rsNode_->UpdateOcclusionCullingStatus(enable, keyOcclusionNodeId);
 }
 
 PipelineContext* RosenRenderContext::GetPipelineContext() const

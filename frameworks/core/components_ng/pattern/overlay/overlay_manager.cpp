@@ -5066,9 +5066,8 @@ void OverlayManager::PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNo
     auto modalPositionY = modalNode->GetGeometryNode()->GetFrameRect().GetY();
     auto showHeight = rootHeight - modalPositionY;
 
-    auto pipelineContext = modalNode->GetContextWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->UpdateOcclusionCullingStatus(true, modalNode);
+    ACE_SCOPED_TRACE("PlayDefaultModalTransition Start");
+    modalNode->AddToOcclusionMap(true);
 
     if (isTransitionIn) {
         PlayDefaultModalIn(modalNode, context, option, showHeight);
@@ -5090,9 +5089,8 @@ void OverlayManager::PlayDefaultModalIn(
             modal->GetPattern<ModalPresentationPattern>()->OnAppear();
             // Fire hidden event of navdestination on the disappeared modal
             overlayManager->FireNavigationStateChange(false);
-            auto pipelineContext = modal->GetContextWithCheck();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->UpdateOcclusionCullingStatus(false, nullptr);
+            ACE_SCOPED_TRACE("PlayDefaultModalIn Finished");
+            modal->AddToOcclusionMap(false);
         });
     }
     AnimationUtils::Animate(
@@ -5131,9 +5129,8 @@ void OverlayManager::PlayDefaultModalOut(
             root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             // Fire shown event of navdestination under the disappeared modal
             overlayManager->FireNavigationStateChange(true);
-            auto pipelineContext = modal->GetContextWithCheck();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->UpdateOcclusionCullingStatus(false, nullptr);
+            ACE_SCOPED_TRACE("PlayDefaultModalOut Finished");
+            modal->AddToOcclusionMap(false);
         });
     context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
     AnimationUtils::Animate(

@@ -77,8 +77,6 @@ public:
     }
     void SetEnableSwipeBack(bool isEnable) {}
 
-    void UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode);
-
 protected:
     float fontScale_ = 1.0f;
     bool isDeclarative_ = false;

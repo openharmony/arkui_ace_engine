@@ -6810,4 +6810,12 @@ void FrameNode::HandleAreaChangeDestruct()
         }
     }
 }
+
+void FrameNode::AddToOcclusionMap(bool enable)
+{
+    auto context = GetContextWithCheck();
+    CHECK_NULL_VOID(context);
+    context->AddToOcclusionMap(GetId(), enable);
+}
+
 } // namespace OHOS::Ace::NG

@@ -947,6 +947,18 @@ void PipelineContext::HandleSpecialContainerNode()
     ClearPositionZNodes();
 }
 
+void PipelineContext::UpdateOcclusionCullingStatus()
+{
+    for (auto &&[id, enable] : keyOcclusionNodes_) {
+        auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(id));
+        if (!frameNode) {
+            continue;
+        }
+        frameNode->UpdateOcclusionCullingStatus(enable);
+    }
+    keyOcclusionNodes_.clear();
+}
+
 void PipelineContext::FlushMessages()
 {
     int32_t id = -1;
@@ -968,6 +980,7 @@ void PipelineContext::FlushMessages()
         ResSchedReport::GetInstance().ResSchedDataReport("page_end_flush", {});
     }
     HandleSpecialContainerNode();
+    UpdateOcclusionCullingStatus();
     window_->FlushTasks();
 }
 
@@ -5947,13 +5960,6 @@ bool PipelineContext::CheckThreadSafe()
         return false;
     }
     return true;
-}
-
-void PipelineContext::UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode)
-{
-    auto rootContext = rootNode_->GetRenderContext();
-    CHECK_NULL_VOID(rootContext);
-    rootContext->UpdateOcclusionCullingStatus(enable, keyOcclusionNode);
 }
 
 uint64_t PipelineContext::AdjustVsyncTimeStamp(uint64_t nanoTimestamp)
