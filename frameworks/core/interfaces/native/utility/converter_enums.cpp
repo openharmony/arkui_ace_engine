@@ -1938,7 +1938,7 @@ void AssignCast(std::optional<SwipeDirection>& dst, const Ark_SwipeDirection& sr
         case ARK_SWIPE_DIRECTION_VERTICAL: dst->type = SwipeDirection::VERTICAL; break;
         case ARK_SWIPE_DIRECTION_ALL: dst->type = SwipeDirection::ALL; break;
         default: {
-            LOGE("Unexpected enum value in Ark_PanDirection: %{public}d", src);
+            LOGE("Unexpected enum value in Ark_SwipeDirection: %{public}d", src);
             dst = std::nullopt;
         }
     }

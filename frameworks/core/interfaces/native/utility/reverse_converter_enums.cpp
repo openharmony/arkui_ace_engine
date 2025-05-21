@@ -241,6 +241,22 @@ void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &
     }
 }
 
+void AssignArkValue(Ark_GestureRecognizerState &dst, const NG::RefereeState& src)
+{
+    switch (src) {
+        case NG::RefereeState::READY: dst = ARK_GESTURE_RECOGNIZER_STATE_READY; break;
+        case NG::RefereeState::DETECTING: dst = ARK_GESTURE_RECOGNIZER_STATE_DETECTING; break;
+        case NG::RefereeState::PENDING: dst = ARK_GESTURE_RECOGNIZER_STATE_PENDING; break;
+        case NG::RefereeState::PENDING_BLOCKED: dst = ARK_GESTURE_RECOGNIZER_STATE_BLOCKED; break;
+        case NG::RefereeState::SUCCEED_BLOCKED: dst = ARK_GESTURE_RECOGNIZER_STATE_BLOCKED; break;
+        case NG::RefereeState::SUCCEED: dst = ARK_GESTURE_RECOGNIZER_STATE_SUCCESSFUL; break;
+        case NG::RefereeState::FAIL: dst = ARK_GESTURE_RECOGNIZER_STATE_FAILED; break;
+        default:
+            dst = INVALID_ENUM_VAL<Ark_GestureRecognizerState>;
+            LOGE("Unexpected enum value in RefereeState: %{public}d", src);
+    }
+}
+
 void AssignArkValue(Ark_IntentionCode& dst, const KeyIntention& src)
 {
     switch (src) {
@@ -627,6 +643,20 @@ void AssignArkValue(Ark_SwipeActionState& dst, const SwipeActionState& src)
         default: {
             dst = static_cast<Ark_SwipeActionState>(-1);
             LOGE("Unexpected enum value in SwipeActionState: %{public}d", src);
+        }
+    }
+}
+
+void AssignArkValue(Ark_SwipeDirection& dst, const OHOS::Ace::SwipeDirection& src)
+{
+    switch (src.type) {
+        case SwipeDirection::NONE: dst = ARK_SWIPE_DIRECTION_NONE; break;
+        case SwipeDirection::HORIZONTAL: dst = ARK_SWIPE_DIRECTION_HORIZONTAL; break;
+        case SwipeDirection::VERTICAL: dst = ARK_SWIPE_DIRECTION_VERTICAL; break;
+        case SwipeDirection::ALL: dst = ARK_SWIPE_DIRECTION_ALL; break;
+        default: {
+            dst = static_cast<Ark_SwipeDirection>(-1);
+            LOGE("Unexpected enum value in OHOS::Ace::SwipeDirection: %{public}d", src.type);
         }
     }
 }

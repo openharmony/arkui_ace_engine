@@ -1684,7 +1684,7 @@ template<>
 RefPtr<NG::NGGestureRecognizer> Convert(const Ark_GestureRecognizer &src)
 {
     if (src) {
-        return src->GetRecognizer();
+        return src->GetRecognizer().Upgrade();
     }
     return nullptr;
 }
@@ -1707,7 +1707,7 @@ void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecogn
     CHECK_NULL_VOID(accessor);
     dst = accessor->ctor();
     if (dst) {
-        dst->SetRecognizer(src);
+        dst->Update(src);
     }
 }
 void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src)

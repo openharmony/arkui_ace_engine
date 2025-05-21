@@ -15,16 +15,19 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/rotation_recognizer_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RotationRecognizerAccessor {
 void DestroyPeerImpl(Ark_RotationRecognizer peer)
 {
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_RotationRecognizer CtorImpl()
 {
-    return nullptr;
+    return PeerUtils::CreatePeer<RotationRecognizerPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,7 +35,9 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Number GetAngleImpl(Ark_RotationRecognizer peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_Number>(DEFAULT_ANGLE);
+    CHECK_NULL_RETURN(peer, errorValue);
+    return Converter::ArkValue<Ark_Number>(peer->GetAngle());
 }
 } // RotationRecognizerAccessor
 const GENERATED_ArkUIRotationRecognizerAccessor* GetRotationRecognizerAccessor()
