@@ -2153,4 +2153,48 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewGetUserSettingLimitTest004, TestS
     EXPECT_NE(result, fontSizeValue * fontScale);
 }
 
+/**
+* @tc.name: TextPickerToJsonDefaultPickerItemHeight001
+* @tc.desc: Test TextPicker ToJsonValue.
+* @tc.type: FUNC
+*/
+HWTEST_F(TextPickerTestNg, TextPickerToJsonDefaultPickerItemHeight001, TestSize.Level0)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    TextPickerModelNG::GetInstance()->SetDefaultAttributes(theme);
+    /**
+    * @tc.step: step1. Set Selecteds Values and Set Values.
+    * @tc.expected: default PickerItemHeight is 0.00px
+    */
+    std::vector<uint32_t> selecteds;
+    selecteds.emplace_back(1);
+    selecteds.emplace_back(2);
+    TextPickerModelNG::GetInstance()->SetSelecteds(selecteds);
+    std::vector<std::string> values;
+    values.emplace_back("1");
+    values.emplace_back("2");
+    TextPickerModelNG::GetInstance()->SetValues(values);
+    TextPickerModelNG::GetInstance()->SetDefaultPickerItemHeight(Dimension(10.0f, DimensionUnit::VP));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+
+    /**
+    * @tc.steps: step2. call ToJsonValue.
+    * @tc.expected: as follows
+    */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    frameNode->ToJsonValue(json, filter);
+
+    GTEST_LOG_(INFO) << json->ToString();
+    /**
+    * @tc.steps: check the key value.
+    * @tc.expected: it should be -.
+    */
+    EXPECT_EQ(json->GetString("defaultPickerItemHeight"), "10.00vp");
+}
+
 } // namespace OHOS::Ace::NG
