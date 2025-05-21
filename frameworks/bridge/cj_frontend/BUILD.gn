@@ -119,6 +119,7 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_foreach_ffi.cpp",
       "interfaces/cj_ffi/cj_gauge_ffi.cpp",
       "interfaces/cj_ffi/cj_gesture_ffi.cpp",
+      "interfaces/cj_ffi/cj_gesture_recognizer_ffi.cpp",
       "interfaces/cj_ffi/cj_grid_col_ffi.cpp",
       "interfaces/cj_ffi/cj_grid_ffi.cpp",
       "interfaces/cj_ffi/cj_grid_item_ffi.cpp",
