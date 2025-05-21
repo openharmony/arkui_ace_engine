@@ -58,6 +58,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_utils.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_inner_surface_controller.h"
 #include "core/event/event_info_convertor.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
@@ -200,8 +201,16 @@ void XComponentPattern::InitSurface()
         InitNativeWindow(initSize_.Width(), initSize_.Height());
     }
     surfaceId_ = renderSurface_->GetUniqueId();
-
     UpdateTransformHint();
+    RegisterSurfaceRenderContext();
+}
+
+void XComponentPattern::RegisterSurfaceRenderContext()
+{
+    if (type_ == XComponentType::SURFACE) {
+        XComponentInnerSurfaceController::RegisterSurfaceRenderContext(
+            surfaceId_, WeakPtr(handlingSurfaceRenderContext_));
+    }
 }
 
 void XComponentPattern::UpdateTransformHint()
@@ -449,6 +458,9 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     UninitializeAccessibility(frameNode);
+    if (type_ == XComponentType::SURFACE) {
+        XComponentInnerSurfaceController::UnregisterSurfaceRenderContext(surfaceId_);
+    }
     if (isTypedNode_) {
         if (surfaceCallbackMode_ == SurfaceCallbackMode::PIP) {
             HandleSurfaceDestroyed(frameNode);

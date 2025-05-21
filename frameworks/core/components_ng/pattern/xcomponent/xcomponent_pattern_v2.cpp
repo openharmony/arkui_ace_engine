@@ -19,6 +19,7 @@
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_session_adapter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_inner_surface_controller.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "transaction/rs_transaction_proxy.h"
 #endif
@@ -266,10 +267,19 @@ void XComponentPatternV2::InitSurface()
         surfaceHolder_->nativeWindow_ = reinterpret_cast<OHNativeWindow*>(nativeWindow_);
     }
     surfaceId_ = renderSurface_->GetUniqueId();
+    if (type_ == XComponentType::SURFACE) {
+        XComponentInnerSurfaceController::RegisterSurfaceRenderContext(
+            surfaceId_, WeakPtr(renderContextForSurface_));
+    }
 }
 
 void XComponentPatternV2::DisposeSurface()
 {
+    if (type_ == XComponentType::SURFACE) {
+        XComponentInnerSurfaceController::UnregisterSurfaceRenderContext(
+            surfaceId_);
+        surfaceId_ = "";
+    }
     if (renderSurface_) {
         renderSurface_->ReleaseSurfaceBuffers();
         renderSurface_->UnregisterSurface();
