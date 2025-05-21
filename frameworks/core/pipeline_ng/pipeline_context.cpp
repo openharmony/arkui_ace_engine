@@ -5773,7 +5773,6 @@ void PipelineContext::FlushNodeChangeFlag()
 void PipelineContext::CleanNodeChangeFlag()
 {
     auto cleanNodes = std::move(changedNodes_);
-    changedNodes_.clear();
     for (const auto& it : cleanNodes) {
         auto changeNode = it.Upgrade();
         if (changeNode) {
