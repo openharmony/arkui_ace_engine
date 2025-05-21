@@ -448,7 +448,13 @@ namespace Converter {
         ResourceConverter converter(src);
         dst = converter.ToInt();
     }
-
+    struct Ark_Resource_Simple {
+        std::string content;
+        std::string bundleName;
+        std::string moduleName;
+    };
+    template<> void AssignCast(std::optional<Ark_Resource_Simple>& dst, const Ark_Resource& src);
+    template<> void AssignCast(std::optional<Ark_Resource_Simple>& dst, const Ark_String& src);
     template<>
     void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& src);
 

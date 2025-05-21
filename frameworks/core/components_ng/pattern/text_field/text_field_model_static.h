@@ -41,6 +41,7 @@ public:
     static void SetPasswordIcon(FrameNode* frameNode, const std::optional<PasswordIcon>& passwordIcon);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& colorOpt);
     static void SetMaxViewLines(FrameNode* frameNode, const std::optional<uint32_t>& valueOpt);
+    static void SetNormalMaxViewLines(FrameNode* frameNode, const std::optional<uint32_t>& valueOpt);
     static void SetType(FrameNode* frameNode, const std::optional<TextInputType>& valueOpt);
     static void SetContentType(const FrameNode* frameNode, const std::optional<TextContentType>& valueOpt);
     static void SetCopyOption(FrameNode* frameNode, const std::optional<CopyOptions>& copyOptionOpt);
@@ -69,7 +70,8 @@ public:
     static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
     static void SetCleanNodeStyle(FrameNode* frameNode, const std::optional<CleanNodeStyle>& cleanNodeStyle);
     static void SetCancelIconSize(FrameNode* frameNode, const std::optional<CalcDimension>& iconSize);
-    static void SetCanacelIconSrc(FrameNode* frameNode, const std::optional<std::string>& iconSrc);
+    static void SetCanacelIconSrc(FrameNode* frameNode,
+        const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName);
     static void SetCancelIconColor(FrameNode* frameNode, const std::optional<Color>& iconColor);
     static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetShowCounterBorder(FrameNode* frameNode, const std::optional<bool>& value);

@@ -157,7 +157,8 @@ void TextIndentImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelStatic::SetTextIndent(frameNode, Converter::OptConvert<Dimension>(*value));
+    auto convValue = Converter::OptConvert<Dimension>(*value);
+    TextFieldModelStatic::SetTextIndent(frameNode, convValue);
 }
 void CaretStyleImpl(Ark_NativePointer node,
                     const Opt_CaretStyle* value)
@@ -400,7 +401,10 @@ void MinFontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::OptConvert<Dimension>(*value);
+    std::optional<Dimension> optValue = std::nullopt;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        optValue = Converter::OptConvertFromArkNumStrRes(value->value);
+    }
     Validator::ValidateNonNegative(optValue);
     Validator::ValidateNonPercent(optValue);
     TextFieldModelStatic::SetAdaptMinFontSize(frameNode, optValue);
@@ -410,7 +414,10 @@ void MaxFontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::OptConvert<Dimension>(*value);
+    std::optional<Dimension> optValue = std::nullopt;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        optValue = Converter::OptConvertFromArkNumStrRes(value->value);
+    }
     Validator::ValidateNonNegative(optValue);
     Validator::ValidateNonPercent(optValue);
     TextFieldModelStatic::SetAdaptMaxFontSize(frameNode, optValue);
@@ -449,6 +456,7 @@ void MaxLinesImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto maxLines = Converter::OptConvert<uint32_t>(*value);
+    TextFieldModelStatic::SetNormalMaxViewLines(frameNode, maxLines);
     TextFieldModelStatic::SetMaxViewLines(frameNode, maxLines);
 }
 void WordBreakImpl(Ark_NativePointer node,
@@ -483,7 +491,10 @@ void LetterSpacingImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto spacing = Converter::OptConvert<Dimension>(*value);
+    std::optional<Dimension> spacing = std::nullopt;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        spacing = Converter::OptConvertFromArkNumStrRes(value->value);
+    }
     Validator::ValidateNonNegative(spacing);
     Validator::ValidateNonPercent(spacing);
     TextFieldModelStatic::SetLetterSpacing(frameNode, spacing);
@@ -502,7 +513,10 @@ void LineHeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::OptConvert<Dimension>(*value);
+    std::optional<Dimension> optValue = std::nullopt;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        optValue = Converter::OptConvertFromArkNumStrRes(value->value);
+    }
     Validator::ValidateNonNegative(optValue);
     TextFieldModelStatic::SetLineHeight(frameNode, optValue);
 }
