@@ -935,4 +935,94 @@ HWTEST_F(QRCodeTestNg, QRCodeMaxLengthTest2, TestSize.Level1)
     auto qrcodeLength = qrCodeModifier->value_->Get().length();
     EXPECT_EQ(qrcodeLength, 311);
 }
+
+/**
+ * @tc.name: QRCodePropertyUpdateTest001
+ * @tc.desc: Test QRCode pattern property updates and rendering
+ * @tc.type: FUNC
+ */
+ HWTEST_F(QRCodeTestNg, QRCodePropertyUpdateTest001, TestSize.Level1)
+ {
+     /**
+      * @tc.steps: step1. Create QRCode node and get pattern
+      */
+     std::string oldValue = "new_qr_value";
+     QRCodeModelNG qrCodeModelNG;
+     qrCodeModelNG.Create(oldValue);
+     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+     ASSERT_NE(frameNode, nullptr);
+     auto qrCodePattern = frameNode->GetPattern<QRCodePattern>();
+     ASSERT_NE(qrCodePattern, nullptr);
+     auto pipelineContext = PipelineContext::GetCurrentContext();
+     ASSERT_NE(pipelineContext, nullptr);
+ 
+     /**
+      * @tc.steps: step2. Test UpdateQRCodeCreate with system color change
+      * @tc.expected: Value should update and node marked dirty
+      */
+     pipelineContext->SetIsSystemColorChange(true);
+     std::string newValue = "new_qr_value";
+     frameNode->SetRerenderable(true);
+     qrCodePattern->UpdateQRCodeCreate(newValue);
+     auto paintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
+     EXPECT_EQ(paintProperty->GetValueValue(), newValue);
+ 
+     /**
+      * @tc.steps: step3. Test UpdateColor on first load
+      * @tc.expected: Color properties should update in paint and render context
+      */
+     Color testColor = Color::BLUE;
+     qrCodePattern->UpdateColor(testColor, true);
+     auto renderContext = frameNode->GetRenderContext();
+     EXPECT_EQ(paintProperty->GetColorValue(), testColor);
+     EXPECT_EQ(renderContext->GetForegroundColorValue(), testColor);
+     EXPECT_TRUE(renderContext->GetForegroundColorFlagValue());
+ }
+ 
+ /**
+  * @tc.name: QRCodePropertyUpdateTest002
+  * @tc.desc: Test QRCode appearance property updates
+  * @tc.type: FUNC
+  */
+ HWTEST_F(QRCodeTestNg, QRCodePropertyUpdateTest002, TestSize.Level1)
+ {
+     /**
+      * @tc.steps: step1. Create QRCode node
+      */
+     std::string oldValue = "test_value";
+     QRCodeModelNG qrCodeModelNG;
+     qrCodeModelNG.Create(oldValue);
+     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+     auto qrCodePattern = frameNode->GetPattern<QRCodePattern>();
+     auto pipelineContext = PipelineContext::GetCurrentContext();
+     pipelineContext->SetIsSystemColorChange(false); // Explicitly set to false
+ 
+     /**
+      * @tc.steps: step2. Test background color update on first load
+      * @tc.expected: Background color should update in both paint and render context
+      */
+     Color bgColor = Color::WHITE;
+     qrCodePattern->UpdateBackgroundColor(bgColor, true);
+     auto paintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
+     auto renderContext = frameNode->GetRenderContext();
+     EXPECT_EQ(paintProperty->GetBackgroundColorValue(), bgColor);
+     EXPECT_EQ(renderContext->GetBackgroundColorValue(), bgColor);
+ 
+     /**
+      * @tc.steps: step3. Test opacity update without conditions
+      * @tc.expected: Opacity should not update when conditions not met
+      */
+     const double opacity = 0.5;
+     double originalOpacity = paintProperty->GetOpacityValue();
+     qrCodePattern->UpdateContentOpacity(opacity, false);
+     EXPECT_EQ(paintProperty->GetOpacityValue(), originalOpacity);
+ 
+     /**
+      * @tc.steps: step4. Test opacity update on first load
+      * @tc.expected: Opacity should update when isFirstLoad is true
+      */
+     const double newOpacity = 0.8;
+     qrCodePattern->UpdateContentOpacity(newOpacity, true);
+     EXPECT_EQ(paintProperty->GetOpacityValue(), newOpacity);
+ }
 } // namespace OHOS::Ace::NG
