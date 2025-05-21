@@ -96,8 +96,6 @@ export class FrameNode implements MaterializedBase {
             ArkUIAniModule._Common_Restore_InstanceId();
             FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(this._nodeId, this);
         }
-        this.renderNode_?.setFrameNode(new WeakRef<FrameNode>(this))
-        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId()
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._FrameNode_getFinalizer();

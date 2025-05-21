@@ -4360,6 +4360,16 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RenderNode_setPath(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32, fillColor: number, strokeColor: number, strokeWidth: number): void
     @ani.unsafe.Direct
+    native static _RenderNode_setRectClip(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RenderNode_setCircleClip(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RenderNode_setRoundRectClip(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RenderNode_setOvalClip(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RenderNode_setPathClip(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _RenderNode_getBackgroundColor(ptr: KPointer): number
     @ani.unsafe.Direct
     native static _RenderNode_setBackgroundColor(ptr: KPointer, backgroundColor: number): void

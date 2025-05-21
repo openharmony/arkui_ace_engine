@@ -23923,6 +23923,16 @@ typedef struct GENERATED_ArkUIRenderNodeAccessor {
                     const Ark_Number* fillColor,
                     const Ark_Number* strokeColor,
                     const Ark_Number* strokeWidth);
+    void (*setRectClip)(Ark_RenderNode peer,
+                        const Ark_Rect* rect);
+    void (*setCircleClip)(Ark_RenderNode peer,
+                          const Ark_Circle* circle);
+    void (*setRoundRectClip)(Ark_RenderNode peer,
+                             const Ark_RoundRect* roundRect);
+    void (*setOvalClip)(Ark_RenderNode peer,
+                        const Ark_Rect* rect);
+    void (*setPathClip)(Ark_RenderNode peer,
+                        const Ark_CommandPath* path);
     Ark_Number (*getBackgroundColor)(Ark_RenderNode peer);
     void (*setBackgroundColor)(Ark_RenderNode peer,
                                const Ark_Number* backgroundColor);

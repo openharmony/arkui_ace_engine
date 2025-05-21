@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { Position, Rect, Circle, RoundRect, CommandPath, Size, Frame, Vector2, Vector3, Matrix4, Edges, Corners, ShapeMask, ShapeClip, ShapeClipInternal, LengthMetricsUnit, DrawContext } from "./Graphics"
+import { Position, Rect, Circle, RoundRect, CommandPath, Size, Frame, Vector2, Vector3, Matrix4, Edges, Corners, ShapeMask, ShapeClip, LengthMetricsUnit, DrawContext } from "./Graphics"
 import { BorderStyle } from "./component/enums"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, InteropNativeModule } from "@koalaui/interop"
@@ -45,6 +45,7 @@ export class RenderNode implements MaterializedBase {
     private borderColorValue: Edges<number> = { left: 0XFF000000, top: 0XFF000000, right: 0XFF000000, bottom: 0XFF000000 }
     private borderRadiusValue: Corners<number> = { topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 }
     private shapeMaskValue: ShapeMask | null = null
+    private shapeClipValue: ShapeClip | null = null
     private backgroundColorValue: number = 0
     private clipToFrameValue: boolean = true
     private frameValue: Frame = { x: 0, y: 0, width: 0, height: 0 }
@@ -634,12 +635,30 @@ export class RenderNode implements MaterializedBase {
         }
     }
     private getShapeClip(): ShapeClip {
-        return this.getShapeClip_serialize()
+        return this.shapeClipValue!
     }
     private setShapeClip(shapeClip: ShapeClip): void {
-        const shapeClip_casted = shapeClip as (ShapeClip)
-        this.setShapeClip_serialize(shapeClip_casted)
-        return
+        if (shapeClip === undefined || shapeClip === null) {
+            this.shapeClipValue = new ShapeClip();
+        } else {
+            this.shapeClipValue = shapeClip;
+        }
+        if (this.shapeClipValue!.rect !== null) {
+            const rectClip = this.shapeClipValue!.rect;
+            this.setRectClip_serialize(rectClip!)
+        } else if (this.shapeClipValue!.circle !== null) {
+            const circle = this.shapeClipValue!.circle;
+            this.setCircleClip_serialize(circle!)
+        } else if (this.shapeClipValue!.roundRect !== null) {
+            const roundRect = this.shapeClipValue!.roundRect;
+            this.setRoundRectClip_serialize(roundRect!)
+        } else if (this.shapeClipValue!.oval !== null) {
+            const oval = this.shapeClipValue!.oval;
+            this.setOvalClip_serialize(oval!)
+        } else if (this.shapeClipValue!.path !== null) {
+            const path = this.shapeClipValue!.path;
+            this.setPathClip_serialize(path!)
+        }
     }
     private getMarkNodeGroup(): boolean {
         return this.getMarkNodeGroup_serialize()
@@ -989,11 +1008,6 @@ export class RenderNode implements MaterializedBase {
 
         ArkUIGeneratedNativeModule._RenderNode_setShapeMask(this.peer!.ptr, toPeerPtr(shapeMask))
     }
-    private getShapeClip_serialize(): ShapeClip {
-        const retval  = ArkUIGeneratedNativeModule._RenderNode_getShapeClip(this.peer!.ptr)
-        const obj : ShapeClip = ShapeClipInternal.fromPtr(retval)
-        return obj
-    }
     private setShapeClip_serialize(shapeClip: ShapeClip): void {
         ArkUIGeneratedNativeModule._RenderNode_setShapeClip(this.peer!.ptr, toPeerPtr(shapeClip))
     }
@@ -1039,6 +1053,36 @@ export class RenderNode implements MaterializedBase {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeCommandPath(path)
         ArkUIGeneratedNativeModule._RenderNode_setPath(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), fillColor, strokeColor, strokeWidth)
+        thisSerializer.release()
+    }
+    private setRectClip_serialize(rect: Rect): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeRect(rect)
+        ArkUIGeneratedNativeModule._RenderNode_setRectClip(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private setCircleClip_serialize(circle: Circle): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeCircle(circle)
+        ArkUIGeneratedNativeModule._RenderNode_setCircleClip(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private setRoundRectClip_serialize(roundRect: RoundRect): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeRoundRect(roundRect)
+        ArkUIGeneratedNativeModule._RenderNode_setRoundRectClip(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private setOvalClip_serialize(rect: Rect): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeRect(rect)
+        ArkUIGeneratedNativeModule._RenderNode_setOvalClip(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private setPathClip_serialize(path: CommandPath): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeCommandPath(path)
+        ArkUIGeneratedNativeModule._RenderNode_setPathClip(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFrameNode(frameNode: WeakRef<FrameNode>) {

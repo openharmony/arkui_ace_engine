@@ -400,83 +400,46 @@ export class ShapeMask {
     public strokeColor: number = 0XFF000000;
     public strokeWidth: number = 0;
 }
-export class ShapeClipInternal {
-    public static fromPtr(ptr: KPointer): ShapeClip {
-        const obj : ShapeClip = new ShapeClip()
-        obj.peer = new Finalizable(ptr, ShapeClip.getFinalizer())
-        return obj
+export class ShapeClip {
+    public rect: Rect | null = null;
+    public roundRect: RoundRect | null = null;
+    public circle: Circle | null = null;
+    public oval: Rect | null = null;
+    public path: CommandPath | null = null;
+    setRectShape(rect: Rect) {
+        this.rect = rect;
+        this.roundRect = null;
+        this.circle = null;
+        this.oval = null;
+        this.path = null;
     }
-}
-export class ShapeClip implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
+    setRoundRectShape(roundRect: RoundRect) {
+        this.roundRect = roundRect;
+        this.rect = null;
+        this.circle = null;
+        this.oval = null;
+        this.path = null;
     }
-    static ctor_shapeclip(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._ShapeClip_ctor()
-        return retval
+    setCircleShape(circle: Circle) {
+        this.circle = circle;
+        this.rect = null;
+        this.roundRect = null;
+        this.oval = null;
+        this.path = null;
     }
-    constructor() {
-        const ctorPtr : KPointer = ShapeClip.ctor_shapeclip()
-        this.peer = new Finalizable(ctorPtr, ShapeClip.getFinalizer())
+    setOvalShape(oval: Rect) {
+        this.oval = oval;
+        this.rect = null;
+        this.circle = null;
+        this.roundRect = null;
+        this.path = null;
     }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._ShapeClip_getFinalizer()
-    }
-    public setRectShape(rect: Rect): void {
-        const rect_casted = rect as (Rect)
-        this.setRectShape_serialize(rect_casted)
-        return
-    }
-    public setRoundRectShape(roundRect: RoundRect): void {
-        const roundRect_casted = roundRect as (RoundRect)
-        this.setRoundRectShape_serialize(roundRect_casted)
-        return
-    }
-    public setCircleShape(circle: Circle): void {
-        const circle_casted = circle as (Circle)
-        this.setCircleShape_serialize(circle_casted)
-        return
-    }
-    public setOvalShape(oval: Rect): void {
-        const oval_casted = oval as (Rect)
-        this.setOvalShape_serialize(oval_casted)
-        return
-    }
-    public setCommandPath(path: CommandPath): void {
-        const path_casted = path as (CommandPath)
-        this.setCommandPath_serialize(path_casted)
-        return
-    }
-    private setRectShape_serialize(rect: Rect): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeRect(rect)
-        ArkUIGeneratedNativeModule._ShapeClip_setRectShape(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private setRoundRectShape_serialize(roundRect: RoundRect): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeRoundRect(roundRect)
-        ArkUIGeneratedNativeModule._ShapeClip_setRoundRectShape(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private setCircleShape_serialize(circle: Circle): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeCircle(circle)
-        ArkUIGeneratedNativeModule._ShapeClip_setCircleShape(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private setOvalShape_serialize(oval: Rect): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeRect(oval)
-        ArkUIGeneratedNativeModule._ShapeClip_setOvalShape(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private setCommandPath_serialize(path: CommandPath): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeCommandPath(path)
-        ArkUIGeneratedNativeModule._ShapeClip_setCommandPath(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+    setCommandPath(path: CommandPath) {
+        this.path = path;
+        this.oval = null;
+        this.rect = null;
+        this.circle = null;
+        this.roundRect = null;
     }
 }
 export interface DrawContext {
@@ -510,12 +473,6 @@ export type Matrix4 = [
     number,
     number
 ]
-export interface Frame {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-}
 export interface Edges<T> {
     top?: T;
     left?: T;

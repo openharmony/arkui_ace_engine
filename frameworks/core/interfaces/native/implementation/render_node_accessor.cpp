@@ -293,6 +293,122 @@ void SetPathImpl(Ark_RenderNode peer, const Ark_CommandPath* path, const Ark_Num
     renderContext->SetCommandPathMask(pathValue, property);
     renderContext->RequestNextFrame();
 }
+void SetRectClipImpl(Ark_RenderNode peer, const Ark_Rect* rect)
+{
+    if (!peer) {
+        LOGW("This renderNode is nullptr when SetRectClip !");
+        return;
+    }
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    auto left = Converter::Convert<float>(rect->left);
+    auto top = Converter::Convert<float>(rect->top);
+    auto right = Converter::Convert<float>(rect->right);
+    auto bottom = Converter::Convert<float>(rect->bottom);
+    RectF rectValue(left, top, right - left, bottom - top);
+
+    renderContext->ClipWithRect(rectValue);
+    renderContext->RequestNextFrame();
+}
+void SetCircleClipImpl(Ark_RenderNode peer, const Ark_Circle* circle)
+{
+    if (!peer) {
+        LOGW("This renderNode is nullptr when SetCircleClip !");
+        return;
+    }
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    auto centerXValue = Converter::Convert<float>(circle->centerX);
+    auto centerYValue = Converter::Convert<float>(circle->centerY);
+    auto radiusValue = Converter::Convert<float>(circle->radius);
+
+    Circle circleValue;
+    Dimension centerX(centerXValue, DimensionUnit::PX);
+    circleValue.SetAxisX(centerX);
+    Dimension centerY(centerYValue, DimensionUnit::PX);
+    circleValue.SetAxisY(centerY);
+    Dimension radius(radiusValue, DimensionUnit::PX);
+    circleValue.SetRadius(radius);
+
+    renderContext->ClipWithCircle(circleValue);
+    renderContext->RequestNextFrame();
+}
+void SetRoundRectClipImpl(Ark_RenderNode peer, const Ark_RoundRect* roundRect)
+{
+    if (!peer) {
+        LOGW("This renderNode is nullptr when SetRoundRectClip !");
+        return;
+    }
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    auto rect = roundRect->rect;
+    auto corners = roundRect->corners;
+
+    RoundRect roundRectInstance;
+    roundRectInstance.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, Converter::Convert<float>(corners.topLeft.x),
+        Converter::Convert<float>(corners.topLeft.y));
+    roundRectInstance.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS,
+        Converter::Convert<float>(corners.topRight.x), Converter::Convert<float>(corners.topRight.y));
+    roundRectInstance.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS,
+        Converter::Convert<float>(corners.bottomLeft.x), Converter::Convert<float>(corners.bottomLeft.y));
+    roundRectInstance.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS,
+        Converter::Convert<float>(corners.bottomRight.x), Converter::Convert<float>(corners.bottomRight.y));
+
+    auto left = Converter::Convert<float>(rect.left);
+    auto top = Converter::Convert<float>(rect.top);
+    auto right = Converter::Convert<float>(rect.right);
+    auto bottom = Converter::Convert<float>(rect.bottom);
+    RectF rectValue(left, top, right - left, bottom - top);
+    roundRectInstance.SetRect(rectValue);
+
+    renderContext->ClipWithRoundRect(roundRectInstance);
+    renderContext->RequestNextFrame();
+}
+void SetOvalClipImpl(Ark_RenderNode peer, const Ark_Rect* rect)
+{
+    if (!peer) {
+        LOGW("This renderNode is nullptr when SetOvalClip !");
+        return;
+    }
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    auto left = Converter::Convert<float>(rect->left);
+    auto top = Converter::Convert<float>(rect->top);
+    auto right = Converter::Convert<float>(rect->right);
+    auto bottom = Converter::Convert<float>(rect->bottom);
+    RectF rectValue(left, top, right - left, bottom - top);
+
+    renderContext->ClipWithOval(rectValue);
+    renderContext->RequestNextFrame();
+}
+void SetPathClipImpl(Ark_RenderNode peer, const Ark_CommandPath* path)
+{
+    if (!peer) {
+        LOGW("This renderNode is nullptr when SetPathClip !");
+        return;
+    }
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    auto pathValue = Converter::Convert<std::string>(*path);
+
+    renderContext->SetClipBoundsWithCommands(pathValue);
+    renderContext->RequestNextFrame();
+}
 void SetBackgroundColorImpl(Ark_RenderNode peer, const Ark_Number* backgroundColor)
 {
     if (!peer) {
@@ -813,6 +929,11 @@ const GENERATED_ArkUIRenderNodeAccessor* GetRenderNodeAccessor()
         RenderNodeAccessor::SetRoundRectMaskImpl,
         RenderNodeAccessor::SetOvalMaskImpl,
         RenderNodeAccessor::SetPathImpl,
+        RenderNodeAccessor::SetRectClipImpl,
+        RenderNodeAccessor::SetCircleClipImpl,
+        RenderNodeAccessor::SetRoundRectClipImpl,
+        RenderNodeAccessor::SetOvalClipImpl,
+        RenderNodeAccessor::SetPathClipImpl,
         RenderNodeAccessor::GetBackgroundColorImpl,
         RenderNodeAccessor::SetBackgroundColorImpl,
         RenderNodeAccessor::GetClipToFrameImpl,
