@@ -136,7 +136,7 @@ void AppBarView::BuildAppbar(RefPtr<PipelineBase> pipleline)
     CHECK_NULL_VOID(appbar->contentStage_);
     stageNodeWrapper->AddChild(appbar->contentStage_);
     stageNodeWrapper->MarkModifyDone();
-    stageNodeWrapper->MarkDirtyNode();
+    stageNodeWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_RENDER);
 }
 
 RefPtr<FrameNode> AppBarView::BuildMenuBarRow()
