@@ -2694,7 +2694,7 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
             SetHasFilter(true);
             SetFilterColumnNode(filterNode);
             filterNode->MountToParent(rootNode);
-            ShowFilterAnimation(filterNode);
+            ShowFilterAnimation(filterNode, menuWrapperPattern->GetHost());
             filterNode->MarkModifyDone();
         }
     }
@@ -2773,6 +2773,11 @@ void OverlayManager::HideMenu(
     const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch, const HideMenuType& reason)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "hide menu enter %{public}d", reason);
+    CHECK_NULL_VOID(menu);
+    auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    auto maskEnable = wrapperPattern->GetMenuMaskEnable();
+    auto menuPreviewMode = wrapperPattern->GetPreviewMode();
     PopMenuAnimation(menu);
     RemoveEventColumn();
     if (isMenuOnTouch) {
@@ -2782,11 +2787,7 @@ void OverlayManager::HideMenu(
         RemovePixelMapAnimation(false, 0, 0);
         RemoveGatherNodeWithAnimation();
     }
-    CHECK_NULL_VOID(menu);
-    auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(wrapperPattern);
-    auto menuPreviewMode = wrapperPattern->GetPreviewMode();
-    if (menuPreviewMode != MenuPreviewMode::NONE) {
+    if (maskEnable || menuPreviewMode != MenuPreviewMode::NONE) {
         RemoveMenuFilter(menu);
     }
 }
@@ -6950,13 +6951,14 @@ void OverlayManager::RemoveMenuFilter(const RefPtr<FrameNode>& menuWrapper, bool
     }
 
     if (hasAnimation) {
-        overlayManager->ShowFilterDisappearAnimation(filterNode);
+        overlayManager->ShowFilterDisappearAnimation(filterNode, menuWrapper);
     } else {
         overlayManager->RemoveFilterWithNode(filterNode);
     }
 }
 
-void OverlayManager::ShowFilterDisappearAnimation(const RefPtr<FrameNode>& filterNode)
+void OverlayManager::ShowFilterDisappearAnimation(
+    const RefPtr<FrameNode>& filterNode, const RefPtr<FrameNode>& menuWrapper)
 {
     CHECK_NULL_VOID(filterNode);
     auto filterContext = filterNode->GetRenderContext();
@@ -6981,12 +6983,20 @@ void OverlayManager::ShowFilterDisappearAnimation(const RefPtr<FrameNode>& filte
     AddFilterOnDisappear(filterNode->GetId());
     AnimationUtils::Animate(
         option,
-        [filterContext]() {
+        [filterContext, menuWrapper]() {
             CHECK_NULL_VOID(filterContext);
+            auto wrapperPattern = menuWrapper ? menuWrapper->GetPattern<MenuWrapperPattern>() : nullptr;
+            auto maskEnable = wrapperPattern ? wrapperPattern->GetMenuMaskEnable() : false;
             BlurStyleOption styleOption;
-            styleOption.blurStyle = BlurStyle::NO_MATERIAL;
+            Color maskColor = Color::TRANSPARENT;
+            BlurStyle maskBlurStyle = BlurStyle::NO_MATERIAL;
+            if (maskEnable) {
+                maskColor = wrapperPattern->GetMenuMaskColor();
+                maskBlurStyle = wrapperPattern->GetMenuMaskblurStyle();
+            }
+            styleOption.blurStyle = maskBlurStyle;
             filterContext->UpdateBackBlurStyle(styleOption);
-            filterContext->UpdateBackgroundColor(Color::TRANSPARENT);
+            filterContext->UpdateBackgroundColor(maskColor);
         },
         option.GetOnFinishEvent());
 }
@@ -8054,7 +8064,7 @@ const RefPtr<GroupManager>& OverlayManager::GetGroupManager() const
     return groupManager_;
 }
 
-void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode)
+void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& menuWrapperNode)
 {
     CHECK_NULL_VOID(columnNode);
 
@@ -8066,9 +8076,13 @@ void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode)
     auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
 
-    auto maskColor = menuTheme->GetPreviewMenuMaskColor();
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto maskEnable = menuWrapperPattern->GetMenuMaskEnable();
+    auto maskColor = maskEnable ? menuWrapperPattern->GetMenuMaskColor() : menuTheme->GetPreviewMenuMaskColor();
     BlurStyleOption styleOption;
-    styleOption.blurStyle = BlurStyle::BACKGROUND_THIN;
+    styleOption.blurStyle = maskEnable ? menuWrapperPattern->GetMenuMaskblurStyle() : BlurStyle::BACKGROUND_THIN;
     styleOption.colorMode = ThemeColorMode::SYSTEM;
 
     AnimationOption option;
@@ -8081,15 +8095,21 @@ void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode)
         overlayManager->SetFilterActive(false);
     });
     filterRenderContext->UpdateBackBlurRadius(Dimension(0.0f));
-    if (!menuTheme->GetHasBackBlur()) {
+    if (maskEnable || !menuTheme->GetHasBackBlur()) {
         filterRenderContext->UpdateBackgroundColor(maskColor.ChangeOpacity(0.0f));
+        if (maskEnable) {
+            filterRenderContext->UpdateBackBlurStyle(styleOption);
+        }
     }
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "start show filter animation");
     AnimationUtils::Animate(
         option,
-        [filterRenderContext, styleOption, maskColor, menuTheme]() {
+        [filterRenderContext, styleOption, maskColor, menuTheme, maskEnable]() {
             CHECK_NULL_VOID(filterRenderContext);
-            if (menuTheme->GetHasBackBlur()) {
+            if (maskEnable) {
+                filterRenderContext->UpdateBackBlurStyle(styleOption);
+                filterRenderContext->UpdateBackgroundColor(maskColor);
+            } else if (menuTheme->GetHasBackBlur()) {
                 filterRenderContext->UpdateBackBlurStyle(styleOption);
             } else {
                 filterRenderContext->UpdateBackgroundColor(maskColor);
@@ -8643,5 +8663,21 @@ void OverlayManager::RemoveFilterOnDisappear(int32_t filterId)
 bool OverlayManager::IsFilterOnDisappear(int32_t filterId) const
 {
     return onDisappearFilterIds_.find(filterId) != onDisappearFilterIds_.end();
+}
+
+void OverlayManager::UpdateFilterMaskType(const RefPtr<FrameNode>& menuWrapperNode)
+{
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto filterNode = menuWrapperPattern->GetFilterColumnNode();
+    if (filterNode) {
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = menuWrapperPattern->GetMenuMaskblurStyle();
+        auto filterRenderContext = filterNode->GetRenderContext();
+        CHECK_NULL_VOID(filterRenderContext);
+        filterRenderContext->UpdateBackBlurStyle(styleOption);
+        filterRenderContext->UpdateBackgroundColor(menuWrapperPattern->GetMenuMaskColor());
+    }
 }
 } // namespace OHOS::Ace::NG
