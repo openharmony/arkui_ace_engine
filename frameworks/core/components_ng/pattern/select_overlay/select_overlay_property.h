@@ -148,6 +148,11 @@ inline constexpr SystemServiceMenuDisableFlag DISABLE_SHARE_FLAG = 1 << 3;
 inline constexpr SystemServiceMenuDisableFlag DISABLE_CAMERA_INPUT_FLAG = 1 << 4;
 inline constexpr SystemServiceMenuDisableFlag DISABLE_AI_WRITER_FLAG = 1 << 5;
 inline constexpr SystemServiceMenuDisableFlag DISABLE_COLLABORATION_SERVICE_FLAG = 1 << 6;
+inline constexpr SystemServiceMenuDisableFlag DISABLE_AI_MENU_PHONE_FLAG = 1 << 7;
+inline constexpr SystemServiceMenuDisableFlag DISABLE_AI_MENU_URL_FLAG = 1 << 8;
+inline constexpr SystemServiceMenuDisableFlag DISABLE_AI_MENU_EMAIL_FLAG = 1 << 9;
+inline constexpr SystemServiceMenuDisableFlag DISABLE_AI_MENU_ADDRESS_FLAG = 1 << 10;
+inline constexpr SystemServiceMenuDisableFlag DISABLE_AI_MENU_DATETIME_FLAG = 1 << 11;
 
 inline constexpr char OH_DEFAULT_CUT[] = "OH_DEFAULT_CUT";
 inline constexpr char OH_DEFAULT_COPY[] = "OH_DEFAULT_COPY";
@@ -443,6 +448,11 @@ DEFINE_MENU_CHECK_METHOD(Share);
 DEFINE_MENU_CHECK_METHOD(CameraInput);
 DEFINE_MENU_CHECK_METHOD(AIWriter);
 DEFINE_MENU_CHECK_METHOD(CollaborationService);
+DEFINE_MENU_CHECK_METHOD(AIUrl);
+DEFINE_MENU_CHECK_METHOD(AIPhone);
+DEFINE_MENU_CHECK_METHOD(AIEmail);
+DEFINE_MENU_CHECK_METHOD(AIAddress);
+DEFINE_MENU_CHECK_METHOD(AIDatetime);
 } // namespace TextSystemMenu
 } // namespace OHOS::Ace::NG
 

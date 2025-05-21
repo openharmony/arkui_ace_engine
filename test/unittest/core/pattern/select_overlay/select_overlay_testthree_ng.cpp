@@ -527,22 +527,23 @@ HWTEST_F(SelectOverlayPatternTestNg, DisableMenuItems, TestSize.Level1)
     menuInfo.showSearch = true;
     menuInfo.showCameraInput = true;
     menuInfo.showShare = true;
+    menuInfo.aiMenuOptionType = TextDataDetectType::ADDRESS;
     overlayInfo.menuInfo = menuInfo;
     std::shared_ptr<SelectOverlayInfo> shareInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(
         SelectOverlayNode::CreateSelectOverlayNode(shareInfo, SelectOverlayMode::MENU_ONLY));
     ASSERT_NE(selectOverlayNode, nullptr);
-    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetTotalChildCount(), 5);
+    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetTotalChildCount(), 6);
 
     AceApplicationInfo::GetInstance().AddTextMenuDisableFlag(NG::DISABLE_AI_WRITER_FLAG|NG::DISABLE_TRANSLATE_FLAG);
     selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(
         SelectOverlayNode::CreateSelectOverlayNode(shareInfo, SelectOverlayMode::MENU_ONLY));
     ASSERT_NE(selectOverlayNode, nullptr);
-    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetTotalChildCount(), 3);
+    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetTotalChildCount(), 4);
 
     AceApplicationInfo::GetInstance().AddTextMenuDisableFlag(
         DISABLE_TRANSLATE_FLAG | DISABLE_SEARCH_FLAG | DISABLE_SHARE_FLAG | DISABLE_CAMERA_INPUT_FLAG |
-        DISABLE_AI_WRITER_FLAG | DISABLE_COLLABORATION_SERVICE_FLAG);
+        DISABLE_AI_WRITER_FLAG | DISABLE_COLLABORATION_SERVICE_FLAG | DISABLE_AI_MENU_ADDRESS_FLAG);
     selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(
             SelectOverlayNode::CreateSelectOverlayNode(shareInfo, SelectOverlayMode::MENU_ONLY));
     ASSERT_NE(selectOverlayNode, nullptr);
@@ -552,6 +553,6 @@ HWTEST_F(SelectOverlayPatternTestNg, DisableMenuItems, TestSize.Level1)
     selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(
         SelectOverlayNode::CreateSelectOverlayNode(shareInfo, SelectOverlayMode::MENU_ONLY));
     ASSERT_NE(selectOverlayNode, nullptr);
-    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetTotalChildCount(), 5);
+    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetTotalChildCount(), 6);
 }
 } // namespace OHOS::Ace::NG
