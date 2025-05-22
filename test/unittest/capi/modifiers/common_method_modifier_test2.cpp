@@ -1248,23 +1248,16 @@ HWTEST_F(CommonMethodModifierTest2, setShadow, TestSize.Level1)
 HWTEST_F(CommonMethodModifierTest2, setBackgroundBlurStyle, TestSize.Level1)
 {
     auto style = Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_COMPONENT_ULTRA_THIN);
-    auto options = Ark_BackgroundBlurStyleOptions {
-        .scale = { .value = Converter::ArkValue<Ark_Number>(2.2999999523162842f) },
-        .colorMode = { .value = ARK_THEME_COLOR_MODE_DARK },
-        .blurOptions = {
-            .value = {
-                .grayscale = {
-                    .value0 = Converter::ArkValue<Ark_Number>(7),
-                    .value1 = Converter::ArkValue<Ark_Number>(7),
-                }
-            }
-        },
-        .adaptiveColor = {
-            .value = ARK_ADAPTIVE_COLOR_AVERAGE,
-        }
-    };
-    auto optOptions = Converter::ArkValue<Opt_BackgroundBlurStyleOptions>(options);
-    modifier_->setBackgroundBlurStyle0(node_, &style, &optOptions);
+    auto options = Converter::ArkValue<Opt_BackgroundBlurStyleOptions>(Ark_BackgroundBlurStyleOptions {
+        .scale = Converter::ArkValue<Opt_Number>(2.2999999523162842f),
+        .colorMode = Converter::ArkValue<Opt_ThemeColorMode>(ARK_THEME_COLOR_MODE_DARK),
+        .blurOptions = Converter::ArkValue<Opt_BlurOptions>(Ark_BlurOptions {
+                .grayscale = Ark_Tuple_Number_Number {Converter::ArkValue<Ark_Number>(7),
+                    Converter::ArkValue<Ark_Number>(7)},
+            }),
+        .adaptiveColor = Converter::ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
+    });
+    modifier_->setBackgroundBlurStyle0(node_, &style, &options);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_BLUR_STYLE_NAME);
     EXPECT_EQ(strResult, "{\"value\":\"BlurStyle.COMPONENT_ULTRA_THIN\","
                          "\"options\":{\"colorMode\":\"ThemeColorMode.Dark\","
@@ -1283,19 +1276,13 @@ HWTEST_F(CommonMethodModifierTest2, setForegroundBlurStyle, TestSize.Level1)
 {
     auto style = Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_COMPONENT_ULTRA_THIN);
     auto options = Ark_ForegroundBlurStyleOptions {
-        .scale = { .value = Converter::ArkValue<Ark_Number>(2.3f) },
-        .colorMode = { .value = ARK_THEME_COLOR_MODE_DARK },
-        .blurOptions = {
-            .value = {
-                .grayscale = {
-                    .value0 = Converter::ArkValue<Ark_Number>(7),
-                    .value1 = Converter::ArkValue<Ark_Number>(7),
-                }
-            }
-        },
-        .adaptiveColor = {
-            .value = ARK_ADAPTIVE_COLOR_AVERAGE,
-        }
+        .scale = Converter::ArkValue<Opt_Number>(2.3f),
+        .colorMode = Converter::ArkValue<Opt_ThemeColorMode>(ARK_THEME_COLOR_MODE_DARK),
+        .blurOptions = Converter::ArkValue<Opt_BlurOptions>(Ark_BlurOptions {
+                .grayscale = Ark_Tuple_Number_Number {Converter::ArkValue<Ark_Number>(7),
+                    Converter::ArkValue<Ark_Number>(7)},
+            }),
+        .adaptiveColor = Converter::ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
     };
     auto optOptions = Converter::ArkValue<Opt_ForegroundBlurStyleOptions>(options);
     modifier_->setForegroundBlurStyle0(node_, &style, &optOptions);

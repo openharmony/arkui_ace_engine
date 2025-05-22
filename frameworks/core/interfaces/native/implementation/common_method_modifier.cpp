@@ -4972,15 +4972,11 @@ void BackgroundBlurStyle0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption convValue;
-    if (options) {
-        if (auto opt = Converter::OptConvert<BlurStyleOption>(*options); opt) {
-            convValue = *opt;
-        }
+    if (auto opt = Converter::OptConvertPtr<BlurStyleOption>(options); opt) {
+        convValue = *opt;
     }
-    if (value) {
-        if (auto style = Converter::OptConvert<BlurStyle>(*value); style) {
-            convValue.blurStyle = *style;
-        }
+    if (auto style = Converter::OptConvertPtr<BlurStyle>(value); style) {
+        convValue.blurStyle = *style;
     }
     ViewAbstract::SetBackgroundBlurStyle(frameNode, convValue);
 }
@@ -5002,15 +4998,11 @@ void ForegroundBlurStyle0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption convValue;
-    if (options) {
-        if (auto opt = Converter::OptConvert<BlurStyleOption>(*options); opt) {
-            convValue = *opt;
-        }
+    if (auto opt = Converter::OptConvertPtr<BlurStyleOption>(options); opt) {
+        convValue = *opt;
     }
-    if (value) {
-        if (auto style = Converter::OptConvert<BlurStyle>(*value); style) {
-            convValue.blurStyle = *style;
-        }
+    if (auto style = Converter::OptConvertPtr<BlurStyle>(value); style) {
+        convValue.blurStyle = *style;
     }
     ViewAbstract::SetForegroundBlurStyle(frameNode, convValue);
 }
@@ -5265,7 +5257,6 @@ void OverlayImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     OverlayOptions overlay { .align = Alignment::TOP_LEFT};
     if (options) {
         overlay = Converter::OptConvert<OverlayOptions>(*options).value_or(overlay);
