@@ -21,7 +21,10 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT HyperlinkModelStatic {
 public:
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetColor(FrameNode* frameNode, const std::optional<Color>& value);
+    static void SetTextStyle(FrameNode* frameNode, const std::string& address,
+        const std::optional<std::string>& content);
 };
 } // namespace OHOS::Ace::NG
 

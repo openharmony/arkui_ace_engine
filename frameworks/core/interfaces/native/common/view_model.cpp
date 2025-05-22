@@ -29,6 +29,7 @@
 #endif
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
+#include "core/components_ng/pattern/hyperlink/hyperlink_model_static.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
@@ -66,6 +67,7 @@
 #include "core/components_ng/pattern/text/span_model_static.h"
 #include "core/components_ng/pattern/symbol/symbol_model_ng.h"
 #include "core/components_ng/pattern/text/symbol_span_model_ng.h"
+#include "core/components_ng/pattern/text/symbol_span_model_static.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
@@ -759,7 +761,7 @@ void* createGridContainerNode(ArkUI_Int32 nodeId)
 
 void* createHyperlinkNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = HyperlinkModelNG::CreateFrameNode(nodeId);
+    auto frameNode = HyperlinkModelStatic::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -1005,7 +1007,7 @@ void* createSymbolGlyphNode(ArkUI_Int32 nodeId)
 
 void* createSymbolSpanNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = SymbolSpanModelNG::CreateFrameNode(nodeId);
+    auto frameNode = SymbolSpanModelStatic::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);

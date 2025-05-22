@@ -557,6 +557,17 @@ void SearchModelStatic::SetKeyboardAppearance(FrameNode* frameNode, const std::o
     SearchModelNG::SetKeyboardAppearance(frameNode, valueOpt.value_or(DEFAULT_KEYBOARD_APPERANCE));
 }
 
+void SearchModelStatic::SetSelectionMenuOptions(FrameNode* frameNode,
+    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
+
 void SearchModelStatic::RequestKeyboardOnFocus(FrameNode* frameNode, std::optional<bool>& needToRequest)
 {
     SearchModelNG::RequestKeyboardOnFocus(frameNode, needToRequest.value_or(true));
@@ -575,5 +586,29 @@ void SearchModelStatic::SetEnablePreviewText(FrameNode* frameNode, std::optional
 void SearchModelStatic::SetEnableHapticFeedback(FrameNode* frameNode, std::optional<bool>& state)
 {
     SearchModelNG::SetEnableHapticFeedback(frameNode, state.value_or(true));
+}
+
+void SearchModelStatic::SetOnChangeEvent(FrameNode* frameNode,
+    std::function<void(const std::u16string&)>&& onChangeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto searchChangeFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), onChangeEvent](
+                                const std::u16string& value) {
+        if (onChangeEvent) {
+            onChangeEvent(value);
+        }
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto searchPattern = AceType::DynamicCast<SearchPattern>(pattern);
+        CHECK_NULL_VOID(searchPattern);
+        searchPattern->UpdateChangeEvent(value);
+    };
+    eventHub->SetOnChangeEvent(std::move(searchChangeFunc));
 }
 } // namespace OHOS::Ace::NG

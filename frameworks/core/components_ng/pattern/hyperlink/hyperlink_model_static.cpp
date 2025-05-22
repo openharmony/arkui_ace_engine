@@ -20,6 +20,12 @@
 
 namespace OHOS::Ace::NG {
 
+RefPtr<FrameNode> HyperlinkModelStatic::CreateFrameNode(int32_t nodeId)
+{
+    return FrameNode::GetOrCreateFrameNode(
+        V2::HYPERLINK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
+}
+
 void HyperlinkModelStatic::SetColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
     if (value.has_value()) {
@@ -31,4 +37,32 @@ void HyperlinkModelStatic::SetColor(FrameNode* frameNode, const std::optional<Co
     }
 }
 
+void HyperlinkModelStatic::SetTextStyle(
+    FrameNode* frameNode, const std::string& address, const std::optional<std::string>& content)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateContent((!content.has_value() || content.value().empty()) ? address : content.value());
+    textLayoutProperty->UpdateAddress(address);
+
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    auto textTheme = context->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    auto textStyle = textTheme->GetTextStyle();
+    auto theme = PipelineContext::GetCurrentContextSafelyWithCheck()->GetTheme<HyperlinkTheme>();
+    CHECK_NULL_VOID(theme);
+
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
+    textLayoutProperty->UpdateTextColor(theme->GetTextColor());
+    textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
+    textLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
+    textLayoutProperty->UpdateAdaptMinFontSize(10.0_vp);
+    textLayoutProperty->UpdateAdaptMaxFontSize(textStyle.GetFontSize());
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    frameNode->MarkModifyDone();
+    frameNode->MarkDirtyNode();
+}
 } // namespace OHOS::Ace::NG
