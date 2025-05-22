@@ -44,6 +44,10 @@ class __RepeatImpl<T> {
         isInitialRender ? this.initialRender() : this.reRender();
     }
 
+    public getKey2Item(): Map<string, __RepeatItemInfo<T>> {
+        return this.key2Item_;
+    }
+
     private genKeys(): Map<string, __RepeatItemInfo<T>> {
         const key2Item = new Map<string, __RepeatItemInfo<T>>();
         this.arr_.forEach((item, index) => {
