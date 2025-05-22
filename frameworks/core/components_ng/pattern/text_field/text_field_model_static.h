@@ -69,7 +69,7 @@ public:
     static void SetShowUnit(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder);
     static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
     static void SetCleanNodeStyle(FrameNode* frameNode, const std::optional<CleanNodeStyle>& cleanNodeStyle);
-    static void SetCancelIconSize(FrameNode* frameNode, const std::optional<CalcDimension>& iconSize);
+    static void SetCancelIconSize(FrameNode* frameNode, const std::optional<CalcDimension>& iconSizeOpt);
     static void SetCanacelIconSrc(FrameNode* frameNode,
         const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName);
     static void SetCancelIconColor(FrameNode* frameNode, const std::optional<Color>& iconColor);

@@ -494,13 +494,20 @@ void TextFieldModelStatic::SetCleanNodeStyle(FrameNode* frameNode, const std::op
     TextFieldModelNG::SetCleanNodeStyle(frameNode, cleanNodeStyle.value_or(CleanNodeStyle::INPUT));
 }
 
-void TextFieldModelStatic::SetCancelIconSize(FrameNode* frameNode, const std::optional<CalcDimension>& iconSize)
+void TextFieldModelStatic::SetCancelIconSize(FrameNode* frameNode, const std::optional<CalcDimension>& iconSizeOpt)
 {
-    if (iconSize) {
-        TextFieldModelNG::SetCancelIconSize(frameNode, iconSize.value());
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSize, frameNode);
+    if (iconSizeOpt) {
+        if (GreatOrEqual(iconSizeOpt.value().Value(), 0.0) && iconSizeOpt.value().Unit() != DimensionUnit::PERCENT) {
+            TextFieldModelNG::SetCancelIconSize(frameNode, iconSizeOpt.value());
+            return;
+        }
     }
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto textFieldTheme = pattern->GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    TextFieldModelNG::SetCancelIconSize(frameNode, textFieldTheme->GetCancelIconSize());
 }
 
 void TextFieldModelStatic::SetCanacelIconSrc(FrameNode* frameNode,
