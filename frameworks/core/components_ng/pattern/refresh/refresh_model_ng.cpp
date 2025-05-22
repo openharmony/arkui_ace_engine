@@ -17,6 +17,8 @@
 
 #include <string>
 
+#include "core/components_ng/pattern/refresh/refresh_pattern.h"
+#include "core/components_ng/pattern/render_node/render_node_pattern.h"
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/base/geometry/ng/offset_t.h"
 #include "frameworks/base/i18n/localization.h"
@@ -25,6 +27,7 @@
 #include "frameworks/core/components_ng/base/frame_node.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
 #include "frameworks/core/components_ng/event/event_hub.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -102,6 +105,28 @@ void RefreshModelNG::SetFriction(int32_t friction)
 void RefreshModelNG::SetLoadingText(const std::string& loadingText)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, loadingText);
+}
+
+void RefreshModelNG::CreateWithResourceObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RefreshPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!resObj) {
+        pattern->RemoveResObj("refresh.promptText");
+        return;
+    }
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        std::string result;
+        if (!ResourceParseUtils::ParseResString(resObj, result)) {
+            return;
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, result, AceType::RawPtr(node));
+    };
+    pattern->AddResObj("refresh.promptText", resObj, std::move(updateFunc));
 }
 
 void RefreshModelNG::ResetLoadingText()

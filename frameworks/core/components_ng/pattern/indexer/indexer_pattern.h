@@ -120,6 +120,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnColorConfigurationUpdate() override;
     void DumpInfo() override;
+    void OnColorModeChange(uint32_t colorMode) override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     void BuildArrayValueItems();

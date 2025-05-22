@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
+#include "indexer_pattern.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/log/dump_log.h"
@@ -2132,6 +2133,13 @@ void IndexerPattern::UpdateChildBoundary(RefPtr<FrameNode>& frameNode)
 
 void IndexerPattern::OnColorConfigurationUpdate()
 {
+    ApplyIndexChanged(true, false);
+    UpdateBubbleView();
+}
+
+void IndexerPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
     ApplyIndexChanged(true, false);
     UpdateBubbleView();
 }
