@@ -1086,15 +1086,7 @@ GradientColor Convert(const Ark_Tuple_ResourceColor_Number& src)
     return gradientColor;
 }
 
-template<>
-Header Convert(const Ark_Header& src)
-{
-    Header header;
-    header.headerKey = Converter::Convert<std::string>(src.headerKey);
-    header.headerValue = Converter::Convert<std::string>(src.headerValue);
-    return header;
-}
-
+#ifdef WRONG_GEN
 template<>
 std::map<std::string, std::string> Convert(const Map_String_String& src)
 {
@@ -1116,6 +1108,7 @@ std::map<std::string, std::string> Convert(const Map_String_String& src)
     }
     return m;
 }
+#endif
 
 template<>
 std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src)
@@ -1420,7 +1413,9 @@ Rect Convert(const Ark_RectResult& src)
 template<>
 ShapePoint Convert(const Ark_Point& src)
 {
-    return ShapePoint(Converter::Convert<Dimension>(src.x), Converter::Convert<Dimension>(src.y));
+    return ShapePoint(
+        Converter::OptConvert<Dimension>(src.x).value_or(Dimension()),
+        Converter::OptConvert<Dimension>(src.y).value_or(Dimension()));
 }
 
 template<>
@@ -1486,7 +1481,7 @@ template<>
 void AssignCast(std::optional<FontWeight>& dst, const Ark_Int32& src)
 {
     if (src >= 0) {
-        auto strVal = std::to_string(intVal);
+        auto strVal = std::to_string(src);
         if (auto [parseOk, val] = StringUtils::ParseFontWeight(strVal); parseOk) {
             dst = val;
         }
@@ -1617,7 +1612,7 @@ RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src)
 }
 
 template<>
-RefPtr<PixelMap> Convert(const Ark_image_PixelMapPeer& src)
+RefPtr<PixelMap> Convert(const Ark_image_PixelMap& src)
 {
     return src ? src->pixelMap : nullptr;
 }
@@ -2517,13 +2512,13 @@ OHOS::Ace::TextMetrics Convert(const Ark_TextMetrics& src)
 }
 
 template<>
-std::set<std::string> Convert(const Array_UniformDataType_UniformDataType& src)
+std::set<std::string> Convert(const Array_uniformTypeDescriptor_UniformDataType& src)
 {
     std::set<std::string> dst = {};
     std::optional<std::string> convVal;
     auto tmp = Converter::OptConvert<std::vector<Ark_uniformTypeDescriptor_UniformDataType>>(src);
     if (!tmp.has_value()) return dst;
-    for (Ark_UniformDataType arkVal : tmp.value()) {
+    for (auto arkVal : tmp.value()) {
         convVal = Converter::OptConvert<std::string>(arkVal);
         if (convVal.has_value()) {
             dst.insert(convVal.value());
@@ -2563,10 +2558,12 @@ template<>
 Corner Convert(const Ark_CornerRadius& src)
 {
     return Corner {
+#ifdef WRONG_GEN
         .topLeftRadius = Converter::Convert<Radius>(src.topLeft),
         .topRightRadius = Converter::Convert<Radius>(src.topRight),
         .bottomLeftRadius = Converter::Convert<Radius>(src.bottomLeft),
         .bottomRightRadius = Converter::Convert<Radius>(src.bottomRight),
+#endif
     };
 }
 template<>
@@ -2656,4 +2653,13 @@ void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_image_PixelMap& v
         LOGE("Invalid peer value at Ark_image_PixelMap");
     }
 }
+
+template<>
+ScrollFrameResult Convert(const Ark_OnScrollFrameBeginHandlerResult& from)
+{
+    ScrollFrameResult ret;
+    ret.offset = Converter::Convert<Dimension>(from.offsetRemain);
+    return ret;
+}
+
 } // namespace OHOS::Ace::NG::Converter

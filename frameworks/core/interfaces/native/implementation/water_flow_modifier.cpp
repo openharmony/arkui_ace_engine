@@ -35,17 +35,6 @@ void AssignCast(std::optional<WaterFlowLayoutMode>& dst, const Ark_WaterFlowLayo
         default: LOGE("Unexpected enum value in Ark_WaterFlowLayoutMode: %{public}d", src);
     }
 }
-
-template<>
-void AssignTo(std::optional<ScrollFrameResult>& dst, const Ark_OnScrollFrameBeginHandlerResult& from)
-{
-    auto offset = Converter::OptConvert<Dimension>(from.offsetRemain);
-    if (offset) {
-        ScrollFrameResult ret;
-        ret.offset = offset.value();
-        dst = ret;
-    }
-}
 } // Converter
 } // OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {

@@ -1763,7 +1763,7 @@ int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext
     CHECK_NULL_RETURN(pipelineContext, 0);
     return (GetMicroTickCount() - pipelineContext->GetFormAnimationStartTime()) / MICROSEC_TO_MILLISEC;
 }
-static void SetWidth(FrameNode *frameNode, std::optional<CalcDimension> value)
+void SetWidth(FrameNode *frameNode, std::optional<CalcDimension> value)
 {
     Validator::ValidateNonNegative(value);
     if (AceType::TypeId(frameNode) == CounterNode::TypeId()) {
@@ -1798,7 +1798,7 @@ void WidthImpl(Ark_NativePointer node,
             // TODO: Reset value
         });
 }
-static void SetHeight(FrameNode *frameNode, std::optional<CalcDimension> value)
+void SetHeight(FrameNode *frameNode, std::optional<CalcDimension> value)
 {
     Validator::ValidateNonNegative(value);
     if (AceType::TypeId(frameNode) == CounterNode::TypeId()) {

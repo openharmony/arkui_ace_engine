@@ -18,33 +18,6 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace PathModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
-{
-    return {};
-}
-} // PathModifier
-namespace PathInterfaceModifier {
-void SetPathOptionsImpl(Ark_NativePointer node,
-                        const Opt_PathOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
-    //PathModelNG::SetSetPathOptions(frameNode, convValue);
-}
-} // PathInterfaceModifier
-namespace PathAttributeModifier {
-void CommandsImpl(Ark_NativePointer node,
-                  const Opt_String* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //PathModelNG::SetCommands(frameNode, convValue);
-}
-} // PathAttributeModifier
 namespace Drawing_PathAccessor {
 void DestroyPeerImpl(Ark_drawing_Path peer)
 {
@@ -240,16 +213,6 @@ Ark_Boolean BuildFromSvgStringImpl(Ark_drawing_Path peer,
     return {};
 }
 } // Drawing_PathAccessor
-const GENERATED_ArkUIPathModifier* GetPathModifier()
-{
-    static const GENERATED_ArkUIPathModifier ArkUIPathModifierImpl {
-        PathModifier::ConstructImpl,
-        PathInterfaceModifier::SetPathOptionsImpl,
-        PathAttributeModifier::CommandsImpl,
-    };
-    return &ArkUIPathModifierImpl;
-}
-
 const GENERATED_ArkUIDrawing_PathAccessor* GetDrawing_PathAccessor()
 {
     static const GENERATED_ArkUIDrawing_PathAccessor Drawing_PathAccessorImpl {

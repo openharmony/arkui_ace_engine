@@ -139,24 +139,6 @@ void AssignArkValue(Ark_RichEditorSelection& dst, const BaseEventInfo& src, Conv
     }
 }
 
-void AssignArkValue(Ark_RichEditorRange& dst, const BaseEventInfo& src)
-{
-    if (src.GetType() == "SelectionInfo") {
-        auto selectionInfo = static_cast<const SelectionInfo*>(&src);
-        if (selectionInfo) {
-            auto selection = selectionInfo->GetSelection();
-            dst.start = Converter::ArkValue<Opt_Number>(selection.selection[0]);
-            dst.end = Converter::ArkValue<Opt_Number>(selection.selection[1]);
-        }
-    } else if (src.GetType() == "SelectionRangeInfo") {
-        auto selectionRangeInfo = static_cast<const SelectionRangeInfo*>(&src);
-        if (selectionRangeInfo) {
-            dst.start = Converter::ArkValue<Opt_Number>(selectionRangeInfo->start_);
-            dst.end = Converter::ArkValue<Opt_Number>(selectionRangeInfo->end_);
-        }
-    }
-}
-
 void AssignArkValue(Ark_RichEditorInsertValue& dst, const RichEditorInsertValue& src, ConvContext *ctx)
 {
     dst.insertOffset = Converter::ArkValue<Ark_Number>(src.GetInsertOffset());
@@ -229,12 +211,6 @@ void AssignArkValue(Ark_RichEditorImageSpanResult& dst, const RichEditorAbstract
     dst.imageStyle.verticalAlign = Converter::ArkValue<Ark_ImageSpanAlignment>(src.GetVerticalAlign());
     dst.offsetInSpan.value0 = Converter::ArkValue<Ark_Number>(src.GetSpanIndex());
     dst.offsetInSpan.value1 = Converter::ArkValue<Ark_Number>(src.OffsetInSpan());
-}
-
-void AssignArkValue(Ark_TextRange& dst, const TextRange& src)
-{
-    dst.start = Converter::ArkValue<Opt_Number>(src.start);
-    dst.end = Converter::ArkValue<Opt_Number>(src.end);
 }
 
 void AssignArkValue(Ark_RichEditorDeleteValue& dst, const RichEditorDeleteValue& src)

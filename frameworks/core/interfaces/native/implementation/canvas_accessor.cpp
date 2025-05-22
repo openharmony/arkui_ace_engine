@@ -18,51 +18,6 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace CanvasModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
-{
-    return {};
-}
-} // CanvasModifier
-namespace CanvasInterfaceModifier {
-void SetCanvasOptions0Impl(Ark_NativePointer node,
-                           const Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext* context)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = context ? Converter::OptConvert<type>(*context) : std::nullopt;
-    //CanvasModelNG::SetSetCanvasOptions0(frameNode, convValue);
-}
-void SetCanvasOptions1Impl(Ark_NativePointer node,
-                           const Ark_Union_CanvasRenderingContext2D_DrawingRenderingContext* context,
-                           const Ark_ImageAIOptions* imageAIOptions)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(context);
-    //auto convValue = Converter::OptConvert<type>(context); // for enums
-    //CanvasModelNG::SetSetCanvasOptions1(frameNode, convValue);
-}
-} // CanvasInterfaceModifier
-namespace CanvasAttributeModifier {
-void OnReadyImpl(Ark_NativePointer node,
-                 const Opt_VoidCallback* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CanvasModelNG::SetOnReady(frameNode, convValue);
-}
-void EnableAnalyzerImpl(Ark_NativePointer node,
-                        const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CanvasModelNG::SetEnableAnalyzer(frameNode, convValue);
-}
-} // CanvasAttributeModifier
 namespace Drawing_CanvasAccessor {
 void DestroyPeerImpl(Ark_drawing_Canvas peer)
 {
@@ -341,18 +296,6 @@ void ResetMatrixImpl(Ark_drawing_Canvas peer)
 {
 }
 } // Drawing_CanvasAccessor
-const GENERATED_ArkUICanvasModifier* GetCanvasModifier()
-{
-    static const GENERATED_ArkUICanvasModifier ArkUICanvasModifierImpl {
-        CanvasModifier::ConstructImpl,
-        CanvasInterfaceModifier::SetCanvasOptions0Impl,
-        CanvasInterfaceModifier::SetCanvasOptions1Impl,
-        CanvasAttributeModifier::OnReadyImpl,
-        CanvasAttributeModifier::EnableAnalyzerImpl,
-    };
-    return &ArkUICanvasModifierImpl;
-}
-
 const GENERATED_ArkUIDrawing_CanvasAccessor* GetDrawing_CanvasAccessor()
 {
     static const GENERATED_ArkUIDrawing_CanvasAccessor Drawing_CanvasAccessorImpl {

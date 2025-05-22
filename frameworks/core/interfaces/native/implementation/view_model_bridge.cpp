@@ -126,7 +126,6 @@ namespace GeneratedViewModel {
     Ark_NodeHandle createUIExtensionComponentNode(Ark_Int32 nodeId);
     Ark_NodeHandle createVideoNode(Ark_Int32 nodeId);
     Ark_NodeHandle createWaterFlowNode(Ark_Int32 nodeId);
-    Ark_NodeHandle createWebNode(Ark_Int32 nodeId);
     Ark_NodeHandle createWindowSceneNode(Ark_Int32 nodeId);
     Ark_NodeHandle createXComponentNode(Ark_Int32 nodeId);
 } // namespace GeneratedViewModel
@@ -246,7 +245,6 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_UIEXTENSION_COMPONENT: return GeneratedViewModel::createUIExtensionComponentNode(id);
             case GENERATED_ARKUI_VIDEO: return GeneratedViewModel::createVideoNode(id);
             case GENERATED_ARKUI_WATER_FLOW: return GeneratedViewModel::createWaterFlowNode(id);
-            case GENERATED_ARKUI_WEB: return GeneratedViewModel::createWebNode(id);
             case GENERATED_ARKUI_WINDOW_SCENE: return GeneratedViewModel::createWindowSceneNode(id);
             case GENERATED_ARKUI_XCOMPONENT: return GeneratedViewModel::createXComponentNode(id);
             default: return nullptr;

@@ -110,7 +110,6 @@ void DestroyPeerImpl(Ark_RectShape peer)
 Ark_RectShape CtorImpl(const Opt_Union_RectShapeOptions_RoundRectShapeOptions* options)
 {
     Ark_RectShape peer = new RectShapePeer();
-#ifdef WRONG_GEN
     RefPtr<ShapeRect> shape = Referenced::MakeRefPtr<ShapeRect>();
     peer->shape = shape;
     CHECK_NULL_RETURN(options, peer);
@@ -139,7 +138,6 @@ Ark_RectShape CtorImpl(const Opt_Union_RectShapeOptions_RoundRectShapeOptions* o
         },
         []() {}
     );
-#endif
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()

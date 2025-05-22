@@ -87,10 +87,8 @@ PaddingPropertyT<Dimension> Convert(const Ark_Resource& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CommonMethodModifier {
-void Width0Impl(Ark_NativePointer node,
-    const Opt_Length* value);
-void Height0Impl(Ark_NativePointer node,
-    const Opt_Length* value);
+void SetWidth(FrameNode *frameNode, std::optional<CalcDimension> value);
+void SetHeight(FrameNode *frameNode, std::optional<CalcDimension> value);
 void SizeImpl(Ark_NativePointer node,
     const Opt_SizeOptions* value);
 void ConstraintSizeImpl(Ark_NativePointer node,
@@ -288,12 +286,16 @@ void KeyImpl(Ark_NativePointer node,
 void WidthImpl(Ark_NativePointer node,
                const Opt_Length* value)
 {
-    CommonMethodModifier::Width0Impl(node, value);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CommonMethodModifier::SetWidth(frameNode, Converter::OptConvert<CalcDimension>(*value));
 }
 void HeightImpl(Ark_NativePointer node,
                 const Opt_Length* value)
 {
-    CommonMethodModifier::Height0Impl(node, value);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CommonMethodModifier::SetHeight(frameNode, Converter::OptConvert<CalcDimension>(*value));
 }
 void SizeImpl(Ark_NativePointer node,
               const Opt_SizeOptions* value)

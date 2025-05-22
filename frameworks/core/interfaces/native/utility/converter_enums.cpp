@@ -224,23 +224,6 @@ void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src)
 }
 
 template<>
-void AssignCast(std::optional<NavigationType>& dst, const Ark_WebNavigationType& src)
-{
-    switch (src) {
-        case ARK_WEB_NAVIGATION_TYPE_UNKNOWN: dst = NavigationType::NAVIGATION_TYPE_UNKNOWN; break;
-        case ARK_WEB_NAVIGATION_TYPE_MAIN_FRAME_NEW_ENTRY: dst =
-            NavigationType::NAVIGATION_TYPE_MAIN_FRAME_NEW_ENTRY; break;
-        case ARK_WEB_NAVIGATION_TYPE_MAIN_FRAME_EXISTING_ENTRY: dst =
-            NavigationType::NAVIGATION_TYPE_MAIN_FRAME_EXISTING_ENTRY; break;
-        case ARK_WEB_NAVIGATION_TYPE_NAVIGATION_TYPE_NEW_SUBFRAME: dst =
-            NavigationType::NAVIGATION_TYPE_NEW_SUBFRAME; break;
-        case ARK_WEB_NAVIGATION_TYPE_NAVIGATION_TYPE_AUTO_SUBFRAME: dst =
-            NavigationType::NAVIGATION_TYPE_AUTO_SUBFRAME; break;
-        default: LOGE("Unexpected enum value in Ark_WebNavigationType: %{public}d", src);
-    }
-}
-
-template<>
 void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringStrategy& src)
 {
     switch (src) {
@@ -970,18 +953,6 @@ void AssignCast(std::optional<TabBarMode>& dst, const Ark_BarMode& src)
 }
 
 template<>
-void AssignCast(std::optional<SslError>& dst, const Ark_SslError& src)
-{
-    switch (src) {
-        case ARK_SSL_ERROR_INVALID: dst = SslError::INVALID; break;
-        case ARK_SSL_ERROR_HOST_MISMATCH: dst = SslError::HOST_MISMATCH; break;
-        case ARK_SSL_ERROR_DATE_INVALID: dst = SslError::DATE_INVALID; break;
-        case ARK_SSL_ERROR_UNTRUSTED: dst = SslError::UNTRUSTED; break;
-        default: LOGE("Unexpected enum value in Ark_SslError: %{public}d", src);
-    }
-}
-
-template<>
 void AssignCast(std::optional<std::string>& dst, const Ark_FunctionKey& src)
 {
     switch (src) {
@@ -1136,18 +1107,6 @@ void AssignCast(std::optional<ThemeColorMode>& dst, const Ark_ThemeColorMode& sr
 }
 
 template<>
-void AssignCast(std::optional<ThreatType>& dst, const Ark_ThreatType& src)
-{
-    switch (src) {
-        case ARK_THREAT_TYPE_THREAT_ILLEGAL: dst = ThreatType::ILLEGAL; break;
-        case ARK_THREAT_TYPE_THREAT_FRAUD: dst = ThreatType::FRAUD; break;
-        case ARK_THREAT_TYPE_THREAT_RISK: dst = ThreatType::RISK; break;
-        case ARK_THREAT_TYPE_THREAT_WARNING: dst = ThreatType::WARNING; break;
-        default: LOGE("Unexpected enum value in Ark_ThreatType: %{public}d", src);
-    }
-}
-
-template<>
 void AssignCast(std::optional<SliderModel::SliderChangeMode>& dst, const Ark_SliderChangeMode& src)
 {
     switch (src) {
@@ -1156,59 +1115,6 @@ void AssignCast(std::optional<SliderModel::SliderChangeMode>& dst, const Ark_Sli
         case ARK_SLIDER_CHANGE_MODE_END: dst = SliderModel::SliderChangeMode::END; break;
         case ARK_SLIDER_CHANGE_MODE_CLICK: dst = SliderModel::SliderChangeMode::CLICK; break;
         default: LOGE("Unexpected enum value in Ark_SliderChangeMode: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<WebDarkMode>& dst, const Ark_WebDarkMode& src)
-{
-    switch (src) {
-        case ARK_WEB_DARK_MODE_OFF: dst = WebDarkMode::Off; break;
-        case ARK_WEB_DARK_MODE_ON: dst = WebDarkMode::On; break;
-        case ARK_WEB_DARK_MODE_AUTO: dst = WebDarkMode::Auto; break;
-        default: LOGE("Unexpected enum value in Ark_WebDarkMode: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<WebElementType>& dst, const Ark_WebElementType& src)
-{
-    switch (src) {
-        case ARK_WEB_ELEMENT_TYPE_IMAGE: dst = WebElementType::IMAGE; break;
-        default: LOGE("Unexpected enum value in Ark_WebElementType: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<WebKeyboardAvoidMode>& dst, const Ark_WebKeyboardAvoidMode& src)
-{
-    switch (src) {
-        case ARK_WEB_KEYBOARD_AVOID_MODE_RESIZE_VISUAL: dst = WebKeyboardAvoidMode::RESIZE_VISUAL; break;
-        case ARK_WEB_KEYBOARD_AVOID_MODE_RESIZE_CONTENT: dst = WebKeyboardAvoidMode::RESIZE_CONTENT; break;
-        case ARK_WEB_KEYBOARD_AVOID_MODE_OVERLAYS_CONTENT: dst = WebKeyboardAvoidMode::OVERLAYS_CONTENT; break;
-        default: LOGE("Unexpected enum value in Ark_WebKeyboardAvoidMode: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<WebLayoutMode>& dst, const Ark_WebLayoutMode& src)
-{
-    switch (src) {
-        case ARK_WEB_LAYOUT_MODE_NONE: dst = WebLayoutMode::NONE; break;
-        case ARK_WEB_LAYOUT_MODE_FIT_CONTENT: dst = WebLayoutMode::FIT_CONTENT; break;
-        default: LOGE("Unexpected enum value in Ark_WebLayoutMode: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<WebCacheMode>& dst, const Ark_CacheMode& src)
-{
-    switch (src) {
-        case ARK_CACHE_MODE_DEFAULT: dst = WebCacheMode::DEFAULT; break;
-        case ARK_CACHE_MODE_NONE: dst = WebCacheMode::USE_CACHE_ELSE_NETWORK; break;
-        case ARK_CACHE_MODE_ONLINE: dst = WebCacheMode::USE_NO_CACHE; break;
-        case ARK_CACHE_MODE_ONLY: dst = WebCacheMode::USE_CACHE_ONLY; break;
-        default: LOGE("Unexpected enum value in Ark_CacheMode: %{public}d", src);
     }
 }
 
@@ -1376,18 +1282,6 @@ void AssignCast(std::optional<InputStyle>& dst, const Ark_TextInputStyle& src)
 }
 
 template<>
-void AssignCast(std::optional<RenderProcessNotRespondingReason>& dst, const Ark_RenderProcessNotRespondingReason& src)
-{
-    switch (src) {
-        case ARK_RENDER_PROCESS_NOT_RESPONDING_REASON_INPUT_TIMEOUT: dst =
-            RenderProcessNotRespondingReason::INPUT_TIMEOUT; break;
-        case ARK_RENDER_PROCESS_NOT_RESPONDING_REASON_NAVIGATION_COMMIT_TIMEOUT: dst =
-            RenderProcessNotRespondingReason::NAVIGATION_COMMIT_TIMEOUT; break;
-        default: LOGE("Unexpected enum value in Ark_RenderProcessNotRespondingReason: %{public}d", src);
-    }
-}
-
-template<>
 void AssignCast(std::optional<ScrollAlign>& dst, const Ark_ScrollAlign& src)
 {
     switch (src) {
@@ -1444,16 +1338,6 @@ void AssignCast(std::optional<OHOS::Ace::SymbolEffectType>& dst, const Ark_Symbo
 }
 
 template<>
-void AssignCast(std::optional<OverScrollMode>& dst, const Ark_OverScrollMode& src)
-{
-    switch (src) {
-        case ARK_OVER_SCROLL_MODE_NEVER: dst = OverScrollMode::NEVER; break;
-        case ARK_OVER_SCROLL_MODE_ALWAYS: dst = OverScrollMode::ALWAYS; break;
-        default: LOGE("Unexpected enum value in Ark_OverScrollMode: %{public}d", src);
-    }
-}
-
-template<>
 void AssignCast(std::optional<Axis>& dst, const Ark_ScrollBarDirection& src)
 {
     switch (src) {
@@ -1471,19 +1355,6 @@ void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src)
         case ARK_SCROLL_DIRECTION_HORIZONTAL: dst = Axis::HORIZONTAL; break;
         case ARK_SCROLL_DIRECTION_NONE: dst = Axis::NONE; break;
         default: LOGE("Unexpected enum value in Ark_ScrollDirection: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<MessageLevel>& dst, const Ark_MessageLevel& src)
-{
-    switch (src) {
-        case ARK_MESSAGE_LEVEL_DEBUG: dst = MessageLevel::DEBUG; break;
-        case ARK_MESSAGE_LEVEL_ERROR: dst = MessageLevel::ERROR; break;
-        case ARK_MESSAGE_LEVEL_INFO: dst = MessageLevel::INFO; break;
-        case ARK_MESSAGE_LEVEL_LOG: dst = MessageLevel::LOG; break;
-        case ARK_MESSAGE_LEVEL_WARN: dst = MessageLevel::WARN; break;
-        default: LOGE("Unexpected enum value in Ark_MessageLevel: %{public}d", src);
     }
 }
 
@@ -1547,17 +1418,6 @@ void AssignCast(std::optional<ChainStyle>& dst, const Ark_ChainStyle& src)
 }
 
 template<>
-void AssignCast(std::optional<MixedModeContent>& dst, const Ark_MixedMode& src)
-{
-    switch (src) {
-        case ARK_MIXED_MODE_ALL: dst = MixedModeContent::MIXED_CONTENT_ALWAYS_ALLOW; break;
-        case ARK_MIXED_MODE_COMPATIBLE: dst = MixedModeContent::MIXED_CONTENT_COMPATIBILITY_MODE; break;
-        case ARK_MIXED_MODE_NONE: dst = MixedModeContent::MIXED_CONTENT_NEVER_ALLOW; break;
-        default: LOGE("Unexpected enum value in Ark_MixedMode: %{public}d", src);
-    }
-}
-
-template<>
 void AssignCast(std::optional<ModalTransition>& dst, const Ark_ModalTransition& src)
 {
     switch (src) {
@@ -1585,17 +1445,6 @@ void AssignCast(std::optional<NavDestinationMode>& dst, const Ark_NavDestination
     switch (src) {
         case ARK_NAV_DESTINATION_MODE_STANDARD: dst = NavDestinationMode::STANDARD; break;
         case ARK_NAV_DESTINATION_MODE_DIALOG: dst = NavDestinationMode::DIALOG; break;
-        default: LOGE("Unexpected enum value in Ark_NavDestinationMode: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<ViewportFit>& dst, const Ark_ViewportFit& src)
-{
-    switch (src) {
-        case ARK_VIEWPORT_FIT_AUTO: dst = ViewportFit::AUTO; break;
-        case ARK_VIEWPORT_FIT_CONTAINS: dst = ViewportFit::CONTAINS; break;
-        case ARK_VIEWPORT_FIT_COVER: dst = ViewportFit::COVER; break;
         default: LOGE("Unexpected enum value in Ark_NavDestinationMode: %{public}d", src);
     }
 }
@@ -1748,31 +1597,12 @@ void AssignCast(std::optional<RectWidthStyle>& dst, const Ark_text_RectWidthStyl
 }
 
 template<>
-void AssignCast(std::optional<RenderMode>& dst, const Ark_RenderMode& src)
-{
-    switch (src) {
-        case ARK_RENDER_MODE_ASYNC_RENDER: dst = RenderMode::ASYNC_RENDER; break;
-        case ARK_RENDER_MODE_SYNC_RENDER: dst = RenderMode::SYNC_RENDER; break;
-        default: LOGE("Unexpected enum value in Ark_RenderMode: %{public}d", src);
-    }
-}
-
-template<>
 void AssignCast(std::optional<ResponseType>& dst, const Ark_ResponseType& src)
 {
     switch (src) {
         case ARK_RESPONSE_TYPE_RIGHT_CLICK: dst = ResponseType::RIGHT_CLICK; break;
         case ARK_RESPONSE_TYPE_LONG_PRESS: dst = ResponseType::LONG_PRESS; break;
         default: LOGE("Unexpected enum value in Ark_ResponseType: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<ResponseType>& dst, const Ark_WebResponseType& src)
-{
-    switch (src) {
-        case ARK_WEB_RESPONSE_TYPE_LONG_PRESS: dst = ResponseType::LONG_PRESS; break;
-        default: LOGE("Unexpected enum value in Ark_WebResponseType: %{public}d", src);
     }
 }
 

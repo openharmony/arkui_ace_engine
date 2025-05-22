@@ -352,21 +352,6 @@ void AssignArkValue(Ark_ListItemStyle& dst, const V2::ListItemStyle& src)
     }
 }
 
-void AssignArkValue(Ark_MessageLevel& dst, const MessageLevel& src)
-{
-    switch (src) {
-        case MessageLevel::DEBUG: dst = ARK_MESSAGE_LEVEL_DEBUG; break;
-        case MessageLevel::ERROR: dst = ARK_MESSAGE_LEVEL_ERROR; break;
-        case MessageLevel::INFO: dst = ARK_MESSAGE_LEVEL_INFO; break;
-        case MessageLevel::LOG: dst = ARK_MESSAGE_LEVEL_LOG; break;
-        case MessageLevel::WARN: dst = ARK_MESSAGE_LEVEL_WARN; break;
-        default: {
-            dst = static_cast<Ark_MessageLevel>(-1);
-            LOGE("Unexpected enum value in MessageLevel: %{public}d", src);
-        }
-    }
-}
-
 void AssignArkValue(Ark_MouseAction& dst, const MouseAction& src)
 {
     switch (src) {
@@ -819,31 +804,6 @@ void AssignArkValue(Ark_TransitionEdge& dst, const TransitionEdge& src)
     }
 }
 
-void AssignArkValue(Ark_RenderProcessNotRespondingReason& dst, const RenderProcessNotRespondingReason& src)
-{
-    switch (src) {
-        case RenderProcessNotRespondingReason::INPUT_TIMEOUT: dst =
-            ARK_RENDER_PROCESS_NOT_RESPONDING_REASON_INPUT_TIMEOUT; break;
-        case RenderProcessNotRespondingReason::NAVIGATION_COMMIT_TIMEOUT: dst =
-            ARK_RENDER_PROCESS_NOT_RESPONDING_REASON_NAVIGATION_COMMIT_TIMEOUT; break;
-        default: dst = static_cast<Ark_RenderProcessNotRespondingReason>(-1);
-            LOGE("Unexpected enum value in RenderProcessNotRespondingReason: %{public}d", src);
-    }
-}
-
-void AssignArkValue(Ark_RenderExitReason& dst, const RenderExitReason& src)
-{
-    switch (src) {
-        case RenderExitReason::ABNORMAL_TERMINATION: dst = ARK_RENDER_EXIT_REASON_PROCESS_ABNORMAL_TERMINATION; break;
-        case RenderExitReason::WAS_KILLED: dst = ARK_RENDER_EXIT_REASON_PROCESS_WAS_KILLED; break;
-        case RenderExitReason::CRASHED: dst = ARK_RENDER_EXIT_REASON_PROCESS_CRASHED; break;
-        case RenderExitReason::OOM: dst = ARK_RENDER_EXIT_REASON_PROCESS_OOM; break;
-        case RenderExitReason::EXIT_UNKNOWN: dst = ARK_RENDER_EXIT_REASON_PROCESS_EXIT_UNKNOWN; break;
-        default: dst = static_cast<Ark_RenderExitReason>(-1);
-            LOGE("Unexpected enum value in RenderExitReason: %{public}d", src);
-    }
-}
-
 void AssignArkValue(Ark_KeyType& dst, const KeyAction& src)
 {
     switch (src) {
@@ -861,33 +821,6 @@ void AssignArkValue(Ark_KeySource& dst, const SourceType& src)
         case SourceType::KEYBOARD: dst = Ark_KeySource::ARK_KEY_SOURCE_KEYBOARD; break;
         default: dst = static_cast<Ark_KeySource>(-1);
             LOGE("Unexpected enum value in SourceType: %{public}d", src);
-    }
-}
-
-void AssignArkValue(Ark_SslError& dst, const SslError& src)
-{
-    switch (src) {
-        case SslError::INVALID: dst = Ark_SslError::ARK_SSL_ERROR_INVALID; break;
-        case SslError::HOST_MISMATCH: dst = Ark_SslError::ARK_SSL_ERROR_HOST_MISMATCH; break;
-        case SslError::DATE_INVALID: dst = Ark_SslError::ARK_SSL_ERROR_DATE_INVALID; break;
-        case SslError::UNTRUSTED: dst = Ark_SslError::ARK_SSL_ERROR_UNTRUSTED; break;
-        default: dst = static_cast<Ark_SslError>(-1);
-            LOGE("Unexpected enum value in SslError: %{public}d", src);
-    }
-}
-
-void AssignArkValue(Ark_NativeEmbedStatus& dst, const NativeEmbedStatus& src)
-{
-    switch (src) {
-        case NativeEmbedStatus::CREATE: dst = Ark_NativeEmbedStatus::ARK_NATIVE_EMBED_STATUS_CREATE; break;
-        case NativeEmbedStatus::UPDATE: dst = Ark_NativeEmbedStatus::ARK_NATIVE_EMBED_STATUS_UPDATE; break;
-        case NativeEmbedStatus::DESTROY: dst = Ark_NativeEmbedStatus::ARK_NATIVE_EMBED_STATUS_DESTROY; break;
-        case NativeEmbedStatus::ENTER_BFCACHE: dst =
-            Ark_NativeEmbedStatus::ARK_NATIVE_EMBED_STATUS_ENTER_BFCACHE; break;
-        case NativeEmbedStatus::LEAVE_BFCACHE: dst =
-            Ark_NativeEmbedStatus::ARK_NATIVE_EMBED_STATUS_LEAVE_BFCACHE; break;
-        default: dst = static_cast<Ark_NativeEmbedStatus>(-1);
-            LOGE("Unexpected enum value in NativeEmbedStatus: %{public}d", src);
     }
 }
 

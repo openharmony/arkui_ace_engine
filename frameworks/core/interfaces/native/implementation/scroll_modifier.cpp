@@ -50,14 +50,6 @@ inline bool Convert(const Ark_EdgeEffectOptions& value)
     return Converter::Convert<bool>(value.alwaysEnabled);
 }
 template<>
-void AssignTo(std::optional<ScrollFrameResult>& dst, const Ark_OnScrollFrameBeginHandlerResult& from)
-{
-    ScrollFrameResult ret;
-    ret.offset = Converter::Convert<Dimension>(from.offsetRemain);
-    dst = ret;
-}
-
-template<>
 TwoDimensionScrollResult Convert(const Ark_OffsetResult& src)
 {
     auto xOffset = OptConvert<Dimension>(src.xOffset);

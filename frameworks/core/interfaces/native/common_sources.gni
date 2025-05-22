@@ -31,7 +31,6 @@ common_sources = [
   "implementation/offscreen_canvas_rendering_context2d_peer_impl.cpp",
   "implementation/scroller_peer_impl.cpp",
   "implementation/video_controller_peer_impl.cpp",
-  "implementation/web_modifier_callbacks.cpp",
   "implementation/x_component_controller_peer_impl.cpp",
   "utility/accessor_utils.cpp",
   "utility/converter_enums.cpp",

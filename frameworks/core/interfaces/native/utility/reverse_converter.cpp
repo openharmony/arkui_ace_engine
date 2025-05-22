@@ -137,7 +137,6 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
     };
 }
 
-#ifdef WRONG_GEN
 void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src)
 {
     if (src.menuOptionsParam.content.has_value()) {
@@ -147,7 +146,6 @@ void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src)
     dst.id = PeerUtils::CreatePeer<TextMenuItemIdPeer>(src.menuOptionsParam.id);
     dst.labelInfo = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.menuOptionsParam.labelInfo);
 }
-#endif
 
 void AssignArkValue(Ark_TextMetrics& dst, const OHOS::Ace::TextMetrics& src)
 {
@@ -443,12 +441,6 @@ void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src, ConvContext *c
     area.globalPosition = Converter::ArkValue<Ark_Position>(globPosition);
     dst.area = area;
     dst.id = Converter::ArkValue<Opt_String>(src.id, ctx);
-}
-
-void AssignArkValue(Ark_Header& dst, const Header& src, ConvContext *ctx)
-{
-    dst.headerKey = Converter::ArkValue<Ark_String>(src.headerKey, ctx);
-    dst.headerValue = Converter::ArkValue<Ark_String>(src.headerValue, ctx);
 }
 
 void AssignArkValue(Ark_KeyboardOptions& dst, const KeyboardOptions& src, ConvContext *ctx)
@@ -809,5 +801,29 @@ Ark_Resource ArkCreate(std::string name, ResourceType type, ConvContext *ctx)
         .bundleName = ArkValue<Ark_String>(""),
         .params = ArkValue<Opt_Array_String>(params, ctx),
     };
+}
+
+void AssignArkValue(Ark_TextRange& dst, const TextRange& src)
+{
+    dst.start = Converter::ArkValue<Opt_Number>(src.start);
+    dst.end = Converter::ArkValue<Opt_Number>(src.end);
+}
+
+void AssignArkValue(Ark_RichEditorRange& dst, const BaseEventInfo& src)
+{
+    if (src.GetType() == "SelectionInfo") {
+        auto selectionInfo = static_cast<const SelectionInfo*>(&src);
+        if (selectionInfo) {
+            auto selection = selectionInfo->GetSelection();
+            dst.start = Converter::ArkValue<Opt_Number>(selection.selection[0]);
+            dst.end = Converter::ArkValue<Opt_Number>(selection.selection[1]);
+        }
+    } else if (src.GetType() == "SelectionRangeInfo") {
+        auto selectionRangeInfo = static_cast<const SelectionRangeInfo*>(&src);
+        if (selectionRangeInfo) {
+            dst.start = Converter::ArkValue<Opt_Number>(selectionRangeInfo->start_);
+            dst.end = Converter::ArkValue<Opt_Number>(selectionRangeInfo->end_);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG::Converter
