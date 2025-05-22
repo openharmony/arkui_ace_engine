@@ -79,7 +79,6 @@ struct TouchEvent final : public PointerEvent {
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
-    InputEventType originInputEventType = InputEventType::TOUCH_SCREEN;
     int32_t touchEventId = 0;
     int32_t operatingHand = 0;
     bool isInterpolated = false;
@@ -135,7 +134,6 @@ struct TouchEvent final : public PointerEvent {
     TouchEvent& SetTargetDisplayId(int32_t targetDisplayId);
     TouchEvent& SetSourceType(SourceType sourceType);
     TouchEvent& SetSourceTool(SourceTool sourceTool);
-    TouchEvent& SetOriginInputEventType(InputEventType inputEventType);
     TouchEvent& SetTouchEventId(int32_t touchEventId);
     TouchEvent& SetIsInterpolated(bool isInterpolated);
     TouchEvent& SetPointers(std::vector<TouchPoint> pointers);
