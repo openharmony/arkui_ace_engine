@@ -2038,7 +2038,7 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
     public customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
         if (this.checkPriority("customKeyboard")) {
             const value_casted = value as (CustomBuilder | undefined)
-            const options_casted = options as (KeyboardOptions)
+            const options_casted = options as (KeyboardOptions | undefined)
             this.getPeer()?.customKeyboardAttribute(value_casted, options_casted)
             return this
         }
