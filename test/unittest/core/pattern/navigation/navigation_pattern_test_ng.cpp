@@ -2034,7 +2034,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_018, TestSize.Level1)
 
     ResSchedReport::GetInstance().keyEventCountMS = -1;
     EXPECT_NE(ResSchedReport::GetInstance().keyEventCountMS, 156);
-    PerfMoniter::GetPerfMonitor()->End("ABILITY_OR_PAGE_SWITCH", PerfActionType::UNKNOWN_ACTION, "");
+    PerfMoniter::GetPerfMonitor()->End("ABILITY_OR_PAGE_SWITCH", PerfActionType::UNKNOWN_ACTION);
     ResschedReport::GetInstance().ResSchedDataReport("ability_or_page_switch_end");
     EXPECT_EQ(ResSchedReport::GetInstance().keyEventCountMS, 156);
 }
