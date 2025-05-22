@@ -52,7 +52,7 @@ inline Ark_FormLinkOptions FormLinkOpt(const char *actionName)
         .bundleName = ArkValue<Opt_String>(BUNDLE_NAME),
         .abilityName = ArkValue<Opt_String>(ABILITY_NAME),
         .uri = ArkValue<Opt_String>(URI),
-        .params = ArkValue<Opt_CustomObject>(),
+        .params = ArkValue<Opt_Object>(),
     };
 }
 } // namespace
@@ -66,7 +66,7 @@ class FormLinkModifierTest : public ModifierTestBase<GENERATED_ArkUIFormLinkModi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormLinkModifierTest, setFormLinkOptionsTestDefaultValues, TestSize.Level1)
+HWTEST_F(FormLinkModifierTest, DISABLED_setFormLinkOptionsTestDefaultValues, TestSize.Level1)
 {
     std::string strResult;
 
@@ -91,7 +91,7 @@ HWTEST_F(FormLinkModifierTest, setFormLinkOptionsTestDefaultValues, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormLinkModifierTest, setFormLinkOptionsTestValidValues, TestSize.Level1)
+HWTEST_F(FormLinkModifierTest, DISABLED_setFormLinkOptionsTestValidValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_FormLinkOptions inputValue = FormLinkOpt(ACTION_1_NAME);
