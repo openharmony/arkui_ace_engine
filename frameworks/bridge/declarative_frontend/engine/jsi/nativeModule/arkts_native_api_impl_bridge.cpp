@@ -959,6 +959,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnDragEnter));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDragEnter"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnDragEnter));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnDragSpringLoading"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnDragSpringLoading));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDragSpringLoading"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnDragSpringLoading));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnDragMove"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnDragMove));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDragMove"),

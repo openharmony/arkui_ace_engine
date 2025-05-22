@@ -451,6 +451,7 @@ public:
     static bool ParseAndUpdateDragItemInfo(const JSRef<JSVal>& info, NG::DragDropBaseInfo& dragInfo);
     static RefPtr<AceType> ParseDragNode(const JSRef<JSVal>& info);
     static void JsOnDragEnter(const JSCallbackInfo& info);
+    static void JsOnDragSpringLoading(const JSCallbackInfo& info);
     static void JsOnDragEnd(const JSCallbackInfo& info);
     static void JsOnDragMove(const JSCallbackInfo& info);
     static void JsOnDragLeave(const JSCallbackInfo& info);
@@ -775,6 +776,8 @@ public:
         const std::optional<Dimension>& radiusTopEnd, const std::optional<Dimension>& radiusBottomStart,
         const std::optional<Dimension>& radiusBottomEnd);
     static void ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
+    static void ParseDragSpringLoadingConfiguration(
+        const JSRef<JSObject>& paramObj, const RefPtr<NG::DragSpringLoadingConfiguration>& config);
 
 private:
     static bool ParseJsStrArrayInternal(const JSRef<JSVal>& jsValue, std::vector<std::string>& result,

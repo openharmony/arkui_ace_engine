@@ -359,6 +359,7 @@ void EventHub::ClearCustomerOnDragFunc()
 {
     onDragStart_ = nullptr;
     customerOnDragEnter_ = nullptr;
+    customerOnDragSpringLoading_ = nullptr;
     customerOnDragLeave_ = nullptr;
     customerOnDragMove_ = nullptr;
     customerOnDrop_ = nullptr;
@@ -373,6 +374,11 @@ void EventHub::ClearCustomerOnDragStart()
 void EventHub::ClearCustomerOnDragEnter()
 {
     customerOnDragEnter_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragSpringLoading()
+{
+    customerOnDragSpringLoading_ = nullptr;
 }
 
 void EventHub::ClearCustomerOnDragMove()
@@ -817,6 +823,16 @@ void EventHub::SetOnDragEnter(OnDragFunc&& onDragEnter)
     onDragEnter_ = std::move(onDragEnter);
 }
 
+void EventHub::SetCustomerOnDragSpringLoading(OnDrapDropSpringLoadingFunc&& onDragSpringLoading)
+{
+    customerOnDragSpringLoading_ = std::move(onDragSpringLoading);
+}
+
+const OnDrapDropSpringLoadingFunc& EventHub::GetCustomerOnDragSpringLoading() const
+{
+    return customerOnDragSpringLoading_;
+}
+
 void EventHub::SetOnDragLeave(OnDragFunc&& onDragLeave)
 {
     onDragLeave_ = std::move(onDragLeave);
@@ -885,6 +901,11 @@ bool EventHub::HasCustomerOnDragEnd() const
 bool EventHub::HasCustomerOnDrop() const
 {
     return customerOnDrop_ != nullptr;
+}
+
+bool EventHub::HasCustomerOnDragSpringLoading() const
+{
+    return customerOnDragSpringLoading_ != nullptr;
 }
 
 void EventHub::SetDisableDataPrefetch(bool disableDataPrefetch)

@@ -1831,6 +1831,24 @@ class DragEnterModifier extends ModifierWithKey<DragEnterCallback> {
   }
 }
 
+class DragSpringLoadingModifier extends ModifierWithKey<ArkDragSpringLoading> {
+  constructor(value: ArkDragSpringLoading) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDragSpringLoading');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDragSpringLoading(node);
+    } else {
+      getUINativeModule().common.setOnDragSpringLoading(node, this.value.callback, this.value.configuration);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !this.value.isEqual(this.stageValue);
+  }
+}
+
 declare type DragMoveCallback = (event?: DragEvent, extraParams?: string) => void;
 class DragMoveModifier extends ModifierWithKey<DragMoveCallback> {
   constructor(value: DragMoveCallback) {
@@ -4999,6 +5017,20 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   onDragEnter(event: (event?: DragEvent, extraParams?: string) => void): this {
     modifierWithKey(this._modifiersWithKeys, DragEnterModifier.identity, DragEnterModifier, event);
+    return this;
+  }
+
+  onDragSpringLoading(callback: (context: ArkSpringLoadingContext) => void, configuration? DragSpringLoadingConfiguration): this {
+    let arkDragSpringLoading = new ArkDragSpringLoading();
+    if (typeof callback === 'function') {
+      arkDragSpringLoading.callback = callback;
+    }
+    arkDragSpringLoading.configuration.stillTimeLimit = configuration?.stillTimeLimit;
+    arkDragSpringLoading.configuration.updateInterval = configuration?.updateInterval;
+    arkDragSpringLoading.configuration.updateNotifyCount = configuration?.updateNotifyCount;
+    arkDragSpringLoading.configuration.updateToFinishInterval = configuration?.updateToFinishInterval;
+
+    modifierWithKey(this._modifiersWithKeys, DragSpringLoadingModifier.identity, DragSpringLoadingModifier, arkDragSpringLoading);
     return this;
   }
 

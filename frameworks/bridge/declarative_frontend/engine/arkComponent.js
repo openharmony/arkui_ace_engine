@@ -1739,6 +1739,22 @@ class DragEnterModifier extends ModifierWithKey {
   }
 }
 DragEnterModifier.identity = Symbol('onDragEnter');
+class DragSpringLoadingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnDragSpringLoading(node);
+    } else {
+      getUINativeModule().common.setOnDragSpringLoading(node, this.value.callback, this.value.configuration);
+    }
+  }
+  checkObjectDiff() {
+    return !this.value.isEqual(this.stageValue);
+  }
+}
+DragSpringLoadingModifier.identity = Symbol('onDragSpringLoading');
 class DragMoveModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -4621,6 +4637,18 @@ class ArkComponent {
   }
   onDragEnter(event) {
     modifierWithKey(this._modifiersWithKeys, DragEnterModifier.identity, DragEnterModifier, event);
+    return this;
+  }
+  onDragSpringLoading(value, options) {
+    let arkDragSpringLoading = new ArkDragSpringLoading();
+    if (typeof value === 'function') {
+      arkDragSpringLoading.callback = value;
+    }
+    if (typeof options === 'object') {
+      arkDragSpringLoading.configuration = options;
+    }
+    modifierWithKey(this._modifiersWithKeys, DragSpringLoadingModifier.identity,
+      DragSpringLoadingModifier, arkDragSpringLoading);
     return this;
   }
   onDragMove(event) {
@@ -12106,6 +12134,9 @@ class ArkSpanComponent {
   onDragEnter(event) {
     throw new Error('Method not implemented.');
   }
+  onDragSpringLoading(event) {
+    throw new Error('Method not implemented.');
+  }
   onDragMove(event) {
     throw new Error('Method not implemented.');
   }
@@ -19243,6 +19274,20 @@ class ArkDragPreview {
       this.onlyForLifting === another.onlyForLifting &&
       this.pixelMap === another.pixelMap &&
       this.extraInfo === another.extraInfo
+    );
+  }
+}
+
+class ArkDragSpringLoading {
+  constructor() {
+    this.configuration = undefined;
+    this.callback = undefined;
+  }
+
+  isEqual(another) {
+    return (
+      this.configuration === another.configuration &&
+      this.callback === another.callback
     );
   }
 }

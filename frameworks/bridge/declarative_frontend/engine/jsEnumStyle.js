@@ -4023,3 +4023,11 @@ let AnimationPropertyType;
     AnimationPropertyType[AnimationPropertyType["SCALE"] = 2] = "SCALE";
     AnimationPropertyType[AnimationPropertyType["OPACITY"] = 3] = "OPACITY";
 })(AnimationPropertyType || (AnimationPropertyType = {}));
+
+let DragSpringLoadingState;
+(function (DragSpringLoadingState) {
+  DragSpringLoadingState.BEGIN = 0;
+  DragSpringLoadingState.UPDATE = 1;
+  DragSpringLoadingState.END = 2;
+  DragSpringLoadingState.CANCEL = 3;
+})(DragSpringLoadingState || (DragSpringLoadingState = {}));

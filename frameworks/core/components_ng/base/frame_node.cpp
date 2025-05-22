@@ -45,6 +45,7 @@
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -3504,6 +3505,15 @@ RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub()
         focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this), focusPattern);
     }
     return focusHub_;
+}
+
+const RefPtr<DragDropRelatedConfigurations>& FrameNode::GetOrCreateDragDropRelatedConfigurations()
+{
+    if (dragDropRelatedConfigurations_) {
+        return dragDropRelatedConfigurations_;
+    }
+    dragDropRelatedConfigurations_ = MakeRefPtr<DragDropRelatedConfigurations>();
+    return dragDropRelatedConfigurations_;
 }
 
 const RefPtr<FocusHub>& FrameNode::GetOrCreateFocusHub(FocusType type, bool focusable, FocusStyleType focusStyleType,

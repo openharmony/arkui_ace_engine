@@ -1121,6 +1121,17 @@ public:
         ViewAbstract::SetOnDragEnter(std::move(onDragEnter));
     }
 
+    void SetOnDragSpringLoading(NG::OnDrapDropSpringLoadingFunc&& onDragSpringLoading) override
+    {
+        ViewAbstract::SetOnDragSpringLoading(std::move(onDragSpringLoading));
+    }
+
+    void SetOnDragSpringLoadingConfiguration(
+        const RefPtr<DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration) override
+    {
+        ViewAbstract::SetOnDragSpringLoadingConfiguration(std::move(dragSpringLoadingConfiguration));
+    }
+
     void SetOnDragEnd(OnNewDragFunc&& onDragEnd) override
     {
         ViewAbstract::SetOnDragEnd(std::move(onDragEnd));
