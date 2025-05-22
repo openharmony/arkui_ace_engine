@@ -3880,6 +3880,7 @@ let HeightBreakpoint;
 let WebElementType;
 (function (WebElementType) {
   WebElementType[WebElementType.IMAGE = 1] = 'IMAGE';
+  WebElementType[WebElementType.LINK = 2] = 'LINK';
 })(WebElementType || (WebElementType = {}));
 
 let WebResponseType;

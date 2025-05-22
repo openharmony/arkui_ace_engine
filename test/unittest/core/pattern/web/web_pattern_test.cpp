@@ -420,4 +420,21 @@ HWTEST_F(WebPatternTest, UpdateKeyboardSafeArea012, TestSize.Level1)
     result = g_webPattern->UpdateKeyboardSafeArea(false, 0.0);
     EXPECT_TRUE(result);
 }
+
+/**
+ * @tc.name: SetLinkPreviewSelectionMenu001
+ * @tc.desc: Test SetPreviewSelectionMenu for link.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, SetLinkPreviewSelectionMenu001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    std::function<void()> menuBuilder = nullptr;
+    std::function<void()> previewBuilder = nullptr;
+    NG::MenuParam menuParam;
+    std::shared_ptr<WebPreviewSelectionMenuParam> param = std::make_shared<WebPreviewSelectionMenuParam>(
+        WebElementType::LINK, ResponseType::LONG_PRESS, menuBuilder, previewBuilder, menuParam);
+    g_webPattern->SetPreviewSelectionMenu(param);
+#endif
+}
 } // namespace OHOS::Ace::NG
