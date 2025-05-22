@@ -2487,7 +2487,7 @@ void RichEditorPattern::SetResultObjectText(ResultObject& resultObject, const Re
     if (spanItem->rangeStart <= previewTextRecord_.startOffset && spanItem->position >= previewTextRecord_.endOffset) {
         resultObject.previewText = previewTextRecord_.previewContent;
     }
-    resultObject.urlAddress = spanItem->urlAddress;
+    resultObject.urlAddress = spanItem->GetUrlAddress();
 }
 
 void RichEditorPattern::GetContentBySpans(std::u16string& u16Str)
@@ -4890,6 +4890,7 @@ TextSpanOptions RichEditorPattern::GetTextSpanOptions(const RefPtr<SpanItem>& sp
     UserGestureOptions gestureOption;
     gestureOption.onClick = spanItem->onClick;
     gestureOption.onLongPress = spanItem->onLongPress;
+    options.urlAddress = spanItem->urlAddress;
     options.userGestureOption = gestureOption;
     options.style = textStyle;
     options.paraStyle = GetParagraphStyle(spanItem);
@@ -6058,7 +6059,7 @@ bool RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     retInfo.SetFontStyle(spanNode->GetItalicFontStyleValue(OHOS::Ace::FontStyle::NORMAL));
     retInfo.SetFontWeight(static_cast<int32_t>(spanNode->GetFontWeightValue(FontWeight::NORMAL)));
     retInfo.SetTextStyle(GetTextStyleObject(spanNode));
-    retInfo.SetUrlAddress(spanItem->urlAddress);
+    retInfo.SetUrlAddress(spanItem->GetUrlAddress());
     std::string fontFamilyValue;
     auto fontFamily = spanNode->GetFontFamilyValue({ "HarmonyOS Sans" });
     for (const auto& str : fontFamily) {
@@ -7167,7 +7168,7 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
     }
     spanResult.SetOffsetInSpan(currentPosition - contentStartPosition);
     spanResult.SetEraseLength(eraseLength);
-    spanResult.SetUrlAddress(spanItem->urlAddress);
+    spanResult.SetUrlAddress(spanItem->GetUrlAddress());
     if (!spanItem->GetTextStyle().has_value()) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "SpanItem text style is empty.");
         return eraseLength;

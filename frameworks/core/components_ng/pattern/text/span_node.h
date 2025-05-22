@@ -314,11 +314,15 @@ public:
     virtual ResultObject GetSpanResultObject(int32_t start, int32_t end);
     virtual RefPtr<SpanItem> GetSameStyleSpanItem(bool isEncodeTlvS = false) const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
-    std::u16string urlAddress;
+    std::optional<std::u16string> urlAddress;
     std::function<void()> urlOnRelease;
     void SetUrlOnReleaseEvent(std::function<void()>&& onRelease)
     {
         urlOnRelease = std::move(onRelease);
+    }
+    const std::u16string GetUrlAddress()
+    {
+        return urlAddress.value_or(u"");
     }
     bool Contains(int32_t index)
     {
