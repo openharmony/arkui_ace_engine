@@ -18,18 +18,14 @@
 
 import { int32, uint32, hashCodeFromString, KoalaCallsiteKey } from '@koalaui/common';
 import { __context, __id, DataNode, RepeatByArray, remember, NodeAttach } from '@koalaui/runtime';
-import { RepeatItem, UIRepeatAttribute, RepeatArray, TemplateTypedFunc, VirtualScrollOptions, TemplateOptions } from './Repeat';
+import { RepeatItem, UIRepeatAttribute, RepeatArray, RepeatItemBuilder, TemplateTypedFunc, VirtualScrollOptions, TemplateOptions } from '../component/repeat';
+import { IDataSource, DataChangeListener } from '../component/lazyForEach';
+import { LazyForEachImpl } from '../LazyForEach';
 import { RepeatType } from '../PeerNode';
-
-export class RepeatDataNode<T> extends DataNode<T> {
-    constructor(kind: uint32 = 1) {
-        super(kind);
-    }
-}
 
 class RepeatItemImpl<T> implements RepeatItem<T> {
     __item: T;
-    __index?: number;
+    __index: number;
     
     constructor(initialItem: T, initialIndex: number) {
         this.__item = initialItem;
@@ -40,7 +36,7 @@ class RepeatItemImpl<T> implements RepeatItem<T> {
         return this.__item;
     }
 
-    get index(): number | undefined {
+    get index(): number {
         return this.__index;
     }
 
@@ -53,16 +49,46 @@ class RepeatItemImpl<T> implements RepeatItem<T> {
     }
 }
 
+class RepeatDataSource<T> implements IDataSource<T> {
+    private arr_: RepeatArray<T>;
+
+    constructor(arr: RepeatArray<T>) {
+        this.arr_ = arr;
+    }
+
+    totalCount(): number {
+        return this.arr_.length;
+    }
+
+    getData(index: number): T {
+        if (index < 0 || index >= this.arr_.length) {
+            throw new Error('index out of range. Application error!');
+        }
+        return this.arr_[index];
+    }
+
+    registerDataChangeListener(listener: DataChangeListener): void {}
+
+    unregisterDataChangeListener(listener: DataChangeListener): void {}
+}
+
+export class RepeatDataNode<T> extends DataNode<T> {
+    constructor(kind: uint32 = 1) {
+        super(kind);
+    }
+}
+
+// should be empty string, don't change it
+const RepeatEachFuncType: string = '';
+
 export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
     arr_: RepeatArray<T>;
-    /** @memo */
-    itemGenFunc_?: (repeatItem: RepeatItem<T>) => void;
+    itemGenFuncs_: Map<string, RepeatItemBuilder<T>> = new Map<string, RepeatItemBuilder<T>>();
     keyGenFunc_?: (item: T, index: number) => string;
-    keyGenFuncSpecified_?: boolean;
-
-    // .vritualScroll
     totalCount_?: number | (() => number);
     totalCountSpecified_?: boolean;
+    templateOptions_: Map<string, number> = new Map<string, number>();
+    ttypeGenFunc_?: TemplateTypedFunc<T>;
     reusable_?: boolean;
     isVirtualScroll_: boolean = false;
 
@@ -71,42 +97,52 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
     }
 
     /** @memo */
-    each(
-        /** @memo */
-        itemGenerator: (repeatItem: RepeatItem<T>) => void
-    ): UIRepeatAttributeImpl<T> {
+    each(itemGenerator: RepeatItemBuilder<T>): UIRepeatAttributeImpl<T> {
         if (itemGenerator === undefined || typeof itemGenerator !== 'function') {
             throw new Error('item generator function missing. Application error!');
         }
-        this.itemGenFunc_ = itemGenerator;
+        this.itemGenFuncs_.set(RepeatEachFuncType, itemGenerator);
+        this.templateOptions_.set(RepeatEachFuncType, this.normTemplateOptions({}));
         return this;
     }
 
     /** @memo */
     key(keyGenerator: (item: T, index: number) => string): UIRepeatAttributeImpl<T> {
-        if (keyGenerator === undefined || typeof keyGenerator !== 'function') {
-            throw new Error('key generator function missing. Application error!');
-        }
         this.keyGenFunc_ = keyGenerator;
-        this.keyGenFuncSpecified_ = true;
         return this;
     }
 
     /** @memo */
     virtualScroll(options?: VirtualScrollOptions): UIRepeatAttributeImpl<T> {
+        // use array length as default value
+        this.totalCount_ = this.arr_.length;
+        this.totalCountSpecified_ = false;
+
+        if (options?.totalCount && Number.isInteger(options?.totalCount!) && (options?.totalCount as number) >= 0) {
+            this.totalCount_ = options?.totalCount;
+            this.totalCountSpecified_ = true;
+        }
+        if (typeof options?.reusable === 'boolean') {
+            this.reusable_ = options!.reusable;
+        } else if (options?.reusable === null) {
+            this.reusable_ = true;
+            throw new Error('Repeat.reusable type should be boolean. Use default value: true.');
+        } else {
+            this.reusable_ = true;
+        }
+
         this.isVirtualScroll_ = true;
         return this;
     }
 
     /** @memo */
-    template(type: string,
-        /** @memo */
-        itemBuilder: (repeatItem: RepeatItem<T>) => void,
-        templateOptions?: TemplateOptions
-    ): UIRepeatAttributeImpl<T> {
+    template(
+        type: string, itemBuilder: RepeatItemBuilder<T>, templateOptions?: TemplateOptions): UIRepeatAttributeImpl<T> {
         if (itemBuilder === undefined || typeof itemBuilder !== 'function') {
             throw new Error('template generator function missing. Application error!');
         }
+        this.itemGenFuncs_.set(type, itemBuilder);
+        this.templateOptions_.set(type, this.normTemplateOptions(templateOptions!));
         return this;
     }
 
@@ -115,22 +151,54 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
         if (typedFunc === undefined || typeof typedFunc !== 'function') {
             throw new Error('templateId generator function missing. Application error!');
         }
+        this.ttypeGenFunc_ = typedFunc;
         return this;
     }
 
     /** @memo */
     render(): void {
-        attachChild<T>(this.arr_, this.itemGenFunc_!, this.keyGenFunc_);
+        if (!this.itemGenFuncs_.get(RepeatEachFuncType)) {
+            throw new Error('Repeat item builder function unspecified. Usage error!');
+        }
+        this.isVirtualScroll_
+            ? virtualRender<T>(this.arr_, this.itemGenFuncs_, this.keyGenFunc_, this.ttypeGenFunc_)
+            : nonVirtualRender<T>(this.arr_, this.itemGenFuncs_.get(RepeatEachFuncType)!, this.keyGenFunc_);
+    }
+
+    // normalize the template options
+    private normTemplateOptions(options: TemplateOptions): number {
+        if (!options || !options.cachedCount || !Number.isInteger(options.cachedCount!)) {
+            return NaN;
+        }
+        return options.cachedCount!;
     }
 }
 
 /** @memo */
-function attachChild<T>(
-    arr: RepeatArray<T>,
+function virtualRender<T>(arr: RepeatArray<T>,
+    itemGenFuncs: Map<string, RepeatItemBuilder<T>>,
+    keyGenerator?: (element: T, index: number) => string,
+    typedFunc?: TemplateTypedFunc<T>): void {
+    const dataSource = new RepeatDataSource<T>(arr);
     /** @memo */
-    itemGenerator: (repeatItem: RepeatItem<T>) => void,
-    keyGenerator?: (element: T, index: number) => string
-): void {
+    const itemGen = (item: T, index: number): void => {
+        const ri = new RepeatItemImpl<T>(item, index as number);
+        let _type: string = typedFunc ? typedFunc!(item, index as number) : RepeatEachFuncType;
+        if (!itemGenFuncs.has(_type)) {
+            _type = RepeatEachFuncType;
+        }
+        /** @memo */
+        const itemBuilder = itemGenFuncs.get(_type)!;
+        itemBuilder(ri);
+    }
+    LazyForEachImpl<T>(dataSource, itemGen, keyGenerator);
+}
+
+/** @memo */
+function nonVirtualRender<T>(arr: RepeatArray<T>,
+    /** @memo */
+    itemGenerator: RepeatItemBuilder<T>,
+    keyGenerator?: (element: T, index: number) => string): void {
     if (typeof keyGenerator !== 'function') {
         throw new Error('key generator is not a function. Application error!');
     }
@@ -138,6 +206,7 @@ function attachChild<T>(
         keyGenerator ? hashCodeFromString(keyGenerator!(ele, (i as number))) : i;
     RepeatByArray<T>(arr, keyGen, (ele: T, i: int32) => {
         const ri = new RepeatItemImpl<T>(ele, (i as number));
+        /** @memo */
         itemGenerator(ri);
     });
 }
