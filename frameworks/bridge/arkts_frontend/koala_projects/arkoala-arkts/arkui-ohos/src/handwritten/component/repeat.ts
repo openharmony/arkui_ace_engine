@@ -17,23 +17,22 @@
 // HANDWRITTEN, DO NOT REGENERATE
 
 import { __context, __id } from '@koalaui/runtime';
-import { RepeatImpl } from './RepeatImpl';
+import { RepeatImpl } from '../handwritten/RepeatImpl';
 
 export interface RepeatItem<T> {
     readonly item: T;
-    readonly index?: number;
+    readonly index: number;
 }
 
 export type RepeatArray<T> = Array<T> | ReadonlyArray<T> | Readonly<Array<T>>;
-/** @memo */
-export type RepeatItemBuilder<T> = (repeatItem: RepeatItem<T>) => void;
+export type RepeatItemBuilder<T> =
+    /** @memo */
+    (repeatItem: RepeatItem<T>) => void;
 export type TemplateTypedFunc<T> = (item: T, index: number) => string;
 
 export interface VirtualScrollOptions {
     totalCount?: number;
     reusable?: boolean;
-    onLazyLoading?: (index: number) => void;
-    onTotalCount?: () => number;
 }
 
 export interface TemplateOptions {
@@ -42,18 +41,14 @@ export interface TemplateOptions {
 
 export interface UIRepeatAttribute<T> {
     /** @memo */
-    each(
-        /** @memo */
-        itemGenerator: (repeatItem: RepeatItem<T>) => void): UIRepeatAttribute<T>;
+    each(itemGenerator: RepeatItemBuilder<T>): UIRepeatAttribute<T>;
     /** @memo */
     key(keyGenerator: (item: T, index: number) => string): UIRepeatAttribute<T>;
     /** @memo */
     virtualScroll(options?: VirtualScrollOptions): UIRepeatAttribute<T>;
     /** @memo */
-    template(type: string,
-        /** @memo */
-        itemBuilder: (repeatItem: RepeatItem<T>) => void,
-        templateOptions?: TemplateOptions): UIRepeatAttribute<T>;
+    template(
+        type: string, itemBuilder: RepeatItemBuilder<T>, templateOptions?: TemplateOptions): UIRepeatAttribute<T>;
     /** @memo */
     templateId(typedFunc: TemplateTypedFunc<T>): UIRepeatAttribute<T>;
     /** @memo */
