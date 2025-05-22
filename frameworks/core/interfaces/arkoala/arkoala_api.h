@@ -4398,6 +4398,7 @@ struct ArkUITextInputModifier {
     ArkUI_Uint32 (*getTextInputStrokeColor)(ArkUINodeHandle node);
     void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
     void (*resetEnableAutoSpacing)(ArkUINodeHandle node);
+    void (*resetTextInputOnSecurityStateChange)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -5756,6 +5757,10 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorStopBackPress)(ArkUINodeHandle node);
     void (*setRichEditorKeyboardAppearance)(ArkUINodeHandle node, ArkUI_Uint32 keyboardAppearance);
     void (*resetRichEditorKeyboardAppearance)(ArkUINodeHandle node);
+    void (*setRichEditorOnDidIMEInput)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorOnDidIMEInput)(ArkUINodeHandle node);
+    void (*setRichEditorEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetRichEditorEnableHapticFeedback)(ArkUINodeHandle node);
 };
 
 struct ArkUIRichEditorControllerModifier {

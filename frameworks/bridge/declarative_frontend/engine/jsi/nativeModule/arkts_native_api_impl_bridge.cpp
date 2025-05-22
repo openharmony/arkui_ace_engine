@@ -2078,6 +2078,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetKeyboardAppearance));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetKeyboardAppearance"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetKeyboardAppearance));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnDidIMEInput"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnDidIMEInput));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDidIMEInput"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnDidIMEInput));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableHapticFeedback"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetEnableHapticFeedback));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableHapticFeedback"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetEnableHapticFeedback));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "richEditor"), richEditor);
 
     auto linearIndicator = panda::ObjectRef::New(vm);
@@ -2797,6 +2805,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetEnableAutoSpacing));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableAutoSpacing"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetEnableAutoSpacing));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSecurityStateChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetOnSecurityStateChange));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSecurityStateChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetOnSecurityStateChange));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textInput"), textInput);
 
     auto navDestination = panda::ObjectRef::New(vm);
@@ -3540,6 +3552,10 @@ void ArkUINativeModule::RegisterSelectAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::SetAvoidance));
     select->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAvoidance"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::ResetAvoidance));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSelect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::SetOnSelect));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSelect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::ResetOnSelect));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "select"), select);
 }
 

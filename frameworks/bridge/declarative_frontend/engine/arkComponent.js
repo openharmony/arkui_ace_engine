@@ -9849,6 +9849,38 @@ class RichEditorKeyboardAppearanceModifier extends ModifierWithKey {
 }
 RichEditorKeyboardAppearanceModifier.identity = Symbol('richEditorKeyboardAppearance');
 
+class RichEditorOnDidIMEInputModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnDidIMEInput(node);
+    } else {
+      getUINativeModule().richEditor.setOnDidIMEInput(node, this.value);
+    }
+  }
+}
+RichEditorOnDidIMEInputModifier.identity = Symbol('richEditorOnDidIMEInput');
+
+class RichEditorEnableHapticFeedbackModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetEnableHapticFeedback(node);
+    }
+    else {
+      getUINativeModule().richEditor.setEnableHapticFeedback(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+RichEditorEnableHapticFeedbackModifier.identity = Symbol('richEditorEnableHapticFeedback');
+
 class ArkRichEditorComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -9993,6 +10025,14 @@ class ArkRichEditorComponent extends ArkComponent {
   }
   keyboardAppearance(value) {
     modifierWithKey(this._modifiersWithKeys, RichEditorKeyboardAppearanceModifier.identity, RichEditorKeyboardAppearanceModifier, value);
+    return this;
+  }
+  onDidIMEInput(callback) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnDidIMEInputModifier.identity, RichEditorOnDidIMEInputModifier, callback);
+    return this;
+  }
+  enableHapticFeedback(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorEnableHapticFeedbackModifier.identity, RichEditorEnableHapticFeedbackModifier, value);
     return this;
   }
 }
@@ -16313,7 +16353,8 @@ class TextInputCaretStyleModifier extends ModifierWithKey {
   }
   checkObjectDiff() {
     if (isObject(this.stageValue) && isObject(this.value)) {
-      return !isBaseOrResourceEqual(this.stageValue.width, this.value.width);
+      return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+        !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
     }
     else {
       return true;
@@ -17212,6 +17253,20 @@ class TextInputEnableAutoSpacingModifier extends ModifierWithKey {
 }
 TextInputEnableAutoSpacingModifier.identity = Symbol('textInputEnableAutoSpacing');
 
+class TextInputOnSecurityStateChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetOnSecurityStateChange(node);
+    }
+    else {
+      getUINativeModule().textInput.setOnSecurityStateChange(node, this.value);
+    }
+  }
+}
+TextInputOnSecurityStateChangeModifier.identity = Symbol('textInputOnSecurityStateChange');
 class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -17638,6 +17693,11 @@ class ArkTextInputComponent extends ArkComponent {
   }
   enableAutoSpacing(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoSpacingModifier.identity, TextInputEnableAutoSpacingModifier, value);
+    return this;
+  }
+  onSecurityStateChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextInputOnSecurityStateChangeModifier.identity,
+      TextInputOnSecurityStateChangeModifier, callback);
     return this;
   }
 }
@@ -18168,6 +18228,12 @@ class ArkBorderRadius {
     this.bottomRight = undefined;
   }
   isEqual(another) {
+    if (this == undefined && another == undefined) {
+      return true;
+    }
+    if ((this == undefined && another != undefined) || (this != undefined && another == undefined)) {
+      return false
+    }
     return (this.topLeft === another.topLeft &&
       this.topRight === another.topRight &&
       this.bottomLeft === another.bottomLeft &&
@@ -21223,7 +21289,8 @@ class ArkSelectComponent extends ArkComponent {
     return this;
   }
   onSelect(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SelectOnSelectModifier.identity, SelectOnSelectModifier, callback);
+    return this;
   }
   space(value) {
     modifierWithKey(this._modifiersWithKeys, SpaceModifier.identity, SpaceModifier, value);
@@ -21862,6 +21929,20 @@ class AvoidanceModifier extends ModifierWithKey {
   }
 }
 AvoidanceModifier.identity = Symbol('selectAvoidance');
+
+class SelectOnSelectModifier extends ModifierWithKey{
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.resetOnSelect(node);
+    } else {
+      getUINativeModule().select.setOnSelect(node, this.value);
+    }
+  }
+}
+SelectOnSelectModifier.identity = Symbol('selectOnSelect');
 
 /// <reference path='./import.ts' />
 class ArkRadioComponent extends ArkComponent {

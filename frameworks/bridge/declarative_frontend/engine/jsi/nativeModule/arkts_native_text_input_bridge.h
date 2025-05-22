@@ -171,6 +171,8 @@ public:
     static ArkUINativeModuleValue ResetStrokeColor(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetEnableAutoSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetEnableAutoSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnSecurityStateChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnSecurityStateChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
 
 private:
     static void SetCancelButtonImage(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t style);

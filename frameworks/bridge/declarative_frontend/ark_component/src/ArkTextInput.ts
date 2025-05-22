@@ -645,7 +645,8 @@ class TextInputCaretStyleModifier extends ModifierWithKey<CaretStyle> {
 
   checkObjectDiff(): boolean {
     if (isObject(this.stageValue) && isObject(this.value)) {
-      return !isBaseOrResourceEqual(this.stageValue.width, this.value.width);
+      return (!isBaseOrResourceEqual(this.stageValue.width, this.value.width)) ||
+        !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
     } else {
       return true;
     }
@@ -1459,6 +1460,20 @@ class TextInputEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextInputOnSecurityStateChangeModifier extends ModifierWithKey<Callback<boolean>> {
+  constructor(value: Callback<boolean>) {
+    super(value);
+  }
+  static identity = Symbol('textInputOnSecurityStateChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOnSecurityStateChange(node);
+    } else {
+      getUINativeModule().textInput.setOnSecurityStateChange(node, this.value);
+    }
+  }
+}
+
 class TextInputEllipsisModeModifier extends ModifierWithKey<EllipsisMode> {
   constructor(value: EllipsisMode) {
     super(value);
@@ -2082,6 +2097,11 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   enableAutoSpacing(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoSpacingModifier.identity, TextInputEnableAutoSpacingModifier, value);
+    return this;
+  }
+  onSecurityStateChange(callback: Callback<boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputOnSecurityStateChangeModifier.identity,
+      TextInputOnSecurityStateChangeModifier, callback);
     return this;
   }
 }

@@ -110,8 +110,10 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
       this._modifiersWithKeys, OptionFontColorModifier.identity, OptionFontColorModifier, value);
     return this;
   }
-  onSelect(callback: (index: number, value: string) => void): this {
-    throw new Error('Method not implemented.');
+  onSelect(callback: (value: OnSelectCallback) => void): this {
+    modifierWithKey(
+      this._modifiersWithKeys, SelectOnSelectModifier.identity, SelectOnSelectModifier, callback);
+    return this;
   }
   space(value: Length): this {
     modifierWithKey(
@@ -759,6 +761,20 @@ class AvoidanceModifier extends ModifierWithKey<AvoidanceMode> {
   }
   checkObjectDiff(): boolean {
     return this.stageValue !== this.value;
+  }
+}
+
+class SelectOnSelectModifier extends ModifierWithKey<(value: OnSelectCallback) => void> {
+  constructor(value: OnSelectCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('selectOnSelect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().select.resetOnSelect(node);
+    } else {
+      getUINativeModule().select.setOnSelect(node, this.value);
+    }
   }
 }
 // @ts-ignore

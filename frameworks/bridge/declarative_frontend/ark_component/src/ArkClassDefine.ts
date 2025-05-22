@@ -155,6 +155,12 @@ class ArkBorderRadius {
   }
 
   isEqual(another: ArkBorderRadius): boolean {
+    if (this == undefined && another == undefined) {
+      return true;
+    }
+    if ((this == undefined && another != undefined) || (this != undefined && another == undefined)) {
+      return false
+    }
     return (
       (this.topLeft === another.topLeft &&
         this.topRight === another.topRight &&

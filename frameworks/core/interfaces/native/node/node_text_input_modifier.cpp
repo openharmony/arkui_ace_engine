@@ -1978,6 +1978,13 @@ void ResetTextInputOnWillChange(ArkUINodeHandle node)
     TextFieldModelNG::SetOnWillChangeEvent(frameNode, nullptr);
 }
 
+void ResetTextInputOnSecurityStateChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnSecurityStateChange(frameNode, nullptr);
+}
+
 void SetTextInputStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2259,6 +2266,7 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .getTextInputStrokeColor = GetTextInputStrokeColor,
         .setEnableAutoSpacing = SetEnableAutoSpacing,
         .resetEnableAutoSpacing = ResetEnableAutoSpacing,
+        .resetTextInputOnSecurityStateChange = ResetTextInputOnSecurityStateChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
