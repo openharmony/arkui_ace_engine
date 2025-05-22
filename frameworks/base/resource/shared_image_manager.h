@@ -30,6 +30,7 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
 
@@ -43,7 +44,11 @@ class SharedImageManager : public AceType {
     DECLARE_ACE_TYPE(SharedImageManager, AceType);
 
 public:
-    explicit SharedImageManager(const RefPtr<TaskExecutor>& taskExecutor) : taskExecutor_(taskExecutor) {}
+    explicit SharedImageManager(const RefPtr<TaskExecutor>& taskExecutor) :
+        sharedImageTotalSize_(0), taskExecutor_(taskExecutor) {
+        sharedImageCacheThreshold_ = SystemProperties::getFormSharedImageCacheThreshold();
+        LOGI("getFormSharedImageCacheThreshold %{public}d", sharedImageCacheThreshold_);
+    }
     ~SharedImageManager() override = default;
     void AddSharedImage(const std::string& name, SharedImage&& sharedImage);
     void AddPictureNamesToReloadMap(std::string&& name);
@@ -68,6 +73,8 @@ private:
     std::mutex providerMapMutex_;
     std::mutex cancelableCallbackMapMutex_;
     SharedImageMap sharedImageMap_;
+    int32_t sharedImageTotalSize_;
+    int32_t sharedImageCacheThreshold_;
     ProviderMapToReload providerMapToReload_;
     std::function<void()> clearImageDataCallback_;
     std::unordered_map<std::string, CancelableCallback<void()>> cancelableCallbackMap_;
