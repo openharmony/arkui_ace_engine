@@ -3694,9 +3694,8 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
     CHECK_NULL_RETURN(safeAreaManager, false);
     bool keyboardSafeAreaEnabled = safeAreaManager->KeyboardSafeAreaEnabled();
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "ProcessVirtualKeyBoard width:%{public}d, height:%{public}d, keyboard:%{public}f, safeArea:%{public}d",
-        width, height, keyboard, keyboardSafeAreaEnabled);
-
+        "ProcessVirtualKeyBoard width:%{public}d, height:%{public}d, keyboard:%{public}f, safeArea:%{public}d", width,
+        height, keyboard, keyboardSafeAreaEnabled);
     if (!isFocus_ || !isVisible_) {
         UpdateOnFocusTextField(false);
         ProcessVirtualKeyBoardHide(width, height, keyboardSafeAreaEnabled);
@@ -3704,9 +3703,10 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
     }
     UpdateOnFocusTextField(!NearZero(keyboard));
     if (NearZero(keyboard)) {
-        return ProcessVirtualKeyBoardHide(width, height, keyboardSafeAreaEnabled);
+        return ProcessVirtualKeyBoardHide(width, height, keyboardSafeAreaEnabled) && UpdateKeyboardSafeArea(true);
     }
-    return ProcessVirtualKeyBoardShow(width, height, keyboard, keyboardSafeAreaEnabled);
+    return ProcessVirtualKeyBoardShow(width, height, keyboard, keyboardSafeAreaEnabled) &&
+           UpdateKeyboardSafeArea(false, keyboard);
 }
 
 void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard, bool isUpdate)
@@ -4771,6 +4771,7 @@ void WebPattern::CloseCustomKeyboard()
     keyboardOverlay_->CloseKeyboard(frameNode->GetId());
     isUsingCustomKeyboardAvoid_ = false;
     TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard CloseCustomKeyboard end");
+    UpdateKeyboardSafeArea(true);
 }
 
 void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp)
@@ -6668,6 +6669,7 @@ void WebPattern::RemoveDataListNode()
 
 void WebPattern::CloseKeyboard()
 {
+    UpdateKeyboardSafeArea(true);
     InputMethodManager::GetInstance()->CloseKeyboard();
 }
 
@@ -7488,4 +7490,22 @@ void WebPattern::CloseDataDetectorMenu()
     CHECK_NULL_VOID(webDataDetectorAdapter_);
     webDataDetectorAdapter_->CloseAIMenu();
 }
+bool WebPattern::UpdateKeyboardSafeArea(bool hideOrClose, double height)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, false);
+    auto keyboardInset = safeAreaManager->GetKeyboardInset();
+    if (hideOrClose) {
+        auto newBottom = std::optional<uint32_t>(keyboardInset.end);
+        safeAreaManager->UpdateKeyboardSafeArea(0, newBottom);
+    } else {
+        safeAreaManager->UpdateKeyboardSafeArea(height);
+    }
+    return true;
+}
+
 } // namespace OHOS::Ace::NG
