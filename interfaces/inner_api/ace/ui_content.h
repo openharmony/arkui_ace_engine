@@ -478,7 +478,7 @@ public:
 
     virtual void SetStatusBarItemColor(uint32_t color) {};
 
-    virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) {};
+    virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool isRouter = true) {};
 
     virtual void EnableContainerModalGesture(bool isEnable) {};
 
