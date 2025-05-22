@@ -260,17 +260,9 @@ HWTEST_F(TextTimerModifierTest, setFormatTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(TextTimerModifierTest, setFormatTestFormatValidValues, TestSize.Level1)
 {
-    Ark_String initValueFormat;
-
-    // Initial setup
-    initValueFormat = std::get<1>(Fixtures::testFixtureTextTimerDateFormatValidValues[0]);
-
-    auto checkValue = [this, &initValueFormat](
-                          const std::string& input, const Ark_String& value, const std::string& expectedStr) {
-        Ark_String inputValueFormat = initValueFormat;
-
-        inputValueFormat = value;
-        modifier_->setFormat(node_, &inputValueFormat);
+    auto checkValue = [this](const std::string& input, const Ark_String& value, const std::string& expectedStr) {
+        auto format = Converter::ArkValue<Opt_String>(value);
+        modifier_->setFormat(node_, &format);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FORMAT_NAME);
         EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setFormat, attribute: format";
@@ -294,10 +286,10 @@ HWTEST_F(TextTimerModifierTest, setFormatTestFormatInvalidValues, TestSize.Level
     initValueFormat = std::get<1>(Fixtures::testFixtureTextTimerDateFormatValidValues[0]);
 
     auto checkValue = [this, &initValueFormat](const std::string& input, const Ark_String& value) {
-        Ark_String inputValueFormat = initValueFormat;
+        Opt_String inputValueFormat = Converter::ArkValue<Opt_String>(initValueFormat);
 
         modifier_->setFormat(node_, &inputValueFormat);
-        inputValueFormat = value;
+        inputValueFormat = Converter::ArkValue<Opt_String>(value);
         modifier_->setFormat(node_, &inputValueFormat);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FORMAT_NAME);
@@ -331,17 +323,9 @@ HWTEST_F(TextTimerModifierTest, setFontColorTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(TextTimerModifierTest, setFontColorTestFontColorValidValues, TestSize.Level1)
 {
-    Ark_ResourceColor initValueFontColor;
-
-    // Initial setup
-    initValueFontColor =
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-
-    auto checkValue = [this, &initValueFontColor](
+    auto checkValue = [this](
                           const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
-        Ark_ResourceColor inputValueFontColor = initValueFontColor;
-
-        inputValueFontColor = value;
+        Opt_ResourceColor inputValueFontColor = Converter::ArkValue<Opt_ResourceColor>(value);
         modifier_->setFontColor(node_, &inputValueFontColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
@@ -370,17 +354,17 @@ HWTEST_F(TextTimerModifierTest, setFontColorTestFontColorValidValues, TestSize.L
  */
 HWTEST_F(TextTimerModifierTest, setFontColorTestFontColorInvalidValues, TestSize.Level1)
 {
-    Ark_ResourceColor initValueFontColor;
+    Opt_ResourceColor initValueFontColor;
 
     // Initial setup
-    initValueFontColor =
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    initValueFontColor = Converter::ArkValue<Opt_ResourceColor>(
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
 
     auto checkValue = [this, &initValueFontColor](const std::string& input, const Ark_ResourceColor& value) {
-        Ark_ResourceColor inputValueFontColor = initValueFontColor;
+        Opt_ResourceColor inputValueFontColor = initValueFontColor;
 
         modifier_->setFontColor(node_, &inputValueFontColor);
-        inputValueFontColor = value;
+        inputValueFontColor = Converter::ArkValue<Opt_ResourceColor>(value);
         modifier_->setFontColor(node_, &inputValueFontColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
@@ -419,16 +403,9 @@ HWTEST_F(TextTimerModifierTest, setFontSizeTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(TextTimerModifierTest, setFontSizeTestFontSizeValidValues, TestSize.Level1)
 {
-    Ark_Length initValueFontSize;
-
-    // Initial setup
-    initValueFontSize = std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]);
-
-    auto checkValue = [this, &initValueFontSize](
+    auto checkValue = [this](
                           const std::string& input, const Ark_Length& value, const std::string& expectedStr) {
-        Ark_Length inputValueFontSize = initValueFontSize;
-
-        inputValueFontSize = value;
+        Opt_Length inputValueFontSize = Converter::ArkValue<Opt_Length>(value);
         modifier_->setFontSize(node_, &inputValueFontSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
@@ -448,16 +425,17 @@ HWTEST_F(TextTimerModifierTest, setFontSizeTestFontSizeValidValues, TestSize.Lev
  */
 HWTEST_F(TextTimerModifierTest, setFontSizeTestFontSizeInvalidValues, TestSize.Level1)
 {
-    Ark_Length initValueFontSize;
+    Opt_Length initValueFontSize;
 
     // Initial setup
-    initValueFontSize = std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]);
+    initValueFontSize = Converter::ArkValue<Opt_Length>(
+        std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
 
     auto checkValue = [this, &initValueFontSize](const std::string& input, const Ark_Length& value) {
-        Ark_Length inputValueFontSize = initValueFontSize;
+        Opt_Length inputValueFontSize = initValueFontSize;
 
         modifier_->setFontSize(node_, &inputValueFontSize);
-        inputValueFontSize = value;
+        inputValueFontSize = Converter::ArkValue<Opt_Length>(value);
         modifier_->setFontSize(node_, &inputValueFontSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
@@ -491,17 +469,10 @@ HWTEST_F(TextTimerModifierTest, setFontStyleTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(TextTimerModifierTest, setFontStyleTestFontStyleValidValues, TestSize.Level1)
 {
-    Ark_FontStyle initValueFontStyle;
-
-    // Initial setup
-    initValueFontStyle = std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]);
-
-    auto checkValue = [this, &initValueFontStyle](
+    auto checkValue = [this](
                           const std::string& input, const Ark_FontStyle& value, const std::string& expectedStr) {
-        Ark_FontStyle inputValueFontStyle = initValueFontStyle;
-
-        inputValueFontStyle = value;
-        modifier_->setFontStyle(node_, inputValueFontStyle);
+        Opt_FontStyle inputValueFontStyle = Converter::ArkValue<Opt_FontStyle>(value);
+        modifier_->setFontStyle(node_, &inputValueFontStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_STYLE_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -520,17 +491,18 @@ HWTEST_F(TextTimerModifierTest, setFontStyleTestFontStyleValidValues, TestSize.L
  */
 HWTEST_F(TextTimerModifierTest, setFontStyleTestFontStyleInvalidValues, TestSize.Level1)
 {
-    Ark_FontStyle initValueFontStyle;
+    Opt_FontStyle initValueFontStyle;
 
     // Initial setup
-    initValueFontStyle = std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]);
+    initValueFontStyle = Converter::ArkValue<Opt_FontStyle>(
+        std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueFontStyle](const std::string& input, const Ark_FontStyle& value) {
-        Ark_FontStyle inputValueFontStyle = initValueFontStyle;
+        Opt_FontStyle inputValueFontStyle = initValueFontStyle;
 
-        modifier_->setFontStyle(node_, inputValueFontStyle);
-        inputValueFontStyle = value;
-        modifier_->setFontStyle(node_, inputValueFontStyle);
+        modifier_->setFontStyle(node_, &inputValueFontStyle);
+        inputValueFontStyle = Converter::ArkValue<Opt_FontStyle>(value);
+        modifier_->setFontStyle(node_, &inputValueFontStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_STYLE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE)
@@ -563,17 +535,10 @@ HWTEST_F(TextTimerModifierTest, setFontWeightTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(TextTimerModifierTest, setFontWeightTestFontWeightValidValues, TestSize.Level1)
 {
-    Ark_Union_Number_FontWeight_String initValueFontWeight;
-
-    // Initial setup
-    initValueFontWeight = ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(
-        std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-
-    auto checkValue = [this, &initValueFontWeight](const std::string& input,
+    auto checkValue = [this](const std::string& input,
                           const Ark_Union_Number_FontWeight_String& value, const std::string& expectedStr) {
-        Ark_Union_Number_FontWeight_String inputValueFontWeight = initValueFontWeight;
-
-        inputValueFontWeight = value;
+        Opt_Union_Number_FontWeight_String inputValueFontWeight =
+            Converter::ArkValue<Opt_Union_Number_FontWeight_String>(value);
         modifier_->setFontWeight(node_, &inputValueFontWeight);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
@@ -599,18 +564,18 @@ HWTEST_F(TextTimerModifierTest, setFontWeightTestFontWeightValidValues, TestSize
  */
 HWTEST_F(TextTimerModifierTest, setFontWeightTestFontWeightInvalidValues, TestSize.Level1)
 {
-    Ark_Union_Number_FontWeight_String initValueFontWeight;
+    Opt_Union_Number_FontWeight_String initValueFontWeight;
 
     // Initial setup
-    initValueFontWeight = ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(
+    initValueFontWeight = ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
 
     auto checkValue = [this, &initValueFontWeight](
                           const std::string& input, const Ark_Union_Number_FontWeight_String& value) {
-        Ark_Union_Number_FontWeight_String inputValueFontWeight = initValueFontWeight;
+        Opt_Union_Number_FontWeight_String inputValueFontWeight = initValueFontWeight;
 
         modifier_->setFontWeight(node_, &inputValueFontWeight);
-        inputValueFontWeight = value;
+        inputValueFontWeight = Converter::ArkValue<Opt_Union_Number_FontWeight_String>(value);
         modifier_->setFontWeight(node_, &inputValueFontWeight);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
@@ -652,17 +617,9 @@ HWTEST_F(TextTimerModifierTest, setFontFamilyTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(TextTimerModifierTest, DISABLED_setFontFamilyTestFontFamilyValidValues, TestSize.Level1)
 {
-    Ark_ResourceStr initValueFontFamily;
-
-    // Initial setup
-    initValueFontFamily =
-        ArkUnion<Ark_ResourceStr, Ark_Resource>(std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-
-    auto checkValue = [this, &initValueFontFamily](
+    auto checkValue = [this](
                           const std::string& input, const Ark_ResourceStr& value, const std::string& expectedStr) {
-        Ark_ResourceStr inputValueFontFamily = initValueFontFamily;
-
-        inputValueFontFamily = value;
+        Opt_ResourceStr inputValueFontFamily = Converter::ArkValue<Opt_ResourceStr>(value);
         modifier_->setFontFamily(node_, &inputValueFontFamily);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FAMILY_NAME);
@@ -685,17 +642,17 @@ HWTEST_F(TextTimerModifierTest, DISABLED_setFontFamilyTestFontFamilyValidValues,
  */
 HWTEST_F(TextTimerModifierTest, setFontFamilyTestFontFamilyInvalidValues, TestSize.Level1)
 {
-    Ark_ResourceStr initValueFontFamily;
+    Opt_ResourceStr initValueFontFamily;
 
     // Initial setup
     initValueFontFamily =
-        ArkUnion<Ark_ResourceStr, Ark_Resource>(std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
+        ArkUnion<Opt_ResourceStr, Ark_Resource>(std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
 
     auto checkValue = [this, &initValueFontFamily](const std::string& input, const Ark_ResourceStr& value) {
-        Ark_ResourceStr inputValueFontFamily = initValueFontFamily;
+        Opt_ResourceStr inputValueFontFamily = initValueFontFamily;
 
         modifier_->setFontFamily(node_, &inputValueFontFamily);
-        inputValueFontFamily = value;
+        inputValueFontFamily = Converter::ArkValue<Opt_ResourceStr>(value);
         modifier_->setFontFamily(node_, &inputValueFontFamily);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FAMILY_NAME);
@@ -779,7 +736,8 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowRadiusValidValues, Te
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
         WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).radius = value;
-        modifier_->setTextShadow(node_, &inputValueTextShadow);
+        auto optValue = Converter::ArkValue<Opt_Union_ShadowOptions_Array_ShadowOptions>(inputValueTextShadow);
+        modifier_->setTextShadow(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_RADIUS_NAME);
@@ -821,10 +779,11 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowRadiusInvalidValues, 
 
     auto checkValue = [this, &initValueTextShadow](const std::string& input, const Ark_Union_Number_Resource& value) {
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
-
-        modifier_->setTextShadow(node_, &inputValueTextShadow);
+        auto optValue = Converter::ArkValue<Opt_Union_ShadowOptions_Array_ShadowOptions>(inputValueTextShadow);
+        modifier_->setTextShadow(node_, &optValue);
         WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).radius = value;
-        modifier_->setTextShadow(node_, &inputValueTextShadow);
+        optValue = Converter::ArkValue<Opt_Union_ShadowOptions_Array_ShadowOptions>(inputValueTextShadow);
+        modifier_->setTextShadow(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_RADIUS_NAME);
@@ -871,7 +830,8 @@ HWTEST_F(TextTimerModifierTest, DISABLED_setTextShadowTestTextShadowTypeValidVal
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
         WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).type = value;
-        modifier_->setTextShadow(node_, &inputValueTextShadow);
+        auto optValue = Converter::ArkValue<Opt_Union_ShadowOptions_Array_ShadowOptions>(inputValueTextShadow);
+        modifier_->setTextShadow(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_TYPE_NAME);
@@ -911,9 +871,11 @@ HWTEST_F(TextTimerModifierTest, DISABLED_setTextShadowTestTextShadowTypeInvalidV
     auto checkValue = [this, &initValueTextShadow](const std::string& input, const Opt_ShadowType& value) {
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
-        modifier_->setTextShadow(node_, &inputValueTextShadow);
+        auto optValue = Converter::ArkValue<Opt_Union_ShadowOptions_Array_ShadowOptions>(inputValueTextShadow);
+        modifier_->setTextShadow(node_, &optValue);
         WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).type = value;
-        modifier_->setTextShadow(node_, &inputValueTextShadow);
+        optValue = Converter::ArkValue<Opt_Union_ShadowOptions_Array_ShadowOptions>(inputValueTextShadow);
+        modifier_->setTextShadow(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_TYPE_NAME);
@@ -956,7 +918,8 @@ HWTEST_F(TextTimerModifierTest, DISABLED_setTextShadowTestTextShadowColorValidVa
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
         WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).color = value;
-        modifier_->setTextShadow(node_, &inputValueTextShadow);
+        auto optValue = Converter::ArkValue<Opt_Union_ShadowOptions_Array_ShadowOptions>(inputValueTextShadow);
+        modifier_->setTextShadow(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_COLOR_NAME);
@@ -1006,10 +969,11 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowColorInvalidValues, T
     auto checkValue = [this, &initValueTextShadow](
                           const std::string& input, const Opt_Union_Color_String_Resource_ColoringStrategy& value) {
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
-
-        modifier_->setTextShadow(node_, &inputValueTextShadow);
+        auto optValue = Converter::ArkValue<Opt_Union_ShadowOptions_Array_ShadowOptions>(inputValueTextShadow);
+        modifier_->setTextShadow(node_, &optValue);
         WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).color = value;
-        modifier_->setTextShadow(node_, &inputValueTextShadow);
+        optValue = Converter::ArkValue<Opt_Union_ShadowOptions_Array_ShadowOptions>(inputValueTextShadow);
+        modifier_->setTextShadow(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_COLOR_NAME);
@@ -1061,7 +1025,8 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowOffsetXValidValues, T
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
         WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).offsetX = value;
-        modifier_->setTextShadow(node_, &inputValueTextShadow);
+        auto optValue = Converter::ArkValue<Opt_Union_ShadowOptions_Array_ShadowOptions>(inputValueTextShadow);
+        modifier_->setTextShadow(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_OFFSET_X_NAME);
@@ -1103,10 +1068,11 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowOffsetXInvalidValues,
 
     auto checkValue = [this, &initValueTextShadow](const std::string& input, const Opt_Union_Number_Resource& value) {
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
-
-        modifier_->setTextShadow(node_, &inputValueTextShadow);
+        auto optValue = Converter::ArkValue<Opt_Union_ShadowOptions_Array_ShadowOptions>(inputValueTextShadow);
+        modifier_->setTextShadow(node_, &optValue);
         WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).offsetX = value;
-        modifier_->setTextShadow(node_, &inputValueTextShadow);
+        optValue = Converter::ArkValue<Opt_Union_ShadowOptions_Array_ShadowOptions>(inputValueTextShadow);
+        modifier_->setTextShadow(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_OFFSET_X_NAME);
@@ -1149,7 +1115,8 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowOffsetYValidValues, T
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
         WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).offsetY = value;
-        modifier_->setTextShadow(node_, &inputValueTextShadow);
+        auto optValue = Converter::ArkValue<Opt_Union_ShadowOptions_Array_ShadowOptions>(inputValueTextShadow);
+        modifier_->setTextShadow(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_OFFSET_Y_NAME);
@@ -1191,10 +1158,11 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowOffsetYInvalidValues,
 
     auto checkValue = [this, &initValueTextShadow](const std::string& input, const Opt_Union_Number_Resource& value) {
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
-
-        modifier_->setTextShadow(node_, &inputValueTextShadow);
+        auto optValue = Converter::ArkValue<Opt_Union_ShadowOptions_Array_ShadowOptions>(inputValueTextShadow);
+        modifier_->setTextShadow(node_, &optValue);
         WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).offsetY = value;
-        modifier_->setTextShadow(node_, &inputValueTextShadow);
+        optValue = Converter::ArkValue<Opt_Union_ShadowOptions_Array_ShadowOptions>(inputValueTextShadow);
+        modifier_->setTextShadow(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_OFFSET_Y_NAME);
@@ -1237,7 +1205,8 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowFillValidValues, Test
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
         WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).fill = value;
-        modifier_->setTextShadow(node_, &inputValueTextShadow);
+        auto optValue = Converter::ArkValue<Opt_Union_ShadowOptions_Array_ShadowOptions>(inputValueTextShadow);
+        modifier_->setTextShadow(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_FILL_NAME);
@@ -1276,10 +1245,11 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowFillInvalidValues, Te
 
     auto checkValue = [this, &initValueTextShadow](const std::string& input, const Opt_Boolean& value) {
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
-
-        modifier_->setTextShadow(node_, &inputValueTextShadow);
+        auto optValue = Converter::ArkValue<Opt_Union_ShadowOptions_Array_ShadowOptions>(inputValueTextShadow);
+        modifier_->setTextShadow(node_, &optValue);
         WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).fill = value;
-        modifier_->setTextShadow(node_, &inputValueTextShadow);
+        optValue = Converter::ArkValue<Opt_Union_ShadowOptions_Array_ShadowOptions>(inputValueTextShadow);
+        modifier_->setTextShadow(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_FILL_NAME);
@@ -1320,8 +1290,8 @@ HWTEST_F(TextTimerModifierTest, setOnTimerTest, TestSize.Level1)
     };
 
     auto arkCallback = Converter::ArkValue<TextTimerAttribute_onTimer_event_type>(checkCallback, contextId);
-
-    modifier_->setOnTimer(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_TextTimerAttribute_onTimer_event_type>(arkCallback);
+    modifier_->setOnTimer(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
 

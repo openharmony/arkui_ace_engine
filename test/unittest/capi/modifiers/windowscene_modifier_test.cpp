@@ -51,9 +51,10 @@ HWTEST_F(WindowSceneModifierTest, setAttractionEffectTest, TestSize.Level1)
     Ark_Position destination;
     destination.x = Converter::ArkValue<Opt_Length>(DESTINATION_X);
     destination.y = Converter::ArkValue<Opt_Length>(DESTINATION_Y);
-    Ark_Number fraction = Converter::ArkValue<Ark_Number>(FRACTION);
+    Opt_Position optDestination = Converter::ArkValue<Opt_Position>(destination);
+    Opt_Number fraction = Converter::ArkValue<Opt_Number>(FRACTION);
 
-    modifier_->setAttractionEffect(node_, &destination, &fraction);
+    modifier_->setAttractionEffect(node_, &optDestination, &fraction);
     AttractionEffect effect = WindowSceneModel::GetAttractionEffect();
     AttractionEffect effectTest;
     effectTest.fraction = FRACTION;

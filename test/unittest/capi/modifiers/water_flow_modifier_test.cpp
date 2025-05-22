@@ -65,7 +65,8 @@ HWTEST_F(WaterFlowModifierTest, setOnReachStartTest, TestSize.Level1)
 
     // setup the callback object via C-API
     auto arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
-    modifier_->setOnReachStart(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    modifier_->setOnReachStart(node_, &optCallback);
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -96,7 +97,8 @@ HWTEST_F(WaterFlowModifierTest, setOnReachEndTest, TestSize.Level1)
 
     // setup the callback object via C-API
     auto arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
-    modifier_->setOnReachEnd(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    modifier_->setOnReachEnd(node_, &optCallback);
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -144,7 +146,8 @@ HWTEST_F(WaterFlowModifierTest, setOnScrollIndexTestCachedCountValidValues, Test
     };
 
     // Set the callback for scroll index change
-    modifier_->setOnScrollIndex(node_, &callBackValue);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Number_Number_Void>(callBackValue);
+    modifier_->setOnScrollIndex(node_, &optCallback);
 
     // Check that the event has not been triggered yet
     EXPECT_FALSE(checkEvent.has_value());
@@ -202,7 +205,8 @@ HWTEST_F(WaterFlowModifierTest, setOnScrollFrameBeginTest, TestSize.Level1)
     };
     auto arkFunc = Converter::ArkValue<Callback_Number_ScrollState_Literal_Number_offsetRemain>(
         nullptr, onScrollFrameBegin, expectedResId);
-    modifier_->setOnScrollFrameBegin(node_, &arkFunc);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain>(arkFunc);
+    modifier_->setOnScrollFrameBegin(node_, &optCallback);
 
     Dimension dimension(TEST_OFFSET);
     ScrollState state = ScrollState::SCROLL;

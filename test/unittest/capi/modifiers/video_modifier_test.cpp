@@ -333,9 +333,9 @@ HWTEST_F(VideoModifierTest, DISABLED_setImageAIOptionsTestValidValues, TestSize.
 }
 
 // Valid values for attribute 'muted' of method 'muted'
-static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> mutedMutedValidValues = {
-    {"true", Converter::ArkValue<Ark_Boolean>(true), "true"},
-    {"false", Converter::ArkValue<Ark_Boolean>(false), "false"},
+static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> mutedMutedValidValues = {
+    {"true", Converter::ArkValue<Opt_Boolean>(true), "true"},
+    {"false", Converter::ArkValue<Opt_Boolean>(false), "false"},
 };
 
 /*
@@ -362,8 +362,8 @@ HWTEST_F(VideoModifierTest, setMutedTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Boolean inputValueMuted;
-    Ark_Boolean initValueMuted;
+    Opt_Boolean inputValueMuted;
+    Opt_Boolean initValueMuted;
 
     // Initial setup
     initValueMuted = std::get<1>(mutedMutedValidValues[0]);
@@ -372,7 +372,7 @@ HWTEST_F(VideoModifierTest, setMutedTestValidValues, TestSize.Level1)
     inputValueMuted = initValueMuted;
     for (auto&& value: mutedMutedValidValues) {
         inputValueMuted = std::get<1>(value);
-        modifier_->setMuted(node_, inputValueMuted);
+        modifier_->setMuted(node_, &inputValueMuted);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MUTED_NAME);
         expectedStr = std::get<2>(value);
@@ -395,9 +395,9 @@ HWTEST_F(VideoModifierTest, setAutoPlayTestDefaultValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'autoPlay' of method 'autoPlay'
-static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> autoPlayAutoPlayValidValues = {
-    {"true", Converter::ArkValue<Ark_Boolean>(true), "true"},
-    {"false", Converter::ArkValue<Ark_Boolean>(false), "false"},
+static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> autoPlayAutoPlayValidValues = {
+    {"true", Converter::ArkValue<Opt_Boolean>(true), "true"},
+    {"false", Converter::ArkValue<Opt_Boolean>(false), "false"},
 };
 
 /*
@@ -410,8 +410,8 @@ HWTEST_F(VideoModifierTest, setAutoPlayTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Boolean inputValueAutoPlay;
-    Ark_Boolean initValueAutoPlay;
+    Opt_Boolean inputValueAutoPlay;
+    Opt_Boolean initValueAutoPlay;
 
     // Initial setup
     initValueAutoPlay = std::get<1>(autoPlayAutoPlayValidValues[0]);
@@ -420,7 +420,7 @@ HWTEST_F(VideoModifierTest, setAutoPlayTestValidValues, TestSize.Level1)
     inputValueAutoPlay = initValueAutoPlay;
     for (auto&& value: autoPlayAutoPlayValidValues) {
         inputValueAutoPlay = std::get<1>(value);
-        modifier_->setAutoPlay(node_, inputValueAutoPlay);
+        modifier_->setAutoPlay(node_, &inputValueAutoPlay);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTO_PLAY_NAME);
         expectedStr = std::get<2>(value);
@@ -443,9 +443,9 @@ HWTEST_F(VideoModifierTest, setControlsTestDefaultValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'controls' of method 'controls'
-static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> controlsControlsValidValues = {
-    {"true", Converter::ArkValue<Ark_Boolean>(true), "true"},
-    {"false", Converter::ArkValue<Ark_Boolean>(false), "false"},
+static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> controlsControlsValidValues = {
+    {"true", Converter::ArkValue<Opt_Boolean>(true), "true"},
+    {"false", Converter::ArkValue<Opt_Boolean>(false), "false"},
 };
 
 /*
@@ -458,8 +458,8 @@ HWTEST_F(VideoModifierTest, setControlsTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Boolean inputValueControls;
-    Ark_Boolean initValueControls;
+    Opt_Boolean inputValueControls;
+    Opt_Boolean initValueControls;
 
     // Initial setup
     initValueControls = std::get<1>(controlsControlsValidValues[0]);
@@ -468,7 +468,7 @@ HWTEST_F(VideoModifierTest, setControlsTestValidValues, TestSize.Level1)
     inputValueControls = initValueControls;
     for (auto&& value: controlsControlsValidValues) {
         inputValueControls = std::get<1>(value);
-        modifier_->setControls(node_, inputValueControls);
+        modifier_->setControls(node_, &inputValueControls);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROLS_NAME);
         expectedStr = std::get<2>(value);
@@ -491,9 +491,9 @@ HWTEST_F(VideoModifierTest, setLoopTestDefaultValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'loop' of method 'loop'
-static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> loopLoopValidValues = {
-    {"true", Converter::ArkValue<Ark_Boolean>(true), "true"},
-    {"false", Converter::ArkValue<Ark_Boolean>(false), "false"},
+static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> loopLoopValidValues = {
+    {"true", Converter::ArkValue<Opt_Boolean>(true), "true"},
+    {"false", Converter::ArkValue<Opt_Boolean>(false), "false"},
 };
 
 /*
@@ -506,8 +506,8 @@ HWTEST_F(VideoModifierTest, setLoopTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Boolean inputValueLoop;
-    Ark_Boolean initValueLoop;
+    Opt_Boolean inputValueLoop;
+    Opt_Boolean initValueLoop;
 
     // Initial setup
     initValueLoop = std::get<1>(loopLoopValidValues[0]);
@@ -516,7 +516,7 @@ HWTEST_F(VideoModifierTest, setLoopTestValidValues, TestSize.Level1)
     inputValueLoop = initValueLoop;
     for (auto&& value: loopLoopValidValues) {
         inputValueLoop = std::get<1>(value);
-        modifier_->setLoop(node_, inputValueLoop);
+        modifier_->setLoop(node_, &inputValueLoop);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LOOP_NAME);
         expectedStr = std::get<2>(value);
@@ -539,23 +539,23 @@ HWTEST_F(VideoModifierTest, setObjectFitTestDefaultValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'objectFit' of method 'objectFit'
-static std::vector<std::tuple<std::string, Ark_ImageFit, std::string>> objectFitObjectFitValidValues = {
-    {"ARK_IMAGE_FIT_CONTAIN", Converter::ArkValue<Ark_ImageFit>(ARK_IMAGE_FIT_CONTAIN), "ImageFit.Contain"},
-    {"ARK_IMAGE_FIT_COVER", Converter::ArkValue<Ark_ImageFit>(ARK_IMAGE_FIT_COVER), "ImageFit.Cover"},
-    {"ARK_IMAGE_FIT_AUTO", Converter::ArkValue<Ark_ImageFit>(ARK_IMAGE_FIT_AUTO), "ImageFit.Auto"},
-    {"ARK_IMAGE_FIT_FILL", Converter::ArkValue<Ark_ImageFit>(ARK_IMAGE_FIT_FILL), "ImageFit.Fill"},
-    {"ARK_IMAGE_FIT_SCALE_DOWN", Converter::ArkValue<Ark_ImageFit>(ARK_IMAGE_FIT_SCALE_DOWN), "ImageFit.ScaleDown"},
-    {"ARK_IMAGE_FIT_NONE", Converter::ArkValue<Ark_ImageFit>(ARK_IMAGE_FIT_NONE), "ImageFit.None"},
-    {"ARK_IMAGE_FIT_TOP_START", Converter::ArkValue<Ark_ImageFit>(ARK_IMAGE_FIT_TOP_START), "ImageFit.TOP_START"},
-    {"ARK_IMAGE_FIT_TOP", Converter::ArkValue<Ark_ImageFit>(ARK_IMAGE_FIT_TOP), "ImageFit.TOP"},
-    {"ARK_IMAGE_FIT_TOP_END", Converter::ArkValue<Ark_ImageFit>(ARK_IMAGE_FIT_TOP_END), "ImageFit.TOP_END"},
-    {"ARK_IMAGE_FIT_START", Converter::ArkValue<Ark_ImageFit>(ARK_IMAGE_FIT_START), "ImageFit.START"},
-    {"ARK_IMAGE_FIT_CENTER", Converter::ArkValue<Ark_ImageFit>(ARK_IMAGE_FIT_CENTER), "ImageFit.CENTER"},
-    {"ARK_IMAGE_FIT_END", Converter::ArkValue<Ark_ImageFit>(ARK_IMAGE_FIT_END), "ImageFit.END"},
-    {"ARK_IMAGE_FIT_BOTTOM_START", Converter::ArkValue<Ark_ImageFit>(ARK_IMAGE_FIT_BOTTOM_START),
+static std::vector<std::tuple<std::string, Opt_ImageFit, std::string>> objectFitObjectFitValidValues = {
+    {"ARK_IMAGE_FIT_CONTAIN", Converter::ArkValue<Opt_ImageFit>(ARK_IMAGE_FIT_CONTAIN), "ImageFit.Contain"},
+    {"ARK_IMAGE_FIT_COVER", Converter::ArkValue<Opt_ImageFit>(ARK_IMAGE_FIT_COVER), "ImageFit.Cover"},
+    {"ARK_IMAGE_FIT_AUTO", Converter::ArkValue<Opt_ImageFit>(ARK_IMAGE_FIT_AUTO), "ImageFit.Auto"},
+    {"ARK_IMAGE_FIT_FILL", Converter::ArkValue<Opt_ImageFit>(ARK_IMAGE_FIT_FILL), "ImageFit.Fill"},
+    {"ARK_IMAGE_FIT_SCALE_DOWN", Converter::ArkValue<Opt_ImageFit>(ARK_IMAGE_FIT_SCALE_DOWN), "ImageFit.ScaleDown"},
+    {"ARK_IMAGE_FIT_NONE", Converter::ArkValue<Opt_ImageFit>(ARK_IMAGE_FIT_NONE), "ImageFit.None"},
+    {"ARK_IMAGE_FIT_TOP_START", Converter::ArkValue<Opt_ImageFit>(ARK_IMAGE_FIT_TOP_START), "ImageFit.TOP_START"},
+    {"ARK_IMAGE_FIT_TOP", Converter::ArkValue<Opt_ImageFit>(ARK_IMAGE_FIT_TOP), "ImageFit.TOP"},
+    {"ARK_IMAGE_FIT_TOP_END", Converter::ArkValue<Opt_ImageFit>(ARK_IMAGE_FIT_TOP_END), "ImageFit.TOP_END"},
+    {"ARK_IMAGE_FIT_START", Converter::ArkValue<Opt_ImageFit>(ARK_IMAGE_FIT_START), "ImageFit.START"},
+    {"ARK_IMAGE_FIT_CENTER", Converter::ArkValue<Opt_ImageFit>(ARK_IMAGE_FIT_CENTER), "ImageFit.CENTER"},
+    {"ARK_IMAGE_FIT_END", Converter::ArkValue<Opt_ImageFit>(ARK_IMAGE_FIT_END), "ImageFit.END"},
+    {"ARK_IMAGE_FIT_BOTTOM_START", Converter::ArkValue<Opt_ImageFit>(ARK_IMAGE_FIT_BOTTOM_START),
         "ImageFit.BOTTOM_START"},
-    {"ARK_IMAGE_FIT_BOTTOM", Converter::ArkValue<Ark_ImageFit>(ARK_IMAGE_FIT_BOTTOM), "ImageFit.BOTTOM"},
-    {"ARK_IMAGE_FIT_BOTTOM_END", Converter::ArkValue<Ark_ImageFit>(ARK_IMAGE_FIT_BOTTOM_END), "ImageFit.BOTTOM_END"},
+    {"ARK_IMAGE_FIT_BOTTOM", Converter::ArkValue<Opt_ImageFit>(ARK_IMAGE_FIT_BOTTOM), "ImageFit.BOTTOM"},
+    {"ARK_IMAGE_FIT_BOTTOM_END", Converter::ArkValue<Opt_ImageFit>(ARK_IMAGE_FIT_BOTTOM_END), "ImageFit.BOTTOM_END"},
 };
 
 /*
@@ -568,8 +568,8 @@ HWTEST_F(VideoModifierTest, setObjectFitTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_ImageFit inputValueObjectFit;
-    Ark_ImageFit initValueObjectFit;
+    Opt_ImageFit inputValueObjectFit;
+    Opt_ImageFit initValueObjectFit;
 
     // Initial setup
     initValueObjectFit = std::get<1>(objectFitObjectFitValidValues[0]);
@@ -578,7 +578,7 @@ HWTEST_F(VideoModifierTest, setObjectFitTestValidValues, TestSize.Level1)
     inputValueObjectFit = initValueObjectFit;
     for (auto&& value: objectFitObjectFitValidValues) {
         inputValueObjectFit = std::get<1>(value);
-        modifier_->setObjectFit(node_, inputValueObjectFit);
+        modifier_->setObjectFit(node_, &inputValueObjectFit);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OBJECT_FIT_NAME);
         expectedStr = std::get<2>(value);
@@ -587,8 +587,8 @@ HWTEST_F(VideoModifierTest, setObjectFitTestValidValues, TestSize.Level1)
 }
 
 // Invalid values for attribute 'objectFit' of method 'objectFit'
-static std::vector<std::tuple<std::string, Ark_ImageFit>> objectFitObjectFitInvalidValues = {
-    {"static_cast<Ark_ImageFit>(-1)", Converter::ArkValue<Ark_ImageFit>(static_cast<Ark_ImageFit>(-1))},
+static std::vector<std::tuple<std::string, Opt_ImageFit>> objectFitObjectFitInvalidValues = {
+    {"static_cast<Ark_ImageFit>(-1)", Converter::ArkValue<Opt_ImageFit>(static_cast<Ark_ImageFit>(-1))},
 };
 
 /*
@@ -601,8 +601,8 @@ HWTEST_F(VideoModifierTest, setObjectFitTestInvalidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_ImageFit inputValueObjectFit;
-    Ark_ImageFit initValueObjectFit;
+    Opt_ImageFit inputValueObjectFit;
+    Opt_ImageFit initValueObjectFit;
 
     // Initial setup
     initValueObjectFit = std::get<1>(objectFitObjectFitValidValues[0]);
@@ -610,9 +610,9 @@ HWTEST_F(VideoModifierTest, setObjectFitTestInvalidValues, TestSize.Level1)
     // Verifying attribute's  values
     for (auto&& value: objectFitObjectFitInvalidValues) {
         inputValueObjectFit = initValueObjectFit;
-        modifier_->setObjectFit(node_, inputValueObjectFit);
+        modifier_->setObjectFit(node_, &inputValueObjectFit);
         inputValueObjectFit = std::get<1>(value);
-        modifier_->setObjectFit(node_, inputValueObjectFit);
+        modifier_->setObjectFit(node_, &inputValueObjectFit);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OBJECT_FIT_NAME);
         expectedStr = ATTRIBUTE_OBJECT_FIT_DEFAULT_VALUE;
@@ -643,8 +643,8 @@ HWTEST_F(VideoModifierTest, setOnStartTest, TestSize.Level1)
     };
 
     auto arkCallback = Converter::ArkValue<VoidCallback>(onStart, frameNode->GetId());
-
-    modifier_->setOnStart(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_VoidCallback>(arkCallback);
+    modifier_->setOnStart(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent);
     eventHub->FireStartEvent();
@@ -675,8 +675,8 @@ HWTEST_F(VideoModifierTest, setOnPauseTest, TestSize.Level1)
     };
 
     auto arkCallback = Converter::ArkValue<VoidCallback>(onPause, frameNode->GetId());
-
-    modifier_->setOnPause(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_VoidCallback>(arkCallback);
+    modifier_->setOnPause(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent);
     eventHub->FirePauseEvent();
@@ -707,8 +707,8 @@ HWTEST_F(VideoModifierTest, setOnFinishTest, TestSize.Level1)
     };
 
     auto arkCallback = Converter::ArkValue<VoidCallback>(onFinish, frameNode->GetId());
-
-    modifier_->setOnFinish(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_VoidCallback>(arkCallback);
+    modifier_->setOnFinish(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent);
     eventHub->FireFinishEvent();
@@ -740,8 +740,8 @@ HWTEST_F(VideoModifierTest, setOnFullscreenChangeTest, TestSize.Level1)
     };
 
     auto arkCallback = Converter::ArkValue<Callback_FullscreenInfo_Void>(onFullscreenChange, frameNode->GetId());
-
-    modifier_->setOnFullscreenChange(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_FullscreenInfo_Void>(arkCallback);
+    modifier_->setOnFullscreenChange(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent);
 
@@ -780,8 +780,8 @@ HWTEST_F(VideoModifierTest, setOnPreparedTest, TestSize.Level1)
     };
 
     auto arkCallback = Converter::ArkValue<Callback_PreparedInfo_Void>(onPrepared, frameNode->GetId());
-
-    modifier_->setOnPrepared(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_PreparedInfo_Void>(arkCallback);
+    modifier_->setOnPrepared(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent);
 
@@ -821,7 +821,8 @@ HWTEST_F(VideoModifierTest, setOnSeekingTest, TestSize.Level1)
 
     auto arkCallback = Converter::ArkValue<Callback_PlaybackInfo_Void>(onSeeking, frameNode->GetId());
 
-    modifier_->setOnSeeking(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_PlaybackInfo_Void>(arkCallback);
+    modifier_->setOnSeeking(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent);
 
@@ -861,7 +862,8 @@ HWTEST_F(VideoModifierTest, setOnSeekedTest, TestSize.Level1)
 
     auto arkCallback = Converter::ArkValue<Callback_PlaybackInfo_Void>(onSeeked, frameNode->GetId());
 
-    modifier_->setOnSeeked(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_PlaybackInfo_Void>(arkCallback);
+    modifier_->setOnSeeked(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent);
 
@@ -900,8 +902,8 @@ HWTEST_F(VideoModifierTest, setOnUpdateTest, TestSize.Level1)
     };
 
     auto arkCallback = Converter::ArkValue<Callback_PlaybackInfo_Void>(onUpdate, frameNode->GetId());
-
-    modifier_->setOnUpdate(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_PlaybackInfo_Void>(arkCallback);
+    modifier_->setOnUpdate(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent);
 
@@ -939,8 +941,8 @@ HWTEST_F(VideoModifierTest, setOnErrorTest, TestSize.Level1)
     };
 
     auto arkCallback = Converter::ArkValue<Callback_Void>(onError, frameNode->GetId());
-
-    modifier_->setOnError(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    modifier_->setOnError(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent);
     eventHub->FireErrorEvent();
@@ -971,8 +973,8 @@ HWTEST_F(VideoModifierTest, setOnStopTest, TestSize.Level1)
     };
 
     auto arkCallback = Converter::ArkValue<Callback_Void>(onStop, frameNode->GetId());
-
-    modifier_->setOnStop(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    modifier_->setOnStop(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent);
     eventHub->FireStopEvent();
@@ -995,9 +997,9 @@ HWTEST_F(VideoModifierTest, setEnableAnalyzerTestDefaultValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'enableAnalyzerEnable' of method 'enableAnalyzer'
-static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> enableAnalyzerEnableAnalyzerEnableValidValues = {
-    {"true", Converter::ArkValue<Ark_Boolean>(true), "true"},
-    {"false", Converter::ArkValue<Ark_Boolean>(false), "false"},
+static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> enableAnalyzerEnableAnalyzerEnableValidValues = {
+    {"true", Converter::ArkValue<Opt_Boolean>(true), "true"},
+    {"false", Converter::ArkValue<Opt_Boolean>(false), "false"},
 };
 
 /*
@@ -1010,8 +1012,8 @@ HWTEST_F(VideoModifierTest, setEnableAnalyzerTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Boolean inputValueEnableAnalyzerEnable;
-    Ark_Boolean initValueEnableAnalyzerEnable;
+    Opt_Boolean inputValueEnableAnalyzerEnable;
+    Opt_Boolean initValueEnableAnalyzerEnable;
 
     // Initial setup
     initValueEnableAnalyzerEnable = std::get<1>(enableAnalyzerEnableAnalyzerEnableValidValues[0]);
@@ -1020,7 +1022,7 @@ HWTEST_F(VideoModifierTest, setEnableAnalyzerTestValidValues, TestSize.Level1)
     inputValueEnableAnalyzerEnable = initValueEnableAnalyzerEnable;
     for (auto&& value: enableAnalyzerEnableAnalyzerEnableValidValues) {
         inputValueEnableAnalyzerEnable = std::get<1>(value);
-        modifier_->setEnableAnalyzer(node_, inputValueEnableAnalyzerEnable);
+        modifier_->setEnableAnalyzer(node_, &inputValueEnableAnalyzerEnable);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_ANALYZER_ENABLE_NAME);
         expectedStr = std::get<2>(value);
@@ -1058,9 +1060,9 @@ HWTEST_F(VideoModifierTest, DISABLED_setAnalyzerConfigTestInvalidValues, TestSiz
     // analyzerConfig attribute is not implemented
 }
 
-static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> enableShortcutKeyTesdtPlan = {
-    {"true", Converter::ArkValue<Ark_Boolean>(true), "true"},
-    {"false", Converter::ArkValue<Ark_Boolean>(false), "false"},
+static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> enableShortcutKeyTesdtPlan = {
+    {"true", Converter::ArkValue<Opt_Boolean>(true), "true"},
+    {"false", Converter::ArkValue<Opt_Boolean>(false), "false"},
 };
 
 /*
@@ -1075,11 +1077,11 @@ HWTEST_F(VideoModifierTest, setEnableShortcutKey, TestSize.Level1)
     EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_SHORTCUT_KEY_DEFAULT_VALUE);
 
     std::string expectedStr;
-    Ark_Boolean inputValueEnableShortcutKey;
+    Opt_Boolean inputValueEnableShortcutKey;
 
     for (auto&& value: enableShortcutKeyTesdtPlan) {
         inputValueEnableShortcutKey = std::get<1>(value);
-        modifier_->setEnableShortcutKey(node_, inputValueEnableShortcutKey);
+        modifier_->setEnableShortcutKey(node_, &inputValueEnableShortcutKey);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_SHORTCUT_KEY_NAME);
         expectedStr = std::get<2>(value);
@@ -1108,8 +1110,8 @@ HWTEST_F(VideoModifierTest, setSurfaceBackgroundColor, TestSize.Level1)
     for (auto&& value: setSurfaceBackgroundColorPlan) {
         ColorMetricsPeer metrix;
         metrix.colorValue.value = std::get<1>(value);
-        Ark_ColorMetrics backgroundColor = &metrix;
-        modifier_->setSurfaceBackgroundColor(node_, backgroundColor);
+        Opt_ColorMetrics backgroundColor = Converter::ArkValue<Opt_ColorMetrics>(&metrix);
+        modifier_->setSurfaceBackgroundColor(node_, &backgroundColor);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SURFACE_BACKGROUND_COLOR_NAME);
         expectedStr = std::get<2>(value);

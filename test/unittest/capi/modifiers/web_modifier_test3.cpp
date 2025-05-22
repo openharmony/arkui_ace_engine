@@ -76,10 +76,10 @@ namespace {
     const std::string TEST_CONTENT_TWO = "ContentTestTwo";
 #ifdef WEB_SUPPORTED
     const auto ATTRIBUTE_DEFAULT_TEXT_ENCODING_FORMAT_NAME = "defaultTextEncodingFormat";
-    const std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureStringValidValues = {
-        { "\"abc\"", Converter::ArkValue<Ark_String>("abc"), "abc" },
-        { "\"\"", Converter::ArkValue<Ark_String>(""), "UTF-8" },
-        { "\"xyz\"", Converter::ArkValue<Ark_String>("xyz"), "xyz" },
+    const std::vector<std::tuple<std::string, Opt_String, std::string>> testFixtureStringValidValues = {
+        { "\"abc\"", Converter::ArkValue<Opt_String>("abc"), "abc" },
+        { "\"\"", Converter::ArkValue<Opt_String>(""), "UTF-8" },
+        { "\"xyz\"", Converter::ArkValue<Opt_String>("xyz"), "xyz" },
     };
 #endif // WEB_SUPPORTED
 } // namespace
@@ -132,11 +132,12 @@ HWTEST_F(WebModifierTest3, bindSelectionMenuTestValidValues, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 
     CustomNodeBuilderTestHelper<WebModifierTest3> builderHelper(this, frameNode);
-    const CustomNodeBuilder builder = builderHelper.GetBuilder();
-    using OneTestStep = std::tuple<Ark_WebElementType, CustomNodeBuilder, Ark_WebResponseType>;
+    Opt_CustomNodeBuilder builder = Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder());
+    using OneTestStep = std::tuple<Opt_WebElementType, Opt_CustomNodeBuilder, Opt_WebResponseType>;
 
     static const std::vector<OneTestStep> testPlan = {
-        {ARK_WEB_ELEMENT_TYPE_IMAGE, builder, ARK_WEB_RESPONSE_TYPE_LONG_PRESS},
+        {Converter::ArkValue<Opt_WebElementType>(ARK_WEB_ELEMENT_TYPE_IMAGE), builder,
+         Converter::ArkValue<Opt_WebResponseType>(ARK_WEB_RESPONSE_TYPE_LONG_PRESS)},
     };
 
     std::unique_ptr<JsonValue> fullJson;
@@ -152,7 +153,7 @@ HWTEST_F(WebModifierTest3, bindSelectionMenuTestValidValues, TestSize.Level1)
     #endif // WEB_SUPPORTED
 
     for (auto [spanType, builder, responseType]: testPlan) {
-        modifier_->setBindSelectionMenu(node_, spanType, &builder, responseType, &options);
+        modifier_->setBindSelectionMenu(node_, &spanType, &builder, &responseType, &options);
         #ifdef WEB_SUPPORTED_TEST
         WebElementType convType = Converter::OptConvert<WebElementType>(spanType).value();
         ResponseType convResponseType = Converter::OptConvert<ResponseType>(responseType).value();
@@ -178,12 +179,12 @@ HWTEST_F(WebModifierTest3, bindSelectionMenuTestValidValues, TestSize.Level1)
 HWTEST_F(WebModifierTest3, setDefaultTextEncodingFormatValidValues, TestSize.Level1)
 {
 #ifdef WEB_SUPPORTED
-    Ark_String initValueDefaultTextEncodingFormat;
+    Opt_String initValueDefaultTextEncodingFormat;
     // Initial setup
     initValueDefaultTextEncodingFormat = std::get<1>(testFixtureStringValidValues[0]);
     auto checkValue = [this, &initValueDefaultTextEncodingFormat](
-                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
-        Ark_String inputValueDefaultTextEncodingFormat = initValueDefaultTextEncodingFormat;
+                          const std::string& input, const std::string& expectedStr, const Opt_String& value) {
+        Opt_String inputValueDefaultTextEncodingFormat = initValueDefaultTextEncodingFormat;
         inputValueDefaultTextEncodingFormat = value;
         modifier_->setDefaultTextEncodingFormat(node_, &inputValueDefaultTextEncodingFormat);
         auto jsonValue = GetJsonValue(node_);
@@ -243,7 +244,8 @@ HWTEST_F(WebModifierTest3, setEditMenuOptionsTest, TestSize.Level1)
     auto params = GetMenuItemParams();
     pattern->OnUpdateOnCreateMenuCallback(selectOverlayInfo);
     EXPECT_TRUE(selectOverlayInfo.onCreateCallback.onCreateMenuCallback == nullptr);
-    modifier_->setEditMenuOptions(node_, &options);
+    auto optOptions = Converter::ArkValue<Opt_EditMenuOptions>(options);
+    modifier_->setEditMenuOptions(node_, &optOptions);
     pattern->OnUpdateOnCreateMenuCallback(selectOverlayInfo);
     ASSERT_NE(selectOverlayInfo.onCreateCallback.onCreateMenuCallback, nullptr);
     selectOverlayInfo.onCreateCallback.onCreateMenuCallback(params);
@@ -282,8 +284,8 @@ HWTEST_F(WebModifierTest3, onFaviconReceivedTest, TestSize.Level1)
 
     Callback_OnFaviconReceivedEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnFaviconReceivedEvent_Void>(checkCallback, contextId);
-
-    modifier_->setOnFaviconReceived(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnFaviconReceivedEvent_Void>(arkCallback);
+    modifier_->setOnFaviconReceived(node_, &optCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);
     EXPECT_CALL(*webFaviconReceived, GetData()).Times(1).WillOnce(Return(nullptr));
