@@ -1667,4 +1667,60 @@ HWTEST_F(SwiperPatternTestNg, FocusMoveOnKey006, TestSize.Level1)
     EXPECT_EQ(pattern_->currentFocusIndex_, 0);
     EXPECT_EQ(pattern_->currentIndex_, 0);
 }
+
+/**
+ * @tc.name: HandleTouchBottomLoop001
+ * @tc.desc: Test SwiperPattern HandleTouchBottomLoop
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, HandleTouchBottomLoop001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+
+    pattern_->currentFirstIndex_ = -1;
+    pattern_->currentIndex_ = -2;
+    pattern_->targetIndex_ = 0;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = -2;
+    pattern_->targetIndex_ = 0;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+}
+
+/**
+ * @tc.name: HandleTouchBottomLoopOnRTL001
+ * @tc.desc: Test SwiperPattern HandleTouchBottomLoopOnRTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, HandleTouchBottomLoopOnRTL001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+
+    pattern_->currentFirstIndex_ = -1;
+    pattern_->currentIndex_ = -2;
+    pattern_->targetIndex_ = 0;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    pattern_->HandleTouchBottomLoopOnRTL();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = -2;
+    pattern_->targetIndex_ = 0;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    pattern_->HandleTouchBottomLoopOnRTL();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
+}
 } // namespace OHOS::Ace::NG
