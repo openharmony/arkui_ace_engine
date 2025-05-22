@@ -1606,6 +1606,7 @@ private:
     void OnHover(bool isHover);
     void ChangeMouseState(
         const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId, bool isByPass = false);
+    void FreeMouseStyleHoldNode(const Offset location);
     void HandleMouseEvent(MouseInfo& info);
     void FocusAndUpdateCaretByMouse(MouseInfo& info);
     void UpdateShiftFlag(const KeyEvent& keyEvent) override;
