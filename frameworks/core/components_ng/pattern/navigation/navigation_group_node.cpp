@@ -512,7 +512,7 @@ void NavigationGroupNode::CheckIsNeedForceExitWindow(bool result)
     CHECK_NULL_VOID(overlayManager);
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);
-    int32_t navigationStackSize = navigationStack->GetAllNavDestinationNodes().size();
+    int32_t navigationStackSize = static_cast<int32_t>(navigationStack->GetAllNavDestinationNodes().size());
     int32_t pageSize =
         stageManager->GetStageNode() ? static_cast<int32_t>(stageManager->GetStageNode()->GetChildren().size()) : 0;
     if (navigationStackSize != 1 || isHasParentNavigation || !overlayManager->IsModalEmpty() || pageSize != 1) {
