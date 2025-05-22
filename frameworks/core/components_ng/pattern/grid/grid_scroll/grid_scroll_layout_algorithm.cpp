@@ -620,7 +620,7 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
             info_.reachEnd_ = false;
             return;
         } else if (!isChildrenUpdated_) {
-            if (LessNotEqual(lengthOfItemsInViewport, mainSize)) {
+            if (LessNotEqual(lengthOfItemsInViewport, mainSize) && NearEqual(mainSize, info_.lastMainSize_)) {
                 return;
             }
         }

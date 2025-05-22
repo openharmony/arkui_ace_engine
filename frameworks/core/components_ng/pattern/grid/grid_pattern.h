@@ -318,6 +318,7 @@ private:
     RefPtr<GridContentModifier> gridContentModifier_;
 
     float endHeight_ = 0.0f;
+    float mainSizeChanged_ = 0.0f;
     KeyEvent keyEvent_;
     GridFocus focusHandler_ { *this, info_ };
 
