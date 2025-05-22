@@ -2986,9 +2986,14 @@ class CustomDialogContentComponent extends ViewPU {
         return sizeResult;
     }
     aboutToAppear() {
-        let uiContext = this.getUIContext();
-        this.isFollowingSystemFontScale = uiContext.isFollowingSystemFontScale();
-        this.appMaxFontScale = uiContext.getMaxFontScale();
+        try{
+            let uiContext = this.getUIContext();
+            this.isFollowingSystemFontScale = uiContext.isFollowingSystemFontScale() ?? false;
+            this.appMaxFontScale = uiContext.getMaxFontScale() ?? 3.2;
+        } catch (err) {
+            let code = err?.code;
+            hilog.error(0x3900, 'Ace', `Faild to dialog getUIContext, code: ${code}`);
+        }
         this.fontSizeScale = this.updateFontScale();
         if (this.controller && this.customStyle === undefined) {
             let customController = this.controller;
