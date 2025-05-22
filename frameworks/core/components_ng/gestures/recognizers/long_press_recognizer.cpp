@@ -254,11 +254,11 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
         return;
     }
     lastTouchEvent_ = event;
+    touchPoints_[event.id] = event;
+    UpdateFingerListInfo();
     if (touchPoints_.find(event.id) != touchPoints_.end()) {
         touchPoints_.erase(event.id);
     }
-    touchPoints_[event.id] = event;
-    UpdateFingerListInfo();
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == 0) {
         SendCallbackMsg(onActionCancel_, false, GestureCallbackType::CANCEL);
         lastRefereeState_ = RefereeState::READY;
