@@ -152,8 +152,6 @@ public:
     void SetAppStartStatus();
     static PerfMonitor* GetPerfMonitor();
     static PerfMonitor* pMonitor;
-    static std::once_flag initFlag;
-    static void InitInstance();
     void SetApsMonitor(const std::shared_ptr<ApsMonitor>& apsMonitor);
     void ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
                            const std::string& pageName);

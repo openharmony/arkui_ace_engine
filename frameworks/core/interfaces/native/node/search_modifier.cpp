@@ -897,20 +897,6 @@ void ResetSearchEnableHapticFeedback(ArkUINodeHandle node)
     SearchModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE);
 }
 
-void SetSearchAutoCapitalizationMode(ArkUINodeHandle node, ArkUI_Int32 value)
-{
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetAutoCapitalizationMode(frameNode, static_cast<AutoCapitalizationMode>(value));
-}
-
-void ResetSearchAutoCapitalizationMode(ArkUINodeHandle node)
-{
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetAutoCapitalizationMode(frameNode, AutoCapitalizationMode::NONE);
-}
-
 void SetStopBackPress(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1024,8 +1010,6 @@ const ArkUISearchModifier* GetSearchModifier()
         .resetSearchSelectionMenuOptions = ResetSearchSelectionMenuOptions,
         .setSearchEnableHapticFeedback = SetSearchEnableHapticFeedback,
         .resetSearchEnableHapticFeedback = ResetSearchEnableHapticFeedback,
-        .setSearchAutoCapitalizationMode = SetSearchAutoCapitalizationMode,
-        .resetSearchAutoCapitalizationMode = ResetSearchAutoCapitalizationMode,
         .setSearchMinFontScale = SetSearchMinFontScale,
         .resetSearchMinFontScale = ResetSearchMinFontScale,
         .setSearchMaxFontScale = SetSearchMaxFontScale,

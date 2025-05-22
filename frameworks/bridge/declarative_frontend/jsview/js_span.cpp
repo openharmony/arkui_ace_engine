@@ -77,14 +77,6 @@ constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyl
 
 void JSSpan::SetFont(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
-    auto infoZero = info[0];
-    if (infoZero->IsUndefined() || infoZero->IsNull()) {
-        SpanModel::GetInstance()->ResetFont();
-        return;
-    }
     Font font;
     JSText::GetFontInfo(info, font);
     SpanModel::GetInstance()->SetFont(font);
@@ -97,9 +89,15 @@ void JSSpan::SetFontSize(const JSCallbackInfo& info)
     }
     CalcDimension fontSize;
     if (!ParseJsDimensionFpNG(info[0], fontSize, false) || fontSize.IsNegative()) {
-        SpanModel::GetInstance()->ResetFontSize();
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        fontSize = theme->GetTextStyle().GetFontSize();
+        SpanModel::GetInstance()->SetFontSize(fontSize);
         return;
     }
+
     SpanModel::GetInstance()->SetFontSize(fontSize);
 }
 
@@ -111,14 +109,12 @@ void JSSpan::SetFontWeight(const std::string& value)
 void JSSpan::SetTextColor(const JSCallbackInfo& info)
 {
     Color textColor;
-    auto infoZero = info[0];
-    if (infoZero->IsUndefined() || infoZero->IsNull()) {
-        SpanModel::GetInstance()->ResetTextColor();
-        return;
-    }
-    if (!ParseJsColor(infoZero, textColor)) {
-        SpanModel::GetInstance()->ResetTextColor();
-        return;
+    if (!ParseJsColor(info[0], textColor)) {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        textColor = theme->GetTextStyle().GetTextColor();
     }
     SpanModel::GetInstance()->SetTextColor(textColor);
 }
@@ -128,8 +124,6 @@ void JSSpan::SetFontStyle(int32_t value)
     if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
         auto style = FONT_STYLES[value];
         SpanModel::GetInstance()->SetItalicFontStyle(style);
-    } else {
-        SpanModel::GetInstance()->ResetItalicFontStyle();
     }
 }
 
@@ -140,7 +134,6 @@ void JSSpan::SetFontFamily(const JSCallbackInfo& info)
     }
     std::vector<std::string> fontFamilies;
     if (!ParseJsFontFamilies(info[0], fontFamilies)) {
-        SpanModel::GetInstance()->ResetFontFamily();
         return;
     }
     SpanModel::GetInstance()->SetFontFamily(fontFamilies);

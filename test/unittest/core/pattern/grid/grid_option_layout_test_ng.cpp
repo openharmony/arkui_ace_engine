@@ -955,33 +955,6 @@ HWTEST_F(GridOptionLayoutTestNg, ScrollTo003, TestSize.Level1)
 }
 
 /**
- * @tc.name: ScrollTo004
- * @tc.desc: Test ScrollTo Function.
- * @tc.type: FUNC
- */
-HWTEST_F(GridOptionLayoutTestNg, DISABLED_ScrollTo004, TestSize.Level1)
-{
-    GridLayoutOptions option;
-    option.irregularIndexes = { 25 };
-    GridModelNG model = CreateGrid();
-    model.SetLayoutOptions(option);
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetCachedCount(0, false);
-    CreateFixedItems(50);
-    CreateDone();
-
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 20);
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 38);
-    EXPECT_EQ(pattern_->EstimateHeight(), ITEM_MAIN_SIZE * 20);
-
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 10);
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 20);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().GetContentOffset(0), ITEM_MAIN_SIZE * 10);
-}
-
-/**
  * @tc.name: ScrollTo001
  * @tc.desc: Test ScrollTo Function.
  * @tc.type: FUNC

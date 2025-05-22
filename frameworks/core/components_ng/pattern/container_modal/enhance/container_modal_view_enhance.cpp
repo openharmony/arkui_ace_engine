@@ -214,19 +214,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildGestureRow(RefPtr<FrameNode>& 
     return gestureRow;
 }
 
-bool ContainerModalViewEnhance::GetContainerModalComponentRect(
-    PipelineContext* pipelineContext, RectF& floatContainerModal, RectF& floatButtons)
-{
-    CHECK_NULL_RETURN(pipelineContext, false);
-    auto rootNode = pipelineContext->GetRootElement();
-    CHECK_NULL_RETURN(rootNode, false);
-    auto containerMode = AceType::DynamicCast<NG::FrameNode>(rootNode->GetChildren().front());
-    CHECK_NULL_RETURN(containerMode, false);
-    auto pattern = containerMode->GetPattern<NG::ContainerModalPatternEnhance>();
-    CHECK_NULL_RETURN(pattern, false);
-    return pattern->GetContainerModalComponentRect(floatContainerModal, floatButtons);
-}
-
 void ContainerModalViewEnhance::SetContainerButtonStyle(RefPtr<PipelineContext> pipeline, uint32_t buttonsize,
     uint32_t spacingBetweenButtons, uint32_t closeButtonRightMargin, int32_t colorMode)
 {
@@ -251,6 +238,19 @@ void ContainerModalViewEnhance::SetContainerButtonStyle(RefPtr<PipelineContext> 
     controlButtonsNode->FireCustomCallback(
         EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE, std::to_string(closeButtonRightMargin));
     containerPattern->CallButtonsRectChange();
+}
+
+bool ContainerModalViewEnhance::GetContainerModalComponentRect(PipelineContext *pipelineContext,
+    RectF& floatContainerModal, RectF& floatButtons)
+{
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto rootNode = pipelineContext->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, false);
+    auto containerMode = AceType::DynamicCast<NG::FrameNode>(rootNode->GetChildren().front());
+    CHECK_NULL_RETURN(containerMode, false);
+    auto pattern = containerMode->GetPattern<NG::ContainerModalPatternEnhance>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetContainerModalComponentRect(floatContainerModal, floatButtons);
 }
 
 int32_t ContainerModalViewEnhance::AddButtonsRectChangeListener(

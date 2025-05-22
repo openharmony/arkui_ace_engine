@@ -251,9 +251,7 @@ class JSBuilderNode extends BaseNode {
       classObject && 'pop' in classObject ? classObject.pop! : () => { };
     const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
       __JSScopeUtil__.syncInstanceId(this.instanceId_);
-      if (Utils.isApiVersionEQAbove(18)) {
-        ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
-      }
+      ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
       // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
       // enable V2 object deep observation
@@ -275,9 +273,7 @@ class JSBuilderNode extends BaseNode {
         ObserveV2.getObserve().stopRecordDependencies();
       }
       ViewStackProcessor.StopGetAccessRecording();
-      if (Utils.isApiVersionEQAbove(18)) {
-        ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
-      }
+      ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
       __JSScopeUtil__.restoreInstanceId();
     };
 

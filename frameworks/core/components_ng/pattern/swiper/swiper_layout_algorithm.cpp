@@ -743,9 +743,6 @@ bool SwiperLayoutAlgorithm::LayoutForwardItem(LayoutWrapper* layoutWrapper, cons
     CHECK_NULL_RETURN(swiperLayoutProperty, false);
 
     float mainAxisSize = GetChildMainAxisSize(wrapper, swiperLayoutProperty);
-    if (SwiperUtils::IsStretch(swiperLayoutProperty)) {
-        mainAxisSize = placeItemWidth_.value_or(mainAxisSize);
-    }
     endPos = startPos + mainAxisSize;
     itemPosition_[currentIndex] = { startPos, endPos, wrapper->GetHostNode() };
     return true;
@@ -788,9 +785,6 @@ bool SwiperLayoutAlgorithm::LayoutBackwardItem(LayoutWrapper* layoutWrapper, con
     measuredItems_.insert(measureIndex);
 
     float mainAxisSize = GetChildMainAxisSize(wrapper, swiperLayoutProperty);
-    if (SwiperUtils::IsStretch(swiperLayoutProperty)) {
-        mainAxisSize = placeItemWidth_.value_or(mainAxisSize);
-    }
     startPos = endPos - mainAxisSize;
     if (!itemPositionIsFull) {
         itemPosition_[currentIndex] = { startPos, endPos, wrapper->GetHostNode() };

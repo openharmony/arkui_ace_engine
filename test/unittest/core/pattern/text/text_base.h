@@ -113,6 +113,10 @@ const std::string TEXT_DEFAULT_VALUE =
     "{\"style\":\"FontStyle.Normal\",\"size\":\"16.00fp\",\"weight\":"
     "\"FontWeight.Normal\",\"variableFontWeight\":\"0\",\"enableVariableFontWeight\":\"false\",\"family\":"
     "\"HarmonyOS Sans\"}";
+const std::string WITH_THEME_CALL_TEXT_DEFAULT_VALUE =
+    "{\"style\":\"FontStyle.Normal\",\"size\":\"14.00px\",\"weight\":"
+    "\"FontWeight.Normal\",\"variableFontWeight\":\"0\",\"enableVariableFontWeight\":\"false\",\"family\":"
+    "\"HarmonyOS Sans\"}";
 const std::string TEXT_EQUALS_VALUE =
     R"({"style":"FontStyle.Italic","size":"20.10px","weight":"FontWeight.Bold",)"
     R"("variableFontWeight":"0","enableVariableFontWeight":"false","family":"cursive"})";

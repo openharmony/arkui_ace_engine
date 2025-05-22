@@ -1031,14 +1031,6 @@ let SearchType;
   SearchType[SearchType.URL = 13] = 'URL';
 })(SearchType || (SearchType = {}));
 
-let AutoCapitalizationMode;
-(function (AutoCapitalizationMode) {
-  AutoCapitalizationMode[AutoCapitalizationMode["NONE"] = 0] = "NONE";
-  AutoCapitalizationMode[AutoCapitalizationMode["WORDS"] = 1] = "WORDS";
-  AutoCapitalizationMode[AutoCapitalizationMode["SENTENCES"] = 2] = "SENTENCES";
-  AutoCapitalizationMode[AutoCapitalizationMode["ALL_CHARACTERS"] = 3] = "ALL_CHARACTERS";
-})(AutoCapitalizationMode || (AutoCapitalizationMode = {}));
-
 let TextAreaType;
 (function (TextAreaType) {
   TextAreaType[TextAreaType.NORMAL = 0] = 'NORMAL';

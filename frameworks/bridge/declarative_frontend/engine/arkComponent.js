@@ -1905,6 +1905,21 @@ class OnKeyPreImeModifier extends ModifierWithKey {
   }
 }
 OnKeyPreImeModifier.identity = Symbol('onKeyPreIme');
+class OnKeyEventDispatchModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      this._onKeyEventDispatch = null;
+      getUINativeModule().common.resetOnKeyEventDispatch(node);
+    } else {
+      this._onKeyEventDispatch = this.value;
+      getUINativeModule().common.setOnKeyEventDispatch(node, this.value);
+    }
+  }
+}
+OnKeyEventDispatchModifier.identity = Symbol('onKeyEventDispatch');
 class OnFocusAxisEventModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3487,18 +3502,22 @@ class ArkComponent {
     });
   }
   onGestureJudgeBegin(callback) {
+    this._onGestureJudgeBegin = callback;
     modifierWithKey(this._modifiersWithKeys, OnGestureJudgeBeginModifier.identity, OnGestureJudgeBeginModifier, callback);
     return this;
   }
   onGestureRecognizerJudgeBegin(callback) {
+    this._onGestureRecognizerJudgeBegin = callback;
     modifierWithKey(this._modifiersWithKeys, OnGestureRecognizerJudgeBeginModifier.identity, OnGestureRecognizerJudgeBeginModifier, callback);
     return this;
   }
   shouldBuiltInRecognizerParallelWith(callback) {
+    this._shouldBuiltInRecognizerParallelWith = callback;
     modifierWithKey(this._modifiersWithKeys, ShouldBuiltInRecognizerParallelWithModifier.identity, ShouldBuiltInRecognizerParallelWithModifier, callback);
     return this;
   }
   onSizeChange(callback) {
+    this._onSizeChange = callback;
     modifierWithKey(this._modifiersWithKeys, OnSizeChangeModifier.identity, OnSizeChangeModifier, callback);
     return this;
   }
@@ -3983,14 +4002,17 @@ class ArkComponent {
     return this;
   }
   onClick(event) {
+    this._clickEvent = event;
     modifierWithKey(this._modifiersWithKeys, ClickModifier.identity, ClickModifier, event);
     return this;
   }
   onHover(event) {
+    this._onHover = event;
     modifierWithKey(this._modifiersWithKeys, OnHoverModifier.identity, OnHoverModifier, event);
     return this;
   }
   onHoverMove(event) {
+    this._onHoverMove = event;
     modifierWithKey(this._modifiersWithKeys, OnHoverMoveModifier.identity, OnHoverMoveModifier, event);
     return this;
   }
@@ -3999,26 +4021,37 @@ class ArkComponent {
     return this;
   }
   onMouse(event) {
+    this._onMouse = event;
     modifierWithKey(this._modifiersWithKeys, OnMouseModifier.identity, OnMouseModifier, event);
     return this;
   }
   onAxisEvent(event) {
+    this._onAxis = event;
     modifierWithKey(this._modifiersWithKeys, OnAxisEventModifier.identity, OnAxisEventModifier, event);
     return this;
   }
   onTouch(event) {
+    this._touchEvent = event;
     modifierWithKey(this._modifiersWithKeys, OnTouchModifier.identity, OnTouchModifier, event);
     return this;
   }
   onKeyEvent(event) {
+    this._onKeyEvent = event;
     modifierWithKey(this._modifiersWithKeys, OnKeyEventModifier.identity, OnKeyEventModifier, event);
     return this;
   }
   onKeyPreIme(event) {
+    this._onKeyPreIme = event;
     modifierWithKey(this._modifiersWithKeys, OnKeyPreImeModifier.identity, OnKeyPreImeModifier, event);
     return this;
   }
+  onKeyEventDispatch(event) {
+    this._onKeyEventDispatch = event;
+    modifierWithKey(this._modifiersWithKeys, OnKeyEventDispatchModifier.identity, OnKeyEventDispatchModifier, event);
+    return this;
+  }
   onFocusAxisEvent(event) {
+    this._onFocusAxisEvent = event;
     modifierWithKey(this._modifiersWithKeys, OnFocusAxisEventModifier.identity, OnFocusAxisEventModifier, event);
     return this;
   }
@@ -4254,22 +4287,27 @@ class ArkComponent {
     return this;
   }
   onAppear(event) {
+    this._onAppearEvent = event;
     modifierWithKey(this._modifiersWithKeys, OnAppearModifier.identity, OnAppearModifier, event);
     return this;
   }
   onDisAppear(event) {
+    this._onDisappearEvent = event;
     modifierWithKey(this._modifiersWithKeys, OnDisappearModifier.identity, OnDisappearModifier, event);
     return this;
   }
   onAttach(event) {
+    this._onAttach = event;
     modifierWithKey(this._modifiersWithKeys, OnAttachModifier.identity, OnAttachModifier, event);
     return this;
   }
   onDetach(event) {
+    this._onDetach = event;
     modifierWithKey(this._modifiersWithKeys, OnDetachModifier.identity, OnDetachModifier, event);
     return this;
   }
   onAreaChange(event) {
+    this._onAreaChange = event;
     modifierWithKey(this._modifiersWithKeys, OnAreaChangeModifier.identity, OnAreaChangeModifier, event);
     return this;
   }
@@ -9887,23 +9925,6 @@ class SearchSelectionMenuHiddenModifier extends ModifierWithKey {
   }
 }
 SearchSelectionMenuHiddenModifier.identity = Symbol('searchSelectionMenuHidden');
-class SearchAutoCapitalizationModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetAutoCapitalizationMode(node);
-    }
-    else {
-      getUINativeModule().search.setAutoCapitalizationMode(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchAutoCapitalizationModifier.identity = Symbol('SearchAutoCapitalization');
 class SearchCaretStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -10906,10 +10927,6 @@ class ArkSearchComponent extends ArkComponent {
   }
   enablePreviewText(value) {
     modifierWithKey(this._modifiersWithKeys, SearchEnablePreviewTextModifier.identity, SearchEnablePreviewTextModifier, value);
-    return this;
-  }
-  autoCapitalizationMode(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchAutoCapitalizationModifier.identity, SearchAutoCapitalizationModifier, value);
     return this;
   }
   editMenuOptions(value) {
@@ -13999,23 +14016,6 @@ class TextAreaEnterKeyTypeModifier extends ModifierWithKey {
   }
 }
 TextAreaEnterKeyTypeModifier.identity = Symbol('textAreaEnterKeyType');
-class TextAreaAutoCapitalizationModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textArea.resetAutoCapitalizationMode(node);
-    }
-    else {
-      getUINativeModule().textArea.setAutoCapitalizationMode(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-TextAreaAutoCapitalizationModifier.identity = Symbol('textAreaAutoCapitalization');
 class TextAreaInputFilterModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14965,10 +14965,6 @@ class ArkTextAreaComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextAreaEnablePreviewTextModifier.identity, TextAreaEnablePreviewTextModifier, value);
     return this;
   }
-  autoCapitalizationMode(value) {
-    modifierWithKey(this._modifiersWithKeys, TextAreaAutoCapitalizationModifier.identity, TextAreaAutoCapitalizationModifier, value);
-    return this;
-  }
   editMenuOptions(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaEditMenuOptionsModifier.identity,
       TextAreaEditMenuOptionsModifier, value);
@@ -15671,23 +15667,6 @@ class TextInputEnterKeyTypeModifier extends ModifierWithKey {
   }
 }
 TextInputEnterKeyTypeModifier.identity = Symbol('textInputEnterKeyType');
-class TextInputAutoCapitalizationModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textInput.resetAutoCapitalizationMode(node);
-    }
-    else {
-      getUINativeModule().textInput.setAutoCapitalizationMode(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-TextInputAutoCapitalizationModifier.identity = Symbol('textInputAutoCapitalization');
 class TextInputBarStateModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -16878,10 +16857,6 @@ class ArkTextInputComponent extends ArkComponent {
   }
   enablePreviewText(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputEnablePreviewTextModifier.identity, TextInputEnablePreviewTextModifier, value);
-    return this;
-  }
-  autoCapitalizationMode(value) {
-    modifierWithKey(this._modifiersWithKeys, TextInputAutoCapitalizationModifier.identity, TextInputAutoCapitalizationModifier, value);
     return this;
   }
   editMenuOptions(value) {
@@ -30339,11 +30314,31 @@ class ListItemSwipeActionModifier extends ModifierWithKey {
   }
 }
 ListItemSwipeActionModifier.identity = Symbol('listItemSwipeAction');
+class ListItemInitializeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().listItem.resetListItemInitialize(node);
+    } else {
+      getUINativeModule().listItem.setListItemInitialize(node, this.value?.style);
+    }
+  }
+}
+ListItemInitializeModifier.identity = Symbol('listItemInitialize');
 class ArkListItemComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
   initialize(value) {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, ListItemInitializeModifier.identity,
+        ListItemInitializeModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, ListItemInitializeModifier.identity,
+        ListItemInitializeModifier, undefined);
+    }
     return this;
   }
   sticky(value) {

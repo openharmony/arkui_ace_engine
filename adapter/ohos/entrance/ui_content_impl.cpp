@@ -491,8 +491,6 @@ private:
         }
         bool isRotate = false;
         auto displayInfo = container->GetDisplayInfo();
-        uint32_t lastKeyboardHeight = pipeline->GetSafeAreaManager() ?
-            pipeline->GetSafeAreaManager()->GetKeyboardInset().Length() : 0;
         if (displayInfo) {
             auto dmRotation = static_cast<int32_t>(displayInfo->GetRotation());
             isRotate = lastRotation != -1 && lastRotation != dmRotation;
@@ -500,10 +498,11 @@ private:
         } else {
             lastRotation = -1;
         }
-        auto alreadyTriggerCallback = textFieldManager->GetFocusFieldAlreadyTriggerWsCallback();
-        textFieldManager->SetFocusFieldAlreadyTriggerWsCallback(false);
-        if (alreadyTriggerCallback && lastRotation == textFieldManager->GetFocusFieldOrientation()) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "input already trigger OnWindowSizeChange, go avoid");
+        auto triggerAvoidTaskOrientation = textFieldManager->GetContextTriggerAvoidTaskOrientation();
+        textFieldManager->SetContextTriggerAvoidTaskOrientation(-1);
+        if ((isRotate && lastRotation == triggerAvoidTaskOrientation) ||
+            (textFieldManager->GetLaterAvoid() && NearEqual(0.0f, keyboardRect.Height()))) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "no need to later avoid, trigger avoid now");
             textFieldManager->SetLaterAvoid(false);
             return false;
         }
@@ -513,10 +512,9 @@ private:
             return true;
         }
         // do not avoid immediately when device is in rotation, trigger it after context trigger root rect update
-        if ((textFieldManager->GetLaterAvoid() || isRotate) && !NearZero(lastKeyboardHeight)) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "rotation change to %{public}d,"
-                "later avoid %{public}s %{public}f %{public}f",
-                lastRotation, keyboardRect.ToString().c_str(), positionY, height);
+        if (textFieldManager->GetLaterAvoid() || isRotate) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "rotation change to %{public}d, later avoid %{public}s %{public}f"
+                "%{public}f", lastRotation, keyboardRect.ToString().c_str(), positionY, height);
             NG::LaterAvoidInfo laterAvoidInfo = {true, keyboardRect, positionY, height, lastRotation };
             textFieldManager->SetLaterAvoidArgs(laterAvoidInfo);
             return true;
@@ -1176,7 +1174,6 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
             AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
             CapabilityRegistry::Register();
             ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
-            ImageFileCache::GetInstance().SetCacheFileInfo();
         });
     }
 
@@ -1699,7 +1696,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
         CapabilityRegistry::Register();
         ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
-        ImageFileCache::GetInstance().SetCacheFileInfo();
         XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
 
         auto task = [] {
@@ -2207,7 +2203,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         safeAreaTaskKey);
 
     InitializeDisplayAvailableRect(container);
-    InitDragSummaryMap(container);
 
     // set container temp dir
     if (abilityContext) {
@@ -2310,14 +2305,6 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
 
     if (!defaultDisplay) {
         TAG_LOGE(AceLogTag::ACE_WINDOW, "DisplayManager failed to get display by id: %{public}u", (uint32_t)displayId);
-    }
-}
-
-void UIContentImpl::InitDragSummaryMap(const RefPtr<Platform::AceContainer>& container)
-{
-    auto pipeline = container->GetPipelineContext();
-    if (pipeline && container->IsUIExtensionWindow()) {
-        pipeline->RequireSummary();
     }
 }
 
@@ -3043,9 +3030,11 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     if (instanceId_ >= MIN_SUBCONTAINER_ID) {
         auto parentContainer = Platform::AceContainer::GetContainer(container->GetParentId());
         CHECK_NULL_VOID(parentContainer);
-        auto parentPipeline = parentContainer->GetPipelineContext();
-        CHECK_NULL_VOID(parentPipeline);
-        modifyConfig.SetDensity(parentPipeline->GetDensity());
+        if (parentContainer->IsScenceBoardWindow()) {
+            auto parentPipeline = parentContainer->GetPipelineContext();
+            CHECK_NULL_VOID(parentPipeline);
+            modifyConfig.SetDensity(parentPipeline->GetDensity());
+        }
     }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -3192,6 +3181,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         }
         viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
         if (rsTransaction != nullptr) {
+            viewportConfigMgr_->CancelAllPromiseTaskLocked();
+        } else if (reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC) {
+            viewportConfigMgr_->CancelUselessTaskLocked();
             viewportConfigMgr_->CancelAllPromiseTaskLocked();
         }
     } else if (rsTransaction != nullptr || !avoidAreas.empty()) {
@@ -3510,8 +3502,8 @@ bool UIContentImpl::IfNeedTouchOutsideListener(const std::string& windowName)
 void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog)
 {
     window_ = window;
-    LOGI("InitSubwindow: %{public}s", window->GetWindowName().c_str());
     CHECK_NULL_VOID(window_);
+    LOGI("InitSubwindow: %{public}s", window->GetWindowName().c_str());
     RefPtr<Container> container;
     instanceId_ = Container::GenerateId<COMPONENT_SUBWINDOW_CONTAINER>();
     int32_t deviceWidth = 0;

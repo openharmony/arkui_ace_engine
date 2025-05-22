@@ -48,11 +48,11 @@ public:
     void SetIconColor(const std::optional<Color>& color) {}
     void SetStatusBarItemColor(bool isLight);
     std::optional<RectF> GetAppBarRect();
-    void AddContentToJSContainer();
     void OnMenuClick();
     void OnCloseClick();
     void CreateServicePanel(const std::string& appGalleryBundleName, const std::string& abilityName,
         std::map<std::string, std::string>& params);
+    static void BuildAppbar(RefPtr<PipelineBase> pipleline);
 private:
     RefPtr<FrameNode> BuildMenuBarRow();
     RefPtr<FrameNode> BuildMenuBar();

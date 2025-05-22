@@ -94,6 +94,7 @@ const std::string IMAGE_POINTER_CONTEXT_MENU_PATH = "etc/webview/ohos_nweb/conte
 const std::string IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
 const std::string AUTO_FILL_VIEW_DATA_PAGE_URL = "autofill_viewdata_origin_pageurl";
 const std::string AUTO_FILL_VIEW_DATA_OTHER_ACCOUNT = "autofill_viewdata_other_account";
+const std::string AUTO_FILL_START_POPUP_WINDOW = "persist.sys.abilityms.autofill.is_passwd_popup_window";
 const std::string WEB_INFO_PC = "8";
 const std::string WEB_INFO_TABLET = "4";
 const std::string WEB_INFO_PHONE = "2";
@@ -178,6 +179,15 @@ constexpr int32_t HALF = 2;
 constexpr int32_t AI_TIMEOUT_LIMIT = 200;
 constexpr int32_t CHECK_PRE_SIZE = 5;
 constexpr int32_t ADJUST_RATIO = 10;
+
+struct TranslateTextExtraData {
+    bool needTranslate = false;
+    std::string registerObjectName = "";
+    std::string registerFunctionName = "";
+    std::string translateScript = "";
+    std::string initScript = "";
+};
+TranslateTextExtraData g_translateTextData;
 
 bool ParseDateTimeJson(const std::string& timeJson, NWeb::DateTime& result)
 {
@@ -361,6 +371,7 @@ const std::string IS_HINT_TYPE = "{\"isHint2Type\": true}";
 const std::string STRING_LF = "\n";
 const std::string DRAG_DATA_TYPE_TEXT = "general.plain-text";
 const std::string DRAG_DATA_TYPE_HTML = "general.html";
+const std::string DRAG_DATA_TYPE_APP_DEF = "ApplicationDefinedType";
 const std::set<std::string> FILE_TYPE_SET = {"general.file", "general.audio", "general.video", "general.image"};
 const std::string DRAG_DATA_TYPE_LINK = "general.hyperlink";
 const std::string FAKE_DRAG_DATA_VAL = " ";
@@ -2266,7 +2277,7 @@ void WebPattern::SetFakeDragData(const RefPtr<OHOS::Ace::DragEvent>& info)
                 delegate_->dragData_->SetFileUri(FAKE_DRAG_DATA_VAL);
             } else if (DRAG_DATA_TYPE_TEXT == iter->first) {
                 delegate_->dragData_->SetFragmentText(FAKE_DRAG_DATA_VAL);
-            } else if (DRAG_DATA_TYPE_HTML == iter->first) {
+            } else if (DRAG_DATA_TYPE_HTML == iter->first || DRAG_DATA_TYPE_APP_DEF == iter->first) {
                 delegate_->dragData_->SetFragmentHtml(FAKE_DRAG_DATA_VAL);
             } else if (DRAG_DATA_TYPE_LINK == iter->first) {
                 delegate_->dragData_->SetLinkURL(FAKE_LINK_VAL);
@@ -4398,6 +4409,9 @@ bool WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessa
 
     auto eventType = viewDataCommon_->GetEventType();
     if (eventType == OHOS::NWeb::NWebAutofillEvent::FILL) {
+        if (isPasswordFill_ && !system::GetBoolParameter(AUTO_FILL_START_POPUP_WINDOW, false)) {
+            return RequestAutoFill(GetFocusedType());
+        }
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         auto context = host->GetContext();
@@ -7206,6 +7220,120 @@ void WebPattern::OnEnableFollowSystemFontWeightUpdate(bool value)
     if (delegate_) {
         delegate_->UpdateEnableFollowSystemFontWeight(value);
     }
+}
+
+void WebPattern::GetTranslateTextCallback(const std::string& result)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "GetTranslateTextCallback WebId:%{public}d | Text.length:%{public}d",
+        GetWebId(), static_cast<int32_t>(result.size()));
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto id = frameNode->GetId();
+    UiSessionManager::GetInstance()->SendWebTextToAI(id, result);
+#endif
+}
+
+void WebPattern::RegisterTranslateTextJavaScript()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "RegisterTranslateTextJavaScript WebId:%{public}d", GetWebId());
+    std::vector<std::string> methods;
+    methods.push_back(g_translateTextData.registerFunctionName);
+    auto lambda = [weak = AceType::WeakClaim(this)](const std::vector<std::string>& param) {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        if (webPattern && param.size() > 0) {
+            webPattern->GetTranslateTextCallback(param[0]);
+        }
+    };
+    std::vector<std::function<void(const std::vector<std::string>&)>> funcs;
+    funcs.push_back(std::move(lambda));
+    std::string permission = "";
+    CHECK_NULL_VOID(delegate_);
+    delegate_->RegisterNativeJavaScriptProxy(g_translateTextData.registerObjectName,
+        methods, funcs, false, permission, true);
+}
+
+void WebPattern::RunJsInit()
+{
+    if (!g_translateTextData.needTranslate) {
+        return;
+    }
+    if (!isRegisterJsObject_) {
+        isRegisterJsObject_ = true;
+        RegisterTranslateTextJavaScript();
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "run java TranslateScript and InitScript. WebId:%{public}d", GetWebId());
+    CHECK_NULL_VOID(delegate_);
+    delegate_->ExecuteTypeScript(g_translateTextData.translateScript, [](std::string result) {});
+    delegate_->ExecuteTypeScript(g_translateTextData.initScript, [](std::string result) {});
+}
+
+void WebPattern::GetTranslateText(std::string extraData, std::function<void(std::string)> callback, bool isContinued)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask([weak = AceType::WeakClaim(this), jsonData = extraData]() {
+        std::unique_ptr<JsonValue> json = JsonUtil::ParseJsonString(jsonData);
+        CHECK_NULL_VOID(json);
+        g_translateTextData.registerObjectName = json->GetString("registerObjectName");
+        g_translateTextData.registerFunctionName = json->GetString("registerFunctionName");
+        g_translateTextData.translateScript = json->GetString("translateScript");
+        g_translateTextData.initScript = json->GetString("initScript");
+
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        TAG_LOGI(AceLogTag::ACE_WEB, "GetTranslateText WebId:%{public}d", webPattern->GetWebId());
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "GetTranslateText 'registerObjectName':%{public}s; 'registerFunctionName':%{public}s",
+            g_translateTextData.registerObjectName.c_str(), g_translateTextData.registerFunctionName.c_str());
+        g_translateTextData.needTranslate = true;
+        webPattern->RunJsInit();
+        }, TaskExecutor::TaskType::UI, "ArkUIWebGetTranslateText");
+}
+
+void WebPattern::SendTranslateResult(std::vector<std::string> results, std::vector<int32_t> ids)
+{
+    return;
+}
+
+void WebPattern::SendTranslateResult(std::string jscode)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "SendTranslateResult WebId:%{public}d; Text.length:%{public}d",
+        GetWebId(), static_cast<int32_t>(jscode.size()));
+    CHECK_NULL_VOID(delegate_);
+    delegate_->ExecuteTypeScript(jscode, [](std::string result) {});
+}
+
+void WebPattern::EndTranslate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask([weak = AceType::WeakClaim(this)]() {
+        g_translateTextData.needTranslate = false;
+        g_translateTextData.translateScript = "";
+        g_translateTextData.initScript = "";
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        if (webPattern->isRegisterJsObject_) {
+            CHECK_NULL_VOID(webPattern->delegate_);
+            std::string p = g_translateTextData.registerObjectName;
+            TAG_LOGI(AceLogTag::ACE_WEB, "UnRegister TranslateText JsObject %{public}s", p.c_str());
+            webPattern->delegate_->UnRegisterNativeArkJSFunction(std::move(p));
+            webPattern->isRegisterJsObject_ = false;
+            webPattern->delegate_->Reload();
+        }
+        TAG_LOGI(AceLogTag::ACE_WEB, "EndTranslateText WebId:%{public}d", webPattern->GetWebId());
+        }, TaskExecutor::TaskType::UI, "ArkUIWebEndTranslate");
 }
 
 void WebPattern::RegisterSurfaceDensityCallback()

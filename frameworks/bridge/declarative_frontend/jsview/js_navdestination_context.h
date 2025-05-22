@@ -70,10 +70,14 @@ public:
 
     void UpdateNavPathInfo(const RefPtr<NG::NavPathInfo>& info) override;
 
+    virtual void OpenScope() override;
+    virtual void CloseScope() override;
+
 private:
     JSRef<JSVal> param_;
     JSRef<JSVal> onPop_;
     JSRef<JSFunc> navDestinationPopCallback_;
+    LocalScope* scope_ = nullptr;
 };
 
 class JSNavDestinationContext : public Referenced {

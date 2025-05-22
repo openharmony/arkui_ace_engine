@@ -83,7 +83,6 @@ constexpr uint8_t APP_RENDER_GROUP_MARKED_MASK = 1 << 7;
 constexpr float HIGHT_RATIO_LIMIT = 0.8;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
-constexpr char UPDATE_FLAG_KEY[] = "updateFlag";
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -624,6 +623,9 @@ bool FrameNode::IsSupportDrawModifier()
 void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node, bool needRemainActive)
 {
     CHECK_NULL_VOID(node);
+    if (node->GetRenderContext()) {
+        node->GetRenderContext()->SetDrawNode();
+    }
     auto task = [weak = AceType::WeakClaim(AceType::RawPtr(node)), needRemainActive]() {
         auto node = weak.Upgrade();
         CHECK_NULL_VOID(node);
@@ -1843,7 +1845,7 @@ void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceD
     SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::VISIBLE_AREA_CHANGE);
     if (hasInnerCallback) {
         if (isCalculateInnerVisibleRectClip_) {
-            ProcessVisibleAreaChangeEvent(visibleResult.innerVisibleRect, visibleResult.frameRect,
+            ProcessVisibleAreaChangeEvent(visibleResult.innerVisibleRect, visibleResult.innerFrameRect,
                 visibleAreaInnerRatios, visibleAreaInnerCallback, false);
         } else {
             ProcessVisibleAreaChangeEvent(visibleResult.visibleRect, visibleResult.frameRect, visibleAreaInnerRatios,
@@ -2095,15 +2097,12 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     auto task = [weak = WeakClaim(this), wrapper, paintProperty = paintProperty_]() {
         auto self = weak.Upgrade();
         ACE_SCOPED_TRACE("FrameNode[%s][id:%d]::RenderTask", self->GetTag().c_str(), self->GetId());
-        auto pipeline = PipelineContext::GetCurrentContext();
-        if (pipeline) {
-            auto id = pipeline->GetInstanceId();
-            ArkUIPerfMonitor::GetPerfMonitor(id)->RecordRenderNode();
-        }
+        ArkUIPerfMonitor::GetInstance().RecordRenderNode();
         wrapper->FlushRender();
         paintProperty->CleanDirty();
         auto eventHub = self->GetEventHubOnly<NG::EventHub>();
         if (self->GetInspectorId() || (eventHub && eventHub->HasNDKDrawCompletedCallback())) {
+            auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
             pipeline->SetNeedRenderNode(weak);
         }
@@ -2772,12 +2771,13 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto& cacheMatrixInfo = GetOrRefreshMatrixFromCache();
     auto paintRect = cacheMatrixInfo.paintRectWithTransform;
     if (!isActive_) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test. Rect is %{public}s",
-            GetTag().c_str(), paintRect.ToString().c_str());
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s/%{public}d is inActive, needn't do touch test. Rect is %{public}s",
+            GetTag().c_str(), GetId(), paintRect.ToString().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
     if (eventHub_ && !eventHub_->IsEnabled()) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s eventHub not enabled, need't do touch test", GetTag().c_str());
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s/%{public}d eventHub not enabled, needn't do touch test",
+            GetTag().c_str(), GetId());
         return HitTestResult::OUT_OF_REGION;
     }
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
@@ -3177,7 +3177,8 @@ HitTestResult FrameNode::AxisTest(const PointF& globalPoint, const PointF& paren
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, AxisTestResult& axisResult)
 {
     if (!isActive_ || (eventHub_ && !eventHub_->IsEnabled())) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test", GetTag().c_str());
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s/%{public}d is inActive, needn't do touch test",
+            GetTag().c_str(), GetId());
         return HitTestResult::OUT_OF_REGION;
     }
     {
@@ -4273,11 +4274,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
             layoutProperty_->GetCalcLayoutConstraint() ? layoutProperty_->GetCalcLayoutConstraint()->ToString().c_str()
                                                        : "NA");
     }
-    auto pipeline = GetContext();
-    if (pipeline) {
-        auto id = pipeline->GetInstanceId();
-        ArkUIPerfMonitor::GetPerfMonitor(id)->RecordLayoutNode();
-    }
+    ArkUIPerfMonitor::GetInstance().RecordLayoutNode();
     isLayoutComplete_ = false;
     if (!oldGeometryNode_) {
         oldGeometryNode_ = geometryNode_->Clone();
@@ -4378,7 +4375,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         auto height = width / aspectRatio;
         geometryNode_->SetFrameSize(SizeF({ width, height }));
     }
-
+    auto pipeline = GetContext();
     if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
         auto size = geometryNode_->GetFrameSize();
         geometryNode_->SetFrameSize(SizeF({ round(size.Width()), round(size.Height()) }));
@@ -5337,6 +5334,14 @@ void FrameNode::ForceSyncGeometryNode()
     renderContext_->SyncGeometryProperties(RawPtr(geometryNode_));
 }
 
+bool FrameNode::IsGeometrySizeChange() const
+{
+    if (oldGeometryNode_ && geometryNode_) {
+        return oldGeometryNode_->GetFrameSize() != geometryNode_->GetFrameSize();
+    }
+    return false;
+}
+
 const std::pair<uint64_t, OffsetF>& FrameNode::GetCachedGlobalOffset() const
 {
     return cachedGlobalOffset_;
@@ -5579,20 +5584,29 @@ CacheVisibleRectResult FrameNode::GetCacheVisibleRect(uint64_t timestamp, bool l
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(true);
     auto rectToParent = GetPaintRectWithTransform();
     auto scale = GetTransformScale();
+    auto innerScale = scale;
+    if (renderContext_) {
+        auto matrix4 = renderContext_->GetTransformMatrixValue(Matrix4());
+        innerScale = { innerScale.x * static_cast<float>(matrix4.GetScaleX()),
+            innerScale.y * static_cast<float>(matrix4.GetScaleY()) };
+    }
 
     if (!parentUi || IsWindowBoundary()) {
-        cachedVisibleRectResult_ = {timestamp,
-            {rectToParent.GetOffset(), rectToParent, rectToParent, scale, rectToParent, rectToParent}};
+        cachedVisibleRectResult_ = { timestamp,
+            { rectToParent.GetOffset(), rectToParent.GetOffset(), rectToParent, rectToParent, scale, innerScale,
+                rectToParent, rectToParent, rectToParent} };
         return cachedVisibleRectResult_.second;
     }
 
     CacheVisibleRectResult result;
     if (parentUi->cachedVisibleRectResult_.first == timestamp) {
         auto parentCacheVisibleRectResult = parentUi->cachedVisibleRectResult_.second;
-        result = CalculateCacheVisibleRect(parentCacheVisibleRectResult, parentUi, rectToParent, scale, timestamp);
+        result = CalculateCacheVisibleRect(
+            parentCacheVisibleRectResult, parentUi, rectToParent, { scale, innerScale }, timestamp);
     } else {
         CacheVisibleRectResult parentCacheVisibleRectResult = parentUi->GetCacheVisibleRect(timestamp, logFlag);
-        result = CalculateCacheVisibleRect(parentCacheVisibleRectResult, parentUi, rectToParent, scale, timestamp);
+        result = CalculateCacheVisibleRect(
+            parentCacheVisibleRectResult, parentUi, rectToParent, { scale, innerScale }, timestamp);
     }
     if (logFlag) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT,
@@ -5606,34 +5620,51 @@ CacheVisibleRectResult FrameNode::GetCacheVisibleRect(uint64_t timestamp, bool l
 }
 
 CacheVisibleRectResult FrameNode::CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
-    const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp)
+    const RefPtr<FrameNode>& parentUi, RectF& rectToParent, const std::pair<VectorF, VectorF>& pairScale,
+    uint64_t timestamp)
 {
     auto parentRenderContext = parentUi->GetRenderContext();
     OffsetF windowOffset;
+    OffsetF innerWindowOffset;
     auto offset = rectToParent.GetOffset();
+    auto innerOffset = rectToParent.GetOffset();
     if (parentRenderContext && parentRenderContext->GetTransformScale()) {
         auto parentScale = parentRenderContext->GetTransformScale();
         offset = OffsetF(offset.GetX() * parentScale.value().x, offset.GetY() * parentScale.value().y);
     }
     windowOffset = parentCacheVisibleRect.windowOffset + offset;
 
+    innerOffset = OffsetF(innerOffset.GetX() * parentCacheVisibleRect.innerCumulativeScale.x,
+        innerOffset.GetY() * parentCacheVisibleRect.innerCumulativeScale.y);
+    innerWindowOffset = parentCacheVisibleRect.innerWindowOffset + innerOffset;
+
     RectF rect;
     rect.SetOffset(windowOffset);
     rect.SetWidth(rectToParent.Width() * parentCacheVisibleRect.cumulativeScale.x);
     rect.SetHeight(rectToParent.Height() * parentCacheVisibleRect.cumulativeScale.y);
 
+    RectF innerRect;
+    innerRect.SetOffset(innerWindowOffset);
+    innerRect.SetWidth(rectToParent.Width() * parentCacheVisibleRect.innerCumulativeScale.x);
+    innerRect.SetHeight(rectToParent.Height() * parentCacheVisibleRect.innerCumulativeScale.y);
+
     auto visibleRect = rect.Constrain(parentCacheVisibleRect.visibleRect);
-    auto innerVisibleRect = rect;
+    auto innerVisibleRect = innerRect;
     auto innerBoundaryRect = parentCacheVisibleRect.innerBoundaryRect;
     if (parentRenderContext && parentRenderContext->GetClipEdge().value_or(false)) {
         innerBoundaryRect = parentCacheVisibleRect.innerVisibleRect.Constrain(innerBoundaryRect);
     }
-    innerVisibleRect = rect.Constrain(innerBoundaryRect);
+    innerVisibleRect = innerRect.Constrain(innerBoundaryRect);
 
-    scale = {scale.x * parentCacheVisibleRect.cumulativeScale.x, scale.y * parentCacheVisibleRect.cumulativeScale.y};
+    VectorF cumulativeScale = { pairScale.first.x * parentCacheVisibleRect.cumulativeScale.x,
+        pairScale.first.y * parentCacheVisibleRect.cumulativeScale.y };
+    VectorF innerCumulativeScale = { pairScale.second.x * parentCacheVisibleRect.innerCumulativeScale.x,
+        pairScale.second.y * parentCacheVisibleRect.innerCumulativeScale.y };
     cachedVisibleRectResult_ = { timestamp,
-        { windowOffset, visibleRect, innerVisibleRect, scale, rect, innerBoundaryRect } };
-    return {windowOffset, visibleRect, innerVisibleRect, scale, rect, innerBoundaryRect};
+        { windowOffset, innerWindowOffset, visibleRect, innerVisibleRect, cumulativeScale, innerCumulativeScale, rect,
+            innerRect, innerBoundaryRect } };
+    return {windowOffset, innerWindowOffset, visibleRect, innerVisibleRect, cumulativeScale, innerCumulativeScale,
+        rect, innerRect, innerBoundaryRect};
 }
 
 bool FrameNode::IsContextTransparent()
@@ -6306,12 +6337,9 @@ void FrameNode::ResetPredictNodes()
 
 void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc)
 {
-    bool result = func();
+    func();
     if (IsCNode()) {
         return;
-    }
-    if (result) {
-        customPropertyMap_[UPDATE_FLAG_KEY] = "1";
     }
     if (!getCustomProperty_) {
         getCustomProperty_ = getFunc;
@@ -6320,21 +6348,26 @@ void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<st
 
 bool FrameNode::GetJSCustomProperty(const std::string& key, std::string& value)
 {
-    if (getCustomProperty_) {
-        value = getCustomProperty_(key);
-        return true;
+    auto iter = customPropertyMap_.find(key);
+    if (iter != customPropertyMap_.end() && !iter->second.empty()) {
+        if (iter->second[1] == "1") {
+            value = iter->second[0];
+            return true;
+        } else if (getCustomProperty_) {
+            value = getCustomProperty_(key);
+            iter->second[0] = value;
+            iter->second[1] = "1";
+            return true;
+        }
     }
     return false;
 }
 
 bool FrameNode::GetCapiCustomProperty(const std::string& key, std::string& value)
 {
-    if (!IsCNode()) {
-        return false;
-    }
     auto iter = customPropertyMap_.find(key);
     if (iter != customPropertyMap_.end()) {
-        value = iter->second;
+        value = iter->second[0];
         return true;
     }
     return false;
@@ -6342,7 +6375,7 @@ bool FrameNode::GetCapiCustomProperty(const std::string& key, std::string& value
 
 void FrameNode::AddCustomProperty(const std::string& key, const std::string& value)
 {
-    customPropertyMap_[key] = value;
+    customPropertyMap_[key] = {value, "1"};
 }
 
 void FrameNode::RemoveCustomProperty(const std::string& key)
@@ -6350,6 +6383,16 @@ void FrameNode::RemoveCustomProperty(const std::string& key)
     auto iter = customPropertyMap_.find(key);
     if (iter != customPropertyMap_.end()) {
         customPropertyMap_.erase(iter);
+    }
+}
+
+void FrameNode::SetCustomPropertyMapFlagByKey(const std::string& key)
+{
+    auto& valueVector = customPropertyMap_[key];
+    if (valueVector.empty()) {
+        valueVector = {"", "0"};
+    } else {
+        valueVector[1] = "0";
     }
 }
 
@@ -6455,8 +6498,8 @@ void FrameNode::SetKitNode(const RefPtr<Kit::FrameNode>& node)
 bool FrameNode::GetCustomPropertyByKey(const std::string& key, std::string& value)
 {
     auto iter = customPropertyMap_.find(key);
-    if (iter != customPropertyMap_.end()) {
-        value = iter->second;
+    if (iter != customPropertyMap_.end() && !iter->second.empty()) {
+        value = iter->second[0];
         return true;
     }
     return false;

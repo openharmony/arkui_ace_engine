@@ -1624,14 +1624,16 @@ void SearchPattern::HandleBlurEvent()
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    if (isFocusTextColorSet_) {
+    auto textFieldPaintProperty = textFieldFrameNode->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textFieldPaintProperty);
+    if (isFocusTextColorSet_ && !textFieldPaintProperty->HasTextColorFlagByUser()) {
         textFieldLayoutProperty->UpdateTextColor(searchTheme->GetTextColor());
-        isFocusTextColorSet_ = false;
     }
-    if (isFocusPlaceholderColorSet_) {
+    if (isFocusPlaceholderColorSet_ && !textFieldPaintProperty->GetPlaceholderColorFlagByUserValue(false)) {
         textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
-        isFocusPlaceholderColorSet_ = false;
     }
+    isFocusTextColorSet_ = false;
+    isFocusPlaceholderColorSet_ = false;
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->HandleBlurEvent();
@@ -1701,16 +1703,23 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     CHECK_NULL_VOID(textFieldPattern);
     auto searchTheme = GetTheme();
     CHECK_NULL_VOID(searchTheme);
+    auto searchTextFieldPattern = DynamicCast<SearchTextFieldPattern>(textFieldPattern);
+    CHECK_NULL_VOID(searchTextFieldPattern);
 
     json->PutExtAttr("value", textFieldPattern->GetTextValue().c_str(), filter);
     json->PutExtAttr("placeholder", UtfUtils::Str16DebugToStr8(textFieldPattern->GetPlaceHolder()).c_str(), filter);
-    json->PutExtAttr("placeholderColor", textFieldPattern->GetPlaceholderColor().c_str(), filter);
-    json->PutExtAttr("placeholderFont", textFieldPattern->GetPlaceholderFont().c_str(), filter);
+    json->PutExtAttr("placeholderColor",
+        textFieldLayoutProperty->GetPlaceholderTextColorValue(searchTheme->GetPlaceholderColor())
+            .ColorToString()
+            .c_str(),
+        filter);
+    json->PutExtAttr("placeholderFont", searchTextFieldPattern->GetPlaceholderFont().c_str(), filter);
     json->PutExtAttr("textAlign", V2::ConvertWrapTextAlignToString(textFieldPattern->GetTextAlign()).c_str(), filter);
     auto textColor = textFieldLayoutProperty->GetTextColor().value_or(searchTheme->GetTextColor());
     json->PutExtAttr("fontColor", textColor.ColorToString().c_str(), filter);
     auto textFontJson = JsonUtil::Create(true);
-    textFontJson->Put("fontSize", textFieldPattern->GetFontSize().c_str());
+    textFontJson->Put(
+        "fontSize", textFieldLayoutProperty->GetFontSizeValue(searchTheme->GetFontSize()).ToString().c_str());
     textFontJson->Put("fontStyle",
         textFieldPattern->GetItalicFontStyle() == Ace::FontStyle::NORMAL ? "FontStyle.Normal" : "FontStyle.Italic");
     textFontJson->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(textFieldPattern->GetFontWeight()).c_str());
@@ -1774,6 +1783,8 @@ std::string SearchPattern::SearchTypeToString() const
             return "SearchType.PHONE_NUMBER";
         case TextInputType::URL:
             return "SearchType.URL";
+        case TextInputType::NUMBER_DECIMAL:
+            return "SearchType.NUMBER_DECIMAL";
         default:
             return "SearchType.NORMAL";
     }
@@ -2007,6 +2018,11 @@ void SearchPattern::OnColorConfigurationUpdate()
     auto searchTheme = GetTheme();
     CHECK_NULL_VOID(searchTheme);
     UpdateCancelButtonColorMode();
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) ||
+        !SystemProperties::IsNeedSymbol()) {
+        UpdateImageIconNode(IMAGE_INDEX);
+        UpdateImageIconNode(CANCEL_IMAGE_INDEX);
+    }
     auto buttonNode = buttonNode_.Upgrade();
     if (buttonNode) {
         auto buttonRenderContext = buttonNode->GetRenderContext();

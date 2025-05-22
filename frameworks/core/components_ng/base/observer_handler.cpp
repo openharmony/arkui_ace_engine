@@ -62,9 +62,11 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
         state == NavDestinationState::ON_ACTIVE || state == NavDestinationState::ON_INACTIVE)) {
         return;
     }
+    pathInfo->OpenScope();
     NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
         pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, uniqueId);
     navigationHandleFunc_(info);
+    pathInfo->CloseScope();
 }
 
 void UIObserverHandler::NotifyScrollEventStateChange(const WeakPtr<AceType>& weakPattern, ScrollEventType eventType)

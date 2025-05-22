@@ -292,11 +292,12 @@ void LazyForEachNode::OnDatasetChange(const std::list<V2::Operation>& DataOperat
                 continue;
             }
             if (!node.second->OnRemoveFromParent(true)) {
-                AddDisappearingChild(node.second);
+                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node.second);
             } else {
                 node.second->DetachFromMainTree();
             }
             builder_->ProcessOffscreenNode(node.second, true);
+            builder_->NotifyItemDeleted(RawPtr(node.second), node.first);
         }
         builder_->clearDeletedNodes();
     }

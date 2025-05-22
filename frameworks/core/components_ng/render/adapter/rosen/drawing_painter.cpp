@@ -25,6 +25,7 @@ void ProcessTexCoords(RSPoint* texsPoint, int32_t row, int32_t column, float wid
     const auto dy = height / static_cast<float>(row);
 
     RSPoint* texsPit = texsPoint;
+    CHECK_NULL_VOID(texsPit);
     float y = 0;
     for (int i = 0; i <= row; i++) {
         if (i == row) {
@@ -215,6 +216,7 @@ void DrawingPainter::DrawPixelMapMesh(
         return;
     }
 
+    CHECK_NULL_VOID(pixelMap);
     ProcessTexCoords(builder.TexCoords(), row, column, static_cast<float>(pixelMap->GetWidth()),
         static_cast<float>(pixelMap->GetHeight()));
     ProcessIndices(builder.Indices(), row, column);

@@ -1150,12 +1150,13 @@ void AceContainer::InitializeCallback()
         ACE_SCOPED_TRACE("DensityChangeCallback(%lf)", density);
         auto callback = [context, density, id]() {
             context->OnSurfaceDensityChanged(density);
-            if (context->IsDensityChanged()) {
+            if (context->IsNeedReloadDensity()) {
                 auto container = Container::GetContainer(id);
                 CHECK_NULL_VOID(container);
                 auto aceContainer = DynamicCast<AceContainer>(container);
                 CHECK_NULL_VOID(aceContainer);
                 aceContainer->NotifyDensityUpdate(density);
+                context->SetIsNeedReloadDensity(false);
             }
         };
         auto taskExecutor = context->GetTaskExecutor();
@@ -3440,7 +3441,7 @@ bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, St
     dragPointerEvent.windowX = pointerItem.GetWindowX();
     dragPointerEvent.windowY = pointerItem.GetWindowY();
     dragPointerEvent.deviceId = pointerItem.GetDeviceId();
-    dragPointerEvent.sourceTool = static_cast<SourceTool>(GetSourceTool(pointerItem.GetToolType()));
+    dragPointerEvent.sourceTool = static_cast<SourceTool>(pointerItem.GetToolType());
     dragPointerEvent.displayId = currentPointerEvent->GetTargetDisplayId();
     dragPointerEvent.pointerEventId = currentPointerEvent->GetId();
     dragPointerEvent.originId = pointerItem.GetOriginPointerId();

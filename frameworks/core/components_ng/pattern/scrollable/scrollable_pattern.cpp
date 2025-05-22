@@ -462,7 +462,9 @@ bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source,
         float handledByNav = ProcessNavBarReactOnUpdate(offsetCoordinate);
         if (NearEqual(handledByNav, offsetCoordinate) && !NearZero(offset)) {
             // All offsets are handled by Navigation, list cannot scroll over.
-            SetCanOverScroll(false);
+            if (!navBarPattern_->IsNeedHandleScroll()) {
+                SetCanOverScroll(false);
+            }
             offset = offsetRemain;
         } else {
             offset = offsetRemain + (offsetCoordinate - handledByNav);
@@ -1414,6 +1416,7 @@ void ScrollablePattern::AnimateTo(
         PlaySpringAnimation(position, DEFAULT_SCROLL_TO_VELOCITY, DEFAULT_SCROLL_TO_MASS, DEFAULT_SCROLL_TO_STIFFNESS,
             DEFAULT_SCROLL_TO_DAMPING, useTotalOffset);
     } else {
+        useTotalOffset_ = true;
         PlayCurveAnimation(position, duration, curve, canOverScroll);
     }
     if (!GetIsDragging()) {
@@ -1428,7 +1431,6 @@ void ScrollablePattern::AnimateTo(
 
 void ScrollablePattern::OnAnimateFinish()
 {
-    useTotalOffset_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (isAnimationStop_) {
@@ -2233,7 +2235,7 @@ ScrollResult ScrollablePattern::HandleScrollSelfFirst(float& offset, int32_t sou
     // triggering overScroll, parent always handle it first
     auto overRes = parent->HandleScroll(result.remain, source, NestedState::CHILD_OVER_SCROLL, GetVelocity());
     offset += LessNotEqual(std::abs(overOffset), std::abs(result.remain)) ? overOffset : overRes.remain;
-    bool parentEdgeEffect = result.reachEdge && NearZero(offset);
+    bool parentEdgeEffect = (result.reachEdge || overRes.reachEdge) && NearZero(offset);
     SetCanOverScroll((!NearZero(overOffset) && HasEdgeEffect(offset)) || parentEdgeEffect);
     return { 0, GetCanOverScroll() };
 }
@@ -2249,7 +2251,7 @@ ScrollResult ScrollablePattern::HandleScrollSelfOnly(float& offset, int32_t sour
     remainOffset += overOffset;
     if (NearZero(remainOffset)) {
         SetCanOverScroll(false);
-        return { 0, false };
+        return { 0, IsEnablePagingValid() };
     }
     bool canOverScroll = false;
     if (state == NestedState::CHILD_SCROLL) {
@@ -2650,7 +2652,7 @@ void ScrollablePattern::ResetBackToTop()
 
 void ScrollablePattern::OnStatusBarClick()
 {
-    if (!backToTop_) {
+    if (!backToTop_ || isBackToTopRunning_ || IsAtTop()) {
         return;
     }
 

@@ -415,4 +415,32 @@ int32_t GridScrollWithOptionsLayoutAlgorithm::CalculateEndCachedCount(
     }
     return end;
 }
+
+int32_t GridScrollWithOptionsLayoutAlgorithm::GetStartingItem(LayoutWrapper* layoutWrapper, int32_t currentIndex)
+{
+    int32_t firstIndex = 0;
+    currentIndex = currentIndex < info_.childrenCount_ ? currentIndex : info_.childrenCount_ - 1;
+    auto index = currentIndex;
+    while (index > 0) {
+        auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        if (!childLayoutWrapper) {
+            TAG_LOGW(AceLogTag::ACE_GRID, "item [%{public}d] does not exist, reload to [0]", index);
+            break;
+        }
+
+        AdjustRowColSpan(childLayoutWrapper, layoutWrapper, index);
+        auto crossIndex = info_.axis_ == Axis::VERTICAL ? currentItemColStart_ : currentItemRowStart_;
+        if (crossIndex == -1 && index % info_.crossCount_ == 0) {
+            firstIndex = index;
+            break;
+        }
+        if (crossIndex == 0) {
+            firstIndex = index;
+            break;
+        }
+        --index;
+    }
+
+    return firstIndex;
+}
 } // namespace OHOS::Ace::NG

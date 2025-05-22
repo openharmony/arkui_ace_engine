@@ -277,7 +277,10 @@ void FontManager::RebuildFontNodeNG()
 {
     for (auto iter = fontNodesNG_.begin(); iter != fontNodesNG_.end();) {
         auto fontNode = iter->Upgrade();
-        CHECK_NULL_VOID(fontNode);
+        if (!fontNode) {
+            iter = fontNodesNG_.erase(iter);
+            continue;
+        }
         auto uiNode = DynamicCast<NG::UINode>(fontNode);
         if (uiNode) {
             uiNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
@@ -292,7 +295,6 @@ void FontManager::RebuildFontNodeNG()
     }
     for (auto iter = observers_.begin(); iter != observers_.end();) {
         auto fontNode = iter->Upgrade();
-        CHECK_NULL_VOID(fontNode);
         if (fontNode) {
             fontNode->OnFontChanged();
             ++iter;

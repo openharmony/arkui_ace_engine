@@ -802,7 +802,7 @@ HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffset002, TestSize.Level1)
     };
     info.lineHeightMap_ = { { 0, 400.f }, { 1, 400.f }, { 2, 400.f } };
     info.crossCount_ = 3;
-    info.childrenCount_ = 10;
+    info.childrenCount_ = 20;
     info.lastRegularMainSize_ = 0;
 
     GridLayoutOptions option;
@@ -817,8 +817,63 @@ HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffset002, TestSize.Level1)
     info.SkipStartIndexByOffset(option, 0.f);
 
     EXPECT_EQ(info.startIndex_, 13);
+    EXPECT_EQ(info.currentOffset_, -200.f);
+    EXPECT_EQ(info.GetContentOffset(option, 0), 5400);
 }
 
+HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffset003, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {};
+    info.lineHeightMap_ = {};
+    info.crossCount_ = 3;
+    info.childrenCount_ = 20;
+    info.lastRegularMainSize_ = 400;
+    info.lastIrregularMainSize_ = 200;
+
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 0, 19 };
+
+    info.currentOffset_ = -2000.f;
+    info.prevOffset_ = -0.f;
+    info.currentHeight_ = 0.f;
+
+    info.SkipStartIndexByOffset(option, 0.f);
+
+    EXPECT_EQ(info.startIndex_, 13);
+    EXPECT_EQ(info.currentOffset_, -200.f);
+    EXPECT_EQ(info.GetContentOffset(option, 0), 2000);
+}
+
+HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffset004, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 0 } } },
+        { 1, { { 0, 1 }, { 1, 2 }, { 2, 3 } } },
+        { 2, { { 0, 4 }, { 1, 5 }, { 2, 6 } } },
+    };
+    info.lineHeightMap_ = { { 0, 200.f }, { 1, 400.f }, { 2, 400.f } };
+    info.crossCount_ = 3;
+    info.childrenCount_ = 20;
+
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 0, 19 };
+
+    info.currentOffset_ = -2000.f;
+    info.prevOffset_ = -0.f;
+    info.currentHeight_ = 0.f;
+
+    info.SkipStartIndexByOffset(option, 0.f);
+
+    EXPECT_EQ(info.startIndex_, 13);
+    EXPECT_EQ(info.currentOffset_, -200.f);
+    EXPECT_EQ(info.GetContentOffset(option, 0), 2000);
+}
 
 HWTEST_F(GridLayoutInfoTest, CheckGridMatrix001, TestSize.Level1)
 {

@@ -134,7 +134,7 @@ void TextPattern::OnAttachToFrameNode()
 void TextPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     dataDetectorAdapter_->aiDetectDelayTask_.Cancel();
-    CloseSelectOverlay();
+    selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
     auto pipeline = pipeline_.Upgrade();
     CHECK_NULL_VOID(pipeline);
     if (HasSurfaceChangedCallback()) {
@@ -154,6 +154,7 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
     pipeline->RemoveWindowStateChangedCallback(node->GetId());
     pipeline->RemoveVisibleAreaChangeNode(node->GetId());
     pipeline->RemoveWindowSizeChangeCallback(node->GetId());
+    RemoveFormVisibleChangeCallback(node->GetId());
 }
 
 void TextPattern::CloseSelectOverlay()
@@ -2990,6 +2991,8 @@ void TextPattern::OnModifyDone()
     CHECK_NULL_VOID(renderContext);
     auto nowTime = static_cast<unsigned long long>(GetSystemTimestamp());
     ACE_TEXT_SCOPED_TRACE("OnModifyDone[Text][id:%d][time:%llu]", host->GetId(), nowTime);
+    auto logTag = "OnModifyDone:" + std::to_string(nowTime);
+    LogForFormRender(logTag);
     auto pipeline = host->GetContext();
     if (!(pipeline && pipeline->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE)) {
         bool shouldClipToContent =
@@ -3022,6 +3025,7 @@ void TextPattern::OnModifyDone()
         }
     }
     RecoverCopyOption();
+    RegisterFormVisibleChangeCallback();
 }
 
 void TextPattern::UpdateMarqueeStartPolicy()
@@ -3211,12 +3215,12 @@ void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
     json->PutExtAttr("selection", result.c_str(), filter);
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
-    json->PutExtAttr("fontSize", GetFontSizeInJson(textLayoutProp->GetFontSize()).c_str(), filter);
+    json->PutExtAttr("fontSize", GetFontSizeWithThemeInJson(textLayoutProp->GetFontSize()).c_str(), filter);
     if (textStyle_.has_value() && textStyle_->GetAdaptTextSize()) {
         auto adaptedFontSize = textStyle_->GetFontSize();
         json->PutExtAttr("actualFontSize", adaptedFontSize.ToString().c_str(), filter);
     } else {
-        json->PutExtAttr("actualFontSize", GetFontSizeInJson(textLayoutProp->GetFontSize()).c_str(), filter);
+        json->PutExtAttr("actualFontSize", GetFontSizeWithThemeInJson(textLayoutProp->GetFontSize()).c_str(), filter);
     }
     json->PutExtAttr("font", GetFontInJson().c_str(), filter);
     json->PutExtAttr("bindSelectionMenu", GetBindSelectionMenuInJson().c_str(), filter);
@@ -3246,13 +3250,24 @@ std::string TextPattern::GetFontInJson() const
     CHECK_NULL_RETURN(textLayoutProp, "");
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("style", GetFontStyleInJson(textLayoutProp->GetItalicFontStyle()).c_str());
-    jsonValue->Put("size", GetFontSizeInJson(textLayoutProp->GetFontSize()).c_str());
+    jsonValue->Put("size", GetFontSizeWithThemeInJson(textLayoutProp->GetFontSize()).c_str());
     jsonValue->Put("weight", GetFontWeightInJson(textLayoutProp->GetFontWeight()).c_str());
     jsonValue->Put("variableFontWeight", std::to_string(textLayoutProp->GetVariableFontWeight().value_or(0)).c_str());
     jsonValue->Put("enableVariableFontWeight",
                    textLayoutProp->GetEnableVariableFontWeight().value_or(false) ? "true" : "false");
     jsonValue->Put("family", GetFontFamilyInJson(textLayoutProp->GetFontFamily()).c_str());
     return jsonValue->ToString();
+}
+
+std::string TextPattern::GetFontSizeWithThemeInJson(const std::optional<Dimension>& value) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, "");
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, "");
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, "");
+    return value.value_or(theme->GetTextStyle().GetFontSize()).ToString();
 }
 
 void TextPattern::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
@@ -5454,5 +5469,52 @@ bool TextPattern::IsLocationInFrameRegion(const Offset& localOffset) const
     auto frameSize = geometryNode->GetFrameSize();
     auto frameRect = RectF(OffsetF(0.0f, 0.0f), frameSize);
     return frameRect.IsInRegion(PointF(localOffset.GetX(), localOffset.GetY()));
+}
+
+void TextPattern::RegisterFormVisibleChangeCallback()
+{
+    if (hasRegisterFormVisibleCallback_ || !IsMarqueeOverflow()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto isFormRender = pipeline->IsFormRender();
+    auto formMgr = pipeline->GetFormVisibleManager();
+    if (!isFormRender || !formMgr) {
+        return;
+    }
+    auto formCallback = [weak = WeakClaim(this)](bool visible) {
+        auto textPattern = weak.Upgrade();
+        CHECK_NULL_VOID(textPattern);
+        textPattern->HandleFormVisibleChange(visible);
+    };
+    formMgr->AddFormVisibleChangeNode(host, formCallback);
+    hasRegisterFormVisibleCallback_ = true;
+}
+
+void TextPattern::RemoveFormVisibleChangeCallback(int32_t id)
+{
+    if (!hasRegisterFormVisibleCallback_) {
+        return;
+    }
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    auto formMgr = pipeline->GetFormVisibleManager();
+    CHECK_NULL_VOID(formMgr);
+    formMgr->RemoveFormVisibleChangeNode(id);
+}
+
+void TextPattern::HandleFormVisibleChange(bool visible)
+{
+    if (!IsMarqueeOverflow() || !contentMod_) {
+        return;
+    }
+    if (visible) {
+        contentMod_->ResumeAnimation();
+    } else {
+        contentMod_->PauseAnimation();
+    }
 }
 } // namespace OHOS::Ace::NG

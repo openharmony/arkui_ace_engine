@@ -67,7 +67,7 @@ constexpr int32_t PARAMETER_NUM = 2;
 constexpr int32_t ARG_COUNT_3 = 3;
 constexpr int32_t SOURCE_TYPE_MOUSE = 1;
 constexpr int32_t MOUSE_POINTER_ID = 1001;
-constexpr int32_t SOURCE_TOOL_PEN = 2;
+constexpr int32_t SOURCE_TOOL_PEN = 1;
 constexpr int32_t SOURCE_TYPE_TOUCH = 2;
 constexpr int32_t PEN_POINTER_ID = 102;
 constexpr int32_t CREATE_PIXELMAP_DELAY_TIME = 80;
@@ -823,8 +823,8 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
     dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
         asyncCtx->dragPointerEvent.sourceType, recordSize, asyncCtx->dragPointerEvent.pointerId,
-        static_cast<int32_t>(asyncCtx->dragPointerEvent.sourceTool), asyncCtx->dragPointerEvent.displayX,
-        asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId, windowId, true, false, summary };
+        asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY,
+        asyncCtx->dragPointerEvent.displayId, windowId, true, false, summary };
     if (!dragData) {
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(asyncCtx->env, &scope);
@@ -870,7 +870,7 @@ int32_t StartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const Msdp::
     bool isStartDragService)
 {
     OHOS::Ace::DragDataCore dragDataCore { {}, {}, dragData.udKey, dragData.extraInfo, dragData.filterInfo,
-        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, dragData.dragNum, dragData.pointerId, dragData.toolType,
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, dragData.dragNum, dragData.pointerId,
         dragData.displayX, dragData.displayY, dragData.displayId, dragData.mainWindow, dragData.hasCanceledAnimation,
         dragData.hasCoordinateCorrected, dragData.summarys };
     for (const auto& shadowInfo : dragData.shadowInfos) {
@@ -909,13 +909,11 @@ void LogDragInfoInner(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const Ms
     std::string summarys = NG::DragDropFuncWrapper::GetSummaryString(dragData.summarys);
     TAG_LOGI(AceLogTag::ACE_DRAG,
         "dragData, pixelMap width %{public}d height %{public}d, udkey %{public}s, recordSize %{public}d, "
-        "extraParams length %{public}d, pointerId %{public}d, toolType %{public}d, summary %{public}s, "
-        "eventId %{public}d",
+        "extraParams length %{public}d, pointerId %{public}d, summary %{public}s, eventId %{public}d",
         pixelMap->GetWidth(), pixelMap->GetHeight(),
         NG::DragDropFuncWrapper::GetAnonyString(dragData.udKey).c_str(), dragData.dragNum,
         static_cast<int32_t>(asyncCtx->extraParams.length()), asyncCtx->dragPointerEvent.pointerId,
-        static_cast<int32_t>(asyncCtx->dragPointerEvent.sourceTool), summarys.c_str(),
-        asyncCtx->dragPointerEvent.pointerEventId);
+        summarys.c_str(), asyncCtx->dragPointerEvent.pointerEventId);
 }
 
 bool CreatePreviewNodeAndScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
@@ -1173,8 +1171,8 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     auto windowId = container->GetWindowId();
     dragData = { { shadowInfo }, {}, udKey, asyncCtx->extraParams,
         arkExtraInfoJson->ToString(), asyncCtx->dragPointerEvent.sourceType, dataSize,
-        asyncCtx->dragPointerEvent.pointerId, static_cast<int32_t>(asyncCtx->dragPointerEvent.sourceTool),
-        asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
+        asyncCtx->dragPointerEvent.pointerId, asyncCtx->dragPointerEvent.displayX,
+        asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
         windowId, true, false, summary };
     return true;
 }

@@ -12,8 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ui/base/ace_type.h"
-#include "ui/base/utils/utils.h"
 #include "base/geometry/dimension.h"
 #include "base/utils/utf_helper.h"
 #include "core/components/common/layout/constants.h"
@@ -120,7 +118,7 @@ void TextLayoutElement::UpdateFontSize()
     auto textStyle = layoutAlgorithm->GetTextStyle();
     auto textProp = AceType::DynamicCast<TextLayoutProperty>(textWrap_->GetLayoutProperty());
     CHECK_NULL_VOID(textProp);
-    if (!NearEqual(textStyle->GetFontSize().Value(), 0.0f)) {
+    if (isAdaptive_ && !NearEqual(textStyle->GetFontSize().Value(), 0.0f)) {
         Dimension fontSize(textStyle->GetFontSize().ConvertToFp(), DimensionUnit::FP);
         textProp->UpdateFontSize(fontSize);
     }
@@ -169,8 +167,14 @@ void TextLayoutElement::Init(const RefPtr<SecurityComponentLayoutProperty>& prop
     auto theme = context->GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
     minFontSize_ = theme->GetMinFontSize();
-    if (property->GetFontSize().has_value() ||
-        (property->GetAdaptMaxFontSize().has_value() && property->GetAdaptMinFontSize().has_value())) {
+    if (property->GetAdaptMaxFontSize().has_value() && property->GetAdaptMinFontSize().has_value()) {
+        if (GreatOrEqual(property->GetAdaptMaxFontSize()->ConvertToFp(),
+            property->GetAdaptMinFontSize()->ConvertToFp())) {
+            textProp->UpdateFontSize(property->GetAdaptMaxFontSize().value());
+            isAdaptive_ = true;
+        }
+        isSetSize_ = true;
+    } else if (property->GetFontSize().has_value()) {
         isSetSize_ = true;
     } else {
         defaultFontSize_ = theme->GetFontSize();
@@ -179,7 +183,7 @@ void TextLayoutElement::Init(const RefPtr<SecurityComponentLayoutProperty>& prop
 
     auto textConstraint = property->CreateChildConstraint();
     SizeT<float> maxSize { textConstraint.maxSize.Width(), Infinity<float>() };
-    if (property->GetHeightAdaptivePolicy().has_value() &&
+    if (isAdaptive_ && property->GetHeightAdaptivePolicy().has_value() &&
         property->GetHeightAdaptivePolicy() == TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST) {
         SC_LOG_DEBUG("Component height constrained.");
         auto heightConstraint = GetHeightConstraint(property, textConstraint.maxSize.Height());

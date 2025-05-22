@@ -374,7 +374,7 @@ class PersistenceV2Impl extends StorageHelper {
     } catch (err) {
       if (this.cb_ && typeof this.cb_ === 'function') {
         this.cb_('', PersistError.Unknown, `fail to get all persisted keys`);
-        return [];
+        return;
       }
       throw new Error(err);
     }

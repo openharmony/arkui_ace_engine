@@ -42,13 +42,12 @@ using DragNotifyMsg = OHOS::Ace::DragNotifyMsg;
 using OnDragCallback = std::function<void(const DragNotifyMsg&)>;
 using StopDragCallback = std::function<void()>;
 constexpr int32_t MOUSE_POINTER_ID = 1001;
-constexpr int32_t SOURCE_TOOL_PEN = 2;
+constexpr int32_t SOURCE_TOOL_PEN = 1;
 constexpr int32_t SOURCE_TYPE_TOUCH = 2;
 constexpr int32_t PEN_POINTER_ID = 102;
 constexpr int32_t SOURCE_TYPE_MOUSE = 1;
 constexpr size_t SHORT_KEY_LENGTH = 8;
 constexpr size_t PLAINTEXT_LENGTH = 4;
-constexpr size_t  CONVERT_TIME_BASE = 1000;
 #if defined(PIXEL_MAP_SUPPORTED)
 constexpr int32_t CREATE_PIXELMAP_TIME = 80;
 #endif
@@ -182,8 +181,7 @@ void EnvelopedDragData(
     arkExtraInfoJson->Put("event_id", dragAction->dragPointerEvent.pointerEventId);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, dragAction->previewOption);
     dragData = { shadowInfos, {}, udKey, dragAction->extraParams, arkExtraInfoJson->ToString(),
-        dragAction->dragPointerEvent.sourceType, recordSize, pointerId,
-        static_cast<int32_t>(dragAction->dragPointerEvent.sourceTool), dragAction->dragPointerEvent.displayX,
+        dragAction->dragPointerEvent.sourceType, recordSize, pointerId, dragAction->dragPointerEvent.displayX,
         dragAction->dragPointerEvent.displayY, dragAction->dragPointerEvent.displayId, windowId, true, false,
         summary };
 }
@@ -936,21 +934,6 @@ RefPtr<PixelMap> DragDropFuncWrapper::GetGatherNodePreviewPixelMap(const RefPtr<
     return pixelMap;
 }
 
-void DragDropFuncWrapper::TrySetDraggableStateAsync(
-    const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    if (frameNode->GetTag() == V2::TEXT_ETS_TAG && !gestureHub->GetIsTextDraggable()) {
-        return;
-    }
-    int64_t downTime = static_cast<int64_t>(touchRestrict.touchEvent.time.time_since_epoch().count());
-    if (DragDropGlobalController::GetInstance().IsAppGlobalDragEnabled()) {
-        InteractionInterface::GetInstance()->SetDraggableStateAsync(true, downTime / CONVERT_TIME_BASE);
-    }
-}
-
 /**
  * check the current node's status to decide if it can initiate one drag operation
  */
@@ -973,7 +956,6 @@ bool DragDropFuncWrapper::IsCurrentNodeStatusSuitableForDragging(
     if (gestureHub->GetTextDraggable()) {
         auto pattern = frameNode->GetPattern<TextBase>();
         if (pattern && !pattern->IsSelected()) {
-            TrySetDraggableStateAsync(frameNode, touchRestrict);
             TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, text is not selected.");
             return false;
         }
@@ -1239,7 +1221,7 @@ std::shared_ptr<PixelMapInfo> DragDropFuncWrapper::GetTiledPixelMapInfo(const st
         auto gestureHub = node->GetOrCreateGestureEventHub();
         gestureHub->SetDragPreviewPixelMap(pixelMap);
         CHECK_NULL_RETURN(pixelMap, nullptr);
-        auto offset = DragDropFuncWrapper::GetPaintRectCenter(node, true);
+        auto offset = node->GetPositionToWindowWithTransform();
         minX = std::min(minX, offset.GetX());
         minY = std::min(minY, offset.GetY());
         maxX = std::max(maxX, offset.GetX() + pixelMap->GetWidth());
@@ -1269,8 +1251,9 @@ void DragDropFuncWrapper::DrawTiledPixelMap(
         CHECK_NULL_VOID(gestureHub);
         auto pixelMap = gestureHub->GetDragPreviewPixelMap();
         CHECK_NULL_VOID(pixelMap);
-        auto offsetX = DragDropFuncWrapper::GetPaintRectCenter(node, true).GetX();
-        auto offsetY = DragDropFuncWrapper::GetPaintRectCenter(node, true).GetY();
+        auto offset = node->GetPositionToWindowWithTransform();
+        auto offsetX = offset.GetX();
+        auto offsetY = offset.GetY();
         auto result =
             tiledPixelMap->WritePixels({ pixelMap->GetPixels(), pixelMap->GetByteCount(), 0, pixelMap->GetRowStride(),
                 { offsetX - pixelMapRect.GetOffset().GetX(), offsetY - pixelMapRect.GetOffset().GetY(),

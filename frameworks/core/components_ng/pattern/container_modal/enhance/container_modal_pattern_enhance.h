@@ -68,9 +68,11 @@ public:
     CalcLength GetControlButtonRowWidth() override;
     bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons) override;
     bool GetContainerModalComponentRect(RectF& containerModal, RectF& buttons);
+    
     void OnMaxButtonClick();
     void OnMinButtonClick();
     void OnCloseButtonClick();
+    void AddPointLight();
     void CallMenuWidthChange(int32_t resId);
     int32_t AddButtonsRectChangeListener(ButtonsRectChangeListener&& listener);
     void RemoveButtonsRectChangeListener(int32_t id);
@@ -99,7 +101,6 @@ private:
     void ChangeFloatingTitle(bool isFocus) override;
     void ChangeCustomTitle(bool isFocus) override;
     void ChangeControlButtons(bool isFocus) override;
-
     RefPtr<FrameNode> ShowMaxMenu(RefPtr<FrameNode>& container, const RefPtr<FrameNode>& targetNode);
     void ResetHoverTimer();
     Dimension GetMenuWidth();
@@ -113,12 +114,12 @@ private:
     VisibleType controlButtonVisibleBeforeAnim_;
     RefPtr<FrameNode> menuList_;
     OffsetF menuOffset_;
+    bool enableContainerModalGesture_ = true;
     float textWidth_ = 0.0f;
     bool isMenuPending_ = false;
     bool isForbidMenuEvent_ = false;
     bool enableSplit_ = true;
     CancelableCallback<void()> contextTimer_;
-    bool enableContainerModalGesture_ = true;
     std::unordered_map<int32_t, ButtonsRectChangeListener> rectChangeListeners_;
 };
 } // namespace OHOS::Ace::NG

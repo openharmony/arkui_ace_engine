@@ -851,12 +851,6 @@ public:
 
     bool IsNeedPaintFocusStateSelf();
 
-    void LostChildFocusToSelf();
-
-    static bool IsFocusStepKey(KeyCode keyCode);
-
-    bool GetNextFocusByStep(const KeyEvent& keyEvent);
-
     void SetDirectionalKeyFocus(bool directionalKeyFocus)
     {
         enableDirectionalKeyFocus_ = directionalKeyFocus;
@@ -866,6 +860,12 @@ public:
     {
         return enableDirectionalKeyFocus_;
     }
+
+    void LostChildFocusToSelf();
+
+    static bool IsFocusStepKey(KeyCode keyCode);
+
+    bool GetNextFocusByStep(const KeyEvent& keyEvent);
 
     void SetIsNodeNeedKey(bool isNodeNeedKey)
     {
@@ -1005,8 +1005,8 @@ private:
     bool isGroup_ { false };
     FocusPriority focusPriority_ = FocusPriority::AUTO;
     bool arrowKeyStepOut_ { true };
-    bool isSwitchByEnter_ { false };
     bool enableDirectionalKeyFocus_ { false };
+    bool isSwitchByEnter_ { false };
     bool isCustomFocusTravel_ = false;
     WeakPtr<FocusHub> nextFocusTravelNode_;
 };

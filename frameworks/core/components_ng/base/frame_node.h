@@ -75,10 +75,13 @@ struct DirtySwapConfig;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
+    OffsetF innerWindowOffset = OffsetF();
     RectF visibleRect = RectF();
     RectF innerVisibleRect = RectF();
     VectorF cumulativeScale = {1.0f, 1.0f};
+    VectorF innerCumulativeScale = {1.0f, 1.0f};
     RectF frameRect = RectF();
+    RectF innerFrameRect = RectF();
     RectF innerBoundaryRect = RectF();
 };
 
@@ -905,6 +908,7 @@ public:
 
     bool SetParentLayoutConstraint(const SizeF& size) const override;
     void ForceSyncGeometryNode();
+    bool IsGeometrySizeChange() const;
 
     template<typename T>
     RefPtr<T> FindFocusChildNodeOfClass()
@@ -1197,6 +1201,8 @@ public:
     void AddCustomProperty(const std::string& key, const std::string& value) override;
     void RemoveCustomProperty(const std::string& key) override;
 
+    void SetCustomPropertyMapFlagByKey(const std::string& key);
+
     void AddExtraCustomProperty(const std::string& key, void* extraData);
     void* GetExtraCustomProperty(const std::string& key) const;
     void RemoveExtraCustomProperty(const std::string& key);
@@ -1317,6 +1323,13 @@ public:
     void AddVisibilityDumpInfo(const std::pair<uint64_t, std::pair<VisibleType, bool>>& dumpInfo);
 
     std::string PrintVisibilityDumpInfo() const;
+
+    void ResetLastFrameNodeRect()
+    {
+        if (lastFrameNodeRect_) {
+            lastFrameNodeRect_.reset();
+        }
+    }
 
 protected:
     void DumpInfo() override;
@@ -1447,7 +1460,8 @@ private:
     CacheVisibleRectResult GetCacheVisibleRect(uint64_t timestamp, bool logFlag = false);
 
     CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
-        const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp);
+        const RefPtr<FrameNode>& parentUi, RectF& rectToParent, const std::pair<VectorF, VectorF>& pairScale,
+        uint64_t timestamp);
 
     void NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange);
 
@@ -1571,7 +1585,7 @@ private:
 
     DragPreviewOption previewOption_;
 
-    std::unordered_map<std::string, std::string> customPropertyMap_;
+    std::unordered_map<std::string, std::vector<std::string>> customPropertyMap_;
 
     std::unordered_map<std::string, void*> extraCustomPropertyMap_;
 

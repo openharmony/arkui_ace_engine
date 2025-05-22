@@ -105,6 +105,7 @@ struct AxisEvent final : public PointerEvent {
     AxisEvent CreateScaleEvent(float scale) const;
     Offset GetOffset() const;
     Offset GetScreenOffset() const;
+    int32_t GetTargetDisplayId() const;
     AxisDirection GetDirection() const;
     static bool IsDirectionUp(AxisDirection direction);
     static bool IsDirectionDown(AxisDirection direction);

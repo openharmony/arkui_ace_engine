@@ -1071,9 +1071,8 @@ void MenuLayoutAlgorithm::LayoutNormalTopPreviewBottomMenuLessThan(
     targetCenterOffset_ = center;
     auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
     OffsetF offset(center.GetX() - previewSize.Width() / HALF,
-        std::min<float>(center.GetY() - previewSize.Height() / HALF, param_.windowGlobalSizeF.Height() -
-                                                                         param_.bottomSecurity - param_.bottom -
-                                                                         totalSize.Height() - param_.previewMenuGap));
+        std::min<float>(center.GetY() - previewSize.Height() / HALF,
+            wrapperRect_.Bottom() - param_.bottomSecurity - totalSize.Height() - param_.previewMenuGap));
     auto x = std::clamp(offset.GetX(), static_cast<float>(wrapperRect_.Left()) + paddingStart_,
         static_cast<float>(wrapperRect_.Right()) - paddingEnd_ - previewSize.Width());
     auto y = std::clamp(offset.GetY(), static_cast<float>(wrapperRect_.Top()) + param_.topSecurity,
@@ -1160,18 +1159,20 @@ void MenuLayoutAlgorithm::LayoutNormalBottomPreviewTopMenuLessThan(
     CHECK_NULL_VOID(previewGeometryNode);
     CHECK_NULL_VOID(menuGeometryNode);
 
-    OffsetF center(targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
+    OffsetF center(
+        targetOffset_.GetX() + targetSize_.Width() / HALF, targetOffset_.GetY() + targetSize_.Height() / HALF);
     targetCenterOffset_ = center;
     auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
-    OffsetF offset(center.GetX() - previewSize.Width() / 2,
-        std::max<float>(center.GetY() - previewSize.Height() / 2,
-            param_.top + param_.topSecurity + totalSize.Height() - previewSize.Height() + param_.previewMenuGap));
+    OffsetF offset(center.GetX() - previewSize.Width() / HALF,
+        std::max<float>(center.GetY() - previewSize.Height() / HALF, wrapperRect_.Top() + param_.topSecurity +
+                                                                      totalSize.Height() - previewSize.Height() +
+                                                                      param_.previewMenuGap));
     auto x = std::clamp(offset.GetX(), static_cast<float>(wrapperRect_.Left()) + paddingStart_,
         static_cast<float>(wrapperRect_.Right()) - previewSize.Width() - paddingEnd_);
     auto y = std::clamp(offset.GetY(), static_cast<float>(wrapperRect_.Top()) + param_.topSecurity,
         static_cast<float>(wrapperRect_.Bottom()) - param_.bottomSecurity - previewSize.Height());
-    x = x + (previewSize.Width() - previewSize.Width() / previewScale_) / 2;
-    y = y + (previewSize.Height() - previewSize.Height() / previewScale_) / 2;
+    x = x + (previewSize.Width() - previewSize.Width() / previewScale_) / HALF;
+    y = y + (previewSize.Height() - previewSize.Height() / previewScale_) / HALF;
     previewGeometryNode->SetMarginFrameOffset(OffsetF(x, y));
 }
 
@@ -1506,18 +1507,20 @@ void MenuLayoutAlgorithm::UpdatePreviewPositionAndOffset(
 
     auto menuHostNode = menuLayoutWrapper->GetHostNode();
     CHECK_NULL_VOID(menuHostNode);
+    previewOriginOffset_ = targetCenterOffset_ - OffsetF(previewSize.Width() / HALF, previewSize.Height() / HALF);
+    previewSize_ = previewSize;
     auto menuPattern = menuHostNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
+    auto lastPreviewOffset = menuPattern->GetPreviewRect().GetOffset();
+    menuPattern->SetPreviewOriginOffset(previewOriginOffset_);
+    menuPattern->SetPreviewRect(RectF(previewOffset_, previewSize_));
 
-    // only update when current position is not equal to last position, otherwise animation will be interrupted
-    if (previewOffset_ != menuPattern->GetPreviewRect().GetOffset()) {
+    if (previewOffset_ != lastPreviewOffset) {
         renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(previewOffsetX), Dimension(previewOffsetY)));
     }
 
-    previewOriginOffset_ = targetCenterOffset_ - OffsetF(previewSize.Width() / HALF, previewSize.Height() / HALF);
-    previewSize_ = previewSize;
-    menuPattern->SetPreviewOriginOffset(previewOriginOffset_);
-    menuPattern->SetPreviewRect(RectF(previewOffset_, previewSize_));
+    TAG_LOGD(AceLogTag::ACE_MENU, "previewOriginOffset: %{public}s currentPreviewRect: %{public}s",
+        previewOriginOffset_.ToString().c_str(), menuPattern->GetPreviewRect().ToString().c_str());
 }
 
 OffsetF MenuLayoutAlgorithm::FixMenuOriginOffset(float beforeAnimationScale, float afterAnimationScale)

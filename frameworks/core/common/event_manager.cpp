@@ -20,6 +20,7 @@
 #include "base/thread/frame_trace_adapter.h"
 #include "core/common/container.h"
 #include "core/common/xcollie/xcollieInterface.h"
+#include "core/components_ng/gestures/recognizers/gestures_extra_handler.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/event/focus_axis_event.h"
@@ -727,6 +728,9 @@ bool EventManager::DispatchMultiContainerEvent(const TouchEvent& point)
 
 bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
 {
+    if (event.sourceType == SourceType::TOUCH) {
+        NG::GestureExtraHandler::NotifiyTouchEvent(event);
+    }
     ContainerScope scope(instanceId_);
     TouchEvent point = event;
     UpdateDragInfo(point);
@@ -1562,8 +1566,7 @@ bool EventManager::DispatchMouseHoverEventNG(const MouseEvent& event)
             currHoverEndNode++;
         }
         if (std::find(lastHoverTestResults_.begin(), lastHoverEndNode, hoverResult) == lastHoverEndNode) {
-            if (!(event.action == MouseAction::WINDOW_LEAVE && event.mockFlushEvent) &&
-                !hoverResult->HandleHoverEvent(true, event)) {
+            if (!hoverResult->HandleHoverEvent(true, event)) {
                 lastHoverDispatchLength_ = iterCountCurr;
                 break;
             }
@@ -1950,6 +1953,25 @@ void EventManager::FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, b
     }
 }
 
+template<typename T>
+bool EventManager::CheckDifferentTargetDisplay(const std::vector<T>& historyEvents, const std::vector<T>& events)
+{
+    int32_t targetDisplayId = -1;
+    for (auto iter = historyEvents.begin(); iter != historyEvents.end(); ++iter) {
+        if (targetDisplayId != -1 && targetDisplayId != iter->GetTargetDisplayId()) {
+            return false;
+        }
+        targetDisplayId = iter->GetTargetDisplayId();
+    }
+    for (auto iter = events.begin(); iter != events.end(); ++iter) {
+        if (targetDisplayId != -1 && targetDisplayId != iter->GetTargetDisplayId()) {
+            return false;
+        }
+        targetDisplayId = iter->GetTargetDisplayId();
+    }
+    return true;
+}
+
 bool EventManager::TryResampleTouchEvent(std::vector<TouchEvent>& history,
     const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& resample)
 {
@@ -1958,7 +1980,8 @@ bool EventManager::TryResampleTouchEvent(std::vector<TouchEvent>& history,
     events.insert(events.end(), current.begin(), current.end());
     ResamplePoint slope;
     resample = GetLatestPoint(events, nanoTimeStamp);
-    bool ret = ResampleAlgo::GetResamplePointerEvent(events, nanoTimeStamp, resample, slope);
+    bool ret = CheckDifferentTargetDisplay({}, events) &&
+        ResampleAlgo::GetResamplePointerEvent(events, nanoTimeStamp, resample, slope);
     if (ret) {
         resample.history = current;
         resample.isInterpolated = true;
@@ -1995,11 +2018,15 @@ bool EventManager::TryResampleTouchEvent(std::vector<TouchEvent>& history,
 bool EventManager::GetResampleTouchEvent(const std::vector<TouchEvent>& history,
     const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& newTouchEvent)
 {
+    newTouchEvent = GetLatestPoint(current, nanoTimeStamp);
+    if (!CheckDifferentTargetDisplay(history, current)) {
+        TAG_LOGI(AceLogTag::ACE_UIEVENT, "TouchEvent not interpolate with different targetDisplayId.");
+        return false;
+    }
     auto newXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
         std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, false);
     auto newScreenXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
         std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, true);
-    newTouchEvent = GetLatestPoint(current, nanoTimeStamp);
     bool ret = false;
     if (newXy.x != 0 && newXy.y != 0) {
         newTouchEvent.x = newXy.x;
@@ -2051,11 +2078,15 @@ TouchEvent EventManager::GetLatestPoint(const std::vector<TouchEvent>& current, 
 MouseEvent EventManager::GetResampleMouseEvent(
     const std::vector<MouseEvent>& history, const std::vector<MouseEvent>& current, uint64_t nanoTimeStamp)
 {
+    MouseEvent newMouseEvent = GetMouseLatestPoint(current, nanoTimeStamp);
+    if (!CheckDifferentTargetDisplay(history, current)) {
+        TAG_LOGI(AceLogTag::ACE_UIEVENT, "MouseEvent not interpolate with different targetDisplayId.");
+        return newMouseEvent;
+    }
     auto newXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
         std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, false);
     auto newScreenXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
         std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, true);
-    MouseEvent newMouseEvent = GetMouseLatestPoint(current, nanoTimeStamp);
     if (newXy.x != 0 && newXy.y != 0) {
         newMouseEvent.x = newXy.x;
         newMouseEvent.y = newXy.y;
@@ -2102,10 +2133,13 @@ MouseEvent EventManager::GetMouseLatestPoint(const std::vector<MouseEvent>& curr
 DragPointerEvent EventManager::GetResamplePointerEvent(const std::vector<DragPointerEvent>& history,
     const std::vector<DragPointerEvent>& current, uint64_t nanoTimeStamp)
 {
+    DragPointerEvent newPointerEvent = GetPointerLatestPoint(current, nanoTimeStamp);
+    if (!CheckDifferentTargetDisplay(history, current)) {
+        TAG_LOGI(AceLogTag::ACE_UIEVENT, "DragPointerEvent not interpolate with different targetDisplayId.");
+        return newPointerEvent;
+    }
     auto newXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
         std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, false);
-    DragPointerEvent newPointerEvent = GetPointerLatestPoint(current, nanoTimeStamp);
-
     if (newXy.x != 0 && newXy.y != 0) {
         newPointerEvent.x = newXy.x;
         newPointerEvent.y = newXy.y;

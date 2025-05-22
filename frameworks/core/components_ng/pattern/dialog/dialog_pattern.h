@@ -69,7 +69,7 @@ public:
 
     bool ShouldDismiss() const
     {
-        if (onWillDismiss_) {
+        if (onWillDismiss_ && !isDialogDisposed_) {
             return true;
         }
         return false;
@@ -90,7 +90,7 @@ public:
 
     void CallOnWillDismiss(const int32_t reason, const int32_t instanceId)
     {
-        if (onWillDismiss_) {
+        if (onWillDismiss_ && !isDialogDisposed_) {
             onWillDismiss_(reason, instanceId);
         }
     }
@@ -311,6 +311,11 @@ public:
         return true;
     }
 
+    void SetIsDialogDisposed(bool isDialogDisposed)
+    {
+        isDialogDisposed_ = isDialogDisposed;
+    }
+
     bool IsShowInFreeMultiWindow();
     bool IsShowInFloatingWindow();
     void AddExtraMaskNode(const DialogProperties& props);
@@ -379,6 +384,8 @@ private:
     void UpdateButtonsPropertyForEachButton(RefPtr<FrameNode> buttonFrameNode, int32_t btnindex);
     void UpdateButtonsProperty();
     void UpdateNodeContent(const RefPtr<FrameNode>& node, std::string& text);
+    void UpdateTitleAndContentColor();
+    void UpdateDialogTextColor(const RefPtr<FrameNode>& textNode, const TextStyle& textStyle);
     void UpdateAlignmentAndOffset();
     void DumpBoolProperty();
     void DumpBoolProperty(std::unique_ptr<JsonValue>& json);
@@ -436,6 +443,7 @@ private:
     std::function<void()> onWillDisappearCallback_ = nullptr;
     std::unordered_map<DialogContentNode, RefPtr<FrameNode>> contentNodeMap_;
     bool isUIExtensionSubWindow_ = false;
+    bool isDialogDisposed_ = false;
     RectF hostWindowRect_;
 };
 } // namespace OHOS::Ace::NG

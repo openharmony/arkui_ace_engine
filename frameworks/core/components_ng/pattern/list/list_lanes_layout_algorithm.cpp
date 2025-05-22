@@ -326,7 +326,7 @@ void ListLanesLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutProperty>& 
     float laneGutter = 0.0f;
     if (layoutProperty->GetLaneGutter().has_value()) {
         laneGutter = ConvertToPx(layoutProperty->GetLaneGutter().value(),
-            layoutConstraint.scaleProperty, crossSizeOptional.value_or(0.0)).value();
+            layoutConstraint.scaleProperty, crossSizeOptional.value_or(0.0)).value_or(0.0f);
         SetLaneGutter(laneGutter);
     }
     lanes_ = CalculateLanesParam(minLaneLength_, maxLaneLength_, lanes, crossSizeOptional, laneGutter);
@@ -448,8 +448,9 @@ void ListLanesLayoutAlgorithm::LayoutCachedALine(LayoutWrapper* layoutWrapper,
 {
     auto wrapper = GetChildByIndex(layoutWrapper, pos.first, true);
     CHECK_NULL_VOID(wrapper);
+    bool isDirty = wrapper->CheckNeedForceMeasureAndLayout() || !IsListLanesEqual(wrapper);
     LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
-    SyncGeometry(wrapper);
+    SyncGeometry(wrapper, isDirty);
     wrapper->SetActive(false);
     SetCachedItemInfo(pos.first, std::move(pos.second));
 }

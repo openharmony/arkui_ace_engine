@@ -561,11 +561,7 @@ HWTEST_P(ListControllerTestNg, ScrollToIndex_ListItemGroup001, TestSize.Level1)
     EXPECT_TRUE(TickPosition(-310.0f));
 
     ScrollToIndex(3, smooth, ScrollAlign::CENTER);
-    if (smooth) {
-        EXPECT_TRUE(TickPosition(-885.0f));
-    } else {
-        EXPECT_TRUE(TickPosition(-785.0f));
-    }
+    EXPECT_TRUE(TickPosition(-885.0f));
 
     ScrollToIndex(3, smooth, ScrollAlign::END);
     EXPECT_TRUE(TickPosition(-840.0f));

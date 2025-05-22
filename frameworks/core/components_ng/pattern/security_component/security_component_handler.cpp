@@ -48,7 +48,7 @@ bool SecurityComponentHandler::GetDisplayOffset(RefPtr<FrameNode>& node, double&
 {
     double x = node->GetTransformRelativeOffset().GetX();
     double y = node->GetTransformRelativeOffset().GetY();
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, false);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -61,7 +61,7 @@ bool SecurityComponentHandler::GetDisplayOffset(RefPtr<FrameNode>& node, double&
 bool SecurityComponentHandler::GetWindowRect(RefPtr<FrameNode>& node,
     OHOS::Security::SecurityComponent::SecCompRect& winRect)
 {
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, false);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -769,7 +769,7 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     auto rect = render->GetPaintRectWithTransform();
     buttonInfo.rect_.width_ = rect.Width();
     buttonInfo.rect_.height_ = rect.Height();
-    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::CurrentSafely());
     CHECK_NULL_RETURN(container, false);
     uint32_t windId = container->GetWindowId();
     auto pipeline = node->GetContextRefPtr();
@@ -1070,7 +1070,7 @@ bool SecurityComponentHandler::IsInModalPage(const RefPtr<UINode>& node)
 }
 
 bool SecurityComponentHandler::CheckSecurityComponentStatus(const RefPtr<UINode>& root, NodeMaps& maps,
-    int32_t secNodeId, std::string& message, NG::RectF& clipRect)
+    int32_t secNodeId, NG::RectF& clipRect, std::string& message)
 {
     bool res = false;
     RectF paintRect;
@@ -1100,7 +1100,7 @@ bool SecurityComponentHandler::CheckSecurityComponentStatus(const RefPtr<UINode>
                 clipRect = UpdateClipRect(clipRect, paintRect);
             }
         }
-        res |= CheckSecurityComponentStatus(*child, maps, secNodeId, message, clipRect);
+        res |= CheckSecurityComponentStatus(*child, maps, secNodeId, clipRect, message);
         clipRect = bakClipRect;
     }
 
@@ -1186,7 +1186,7 @@ bool SecurityComponentHandler::CheckComponentCoveredStatus(int32_t secNodeId, st
     NodeMaps maps;
     UpdateAllZindex(root, maps.nodeId2Zindex);
     NG::RectF clipRect = NG::RectF(-1.0, -1.0, -1.0, -1.0);
-    if (CheckSecurityComponentStatus(root, maps, secNodeId, message, clipRect)) {
+    if (CheckSecurityComponentStatus(root, maps, secNodeId, clipRect, message)) {
         return true;
     }
     return false;
@@ -1206,7 +1206,7 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEventInner(int32_t
     if (!ret) {
         return -1;
     }
-    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::CurrentSafely());
     CHECK_NULL_RETURN(container, -1);
     sptr<IRemoteObject> token = container->GetToken();
     if (container->GetParentToken() != nullptr) {

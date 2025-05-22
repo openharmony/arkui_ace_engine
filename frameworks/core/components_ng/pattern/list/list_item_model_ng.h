@@ -63,6 +63,7 @@ public:
     static void SetAutoScale(FrameNode* frameNode, bool autoScale);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, bool isCreateArc = false);
     static void SetSelectCallback(FrameNode* frameNode, OnSelectFunc&& selectCallback);
+    static void SetStyle(FrameNode* frameNode, V2::ListItemStyle style);
 private:
     void InstallSwiperCallBack(RefPtr<ListItemEventHub> eventHub,
                                OnDeleteEvent&& onDelete,

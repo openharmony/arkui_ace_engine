@@ -47,9 +47,9 @@ int32_t InteractionImpl::UpdateShadowPic(const OHOS::Ace::ShadowInfoCore& shadow
     return InteractionManager::GetInstance()->UpdateShadowPic(msdpShadowInfo);
 }
 
-int32_t InteractionImpl::SetDragWindowVisible(bool visible)
+int32_t InteractionImpl::SetDragWindowVisible(bool visible, const std::shared_ptr<Rosen::RSTransaction>& rSTransaction)
 {
-    return InteractionManager::GetInstance()->SetDragWindowVisible(visible);
+    return InteractionManager::GetInstance()->SetDragWindowVisible(visible, false, rSTransaction);
 }
 
 int32_t InteractionImpl::SetMouseDragMonitorState(bool state)
@@ -69,9 +69,9 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
         }
     };
     Msdp::DeviceStatus::DragData msdpDragData { {}, dragData.buffer, dragData.udKey, dragData.extraInfo,
-    dragData.filterInfo, dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.toolType,
-    dragData.displayX, dragData.displayY, dragData.displayId, dragData.mainWindow,
-    dragData.hasCanceledAnimation, dragData.hasCoordinateCorrected, dragData.summarys };
+    dragData.filterInfo, dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.displayX,
+    dragData.displayY, dragData.displayId, dragData.mainWindow, dragData.hasCanceledAnimation,
+    dragData.hasCoordinateCorrected, dragData.summarys };
     for (auto& shadowInfo: dragData.shadowInfos) {
         if (shadowInfo.pixelMap) {
             msdpDragData.shadowInfos.push_back({ shadowInfo.pixelMap->GetPixelMapSharedPtr(),
@@ -166,21 +166,6 @@ int32_t InteractionImpl::UnRegisterCoordinationListener()
     auto ret = InteractionManager::GetInstance()->UnregisterCoordinationListener(consumer_);
     consumer_ = nullptr;
     return ret;
-}
-
-int32_t InteractionImpl::SetDraggableState(bool state)
-{
-    return InteractionManager::GetInstance()->SetDraggableState(state);
-}
-
-int32_t InteractionImpl::GetAppDragSwitchState(bool& state)
-{
-    return InteractionManager::GetInstance()->GetAppDragSwitchState(state);
-}
-
-void InteractionImpl::SetDraggableStateAsync(bool state, int64_t downTime)
-{
-    InteractionManager::GetInstance()->SetDraggableStateAsync(state, downTime);
 }
 
 Msdp::DeviceStatus::DragCursorStyle TranslateDragCursorStyle(OHOS::Ace::DragCursorStyleCore style)

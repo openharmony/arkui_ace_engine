@@ -113,6 +113,11 @@ bool AxisEvent::HasKey(KeyCode expectCode) const
     return false;
 }
 
+int32_t AxisEvent::GetTargetDisplayId() const
+{
+    return targetDisplayId;
+}
+
 AxisInfo::AxisInfo(const AxisEvent& event, const Offset& localLocation, const EventTarget& target)
     : BaseEventInfo("onAxis")
 {

@@ -812,6 +812,8 @@ GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
         info->SetVelocity(Velocity());
         info->SetMainVelocity(0.0);
         info->SetSourceTool(lastAxisEvent_.sourceTool);
+        info->SetVerticalAxis(lastAxisEvent_.verticalAxis);
+        info->SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
     } else {
         info->SetVelocity(panVelocity_.GetVelocity());
         info->SetMainVelocity(panVelocity_.GetMainAxisVelocity());
@@ -870,6 +872,7 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
     distance_ = curr->distance_;
     newDistance_ = curr->newDistance_;
     mouseDistance_ = curr->mouseDistance_;
+    isLimitFingerCount_ = curr->isLimitFingerCount_;
 
     onActionStart_ = std::move(curr->onActionStart_);
     onActionUpdate_ = std::move(curr->onActionUpdate_);

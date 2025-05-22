@@ -326,6 +326,7 @@ bool TextLayoutAlgorithm::CreateParagraph(
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, false);
+    pattern->LogForFormRender("CreateParagraph");
     pattern->ClearCustomSpanPlaceholderInfo();
     if (pattern->IsSensitiveEnalbe()) {
         UpdateSensitiveContent(content);

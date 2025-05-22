@@ -78,9 +78,13 @@ std::unique_ptr<JsonValue> ConvertShadowsToJson(const std::vector<Shadow>& shado
 
 std::string SpanItem::GetFont() const
 {
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, "");
+    auto textPattern = DynamicCast<TextPattern>(pattern);
+    CHECK_NULL_RETURN(textPattern, "");
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("style", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str());
-    jsonValue->Put("size", GetFontSizeInJson(fontStyle->GetFontSize()).c_str());
+    jsonValue->Put("size", textPattern->GetFontSizeWithThemeInJson(fontStyle->GetFontSize()).c_str());
     jsonValue->Put("weight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str());
     jsonValue->Put("family", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str());
     return jsonValue->ToString();
@@ -94,9 +98,13 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
         TextBackgroundStyle::ToJsonValue(json, backgroundStyle, filter);
         return;
     }
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textPattern = DynamicCast<TextPattern>(pattern);
+    CHECK_NULL_VOID(textPattern);
     if (fontStyle) {
         json->PutExtAttr("font", GetFont().c_str(), filter);
-        json->PutExtAttr("fontSize", GetFontSizeInJson(fontStyle->GetFontSize()).c_str(), filter);
+        json->PutExtAttr("fontSize", textPattern->GetFontSizeWithThemeInJson(fontStyle->GetFontSize()).c_str(), filter);
         json->PutExtAttr("decoration", GetDeclaration(fontStyle->GetTextDecorationColor(),
             fontStyle->GetTextDecoration(), fontStyle->GetTextDecorationStyle()).c_str(), filter);
         json->PutExtAttr("letterSpacing",
@@ -556,8 +564,8 @@ void SpanItem::UpdateTextStyle(const std::u16string& content, const RefPtr<Parag
         // for content such as Hellow Wrold, update text style for three parts:
         // [0, selStart), [selStart, selEnd), [selEnd, content.length) through UpdateContentTextStyle
         auto contentLength = static_cast<int32_t>(content.length());
-        CHECK_NULL_VOID(selEnd > 0);
         selStart = selStart < 0 ? 0: selStart;
+        selEnd = selEnd < 0 ? 0 : selEnd;
         selEnd = selEnd > contentLength ? contentLength : selEnd;
         if (content.empty()) {
             builder->PushStyle(textStyle);

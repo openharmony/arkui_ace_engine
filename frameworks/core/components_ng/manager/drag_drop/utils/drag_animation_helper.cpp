@@ -516,7 +516,10 @@ RefPtr<FrameNode> DragAnimationHelper::CreateGatherNode(const RefPtr<FrameNode>&
         }
         GatherNodeChildInfo gatherNodeChildInfo;
         auto imageNode = CreateGatherImageNode(itemFrameNode, gatherNodeChildInfo);
-        CHECK_NULL_RETURN(imageNode, nullptr);
+        if (!imageNode) {
+            TAG_LOGW(AceLogTag::ACE_DRAG, "Create gather image node failed");
+            continue;
+        }
         stackNode->AddChild(imageNode);
         gatherNodeInfo.push_back(gatherNodeChildInfo);
     }
@@ -647,7 +650,7 @@ bool DragAnimationHelper::ShowGatherNodeAnimation(const RefPtr<FrameNode>& frame
     AddDragNodeCopy(manager, frameNode, gatherNode);
     MarkDirtyNode(gatherNode);
     
-    pipeline->FlushSyncGeometryNodeTasks();
+    pipeline->FlushPipelineImmediately();
     manager->SetIsGatherWithMenu(false);
 
     //do gather animation before lifting

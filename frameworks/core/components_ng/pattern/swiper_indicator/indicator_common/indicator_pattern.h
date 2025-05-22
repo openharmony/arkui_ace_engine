@@ -57,9 +57,28 @@ public:
         return MakeRefPtr<IndicatorEventHub>();
     }
 
+    void InitIndicatorController()
+    {
+        CHECK_NULL_VOID(indicatorController_);
+        indicatorController_->SetIndicatorPattern(AceType::Claim(this));
+        indicatorController_->ResetJSIndicatorController();
+    }
+
     const RefPtr<IndicatorController>& GetIndicatorController() const
     {
         return indicatorController_;
+    }
+
+    void ResetSwiperNode() const
+    {
+        CHECK_NULL_VOID(indicatorController_);
+        indicatorController_->ResetSwiperNode();
+    }
+
+    void ResetJSIndicatorController()
+    {
+        CHECK_NULL_VOID(indicatorController_);
+        indicatorController_->ResetJSIndicatorController();
     }
 
     void UpdateChangeEvent(ChangeEvent&& event)
@@ -97,7 +116,7 @@ public:
         auto controller = GetIndicatorController();
         CHECK_NULL_RETURN(controller, nullptr);
         auto weakUINode = controller->GetSwiperNode();
-        return WeakUINode2RefFrameNode(weakUINode);
+        return weakUINode.Upgrade();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
@@ -237,7 +256,6 @@ protected:
     bool IsLoopFromProperty() const;
 
 private:
-    void InitIndicatorController();
     std::shared_ptr<SwiperParameters> GetSwiperParameters();
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters();
     void SaveDotIndicatorProperty();

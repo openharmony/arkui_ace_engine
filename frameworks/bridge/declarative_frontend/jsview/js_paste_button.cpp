@@ -14,9 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_paste_button.h"
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"

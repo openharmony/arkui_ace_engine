@@ -146,6 +146,11 @@ struct MouseEvent final : public PointerEvent {
         return static_cast<int32_t>(button) + MOUSE_BASE_ID + pointerId;
     }
 
+    int32_t GetTargetDisplayId() const
+    {
+        return targetDisplayId;
+    }
+
     MouseEvent CloneWith(float scale) const
     {
         if (NearEqual(scale, 0.f)) {

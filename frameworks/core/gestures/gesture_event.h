@@ -255,26 +255,6 @@ public:
         return rawGlobalLocation_;
     }
 
-    float GetHorizontalAxis() const
-    {
-        return horizontalAxis_;
-    }
-
-    float GetVerticalAxis() const
-    {
-        return verticalAxis_;
-    }
-
-    void SetHorizontalAxis(float axis)
-    {
-        horizontalAxis_ = axis;
-    }
-
-    void SetVerticalAxis(float axis)
-    {
-        verticalAxis_ = axis;
-    }
-
     float GetInputXDeltaSlope() const
     {
         return inputXDeltaSlope_;
@@ -380,9 +360,6 @@ private:
     Offset delta_;
     std::list<FingerInfo> fingerList_;
     InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
-    float horizontalAxis_ = 0.0;
-    float verticalAxis_ = 0.0;
-
     // Save historical touch point slope.
     bool isInterpolated_ = false;
     float inputXDeltaSlope_ = 0.0f;

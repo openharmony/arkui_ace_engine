@@ -97,9 +97,9 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
     auto manager = pipeline->GetSafeAreaManager();
     bool isFocusOnOverlay = pipeline->CheckOverlayFocus();
     bool isNeedAvoidKeyboard = manager->CheckPageNeedAvoidKeyboard(host);
+    bool isOverlay = GetHostTag() == V2::OVERLAY_ETS_TAG || GetHostTag() == V2::ORDER_OVERLAY_ETS_TAG;
     // apply keyboard avoidance on Page or Overlay
-    if ((GetHostTag() == V2::PAGE_ETS_TAG && isNeedAvoidKeyboard && !isFocusOnOverlay) ||
-        GetHostTag() == V2::OVERLAY_ETS_TAG || GetHostTag() == V2::ORDER_OVERLAY_ETS_TAG) {
+    if ((GetHostTag() == V2::PAGE_ETS_TAG && isNeedAvoidKeyboard) || isOverlay) {
         CHECK_NULL_RETURN(IsActive(), false);
         auto renderContext = GetHostNode()->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
@@ -111,7 +111,7 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
         if (GetHostTag() == V2::PAGE_ETS_TAG && lastChild && lastChild->GetTag() == V2::DIALOG_ETS_TAG) {
             keyboardOffset = 0.0f;
         }
-        if (!(isFocusOnPage || isFocusOnOverlay || pageHasOffset) && LessNotEqual(keyboardOffset, 0.0)) {
+        if (!(isFocusOnPage || (isFocusOnOverlay && isOverlay) || pageHasOffset) && LessNotEqual(keyboardOffset, 0.0)) {
             renderContext->SavePaintRect(true, GetLayoutProperty()->GetPixelRound());
             return false;
         }
@@ -124,8 +124,7 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
             renderContext->SyncPartialRsProperties();
             return true;
         }
-        auto usingRect =
-            RectF(OffsetF(x, safeArea.top_.Length() + keyboardOffset), geometryNode->GetFrameSize());
+        auto usingRect = RectF(OffsetF(x, safeArea.top_.Length() + keyboardOffset), geometryNode->GetFrameSize());
         renderContext->UpdatePaintRect(usingRect);
         geometryNode->SetSelfAdjust(usingRect - geometryNode->GetFrameRect());
         renderContext->SyncPartialRsProperties();

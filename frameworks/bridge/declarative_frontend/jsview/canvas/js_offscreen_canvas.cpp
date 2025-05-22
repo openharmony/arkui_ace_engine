@@ -73,6 +73,7 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
 
     napi_value offscreenCanvas = nullptr;
     napi_create_object(env, &offscreenCanvas);
+
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_GETTER_SETTER("width", JSOffscreenCanvas::JsGetWidth, JSOffscreenCanvas::JsSetWidth),
         DECLARE_NAPI_GETTER_SETTER("height", JSOffscreenCanvas::JsGetHeight, JSOffscreenCanvas::JsSetHeight),
@@ -80,6 +81,7 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
         DECLARE_NAPI_FUNCTION("getContext", JSOffscreenCanvas::JsGetContext),
     };
     napi_define_properties(env, offscreenCanvas, sizeof(desc) / sizeof(*desc), desc);
+
     napi_coerce_to_native_binding_object(
         env, offscreenCanvas, DetachOffscreenCanvas, AttachOffscreenCanvas, value, nullptr);
     napi_wrap_with_size(
@@ -195,20 +197,17 @@ napi_value JSOffscreenCanvas::JsGetHeight(napi_env env, napi_callback_info info)
 
 napi_value JSOffscreenCanvas::JsSetWidth(napi_env env, napi_callback_info info)
 {
-    ContainerScope scope(Container::CurrentIdSafely());
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
     return (me != nullptr && !me->isDetached_) ? me->OnSetWidth(env, info) : nullptr;
 }
 
 napi_value JSOffscreenCanvas::JsSetHeight(napi_env env, napi_callback_info info)
 {
-    ContainerScope scope(Container::CurrentIdSafely());
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
     return (me != nullptr && !me->isDetached_) ? me->OnSetHeight(env, info) : nullptr;
 }
 napi_value JSOffscreenCanvas::JsTransferToImageBitmap(napi_env env, napi_callback_info info)
 {
-    ContainerScope scope(Container::CurrentIdSafely());
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
     if (me != nullptr && me->isDetached_) {
         JSException::Throw("%s", "Failed to execute 'transferToImageBitmap' on 'OffscreenCanvas': Cannot transfer an "
@@ -222,7 +221,6 @@ napi_value JSOffscreenCanvas::JsTransferToImageBitmap(napi_env env, napi_callbac
 
 napi_value JSOffscreenCanvas::JsGetContext(napi_env env, napi_callback_info info)
 {
-    ContainerScope scope(Container::CurrentIdSafely());
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
     if (me != nullptr && me->isDetached_) {
         JSException::Throw(
@@ -402,7 +400,6 @@ napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double
     }
     JSObject jsObject(vm, NapiValueToLocalValue(thisVal)->ToEcmaObject(vm));
     offscreenCanvasContext_ = Referenced::Claim(jsObject.Unwrap<JSOffscreenRenderingContext>());
-    offscreenCanvasContext_->SetInstanceId(Container::CurrentId());
     offscreenCanvasContext_->SetOffscreenPattern(offscreenCanvasPattern_);
     offscreenCanvasContext_->AddOffscreenCanvasPattern(offscreenCanvasPattern_);
     offscreenCanvasContext_->SetWidth(width_);

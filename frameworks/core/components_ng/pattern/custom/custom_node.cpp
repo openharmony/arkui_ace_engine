@@ -53,11 +53,7 @@ bool CustomNode::Render(int64_t deadline)
             }
         }
         {
-            int32_t id = -1;
-            if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
-                id = Container::CurrentId();
-            }
-            COMPONENT_CREATION_DURATION(id);
+            COMPONENT_CREATION_DURATION();
             ACE_SCOPED_TRACE("CustomNode:BuildItem [%s][self:%d][parent:%d][frameRound:%d]",
                 GetJSViewName().c_str(), GetId(), GetParent() ? GetParent()->GetId() : 0, prebuildFrameRounds_);
             // first create child node and wrapper.

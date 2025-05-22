@@ -32,6 +32,24 @@ napi_value JSNavPathInfo::GetParamObj() const
     return JsConverter::ConvertJsValToNapiValue(param_);
 }
 
+void JSNavPathInfo::OpenScope()
+{
+    if (param_->IsEmpty()) {
+        return;
+    }
+    if (!scope_) {
+        scope_ = new LocalScope(param_->GetEcmaVM());
+    }
+}
+
+void JSNavPathInfo::CloseScope()
+{
+    if (scope_) {
+        delete scope_;
+        scope_ = nullptr;
+    }
+}
+
 void JSNavDestinationContext::GetPathInfo(const JSCallbackInfo& info)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();

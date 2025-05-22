@@ -96,6 +96,19 @@ constexpr int32_t JUMP_NEAR_VALUE = 3;
 constexpr int32_t MIN_DUMP_VELOCITY_THRESHOLD = 500;
 constexpr float MAX_INDICATOR_VELOCITY = 1200.0f;
 constexpr Dimension DEFAULT_INDICATOR_HEAD_DISTANCE = 14.0_vp;
+
+MoveStep GetKeyMoveStep(const KeyEvent& event, Axis axis, bool isRtl)
+{
+    if ((axis == Axis::HORIZONTAL && event.code == (isRtl ? KeyCode::KEY_DPAD_RIGHT : KeyCode::KEY_DPAD_LEFT)) ||
+        (axis == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
+        return MoveStep::PREV;
+    }
+    if ((axis == Axis::HORIZONTAL && event.code == (isRtl ? KeyCode::KEY_DPAD_LEFT : KeyCode::KEY_DPAD_RIGHT)) ||
+        (axis == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
+        return MoveStep::NEXT;
+    }
+    return MoveStep::NONE;
+}
 } // namespace
 
 SwiperPattern::SwiperPattern()
@@ -449,9 +462,7 @@ void SwiperPattern::OnModifyDone()
     }
 
     if (isBindIndicator_) {
-        auto refUINode = indicatorNode_.Upgrade();
-        CHECK_NULL_VOID(refUINode);
-        auto frameNode = DynamicCast<NG::FrameNode>(refUINode);
+        auto frameNode = indicatorNode_.Upgrade();
         CHECK_NULL_VOID(frameNode);
         auto indicatorPattern = frameNode->GetPattern<SwiperIndicatorPattern>();
         CHECK_NULL_VOID(indicatorPattern);
@@ -884,6 +895,9 @@ bool SwiperPattern::IsFocusNodeInItemPosition(const RefPtr<FocusHub>& targetFocu
 
 void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
 {
+    if (GetDisableFlushFocus()) {
+        return;
+    }
     CHECK_NULL_VOID(curShowFrame);
     auto swiperHost = GetHost();
     CHECK_NULL_VOID(swiperHost);
@@ -2179,8 +2193,9 @@ bool SwiperPattern::ComputeTargetIndex(int32_t index, int32_t& targetIndex) cons
     index = CheckIndexRange(index);
     auto itemCount = TotalCount();
     auto displayCount = GetDisplayCount();
-    auto loopCount = itemCount == 0 ? 0 : std::abs(currentIndex_ / itemCount);
-    targetIndex = currentIndex_ >= 0 ? loopCount * itemCount + index : -(loopCount + 1) * itemCount + index;
+    auto loopCount =
+        itemCount == 0 ? 0 : (currentIndex_ >= 0 ? currentIndex_ / itemCount : (currentIndex_ + 1) / itemCount - 1);
+    targetIndex = loopCount * itemCount + index;
     targetIndex = IsSwipeByGroup() ? SwiperUtils::ComputePageIndex(targetIndex, displayCount) : targetIndex;
     if (targetIndex_.has_value() && targetIndex_.value() == targetIndex) {
         return false;
@@ -2764,43 +2779,66 @@ bool SwiperPattern::IsContentFocused()
     return ret;
 }
 
+bool SwiperPattern::IsContentChildFocusable(int32_t childIndex) const
+{
+    auto child = GetCurrentFrameNode(childIndex);
+    CHECK_NULL_RETURN(child, false);
+    auto focusHub = child->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    return focusHub->IsFocusable();
+}
+
+bool SwiperPattern::FindFocusableContentIndex(MoveStep moveStep)
+{
+    if (itemPosition_.empty()) {
+        return false;
+    }
+    if (!IsContentFocused() || GetDisplayCount() <= 1) {
+        return false;
+    }
+    if (moveStep == MoveStep::PREV) {
+        auto endIndex = itemPosition_.begin()->first;
+        for (auto i = currentFocusIndex_ - 1; i >= endIndex; --i) {
+            currentFocusIndex_ = i;
+            if (IsContentChildFocusable(i)) {
+                return true;
+            }
+        }
+    } else if (moveStep == MoveStep::NEXT) {
+        auto endIndex = itemPosition_.rbegin()->first;
+        for (auto i = currentFocusIndex_ + 1; i <= endIndex; ++i) {
+            currentFocusIndex_ = i;
+            if (IsContentChildFocusable(i)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 bool SwiperPattern::OnKeyEvent(const KeyEvent& event)
 {
     if (event.action != KeyAction::DOWN) {
         return false;
     }
-    if ((GetDirection() == Axis::HORIZONTAL && event.code == (IsHorizontalAndRightToLeft() ? KeyCode::KEY_DPAD_RIGHT :
-        KeyCode::KEY_DPAD_LEFT)) || (GetDirection() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
-        auto onlyFlushFocus = IsContentFocused() && GetDisplayCount() > 1 && currentFocusIndex_ > currentIndex_;
-        if (onlyFlushFocus) {
-            currentFocusIndex_ =
-                IsLoop() ? currentFocusIndex_ - 1 : std::clamp(currentFocusIndex_ - 1, 0, TotalCount() - 1);
-            FlushFocus(GetCurrentFrameNode(currentFocusIndex_));
-        } else {
+    auto step = GetKeyMoveStep(event, GetDirection(), IsHorizontalAndRightToLeft());
+    if (step == MoveStep::NONE) {
+        return false;
+    }
+    if (FindFocusableContentIndex(step)) {
+        FlushFocus(GetCurrentFrameNode(currentFocusIndex_));
+    } else {
+        if (step == MoveStep::PREV) {
             ShowPrevious(true);
             currentFocusIndex_ =
                 IsLoop() ? currentFocusIndex_ - 1 : std::clamp(currentFocusIndex_ - 1, 0, TotalCount() - 1);
-        }
-
-        return true;
-    }
-    if ((GetDirection() == Axis::HORIZONTAL && event.code == (IsHorizontalAndRightToLeft() ? KeyCode::KEY_DPAD_LEFT :
-        KeyCode::KEY_DPAD_RIGHT)) || (GetDirection() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
-        auto onlyFlushFocus =
-            IsContentFocused() && GetDisplayCount() > 1 && currentFocusIndex_ < currentIndex_ + GetDisplayCount() - 1;
-        if (onlyFlushFocus) {
-            currentFocusIndex_ =
-                IsLoop() ? currentFocusIndex_ + 1 : std::clamp(currentFocusIndex_ + 1, 0, TotalCount() - 1);
-            FlushFocus(GetCurrentFrameNode(currentFocusIndex_));
         } else {
             ShowNext(true);
             currentFocusIndex_ =
                 IsLoop() ? currentFocusIndex_ + 1 : std::clamp(currentFocusIndex_ + 1, 0, TotalCount() - 1);
         }
-
-        return true;
     }
-    return false;
+    return true;
 }
 
 void SwiperPattern::StopAutoPlay()
@@ -4489,7 +4527,7 @@ bool SwiperPattern::IsAtEnd() const
 
 bool SwiperPattern::AutoLinearIsOutOfBoundary(float mainOffset) const
 {
-    // Check the scenario where all child nodes are within the window but isloop is true。
+    // Check the scenario where all child nodes are within the window but isloop is true
     if (!IsLoop() || itemPosition_.empty() || static_cast<int32_t>(itemPosition_.size()) < TotalCount()) {
         return false;
     }
@@ -6446,6 +6484,33 @@ std::optional<bool> SwiperPattern::OnContentWillScroll(int32_t currentIndex, int
     return ret;
 }
 
+void SwiperPattern::UpdateBottomTypeOnMultipleRTL(int32_t currentFirstIndex)
+{
+    CHECK_NULL_VOID(targetIndex_);
+    auto targetIndex = targetIndex_.value();
+    if (targetIndex < currentIndex_ && GetLoopIndex(targetIndex) == 0) {
+        touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+        return;
+    }
+
+    if (targetIndex > currentIndex_ && GetLoopIndex(targetIndex) == TotalCount() - 1) {
+        touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+        return;
+    }
+
+    if (targetIndex != currentIndex_ && currentFirstIndex == TotalCount() - 1 &&
+        gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
+        touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+        return;
+    }
+
+    if (targetIndex != currentIndex_ && currentFirstIndex == 0 &&
+        gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT) {
+        touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+        return;
+    }
+}
+
 void SwiperPattern::HandleTouchBottomLoopOnRTL()
 {
     auto currentFirstIndex = GetLoopIndex(currentFirstIndex_);
@@ -6480,6 +6545,37 @@ void SwiperPattern::HandleTouchBottomLoopOnRTL()
     }
 
     if (releaseRightTouchBottom && currentIndex == 0 &&
+        gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
+        touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+        return;
+    }
+
+    if (GetDisplayCount() > 1) {
+        UpdateBottomTypeOnMultipleRTL(currentFirstIndex);
+    }
+}
+
+void SwiperPattern::UpdateBottomTypeOnMultiple(int32_t currentFirstIndex)
+{
+    CHECK_NULL_VOID(targetIndex_);
+    auto targetIndex = targetIndex_.value();
+    if (targetIndex < currentIndex_ && GetLoopIndex(targetIndex) == 0) {
+        touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+        return;
+    }
+
+    if (targetIndex > currentIndex_ && GetLoopIndex(targetIndex) == TotalCount() - 1) {
+        touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+        return;
+    }
+
+    if (targetIndex != currentIndex_ && currentFirstIndex == TotalCount() - 1 &&
+        gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT) {
+        touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+        return;
+    }
+
+    if (targetIndex != currentIndex_ && currentFirstIndex == 0 &&
         gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
         touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
         return;
@@ -6520,12 +6616,17 @@ void SwiperPattern::HandleTouchBottomLoop()
         if (currentIndex == 0) {
             // left bottom
             touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+            return;
         } else if (releaseTouchBottom) {
             // right bottom
             touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+            return;
         }
     }
-    return;
+
+    if (GetDisplayCount() > 1) {
+        UpdateBottomTypeOnMultiple(currentFirstIndex);
+    }
 }
 
 void SwiperPattern::CalculateGestureStateOnRTL(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex)
@@ -7247,7 +7348,7 @@ RefPtr<FrameNode> SwiperPattern::GetCommonIndicatorNode()
     }
 }
 
-void SwiperPattern::SetIndicatorNode(const WeakPtr<NG::UINode>& indicatorNode)
+void SwiperPattern::SetIndicatorNode(const RefPtr<FrameNode>& indicatorNode)
 {
     if (isBindIndicator_) {
         indicatorNode_ = indicatorNode;
@@ -7259,5 +7360,15 @@ void SwiperPattern::SetIndicatorNode(const WeakPtr<NG::UINode>& indicatorNode)
         CHECK_NULL_VOID(frameIndicatorNode);
         frameIndicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+}
+
+void SwiperPattern::ResetIndicatorNode()
+{
+    auto frameNode = indicatorNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto indicatorPattern = frameNode->GetPattern<IndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+    indicatorPattern->ResetSwiperNode();
+    indicatorNode_ = nullptr;
 }
 } // namespace OHOS::Ace::NG

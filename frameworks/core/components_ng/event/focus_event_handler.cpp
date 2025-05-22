@@ -171,7 +171,7 @@ int32_t FocusEventHandler::GetKeyProcessingMode()
     auto context = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(context, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
     auto focusManager = context->GetOrCreateFocusManager();
-    CHECK_NULL_RETURN(context, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
+    CHECK_NULL_RETURN(focusManager, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
     return static_cast<int32_t>(focusManager->GetKeyProcessingMode());
 }
 
@@ -342,16 +342,15 @@ bool FocusEventHandler::OnKeyEventNodeInternal(const KeyEvent& keyEvent)
     if (isNodeNeedKey_) {
         retInternal =  ProcessOnKeyEventInternal(keyEvent);
         TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "OnKeyEventInteral Node process self: Node %{public}s/%{public}d"
-            "handle KeyEvent(" SEC_PLD(%{private}d) ", %{public}d) "
+            "OnKeyEventInteral Node process self: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) "
             "return: %{public}d",
-            GetFrameName().c_str(), GetFrameId(), SEC_PARAM(keyEvent.code), keyEvent.action, retInternal);
+            GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retInternal);
         return retInternal;
     }
     if (!isBypassInner && !onKeyEventsInternal_.empty()) {
         retInternal = ProcessOnKeyEventInternal(keyEvent);
         TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "OnKeyEventInteral: Node %{public}s/%{public}d"
+            "OnKeyEventInteral Node process self: Node %{public}s/%{public}d"
             "handle KeyEvent(" SEC_PLD(%{private}d) ", %{public}d) "
             "return: %{public}d",
             GetFrameName().c_str(), GetFrameId(), SEC_PARAM(keyEvent.code), keyEvent.action, retInternal);

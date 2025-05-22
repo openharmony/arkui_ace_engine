@@ -48,11 +48,8 @@ void SwiperIndicatorPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_VOID(indicatorTheme);
-    host->GetRenderContext()->SetClipToBounds(indicatorTheme->GetClipEdge());
+    CHECK_NULL_VOID(host->GetRenderContext());
+    host->GetRenderContext()->SetClipToBounds(false);
 }
 
 void SwiperIndicatorPattern::OnModifyDone()

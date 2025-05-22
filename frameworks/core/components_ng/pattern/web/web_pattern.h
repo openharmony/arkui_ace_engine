@@ -754,6 +754,15 @@ public:
     void WebOverlayRequestFocus();
     
     std::string GetCurrentLanguage() override;
+    void GetTranslateTextCallback(const std::string& result);
+    void RegisterTranslateTextJavaScript();
+    void InitTranslateText();
+    void GetTranslateText(
+        std::string extraData, std::function<void(std::string)> callback, bool isContinued) override;
+    void SendTranslateResult(std::vector<std::string> results, std::vector<int32_t> ids) override;
+    void SendTranslateResult(std::string results) override;
+    void EndTranslate() override;
+    void RunJsInit();
 
     void RegisterSurfaceDensityCallback();
     void SetSurfaceDensity(double density);
@@ -1218,6 +1227,7 @@ private:
     int32_t densityCallbackId_ = 0;
 
     std::optional<int32_t> dataListNodeId_ = std::nullopt;
+    bool isRegisterJsObject_ = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

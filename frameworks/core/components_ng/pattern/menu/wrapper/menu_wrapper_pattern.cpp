@@ -19,7 +19,6 @@
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 
 namespace OHOS::Ace::NG {
-constexpr int32_t FOCUS_MENU_NUM = 2;
 void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
 {
     CHECK_NULL_VOID(menu);
@@ -252,15 +251,15 @@ void MenuWrapperPattern::HideSubMenu()
         // sub menu not show
         return;
     }
-    auto menu = GetMenu();
-    CHECK_NULL_VOID(menu);
-    auto menuPattern = menu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
     auto subMenu = host->GetChildren().back();
-    auto focusMenu = MenuFocusViewShow();
-    CHECK_NULL_VOID(focusMenu);
+    CHECK_NULL_VOID(subMenu);
+    auto menuNode = GetParentMenu(subMenu);
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    MenuFocusViewShow(menuNode);
     menuPattern->SetShowedSubMenu(nullptr);
-    auto innerMenu = GetMenuChild(focusMenu);
+    auto innerMenu = GetMenuChild(menuNode);
     if (!innerMenu) {
         UpdateMenuAnimation(host);
         SendToAccessibility(subMenu, false);
@@ -273,9 +272,7 @@ void MenuWrapperPattern::HideSubMenu()
     auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
     auto expandingMode = layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
-    auto outterMenuPattern = focusMenu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(outterMenuPattern);
-    bool hasAnimation = outterMenuPattern->GetDisappearAnimation();
+    bool hasAnimation = menuPattern->GetDisappearAnimation();
     GetExpandingMode(subMenu, expandingMode, hasAnimation);
     if (expandingMode == SubMenuExpandingMode::STACK && hasAnimation) {
         HideStackExpandMenu(subMenu);
@@ -285,6 +282,19 @@ void MenuWrapperPattern::HideSubMenu()
         host->RemoveChild(subMenu);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     }
+}
+
+RefPtr<FrameNode> MenuWrapperPattern::GetParentMenu(const RefPtr<UINode>& subMenu)
+{
+    auto subMenuNode = AceType::DynamicCast<FrameNode>(subMenu);
+    CHECK_NULL_RETURN(subMenuNode, nullptr);
+    auto subMenuPattern = subMenuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(subMenuPattern, nullptr);
+    auto menuItem = subMenuPattern->GetParentMenuItem();
+    CHECK_NULL_RETURN(menuItem, nullptr);
+    auto itemPattern = menuItem->GetPattern<MenuItemPattern>();
+    CHECK_NULL_RETURN(itemPattern, nullptr);
+    return itemPattern->GetMenu(true);
 }
 
 void MenuWrapperPattern::SendToAccessibility(const RefPtr<UINode>& subMenu, bool isShow)
@@ -336,29 +346,17 @@ bool MenuWrapperPattern::HasEmbeddedSubMenu()
     return expandingMode == SubMenuExpandingMode::EMBEDDED;
 }
 
-RefPtr<FrameNode> MenuWrapperPattern::MenuFocusViewShow()
+void MenuWrapperPattern::MenuFocusViewShow(const RefPtr<FrameNode>& menuNode)
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
-    auto iter = host->GetChildren().begin();
-    int32_t focusNodeId = static_cast<int32_t>(host->GetChildren().size()) - FOCUS_MENU_NUM;
-    CHECK_NULL_RETURN(focusNodeId >= 0, nullptr);
-    std::advance(iter, focusNodeId);
-    auto focusMenu = DynamicCast<FrameNode>(*iter);
-    CHECK_NULL_RETURN(focusMenu, nullptr);
-    if (GetPreviewMode() != MenuPreviewMode::NONE && focusNodeId == 1) {
-        focusMenu = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
-        CHECK_NULL_RETURN(focusMenu, nullptr);
-    }
+    CHECK_NULL_VOID(menuNode);
     // SelectOverlay's custom menu does not need to be focused.
-    auto isCustomMenu = IsSelectOverlayCustomMenu(focusMenu);
-    auto isRightClickMenu = IsSelectOverlayRightClickMenu(focusMenu);
+    auto isCustomMenu = IsSelectOverlayCustomMenu(menuNode);
+    auto isRightClickMenu = IsSelectOverlayRightClickMenu(menuNode);
     if (!isCustomMenu && !isRightClickMenu) {
-        auto menuPattern = focusMenu->GetPattern<MenuPattern>();
-        CHECK_NULL_RETURN(menuPattern, nullptr);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
         menuPattern->FocusViewShow();
     }
-    return DynamicCast<FrameNode>(focusMenu);
 }
 
 void MenuWrapperPattern::HideStackExpandMenu(const RefPtr<UINode>& subMenu)

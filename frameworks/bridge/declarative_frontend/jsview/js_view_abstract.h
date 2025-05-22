@@ -180,10 +180,10 @@ public:
     static void JsBindSheet(const JSCallbackInfo& info);
     static bool CheckJSCallbackInfo(
         const std::string& callerName, const JSRef<JSVal>& tmpInfo, std::vector<JSCallbackInfoType>& infoTypes);
-    static RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
-        const JSRef<JSObject>& object, const JSExecutionContext& context, const RefPtr<NG::FrameNode> node = nullptr);
     static bool ParseSheetIsShow(
         const JSCallbackInfo& info, const std::string& name, std::function<void(const std::string&)>& callback);
+    static RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
+        const JSRef<JSObject>& object, const JSExecutionContext& context, const RefPtr<NG::FrameNode> node = nullptr);
     static void ParseSheetStyle(
         const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle, bool isPartialUpdate = false);
     static NG::SheetEffectEdge ParseSheetEffectEdge(const JSRef<JSObject>& paramObj);
@@ -205,8 +205,10 @@ public:
         std::function<void()>& onDisappear, std::function<void()>& shouldDismiss,
         std::function<void(const int32_t info)>& onWillDismiss, std::function<void()>& onWillAppear,
         std::function<void()>& onWillDisappear, std::function<void(const float)>& onHeightDidChange,
-        std::function<void(const float)>& onDetentsDidChange, std::function<void(const float)>& onWidthDidChange,
-        std::function<void(const float)>& onTypeDidChange, std::function<void()>& sheetSpringBack);
+        std::function<void(const float)>& onDetentsDidChange,
+        std::function<void(const float)>& onWidthDidChange,
+        std::function<void(const float)>& onTypeDidChange,
+        std::function<void()>& sheetSpringBack);
     static void ParseSheetTitle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle,
         std::function<void()>& titleBuilderFunction);
     static panda::Local<panda::JSValueRef> JsDismissSheet(panda::JsiRuntimeCallInfo* runtimeCallInfo);
@@ -230,11 +232,6 @@ public:
     static bool ParseCommonMarginOrPaddingCorner(
         const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension);
     static void GetBorderRadiusByLengthMetrics(const char* key, JSRef<JSObject>& object, CalcDimension& radius);
-    static void JsOutline(const JSCallbackInfo& info);
-    static void JsOutlineWidth(const JSCallbackInfo& info);
-    static void JsOutlineColor(const JSCallbackInfo& info);
-    static void JsOutlineStyle(const JSCallbackInfo& info);
-    static void JsOutlineRadius(const JSCallbackInfo& info);
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderWidth(const JSCallbackInfo& info);
     static void ParseBorderWidth(const JSRef<JSVal>& args);
@@ -245,6 +242,11 @@ public:
     static void ParseDashGap(const JSRef<JSVal>& args);
     static void ParseDashWidth(const JSRef<JSVal>& args);
     static void JsBorderImage(const JSCallbackInfo& info);
+    static void JsOutline(const JSCallbackInfo& info);
+    static void JsOutlineWidth(const JSCallbackInfo& info);
+    static void JsOutlineColor(const JSCallbackInfo& info);
+    static void JsOutlineStyle(const JSCallbackInfo& info);
+    static void JsOutlineRadius(const JSCallbackInfo& info);
     static void ParseBorderImageRepeat(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage);
     static void ParseBorderImageOutset(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage);
     static void ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage);

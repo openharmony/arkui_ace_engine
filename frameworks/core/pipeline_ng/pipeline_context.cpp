@@ -474,8 +474,7 @@ void PipelineContext::FlushDirtyNodeUpdate()
     // use maxFlushTimes to avoid dead cycle.
     int maxFlushTimes = 3;
     while (!dirtyNodes_.empty() && maxFlushTimes > 0) {
-        auto id = GetInstanceId();
-        ArkUIPerfMonitor::GetPerfMonitor(id)->RecordStateMgmtNode(dirtyNodes_.size());
+        ArkUIPerfMonitor::GetInstance().RecordStateMgmtNode(dirtyNodes_.size());
         decltype(dirtyNodes_) dirtyNodes(std::move(dirtyNodes_));
         for (const auto& node : dirtyNodes) {
             if (AceType::InstanceOf<NG::CustomNodeBase>(node)) {
@@ -770,11 +769,7 @@ void PipelineContext::FlushMouseEventVoluntarily()
 void PipelineContext::FlushWindowPatternInfo()
 {
 #ifdef WINDOW_SCENE_SUPPORTED
-    int32_t id = -1;
-    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
-        id = Container::CurrentId();
-    }
-    OTHER_DURATION(id);
+    OTHER_DURATION();
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     if (!container->IsScenceBoardWindow()) {
@@ -836,11 +831,7 @@ void PipelineContext::ProcessDelayTasks()
 
 void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
 {
-    int32_t currentId = -1;
-    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
-        currentId = Container::CurrentId();
-    }
-    OTHER_DURATION(currentId);
+    OTHER_DURATION();
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
 
@@ -867,17 +858,12 @@ void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
     int32_t displaySyncRate = displaySyncManager->GetDisplaySyncRate();
     frameRateManager_->SetDisplaySyncRate(displaySyncRate);
     auto monitorVsyncRate = displaySyncManager->GetMonitorVsyncRate();
-    auto id = GetInstanceId();
-    ArkUIPerfMonitor::GetPerfMonitor(id)->RecordDisplaySyncRate(monitorVsyncRate);
+    ArkUIPerfMonitor::GetInstance().RecordDisplaySyncRate(monitorVsyncRate);
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
 {
-    int32_t id = -1;
-    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
-        id = Container::CurrentId();
-    }
-    OTHER_DURATION(id);
+    OTHER_DURATION();
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
     if (scheduleTasks_.empty()) {
@@ -930,11 +916,7 @@ void PipelineContext::HandleSpecialContainerNode()
 
 void PipelineContext::FlushMessages()
 {
-    int32_t id = -1;
-    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
-        id = Container::CurrentId();
-    }
-    OTHER_DURATION(id);
+    OTHER_DURATION();
     ACE_FUNCTION_TRACE_COMMERCIAL();
     if (IsFreezeFlushMessage()) {
         SetIsFreezeFlushMessage(false);
@@ -1658,29 +1640,33 @@ void PipelineContext::PostKeyboardAvoidTask()
             TaskExecutor::TaskType::UI, "ArkUICustomKeyboardAvoid");
         return;
     }
-    CHECK_NULL_VOID(textFieldManager->GetLaterAvoid());
     auto container = Container::Current();
+    int32_t orientation = -1;
     if (container) {
         auto displayInfo = container->GetDisplayInfo();
-        if (displayInfo && textFieldManager->GetLaterOrientation() != (int32_t)displayInfo->GetRotation()) {
+        orientation = displayInfo ? (int32_t)displayInfo->GetRotation() : -1;
+        if (textFieldManager->GetLaterAvoid() && textFieldManager->GetLaterOrientation() != orientation) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "orientation not match, clear laterAvoid");
             textFieldManager->SetLaterAvoid(false);
             return;
         }
     }
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "after rotation set root, trigger avoid now");
     taskExecutor_->PostTask(
-        [weakContext = WeakClaim(this), weakManager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
+        [weakContext = WeakClaim(this), weakManager = WeakPtr<TextFieldManagerNG>(textFieldManager), orientation] {
             auto manager = weakManager.Upgrade();
             CHECK_NULL_VOID(manager);
+            if (!manager->GetLaterAvoid()) {
+                manager->SetContextTriggerAvoidTaskOrientation(orientation);
+                return;
+            }
             auto context = weakContext.Upgrade();
             CHECK_NULL_VOID(context);
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "after rotation set root, trigger avoid now");
             auto keyboardRect = manager->GetLaterAvoidKeyboardRect();
             auto positionY = manager->GetLaterAvoidPositionY();
             auto height = manager->GetLaterAvoidHeight();
             context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, nullptr, true);
             manager->SetLaterAvoid(false);
-            manager->SetFocusFieldAlreadyTriggerWsCallback(false);
         },
         TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
 }
@@ -2047,27 +2033,29 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
 }
 
 void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction,
-    const float safeHeight, const bool supportAvoidance)
+    float safeHeight, const bool supportAvoidance)
 {
     auto func = [this, keyboardHeight, safeHeight]() mutable {
         safeAreaManager_->UpdateKeyboardSafeArea(static_cast<uint32_t>(keyboardHeight));
         keyboardHeight += safeAreaManager_->GetSafeHeight();
         float positionY = 0.0f;
-        float textfieldHeight = 0.0f;
         float keyboardPosition = rootHeight_ - keyboardHeight;
         auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
         float keyboardOffset = manager ? manager->GetClickPositionOffset() : safeAreaManager_->GetKeyboardOffset();
         if (manager) {
             positionY = static_cast<float>(manager->GetClickPosition().GetY()) - keyboardOffset;
-            textfieldHeight = manager->GetHeight();
+        }
+        auto bottomLen = safeAreaManager_->GetNavSafeArea().bottom_.IsValid() ?
+            safeAreaManager_->GetNavSafeArea().bottom_.Length() : 0;
+        if (manager->IsScrollableChild() && rootHeight_ - positionY - safeHeight - bottomLen < 0) {
+            safeHeight = rootHeight_ - positionY - bottomLen;
         }
         if (NearZero(keyboardHeight)) {
             safeAreaManager_->UpdateKeyboardOffset(0.0f);
-        } else if (LessOrEqual(positionY + safeHeight + textfieldHeight, rootHeight_ - keyboardHeight)) {
+        } else if (LessOrEqual(positionY + safeHeight, rootHeight_ - keyboardHeight)) {
             safeAreaManager_->UpdateKeyboardOffset(0.0f);
-        } else if (positionY + safeHeight + textfieldHeight > rootHeight_ - keyboardHeight) {
-            safeAreaManager_->UpdateKeyboardOffset(
-                -(positionY - rootHeight_ + keyboardHeight)- safeHeight - textfieldHeight);
+        } else if (positionY + safeHeight > rootHeight_ - keyboardHeight) {
+            safeAreaManager_->UpdateKeyboardOffset(-(positionY - rootHeight_ + keyboardHeight)- safeHeight);
         } else {
             safeAreaManager_->UpdateKeyboardOffset(0.0f);
         }
@@ -2978,12 +2966,13 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
     CHECK_RUN_ON(UI);
     if (!NearEqual(density, density_)) {
         isDensityChanged_ = true;
+        isNeedReloadDensity_ = true;
     }
     density_ = density;
     if (!NearZero(viewScale_)) {
         dipScale_ = density_ / viewScale_;
     }
-    if (isDensityChanged_) {
+    if (isNeedReloadDensity_) {
         UIObserverHandler::GetInstance().NotifyDensityChange(density_);
         PipelineBase::OnSurfaceDensityChanged(density);
     }
@@ -3340,6 +3329,11 @@ void PipelineContext::DumpPipelineInfo() const
 void PipelineContext::CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents)
 {
     auto targetTimeStamp = compensationValue_ > 0 ? GetVsyncTime() - compensationValue_ : GetVsyncTime();
+    if (touchEvents_.size() >= 40) { // TP:140Hz, vsync:30Hz, Fingers:10
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+            "Too many touch events in current vsync.(vsync: %{public}" PRIu64 ", eventsCnt: %{public}u)",
+            GetVsyncTime(), static_cast<uint32_t>(touchEvents_.size()));
+    }
     for (auto iter = touchEvents_.begin(); iter != touchEvents_.end();) {
         auto timeStamp = std::chrono::duration_cast<std::chrono::nanoseconds>(iter->time.time_since_epoch()).count();
         if (targetTimeStamp < static_cast<uint64_t>(timeStamp)) {
@@ -3581,6 +3575,7 @@ void PipelineContext::UpdateLastMoveEvent(const MouseEvent& event)
     lastMouseEvent_->mockFlushEvent = event.mockFlushEvent;
     lastMouseEvent_->pointerEvent = event.pointerEvent;
     lastMouseEvent_->deviceId = event.deviceId;
+    lastMouseEvent_->sourceTool = event.sourceTool;
     lastSourceType_ = event.sourceType;
 }
 
@@ -5976,10 +5971,6 @@ void PipelineContext::FlushMouseEventForHover()
     touchRestrict.sourceType = event.sourceType;
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
-    // The purpose of setting the action here as WINDOW_ENTER is to force the hover node to recalculate.
-    if (windowSizeChangeReason_ == WindowSizeChangeReason::MAXIMIZE) {
-        event.action = MouseAction::WINDOW_ENTER;
-    }
     if (container->IsScenceBoardWindow()) {
         eventManager_->MouseTest(event, lastMouseEvent_->node.Upgrade(), touchRestrict);
     } else {
@@ -6016,8 +6007,8 @@ void PipelineContext::FlushMouseEventInVsync()
     }
     if (isTransFlag_ && (mouseEventSize == 0 || lastMouseEvent_->mockFlushEvent)) {
         FlushMouseEventForHover();
-        isTransFlag_ = false;
     }
+    isTransFlag_ = false;
 }
 
 void PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reason)

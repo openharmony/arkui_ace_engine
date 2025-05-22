@@ -214,7 +214,7 @@ float OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale(const ArkUI_SystemFontSty
 
 void OH_ArkUI_NodeUtils_AddCustomProperty(ArkUI_NodeHandle node, const char* name, const char* value)
 {
-    if (node == nullptr) {
+    if (node == nullptr || !OHOS::Ace::NodeModel::CheckIsCNode(node)) {
         return;
     }
     if (name == nullptr || value == nullptr) {
