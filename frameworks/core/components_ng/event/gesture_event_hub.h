@@ -116,6 +116,7 @@ struct PreparedInfoForDrag {
     RectF originPreviewRect;
     RectF dragPreviewRect;
     BorderRadiusProperty borderRadius = BorderRadiusProperty(0.0_vp);
+    SourceType deviceType = SourceType::NONE;
 };
 
 struct PreparedAsyncCtxForAnimate {
