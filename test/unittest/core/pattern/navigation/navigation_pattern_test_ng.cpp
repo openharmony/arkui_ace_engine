@@ -2025,7 +2025,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_017, TestSize.Level1)
  * @tc.desc: Test Ability_or_page_switch and report to RSS
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_017, TestSize.Level1)
+HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_018, TestSize.Level1)
 {
     EXPECT_NE(ResSchedReport::GetInstance().keyEventCountMS, 156);
     PerfMoniter::GetPerfMonitor()->Start("ABILITY_OR_PAGE_SWITCH", PerfActionType::UNKNOWN_ACTION, "");
