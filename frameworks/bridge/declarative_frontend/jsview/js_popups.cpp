@@ -1558,6 +1558,7 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
             contentCoverParam.onWillDismiss = std::move(onWillDismissFunc);
             ParseModalTransitonEffect(info[NUM_SECOND], contentCoverParam, /* 2:args index */
                 info.GetExecutionContext());
+            ParseEnableSafeArea(info[NUM_SECOND], contentCoverParam);
         } else if (info[NUM_SECOND]->IsNumber()) {
             auto transitionNumber = info[NUM_SECOND]->ToNumber<int32_t>();
             if (transitionNumber >= TRANSITION_NUM_ZERO && transitionNumber <= TRANSITION_NUM_TWO) {
@@ -1593,6 +1594,15 @@ void JSViewAbstract::ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalS
     Color color;
     if (ParseJsColor(backgroundColor, color)) {
         modalStyle.backgroundColor = color;
+    }
+}
+
+void JSViewAbstract::ParseEnableSafeArea(const JSRef<JSObject>& paramObj, NG::ContentCoverParam& contentCoverParam)
+{
+    auto enableSafeArea = paramObj->GetProperty("enableSafeArea");
+    if (enableSafeArea->IsBoolean()) {
+        bool enable = enableSafeArea->ToBoolean();
+        contentCoverParam.enableSafeArea = enable;
     }
 }
 
