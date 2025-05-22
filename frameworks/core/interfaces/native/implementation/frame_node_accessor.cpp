@@ -418,9 +418,9 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
         FrameNodeAccessor::GetAttachedFrameNodeByIdImpl,
         FrameNodeAccessor::GetFrameNodeByIdImpl,
         FrameNodeAccessor::GetFrameNodeByUniqueIdImpl,
-        FrameNodeAccessor::GetRenderNodeImpl,
         FrameNodeAccessor::ReuseImpl,
         FrameNodeAccessor::RecycleImpl,
+        FrameNodeAccessor::GetRenderNodeImpl,
     };
     return &FrameNodeAccessorImpl;
 }

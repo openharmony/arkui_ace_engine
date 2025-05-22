@@ -400,10 +400,6 @@ export class FrameNode implements MaterializedBase {
         const obj : FrameNode = FrameNodeInternal.fromPtr(retval);
         return obj;
     }
-    public getRenderNode(): RenderNode | null {
-        const retval = ArkUIGeneratedNativeModule._FrameNode_getRenderNode(this.peer!.ptr)
-        return RenderNodeInternal.fromPtr(retval)
-    }
     public reuse(): void {
         this.reuse_serialize()
         return
@@ -417,6 +413,10 @@ export class FrameNode implements MaterializedBase {
     }
     private recycle_serialize(): void {
         ArkUIGeneratedNativeModule._FrameNode_recycle(this.peer!.ptr);
+    }
+    public getRenderNode(): RenderNode | null {
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getRenderNode(this.peer!.ptr)
+        return RenderNodeInternal.fromPtr(retval)
     }
 }
 class ImmutableFrameNode extends FrameNode {
