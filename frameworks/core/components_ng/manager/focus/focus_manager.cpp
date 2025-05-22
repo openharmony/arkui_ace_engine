@@ -522,23 +522,12 @@ bool FocusManager::SetIsFocusActive(bool isFocusActive, FocusActiveReason reason
         return false;
     }
     TAG_LOGI(AceLogTag::ACE_FOCUS, "focusActive turns:%{public}d, reason:%{public}d", isFocusActive, reason);
-    isFocusActive_ = isFocusActive;
+
+    SyncWindowsFocus(isFocusActive, reason, autoFocusInactive);
+    TriggerAllFocusActiveChangeCallback(isFocusActive);
 
     auto pipeline = pipeline_.Upgrade();
     CHECK_NULL_RETURN(pipeline, false);
-    auto containerId = Container::CurrentId();
-    auto subWindowContainerId = SubwindowManager::GetInstance()->GetSubContainerId(containerId);
-    if (subWindowContainerId >= 0) {
-        auto subPipeline = pipeline->GetContextByContainerId(subWindowContainerId);
-        CHECK_NULL_RETURN(subPipeline, false);
-        ContainerScope scope(subWindowContainerId);
-        auto subFocusManager = subPipeline->GetOrCreateFocusManager();
-        CHECK_NULL_RETURN(subFocusManager, false);
-        subFocusManager->SetIsFocusActive(isFocusActive, reason, autoFocusInactive);
-    }
-
-    TriggerAllFocusActiveChangeCallback(isFocusActive);
-
     auto rootNode = pipeline->GetRootElement();
     CHECK_NULL_RETURN(rootNode, false);
     auto rootFocusHub = rootNode->GetFocusHub();
@@ -547,6 +536,45 @@ bool FocusManager::SetIsFocusActive(bool isFocusActive, FocusActiveReason reason
         return rootFocusHub->PaintAllFocusState();
     }
     rootFocusHub->ClearAllFocusState();
+    return true;
+}
+
+bool FocusManager::SyncWindowsFocus(bool isFocusActive, FocusActiveReason reason, bool autoFocusInactive)
+{
+    isFocusActive_ = isFocusActive;
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto containerId = Container::CurrentId();
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+
+    auto isSubContainer = container->IsSubContainer();
+    if (!isSubContainer) {
+        auto subWindowContainerId = SubwindowManager::GetInstance()->GetSubContainerId(containerId);
+        if (subWindowContainerId >= 0) {
+            auto subPipeline = pipeline->GetContextByContainerId(subWindowContainerId);
+            CHECK_NULL_RETURN(subPipeline, false);
+            ContainerScope scope(subWindowContainerId);
+            auto subFocusManager = subPipeline->GetOrCreateFocusManager();
+            CHECK_NULL_RETURN(subFocusManager, false);
+            if (isFocusActive_ != subFocusManager->GetIsFocusActive()) {
+                subFocusManager->SetIsFocusActive(isFocusActive, reason, autoFocusInactive);
+            }
+        }
+        return true;
+    }
+    auto parentContainerId = Container::CurrentId();
+    if (parentContainerId >= 0) {
+        auto parentPipeline = pipeline->GetContextByContainerId(containerId);
+        CHECK_NULL_RETURN(parentPipeline, false);
+        ContainerScope scope(parentContainerId);
+        auto parentFocusManager = parentPipeline->GetOrCreateFocusManager();
+        CHECK_NULL_RETURN(parentFocusManager, false);
+        if (isFocusActive_ != parentFocusManager->GetIsFocusActive()) {
+            // To prevent recursive invocation between the parent and child windows.
+            parentFocusManager->SetIsFocusActive(isFocusActive, reason, autoFocusInactive);
+        }
+    }
     return true;
 }
 
