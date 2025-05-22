@@ -1002,4 +1002,24 @@ HWTEST_F(AppBarTestNg, TestAppScreenCallBack030, TestSize.Level1)
     atomicServicePattern->AppScreenCallBack();
     EXPECT_EQ(name1, "test");
 }
+
+/**
+ * @tc.name: TestAppScreenCallBack031
+ * @tc.desc: Test AppScreenCallBack
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestAppScreenCallBack031, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    EXPECT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    EXPECT_NE(atom, nullptr);;
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    AppBarView::BuildAppbar(pipeline);
+    EXPECT_EQ(atom, appBar->atomicService_.Upgrade());
+}
 } // namespace OHOS::Ace::NG
