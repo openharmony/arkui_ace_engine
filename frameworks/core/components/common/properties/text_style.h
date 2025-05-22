@@ -386,6 +386,7 @@ enum class TextStyleAttribute {
     FONT_COLOR = 18,
     SHADOWS = 19,
     HALF_LEADING = 20,
+    FOREGROUND_BRUSH = 21,
     MAX_TEXT_STYLE
 };
 
