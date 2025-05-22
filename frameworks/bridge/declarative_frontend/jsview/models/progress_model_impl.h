@@ -51,6 +51,7 @@ public:
     void SetRingSweepingEffect(bool value) override {};
     void SetLinearSweepingEffect(bool value) override {};
     void SetSmoothEffect(bool value) override {};
+    void CreateWithResourceObj(JsProgressResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) override {};
 };
 
 } // namespace OHOS::Ace::Framework

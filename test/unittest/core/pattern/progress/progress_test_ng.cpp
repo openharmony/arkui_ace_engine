@@ -1645,4 +1645,80 @@ HWTEST_F(ProgressTestNg, ProgressThemeWrapperTest001, TestSize.Level1)
     EXPECT_EQ(progressTheme->GetTrackSelectedColor(), colors[TokenColors::BACKGROUND_EMPHASIZE]);
     EXPECT_EQ(progressTheme->GetBorderColor(), colors[TokenColors::COMP_EMPHASIZE_SECONDARY]);
 }
+
+/**
+ * @tc.name: ProgressPatternUpdateColorTest001
+ * @tc.desc: Test UpdateColor function with first load scenario.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPatternUpdateColorTest001, TestSize.Level1)
+{
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    Color testColor(Color::RED);
+    pattern->UpdateColor(testColor, true);
+    
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetColorValue(), testColor);
+}
+
+/**
+ * @tc.name: ProgressPatternUpdateColorTest003
+ * @tc.desc: Test UpdateColor function without first load or system color change.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPatternUpdateColorTest003, TestSize.Level1)
+{
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    // Set initial color
+    Color initialColor(Color::GREEN);
+    pattern->UpdateColor(initialColor, true);
+    
+    // Try to update without first load or system color change
+    Color newColor(Color::BLUE);
+    pattern->UpdateColor(newColor, false);
+    
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    // Should keep the initial color
+    EXPECT_EQ(paintProperty->GetColorValue(), initialColor);
+}
+
+/**
+ * @tc.name: ProgressPatternUpdateGradientColorTest001
+ * @tc.desc: Test UpdateGradientColor function with first load scenario.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPatternUpdateGradientColorTest001, TestSize.Level1)
+{
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    Gradient gradient;
+    GradientColor gradientColorEnd;
+    GradientColor gradientColorStart;
+    gradientColorEnd.SetLinearColor(LinearColor(Color::WHITE));
+    gradientColorStart.SetLinearColor(LinearColor(Color::WHITE));
+    gradient.AddColor(gradientColorEnd);
+    gradient.AddColor(gradientColorStart);
+    
+    pattern->UpdateGradientColor(gradient, true);
+    
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetGradientColorValue(), gradient);
+}
 } // namespace OHOS::Ace::NG

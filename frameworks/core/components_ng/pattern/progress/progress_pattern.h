@@ -166,6 +166,9 @@ public:
     }
 
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void UpdateGradientColor(const NG::Gradient& gradient, bool isFirstLoad);
+    void UpdateColor(const Color& color, bool isFirstLoad);
+    void OnColorModeChange(uint32_t colorMode) override;
 
 private:
     void InitAnimatableProperty(ProgressAnimatableProperty& progressAnimatableProperty);
