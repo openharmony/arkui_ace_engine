@@ -94,6 +94,10 @@ public:
     static void SetBackToTop(FrameNode* frameNode, bool backToTop);
     static void ResetBackToTop(FrameNode* frameNode);
     static bool GetBackToTop(FrameNode* frameNode);
+    static void SetScrollBarMargin(const ScrollBarMargin& scrollBarMargin);
+    static void SetScrollBarMargin(FrameNode* frameNode, const ScrollBarMargin& scrollBarMargin);
+    static void ResetScrollBarMargin(FrameNode* frameNode);
+    static void GetScrollBarMargin(FrameNode* frameNode, ScrollBarMargin& scrollBarMargin);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_H
