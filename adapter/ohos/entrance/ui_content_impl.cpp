@@ -805,8 +805,7 @@ public:
                 auto aceFoldStatus = static_cast<FoldStatus>(static_cast<uint32_t>(foldStatus));
                 context->OnFoldStatusChanged(aceFoldStatus);
                 if (SystemProperties::IsSuperFoldDisplayDevice()) {
-                    SubwindowManager::GetInstance()->HideMenuNG(false);
-                    SubwindowManager::GetInstance()->ClearPopupInSubwindow(instanceId, true);
+                    SubwindowManager::GetInstance()->ClearAllMenuPopup(instanceId);
                 }
             },
             TaskExecutor::TaskType::UI, "ArkUIFoldStatusChanged");
@@ -886,6 +885,49 @@ public:
 private:
     int32_t instanceId_ = -1;
     int32_t targetId_ = -1;
+};
+
+class WindowRectChangeListener : public OHOS::Rosen::IWindowRectChangeListener {
+public:
+    explicit WindowRectChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
+    ~WindowRectChangeListener() = default;
+
+    void OnRectChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason)
+    {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "window size is changed. current rect width: %{public}u, "
+            "height: %{public}u, left: %{public}d, top: %{public}d, instance id is %{public}d, reason: %{public}d",
+            rect.width_, rect.height_, rect.posX_, rect.posY_, instanceId_, reason);
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        bool isWindowSizeChanged = !isRectEquel(rect);
+        lastRect_ = rect;
+        taskExecutor->PostTask(
+            [instanceId = instanceId_, isWindowSizeChanged] {
+                CHECK_EQUAL_VOID(isWindowSizeChanged, false);
+                ContainerScope scope(instanceId);
+                auto container = Platform::AceContainer::GetContainer(instanceId);
+                CHECK_NULL_VOID(container);
+                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+                CHECK_NULL_VOID(pipeline);
+                auto overlay = pipeline->GetOverlayManager();
+                CHECK_NULL_VOID(overlay);
+                overlay->HideAllMenusWithoutAnimation(false);
+                overlay->HideAllPopupsWithoutAnimation();
+                SubwindowManager::GetInstance()->ClearAllMenuPopup(instanceId);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIWindowRectChange");
+    }
+
+private:
+    bool isRectEquel(OHOS::Rosen::Rect curRect) const
+    {
+        return curRect.width_ == lastRect_.width_ && curRect.height_ == lastRect_.height_ &&
+            curRect.posX_ == lastRect_.posX_ && curRect.posY_ == lastRect_.posY_;
+    }
+    int32_t instanceId_ = -1;
+    OHOS::Rosen::Rect lastRect_;
 };
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime) : runtime_(runtime)
@@ -3837,6 +3879,10 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     OHOS::Rosen::DisplayManager::GetInstance().RegisterFoldStatusListener(foldStatusListener_);
     foldDisplayModeListener_ = new FoldDisplayModeListener(instanceId_, isDialog);
     OHOS::Rosen::DisplayManager::GetInstance().RegisterDisplayModeListener(foldDisplayModeListener_);
+    if (window_->GetType() != Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
+        windowRectChangeListener_ = new WindowRectChangeListener(instanceId_);
+        window_->RegisterWindowRectChangeListener(windowRectChangeListener_);
+    }
 
     auto isAppOrSystemWindow = window_->IsAppWindow() || window_->IsSystemWindow();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && isAppOrSystemWindow) {

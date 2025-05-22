@@ -146,6 +146,8 @@ public:
     PopupInfo GetTipsInfo(int32_t targetId);
     void HideAllPopups();
     void HideCustomPopups();
+    void HideAllPopupsWithoutAnimation();
+    void HideAllMenusWithoutAnimation(bool showInSubwindow = false);
     void SetPopupHotAreas(RefPtr<FrameNode> popupNode);
     void ShowPopupAnimation(const RefPtr<FrameNode>& popupNode);
     void ShowPopupAnimationNG(const RefPtr<FrameNode>& popupNode);

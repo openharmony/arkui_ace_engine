@@ -405,6 +405,24 @@ void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId, bool isForceCle
     }
 }
 
+void SubwindowManager::ClearAllMenuPopup(int32_t instanceId)
+{
+    auto allSubcontainerId = GetAllSubContainerId(instanceId);
+    for (auto subContainerId : allSubcontainerId) {
+        auto subContainer = Container::GetContainer(subContainerId);
+        CHECK_NULL_CONTINUE(subContainer);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(subContainer->GetPipelineContext());
+        CHECK_NULL_CONTINUE(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_CONTINUE(overlayManager);
+        overlayManager->HideAllPopupsWithoutAnimation();
+        overlayManager->HideAllMenusWithoutAnimation(true);
+        auto subwindow = GetSubwindowById(subContainerId);
+        CHECK_NULL_CONTINUE(subwindow);
+        subwindow->HideSubWindowNG();
+    }
+}
+
 void SubwindowManager::ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
     const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss)
 {
