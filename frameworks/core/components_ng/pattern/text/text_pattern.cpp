@@ -1009,22 +1009,16 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
         context->AddAfterLayoutTask([weak = WeakClaim(this), selectionStart, selectionEnd, eventHub]() {
             auto textPattern = weak.Upgrade();
             CHECK_NULL_VOID(textPattern);
+            auto host = textPattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto geometryNode = host->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            auto frameRect = geometryNode->GetFrameRect();
+            if (frameRect.IsEmpty()) {
+                return;
+            }
             auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
-            if (textLayoutProperty->GetCalcLayoutConstraint() &&
-                textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.has_value()) {
-                auto selfIdealSizeWidth = textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Width();
-                auto selfIdealSizeHeight = textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height();
-                auto constraint = textLayoutProperty->GetLayoutConstraint();
-                if ((selfIdealSizeWidth.has_value() && NearZero(selfIdealSizeWidth->GetDimension().ConvertToPxWithSize(
-                            constraint->percentReference.Width()))) ||
-                    (selfIdealSizeHeight.has_value() &&
-                        NearZero(selfIdealSizeHeight->GetDimension().ConvertToPxWithSize(
-                            constraint->percentReference.Height())))) {
-                    return;
-                }
-            }
-
             auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
             if (mode == TextSelectableMode::UNSELECTABLE ||
                 textLayoutProperty->GetCopyOptionValue(CopyOptions::None) == CopyOptions::None ||
