@@ -64,4 +64,27 @@ void ToggleModelStatic::SetTrackBorderRadius(FrameNode* frameNode, const std::op
         }
     }
 }
+
+void ToggleModelStatic::OnChangeEvent(FrameNode* frameNode, ChangeEvent&& onChangeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto checkboxPattern = AceType::DynamicCast<ToggleCheckBoxPattern>(frameNode->GetPattern());
+    if (checkboxPattern) {
+        auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetChangeEvent(std::move(onChangeEvent));
+        return;
+    }
+    auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
+    if (buttonPattern) {
+        auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+        return;
+    }
+    auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
 } // namespace OHOS::Ace::NG
