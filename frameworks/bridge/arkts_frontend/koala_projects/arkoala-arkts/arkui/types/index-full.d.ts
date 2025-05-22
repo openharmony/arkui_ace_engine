@@ -450,6 +450,8 @@ declare class FrameNode {
     dispose(): void;
     getOpacity(): number;
     getPositionToWindowWithTransform(): Position;
+    reuse(): void;
+    recycle(): void;
 }
 declare interface PixelMap {
     readonly isEditable: boolean;

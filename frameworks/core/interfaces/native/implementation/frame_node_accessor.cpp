@@ -370,6 +370,24 @@ Ark_RenderNode GetRenderNodeImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(peer && peer->node, nullptr);
     return peer->GetRenderNodePeer();
 }
+void ReuseImpl(Ark_FrameNode peer)
+{
+    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_VOID(peerNode);
+    auto currentUINodeRef = AceType::DynamicCast<UINode>(peerNode);
+    CHECK_NULL_VOID(currentUINodeRef);
+
+    currentUINodeRef->OnReuse();
+}
+void RecycleImpl(Ark_FrameNode peer)
+{
+    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_VOID(peerNode);
+    auto currentUINodeRef = AceType::DynamicCast<UINode>(peerNode);
+    CHECK_NULL_VOID(currentUINodeRef);
+
+    currentUINodeRef->OnRecycle();
+}
 } // FrameNodeAccessor
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
 {
@@ -401,6 +419,8 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
         FrameNodeAccessor::GetFrameNodeByIdImpl,
         FrameNodeAccessor::GetFrameNodeByUniqueIdImpl,
         FrameNodeAccessor::GetRenderNodeImpl,
+        FrameNodeAccessor::ReuseImpl,
+        FrameNodeAccessor::RecycleImpl,
     };
     return &FrameNodeAccessorImpl;
 }

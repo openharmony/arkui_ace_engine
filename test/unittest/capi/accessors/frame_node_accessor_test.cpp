@@ -709,4 +709,36 @@ HWTEST_F(FrameNodeAccessorTest, GetPositionToWindowWithTransformInvalidTest, Tes
     EXPECT_EQ(std::get<0>(position).Value(), 0.00);
     EXPECT_EQ(std::get<1>(position).Value(), 0.00);
 }
+
+/**
+ * @tc.name: ReuseImplTest001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, ReuseImplTest001, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->reuse, nullptr);
+    auto childPeer = CreatePeer();
+    auto childList = peer_->node->GetChildren();
+    EXPECT_EQ(childList.size(), CHILD_COUNT_0);
+    EXPECT_EQ(childPeer->node->GetParentFrameNode(), nullptr);
+    accessor_->reuse(peer_);
+    DestroyPeer(childPeer);
+}
+
+/**
+ * @tc.name: RecycleImplTest001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, RecycleImplTest001, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->recycle, nullptr);
+    auto childPeer = CreatePeer();
+    auto childList = peer_->node->GetChildren();
+    EXPECT_EQ(childList.size(), CHILD_COUNT_0);
+    EXPECT_EQ(childPeer->node->GetParentFrameNode(), nullptr);
+    accessor_->recycle(peer_);
+    DestroyPeer(childPeer);
+}
 } // namespace OHOS::Ace::NG
