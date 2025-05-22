@@ -262,6 +262,10 @@ let ImageRotateOrientation;
   ImageRotateOrientation[ImageRotateOrientation.RIGHT = 2] = 'RIGHT';
   ImageRotateOrientation[ImageRotateOrientation.DOWN = 3] = 'DOWN';
   ImageRotateOrientation[ImageRotateOrientation.LEFT = 4] = 'LEFT';
+  ImageRotateOrientation[ImageRotateOrientation.UP_MIRRORED = 5] = 'UP_MIRRORED';
+  ImageRotateOrientation[ImageRotateOrientation.RIGHT_MIRRORED = 6] = 'RIGHT_MIRRORED';
+  ImageRotateOrientation[ImageRotateOrientation.DOWN_MIRRORED = 7] = 'DOWN_MIRRORED';
+  ImageRotateOrientation[ImageRotateOrientation.LEFT_MIRRORED = 8] = 'LEFT_MIRRORED';
 })(ImageRotateOrientation || (ImageRotateOrientation = {}));
 
 let ImageInterpolation;

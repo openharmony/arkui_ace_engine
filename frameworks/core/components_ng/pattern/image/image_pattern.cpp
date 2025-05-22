@@ -82,14 +82,14 @@ std::string ConvertOrientationToString(ImageRotateOrientation orientation)
             return "DOWN";
         case ImageRotateOrientation::LEFT:
             return "LEFT";
-        case ImageRotateOrientation::UP_MIRROR:
-            return "UP_MIRROR";
-        case ImageRotateOrientation::RIGHT_MIRROR:
-            return "RIGHT_MIRROR";
-        case ImageRotateOrientation::DOWN_MIRROR:
-            return "DOWN_MIRROR";
-        case ImageRotateOrientation::LEFT_MIRROR:
-            return "LEFT_MIRROR";
+        case ImageRotateOrientation::UP_MIRRORED:
+            return "UP_MIRRORED";
+        case ImageRotateOrientation::RIGHT_MIRRORED:
+            return "RIGHT_MIRRORED";
+        case ImageRotateOrientation::DOWN_MIRRORED:
+            return "DOWN_MIRRORED";
+        case ImageRotateOrientation::LEFT_MIRRORED:
+            return "LEFT_MIRRORED";
         case ImageRotateOrientation::AUTO:
             return "AUTO";
         default:
