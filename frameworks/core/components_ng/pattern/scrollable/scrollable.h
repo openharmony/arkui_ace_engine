@@ -222,6 +222,14 @@ public:
     {
         return canOverScroll_;
     }
+    void SetCanStayOverScroll(bool value)
+    {
+        canStayOverScroll_ = value;
+    }
+    bool CanStayOverScroll() const
+    {
+        return canStayOverScroll_;
+    }
 
     void ProcessScrollMotionStop();
 
@@ -679,6 +687,7 @@ private:
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool canOverScroll_ = true;
+    bool canStayOverScroll_ = false;
 
     // scrollSnap
     bool needScrollSnapChange_ = false;

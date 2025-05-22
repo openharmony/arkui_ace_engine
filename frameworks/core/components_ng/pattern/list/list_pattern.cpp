@@ -274,7 +274,10 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     bool sizeDiminished =
         !chainAnimation_ && IsOutOfBoundary(false) && (endOffset + relativeOffset - prevEndOffset_ < -0.1f);
-    CheckRestartSpring(sizeDiminished);
+
+    if (!GetCanStayOverScroll()) {
+        CheckRestartSpring(sizeDiminished);
+    }
 
     DrivenRender(dirty);
 
@@ -1690,7 +1693,9 @@ void ListPattern::ScrollTo(float position)
     jumpIndex_.reset();
     targetIndex_.reset();
     currentDelta_ = 0.0f;
+    SetAnimateCanOverScroll(GetCanStayOverScroll());
     UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
+    SetIsOverScroll(GetCanStayOverScroll());
     MarkDirtyNodeSelf();
     isScrollEnd_ = true;
 }
@@ -1985,6 +1990,7 @@ void ListPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType 
 void ListPattern::ScrollBy(float offset)
 {
     StopAnimate();
+    SetIsOverScroll(false);
     UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
     isScrollEnd_ = true;
 }

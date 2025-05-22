@@ -161,7 +161,7 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
         AddScrollLayoutInfo();
     }
 
-    if (LessNotEqual(scrollableDistance_, oldScrollableDistance)) {
+    if (LessNotEqual(scrollableDistance_, oldScrollableDistance) && !GetCanStayOverScroll()) {
         CheckRestartSpring(true);
     }
     auto axis = GetAxis();
@@ -687,6 +687,7 @@ void ScrollPattern::ScrollBy(float pixelX, float pixelY, bool smooth, const std:
         return;
     }
     float position = currentOffset_ + distance;
+    SetIsOverScroll(false);
     if (smooth) {
         AnimateTo(-position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED, Curves::EASE_OUT, true, false, false);
         return;
@@ -721,7 +722,9 @@ void ScrollPattern::JumpToPosition(float position, int32_t source)
 
 void ScrollPattern::ScrollTo(float position)
 {
+    SetAnimateCanOverScroll(GetCanStayOverScroll());
     JumpToPosition(-position, SCROLL_FROM_JUMP);
+    SetIsOverScroll(GetCanStayOverScroll());
 }
 
 void ScrollPattern::DoJump(float position, int32_t source)

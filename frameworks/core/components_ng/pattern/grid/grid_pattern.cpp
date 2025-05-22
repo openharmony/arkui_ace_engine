@@ -545,7 +545,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             GetScrollBar()->ScheduleDisappearDelayTask();
         }
     }
-    if (!preSpring_) {
+    if (!preSpring_ && !GetCanStayOverScroll()) {
         CheckRestartSpring(sizeDiminished);
     }
     CheckScrollable();
@@ -703,6 +703,7 @@ std::function<bool(int32_t)> GridPattern::GetScrollIndexAbility()
 void GridPattern::ScrollBy(float offset)
 {
     StopAnimate();
+    SetIsOverScroll(false);
     UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
     // AccessibilityEventType::SCROLL_END
 }
@@ -812,7 +813,9 @@ void GridPattern::ScrollTo(float position)
     }
     TAG_LOGI(AceLogTag::ACE_GRID, "ScrollTo:%{public}f", position);
     StopAnimate();
+    SetAnimateCanOverScroll(GetCanStayOverScroll());
     UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
+    SetIsOverScroll(GetCanStayOverScroll());
     // AccessibilityEventType::SCROLL_END
 }
 
