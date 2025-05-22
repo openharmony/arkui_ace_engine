@@ -25,6 +25,7 @@ void ProcessTexCoords(RSPoint* texsPoint, int32_t row, int32_t column, float wid
     const auto dy = height / static_cast<float>(row);
 
     RSPoint* texsPit = texsPoint;
+    CHECK_NULL_VOID(texsPit);
     float y = 0;
     for (int i = 0; i <= row; i++) {
         if (i == row) {
@@ -32,12 +33,10 @@ void ProcessTexCoords(RSPoint* texsPoint, int32_t row, int32_t column, float wid
         }
         float x = 0;
         for (int j = 0; j < column; j++) {
-            CHECK_NULL_VOID(texsPit);
             texsPit->Set(x, y);
             ++texsPit;
             x += dx;
         }
-        CHECK_NULL_VOID(texsPit);
         texsPit->Set(width, y);
         ++texsPit;
         y += dy;
