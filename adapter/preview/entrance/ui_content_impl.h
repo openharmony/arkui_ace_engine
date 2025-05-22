@@ -159,7 +159,7 @@ public:
 
     void SetStatusBarItemColor(uint32_t color) override;
 
-    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override {};
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool isRouter = true) override {};
 
     void EnableContainerModalGesture(bool isEnable) override {};
 

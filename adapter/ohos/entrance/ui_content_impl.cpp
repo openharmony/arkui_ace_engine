@@ -4897,7 +4897,7 @@ void UIContentImpl::SetStatusBarItemColor(uint32_t color)
     appBar->SetStatusBarItemColor(IsDarkColor(color));
 }
 
-void UIContentImpl::SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
+void UIContentImpl::SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool isRouter)
 {
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
