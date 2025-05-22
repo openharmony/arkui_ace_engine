@@ -36,6 +36,8 @@
      static void SetAlt(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
      static void SetImageInterpolation(FrameNode* frameNode, const std::optional<ImageInterpolation>& interpolation);
      static void SetDynamicRangeMode(FrameNode* frameNode, const std::optional<DynamicRangeMode>& dynamicRangeMode);
+     static void SetOrientation(FrameNode* frameNode, const std::optional<ImageRotateOrientation>& orientation);
+     static void SetEnhancedImageQuality(FrameNode* frameNode, const std::optional<AIImageQuality>& imageQuality);
  };
  } // namespace OHOS::Ace::NG
  #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_STATIC_H
