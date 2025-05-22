@@ -78,10 +78,7 @@ void SwipeRecognizer::OnAccepted()
     }
     localMatrix_ = NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false,
         isPostEventResult_, touchPoint.postEventNodeId);
-    {
-        ACE_SCOPED_TRACE("SwipeRecognizer onAction, result speed: %f", resultSpeed_);
-        SendCallbackMsg(onAction_, GestureCallbackType::ACTION);
-    }
+    SendCallbackMsg(onAction_, GestureCallbackType::ACTION);
     int64_t overTime = GetSysTimestamp();
     if (SystemProperties::GetTraceInputEventEnabled()) {
         ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:SwipeGesture",
@@ -335,7 +332,6 @@ void SwipeRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
-        ACE_SCOPED_TRACE("SwipeRecognizer onActionCancel");
         SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
     }
 }
@@ -348,7 +344,6 @@ void SwipeRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
-        ACE_SCOPED_TRACE("SwipeRecognizer onActionCancel");
         SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
     }
 }
@@ -395,6 +390,8 @@ void SwipeRecognizer::OnResetStatus()
 
 void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type)
 {
+    std::string callbackName = GetCallbackName(callback);
+    ACE_SCOPED_TRACE("SwipeRecognizer %s", callbackName.c_str());
     if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
         return;
     }
