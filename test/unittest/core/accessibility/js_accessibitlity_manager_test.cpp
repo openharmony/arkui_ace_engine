@@ -2107,10 +2107,10 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager039, TestSize.Level1)
     MockJsAccessibilityManager mockJsManger;
     mockJsManger.SetPipelineContext(context);
     mockJsManger.Register(true);
-    /** 
+   /**
     * @tc.steps: step2. test 
     */
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetGestureEventHub(nullptr);
     EXPECT_CALL(mockJsManger, ActClick(_)).Times(0).WillOnce(Return(false));
