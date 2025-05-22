@@ -25,6 +25,7 @@ const MAX_MAX_FONT_SCALE: number = 2
 const MIN_MAX_FONT_SCALE: number = 1
 const RESOURCE_TYPE_FLOAT = 10002;
 const RESOURCE_TYPE_INTEGER = 10007;
+const CAPSULE_FOCUS_SELECTED_OFFSET: number = 4;
 
 interface SegmentButtonThemeInterface {
   SEGMENT_TEXT_VERTICAL_PADDING: Resource;
@@ -360,13 +361,12 @@ export class SegmentButtonOptions {
     this.borderRadiusMode = options.borderRadiusMode ?? BorderRadiusMode.DEFAULT
     if (this.borderRadiusMode !== BorderRadiusMode.DEFAULT &&
       this.borderRadiusMode !== BorderRadiusMode.CUSTOM) {
-      console.warn('[SegmentButton] Invalid borderRadiusMode value, use DEFAULT mode instead.');
       this.borderRadiusMode = BorderRadiusMode.DEFAULT;
     }
-    this.backgroundBorderRadius = options.backgroundBorderRadius ?? 
-      LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_CONTAINER_SHAPE);
-    this.itemBorderRadius = options.itemBorderRadius ?? 
-      LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_SELECTED_BACKGROUND_SHAPE);
+    this.backgroundBorderRadius =
+      options.backgroundBorderRadius ?? LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_CONTAINER_SHAPE);
+    this.itemBorderRadius =
+      options.itemBorderRadius ?? LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_SELECTED_BACKGROUND_SHAPE);
     this.buttons = new SegmentButtonItemOptionsArray(options.buttons)
     if (this.type === 'capsule') {
       this.multiply = (options as CapsuleSegmentButtonOptions).multiply ?? false
@@ -868,17 +868,49 @@ struct SegmentButtonItemArrayComponent {
     for (let index = 0; index < this.buttonItemsRealHeight.length; index++) {
       this.buttonItemsRealHeight[index] = 0
     }
-  }  
+  }
 
   private getFocusItemBorderRadius(index: number): LocalizedBorderRadiuses {
-    let focusOffset = this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? 4 : 0;
+    if (index < 0 || index >= this.buttonBorderRadius.length) {
+      return {
+        topStart: LengthMetrics.vp(0),
+        topEnd: LengthMetrics.vp(0),
+        bottomStart: LengthMetrics.vp(0),
+        bottomEnd: LengthMetrics.vp(0)
+      };
+    }
+
+    let focusOffset = 0;
+    if (this.options.type === 'capsule' &&
+      this.focusIndex >= 0 &&
+      this.focusIndex < this.buttonItemsSelected.length &&
+    this.buttonItemsSelected[this.focusIndex]) {
+      focusOffset = CAPSULE_FOCUS_SELECTED_OFFSET;
+    }
+
     let borderRadius: LocalizedBorderRadiuses = this.buttonBorderRadius[index];
-    
+
     return {
       topStart: LengthMetrics.vp((borderRadius.topStart?.value ?? 0) + focusOffset),
       topEnd: LengthMetrics.vp((borderRadius.topEnd?.value ?? 0) + focusOffset),
       bottomStart: LengthMetrics.vp((borderRadius.bottomStart?.value ?? 0) + focusOffset),
       bottomEnd: LengthMetrics.vp((borderRadius.bottomEnd?.value ?? 0) + focusOffset)
+    };
+  }
+
+  private getFocusStackSize(index: number): SizeOptions {
+    const isCapsuleAndSelected = this.options.type === 'capsule' &&
+      this.focusIndex >= 0 &&
+      this.focusIndex < this.buttonItemsSelected.length &&
+    this.buttonItemsSelected[this.focusIndex];
+
+    return {
+      width: isCapsuleAndSelected
+        ? this.buttonWidth[index] + CAPSULE_FOCUS_SELECTED_OFFSET * 2
+        : this.buttonWidth[index],
+      height: isCapsuleAndSelected
+        ? this.buttonHeight[index] + CAPSULE_FOCUS_SELECTED_OFFSET * 2
+        : this.buttonHeight[index]
     };
   }
 
@@ -888,12 +920,7 @@ struct SegmentButtonItemArrayComponent {
       Stack()
         .direction(this.options.direction)
         .borderRadius(this.getFocusItemBorderRadius(index))
-        .size({
-          width: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ?
-            this.buttonWidth[index] + 8 : this.buttonWidth[index],
-          height: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ?
-            this.buttonHeight[index] + 8 : this.buttonHeight[index]
-        })
+        .size(this.getFocusStackSize(index))
         .borderColor(segmentButtonTheme.FOCUS_BORDER_COLOR)
         .borderWidth(2)
     }
@@ -916,30 +943,46 @@ struct SegmentButtonItemArrayComponent {
     });
 
     const isSingleSelect = this.options.type === 'tab' || !(this.options.multiply ?? false);
-    const buttonsLength = this.options.buttons ?
-    Math.min(this.options.buttons.length, this.buttonItemsSize.length) : MIN_ITEM_COUNT;
+    const buttonsLength =
+      this.options.buttons ? Math.min(this.options.buttons.length, this.buttonItemsSize.length) : MIN_ITEM_COUNT;
     const setAllCorners = (array: LocalizedBorderRadiuses[], index: number, value: number) => {
-      array[index].topStart = LengthMetrics.vp(value);
-      array[index].topEnd = LengthMetrics.vp(value);
-      array[index].bottomStart = LengthMetrics.vp(value);
-      array[index].bottomEnd = LengthMetrics.vp(value);
+      if (!array || index < 0 || index >= array.length) {
+        return;
+      }
+
+      const safeValue = Math.max(0, value);
+      array[index].topStart = LengthMetrics.vp(safeValue);
+      array[index].topEnd = LengthMetrics.vp(safeValue);
+      array[index].bottomStart = LengthMetrics.vp(safeValue);
+      array[index].bottomEnd = LengthMetrics.vp(safeValue);
     };
 
     const setLeftCorners = (array: LocalizedBorderRadiuses[], index: number, value: number) => {
-      array[index].topStart = LengthMetrics.vp(value);
+      if (!array || index < 0 || index >= array.length) {
+        return;
+      }
+      const safeValue = Math.max(0, value);
+      array[index].topStart = LengthMetrics.vp(safeValue);
       array[index].topEnd = LengthMetrics.vp(0);
-      array[index].bottomStart = LengthMetrics.vp(value);
+      array[index].bottomStart = LengthMetrics.vp(safeValue);
       array[index].bottomEnd = LengthMetrics.vp(0);
     };
 
     const setRightCorners = (array: LocalizedBorderRadiuses[], index: number, value: number) => {
+      if (!array || index < 0 || index >= array.length) {
+        return;
+      }
+      const safeValue = Math.max(0, value);
       array[index].topStart = LengthMetrics.vp(0);
-      array[index].topEnd = LengthMetrics.vp(value);
+      array[index].topEnd = LengthMetrics.vp(safeValue);
       array[index].bottomStart = LengthMetrics.vp(0);
-      array[index].bottomEnd = LengthMetrics.vp(value);
+      array[index].bottomEnd = LengthMetrics.vp(safeValue);
     };
 
     const setMiddleCorners = (array: LocalizedBorderRadiuses[], index: number) => {
+      if (!array || index < 0 || index >= array.length) {
+        return;
+      }
       array[index].topStart = LengthMetrics.vp(0);
       array[index].topEnd = LengthMetrics.vp(0);
       array[index].bottomStart = LengthMetrics.vp(0);
@@ -948,7 +991,7 @@ struct SegmentButtonItemArrayComponent {
 
     for (let index = 0; index < this.buttonBorderRadius.length; index++) {
       let halfButtonItemsSizeHeight = this.buttonItemsSize[index].height as number / 2;
-      let radius = this.options.iconTextRadius ?? halfButtonItemsSizeHeight; //default radius
+      let radius = this.options.iconTextRadius ?? halfButtonItemsSizeHeight; // default radius
 
       const isCustomMode = this.options.borderRadiusMode === BorderRadiusMode.CUSTOM &&
         this.options.itemBorderRadius !== undefined;
@@ -1691,12 +1734,11 @@ function getBackgroundBorderRadius(options: SegmentButtonOptions, defaultRadius:
     // For capsule multi-select buttons, use itemBorderRadius
     if (options.type === 'capsule' && (options.multiply ?? false) && options.itemBorderRadius !== undefined) {
       return options.itemBorderRadius.value;
-    } 
-    else if (options.backgroundBorderRadius !== undefined) {
+    } else if (options.backgroundBorderRadius !== undefined) {
       return options.backgroundBorderRadius.value;
     }
   }
-  
+
   if (options.type === 'capsule' && (options.multiply ?? false)) {
     return options.iconTextRadius ?? options.iconTextBackgroundRadius ?? defaultRadius;
   }
