@@ -12152,12 +12152,12 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         let isAttributeUpdater: boolean = (modifier instanceof AttributeUpdater);
         if (isAttributeUpdater) {
             let attributeUpdater = modifier as object as AttributeUpdater<T, (...params: Object[]) => T>
-            if (this.getAttributeSet().peerNode_ == null) {
+            if (!attributeUpdater.peerNode_) {
                 attributeUpdater.initializeModifier(peerNode._attributeSet as T);
-            } else if (this.getPeer() != this.getAttributeSet().peerNode_) {
+            } else if (this.getPeer() !== attributeUpdater.peerNode_) {
                 attributeUpdater.onComponentChanged(peerNode._attributeSet as T);
             }
-            this.getAttributeSet().peerNode_ = this.getPeer();
+            attributeUpdater.peerNode_ = this.getPeer();
             attributeUpdater.attribute = this.getModifierHost() as T
             attributeUpdater.updateConstructorParams = (...params: Object[]) => {
                 let attribute = this.getModifierHost()! as T;

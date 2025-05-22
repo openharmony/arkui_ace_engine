@@ -322,8 +322,6 @@ export function modifierNullWithKey(modifiers: ObservedMap, identity: string) {
 
 export class ArkCommonAttributeSet implements CommonAttribute {
 
-    peerNode_?: ArkCommonMethodPeer;
-
     accessibilityDescription(value: String | Resource | undefined): this {
       return this;
    }
