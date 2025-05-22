@@ -134,7 +134,9 @@ private:
     void InitializeParam(LayoutWrapper* layoutWrapper, const RefPtr<MenuPattern>& menuPattern);
     void InitializeLayoutRegionMargin(const RefPtr<MenuPattern>& menuPattern);
     void InitWrapperRect(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
-    void UpdateWrapperRectForHoverMode(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
+    void CalcWrapperRectForHoverMode(const RefPtr<MenuPattern>& menuPattern);
+    void UpdateWrapperRectForHoverMode(
+        const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern, float creaseHeightOffset);
     uint32_t GetBottomBySafeAreaManager(const RefPtr<SafeAreaManager>& safeAreaManager,
         const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void InitSpace(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
@@ -328,7 +330,6 @@ private:
     OffsetF preOffset_;
     Rect preRect_;
     bool flag_ = false;
-    bool isHalfFoldHover_ = false;
     // previewScale_ must be greater than 0
     float previewScale_ = 1.0f;
     MenuDumpInfo dumpInfo_;

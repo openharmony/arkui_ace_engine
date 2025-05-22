@@ -8727,4 +8727,48 @@ void OverlayManager::UpdateFilterMaskType(const RefPtr<FrameNode>& menuWrapperNo
         filterRenderContext->UpdateBackgroundColor(menuWrapperPattern->GetMenuMaskColor());
     }
 }
+
+bool OverlayManager::IsNeedAvoidFoldCrease(
+    const RefPtr<FrameNode>& frameNode, bool checkSenboard, bool expandDisplay, std::optional<bool> enableHoverMode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    if (!SystemProperties::IsSuperFoldDisplayDevice()) {
+        return false;
+    }
+
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
+
+    auto currentId = pipeline->GetInstanceId();
+    auto container = AceEngine::Get().GetContainer(currentId);
+    if (!container) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "container is null");
+        return false;
+    }
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(currentId);
+        if (!container) {
+            TAG_LOGW(AceLogTag::ACE_OVERLAY, "parent container is null");
+            return false;
+        }
+    }
+    // Check is half fold status
+    auto halfFoldStatus = container->GetFoldStatusFromListener() == FoldStatus::HALF_FOLD;
+    // Check is waterfall window
+    auto isWaterfallWindow = container->IsWaterfallWindow();
+    // Check whether the senboard scenario needs to be filtered for crease avoidance
+    auto isSceneBoard = checkSenboard && container->IsSceneBoardWindow();
+    TAG_LOGD(AceLogTag::ACE_OVERLAY,
+        "avoid foldCrease halfFoldStatus %{public}d, isWaterfallWindow %{public}d, isSceneBoard %{public}d",
+        halfFoldStatus, isWaterfallWindow, isSceneBoard);
+    // Judge whether to avoid the foldCrease according to the conditions
+    // Condition1. is isWaterfallWindow mode and user not set enableHoverMode or set true
+    // Condition2. isSceneBoard and halfFoldStatus and is pc mode and user not set enableHoverMode or set true
+    // Condition3. halfFoldStatus and is phone mode and user set enableHoverMode true
+    auto isNeedAvoidFoldCrease = (isWaterfallWindow && enableHoverMode.value_or(true)) ||
+        (isSceneBoard && halfFoldStatus && expandDisplay && enableHoverMode.value_or(true)) ||
+        (halfFoldStatus && !expandDisplay && enableHoverMode.value_or(false));
+    return isNeedAvoidFoldCrease;
+}
 } // namespace OHOS::Ace::NG
