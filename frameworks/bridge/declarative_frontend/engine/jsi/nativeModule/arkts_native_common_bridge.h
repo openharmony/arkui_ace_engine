@@ -21,6 +21,7 @@
 #include "core/event/focus_axis_event.h"
 
 namespace OHOS::Ace::NG {
+using TouchRecognizerMap = std::map<WeakPtr<TouchEventTarget>, std::unordered_set<int32_t>>;
 class CommonBridge {
 public:
     static ArkUINativeModuleValue SetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -297,6 +298,10 @@ public:
     static Local<panda::ObjectRef> CreateRecognizerObject(EcmaVM* vm, const RefPtr<NG::NGGestureRecognizer>& target);
     static Local<panda::ArrayRef> CreateTouchRecognizersObject(
         EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NG::NGGestureRecognizer>& target);
+    static TouchRecognizerMap CreateTouchRecognizerMap(
+        const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NG::NGGestureRecognizer>& current);
+    static void CollectTouchEventTarget(TouchRecognizerMap& dict, std::list<RefPtr<TouchEventTarget>>& targets,
+        NG::FrameNode* borderNode, int32_t fingerId);
     static Local<panda::ObjectRef> CreateFingerInfo(EcmaVM* vm, const FingerInfo& fingerInfo);
     static Local<panda::ObjectRef> CreateEventTargetObject(EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info);
     static Local<panda::ObjectRef> CreateAreaObject(EcmaVM* vm, const RectF& rect, const OffsetF& origin);
