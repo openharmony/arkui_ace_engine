@@ -453,9 +453,9 @@ void ArcListLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper, const Of
     } else {
         SyncGeometry(wrapper);
     }
+    wrapper->MarkAndCheckNewOpIncNode(axis_);
     auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
     if (frameNode) {
-        frameNode->MarkAndCheckNewOpIncNode();
         auto renderContext = frameNode->GetRenderContext();
         if (renderContext) {
             renderContext->UpdateOpacity(transparency);
