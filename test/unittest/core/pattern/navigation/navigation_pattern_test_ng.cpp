@@ -21,7 +21,7 @@
 
 #define protected public
 #define private public
-#include "base/ressched/resscged_report.h"
+#include "base/ressched/ressched_report.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components/button/button_theme.h"
