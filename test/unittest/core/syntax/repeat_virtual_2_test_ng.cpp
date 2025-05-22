@@ -53,7 +53,8 @@ RefPtr<RepeatVirtualScroll2Node> RepeatVirtual2TestNg::CreateRepeatVirtualNode(u
     onRecycleItems_ = [](IndexType fromIndex, IndexType toIndex) -> void {
         return;
     };
-    onActiveRange_ = [](int32_t fromIndex, int32_t toIndex, int32_t vStart, int32_t vEnd, bool isLoop) -> void {
+    onActiveRange_ = [](int32_t fromIndex, int32_t toIndex, int32_t vStart, int32_t vEnd, bool isLoop,
+        bool forceUpdate) -> void {
         return;
     };
     onMoveFromTo_ = [](IndexType, IndexType) -> void {
@@ -649,5 +650,36 @@ HWTEST_F(RepeatVirtual2TestNg, ConvertFromToIndex002, TestSize.Level1)
     EXPECT_EQ(mappedIndex, 5);
     mappedIndex = repeatNode->caches_.ConvertFromToIndexRevert(6);
     EXPECT_EQ(mappedIndex, 6);
+}
+
+/**
+ * @tc.name: UpdateFrameChildIndexRecord001
+ * @tc.desc: Test node.updateFrameChildIndexRecord
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, UpdateFrameChildIndexRecord001, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(6);
+    repeatNode->minFrameChildIndex_ = 0;
+    repeatNode->maxFrameChildIndex_ = 0;
+    repeatNode->needRecordFirstFrameChild_ = true;
+
+    /**
+     * @tc.steps: step1.
+     * @tc.expected: minFrameChildIndex_ is 2, maxFrameChildIndex_ is 2, needRecordFirstFrameChild_ is false.
+     */
+    repeatNode->updateFrameChildIndexRecord(2);
+    EXPECT_EQ(repeatNode->minFrameChildIndex_, 2);
+    EXPECT_EQ(repeatNode->maxFrameChildIndex_, 2);
+    EXPECT_EQ(repeatNode->needRecordFirstFrameChild_, false);
+
+    /**
+     * @tc.steps: step2.
+     * @tc.expected: minFrameChildIndex_ is 1, maxFrameChildIndex_ is 3
+     */
+    repeatNode->updateFrameChildIndexRecord(1);
+    repeatNode->updateFrameChildIndexRecord(3);
+    EXPECT_EQ(repeatNode->minFrameChildIndex_, 1);
+    EXPECT_EQ(repeatNode->maxFrameChildIndex_, 3);
 }
 } // namespace OHOS::Ace::NG
