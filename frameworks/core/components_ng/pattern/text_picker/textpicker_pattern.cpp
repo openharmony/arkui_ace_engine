@@ -1104,18 +1104,19 @@ void TextPickerPattern::SetFocusCornerRadius(RoundRect& paintRect, const BorderR
         radius.radiusBottomRight->ConvertToPx()), static_cast<RSScalar>(radius.radiusBottomRight->ConvertToPx()));
 }
 
-RectF TextPickerPattern::CalculatePaintRect(int32_t currentFocusIndex,
-    float centerX, float centerY, float paintRectWidth, float paintRectHeight, float columnWidth)
+RectF TextPickerPattern::CalculatePaintRect(int32_t currentFocusIndex, float centerX, float centerY,
+    float paintRectWidth, float paintRectHeight, float columnWidth)
 {
+    auto columnWidthSum = GetColumnWidthSumForFirstIndexColumns(currentFocusIndex);
     if (!GetIsShowInDialog()) {
         paintRectWidth = columnWidth - FOCUS_WIDTH.ConvertToPx() - PRESS_RADIUS.ConvertToPx();
-        centerX = currentFocusIndex * columnWidth + (columnWidth - paintRectWidth) / HALF;
+        centerX = columnWidthSum + (columnWidth - paintRectWidth) / HALF;
         AdjustFocusBoxOffset(centerX, centerY);
     } else {
         paintRectHeight = paintRectHeight - DIALOG_OFFSET.ConvertToPx();
         centerY = centerY + DIALOG_OFFSET_LENGTH.ConvertToPx();
         paintRectWidth = columnWidth - FOCUS_WIDTH.ConvertToPx() - PRESS_RADIUS.ConvertToPx();
-        centerX = currentFocusIndex * columnWidth + (columnWidth - paintRectWidth) / HALF;
+        centerX = columnWidthSum + (columnWidth - paintRectWidth) / HALF;
     }
     return RectF(centerX, centerY, paintRectWidth, paintRectHeight);
 }
@@ -1167,30 +1168,46 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto frameSize = geometryNode->GetPaddingSize();
     auto dividerSpacing = pipeline->NormalizeToPx(pickerTheme->GetDividerSpacing());
     auto pickerThemeWidth = dividerSpacing * RATE;
-    auto currentFocusIndex = focusKeyID_;
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    if (isRtl) {
-        currentFocusIndex = childSize - 1 - focusKeyID_;
-    }
     auto itemHeight = GreatNotEqual(defaultPickerItemHeight_, 0.0f) ? defaultPickerItemHeight_ : dividerSpacing;
-    auto centerX = (frameSize.Width() / childSize - pickerThemeWidth) / RATE +
-                   columnNode->GetGeometryNode()->GetFrameRect().Width() * currentFocusIndex +
-                   PRESS_INTERVAL.ConvertToPx() * RATE;
-    auto centerY = (frameSize.Height() - itemHeight) / RATE +
-                   FOCUS_INTERVAL.ConvertToPx() + LINE_WIDTH.ConvertToPx();
+    auto centerX = (columnWidth - pickerThemeWidth) / RATE;
+    auto centerY = (frameSize.Height() - itemHeight) / RATE + FOCUS_INTERVAL.ConvertToPx() + LINE_WIDTH.ConvertToPx();
     float paintRectWidth = columnWidth - FOCUS_INTERVAL.ConvertToPx() * RATE - LINE_WIDTH.ConvertToPx() * RATE;
     float paintRectHeight = itemHeight - FOCUS_INTERVAL.ConvertToPx() * RATE - LINE_WIDTH.ConvertToPx() * RATE;
     if (LessNotEqual(paintRectHeight, 0.0f)) {
         paintRectHeight = 0.0f;
     }
-    auto focusPaintRect = CalculatePaintRect(currentFocusIndex,
-        centerX, centerY, paintRectWidth, paintRectHeight, columnWidth);
+    auto focusPaintRect =
+        CalculatePaintRect(focusKeyID_, centerX, centerY, paintRectWidth, paintRectHeight, columnWidth);
     paintRect.SetRect(focusPaintRect);
-    if(layoutProperty->HasSelectedBorderRadius()) {
+    if (layoutProperty->HasSelectedBorderRadius()) {
         SetFocusCornerRadius(paintRect, layoutProperty->GetSelectedBorderRadiusValue());
     } else {
         SetFocusCornerRadius(paintRect, NG::BorderRadiusProperty(PRESS_RADIUS));
     }
+}
+
+float TextPickerPattern::GetColumnWidthSumForFirstIndexColumns(int32_t index)
+{
+    float columnWidthSum = 0.0f;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, columnWidthSum);
+
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    int32_t childCount = static_cast<int32_t>(host->GetChildren().size());
+
+    int32_t start = isRtl ? index + 1 : 0;
+    int32_t end = isRtl ? childCount : index;
+
+    for (int32_t i = start; i < end; ++i) {
+        auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(i));
+        CHECK_NULL_RETURN(stackChild, columnWidthSum);
+        auto blendChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
+        CHECK_NULL_RETURN(blendChild, columnWidthSum);
+        auto pickerChild = DynamicCast<FrameNode>(blendChild->GetLastChild());
+        CHECK_NULL_RETURN(pickerChild, columnWidthSum);
+        columnWidthSum += pickerChild->GetGeometryNode()->GetFrameSize().Width();
+    }
+    return columnWidthSum;
 }
 
 bool TextPickerPattern::OnKeyEvent(const KeyEvent& event)
