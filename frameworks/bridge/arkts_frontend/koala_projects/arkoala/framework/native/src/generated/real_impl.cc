@@ -12623,6 +12623,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    void RecycleImpl(Ark_FrameNode peer)
+    {
+    }
+    void ReuseImpl(Ark_FrameNode peer)
+    {
+    }
     Ark_Number Vp2pxImpl(Ark_UIContext peer,
                          const Ark_Number* value)
     {
@@ -21337,6 +21343,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeAccessor::GetAttachedFrameNodeByIdImpl,
             FrameNodeAccessor::GetFrameNodeByIdImpl,
             FrameNodeAccessor::GetFrameNodeByUniqueIdImpl,
+            FrameNodeAccessor::ReuseImpl,
+            FrameNodeAccessor::RecycleImpl,
         };
         return &FrameNodeAccessorImpl;
     }

@@ -365,6 +365,24 @@ Ark_FrameNode GetFrameNodeByUniqueIdImpl(const Ark_Number* id)
     auto nodeRef = AceType::DynamicCast<NG::FrameNode>(node);
     return FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(nodeRef));
 }
+void ReuseImpl(Ark_FrameNode peer)
+{
+    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_VOID(peerNode);
+    auto currentUINodeRef = AceType::DynamicCast<UINode>(peerNode);
+    CHECK_NULL_VOID(currentUINodeRef);
+
+    currentUINodeRef->OnReuse();
+}
+void RecycleImpl(Ark_FrameNode peer)
+{
+    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_VOID(peerNode);
+    auto currentUINodeRef = AceType::DynamicCast<UINode>(peerNode);
+    CHECK_NULL_VOID(currentUINodeRef);
+
+    currentUINodeRef->OnRecycle();
+}
 Ark_RenderNode GetRenderNodeImpl(Ark_FrameNode peer)
 {
     CHECK_NULL_RETURN(peer && peer->node, nullptr);
@@ -400,6 +418,8 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
         FrameNodeAccessor::GetAttachedFrameNodeByIdImpl,
         FrameNodeAccessor::GetFrameNodeByIdImpl,
         FrameNodeAccessor::GetFrameNodeByUniqueIdImpl,
+        FrameNodeAccessor::ReuseImpl,
+        FrameNodeAccessor::RecycleImpl,
         FrameNodeAccessor::GetRenderNodeImpl,
     };
     return &FrameNodeAccessorImpl;

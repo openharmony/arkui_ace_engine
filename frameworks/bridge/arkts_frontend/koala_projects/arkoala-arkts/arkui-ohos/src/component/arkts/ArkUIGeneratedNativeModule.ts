@@ -4216,6 +4216,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _FrameNode_getFrameNodeByUniqueId(id: number): KPointer
     @ani.unsafe.Direct
+    native static _FrameNode_reuse(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _FrameNode_recycle(ptr: KPointer): void
+    @ani.unsafe.Direct
     native static _FrameNode_getRenderNode(ptr: KPointer): KPointer
     @ani.unsafe.Direct
     native static _LengthMetrics_ctor(): KPointer

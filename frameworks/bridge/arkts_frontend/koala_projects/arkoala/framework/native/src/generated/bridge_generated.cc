@@ -33921,6 +33921,16 @@ Ark_NativePointer impl_FrameNode_getFrameNodeByUniqueId(KInteropNumber id) {
     return GetAccessors()->getFrameNodeAccessor()->getFrameNodeByUniqueId((const Ark_Number*) (&id));
 }
 KOALA_INTEROP_DIRECT_1(FrameNode_getFrameNodeByUniqueId, Ark_NativePointer, KInteropNumber)
+void impl_FrameNode_reuse(Ark_NativePointer thisPtr) {
+    Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+    GetAccessors()->getFrameNodeAccessor()->reuse(self);
+}
+KOALA_INTEROP_DIRECT_V1(FrameNode_reuse, Ark_NativePointer)
+void impl_FrameNode_recycle(Ark_NativePointer thisPtr) {
+    Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+    GetAccessors()->getFrameNodeAccessor()->recycle(self);
+}
+KOALA_INTEROP_DIRECT_V1(FrameNode_recycle, Ark_NativePointer)
 Ark_NativePointer impl_LengthMetrics_ctor() {
         return GetAccessors()->getLengthMetricsAccessor()->ctor();
 }

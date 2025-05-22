@@ -11662,6 +11662,20 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
+    static _FrameNode_reuse(ptr: KPointer): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._FrameNode_reuse(ptr)
+        }
+        throw new Error("Not implemented")
+    }
+    static _FrameNode_recycle(ptr: KPointer): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._FrameNode_recycle(ptr)
+        }
+        throw new Error("Not implemented")
+    }
     static _PixelMap_ctor(): KPointer {
         if ((this._LoadOnce()) == (true))
         {
