@@ -40,9 +40,9 @@ void DestroyPeerImpl(Ark_FrameNode peer)
 }
 Ark_FrameNode CtorImpl(Ark_UIContext uiContext)
 {
+    auto peer = FrameNodePeer::Create(uiContext);
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
-    auto peer = FrameNodePeer::Create(frameNode);
+    peer->node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
     peer->node->SetExclusiveEventForChild(true);
     peer->node->SetIsArkTsFrameNode(true);
     FrameNodePeer::peerMap_.emplace(nodeId, *peer);

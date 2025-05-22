@@ -191,16 +191,7 @@ export class RenderNode implements MaterializedBase {
         if (transform === undefined || transform === null) {
             this.transformValue = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
         } else {
-            let transformArray = [...this.transformValue]
-            Object.values(transform).forEach((value, index) => {
-                if (index % 5 === 0) {
-                    transformArray[index] = this.checkUndefinedOrNullWithDefaultValue<number>(value as number, 1)
-                }
-                else {
-                    transformArray[index] = this.checkUndefinedOrNullWithDefaultValue<number>(value as number, 0)
-                }
-            })
-            this.transformValue = transformArray as Matrix4
+            this.transformValue = transform
         }
         this.setTransform(this.transformValue);
     }
