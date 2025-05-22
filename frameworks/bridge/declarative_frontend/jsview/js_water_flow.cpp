@@ -422,62 +422,6 @@ void JSWaterFlow::SetFriction(const JSCallbackInfo& info)
     WaterFlowModel::GetInstance()->SetFriction(friction);
 }
 
-void JSWaterFlow::ReachStartCallback(const JSCallbackInfo& args)
-{
-    if (args[0]->IsFunction()) {
-        auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
-            func->Call(JSRef<JSObject>());
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onReachStart");
-            return;
-        };
-        WaterFlowModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
-    }
-    args.ReturnSelf();
-}
-
-void JSWaterFlow::ReachEndCallback(const JSCallbackInfo& args)
-{
-    if (args[0]->IsFunction()) {
-        auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
-            func->Call(JSRef<JSObject>());
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onReachEnd");
-            return;
-        };
-        WaterFlowModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
-    }
-    args.ReturnSelf();
-}
-
-void JSWaterFlow::ScrollFrameBeginCallback(const JSCallbackInfo& args)
-{
-    if (args[0]->IsFunction()) {
-        auto onScrollBegin = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                                 const Dimension& offset, const ScrollState& state) -> ScrollFrameResult {
-            ScrollFrameResult scrollRes { .offset = offset };
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollRes);
-            auto params = ConvertToJSValues(offset, state);
-            auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
-            if (result.IsEmpty()) {
-                LOGE("Error calling onScrollFrameBegin, result is empty.");
-                return scrollRes;
-            }
-
-            if (!result->IsObject()) {
-                LOGE("Error calling onScrollFrameBegin, result is not object.");
-                return scrollRes;
-            }
-
-            auto resObj = JSRef<JSObject>::Cast(result);
-            auto dxRemainValue = resObj->GetProperty("offsetRemain");
-            if (dxRemainValue->IsNumber()) {
-                scrollRes.offset = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
-            }
-            return scrollRes;
-        };
-        WaterFlowModel::GetInstance()->SetOnScrollFrameBegin(std::move(onScrollBegin));
-    }
-}
-
 void JSWaterFlow::SetCachedCount(const JSCallbackInfo& info)
 {
     int32_t cachedCount = 1;
@@ -521,46 +465,6 @@ void JSWaterFlow::JsOnScroll(const JSCallbackInfo& args)
             return;
         };
         WaterFlowModel::GetInstance()->SetOnScroll(std::move(onScroll));
-    }
-    args.ReturnSelf();
-}
-
-void JSWaterFlow::JsOnScrollStart(const JSCallbackInfo& args)
-{
-    if (args[0]->IsFunction()) {
-        auto onScrollStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
-            func->Call(JSRef<JSObject>());
-            return;
-        };
-        WaterFlowModel::GetInstance()->SetOnScrollStart(std::move(onScrollStart));
-    }
-    args.ReturnSelf();
-}
-
-void JSWaterFlow::JsOnScrollStop(const JSCallbackInfo& args)
-{
-    if (args[0]->IsFunction()) {
-        auto onScrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
-            func->Call(JSRef<JSObject>());
-            return;
-        };
-        WaterFlowModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
-    }
-    args.ReturnSelf();
-}
-
-void JSWaterFlow::JsOnScrollIndex(const JSCallbackInfo& args)
-{
-    if (args[0]->IsFunction()) {
-        auto onScrollIndex = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                                 const int32_t first, const int32_t last) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(first, last);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onScrollIndex");
-            return;
-        };
-        WaterFlowModel::GetInstance()->SetOnScrollIndex(std::move(onScrollIndex));
     }
     args.ReturnSelf();
 }
