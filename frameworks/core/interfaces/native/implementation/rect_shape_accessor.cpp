@@ -107,7 +107,7 @@ void DestroyPeerImpl(Ark_RectShape peer)
 {
     delete peer;
 }
-Ark_RectShape CtorImpl()
+Ark_RectShape CtorImpl(const Opt_Union_RectShapeOptions_RoundRectShapeOptions* options)
 {
     Ark_RectShape peer = new RectShapePeer();
 #ifdef WRONG_GEN

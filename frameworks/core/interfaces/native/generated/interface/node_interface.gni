@@ -315,8 +315,6 @@ generated_sources = [
   "implementation/time_picker_modifier.cpp",
   "implementation/toggle_modifier.cpp",
   "implementation/touch_event_accessor.cpp",
-  "implementation/touch_result_accessor.cpp",
-  "implementation/touch_test_info_accessor.cpp",
   "implementation/transition_effect_accessor.cpp",
   "implementation/typeface_accessor.cpp",
   "implementation/ui_common_event_accessor.cpp",

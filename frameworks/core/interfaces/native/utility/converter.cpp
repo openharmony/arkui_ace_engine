@@ -1096,15 +1096,6 @@ Header Convert(const Ark_Header& src)
 }
 
 template<>
-Header Convert(const Ark_WebHeader& src)
-{
-    Header header;
-    header.headerKey = Converter::Convert<std::string>(src.headerKey);
-    header.headerValue = Converter::Convert<std::string>(src.headerValue);
-    return header;
-}
-
-template<>
 std::map<std::string, std::string> Convert(const Map_String_String& src)
 {
     Array_String arkKeys {
@@ -1149,16 +1140,6 @@ CaretStyle Convert(const Ark_CaretStyle& src)
     caretStyle.color = OptConvert<Color> (src.color);
     caretStyle.width = OptConvert<Dimension> (src.width);
     return caretStyle;
-}
-
-template<>
-CheckboxSettingData Convert(const Ark_LunarSwitchStyle& src)
-{
-    CheckboxSettingData data;
-    data.selectedColor = OptConvert<Color>(src.selectedColor);
-    data.unselectedColor = OptConvert<Color>(src.unselectedColor);
-    data.strokeColor = OptConvert<Color>(src.strokeColor);
-    return data;
 }
 
 template<>
@@ -2536,7 +2517,7 @@ OHOS::Ace::TextMetrics Convert(const Ark_TextMetrics& src)
 }
 
 template<>
-std::set<std::string> Convert(const Array_UniformDataType& src)
+std::set<std::string> Convert(const Array_UniformDataType_UniformDataType& src)
 {
     std::set<std::string> dst = {};
     std::optional<std::string> convVal;

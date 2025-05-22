@@ -1763,6 +1763,23 @@ int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext
     CHECK_NULL_RETURN(pipelineContext, 0);
     return (GetMicroTickCount() - pipelineContext->GetFormAnimationStartTime()) / MICROSEC_TO_MILLISEC;
 }
+static void SetWidth(FrameNode *frameNode, std::optional<CalcDimension> value)
+{
+    Validator::ValidateNonNegative(value);
+    if (AceType::TypeId(frameNode) == CounterNode::TypeId()) {
+        if (!value) {
+            // TODO: Reset value
+            return;
+        }
+        CounterModelNG::SetWidth(frameNode, *value);
+    } else {
+        if (!value) {
+            ViewAbstract::ClearWidthOrHeight(frameNode, true);
+            return;
+        }
+        ViewAbstractModelStatic::SetWidth(frameNode, *value);
+    }
+}
 void WidthImpl(Ark_NativePointer node,
                const Opt_Union_Length_LayoutPolicy* value)
 {
@@ -1771,20 +1788,7 @@ void WidthImpl(Ark_NativePointer node,
     Converter::VisitUnionPtr(value,
         [frameNode](const Ark_Length& src) {
             auto result = Converter::OptConvert<CalcDimension>(src);
-            Validator::ValidateNonNegative(result);
-            if (AceType::TypeId(frameNode) == CounterNode::TypeId()) {
-                if (!result) {
-                    // TODO: Reset value
-                    return;
-                }
-                CounterModelNG::SetWidth(frameNode, *result);
-            } else {
-                if (!result) {
-                    ViewAbstract::ClearWidthOrHeight(frameNode, true);
-                    return;
-                }
-                ViewAbstractModelStatic::SetWidth(frameNode, *result);
-            }
+            SetWidth(frameNode, result);
         },
         [frameNode](const Ark_LayoutPolicy& src) {
             // TODO: Need to implement
@@ -1794,6 +1798,23 @@ void WidthImpl(Ark_NativePointer node,
             // TODO: Reset value
         });
 }
+static void SetHeight(FrameNode *frameNode, std::optional<CalcDimension> value)
+{
+    Validator::ValidateNonNegative(value);
+    if (AceType::TypeId(frameNode) == CounterNode::TypeId()) {
+        if (!value) {
+            // TODO: Reset value
+            return;
+        }
+        CounterModelNG::SetHeight(frameNode, *value);
+    } else {
+        if (!value) {
+            ViewAbstract::ClearWidthOrHeight(frameNode, false);
+            return;
+        }
+        ViewAbstractModelStatic::SetHeight(frameNode, *value);
+    }
+}
 void HeightImpl(Ark_NativePointer node,
                 const Opt_Union_Length_LayoutPolicy* value)
 {
@@ -1801,21 +1822,8 @@ void HeightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     Converter::VisitUnionPtr(value,
         [frameNode](const Ark_Length& src) {
-            auto result = Converter::OptConvert<CalcDimension>(*value);
-            Validator::ValidateNonNegative(result);
-            if (AceType::TypeId(frameNode) == CounterNode::TypeId()) {
-                if (!result) {
-                    // TODO: Reset value
-                    return;
-                }
-                CounterModelNG::SetHeight(frameNode, *result);
-            } else {
-                if (!result) {
-                    ViewAbstract::ClearWidthOrHeight(frameNode, false);
-                    return;
-                }
-                ViewAbstractModelStatic::SetHeight(frameNode, *result);
-            }
+            auto result = Converter::OptConvert<CalcDimension>(src);
+            SetHeight(frameNode, result);
         },
         [frameNode](const Ark_LayoutPolicy& src) {
             // TODO: Need to implement
@@ -1873,12 +1881,10 @@ void SizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    Width0Impl(node, &optValue->width);
-    Height0Impl(node, &optValue->height);
+    auto width = optValue ? Converter::OptConvert<CalcDimension>(optValue->width) : std::nullopt;
+    auto height = optValue ? Converter::OptConvert<CalcDimension>(optValue->height) : std::nullopt;
+    SetWidth(frameNode, width);
+    SetHeight(frameNode, height);
 }
 void ConstraintSizeImpl(Ark_NativePointer node,
                         const Opt_ConstraintSizeOptions* value)
@@ -2645,11 +2651,12 @@ void OnKeyEvent1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (!value) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
         ViewAbstract::DisableOnKeyEvent(frameNode);
     } else {
         auto weakNode = AceType::WeakClaim(frameNode);
-        auto onKeyEvent = [arkCallback = CallbackHelper(*value), node = weakNode](KeyEventInfo& info) -> bool {
+        auto onKeyEvent = [arkCallback = CallbackHelper(*optValue), node = weakNode](KeyEventInfo& info) -> bool {
             PipelineContext::SetCallBackNode(node);
             const auto event = Converter::ArkKeyEventSync(info);
             auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event.ArkValue());
@@ -2673,7 +2680,9 @@ void OnDigitalCrownImpl(Ark_NativePointer node,
                 info.SetStopPropagation(true);
             });
             Ark_CrownEvent crownEvent {
+#ifdef WRONG_GEN
                 .timestamp = ArkValue<Ark_Int64>(info.GetTimeStamp().time_since_epoch().count()),
+#endif
                 .angularVelocity = ArkValue<Ark_Number>(info.GetAngularVelocity()),
                 .degree = ArkValue<Ark_Number>(info.GetDegree()),
                 .action = ArkValue<Ark_CrownAction>(info.GetAction()),
@@ -2954,17 +2963,12 @@ void Transition0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    Converter::VisitUnion(*value,
-        [frameNode](const Ark_TransitionOptions& value) {
-            auto convValue = Converter::Convert<TransitionOptions>(value);
-            ViewAbstract::SetTransition(frameNode, convValue);
-        },
-        [frameNode](const Ark_TransitionEffect& value) {
-            auto convValue = Converter::Convert<RefPtr<NG::ChainedTransitionEffect>>(value);
-             ViewAbstract::SetChainedTransition(frameNode, convValue);
-        },
-        []() {}
-    );
+    auto convValue = Converter::OptConvert<RefPtr<NG::ChainedTransitionEffect>>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    ViewAbstract::SetChainedTransition(frameNode, *convValue);
 }
 void Transition1Impl(Ark_NativePointer node,
                      const Opt_TransitionEffect* effect,
@@ -3473,6 +3477,7 @@ void EnabledImpl(Ark_NativePointer node,
 void AlignRules0Impl(Ark_NativePointer node,
                      const Opt_AlignRuleOption* value)
 {
+#ifdef WRONG_GEN
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convMapValue = Converter::OptConvert<std::map<AlignDirection, AlignRule>>(*value);
@@ -3484,6 +3489,7 @@ void AlignRules0Impl(Ark_NativePointer node,
     } else {
         ViewAbstractModelStatic::SetBias(frameNode, std::nullopt);
     }
+#endif
 }
 void AlignRules1Impl(Ark_NativePointer node,
                      const Opt_LocalizedAlignRuleOptions* value)
@@ -3846,6 +3852,13 @@ void ShadowImpl(Ark_NativePointer node,
         ViewAbstract::SetBackShadow(frameNode, shadow.value());
     }
 }
+void ClipImpl(Ark_NativePointer node,
+              const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    ViewAbstract::SetClipEdge(frameNode, convValue);
 }
 void ClipShapeImpl(Ark_NativePointer node,
                    const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
@@ -4563,8 +4576,8 @@ void BackgroundBlurStyleImpl(Ark_NativePointer node,
             convValue = *opt;
         }
     }
-    if (auto style = Converter::OptConvert<BlurStyle>(*value); style) {
-        convValue.blurStyle = *style;
+    if (auto optStyle = Converter::OptConvert<BlurStyle>(*style); optStyle) {
+        convValue.blurStyle = *optStyle;
     }
     ViewAbstract::SetBackgroundBlurStyle(frameNode, convValue);
 }
@@ -4581,8 +4594,8 @@ void ForegroundBlurStyleImpl(Ark_NativePointer node,
             convValue = *opt;
         }
     }
-    if (auto style = Converter::OptConvert<BlurStyle>(*value); style) {
-        convValue.blurStyle = *style;
+    if (auto optStyle = Converter::OptConvert<BlurStyle>(*style); optStyle) {
+        convValue.blurStyle = *optStyle;
     }
     ViewAbstract::SetForegroundBlurStyle(frameNode, convValue);
 }
@@ -4624,7 +4637,9 @@ void GestureImplInternal(Ark_NativePointer node, const Opt_GestureType* gesture,
     std::optional<RefPtr<Gesture>> aceGestureOpt;
     Converter::VisitUnion(*gesture,
         [&aceGestureOpt](const auto& gestureType) {
-            aceGestureOpt = gestureType->gesture;
+            aceGestureOpt = gestureType->GetGesture();
+        },
+        [](const Ark_CustomObject& src) {
         },
         []() {}
     );
@@ -4706,10 +4721,9 @@ void BackdropBlurImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto radius = Converter::OptConvert<Dimension>(*value);
+    auto optRadius = Converter::OptConvert<Dimension>(*radius);
     auto option = nullptr == options ? std::nullopt : Converter::OptConvert<BlurOption>(*options);
-    ViewAbstract::SetBackdropBlur(frameNode, radius, option);
+    ViewAbstract::SetBackdropBlur(frameNode, optRadius, option);
 }
 void SharedTransitionImpl(Ark_NativePointer node,
                           const Opt_String* id,
@@ -4829,8 +4843,8 @@ void AdvancedBlendModeImpl(Ark_NativePointer node,
             blendApplyType = BlendApplyType::OFFSCREEN;
             ViewAbstract::SetBlendMode(frameNode, blendMode);
         },
-        [](const Ark_BrightnessBlender& value) {
-            LOGE("CommonMethodModifier::AdvancedBlendModeImpl Ark_BrightnessBlender is not supported yet.");
+        [](const Ark_uiEffect_BrightnessBlender& value) {
+            LOGE("CommonMethodModifier::AdvancedBlendModeImpl Ark_uiEffect_BrightnessBlender is not supported yet.");
         },
         []() {}
     );

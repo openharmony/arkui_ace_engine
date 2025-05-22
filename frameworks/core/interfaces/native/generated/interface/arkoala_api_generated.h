@@ -421,8 +421,6 @@ typedef struct Opt_DrawingColorFilter Opt_DrawingColorFilter;
 typedef struct DrawingLatticePeer DrawingLatticePeer;
 typedef struct DrawingLatticePeer* Ark_DrawingLattice;
 typedef struct Opt_DrawingLattice Opt_DrawingLattice;
-typedef struct Ark_EditMenuOptions Ark_EditMenuOptions;
-typedef struct Opt_EditMenuOptions Opt_EditMenuOptions;
 typedef struct EllipseShapePeer EllipseShapePeer;
 typedef struct EllipseShapePeer* Ark_EllipseShape;
 typedef struct Opt_EllipseShape Opt_EllipseShape;
@@ -783,8 +781,7 @@ typedef struct TimePickerDialogPeer* Ark_TimePickerDialog;
 typedef struct Opt_TimePickerDialog Opt_TimePickerDialog;
 typedef struct Ark_TimePickerResult Ark_TimePickerResult;
 typedef struct Opt_TimePickerResult Opt_TimePickerResult;
-typedef struct TouchTestInfoPeer TouchTestInfoPeer;
-typedef struct TouchTestInfoPeer* Ark_TouchTestInfo;
+typedef struct Ark_TouchTestInfo Ark_TouchTestInfo;
 typedef struct Opt_TouchTestInfo Opt_TouchTestInfo;
 typedef struct TransitionEffectPeer TransitionEffectPeer;
 typedef struct TransitionEffectPeer* Ark_TransitionEffect;
@@ -903,7 +900,7 @@ typedef struct Opt_WebResourceRequest Opt_WebResourceRequest;
 typedef struct WebResourceResponsePeer WebResourceResponsePeer;
 typedef struct WebResourceResponsePeer* Ark_WebResourceResponse;
 typedef struct Opt_WebResourceResponse Opt_WebResourceResponse;
-typedef struct webview_WebviewControllerPeer* Ark_webview_WebviewController;
+typedef struct Ark_webview_WebviewController Ark_webview_WebviewController;
 typedef struct Opt_webview_WebviewController Opt_webview_WebviewController;
 typedef struct Ark_WindowAnimationTarget Ark_WindowAnimationTarget;
 typedef struct Opt_WindowAnimationTarget Opt_WindowAnimationTarget;
@@ -1039,6 +1036,8 @@ typedef struct Array_TextCascadePickerRangeContent Array_TextCascadePickerRangeC
 typedef struct Opt_Array_TextCascadePickerRangeContent Opt_Array_TextCascadePickerRangeContent;
 typedef struct Array_TextDataDetectorType Array_TextDataDetectorType;
 typedef struct Opt_Array_TextDataDetectorType Opt_Array_TextDataDetectorType;
+typedef struct Array_TextMenuItem Array_TextMenuItem;
+typedef struct Opt_Array_TextMenuItem Opt_Array_TextMenuItem;
 typedef struct Array_TextPickerRangeContent Array_TextPickerRangeContent;
 typedef struct Opt_Array_TextPickerRangeContent Opt_Array_TextPickerRangeContent;
 typedef struct Array_ToolbarItem Array_ToolbarItem;
@@ -1075,6 +1074,10 @@ typedef struct Callback_Array_String_Boolean Callback_Array_String_Boolean;
 typedef struct Opt_Callback_Array_String_Boolean Opt_Callback_Array_String_Boolean;
 typedef struct Callback_Array_String_Void Callback_Array_String_Void;
 typedef struct Opt_Callback_Array_String_Void Opt_Callback_Array_String_Void;
+typedef struct Callback_Array_TextMenuItem_Array_TextMenuItem Callback_Array_TextMenuItem_Array_TextMenuItem;
+typedef struct Opt_Callback_Array_TextMenuItem_Array_TextMenuItem Opt_Callback_Array_TextMenuItem_Array_TextMenuItem;
+typedef struct Callback_Array_TextMenuItem_Void Callback_Array_TextMenuItem_Void;
+typedef struct Opt_Callback_Array_TextMenuItem_Void Opt_Callback_Array_TextMenuItem_Void;
 typedef struct Callback_Array_TouchTestInfo_TouchResult Callback_Array_TouchTestInfo_TouchResult;
 typedef struct Opt_Callback_Array_TouchTestInfo_TouchResult Opt_Callback_Array_TouchTestInfo_TouchResult;
 typedef struct Callback_AxisEvent_Void Callback_AxisEvent_Void;
@@ -1391,6 +1394,8 @@ typedef struct Callback_TabContentTransitionProxy_Void Callback_TabContentTransi
 typedef struct Opt_Callback_TabContentTransitionProxy_Void Opt_Callback_TabContentTransitionProxy_Void;
 typedef struct Callback_TerminationInfo_Void Callback_TerminationInfo_Void;
 typedef struct Opt_Callback_TerminationInfo_Void Opt_Callback_TerminationInfo_Void;
+typedef struct Callback_TextMenuItem_TextRange_Boolean Callback_TextMenuItem_TextRange_Boolean;
+typedef struct Opt_Callback_TextMenuItem_TextRange_Boolean Opt_Callback_TextMenuItem_TextRange_Boolean;
 typedef struct Callback_TextPickerResult_Void Callback_TextPickerResult_Void;
 typedef struct Opt_Callback_TextPickerResult_Void Opt_Callback_TextPickerResult_Void;
 typedef struct Callback_TextRange_Void Callback_TextRange_Void;
@@ -1789,6 +1794,8 @@ typedef struct Ark_EdgeOutlineStyles Ark_EdgeOutlineStyles;
 typedef struct Opt_EdgeOutlineStyles Opt_EdgeOutlineStyles;
 typedef struct Ark_EdgeStyles Ark_EdgeStyles;
 typedef struct Opt_EdgeStyles Opt_EdgeStyles;
+typedef struct Ark_EditMenuOptions Ark_EditMenuOptions;
+typedef struct Opt_EditMenuOptions Opt_EditMenuOptions;
 typedef struct Ark_EllipseOptions Ark_EllipseOptions;
 typedef struct Opt_EllipseOptions Opt_EllipseOptions;
 typedef struct Ark_EmbedOptions Ark_EmbedOptions;
@@ -2232,8 +2239,7 @@ typedef struct Ark_ToggleOptions Ark_ToggleOptions;
 typedef struct Opt_ToggleOptions Opt_ToggleOptions;
 typedef struct Ark_TouchObject Ark_TouchObject;
 typedef struct Opt_TouchObject Opt_TouchObject;
-typedef struct TouchResultPeer TouchResultPeer;
-typedef struct TouchResultPeer* Ark_TouchResult;
+typedef struct Ark_TouchResult Ark_TouchResult;
 typedef struct Opt_TouchResult Opt_TouchResult;
 typedef struct Ark_TranslateOptions Ark_TranslateOptions;
 typedef struct Opt_TranslateOptions Opt_TranslateOptions;
@@ -2584,6 +2590,8 @@ typedef struct Ark_TextDecorationOptions Ark_TextDecorationOptions;
 typedef struct Opt_TextDecorationOptions Opt_TextDecorationOptions;
 typedef struct Ark_TextInputOptions Ark_TextInputOptions;
 typedef struct Opt_TextInputOptions Opt_TextInputOptions;
+typedef struct Ark_TextMenuItem Ark_TextMenuItem;
+typedef struct Opt_TextMenuItem Opt_TextMenuItem;
 typedef struct Ark_TextPickerOptions Ark_TextPickerOptions;
 typedef struct Opt_TextPickerOptions Opt_TextPickerOptions;
 typedef struct Ark_TextPickerRangeContent Ark_TextPickerRangeContent;
@@ -3598,7 +3606,7 @@ typedef struct Opt_ColoringStrategy {
 } Opt_ColoringStrategy;
 typedef enum Ark_ColorMode {
     ARK_COLOR_MODE_LIGHT = 0,
-    ARK_COLOR_MODE_DARK = 0,
+    ARK_COLOR_MODE_DARK = 1,
 } Ark_ColorMode;
 typedef struct Opt_ColorMode {
     Ark_Tag tag;
@@ -3654,10 +3662,10 @@ typedef struct Opt_ContentType {
 } Opt_ContentType;
 typedef enum Ark_ContextMenuEditStateFlags {
     ARK_CONTEXT_MENU_EDIT_STATE_FLAGS_NONE = 0,
-    ARK_CONTEXT_MENU_EDIT_STATE_FLAGS_CAN_CUT = 0,
-    ARK_CONTEXT_MENU_EDIT_STATE_FLAGS_CAN_COPY = 1,
-    ARK_CONTEXT_MENU_EDIT_STATE_FLAGS_CAN_PASTE = 2,
-    ARK_CONTEXT_MENU_EDIT_STATE_FLAGS_CAN_SELECT_ALL = 3,
+    ARK_CONTEXT_MENU_EDIT_STATE_FLAGS_CAN_CUT = 1,
+    ARK_CONTEXT_MENU_EDIT_STATE_FLAGS_CAN_COPY = 2,
+    ARK_CONTEXT_MENU_EDIT_STATE_FLAGS_CAN_PASTE = 3,
+    ARK_CONTEXT_MENU_EDIT_STATE_FLAGS_CAN_SELECT_ALL = 4,
 } Ark_ContextMenuEditStateFlags;
 typedef struct Opt_ContextMenuEditStateFlags {
     Ark_Tag tag;
@@ -5170,8 +5178,8 @@ typedef struct Opt_NavigationSystemTransitionType {
 } Opt_NavigationSystemTransitionType;
 typedef enum Ark_NavigationTitleMode {
     ARK_NAVIGATION_TITLE_MODE_FREE = 0,
-    ARK_NAVIGATION_TITLE_MODE_FULL = 0,
-    ARK_NAVIGATION_TITLE_MODE_MINI = 1,
+    ARK_NAVIGATION_TITLE_MODE_FULL = 1,
+    ARK_NAVIGATION_TITLE_MODE_MINI = 2,
 } Ark_NavigationTitleMode;
 typedef struct Opt_NavigationTitleMode {
     Ark_Tag tag;
@@ -5718,13 +5726,13 @@ typedef struct Opt_ScrollSnapAlign {
 } Opt_ScrollSnapAlign;
 typedef enum Ark_ScrollSource {
     ARK_SCROLL_SOURCE_DRAG = 0,
-    ARK_SCROLL_SOURCE_FLING = 0,
-    ARK_SCROLL_SOURCE_EDGE_EFFECT = 1,
-    ARK_SCROLL_SOURCE_OTHER_USER_INPUT = 2,
-    ARK_SCROLL_SOURCE_SCROLL_BAR = 3,
-    ARK_SCROLL_SOURCE_SCROLL_BAR_FLING = 4,
-    ARK_SCROLL_SOURCE_SCROLLER = 5,
-    ARK_SCROLL_SOURCE_SCROLLER_ANIMATION = 6,
+    ARK_SCROLL_SOURCE_FLING = 1,
+    ARK_SCROLL_SOURCE_EDGE_EFFECT = 2,
+    ARK_SCROLL_SOURCE_OTHER_USER_INPUT = 3,
+    ARK_SCROLL_SOURCE_SCROLL_BAR = 4,
+    ARK_SCROLL_SOURCE_SCROLL_BAR_FLING = 5,
+    ARK_SCROLL_SOURCE_SCROLLER = 6,
+    ARK_SCROLL_SOURCE_SCROLLER_ANIMATION = 7,
 } Ark_ScrollSource;
 typedef struct Opt_ScrollSource {
     Ark_Tag tag;
@@ -7043,14 +7051,6 @@ typedef struct Opt_DrawingLattice {
     Ark_Tag tag;
     Ark_DrawingLattice value;
 } Opt_DrawingLattice;
-typedef struct Ark_EditMenuOptions {
-    /* kind: Interface */
-    void *handle;
-} Ark_EditMenuOptions;
-typedef struct Opt_EditMenuOptions {
-    Ark_Tag tag;
-    Ark_EditMenuOptions value;
-} Opt_EditMenuOptions;
 typedef struct Opt_EllipseShape {
     Ark_Tag tag;
     Ark_EllipseShape value;
@@ -7863,6 +7863,17 @@ typedef struct Opt_TimePickerResult {
     Ark_Tag tag;
     Ark_TimePickerResult value;
 } Opt_TimePickerResult;
+typedef struct Ark_TouchTestInfo {
+    /* kind: Interface */
+    Ark_Number windowX;
+    Ark_Number windowY;
+    Ark_Number parentX;
+    Ark_Number parentY;
+    Ark_Number x;
+    Ark_Number y;
+    Ark_RectResult rect;
+    Ark_String id;
+} Ark_TouchTestInfo;
 typedef struct Opt_TouchTestInfo {
     Ark_Tag tag;
     Ark_TouchTestInfo value;
@@ -8329,6 +8340,10 @@ typedef struct Opt_WebResourceResponse {
     Ark_Tag tag;
     Ark_WebResourceResponse value;
 } Opt_WebResourceResponse;
+typedef struct Ark_webview_WebviewController {
+    /* kind: Interface */
+    void *handle;
+} Ark_webview_WebviewController;
 typedef struct Opt_webview_WebviewController {
     Ark_Tag tag;
     Ark_webview_WebviewController value;
@@ -8937,6 +8952,15 @@ typedef struct Opt_Array_TextDataDetectorType {
     Ark_Tag tag;
     Array_TextDataDetectorType value;
 } Opt_Array_TextDataDetectorType;
+typedef struct Array_TextMenuItem {
+    /* kind: ContainerType */
+    Ark_TextMenuItem* array;
+    Ark_Int32 length;
+} Array_TextMenuItem;
+typedef struct Opt_Array_TextMenuItem {
+    Ark_Tag tag;
+    Array_TextMenuItem value;
+} Opt_Array_TextMenuItem;
 typedef struct Array_TextPickerRangeContent {
     /* kind: ContainerType */
     Ark_TextPickerRangeContent* array;
@@ -9105,6 +9129,26 @@ typedef struct Opt_Callback_Array_String_Void {
     Ark_Tag tag;
     Callback_Array_String_Void value;
 } Opt_Callback_Array_String_Void;
+typedef struct Callback_Array_TextMenuItem_Array_TextMenuItem {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Array_TextMenuItem menuItems, const Callback_Array_TextMenuItem_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Array_TextMenuItem menuItems, const Callback_Array_TextMenuItem_Void continuation);
+} Callback_Array_TextMenuItem_Array_TextMenuItem;
+typedef struct Opt_Callback_Array_TextMenuItem_Array_TextMenuItem {
+    Ark_Tag tag;
+    Callback_Array_TextMenuItem_Array_TextMenuItem value;
+} Opt_Callback_Array_TextMenuItem_Array_TextMenuItem;
+typedef struct Callback_Array_TextMenuItem_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Array_TextMenuItem value);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Array_TextMenuItem value);
+} Callback_Array_TextMenuItem_Void;
+typedef struct Opt_Callback_Array_TextMenuItem_Void {
+    Ark_Tag tag;
+    Callback_Array_TextMenuItem_Void value;
+} Opt_Callback_Array_TextMenuItem_Void;
 typedef struct Callback_Array_TouchTestInfo_TouchResult {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -10685,6 +10729,16 @@ typedef struct Opt_Callback_TerminationInfo_Void {
     Ark_Tag tag;
     Callback_TerminationInfo_Void value;
 } Opt_Callback_TerminationInfo_Void;
+typedef struct Callback_TextMenuItem_TextRange_Boolean {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_TextMenuItem menuItem, const Ark_TextRange range, const Callback_Boolean_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TextMenuItem menuItem, const Ark_TextRange range, const Callback_Boolean_Void continuation);
+} Callback_TextMenuItem_TextRange_Boolean;
+typedef struct Opt_Callback_TextMenuItem_TextRange_Boolean {
+    Ark_Tag tag;
+    Callback_TextMenuItem_TextRange_Boolean value;
+} Opt_Callback_TextMenuItem_TextRange_Boolean;
 typedef struct Callback_TextPickerResult_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -12551,6 +12605,15 @@ typedef struct Opt_EdgeStyles {
     Ark_Tag tag;
     Ark_EdgeStyles value;
 } Opt_EdgeStyles;
+typedef struct Ark_EditMenuOptions {
+    /* kind: Interface */
+    Callback_Array_TextMenuItem_Array_TextMenuItem onCreateMenu;
+    Callback_TextMenuItem_TextRange_Boolean onMenuItemClick;
+} Ark_EditMenuOptions;
+typedef struct Opt_EditMenuOptions {
+    Ark_Tag tag;
+    Ark_EditMenuOptions value;
+} Opt_EditMenuOptions;
 typedef struct Ark_EllipseOptions {
     /* kind: Interface */
     Opt_Union_String_Number width;
@@ -14586,6 +14649,11 @@ typedef struct Opt_TouchObject {
     Ark_Tag tag;
     Ark_TouchObject value;
 } Opt_TouchObject;
+typedef struct Ark_TouchResult {
+    /* kind: Interface */
+    Ark_TouchTestStrategy strategy;
+    Opt_String id;
+} Ark_TouchResult;
 typedef struct Opt_TouchResult {
     Ark_Tag tag;
     Ark_TouchResult value;
@@ -16574,6 +16642,17 @@ typedef struct Opt_TextInputOptions {
     Ark_Tag tag;
     Ark_TextInputOptions value;
 } Opt_TextInputOptions;
+typedef struct Ark_TextMenuItem {
+    /* kind: Interface */
+    Ark_ResourceStr content;
+    Opt_ResourceStr icon;
+    Ark_TextMenuItemId id;
+    Opt_ResourceStr labelInfo;
+} Ark_TextMenuItem;
+typedef struct Opt_TextMenuItem {
+    Ark_Tag tag;
+    Ark_TextMenuItem value;
+} Opt_TextMenuItem;
 typedef struct Ark_TextPickerOptions {
     /* kind: Interface */
     Ark_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent range;
@@ -22939,7 +23018,7 @@ typedef struct GENERATED_ArkUIPathShapeAccessor {
 
 typedef struct GENERATED_ArkUIRectShapeAccessor {
     void (*destroyPeer)(Ark_RectShape peer);
-    Ark_RectShape (*ctor)();
+    Ark_RectShape (*ctor)(const Opt_Union_RectShapeOptions_RoundRectShapeOptions* options);
     Ark_NativePointer (*getFinalizer)();
     Ark_RectShape (*offset)(Ark_RectShape peer,
                             const Ark_Position* offset);
@@ -24856,48 +24935,6 @@ typedef struct GENERATED_ArkUIProgressMaskAccessor {
     void (*enableBreathingAnimation)(Ark_ProgressMask peer,
                                      Ark_Boolean value);
 } GENERATED_ArkUIProgressMaskAccessor;
-
-typedef struct GENERATED_ArkUITouchTestInfoAccessor {
-    void (*destroyPeer)(Ark_TouchTestInfo peer);
-    Ark_TouchTestInfo (*ctor)();
-    Ark_NativePointer (*getFinalizer)();
-    Ark_Number (*getWindowX)(Ark_TouchTestInfo peer);
-    void (*setWindowX)(Ark_TouchTestInfo peer,
-                       const Ark_Number* windowX);
-    Ark_Number (*getWindowY)(Ark_TouchTestInfo peer);
-    void (*setWindowY)(Ark_TouchTestInfo peer,
-                       const Ark_Number* windowY);
-    Ark_Number (*getParentX)(Ark_TouchTestInfo peer);
-    void (*setParentX)(Ark_TouchTestInfo peer,
-                       const Ark_Number* parentX);
-    Ark_Number (*getParentY)(Ark_TouchTestInfo peer);
-    void (*setParentY)(Ark_TouchTestInfo peer,
-                       const Ark_Number* parentY);
-    Ark_Number (*getX)(Ark_TouchTestInfo peer);
-    void (*setX)(Ark_TouchTestInfo peer,
-                 const Ark_Number* x);
-    Ark_Number (*getY)(Ark_TouchTestInfo peer);
-    void (*setY)(Ark_TouchTestInfo peer,
-                 const Ark_Number* y);
-    Ark_RectResult (*getRect)(Ark_TouchTestInfo peer);
-    void (*setRect)(Ark_TouchTestInfo peer,
-                    const Ark_RectResult* rect);
-    Ark_String (*getId)(Ark_TouchTestInfo peer);
-    void (*setId)(Ark_TouchTestInfo peer,
-                  const Ark_String* id);
-} GENERATED_ArkUITouchTestInfoAccessor;
-
-typedef struct GENERATED_ArkUITouchResultAccessor {
-    void (*destroyPeer)(Ark_TouchResult peer);
-    Ark_TouchResult (*ctor)();
-    Ark_NativePointer (*getFinalizer)();
-    Ark_TouchTestStrategy (*getStrategy)(Ark_TouchResult peer);
-    void (*setStrategy)(Ark_TouchResult peer,
-                        Ark_TouchTestStrategy strategy);
-    Opt_String (*getId)(Ark_TouchResult peer);
-    void (*setId)(Ark_TouchResult peer,
-                  const Opt_String* id);
-} GENERATED_ArkUITouchResultAccessor;
 
 typedef struct GENERATED_ArkUIMeasurableAccessor {
     void (*destroyPeer)(Ark_Measurable peer);
@@ -27200,8 +27237,6 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIKeyEventAccessor* (*getKeyEventAccessor)();
     const GENERATED_ArkUIFocusAxisEventAccessor* (*getFocusAxisEventAccessor)();
     const GENERATED_ArkUIProgressMaskAccessor* (*getProgressMaskAccessor)();
-    const GENERATED_ArkUITouchTestInfoAccessor* (*getTouchTestInfoAccessor)();
-    const GENERATED_ArkUITouchResultAccessor* (*getTouchResultAccessor)();
     const GENERATED_ArkUIMeasurableAccessor* (*getMeasurableAccessor)();
     const GENERATED_ArkUITextContentControllerBaseAccessor* (*getTextContentControllerBaseAccessor)();
     const GENERATED_ArkUIScrollResultAccessor* (*getScrollResultAccessor)();

@@ -37,7 +37,7 @@ void AssignCast(std::optional<WaterFlowLayoutMode>& dst, const Ark_WaterFlowLayo
 }
 
 template<>
-void AssignTo(std::optional<ScrollFrameResult>& dst, const Ark_Literal_Number_offsetRemain& from)
+void AssignTo(std::optional<ScrollFrameResult>& dst, const Ark_OnScrollFrameBeginHandlerResult& from)
 {
     auto offset = Converter::OptConvert<Dimension>(from.offsetRemain);
     if (offset) {
@@ -218,8 +218,8 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
         Ark_Number arkOffset = Converter::ArkValue<Ark_Number>(offset);
         Ark_ScrollState arkState = Converter::ArkValue<Ark_ScrollState>(state);
         return callback.InvokeWithOptConvertResult<
-            ScrollFrameResult, Ark_Literal_Number_offsetRemain,
-            Callback_Literal_Number_offsetRemain_Void>(arkOffset, arkState)
+            ScrollFrameResult, Ark_OnScrollFrameBeginHandlerResult,
+            Callback_OnScrollFrameBeginHandlerResult_Void>(arkOffset, arkState)
             .value_or(result);
     };
 

@@ -324,8 +324,6 @@ const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor();
 const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor();
 const GENERATED_ArkUIFocusAxisEventAccessor* GetFocusAxisEventAccessor();
 const GENERATED_ArkUIProgressMaskAccessor* GetProgressMaskAccessor();
-const GENERATED_ArkUITouchTestInfoAccessor* GetTouchTestInfoAccessor();
-const GENERATED_ArkUITouchResultAccessor* GetTouchResultAccessor();
 const GENERATED_ArkUIMeasurableAccessor* GetMeasurableAccessor();
 const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor();
 const GENERATED_ArkUIScrollResultAccessor* GetScrollResultAccessor();

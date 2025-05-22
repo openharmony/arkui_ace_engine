@@ -336,7 +336,7 @@ void OnPasteImpl(Ark_NativePointer node,
         NG::TextCommonEvent& event) -> void {
         Converter::ConvContext ctx;
         auto arkContent = Converter::ArkValue<Ark_String>(content, &ctx);
-        auto keeper = CallbackKeeper::Claim([&event]() {
+        auto keeper = CallbackKeeper::Claim<Callback_Void>([&event]() {
             event.SetPreventDefault(true);
         });
         Ark_PasteEvent arkEvent = {

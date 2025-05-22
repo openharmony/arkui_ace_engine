@@ -501,6 +501,7 @@ namespace Converter {
     template<> LightSource Convert(const Ark_LightSource& src);
     template<> ListItemGroupIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
+    template<> MenuOptionsParam Convert(const Ark_TextMenuItem& src);
     template<> NG::NavToolbarItemStatus Convert(const Ark_ToolbarItemStatus& src);
     template<> NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src);
     template<> NG::NavigationBackgroundOptions Convert(const Ark_NavigationToolbarOptions& src);
@@ -577,6 +578,7 @@ namespace Converter {
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Tuple_Dimension_Dimension& src);
     template<> std::pair<std::optional<Color>, Dimension> Convert(const Ark_ColorStop& src);
+    template<> std::set<std::string> Convert(const Array_uniformTypeDescriptor_UniformDataType& src);
     template<> std::string Convert(const Ark_CommandPath& src);
     template<> std::tuple<Ark_Float32, Ark_Int32> Convert(const Ark_String& src);
     template<> std::u16string Convert(const Ark_String& src);
@@ -589,12 +591,6 @@ namespace Converter {
     template<> std::vector<uint32_t> Convert(const Array_LayoutSafeAreaType& src);
     template<> uint32_t Convert(const Ark_LayoutSafeAreaEdge& src);
     template<> uint32_t Convert(const Ark_LayoutSafeAreaType& src);
-//    template<> ActionSheetInfo Convert(const Ark_SheetInfo& src);
-//    template<> CheckboxSettingData Convert(const Ark_LunarSwitchStyle& src);
-//    template<> DimensionOffset Convert(const Ark_ActionSheetOffset& src);
-//    template<> Header Convert(const Ark_WebHeader& src);
-//    template<> MenuOptionsParam Convert(const Ark_TextMenuItem& src);
-//    template<> std::set<std::string> Convert(const Array_UniformDataType& src);
 
     // SORTED_SECTION: No multiline declarations, please!
     template<> void AssignCast(std::optional<AIImageQuality>& dst, const Ark_image_ResolutionQuality& src);

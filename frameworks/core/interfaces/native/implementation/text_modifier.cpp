@@ -661,7 +661,10 @@ void FontWeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    FontWeight0Impl(node, weight);
+    Converter::FontWeightInt defaultWeight = {};
+    auto convWeight = Converter::OptConvert<Converter::FontWeightInt>(*weight).value_or(defaultWeight);
+    TextModelNG::SetFontWeight(frameNode, convWeight.fixed);
+    TextModelNG::SetVariableFontWeight(frameNode, convWeight.variable);
 
     std::optional<bool> enableVariableFontWeight;
     if (options) {

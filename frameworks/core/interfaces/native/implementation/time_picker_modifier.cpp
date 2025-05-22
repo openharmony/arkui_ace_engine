@@ -147,7 +147,7 @@ void SelectedTextStyleImpl(Ark_NativePointer node,
     TimePickerModelNG::SetSelectedTextStyle(frameNode, theme, *convValue);
 }
 void DateTimeOptionsImpl(Ark_NativePointer node,
-                         const Opt_DateTimeOptions* value)
+                         const Opt_intl_DateTimeOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

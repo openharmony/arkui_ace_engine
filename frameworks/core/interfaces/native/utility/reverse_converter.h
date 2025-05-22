@@ -330,6 +330,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecorationStyle& src);
     void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration& src);
     void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
+    void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src);
     void AssignArkValue(Ark_TextMetrics& dst, const OHOS::Ace::TextMetrics& src);
     void AssignArkValue(Ark_TextOverflow& dst, const TextOverflow& src);
     void AssignArkValue(Ark_TextRange& dst, const SelectionInfo& src);
@@ -349,8 +350,6 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_unifiedDataChannel_UnifiedData& arkData, const RefPtr<UnifiedData>& data);
     void AssignArkValue(Array_ImageAnalyzerType& dst, const std::vector<ImageAnalyzerType>& src);
     void AssignArkValue(Array_Number& dst, const std::vector<double>& src);
-//    void AssignArkValue(Ark_DatePickerResult& dst, const std::string& src);
-//    void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src);
 
     // Long declarations
     void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Dimension, const Dimension>& src,
