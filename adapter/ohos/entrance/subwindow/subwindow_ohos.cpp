@@ -2196,6 +2196,7 @@ bool SubwindowOhos::CheckHostWindowStatus() const
 
 bool SubwindowOhos::Close()
 {
+    // prevent repeated closure when subWindow's container is destroying
     if (isClosing_) {
         return true;
     }
@@ -2203,7 +2204,7 @@ bool SubwindowOhos::Close()
     CHECK_NULL_RETURN(window_, false);
     window_->UnregisterSwitchFreeMultiWindowListener(freeMultiWindowListener_);
     isClosing_ = true;
-    OHOS::Rosen::WMError ret = window_->Close();
+    OHOS::Rosen::WMError ret = window_->Destroy();
     isClosing_ = false;
     if (ret != OHOS::Rosen::WMError::WM_OK) {
         TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "SubwindowOhos failed to close the dialog subwindow.");
