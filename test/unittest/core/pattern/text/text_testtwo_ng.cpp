@@ -153,6 +153,7 @@ HWTEST_F(TextTestTwoNg, TextAccessibilityPropertyGetText001, TestSize.Level1)
     auto spanNode = SpanNode::GetOrCreateSpanNode(ElementRegister::GetInstance()->MakeUniqueId());
     frameNode->AddChild(spanNode);
     textPattern->textForDisplay_ = TEXT_U16CONTENT;
+
     EXPECT_EQ(textAccessibilityProperty->GetText(), TEXT_CONTENT);
 }
 
