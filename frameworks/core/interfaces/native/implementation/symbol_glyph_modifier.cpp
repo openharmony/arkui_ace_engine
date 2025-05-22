@@ -97,7 +97,7 @@ void RenderingStrategyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<RenderingStrategy>(*value);
+    auto convValue = Converter::OptConvert<Converter::RenderingStrategy>(*value);
     SymbolModelStatic::SetRenderingStrategy(frameNode, EnumToInt(convValue));
 }
 void MinFontScaleImpl(Ark_NativePointer node,

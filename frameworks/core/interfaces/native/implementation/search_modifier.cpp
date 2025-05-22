@@ -683,7 +683,7 @@ void EditMenuOptionsImpl(Ark_NativePointer node,
                 Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
             return Converter::Convert<bool>(arkResult);
         };
-    SearchModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    SearchModelStatic::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 void EnablePreviewTextImpl(Ark_NativePointer node,
                            const Opt_Boolean* value)
@@ -827,7 +827,7 @@ void _onChangeEvent_valueImpl(Ark_NativePointer node,
         auto arkContent = Converter::ArkValue<Ark_String>(content, &ctx);
         arkCallback.Invoke(arkContent);
     };
-    SearchModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
+    SearchModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
 } // SearchAttributeModifier
 const GENERATED_ArkUISearchModifier* GetSearchModifier()

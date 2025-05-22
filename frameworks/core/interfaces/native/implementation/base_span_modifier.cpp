@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_static.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
+#include "core/components_ng/pattern/text/image_span_view_static.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 
@@ -59,7 +60,7 @@ void BaselineOffsetImpl(Ark_NativePointer node,
     if (AceType::TypeId(frameNode) == SpanNode::TypeId()) {
         SpanModelStatic::SetBaselineOffset(frameNode, convValue);
     } else {
-        ImageSpanView::SetBaselineOffset(frameNode, convValue);
+        ImageSpanViewStatic::SetBaselineOffset(frameNode, convValue);
     }
 }
 } // BaseSpanModifier
