@@ -32,7 +32,7 @@ public:
     void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol, const std::string& src,
         const ImageOption& imageOption, RefPtr<PixelMap>& pixMap, const std::vector<std::string>& nameList,
         bool userDefinedAccessibilityText = false, const std::string& backButtonAccessibilityText = "") override;
-    void SetBackButtonIconSrcRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+    void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
         const RefPtr<ResourceObject>& resObj, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
         const std::vector<std::string>& nameList, bool userDefinedAccessibilityText = false,
         const std::string& backButtonAccessibilityText = "") override;
@@ -44,13 +44,16 @@ public:
         const RefPtr<ResourceObject>& backButtonResObj, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
         const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
         const RefPtr<ResourceObject>& backButtonTextResObj) override;
-    void UpdateBackButtonIcon(const std::vector<std::string>& nameList, RefPtr<PixelMap>& pixMap,
-        const ImageOption& imageOption, const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
-        NG::FrameNode* frameNode, const RefPtr<ResourceObject>& backButtonIconResObj) override;
+    void UpdateBackButtonIcon(const std::vector<std::string>& nameList,
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& backButtonIconResObj) override;
+    void UpdateBackButtonIconText(bool userDefinedAccessibilityText,
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& backButtonTextResObj) override;
     void SetSubtitle(const std::string& subtitle) override;
     void SetCustomTitle(const RefPtr<AceType>& customNode) override;
     void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) override;
     void SetTitleHeight(const RefPtr<ResourceObject>& resObj, bool isValid = true) override;
+    void UpdateTitleHeight(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& resObj) override;
     void SetOnShown(std::function<void()>&& onShow) override;
     void SetOnHidden(std::function<void()>&& onHidden) override;
     void SetOnWillAppear(std::function<void()>&& willAppear) override;
@@ -64,6 +67,7 @@ public:
     void SetHideToolBar(bool hideToolBar, bool animated) override;
     static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated);
     void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) override;
+    void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems, MoreButtonOptions&& opt) override;
     void SetCustomToolBar(const RefPtr<AceType>& customNode) override;
     void SetHideItemText(bool isHideItemText) override;
     void SetToolBarOptions(NavigationToolbarOptions&& opt) override;
@@ -128,14 +132,13 @@ public:
     void SetEnableNavigationIndicator(const std::optional<bool>& navigationIndicator) override;
     static void SetEnableNavigationIndicator(
         FrameNode* frameNode, const std::optional<bool>& navigationIndicator);
-    bool ParseCommonMainTitle(bool hasSubTitle, bool hasMainTitle, const RefPtr<ResourceObject>& subResObj,
+    bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const RefPtr<ResourceObject>& subResObj,
         const RefPtr<ResourceObject>& mainResObj, bool ignoreMainTitle = false) override;
-    void UpdateSubTitle(const RefPtr<NG::TitleBarNode>& titleBarNode,
-        const RefPtr<ResourceObject>& subResObj) override;
-    void UpdateMainTitle(const bool hasSubTitle, const RefPtr<ResourceObject>& mainResObj,
-        NG::FrameNode* frameNode) override;
-    void UpdateTitleBarNode(const RefPtr<NG::NavDestinationGroupNode>& navDestinationNode,
-            const RefPtr<NG::TitleBarNode>& titleBarNode) override;
+    void UpdateMainTitle(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj) override;
+    void UpdateSubTitle(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& subResObj) override;
+    static CalcDimension ParseTitleHeight(const RefPtr<ResourceObject>& resObj);
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

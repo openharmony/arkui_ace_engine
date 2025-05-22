@@ -150,10 +150,11 @@ bool ParseCommonTitle(const JSRef<JSObject>& jsObj)
     bool hasMain = JSViewAbstract::ParseJsString(title, mainTitle, mainResObj);
     if (hasSub || hasMain) {
         if (SystemProperties::ConfigChangePerform() && (mainResObj || subResObj)) {
-            return NG::NavDestinationModelNG::GetInstance()->ParseCommonMainTitle(
+            return NG::NavDestinationModelNG::GetInstance()->ParseCommonTitle(
                 hasSub, hasMain, subResObj, mainResObj);
         } else {
-            return NG::NavDestinationModelNG::GetInstance()->ParseCommonTitle(hasSub, hasMain, subTitle, mainTitle);
+            return NG::NavDestinationModelNG::GetInstance()->ParseCommonTitle(
+                hasSub, hasMain, subTitle, mainTitle);
         }
     }
     return false;
@@ -161,68 +162,68 @@ bool ParseCommonTitle(const JSRef<JSObject>& jsObj)
 
 void ParseCommonAndCustomTitle(const JSRef<JSObject>& jsObj)
 {
-    do {
-        // NavigationCommonTitle
-        if (ParseCommonTitle(jsObj)) {
-            break;
+    // NavigationCommonTitle
+    if (ParseCommonTitle(jsObj)) {
+        return;
+    }
+    // CustomBuilder | NavigationCustomTitle
+    CalcDimension titleHeight;
+    if (!jsObj->HasProperty("height")) {
+        NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight, false);
+        return;
+    }
+    JSRef<JSVal> height = jsObj->GetProperty("height");
+    RefPtr<ResourceObject> heightResObj;
+    bool isValid = JSContainerBase::ParseJsDimensionVpNG(height, titleHeight, heightResObj);
+    if (height->IsString()) {
+        std::string heightValue;
+        JSViewAbstract::ParseJsString(height, heightValue);
+        if (heightValue == NG::TITLE_MAIN_WITH_SUB) {
+            NavDestinationModel::GetInstance()->SetTitleHeight(NG::DOUBLE_LINE_TITLEBAR_HEIGHT);
+            return;
         }
-        // CustomBuilder | NavigationCustomTitle
-        CalcDimension titleHeight;
-        if (!jsObj->HasProperty("height")) {
-            NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight, false);
-            break;
+        if (heightValue == NG::TITLE_MAIN) {
+            NavDestinationModel::GetInstance()->SetTitleHeight(NG::SINGLE_LINE_TITLEBAR_HEIGHT);
+            return;
         }
-        JSRef<JSVal> height = jsObj->GetProperty("height");
-        RefPtr<ResourceObject> heightResObj;
-        bool isValid = JSContainerBase::ParseJsDimensionVpNG(height, titleHeight, heightResObj);
-        if (isValid) {
-            if (height->IsString()) {
-                std::string heightValue;
-                JSViewAbstract::ParseJsString(height, heightValue);
-                if (heightValue == NG::TITLE_MAIN_WITH_SUB) {
-                    NavDestinationModel::GetInstance()->SetTitleHeight(NG::DOUBLE_LINE_TITLEBAR_HEIGHT);
-                    break;
-                }
-                if (heightValue == NG::TITLE_MAIN) {
-                    NavDestinationModel::GetInstance()->SetTitleHeight(NG::SINGLE_LINE_TITLEBAR_HEIGHT);
-                    break;
-                }
-            }
-        } else if (SystemProperties::ConfigChangePerform() && heightResObj) {
-            NavDestinationModel::GetInstance()->SetTitleHeight(heightResObj);
-            break;
-        }
-        if (!isValid || titleHeight.Value() < 0) {
-            NavDestinationModel::GetInstance()->SetTitleHeight(Dimension(), true);
-            break;
-        }
-        NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight);
-    } while (0);
+    }
+    if (SystemProperties::ConfigChangePerform() && heightResObj) {
+        NavDestinationModel::GetInstance()->SetTitleHeight(heightResObj);
+        return;
+    }
+    if (!isValid || titleHeight.Value() < 0) {
+        NavDestinationModel::GetInstance()->SetTitleHeight(Dimension(), true);
+        return;
+    }
+    NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight);
 }
 
-void ParseBackButtonText(const JSCallbackInfo& info, bool configChange, RefPtr<PixelMap>& pixMap,
+void ParseBackButtonText(const JSCallbackInfo& info, RefPtr<PixelMap>& pixMap,
     const NG::ImageOption& imageOption, const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol, std::string src,
     const std::vector<std::string>& nameList, RefPtr<ResourceObject>& backButtonIconResObj)
 {
     std::string backButtonAccessibilityText;
     RefPtr<ResourceObject> backButtonTextResObj;
-    if (JSViewAbstract::ParseJsString(info[1], backButtonAccessibilityText, backButtonTextResObj)) {
-        if (configChange && backButtonIconResObj) {
-            NavDestinationModel::GetInstance()->SetBackButtonIconSrcRes(iconSymbol, backButtonIconResObj,
-                imageOption, pixMap, nameList, true, backButtonAccessibilityText);
-        } else {
-            NavDestinationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, imageOption, pixMap,
-                nameList, true, backButtonAccessibilityText);
+    JSViewAbstract::ParseJsString(info[1], backButtonAccessibilityText, backButtonTextResObj);
+    if (SystemProperties::ConfigChangePerform()) {
+        if (backButtonIconResObj && backButtonTextResObj) {
+            NavDestinationModel::GetInstance()->SetBackButtonIconSrcAndTextRes(
+                iconSymbol, backButtonIconResObj, imageOption, pixMap, nameList, true, backButtonTextResObj);
+            return;
+        }
+        if (backButtonTextResObj) {
+            NavDestinationModel::GetInstance()->SetBackButtonIconTextRes(
+                iconSymbol, src, imageOption, pixMap, nameList, true, backButtonTextResObj);
+            return;
+        }
+        if (backButtonIconResObj) {
+            NavDestinationModel::GetInstance()->SetBackButtonIcon(
+                iconSymbol, backButtonIconResObj, imageOption, pixMap, nameList, true, backButtonAccessibilityText);
+            return;
         }
     }
-    if (configChange && backButtonTextResObj && !backButtonIconResObj) {
-        NavDestinationModel::GetInstance()->SetBackButtonIconTextRes(iconSymbol, src, imageOption, pixMap,
-            nameList, true, backButtonTextResObj);
-    }
-    if (configChange && backButtonTextResObj && backButtonIconResObj) {
-        NavDestinationModel::GetInstance()->SetBackButtonIconSrcAndTextRes(iconSymbol, backButtonIconResObj,
-            imageOption, pixMap, nameList, true, backButtonTextResObj);
-    }
+    NavDestinationModel::GetInstance()->SetBackButtonIcon(
+        iconSymbol, src, imageOption, pixMap, nameList, true, backButtonAccessibilityText);
 }
 } // namespace
 
@@ -338,9 +339,9 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
     RefPtr<ResourceObject> mainResObj;
     if (JSViewAbstract::ParseJsString(info[0], title, mainResObj)) {
         if (SystemProperties::ConfigChangePerform() && mainResObj) {
-            NavDestinationModel::GetInstance()->ParseCommonMainTitle(false, true, nullptr, mainResObj);
+            NavDestinationModel::GetInstance()->ParseCommonTitle(false, true, nullptr, mainResObj);
         } else {
-        NavDestinationModel::GetInstance()->ParseCommonTitle(false, true, "", title);
+            NavDestinationModel::GetInstance()->ParseCommonTitle(false, true, "", title);
         }
     } else if (info[0]->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
@@ -401,13 +402,13 @@ void JSNavDestination::SetBackButtonIcon(const JSCallbackInfo& info)
     bool configChange = SystemProperties::ConfigChangePerform();
     if (info.Length() > 1) {
         if (!info[1]->IsNull() && !info[1]->IsUndefined()) {
-            ParseBackButtonText(info, configChange, pixMap, imageOption, iconSymbol, src, nameList,
+            ParseBackButtonText(info, pixMap, imageOption, iconSymbol, src, nameList,
                 backButtonIconResObj);
             return;
         }
     }
     if (configChange && backButtonIconResObj) {
-        NavDestinationModel::GetInstance()->SetBackButtonIconSrcRes(iconSymbol, backButtonIconResObj, imageOption,
+        NavDestinationModel::GetInstance()->SetBackButtonIcon(iconSymbol, backButtonIconResObj, imageOption,
             pixMap, nameList);
     } else {
         NavDestinationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, imageOption, pixMap, nameList);
@@ -675,8 +676,13 @@ void JSNavDestination::SetToolBarConfiguration(const JSCallbackInfo& info)
             auto moreButtonProperty = optObj->GetProperty(MORE_BUTTON_OPTIONS_PROPERTY);
             JSNavigationUtils::ParseToolBarMoreButtonOptions(moreButtonProperty, toolbarMoreButtonOptions);
         }
-        NavDestinationModel::GetInstance()->SetToolbarMorebuttonOptions(std::move(toolbarMoreButtonOptions));
-        NavDestinationModel::GetInstance()->SetToolbarConfiguration(std::move(toolBarItems));
+        if (SystemProperties::ConfigChangePerform()) {
+            NavDestinationModel::GetInstance()->SetToolbarConfiguration(
+                std::move(toolBarItems), std::move(toolbarMoreButtonOptions));
+        } else {
+            NavDestinationModel::GetInstance()->SetToolbarMorebuttonOptions(std::move(toolbarMoreButtonOptions));
+            NavDestinationModel::GetInstance()->SetToolbarConfiguration(std::move(toolBarItems));
+        }
     } else if (info[0]->IsObject()) {
         auto builderFuncParam = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
         if (builderFuncParam->IsFunction()) {

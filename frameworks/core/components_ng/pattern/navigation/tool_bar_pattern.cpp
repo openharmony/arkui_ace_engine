@@ -82,9 +82,9 @@ void NavToolbarPattern::SetToolbarOptions(NavigationToolbarOptions& opt)
     UpdateBackgroundStyle();
 }
 
-void NavToolbarPattern::SetToolbarMoreButtonOptions(MoreButtonOptions& opt)
+void NavToolbarPattern::SetToolbarMoreButtonOptions(MoreButtonOptions&& opt)
 {
-    moreButtonOptions_ = opt;
+    moreButtonOptions_ = std::move(opt);
 }
 
 void NavToolbarPattern::UpdateBackgroundStyle()

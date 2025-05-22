@@ -45,7 +45,7 @@ public:
         const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
         const std::vector<std::string>& nameList, bool userDefinedAccessibilityText = false,
         const std::string& backButtonAccessibilityText = "") = 0;
-    virtual void SetBackButtonIconSrcRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+    virtual void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
         const RefPtr<ResourceObject>& resObj, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
         const std::vector<std::string>& nameList, bool userDefinedAccessibilityText = false,
         const std::string& backButtonAccessibilityText = "");
@@ -57,13 +57,16 @@ public:
         const RefPtr<ResourceObject>& backButtonResObj, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
         const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
         const RefPtr<ResourceObject>& backButtonTextResObj);
-    virtual void UpdateBackButtonIcon(const std::vector<std::string>& nameList, RefPtr<PixelMap>& pixMap,
-        const NG::ImageOption& imageOption, const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
-        NG::FrameNode* frameNode, const RefPtr<ResourceObject>& backButtonIconResObj);
+    virtual void UpdateBackButtonIcon(const std::vector<std::string>& nameList,
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& backButtonIconResObj);
+    virtual void UpdateBackButtonIconText(bool userDefinedAccessibilityText,
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& backButtonTextResObj);
     virtual void SetSubtitle(const std::string& subtitle) = 0;
     virtual void SetCustomTitle(const RefPtr<AceType>& customNode) = 0;
     virtual void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) = 0;
     virtual void SetTitleHeight(const RefPtr<ResourceObject>& resObj, bool isValid = true) = 0;
+    virtual void UpdateTitleHeight(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& resObj) = 0;
     virtual void SetOnShown(std::function<void()>&& onShow) = 0;
     virtual void SetOnHidden(std::function<void()>&& onHidden) = 0;
     virtual void SetOnWillAppear(std::function<void()>&& willAppear) = 0;
@@ -77,6 +80,7 @@ public:
     virtual void SetOnPop(std::function<void(const RefPtr<NG::NavPathInfo>&)>&& onPop) = 0;
     virtual void SetHideToolBar(bool hideToolBar, bool animated = false) = 0;
     virtual void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) = 0;
+    virtual void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems, NG::MoreButtonOptions&& opt) {}
     virtual void SetHideItemText(bool isHideItemText) {};
     virtual void SetToolBarOptions(NG::NavigationToolbarOptions&& opt) {}
     virtual void SetToolbarMorebuttonOptions(NG::MoreButtonOptions&& opt) {}
@@ -110,14 +114,12 @@ public:
     virtual void SetPreferredOrientation(const std::optional<Orientation>& ori) {}
     virtual void SetEnableStatusBar(const std::optional<std::pair<bool, bool>>& statusBar) {}
     virtual void SetEnableNavigationIndicator(const std::optional<bool>& navigationIndicator) {}
-    virtual bool ParseCommonMainTitle(bool hasSubTitle, bool hasMainTitle, const RefPtr<ResourceObject>& subResObj,
+    virtual bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const RefPtr<ResourceObject>& subResObj,
         const RefPtr<ResourceObject>& mainResObj, bool ignoreMainTitle = false) {return false;};
-    virtual void UpdateSubTitle(const RefPtr<NG::TitleBarNode>& titleBarNode,
-        const RefPtr<ResourceObject>& subResObj) {};
-    virtual void UpdateMainTitle(const bool hasSubTitle, const RefPtr<ResourceObject>& mainResObj,
-        NG::FrameNode* frameNode) {};
-    virtual void UpdateTitleBarNode(const RefPtr<NG::NavDestinationGroupNode>& navDestinationNode,
-            const RefPtr<NG::TitleBarNode>& titleBarNode) {};
+    virtual void UpdateMainTitle(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj) {};
+    virtual void UpdateSubTitle(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& subResObj) {};
 
 private:
     static std::unique_ptr<NavDestinationModel> instance_;

@@ -114,7 +114,7 @@ void NavigationModelImpl::SetBackButtonIcon(const std::function<void(WeakPtr<NG:
     return;
 }
 
-void NavigationModelImpl::SetBackButtonIconSrcRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+void NavigationModelImpl::SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
     const RefPtr<ResourceObject>& resObj, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
     const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
     const std::string& backButtonAccessibilityText)
@@ -138,9 +138,14 @@ void NavigationModelImpl::SetBackButtonIconSrcAndTextRes(
     return;
 }
 
-void NavigationModelImpl::UpdateBackButtonIcon(const std::vector<std::string>& nameList, RefPtr<PixelMap>& pixMap,
-    const NG::ImageOption& imageOption, const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+void NavigationModelImpl::UpdateBackButtonIcon(const std::vector<std::string>& nameList,
     NG::FrameNode* frameNode, const RefPtr<ResourceObject>& backButtonIconResObj)
+{
+    return;
+}
+
+void NavigationModelImpl::UpdateBackButtonIconText(bool userDefinedAccessibilityText,
+    const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& backButtonTextResObj)
 {
     return;
 }
