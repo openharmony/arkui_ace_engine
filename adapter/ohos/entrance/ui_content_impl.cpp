@@ -5297,6 +5297,27 @@ bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uin
     return true;
 }
 
+bool UIContentImpl::SendUIExtProprtyByPersistentId(uint32_t code, const AAFwk::Want& data,
+        const std::unordered_set<int32_t>& persistentIds, uint8_t subSystemId)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    CHECK_NULL_RETURN(aceContainer, false);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+    taskExecutor->PostTask(
+        [instanceId = instanceId_, code, data, persistentIds, subSystemId]() {
+            auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
+            CHECK_NULL_VOID(context);
+            auto uiExtManager = context->GetUIExtensionManager();
+            CHECK_NULL_VOID(uiExtManager);
+            uiExtManager->UpdateWMSUIExtPropertyByPersistentId(static_cast<Ace::NG::UIContentBusinessCode>(code),
+                data, persistentIds, static_cast<Ace::NG::RSSubsystemId>(subSystemId));
+        }, TaskExecutor::TaskType::UI, "ArkUISendUIExtProprtyByPersistentId");
+    return true;
+}
+
 void UIContentImpl::EnableContainerModalCustomGesture(bool enable)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);

@@ -406,6 +406,8 @@ public:
     void InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline);
     void InitSendCommandFunctionsCallbacks(RefPtr<PipelineBase> pipeline);
     bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId) override;
+    bool SendUIExtProprtyByPersistentId(uint32_t code, const AAFwk::Want& data,
+        const std::unordered_set<int32_t>& persistentIds, uint8_t subSystemId) override;
     void EnableContainerModalCustomGesture(bool enable) override;
 
     void AddKeyFrameAnimateEndCallback(const std::function<void()>& callback) override;
