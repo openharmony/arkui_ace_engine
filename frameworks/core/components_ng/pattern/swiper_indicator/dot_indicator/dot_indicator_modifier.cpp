@@ -170,6 +170,8 @@ std::tuple<float, float, float, float> DotIndicatorModifier::CalcAndAdjustIndica
     float rectBottom = rectTop + (axis_ == Axis::HORIZONTAL ? rectHeight : rectWidth);
 
     if (axis_ == Axis::HORIZONTAL) {
+        boundsRectF_.SetWidth(rectRight - rectLeft + widthChangeValue * TWO_FLOAT);
+        boundsRectF_.SetHeight(rectBottom - rectTop);
         if (touchBottomType_ == TouchBottomType::START) {
             rectLeft -= widthChangeValue;
         }
@@ -180,6 +182,8 @@ std::tuple<float, float, float, float> DotIndicatorModifier::CalcAndAdjustIndica
         rectBottom = rectBottom - heightChangeValue * 0.5f;
         rectHeight -= heightChangeValue;
     } else {
+        boundsRectF_.SetWidth(rectRight - rectLeft);
+        boundsRectF_.SetHeight(rectBottom - rectTop + heightChangeValue * TWO_FLOAT);
         if (touchBottomType_ == TouchBottomType::START) {
             rectTop -= heightChangeValue;
         }
@@ -190,7 +194,8 @@ std::tuple<float, float, float, float> DotIndicatorModifier::CalcAndAdjustIndica
         rectRight = rectRight - widthChangeValue * 0.5f;
         rectWidth -= widthChangeValue;
     }
-
+    boundsRectF_.SetLeft(rectLeft);
+    boundsRectF_.SetTop(rectTop);
     return { rectLeft, rectRight, rectTop, rectBottom };
 }
 

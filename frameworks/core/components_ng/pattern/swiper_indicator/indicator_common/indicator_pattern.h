@@ -237,6 +237,7 @@ public:
     void HandleDragEnd(double dragVelocity) override;
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub) override; 
     void HandleLongDragUpdate(const TouchLocationInfo& info) override;
+    RectF CalcBoundsRect() const override;
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     std::shared_ptr<SwiperParameters> GetIndicatorParameters() const

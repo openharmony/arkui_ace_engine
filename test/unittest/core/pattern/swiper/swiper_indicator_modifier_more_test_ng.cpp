@@ -853,7 +853,10 @@ HWTEST_F(SwiperIndicatorModifierMoreTestNg, CalcAndAdjustIndicatorPaintRect001, 
     dotIndicatorModifier.isTouchBottomLoop_ = true;
     float rectWidth = 10.0f;
     float rectHeight = 0.0f;
-    dotIndicatorModifier.CalcAndAdjustIndicatorPaintRect(contentProperty, rectWidth, rectHeight);
+    auto [rectLeft, rectRight, rectTop, rectBottom] =
+        dotIndicatorModifier.CalcAndAdjustIndicatorPaintRect(contentProperty, rectWidth, rectHeight);
+    EXPECT_GE(dotIndicatorModifier.boundsRectF_.width_, rectRight - rectLeft);
+    EXPECT_GE(dotIndicatorModifier.boundsRectF_.height_, rectBottom - rectTop);
     EXPECT_EQ(rectWidth, 10);
     EXPECT_EQ(rectHeight, 0);
 }
