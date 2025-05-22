@@ -901,4 +901,30 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, ContentClip001, TestSize.Level1)
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetFrameRect()))).Times(1);
     FlushUITasks();
 }
+
+/**
+ * @tc.name: ContentClip002
+ * @tc.desc: Test ContentClip
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollVisibleContentChangeTestNg, ContentClip002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateGroupWithSetting(5, V2::ListItemGroupStyle::NONE);
+    CreateDone();
+
+    PaddingProperty padding;
+    padding.top = CalcLength(100);
+    padding.bottom = CalcLength(100);
+    layoutProperty_->UpdatePadding(padding);
+    auto ctx = AceType::DynamicCast<MockRenderContext>(frameNode_->GetRenderContext());
+    ASSERT_TRUE(ctx);
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(RectF(0, 100, WIDTH, HEIGHT - 200)))).Times(1);
+    FlushUITasks();
+
+    PaddingProperty padding0;
+    layoutProperty_->UpdatePadding(padding0);
+    EXPECT_CALL(*ctx, ResetContentClip()).Times(1);
+    FlushUITasks();
+}
 } // namespace OHOS::Ace::NG

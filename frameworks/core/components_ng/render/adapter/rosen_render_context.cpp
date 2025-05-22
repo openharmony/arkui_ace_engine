@@ -5032,10 +5032,11 @@ void RosenRenderContext::SetContentClip(const std::variant<RectF, RefPtr<ShapeRe
 {
     CHECK_NULL_VOID(rsNode_);
     RectF rectF;
+    Rosen::Vector4f clipRect;
     if (std::holds_alternative<RectF>(rect)) {
         rectF = std::get<RectF>(rect);
-        rsNode_->SetCustomClipToFrame(
-            { rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height() });
+        clipRect =
+            Rosen::Vector4f{ rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height() };
     } else {
         auto shape = std::get<RefPtr<ShapeRect>>(rect);
         CHECK_NULL_VOID(shape);
@@ -5050,11 +5051,31 @@ void RosenRenderContext::SetContentClip(const std::variant<RectF, RefPtr<ShapeRe
         const float height =
             helper::DrawingDimensionToPx(shape->GetHeight(), paintRect_.GetSize(), LengthMode::VERTICAL);
         rectF = RectF(x, y, width, height);
-        rsNode_->SetCustomClipToFrame({ x, y, x + width, y + height });
+        clipRect = Rosen::Vector4f{ x, y, x + width, y + height };
+    }
+    if (!customClipToFrameModifier_) {
+        auto prop = std::make_shared<RSAnimatableProperty<Rosen::Vector4f>>(clipRect);
+        customClipToFrameModifier_ = std::make_shared<Rosen::RSCustomClipToFrameModifier>(prop);
+        rsNode_->AddModifier(customClipToFrameModifier_);
+    } else {
+        auto property = std::static_pointer_cast<RSAnimatableProperty<Rosen::Vector4f>>(
+            customClipToFrameModifier_->GetProperty());
+        property->Set(clipRect);
     }
     if (!contentClip_ || rectF != *contentClip_) {
         contentClip_ = std::make_unique<RectF>(rectF);
         GetHost()->AddFrameNodeChangeInfoFlag(FRAME_NODE_CONTENT_CLIP_CHANGE);
+    }
+}
+
+void RosenRenderContext::ResetContentClip()
+{
+    if (customClipToFrameModifier_) {
+        rsNode_->RemoveModifier(customClipToFrameModifier_);
+        customClipToFrameModifier_.reset();
+    }
+    if (contentClip_) {
+        contentClip_.reset();
     }
 }
 
