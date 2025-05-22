@@ -26,7 +26,7 @@ constexpr uint32_t RES_TYPE_LOAD_PAGE       = 34;
 constexpr uint32_t RES_TYPE_KEY_EVENT       = 122;
 constexpr uint32_t RES_TYPE_AXIS_EVENT      = 123;
 constexpr uint32_t RES_TYPE_PAGE_TRANSITION = 140;
-constexpr uint32_t RES_TYPE_ABILITY_OR_PAGE_SWITCH = 154;
+constexpr uint32_t RES_TYPE_ABILITY_OR_PAGE_SWITCH = 156;
 constexpr uint32_t RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST = 504;
 #ifdef FFRT_EXISTS
 constexpr uint32_t RES_TYPE_LONG_FRAME     = 71;

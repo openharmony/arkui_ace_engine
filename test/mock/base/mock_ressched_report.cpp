@@ -22,13 +22,22 @@ ResSchedReport& ResSchedReport::GetInstance()
     return instance;
 }
 
+namespace {
+    constexpr char ABILITY_OR_PAGE_SWITCH_START[] = "ability_or_page_switch_start";
+    constexpr char ABILITY_OR_PAGE_SWITCH_END[] = "ability_or_page_switch_end";
+    constexpr uint64_t RES_TYPE_ABILITY_OR_PAGE_SWITCH = 156;
+}
+
 ResSchedReport::ResSchedReport()
 {}
 
 void ResSchedReport::ResSchedDataReport(
-    const char* /* name */, const std::unordered_map<std::string, std::string>& /* param */)
+    const char* name , const std::unordered_map<std::string, std::string>& param)
 {
     reportDataFunc_ = nullptr;
+    if (std::strcmp(ABILITY_OR_PAGE_SWITCH_START, name) == 0 || std::strcmp(ABILITY_OR_PAGE_SWITCH_END, name) == 0) {
+        keyEventCountMS = RES_TYPE_ABILITY_OR_PAGE_SWITCH;
+    }
 }
 
 void ResSchedReport::ResSchedDataReport(
