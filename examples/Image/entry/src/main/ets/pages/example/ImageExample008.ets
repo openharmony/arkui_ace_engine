@@ -25,36 +25,45 @@ struct ImageExample3 {
   private imageTwo: Resource = $r('app.media.2');
   @State src: Resource = this.imageOne;
   @State src2: Resource = this.imageTwo;
-  private ColorFilterMatrix: number[] = [1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0];
-  private color: common2D.Color = { alpha: 255, red: 255, green: 0, blue: 0 };
-  @State DrawingColorFilterFirst: ColorFilter | undefined = undefined;
-  @State DrawingColorFilterSecond: ColorFilter | undefined = undefined;
-  @State DrawingColorFilterThird: ColorFilter | undefined = undefined;
+  private colorFilterMatrix: number[] = [1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0];
+  private color: common2D.Color = {
+    alpha: 255,
+    red: 255,
+    green: 0,
+    blue: 0
+  };
+  @State drawingColorFilterFirst: ColorFilter | undefined = undefined;
+  @State drawingColorFilterSecond: ColorFilter | undefined = undefined;
+  @State drawingColorFilterThird: ColorFilter | undefined = undefined;
 
   build() {
     Column() {
       Image(this.src)
         .width(100)
         .height(100)
-        .colorFilter(this.DrawingColorFilterFirst)
+        .colorFilter(this.drawingColorFilterFirst)
         .onClick(()=>{
-          this.DrawingColorFilterFirst = drawing.ColorFilter.createBlendModeColorFilter(this.color, drawing.BlendMode.SRC_IN);
+          this.drawingColorFilterFirst =
+            drawing.ColorFilter.createBlendModeColorFilter(this.color, drawing.BlendMode.SRC_IN);
         })
 
       Image(this.src2)
         .width(100)
         .height(100)
-        .colorFilter(this.DrawingColorFilterSecond)
+        .colorFilter(this.drawingColorFilterSecond)
         .onClick(()=>{
-          this.DrawingColorFilterSecond = new ColorFilter(this.ColorFilterMatrix);
+          this.drawingColorFilterSecond = new ColorFilter(this.ColorFilterMatrix);
         })
 
       //当加载图片为SVG格式时
       Image($r('app.media.test_self'))
-        .width(110).height(110).margin(15)
-        .colorFilter(this.DrawingColorFilterThird)
+        .width(110)
+        .height(110)
+        .margin(15)
+        .colorFilter(this.drawingColorFilterThird)
         .onClick(()=>{
-          this.DrawingColorFilterThird = drawing.ColorFilter.createBlendModeColorFilter(this.color, drawing.BlendMode.SRC_IN);
+          this.drawingColorFilterThird =
+            drawing.ColorFilter.createBlendModeColorFilter(this.color, drawing.BlendMode.SRC_IN);
         })
     }
   }

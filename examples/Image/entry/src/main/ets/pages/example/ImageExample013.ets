@@ -37,33 +37,33 @@ struct Test {
     Row() {
       Column({ space: 50 }) {
         Column({ space: 5 }) {
-          Image($r("app.media.example"))
+          Image($r('app.media.example'))
             .border({ width:2, color: Color.Black })
             .objectFit(ImageFit.Contain)
             .width(150)
             .height(150)
-          Text("图片无变换")
+          Text('图片无变换')
             .fontSize('25px')
         }
         Column({ space: 5 }) {
-          Image($r("app.media.example"))
+          Image($r('app.media.example'))
             .border({ width:2, color: Color.Black })
             .objectFit(ImageFit.None)
             .translate({ x: 10, y: 10 })
             .scale({ x: 0.5, y: 0.5 })
             .width(100)
             .height(100)
-          Text("Image直接变换，默认显示图源左上角。")
+          Text('Image直接变换，默认显示图源左上角。')
             .fontSize('25px')
         }
         Column({ space: 5 }) {
-          Image($r("app.media.example"))
+          Image($r('app.media.example'))
             .objectFit(ImageFit.MATRIX)
             .imageMatrix(this.matrix1)
             .border({ width:2, color: Color.Black })
             .width(150)
             .height(150)
-          Text("通过imageMatrix变换，调整图源位置，实现最佳呈现。")
+          Text('通过imageMatrix变换，调整图源位置，实现最佳呈现。')
             .fontSize('25px')
         }
       }
