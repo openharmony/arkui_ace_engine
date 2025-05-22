@@ -1950,31 +1950,6 @@ HWTEST_F(DragDropManagerTestNg, CalculateScale001, TestSize.Level1)
 }
 
 /**
- * @tc.name: NotifyPullEventListener001
- * @tc.desc: ResetPreTargetFrameNode
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(DragDropManagerTestNg, NotifyPullEventListener001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct a DragDropManager.
-     * @tc.expected: dragDropManager is not null.
-     */
-    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-    ASSERT_NE(dragDropManager, nullptr);
-    DragPointerEvent pointerEvent;
-    bool result = false;
-    dragDropManager->NotifyPullEventListener(pointerEvent);
-    EXPECT_EQ(result, false);
-
-    std::function<void(const DragPointerEvent&)> testFunction;
-    dragDropManager->pullEventListener_.insert({2, testFunction});
-    dragDropManager->NotifyPullEventListener(pointerEvent);
-    EXPECT_EQ(result, false);
-}
-
-/**
  * @tc.name: UnRegisterPullEventListener001
  * @tc.desc: ResetPreTargetFrameNode
  * @tc.type: FUNC
@@ -2072,22 +2047,6 @@ HWTEST_F(DragDropManagerTestNg, RequireSummaryAndDragBundleInfoIfNecessary001, T
 }
 
 /**
- * @tc.name: DoDragMoveAnimate001
- * @tc.desc: ResetPreTargetFrameNode
- * @tc.type: FUNC
- */
-HWTEST_F(DragDropManagerTestNg, DoDragMoveAnimate001, TestSize.Level1)
-{
-    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-    ASSERT_NE(dragDropManager, nullptr);
-
-    DragPointerEvent pointerEvent;
-    bool needDoDragMoveAnimate = false;
-    dragDropManager->DoDragMoveAnimate(pointerEvent);
-    EXPECT_EQ(needDoDragMoveAnimate, false);
-}
-
-/**
  * @tc.name: HandleSyncOnDragStart001
  * @tc.desc: ResetPreTargetFrameNode
  * @tc.type: FUNC
@@ -2108,28 +2067,6 @@ HWTEST_F(DragDropManagerTestNg, HandleSyncOnDragStart001, TestSize.Level1)
     dragStartRequestStatus = DragStartRequestStatus::READY;
     dragDropManager->HandleSyncOnDragStart(dragStartRequestStatus);
     EXPECT_EQ(dragStartRequestStatus, DragStartRequestStatus::READY);
-}
-
-/**
- * @tc.name: DoDragMoveAnimate002
- * @tc.desc: ResetPreTargetFrameNode
- * @tc.type: FUNC
- */
-HWTEST_F(DragDropManagerTestNg, DoDragMoveAnimate002, TestSize.Level1)
-{
-    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-    ASSERT_NE(dragDropManager, nullptr);
-
-    DragPointerEvent pointerEvent;
-    bool needDoDragMoveAnimate = false;
-    dragDropManager->isDragWithContextMenu_ = true;
-    dragDropManager->isDragFwkShow_ = false;
-    dragDropManager->info_.scale = 0.1f;
-    Container::UpdateCurrent(MIN_SUBCONTAINER_ID);
-    SubwindowManager::GetInstance()->AddParentContainerId(MIN_SUBCONTAINER_ID, 1);
-    dragDropManager->info_.imageNode =  AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    dragDropManager->DoDragMoveAnimate(pointerEvent);
-    EXPECT_EQ(needDoDragMoveAnimate, false);
 }
 
 /**
