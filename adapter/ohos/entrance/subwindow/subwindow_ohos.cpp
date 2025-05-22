@@ -303,6 +303,7 @@ void SubwindowOhos::InitContainer()
         window_->RegisterWindowAttachStateChangeListener(new MenuWindowSceneListener(WeakClaim(this)));
         window_->SetFollowScreenChange(needFollowScreen);
         defaultDisplayId_ = displayId;
+        window_->SetSubWindowSource(Rosen::SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
     }
     std::string url = "";
     auto subSurface = window_->GetSurfaceNode();
@@ -1464,6 +1465,7 @@ bool SubwindowOhos::InitToastDialogWindow(int32_t& width, int32_t& height, int32
     }
     CHECK_NULL_RETURN(dialogWindow_, false);
     dialogWindow_->SetLayoutFullScreen(true);
+    dialogWindow_->SetSubWindowSource(Rosen::SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
     auto focusWindowId = dialogWindow_->GetDisplayId();
     auto focusDisplayInfo = Rosen::DisplayManager::GetInstance().GetDisplayById(focusWindowId);
     CHECK_NULL_RETURN(focusDisplayInfo, false);
