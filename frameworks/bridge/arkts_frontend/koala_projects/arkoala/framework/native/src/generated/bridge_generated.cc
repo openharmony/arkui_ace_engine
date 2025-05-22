@@ -33925,6 +33925,12 @@ Ark_NativePointer impl_LengthMetrics_ctor() {
         return GetAccessors()->getLengthMetricsAccessor()->ctor();
 }
 KOALA_INTEROP_DIRECT_0(LengthMetrics_ctor, Ark_NativePointer)
+Ark_NativePointer impl_FrameNode_getRenderNode(Ark_NativePointer thisPtr) {
+    Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+    const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getRenderNode(self);
+    return retValue;
+}
+KOALA_INTEROP_DIRECT_1(FrameNode_getRenderNode, Ark_NativePointer, Ark_NativePointer)
 Ark_NativePointer impl_LengthMetrics_getFinalizer() {
         return GetAccessors()->getLengthMetricsAccessor()->getFinalizer();
 }
@@ -34213,10 +34219,19 @@ Ark_Boolean impl_PixelMap_getIsStrideAlignment(Ark_NativePointer thisPtr) {
         return GetAccessors()->getPixelMapAccessor()->getIsStrideAlignment(self);
 }
 KOALA_INTEROP_DIRECT_1(PixelMap_getIsStrideAlignment, Ark_Boolean, Ark_NativePointer)
-Ark_NativePointer impl_RenderNode_ctor() {
-        return GetAccessors()->getRenderNodeAccessor()->ctor();
+Ark_NativePointer impl_RenderNode_ctor(Ark_Int32 nodeId, KSerializerBuffer thisArray, int32_t thisLength)
+{
+    Deserializer thisDeserializer(thisArray, thisLength);
+    DrawCallbackFunc callback_value = { thisDeserializer.readCallbackResource(),
+        reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_DrawContext context)>(
+            thisDeserializer.readPointerOrDefault(
+                reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_DrawCallback)))),
+        reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_DrawContext context)>(
+            thisDeserializer.readPointerOrDefault(
+                reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_DrawCallback)))) };
+    return GetAccessors()->getRenderNodeAccessor()->ctor(nodeId, (const DrawCallbackFunc*)&callback_value);
 }
-KOALA_INTEROP_DIRECT_0(RenderNode_ctor, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_3(RenderNode_ctor, Ark_NativePointer, Ark_Int32, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_RenderNode_getFinalizer() {
         return GetAccessors()->getRenderNodeAccessor()->getFinalizer();
 }
@@ -34342,6 +34357,76 @@ void impl_RenderNode_dispose(Ark_NativePointer thisPtr) {
         GetAccessors()->getRenderNodeAccessor()->dispose(self);
 }
 KOALA_INTEROP_DIRECT_V1(RenderNode_dispose, Ark_NativePointer)
+void impl_RenderNode_setRectMask(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength, KInteropNumber fillColor, KInteropNumber strokeColor, KInteropNumber strokeWidth) {
+    Ark_RenderNode self = reinterpret_cast<Ark_RenderNode>(thisPtr);
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Ark_Rect rect_value = thisDeserializer.readRect();;
+    GetAccessors()->getRenderNodeAccessor()->setRectMask(self, (const Ark_Rect*)&rect_value, (const Ark_Number*) (&fillColor), (const Ark_Number*) (&strokeColor), (const Ark_Number*) (&strokeWidth));
+}
+KOALA_INTEROP_DIRECT_V6(RenderNode_setRectMask, Ark_NativePointer, KSerializerBuffer, int32_t, KInteropNumber, KInteropNumber, KInteropNumber)
+void impl_RenderNode_setCircleMask(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength, KInteropNumber fillColor, KInteropNumber strokeColor, KInteropNumber strokeWidth) {
+    Ark_RenderNode self = reinterpret_cast<Ark_RenderNode>(thisPtr);
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Ark_Circle circle_value = thisDeserializer.readCircle();;
+    GetAccessors()->getRenderNodeAccessor()->setCircleMask(self, (const Ark_Circle*)&circle_value, (const Ark_Number*) (&fillColor), (const Ark_Number*) (&strokeColor), (const Ark_Number*) (&strokeWidth));
+}
+KOALA_INTEROP_DIRECT_V6(RenderNode_setCircleMask, Ark_NativePointer, KSerializerBuffer, int32_t, KInteropNumber, KInteropNumber, KInteropNumber)
+void impl_RenderNode_setRoundRectMask(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength, KInteropNumber fillColor, KInteropNumber strokeColor, KInteropNumber strokeWidth) {
+    Ark_RenderNode self = reinterpret_cast<Ark_RenderNode>(thisPtr);
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Ark_RoundRect roundRect_value = thisDeserializer.readRoundRect();;
+    GetAccessors()->getRenderNodeAccessor()->setRoundRectMask(self, (const Ark_RoundRect*)&roundRect_value, (const Ark_Number*) (&fillColor), (const Ark_Number*) (&strokeColor), (const Ark_Number*) (&strokeWidth));
+}
+KOALA_INTEROP_DIRECT_V6(RenderNode_setRoundRectMask, Ark_NativePointer, KSerializerBuffer, int32_t, KInteropNumber, KInteropNumber, KInteropNumber)
+void impl_RenderNode_setOvalMask(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength, KInteropNumber fillColor, KInteropNumber strokeColor, KInteropNumber strokeWidth) {
+    Ark_RenderNode self = reinterpret_cast<Ark_RenderNode>(thisPtr);
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Ark_Rect rect_value = thisDeserializer.readRect();;
+    GetAccessors()->getRenderNodeAccessor()->setOvalMask(self, (const Ark_Rect*)&rect_value, (const Ark_Number*) (&fillColor), (const Ark_Number*) (&strokeColor), (const Ark_Number*) (&strokeWidth));
+}
+KOALA_INTEROP_DIRECT_V6(RenderNode_setOvalMask, Ark_NativePointer, KSerializerBuffer, int32_t, KInteropNumber, KInteropNumber, KInteropNumber)
+void impl_RenderNode_setPath(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength, KInteropNumber fillColor, KInteropNumber strokeColor, KInteropNumber strokeWidth) {
+    Ark_RenderNode self = reinterpret_cast<Ark_RenderNode>(thisPtr);
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Ark_CommandPath path_value = thisDeserializer.readCommandPath();;
+    GetAccessors()->getRenderNodeAccessor()->setPath(self, (const Ark_CommandPath*)&path_value, (const Ark_Number*) (&fillColor), (const Ark_Number*) (&strokeColor), (const Ark_Number*) (&strokeWidth));
+}
+KOALA_INTEROP_DIRECT_V6(RenderNode_setPath, Ark_NativePointer, KSerializerBuffer, int32_t, KInteropNumber, KInteropNumber, KInteropNumber)
+void impl_RenderNode_setRectClip(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+    Ark_RenderNode self = reinterpret_cast<Ark_RenderNode>(thisPtr);
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Ark_Rect rect_value = thisDeserializer.readRect();;
+    GetAccessors()->getRenderNodeAccessor()->setRectClip(self, (const Ark_Rect*)&rect_value);
+}
+KOALA_INTEROP_DIRECT_V3(RenderNode_setRectClip, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_RenderNode_setCircleClip(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+    Ark_RenderNode self = reinterpret_cast<Ark_RenderNode>(thisPtr);
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Ark_Circle circle_value = thisDeserializer.readCircle();;
+    GetAccessors()->getRenderNodeAccessor()->setCircleClip(self, (const Ark_Circle*)&circle_value);
+}
+KOALA_INTEROP_DIRECT_V3(RenderNode_setCircleClip, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_RenderNode_setRoundRectClip(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+    Ark_RenderNode self = reinterpret_cast<Ark_RenderNode>(thisPtr);
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Ark_RoundRect roundRect_value = thisDeserializer.readRoundRect();;
+    GetAccessors()->getRenderNodeAccessor()->setRoundRectClip(self, (const Ark_RoundRect*)&roundRect_value);
+}
+KOALA_INTEROP_DIRECT_V3(RenderNode_setRoundRectClip, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_RenderNode_setOvalClip(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+    Ark_RenderNode self = reinterpret_cast<Ark_RenderNode>(thisPtr);
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Ark_Rect rect_value = thisDeserializer.readRect();;
+    GetAccessors()->getRenderNodeAccessor()->setOvalClip(self, (const Ark_Rect*)&rect_value);
+}
+KOALA_INTEROP_DIRECT_V3(RenderNode_setOvalClip, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_RenderNode_setPathClip(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+    Ark_RenderNode self = reinterpret_cast<Ark_RenderNode>(thisPtr);
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Ark_CommandPath path_value = thisDeserializer.readCommandPath();;
+    GetAccessors()->getRenderNodeAccessor()->setPathClip(self, (const Ark_CommandPath*)&path_value);
+}
+KOALA_INTEROP_DIRECT_V3(RenderNode_setPathClip, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_Number impl_RenderNode_getBackgroundColor(Ark_NativePointer thisPtr) {
         Ark_RenderNode self = reinterpret_cast<Ark_RenderNode>(thisPtr);
         return GetAccessors()->getRenderNodeAccessor()->getBackgroundColor(self);
@@ -34383,8 +34468,9 @@ KOALA_INTEROP_1(RenderNode_getSize, KInteropReturnBuffer, Ark_NativePointer)
 void impl_RenderNode_setSize(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_RenderNode self = reinterpret_cast<Ark_RenderNode>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
-        Ark_Size size_value = thisDeserializer.readSize();;
-        GetAccessors()->getRenderNodeAccessor()->setSize(self, (const Ark_Size*)&size_value);
+        Ark_Size size_value = thisDeserializer.readSize();
+        Ark_Int32 lengthMetrics_unit_value = thisDeserializer.readInt32();
+        GetAccessors()->getRenderNodeAccessor()->setSize(self, (const Ark_Size*)&size_value, (const Ark_Int32)lengthMetrics_unit_value);
 }
 KOALA_INTEROP_DIRECT_V3(RenderNode_setSize, Ark_NativePointer, KSerializerBuffer, int32_t)
 KInteropReturnBuffer impl_RenderNode_getPosition(Ark_NativePointer thisPtr) {
@@ -34398,8 +34484,9 @@ KOALA_INTEROP_1(RenderNode_getPosition, KInteropReturnBuffer, Ark_NativePointer)
 void impl_RenderNode_setPosition(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_RenderNode self = reinterpret_cast<Ark_RenderNode>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
-        Ark_Position position_value = thisDeserializer.readPosition();;
-        GetAccessors()->getRenderNodeAccessor()->setPosition(self, (const Ark_Position*)&position_value);
+        Ark_Position position_value = thisDeserializer.readPosition();
+        Ark_Int32 lengthMetrics_unit_value = thisDeserializer.readInt32();
+        GetAccessors()->getRenderNodeAccessor()->setPosition(self, (const Ark_Position*)&position_value, (const Ark_Int32)lengthMetrics_unit_value);
 }
 KOALA_INTEROP_DIRECT_V3(RenderNode_setPosition, Ark_NativePointer, KSerializerBuffer, int32_t)
 KInteropReturnBuffer impl_RenderNode_getFrame(Ark_NativePointer thisPtr) {
@@ -34473,8 +34560,9 @@ KOALA_INTEROP_1(RenderNode_getRotation, KInteropReturnBuffer, Ark_NativePointer)
 void impl_RenderNode_setRotation(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_RenderNode self = reinterpret_cast<Ark_RenderNode>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
-        Ark_Vector3 rotation_value = thisDeserializer.readVector3();;
-        GetAccessors()->getRenderNodeAccessor()->setRotation(self, (const Ark_Vector3*)&rotation_value);
+        Ark_Vector3 rotation_value = thisDeserializer.readVector3();
+        Ark_Int32 lengthMetrics_unit_value = thisDeserializer.readInt32();
+        GetAccessors()->getRenderNodeAccessor()->setRotation(self, (const Ark_Vector3*)&rotation_value, (const Ark_Int32)lengthMetrics_unit_value);
 }
 KOALA_INTEROP_DIRECT_V3(RenderNode_setRotation, Ark_NativePointer, KSerializerBuffer, int32_t)
 KInteropReturnBuffer impl_RenderNode_getTransform(Ark_NativePointer thisPtr) {
@@ -34561,8 +34649,9 @@ KOALA_INTEROP_1(RenderNode_getShadowOffset, KInteropReturnBuffer, Ark_NativePoin
 void impl_RenderNode_setShadowOffset(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_RenderNode self = reinterpret_cast<Ark_RenderNode>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
-        Ark_Vector2 shadowOffset_value = thisDeserializer.readVector2();;
-        GetAccessors()->getRenderNodeAccessor()->setShadowOffset(self, (const Ark_Vector2*)&shadowOffset_value);
+        Ark_Vector2 shadowOffset_value = thisDeserializer.readVector2();
+        Ark_Int32 lengthMetrics_unit_value = thisDeserializer.readInt32();
+        GetAccessors()->getRenderNodeAccessor()->setShadowOffset(self, (const Ark_Vector2*)&shadowOffset_value, (const Ark_Int32)lengthMetrics_unit_value);
 }
 KOALA_INTEROP_DIRECT_V3(RenderNode_setShadowOffset, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_String impl_RenderNode_getLabel(Ark_NativePointer thisPtr) {
@@ -34624,30 +34713,31 @@ KInteropReturnBuffer impl_RenderNode_getBorderWidth(Ark_NativePointer thisPtr) {
         Ark_RenderNode self = reinterpret_cast<Ark_RenderNode>(thisPtr);
         const auto &retValue = GetAccessors()->getRenderNodeAccessor()->getBorderWidth(self);
         Serializer _retSerializer {};
-        _retSerializer.writeEdges(retValue);
+        _retSerializer.writeEdgesNumber(retValue);
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(RenderNode_getBorderWidth, KInteropReturnBuffer, Ark_NativePointer)
 void impl_RenderNode_setBorderWidth(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_RenderNode self = reinterpret_cast<Ark_RenderNode>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
-        Ark_Edges borderWidth_value = thisDeserializer.readEdges();;
-        GetAccessors()->getRenderNodeAccessor()->setBorderWidth(self, (const Ark_Edges*)&borderWidth_value);
+        Ark_EdgesNumber borderWidth_value = thisDeserializer.readEdgesNumber();
+        Ark_Int32 lengthMetrics_unit_value = thisDeserializer.readInt32();
+        GetAccessors()->getRenderNodeAccessor()->setBorderWidth(self, (const Ark_EdgesNumber*)&borderWidth_value, (const Ark_Int32)lengthMetrics_unit_value);
 }
 KOALA_INTEROP_DIRECT_V3(RenderNode_setBorderWidth, Ark_NativePointer, KSerializerBuffer, int32_t)
 KInteropReturnBuffer impl_RenderNode_getBorderColor(Ark_NativePointer thisPtr) {
         Ark_RenderNode self = reinterpret_cast<Ark_RenderNode>(thisPtr);
         const auto &retValue = GetAccessors()->getRenderNodeAccessor()->getBorderColor(self);
         Serializer _retSerializer {};
-        _retSerializer.writeEdges(retValue);
+        _retSerializer.writeEdgesNumber(retValue);
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(RenderNode_getBorderColor, KInteropReturnBuffer, Ark_NativePointer)
 void impl_RenderNode_setBorderColor(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_RenderNode self = reinterpret_cast<Ark_RenderNode>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
-        Ark_Edges borderColor_value = thisDeserializer.readEdges();;
-        GetAccessors()->getRenderNodeAccessor()->setBorderColor(self, (const Ark_Edges*)&borderColor_value);
+        Ark_EdgesNumber borderColor_value = thisDeserializer.readEdgesNumber();;
+        GetAccessors()->getRenderNodeAccessor()->setBorderColor(self, (const Ark_EdgesNumber*)&borderColor_value);
 }
 KOALA_INTEROP_DIRECT_V3(RenderNode_setBorderColor, Ark_NativePointer, KSerializerBuffer, int32_t)
 KInteropReturnBuffer impl_RenderNode_getBorderRadius(Ark_NativePointer thisPtr) {
@@ -34661,8 +34751,9 @@ KOALA_INTEROP_1(RenderNode_getBorderRadius, KInteropReturnBuffer, Ark_NativePoin
 void impl_RenderNode_setBorderRadius(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_RenderNode self = reinterpret_cast<Ark_RenderNode>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
-        Ark_BorderRadiuses_graphics borderRadius_value = thisDeserializer.readBorderRadiuses_graphics();;
-        GetAccessors()->getRenderNodeAccessor()->setBorderRadius(self, (const Ark_BorderRadiuses_graphics*)&borderRadius_value);
+        Ark_BorderRadiuses_graphics borderRadius_value = thisDeserializer.readBorderRadiuses_graphics();
+        Ark_Int32 lengthMetrics_unit_value = thisDeserializer.readInt32();
+        GetAccessors()->getRenderNodeAccessor()->setBorderRadius(self, (const Ark_BorderRadiuses_graphics*)&borderRadius_value, (const Ark_Int32)lengthMetrics_unit_value);
 }
 KOALA_INTEROP_DIRECT_V3(RenderNode_setBorderRadius, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_RenderNode_getShapeMask(Ark_NativePointer thisPtr) {

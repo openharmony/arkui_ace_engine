@@ -19,7 +19,7 @@
 import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { Size } from "../Graphics"
+import { Size } from "./../Graphics"
 export interface ComponentInfo {
     size: Size;
     localOffset: Offset_componentutils;

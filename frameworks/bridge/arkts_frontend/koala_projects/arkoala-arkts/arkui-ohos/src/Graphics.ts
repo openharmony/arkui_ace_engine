@@ -24,6 +24,9 @@ import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./component"
 import { ResourceColor } from "./component/units"
 import { Color } from "./component/enums"
+import { DrawingCanvas } from "./component/arkui-drawing"
+import { Dimension } from "./component/units"
+import { common2D } from "@ohos/graphics/common2D"
 export interface Size {
     width: number;
     height: number;
@@ -352,3 +355,152 @@ export class ColorMetrics implements MaterializedBase {
         return retval
     }
 }
+export class ShapeMask {
+    public rect: Rect | null = null;
+    public roundRect: RoundRect | null = null;
+    public circle: Circle | null = null;
+    public oval: Rect | null = null;
+    public path: CommandPath | null = null;
+    setRectShape(rect: Rect) {
+        this.rect = rect;
+        this.roundRect = null;
+        this.circle = null;
+        this.oval = null;
+        this.path = null;
+    }
+    setRoundRectShape(roundRect: RoundRect) {
+        this.roundRect = roundRect;
+        this.rect = null;
+        this.circle = null;
+        this.oval = null;
+        this.path = null;
+    }
+    setCircleShape(circle: Circle) {
+        this.circle = circle;
+        this.rect = null;
+        this.roundRect = null;
+        this.oval = null;
+        this.path = null;
+    }
+    setOvalShape(oval: Rect) {
+        this.oval = oval;
+        this.rect = null;
+        this.circle = null;
+        this.roundRect = null;
+        this.path = null;
+    }
+    setCommandPath(path: CommandPath) {
+        this.path = path;
+        this.oval = null;
+        this.rect = null;
+        this.circle = null;
+        this.roundRect = null;
+    }
+    public fillColor: number = 0XFF000000;
+    public strokeColor: number = 0XFF000000;
+    public strokeWidth: number = 0;
+}
+export class ShapeClip {
+    public rect: Rect | null = null;
+    public roundRect: RoundRect | null = null;
+    public circle: Circle | null = null;
+    public oval: Rect | null = null;
+    public path: CommandPath | null = null;
+    setRectShape(rect: Rect) {
+        this.rect = rect;
+        this.roundRect = null;
+        this.circle = null;
+        this.oval = null;
+        this.path = null;
+    }
+    setRoundRectShape(roundRect: RoundRect) {
+        this.roundRect = roundRect;
+        this.rect = null;
+        this.circle = null;
+        this.oval = null;
+        this.path = null;
+    }
+    setCircleShape(circle: Circle) {
+        this.circle = circle;
+        this.rect = null;
+        this.roundRect = null;
+        this.oval = null;
+        this.path = null;
+    }
+    setOvalShape(oval: Rect) {
+        this.oval = oval;
+        this.rect = null;
+        this.circle = null;
+        this.roundRect = null;
+        this.path = null;
+    }
+    setCommandPath(path: CommandPath) {
+        this.path = path;
+        this.oval = null;
+        this.rect = null;
+        this.circle = null;
+        this.roundRect = null;
+    }
+}
+export interface DrawContext {
+    size: Size;
+    sizeInPixel: Size;
+    canvas: DrawingCanvas;
+}export interface Vector2T {
+    x: number;
+    y: number;
+}
+export interface Vector3 {
+    x: number;
+    y: number;
+    z: number;
+}
+export type Matrix4 = [
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number
+]
+export interface Edges<T> {
+    top?: T;
+    left?: T;
+    bottom?: T;
+    right?: T;
+}
+export type CornerRadius = Corners<Vector2>
+export interface Corners<T> {
+    topLeft: T;
+    topRight: T;
+    bottomLeft: T;
+    bottomRight: T;
+}
+export type Rect = common2D.Rect;
+export interface RoundRect {
+    rect: Rect;
+    corners: CornerRadius;
+}
+export interface Circle {
+    centerX: number;
+    centerY: number;
+    radius: number;
+}
+export interface CommandPath {
+    commands: string;
+}
+export type Offset_graphics = Vector2;
+export type Pivot = Vector2;
+export type Scale = Vector2;
+export type Translation = Vector2;
+export type Rotation = Vector3;

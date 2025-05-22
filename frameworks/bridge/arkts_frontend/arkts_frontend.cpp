@@ -66,11 +66,58 @@ const AppInfo KOALA_APP_INFO = {
 //     }
 // }
 
+std::string GetErrorProperty(ani_env* aniEnv, ani_error aniError, const char* property)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "called");
+    std::string propertyValue;
+    ani_status status = ANI_ERROR;
+    ani_type errorType = nullptr;
+    if ((status = aniEnv->Object_GetType(aniError, &errorType)) != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Object_GetType failed, status : %{public}d", status);
+        return propertyValue;
+    }
+    ani_method getterMethod = nullptr;
+    if ((status = aniEnv->Class_FindGetter(static_cast<ani_class>(errorType), property, &getterMethod)) != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Class_FindGetter failed, status : %{public}d", status);
+        return propertyValue;
+    }
+    ani_ref aniRef = nullptr;
+    if ((status = aniEnv->Object_CallMethod_Ref(aniError, getterMethod, &aniRef)) != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Object_CallMethod_Ref failed, status : %{public}d", status);
+        return propertyValue;
+    }
+    ani_string aniString = reinterpret_cast<ani_string>(aniRef);
+    ani_size sz {};
+    if ((status = aniEnv->String_GetUTF8Size(aniString, &sz)) != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "String_GetUTF8Size failed, status : %{public}d", status);
+        return propertyValue;
+    }
+    propertyValue.resize(sz + 1);
+    if ((status = aniEnv->String_GetUTF8SubString(
+        aniString, 0, sz, propertyValue.data(), propertyValue.size(), &sz))!= ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "String_GetUTF8SubString failed, status : %{public}d", status);
+        return propertyValue;
+    }
+    propertyValue.resize(sz);
+    return propertyValue;
+}
+
 void RunArkoalaEventLoop(ani_env* env, ani_ref app)
 {
+    ani_boolean errorExists;
+    env->ExistUnhandledError(&errorExists);
+    ani_status status;
     ani_class appClass;
-    if (env->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
-        LOGE("[%{public}s] Cannot load main class %{public}s", __func__, KOALA_APP_INFO.className);
+    if ((status = env->FindClass(KOALA_APP_INFO.className, &appClass)) != ANI_OK) {
+        ani_error aniError;
+        env->GetUnhandledError(&aniError);
+        env->ResetError();
+        std::string errorMsg = GetErrorProperty(env, aniError, "message");
+        std::string errorName = GetErrorProperty(env, aniError, "name");
+        std::string errorStack = GetErrorProperty(env, aniError, "stack");
+        LOGE("[%{public}s] Cannot load main class %{public}s, status: %{public}d, \nerrorMsg: %{public}s, \nerrorName: "
+             "%{public}s, \nerrorStack: %{public}s",
+            __func__, KOALA_APP_INFO.className, status, errorMsg.c_str(), errorName.c_str(), errorStack.c_str());
         return;
     }
 

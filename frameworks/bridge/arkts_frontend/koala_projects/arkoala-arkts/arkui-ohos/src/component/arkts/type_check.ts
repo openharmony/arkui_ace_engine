@@ -54,8 +54,7 @@ import { ContentModifier, WrappedBuilder, CommonConfiguration, Callback_WrappedB
 import { ContentType, EnterKeyType, InputType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback, TextInputAttribute, OnSubmitCallback, TextInputStyle, PasswordIcon, UnderlineColor, TextInputController, TextInputOptions } from "./../textInput"
 import { CustomDialogController, CustomDialogControllerOptions } from "./../customDialogController"
 import { CustomSpan, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, GestureStyle, GestureStyleInterface, StyledString, MutableStyledString, StyleOptions, SpanStyle, ImageAttachment, StyledStringKey, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback, DecorationStyleInterface, UrlStyle, BaselineOffsetStyle, LetterSpacingStyle, LineHeightStyle, TextShadowStyle, DecorationStyle, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInterface, TextStyle_styled_string, TextStyleInterface, BackgroundColorStyle, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../styledString"
-import { DrawContext, Rect, LengthUnit, ShapeClip, RoundRect, Circle, CommandPath, ShapeMask, Vector2, Vector3, BorderRadiuses_graphics, CornerRadius, Edges, Matrix4 } from "./../arkui-graphics"
-import { LengthMetrics, LengthMetricsUnit, ColorMetrics, Frame, Size } from "../../Graphics"
+import { DrawContext, Rect, LengthUnit, ShapeClip, ColorMetrics, RoundRect, Circle, CommandPath, ShapeMask, Size, Vector2, Vector3, CornerRadius, Edges, Frame, Matrix4, Corners, LengthMetrics, LengthMetricsUnit } from "./../../Graphics"
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, ColorStop, LinearGradient, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
 import { DatePickerMode, DatePickerOptions, DatePickerResult, LunarSwitchStyle, DatePickerDialogOptions, Callback_DatePickerResult_Void } from "./../datePicker"
@@ -149,7 +148,7 @@ import { PluginComponentTemplate, PluginErrorData, PluginComponentOptions } from
 import { PolygonOptions } from "./../polygon"
 import { PolylineOptions } from "./../polyline"
 import { RatingOptions, StarStyleOptions } from "./../rating"
-import { RenderNode } from "./../arkui-rendernode"
+import { RenderNode } from "./../../RenderNode"
 import { RoundedRectOptions, RectOptions } from "./../rect"
 import { RowOptions, RowOptionsV2 } from "./../row"
 import { StackOptions } from "./../stack"
@@ -388,7 +387,7 @@ export class TypeChecker {
         return value instanceof BorderRadiuses
     }
     static isBorderRadiuses_graphics(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
-        return value instanceof BorderRadiuses_graphics
+        return value instanceof Corners<number>
     }
     static isBorderStyle(value: Object | string | number | undefined): boolean {
         return value instanceof BorderStyle

@@ -24,6 +24,7 @@ import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./component"
 import { ArkUIAniModule } from "arkui.ani"
+import { RenderNode, RenderNodeInternal } from "./RenderNode"
 
 export enum ExpandMode {
     NOT_EXPAND = 0,
@@ -47,6 +48,7 @@ export class FrameNodeInternal {
 export class FrameNode implements MaterializedBase {
     peer?: Finalizable | undefined = undefined
     uiContext: UIContext | undefined = undefined
+    renderNode_: RenderNode | undefined = undefined
     instanceId_?: number;
     _nodeId: number = -1;
     getType(): string {
@@ -76,10 +78,19 @@ export class FrameNode implements MaterializedBase {
                 }
                 return;
             }
+            if (this.getType() === 'BuilderRootFrameNode') {
+                this.renderNode_ = new RenderNode(this.getType());
+                this.renderNode_!.setFrameNode(new WeakRef<FrameNode>(this));
+                return;
+            }
             const instanceId = this.instanceId_ as (int32);
             ArkUIAniModule._Common_Sync_InstanceId(instanceId);
-            const ctorPtr : KPointer = FrameNode.ctor_framenode();
-            this.peer = new Finalizable(ctorPtr, FrameNode.getFinalizer());
+            if (this.getType() === undefined || this.getType() === "CustomFrameNode") {
+                this.renderNode_ = new RenderNode('CustomFrameNode')
+                const ctorPtr: KPointer = FrameNode.ctor_framenode()
+                this.peer = new Finalizable(ctorPtr, FrameNode.getFinalizer())
+            }
+            this.renderNode_?.setFrameNode(new WeakRef<FrameNode>(this))
 
             this._nodeId = this.getIdByFrameNode_serialize(this);
             ArkUIAniModule._Common_Restore_InstanceId();
@@ -388,6 +399,10 @@ export class FrameNode implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeByUniqueId(id);
         const obj : FrameNode = FrameNodeInternal.fromPtr(retval);
         return obj;
+    }
+    public getRenderNode(): RenderNode | null {
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getRenderNode(this.peer!.ptr)
+        return RenderNodeInternal.fromPtr(retval)
     }
 }
 class ImmutableFrameNode extends FrameNode {

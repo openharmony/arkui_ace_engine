@@ -365,6 +365,11 @@ Ark_FrameNode GetFrameNodeByUniqueIdImpl(const Ark_Number* id)
     auto nodeRef = AceType::DynamicCast<NG::FrameNode>(node);
     return FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(nodeRef));
 }
+Ark_RenderNode GetRenderNodeImpl(Ark_FrameNode peer)
+{
+    CHECK_NULL_RETURN(peer && peer->node, nullptr);
+    return peer->GetRenderNodePeer();
+}
 } // FrameNodeAccessor
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
 {
@@ -395,6 +400,7 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
         FrameNodeAccessor::GetAttachedFrameNodeByIdImpl,
         FrameNodeAccessor::GetFrameNodeByIdImpl,
         FrameNodeAccessor::GetFrameNodeByUniqueIdImpl,
+        FrameNodeAccessor::GetRenderNodeImpl,
     };
     return &FrameNodeAccessorImpl;
 }
