@@ -25,6 +25,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/rosen/testing_canvas.h"
 
+#include "core/common/ace_engine.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
@@ -776,6 +777,9 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg015, TestSize.Level1)
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
+    auto container = Container::Current();
+    menuNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
     auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     ASSERT_NE(property, nullptr);
     LayoutConstraintF parentLayoutConstraint;
@@ -791,6 +795,9 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg015, TestSize.Level1)
     CHECK_NULL_VOID(menuPattern);
     menuPattern->isSelectMenu_ = true;
     SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
+    auto menuGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(menuNode, menuGeometryNode, property);
+    ASSERT_NE(layoutWrapper, nullptr);
 
     /**
      * @tc.cases: case1. parameter property is nullptr, return OffsetF(0.0, 0.0).
@@ -813,7 +820,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg015, TestSize.Level1)
     menuLayoutAlgorithm->targetOffset_ = OffsetF(POSITION_OFFSET, POSITION_OFFSET);
     menuLayoutAlgorithm->wrapperSize_ = SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
     menuLayoutAlgorithm->wrapperRect_ = Rect(0, 0, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
-    resultOffset = menuLayoutAlgorithm->MenuLayoutAvoidAlgorithm(property, menuPattern, size);
+    resultOffset = menuLayoutAlgorithm->MenuLayoutAvoidAlgorithm(property, menuPattern, size, false, layoutWrapper);
     float expectOffsetX = POSITION_OFFSET + TARGET_SIZE_WIDTH + TARGET_SECURITY.ConvertToPx();
     float expectOffsetY = MENU_SIZE_HEIGHT / 2;
     EXPECT_EQ(resultOffset, OffsetF(expectOffsetX, expectOffsetY));
@@ -822,7 +829,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg015, TestSize.Level1)
      * @tc.cases: case4. target size is (0.0, 0.0)
      */
     menuLayoutAlgorithm->targetSize_ = SizeF(0.0f, 0.0f);
-    resultOffset = menuLayoutAlgorithm->MenuLayoutAvoidAlgorithm(property, menuPattern, size);
+    resultOffset = menuLayoutAlgorithm->MenuLayoutAvoidAlgorithm(property, menuPattern, size, false, layoutWrapper);
     EXPECT_EQ(resultOffset, OffsetF(0, FULL_SCREEN_HEIGHT - MENU_SIZE_HEIGHT));
 }
 
@@ -1774,10 +1781,10 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg044, TestSize.Level1)
 
     selectTheme->expandDisplay_ = true;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
-    layoutAlgorithm->InitCanExpandCurrentWindow(false);
+    layoutAlgorithm->InitCanExpandCurrentWindow(false, &layoutWrapper);
 
     menuPattern->isSelectMenu_ = true;
-    layoutAlgorithm->InitCanExpandCurrentWindow(false);
+    layoutAlgorithm->InitCanExpandCurrentWindow(false, &layoutWrapper);
 }
 /**
  * @tc.name: MenuLayoutAlgorithmTestNg045
@@ -1813,7 +1820,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg045, TestSize.Level1)
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
     layoutAlgorithm->Measure(&layoutWrapper);
     layoutAlgorithm->Layout(&layoutWrapper);
-    layoutAlgorithm->InitCanExpandCurrentWindow(false);
+    layoutAlgorithm->InitCanExpandCurrentWindow(false, &layoutWrapper);
 }
 
 /**

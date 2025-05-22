@@ -569,8 +569,11 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPaintMethod001, TestSize.Level1)
      * @tc.steps: step2. update paint property and execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    WeakPtr<RenderContext> renderContext;
+    RefPtr<RenderContext> renderContext = AceType::MakeRefPtr<RenderContext>();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    renderContext->SetHostNode(wrapperNode);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
@@ -614,8 +617,11 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPaintMethod002, TestSize.Level1)
      * @tc.steps: step2. update paint property and execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    WeakPtr<RenderContext> renderContext;
+    RefPtr<RenderContext> renderContext = AceType::MakeRefPtr<RenderContext>();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    renderContext->SetHostNode(wrapperNode);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
@@ -653,8 +659,11 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPaintMethod003, TestSize.Level1)
      * @tc.steps: step2. update paint property and execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    WeakPtr<RenderContext> renderContext;
+    RefPtr<RenderContext> renderContext = AceType::MakeRefPtr<RenderContext>();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    renderContext->SetHostNode(wrapperNode);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);

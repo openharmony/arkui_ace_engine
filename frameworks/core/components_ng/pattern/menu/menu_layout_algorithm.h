@@ -79,7 +79,7 @@ public:
     }
 
     bool canExpandCurrentWindow_ = false;
-    void InitCanExpandCurrentWindow(bool isShowInSubWindow);
+    void InitCanExpandCurrentWindow(bool isShowInSubWindow, LayoutWrapper* layoutWrapper);
     bool HoldEmbeddedMenuPosition(LayoutWrapper* layoutWrapper);
     Rect GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuPattern);
 
@@ -172,7 +172,7 @@ private:
     bool GetIfNeedArrow(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);
     void UpdateArrowOffsetWithMenuLimit(const SizeF& menuSize, const LayoutWrapper* layoutWrapper);
     void UpdatePropArrowOffset();
-    void LimitContainerModalMenuRect(double& rectWidth, double& rectHeight);
+    void LimitContainerModalMenuRect(double& rectWidth, double& rectHeight, const RefPtr<MenuPattern>& menuPattern);
 
     // get option LayoutWrapper for measure get max width
     std::list<RefPtr<LayoutWrapper>> GetOptionsLayoutWrappper(LayoutWrapper* layoutWrapper);
@@ -211,8 +211,6 @@ private:
     OffsetF CalculateMenuPositionWithArrow(const OffsetF& menuPosition, bool didNeedArrow);
     void UpdateMenuFrameSizeWithArrow(const RefPtr<GeometryNode>& geometryNode, bool didNeedArrow);
 
-    RefPtr<PipelineContext> GetCurrentPipelineContext();
-
     void LayoutPreviewMenu(LayoutWrapper* layoutWrapper);
     void UpdatePreviewPositionAndOffset(
         RefPtr<LayoutWrapper>& previewLayoutWrapper, RefPtr<LayoutWrapper>& menuLayoutWrapper);
@@ -223,13 +221,15 @@ private:
         RefPtr<LayoutWrapper>& previewLayoutWrapper, RefPtr<LayoutWrapper>& menuLayoutWrapper);
 
     void LayoutNormalTopPreviewBottomMenu(const RefPtr<GeometryNode>& previewGeometryNode,
-        const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize, float menuItemTotalHeight);
+        const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize, float menuItemTotalHeight,
+        LayoutWrapper* layoutWrapper);
     void LayoutNormalTopPreviewBottomMenuLessThan(const RefPtr<GeometryNode>& previewGeometryNode,
         const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize);
     void LayoutNormalTopPreviewBottomMenuGreateThan(const RefPtr<GeometryNode>& previewGeometryNode,
         const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize);
     void LayoutNormalBottomPreviewTopMenu(const RefPtr<GeometryNode>& previewGeometryNode,
-        const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize, float menuItemTotalHeight);
+        const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize, float menuItemTotalHeight,
+        LayoutWrapper* layoutWrapper);
     void LayoutNormalBottomPreviewTopMenuLessThan(const RefPtr<GeometryNode>& previewGeometryNode,
         const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize);
     void LayoutNormalBottomPreviewTopMenuGreateThan(const RefPtr<GeometryNode>& previewGeometryNode,
@@ -291,6 +291,7 @@ private:
         float lastItemTopPositionY, float firstItemBottomPositionY, float parentMenuPositionY);
     float CalcSubMenuMaxHeightNoPreview(RefPtr<FrameNode> parentItem, LayoutConstraintF& childConstraint,
         float lastItemTopPositionY, float firstItemBottomPositionY, float parentMenuPositionY);
+    RefPtr<SelectTheme> GetCurrentSelectTheme(const RefPtr<FrameNode>& frameNode);
 
     std::optional<OffsetF> lastPosition_;
     OffsetF targetOffset_;

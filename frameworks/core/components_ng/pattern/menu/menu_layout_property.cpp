@@ -110,7 +110,10 @@ void MenuLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     }
     json->PutExtAttr("title", GetTitle().value_or("").c_str(), filter);
     json->PutExtAttr("offset", GetPositionOffset().value_or(OffsetF()).ToString().c_str(), filter);
-    auto context = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
     auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
     auto defaultFontSize = theme ? theme->GetMenuFontSize() : Dimension(0, DimensionUnit::FP);
     json->PutExtAttr("fontSize", GetFontSize().value_or(defaultFontSize).ToString().c_str(), filter);

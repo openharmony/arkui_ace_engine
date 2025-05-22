@@ -49,7 +49,7 @@ CanvasDrawFunction MenuItemPaintMethod::GetOverlayDrawFunction(PaintWrapper* pai
         if (topDivider && topDivider->GetParent()) {
             return;
         }
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto selectTheme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(selectTheme);
