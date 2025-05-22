@@ -534,6 +534,7 @@ HWTEST_F(SwiperIndicatorModifierMoreTestNg, SwiperIndicatorUpdateBackgroundX002,
      * @tc.expected: run success
      */
     paintMethod->UpdateBackground(&paintWrapper);
+    EXPECT_EQ(paintMethod->dotIndicatorModifier_->touchBottomType_, TouchBottomType::NONE);
 }
 
 /**
@@ -572,6 +573,7 @@ HWTEST_F(SwiperIndicatorModifierMoreTestNg, SwiperIndicatorUpdateBackgroundX003,
      * @tc.expected: run success
      */
     paintMethod->UpdateBackground(&paintWrapper);
+    EXPECT_EQ(paintMethod->dotIndicatorModifier_->touchBottomType_, TouchBottomType::START);
 }
 
 /**
@@ -595,6 +597,7 @@ HWTEST_F(SwiperIndicatorModifierMoreTestNg, UpdateAllPointCenterXAnimation001, T
      * @tc.expected: run success
      */
     modifier->UpdateAllPointCenterXAnimation(gestureState, vectorBlackPointCenterX, longPointCenterX);
+    EXPECT_TRUE(modifier->longPointRightAnimEnd_);
 }
 
 /**
@@ -611,7 +614,6 @@ HWTEST_F(SwiperIndicatorModifierMoreTestNg, UpdateAllPointCenterXAnimation002, T
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     LinearVector<float> vectorBlackPointCenterX = { 10.0f };
     std::pair<float, float> longPointCenterX = { 0.0f, 0.0f };
-    modifier->longPointLeftAnimEnd_ = true;
     modifier->longPointRightAnimEnd_ = false;
     GestureState gestureState = GestureState::GESTURE_STATE_RELEASE_RIGHT;
     /**
@@ -619,6 +621,7 @@ HWTEST_F(SwiperIndicatorModifierMoreTestNg, UpdateAllPointCenterXAnimation002, T
      * @tc.expected: run success
      */
     modifier->UpdateAllPointCenterXAnimation(gestureState, vectorBlackPointCenterX, longPointCenterX);
+    EXPECT_TRUE(modifier->longPointLeftAnimEnd_);
 }
 
 /**
