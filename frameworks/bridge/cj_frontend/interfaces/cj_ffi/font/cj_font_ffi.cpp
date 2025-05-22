@@ -45,7 +45,37 @@ VectorStringHandle FfiFontManagerGetSystemFontList()
     }
 }
 
-NativeFontInfo4Font* FfiFontManagerGetFontByName(const char* fontName)
+NativeOptionFontInfo FfiFontManagerGetFontByName(const char* fontName)
+{
+    auto container = Container::Current();
+    if (!container || !container->GetPipelineContext()) {
+        LOGE("Can not get pipelineContext.");
+        return NativeOptionFontInfo { .hasValue = false, .info = nullptr };
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    FontInfo fontInfo;
+    if (!pipelineContext->GetSystemFont(fontName, fontInfo)) {
+        LOGE("Can not get system font.");
+        return NativeOptionFontInfo { .hasValue = false, .info = nullptr };
+    }
+    return NativeOptionFontInfo {
+        .hasValue = true,
+        .info = new NativeFontInfo {
+            .path = fontInfo.path.c_str(),
+            .postScriptName = fontInfo.postScriptName.c_str(),
+            .fullName = fontInfo.fullName.c_str(),
+            .family = fontInfo.family.c_str(),
+            .subfamily = fontInfo.subfamily.c_str(),
+            .weight = fontInfo.weight,
+            .width = fontInfo.width,
+            .italic = fontInfo.italic,
+            .monoSpace = fontInfo.monoSpace,
+            .symbolic = fontInfo.symbolic
+        }
+    } ;
+}
+
+NativeFontInfo4Font* FfiFontManagerGetFontByNameV2(const char* fontName)
 {
     auto container = Container::Current();
     if (!container || !container->GetPipelineContext()) {
