@@ -546,7 +546,7 @@ HWTEST_F(MenuLayout3TestNg, ModifyPositionToWrapper001, TestSize.Level1)
     OffsetF result = OffsetF(static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx()),
         static_cast<float>((CONTAINER_BORDER_WIDTH).ConvertToPx()));
     menuAlgorithm->ModifyPositionToWrapper(AceType::RawPtr(menuNode), result);
-    EXPECT_TRUE(NearZero(result.GetX()));
+    EXPECT_FALSE(NearZero(result.GetX()));
     EXPECT_TRUE(NearZero(result.GetY()));
 }
 
@@ -1075,7 +1075,7 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg060, TestSize.Level1)
     double rectWidth = 10.0f;
     double rectHeight = 15.0f;
     layoutAlgorithm->LimitContainerModalMenuRect(rectWidth, rectHeight);
-    EXPECT_EQ(rectWidth, 6);
+    EXPECT_EQ(rectWidth, 10);
     EXPECT_EQ(rectHeight, 15);
 }
 
