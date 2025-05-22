@@ -142,7 +142,8 @@ HWTEST_F(WebModifierTest, onPageEndTest, TestSize.Level1)
     Callback_OnPageEndEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnPageEndEvent_Void>(checkCallback, contextId);
 
-    modifier_->setOnPageEnd(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnPageEndEvent_Void>(arkCallback);
+    modifier_->setOnPageEnd(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnPageFinishedEvent(std::make_shared<LoadWebPageFinishEvent>(url));
@@ -178,7 +179,8 @@ HWTEST_F(WebModifierTest, onPageBeginTest, TestSize.Level1)
     Callback_OnPageBeginEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnPageBeginEvent_Void>(checkCallback, contextId);
 
-    modifier_->setOnPageBegin(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnPageBeginEvent_Void>(arkCallback);
+    modifier_->setOnPageBegin(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnPageStartedEvent(std::make_shared<LoadWebPageStartEvent>(url));
@@ -214,7 +216,8 @@ HWTEST_F(WebModifierTest, onProgressChangeTest, TestSize.Level1)
     Callback_OnProgressChangeEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnProgressChangeEvent_Void>(checkCallback, contextId);
 
-    modifier_->setOnProgressChange(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnProgressChangeEvent_Void>(arkCallback);
+    modifier_->setOnProgressChange(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnProgressChangeEvent(std::make_shared<LoadWebProgressChangeEvent>(newProgress));
@@ -250,7 +253,8 @@ HWTEST_F(WebModifierTest, onTitleReceiveTest, TestSize.Level1)
     Callback_OnTitleReceiveEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnTitleReceiveEvent_Void>(checkCallback, contextId);
 
-    modifier_->setOnTitleReceive(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnTitleReceiveEvent_Void>(arkCallback);
+    modifier_->setOnTitleReceive(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnTitleReceiveEvent(std::make_shared<LoadWebTitleReceiveEvent>(title));
@@ -284,7 +288,8 @@ HWTEST_F(WebModifierTest, onGeolocationHideTest, TestSize.Level1)
     Callback_Void arkCallback =
         Converter::ArkValue<Callback_Void>(checkCallback, contextId);
 
-    modifier_->setOnGeolocationHide(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    modifier_->setOnGeolocationHide(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnGeolocationHideEvent(std::make_shared<LoadWebGeolocationHideEvent>(origin));
@@ -322,7 +327,8 @@ HWTEST_F(WebModifierTest, onGeolocationShowTest, TestSize.Level1)
     Callback_OnGeolocationShowEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnGeolocationShowEvent_Void>(checkCallback, contextId);
 
-    modifier_->setOnGeolocationShow(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnGeolocationShowEvent_Void>(arkCallback);
+    modifier_->setOnGeolocationShow(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnGeolocationShowEvent(std::make_shared<LoadWebGeolocationShowEvent>(origin, webGeolocation));
@@ -358,7 +364,8 @@ HWTEST_F(WebModifierTest, onRequestSelectedTest, TestSize.Level1)
     Callback_Void arkCallback =
         Converter::ArkValue<Callback_Void>(checkCallback, contextId);
 
-    modifier_->setOnRequestSelected(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    modifier_->setOnRequestSelected(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnRequestFocusEvent(std::make_shared<BaseEventInfo>(type));
@@ -404,7 +411,8 @@ HWTEST_F(WebModifierTest, onAlertTest, TestSize.Level1)
     Callback_OnAlertEvent_Boolean arkCallback =
         Converter::ArkValue<Callback_OnAlertEvent_Boolean>(nullptr, checkCallback, contextId);
 
-    modifier_->setOnAlert(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnAlertEvent_Boolean>(arkCallback);
+    modifier_->setOnAlert(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent.has_value());
     EXPECT_FALSE(webEventHub->FireOnCommonDialogEvent(
@@ -459,7 +467,8 @@ HWTEST_F(WebModifierTest, onBeforeUnloadTest, TestSize.Level1)
     Callback_OnBeforeUnloadEvent_Boolean arkCallback =
         Converter::ArkValue<Callback_OnBeforeUnloadEvent_Boolean>(nullptr, checkCallback, contextId);
 
-    modifier_->setOnBeforeUnload(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnBeforeUnloadEvent_Boolean>(arkCallback);
+    modifier_->setOnBeforeUnload(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent.has_value());
     EXPECT_FALSE(webEventHub->FireOnCommonDialogEvent(
@@ -514,7 +523,8 @@ HWTEST_F(WebModifierTest, onConfirmTest, TestSize.Level1)
     Callback_OnConfirmEvent_Boolean arkCallback =
         Converter::ArkValue<Callback_OnConfirmEvent_Boolean>(nullptr, checkCallback, contextId);
 
-    modifier_->setOnConfirm(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnConfirmEvent_Boolean>(arkCallback);
+    modifier_->setOnConfirm(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent.has_value());
     EXPECT_FALSE(webEventHub->FireOnCommonDialogEvent(
@@ -569,7 +579,8 @@ HWTEST_F(WebModifierTest, onPromptTest, TestSize.Level1)
     Callback_OnPromptEvent_Boolean arkCallback =
         Converter::ArkValue<Callback_OnPromptEvent_Boolean>(nullptr, checkCallback, contextId);
 
-    modifier_->setOnPrompt(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnPromptEvent_Boolean>(arkCallback);
+    modifier_->setOnPrompt(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent.has_value());
     EXPECT_FALSE(webEventHub->FireOnCommonDialogEvent(
@@ -621,7 +632,8 @@ HWTEST_F(WebModifierTest, onConsoleTest, TestSize.Level1)
     Callback_OnConsoleEvent_Boolean arkCallback =
         Converter::ArkValue<Callback_OnConsoleEvent_Boolean>(nullptr, checkCallback, contextId);
 
-    modifier_->setOnConsole(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnConsoleEvent_Boolean>(arkCallback);
+    modifier_->setOnConsole(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent.has_value());
     const auto event = webEventHub->GetOnConsoleEvent();
@@ -674,7 +686,8 @@ HWTEST_F(WebModifierTest, onErrorReceiveTest, TestSize.Level1)
     Callback_OnErrorReceiveEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnErrorReceiveEvent_Void>(checkCallback, contextId);
 
-    modifier_->setOnErrorReceive(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnErrorReceiveEvent_Void>(arkCallback);
+    modifier_->setOnErrorReceive(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnErrorReceiveEvent(std::make_shared<ReceivedErrorEvent>(webRequest, webError));
@@ -722,7 +735,8 @@ HWTEST_F(WebModifierTest, onHttpErrorReceiveTest, TestSize.Level1)
     Callback_OnHttpErrorReceiveEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnHttpErrorReceiveEvent_Void>(checkCallback, contextId);
 
-    modifier_->setOnHttpErrorReceive(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnHttpErrorReceiveEvent_Void>(arkCallback);
+    modifier_->setOnHttpErrorReceive(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnHttpErrorReceiveEvent(std::make_shared<ReceivedHttpErrorEvent>(webRequest, webResponse));
@@ -772,7 +786,8 @@ HWTEST_F(WebModifierTest, onDownloadStartTest, TestSize.Level1)
     Callback_OnDownloadStartEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnDownloadStartEvent_Void>(checkCallback, contextId);
 
-    modifier_->setOnDownloadStart(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnDownloadStartEvent_Void>(arkCallback);
+    modifier_->setOnDownloadStart(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnDownloadStartEvent(
@@ -816,7 +831,8 @@ HWTEST_F(WebModifierTest, onRefreshAccessedHistoryTest, TestSize.Level1)
     Callback_OnRefreshAccessedHistoryEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnRefreshAccessedHistoryEvent_Void>(checkCallback, contextId);
 
-    modifier_->setOnRefreshAccessedHistory(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnRefreshAccessedHistoryEvent_Void>(arkCallback);
+    modifier_->setOnRefreshAccessedHistory(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnRefreshAccessedHistoryEvent(std::make_shared<RefreshAccessedHistoryEvent>(url, isRefreshed));
@@ -865,7 +881,8 @@ HWTEST_F(WebModifierTest, onUrlLoadInterceptTest, TestSize.Level1)
     Type_WebAttribute_onUrlLoadIntercept_callback arkCallback =
         Converter::ArkValue<Type_WebAttribute_onUrlLoadIntercept_callback>(nullptr, checkCallback, contextId);
 
-    modifier_->setOnUrlLoadIntercept(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Type_WebAttribute_onUrlLoadIntercept_callback>(arkCallback);
+    modifier_->setOnUrlLoadIntercept(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent.has_value());
     const auto event = webEventHub->GetOnUrlLoadInterceptEvent();
@@ -906,7 +923,8 @@ HWTEST_F(WebModifierTest, onRenderExitedTest, TestSize.Level1)
     Callback_OnRenderExitedEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnRenderExitedEvent_Void>(checkCallback, contextId);
 
-    modifier_->setOnRenderExited0(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnRenderExitedEvent_Void>(arkCallback);
+    modifier_->setOnRenderExited0(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnRenderExitedEvent(std::make_shared<RenderExitedEvent>(
@@ -949,7 +967,8 @@ HWTEST_F(WebModifierTest, onShowFileSelectorTest, TestSize.Level1)
     Callback_OnShowFileSelectorEvent_Boolean arkCallback =
         Converter::ArkValue<Callback_OnShowFileSelectorEvent_Boolean>(nullptr, checkCallback, contextId);
 
-    modifier_->setOnShowFileSelector(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnShowFileSelectorEvent_Boolean>(arkCallback);
+    modifier_->setOnShowFileSelector(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent.has_value());
     const auto event = webEventHub->GetOnFileSelectorShowEvent();
@@ -993,7 +1012,8 @@ HWTEST_F(WebModifierTest, onResourceLoadTest, TestSize.Level1)
     Callback_OnResourceLoadEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnResourceLoadEvent_Void>(checkCallback, contextId);
 
-    modifier_->setOnResourceLoad(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnResourceLoadEvent_Void>(arkCallback);
+    modifier_->setOnResourceLoad(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnResourceLoadEvent(std::make_shared<ResourceLoadEvent>(url));
@@ -1027,7 +1047,8 @@ HWTEST_F(WebModifierTest, onFullScreenExitTest, TestSize.Level1)
     Callback_Void arkCallback =
         Converter::ArkValue<Callback_Void>(checkCallback, contextId);
 
-    modifier_->setOnFullScreenExit(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    modifier_->setOnFullScreenExit(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnFullScreenExitEvent(std::make_shared<BaseEventInfo>(type));
@@ -1068,7 +1089,8 @@ HWTEST_F(WebModifierTest, onFullScreenEnterTest, TestSize.Level1)
     OnFullScreenEnterCallback arkCallback =
         Converter::ArkValue<OnFullScreenEnterCallback>(checkCallback, contextId);
 
-    modifier_->setOnFullScreenEnter(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_OnFullScreenEnterCallback>(arkCallback);
+    modifier_->setOnFullScreenEnter(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnFullScreenEnterEvent(std::make_shared<FullScreenEnterEvent>(handler, width, height));
@@ -1110,7 +1132,8 @@ HWTEST_F(WebModifierTest, onScaleChangeTest, TestSize.Level1)
     Callback_OnScaleChangeEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnScaleChangeEvent_Void>(checkCallback, contextId);
 
-    modifier_->setOnScaleChange(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnScaleChangeEvent_Void>(arkCallback);
+    modifier_->setOnScaleChange(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnScaleChangeEvent(std::make_shared<ScaleChangeEvent>(oldScale, newScale));
@@ -1156,7 +1179,8 @@ HWTEST_F(WebModifierTest, onHttpAuthRequestTest, TestSize.Level1)
     Callback_OnHttpAuthRequestEvent_Boolean arkCallback =
         Converter::ArkValue<Callback_OnHttpAuthRequestEvent_Boolean>(nullptr, checkCallback, contextId);
 
-    modifier_->setOnHttpAuthRequest(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnHttpAuthRequestEvent_Boolean>(arkCallback);
+    modifier_->setOnHttpAuthRequest(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent.has_value());
     const auto event = webEventHub->GetOnHttpAuthRequestEvent();
@@ -1207,8 +1231,8 @@ HWTEST_F(WebModifierTest, onInterceptRequestTest, TestSize.Level1)
 
     Callback_OnInterceptRequestEvent_WebResourceResponse arkCallback =
         Converter::ArkValue<Callback_OnInterceptRequestEvent_WebResourceResponse>(nullptr, checkCallback, contextId);
-
-    modifier_->setOnInterceptRequest(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnInterceptRequestEvent_WebResourceResponse>(arkCallback);
+    modifier_->setOnInterceptRequest(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent.has_value());
     const auto event = webEventHub->GetOnInterceptRequestEvent();
@@ -1257,8 +1281,8 @@ HWTEST_F(WebModifierTest, onPermissionRequestTest, TestSize.Level1)
 
     Callback_OnPermissionRequestEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnPermissionRequestEvent_Void>(checkCallback, contextId);
-
-    modifier_->setOnPermissionRequest(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnPermissionRequestEvent_Void>(arkCallback);
+    modifier_->setOnPermissionRequest(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnPermissionRequestEvent(std::make_shared<WebPermissionRequestEvent>(webPermissionRequest));
@@ -1294,8 +1318,8 @@ HWTEST_F(WebModifierTest, onScreenCaptureRequestTest, TestSize.Level1)
 
     Callback_OnScreenCaptureRequestEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnScreenCaptureRequestEvent_Void>(checkCallback, contextId);
-
-    modifier_->setOnScreenCaptureRequest(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnScreenCaptureRequestEvent_Void>(arkCallback);
+    modifier_->setOnScreenCaptureRequest(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnScreenCaptureRequestEvent(std::make_shared<WebScreenCaptureRequestEvent>(request));
@@ -1337,8 +1361,8 @@ HWTEST_F(WebModifierTest, onContextMenuShowTest, TestSize.Level1)
 
     Callback_OnContextMenuShowEvent_Boolean arkCallback =
         Converter::ArkValue<Callback_OnContextMenuShowEvent_Boolean>(nullptr, checkCallback, contextId);
-
-    modifier_->setOnContextMenuShow(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnContextMenuShowEvent_Boolean>(arkCallback);
+    modifier_->setOnContextMenuShow(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent.has_value());
     const auto event = webEventHub->GetOnContextMenuShowEvent();
@@ -1380,8 +1404,8 @@ HWTEST_F(WebModifierTest, onContextMenuHideTest, TestSize.Level1)
 
     OnContextMenuHideCallback arkCallback =
         Converter::ArkValue<OnContextMenuHideCallback>(checkCallback, contextId);
-
-    modifier_->setOnContextMenuHide(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_OnContextMenuHideCallback>(arkCallback);
+    modifier_->setOnContextMenuHide(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnContextMenuHideEvent(std::make_shared<BaseEventInfo>(type));
@@ -1421,8 +1445,8 @@ HWTEST_F(WebModifierTest, onSearchResultReceiveTest, TestSize.Level1)
 
     Callback_OnSearchResultReceiveEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnSearchResultReceiveEvent_Void>(checkCallback, contextId);
-
-    modifier_->setOnSearchResultReceive(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnSearchResultReceiveEvent_Void>(arkCallback);
+    modifier_->setOnSearchResultReceive(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnSearchResultReceiveEvent(std::make_shared<SearchResultReceiveEvent>(
@@ -1463,8 +1487,8 @@ HWTEST_F(WebModifierTest, onScrollTest, TestSize.Level1)
 
     Callback_OnScrollEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnScrollEvent_Void>(checkCallback, contextId);
-
-    modifier_->setOnScroll(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnScrollEvent_Void>(arkCallback);
+    modifier_->setOnScroll(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnScrollEvent(std::make_shared<WebOnScrollEvent>(xOffset, yOffset));
@@ -1507,8 +1531,8 @@ HWTEST_F(WebModifierTest, onSslErrorEventReceiveTest, TestSize.Level1)
 
     Callback_OnSslErrorEventReceiveEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnSslErrorEventReceiveEvent_Void>(checkCallback, contextId);
-
-    modifier_->setOnSslErrorEventReceive(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnSslErrorEventReceiveEvent_Void>(arkCallback);
+    modifier_->setOnSslErrorEventReceive(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnSslErrorRequestEvent(std::make_shared<WebSslErrorEvent>(
@@ -1537,8 +1561,7 @@ HWTEST_F(WebModifierTest, onSslErrorEventTest, TestSize.Level1)
     std::string url = "url";
     std::string originalUrl = "originalUrl";
     std::string referrer = "referrer";
-    bool isFatalError = true;
-    bool isMainFrame = true;
+    bool isFatalError = true, isMainFrame = true;
 
     struct CheckEvent {
         int32_t resourceId;
@@ -1566,8 +1589,8 @@ HWTEST_F(WebModifierTest, onSslErrorEventTest, TestSize.Level1)
     };
 
     OnSslErrorEventCallback arkCallback = Converter::ArkValue<OnSslErrorEventCallback>(checkCallback, contextId);
-
-    modifier_->setOnSslErrorEvent(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_OnSslErrorEventCallback>(arkCallback);
+    modifier_->setOnSslErrorEvent(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnAllSslErrorRequestEvent(std::make_shared<WebAllSslErrorEvent>(
@@ -1622,8 +1645,8 @@ HWTEST_F(WebModifierTest, onClientAuthenticationRequestTest, TestSize.Level1)
 
     Callback_OnClientAuthenticationEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnClientAuthenticationEvent_Void>(checkCallback, contextId);
-
-    modifier_->setOnClientAuthenticationRequest(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnClientAuthenticationEvent_Void>(arkCallback);
+    modifier_->setOnClientAuthenticationRequest(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnSslSelectCertRequestEvent(std::make_shared<WebSslSelectCertEvent>(
@@ -1673,8 +1696,8 @@ HWTEST_F(WebModifierTest, onWindowNewTest, TestSize.Level1)
 
     Callback_OnWindowNewEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnWindowNewEvent_Void>(checkCallback, contextId);
-
-    modifier_->setOnWindowNew(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnWindowNewEvent_Void>(arkCallback);
+    modifier_->setOnWindowNew(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnWindowNewEvent(std::make_shared<WebWindowNewEvent>(
@@ -1712,8 +1735,8 @@ HWTEST_F(WebModifierTest, onWindowExitTest, TestSize.Level1)
 
     Callback_Void arkCallback =
         Converter::ArkValue<Callback_Void>(checkCallback, contextId);
-
-    modifier_->setOnWindowExit(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    modifier_->setOnWindowExit(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnWindowExitEvent(std::make_shared<BaseEventInfo>(type));
@@ -1750,8 +1773,8 @@ HWTEST_F(WebModifierTest, onTouchIconUrlReceivedTest, TestSize.Level1)
 
     Callback_OnTouchIconUrlReceivedEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnTouchIconUrlReceivedEvent_Void>(checkCallback, contextId);
-
-    modifier_->setOnTouchIconUrlReceived(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnTouchIconUrlReceivedEvent_Void>(arkCallback);
+    modifier_->setOnTouchIconUrlReceived(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnTouchIconUrlEvent(std::make_shared<TouchIconUrlEvent>(url, precomposed));
@@ -1787,8 +1810,8 @@ HWTEST_F(WebModifierTest, onPageVisibleTest, TestSize.Level1)
 
     Callback_OnPageVisibleEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnPageVisibleEvent_Void>(checkCallback, contextId);
-
-    modifier_->setOnPageVisible(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnPageVisibleEvent_Void>(arkCallback);
+    modifier_->setOnPageVisible(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnPageVisibleEvent(std::make_shared<PageVisibleEvent>(url));
@@ -1823,8 +1846,8 @@ HWTEST_F(WebModifierTest, onDataResubmittedTest, TestSize.Level1)
 
     Callback_OnDataResubmittedEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnDataResubmittedEvent_Void>(checkCallback, contextId);
-
-    modifier_->setOnDataResubmitted(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnDataResubmittedEvent_Void>(arkCallback);
+    modifier_->setOnDataResubmitted(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnDataResubmittedEvent(std::make_shared<DataResubmittedEvent>(handler));
@@ -1860,8 +1883,8 @@ HWTEST_F(WebModifierTest, onAudioStateChangedTest, TestSize.Level1)
 
     Callback_OnAudioStateChangedEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnAudioStateChangedEvent_Void>(checkCallback, contextId);
-
-    modifier_->setOnAudioStateChanged(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnAudioStateChangedEvent_Void>(arkCallback);
+    modifier_->setOnAudioStateChanged(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnAudioStateChangedEvent(std::make_shared<AudioStateChangedEvent>(playing));
@@ -1899,8 +1922,8 @@ HWTEST_F(WebModifierTest, onFirstContentfulPaintTest, TestSize.Level1)
 
     Callback_OnFirstContentfulPaintEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnFirstContentfulPaintEvent_Void>(checkCallback, contextId);
-
-    modifier_->setOnFirstContentfulPaint(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnFirstContentfulPaintEvent_Void>(arkCallback);
+    modifier_->setOnFirstContentfulPaint(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnFirstContentfulPaintEvent(std::make_shared<FirstContentfulPaintEvent>(
@@ -1941,8 +1964,8 @@ HWTEST_F(WebModifierTest, onFirstMeaningfulPaintTest, TestSize.Level1)
 
     OnFirstMeaningfulPaintCallback arkCallback =
         Converter::ArkValue<OnFirstMeaningfulPaintCallback>(checkCallback, contextId);
-
-    modifier_->setOnFirstMeaningfulPaint(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_OnFirstMeaningfulPaintCallback>(arkCallback);
+    modifier_->setOnFirstMeaningfulPaint(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnFirstMeaningfulPaintEvent(std::make_shared<FirstMeaningfulPaintEvent>(
@@ -1993,8 +2016,8 @@ HWTEST_F(WebModifierTest, onLargestContentfulPaintTest, TestSize.Level1)
     };
 
     auto arkCallback = Converter::ArkValue<OnLargestContentfulPaintCallback>(checkCallback, contextId);
-
-    modifier_->setOnLargestContentfulPaint(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_OnLargestContentfulPaintCallback>(arkCallback);
+    modifier_->setOnLargestContentfulPaint(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnLargestContentfulPaintEvent(std::make_shared<LargestContentfulPaintEvent>(navigationStartTime,
@@ -2044,8 +2067,8 @@ HWTEST_F(WebModifierTest, onLoadInterceptTest, TestSize.Level1)
 
     Callback_OnLoadInterceptEvent_Boolean arkCallback =
         Converter::ArkValue<Callback_OnLoadInterceptEvent_Boolean>(nullptr, checkCallback, contextId);
-
-    modifier_->setOnLoadIntercept(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnLoadInterceptEvent_Boolean>(arkCallback);
+    modifier_->setOnLoadIntercept(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent.has_value());
     const auto event = webEventHub->GetOnLoadInterceptEvent();
@@ -2083,8 +2106,8 @@ HWTEST_F(WebModifierTest, onControllerAttachedTest, TestSize.Level1)
 
     Callback_Void arkCallback =
         Converter::ArkValue<Callback_Void>(checkCallback, contextId);
-
-    modifier_->setOnControllerAttached(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    modifier_->setOnControllerAttached(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     auto callback = webPattern->GetOnControllerAttachedCallback();
