@@ -1031,7 +1031,7 @@ void JSViewPopups::ParseMenuMaskType(const JSRef<JSObject>& menuOptions, NG::Men
             auto blurStyle = backgroundBlurStyleValue->ToNumber<int32_t>();
             if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
                 blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
-                menuParam.maskType->maskBackGroundBlueStyle = static_cast<BlurStyle>(blurStyle);
+                menuParam.maskType->maskBackGroundBlurStyle = static_cast<BlurStyle>(blurStyle);
             }
         }
     }

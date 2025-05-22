@@ -823,50 +823,23 @@ static RefPtr<FrameNode> CreateFilterColumnNode()
     return columnNode;
 }
 
-static void ShowFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<OverlayManager>& manager,
-    const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& menuWrapperNode, const RefPtr<Container>& container)
+static RefPtr<UINode> GetFilterParentNode(
+    const RefPtr<UINode>& targetNode, const RefPtr<OverlayManager>& manager, bool isShowInSubWindow)
 {
-    CHECK_NULL_VOID(targetNode && manager && columnNode && menuWrapperNode && container);
-    auto parent = targetNode->GetParent();
-    CHECK_NULL_VOID(parent);
-    while (parent->GetDepth() != 1) {
-        parent = parent->GetParent();
-        CHECK_NULL_VOID(parent);
-    }
-    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    auto menuNode = menuWrapperPattern->GetMenu();
-    CHECK_NULL_VOID(menuNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto isShowInSubWindow = layoutProperty->GetShowInSubWindowValue(true);
-    auto showFilter = [columnNode, manager, menuWrapperNode](const RefPtr<UINode>& parent) {
-        columnNode->MountToParent(parent);
-        columnNode->OnMountToParentDone();
-        manager->SetHasFilter(true);
-        manager->SetFilterActive(true);
-        manager->SetFilterColumnNode(columnNode);
-        parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
-        manager->ShowFilterAnimation(columnNode, menuWrapperNode);
-    };
-    if ((menuWrapperPattern->GetMenuMaskEnable() &&
-            (menuPattern->GetMenuType() == MenuType::MENU || menuWrapperPattern->GetIsOpenMenu()) &&
-            !isShowInSubWindow)) {
-        auto rootNodeWeak = manager->GetRootNode();
-        auto rootNode = rootNodeWeak.Upgrade();
-        CHECK_NULL_VOID(rootNode);
-        showFilter(rootNode);
-    } else if (container->IsSceneBoardWindow()) {
-        auto windowScene = manager->FindWindowScene(targetNode);
-        manager->MountFilterToWindowScene(columnNode, windowScene);
-        manager->ShowFilterAnimation(columnNode, menuWrapperNode);
-    } else if (container->IsUIExtensionWindow()) {
-        // mount filter node on subwindow to ensure filter node's size equals to host window's size
-        menuWrapperPattern->SetIsFilterInSubwindow(true);
+    CHECK_NULL_RETURN((targetNode && manager), nullptr);
+    RefPtr<UINode> parent = nullptr;
+    if (isShowInSubWindow) {
+        parent = targetNode->GetParent();
+        CHECK_NULL_RETURN(parent, nullptr);
+        while (parent->GetDepth() != 1) {
+            parent = parent->GetParent();
+            CHECK_NULL_RETURN(parent, nullptr);
+        }
     } else {
-        showFilter(parent);
+        auto rootNodeWeak = manager->GetRootNode();
+        parent = rootNodeWeak.Upgrade();
     }
+    return parent;
 }
 
 static void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& menuWrapperNode)
@@ -895,8 +868,31 @@ static void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNod
         // insert columnNode to rootNode
         auto columnNode = CreateFilterColumnNode();
         CHECK_NULL_VOID(columnNode);
+        // set filter
         menuWrapperPattern->SetFilterColumnNode(columnNode);
-        ShowFilter(targetNode, manager, columnNode, menuWrapperNode, container);
+        auto menuNode = menuWrapperPattern->GetMenu();
+        auto menuPattern = menuNode ? menuNode->GetPattern<MenuPattern>() : nullptr;
+        auto layoutProperty = menuPattern ? menuPattern->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
+        CHECK_NULL_VOID(layoutProperty);
+        auto isShowInSubWindow = layoutProperty->GetShowInSubWindowValue(true);
+        if (container->IsSceneBoardWindow()) {
+            auto windowScene = manager->FindWindowScene(targetNode);
+            manager->MountFilterToWindowScene(columnNode, windowScene);
+            manager->ShowFilterAnimation(columnNode, menuWrapperNode);
+        } else if (container->IsUIExtensionWindow() && isShowInSubWindow) {
+            // mount filter node on subwindow to ensure filter node's size equals to host window's size
+            menuWrapperPattern->SetIsFilterInSubwindow(true);
+        } else {
+            auto parent = GetFilterParentNode(targetNode, manager, isShowInSubWindow);
+            CHECK_NULL_VOID(parent);
+            columnNode->MountToParent(parent);
+            columnNode->OnMountToParentDone();
+            manager->SetHasFilter(true);
+            manager->SetFilterActive(true);
+            manager->SetFilterColumnNode(columnNode);
+            parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            manager->ShowFilterAnimation(columnNode, menuWrapperNode);
+        }
     }
 }
 
@@ -1090,35 +1086,7 @@ void UpdateMenuMaskType(const RefPtr<FrameNode>& wrapperNode)
     CHECK_NULL_VOID(menuWrapperPattern);
     auto maskEnable = menuWrapperPattern->GetMenuMaskEnable();
     if (maskEnable) {
-        auto context = wrapperNode->GetContext();
-        CHECK_NULL_VOID(context);
-        auto container = Container::GetContainer(context->GetInstanceId());
-        CHECK_NULL_VOID(container);
-        if (container->IsUIExtensionWindow()) {
-            menuWrapperPattern->UpdateFilterMaskType();
-        } else {
-            auto manager = context->GetOverlayManager();
-            CHECK_NULL_VOID(manager);
-            manager->UpdateFilterMaskType(wrapperNode);
-        }
-    }
-}
-
-void UpdateMenuMask(
-    const RefPtr<FrameNode>& wrapperNode, int32_t targetId, const std::string& targetTag, const MenuParam& menuParam)
-{
-    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    if (menuParam.maskEnable.value_or(false)) {
-        menuWrapperPattern->SetMenuMaskEnable(menuParam.maskEnable.value());
-        if (menuParam.maskType.has_value() && menuParam.maskType->maskColor.has_value()) {
-            menuWrapperPattern->SetMenuMaskColor(menuParam.maskType->maskColor.value());
-        }
-        if (menuParam.maskType.has_value() && menuParam.maskType->maskBackGroundBlueStyle.has_value()) {
-            menuWrapperPattern->SetMenuMaskblurStyle(menuParam.maskType->maskBackGroundBlueStyle.value());
-        }
-        auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
-        SetFilter(targetNode, wrapperNode);
+        menuWrapperPattern->UpdateFilterMaskType();
     }
 }
 } // namespace
@@ -1269,8 +1237,10 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     scroll->MarkModifyDone();
     menuNode->MarkModifyDone();
 
-    if (type == MenuType::MENU) {
-        UpdateMenuMask(wrapperNode, targetId, targetTag, menuParam);
+    if (menuParam.maskEnable.value_or(false)) {
+        menuWrapperPattern->SetMenuParam(menuParam);
+        auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
+        SetFilter(targetNode, wrapperNode);
     }
     return wrapperNode;
 }
@@ -1393,11 +1363,9 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
         auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
         ContextMenuChildMountProc(targetNode, wrapperNode, previewNode, menuNode, menuParam);
         MountTextNode(wrapperNode, previewCustomNode);
-    } else if (type == MenuType::MENU) {
-        if (menuParam.maskEnable.value_or(false)) {
-            auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
-            SetFilter(targetNode, wrapperNode);
-        }
+    } else if (type == MenuType::MENU && menuParam.maskEnable.value_or(false)) {
+        auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
+        SetFilter(targetNode, wrapperNode);
     }
     return wrapperNode;
 }

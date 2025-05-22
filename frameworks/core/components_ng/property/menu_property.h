@@ -49,7 +49,7 @@ enum class ContextMenuRegisterType : char {
 
 struct MenuMaskType {
     std::optional<Color> maskColor;
-    std::optional<BlurStyle> maskBackGroundBlueStyle;
+    std::optional<BlurStyle> maskBackGroundBlurStyle;
 };
 
 struct MenuParam {

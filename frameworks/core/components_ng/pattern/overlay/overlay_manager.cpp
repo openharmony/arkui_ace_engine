@@ -2735,7 +2735,8 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
 
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    if (menuWrapperPattern->IsContextMenu() && menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
+    if ((menuWrapperPattern->IsContextMenu() || menuWrapperPattern->GetIsOpenMenu()) &&
+        (menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE || menuWrapperPattern->GetMenuMaskEnable())) {
         auto filterNode = menuWrapperPattern->GetFilterColumnNode();
         if (filterNode && menuWrapperPattern->GetIsFilterInSubwindow()) {
             SetHasFilter(true);
@@ -6998,14 +6999,13 @@ void OverlayManager::RemoveMenuFilter(const RefPtr<FrameNode>& menuWrapper, bool
     }
 
     if (hasAnimation) {
-        overlayManager->ShowFilterDisappearAnimation(filterNode, menuWrapper);
+        overlayManager->ShowFilterDisappearAnimation(filterNode);
     } else {
         overlayManager->RemoveFilterWithNode(filterNode);
     }
 }
 
-void OverlayManager::ShowFilterDisappearAnimation(
-    const RefPtr<FrameNode>& filterNode, const RefPtr<FrameNode>& menuWrapper)
+void OverlayManager::ShowFilterDisappearAnimation(const RefPtr<FrameNode>& filterNode)
 {
     CHECK_NULL_VOID(filterNode);
     auto filterContext = filterNode->GetRenderContext();
@@ -7030,20 +7030,12 @@ void OverlayManager::ShowFilterDisappearAnimation(
     AddFilterOnDisappear(filterNode->GetId());
     AnimationUtils::Animate(
         option,
-        [filterContext, menuWrapper]() {
+        [filterContext]() {
             CHECK_NULL_VOID(filterContext);
-            auto wrapperPattern = menuWrapper ? menuWrapper->GetPattern<MenuWrapperPattern>() : nullptr;
-            auto maskEnable = wrapperPattern ? wrapperPattern->GetMenuMaskEnable() : false;
             BlurStyleOption styleOption;
-            Color maskColor = Color::TRANSPARENT;
-            BlurStyle maskBlurStyle = BlurStyle::NO_MATERIAL;
-            if (maskEnable) {
-                maskColor = wrapperPattern->GetMenuMaskColor();
-                maskBlurStyle = wrapperPattern->GetMenuMaskblurStyle();
-            }
-            styleOption.blurStyle = maskBlurStyle;
+            styleOption.blurStyle = BlurStyle::NO_MATERIAL;
             filterContext->UpdateBackBlurStyle(styleOption);
-            filterContext->UpdateBackgroundColor(maskColor);
+            filterContext->UpdateBackgroundColor(Color::TRANSPARENT);
         },
         option.GetOnFinishEvent());
 }
@@ -8144,9 +8136,6 @@ void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode, co
     filterRenderContext->UpdateBackBlurRadius(Dimension(0.0f));
     if (maskEnable || !menuTheme->GetHasBackBlur()) {
         filterRenderContext->UpdateBackgroundColor(maskColor.ChangeOpacity(0.0f));
-        if (maskEnable) {
-            filterRenderContext->UpdateBackBlurStyle(styleOption);
-        }
     }
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "start show filter animation");
     AnimationUtils::Animate(
@@ -8710,22 +8699,6 @@ void OverlayManager::RemoveFilterOnDisappear(int32_t filterId)
 bool OverlayManager::IsFilterOnDisappear(int32_t filterId) const
 {
     return onDisappearFilterIds_.find(filterId) != onDisappearFilterIds_.end();
-}
-
-void OverlayManager::UpdateFilterMaskType(const RefPtr<FrameNode>& menuWrapperNode)
-{
-    CHECK_NULL_VOID(menuWrapperNode);
-    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    auto filterNode = menuWrapperPattern->GetFilterColumnNode();
-    if (filterNode) {
-        BlurStyleOption styleOption;
-        styleOption.blurStyle = menuWrapperPattern->GetMenuMaskblurStyle();
-        auto filterRenderContext = filterNode->GetRenderContext();
-        CHECK_NULL_VOID(filterRenderContext);
-        filterRenderContext->UpdateBackBlurStyle(styleOption);
-        filterRenderContext->UpdateBackgroundColor(menuWrapperPattern->GetMenuMaskColor());
-    }
 }
 
 bool OverlayManager::IsNeedAvoidFoldCrease(
