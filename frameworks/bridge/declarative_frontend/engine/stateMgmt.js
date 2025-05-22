@@ -6363,6 +6363,10 @@ class ViewPU extends PUV2ViewBase {
         }
         // tell UINodeRegisterProxy that all elmtIds under
         // this ViewPU should be treated as already unregistered
+        // un-register all repeat sub-components
+        this.elmtId2Repeat_.forEach((repeat) => {
+            repeat.aboutToBeDeleted();
+        });
         
         // purge the elmtIds owned by this viewPU from the updateFuncByElmtId and also the state variable dependent elmtIds
         Array.from(this.updateFuncByElmtId.keys()).forEach((elmtId) => {
@@ -10126,6 +10130,11 @@ class __RepeatItemPU {
             (_c = this._observedIndex) === null || _c === void 0 ? void 0 : _c.set(newIndex);
         }
     }
+    aboutToBeDeleted() {
+        var _a;
+        this._observedItem.aboutToBeDeleted();
+        (_a = this._observedIndex) === null || _a === void 0 ? void 0 : _a.aboutToBeDeleted();
+    }
 }
 // Framework internal, deep observation
 // Using @ObservedV2_Internal instead of @ObservedV2 to avoid forcing V2 usage.
@@ -10280,6 +10289,16 @@ class __Repeat {
         this.config.onMoveHandler = handler;
         return this;
     }
+    // un-register all repeat sub-components
+    aboutToBeDeleted() {
+        if (this.impl instanceof __RepeatImpl) {
+            this.impl.getKey2Item().forEach((itemInfo) => {
+                if (itemInfo.repeatItem && itemInfo.repeatItem instanceof __RepeatItemPU) {
+                    itemInfo.repeatItem.aboutToBeDeleted();
+                }
+            });
+        }
+    }
     // normalize template options
     normTemplateOptions(options) {
         const value = (options && Number.isInteger(options.cachedCount) && options.cachedCount >= 0)
@@ -10324,6 +10343,9 @@ class __RepeatImpl {
         this.mkRepeatItem_ = config.mkRepeatItem;
         this.onMoveHandler_ = config.onMoveHandler;
         isInitialRender ? this.initialRender() : this.reRender();
+    }
+    getKey2Item() {
+        return this.key2Item_;
     }
     genKeys() {
         const key2Item = new Map();
@@ -10414,6 +10436,10 @@ class __RepeatImpl {
         // keep  this.id2item_. by removing all entries for remaining
         // deleted items
         deletedKeysAndIndex.forEach(delItem => {
+            if (delItem && delItem.repeatItem && ('aboutToBeDeleted' in delItem.repeatItem)) {
+                // delete repeatItem property
+                delItem.repeatItem.aboutToBeDeleted();
+            }
             this.key2Item_.delete(delItem.key);
         });
         // Finish up for.each update
