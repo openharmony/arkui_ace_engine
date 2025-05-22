@@ -2476,4 +2476,37 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder36, TestSize.Level1)
     lazyForEachBuilder->PaintDebugBoundaryTreeAll(true);
     EXPECT_EQ(lazyForEachBuilder->expiringItem_.size(), 3);
 }
+
+/**
+ * @tc.name: LazyForEachBuilder37
+ * @tc.desc: Test the NotifyColorModeChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder37, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Invoke lazyForEach Create function.
+     * @tc.expected: Create lazyForEachBuilder.
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    /**
+     * @tc.steps: step2. Create node and lazyForEach expiringItem_ and cachedItems_.
+     */
+    auto node = AceType::MakeRefPtr<NG::FrameNode>(V2::TEXT_ETS_TAG, 666, AceType::MakeRefPtr<NG::Pattern>());
+    std::string str0 = "0";
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild(str0, nullptr);
+    std::string str1 = "1";
+    lazyForEachBuilder->cachedItems_[1] = LazyForEachChild(str1, nullptr);
+    std::string str2 = "2";
+    lazyForEachBuilder->cachedItems_[2] = LazyForEachChild(str2, nullptr);
+    lazyForEachBuilder->expiringItem_["1"] = LazyForEachCacheChild(-1, nullptr);
+    lazyForEachBuilder->expiringItem_["2"] = LazyForEachCacheChild(5, nullptr);
+    lazyForEachBuilder->expiringItem_["3"] = LazyForEachCacheChild(7, node);
+    /**
+     * @tc.steps: step3. Invoke the PaintDebugBoundaryTreeAll function.
+     * @tc.expected:  Set condition to true.
+     */
+    lazyForEachBuilder->NotifyColorModeChange(1, true);
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_.size(), 3);
+}
 } // namespace OHOS::Ace::NG

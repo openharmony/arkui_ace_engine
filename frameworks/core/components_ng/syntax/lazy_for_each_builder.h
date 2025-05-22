@@ -301,6 +301,7 @@ public:
     }
 
     void SetDestroying(bool isDestroying, bool cleanStatus);
+    void NotifyColorModeChange(uint32_t colorMode, bool rerenderable);
 
 protected:
     virtual int32_t OnGetTotalCount() = 0;
