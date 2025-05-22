@@ -2353,8 +2353,8 @@ frameworks/core/components_ng/base/view_abstract.h @arkuievent
 frameworks/core/components_ng/base/view_abstract_model.h @arkuievent
 frameworks/core/components_ng/base/view_abstract_model_ng.cpp @arkuievent
 frameworks/core/components_ng/base/view_abstract_model_ng.h @arkuievent
-frameworks/core/components_ng/base/view_advanced_register.cpp @arkuiframework
-frameworks/core/components_ng/base/view_advanced_register.h @arkuiframework
+frameworks/core/components_ng/base/view_advanced_register.cpp @arkui_superman
+frameworks/core/components_ng/base/view_advanced_register.h @arkui_superman
 frameworks/core/components_ng/base/view_full_update_model.h @arkuistatemgmt
 frameworks/core/components_ng/base/view_full_update_model_ng.cpp @arkuistatemgmt
 frameworks/core/components_ng/base/view_full_update_model_ng.h @arkuistatemgmt
@@ -2581,8 +2581,8 @@ frameworks/core/components_ng/property/measure_utils.cpp @arkuilayout
 frameworks/core/components_ng/property/measure_utils.h @arkuilayout
 frameworks/core/components_ng/property/menu_property.h @arkuipopupwindow
 frameworks/core/components_ng/property/overlay_property.h @arkuipopupwindow
-frameworks/core/components_ng/property/particle_property_animation.h @aarkui_superman
-frameworks/core/components_ng/property/particle_property.h @aarkui_superman
+frameworks/core/components_ng/property/particle_property_animation.h @arkui_superman
+frameworks/core/components_ng/property/particle_property.h @arkui_superman
 frameworks/core/components_ng/property/position_property.h @arkuilayout
 frameworks/core/components_ng/property/progress_mask_property.h @arkui_superman
 frameworks/core/components_ng/property/property.cpp @arkuievent
@@ -3100,7 +3100,7 @@ test/mock/core/animation/mock_implicit_animation.cpp @zhoutianer
 
 test/unittest/ @zhoulianhai5
 test/unittest/core/accessibility/ @arkuiabilitygroup
-test/unittest/core/animation/ @aarkui_superman
+test/unittest/core/animation/ @arkui_superman
 test/unittest/core/common/ace_engine/ @arkuiframework
 test/unittest/core/common/asset/ @arkuiframework
 test/unittest/core/common/clipboard/ @huawei_g_five
