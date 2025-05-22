@@ -398,6 +398,20 @@ bool MenuWrapperPattern::HasEmbeddedSubMenu()
     return expandingMode == SubMenuExpandingMode::EMBEDDED;
 }
 
+bool MenuWrapperPattern::HasSideSubMenu()
+{
+    auto outterMenu = GetMenu();
+    CHECK_NULL_RETURN(outterMenu, false);
+    auto innerMenu = GetMenuChild(outterMenu);
+    CHECK_NULL_RETURN(innerMenu, false);
+    auto innerMenuPattern = innerMenu->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(innerMenuPattern, false);
+    auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProps, false);
+    auto expandingMode = layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+    return expandingMode == SubMenuExpandingMode::SIDE;
+}
+
 void MenuWrapperPattern::MenuFocusViewShow(const RefPtr<FrameNode>& menuNode)
 {
     CHECK_NULL_VOID(menuNode);
@@ -501,7 +515,6 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
         // Record the latest touch finger ID. If other fingers are pressed, the latest one prevails
         fingerId_ = touch.GetFingerId();
         TAG_LOGD(AceLogTag::ACE_MENU, "record newest finger ID %{public}d", fingerId_);
-        bool lastMenu = true;
         for (auto child = children.rbegin(); child != children.rend(); ++child) {
             // get child frame node of menu wrapper
             auto menuWrapperChildNode = DynamicCast<FrameNode>(*child);
@@ -514,10 +527,10 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
             // if DOWN-touched outside the menu region, then hide menu
             auto menuPattern = menuWrapperChildNode->GetPattern<MenuPattern>();
             CHECK_NULL_CONTINUE(menuPattern);
-            if (IsTouchWithinParentMenuZone(child, children, position) && lastMenu) {
-                return;
+            if (menuPattern->IsSubMenu() && HasSideSubMenu() &&
+                IsTouchWithinParentMenuItemZone(child, children, position)) {
+                continue;
             }
-            lastMenu = false;
             TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu due to touch down");
             HideMenu(menuPattern, menuWrapperChildNode, position, HideMenuType::WRAPPER_TOUCH_DOWN);
         }
@@ -530,9 +543,11 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
     ChangeTouchItem(info, touch.GetTouchType());
 }
 
-bool MenuWrapperPattern::IsTouchWithinParentMenuZone(std::list<RefPtr<UINode>>::reverse_iterator& child,
+bool MenuWrapperPattern::IsTouchWithinParentMenuItemZone(std::list<RefPtr<UINode>>::reverse_iterator& child,
     const std::list<RefPtr<UINode>>& children, const PointF& position)
 {
+    auto currentMenuNode = DynamicCast<FrameNode>(*child);
+    CHECK_NULL_RETURN(currentMenuNode, false);
     auto menuIterator = child;
     menuIterator++;
     while (menuIterator != children.rend()) {
@@ -543,7 +558,18 @@ bool MenuWrapperPattern::IsTouchWithinParentMenuZone(std::list<RefPtr<UINode>>::
             continue;
         }
         if (CheckPointInMenuZone(parentMenuNode, position)) {
-            return true;
+            auto menuPattern = parentMenuNode->GetPattern<MenuPattern>();
+            CHECK_NULL_RETURN(menuPattern, false);
+            auto innerMenuNode = menuPattern->GetFirstInnerMenu();
+            if (!innerMenuNode) {
+                innerMenuNode = parentMenuNode;
+            }
+            auto currentTouchItem = FindTouchedMenuItem(innerMenuNode, position);
+            auto currentMenuPattern = currentMenuNode->GetPattern<MenuPattern>();
+            CHECK_NULL_RETURN(currentMenuPattern, false);
+            if (currentTouchItem == currentMenuPattern->GetParentMenuItem()) {
+                return true;
+            }
         }
         return false;
     }
