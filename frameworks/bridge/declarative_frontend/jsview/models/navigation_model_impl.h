@@ -28,6 +28,7 @@ public:
     void SetTitle(const std::string& title, bool hasSubTitle = false) override;
     void SetCustomTitle(const RefPtr<AceType>& customTitle) override;
     void SetTitleHeight(const Dimension& height, bool isValid = true) override;
+    void SetTitleHeight(const RefPtr<ResourceObject>& resObj, bool isValid = true) override;
     void SetTitleMode(NG::NavigationTitleMode mode) override;
     void SetSubtitle(const std::string& subtitle) override;
     void SetEnableModeChangeAnimation(bool isEnable) override;
@@ -37,6 +38,22 @@ public:
         const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
         const std::vector<std::string>& nameList, bool userDefinedAccessibilityText = false,
         const std::string& backButtonAccessibilityText = "") override;
+    void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const RefPtr<ResourceObject>& resObj, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText = false,
+        const std::string& backButtonAccessibilityText = "") override;
+    void SetBackButtonIconTextRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
+        const RefPtr<ResourceObject>& resObj) override;
+    void SetBackButtonIconSrcAndTextRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const RefPtr<ResourceObject>& backButtonResObj, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
+        const RefPtr<ResourceObject>& backButtonTextResObj) override;
+    void UpdateBackButtonIcon(const std::vector<std::string>& nameList,
+        NG::FrameNode* frameNode, const RefPtr<ResourceObject>& backButtonIconResObj) override;
+    void UpdateBackButtonIconText(bool userDefinedAccessibilityText,
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& backButtonTextResObj) override;
     void SetHideBackButton(bool hideBackButton) override;
     void SetHideToolBar(bool hideToolBar, bool animated = false) override;
     void SetCustomToolBar(const RefPtr<AceType>& customToolBar) override;
