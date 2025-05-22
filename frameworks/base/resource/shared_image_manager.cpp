@@ -29,7 +29,7 @@ constexpr uint32_t MAX_SIZE_FOR_TOTAL_IMAGE = 10000000;
 
 std::function<void()> SharedImageManager::GenerateClearImageDataCallback(const std::string& name, size_t dataSize)
 {
-    auto clearImageDataCallback = [wp = AceType::WeakClaim(this), picName = name, dataSize = dataSize]() {
+    auto clearImageDataCallback = [wp = AceType::WeakClaim(this), picName = name, dataSize]() {
         auto sharedImageManager = wp.Upgrade();
         if (!sharedImageManager) {
             return;
@@ -39,8 +39,8 @@ std::function<void()> SharedImageManager::GenerateClearImageDataCallback(const s
             sharedImageManager->sharedImageMap_.erase(picName);
         }
         {
-            std::lock_guard<std::mutex> lockAll(sharedImageManager->cancelableCallbackMapMutex_,
-                sharedImageManager->sharedImageMapMutex_);
+            std::lock_guard<std::mutex> lockCancelableCallbackMap_(sharedImageManager->cancelableCallbackMapMutex_);
+            std::lock_guard<std::mutex> lockImageMap(sharedImageManager->sharedImageMapMutex_);
             LOGW("clear image cache name: %{public}s", picName.c_str());
             sharedImageManager->sharedImageTotalSize_ -= dataSize;
             sharedImageManager->cancelableCallbackMap_.erase(picName);
