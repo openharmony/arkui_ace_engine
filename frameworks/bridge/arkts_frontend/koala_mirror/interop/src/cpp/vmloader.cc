@@ -185,7 +185,8 @@ enum PandaLog2MobileLog : int {
     SILENT,
 };
 
-int ArkMobileLog(int id, int level, const char *component, const char *fmt, const char *msg) {
+int ArkMobileLog(int id, int level, const char *component, const char *fmt, const char *msg)
+{
     switch (level) {
         case PandaLog2MobileLog::DEFAULT:
         case PandaLog2MobileLog::VERBOSE:
@@ -211,7 +212,8 @@ int ArkMobileLog(int id, int level, const char *component, const char *fmt, cons
 #ifdef KOALA_ANI
 
 static void AniMobileLog([[maybe_unused]] FILE *stream, int level,
-                         const char *component, const char *msg) {
+                         const char *component, const char *msg)
+{
     switch (level) {
     case ANI_LOGLEVEL_INFO:
     case ANI_LOGLEVEL_DEBUG:
@@ -226,7 +228,8 @@ static void AniMobileLog([[maybe_unused]] FILE *stream, int level,
     }
 }
 
-static std::string makeClasspath(const std::vector<std::string>& files) {
+static std::string makeClasspath(const std::vector<std::string>& files)
+{
     std::stringstream stream;
     for (size_t index = 0, end = files.size(); index < end; ++index) {
         if (index > 0) {
@@ -261,7 +264,8 @@ static std::pair<std::string, std::string> GetBootAndAppPandaFiles(const VMLibIn
     return { makeClasspath(bootFiles), makeClasspath(files) };
 }
 
-static std::string GetAOTFiles(const char* appClassPath) {
+static std::string GetAOTFiles(const char* appClassPath)
+{
     std::vector<std::string> files;
     traverseDir(std::string(appClassPath), files, ".an");
     return makeClasspath(files);
@@ -280,7 +284,8 @@ static bool ResetErrorIfExists(ani_env *env)
 }
 #endif
 
-extern "C" DLL_EXPORT KInt LoadVirtualMachine(KInt vmKind, const char* appClassPath, const char* appLibPath, const ForeignVMContext* foreignVMContext) {
+extern "C" DLL_EXPORT KInt LoadVirtualMachine(KInt vmKind, const char* appClassPath, const char* appLibPath, const ForeignVMContext* foreignVMContext)
+{
     if (vmKind == ES2PANDA_KIND) {
         return loadES2Panda(appClassPath, appLibPath);
     }
@@ -534,19 +539,19 @@ const AppInfo harnessAppInfo = {
 #endif
 #ifdef KOALA_ANI
 const AppInfo harnessAniAppInfo = {
-        "L@koalaui/ets-harness/src/EtsHarnessApplication/EtsHarnessApplication;",
-        "createApplication",
-        "Lstd/core/String;Lstd/core/String;ZI:L@koalaui/ets-harness/src/EtsHarnessApplication/EtsHarnessApplication;",
-        "start",
-        "J:J",
-        "enter",
-        "IIJ:Z",
-        "emitEvent",
-        "IIII:Lstd/core/String;",
-        "restartWith",
-        "Lstd/core/String;:V",
-        "UNUSED",
-        "I:I"
+    "L@koalaui/ets-harness/src/EtsHarnessApplication/EtsHarnessApplication;",
+    "createApplication",
+    "Lstd/core/String;Lstd/core/String;ZI:L@koalaui/ets-harness/src/EtsHarnessApplication/EtsHarnessApplication;",
+    "start",
+    "J:J",
+    "enter",
+    "IIJ:Z",
+    "emitEvent",
+    "IIII:Lstd/core/String;",
+    "restartWith",
+    "Lstd/core/String;:V",
+    "UNUSED",
+    "I:I"
 };
 const AppInfo aniAppInfo = {
     "L@ohos/arkui/Application/Application;",
@@ -565,7 +570,8 @@ const AppInfo aniAppInfo = {
 };
 #endif
 
-extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const char* appParams) {
+extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const char* appParams)
+{
     const auto isTestEnv = std::string(appUrl) == "EtsHarness";
     const AppInfo* appInfo =
         #ifdef KOALA_JNI
@@ -770,7 +776,8 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
         ani_method loadView {};
         status = env->Class_FindMethod(appClass, appInfo->loadViewMethodName, appInfo->loadViewMethodSig, &loadView);
         if (status != ANI_OK) {
-            LOGE("Cannot find `%" LOG_PUBLIC "s` method %" LOG_PUBLIC "s", appInfo->loadViewMethodName, appInfo->loadViewMethodSig);
+            LOGE("Cannot find `%" LOG_PUBLIC "s` method %" LOG_PUBLIC "s",
+                appInfo->loadViewMethodName, appInfo->loadViewMethodSig);
             ResetErrorIfExists(env);
             return nullptr;
         }
@@ -865,7 +872,8 @@ extern "C" DLL_EXPORT KBoolean RunApplication(const KInt arg0, const KInt arg1) 
     return 1;
 }
 
-extern "C" DLL_EXPORT const char* EmitEvent(const KInt type, const KInt target, const KInt arg0, const KInt arg1) {
+extern "C" DLL_EXPORT const char* EmitEvent(const KInt type, const KInt target, const KInt arg0, const KInt arg1)
+{
 #ifdef KOALA_JNI
     if (g_vmEntry.vmKind == JAVA_VM_KIND) {
         JNIEnv* jEnv = (JNIEnv*)(g_vmEntry.env);
@@ -956,7 +964,8 @@ extern "C" DLL_EXPORT const char* EmitEvent(const KInt type, const KInt target, 
     return "-1";
 }
 
-extern "C" DLL_EXPORT void RestartWith(const char* page) {
+extern "C" DLL_EXPORT void RestartWith(const char* page)
+{
 #ifdef KOALA_JNI
     if (g_vmEntry.vmKind == JAVA_VM_KIND) {
         JNIEnv* jEnv = (JNIEnv*)(g_vmEntry.env);
@@ -1017,7 +1026,8 @@ extern "C" DLL_EXPORT void RestartWith(const char* page) {
 #endif
 }
 
-extern "C" DLL_EXPORT const char* LoadView(const char* className, const char* params) {
+extern "C" DLL_EXPORT const char* LoadView(const char* className, const char* params)
+{
 #if defined(KOALA_ANI)
     if (g_vmEntry.vmKind == PANDA_ANI_VM_KIND) {
         ani_env *env = reinterpret_cast<ani_env *>(g_vmEntry.env);
@@ -1049,7 +1059,6 @@ extern "C" DLL_EXPORT const char* LoadView(const char* className, const char* pa
         char* resultChars = (char*)malloc(resultStringLength);
         status = env->String_GetUTF8(resultString, resultChars, resultStringLength, &resultStringLength);
         return resultChars;
-
     }
 #endif
     return strdup("Unsupported");
@@ -1062,7 +1071,8 @@ bool ends_with(std::string str, std::string suffix)
     return str.size() >= suffix.size() && str.compare(str.size()-suffix.size(), suffix.size(), suffix) == 0;
 }
 
-void traverseDir(const std::string& root, std::vector<std::string>& paths, std::string suffix, const std::vector<std::string>& fallbackPaths) {
+void traverseDir(const std::string& root, std::vector<std::string>& paths, std::string suffix, const std::vector<std::string>& fallbackPaths)
+{
     #ifdef KOALA_OHOS_ARM32
     // selinux prohibits any access to "/system/framework"
     if (root == "/system/framework") {

@@ -22,16 +22,19 @@ static es2panda_Impl *impl = nullptr;
 
 static thread_local StageArena currentArena;
 
-StageArena* StageArena::instance() {
+StageArena* StageArena::instance()
+{
     return &currentArena;
 }
 
-void StageArena::add(void* pointer) {
+void StageArena::add(void* pointer)
+{
     if (pointer)
         allocated.push_back(pointer);
 }
 
-void StageArena::cleanup() {
+void StageArena::cleanup()
+{
     if (totalSize > 0 && false)
         printf("cleanup %d objects %d bytes\n", (int)allocated.size(), (int)totalSize);
     for (auto it : allocated) {
@@ -41,15 +44,18 @@ void StageArena::cleanup() {
     allocated.clear();
 }
 
-StageArena::StageArena() {
+StageArena::StageArena()
+{
     totalSize = 0;
 }
 
-StageArena::~StageArena() {
+StageArena::~StageArena()
+{
     cleanup();
 }
 
-char* StageArena::strdup(const char* string) {
+char* StageArena::strdup(const char* string)
+{
     auto* arena = StageArena::instance();
     auto size = strlen(string) + 1;
     char* memory = (char*)arena->alloc(size);
@@ -57,7 +63,8 @@ char* StageArena::strdup(const char* string) {
     return memory;
 }
 
-void* StageArena::alloc(size_t size) {
+void* StageArena::alloc(size_t size)
+{
     void* result = malloc(size);
     totalSize += size;
     add(result);
@@ -87,7 +94,8 @@ void* StageArena::alloc(size_t size) {
 const char* DEFAULT_SDK_PATH = "../../../incremental/tools/panda/node_modules/@panda/sdk" ;
 const char* NAME = LIB_PREFIX "es2panda-public" LIB_SUFFIX;
 
-void* FindLibrary() {
+void* FindLibrary()
+{
     char* envValue = getenv("PANDA_SDK_PATH");
     if (!envValue) {
         std::cout << "PANDA_SDK_PATH not specified, assuming " << DEFAULT_SDK_PATH << std::endl;
@@ -97,13 +105,14 @@ void* FindLibrary() {
     return loadLibrary(libraryName);
 }
 
-es2panda_Impl *GetImpl() {
+es2panda_Impl *GetImpl()
+{
     if (impl) {
         return impl;
     }
     auto library = FindLibrary();
     if (!library) {
-        printf("No library (es2panda_lib.cc)"); // TODO: dont use throw for ohos build
+        printf("No library (es2panda_lib.cc)");
         abort();
     }
     auto symbol = findSymbol(library, "es2panda_GetImpl");
@@ -120,15 +129,18 @@ es2panda_ContextState intToState(KInt state)
     return es2panda_ContextState(state);
 }
 
-string getString(KStringPtr ptr) {
+string getString(KStringPtr ptr)
+{
     return ptr.data();
 }
 
-char* getStringCopy(KStringPtr& ptr) {
+char* getStringCopy(KStringPtr& ptr)
+{
     return StageArena::strdup(ptr.c_str() ? ptr.c_str() : "");
 }
 
-inline KUInt unpackUInt(const KByte* bytes) {
+inline KUInt unpackUInt(const KByte* bytes)
+{
     const KUInt BYTE_0 = 0;
     const KUInt BYTE_1 = 1;
     const KUInt BYTE_2 = 2;
@@ -256,7 +268,8 @@ KOALA_INTEROP_2(AstNodeUpdateChildren, KNativePointer, KNativePointer, KNativePo
 
 std::vector<void*> cachedChildren;
 
-static void visitChild(es2panda_AstNode *node) {
+static void visitChild(es2panda_AstNode *node)
+{
     cachedChildren.emplace_back(node);
 }
 
