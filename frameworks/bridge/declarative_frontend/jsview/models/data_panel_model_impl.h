@@ -28,6 +28,7 @@ public:
     void SetTrackBackground(const Color& trackBackgroundColor) override {}
     void SetStrokeWidth(const Dimension& strokeWidth) override {}
     void SetShadowOption(const OHOS::Ace::NG::DataPanelShadow& shadowOption) override {}
+    void CreateWithResourceObj(DataPanelResourceType colorType, const RefPtr<ResourceObject>& resObj) override {}
 };
 
 } // namespace OHOS::Ace::Framework
