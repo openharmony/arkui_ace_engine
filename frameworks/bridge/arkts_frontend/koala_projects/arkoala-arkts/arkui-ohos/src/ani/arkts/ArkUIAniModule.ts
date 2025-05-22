@@ -17,7 +17,6 @@ import { KPointer, KInt } from "@koalaui/interop"
 import image from "@ohos.multimedia.image"
 import webview from "@ohos.web.webview"
 import common from "@ohos.app.ability.common"
-import { int32 } from "@koalaui/common"
 
 export class ArkUIAniModule {
     static {
@@ -34,9 +33,6 @@ export class ArkUIAniModule {
 
     native static _Common_GetHostContext(): common.Context
 
-    native static _CustomNode_Constructor(id: int32): KPointer
-
     native static _Common_Sync_InstanceId(id: KInt): void
-
     native static _Common_Restore_InstanceId(): void
 }

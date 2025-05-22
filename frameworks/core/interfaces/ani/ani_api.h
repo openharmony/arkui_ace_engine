@@ -30,8 +30,6 @@ struct _ArkUINode;
 typedef class __ani_ref* ani_ref;
 typedef _ArkUINode* ArkUINodeHandle;
 typedef int ArkUI_Int32;
-typedef int32_t ani_int;
-typedef int64_t ani_long;
 
 struct ArkUIAniImageModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
@@ -42,23 +40,16 @@ struct ArkUIAniWebModifier {
         std::function<void(int32_t)>&& onNWebId,
         std::function<void(const std::string&)>&& onHapPath);
 };
-
 struct ArkUIAniCommonModifier {
     ani_ref* (*getHostContext)();
     void (*syncInstanceId)(ArkUI_Int32 id);
     void (*restoreInstanceId)();
 };
-
-struct ArkUIAniCustomNodeModifier {
-    ani_long (*constructCustomNode)(ani_int);
-};
-
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
     const ArkUIAniWebModifier* (*getWebAniModifier)();
     const ArkUIAniCommonModifier* (*getCommonAniModifier)();
-    const ArkUIAniCustomNodeModifier* (*getCustomNodeAniModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

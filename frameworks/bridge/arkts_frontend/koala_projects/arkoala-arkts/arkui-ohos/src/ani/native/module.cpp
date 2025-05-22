@@ -19,7 +19,6 @@
 #include "load.h"
 
 #include "common_module.h"
-#include "custom/custom_node_module.h"
 #include "utils/convert_utils.h"
 #include "web_module_methods.h"
 
@@ -86,11 +85,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Common_Restore_InstanceId",
             ":V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::RestoreInstanceId)
-        },
-        ani_native_function {
-            "_CustomNode_Constructor",
-            "I:J",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructCustomNode)
         },
     };
 

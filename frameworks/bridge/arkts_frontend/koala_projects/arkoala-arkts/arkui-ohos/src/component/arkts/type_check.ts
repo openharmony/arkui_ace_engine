@@ -5652,5 +5652,5 @@ export class TypeChecker {
     }
     static isIWatchTrigger<T>(value: T): boolean {
         return value instanceof IWatchTrigger;
-     }
+    }
 }
