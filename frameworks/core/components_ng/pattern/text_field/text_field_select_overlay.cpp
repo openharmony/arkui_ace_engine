@@ -457,10 +457,15 @@ int32_t TextFieldSelectOverlay::GetTextInputCaretPosition(const OffsetF& localOf
     return pattern->ConvertTouchOffsetToCaretPosition(offset);
 }
 
-int32_t TextFieldSelectOverlay::GetCaretPositionOnHandleMove(const OffsetF& localOffset, bool isFirst)
+int32_t TextFieldSelectOverlay::GetCaretPositionOnHandleMove(const OffsetF& offset, bool isFirst)
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, 0);
+    auto localOffset = offset;
+    if (pattern->GetContentScrollerIsScrolling()) {
+        auto adjustOffset = pattern->AdjustAutoScrollOffset(Offset(offset.GetX(), offset.GetY()));
+        localOffset = OffsetF(adjustOffset.GetX(), adjustOffset.GetY());
+    }
     if (pattern->IsTextArea()) {
         return GetTextAreaCaretPosition(localOffset);
     }

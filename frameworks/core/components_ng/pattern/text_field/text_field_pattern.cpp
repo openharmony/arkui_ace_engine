@@ -2093,7 +2093,11 @@ void TextFieldPattern::ResetTouchAndMoveCaretState()
     }
     if (moveCaretState_.isMoveCaret) {
         moveCaretState_.isMoveCaret = false;
+        auto isAutoScrolling = contentScroller_.isScrolling;
         StopContentScroll();
+        if (isAutoScrolling) {
+            UpdateCaretRect(false);
+        }
         if (HasFocus()) {
             StartTwinkling();
         } else {
@@ -2531,7 +2535,7 @@ void TextFieldPattern::InitDragDropCallBack()
         Offset localOffset =
             Offset(event->GetX(), event->GetY()) - Offset(textPaintOffset.GetX(), textPaintOffset.GetY());
         if (host->GetDragPreviewOption().enableEdgeAutoScroll) {
-            pattern->UpdateContentScroller(localOffset);
+            pattern->UpdateContentScroller(localOffset, AUTO_SCROLL_HOT_AREA_LONGPRESS_DURATION);
         } else {
             pattern->contentScroller_.OnBeforeScrollingCallback(localOffset);
             pattern->PauseContentScroll();
@@ -10019,8 +10023,9 @@ bool TextFieldPattern::IsTextEditableForStylus() const
     return !IsInPasswordMode();
 }
 
-void TextFieldPattern::UpdateContentScroller(const Offset& localOffset)
+void TextFieldPattern::UpdateContentScroller(const Offset& offset, float delay)
 {
+    auto localOffset = AdjustAutoScrollOffset(offset);
     auto scrollStep = CalcAutoScrollStepOffset(localOffset);
     // 在热区外移动
     if (!scrollStep || (!GetScrollEnabled() && !moveCaretState_.isMoveCaret)) {
@@ -10037,15 +10042,27 @@ void TextFieldPattern::UpdateContentScroller(const Offset& localOffset)
     contentScroller_.OnBeforeScrollingCallback(localOffset);
     if (!contentScroller_.hotAreaOffset) {
         contentScroller_.hotAreaOffset = localOffset;
-        ScheduleContentScroll(AUTO_SCROLL_HOT_AREA_LONGPRESS_DURATION);
+        ScheduleContentScroll(delay);
     } else {
         auto hotAreaMoveDistance = (localOffset - contentScroller_.hotAreaOffset.value()).GetDistance();
         if (GreatOrEqual(hotAreaMoveDistance, AUTO_SCROLL_HOT_AREA_LONGPRESS_DISTANCE.ConvertToPx())) {
             contentScroller_.hotAreaOffset = localOffset;
             contentScroller_.autoScrollTask.Cancel();
-            ScheduleContentScroll(AUTO_SCROLL_HOT_AREA_LONGPRESS_DURATION);
+            ScheduleContentScroll(delay);
         }
     }
+}
+
+Offset TextFieldPattern::AdjustAutoScrollOffset(const Offset& offset)
+{
+    auto contentRect = GetContentRect();
+    // ensure the point is in the content area.
+    double margin = 1.0f;
+    auto offsetX = std::clamp(offset.GetX(), static_cast<double>(contentRect.Left()) + margin,
+        static_cast<double>(contentRect.Right()) - margin);
+    auto offsetY = std::clamp(offset.GetY(), static_cast<double>(contentRect.Top()) + margin,
+        static_cast<double>(contentRect.Bottom()) - margin);
+    return Offset(offsetX, offsetY);
 }
 
 std::optional<float> TextFieldPattern::CalcAutoScrollStepOffset(const Offset& localOffset)
