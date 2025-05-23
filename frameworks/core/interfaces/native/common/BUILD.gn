@@ -44,7 +44,7 @@ template("ace_core_interfaces_native") {
     cflags_cc += [ "-Wno-unused-variable" ]
     external_deps = []
     configs = [ "$ace_root:ace_config" ]
-    configs += [ ":ace_core_interfaces_native_node_config" ]
+    public_configs = [ ":ace_core_interfaces_native_node_config" ]
 
     if (ace_engine_feature_enable_point_light) {
       defines += [ "POINT_LIGHT_ENABLE" ]
