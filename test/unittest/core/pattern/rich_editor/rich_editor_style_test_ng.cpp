@@ -24,6 +24,7 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/style_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -838,7 +839,7 @@ HWTEST_F(RichEditorStyleTestNg, CreateDecorationSpanByTextStyle001, TestSize.Lev
     style.SetLineHeight(LINE_HEIGHT_VALUE);
     style.SetLetterSpacing(LETTER_SPACING);
     style.SetFontFeatures(TEXT_FONTFEATURE);
-    RefPtr<DecorationSpan> span = richEditorPattern->CreateDecorationSpanByTextStyle(updateSpanStyle, style, 0);
+    RefPtr<DecorationSpan> span = richEditorPattern->styleManager_->CreateDecorationSpanByTextStyle(updateSpanStyle, style, 0);
     ASSERT_NE(span, nullptr);
 }
 

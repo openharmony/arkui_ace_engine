@@ -96,9 +96,10 @@ class InspectorFilter;
 class OneStepDragController;
 class RichEditorUndoManager;
 struct UndoRedoRecord;
+class RichEditorContentPattern;
+class StyleManager;
 using SpanOptions = std::variant<TextSpanOptions, ImageSpanOptions, SymbolSpanOptions, BuilderSpanOptions>;
 using OptionsList = std::list<SpanOptions>;
-class RichEditorContentPattern;
 
 // TextPattern is the base class for text render node to perform paint text.
 enum class MoveDirection { FORWARD, BACKWARD };
@@ -378,7 +379,8 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         HandleSysScaleChanged();
-        return MakeRefPtr<RichEditorLayoutAlgorithm>(spans_, &paragraphs_, typingTextStyle_, &paragraphCache_);
+        return MakeRefPtr<RichEditorLayoutAlgorithm>(
+            spans_, &paragraphs_, &paragraphCache_, styleManager_, NeedShowPlaceholder());
     }
 
     void HandleSysScaleChanged()
@@ -548,7 +550,6 @@ public:
         OperationType operationType = OperationType::DEFAULT);
     void InsertValueOperation(const std::u16string& insertValue, OperationRecord* const record = nullptr,
         OperationType operationType = OperationType::IME);
-    // void DeleteSelectOperation(OperationRecord* const record);
     void DeleteByRange(OperationRecord* const record, int32_t start, int32_t end);
     void InsertDiffStyleValueInSpan(RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info,
         const std::u16string& insertValue, bool isIME = true);
@@ -556,7 +557,7 @@ public:
     bool IsLineSeparatorInLast(RefPtr<SpanNode>& spanNode);
     void InsertValueToSpanNode(
         RefPtr<SpanNode>& spanNode, const std::u16string& insertValue, const TextInsertValueInfo& info);
-    void SpanNodeFission(RefPtr<SpanNode>& spanNode);
+    void SpanNodeFission(RefPtr<SpanNode>& spanNode, bool needLeadingMargin = false);
     void CreateTextSpanNode(RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info,
         const std::u16string& insertValue, bool isIME = true);
     void SetDefaultColor(RefPtr<SpanNode>& spanNode);
@@ -705,7 +706,8 @@ public:
     void UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle& style);
     void UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const struct UpdateParagraphStyle& style);
     std::vector<ParagraphInfo> GetParagraphInfo(int32_t start, int32_t end);
-    void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle, std::optional<TextStyle> textStyle);
+    void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle, std::optional<TextStyle> textStyle);    
+    void SetTypingParagraphStyle(std::optional<struct UpdateParagraphStyle> typingParagraphStyle);
     std::optional<struct UpdateSpanStyle> GetTypingStyle();
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool updateCaret = true);
@@ -749,7 +751,7 @@ public:
     void SetIsTextDraggable(bool isTextDraggable = true) override;
     bool JudgeContentDraggable();
     std::pair<OffsetF, float> CalculateCaretOffsetAndHeight();
-    std::pair<OffsetF, float> CalculateEmptyValueCaretRect();
+    OffsetF CalculateEmptyValueCaretOffset();
     void UpdateModifierCaretOffsetAndHeight();
     void NotifyCaretChange();
     TextAlign GetTextAlignByDirection();
@@ -1089,13 +1091,6 @@ public:
         return contentRect_;
     }
 
-    void PreferredParagraph();
-
-    const RefPtr<Paragraph>& GetPresetParagraph()
-    {
-        return presetParagraph_;
-    }
-
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override
     {
         selectOverlay_->OnAncestorNodeChanged(flag);
@@ -1294,6 +1289,7 @@ public:
     RefPtr<FrameNode> GetContentHost() const override;
 
     float GetCaretWidth();
+    void UpdateCaretStyleByTypingStyle();
 
 protected:
     bool CanStartAITask() const override;
@@ -1306,6 +1302,7 @@ private:
     friend class OneStepDragController;
     friend class RichEditorUndoManager;
     friend class RichEditorContentPattern;
+    friend class StyleManager;
     bool HandleUrlSpanClickEvent(const GestureEvent& info);
     void HandleUrlSpanForegroundClear();
     bool HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color);
@@ -1492,7 +1489,7 @@ private:
 
     void GetChangeSpanStyle(RichEditorChangeValue& changeValue, std::optional<TextStyle>& spanTextStyle,
         std::optional<struct UpdateParagraphStyle>& spanParaStyle, std::optional<std::u16string>& urlAddress,
-        const RefPtr<SpanNode>& spanNode, int32_t spanIndex);
+        const RefPtr<SpanNode>& spanNode, int32_t spanIndex, bool useTypingParaStyle = false);
     void GetReplacedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition, const std::u16string& insertValue,
         int32_t textIndex, std::optional<TextStyle> textStyle, std::optional<struct UpdateParagraphStyle> paraStyle,
         std::optional<std::u16string> urlAddress = std::nullopt, bool isCreate = false, bool fixDel = true);
@@ -1661,6 +1658,7 @@ private:
     void SetIsEnableSubWindowMenu();
     void OnReportRichEditorEvent(const std::string& event);
     void AsyncHandleOnCopyStyledStringHtml(RefPtr<SpanString>& subSpanString);
+    bool NeedShowPlaceholder();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1708,7 +1706,6 @@ private:
 
     // still in progress
     RichEditorParagraphManager paragraphs_;
-    RefPtr<Paragraph> presetParagraph_;
     std::vector<OperationRecord> operationRecords_;
     std::vector<OperationRecord> redoOperationRecords_;
     std::list<WeakPtr<ImageSpanNode>> hoverableNodes;
@@ -1808,6 +1805,7 @@ private:
     bool firstClickAfterWindowFocus_ = false;
     CancelableCallback<void()> firstClickResetTask_;
     RefPtr<RichEditorContentPattern> contentPattern_;
+    std::unique_ptr<StyleManager> styleManager_;
 };
 } // namespace OHOS::Ace::NG
 

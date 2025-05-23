@@ -83,6 +83,12 @@ public:                                                           \
         }                                                         \
         RequestTextFlushDirty();                                  \
     }                                                             \
+    void Update##name(const std::optional<type>& value)           \
+    {                                                             \
+        if (value.has_value()) {                                  \
+            Update##name(value.value());                          \
+        }                                                         \
+    }                                                             \
     void Reset##name()                                            \
     {                                                             \
         if (spanItem_->fontStyle) {                               \
@@ -119,6 +125,12 @@ public:                                                           \
         }                                                         \
         RequestTextFlushDirty();                                  \
         spanItem_->MarkReCreateParagraph();                       \
+    }                                                             \
+    void Update##name(const std::optional<type>& value)           \
+    {                                                             \
+        if (value.has_value()) {                                  \
+            Update##name(value.value());                          \
+        }                                                         \
     }                                                             \
     void Reset##name()                                            \
     {                                                             \
@@ -182,6 +194,12 @@ public:                                                                         
             spanItem_->MarkReLayoutParagraph();                                  \
         }                                                                        \
         RequestTextFlushDirty();                                                 \
+    }                                                                            \
+    void Update##name(const std::optional<type>& value)                          \
+    {                                                                            \
+        if (value.has_value()) {                                                 \
+            Update##name(value.value());                                         \
+        }                                                                        \
     }                                                                            \
     void Reset##name()                                                           \
     {                                                                            \
@@ -555,6 +573,11 @@ public:
     bool IsSyntaxNode() const override
     {
         return true;
+    }
+
+    void SetSpanItem(const RefPtr<SpanItem>& spanItem)
+    {
+        spanItem_ = spanItem;
     }
 
     const RefPtr<SpanItem>& GetSpanItem() const

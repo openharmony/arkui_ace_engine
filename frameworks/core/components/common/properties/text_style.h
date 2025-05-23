@@ -444,6 +444,12 @@ public:                                                    \
             needReCreateParagraph_ = true;                 \
         }                                                  \
         prop##name##_ = newValue;                          \
+    }                                                      \
+    void Set##name(const std::optional<type>& value)       \
+    {                                                      \
+        if (value.has_value()) {                           \
+            Set##name(value.value());                      \
+        }                                                  \
     }
 
 #define ACE_DEFINE_TEXT_STYLE(name, type, changeflag)  \
@@ -559,28 +565,34 @@ public:                                                    \
 private:                                                   \
     type prop##name##_;
 
-#define ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(name, type, value, changeflag) \
-public:                                                                              \
-    const type& Get##name() const                                                    \
-    {                                                                                \
-        return prop##name##_;                                                        \
-    }                                                                                \
-    void Set##name(const type& newValue)                                             \
-    {                                                                                \
-        if (NearEqual(prop##name##_, newValue)) {                                    \
-            return;                                                                  \
-        }                                                                            \
-        auto flag = static_cast<int32_t>(changeflag);                                \
-        if (GreatOrEqual(flag, 0)) {                                                 \
-            reLayoutParagraphStyleBitmap_.set(flag);                                 \
-        } else {                                                                     \
-            needReCreateParagraph_ = true;                                           \
-        }                                                                            \
-        prop##name##_ = newValue;                                                    \
-    }                                                                                \
-                                                                                     \
-private:                                                                             \
-    type prop##name##_ = value;
+#define ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(name, type, initValue, changeflag) \
+public:                                                                                  \
+    const type& Get##name() const                                                        \
+    {                                                                                    \
+        return prop##name##_;                                                            \
+    }                                                                                    \
+    void Set##name(const type& newValue)                                                 \
+    {                                                                                    \
+        if (NearEqual(prop##name##_, newValue)) {                                        \
+            return;                                                                      \
+        }                                                                                \
+        auto flag = static_cast<int32_t>(changeflag);                                    \
+        if (GreatOrEqual(flag, 0)) {                                                     \
+            reLayoutParagraphStyleBitmap_.set(flag);                                     \
+        } else {                                                                         \
+            needReCreateParagraph_ = true;                                               \
+        }                                                                                \
+        prop##name##_ = newValue;                                                        \
+    }                                                                                    \
+    void Set##name(const std::optional<type>& newValue)                                  \
+    {                                                                                    \
+        if (newValue.has_value()) {                                                      \
+            Set##name(newValue.value());                                                 \
+        }                                                                                \
+    }                                                                                    \
+                                                                                         \
+private:                                                                                 \
+    type prop##name##_ = initValue;
 
 // For symbol
 #define ACE_DEFINE_SYMBOL_STYLE(name, type, changeflag) \
@@ -769,6 +781,13 @@ public:
         reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::FONT_VARIATIONS));
     }
 
+    void SetFontWeight(const std::optional<FontWeight>& fontWeight) const
+    {
+        if (fontWeight.has_value()) {
+            SetFontWeight(fontWeight.value());
+        }
+    }
+
     const std::list<std::pair<std::string, int32_t>>& GetFontFeatures() const
     {
         return fontFeatures_;
@@ -781,6 +800,13 @@ public:
         }
         reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::FONT_FEATURES));
         fontFeatures_ = fontFeatures;
+    }
+
+    void SetFontFeatures(const std::optional<std::list<std::pair<std::string, int32_t>>>& fontFeatures)
+    {
+        if (fontFeatures.has_value()) {
+            SetFontFeatures(fontFeatures.value());
+        }
     }
 
     const Dimension& GetLineHeight() const

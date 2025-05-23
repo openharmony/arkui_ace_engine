@@ -430,28 +430,6 @@ HWTEST_F(RichEditorClickTestNg, TestRichEditorHandleTripleClickEvent001, TestSiz
     EXPECT_EQ(richEditorPattern->GetFocusHub()->IsFocusable(), true);
 }
 
-// /**
-//  * @tc.name: HandleSingleClickEvent004
-//  * @tc.desc: test RichEditorPattern HandleSingleClickEvent
-//  * @tc.type: FUNC
-//  */
-// HWTEST_F(RichEditorClickTestNg, HandleSingleClickEvent004, TestSize.Level1)
-// {
-//     ASSERT_NE(richEditorNode_, nullptr);
-//     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-//     ASSERT_NE(richEditorPattern, nullptr);
-
-//     RichEditorPattern::OperationRecord record;
-//     AddSpan("hello1");
-
-//     RectF rect(0, 0, 5, 5);
-//     richEditorPattern->CreateHandles();
-//     richEditorPattern->textSelector_.Update(0, 5);
-//     richEditorPattern->DeleteSelectOperation(&record);
-
-//     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
-// }
-
 /**
  * @tc.name: ClickAISpan001
  * @tc.desc: test RichEditorPattern ClickAISpan

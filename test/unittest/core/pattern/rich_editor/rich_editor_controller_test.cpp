@@ -778,7 +778,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController015, TestSize.Level1)
     EXPECT_EQ(rect2.GetOffset().GetX(), 0);
     EXPECT_EQ(rect2.GetOffset().GetY(), 0);
     EXPECT_EQ(rect2.Width(), 0);
-    EXPECT_EQ(rect2.Height(), 18.5);
+    EXPECT_EQ(rect2.Height(), 0);
 }
 
 /**
