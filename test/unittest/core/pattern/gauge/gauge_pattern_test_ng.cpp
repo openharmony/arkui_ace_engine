@@ -1843,4 +1843,119 @@ HWTEST_F(GaugePatternTestNg, GaugePatternTest094, TestSize.Level1)
     gaugePattern->FireBuilder();
     EXPECT_FALSE(host->TotalChildCount() > 0);
 }
+
+/**
+ * @tc.name: GaugePatternTest001
+ * @tc.desc: Test UpdateStrokeWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePatternTestNg, GaugePatternTest001, TestSize.Level1)
+{
+    const double widthValue = 10.0;
+    /**
+     * @tc.steps: step1. Init Gauge node and pattern
+     */
+    auto gaugePattern = AceType::MakeRefPtr<GaugePattern>();
+    ASSERT_NE(gaugePattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::GAUGE_ETS_TAG, -1, gaugePattern);
+    gaugePattern->AttachToFrameNode(frameNode);
+    
+    /**
+     * @tc.steps: step2. Call UpdateStrokeWidth
+     */
+    CalcDimension strokeWidth(widthValue);
+    gaugePattern->UpdateStrokeWidth(strokeWidth, false);
+    
+    /**
+     * @tc.expected: step3. Verify paint and layout properties updated
+     */
+    auto paintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetStrokeWidth(), strokeWidth);
+    
+    auto layoutProperty = frameNode->GetLayoutProperty<GaugeLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetStrokeWidth(), strokeWidth);
+}
+
+/**
+ * @tc.name: GaugePatternTest002
+ * @tc.desc: Test UpdateIndicatorIconPath with different conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePatternTestNg, GaugePatternTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Gauge node and pattern
+     */
+    auto gaugePattern = AceType::MakeRefPtr<GaugePattern>();
+    ASSERT_NE(gaugePattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::GAUGE_ETS_TAG, -1, gaugePattern);
+    gaugePattern->AttachToFrameNode(frameNode);
+    frameNode->SetRerenderable(true);
+    
+    /**
+     * @tc.steps: step2. Test with isFirstLoad = true
+     */
+    std::string iconPath = "common/test.png";
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    gaugePattern->UpdateIndicatorIconPath(iconPath, bundleName, moduleName, true);
+    
+    /**
+     * @tc.expected: step3. Verify property updated
+     */
+    auto paintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto sourceInfo = paintProperty->GetIndicatorIconSourceInfo();
+    EXPECT_EQ(sourceInfo->GetSrc(), iconPath);
+    EXPECT_EQ(sourceInfo->GetBundleName(), bundleName);
+    EXPECT_EQ(sourceInfo->GetModuleName(), moduleName);
+    
+    /**
+     * @tc.steps: step4. Test with isFirstLoad = false (should not update)
+     */
+    std::string newPath = "common/new.png";
+    gaugePattern->UpdateIndicatorIconPath(newPath, "", "", false);
+    EXPECT_EQ(paintProperty->GetIndicatorIconSourceInfo()->GetSrc(), iconPath);
+}
+
+/**
+ * @tc.name: GaugePatternTest003
+ * @tc.desc: Test UpdateIndicatorSpace
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePatternTestNg, GaugePatternTest003, TestSize.Level1)
+{
+    const double spaceValue = 5.0;
+    const double spaceValue2 = 10.0;
+    /**
+     * @tc.steps: step1. Init Gauge node and pattern
+     */
+    auto gaugePattern = AceType::MakeRefPtr<GaugePattern>();
+    ASSERT_NE(gaugePattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::GAUGE_ETS_TAG, -1, gaugePattern);
+    gaugePattern->AttachToFrameNode(frameNode);
+    frameNode->SetRerenderable(true);
+    
+    /**
+     * @tc.steps: step2. Test with isFirstLoad = true
+     */
+    CalcDimension space(spaceValue);
+    gaugePattern->UpdateIndicatorSpace(space, true);
+    
+    /**
+     * @tc.expected: step3. Verify property updated
+     */
+    auto paintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetIndicatorSpace(), space);
+    
+    /**
+     * @tc.steps: step4. Test with isFirstLoad = false (should not update)
+     */
+    CalcDimension newSpace(spaceValue2);
+    gaugePattern->UpdateIndicatorSpace(newSpace, false);
+    EXPECT_EQ(paintProperty->GetIndicatorSpace(), space);
+}
 } // namespace OHOS::Ace::NG
