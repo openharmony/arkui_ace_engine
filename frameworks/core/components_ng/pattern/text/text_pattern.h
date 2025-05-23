@@ -81,7 +81,6 @@ class TextPattern : public virtual Pattern,
                     public Magnifier,
                     public LayoutInfoInterface {
     DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase, TextGestureSelector, Magnifier);
-    UNITEST_FRIEND_CLASS;
 
 public:
     TextPattern()
@@ -784,10 +783,6 @@ public:
         return magnifierController_;
     }
 
-    void SetSelectedType(const std::optional<TextSpanType>& selectedType)
-    {
-        selectedType_ = selectedType;
-    }
     std::string GetCaretColor() const;
     std::string GetSelectedBackgroundColor() const;
 
