@@ -32,13 +32,17 @@ struct NavigationInfo {
     std::string navigationId; // inspectorId
     WeakPtr<NavigationStack> pathStack;
     WeakPtr<FrameNode> navigationNode;
-
+    int32_t uniqueId;
+    
     NavigationInfo() = default;
     NavigationInfo(const std::string& id, const WeakPtr<NavigationStack>& navigationStack)
         : navigationId(std::move(id)), pathStack(navigationStack)
     {}
     NavigationInfo(int32_t nodeId, const std::string& navigationId, WeakPtr<FrameNode> navigationNode)
         : nodeId(nodeId), navigationId(std::move(navigationId)), navigationNode(navigationNode)
+    {}
+    NavigationInfo(const std::string& id, const WeakPtr<NavigationStack>& navigationStack, int32_t navigationUniqueId)
+        : navigationId(std::move(id)), pathStack(navigationStack), uniqueId(std::move(navigationUniqueId))
     {}
 };
 
