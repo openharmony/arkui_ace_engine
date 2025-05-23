@@ -66,8 +66,11 @@ export abstract class ArkStructBase<T, T_Options> extends ArkCustomComponentImpl
         initializers?: T_Options
     ): void {
         ArkComponentRoot(this, () => {
-            this.__updateStruct(initializers)
-            this.__build(attributes, content, initializers)
+            this.__updateStruct(initializers);
+            this.__build(attributes, content, initializers);
+            remember(() => {
+                this.onDidBuild();
+            });
         })
     }
 
