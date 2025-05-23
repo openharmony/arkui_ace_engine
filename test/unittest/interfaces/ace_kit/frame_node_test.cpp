@@ -170,4 +170,20 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest005, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetPropertyChangeFlag(),
         NG::PROPERTY_UPDATE_MEASURE | NG::PROPERTY_UPDATE_LAYOUT | NG::PROPERTY_UPDATE_MEASURE_SELF);
 }
+
+/**
+ * @tc.name: FrameNodeTestTest005
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTest, FrameNodeTestTest006, TestSize.Level1)
+{
+    const std::string tag = "TEST6";
+    const int32_t id = 5;
+
+    auto aceFrameNode =
+        NG::FrameNode::GetOrCreateFrameNode(tag, id, []() { return AceType::MakeRefPtr<NG::Pattern>(); });
+    auto frameNode = Kit::FrameNode::GetFrameNode(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(aceFrameNode)));
+    EXPECT_NE(frameNode, nullptr);
+}
 } // namespace OHOS::Ace

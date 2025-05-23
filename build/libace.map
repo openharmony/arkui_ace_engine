@@ -473,6 +473,7 @@
       OHOS::Ace::NG::BuildMenuBarRow*;
       OHOS::Ace::RegistAppBarNodeBuilder*;
       OHOS::Ace::RegisterBeforeCreateLayoutBuilder*;
+      OHOS::Ace::Kit::FrameNode::*;
 
       vtable?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
