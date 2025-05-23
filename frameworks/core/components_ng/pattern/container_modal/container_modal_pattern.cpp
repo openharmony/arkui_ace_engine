@@ -605,12 +605,17 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     UpdateGestureRowVisible();
     UpdateContainerBgColor();
     InitColumnTouchTestFunc();
+
     CHECK_NULL_VOID(titleMgr_);
     if (customTitleSettedShow) {
         titleMgr_->UpdateTargetNodesBarMargin();
     } else {
         titleMgr_->ResetExpandStackNode();
     }
+
+    titleMgr_->UpdateToolbarShow(isTitleShow_, customTitleSettedShow_);
+    CHECK_NULL_VOID(floatTitleMgr_);
+    floatTitleMgr_->UpdateToolbarShow(isTitleShow_, customTitleSettedShow_);
 }
 
 bool ContainerModalPattern::GetContainerModalTitleVisible(bool isImmersive)
@@ -633,21 +638,31 @@ void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
         height = 0;
     }
     titleHeight_ = Dimension(Dimension(height, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
+    SetControlButtonsRowHeight(titleHeight_);
+    SetContainerModalTitleWithoutButtonsHeight(titleHeight_);
+}
+
+void ContainerModalPattern::SetContainerModalTitleWithoutButtonsHeight(Dimension height)
+{
     auto customTitleRow = GetCustomTitleRow();
-    UpdateRowHeight(customTitleRow, titleHeight_);
-    auto controlButtonsRow = GetControlButtonRow();
-    UpdateRowHeight(controlButtonsRow, titleHeight_);
+    UpdateRowHeight(customTitleRow, height);
     auto gestureRow = GetGestureRow();
-    UpdateRowHeight(gestureRow, titleHeight_);
-    CallButtonsRectChange();
+    UpdateRowHeight(gestureRow, height);
     if (floatTitleMgr_ != nullptr) {
         auto floatingTitleRow = GetFloatingTitleRow();
         CHECK_NULL_VOID(floatingTitleRow);
-        UpdateRowHeight(floatingTitleRow, titleHeight_);
+        UpdateRowHeight(floatingTitleRow, height);
     }
     if (titleMgr_ != nullptr) {
         titleMgr_->UpdateTargetNodesBarMargin();
     }
+}
+
+void ContainerModalPattern::SetControlButtonsRowHeight(Dimension height)
+{
+    auto controlButtonsRow = GetControlButtonRow();
+    UpdateRowHeight(controlButtonsRow, height);
+    CallButtonsRectChange();
 }
 
 int32_t ContainerModalPattern::GetContainerModalTitleHeight()
@@ -1045,7 +1060,13 @@ void ContainerModalPattern::CallSetContainerWindow(bool considerFloatingWindow)
     // set container window show state to RS
     pipelineContext->SetContainerWindow(isTitleShow_, expectRect);
     windowPaintRect_ = expectRect;
+
+    CHECK_NULL_VOID(titleMgr_);
+    titleMgr_->UpdateToolbarShow(isTitleShow_, customTitleSettedShow_);
+    CHECK_NULL_VOID(floatTitleMgr_);
+    floatTitleMgr_->UpdateToolbarShow(isTitleShow_, customTitleSettedShow_);
 }
+
 void ContainerModalPattern::UpdateRowHeight(const RefPtr<FrameNode>& row, Dimension height)
 {
     CHECK_NULL_VOID(row);
