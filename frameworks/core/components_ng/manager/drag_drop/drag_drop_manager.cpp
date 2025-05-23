@@ -1250,8 +1250,10 @@ bool DragDropManager::IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode)
     DragDropBehaviorReporter::GetInstance().UpdateAllowDropType(dragFrameNodeAllowDrop);
     for (const auto& it : summaryMap_) {
         // if one matched found, allow drop
-        if (dragFrameNodeAllowDrop.find(it.first) != dragFrameNodeAllowDrop.end()) {
-            return true;
+        for (const auto& element : dragFrameNodeAllowDrop) {
+            if (element == it.first || UdmfClient::GetInstance()->IsBelongsTo(it.first, element)) {
+                return true;
+            }
         }
     }
     return false;
