@@ -297,6 +297,9 @@ public:
 
     // initial drag gesture event
     void InitPanEvent();
+    void InitOnkeyEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleFocusEvent();
+    void HandleBlurEvent();
 
     void HandleDragStart();
 
