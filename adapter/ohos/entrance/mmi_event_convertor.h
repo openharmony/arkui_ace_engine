@@ -81,6 +81,12 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
 
 void SetTouchEventType(int32_t orgAction, TouchEvent& event);
 
+TouchType ConvertTouchEventType(int32_t originAction);
+
+MouseAction ConvertMouseEventAction(int32_t originAction);
+
+AxisAction ConvertAxisEventAction(int32_t originAction);
+
 // when the event didn't do touchtest, useRealtimeMatrix need to set true to get current matrix.
 void CalculatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& point, const RefPtr<NG::FrameNode>& frameNode,
     bool useRealtimeMatrix = false);
@@ -116,6 +122,12 @@ bool GetPointerEventToolType(const std::shared_ptr<MMI::PointerEvent>& pointerEv
 void SetClonedPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUITouchEvent* arkUITouchEventCloned);
 
 void SetPostPointerEvent(const MMI::PointerEvent* pointerEvent, TouchEvent& touchEvent);
+
+TouchType GetTouchTypeFromPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+
+AxisAction GetAxisActionFromPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+
+MouseAction GetMouseActionFromPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 } // namespace OHOS::Ace::Platform
 
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_MMI_EVENT_CONVERTOR_H

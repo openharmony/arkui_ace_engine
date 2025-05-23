@@ -347,20 +347,15 @@ int32_t GetPointerEventAction(InputEventType type, std::shared_ptr<MMI::PointerE
 {
     CHECK_NULL_RETURN(pointerEvent, 0);
     if (type == InputEventType::AXIS) {
-        AxisEvent tempAxisEvent;
-        NG::ConvertToAxisEvent(tempAxisEvent, pointerEvent);
-        return static_cast<int32_t>(tempAxisEvent.action);
+        return static_cast<int32_t>(NG::GetAxisEventType(pointerEvent));
     }
     if (type == InputEventType::MOUSE_BUTTON) {
-        MouseEvent tempMouseEvent;
-        NG::ConvertToMouseEvent(tempMouseEvent, pointerEvent);
-        return static_cast<int32_t>(tempMouseEvent.action);
+        return static_cast<int32_t>(NG::GetMouseEventType(pointerEvent));
     }
     if (type == InputEventType::KEYBOARD) {
         return static_cast<int32_t>(KeyAction::DOWN);
     }
-    TouchEvent tempTouchEvent = NG::ConvertToTouchEvent(pointerEvent);
-    return static_cast<int32_t>(tempTouchEvent.type);
+    return static_cast<int32_t>(NG::GetTouchEventType(pointerEvent));
 }
 
 void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& rawInputEvent,
