@@ -1038,6 +1038,15 @@ void JSText::SetEnableHapticFeedback(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetEnableHapticFeedback(state);
 }
 
+void JSText::SetOptimizeTrailingSpace(const JSCallbackInfo& info)
+{
+    bool state = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        state = info[0]->ToBoolean();
+    }
+    TextModel::GetInstance()->SetOptimizeTrailingSpace(state);
+}
+
 void JSText::SetEnableAutoSpacing(const JSCallbackInfo& info)
 {
     bool enabled = false;
@@ -1116,6 +1125,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("responseRegion", &JSText::JsResponseRegion);
     JSClass<JSText>::StaticMethod("halfLeading", &JSText::SetHalfLeading);
     JSClass<JSText>::StaticMethod("enableHapticFeedback", &JSText::SetEnableHapticFeedback);
+    JSClass<JSText>::StaticMethod("optimizeTrailingSpace", &JSText::SetOptimizeTrailingSpace);
     JSClass<JSText>::StaticMethod("enableAutoSpacing", &JSText::SetEnableAutoSpacing);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }

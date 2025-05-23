@@ -33,6 +33,7 @@ namespace OHOS::Ace::NG {
 constexpr int DEFAULT_SELECTION = -1;
 constexpr Dimension DEFAULT_LINE_HEIGHT = Dimension(0.0, DimensionUnit::PX);
 constexpr Dimension DEFAULT_LINE_SPACING = Dimension(0.0, DimensionUnit::PX);
+constexpr bool DEFAULT_TRIM_SPACE = false;
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
@@ -1275,6 +1276,27 @@ void ResetOnMarqueeStateChange(ArkUINodeHandle node)
     TextModelNG::SetOnMarqueeStateChange(frameNode, nullptr);
 }
 
+void SetTextOptimizeTrailingSpace(ArkUINodeHandle node, ArkUI_Bool trim)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetOptimizeTrailingSpace(frameNode, trim);
+}
+
+ArkUI_Int32 GetTextOptimizeTrailingSpace(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetOptimizeTrailingSpace(frameNode));
+}
+
+void ResetTextOptimizeTrailingSpace(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetOptimizeTrailingSpace(frameNode, DEFAULT_TRIM_SPACE);
+}
+
 void SetEnableAutoSpacing(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1425,6 +1447,9 @@ const ArkUITextModifier* GetTextModifier()
         .setOnMarqueeStateChange = SetOnMarqueeStateChange,
         .resetOnMarqueeStateChange = ResetOnMarqueeStateChange,
         .setImmutableFontWeight = SetImmutableFontWeight,
+        .setTextOptimizeTrailingSpace = SetTextOptimizeTrailingSpace,
+        .resetTextOptimizeTrailingSpace = ResetTextOptimizeTrailingSpace,
+        .getTextOptimizeTrailingSpace = GetTextOptimizeTrailingSpace,
         .getLineCount = GetLineCount,
         .setEnableAutoSpacing = SetEnableAutoSpacing,
         .resetEnableAutoSpacing = ResetEnableAutoSpacing,

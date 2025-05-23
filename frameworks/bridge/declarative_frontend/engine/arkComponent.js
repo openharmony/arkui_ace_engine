@@ -13285,6 +13285,23 @@ class TextLineSpacingModifier extends ModifierWithKey {
   }
 }
 TextLineSpacingModifier.identity = Symbol('textLineSpacing');
+class TextOptimizeTrailingSpaceModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetOptimizeTrailingSpace(node);
+    }
+    else {
+      getUINativeModule().text.setOptimizeTrailingSpace(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextOptimizeTrailingSpaceModifier.identity = Symbol('textOptimizeTrailingSpace');
 class TextTextOverflowModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -13881,6 +13898,11 @@ class ArkTextComponent extends ArkComponent {
     arkLineSpacing.value = value;
     arkLineSpacing.onlyBetweenLines = options?.onlyBetweenLines;
     modifierWithKey(this._modifiersWithKeys, TextLineSpacingModifier.identity, TextLineSpacingModifier, arkLineSpacing);
+    return this;
+  }
+  optimizeTrailingSpace(value) {
+    modifierWithKey(this._modifiersWithKeys, TextOptimizeTrailingSpaceModifier.identity,
+      TextOptimizeTrailingSpaceModifier, value);
     return this;
   }
   textCase(value) {

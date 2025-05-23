@@ -476,6 +476,7 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(const TextSty
         .indent = textStyle.GetTextIndent(),
         .halfLeading = textStyle.GetHalfLeading(),
         .paragraphSpacing = textStyle.GetParagraphSpacing(),
+        .optimizeTrailingSpace = textStyle.GetOptimizeTrailingSpace(),
         .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines(),
         .enableAutoSpacing = textStyle.GetEnableAutoSpacing()
         };
