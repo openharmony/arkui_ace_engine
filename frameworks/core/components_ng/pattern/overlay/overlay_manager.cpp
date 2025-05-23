@@ -4919,7 +4919,9 @@ void OverlayManager::OnBindContentCover(bool isShow, std::function<void(const st
             targetModalPattern->UpdateOnWillDismiss(std::move(contentCoverParam.onWillDismiss));
             targetModalPattern->SetType(modalTransition.value());
             targetModalPattern->SetHasTransitionEffect(contentCoverParam.transitionEffect != nullptr);
+            targetModalPattern->SetEnableSafeArea(contentCoverParam.enableSafeArea);
             modalRenderContext->UpdateChainedTransition(contentCoverParam.transitionEffect);
+            targetModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             return;
         }
         if (onWillAppear) {
@@ -4968,6 +4970,7 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     modalPagePattern->SetProhibitedRemoveByRouter(modalStyle.prohibitedRemoveByRouter);
     modalPagePattern->SetProhibitedRemoveByNavigation(modalStyle.prohibitedRemoveByNavigation);
     modalPagePattern->SetHasTransitionEffect(contentCoverParam.transitionEffect != nullptr);
+    modalPagePattern->SetEnableSafeArea(contentCoverParam.enableSafeArea);
     modalNode->GetRenderContext()->UpdateChainedTransition(contentCoverParam.transitionEffect);
     auto levelOrder = GetLevelOrder(modalNode);
     if (targetId < 0) {

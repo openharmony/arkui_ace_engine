@@ -104,6 +104,8 @@ public:
 
     void ModalInteractiveDismiss();
 
+    void BeforeCreateLayoutWrapper() override;
+
     void UpdateOnDisappear(std::function<void()>&& onDisappear) {
         onDisappear_ = std::move(onDisappear);
         isExecuteOnDisappear_ = false;
@@ -197,6 +199,15 @@ public:
         return true;
     }
 
+    void SetEnableSafeArea(bool enableSafeArea)
+    {
+        enableSafeArea_ = enableSafeArea;
+    }
+
+    bool GetEnableSafeArea() const
+    {
+        return enableSafeArea_;
+    }
 private:
     void OnAttachToFrameNode() override;
     bool isUIExtension_ = false;
@@ -211,6 +222,7 @@ private:
     std::function<void()> onWillDisappear_;
     std::function<void()> onAppear_;
     bool isExecuteOnDisappear_ = false;
+    bool enableSafeArea_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ModalPresentationPattern);
 };
