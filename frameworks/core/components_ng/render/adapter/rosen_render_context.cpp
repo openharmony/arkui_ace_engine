@@ -2885,6 +2885,23 @@ void RosenRenderContext::UpdateAccessibilityRoundRect()
     frameRect.SetRect(RectF(lineWidth - borderPaddingPx - paintWidthPx / 2,
         lineWidth - borderPaddingPx - paintWidthPx / 2, noGreenBorderWidth + 2 * borderPaddingPx + paintWidthPx,
         noGreenBorderHeight + 2 * borderPaddingPx + paintWidthPx)); // 2: framenode to graphic specification
+
+    // SetCornerRadius
+    EdgeF diffRadius = { borderPaddingPx + paintWidthPx / 2, borderPaddingPx + paintWidthPx / 2 };
+    auto focusPaintCornerTopLeft = frameRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS) + diffRadius;
+    auto focusPaintCornerTopRight = frameRect.GetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS) + diffRadius;
+    auto focusPaintCornerBottomLeft = frameRect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS) + diffRadius;
+    auto focusPaintCornerBottomRight = frameRect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS) + diffRadius;
+
+    frameRect.SetCornerRadius(
+        RoundRect::CornerPos::TOP_LEFT_POS, focusPaintCornerTopLeft.x, focusPaintCornerTopLeft.y);
+    frameRect.SetCornerRadius(
+        RoundRect::CornerPos::TOP_RIGHT_POS, focusPaintCornerTopRight.x, focusPaintCornerTopRight.y);
+    frameRect.SetCornerRadius(
+        RoundRect::CornerPos::BOTTOM_LEFT_POS, focusPaintCornerBottomLeft.x, focusPaintCornerBottomLeft.y);
+    frameRect.SetCornerRadius(
+        RoundRect::CornerPos::BOTTOM_RIGHT_POS, focusPaintCornerBottomRight.x, focusPaintCornerBottomRight.y);
+
     modifier->SetRoundRect(frameRect, paintWidthPx);
 }
 void RosenRenderContext::ClearAccessibilityFocus()
