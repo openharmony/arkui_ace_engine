@@ -1554,6 +1554,7 @@ HWTEST_F(DialogPatternTestNg, CustomDialogControllerModelNGTest002, TestSize.Lev
     props.isSceneBoardDialog = false;
     controllerModel.SetOpenDialogWithNode(props, nullptr);
     EXPECT_TRUE(props.isShowInSubWindow);
+    EXPECT_TRUE(props.isModal);
 }
 
 /**
