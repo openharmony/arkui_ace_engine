@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -45,6 +46,33 @@ void DividerModelNG::Vertical(bool value)
 void DividerModelNG::DividerColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(DividerRenderProperty, DividerColor, value);
+}
+
+void DividerModelNG::DividerColor(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto dividerPattern = frameNode->GetPattern<DividerPattern>();
+    CHECK_NULL_VOID(dividerPattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto dividerPattern = frameNode->GetPattern<DividerPattern>();
+        CHECK_NULL_VOID(dividerPattern);
+        std::string dividerColor = dividerPattern->GetResCacheMapByKey("divider.Color");
+        Color result;
+        if (dividerColor.empty()) {
+            ResourceParseUtils::ParseResColor(resObj, result);
+            dividerPattern->AddResCache("divider.Color", result.ColorToString());
+        } else {
+            result = Color::ColorFromString(dividerColor);
+        }
+        ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColor, result, frameNode);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    };
+    updateFunc(resObj);
+    dividerPattern->AddResObj("divider.Color", resObj, std::move(updateFunc));
 }
 
 void DividerModelNG::StrokeWidth(const Dimension& value)

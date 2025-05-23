@@ -16,12 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_GRID_LAYOUT_GRID_CONTAINER_UTIL_CLASS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_GRID_LAYOUT_GRID_CONTAINER_UTIL_CLASS_H
 
+#include <functional>
 #include <sstream>
 #include <utility>
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/grid_container_info.h"
 
 namespace OHOS::Ace::V2 {
@@ -145,6 +147,11 @@ public:
     Dimension yXl;
     Dimension xXXl;
     Dimension yXXl;
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, RefPtr<V2::Gutter>&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
 
     std::string ToString()
     {
@@ -164,6 +171,24 @@ public:
         ss << "yXXl: " << yXXl.ToString().c_str();
         ss << " }";
         return ss.str();
+    }
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, RefPtr<V2::Gutter>&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = {resObj, std::move(updateFunc)};
+    }
+
+    void ReloadResources(RefPtr<V2::Gutter>& gutter)
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, gutter);
+        }
     }
 };
 
