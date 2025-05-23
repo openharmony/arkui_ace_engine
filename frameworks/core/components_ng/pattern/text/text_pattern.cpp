@@ -4412,9 +4412,9 @@ void TextPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
 {
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
-    auto textValue = UtfUtils::Str16DebugToStr8(textLayoutProp->GetContent().value_or(u" ")).c_str();
+    auto textValue = UtfUtils::Str16DebugToStr8(textLayoutProp->GetContent().value_or(u" "));
     if (!IsSetObscured() && textValue[0] != '\0') {
-        json->Put("content", textValue);
+        json->Put("content", textValue.c_str());
         return;
     }
 
