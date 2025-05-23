@@ -137,14 +137,62 @@ static bool IsCanUpdate(UIState subscribers, UIState handlingState, UIState curr
     return ((subscribers & handlingState) == handlingState || currentState == UI_STATE_NORMAL);
 }
 
+bool StateStyleManager::IsExcludeInner(UIState handlingState)
+{
+    return (userSubscribersExcludeConfigs_ & handlingState) == handlingState;
+}
+
+void StateStyleManager::AddSupportedUIStateWithCallback(
+    UIState state, std::function<void(uint64_t)>& callback, bool isInner, bool excludeInner)
+{
+    if (state == UI_STATE_NORMAL) {
+        return;
+    }
+    if (!HasStateStyle(state)) {
+        supportedStates_ = supportedStates_ | state;
+    }
+    if (isInner) {
+        innerStateStyleSubscribers_.first |= state;
+        innerStateStyleSubscribers_.second = callback;
+        return;
+    }
+    userStateStyleSubscribers_.first |= state;
+    userStateStyleSubscribers_.second = callback;
+    if (excludeInner) {
+        userSubscribersExcludeConfigs_ |= state;
+    } else {
+        userSubscribersExcludeConfigs_ &= ~state;
+    }
+}
+
+void StateStyleManager::RemoveSupportedUIState(UIState state, bool isInner)
+{
+    if (state == UI_STATE_NORMAL) {
+        return;
+    }
+    if (isInner) {
+        innerStateStyleSubscribers_.first &= ~state;
+    } else {
+        userStateStyleSubscribers_.first &= ~state;
+        userSubscribersExcludeConfigs_ &= ~state;
+    }
+    UIState temp = frontendSubscribers_ | innerStateStyleSubscribers_.first | userStateStyleSubscribers_.first;
+    if ((temp & state) != state) {
+        supportedStates_ = supportedStates_ & ~state;
+    }
+}
+
 void StateStyleManager::HandleStateChangeInternal(UIState handlingState, UIState currentState, bool isReset)
 {
     std::function<void(UIState)> onStateStyleChange;
-    if (IsCanUpdate(innerStateStyleSubscribers_.first, handlingState, currentState)) {
+    if (IsCanUpdate(innerStateStyleSubscribers_.first, handlingState, currentState) &&
+        !IsExcludeInner(handlingState)) {
         onStateStyleChange = innerStateStyleSubscribers_.second;
         if (onStateStyleChange) {
             ScopedViewStackProcessor processor;
             onStateStyleChange(currentState);
+            TAG_LOGD(AceLogTag::ACE_STATE_STYLE,
+                "Internal state style subscriber callbacks, currentState=%{public}" PRIu64 "", currentState);
         }
     }
     if (IsCanUpdate(frontendSubscribers_, handlingState, currentState)) {
