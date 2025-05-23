@@ -358,6 +358,33 @@ void EventTreeRecord::Dump(std::list<std::pair<int32_t, std::string>>& dumpList,
     }
 }
 
+void EventTreeRecord::DumpBriefInfo(std::list<std::pair<int32_t, std::string>>& dumpList,
+    int32_t depth, int32_t startNumber) const
+{
+    int32_t index = 0;
+    int32_t listDepth = depth + 1;
+    int32_t detailDepth = listDepth + 1;
+    for (auto& tree : eventTreeList) {
+        if (index < startNumber) {
+            index++;
+            continue;
+        }
+        std::string header = std::to_string(index - startNumber).append(": event tree =>");
+
+        // dump needful touch points:
+        dumpList.emplace_back(std::make_pair(depth, header));
+        dumpList.emplace_back(std::make_pair(listDepth, "touch points:"));
+        auto count = 0;
+        for (auto& item : tree.touchPoints) {
+            item.Dump(dumpList, detailDepth);
+            if (++count >= 10) {
+                break;
+            }
+        }
+        ++index;
+    }
+}
+
 void FrameNodeSnapshot::Dump(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("nodeId", nodeId);
