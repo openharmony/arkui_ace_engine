@@ -301,6 +301,13 @@ void ResetSyncLoad(ArkUINodeHandle node)
     ImageModelNG::SetSyncMode(frameNode, DEFAULT_SYNC_LOAD_VALUE);
 }
 
+int32_t GetSyncLoad(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    return ImageModelNG::GetSyncLoad(frameNode);
+}
+
 void SetImageMatrix(ArkUINodeHandle node, const ArkUI_Float32* matrix)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1086,6 +1093,7 @@ const ArkUIImageModifier* GetImageModifier()
         .resetEnhancedImageQuality = ResetEnhancedImageQuality,
         .getImageSrc = GetImageSrc,
         .getAutoResize = GetAutoResize,
+        .getSyncLoad = GetSyncLoad,
         .getObjectRepeat = GetObjectRepeat,
         .getObjectFit = GetObjectFit,
         .getImageInterpolation = GetImageInterpolation,
@@ -1178,6 +1186,7 @@ const CJUIImageModifier* GetCJUIImageModifier()
         .resetEnhancedImageQuality = ResetEnhancedImageQuality,
         .getImageSrc = GetImageSrc,
         .getAutoResize = GetAutoResize,
+        .getSyncLoad = GetSyncLoad,
         .getObjectRepeat = GetObjectRepeat,
         .getObjectFit = GetObjectFit,
         .getImageInterpolation = GetImageInterpolation,
