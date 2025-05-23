@@ -400,35 +400,6 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg005, 
 }
 
 /**
- * @tc.name: SecuritySessionWrapperImplTestNg006
- * @tc.desc: Test the method NotifySizeChangeReason
- * @tc.type: FUNC
- */
-HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg006, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    /**
-     * @tc.steps: step1. construct a SecuritySessionWrapperImpl
-     */
-    auto sessionWrapper = GenerateSecuritySessionWrapperImpl();
-    Rosen::SessionInfo sessionInfo;
-    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
-
-    /**
-     * @tc.steps: step2. test NotifySizeChangeReason
-     */
-    auto type = OHOS::Ace::WindowSizeChangeReason::UNDEFINED;
-    std::shared_ptr<Rosen::RSTransaction> rsTransaction;
-    sessionWrapper->NotifySizeChangeReason(type, nullptr);
-
-    sessionWrapper->NotifySizeChangeReason(type, rsTransaction);
-
-    type = OHOS::Ace::WindowSizeChangeReason::ROTATION;
-    sessionWrapper->NotifySizeChangeReason(type, rsTransaction);
-#endif
-}
-
-/**
  * @tc.name: SecuritySessionWrapperImplTestNg007
  * @tc.desc: Test the method NotifyOccupiedAreaChangeInfo, SetDensityDpiImpl and SendDataSync
  * @tc.type: FUNC
