@@ -6152,6 +6152,38 @@ void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetOnDragEnter(std::move(onDragEnter));
 }
 
+void JSViewAbstract::JsOnDragSpringLoading(const JSCallbackInfo& info)
+{
+    if (info.Length() > 0) {
+        static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION, JSCallbackInfoType::OBJECT };
+        auto jsVal = info[0];
+        if (!CheckJSCallbackInfo("JsOnDragSpringLoading", jsVal, checkList)) {
+            return;
+        }
+        NG::OnDrapDropSpringLoadingFunc onDragSpringLoading = nullptr;
+        WeakPtr<NG::FrameNode> frameNode =
+            AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        if (jsVal->IsFunction()) {
+            RefPtr<JsDragFunction> jsOnDragSpringLoadingFunc =
+                AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(jsVal));
+            onDragSpringLoading = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragSpringLoadingFunc),
+                                      node = frameNode](const RefPtr<DragSpringLoadingContext>& info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("JsOnDragSpringLoading");
+                PipelineContext::SetCallBackNode(node);
+                func->DragSpringLoadingExecute(info);
+            };
+        }
+        ViewAbstractModel::GetInstance()->SetOnDragSpringLoading(std::move(onDragSpringLoading));
+    }
+    if (info.Length() == NUM2 && info[NUM1]->IsObject()) {
+        auto dragSpringLoadingConfiguration = AceType::MakeRefPtr<NG::DragSpringLoadingConfiguration>();
+        ParseDragSpringLoadingConfiguration(info[NUM1], dragSpringLoadingConfiguration);
+        ViewAbstractModel::GetInstance()->SetOnDragSpringLoadingConfiguration(
+            std::move(dragSpringLoadingConfiguration));
+    }
+}
+
 void JSViewAbstract::JsOnDragEnd(const JSCallbackInfo& info)
 {
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
@@ -7460,6 +7492,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onPreDrag", &JSViewAbstract::JsOnPreDrag);
     JSClass<JSViewAbstract>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
     JSClass<JSViewAbstract>::StaticMethod("onDragEnter", &JSViewAbstract::JsOnDragEnter);
+    JSClass<JSViewAbstract>::StaticMethod("onDragSpringLoading", &JSViewAbstract::JsOnDragSpringLoading);
     JSClass<JSViewAbstract>::StaticMethod("onDragMove", &JSViewAbstract::JsOnDragMove);
     JSClass<JSViewAbstract>::StaticMethod("onDragLeave", &JSViewAbstract::JsOnDragLeave);
     JSClass<JSViewAbstract>::StaticMethod("onDrop", &JSViewAbstract::JsOnDrop);
@@ -10411,5 +10444,32 @@ uint8_t JSViewAbstract::GetPixelRoundMode()
     auto pipeline = PipelineBase::GetCurrentContext();
     return pipeline ? static_cast<uint8_t>(pipeline->GetPixelRoundMode())
                     : static_cast<uint8_t>(PixelRoundMode::PIXEL_ROUND_ON_LAYOUT_FINISH);
+}
+
+void JSViewAbstract::ParseDragSpringLoadingConfiguration(
+    const JSRef<JSObject>& paramObj, const RefPtr<NG::DragSpringLoadingConfiguration>& config)
+{
+    JSRef<JSObject> configuration = JSRef<JSObject>::Cast(paramObj);
+    auto setConfigurationPropertyIfValid =
+        [&configuration, &config](const char* propName,
+            std::function<void(const RefPtr<NG::DragSpringLoadingConfiguration>&, int32_t)> setter) {
+            auto propObj = configuration->GetProperty(propName);
+            if (propObj->IsNumber()) {
+                auto value = propObj->ToNumber<int32_t>();
+                if (value >= 0) {
+                    setter(config, value);
+                }
+            }
+        };
+    setConfigurationPropertyIfValid("stillTimeLimit", [](const RefPtr<NG::DragSpringLoadingConfiguration>& config,
+                                                          int32_t value) { config->stillTimeLimit = value; });
+    setConfigurationPropertyIfValid("updateInterval", [](const RefPtr<NG::DragSpringLoadingConfiguration>& config,
+                                                          int32_t value) { config->updateInterval = value; });
+    setConfigurationPropertyIfValid("updateNotifyCount", [](const RefPtr<NG::DragSpringLoadingConfiguration>& config,
+                                                             int32_t value) { config->updateNotifyCount = value; });
+    setConfigurationPropertyIfValid(
+        "updateToFinishInterval", [](const RefPtr<NG::DragSpringLoadingConfiguration>& config, int32_t value) {
+            config->updateToFinishInterval = value;
+        });
 }
 } // namespace OHOS::Ace::Framework

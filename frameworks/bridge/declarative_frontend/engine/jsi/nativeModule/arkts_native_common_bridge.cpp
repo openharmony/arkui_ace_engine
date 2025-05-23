@@ -63,6 +63,7 @@ constexpr int NUM_10 = 10;
 constexpr int NUM_11 = 11;
 constexpr int NUM_12 = 12;
 constexpr int NUM_13 = 13;
+constexpr int SIZE_OF_ONE = 1;
 constexpr int SIZE_OF_TWO = 2;
 constexpr int SIZE_OF_THREE = 3;
 constexpr int SIZE_OF_FOUR = 4;
@@ -7698,6 +7699,53 @@ ArkUINativeModuleValue CommonBridge::ResetOnDragEnter(ArkUIRuntimeCallInfo* runt
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     ViewAbstract::DisableOnDragEnter(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOnDragSpringLoading(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (info.Length() > SIZE_OF_ONE) {
+        static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
+        auto jsVal = info[NUM_1];
+        if (!JSViewAbstract::CheckJSCallbackInfo("JsOnDragSpringLoading", jsVal, checkList)) {
+            return panda::JSValueRef::Undefined(vm);
+        }
+        NG::OnDrapDropSpringLoadingFunc onDragSpringLoading = nullptr;
+        if (jsVal->IsFunction()) {
+            RefPtr<JsDragFunction> jsOnDragSpringLoadingFunc =
+                AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(jsVal));
+            onDragSpringLoading = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragSpringLoadingFunc),
+                                      node = AceType::WeakClaim<NG::FrameNode>(frameNode)](
+                                      const RefPtr<DragSpringLoadingContext>& info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("JsOnDragSpringLoading");
+                PipelineContext::SetCallBackNode(node);
+                func->DragSpringLoadingExecute(info);
+            };
+        }
+        NG::ViewAbstract::SetOnDragSpringLoading(frameNode, std::move(onDragSpringLoading));
+    }
+    if (info.Length() == SIZE_OF_THREE && info[NUM_2]->IsObject()) {
+        auto dragSpringLoadingConfiguration = AceType::MakeRefPtr<NG::DragSpringLoadingConfiguration>();
+        JSViewAbstract::ParseDragSpringLoadingConfiguration(info[NUM_2], dragSpringLoadingConfiguration);
+        NG::ViewAbstract::SetOnDragSpringLoadingConfiguration(frameNode, std::move(dragSpringLoadingConfiguration));
+    }
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOnDragSpringLoading(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ViewAbstract::DisableOnDragSpringLoading(frameNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

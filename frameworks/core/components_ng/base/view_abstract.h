@@ -377,6 +377,14 @@ public:
     static void SetOnPreDrag(FrameNode* frameNode, std::function<void(const PreDragStatus)>&& onPreDragFunc);
     static void SetOnDragEnter(
         std::function<void(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDragEnter);
+    static void SetOnDragSpringLoading(
+        std::function<void(const RefPtr<DragSpringLoadingContext>&)>&& onDragSpringLoading);
+    static void SetOnDragSpringLoading(
+        FrameNode* frameNode, std::function<void(const RefPtr<DragSpringLoadingContext>&)>&& onDragSpringLoading);
+    static void SetOnDragSpringLoadingConfiguration(
+        const RefPtr<DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration);
+    static void SetOnDragSpringLoadingConfiguration(
+        FrameNode* frameNode, const RefPtr<DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration);
     static void SetOnDragLeave(
         std::function<void(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDragLeave);
     static void SetOnDragMove(
@@ -500,6 +508,7 @@ public:
     static void DisableOnClick(FrameNode* frameNode);
     static void DisableOnDragStart(FrameNode* frameNode);
     static void DisableOnDragEnter(FrameNode* frameNode);
+    static void DisableOnDragSpringLoading(FrameNode* frameNode);
     static void DisableOnDragMove(FrameNode* frameNode);
     static void DisableOnDragLeave(FrameNode* frameNode);
     static void DisableOnDrop(FrameNode* frameNode);

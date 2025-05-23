@@ -38,9 +38,11 @@ public:
     void ItemDropExecute(const ItemDragInfo& info, int32_t itemIndex, int32_t insertIndex, bool isSuccess);
     void PreDragExecute(const PreDragStatus preDragStatus);
     JSRef<JSVal> Execute(const RefPtr<DragEvent>& info, const std::string& extraParams);
+    JSRef<JSVal> DragSpringLoadingExecute(const RefPtr<DragSpringLoadingContext>& info);
 
 private:
     JSRef<JSObject> CreateDragEvent(const RefPtr<DragEvent>& info);
+    JSRef<JSObject> CreateSpringLoadingContext(const RefPtr<DragSpringLoadingContext>& info);
     JSRef<JSObject> CreatePasteData(const RefPtr<PasteData>& info);
     JSRef<JSObject> CreateItemDragInfo(const ItemDragInfo& info);
 };
@@ -96,5 +98,42 @@ private:
     JSRef<JSObject> jsPasteData_;
 };
 
+class JsDragSpringLoadingContext : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj);
+    void GetState(const JSCallbackInfo& args);
+    void SetState(const JSCallbackInfo& args);
+    void GetCurrentNotifySequence(const JSCallbackInfo& args);
+    void SetCurrentNotifySequence(const JSCallbackInfo& args);
+    void GetDragInfos(const JSCallbackInfo& args);
+    void SetDragInfos(const JSCallbackInfo& args);
+    void GetCurrentConfig(const JSCallbackInfo& args);
+    void SetCurrentConfig(const JSCallbackInfo& args);
+    void Abort(const JSCallbackInfo& args);
+    void UpdateConfiguration(const JSCallbackInfo& args);
+    const RefPtr<NG::DragSpringLoadingConfiguration>& GetDragSpringLoadingConfiguration()
+    {
+        return context_->GetDragSpringLoadingConfiguration();
+    }
+    void SetDragSpringLoadingConfiguration(const RefPtr<NG::DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration)
+    {
+        context_->SetDragSpringLoadingConfiguration(dragSpringLoadingConfiguration);
+    }
+    void SetContext(const RefPtr<DragSpringLoadingContext>& context)
+    {
+        context_ = context;
+    }
+
+    RefPtr<DragSpringLoadingContext> GetContext() const
+    {
+        return context_;
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JsDragSpringLoadingContext* springLoadingContext);
+
+    RefPtr<DragSpringLoadingContext> context_;
+};
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_DRAG_FUNCTION_H

@@ -1259,6 +1259,17 @@ void ViewAbstract::DisableOnDragEnter(FrameNode* frameNode)
     eventHub->ClearCustomerOnDragEnter();
 }
 
+void ViewAbstract::DisableOnDragSpringLoading(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearCustomerOnDragSpringLoading();
+    auto relatedConfigurations = frameNode->GetOrCreateDragDropRelatedConfigurations();
+    CHECK_NULL_VOID(relatedConfigurations);
+    relatedConfigurations->SetDragSpringLoadingConfiguration(nullptr);
+}
+
 void ViewAbstract::DisableOnDragMove(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1829,6 +1840,44 @@ void ViewAbstract::SetOnDragMove(FrameNode* frameNode,
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_MOVE, std::move(onDragMove));
 
     AddDragFrameNodeToManager(frameNode);
+}
+
+void ViewAbstract::SetOnDragSpringLoading(
+    std::function<void(const RefPtr<DragSpringLoadingContext>&)>&& onDragSpringLoading)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCustomerOnDragSpringLoading(std::move(onDragSpringLoading));
+    AddDragFrameNodeToManager();
+}
+
+void ViewAbstract::SetOnDragSpringLoading(
+    FrameNode* frameNode, std::function<void(const RefPtr<DragSpringLoadingContext>&)>&& onDragSpringLoading)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCustomerOnDragSpringLoading(std::move(onDragSpringLoading));
+    AddDragFrameNodeToManager();
+}
+
+void ViewAbstract::SetOnDragSpringLoadingConfiguration(
+    const RefPtr<DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto relatedConfigurations = frameNode->GetOrCreateDragDropRelatedConfigurations();
+    CHECK_NULL_VOID(relatedConfigurations);
+    relatedConfigurations->SetDragSpringLoadingConfiguration(std::move(dragSpringLoadingConfiguration));
+}
+
+void ViewAbstract::SetOnDragSpringLoadingConfiguration(
+    FrameNode* frameNode, const RefPtr<DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto relatedConfigurations = frameNode->GetOrCreateDragDropRelatedConfigurations();
+    CHECK_NULL_VOID(relatedConfigurations);
+    relatedConfigurations->SetDragSpringLoadingConfiguration(std::move(dragSpringLoadingConfiguration));
 }
 
 void ViewAbstract::SetOnDragLeave(FrameNode* frameNode,

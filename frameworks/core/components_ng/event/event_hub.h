@@ -126,6 +126,8 @@ public:
     void SetOnPreDrag(OnPreDragFunc&& onPreDragFunc);
     const OnPreDragFunc& GetOnPreDrag() const;
     void SetOnDragStart(OnDragStartFunc&& onDragStart);
+    void SetCustomerOnDragSpringLoading(OnDrapDropSpringLoadingFunc&& onDragSpringLoading);
+    const OnDrapDropSpringLoadingFunc& GetCustomerOnDragSpringLoading() const;
 
     const OnDragStartFunc& GetOnDragStart() const
     {
@@ -163,6 +165,7 @@ public:
     void FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
     bool HasOnDrop() const;
     bool HasCustomerOnDragEnter() const;
+    bool HasCustomerOnDragSpringLoading() const;
     bool HasCustomerOnDragLeave() const;
     bool HasCustomerOnDragMove() const;
     bool HasCustomerOnDragEnd() const;
@@ -239,6 +242,7 @@ public:
     void ClearCustomerOnDragFunc();
     void ClearCustomerOnDragStart();
     void ClearCustomerOnDragEnter();
+    void ClearCustomerOnDragSpringLoading();
     void ClearCustomerOnDragMove();
     void ClearCustomerOnDragLeave();
     void ClearCustomerOnDrop();
@@ -348,6 +352,7 @@ private:
 
     OnDragStartFunc defaultOnDragStart_;
     OnDragFunc customerOnDragEnter_;
+    OnDrapDropSpringLoadingFunc customerOnDragSpringLoading_;
     OnDragFunc customerOnDragLeave_;
     OnDragFunc customerOnDragMove_;
     OnDragFunc customerOnDrop_;

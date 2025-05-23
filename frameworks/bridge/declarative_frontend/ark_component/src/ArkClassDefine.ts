@@ -1605,6 +1605,72 @@ class ArkDragPreview {
   }
 }
 
+class ArkDragSpringLoading {
+  callback: (context: ArkSpringLoadingContext) => void;
+  configuration: ArkDragSpringLoadingConfiguration | undefined;
+  constructor() {
+    this.configuration = undefined;
+    this.callback = undefined;
+  }
+
+  isEqual(another: ArkDragSpringLoading): boolean {
+    return (
+      this.callback === another.callback &&
+      this.configuration.isEqual(another.configuration)
+    );
+  }
+}
+
+class ArkSpringLoadingContext {
+  state: DragSpringLoadingState | undefined;
+  currentNotifySequence: number | undefined;
+  dragInfos: SpringLoadingDragInfos | undefined;
+  currentConfig: ArkDragSpringLoadingConfiguration | undefined;
+  abort: () => void;
+  updateConfiguration: (config: ArkDragSpringLoadingConfiguration) => void;
+  constructor() {
+    this.state = undefined;
+    this.currentNotifySequence = undefined;
+    this.dragInfos = undefined;
+    this.currentConfig = undefined;
+    this.abort = undefined;
+    this.updateConfiguration = undefined;
+  }
+
+  isEqual(another: ArkSpringLoadingContext): boolean {
+    return (
+      this.state === another.state &&
+      this.currentNotifySequence === another.currentNotifySequence &&
+      this.dragInfos === another.dragInfos &&
+      this.currentConfig.isEqual(another.currentConfig) &&
+      this.abort === another.abort &&
+      this.updateConfiguration === another.updateConfiguration
+    );
+  }
+}
+
+class ArkDragSpringLoadingConfiguration {
+  stillTimeLimit: number | undefined;
+  updateInterval: number | undefined;
+  updateNotifyCount: number | undefined;
+  updateToFinishInterval: number | undefined;
+  constructor() {
+    this.stillTimeLimit = undefined;
+    this.updateInterval = undefined;
+    this.updateNotifyCount = undefined;
+    this.updateToFinishInterval = undefined;
+  }
+
+  isEqual(another: ArkDragSpringLoadingConfiguration): boolean {
+    return (
+      this.stillTimeLimit === another.stillTimeLimit &&
+      this.updateInterval === another.updateInterval &&
+      this.updateNotifyCount === another.updateNotifyCount &&
+      this.updateToFinishInterval === another.updateToFinishInterval
+    );
+  }
+}
+
 class ArkRelativeContainerGuideLine {
   ids: Array<string> | undefined;
   directions: Array<Axis> | undefined;

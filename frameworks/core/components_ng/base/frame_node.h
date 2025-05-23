@@ -72,6 +72,7 @@ class Pattern;
 class StateModifyTask;
 class UITask;
 struct DirtySwapConfig;
+class DragDropRelatedConfigurations;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
@@ -401,6 +402,8 @@ public:
     const RefPtr<FocusHub>& GetOrCreateFocusHub(FocusType type, bool focusable, FocusStyleType focusStyleType,
         const std::unique_ptr<FocusPaintParam>& paintParamsPtr);
     const RefPtr<FocusHub>& GetOrCreateFocusHub(const FocusPattern& focusPattern);
+
+    const RefPtr<DragDropRelatedConfigurations>& GetOrCreateDragDropRelatedConfigurations();
 
     void CreateEventHubInner();
 
@@ -1697,6 +1700,7 @@ private:
     std::unordered_map<uint32_t, std::function<void()>> removeToolbarItemCallbacks_;
 
     RefPtr<FrameNode> cornerMarkNode_ = nullptr;
+    RefPtr<DragDropRelatedConfigurations> dragDropRelatedConfigurations_;
 };
 } // namespace OHOS::Ace::NG
 
