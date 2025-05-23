@@ -431,4 +431,9 @@ int32_t SystemProperties::getFormSharedImageCacheThreshold()
 {
     return formSharedImageCacheThreshold_;
 }
+
+void SystemProperties::SetMultiInstanceEnabled(bool enabled)
+{
+}
+
 } // namespace OHOS::Ace
