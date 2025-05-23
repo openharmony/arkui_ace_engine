@@ -27,6 +27,9 @@ interface __IRepeatItemInternal<T> {
     // - on child reuse. reuse children to render newItemValue. index of
     //   newItemValue is a new one
     updateIndex: (newIndexValue: number) => void;
+
+    // un-register all repeat sub-components
+    aboutToBeDeleted?: () => void;
 }
 
 interface __RepeatItemFactoryReturn<T> extends RepeatItem<T>, __IRepeatItemInternal<T> { }
@@ -65,6 +68,11 @@ class __RepeatItemPU<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
         if (this._observedIndex?.getUnmonitored() !== newIndex) {
             this._observedIndex?.set(newIndex);
         }
+    }
+
+    public aboutToBeDeleted(): void {
+        this._observedItem.aboutToBeDeleted();
+        this._observedIndex?.aboutToBeDeleted();
     }
 }
 
@@ -279,6 +287,17 @@ class __Repeat<T> implements RepeatAPI<T> {
         this.config.onMoveHandler = handler;
         this.config.itemDragEventHandler = eventHandler;
         return this;
+    }
+
+    // un-register all repeat sub-components
+    public aboutToBeDeleted(): void {
+        if (this.impl instanceof __RepeatImpl) {
+            this.impl.getKey2Item().forEach((itemInfo: __RepeatItemInfo<T>) => {
+                if (itemInfo.repeatItem && itemInfo.repeatItem instanceof __RepeatItemPU) {
+                    itemInfo.repeatItem.aboutToBeDeleted();
+                }
+            });
+        }
     }
 
     // normalize template options

@@ -207,6 +207,11 @@ abstract class ViewPU extends PUV2ViewBase
     // tell UINodeRegisterProxy that all elmtIds under
     // this ViewPU should be treated as already unregistered
 
+    // un-register all repeat sub-components
+    this.elmtId2Repeat_.forEach(<I>(repeat: __Repeat<I>) => {
+      repeat.aboutToBeDeleted();
+    });
+
     stateMgmtConsole.debug(`${this.constructor.name}: aboutToBeDeletedInternal `);
 
     // purge the elmtIds owned by this viewPU from the updateFuncByElmtId and also the state variable dependent elmtIds
