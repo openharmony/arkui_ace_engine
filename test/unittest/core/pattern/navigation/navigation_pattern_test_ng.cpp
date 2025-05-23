@@ -2028,14 +2028,14 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_017, TestSize.Level1)
 HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_018, TestSize.Level1)
 {
     EXPECT_NE(ResSchedReport::GetInstance().keyEventCountMS, 156);
-    PerfMoniter::GetPerfMonitor()->Start("ABILITY_OR_PAGE_SWITCH", PerfActionType::UNKNOWN_ACTION, "");
-    ResschedReport::GetInstance().ResSchedDataReport("ability_or_page_switch_start");
+    PerfMonitor::GetPerfMonitor()->Start("ABILITY_OR_PAGE_SWITCH", PerfActionType::UNKNOWN_ACTION, "");
+    ResSchedReport::GetInstance().ResSchedDataReport("ability_or_page_switch_start");
     EXPECT_EQ(ResSchedReport::GetInstance().keyEventCountMS, 156);
 
     ResSchedReport::GetInstance().keyEventCountMS = -1;
     EXPECT_NE(ResSchedReport::GetInstance().keyEventCountMS, 156);
-    PerfMoniter::GetPerfMonitor()->End("ABILITY_OR_PAGE_SWITCH", PerfActionType::UNKNOWN_ACTION);
-    ResschedReport::GetInstance().ResSchedDataReport("ability_or_page_switch_end");
+    PerfMonitor::GetPerfMonitor()->End("ABILITY_OR_PAGE_SWITCH", PerfActionType::UNKNOWN_ACTION);
+    ResSchedReport::GetInstance().ResSchedDataReport("ability_or_page_switch_end");
     EXPECT_EQ(ResSchedReport::GetInstance().keyEventCountMS, 156);
 }
 } // namespace OHOS::Ace::NG
