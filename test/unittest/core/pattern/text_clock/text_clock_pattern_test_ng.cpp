@@ -836,4 +836,106 @@ HWTEST_F(TextClockPatternTestNG, TextClockCheckDateTimeElement001, TestSize.Leve
     std::string checkRes6 = "07";
     EXPECT_EQ(res6, checkRes6);
 }
+
+/**
+ * @tc.name: TextClockUpdateColor001
+ * @tc.desc: Test UpdateTextClockColor of TextClockPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, TextClockUpdateColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and renderContext.
+     * @tc.expected: step2.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step3. call UpdateTextClockColor function.
+     * @tc.expected: step3. check color properties updated.
+     */
+    Color testColor = Color::BLUE;
+    pattern->UpdateTextClockColor(testColor);
+    
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetTextColor().value(), testColor);
+    EXPECT_EQ(renderContext->GetForegroundColor().value(), testColor);
+    EXPECT_TRUE(renderContext->GetForegroundColorFlag().value());
+}
+
+/**
+ * @tc.name: TextClockUpdateFontSize002
+ * @tc.desc: Test UpdateTextClockFontSize of TextClockPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, TextClockUpdateFontSize002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     * @tc.expected: step2.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. call UpdateTextClockFontSize function.
+     * @tc.expected: step3. check fontSize property updated.
+     */
+    const double fontSizeValue = 20.0;
+    CalcDimension fontSize(fontSizeValue, DimensionUnit::VP);
+    pattern->UpdateTextClockFontSize(fontSize);
+    EXPECT_EQ(layoutProperty->GetFontSize().value(), fontSize);
+}
+
+/**
+ * @tc.name: TextClockUpdateFontFamily003
+ * @tc.desc: Test UpdateTextClockFontFamily of TextClockPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, TextClockUpdateFontFamily003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     * @tc.expected: step2.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. call UpdateTextClockFontFamily function.
+     * @tc.expected: step3. check fontFamily property updated.
+     */
+    std::vector<std::string> fontFamilies = {"Arial", "sans-serif"};
+    pattern->UpdateTextClockFontFamily(fontFamilies);
+    EXPECT_EQ(layoutProperty->GetFontFamily().value(), fontFamilies);
+}
 } // namespace OHOS::Ace::NG

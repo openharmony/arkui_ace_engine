@@ -37,6 +37,9 @@ public:
     void SetTextShadow(const std::vector<Shadow>& value) override {};
     void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) override {};
     void InitFontDefault(const TextStyle& textStyle) override;
+    void CreateWithTextColorResourceObj(const RefPtr<ResourceObject>& resObj) override {};
+    void CreateWithFontSizeResourceObj(const RefPtr<ResourceObject>& resObj) override {};
+    void CreateWithFontFamilyResourceObj(const RefPtr<ResourceObject>& resObj) override {};
     
 private:
     static RefPtr<TextClockComponent> GetComponent();
