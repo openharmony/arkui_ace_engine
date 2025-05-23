@@ -3060,17 +3060,22 @@ struct ArkUIParticleModifier {
 };
 
 struct ArkUISwiperModifier {
-    void (*setSwiperNextMargin)(
-        ArkUINodeHandle node, ArkUI_Float32 nextMarginValue, ArkUI_Int32 nextMarginUnit, ArkUI_Bool ignoreBlank);
+    void (*setSwiperNextMargin)(ArkUINodeHandle node, ArkUI_Float32 nextMarginValue, ArkUI_Int32 nextMarginUnit,
+        ArkUI_Bool ignoreBlank);
+    void (*setSwiperNextMarginRaw)(ArkUINodeHandle node, ArkUI_Float32 nextMarginValue, ArkUI_Int32 nextMarginUnit,
+        ArkUI_Bool ignoreBlank, void* nextMarginRawPtr);
     void (*resetSwiperNextMargin)(ArkUINodeHandle node);
-    void (*setSwiperPrevMargin)(
-        ArkUINodeHandle node, ArkUI_Float32 prevMarginValue, ArkUI_Int32 prevMarginUnit, ArkUI_Bool ignoreBlank);
+    void (*setSwiperPrevMargin)(ArkUINodeHandle node, ArkUI_Float32 prevMarginValue, ArkUI_Int32 prevMarginUnit,
+        ArkUI_Bool ignoreBlank);
+    void (*setSwiperPrevMarginRaw)(ArkUINodeHandle node, ArkUI_Float32 prevMarginValue, ArkUI_Int32 prevMarginUnit,
+        ArkUI_Bool ignoreBlank, void* prevMarginRawPtr);
     void (*resetSwiperPrevMargin)(ArkUINodeHandle node);
     void (*setSwiperDisplayCount)(ArkUINodeHandle node, ArkUI_CharPtr displayCountChar, ArkUI_CharPtr displayCountType);
     void (*resetSwiperDisplayCount)(ArkUINodeHandle node);
     void (*setSwiperSwipeByGroup)(ArkUINodeHandle node, ArkUI_Bool swipeByGroup);
     void (*resetSwiperSwipeByGroup)(ArkUINodeHandle node);
     void (*setSwiperDisplayArrow)(ArkUINodeHandle node, ArkUI_CharPtr displayArrowStr);
+    void (*setSwiperDisplayArrowRaw)(ArkUINodeHandle node, ArkUI_CharPtr displayArrowStr, const void* resObjs);
     void (*resetSwiperDisplayArrow)(ArkUINodeHandle node);
     void (*setSwiperCurve)(ArkUINodeHandle node, ArkUI_CharPtr curveChar);
     void (*resetSwiperCurve)(ArkUINodeHandle node);
@@ -3099,6 +3104,7 @@ struct ArkUISwiperModifier {
     void (*setSwiperIndex)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animationMode);
     void (*resetSwiperIndex)(ArkUINodeHandle node);
     void (*setSwiperIndicator)(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr);
+    void (*setSwiperIndicatorRaw)(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr, const void* resObjs);
     void (*resetSwiperIndicator)(ArkUINodeHandle node);
     void (*setSwiperDuration)(ArkUINodeHandle node, ArkUI_Float32 duration);
     void (*resetSwiperDuration)(ArkUINodeHandle node);

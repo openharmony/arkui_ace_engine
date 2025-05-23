@@ -7598,4 +7598,18 @@ void SwiperPattern::NotifyDataChange(int32_t index, int32_t count)
         jumpIndex_ = jumpIndex_.value_or(CheckIndexRange(curretIndex + count));
     }
 }
+
+void SwiperPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto swiperNode = GetHost();
+    CHECK_NULL_VOID(swiperNode);
+    if (!isBindIndicator_) {
+        InitIndicator();
+    } else if (NeedForceMeasure()) {
+        MarkDirtyBindIndicatorNode();
+    }
+    InitArrow();
+    swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
 } // namespace OHOS::Ace::NG

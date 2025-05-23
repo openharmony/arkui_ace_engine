@@ -2234,4 +2234,24 @@ HWTEST_F(SwiperAttrTestNg, CheckSwiperModelNG002, TestSize.Level1)
     EXPECT_EQ(swiperModel.GetShowDisplayArrow(frameNode), 0);
     EXPECT_EQ(swiperModel.GetEffectMode(frameNode), EdgeEffect::SPRING);
 }
+
+/**
+ * @tc.name: CreateDotWithResourceObj001
+ * @tc.desc: Test Swiper Model CreateDotWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, CreateDotWithResourceObj001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    auto layoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    auto paintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
+
+    SwiperParameters swiperParameters;
+    swiperParameters.colorVal = Color(Color::BLUE);
+    model.CreateDotWithResourceObj(frameNode, swiperParameters);
+    model.SetIndicatorStyle(swiperParameters);
+    EXPECT_EQ(pattern->swiperParameters_->colorVal, swiperParameters.colorVal);
+}
 } // namespace OHOS::Ace::NG

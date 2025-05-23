@@ -825,6 +825,8 @@ public:
 
     void NotifyDataChange(int32_t index, int32_t count) override;
 
+    void OnColorModeChange(uint32_t colorMode) override;
+    void ResetOnForceMeasure();
 protected:
     void MarkDirtyNodeSelf();
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
@@ -1205,7 +1207,6 @@ private:
                SwiperUtils::IsStretch(swiperLayoutProperty);
     }
 
-    void ResetOnForceMeasure();
     void ResetTabBar();
     void UpdateTabBarIndicatorCurve();
     const RefPtr<Curve> GetTabBarAnimationCurve(const RefPtr<Curve>& curve);
