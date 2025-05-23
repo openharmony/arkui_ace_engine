@@ -142,6 +142,7 @@ const CONTENT_FONT_WEIGHT = lazyInit<FontWeight>(() => {
   return fontWeight;
 });
 const SCROLL_BAR_OFFSET = 20;
+const SELECT_DIALOG_SCROLL_BAR_OFFSET = 4;
 
 @CustomDialog
 export struct TipsDialog {
@@ -320,11 +321,12 @@ export struct TipsDialog {
           }
         }
       }
-      .margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN()) })
+      .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
+      .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
     }
     .fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
     .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
-    .margin({ end: LengthMetrics.vp(this.marginOffset) })
+    .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) })
   }
 
   aboutToAppear() {
@@ -584,6 +586,7 @@ export struct SelectDialog {
         this.isFocus = false;
       }
     })
+    .margin({ end: LengthMetrics.vp(SELECT_DIALOG_SCROLL_BAR_OFFSET) })
   }
 
   build() {
@@ -745,11 +748,12 @@ export struct ConfirmDialog {
             })
             .width('100%')
         }
-        .margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN()) })
+        .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
+        .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
       }
       .fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
-      .margin({ end: LengthMetrics.vp(this.marginOffset) })
+      .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) })
     }
   }
 
@@ -1138,6 +1142,7 @@ struct CustomDialogContentComponent {
         } : { left: 0, right: 0, bottom: 0 })
         .backgroundColor(this.customStyle ? $r('sys.color.ohos_id_color_dialog_bg') : Color.Transparent)
       }
+      .borderRadius($r('sys.float.alert_container_shape'))
       .edgeEffect(EdgeEffect.None, { alwaysEnabled: false })
       .backgroundColor(this.themeColorMode === ThemeColorMode.SYSTEM || undefined ?
       Color.Transparent : $r('sys.color.comp_background_primary'))
@@ -1169,9 +1174,14 @@ struct CustomDialogContentComponent {
   }
 
   aboutToAppear(): void {
-    let uiContext: UIContext = this.getUIContext();
-    this.isFollowingSystemFontScale = uiContext.isFollowingSystemFontScale();
-    this.appMaxFontScale = uiContext.getMaxFontScale();
+    try{
+      let uiContext: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale() ?? false;
+      this.appMaxFontScale = uiContext?.getMaxFontScale() ?? 3.2;
+    } catch (err) {
+      let code: number = (err as BusinessError)?.code;
+      hilog.error(0x3900, 'Ace', `Faild to dialog getUIContext, code: ${code}`);
+    }
     this.fontSizeScale = this.updateFontScale();
     if (this.controller && this.customStyle === undefined) {
       let customController: CustomDialogControllerExtend = this.controller as CustomDialogControllerExtend;
