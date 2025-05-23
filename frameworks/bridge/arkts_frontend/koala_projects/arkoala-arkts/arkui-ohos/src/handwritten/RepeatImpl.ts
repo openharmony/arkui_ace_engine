@@ -22,6 +22,7 @@ import { RepeatItem, UIRepeatAttribute, RepeatArray, RepeatItemBuilder, Template
 import { IDataSource, DataChangeListener } from '../component/lazyForEach';
 import { LazyForEachImpl } from '../LazyForEach';
 import { RepeatType } from '../PeerNode';
+import { ArkColumnPeer } from '../component/column';
 
 class RepeatItemImpl<T> implements RepeatItem<T> {
     __item: T;
@@ -161,7 +162,7 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
             throw new Error('Repeat item builder function unspecified. Usage error!');
         }
         this.isVirtualScroll_
-            ? virtualRender<T>(this.arr_, this.itemGenFuncs_, this.keyGenFunc_, this.ttypeGenFunc_)
+            ? virtualRender<T>(this.arr_, this.itemGenFuncs_, this.keyGenFunc_, this.ttypeGenFunc_, this.reusable_)
             : nonVirtualRender<T>(this.arr_, this.itemGenFuncs_.get(RepeatEachFuncType)!, this.keyGenFunc_);
     }
 
@@ -178,8 +179,10 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
 function virtualRender<T>(arr: RepeatArray<T>,
     itemGenFuncs: Map<string, RepeatItemBuilder<T>>,
     keyGenerator?: (element: T, index: number) => string,
-    typedFunc?: TemplateTypedFunc<T>): void {
-    const dataSource = new RepeatDataSource<T>(arr);
+    typedFunc?: TemplateTypedFunc<T>,
+    reusable?: boolean
+): void {
+    const dataSource = new RepeatDataSource<T>(arr); // todo: compare performance with/without remember
     /** @memo */
     const itemGen = (item: T, index: number): void => {
         const ri = new RepeatItemImpl<T>(item, index as number);
@@ -189,7 +192,17 @@ function virtualRender<T>(arr: RepeatArray<T>,
         }
         /** @memo */
         const itemBuilder = itemGenFuncs.get(_type)!;
-        itemBuilder(ri);
+        /**
+         * wrap in reusable node.
+         * To optimize performance, insert reuseKey through compiler plugin to the content of itemBuilder.
+         */
+        if (reusable) {
+            NodeAttach(() => ArkColumnPeer.create(undefined), (node: ArkColumnPeer) => {
+                itemBuilder(ri);
+            }, _type) // using type as reuseKey
+        } else {
+            itemBuilder(ri);
+        }
     }
     LazyForEachImpl<T>(dataSource, itemGen, keyGenerator);
 }
