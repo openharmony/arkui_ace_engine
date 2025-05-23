@@ -227,13 +227,21 @@ bool HasTransparentCallback(const RefPtr<NG::FrameNode>& node)
 }
 
 bool AccessibilityManagerNG::ExecuteChildNodeHoverTransparentCallback(const RefPtr<FrameNode>& root,
-    const TouchEvent& event)
+    const PointF& point, const TouchEvent& event)
 {
     CHECK_NULL_RETURN(root, false);
+    auto renderContext = root->GetRenderContext();
     auto accessibilityProperty = root->GetAccessibilityProperty<NG::AccessibilityProperty>();
-    if (accessibilityProperty != nullptr) {
+    PointF selfPoint = point;
+    if (accessibilityProperty) {
+        bool isInHoverArea = false;
+        if (renderContext) {
+            auto rect = AccessibilityProperty::UpdateHoverTestRect(root);
+            renderContext->GetPointWithRevert(selfPoint);
+            isInHoverArea = rect.IsInnerRegion(selfPoint);
+        }
         auto callback = accessibilityProperty->GetAccessibilityTransparentCallbackFunc();
-        if (callback) {
+        if (callback && isInHoverArea) {
             TouchEventInfo eventInfo("touchEvent");
             ConvertTouchEvent2TouchEventInfo(root, event, eventInfo);
             callback(eventInfo);
@@ -245,23 +253,28 @@ bool AccessibilityManagerNG::ExecuteChildNodeHoverTransparentCallback(const RefP
         if (child == nullptr) {
             continue;
         }
-        ExecuteChildNodeHoverTransparentCallback(child, event);
+        PointF noOffsetPoint = selfPoint;
+        if (renderContext) {
+            auto orginRect = renderContext->GetPaintRectWithoutTransform();
+            noOffsetPoint = selfPoint - orginRect.GetOffset();
+        }
+        ExecuteChildNodeHoverTransparentCallback(child, noOffsetPoint, event);
     }
     return true;
 }
 
 bool AccessibilityManagerNG::HandleAccessibilityHoverTransparentCallback(bool transformed,
     const RefPtr<FrameNode>& root,
-    const int32_t& currentHoveringId,
-    const int32_t& lastHoveringId,
+    const HandleTransparentCallbackParam& param,
+    const PointF& point,
     const TouchEvent& event)
 {
     static constexpr int32_t INVALID_NODE_ID = -1;
     if (transformed) {
         return false;
     }
-    if ((currentHoveringId == INVALID_NODE_ID) && (lastHoveringId == INVALID_NODE_ID)) {
-        return ExecuteChildNodeHoverTransparentCallback(root, event);
+    if ((param.currentHoveringId == INVALID_NODE_ID) && (param.lastHoveringId == INVALID_NODE_ID)) {
+        return ExecuteChildNodeHoverTransparentCallback(root, point, event);
     }
     return false;
 }
@@ -352,7 +365,8 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
     }
 
     if (sourceType != SourceType::MOUSE) {
-        HandleAccessibilityHoverTransparentCallback(transformHover, root, currentHoveringId, lastHoveringId, event);
+        HandleTransparentCallbackParam param = {currentHoveringId, lastHoveringId};
+        HandleAccessibilityHoverTransparentCallback(transformHover, root, param, point, event);
     }
 
     hoverState_.nodesHovering = std::move(currentNodesHovering);

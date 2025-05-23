@@ -365,21 +365,33 @@ HWTEST_F(AccessibilityManagerUtilsTest, AccessibilityManagerUtilsTest010, TestSi
 HWTEST_F(AccessibilityManagerUtilsTest, AddToHoverTransparentCallbackList010, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. construct JsAccessibilityManager
+     * @tc.steps: step1. construct HoverTransparentCallbackController.
      */
     HoverTransparentCallbackController controller;
     auto frameNode1 = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
     auto context1 = AceType::MakeRefPtr<NG::PipelineContext>();
-    CHECK_NULL_VOID(frameNode1);
-    CHECK_NULL_VOID(context1);
+    ASSERT_NE(frameNode1, nullptr);
+    ASSERT_NE(context1, nullptr);
     context1->instanceId_ = 1;
     frameNode1->AttachContext(AceType::RawPtr(context1), false);
 
     /**
-    * @tc.steps: step2. add controller with instanceId 1.
-    * @tc.expected: check controller_ is not empty.
+    * @tc.steps: step2. not add controller.
+    * @tc.expected: check controller_ is empty.
+    */
+    EXPECT_TRUE(controller.CheckHoverTransparentCallbackListEmpty(1));
+
+    /**
+    * @tc.steps: step3. add controller with instanceId 1.
+    * @tc.expected: check IsInHoverTransparentCallbackList return true.
     */
     controller.AddToHoverTransparentCallbackList(frameNode1);
     EXPECT_TRUE(controller.IsInHoverTransparentCallbackList(frameNode1));
+
+    /**
+    * @tc.steps: step4. Call CheckHoverTransparentCallbackListEmpty function.
+    * @tc.expected: check CheckHoverTransparentCallbackListEmpty return false.
+    */
+    EXPECT_FALSE(controller.CheckHoverTransparentCallbackListEmpty(1));
 }
 } // namespace OHOS::Ace::NG
