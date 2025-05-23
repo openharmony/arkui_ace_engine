@@ -26,8 +26,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-using onErrorFuncType = void (*)(int32_t code, const char* name, const char* message);
-using onTerminatedFuncType = void (*)(int32_t code, AbilityBase_Want* want);
+using OnErrorFuncType = void (*)(int32_t code, const char* name, const char* message);
+using OnTerminatedFuncType = void (*)(int32_t code, AbilityBase_Want* want);
 
 void SetEmbeddedComponentWant(ArkUINodeHandle node, AbilityBase_Want* cwant)
 {
@@ -44,7 +44,7 @@ void SetEmbeddedComponentWant(ArkUINodeHandle node, AbilityBase_Want* cwant)
     UIExtensionAdapter::SetEmbeddedComponentWant(frameNode, want);
 }
 
-void TransformToCWantElement(AbilityBase_Element& element, AAFwk::Want want)
+void TransformToCWantElement(AbilityBase_Element& element, const AAFwk::Want& want)
 {
     element.bundleName = new char[want.GetElement().GetBundleName().length() + 1];
     element.moduleName = new char[want.GetElement().GetModuleName().length() + 1];
@@ -67,12 +67,15 @@ void DestoryCWantElement(AbilityBase_Element& element)
 {
     if (element.bundleName) {
         delete[] element.bundleName;
+        element.bundleName = nullptr;
     }
     if (element.moduleName) {
         delete[] element.moduleName;
+        element.moduleName = nullptr;
     }
     if (element.abilityName) {
         delete[] element.abilityName;
+        element.abilityName = nullptr;
     }
 }
 
@@ -88,7 +91,7 @@ void SetEmbeddedComponentOnError(FrameNode* frameNode, ArkUIEmbeddedComponentOpt
             return;
         }
 
-        onErrorFuncType func = reinterpret_cast<onErrorFuncType>(option->onError);
+        OnErrorFuncType func = reinterpret_cast<OnErrorFuncType>(option->onError);
         if (func == nullptr) {
             TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "func is null, set EmbeddedComponent onError failed");
             return;
@@ -112,7 +115,7 @@ void SetEmbeddedComponentOnTerminated(FrameNode* frameNode, ArkUIEmbeddedCompone
             return;
         }
 
-        onTerminatedFuncType func = reinterpret_cast<onTerminatedFuncType>(option->onTerminated);
+        OnTerminatedFuncType func = reinterpret_cast<OnTerminatedFuncType>(option->onTerminated);
         if (func == nullptr) {
             TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "func is null, set EmbeddedComponent onTerminated failed");
             return;
