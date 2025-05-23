@@ -402,4 +402,102 @@ HWTEST_F(RichEditorStyledUndoTestNg, RecordOperation006, TestSize.Level1)
     EXPECT_EQ(undoRecord.rangeAfter.start, 0);
     EXPECT_EQ(undoRecord.rangeAfter.end, 5);
 }
+
+/**
+ * @tc.name: RecordOperation007
+ * @tc.desc: Test RecordOperation UpdateSpanStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledUndoTestNg, RecordOperation007, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto& undoRecords = richEditorPattern->undoManager_->undoRecords_;
+    richEditorPattern->SetCaretPosition(0);
+    richEditorPattern->AddImageSpan(IMAGE_SPAN_OPTIONS_1);
+    richEditorPattern->ClearOperationRecords();
+
+    // step1 UpdateSpanStyle
+    TextStyle textStyle;
+    textStyle.SetFontSize(FONT_SIZE_VALUE_2);
+    struct UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateFontSize = FONT_SIZE_VALUE_2;
+    richEditorController->SetUpdateSpanStyle(updateSpanStyle);
+    ImageSpanAttribute imageStyle;
+    richEditorController->UpdateSpanStyle(0, 1, textStyle, imageStyle);
+
+    // step2 DeleteBackward
+    richEditorPattern->SetCaretPosition(1);
+    richEditorPattern->DeleteBackward(1);
+    EXPECT_EQ(richEditorPattern->undoManager_->undoRecords_.size(), 2);
+    auto undoRecord = undoRecords.back();
+    EXPECT_TRUE(undoRecord.optionsListBefore.has_value());
+    auto optionsList = undoRecord.optionsListBefore.value();
+    EXPECT_EQ(optionsList.size(), 1);
+    auto lastOption = &optionsList.back();
+    auto options = std::get_if<ImageSpanOptions>(lastOption);
+    ASSERT_NE(options, nullptr);
+    ImageSpanOptions imageOptions = *options;
+    auto imageAttribute = imageOptions.imageAttribute;
+    EXPECT_TRUE(imageAttribute.has_value());
+    EXPECT_EQ(*imageAttribute, IMAGE_SPAN_ATTRIBUTE_1);
+}
+
+/**
+ * @tc.name: RecordOperation008
+ * @tc.desc: Test RecordOperation UpdateSpanStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledUndoTestNg, RecordOperation008, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto& undoRecords = richEditorPattern->undoManager_->undoRecords_;
+    richEditorPattern->SetCaretPosition(0);
+    richEditorPattern->AddImageSpan(IMAGE_SPAN_OPTIONS_1);
+    richEditorPattern->ClearOperationRecords();
+
+    // step1 UpdateImageStyle
+    MarginProperty margins;
+    margins.SetEdges(CalcLength{ 10.0, DimensionUnit::CALC });
+    ImageSpanSize imageSize{ .width = 100.0_px, .height = 50.0_px };
+    BorderRadiusProperty borderRadius = { 4.0_vp, 4.0_vp, 4.0_vp, 4.0_vp };
+    ImageSpanAttribute imageStyle{ .size = imageSize,
+        .marginProp = margins,
+        .borderRadius = borderRadius,
+        .objectFit = ImageFit::COVER,
+        .verticalAlign = VerticalAlign::BOTTOM };
+    struct UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateImageWidth = imageSize.width;
+    updateSpanStyle.updateImageHeight = imageSize.height;
+    updateSpanStyle.marginProp = margins;
+    updateSpanStyle.updateImageFit = ImageFit::COVER;
+    updateSpanStyle.updateImageVerticalAlign = VerticalAlign::BOTTOM;
+    updateSpanStyle.borderRadius = borderRadius;
+    richEditorController->SetUpdateSpanStyle(updateSpanStyle);
+    TextStyle textStyle;
+    richEditorController->UpdateSpanStyle(0, 1, textStyle, imageStyle);
+
+    // step2 DeleteBackward
+    richEditorPattern->SetCaretPosition(1);
+    richEditorPattern->DeleteBackward(1);
+    EXPECT_EQ(richEditorPattern->undoManager_->undoRecords_.size(), 2);
+    auto undoRecord = undoRecords.back();
+    EXPECT_TRUE(undoRecord.optionsListBefore.has_value());
+    auto optionsList = undoRecord.optionsListBefore.value();
+    EXPECT_EQ(optionsList.size(), 1);
+    auto lastOption = &optionsList.back();
+    auto options = std::get_if<ImageSpanOptions>(lastOption);
+    ASSERT_NE(options, nullptr);
+    ImageSpanOptions imageOptions = *options;
+    auto imageAttribute = imageOptions.imageAttribute;
+    EXPECT_TRUE(imageAttribute.has_value());
+    EXPECT_EQ(*imageAttribute, imageStyle);
+}
 }

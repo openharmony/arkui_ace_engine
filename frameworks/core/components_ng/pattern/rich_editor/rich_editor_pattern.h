@@ -548,18 +548,20 @@ public:
     void InsertValue(const std::u16string& insertValue, bool isIME = false) override;
     void InsertValueByOperationType(const std::u16string& insertValue,
         OperationType operationType = OperationType::DEFAULT);
+    void DeleteSelectionOrPreviewText(OperationRecord* const record, UndoRedoRecord& styledRecord,
+        bool shouldCommitInput);
     void InsertValueOperation(const std::u16string& insertValue, OperationRecord* const record = nullptr,
-        OperationType operationType = OperationType::IME);
+        OperationType operationType = OperationType::IME, bool shouldCommitInput = false);
     void DeleteByRange(OperationRecord* const record, int32_t start, int32_t end);
     void InsertDiffStyleValueInSpan(RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info,
-        const std::u16string& insertValue, bool isIME = true);
+        const std::u16string& insertValue);
     void InsertValueByPaste(const std::u16string& insertValue);
     bool IsLineSeparatorInLast(RefPtr<SpanNode>& spanNode);
     void InsertValueToSpanNode(
         RefPtr<SpanNode>& spanNode, const std::u16string& insertValue, const TextInsertValueInfo& info);
     void SpanNodeFission(RefPtr<SpanNode>& spanNode, bool needLeadingMargin = false);
     void CreateTextSpanNode(RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info,
-        const std::u16string& insertValue, bool isIME = true);
+        const std::u16string& insertValue);
     void SetDefaultColor(RefPtr<SpanNode>& spanNode);
     void HandleOnDelete(bool backward) override;
     std::pair<bool, bool> IsEmojiOnCaretPosition(int32_t& emojiLength, bool isBackward, int32_t length);

@@ -450,6 +450,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController008, TestSize.Level
     auto spanItem = richEditorPattern->spans_.front();
     auto& fontStyle = spanItem->fontStyle;
     ASSERT_NE(fontStyle, nullptr);
+    EXPECT_EQ(fontStyle->GetFontWeight(), FONT_WEIGHT_VALUE);
     EXPECT_EQ(fontStyle->GetFontSize(), FONT_SIZE_VALUE);
     EXPECT_EQ(fontStyle->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(fontStyle->GetTextColor(), TEXT_COLOR_VALUE);

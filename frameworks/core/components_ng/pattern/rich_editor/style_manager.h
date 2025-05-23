@@ -253,7 +253,7 @@ public:
 
         auto insertStyledString = AceType::MakeRefPtr<SpanString>(insertValue);
         std::vector<RefPtr<SpanBase>> spans;
-        int length = styledString->GetLength();
+        int length = insertStyledString->GetLength();
         IF_TRUE(hasTypingStyle, HandleStyledStringByTypingTextStyle(length, spans));
         IF_TRUE(needTypingParagraphStyle, HandleStyledStringByTypingParagraphStyle(length, spans));
         insertStyledString->BindWithSpans(spans);
