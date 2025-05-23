@@ -1421,19 +1421,16 @@ HWTEST_F(ListModifierTest, setOnItemMoveTest, TestSize.Level1)
     modifier_->setOnItemMove(node_, &optFunc2);
     dragInfo.SetX(975);
     dragInfo.SetY(864);
-    {
-        checkEvent.reset();
-        eventHub->FireOnItemDrop(dragInfo, 81, 99, false);
-        ASSERT_TRUE(checkEvent.has_value());
-        EXPECT_FALSE(checkEvent->isSuccess);
-    }
 
-    {
-        checkEvent.reset();
-        eventHub->FireOnItemDrop(dragInfo, 30, 20, false);
-        ASSERT_TRUE(checkEvent.has_value());
-        EXPECT_TRUE(checkEvent->isSuccess);
-    }
+    checkEvent.reset();
+    eventHub->FireOnItemDrop(dragInfo, 81, 99, false);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_FALSE(checkEvent->isSuccess);
+
+    checkEvent.reset();
+    eventHub->FireOnItemDrop(dragInfo, 30, 20, false);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_TRUE(checkEvent->isSuccess);
 }
 
 /*
