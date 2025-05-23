@@ -69,6 +69,14 @@ std::optional<struct UpdateSpanStyle> RichEditorBaseController::GetTypingStyle()
     return richEditorPattern->GetTypingStyle();
 }
 
+void RichEditorBaseController::SetTypingParagraphStyle(std::optional<struct UpdateParagraphStyle> typingParagraphStyle)
+{
+    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetTypingParagraphStyle(typingParagraphStyle);
+    richEditorPattern->ForceTriggerAvoidOnCaretChange();
+}
+
 void RichEditorBaseController::CloseSelectionMenu()
 {
     auto richEditorPattern = pattern_.Upgrade();

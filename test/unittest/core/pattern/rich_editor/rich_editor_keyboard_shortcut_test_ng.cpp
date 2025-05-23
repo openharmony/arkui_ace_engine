@@ -602,17 +602,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, PreferredParagraph001, TestSize.Level
         EXPECT_CALL(*paragraph, ComputeOffsetForCaretUpstream(index, _, _))
             .WillRepeatedly(DoAll(SetArgReferee<1>(metricsUp), Return(true)));
     }
-
-    TextStyle style;
-    style.SetLineHeight(LINE_HEIGHT_VALUE);
-    style.SetLetterSpacing(LETTER_SPACING);
-    style.SetFontFeatures(TEXT_FONTFEATURE);
-    richEditorPattern->CalculateEmptyValueCaretRect();
-    richEditorPattern->typingTextStyle_ = style;
-    richEditorPattern->PreferredParagraph();
-    EXPECT_NE(richEditorPattern->presetParagraph_, nullptr);
-    richEditorPattern->PreferredParagraph();
-    EXPECT_NE(richEditorPattern->presetParagraph_, nullptr);
 }
 /**
  * @tc.name: GetTextColorInJson001

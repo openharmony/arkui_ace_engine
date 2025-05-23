@@ -330,6 +330,13 @@ public:                                                                         
         prop##name = value;                             \
         return true;                                    \
     }                                                   \
+    bool Update##name(const std::optional<type>& value) \
+    {                                                   \
+        if (value.has_value()) {                        \
+            return Update##name(value.value());         \
+        }                                               \
+        return false;                                   \
+    }                                                   \
     bool Check##name(const type& value) const           \
     {                                                   \
         if (!prop##name.has_value()) {                  \

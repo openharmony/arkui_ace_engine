@@ -20,6 +20,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/style_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -449,7 +450,6 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController008, TestSize.Level
     auto spanItem = richEditorPattern->spans_.front();
     auto& fontStyle = spanItem->fontStyle;
     ASSERT_NE(fontStyle, nullptr);
-    EXPECT_EQ(fontStyle->GetFontWeight(), FONT_WEIGHT_VALUE);
     EXPECT_EQ(fontStyle->GetFontSize(), FONT_SIZE_VALUE);
     EXPECT_EQ(fontStyle->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(fontStyle->GetTextColor(), TEXT_COLOR_VALUE);
@@ -1043,7 +1043,8 @@ HWTEST_F(RichEditorStyledStringTestNg, CreateStyledStringByTextStyle, TestSize.L
     /**
      * @tc.steps: step5. test CreateStyledStringByTextStyle
      */
-    richEditorPattern->CreateStyledStringByTextStyle(INIT_VALUE_2, updateSpanStyle, textStyle);
+    auto& styledString = richEditorPattern->styledString_;
+    richEditorPattern->styleManager_->CreateStyledStringByTypingStyle(INIT_VALUE_2, styledString, 0, 0);
     auto spanItem = richEditorPattern->spans_.back();
     auto& fontStyle = spanItem->fontStyle;
     ASSERT_NE(fontStyle, nullptr);

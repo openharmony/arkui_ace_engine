@@ -115,7 +115,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleAddTest001, TestSize.Level1)
     richEditorController->AddTextSpan(options);
     ASSERT_EQ(spans.size(), 1);
     auto spanItem = GetSpanItemAtIndex(0);
-    EXPECT_EQ(spanItem->urlAddress, u"");
+    EXPECT_EQ(spanItem->urlAddress, std::nullopt);
     EXPECT_EQ(spanItem->urlOnRelease, nullptr);
 }
 
@@ -256,7 +256,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleUpdateTest001, TestSize.Level
     richEditorController->AddTextSpan(options);
     ASSERT_EQ(spans.size(), 1);
     auto spanItem1 = GetSpanItemAtIndex(0);
-    EXPECT_EQ(spanItem1->urlAddress, u"");
+    EXPECT_EQ(spanItem1->urlAddress, std::nullopt);
     EXPECT_EQ(spanItem1->urlOnRelease, nullptr);
 
     struct UpdateSpanStyle updateSpanStyle;
