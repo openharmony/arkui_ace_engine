@@ -267,7 +267,7 @@ void ConvertIMMEventToTouchEvent(GestureEvent& info, ArkUITouchEvent& touchEvent
     touchEvent.deviceId = info.GetDeviceId();
     // modifierkeystates
     touchEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
-    touchEvent.action = static_cast<int32_t>(tempTouchEvent.type);
+    touchEvent.action = info.GetLastAction().value_or(static_cast<int32_t>(tempTouchEvent.type));
     touchEvent.sourceType = static_cast<int32_t>(tempTouchEvent.sourceType);
     touchEvent.timeStamp = tempTouchEvent.time.time_since_epoch().count();
     touchEvent.actionTouchPoint.pressure = tempTouchEvent.force;
@@ -363,7 +363,8 @@ void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& r
 {
     rawInputEvent.sourceType = static_cast<ArkUI_Int32>(info->GetSourceDevice());
     rawInputEvent.timeStamp = info->GetTimeStamp().time_since_epoch().count();
-    rawInputEvent.action = GetPointerEventAction(info->GetRawInputEventType(), info->GetRawInputEvent());
+    rawInputEvent.action =
+        info->GetLastAction().value_or(GetPointerEventAction(info->GetRawInputEventType(), info->GetRawInputEvent()));
     rawInputEvent.deviceId = info->GetRawInputDeviceId();
     rawInputEvent.actionTouchPoint.tiltX = info->GetTiltX().value_or(0.0f);
     rawInputEvent.actionTouchPoint.tiltY = info->GetTiltY().value_or(0.0f);
@@ -461,7 +462,7 @@ void ConvertIMMEventToMouseEvent(GestureEvent& info, ArkUIMouseEvent& mouseEvent
     mouseEvent.deviceId = info.GetDeviceId();
     // modifierkeystates
     mouseEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
-    mouseEvent.action = static_cast<int32_t>(tempMouseEvent.action);
+    mouseEvent.action = info.GetLastAction().value_or(static_cast<int32_t>(tempMouseEvent.action));
     mouseEvent.sourceType = static_cast<int32_t>(tempMouseEvent.sourceType);
     mouseEvent.timeStamp = tempMouseEvent.time.time_since_epoch().count();
     mouseEvent.actionTouchPoint.pressure = 0.0f;
@@ -495,7 +496,7 @@ void ConvertIMMEventToAxisEvent(GestureEvent& info, ArkUIAxisEvent& axisEvent)
     axisEvent.deviceId = info.GetDeviceId();
     // modifierkeystates
     axisEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
-    axisEvent.action = static_cast<int32_t>(tempAxisEvent.action);
+    axisEvent.action = info.GetLastAction().value_or(static_cast<int32_t>(tempAxisEvent.action));
     axisEvent.sourceType = static_cast<int32_t>(tempAxisEvent.sourceType);
     axisEvent.timeStamp = tempAxisEvent.time.time_since_epoch().count();
     axisEvent.horizontalAxis = tempAxisEvent.horizontalAxis;

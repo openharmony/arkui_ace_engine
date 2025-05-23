@@ -304,6 +304,16 @@ public:
     {
         return gestureType_;
     }
+
+    void SetLastAction(int32_t action)
+    {
+        lastAction_.emplace(action);
+    }
+
+    std::optional<int32_t> GetLastAction() const
+    {
+        return lastAction_;
+    }
 #ifdef SECURITY_COMPONENT_ENABLE
     void SetDisplayX(double displayX)
     {
@@ -375,6 +385,7 @@ private:
     float inputXDeltaSlope_ = 0.0f;
     float inputYDeltaSlope_ = 0.0f;
     GestureTypeName gestureType_ = GestureTypeName::UNKNOWN;
+    std::optional<int32_t> lastAction_;
 };
 
 using GestureEventFunc = std::function<void(GestureEvent& info)>;

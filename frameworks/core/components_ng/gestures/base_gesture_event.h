@@ -70,11 +70,22 @@ public:
         rawInputDeviceId_ = rawInputDeviceId;
     }
 
+    void SetLastAction(int32_t action)
+    {
+        lastAction_.emplace(action);
+    }
+
+    std::optional<int32_t> GetLastAction() const
+    {
+        return lastAction_;
+    }
+
 protected:
     std::list<FingerInfo> fingerList_;
     InputEventType rawInputEventType_;
     std::shared_ptr<MMI::PointerEvent> rawInputEvent_;
     int64_t rawInputDeviceId_;
+    std::optional<int32_t> lastAction_;
 };
 
 class ACE_EXPORT TapGestureEvent : public BaseGestureEvent {
