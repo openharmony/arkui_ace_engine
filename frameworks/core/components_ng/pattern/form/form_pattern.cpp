@@ -1511,11 +1511,7 @@ void FormPattern::GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRec
     if (pipeline) {
         auto accessibilityManager = pipeline->GetAccessibilityManager();
         if (accessibilityManager) {
-            auto windowInfo = accessibilityManager->GenerateWindowInfo(host, pipeline);
-            parentRectInfo.left = parentRectInfo.left * windowInfo.scaleX + static_cast<int32_t>(windowInfo.left);
-            parentRectInfo.top = parentRectInfo.top * windowInfo.scaleY + static_cast<int32_t>(windowInfo.top);
-            parentRectInfo.scaleX *= windowInfo.scaleX;
-            parentRectInfo.scaleY *= windowInfo.scaleY;
+            parentRectInfo = accessibilityManager->GetTransformRectInfoRelativeToWindow(host, pipeline);
         } else {
             auto windowRect = pipeline->GetDisplayWindowRectInfo();
             parentRectInfo.top += static_cast<int32_t>(windowRect.Top());

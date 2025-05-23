@@ -2214,4 +2214,56 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager040, TestSize.Level1)
     frameNode->accessibilityId_ = frameNode->GetId() + 1;
     jsAccessibilityManager->DumpTreeNG(frameNode, 1, frameNode->GetId(), true);
 }
+
+/**
+ * @tc.name: JsAccessibilityManager041
+ * @tc.desc: Test RegisterDynamicRenderGetParentRectHandler default
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager041, TestSize.Level1)
+{
+    HandlerReply reply;
+
+    RotateTransform rotateData(reply.GetParam<int32_t>("rotateDegree", 0),
+        reply.GetParam<int32_t>("centerX", 0),
+        reply.GetParam<int32_t>("centerY", 0),
+        reply.GetParam<int32_t>("innerCenterX", 0),
+        reply.GetParam<int32_t>("innerCenterY", 0));
+
+    AccessibilityParentRectInfo parentRectInfo;
+    EXPECT_EQ(parentRectInfo.rotateTransform.rotateDegree, 0);
+    EXPECT_EQ(parentRectInfo.rotateTransform.centerX, 0);
+    EXPECT_EQ(parentRectInfo.rotateTransform.centerY, 0);
+    EXPECT_EQ(parentRectInfo.rotateTransform.innerCenterX, 0);
+    EXPECT_EQ(parentRectInfo.rotateTransform.innerCenterY, 0);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager042
+ * @tc.desc: Test RegisterDynamicRenderGetParentRectHandler
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager042, TestSize.Level1)
+{
+    HandlerReply reply;
+
+    reply.SetParam<int32_t>("rotateDegree", 90);
+    reply.SetParam<int32_t>("centerX", 10);
+    reply.SetParam<int32_t>("centerY", 20);
+    reply.SetParam<int32_t>("innerCenterX", 30);
+    reply.SetParam<int32_t>("innerCenterY", 40);
+
+    RotateTransform rotateData(reply.GetParam<int32_t>("rotateDegree", 0),
+        reply.GetParam<int32_t>("centerX", 0),
+        reply.GetParam<int32_t>("centerY", 0),
+        reply.GetParam<int32_t>("innerCenterX", 0),
+        reply.GetParam<int32_t>("innerCenterY", 0));
+
+    AccessibilityParentRectInfo parentRectInfo;
+    EXPECT_EQ(parentRectInfo.rotateTransform.rotateDegree, 90);
+    EXPECT_EQ(parentRectInfo.rotateTransform.centerX, 10);
+    EXPECT_EQ(parentRectInfo.rotateTransform.centerY, 20);
+    EXPECT_EQ(parentRectInfo.rotateTransform.innerCenterX, 30);
+    EXPECT_EQ(parentRectInfo.rotateTransform.innerCenterY, 40);
+}
 } // namespace OHOS::Ace::NG
