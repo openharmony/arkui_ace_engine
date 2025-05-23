@@ -18498,6 +18498,19 @@ class ArkStarStyle {
       this.secondaryUri === another.secondaryUri);
   }
 }
+class ArkRegisterNativeEmbedRule {
+  constructor() {
+    this.tag = undefined;
+    this.type = undefined;
+  }
+
+  isEqual(another) {
+    return (
+      this.tag === another.tag &&
+      this.type === another.type
+    );
+  }
+}
 class ArkBackgroundBlurStyle {
   constructor() {
     this.blurStyle = undefined;
@@ -29836,14 +29849,16 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   onlineImageAccess(onlineImageAccess) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnlineImageAccessModifier.identity, WebOnlineImageAccessModifier, onlineImageAccess);
+    return this;
   }
   domStorageAccess(domStorageAccess) {
     modifierWithKey(this._modifiersWithKeys, WebDomStorageAccessModifier.identity, WebDomStorageAccessModifier, domStorageAccess);
     return this;
   }
   imageAccess(imageAccess) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebImageAccessModifier.identity, WebImageAccessModifier, imageAccess);
+    return this;
   }
   mixedMode(mixedMode) {
     modifierWithKey(this._modifiersWithKeys, WebMixedModeModifier.identity, WebMixedModeModifier, mixedMode);
@@ -29876,7 +29891,8 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   mediaOptions(options) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebMediaOptionsModifier.identity, WebMediaOptionsModifier, options);
+    return this;
   }
   tableData(tableData) {
     throw new Error('Method not implemented.');
@@ -30003,7 +30019,8 @@ class ArkWebComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   mediaPlayGestureAccess(access) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebMediaPlayGestureAccessModifier.identity, WebMediaPlayGestureAccessModifier, access);
+    return this;
   }
   onSearchResultReceive(callback) {
     throw new Error('Method not implemented.');
@@ -30047,13 +30064,16 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   webFixedFont(family) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebFixedFontModifier.identity, WebFixedFontModifier, family);
+    return this;
   }
   webFantasyFont(family) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebFantasyFontModifier.identity, WebFantasyFontModifier, family);
+    return this;
   }
   webCursiveFont(family) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebCursiveFontModifier.identity, WebCursiveFontModifier, family);
+    return this;
   }
   defaultFixedFontSize(size) {
     modifierWithKey(this._modifiersWithKeys, WebDefaultFixedFontSizeModifier.identity, WebDefaultFixedFontSizeModifier, size);
@@ -30115,10 +30135,12 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   onAudioStateChanged(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnAudioStateChangedModifier.identity, WebOnAudioStateChangedModifier, callback);
+    return this;
   }
   onFirstContentfulPaint(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnFirstContentfulPaintModifier.identity, WebOnFirstContentfulPaintModifier, callback);
+    return this;
   }
   onLoadIntercept(callback) {
     throw new Error('Method not implemented.');
@@ -30135,7 +30157,27 @@ class ArkWebComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   layoutMode(mode) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebLayoutModeModifier.identity, WebLayoutModeModifier, mode);
+    return this;
+  }
+  onNativeEmbedLifecycleChange(event) {
+    modifierWithKey(this._modifiersWithKeys, WebOnNativeEmbedLifecycleChangeModifier.identity, WebOnNativeEmbedLifecycleChangeModifier, event);
+    return this;
+  }
+  registerNativeEmbedRule(mode) {
+    let rule = new ArkRegisterNativeEmbedRule();
+    if (!isUndefined(mode)) {
+      rule.tag = mode.tag;
+      rule.type = mode.type;
+      modifierWithKey(this._modifiersWithKeys, WebRegisterNativeEmbedRuleModifier.identity, WebRegisterNativeEmbedRuleModifier, rule);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, WebRegisterNativeEmbedRuleModifier.identity, WebRegisterNativeEmbedRuleModifier, undefined);
+    }
+    return this;
+  }
+  nativeEmbedOptions(value){
+    modifierWithKey(this._modifiersWithKeys, WebNativeEmbedOptionsModifier.identity, WebNativeEmbedOptionsModifier, value);
+    return this;
   }
   nestedScroll(value) {
     throw new Error('Method not implemented.');
@@ -30676,6 +30718,216 @@ class WebSansSerifFontModifier extends ModifierWithKey {
   }
 }
 WebSansSerifFontModifier.identity = Symbol('webSansSerifFontModifier');
+
+class WebFixedFontModifier extends ModifierWithKey {
+  constructor (value) {
+    super(value);
+  }
+  applyPeer (node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetWebFixedFont(node);
+    } else {
+      getUINativeModule().web.setWebFixedFont(node, this.value);
+    }
+  }
+}
+WebFixedFontModifier.identity = Symbol('webFixedFontModifier');
+
+class WebFantasyFontModifier extends ModifierWithKey {
+  constructor (value) {
+    super(value);
+  }
+  applyPeer (node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetWebFantasyFont(node);
+    } else {
+      getUINativeModule().web.setWebFantasyFont(node, this.value);
+    }
+  }
+}
+WebFantasyFontModifier.identity = Symbol('webFantasyFontModifier');
+
+class WebCursiveFontModifier extends ModifierWithKey {
+  constructor (value) {
+    super(value);
+  }
+  applyPeer (node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetWebCursiveFont(node);
+    } else {
+      getUINativeModule().web.setWebCursiveFont(node, this.value);
+    }
+  }
+}
+WebCursiveFontModifier.identity = Symbol('webCursiveFontModifier');
+
+class WebLayoutModeModifier extends ModifierWithKey {
+  constructor (value) {
+    super(value);
+  }
+  applyPeer (node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetLayoutMode(node);
+    } else {
+      getUINativeModule().web.setLayoutMode(node, this.value);
+    }
+  }
+}
+WebLayoutModeModifier.identity = Symbol('webLayoutModeModifier');
+
+class WebOnNativeEmbedLifecycleChangeModifier extends ModifierWithKey {
+  constructor (value) {
+    super(value);
+  }
+  applyPeer (node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnNativeEmbedLifecycleChange(node);
+    } else {
+      getUINativeModule().web.setOnNativeEmbedLifecycleChange(node, this.value);
+    }
+  }
+}
+WebOnNativeEmbedLifecycleChangeModifier.identity = Symbol('webOnNativeEmbedLifecycleChangeModifier');
+
+class WebRegisterNativeEmbedRuleModifier extends ModifierWithKey {
+  constructor (value) {
+    super(value);
+  }
+  applyPeer (node, reset) {
+    let _a, _b
+    if (reset) {
+      getUINativeModule().web.resetRegisterNativeEmbedRule(node);
+    } else {
+      getUINativeModule().web.setRegisterNativeEmbedRule(
+        node,
+        (_a = this.value) === null || _a === void 0 ? void 0 : _a.tag,
+        (_b = this.value) === null || _b === void 0 ? void 0 : _b.type
+      );
+    }
+  }
+  checkObjectDiff () {
+    let _a, _b, _c, _d, _e, _f
+    return (
+      ((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.tag) !==
+        ((_b = this.value) === null || _b === void 0 ? void 0 : _b.tag) ||
+      ((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.type) !==
+        ((_d = this.value) === null || _d === void 0 ? void 0 : _d.type)
+    );
+  }
+}
+WebRegisterNativeEmbedRuleModifier.identity = Symbol('webRegisterNativeEmbedRuleModifier');
+
+class WebNativeEmbedOptionsModifier extends ModifierWithKey {
+  constructor (value) {
+    super(value);
+  }
+  applyPeer (node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetNativeEmbedOptions(node);
+    } else {
+      getUINativeModule().web.setNativeEmbedOptions(node, this.value);
+    }
+  }
+}
+WebNativeEmbedOptionsModifier.identity = Symbol('webNativeEmbedOptionsModifier');
+
+class WebOnFirstContentfulPaintModifier extends ModifierWithKey {
+  constructor (value) {
+    super(value);
+  }
+  applyPeer (node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnFirstContentfulPaint(node);
+    } else {
+      getUINativeModule().web.setOnFirstContentfulPaint(node, this.value);
+    }
+  }
+}
+WebOnFirstContentfulPaintModifier.identity = Symbol('webOnFirstContentfulPaintModifier');
+
+class WebOnAudioStateChangedModifier extends ModifierWithKey {
+  constructor (value) {
+    super(value);
+  }
+  applyPeer (node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnAudioStateChanged(node);
+    } else {
+      getUINativeModule().web.setOnAudioStateChanged(node, this.value);
+    }
+  }
+}
+WebOnAudioStateChangedModifier.identity = Symbol('webOnAudioStateChangedModifier');
+
+class WebOnFullScreenExitModifier extends ModifierWithKey {
+  constructor (value) {
+    super(value);
+  }
+  applyPeer (node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnFullScreenExit(node);
+    } else {
+      getUINativeModule().web.setOnFullScreenExit(node, this.value);
+    }
+  }
+}
+WebOnFullScreenExitModifier.identity = Symbol('webOnFullScreenExitModifier');
+
+class WebImageAccessModifier extends ModifierWithKey {
+  constructor (value) {
+    super(value);
+  }
+  applyPeer (node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetImageAccess(node);
+    } else {
+      getUINativeModule().web.setImageAccess(node, this.value);
+    }
+  }
+}
+WebImageAccessModifier.identity = Symbol('webImageAccessModifier');
+
+class WebOnlineImageAccessModifier extends ModifierWithKey {
+  constructor (value) {
+    super(value);
+  }
+  applyPeer (node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnlineImageAccess(node);
+    } else {
+      getUINativeModule().web.setOnlineImageAccess(node, this.value);
+    }
+  }
+}
+WebOnlineImageAccessModifier.identity = Symbol('webOnlineImageAccessModifier');
+
+class WebMediaPlayGestureAccessModifier extends ModifierWithKey {
+  constructor (value) {
+    super(value);
+  }
+  applyPeer (node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetMediaPlayGestureAccess(node);
+    } else {
+      getUINativeModule().web.setMediaPlayGestureAccess(node, this.value);
+    }
+  }
+}
+WebMediaPlayGestureAccessModifier.identity = Symbol('webMediaPlayGestureAccessModifier');
+
+class WebMediaOptionsModifier extends ModifierWithKey {
+  constructor (value) {
+    super(value);
+  }
+  applyPeer (node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetMediaOptions(node);
+    } else {
+      getUINativeModule().web.setMediaOptions(node, this.value);
+    }
+  }
+}
+WebMediaOptionsModifier.identity = Symbol('webMediaOptionsModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {

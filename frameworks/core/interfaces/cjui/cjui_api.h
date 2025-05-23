@@ -1959,6 +1959,34 @@ struct CJUIWebModifier {
     void (*resetWebSerifFont)(ArkUINodeHandle node);
     void (*setWebSansSerifFont)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetWebSansSerifFont)(ArkUINodeHandle node);
+    void (*setWebFixedFont)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetWebFixedFont)(ArkUINodeHandle node);
+    void (*setWebFantasyFont)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetWebFantasyFont)(ArkUINodeHandle node);
+    void (*setWebCursiveFont)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetWebCursiveFont)(ArkUINodeHandle node);
+    void (*setLayoutMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetLayoutMode)(ArkUINodeHandle node);
+    void (*setOnNativeEmbedLifecycleChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnNativeEmbedLifecycleChange)(ArkUINodeHandle node);
+    void (*setRegisterNativeEmbedRule)(ArkUINodeHandle node, ArkUI_CharPtr tag, ArkUI_CharPtr type);
+    void (*resetRegisterNativeEmbedRule)(ArkUINodeHandle node);
+    void (*setNativeEmbedOptions)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetNativeEmbedOptions)(ArkUINodeHandle node);
+    void (*setOnFirstContentfulPaint)(ArkUINodeHandle node, void* callback);
+    void (*resetOnFirstContentfulPaint)(ArkUINodeHandle node);
+    void (*setOnAudioStateChanged)(ArkUINodeHandle node, void* callback);
+    void (*resetOnAudioStateChanged)(ArkUINodeHandle node);
+    void (*setOnFullScreenExit)(ArkUINodeHandle node, void* callback);
+    void (*resetOnFullScreenExit)(ArkUINodeHandle node);
+    void (*setImageAccess)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetImageAccess)(ArkUINodeHandle node);
+    void (*setOnlineImageAccess)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetOnlineImageAccess)(ArkUINodeHandle node);
+    void (*setMediaPlayGestureAccess)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetMediaPlayGestureAccess)(ArkUINodeHandle node);
+    void (*setMediaOptions)(ArkUINodeHandle node, ArkUI_Int32 resumeInterval, ArkUI_Bool value);
+    void (*resetMediaOptions)(ArkUINodeHandle node);
 };
 
 struct CJUIBlankModifier {
