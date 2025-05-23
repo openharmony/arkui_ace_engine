@@ -42,7 +42,10 @@ void TextFieldModelStatic::SetShowUnit(FrameNode* frameNode, std::function<RefPt
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    RefPtr<UINode> unitNode = builder();
+    RefPtr<UINode> unitNode;
+    if (builder) {
+        unitNode = builder();
+    }
     CHECK_NULL_VOID(unitNode);
     pattern->SetUnitNode(unitNode);
 }
@@ -351,15 +354,6 @@ void TextFieldModelStatic::SetFontFamily(FrameNode* frameNode,
     }
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontFamily, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true, frameNode);
-}
-
-void TextFieldModelStatic::SetMaxLines(FrameNode* frameNode, const std::optional<uint32_t>& valueOpt)
-{
-    if (valueOpt) {
-        TextFieldModelNG::SetMaxLines(frameNode, valueOpt.value());
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLines, frameNode);
-    }
 }
 
 void TextFieldModelStatic::SetPlaceholderFont(FrameNode* frameNode, const std::optional<Font>& valueOpt)

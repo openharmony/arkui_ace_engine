@@ -57,7 +57,6 @@ public:
     static void SetNormalUnderlineColor(FrameNode* frameNode, const std::optional<Color>& normalColor);
     static void SetUserUnderlineColor(FrameNode* frameNode, const std::optional<UserUnderlineColor>& userColor);
     static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& fontFamilies);
-    static void SetMaxLines(FrameNode* frameNode, const std::optional<uint32_t>& value);
     static void SetPlaceholderFont(FrameNode* frameNode, const std::optional<Font>& valueOpt);
     static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetCaretColor(FrameNode* frameNode, const std::optional<Color>& colorOpt);
