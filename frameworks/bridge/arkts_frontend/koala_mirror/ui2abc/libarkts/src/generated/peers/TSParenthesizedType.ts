@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 export class TSParenthesizedType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 107)
+        assertValidPeer(pointer, 108)
         super(pointer)
     }
     static createTSParenthesizedType(type?: TypeNode): TSParenthesizedType {

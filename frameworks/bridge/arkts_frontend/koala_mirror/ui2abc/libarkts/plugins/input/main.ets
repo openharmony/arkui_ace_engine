@@ -1,32 +1,35 @@
-import { Component } from "./library"
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-@interface BuilderLambda {
-	value: string
+enum X {
+    A = 17
 }
 
-@Component
-struct MyComponent {
-	@BuilderLambda("MyComponent.instantiateImpl")
-	static $_instantiate(factory: () => MyComponent): MyComponent {
-		const instance = factory()
-		return instance
-	}
-
-	static instantiateImpl(builder: (instance: MyComponent)=>void, factory: () => MyComponent): void {
-		const instance = factory()
-		builder(instance)
-	}
-
-	width(value: number): MyComponent { return this }
-	build() {}
+namespace Y {
+    function foo() {
+    }
 }
 
+function foo(value: int): void {
+    switch (X.fromValue(value)) {
+        case X.A:
+            console.log("A")
+            break
+        default:
+            console.log("default")
 
-@Component
-struct AnotherComponent {
-
-	build() {
-		MyComponent()
-			.width(17.0)
-	}
+    }
 }
+

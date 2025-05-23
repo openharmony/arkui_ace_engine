@@ -19,7 +19,6 @@ import {
     registerNativeModuleLibraryName,
     loadNativeModuleLibrary
 } from "@koalaui/interop"
-import * as path from "path"
 import { findNativeModule } from "./Es2pandaNativeModule"
 
 export class InteropNativeModule {
@@ -30,6 +29,9 @@ export class InteropNativeModule {
         throw new Error("Not implemented")
     }
     _GetStringFinalizer(): KPtr {
+        throw new Error("Not implemented")
+    }
+    _RawUtf8ToString(ptr: KPtr): string  {
         throw new Error("Not implemented")
     }
     _InvokeFinalizer(ptr: KPtr, finalizer: KPtr): void {

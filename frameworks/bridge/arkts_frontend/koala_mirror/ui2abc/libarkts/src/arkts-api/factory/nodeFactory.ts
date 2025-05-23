@@ -38,10 +38,10 @@ import { createETSImportDeclaration, updateETSImportDeclaration } from "../node-
 import { updateVariableDeclarator } from "../node-utilities/VariableDeclarator"
 import { updateClassDefinition } from "../node-utilities/ClassDefinition"
 import { updateETSStructDeclaration } from "../node-utilities/ETSStructDeclaration"
-import { updateClassProperty } from "../node-utilities/ClassProperty"
+import { createClassProperty, updateClassProperty } from "../node-utilities/ClassProperty"
 import { createETSFunctionType, updateETSFunctionType } from "../node-utilities/ETSFunctionType"
 import { createMethodDefinition, updateMethodDefinition } from "../node-utilities/MethodDefinition"
-import { updateTSInterfaceDeclaration } from "../node-utilities/TSInterfaceDeclaration"
+import { createTSInterfaceDeclaration, updateTSInterfaceDeclaration } from "../node-utilities/TSInterfaceDeclaration"
 import { createArrowFunctionExpression, updateArrowFunctionExpression } from "../node-utilities/ArrowFunctionExpression"
 import { updateTryStatement } from "../node-utilities/TryStatement"
 import { createVariableDeclaration, updateVariableDeclaration } from "../node-utilities/VariableDeclaration"
@@ -90,7 +90,7 @@ export const factory = {
     createClassDefinition: ClassDefinition.createClassDefinition,
     updateClassDefinition,
 
-    createClassProperty: ClassProperty.createClassProperty,
+    createClassProperty,
     updateClassProperty,
 
     createETSFunctionType,
@@ -99,7 +99,7 @@ export const factory = {
     createMethodDefinition,
     updateMethodDefinition,
 
-    createInterfaceDeclaration: TSInterfaceDeclaration.createTSInterfaceDeclaration,
+    createInterfaceDeclaration: createTSInterfaceDeclaration,
     updateInterfaceDeclaration: updateTSInterfaceDeclaration,
 
     createArrowFunctionExpression,

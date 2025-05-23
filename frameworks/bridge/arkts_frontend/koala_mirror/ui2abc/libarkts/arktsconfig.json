@@ -3,15 +3,6 @@
 	"package0": "@koalaui/example",
         "outDir": "./build/abc",
         "baseUrl": ".",
-        "paths": {
-            "@ohos.arkui": ["../../arkoala-arkts/arkui/src/ets-stubs"],
-            "@koalaui/compat": [ "../../incremental/compat/src/arkts" ],
-            "#platform": [ "../../incremental/compat/src/arkts" ],
-            "@koalaui/common": [ "../../incremental/common/src" ],
-            "@koalaui/interop": [ "../../interop/src/arkts" ],
-            "@koalaui/runtime": [ "../../incremental/runtime/ets" ],
-            "@koalaui/runtime/annotations": [ "../../incremental/runtime/annotations" ]
-        },
         "plugins": [
             {
                 "transform": "./lib/plugins/printer-plugin.js",
@@ -19,25 +10,16 @@
                 "name": "printer"
             },
             {
-                "transform": "@koalaui/ui-plugins/parsed-stage-plugin",
-                "stage": "parsed",
-                "name": "ui"
+                "transform": "./lib/plugins/printer-plugin.js",
+                "stage": "checked",
+                "name": "printer"
             },
             {
-                "transform": "@koalaui/ui-plugins/checked-stage-plugin",
+                "transform": "./lib/plugins/printer-plugin.js",
                 "stage": "checked",
-                "name": "ui"
-            },
-            {
-                "transform": "@koalaui/memo-plugin",
-                "stage": "checked",
-                "name": "memo"
+                "name": "printer2"
             }
         ]
-    },
-    "dependencies": {
-        "@koalaui/runtime": [ "../../incremental/runtime/ui2abcconfig.json" ],
-        "@ohos.arkui": ["../../arkoala-arkts/arkui/ui2abcconfig-pure-ets.json"]
     },
     "include": ["./plugins/input/main.ets", "./plugins/input/library.ets"]
 }

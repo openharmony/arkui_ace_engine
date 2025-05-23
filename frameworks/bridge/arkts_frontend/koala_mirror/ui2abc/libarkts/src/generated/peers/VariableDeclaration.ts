@@ -36,7 +36,7 @@ import { Statement } from "./Statement"
 import { VariableDeclarator } from "./VariableDeclarator"
 export class VariableDeclaration extends Statement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 149)
+        assertValidPeer(pointer, 150)
         super(pointer)
     }
     static createVariableDeclaration(kind: Es2pandaVariableDeclarationKind, declarators: readonly VariableDeclarator[]): VariableDeclaration {

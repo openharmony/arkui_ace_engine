@@ -34,7 +34,7 @@ import { Statement } from "./Statement"
 import { SwitchCaseStatement } from "./SwitchCaseStatement"
 export class SwitchStatement extends Statement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 85)
+        assertValidPeer(pointer, 86)
         super(pointer)
     }
     static createSwitchStatement(discriminant: Expression | undefined, cases: readonly SwitchCaseStatement[]): SwitchStatement {

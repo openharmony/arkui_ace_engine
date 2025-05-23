@@ -35,11 +35,17 @@ export class EmptyStatement extends Statement {
         assertValidPeer(pointer, 25)
         super(pointer)
     }
-    static createEmptyStatement(): EmptyStatement {
-        return new EmptyStatement(global.generatedEs2panda._CreateEmptyStatement(global.context))
+    static create1EmptyStatement(isBrokenStatement: boolean): EmptyStatement {
+        return new EmptyStatement(global.generatedEs2panda._CreateEmptyStatement1(global.context, isBrokenStatement))
     }
     static updateEmptyStatement(original?: EmptyStatement): EmptyStatement {
         return new EmptyStatement(global.generatedEs2panda._UpdateEmptyStatement(global.context, passNode(original)))
+    }
+    static update1EmptyStatement(original: EmptyStatement | undefined, isBrokenStatement: boolean): EmptyStatement {
+        return new EmptyStatement(global.generatedEs2panda._UpdateEmptyStatement1(global.context, passNode(original), isBrokenStatement))
+    }
+    get isBrokenStatement(): boolean {
+        return global.generatedEs2panda._EmptyStatementIsBrokenStatement(global.context, this.peer)
     }
 }
 export function isEmptyStatement(node: object | undefined): node is EmptyStatement {

@@ -29,6 +29,7 @@ import {
 } from "../../reexport-for-generated"
 
 import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
+import { Expression } from "./Expression"
 import { Identifier } from "./Identifier"
 import { Statement } from "./Statement"
 export class ExportSpecifier extends Statement {
@@ -47,6 +48,22 @@ export class ExportSpecifier extends Statement {
     }
     get exported(): Identifier | undefined {
         return unpackNode(global.generatedEs2panda._ExportSpecifierExportedConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    setDefault(): this {
+        global.generatedEs2panda._ExportSpecifierSetDefault(global.context, this.peer)
+        return this
+    }
+    get isDefault(): boolean {
+        return global.generatedEs2panda._ExportSpecifierIsDefaultConst(global.context, this.peer)
+    }
+    /** @deprecated */
+    setConstantExpression(constantExpression?: Expression): this {
+        global.generatedEs2panda._ExportSpecifierSetConstantExpression(global.context, this.peer, passNode(constantExpression))
+        return this
+    }
+    get constantExpression(): Expression | undefined {
+        return unpackNode(global.generatedEs2panda._ExportSpecifierGetConstantExpressionConst(global.context, this.peer))
     }
 }
 export function isExportSpecifier(node: object | undefined): node is ExportSpecifier {

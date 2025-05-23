@@ -595,7 +595,7 @@ class StateManagerImpl implements StateManager {
 
     updatableNode<Node extends IncrementalNode>(node: Node, update: (context: StateContext) => void, cleanup?: () => void): ComputableState<Node> {
         this.checkForStateComputing()
-        const scope = new ScopeImpl<Node>(KoalaCallsiteKeys.empty, 0, (): Node => {
+        const scope = ScopeImpl.create<Node>(KoalaCallsiteKeys.empty, 0, (): Node => {
             update(this)
             return node
         }, cleanup === undefined ? undefined : (value: Node | undefined): void => {
@@ -613,7 +613,7 @@ class StateManagerImpl implements StateManager {
     computableState<Value>(compute: (context: StateContext) => Value, cleanup?: (context: StateContext, value: Value | undefined) => void): ComputableState<Value> {
         if (this.current?.once == false) throw new Error("computable state created in memo-context without remember")
         this.checkForStateCreating()
-        const scope = new ScopeImpl<Value>(KoalaCallsiteKeys.empty, 0, (): Value => compute(this), cleanup === undefined ? undefined : (value: Value | undefined): void => {
+        const scope = ScopeImpl.create<Value>(KoalaCallsiteKeys.empty, 0, (): Value => compute(this), cleanup === undefined ? undefined : (value: Value | undefined): void => {
             cleanup?.(this, value)
         })
         scope.manager = this
@@ -803,19 +803,24 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
     parentScope: ManagedScope | undefined = undefined
     next: ManagedScope | undefined = undefined
 
-    private _id: KoalaCallsiteKey
+    private _id: KoalaCallsiteKey = -1
     private _once: boolean = false
     private _node: IncrementalNode | undefined = undefined
     private _nodeRef: IncrementalNode | undefined = undefined
-    private readonly _reuseKey?: string  /** need to store on Scope because not obtainable in every @method recache */
+    private _reuseKey?: string  /** need to store on Scope because not obtainable in every @method recache */
     nodeCount: uint32 = 0
 
-    constructor(id: KoalaCallsiteKey, paramCount: int32, compute?: () => Value, cleanup?: (value: Value | undefined) => void, reuseKey?: string) {
-        this._id = id // special type to distinguish scopes
-        this.params = paramCount > 0 ? new Array<Disposable | undefined>(paramCount) : undefined
-        this.myCompute = compute
-        this.myCleanup = cleanup
-        this._reuseKey = reuseKey
+    // Constructor with (compute?: () => Value, cleanup?: (value: Value | undefined) => void)
+    // signature causes es2panda recheck crash, so I have introduced a create
+    private constructor() {}
+    static create<V>(id: KoalaCallsiteKey, paramCount: int32, compute?: () => V, cleanup?: (value: V | undefined) => void, reuseKey?: string): ScopeImpl<V> {
+        const instance = new ScopeImpl<V>()
+        instance._id = id // special type to distinguish scopes
+        instance.params = paramCount > 0 ? new Array<Disposable | undefined>(paramCount) : undefined
+        instance.myCompute = compute
+        instance.myCleanup = cleanup
+        instance._reuseKey = reuseKey
+        return instance
     }
 
     hasDependencies(): boolean {
@@ -891,8 +896,8 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
             }
         }
         if (once != true && this.once) throw new Error("prohibited to create scope(" + KoalaCallsiteKeys.asString(id) + ") within the remember scope(" + KoalaCallsiteKeys.asString(this.id) + ")")
-        let reused = reuseKey ? this.nodeRef?.reuse(reuseKey) : undefined
-        const scope = reused ? reused as ScopeImpl<Value> : new ScopeImpl<Value>(id, paramCount, compute, cleanup, reuseKey)
+        let reused = reuseKey ? this.nodeRef?.reuse(reuseKey, id) : undefined
+        const scope = reused ? reused as ScopeImpl<Value> : ScopeImpl.create<Value>(id, paramCount, compute, cleanup, reuseKey)
         scope.manager = manager
         if (reused) {
             scope.recomputeNeeded = true
@@ -1051,7 +1056,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
 
     private recycleOrDispose(child: ManagedScope): void {
         // TEMP: explicit compares to avoid compiler bug
-        const recycled = child.reuseKey !== undefined && this._nodeRef?.recycle(child.reuseKey!!, child) == true
+        const recycled = child.reuseKey !== undefined && this._nodeRef?.recycle(child.reuseKey!!, child, child.id) == true
         if (recycled) {
              // if parent node is also disposed, the recycled scopes would dispose in the ReusablePool
             if (!child.node) throw Error("reusable scope doesn't have a node")

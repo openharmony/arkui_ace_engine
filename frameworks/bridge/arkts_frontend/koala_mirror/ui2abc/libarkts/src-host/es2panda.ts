@@ -16,14 +16,16 @@
 import * as fs from "node:fs"
 import * as path from "node:path"
 import { arktsGlobal as global } from "@koalaui/libarkts"
+import { CheckedBackFilter } from "@koalaui/libarkts"
 import { Command } from "commander"
 import { filterSource, isNumber, throwError, withWarning } from "@koalaui/libarkts"
 import { Es2pandaContextState } from "@koalaui/libarkts"
-import { AstNode, checkErrors, Config, Context, createETSModuleFromContext, proceedToState, rebindSubtree, recheckSubtree } from "@koalaui/libarkts"
+import { AstNode, CompilationOptions, Config, Context, createETSModuleFromContext, listPrograms, proceedToState, ProgramTransformer, rebindSubtree, recheckSubtree, setBaseOverloads } from "@koalaui/libarkts"
 
 function parseCommandLineArgs() {
     const commander = new Command()
-        .option('--file, <char>', 'Path to file to be compiled')
+        .argument('[file]', 'Path to file to be compiled')
+        .option('--file, <char>', 'Path to file to be compiled (deprecated)')
         .option('--arktsconfig, <char>', 'Path to arkts configuration file')
         .option('--ets-module', 'Do nothing, legacy compatibility')
         .option('--output, <char>', 'The name of result file')
@@ -31,32 +33,41 @@ function parseCommandLineArgs() {
         .option('--restart-stages', 'Restart the compiler to proceed to next stage')
         .option('--stage <int>', 'Stage of multistage compilation (from 0 to number of plugins in arktsconfig + 1)')
         .parse(process.argv)
-        .opts()
 
-    const restOptions = commander.args
-
-    const filePath = path.resolve(commander.file)
-    const configPath = path.resolve(commander.arktsconfig)
-    const outputPath = path.resolve(commander.output)
+    const cliOptions = commander.opts()
+    const cliArgs = commander.args
+    const filePathArg = cliOptions.file ?? cliArgs[0]
+    if (!filePathArg) {
+        reportErrorAndExit(`Either --file option or file argument is required`)
+    }
+    const filePath = path.resolve(filePathArg)
+    const configPath = path.resolve(cliOptions.arktsconfig)
+    const outputPath = path.resolve(cliOptions.output)
     if (!fs.existsSync(filePath)) {
-        throw new Error(`File path doesn't exist: ${filePath}`)
+        reportErrorAndExit(`File path doesn't exist: ${filePath}`)
     }
     if (!fs.existsSync(configPath)) {
-        throw new Error(`Arktsconfig path doesn't exist: ${configPath}`)
+        reportErrorAndExit(`Arktsconfig path doesn't exist: ${configPath}`)
     }
 
-    const dumpAst = commander.dumpPluginAst ?? false
-    const restartStages = commander.restartStages ?? false
-    const stage = commander.stage ?? 0
+    const dumpAst = cliOptions.dumpPluginAst ?? false
+    const restartStages = cliOptions.restartStages ?? false
+    const stage = cliOptions.stage ?? 0
 
     return { filePath, configPath, outputPath, dumpAst, restartStages, stage }
 }
 
-function insertPlugin(transform: (ast: AstNode) => void, state: Es2pandaContextState, dumpAst: boolean, restart: boolean, updateWith?: (node: AstNode) => void): AstNode {
+function insertPlugin(
+    source: string,
+    transform: ProgramTransformer,
+    state: Es2pandaContextState,
+    dumpAst: boolean, restart: boolean,
+    updateWith?: (node: AstNode) => void): AstNode {
     proceedToState(state)
     const script = createETSModuleFromContext()
+    // Or this: const script = createETSModuleFromSource(source)
     if (script === undefined) {
-        throwError(`Failed to receive ast from es2panda`)
+        throw new Error(`Failed to receive AST from es2panda for ${source}`)
     }
 
     if (dumpAst) {
@@ -66,30 +77,55 @@ function insertPlugin(transform: (ast: AstNode) => void, state: Es2pandaContextS
 
     const beforeTransform = Date.now()
 
-    transform?.(script)
+    if (!restart) {
+        const programs = listPrograms(global.compilerContext.program)
+        programs.forEach((program, index) => {
+            if (index == 0) {
+                return
+            }
+            const ast = program.program.astNode
+            transform?.(program.program, { isMainProgram: false, name: program.name, stage: state })
+            setBaseOverloads(ast)
+            setAllParents(ast)
+        })
+    }
+
+    transform?.(global.compilerContext.program, { isMainProgram: true, name: `${global.packageName}.${global.filePathFromPackageRoot}`, stage: state })
 
     const afterTransform = Date.now()
     global.profiler.transformTime += afterTransform - beforeTransform
 
     if (dumpAst) {
         console.log(`AFTER ${stateName(state)}:`)
-        console.log(filterSource(script.dumpSrc()))
+        if (restart) {
+            console.log(filterSource(script.dumpSrc()))
+        } else {
+            console.log(script.dumpSrc())
+        }
     }
 
+    setBaseOverloads(script)
     setAllParents(script)
 
     if (!restart) {
+        console.log("UPDATE...")
         updateWith?.(script)
+        console.log("DONE!")
     }
-    // note: sometimes errors are generated, but state not changed to Es2pandaContextState.ES2PANDA_STATE_ERROR (01.04.25)
     return script
 }
 
-function restartCompiler(configPath: string, filePath: string, stdlib: string, outputPath: string, verbose: boolean = true) {
+function restartCompiler(source: string, configPath: string, filePath: string, stdlib: string, outputPath: string, verbose: boolean = true) {
     if (verbose) {
         console.log(`restarting with config ${configPath}, file ${filePath}`)
     }
-    const srcText = filterSource(createETSModuleFromContext().dumpSrc())
+    const module = createETSModuleFromContext()
+    if (module == undefined) throw new Error(`Cannot restart compiler for ${source}`)
+    const filterTransform = new CheckedBackFilter()
+    const srcText = filterSource(
+        filterTransform.visitor(module)
+        .dumpSrc()
+    )
     global.es2panda._DestroyContext(global.context)
     global.es2panda._DestroyConfig(global.config)
 
@@ -117,7 +153,7 @@ function invokeWithPlugins(
     outDir: string,
     filePath: string,
     outputPath: string,
-    pluginsByState: Map<Es2pandaContextState, ((ast: AstNode) => void)[]>,
+    pluginsByState: Map<Es2pandaContextState, ProgramTransformer[]>,
     dumpAst: boolean,
     restart: boolean,
     stage: number,
@@ -145,6 +181,8 @@ function invokeWithPlugins(
         '--output',
         outputPath
     ]).peer
+    if (!global.configIsInitialized())
+        throw new Error(`Wrong config: path=${configPath} file=${filePath} stdlib=${stdlib} output=${outputPath}`)
     fs.mkdirSync(path.dirname(outputPath), {recursive: true})
     global.compilerContext = Context.createFromString(source)
 
@@ -165,7 +203,7 @@ function invokeWithPlugins(
                 generateDeclFromCurrentContext(newFilePath)
             }
             pluginsApplied++
-            restartCompiler(newConfigPath, newFilePath, stdlib, outputPath)
+            restartCompiler(source, newConfigPath, newFilePath, stdlib, outputPath)
             configPath = newConfigPath
             filePath = newFilePath
             const after = Date.now()
@@ -174,17 +212,17 @@ function invokeWithPlugins(
     }
 
     pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_PARSED)?.forEach(plugin => {
-        insertPlugin(plugin, Es2pandaContextState.ES2PANDA_STATE_PARSED, dumpAst, restart)
+        insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_PARSED, dumpAst, restart)
         restartProcedure()
     })
 
     pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_BOUND)?.forEach(plugin => {
-        insertPlugin(plugin, Es2pandaContextState.ES2PANDA_STATE_BOUND, dumpAst, restart, rebindSubtree)
+        insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_BOUND, dumpAst, restart, rebindSubtree)
         restartProcedure()
     })
 
     pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_CHECKED)?.forEach(plugin => {
-        insertPlugin(plugin, Es2pandaContextState.ES2PANDA_STATE_CHECKED, dumpAst, restart, recheckSubtree)
+        insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_CHECKED, dumpAst, restart, recheckSubtree)
         restartProcedure()
     })
     proceedToState(Es2pandaContextState.ES2PANDA_STATE_BIN_GENERATED)
@@ -195,8 +233,12 @@ const exportsFromInitialFile: string[] = []
 function generateDeclFromCurrentContext(filePath: string): never {
     proceedToState(Es2pandaContextState.ES2PANDA_STATE_PARSED)
     console.log(`Emitting to ${filePath}`)
+    const filterTransform = new CheckedBackFilter()
     let out = [
-        filterSource(global.compilerContext.program.astNode.dumpSrc()),
+        filterSource(
+            filterTransform.visitor(global.compilerContext.program.astNode)
+            .dumpSrc()
+        ),
         ...exportsFromInitialFile
     ].join('\n')
     fs.mkdirSync(path.dirname(filePath), { recursive: true })
@@ -217,7 +259,7 @@ function loadPlugin(configDir: string, jsonPlugin: any) {
     return pluginFunction
 }
 
-function selectPlugins(configDir: string, plugins: any[], stage: string): ((arg: AstNode) => AstNode)[] | undefined {
+function selectPlugins(configDir: string, plugins: any[], stage: string): ProgramTransformer[] | undefined {
     const selected = plugins
         .filter(it => (it.stage == stage))
         .map(it => loadPlugin(configDir, it))
@@ -232,7 +274,7 @@ function stateName(value: Es2pandaContextState): string {
 }
 
 function readAndSortPlugins(configDir: string, plugins: any[]) {
-    const pluginsByState = new Map<Es2pandaContextState, ((ast: AstNode) => void)[]>()
+    const pluginsByState = new Map<Es2pandaContextState, ProgramTransformer[]>()
 
     Object.values(Es2pandaContextState)
         .filter(isNumber)
@@ -271,6 +313,11 @@ export function main() {
     const after = Date.now()
     global.profiler.totalTime = after - before
     global.profiler.report()
+}
+
+function reportErrorAndExit(message: string): never {
+    console.error(message)
+    process.exit(1)
 }
 
 main()

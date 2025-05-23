@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import { Es2pandaModifierFlags } from ".."
 import { AnnotationUsage, Identifier, TSTypeAliasDeclaration, TSTypeParameterDeclaration, TypeNode } from "../../generated"
 import { isSameNativeObject } from "../peers/ArktsObject"
 import { updateNodeByNode } from "../utilities/private"
@@ -21,7 +22,8 @@ export function createTSTypeAliasDeclaration(
     id?: Identifier,
     typeParams?: TSTypeParameterDeclaration,
     typeAnnotation?: TypeNode,
-    annotations?: readonly AnnotationUsage[] 
+    annotations?: readonly AnnotationUsage[],
+    modifiers?: Es2pandaModifierFlags
 ): TSTypeAliasDeclaration {
     const res = TSTypeAliasDeclaration.createTSTypeAliasDeclaration(
         id,
@@ -31,6 +33,9 @@ export function createTSTypeAliasDeclaration(
     if (annotations) {
         res.setAnnotations(annotations)
     }
+    if (modifiers) {
+        res.modifierFlags = modifiers
+    }
     return res
 }
 
@@ -39,12 +44,14 @@ export function updateTSTypeAliasDeclaration(
     id?: Identifier,
     typeParams?: TSTypeParameterDeclaration,
     typeAnnotation?: TypeNode,
-    annotations?: readonly AnnotationUsage[] 
+    annotations?: readonly AnnotationUsage[],
+    modifiers?: Es2pandaModifierFlags
 ): TSTypeAliasDeclaration {
     if (isSameNativeObject(id, original.id)
         && isSameNativeObject(typeParams, original.typeParams)
         && isSameNativeObject(typeAnnotation, original.typeAnnotation)
         && isSameNativeObject(annotations, original.annotations)
+        && isSameNativeObject(modifiers, original.modifierFlags)
     ) {
         return original
     }
@@ -54,6 +61,7 @@ export function updateTSTypeAliasDeclaration(
             typeParams,
             typeAnnotation,
             annotations,
+            modifiers
         ),
         original,
     )

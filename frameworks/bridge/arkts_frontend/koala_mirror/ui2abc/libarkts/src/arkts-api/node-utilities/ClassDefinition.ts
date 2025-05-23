@@ -40,7 +40,7 @@ export function updateClassDefinition(
     body: readonly AstNode[],
     modifiers: Es2pandaClassDefinitionModifiers,
     flags: Es2pandaModifierFlags
-) {
+): ClassDefinition {
     if (original.ctor !== undefined && !isMethodDefinition(original.ctor)) {
         throwError(`class definition constructor is not method definition: ${ctor?.dump()}`)
     }

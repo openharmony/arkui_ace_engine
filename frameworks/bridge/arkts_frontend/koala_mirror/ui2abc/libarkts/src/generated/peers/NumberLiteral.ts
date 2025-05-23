@@ -38,9 +38,6 @@ export class NumberLiteral extends Literal {
     static createNumberLiteral(value: number): AstNode {
         return new NumberLiteral(global.generatedEs2panda._CreateNumberLiteral(global.context, value))
     }
-    get str(): string {
-        return unpackString(global.generatedEs2panda._NumberLiteralStrConst(global.context, this.peer))
-    }
     static updateNumberLiteral(original: AstNode | undefined, value: number): AstNode {
         return new NumberLiteral(global.generatedEs2panda._UpdateNumberLiteral(global.context, passNode(original), value))
     }

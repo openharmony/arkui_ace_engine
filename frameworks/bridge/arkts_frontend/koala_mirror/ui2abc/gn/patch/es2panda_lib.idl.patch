@@ -1,0 +1,11 @@
+--- "ohos_arm64/include/tools/es2panda/generated/es2panda_lib/es2panda_lib.idl"	2025-05-21 18:55:45.554925586 +0300
++++ ohos_arm64/include/tools/es2panda/generated/es2panda_lib/es2panda_lib.idl	2025-05-21 19:19:16.496423554 +0300
+@@ -1821,7 +1821,7 @@
+ 
+ namespace ir {
+ 
+-[Entity=Class, c_type=es2panda_AstNode] interface NumberLiteral: Literal {
++[Entity=Class, Es2pandaAstNodeType=52, c_type=es2panda_AstNode] interface NumberLiteral: Literal {    
+     ir.AstNode Create(es2panda_Context ctx, i32 value);
+     ir.AstNode Create1(es2panda_Context ctx, i64 value);
+     ir.AstNode Create2(es2panda_Context ctx, f64 value);

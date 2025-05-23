@@ -35,7 +35,7 @@ import { Identifier } from "./Identifier"
 import { TypedStatement } from "./TypedStatement"
 export class TSEnumDeclaration extends TypedStatement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 86)
+        assertValidPeer(pointer, 87)
         super(pointer)
     }
     static createTSEnumDeclaration(key: Identifier | undefined, members: readonly AstNode[], isConst: boolean, isStatic: boolean, isDeclare: boolean): TSEnumDeclaration {

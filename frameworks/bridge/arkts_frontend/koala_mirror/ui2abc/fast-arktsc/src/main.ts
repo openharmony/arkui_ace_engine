@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,7 +31,6 @@ export const options = program
     .option('--compiler <path>', 'Path to compiler')
     .option('--link-name <path>', 'Path to final linked file', "all")
 
-    .option('--file-option', 'When provided pass the source as --file <path> rather than a free option')
     .option('--restart-stages', 'Compilation with plugins and compiler restarting')
 
     .option('--output-dir <path>', 'Path to output dir (only used by AOT compilation)')
@@ -80,7 +77,7 @@ function produceNinjafile(
 
     let compilerPrefix = [...Array(stages).keys()].map((i) => `
 rule arkts_compiler_stage${i}
-    command = ${tools_prefix}${compiler} --ets-module --arktsconfig ${path.resolve(config)} ${options.fileOption ? "--file" : ""} $in --output $out ${options.restartStages ? `--restart-stages` : ``} ${stages > 1 ? `--stage ${i}` : ``}
+    command = ${tools_prefix}${compiler} --ets-module --arktsconfig ${path.resolve(config)} --output $out ${options.restartStages ? `--restart-stages` : ``} ${stages > 1 ? `--stage ${i}` : ``} $in
     description = "Compiling ARKTS ${stages > 1 ? `(stage ${i})` : ``} $in"
 `).join('')
 

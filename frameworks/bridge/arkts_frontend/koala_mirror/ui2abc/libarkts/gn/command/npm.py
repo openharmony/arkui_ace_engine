@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# -*- coding: utf-8 -*-
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ def install(dir):
     except subprocess.CalledProcessError as e:
         with open(koala_log, "a+") as f:
             f.write("\n")
-            f.write("error message: "+ e.output + "\n")
+            f.write("error message: "+ e.stderr + "\n")
             f.close()
 
 def npm_command(dir, command):

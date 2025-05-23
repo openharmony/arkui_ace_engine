@@ -251,6 +251,7 @@ typedef KNativePointer (*StartApplication_t)(const char* appUrl, const char* app
 typedef KBoolean (*RunApplication_t)(const KInt arg0, const KInt arg1);
 typedef const char* (*EmitEvent_t)(const KInt type, const KInt target, const KInt arg0, const KInt arg1);
 typedef void (*RestartWith_t)(const char* page);
+typedef const char* (*LoadView_t)(const char* className, const char* params);
 
 void* getImpl(const char* path, const char* name) {
     static void* lib = nullptr;
@@ -316,6 +317,16 @@ void impl_RestartWith(const KStringPtr& page) {
     impl(page.c_str());
 }
 KOALA_INTEROP_V1(RestartWith, KStringPtr)
+
+#ifdef KOALA_ANI
+KStringPtr impl_LoadView(const KStringPtr& className, const KStringPtr& params) {
+    static LoadView_t impl = nullptr;
+    if (!impl) impl = reinterpret_cast<LoadView_t>(getImpl(nullptr, "LoadView"));
+    const char* result = impl(className.c_str(), params.c_str());
+    return KStringPtr(result, strlen(result), true);
+}
+KOALA_INTEROP_2(LoadView, KStringPtr, KStringPtr, KStringPtr)
+#endif  // KOALA_ANI
 
 KNativePointer impl_Malloc(KLong length) {
     const auto ptr = static_cast<char *>(malloc(length));
@@ -638,6 +649,15 @@ KStringPtr impl_Utf8ToString(KVMContext vmContext, KByte* data, KInt offset, KIn
     return result;
 }
 KOALA_INTEROP_CTX_3(Utf8ToString, KStringPtr, KByte*, KInt, KInt)
+#endif
+
+#if  defined(KOALA_NAPI)  || defined(KOALA_ANI)
+KStringPtr impl_RawUtf8ToString(KVMContext vmContext, KNativePointer data) {
+    auto string = (const char*)data;
+    KStringPtr result(string, strlen(string), false);
+    return result;
+}
+KOALA_INTEROP_CTX_1(RawUtf8ToString, KStringPtr, KNativePointer)
 #endif
 
 #if defined(KOALA_NAPI) || defined(KOALA_JNI) || defined(KOALA_CJ) || defined(KOALA_ETS_NAPI) || defined(KOALA_ANI)

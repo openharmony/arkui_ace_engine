@@ -36,10 +36,7 @@ export interface TransformerOptions {
 export default function memoTransformer(
     userPluginOptions?: TransformerOptions
 ) {
-    return (node: arkts.AstNode) => {
-        if (!arkts.isETSModule(node)) {
-            throw new Error(`expected ETSModule got ${node.constructor.name}`)
-        }
+    return (program: arkts.Program) => {
         const scriptFunctions = new Map<arkts.KNativePointer, MemoFunctionKind>()
         const ETSFunctionTypes = new Map<arkts.KNativePointer, MemoFunctionKind>()
         const analysisVisitor = new AnalysisVisitor(scriptFunctions, ETSFunctionTypes)
@@ -50,6 +47,7 @@ export default function memoTransformer(
         const parameterTransformer = new ParameterTransformer(positionalIdTracker)
         const returnTransformer = new ReturnTransformer()
 
+        const node = program.astNode
         analysisVisitor.visitor(node)
         diagnosticVisitor.visitor(node)
 
@@ -66,14 +64,7 @@ export default function memoTransformer(
         let result = functionTransformer.visitor(node)
         if (userPluginOptions?.manuallyDisableInsertingImport != true) {
             if ((functionTransformer.modified || signatureTransformer.modified)) {
-                result = arkts.updateETSModuleByStatements(
-                    node,
-                    [
-                        ...node.getChildren().filter(it => arkts.isETSImportDeclaration(it)),
-                        factory.createContextTypesImportDeclaration(userPluginOptions?.contextImport),
-                        ...node.getChildren().filter(it => !arkts.isETSImportDeclaration(it)),
-                    ]
-                )
+                factory.createContextTypesImportDeclaration(program, userPluginOptions?.stableForTests ?? false, userPluginOptions?.contextImport)
             }
         }
         if (userPluginOptions?.keepTransformed) {

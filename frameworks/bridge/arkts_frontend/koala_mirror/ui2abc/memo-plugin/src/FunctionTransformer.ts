@@ -23,6 +23,7 @@ import {
     hasMemoStableAnnotation,
     isTrackableParam,
     isVoidType,
+    moveToFront,
     shouldWrap,
 } from "./utils"
 import { ParameterTransformer, ParamInfo } from "./ParameterTransformer"
@@ -35,6 +36,8 @@ import {
     getParams,
     isMemo,
     isMemoizable,
+    memoizableHasReceiver,
+    parametersBlockHasReceiver,
 } from "./api-utils"
 
 function needThisRewrite(hasReceiver: boolean, isStatic: boolean, stableThis: boolean) {
@@ -92,7 +95,7 @@ function updateFunctionBody(
     hasReceiver: boolean,
     isStatic: boolean,
     stableThis: boolean,
-    hash: arkts.NumberLiteral | arkts.StringLiteral,
+    hash: arkts.Expression,
     addLogging: boolean,
 ): [
     arkts.BlockStatement,
@@ -100,7 +103,7 @@ function updateFunctionBody(
     arkts.VariableDeclaration | undefined,
     arkts.ReturnStatement | arkts.BlockStatement | undefined,
 ] {
-    const shouldCreateMemoThisParam = needThisRewrite(hasReceiver, isStatic, stableThis)
+    const shouldCreateMemoThisParam = needThisRewrite(hasReceiver, isStatic, stableThis) && !parametersBlockHasReceiver(parameters)
     const parameterIdentifiers = getMemoParameterIdentifiers(parameters)
     const gensymParamsCount = fixGensymParams(parameterIdentifiers, node)
     const parameterNames = [...(shouldCreateMemoThisParam ? [RuntimeNames.THIS.valueOf()] : []), ...parameterIdentifiers.map(it => it.ident.name)]
@@ -275,10 +278,15 @@ export class FunctionTransformer extends arkts.AbstractVisitor {
             return this.fixObjectArg(it, params[index])
         })
         this.modified = true
+
+        let newArgs = [...factory.createHiddenArguments(this.positionalIdTracker.id(getName(decl))), ...updatedArguments]
+        if (memoizableHasReceiver(decl)) {
+            newArgs = moveToFront(newArgs, 2)
+        }
         return arkts.factory.updateCallExpression(
             node,
             node.callee,
-            [...factory.createHiddenArguments(this.positionalIdTracker.id(getName(decl))), ...updatedArguments],
+            newArgs,
             node.typeParams,
             node.isOptional,
             node.hasTrailingComma,

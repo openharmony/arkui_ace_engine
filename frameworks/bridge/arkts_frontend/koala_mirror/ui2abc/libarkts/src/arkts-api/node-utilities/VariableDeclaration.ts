@@ -40,7 +40,7 @@ export function updateVariableDeclaration(
     kind: Es2pandaVariableDeclarationKind,
     declarators: readonly VariableDeclarator[],
     annotations?: readonly AnnotationUsage[]
-) {
+): VariableDeclaration {
     if (isSameNativeObject(kind, original.kind)
         && isSameNativeObject(declarators, original.declarators)
         && isSameNativeObject(annotations, original.annotations)

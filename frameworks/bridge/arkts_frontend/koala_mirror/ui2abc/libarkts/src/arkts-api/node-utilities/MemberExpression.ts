@@ -25,7 +25,7 @@ export function updateMemberExpression(
     kind: Es2pandaMemberExpressionKind,
     computed: boolean,
     optional_arg: boolean
-) {
+): MemberExpression {
     if (isSameNativeObject(object_arg, original.object)
         && isSameNativeObject(property, original.property)
         && isSameNativeObject(kind, original.kind)

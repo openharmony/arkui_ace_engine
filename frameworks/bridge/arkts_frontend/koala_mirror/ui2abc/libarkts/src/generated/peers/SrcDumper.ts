@@ -32,8 +32,8 @@ export class SrcDumper extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
-    static create1SrcDumper(node: AstNode | undefined, isDeclgen: boolean): SrcDumper {
-        return new SrcDumper(global.generatedEs2panda._CreateSrcDumper1(global.context, passNode(node), isDeclgen))
+    static create1SrcDumper(node: AstNode | undefined, isDeclgen: boolean, isIsolatedDeclgen: boolean): SrcDumper {
+        return new SrcDumper(global.generatedEs2panda._CreateSrcDumper1(global.context, passNode(node), isDeclgen, isIsolatedDeclgen))
     }
     /** @deprecated */
     add(str: string): this {
@@ -80,6 +80,9 @@ export class SrcDumper extends ArktsObject {
     }
     get isDeclgen(): boolean {
         return global.generatedEs2panda._SrcDumperIsDeclgenConst(global.context, this.peer)
+    }
+    get isIsolatedDeclgen(): boolean {
+        return global.generatedEs2panda._SrcDumperIsIsolatedDeclgenConst(global.context, this.peer)
     }
     /** @deprecated */
     dumpNode(key: string): this {

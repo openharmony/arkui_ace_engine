@@ -1,6 +1,6 @@
 {
     "name": "@koalaui/interop",
-    "version": "1.5.15+devel",
+    "version": "1.7.1+devel",
     "description": "",
     "workspaces": [
         "../incremental/build-common",
@@ -43,6 +43,7 @@
         "clean": "rimraf dist build types",
         "compile": "ets-tsc -b .",
         "build:interop": "npm run build:interop:inc",
+        "build:interop:gn": "npm run build:interop:inc",
         "build:interop:inc": "fast-arktsc --config ./arktsconfig.json --compiler ../incremental/tools/panda/arkts/arktsc --link-name ./build/interop.abc && ninja ${NINJA_OPTIONS} -f build/abc/build.ninja",
         "clean:interop": "npm run clean",
         "lint": "eslint src test components",
@@ -94,7 +95,7 @@
     "keywords": [],
     "dependencies": {
         "@types/node": "^18.0.0",
-        "@koalaui/common": "1.5.15+devel"
+        "@koalaui/common": "1.7.1+devel"
     },
     "devDependencies": {
         "@ohos/hypium": "1.0.6",

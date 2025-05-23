@@ -34,7 +34,7 @@ import { TSTypeParameterInstantiation } from "./TSTypeParameterInstantiation"
 import { TypeNode } from "./TypeNode"
 export class TSImportType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 111)
+        assertValidPeer(pointer, 112)
         super(pointer)
     }
     static createTSImportType(param: Expression | undefined, typeParams: TSTypeParameterInstantiation | undefined, qualifier: Expression | undefined, isTypeof: boolean): TSImportType {

@@ -16,7 +16,7 @@
 import * as arkts from "@koalaui/libarkts"
 
 export default function noVisitor() {
-    return (node: arkts.ETSModule) => {
-        return node
+    return (program: arkts.Program) => {
+        return program
     }
 }

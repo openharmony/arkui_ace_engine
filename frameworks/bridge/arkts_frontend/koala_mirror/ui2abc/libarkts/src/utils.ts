@@ -117,8 +117,8 @@ function replaceGensymWrappers(code: string): string {
 
 
 function addExports(code: string): string {
-    const exportAstNodes = ["let", "const", "class", "abstract class", "@Entry() @Component() final class", "@Component() final class", "interface", "@interface", "type", "enum", "final class", "function",
-        "declare interface",
+    const exportAstNodes = ["  enum", "let", "const", "class", "abstract class", "@Entry() @Component() final class", "@Component() final class", "interface", "@interface", "type", "enum", "final class", "function",
+        "declare interface", "@memo_stable() declare interface",  "@memo_stable() interface",
         "@Retention({policy:\"SOURCE\"}) @interface", "@memo() function", "@memo_entry() function", "@memo_intrinsic() function",
     ]
     exportAstNodes.forEach((astNodeText) => {
@@ -131,6 +131,7 @@ function addExports(code: string): string {
         ["export @memo() function", "@memo() export function"],
         ["export @memo_entry() function", "@memo_entry() export function"],
         ["export @memo_intrinsic() function", "@memo_intrinsic() export function"],
+        ["export @memo_stable()", "@memo_stable() export"],
         ["export class OhosRouter", "export default class OhosRouter"]
     ]
     for (var [f, t] of fix) {
@@ -261,15 +262,10 @@ function fixDuplicateSettersInInterfaces(code: string): string {
     sometimes interfaces contains duplicate setters, this functions fixes it
 
     */
-    code = code.replaceAll(/\n(.*)interface(.*){\n([\s\S]*?)\n}\n/g, (match, modifiers, p1, p2: string) => {
+    code = code.replaceAll(/\n[ ]*(.*)interface(.*){\n([\s\S]*?)\n[ ]*}\n/g, (match, modifiers, p1, p2: string) => {
         const keep = p2.split('\n').filter((it) => !it.trimStart().startsWith(`set`))
         const setters = [...new Set(p2.split('\n').filter((it) => it.trimStart().startsWith(`set`)))]
         return `\n${modifiers}interface${p1}{\n${keep.join('\n')}\n${setters.join('\n')}\n}\n`
-    })
-    code = code.replaceAll(/\n  (.*)interface(.*){\n([\s\S]*?)\n  }\n/g, (match, modifiers, p1, p2: string) => {
-        const keep = p2.split('\n').filter((it) => !it.trimStart().startsWith(`set`))
-        const setters = [...new Set(p2.split('\n').filter((it) => it.trimStart().startsWith(`set`)))]
-        return `\n  ${modifiers}interface${p1}{\n${keep.join('\n')}\n${setters.join('\n')}\n  }\n`
     })
     return code
 }
@@ -285,14 +281,12 @@ function fixNamespace(code: string) {
 
     we have only one such place, so fix manually
     */
-    code = code.replaceAll(` export abstract class Profiler {
-  public static _$initializerBlockInit$_() {}
-  
-  public static _$init$_() {}`, ` export namespace Profiler {`)
-
+    code = code.replaceAll(/export (declare )?abstract class (Profiler|GestureControl|text|common2D) {/g, `export $1 namespace $2 {`)
+    code = code.replaceAll(`public static _$init$_() {}`, ``)
+    code = code.replaceAll(`public static _$initializerBlockInit$_() {}`, ``)
     code = code.replaceAll(/public static ((?:un)?registerVsyncCallback)/g, "export function $1")
 
-    return code.replaceAll(/export abstract class GestureControl {((.*)\n){4}/g, "export namespace GestureControl {")
+    return code
 }
 
 function fixEnums(code: string) {
@@ -364,11 +358,11 @@ export function filterSource(text: string): string {
     //console.error("====")
     // console.error(text.split('\n').map((it, index) => `${`${index + 1}`.padStart(4)} |${it}`).join('\n'))
     const dumperUnwrappers = [
+        addExports,
         fixNamespace,
         fixEnums,
         fixDuplicateSettersInInterfaces,
         removeAbstractFromInterfaces,
-        addExports,
         replaceGensymWrappers, // nested
         replaceGensymWrappers, // nested
         replaceGensymWrappers,

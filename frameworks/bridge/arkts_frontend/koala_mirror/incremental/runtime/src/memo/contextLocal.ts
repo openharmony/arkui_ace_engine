@@ -15,6 +15,7 @@
 
 import { __context, __id } from "../internals"
 import { State } from "../states/State"
+import { __memo_context_type, __memo_id_type } from "../internals"
 
 /**
  * @param name - a name of a context state

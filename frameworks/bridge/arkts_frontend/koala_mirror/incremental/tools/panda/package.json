@@ -8,6 +8,7 @@
         "rimraf": "^6.0.1"
     },
     "scripts": {
+        "panda:patch": "git apply patch/es2panda_lib.idl.patch",
         "panda:sdk:check-install": "npm ls @panda/sdk || npm run panda:sdk:install",
         "panda:sdk:install": "npm install --prefix . --no-save @panda/sdk@${PANDA_SDK_VERSION:-next}",
         "panda:sdk:clean": "rimraf ./node_modules",

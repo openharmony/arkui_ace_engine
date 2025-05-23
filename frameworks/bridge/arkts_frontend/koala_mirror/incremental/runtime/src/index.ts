@@ -146,12 +146,14 @@ export {
     StateContext,
     StateManager,
     ValueTracker,
+    InternalScope,
 } from "./states/State"
 
 export {
     __context,
     __id,
     __key,
+    __hash,
     __memo_context_type,
     __memo_id_type,
     __memo_transformed,

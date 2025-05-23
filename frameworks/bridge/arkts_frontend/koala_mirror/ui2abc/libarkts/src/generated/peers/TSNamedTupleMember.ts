@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 export class TSNamedTupleMember extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 134)
+        assertValidPeer(pointer, 135)
         super(pointer)
     }
     static createTSNamedTupleMember(label: Expression | undefined, elementType: TypeNode | undefined, optional_arg: boolean): TSNamedTupleMember {

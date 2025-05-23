@@ -155,19 +155,63 @@ export function resolveConfig(configPath: string, restartStages: boolean): [stri
         }
 
         for (const [k, v] of resolvedPaths) {
-            if ((k.startsWith('@') || k.startsWith('#')) && !v.endsWith('*') && !fs.existsSync(path.join(v, "index.ts")) && !fs.existsSync(path.join(v, "index.ets"))) {
+            let ext = path.extname(v)
+            let isResolvedToFile = ext === ".ts" || ext === ".ets"
+            if (isResolvedToFile) {
+                try {
+                    isResolvedToFile = fs.statSync(v).isFile()
+                } catch (_e) {
+                    isResolvedToFile = false
+                }
+            }
+            if (!isResolvedToFile && (k.startsWith('@') || k.startsWith('#')) && !v.endsWith('*') && !fs.existsSync(path.join(v, "index.ts")) && !fs.existsSync(path.join(v, "index.ets"))) {
                 error(`File ${v}/index.[ts|ets] does not exists`)
             }
         }
 
         const newBaseUrl = i == 0 ? relativeOrDot(outDir, baseUrl) : `./${pluginNames[i - 1]}`
-        const pathsInConfig = Array.from(resolvedPaths).map(([k, v]) => {
+        const pathsInConfig = Array.from(resolvedPaths).flatMap(([k, v]) => {
             if (!path.relative(baseUrl, v).startsWith('..')) {
                 const res = relativeOrDot(path.resolve(baseUrl), v)
-                return [k, [k.endsWith('*') && !res.endsWith('*') ? `${res}/*` : res]]
+                return [[k, [k.endsWith('*') && !res.endsWith('*') ? `${res}/*` : res]]]
             }
-            const res = relativeOrDot(path.resolve(outDir ?? `.`, newBaseUrl), v)
-            return [k, [k.endsWith('*') && !res.endsWith('*') ? `${res}/*` : res]]
+            const from = path.resolve(outDir ?? `.`, newBaseUrl)
+            const res = relativeOrDot(from, v)
+            if (k.endsWith('*') && res.endsWith('*')) {
+                const replaceTrailStar = (str: string, replaceStr: string = '') => {
+                    if (str.length == 0 || str.charAt(str.length - 1) !== '*')
+                        return str
+                    return str.slice(0, -1) + replaceStr
+                }
+                const rmLeadSlash = (str: string) => {
+                    if (str.startsWith("/"))
+                        str = str.length > 1 ? str.substring(1) : ""
+                    return str
+                }
+                const pattern = path.resolve(from, replaceTrailStar(res))
+                const parent = path.parse(pattern).dir
+
+                const ret: [string, string[]][] = []
+                const traverseDir = (dir: string, filter: (file: string) => boolean, apply: (file: string) => void) => {
+                    const dirents = fs.readdirSync(dir, { withFileTypes: true })
+                    for (const entry of dirents) {
+                        const fullPath = path.join(dir, entry.name)
+                        if (entry.isDirectory())
+                            traverseDir(fullPath, filter, apply)
+                        else if (filter(fullPath))
+                            apply(fullPath)
+                    }
+                }
+                traverseDir(parent, file => file.endsWith(".d.ets") && file.startsWith(pattern), file => {
+                    let resolvedStar = rmLeadSlash(file.substring(pattern.length))
+                    let resolvedK = replaceTrailStar(k, resolvedStar)
+                    resolvedK = resolvedK.substring(0, resolvedK.length - ".d.ets".length)
+                    const resolvedV = replaceTrailStar(res, resolvedStar)
+                    ret.push([resolvedK, [resolvedV]])
+                })
+                return ret
+            }
+            return [[k, [k.endsWith('*') && !res.endsWith('*') ? `${res}/*` : res]]]
         })
 
         const arktsconfig = {

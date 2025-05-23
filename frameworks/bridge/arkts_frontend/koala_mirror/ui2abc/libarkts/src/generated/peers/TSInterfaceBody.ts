@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 export class TSInterfaceBody extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 131)
+        assertValidPeer(pointer, 132)
         super(pointer)
     }
     static createTSInterfaceBody(body: readonly AstNode[]): TSInterfaceBody {

@@ -17,6 +17,7 @@ import { KoalaCallsiteKey } from "@koalaui/common"
 import { __context, __id } from "../internals"
 import { StateContext } from "../states/State"
 import { memoEntry1 } from "./entry"
+import { __memo_context_type, __memo_id_type } from "../internals"
 
 /** @internal */
 export class MemoCallbackContext {

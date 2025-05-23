@@ -14,6 +14,7 @@
  */
 
 import * as arkts from "@koalaui/libarkts"
+import { DecoratorNames, hasDecorator } from "./property-translators/utils"
 
 export const styledInstance = mangle("instance")
 
@@ -82,7 +83,7 @@ export function createOptionalClassProperty(
         arkts.factory.createIdentifier(name, undefined),
         undefined,
         stageManagementIdent.length ? createStageManagementType(stageManagementIdent, property) :
-        newType,
+            newType,
         modifiers,
         false
     );
@@ -105,11 +106,76 @@ export function createStageManagementType(stageManagementIdent: string, property
             arkts.factory.createIdentifier(stageManagementIdent, undefined),
             arkts.factory.createTSTypeParameterInstantiation(
                 [
-                    newType? newType:
-                    arkts.factory.createETSUndefinedType(),
+                    newType ? newType :
+                        arkts.factory.createETSUndefinedType(),
                 ]
             ),
             undefined
         )
     );
+}
+
+export function makeImport(program: arkts.Program, what: string, asWhat: string, where: string) {
+    const source: arkts.StringLiteral = arkts.factory.createStringLiteral(where)
+    arkts.factory.createETSImportDeclaration(
+        source,
+        [
+            arkts.factory.createImportSpecifier(
+                arkts.factory.createIdentifier(what),
+                arkts.factory.createIdentifier(asWhat)
+            )
+        ],
+        arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL,
+        program,
+        arkts.Es2pandaImportFlags.IMPORT_FLAGS_NONE
+    )
+}
+
+export class Importer {
+    storage = new Map<string, [string, string]>()
+    private defaultArkUIImports = [
+        'Color', 'Button', 'ButtonOptions', 'ClickEvent', 'FlexAlign',
+        'Image', 'ListOptions', 'Scroller', 'SwiperController',
+        'PageTransitionEnter', 'PageTransitionExit', 'PageTransitionOptions',
+        'Column', 'ColumnOptions', 'Row', 'RowOptions',
+        'FlexOptions', 'TabsOptions', 'StackOptions', 'ToggleOptions', 'TextInputOptions',
+        'TestComponent', 'TestComponentOptions', 'ForEach', 'Text',
+        'Margin', 'Padding', 'BorderOptions', 'Curve', 'RouteType', 'TextOverflowOptions',
+        'Flex', 'FlexWrap', 'HorizontalAlign', 'Scroll', 'Tabs', 'TabsController', 'TabContent',
+        'NavDestination', 'NavPathStack', 'Literal_String_target_NavigationType_type',
+        'IDataSource', 'DataChangeListener', 'ItemAlign', 'ImageFit', 'FlexDirection',
+        'FontWeight', 'Counter', 'Toggle', 'ToggleType', 'BarMode', 'TextAlign', 'VerticalAlign',
+        'TextOverflow', 'BarState', 'NavPathInfo', 'Stack', 'Swiper',
+        'List', 'ListItem', 'Grid', 'GridItem', 'Navigator', 'Position', 'Axis',
+        'TextInput', 'Font', 'Alignment', 'Visibility', 'ImageRepeat', 'SizeOptions', 'Divider',
+        'TabBarOptions', 'Navigation', 'Span', 'NavigationMode', 'BarPosition', 'EnterKeyType',
+        'LazyForEach',
+        'TestComponent', 'TestComponentOptions', 'ForEach', 'Text', 'AppStorage', 'LocalStorage',
+        'SubscribedAbstractProperty',
+    ]
+    constructor() {
+        const withDefaultImports = true
+        if (withDefaultImports) {
+            this.defaultArkUIImports.forEach(it => {
+                this.add(it, '@ohos.arkui')
+            })
+        }
+    }
+    add(what: string, where: string, asWhat?: string) {
+        const previous = this.storage.get(what)
+        if (!asWhat)
+            asWhat = what
+        if (previous != undefined && (previous[0] != where || previous[1] != asWhat))
+            throw new Error(`Mismatching import ${what} from ${where}`)
+        this.storage.set(what, [where, asWhat])
+    }
+    emit(program: arkts.Program): void {
+        this.storage.forEach(([where, asWhat], what) => {
+            makeImport(program, what, asWhat, where)
+        })
+    }
+}
+
+export interface ImportingTransformer {
+    collectImports(imports: Importer): void
 }

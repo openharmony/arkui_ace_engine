@@ -169,22 +169,8 @@ export function correctObjectExpression(node: arkts.AstNode | undefined): boolea
     return arkts.isObjectExpression(node) || (arkts.isTSAsExpression(node) && correctObjectExpression(node.expr))
 }
 
-export function correctFunctionParamType(type: arkts.TypeNode): boolean {
-    if (arkts.isETSFunctionType(type)) {
-        return true
-    }
-    if (arkts.isETSUnionType(type)) {
-        const nonUndefined: arkts.TypeNode[] = type.types.filter((it) => {
-            return !arkts.isETSUndefinedType(it)
-        })
-        if (nonUndefined.length != 1) {
-            return false
-        }
-        if (arkts.isETSFunctionType(nonUndefined[0])) {
-            return true
-        }
-    }
-    return false
+export function correctFunctionParamType(arg: arkts.Expression): boolean {
+    return arkts.isArrowFunctionExpression(arg)
 }
 
 function assertIsNever(isNever: never): never {
@@ -231,4 +217,47 @@ export function getParams(decl: Memoizable) {
         return []
     }
     assertIsNever(decl)
+}
+
+function isThisParam(node: arkts.Expression | undefined): boolean {
+    if (node === undefined || !arkts.isETSParameterExpression(node)) {
+        return false
+    }
+    return node.ident?.isReceiver ?? false
+}
+
+export function parametersBlockHasReceiver(params: readonly arkts.Expression[]): boolean {
+    return params.length > 0 && arkts.isETSParameterExpression(params[0]) && isThisParam(params[0])
+}
+
+export function parametrizedNodeHasReceiver(node: arkts.ScriptFunction | arkts.ETSFunctionType | undefined): boolean {
+    if (node === undefined) {
+        return false
+    }
+    return parametersBlockHasReceiver(node.params)
+}
+
+export function memoizableHasReceiver(node: Memoizable): boolean {
+    if (arkts.isMethodDefinition(node)) {
+        return parametrizedNodeHasReceiver(node.function)
+    }
+    if (arkts.isETSParameterExpression(node)) {
+        if (arkts.isETSFunctionType(node.typeAnnotation)) {
+            return isThisParam(node.typeAnnotation.params[0])
+        }
+        return false
+    }
+    if (arkts.isIdentifier(node)) {
+        if (arkts.isVariableDeclarator(node.parent) && arkts.isArrowFunctionExpression(node.parent.init)) {
+            return isThisParam(node.parent.init.function!.params[0])
+        }
+        return false
+    }
+    if (arkts.isClassProperty(node)) {
+        if (arkts.isArrowFunctionExpression(node.value)) {
+            return isThisParam(node.value.function!.params[0])
+        }
+        return false
+    }
+    assertIsNever(node)
 }

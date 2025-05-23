@@ -4,15 +4,18 @@
     "workspaces": [
         "./annotate",
         "./libarkts",
+        "./fast-arktsc",
         "./memo-plugin",
         "./ui-plugins",
+        "./tests-memo",
         "../incremental/build-common",
         "../interop",
-        "../incremental/harness"
+        "../incremental/harness",
+        "../incremental/common",
+        "../incremental/compat"
     ],
     "devDependencies": {
         "@koalaui/ets-tsc": "4.9.5-r5",
-        "@koalaui/fast-arktsc": "1.5.15",
         "@types/chai": "^4.3.1",
         "@types/mocha": "^9.1.0",
         "bin-links": "^4.0.4",
@@ -35,9 +38,9 @@
         "commander": "^13.1.0"
     },
     "scripts": {
-        "clean:all": "npm run clean --prefix libarkts && npm run clean:plugins --prefix libarkts && npm run clean --prefix memo-plugin && npm run runtime:clean --prefix memo-plugin && npm run clean --prefix memo-plugin/demo",
-        "build:all": "npm run compile --prefix libarkts && npm run compile:plugins --prefix libarkts && npm run compile --prefix memo-plugin && npm run runtime:prepare --prefix memo-plugin && npm run compile --prefix ui-plugins",
-        "test:all": "npm run build:arkui:pure-ets --prefix ../arkoala-arkts/arkui && npm run run --prefix libarkts && npm run test --prefix libarkts && npm run demo:run --prefix memo-plugin && npm run test:all --prefix memo-plugin",
+        "clean:all": "npm run clean --prefix libarkts && npm run clean:plugins --prefix libarkts && npm run clean --prefix memo-plugin && npm run runtime:clean --prefix memo-plugin && npm run clean --prefix memo-plugin/demo && npm run clean --prefix ../arkoala-arkts/arkui && npm run clean --prefix ../arkoala-arkts/trivial/user",
+        "build:all": "npm run compile --prefix fast-arktsc && npm run compile --prefix libarkts && npm run compile:plugins --prefix libarkts && npm run compile --prefix memo-plugin && npm run runtime:prepare --prefix memo-plugin && npm run compile --prefix ui-plugins",
+        "test:all": "npm run build:harness --prefix ../incremental/harness && npm run test --prefix libarkts && npm run demo:run --prefix memo-plugin && npm run test:all --prefix memo-plugin",
         "all": "npm run clean:all && npm run build:all && npm run test:all"
     }
 }

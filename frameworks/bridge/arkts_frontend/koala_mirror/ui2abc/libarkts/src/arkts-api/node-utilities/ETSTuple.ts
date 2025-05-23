@@ -20,7 +20,7 @@ import { updateNodeByNode } from "../utilities/private"
 export function updateETSTuple(
     original: ETSTuple,
     typeList: readonly TypeNode[]
-) {
+): ETSTuple {
     if (isSameNativeObject(typeList, original.tupleTypeAnnotationsList)) {
         return original
     }

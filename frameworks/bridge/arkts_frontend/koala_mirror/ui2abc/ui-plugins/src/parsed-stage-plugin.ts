@@ -16,14 +16,22 @@
 import * as arkts from "@koalaui/libarkts"
 import { ComponentTransformer, ComponentTransformerOptions } from './component-transformer'
 import { AnnotationsTransformer } from "./annotation-translator"
+import { CallTransformer } from "./call-transformer"
+import { Importer } from "./utils"
+import { ImportsTransformer } from "./imports-transformer"
+import { StructRecorder, StructTable } from "./struct-recorder"
 
 export default function parsedTransformer(
     userPluginOptions?: ComponentTransformerOptions
 ) {
-    console.log(`PARSED: ${userPluginOptions}`)
-    return (node: arkts.ETSModule) => [
-            new ComponentTransformer(userPluginOptions),
-            new AnnotationsTransformer()
+    const imports = new Importer()
+    const structTable = new StructTable()
+    return (program: arkts.Program) => [
+            new StructRecorder(structTable),
+            new ComponentTransformer(imports, structTable, userPluginOptions),
+            new AnnotationsTransformer(),
+            new CallTransformer(imports, userPluginOptions),
+            new ImportsTransformer(program, imports)
         ]
-        .reduce((node: arkts.AstNode, transformer) => transformer.visitor(node), node)
+        .reduce((node: arkts.AstNode, transformer) => transformer.visitor(node), program.astNode)
 }

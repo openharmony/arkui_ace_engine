@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,9 @@ export * from "./arkts-api/utilities/public"
 export * from "./arkts-api/factory/nodeFactory"
 export * from "./arkts-api/visitor"
 export * from "./arkts-api/AbstractVisitor"
+export * from "./arkts-api/CheckedBackFilter"
+export * from "./arkts-api/SetBaseOverloads"
+export * from "./arkts-api/plugins"
 
 export * from "./arkts-api/peers/AstNode"
 export * from "./arkts-api/peers/Config"

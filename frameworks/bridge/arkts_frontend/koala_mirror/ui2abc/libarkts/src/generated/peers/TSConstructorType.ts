@@ -35,7 +35,7 @@ import { TSTypeParameterDeclaration } from "./TSTypeParameterDeclaration"
 import { TypeNode } from "./TypeNode"
 export class TSConstructorType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 125)
+        assertValidPeer(pointer, 126)
         super(pointer)
     }
     static createTSConstructorType(signature: FunctionSignature | undefined, abstract: boolean): TSConstructorType {

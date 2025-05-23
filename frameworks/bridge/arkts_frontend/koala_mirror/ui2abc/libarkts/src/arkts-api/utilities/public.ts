@@ -29,14 +29,19 @@ import {
     isFunctionDeclaration,
     isMemberExpression,
     isScriptFunction,
-    isIdentifier
+    isIdentifier,
+    isETSModule
 } from "../../generated"
 import { Config } from "../peers/Config"
 import { Context } from "../peers/Context"
 import { NodeCache } from "../node-cache"
 
 export function createETSModuleFromContext(): ETSModule {
-    return new ETSModule(global.es2panda._ProgramAst(global.context, global.es2panda._ContextProgram(global.context)))
+    let program = global.es2panda._ContextProgram(global.context)
+    if (program == nullptr) {
+        throw new Error(`Program is null for context ${global.context.toString(16)}`)
+    }
+    return new ETSModule(global.es2panda._ProgramAst(global.context, program))
 }
 
 export function createETSModuleFromSource(
@@ -48,7 +53,10 @@ export function createETSModuleFromSource(
     }
     global.compilerContext = Context.createFromString(source)
     proceedToState(state)
-    return new ETSModule(global.es2panda._ProgramAst(global.context, global.es2panda._ContextProgram(global.context)))
+    let program = global.es2panda._ContextProgram(global.compilerContext.peer)
+    if (program == nullptr)
+        throw new Error(`Program is null for ${source} 0x${global.compilerContext.peer.toString(16)}`)
+    return new ETSModule(global.es2panda._ProgramAst(global.context, program))
 }
 
 export function updateETSModuleByStatements(
@@ -157,12 +165,6 @@ export function classPropertySetOptional(node: ClassProperty, value: boolean): C
     return node;
 }
 
-// TODO: Import statements should be inserted to the statements.
-export function importDeclarationInsert(node: ETSImportDeclaration): void {
-    const program = global.compilerContext.program; // TODO: external source has different program. Currently not considered.
-    global.es2panda._InsertETSImportDeclarationAndParse(global.context, program.peer, node.peer)
-}
-
 export function hasModifierFlag(node: AstNode, flag: Es2pandaModifierFlags): boolean {
     if (!node) return false;
 
@@ -186,6 +188,10 @@ export function modifiersToString(modifiers: Es2pandaModifierFlags): string {
 
 export function nameIfIdentifier(node: AstNode): string {
     return isIdentifier(node) ? `'${node.name}'` : ""
+}
+
+export function nameIfETSModule(node: AstNode): string {
+    return isETSModule(node) ? `'${node.ident?.name}'` : ""
 }
 
 export function asString(node: AstNode|undefined): string {

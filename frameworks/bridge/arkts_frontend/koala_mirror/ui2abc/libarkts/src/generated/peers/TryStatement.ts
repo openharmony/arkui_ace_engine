@@ -35,7 +35,7 @@ import { LabelPair } from "./LabelPair"
 import { Statement } from "./Statement"
 export class TryStatement extends Statement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 146)
+        assertValidPeer(pointer, 147)
         super(pointer)
     }
     static createTryStatement(block: BlockStatement | undefined, catchClauses: readonly CatchClause[], finalizer: BlockStatement | undefined, finalizerInsertionsLabelPair: readonly LabelPair[], finalizerInsertionsStatement: readonly Statement[]): TryStatement {

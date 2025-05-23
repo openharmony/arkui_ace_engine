@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-import { uint32 } from "@koalaui/common"
+import { int32, KoalaCallsiteKey, uint32 } from "@koalaui/common"
 import { GlobalStateManager } from "../states/GlobalStateManager"
 import { ComputableState, State, StateManager } from "../states/State"
 import { IncrementalNode } from "../tree/IncrementalNode"
 import { Disposable } from "../states/Disposable"
 import { memoRoot } from "./entry"
 import { NodeAttach } from "./node"
+import { __memo_context_type, __memo_id_type } from "../internals"
 
 /** @internal */
 export class TestNode extends IncrementalNode {
@@ -45,16 +46,20 @@ export class TestNode extends IncrementalNode {
         /** @memo */
         content: (node: TestNode) => void
     ) {
-        NodeAttach(() => new TestNode(), content)
+        NodeAttach(():TestNode => new TestNode(), content)
     }
 
 }
 
 /* parent node that has a Reusable pool */
 export class ReusableTestNode extends TestNode {
+    constructor() {
+        super()
+    }
+
     reusePool = new Map<string, Array<Disposable>>()
 
-    override reuse(reuseKey: string): Disposable | undefined {
+    override reuse(reuseKey: string, id: KoalaCallsiteKey): Disposable | undefined {
         if (this.reusePool!.has(reuseKey)) {
             const scopes = this.reusePool!.get(reuseKey)!;
             return scopes.pop();
@@ -62,7 +67,7 @@ export class ReusableTestNode extends TestNode {
         return undefined;
     }
 
-    override recycle(reuseKey: string, child: Disposable): boolean {
+    override recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
         if (!this.reusePool!.has(reuseKey)) {
             this.reusePool!.set(reuseKey, new Array<Disposable>());
         }

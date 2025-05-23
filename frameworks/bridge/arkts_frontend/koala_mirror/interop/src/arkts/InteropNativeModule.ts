@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,7 +11,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*/
 
 import { int32, int64 } from "@koalaui/common";
 import { KPointer, KUint8ArrayPtr, KInt, KSerializerBuffer } from "./InteropTypes";
@@ -55,7 +55,7 @@ export class InteropNativeModule {
     native static _LoadVirtualMachine(arg0: int32, arg1: string, arg2: string): int32
     native static _RunApplication(arg0: int32, arg1: int32): boolean
     native static _StartApplication(appUrl: string, appParams: string): KPointer
-    native static _EmitEvent(eventType: int32, target: int32, arg0: int32, arg1: int32): void
+    native static _EmitEvent(eventType: int32, target: int32, arg0: int32, arg1: int32): string
     native static _CallForeignVM(context:KPointer, callback: int32, data: KSerializerBuffer, dataLength: int32): int32
     native static _SetForeignVMContext(context: KPointer): void
     native static _RestartWith(page: string): void

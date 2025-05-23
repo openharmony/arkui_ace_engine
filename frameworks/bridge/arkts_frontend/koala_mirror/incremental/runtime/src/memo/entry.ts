@@ -17,6 +17,7 @@ import { KoalaCallsiteKey, KoalaCallsiteKeys, KoalaProfiler } from "@koalaui/com
 import { GlobalStateManager } from "../states/GlobalStateManager"
 import { ComputableState, StateContext, StateManager } from "../states/State"
 import { IncrementalNode } from "../tree/IncrementalNode"
+import { __memo_context_type, __memo_id_type } from "../internals"
 
 /**
  * @param node - a root node for the composition
