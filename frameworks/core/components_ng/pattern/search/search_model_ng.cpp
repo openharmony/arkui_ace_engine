@@ -591,7 +591,7 @@ void SearchModelNG::ResetTextColor()
 void SearchModelNG::SetBackgroundColor(const Color& color)
 {
     ViewAbstract::SetBackgroundColor(color);
-
+ 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -602,7 +602,7 @@ void SearchModelNG::SetBackgroundColor(const Color& color)
 
     ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, BackgroundColor, color);
 }
-
+ 
 void SearchModelNG::ResetBackgroundColor()
 {
     ACE_RESET_RENDER_CONTEXT(RenderContext, BackgroundColor);

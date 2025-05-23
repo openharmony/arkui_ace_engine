@@ -28,7 +28,7 @@ void SymbolModelNG::Create(const std::uint32_t& unicode)
         V2::SYMBOL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
 
     stack->Push(symbolNode);
-
+    
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo, SymbolSourceInfo{unicode});
 }
 
@@ -138,18 +138,10 @@ void SymbolModelNG::SetSymbolEffect(FrameNode* frameNode, const std::uint32_t ef
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectStrategy, effectStrategy, frameNode);
 }
 
-void SymbolModelNG::InitialSymbol(FrameNode* frameNode, const std::optional<uint32_t>& unicode)
+void SymbolModelNG::InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (unicode.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo,
-            SymbolSourceInfo{unicode.value()}, frameNode);
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolType, SymbolType::SYSTEM, frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, SymbolSourceInfo,
-            PROPERTY_UPDATE_MEASURE, frameNode);
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolType, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo, SymbolSourceInfo{unicode}, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolType, SymbolType::SYSTEM, frameNode);
 }
 
 void SymbolModelNG::InitialCustomSymbol(FrameNode* frameNode, const std::uint32_t& unicode, const char* fontFamilyName)
