@@ -788,6 +788,36 @@ HWTEST_F(CommonMethodModifierTest9, setOnAccessibilityFocusTest, TestSize.Level1
 }
 
 /*
+ * @tc.name: setOnFocusTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest9, setOnFocusTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnFocus, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    struct CheckEvent {
+        int32_t nodeId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onFocusFunc = [](const Ark_Int32 resourceId) {
+        checkEvent = { .nodeId = Convert<int32_t>(resourceId) };
+    };
+
+    auto focusCallback = ArkValue<Callback_Void>(onFocusFunc, frameNode->GetId());
+    modifier_->setOnFocus(node_, &focusCallback);
+    EXPECT_FALSE(checkEvent);
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_TRUE(focusHub);
+    auto onFocus = focusHub->GetOnFocusCallback();
+    ASSERT_TRUE(onFocus);
+    onFocus();
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId()) << "Passed id is: " << frameNode->GetId();
+}
+
+/*
  * @tc.name: setOnFocusAxisEventTest
  * @tc.desc:
  * @tc.type: FUNC

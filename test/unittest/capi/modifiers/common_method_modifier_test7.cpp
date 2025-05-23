@@ -714,4 +714,63 @@ HWTEST_F(CommonMethodModifierTest7, SetShouldBuiltInRecognizerParallelWithTest, 
     final = shouldBuiltInRecognizerParallelWithFunc(current, {});
     EXPECT_EQ(final, current);
 }
+
+/*
+ * @tc.name: setOnAppearTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest7, setOnAppearTest, TestSize.Level1)
+{
+    MockPipelineContext::GetCurrent()->SetTaskExecutor(AceType::MakeRefPtr<MockTaskExecutor>(false));
+    ASSERT_NE(modifier_->setOnAppear, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    struct CheckEvent {
+        int32_t nodeId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onAppearFunc = [](const Ark_Int32 resourceId) {
+        checkEvent = { .nodeId = Converter::Convert<int32_t>(resourceId) };
+    };
+    auto onAppearCallback = Converter::ArkValue<Callback_Void>(onAppearFunc, frameNode->GetId());
+    modifier_->setOnAppear(node_, &onAppearCallback);
+    EXPECT_FALSE(checkEvent);
+    eventHub->FireOnAppear();
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId()) << "Passed id is: " << frameNode->GetId();
+}
+
+/*
+ * @tc.name: setOnDisAppearTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest7, setOnDisAppearTest, TestSize.Level1)
+{
+    MockPipelineContext::GetCurrent()->SetTaskExecutor(AceType::MakeRefPtr<MockTaskExecutor>(false));
+    ASSERT_NE(modifier_->setOnDisAppear, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    struct CheckEvent {
+        int32_t nodeId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onDisAppearFunc = [](const Ark_Int32 resourceId) {
+        checkEvent = { .nodeId = Converter::Convert<int32_t>(resourceId) };
+    };
+    auto onDisAppearCallback = Converter::ArkValue<Callback_Void>(onDisAppearFunc, frameNode->GetId());
+    modifier_->setOnDisAppear(node_, &onDisAppearCallback);
+    EXPECT_FALSE(checkEvent);
+    eventHub->FireOnDisappear();
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId()) << "Passed id is: " << frameNode->GetId();
+}
+
 }
