@@ -23,6 +23,30 @@
 namespace OHOS::Ace::NG {
 class FrameNode;
 
+struct LanePos {
+    float position = 0.0f;
+    size_t laneIndex = 0;
+
+    // Constructor
+    LanePos(float pos, size_t idx) : position(pos), laneIndex(idx) {}
+};
+
+struct LanePosComparator {
+private:
+    bool isMinHeap;
+
+public:
+    explicit LanePosComparator(bool minHeap) : isMinHeap(minHeap) {}
+
+    bool operator()(const LanePos& lhs, const LanePos& rhs) const
+    {
+        if (NearEqual(lhs.position, rhs.position)) {
+            return isMinHeap ? (lhs.laneIndex > rhs.laneIndex) : (lhs.laneIndex < rhs.laneIndex);
+        }
+        return isMinHeap ? (lhs.position > rhs.position) : (lhs.position < rhs.position);
+    }
+};
+
 class SectionFiller {
 public:
     SectionFiller() = default;
@@ -36,9 +60,6 @@ public:
      */
     virtual bool Fill(const RefPtr<Measurer>& measurer, FrameNode* node, int32_t index, float viewportBound) = 0;
     virtual bool CanFill() const = 0;
-
-    // [lane start/end position, lane index]
-    using LanePos = std::pair<float, size_t>;
 
     ACE_DISALLOW_COPY_AND_MOVE(SectionFiller);
 };
@@ -60,8 +81,8 @@ public:
 private:
     void PrepareEndPosQueue(const std::vector<Lane>& lanes, float mainGap, float viewportBound);
 
-    using EndPosQ = std::priority_queue<LanePos, std::vector<LanePos>, std::greater<>>;
-    EndPosQ q_;
+    using EndPosQ = std::priority_queue<LanePos, std::vector<LanePos>, LanePosComparator>;
+    EndPosQ q_ { LanePosComparator(true) }; // Min-heap
 
     Section& section_;
 };
@@ -83,8 +104,8 @@ public:
 private:
     void PrepareStartPosQueue(const std::vector<Lane>& lanes, float mainGap, float viewportBound);
 
-    using StartPosQ = std::priority_queue<LanePos>;
-    StartPosQ q_;
+    using StartPosQ = std::priority_queue<LanePos, std::vector<LanePos>, LanePosComparator>;
+    StartPosQ q_ { LanePosComparator(false) }; // Max-heap
 
     Section& section_;
 };

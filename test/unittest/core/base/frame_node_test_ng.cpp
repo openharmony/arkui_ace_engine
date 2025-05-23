@@ -1533,7 +1533,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback050, TestSize
     RefPtr<FrameNode> GET_CHILD2 = FrameNode::CreateFrameNode("child2", 6, AceType::MakeRefPtr<Pattern>());
     GET_PARENT->AddChild(GET_CHILD1);
     GET_PARENT->AddChild(GET_CHILD2);
-    GET_CHILD1->MarkAndCheckNewOpIncNode();
+    GET_CHILD1->MarkAndCheckNewOpIncNode(Axis::VERTICAL);
     EXPECT_FALSE(GET_PARENT->GetSuggestOpIncActivatedOnce());
 
     /**
@@ -1543,10 +1543,10 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback050, TestSize
     GET_PARENT->suggestOpIncByte_ = 7;
     GET_CHILD1->SetSuggestOpIncActivatedOnce();
     GET_PARENT->SetSuggestOpIncActivatedOnce();
-    GET_CHILD1->MarkAndCheckNewOpIncNode();
+    GET_CHILD1->MarkAndCheckNewOpIncNode(Axis::VERTICAL);
     EXPECT_TRUE(GET_PARENT->GetSuggestOpIncActivatedOnce());
     GET_CHILD1->suggestOpIncByte_ = 1;
-    GET_CHILD1->MarkAndCheckNewOpIncNode();
+    GET_CHILD1->MarkAndCheckNewOpIncNode(Axis::VERTICAL);
 }
 
 /**
@@ -1570,14 +1570,14 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest051, TestSize.Level1)
      * @tc.expected: expect result value.
      */
     frameNode->geometryNode_->SetFrameSize(SizeF(20, 20));
-    auto result = frameNode->FindSuggestOpIncNode(tag, SizeF(0, 0), 1);
-    EXPECT_EQ(result, 3);
-    result = frameNode->FindSuggestOpIncNode(tag, SizeF(0, 0), 1);
+    auto result = frameNode->FindSuggestOpIncNode(tag, SizeF(0, 0), 1, Axis::VERTICAL);
+    EXPECT_EQ(result, 0);
+    result = frameNode->FindSuggestOpIncNode(tag, SizeF(0, 0), 1, Axis::VERTICAL);
     EXPECT_EQ(result, 2);
     SystemProperties::debugEnabled_ = true;
     frameNode->suggestOpIncByte_ = 0;
-    result = frameNode->FindSuggestOpIncNode(tag, SizeF(0, 0), 1);
-    EXPECT_EQ(result, 3);
+    result = frameNode->FindSuggestOpIncNode(tag, SizeF(0, 0), 1, Axis::VERTICAL);
+    EXPECT_EQ(result, 0);
 }
 
 /**
@@ -1598,17 +1598,17 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback052, TestSize
      * @tc.steps2: call the function IsOpIncValidNode.
      * @tc.expected: Value returned as expected.
      */
-    auto result = FRAME_NODE2->IsOpIncValidNode(boundary, childNumber);
-    EXPECT_EQ(result, 2);
+    auto result = FRAME_NODE2->IsOpIncValidNode(boundary, Axis::VERTICAL, childNumber);
+    EXPECT_EQ(result, 0);
 
     FRAME_NODE2->geometryNode_->SetFrameSize(SizeF(20, 20));
-    result = FRAME_NODE2->IsOpIncValidNode(boundary, childNumber);
-    EXPECT_EQ(result, 3);
+    result = FRAME_NODE2->IsOpIncValidNode(boundary, Axis::VERTICAL, childNumber);
+    EXPECT_EQ(result, 0);
 
     SizeF boundary1(40, 40);
     FRAME_NODE2->geometryNode_->SetFrameSize(SizeF(20, 20));
-    result = FRAME_NODE2->IsOpIncValidNode(boundary1, childNumber);
-    EXPECT_EQ(result, 2);
+    result = FRAME_NODE2->IsOpIncValidNode(boundary1, Axis::VERTICAL, childNumber);
+    EXPECT_EQ(result, 0);
 }
 
 /**
@@ -2531,12 +2531,36 @@ HWTEST_F(FrameNodeTestNg, GetFocusPaintNodeTest, TestSize.Level1)
 
 /**
  * @tc.name: FrameNodeTestNg097
- * @tc.desc: Test IsDrawFocusOnTop
+ * @tc.desc: Test the function IsOpIncValidNode
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeTestNg, IsDrawFocusOnTopTest, TestSize.Level1)
+HWTEST_F(FrameNodeTestNg, IsOpIncValidNodeTest01, TestSize.Level1)
 {
-    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    EXPECT_FALSE(frameNode->IsDrawFocusOnTop());
+    /**
+     * @tc.steps: step1. creat node and generate a node tree.
+     */
+    RefPtr<FrameNode> GET_PARENT = FrameNode::CreateFrameNode("parent", 4, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> GET_CHILD1 = FrameNode::CreateFrameNode("child1", 5, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> GET_CHILD2 = FrameNode::CreateFrameNode("child2", 6, AceType::MakeRefPtr<Pattern>());
+    GET_PARENT->AddChild(GET_CHILD1);
+    GET_PARENT->AddChild(GET_CHILD2);
+    GET_PARENT->GetGeometryNode()->SetFrameSize(SizeF(50, 50));
+
+    /**
+     * @tc.steps2: set boundary1 and call the function IsOpIncValidNode.
+     * @tc.expected: Value returned as expected.
+     */
+    SizeF boundary1(100, 100);
+    EXPECT_EQ(GET_PARENT->IsOpIncValidNode(boundary1, Axis::VERTICAL), 0);
+
+    GET_PARENT->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
+    EXPECT_EQ(GET_PARENT->IsOpIncValidNode(boundary1, Axis::VERTICAL), 0);
+    EXPECT_EQ(GET_PARENT->IsOpIncValidNode(boundary1, Axis::HORIZONTAL), 1);
+
+    SizeF boundary2(100, 200);
+    EXPECT_EQ(GET_PARENT->IsOpIncValidNode(boundary2, Axis::VERTICAL), 1);
+
+    GET_PARENT->RemoveChild(GET_CHILD2);
+    EXPECT_EQ(GET_PARENT->IsOpIncValidNode(boundary2, Axis::VERTICAL), 0);
 }
 } // namespace OHOS::Ace::NG

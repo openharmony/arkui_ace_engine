@@ -14,12 +14,13 @@
  */
 
 import { throwError } from "../../utils"
-import { KNativePointer } from "@koalaui/interop"
+import { KNativePointer, nullptr } from "@koalaui/interop"
 import { initEs2panda, Es2pandaNativeModule, initGeneratedEs2panda } from "../../Es2pandaNativeModule"
 import { Es2pandaNativeModule as GeneratedEs2pandaNativeModule } from "../../generated/Es2pandaNativeModule"
 import { initInterop, InteropNativeModule } from "../../InteropNativeModule"
 import { Context } from "../peers/Context"
 import { Profiler } from "./profiler"
+import { Program } from "../peers/Program"
 
 export class global {
     public static filePath: string = "./plugins/input/main.ets"
@@ -34,7 +35,7 @@ export class global {
         return global._config ?? throwError('Global.config not initialized')
     }
     public static configIsInitialized(): boolean {
-        return global._config !== undefined
+        return global._config !== undefined && global._config !== nullptr
     }
 
     // TODO: rename to contextPeer

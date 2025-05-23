@@ -24,7 +24,7 @@ export interface TransformerOptions {
 export default function printerTransformer(
     userPluginOptions?: TransformerOptions
 ) {
-    return (node: arkts.ETSModule) => {
-        return new PrintVisitor().visitor(node)
+    return (program: arkts.Program) => {
+        return new PrintVisitor().visitor(program.astNode)
     }
 }

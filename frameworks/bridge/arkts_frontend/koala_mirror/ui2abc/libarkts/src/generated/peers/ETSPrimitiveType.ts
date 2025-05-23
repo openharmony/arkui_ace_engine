@@ -33,7 +33,7 @@ import { Es2pandaPrimitiveType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 export class ETSPrimitiveType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 68)
+        assertValidPeer(pointer, 69)
         super(pointer)
     }
     static createETSPrimitiveType(type: Es2pandaPrimitiveType): ETSPrimitiveType {

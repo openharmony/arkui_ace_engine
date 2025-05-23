@@ -287,7 +287,7 @@ void OnSubmitImpl(Ark_NativePointer node,
 {
 }
 void OnSubmit0Impl(Ark_NativePointer node,
-                  const Opt_Callback_String_Void* value)
+                   const Opt_Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -665,7 +665,6 @@ void EditMenuOptionsImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-#ifdef WRONG_GEN
     auto onCreateMenuCallback = [arkCreateMenu = CallbackHelper(optValue->onCreateMenu)](
         const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
             auto menuItems = Converter::ArkValue<Array_TextMenuItem>(systemMenuItems, Converter::FC);
@@ -682,8 +681,7 @@ void EditMenuOptionsImpl(Ark_NativePointer node,
                 Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
             return Converter::Convert<bool>(arkResult);
         };
-    SearchModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
-#endif
+    SearchModelStatic::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 void EnablePreviewTextImpl(Ark_NativePointer node,
                            const Opt_Boolean* value)
@@ -828,7 +826,7 @@ void _onChangeEvent_valueImpl(Ark_NativePointer node,
         auto arkContent = Converter::ArkValue<Ark_String>(content, &ctx);
         arkCallback.Invoke(arkContent);
     };
-    SearchModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
+    SearchModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
 #endif
 } // SearchAttributeModifier

@@ -46,7 +46,7 @@ export function hasDecorator(property: arkts.ClassProperty | arkts.ClassDefiniti
         return property.function!.annotations.some((anno) => isDecoratorAnnotation(anno, decoratorName));
     }
     if (arkts.isClassDeclaration(property)) {
-        return property.decorators.some((anno) => arkts.isIdentifier(anno.expr) && anno.expr.name === decoratorName);
+        return property.decorators.some((anno) => arkts.isIdentifier(anno.expr) && anno.expr.name === decoratorName)
     }
     return property.annotations.some((anno) => isDecoratorAnnotation(anno, decoratorName));
 }
@@ -215,7 +215,7 @@ function getAnnotationValue(anno: arkts.AnnotationUsage, decoratorName: Decorato
     return undefined;
 }
 
-export function getValueInAnnotation(node: arkts.ClassProperty, decoratorName: DecoratorNames): string | undefined {
+export function getValueInDecorator(node: arkts.ClassProperty, decoratorName: DecoratorNames): string | undefined {
     const annotations: readonly arkts.AnnotationUsage[] = node.annotations;
     for (let i = 0; i < annotations.length; i++) {
         const anno: arkts.AnnotationUsage = annotations[i];

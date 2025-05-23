@@ -27,14 +27,14 @@ export interface Dependency {
 /** This class allows to store and update all dependencies. */
 export class Dependencies {
     private frame = 0
-    private dependencies: Set<Dependency> | undefined = undefined
+    private dependencies: Array<Dependency> | undefined = undefined
     private latest: Dependency | undefined = undefined
 
     /** Returns `true` if there are no dependencies to invalidate. */
     get empty(): boolean {
         const dependencies = this.dependencies
         return dependencies
-            ? (dependencies.size == 0)
+            ? (dependencies.length == 0)
             : (this.latest === undefined)
     }
 
@@ -43,13 +43,14 @@ export class Dependencies {
         if (dependency === undefined || dependency == this.latest || dependency.obsolete) return
         let dependencies = this.dependencies
         if (dependencies) {
-            dependencies.add(dependency)
+            // Array includes repeated elements, they will be processed in updateDependencies
+            dependencies.push(dependency)
         } else {
             const latest = this.latest
             if (latest) {
-                dependencies = new Set<Dependency>()
-                dependencies.add(latest)
-                dependencies.add(dependency)
+                dependencies = new Array<Dependency>()
+                dependencies.push(latest)
+                dependencies.push(dependency)
                 this.dependencies = dependencies
             }
         }
@@ -62,23 +63,15 @@ export class Dependencies {
         this.frame = 0
         const dependencies = this.dependencies
         if (dependencies) {
-            let disposed: Array<Dependency> | undefined = undefined
-            const it = dependencies.values()
-            while (true) {
-                const result = it.next()
-                if (result.done) break
-                const dependency = result.value as Dependency
-                if (!updateDependency(invalidate, dependency)) {
-                    if (disposed) {
-                        disposed.push(dependency)
-                    } else {
-                        disposed = Array.of<Dependency>(dependency)
+            let dependenciesSet = new Set<Dependency>(dependencies);
+            this.dependencies = [];
+            const newDependencies = this.dependencies;
+            if (newDependencies) {
+                dependenciesSet.forEach((dependency: Dependency) => {
+                    if (updateDependency(invalidate, dependency)) {
+                        newDependencies.push(dependency);
                     }
-                }
-            }
-            if (disposed) {
-                let index = disposed.length
-                while (0 < index--) dependencies.delete(disposed[index])
+                });
             }
         } else {
             const latest = this.latest

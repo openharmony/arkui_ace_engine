@@ -34,7 +34,7 @@ import { ArkUIAniModule } from "arkui.ani"
 import { Serializer } from "./src/component/peers/Serializer"
 import { componentUtils } from "@ohos/arkui/componentUtils"
 import { focusController } from "@ohos/arkui/focusController"
-import { Frame } from "./src/component/arkui-graphics"
+import { Frame } from "./src/Graphics"
 import { KeyEvent } from "./src/component/common"
 import { Nullable } from "./src/component/enums"
 import { KeyProcessingMode } from "./src/component/focus"
@@ -335,6 +335,20 @@ export class UIContext {
             this.observer_ = new UIObserver(this.instanceId_);
         }
         return this.observer_ as UIObserver;
+    }
+
+    // @ts-ignore
+    public freezeUINode(id: number, isFrozen: boolean): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
+        ArkUIGeneratedNativeModule._UIContextImp_freezeUINode1(id, isFrozen ? 1 : 0);
+        ArkUIAniModule._Common_Restore_InstanceId()
+    }
+
+    // @ts-ignore
+    public freezeUINode(id: string, isFrozen: boolean): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
+        ArkUIGeneratedNativeModule._UIContextImp_freezeUINode0(id, isFrozen ? 1 : 0);
+        ArkUIAniModule._Common_Restore_InstanceId()
     }
 }
 export abstract class FrameCallback {

@@ -442,14 +442,9 @@ export class ArkCheckboxComponent extends ArkCommonMethodComponent implements UI
     public shape(value: CheckBoxShape | undefined): this {
         if (this.checkPriority("shape")) {
             const value_type = runtimeType(value)
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
+            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (CheckBoxShape | undefined)
                 this.getPeer()?.shape0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
-                const value_casted = value as (CheckBoxShape | undefined)
-                this.getPeer()?.shape1Attribute(value_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")

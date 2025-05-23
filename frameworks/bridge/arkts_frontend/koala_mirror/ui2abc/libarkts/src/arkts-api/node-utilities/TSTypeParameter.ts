@@ -24,7 +24,7 @@ export function updateTSTypeParameter(
     constraint: TypeNode | undefined,
     defaultType: TypeNode | undefined,
     flags: Es2pandaModifierFlags
-) {
+): TSTypeParameter {
     if (isSameNativeObject(name, original.name)
         && isSameNativeObject(constraint, original.constraint)
         && isSameNativeObject(defaultType, original.defaultType)

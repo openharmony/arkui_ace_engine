@@ -428,7 +428,7 @@ HWTEST_F(CanvasRendererAccessorTest2, setLineJoinTest, TestSize.Level1)
 HWTEST_F(CanvasRendererAccessorTest2, setPixelMapTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setPixelMap, nullptr);
-    Ark_PixelMap arkPixelMap = new PixelMapPeer();
+    Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     auto optPixelMap = Converter::ArkValue<Opt_PixelMap>(arkPixelMap);
     Ace::ImageInfo target;
     EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
@@ -648,7 +648,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage0SvgTest, TestSize.Level1)
 HWTEST_F(CanvasRendererAccessorTest2, drawImage0PixelMapTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage0, nullptr);
-    Ark_PixelMap arkPixelMap = new PixelMapPeer();
+    Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     arkPixelMap->pixelMap = pixelMap;
     for (const auto& actualX : NUMBER_TEST_PLAN) {
@@ -657,7 +657,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage0PixelMapTest, TestSize.Level1)
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             auto dx = Converter::ArkValue<Ark_Number>(actualX);
             auto dy = Converter::ArkValue<Ark_Number>(actualY);
-            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_PixelMap>(arkPixelMap);
+            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_image_PixelMap>(arkPixelMap);
             accessor_->drawImage0(peer_, &image, &dx, &dy);
 
             ASSERT_NE(target.pixelMap, nullptr);
@@ -848,7 +848,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1SvgWHTest, TestSize.Level1)
 HWTEST_F(CanvasRendererAccessorTest2, drawImage1PixelMapXYTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage1, nullptr);
-    Ark_PixelMap arkPixelMap = new PixelMapPeer();
+    Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     arkPixelMap->pixelMap = pixelMap;
     const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
@@ -858,7 +858,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1PixelMapXYTest, TestSize.Level1)
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             auto dx = Converter::ArkValue<Ark_Number>(actualX);
             auto dy = Converter::ArkValue<Ark_Number>(actualY);
-            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_PixelMap>(arkPixelMap);
+            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_image_PixelMap>(arkPixelMap);
             accessor_->drawImage1(peer_, &image, &dx, &dy, &dv, &dv);
 
             ASSERT_NE(target.pixelMap, nullptr);
@@ -877,7 +877,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1PixelMapXYTest, TestSize.Level1)
 HWTEST_F(CanvasRendererAccessorTest2, drawImage1PixelMapWHTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage1, nullptr);
-    Ark_PixelMap arkPixelMap = new PixelMapPeer();
+    Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     arkPixelMap->pixelMap = pixelMap;
     const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
@@ -887,7 +887,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1PixelMapWHTest, TestSize.Level1)
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             auto dw = Converter::ArkValue<Ark_Number>(actualX);
             auto dh = Converter::ArkValue<Ark_Number>(actualY);
-            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_PixelMap>(arkPixelMap);
+            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_image_PixelMap>(arkPixelMap);
             accessor_->drawImage1(peer_, &image, &dv, &dv, &dw, &dh);
 
             ASSERT_NE(target.pixelMap, nullptr);
@@ -1248,7 +1248,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2SvgWHTest, TestSize.Level1)
 HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapSXYTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage2, nullptr);
-    Ark_PixelMap arkPixelMap = new PixelMapPeer();
+    Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     arkPixelMap->pixelMap = pixelMap;
     const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
@@ -1258,7 +1258,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapSXYTest, TestSize.Level1
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             auto dx = Converter::ArkValue<Ark_Number>(actualX);
             auto dy = Converter::ArkValue<Ark_Number>(actualY);
-            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_PixelMap>(arkPixelMap);
+            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_image_PixelMap>(arkPixelMap);
             accessor_->drawImage2(peer_, &image, &dx, &dy, &dv, &dv, &dv, &dv, &dv, &dv);
 
             ASSERT_NE(target.pixelMap, nullptr);
@@ -1277,7 +1277,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapSXYTest, TestSize.Level1
 HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapSWHTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage2, nullptr);
-    Ark_PixelMap arkPixelMap = new PixelMapPeer();
+    Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     arkPixelMap->pixelMap = pixelMap;
     const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
@@ -1287,7 +1287,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapSWHTest, TestSize.Level1
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             auto dx = Converter::ArkValue<Ark_Number>(actualX);
             auto dy = Converter::ArkValue<Ark_Number>(actualY);
-            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_PixelMap>(arkPixelMap);
+            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_image_PixelMap>(arkPixelMap);
             accessor_->drawImage2(peer_, &image, &dv, &dv, &dx, &dy, &dv, &dv, &dv, &dv);
 
             ASSERT_NE(target.pixelMap, nullptr);
@@ -1306,7 +1306,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapSWHTest, TestSize.Level1
 HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapXYTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage2, nullptr);
-    Ark_PixelMap arkPixelMap = new PixelMapPeer();
+    Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     arkPixelMap->pixelMap = pixelMap;
     const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
@@ -1316,7 +1316,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapXYTest, TestSize.Level1)
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             auto dx = Converter::ArkValue<Ark_Number>(actualX);
             auto dy = Converter::ArkValue<Ark_Number>(actualY);
-            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_PixelMap>(arkPixelMap);
+            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_image_PixelMap>(arkPixelMap);
             accessor_->drawImage2(peer_, &image, &dv, &dv, &dv, &dv, &dx, &dy, &dv, &dv);
 
             ASSERT_NE(target.pixelMap, nullptr);
@@ -1335,7 +1335,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapXYTest, TestSize.Level1)
 HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapWHTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage2, nullptr);
-    Ark_PixelMap arkPixelMap = new PixelMapPeer();
+    Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     arkPixelMap->pixelMap = pixelMap;
     const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
@@ -1345,7 +1345,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapWHTest, TestSize.Level1)
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             auto dx = Converter::ArkValue<Ark_Number>(actualX);
             auto dy = Converter::ArkValue<Ark_Number>(actualY);
-            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_PixelMap>(arkPixelMap);
+            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_image_PixelMap>(arkPixelMap);
             accessor_->drawImage2(peer_, &image, &dv, &dv, &dv, &dv, &dv, &dv, &dx, &dy);
 
             ASSERT_NE(target.pixelMap, nullptr);

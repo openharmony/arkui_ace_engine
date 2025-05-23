@@ -37,7 +37,7 @@ import { SpreadElement } from "./SpreadElement"
 import { TypeNode } from "./TypeNode"
 export class ETSParameterExpression extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 79)
+        assertValidPeer(pointer, 80)
         super(pointer)
     }
     static createETSParameterExpression(identOrSpread: AnnotatedExpression | undefined, isOptional: boolean): ETSParameterExpression {

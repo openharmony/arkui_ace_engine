@@ -22,7 +22,7 @@ export function updateETSTypeReferencePart(
     name?: Expression,
     typeParams?: TSTypeParameterInstantiation,
     prev?: ETSTypeReferencePart
-) {
+): ETSTypeReferencePart {
     if (isSameNativeObject(name, original.name)
         && isSameNativeObject(typeParams, original.typeParams)
         && isSameNativeObject(prev, original.previous)

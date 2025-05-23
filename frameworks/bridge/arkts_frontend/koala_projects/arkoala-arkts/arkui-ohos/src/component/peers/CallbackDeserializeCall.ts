@@ -93,6 +93,9 @@ import { PluginErrorCallback, PluginErrorData } from "./../pluginComponent"
 import { SaveButtonCallback, SaveButtonOnClickResult } from "./../saveButton"
 import { SelectedCallback } from "./../griditemops"
 import { TypeChecker } from "#components"
+import { NodeContainer_AboutToResizeCallback } from "./../nodeContainer"
+import { Size, DrawContext } from "../../Graphics"
+import { DrawCallback } from "./../../RenderNode"
 export function deserializeAndCallAccessibilityCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as AccessibilityCallback)
@@ -1556,6 +1559,12 @@ export function deserializeAndCallCustomNodeBuilder(thisDeserializer: Deserializ
     const _callResult  = _call(parentNode)
     _continuation(_callResult)
 }
+export function deserializeAndCallDrawCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as DrawCallback)
+    let context : DrawContext = thisDeserializer.readDrawContext()
+    _call(context)
+}
 export function deserializeAndCallEditableTextOnChangeCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as EditableTextOnChangeCallback)
@@ -1718,6 +1727,12 @@ export function deserializeAndCallNavExtender_OnUpdateStack(thisDeserializer: De
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as NavExtender_OnUpdateStack)
     _call()
+}
+export function deserializeAndCallNodeContainer_AboutToResizeCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as NodeContainer_AboutToResizeCallback)
+    let size : Size = thisDeserializer.readSize()
+    _call(size)
 }
 export function deserializeAndCallOnAdsBlockedCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2682,6 +2697,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case -2146044511/*CallbackKind.Kind_ContentWillScrollCallback*/: return deserializeAndCallContentWillScrollCallback(thisDeserializer);
         case 260483890/*CallbackKind.Kind_Context_getGroupDir_Callback*/: return deserializeAndCallContext_getGroupDir_Callback(thisDeserializer);
         case 1766817632/*CallbackKind.Kind_CustomNodeBuilder*/: return deserializeAndCallCustomNodeBuilder(thisDeserializer);
+        case -177744805/*CallbackKind.Kind_DrawCallback*/: return deserializeAndCallDrawCallback(thisDeserializer);
         case -1729563209/*CallbackKind.Kind_EditableTextOnChangeCallback*/: return deserializeAndCallEditableTextOnChangeCallback(thisDeserializer);
         case -1936519453/*CallbackKind.Kind_ErrorCallback*/: return deserializeAndCallErrorCallback(thisDeserializer);
         case -2119548940/*CallbackKind.Kind_GestureRecognizerJudgeBeginCallback*/: return deserializeAndCallGestureRecognizerJudgeBeginCallback(thisDeserializer);
@@ -2698,6 +2714,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case -614475458/*CallbackKind.Kind_MenuOnAppearCallback*/: return deserializeAndCallMenuOnAppearCallback(thisDeserializer);
         case -1066063065/*CallbackKind.Kind_NavDestinationTransitionDelegate*/: return deserializeAndCallNavDestinationTransitionDelegate(thisDeserializer);
         case -588228933/*CallbackKind.Kind_NavExtender_OnUpdateStack*/: return deserializeAndCallNavExtender_OnUpdateStack(thisDeserializer);
+        case -1817630617/*CallbackKind.Kind_NodeContainer_AboutToResizeCallback*/: return deserializeAndCallNodeContainer_AboutToResizeCallback(thisDeserializer);
         case 1572284740/*CallbackKind.Kind_OnAdsBlockedCallback*/: return deserializeAndCallOnAdsBlockedCallback(thisDeserializer);
         case 726938390/*CallbackKind.Kind_OnAlphabetIndexerPopupSelectCallback*/: return deserializeAndCallOnAlphabetIndexerPopupSelectCallback(thisDeserializer);
         case -1956514817/*CallbackKind.Kind_OnAlphabetIndexerRequestPopupDataCallback*/: return deserializeAndCallOnAlphabetIndexerRequestPopupDataCallback(thisDeserializer);

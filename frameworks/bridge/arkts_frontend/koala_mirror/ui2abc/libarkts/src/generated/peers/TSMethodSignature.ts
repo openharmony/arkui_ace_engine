@@ -35,7 +35,7 @@ import { TSTypeParameterDeclaration } from "./TSTypeParameterDeclaration"
 import { TypeNode } from "./TypeNode"
 export class TSMethodSignature extends AstNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 105)
+        assertValidPeer(pointer, 106)
         super(pointer)
     }
     static createTSMethodSignature(key: Expression | undefined, signature: FunctionSignature | undefined, computed: boolean, optional_arg: boolean): TSMethodSignature {

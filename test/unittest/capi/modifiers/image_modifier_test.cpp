@@ -122,7 +122,8 @@ HWTEST_F(ImageModifierTest, setFillColorTestDefaultValues, TestSize.Level1)
 HWTEST_F(ImageModifierTest, setFillColor0TestValidValues, TestSize.Level1)
 {
     auto checkValue = [this](const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
-        modifier_->setFillColor0(node_, &value);
+        auto optValue = Converter::ArkValue<Opt_ResourceColor>(value);
+        modifier_->setFillColor0(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_COLOR_NAME);
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
@@ -189,7 +190,8 @@ HWTEST_F(ImageModifierTest, setAutoResizeTestValidValues, TestSize.Level1)
     inputValueAutoResize = initValueAutoResize;
     for (auto&& value: validBoolean) {
         inputValueAutoResize = std::get<1>(value);
-        modifier_->setAutoResize(node_, inputValueAutoResize);
+        auto optInputValueAutoResize = Converter::ArkValue<Opt_Boolean>(inputValueAutoResize);
+        modifier_->setAutoResize(node_, &optInputValueAutoResize);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTO_RESIZE_NAME);
         expectedStr = std::get<2>(value);
@@ -224,7 +226,8 @@ HWTEST_F(ImageModifierTest, setOnFinishTest, TestSize.Level1)
     };
 
     EXPECT_FALSE(checkEvent.has_value());
-    modifier_->setOnFinish(node_, &onFinishCallback);
+    auto optOnFinishCallback = Converter::ArkValue<Opt_Callback_Void>(onFinishCallback);
+    modifier_->setOnFinish(node_, &optOnFinishCallback);
     eventHub->FireFinishEvent();
     EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
@@ -269,7 +272,8 @@ HWTEST_F(ImageModifierTest, setOnErrorTest, TestSize.Level1)
     };
 
     EXPECT_FALSE(checkEvent.has_value());
-    modifier_->setOnError(node_, &onChangeCallback);
+    auto optOnChangeCallback = Converter::ArkValue<Opt_ImageErrorCallback>(onChangeCallback);
+    modifier_->setOnError(node_, &optOnChangeCallback);
     eventHub->FireErrorEvent(event);
     EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
@@ -298,7 +302,8 @@ HWTEST_F(ImageModifierTest, ObjectFit_SetFitType, testing::ext::TestSize.Level1)
     };
 
     for (auto& tv : testMap) {
-        modifier_->setObjectFit(frameNode, tv.second);
+        auto optImageFit = Converter::ArkValue<Opt_ImageFit>(tv.second);
+        modifier_->setObjectFit(frameNode, &optImageFit);
         auto json = GetJsonValue(node_);
         ASSERT_TRUE(json);
         ASSERT_EQ(tv.first, GetAttrValue<std::string>(json, "objectFit"));
@@ -318,10 +323,9 @@ HWTEST_F(ImageModifierTest, ObjectFit_SetDefaultedFitType, testing::ext::TestSiz
     std::string key = "objectFit";
     std::string defaultedFit = "ImageFit.Cover";
 
-    modifier_->setObjectFit(
-        frameNode,
-        static_cast<Ark_ImageFit>(INT_MAX)
-    );
+    auto imageFit = static_cast<Ark_ImageFit>(INT_MAX);
+    auto optImageFit = Converter::ArkValue<Opt_ImageFit>(imageFit);
+    modifier_->setObjectFit(frameNode, &optImageFit);
     auto json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     ASSERT_EQ(defaultedFit, GetAttrValue<std::string>(json, key));
@@ -503,7 +507,8 @@ HWTEST_F(ImageModifierTest, setDraggableTestDraggableValidValues, TestSize.Level
         Ark_Boolean inputValueDraggable = initValueDraggable;
 
         inputValueDraggable = value;
-        modifier_->setDraggable(node_, inputValueDraggable);
+        auto optInputValueDraggable = Converter::ArkValue<Opt_Boolean>(inputValueDraggable);
+        modifier_->setDraggable(node_, &optInputValueDraggable);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto imagePattern = frameNode->GetPattern();
@@ -560,7 +565,8 @@ HWTEST_F(ImageModifierTest, setSourceSizeTestSourceSizeWidthValues, TestSize.Lev
         Ark_ImageSourceSize inputValueSourceSize = initValueSourceSize;
 
         inputValueSourceSize.width = value;
-        modifier_->setSourceSize(node_, &inputValueSourceSize);
+        auto optInputValueSourceSize = Converter::ArkValue<Opt_ImageSourceSize>(inputValueSourceSize);
+        modifier_->setSourceSize(node_, &optInputValueSourceSize);
         std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
         auto resultSourceSize = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SOURCE_SIZE_NAME);
         EXPECT_EQ(resultSourceSize, expectedStr) <<
@@ -599,7 +605,8 @@ HWTEST_F(ImageModifierTest, setSourceSizeTestSourceSizeHeightValues, TestSize.Le
         Ark_ImageSourceSize inputValueSourceSize = initValueSourceSize;
 
         inputValueSourceSize.height = value;
-        modifier_->setSourceSize(node_, &inputValueSourceSize);
+        auto optInputValueSourceSize = Converter::ArkValue<Opt_ImageSourceSize>(inputValueSourceSize);
+        modifier_->setSourceSize(node_, &optInputValueSourceSize);
         std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
         auto resultSourceSize = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SOURCE_SIZE_NAME);
         EXPECT_EQ(resultSourceSize, expectedStr) <<
@@ -658,7 +665,9 @@ HWTEST_F(ImageModifierTest, setOnCompleteTest, TestSize.Level1)
         ArkValue<Callback_Type_ImageAttribute_onComplete_callback_event_Void>(onComplete, contextId);
 
     EXPECT_FALSE(checkEvent);
-    modifier_->setOnComplete(node_, &arkCallback);
+    auto optCallback =
+        Converter::ArkValue<Opt_Callback_Type_ImageAttribute_onComplete_callback_event_Void>(arkCallback);
+    modifier_->setOnComplete(node_, &optCallback);
     eventHub->FireCompleteEvent(info);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->resourceId, contextId);
@@ -898,7 +907,8 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourcePositionXValid
         Ark_PointLightStyle inputValuePointLight = initValuePointLight;
 
         WriteTo(inputValuePointLight.lightSource).positionX = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto optInputValuePointLight = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optInputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultLightSource =
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
@@ -941,7 +951,8 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourcePositionYValid
         Ark_PointLightStyle inputValuePointLight = initValuePointLight;
 
         WriteTo(inputValuePointLight.lightSource).positionY = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto optInputValuePointLight = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optInputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultLightSource =
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
@@ -984,7 +995,8 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourcePositionZValid
         Ark_PointLightStyle inputValuePointLight = initValuePointLight;
 
         WriteTo(inputValuePointLight.lightSource).positionZ = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto optInputValuePointLight = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optInputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultLightSource =
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
@@ -1027,7 +1039,8 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourceIntensity, Tes
         Ark_PointLightStyle inputValuePointLight = initValuePointLight;
 
         WriteTo(inputValuePointLight.lightSource).intensity = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto optInputValuePointLight = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optInputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultLightSource =
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
@@ -1075,7 +1088,8 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourceColorValidValu
         Ark_PointLightStyle inputValuePointLight = initValuePointLight;
 
         WriteTo(inputValuePointLight.lightSource).color = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto optInputValuePointLight = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optInputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight =
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
@@ -1127,9 +1141,11 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightLightSourceColorInvalidVa
     auto checkValue = [this, &initValuePointLight](const std::string& input, const Opt_ResourceColor& value) {
         Ark_PointLightStyle inputValuePointLight = initValuePointLight;
 
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto optInputValuePointLight = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optInputValuePointLight);
         WriteTo(inputValuePointLight.lightSource).color = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        optInputValuePointLight = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optInputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight =
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
@@ -1178,7 +1194,8 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightIlluminatedValidValues, T
         Ark_PointLightStyle inputValuePointLight = initValuePointLight;
 
         inputValuePointLight.illuminated = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto optInputValuePointLight = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optInputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_NAME);
@@ -1210,7 +1227,8 @@ HWTEST_F(ImageModifierTest, setColorFilterTest, TestSize.Level1)
         auto peer = accessor->ctor(&value);
         ASSERT_TRUE(peer);
         auto unionValue = Converter::ArkUnion<Ark_Union_ColorFilter_DrawingColorFilter, Ark_ColorFilter>(peer);
-        modifier_->setColorFilter(node_, &unionValue);
+        auto optUnionValue = Converter::ArkValue<Opt_Union_ColorFilter_DrawingColorFilter>(unionValue);
+        modifier_->setColorFilter(node_, &optUnionValue);
         jsonValue = GetJsonValue(node_);
         for (const auto& elem : expected) {
             expectedStream << std::fixed << elem << " ";
@@ -1246,7 +1264,8 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightIlluminatedInvalidValues,
     auto checkValue = [this, &initValuePointLight](const std::string& input, const Opt_IlluminatedType& value) {
         Ark_PointLightStyle inputValuePointLight = initValuePointLight;
         inputValuePointLight.illuminated = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto optInputValuePointLight = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optInputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_NAME);
@@ -1287,7 +1306,8 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightBloomValidValues, TestSiz
         Ark_PointLightStyle inputValuePointLight = initValuePointLight;
 
         inputValuePointLight.bloom = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto optInputValuePointLight = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optInputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight =
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
@@ -1331,9 +1351,11 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightBloomInvalidValues, TestS
     auto checkValue = [this, &initValuePointLight](const std::string& input, const Opt_Number& value) {
         Ark_PointLightStyle inputValuePointLight = initValuePointLight;
 
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto optInputValuePointLight = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optInputValuePointLight);
         inputValuePointLight.bloom = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        optInputValuePointLight = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optInputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight =
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
@@ -1382,7 +1404,8 @@ HWTEST_F(ImageModifierTest, setResizableTestResizableSliceValidValues, TestSize.
             .left = Converter::ArkValue<Opt_Length>(arkLength),
         };
         Ark_ResizableOptions value = { .slice = Converter::ArkValue<Opt_EdgeWidths>(edgeWidths) };
-        modifier_->setResizable(node_, &value);
+        auto optValue = Converter::ArkValue<Opt_ResizableOptions>(value);
+        modifier_->setResizable(node_, &optValue);
         auto resizableSlice = renderProps->GetImagePaintStyle()->GetImageResizableSlice();
         ASSERT_TRUE(resizableSlice.has_value());
         EXPECT_EQ(resizableSlice->top.ToString(), expected);
@@ -1420,7 +1443,8 @@ HWTEST_F(ImageModifierTest, setResizableTestResizableSliceInvalidValues, TestSiz
             .left = Converter::ArkValue<Opt_Length>(arkLength),
         };
         Ark_ResizableOptions value = { .slice = Converter::ArkValue<Opt_EdgeWidths>(edgeWidths) };
-        modifier_->setResizable(node_, &value);
+        auto optValue = Converter::ArkValue<Opt_ResizableOptions>(value);
+        modifier_->setResizable(node_, &optValue);
         auto resizableSlice = renderProps->GetImagePaintStyle()->GetImageResizableSlice();
         ASSERT_TRUE(resizableSlice.has_value());
         EXPECT_EQ(resizableSlice->top.ToString(), expected);
@@ -1453,7 +1477,8 @@ HWTEST_F(ImageModifierTest, setEnhancedImageQualityValues, TestSize.Level1)
     };
 
     for (auto& tv : testMap) {
-        modifier_->setEnhancedImageQuality(frameNode, tv.second);
+        auto optResQuality = Converter::ArkValue<Opt_ResolutionQuality>(tv.second);
+        modifier_->setEnhancedImageQuality(frameNode, &optResQuality);
         auto json = GetJsonValue(node_);
         ASSERT_TRUE(json);
         EXPECT_EQ(tv.first, GetAttrValue<std::string>(json, "enhancedImageQuality"));

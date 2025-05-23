@@ -28,6 +28,7 @@ export function createETSImportDeclaration(
     program: Program,
     flags: Es2pandaImportFlags
 ): ETSImportDeclaration {
+    // TODO: check that plugin is on parsed stage
     const res = unpackNonNullableNode(
         global.es2panda._ETSParserBuildImportDeclaration(
             global.context,
@@ -39,7 +40,7 @@ export function createETSImportDeclaration(
             flags
         )
     )
-    global.es2panda._InsertETSImportDeclarationAndParse(global.context, global.compilerContext.program.peer, res.peer)
+    global.es2panda._InsertETSImportDeclarationAndParse(global.context, program.peer, res.peer)
     return new ETSImportDeclaration(res.peer)
 }
 
@@ -48,7 +49,7 @@ export function updateETSImportDeclaration(
     source: StringLiteral | undefined,
     specifiers: readonly AstNode[],
     importKind: Es2pandaImportKinds
-) {
+): ETSImportDeclaration {
     if (isSameNativeObject(source, original.source)
         && isSameNativeObject(specifiers, original.specifiers)
         /* no getter for importKind */

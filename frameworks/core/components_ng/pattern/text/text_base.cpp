@@ -78,7 +78,7 @@ void TextBase::CalculateSelectedRect(std::vector<RectF>& selectedRect, float lon
 
 float TextBase::GetSelectedBlankLineWidth()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, static_cast<float>(SELECTED_BLANK_LINE_WIDTH.ConvertToPx()));
     auto blankWidth = pipeline->NormalizeToPx(SELECTED_BLANK_LINE_WIDTH);
     return static_cast<float>(blankWidth);

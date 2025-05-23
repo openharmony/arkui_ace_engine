@@ -1,0 +1,33 @@
+{
+    "compilerOptions": {
+        "package": "@memo-plugin-tests",
+        "outDir": "./build/memo-plugin",
+        "baseUrl": ".",
+        "paths": {
+            "@koalaui/common": ["../../incremental/common/src"],
+            "@koalaui/compat": ["../../incremental/compat/src/arkts"],
+            "@koalaui/harness": ["../../incremental/harness/src/arkts"],
+            "@koalaui/runtime": ["../../incremental/runtime/ets"],
+            "@koalaui/runtime/annotations": ["../../incremental/runtime/annotations"]
+        },
+        "plugins": [
+            {
+                "transform": "../memo-plugin/lib/ParserTransformer",
+                "stage": "parsed",
+                "name": "memo"
+            },
+            {
+                "transform": "../memo-plugin/lib/MemoTransformer",
+                "stage": "checked",
+                "name": "memo",
+                "manuallyDisableInsertingImport": true
+            }
+        ]
+    },
+    "include": [
+        "./test/ets/**/*.ts"
+    ],
+    "dependencies": {
+        "@koalaui/runtime": ["../../incremental/runtime/ui2abcconfig.json"]
+    }
+}

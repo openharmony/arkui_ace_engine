@@ -33,7 +33,7 @@ import { Es2pandaTSOperatorType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 export class TSTypeOperator extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 116)
+        assertValidPeer(pointer, 117)
         super(pointer)
     }
     static createTSTypeOperator(type: TypeNode | undefined, operatorType: Es2pandaTSOperatorType): TSTypeOperator {

@@ -18,7 +18,7 @@
 
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ComponentInfo, Offset_componentutils, TranslateResult, ScaleResult, RotateResult, Matrix4Result } from "./arkui-componentutils"
-import { Size, Edges } from "./arkui-graphics"
+import { Size, Edges } from "./../Graphics"
 import { Dimension, BorderRadiuses, Length } from "./units"
 import { WrappedBuilder, Callback_WrappedBuilder_Args_Void, CommonConfiguration } from "./arkui-wrapper-builder"
 import { Context, BaseContext, Context_getGroupDir_Callback, ContextInternal, PointerStyle } from "./arkui-custom"
@@ -44,24 +44,24 @@ export class GlobalScope {
         const returnResult : ComponentInfo = retvalDeserializer.readComponentInfo()
         return returnResult
     }
-    public static edgeColors(all: number): Edges {
+    public static edgeColors(all: number): Edges<number> {
         const all_casted = all as (number)
         return GlobalScope.edgeColors_serialize(all_casted)
     }
-    static edgeColors_serialize(all: number): Edges {
+    static edgeColors_serialize(all: number): Edges<number> {
         const retval  = ArkUIGeneratedNativeModule._GlobalScope_edgeColors(all)
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : Edges = retvalDeserializer.readEdges()
+        const returnResult : Edges<number> = retvalDeserializer.readEdgesNumber()
         return returnResult
     }
-    public static edgeWidths(all: number): Edges {
+    public static edgeWidths(all: number): Edges<number> {
         const all_casted = all as (number)
         return GlobalScope.edgeWidths_serialize(all_casted)
     }
-    static edgeWidths_serialize(all: number): Edges {
+    static edgeWidths_serialize(all: number): Edges<number> {
         const retval  = ArkUIGeneratedNativeModule._GlobalScope_edgeWidths(all)
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : Edges = retvalDeserializer.readEdges()
+        const returnResult : Edges<number> = retvalDeserializer.readEdgesNumber()
         return returnResult
     }
     public static borderRadiuses(all: number): BorderRadiuses {

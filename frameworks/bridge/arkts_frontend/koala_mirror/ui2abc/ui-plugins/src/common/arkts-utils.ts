@@ -71,3 +71,9 @@ export function matchPrefix(prefixCollection: string[], name: string): boolean {
     }
     return false;
 }
+
+export function classMethods(clazz: arkts.ClassDeclaration, predicate?: (method: arkts.MethodDefinition) => boolean): arkts.MethodDefinition[] {
+    const body = clazz.definition?.body ?? []
+    const methods = body.filter(arkts.isMethodDefinition)
+    return predicate ? methods.filter(predicate) : methods
+}

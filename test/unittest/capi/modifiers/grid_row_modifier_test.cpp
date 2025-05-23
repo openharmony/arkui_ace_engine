@@ -484,7 +484,8 @@ HWTEST_F(GridRowModifierTest, DISABLED_setAlignItemsTestAlignItemsValidValues, T
         Ark_ItemAlign inputValueAlignItems = initValueAlignItems;
 
         inputValueAlignItems = value;
-        modifier_->setAlignItems(node_, inputValueAlignItems);
+        auto optInputValueAlignItems = Converter::ArkValue<Opt_ItemAlign>(inputValueAlignItems);
+        modifier_->setAlignItems(node_, &optInputValueAlignItems);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALIGN_ITEMS_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -518,7 +519,8 @@ HWTEST_F(GridRowModifierTest, DISABLED_setAlignItemsTestAlignItemsInvalidValues,
         Ark_ItemAlign inputValueAlignItems = initValueAlignItems;
 
         inputValueAlignItems = value;
-        modifier_->setAlignItems(node_, inputValueAlignItems);
+        auto optInputValueAlignItems = Converter::ArkValue<Opt_ItemAlign>(inputValueAlignItems);
+        modifier_->setAlignItems(node_, &optInputValueAlignItems);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALIGN_ITEMS_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -561,7 +563,8 @@ HWTEST_F(GridRowModifierTest, setOnBreakpointChangeTest, TestSize.Level1)
         .call = onBreakpointChange
     };
 
-    modifier_->setOnBreakpointChange(node_, &callBackValue);
+    auto optCallBackValue = Converter::ArkValue<Opt_Callback_String_Void>(callBackValue);
+    modifier_->setOnBreakpointChange(node_, &optCallBackValue);
 
     EXPECT_FALSE(checkEvent.has_value());
 

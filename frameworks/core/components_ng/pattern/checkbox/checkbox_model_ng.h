@@ -72,7 +72,7 @@ public:
     static void SetBuilder(FrameNode* frameNode, std::optional<std::function<void(void)>>& buildFunc);
     static void SetBuilderFunc(FrameNode* frameNode, NG::CheckBoxMakeCallback&& jsMake);
     static void SetChangeValue(FrameNode* frameNode, bool value);
-    static void SetCheckboxStyle(FrameNode* frameNode, const std::optional<CheckBoxStyle>& checkboxStyle);
+    static void SetCheckboxStyle(FrameNode* frameNode, CheckBoxStyle checkboxStyle);
     static void SetCheckboxName(FrameNode* frameNode, const std::optional<std::string>& name);
     static void SetCheckboxGroup(FrameNode* frameNode, const std::optional<std::string>& groupName);
     static void ResetSelectedColor(FrameNode* frameNode);
@@ -90,7 +90,6 @@ public:
     static std::string GetCheckboxGroup(FrameNode* frameNode);
 
     static void SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange);
-    static void SetChangeEvent(FrameNode* frameNode, ChangeEvent&& onChange);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_MODEL_NG_H

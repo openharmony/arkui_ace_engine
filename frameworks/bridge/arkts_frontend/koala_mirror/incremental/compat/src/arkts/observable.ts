@@ -205,9 +205,8 @@ export function observableProxy<Value>(value: Value, parent?: ObservableHandler,
         return ObservableArray(value, parent, observed) as Value
     } else if (value instanceof Map) {
         return ObservableMap(value, parent, observed) as Value
-    // TODO: relates to https://gitee.com/rri_opensource/koala_projects/issues/IC14KY
-    // } else if (value instanceof Set) {
-    //     return ObservableSet(value, parent, observed) as Value
+    } else if (value instanceof Set) {
+        return ObservableSet(value, parent, observed) as Value
     } else if (value instanceof Date) {
         return ObservableDate(value, parent, observed) as Value
     }
@@ -628,21 +627,20 @@ class ObservableMap<T, V> extends Map<T, V> {
     }
 }
 
-/*
- * TODO: relates to https://gitee.com/rri_opensource/koala_projects/issues/IC14KY
- *
 class ObservableSet<T> extends Set<T> {
-    static $_invoke<T>(data: Map<T>, parent?: ObservableHandler, observed?: boolean): Map<T, V> {
+    private readonly elements: Map<T, T>
+
+    static $_invoke<T>(data: Set<T>, parent?: ObservableHandler, observed?: boolean): Set<T> {
         return new ObservableSet<T>(data, parent, observed);
     }
 
     constructor(data: Set<T>, parent?: ObservableHandler, observed?: boolean) {
-        super(data)
+        this.elements = new Map<T, T>()
         const handler = new ObservableHandler(parent)
-        // for (let item of data.values()) {
-        //     if (observed === undefined) observed = ObservableHandler.contains(handler)
-        //     super.add(observableProxy(item, handler, observed))
-        // }
+        for (let item of data.values()) {
+            if (observed === undefined) observed = ObservableHandler.contains(handler)
+            this.elements.set(item, observableProxy(item, handler, observed))
+        }
         ObservableHandler.installOn(this, handler)
     }
 
@@ -650,58 +648,102 @@ class ObservableSet<T> extends Set<T> {
         return ObservableHandler.find(this)
     }
 
+    override toString(): string {
+        return new Set<T>(this.elements.keys()).toString()
+    }
+
     override get size(): number {
         this.handler?.onAccess()
-        return super.size
+        return this.elements.size
     }
 
     override has(value: T): boolean {
         this.handler?.onAccess()
-        return super.has(key)
+        return this.elements.has(value)
     }
 
     override add(value: T): this {
-        this.handler?.onModify()
-        super.add(value)
+        const handler = this.handler
+        let observable = value
+        if (handler) {
+            if (!this.elements.has(value)) handler.onModify()
+            const prev = this.elements.get(value)
+            if (prev) handler.removeChild(prev)
+            observable = observableProxy(value)
+        }
+        this.elements.set(value, observable)
         return this
     }
 
     override delete(value: T): boolean {
-        this.handler?.onModify()
-        return super.delete(key)
+        const handler = this.handler
+        if (handler) {
+            handler.onModify()
+            const prev = this.elements.get(value)
+            if (prev) handler.removeChild(prev)
+        }
+        return this.elements.delete(value)
     }
 
     override clear() {
-        this.handler?.onModify()
-        super.clear()
+        const handler = this.handler
+        if (handler) {
+            handler.onModify()
+            for (let value of this.elements.values()) {
+                handler!.removeChild(value)
+            }
+        }
+        this.elements.clear()
     }
 
     override keys(): IterableIterator<T> {
-        this.handler?.onAccess()
-        return super.keys()
+        return this.values()
     }
 
     override values(): IterableIterator<T> {
         this.handler?.onAccess()
-        return super.values()
+        return this.elements.values()
     }
 
     override $_iterator(): IterableIterator<T> {
-        this.handler?.onAccess()
-        return super.$_iterator()
+        return this.values()
     }
 
     override entries(): IterableIterator<[T, T]> {
         this.handler?.onAccess()
-        return super.entries()
+        return new MappingIterator<T, [T, T]>(this.elements.values(), (item) => [item, item])
     }
 
     override forEach(callbackfn: (value: T, key: T, set: Set<T>) => void) {
         this.handler?.onAccess()
-        super.forEach(callbackfn)
+        const it = this.elements.values()
+        while (true) {
+            const item = it.next()
+            if (item.done) return
+            callbackfn(item.value as T, item.value as T, this)
+        }
     }
 }
-*/
+
+class MappingIterator<T, V> implements IterableIterator<V> {
+    private it: IterableIterator<T>
+    private mapper: (value: T) => V
+
+    constructor(it: IterableIterator<T>, fn: (value: T) => V) {
+        this.it = it
+        this.mapper = fn
+    }
+
+    override next(): IteratorResult<V> {
+        const item = this.it.next()
+        if (item.done) return new IteratorResult<V>()
+        return new IteratorResult<V>(this.mapper(item.value as T))
+    }
+
+    override $_iterator(): IterableIterator<V> {
+        return this
+    }
+}
 
 class ObservableDate extends Date {
     static $_invoke(value: Date, parent?: ObservableHandler, observed?: boolean): Date {

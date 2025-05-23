@@ -28,6 +28,7 @@
 #include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/implementation/pan_gesture_options_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -68,13 +69,27 @@ Ark_NativePointer CreatePanGestureImpl(
     const Ark_Number* fingers, Ark_PanDirection direction, const Ark_Number* distance, Ark_Boolean isFingerCountLimited)
 {
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
-    // TODO: direction need to adapt
-    PanDirection panDirection;
-    panDirection.type = PanDirection::ALL;
+    PanDirection defaultPanDirection;
+    defaultPanDirection.type = PanDirection::ALL;
+    auto panDirection = Converter::Convert<std::optional<PanDirection>>(direction).value_or(defaultPanDirection);
     double distanceValue = Converter::Convert<double>(*distance);
     bool isFingerCountLimitedValue = Converter::Convert<bool>(isFingerCountLimited);
     auto panGestureObject =
         AceType::MakeRefPtr<PanGesture>(fingerValue, panDirection, distanceValue, isFingerCountLimitedValue);
+    panGestureObject->IncRefCount();
+    return AceType::RawPtr(panGestureObject);
+}
+Ark_NativePointer CreatePanGestureWithPanGestureOptionsImpl(Ark_NativePointer panGestureOptions)
+{
+    Ark_PanGestureOptions peer = reinterpret_cast<Ark_PanGestureOptions>(panGestureOptions);
+    CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(peer->handler,  nullptr);
+    auto direction = peer->handler->GetDirection();
+    auto distance = peer->handler->GetDistance();
+    auto fingers = peer->handler->GetFingers();
+    auto isFingerCountLimited = peer->handler->GetIsLimitFingerCount();
+    auto panGestureObject =
+        AceType::MakeRefPtr<PanGesture>(fingers, direction, distance, isFingerCountLimited);
     panGestureObject->IncRefCount();
     return AceType::RawPtr(panGestureObject);
 }
@@ -103,9 +118,9 @@ Ark_NativePointer CreateSwipeGestureImpl(
     const Ark_Number* fingers, Ark_SwipeDirection direction, const Ark_Number* speed, Ark_Boolean isFingerCountLimited)
 {
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
-    // TODO: direction need to adapt
-    SwipeDirection swipeDirection;
-    swipeDirection.type = SwipeDirection::ALL;
+    SwipeDirection defaultDirection;
+    defaultDirection.type = SwipeDirection::ALL;
+    auto swipeDirection = Converter::Convert<std::optional<SwipeDirection>>(direction).value_or(defaultDirection);
     double speedValue = Converter::Convert<double>(*speed);
     bool isFingerCountLimitedValue = Converter::Convert<bool>(isFingerCountLimited);
     auto swipeGestureObject =
@@ -183,7 +198,12 @@ void SetGestureTagImpl(Ark_NativePointer gesture, const Ark_String* tag)
     CHECK_NULL_VOID(gestureObject);
     gestureObject->SetTag(Converter::Convert<std::string>(*tag));
 }
-void SetAllowedTypesImpl(Ark_NativePointer gesture, const Array_SourceTool* types) {}
+void SetAllowedTypesImpl(Ark_NativePointer gesture, const Array_SourceTool* types)
+{
+    auto* gestureObject = reinterpret_cast<Gesture*>(gesture);
+    CHECK_NULL_VOID(gestureObject);
+    gestureObject->SetAllowedTypes(Converter::Convert<std::set<SourceTool>>(*types));
+}
 void AddGestureToNodeImpl(Ark_NativePointer node, const Ark_Number* priority, Ark_GestureMask mask,
     Ark_NativePointer gesture, Ark_Boolean isModifier)
 {
@@ -245,6 +265,7 @@ const GENERATED_ArkUIGestureOpsAccessor* GetGestureOpsAccessor()
         GestureOpsAccessor::CreateTapGestureImpl,
         GestureOpsAccessor::CreateLongPressGestureImpl,
         GestureOpsAccessor::CreatePanGestureImpl,
+        GestureOpsAccessor::CreatePanGestureWithPanGestureOptionsImpl,
         GestureOpsAccessor::CreatePinchGestureImpl,
         GestureOpsAccessor::CreateRotationGestureImpl,
         GestureOpsAccessor::CreateSwipeGestureImpl,

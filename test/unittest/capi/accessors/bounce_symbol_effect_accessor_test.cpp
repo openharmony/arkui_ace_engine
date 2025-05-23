@@ -120,7 +120,8 @@ HWTEST_F(BounceSymbolEffectAccessorTest, setScopeTest, TestSize.Level1)
     };
     for (auto [peer, value, expected] : testPlan) {
         peer_->scope.reset();
-        accessor_->setScope(peer, value);
+        auto optVal = Converter::ArkValue<Opt_EffectScope>(value);
+        accessor_->setScope(peer, &optVal);
         EXPECT_EQ(peer_->scope, expected);
     }
 }
@@ -163,7 +164,8 @@ HWTEST_F(BounceSymbolEffectAccessorTest, setDirectionTest, TestSize.Level1)
     };
     for (auto [peer, value, expected] : testPlan) {
         peer_->direction.reset();
-        accessor_->setDirection(peer, value);
+        auto optVal = Converter::ArkValue<Opt_EffectDirection>(value);
+        accessor_->setDirection(peer, &optVal);
         EXPECT_EQ(peer_->direction, expected);
     }
 }

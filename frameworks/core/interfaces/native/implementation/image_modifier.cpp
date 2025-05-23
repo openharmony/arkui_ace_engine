@@ -21,6 +21,7 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -73,29 +74,6 @@ void AssignCast(std::optional<Color>& dst, const Ark_ColorContent& src)
     // TODO: Check that ColorContent is indeed ORIGIN. There can be other types in future.
     dst.reset();
 }
-
-/*
-template<>
-void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_Union_String_Resource_Image_PixelMap& src)
-{
-    Converter::VisitUnion(src,
-        [&dst](const Ark_String& val) {
-            dst = Converter::OptConvert<ImageSourceInfo>(val);
-        },
-        [&dst](const Ark_Resource& val) {
-            dst = Converter::OptConvert<ImageSourceInfo>(val);
-        },
-        [&dst](const Ark_image_PixelMap& val) {
-            dst = std::nullopt;
-            auto pixMapRefPtr = Converter::OptConvert<RefPtr<PixelMap>>(val).value_or(nullptr);
-            if (pixMapRefPtr) {
-                dst = ImageSourceInfo(pixMapRefPtr);
-            }
-        },
-        []() {}
-    );
-}
-*/
 } // Converter
 } // OHOS::Ace::NG
 
@@ -311,27 +289,27 @@ void PointLightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(themeConstants);
     if (pointLightStyle) {
         if (pointLightStyle->lightSource) {
-            ViewAbstractModelNG::SetLightPosition(frameNode, pointLightStyle->lightSource->x,
+            ViewAbstractModelStatic::SetLightPosition(frameNode, pointLightStyle->lightSource->x,
                 pointLightStyle->lightSource->y,
                 pointLightStyle->lightSource->z);
-            ViewAbstractModelNG::SetLightIntensity(frameNode,
+            ViewAbstractModelStatic::SetLightIntensity(frameNode,
                 pointLightStyle->lightSource->intensity);
-            ViewAbstractModelNG::SetLightColor(frameNode, pointLightStyle->lightSource->lightColor);
+            ViewAbstractModelStatic::SetLightColor(frameNode, pointLightStyle->lightSource->lightColor);
         } else {
-            ViewAbstractModelNG::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
-            ViewAbstractModelNG::SetLightIntensity(frameNode, std::nullopt);
-            ViewAbstractModelNG::SetLightColor(frameNode, std::nullopt);
+            ViewAbstractModelStatic::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+            ViewAbstractModelStatic::SetLightIntensity(frameNode, std::nullopt);
+            ViewAbstractModelStatic::SetLightColor(frameNode, std::nullopt);
         }
         // illuminated
-        ViewAbstractModelNG::SetLightIlluminated(frameNode, pointLightStyle->illuminationType, themeConstants);
+        ViewAbstractModelStatic::SetLightIlluminated(frameNode, pointLightStyle->illuminationType, themeConstants);
         // bloom
-        ViewAbstractModelNG::SetBloom(frameNode, pointLightStyle->bloom, themeConstants);
+        ViewAbstractModelStatic::SetBloom(frameNode, pointLightStyle->bloom, themeConstants);
     } else {
-        ViewAbstractModelNG::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
-        ViewAbstractModelNG::SetLightIntensity(frameNode, std::nullopt);
-        ViewAbstractModelNG::SetLightColor(frameNode, std::nullopt);
-        ViewAbstractModelNG::SetLightIlluminated(frameNode, std::nullopt, themeConstants);
-        ViewAbstractModelNG::SetBloom(frameNode, std::nullopt, themeConstants);
+        ViewAbstractModelStatic::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+        ViewAbstractModelStatic::SetLightIntensity(frameNode, std::nullopt);
+        ViewAbstractModelStatic::SetLightColor(frameNode, std::nullopt);
+        ViewAbstractModelStatic::SetLightIlluminated(frameNode, std::nullopt, themeConstants);
+        ViewAbstractModelStatic::SetBloom(frameNode, std::nullopt, themeConstants);
     }
 #endif
 }
@@ -458,7 +436,7 @@ void OrientationImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<ImageRotateOrientation>(*value);
-    ImageModelNG::SetOrientation(frameNode, convValue);
+    ImageModelStatic::SetOrientation(frameNode, convValue);
 }
 } // ImageAttributeModifier
 const GENERATED_ArkUIImageModifier* GetImageModifier()

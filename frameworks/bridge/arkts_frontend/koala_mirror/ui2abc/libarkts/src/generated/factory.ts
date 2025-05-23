@@ -708,12 +708,14 @@ export const factory = {
         return updateNodeByNode(AnnotationUsage.create1AnnotationUsage(expr, properties), original)
     }
     ,
-    createEmptyStatement(): EmptyStatement {
-        return EmptyStatement.createEmptyStatement()
+    createEmptyStatement(isBrokenStatement: boolean): EmptyStatement {
+        return EmptyStatement.create1EmptyStatement(isBrokenStatement)
     }
     ,
-    updateEmptyStatement(original: EmptyStatement): EmptyStatement {
-        return updateNodeByNode(EmptyStatement.createEmptyStatement(), original)
+    updateEmptyStatement(original: EmptyStatement, isBrokenStatement: boolean): EmptyStatement {
+        if (isSameNativeObject(isBrokenStatement, original.isBrokenStatement))
+            return original
+        return updateNodeByNode(EmptyStatement.create1EmptyStatement(isBrokenStatement), original)
     }
     ,
     createWhileStatement(test?: Expression, body?: Statement): WhileStatement {

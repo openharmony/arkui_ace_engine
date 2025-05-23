@@ -22,7 +22,6 @@
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "core/common/multi_thread_build_manager.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components/theme/app_theme.h"
@@ -549,15 +548,10 @@ void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
-        MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host),
-            [weak = WeakClaim(this), instanceId = context->GetInstanceId()]() {
-            auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
-            CHECK_NULL_VOID(context);
-            context->AddAfterRenderTask([weak]() {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->FireChangeEvent(SliderChangeMode::End);
-            });
+        context->AddAfterRenderTask([weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->FireChangeEvent(SliderChangeMode::End);
         });
     }
 }
@@ -1933,13 +1927,7 @@ void SliderPattern::UpdateValue(float value)
 
 void SliderPattern::OnAttachToFrameNode()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->RegisterVisibleAreaChange();
-    });
+    RegisterVisibleAreaChange();
     InitHapticController();
 }
 

@@ -157,7 +157,8 @@ void TextIndentImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelStatic::SetTextIndent(frameNode, Converter::OptConvert<Dimension>(*value));
+    auto convValue = Converter::OptConvert<Dimension>(*value);
+    TextFieldModelStatic::SetTextIndent(frameNode, convValue);
 }
 void CaretStyleImpl(Ark_NativePointer node,
                     const Opt_CaretStyle* value)
@@ -453,6 +454,7 @@ void MaxLinesImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto maxLines = Converter::OptConvert<uint32_t>(*value);
+    TextFieldModelStatic::SetNormalMaxViewLines(frameNode, maxLines);
     TextFieldModelStatic::SetMaxViewLines(frameNode, maxLines);
 }
 void WordBreakImpl(Ark_NativePointer node,

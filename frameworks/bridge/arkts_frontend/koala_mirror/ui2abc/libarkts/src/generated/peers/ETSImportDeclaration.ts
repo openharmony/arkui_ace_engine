@@ -36,7 +36,7 @@ import { ImportDeclaration } from "./ImportDeclaration"
 import { StringLiteral } from "./StringLiteral"
 export class ETSImportDeclaration extends ImportDeclaration {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 78)
+        assertValidPeer(pointer, 79)
         super(pointer)
     }
     static createETSImportDeclaration(importPath: StringLiteral | undefined, specifiers: readonly AstNode[], importKinds: Es2pandaImportKinds): ETSImportDeclaration {

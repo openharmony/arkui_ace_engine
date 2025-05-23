@@ -60,7 +60,8 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollBarUpdateTest, TestSize.Level1)
         CallbackHelper(continuation).InvokeSync(arkResult);
     };
     auto func = Converter::ArkValue<Callback_Number_Number_ComputedBarAttribute>(nullptr, callSyncFunc);
-    modifier_->setOnScrollBarUpdate(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_Callback_Number_Number_ComputedBarAttribute>(func);
+    modifier_->setOnScrollBarUpdate(node_, &optFunc);
 
     auto result = eventHub->FireOnScrollBarUpdate(1000, Dimension(2, DimensionUnit::VP));
     EXPECT_EQ(result.first, 2);
@@ -76,15 +77,11 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTestInvalid, Te
 {
     // test is disabled because onScrollBarUpdate callback should return value
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
-    EXPECT_NE(eventHub, nullptr);
+    ASSERT_NE(eventHub, nullptr);
 
-    struct CheckEvent {
-        int32_t nodeId;
-        int32_t index;
-        Dimension offset;
-    };
+    struct CheckEvent { int32_t nodeId; int32_t index; Dimension offset; };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     Callback_Number_Number_ComputedBarAttribute onScrollBarUpdate = {
         .resource = {.resourceId = frameNode->GetId()},
@@ -99,7 +96,8 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTestInvalid, Te
         }
     };
 
-    modifier_->setOnScrollBarUpdate(node_, &onScrollBarUpdate);
+    auto optOnScrollBarUpdate = Converter::ArkValue<Opt_Callback_Number_Number_ComputedBarAttribute>(onScrollBarUpdate);
+    modifier_->setOnScrollBarUpdate(node_, &optOnScrollBarUpdate);
 
     // index: 11, offset: 12 invalid
     EXPECT_EQ(checkEvent.has_value(), false);
@@ -119,6 +117,7 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTestInvalid, Te
     EXPECT_EQ(checkEvent->offset.Unit(), DimensionUnit::VP);
 
     // index: 15, offset: 16 auto
+    EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireOnScrollBarUpdate(15, Dimension(16, DimensionUnit::AUTO));
     EXPECT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
@@ -166,7 +165,8 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollIndexTest, TestSize.Level1)
     Callback_Number_Number_Void arkCallback =
         Converter::ArkValue<Callback_Number_Number_Void>(checkCallback, contextId);
 
-    modifier_->setOnScrollIndex(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Number_Number_Void>(arkCallback);
+    modifier_->setOnScrollIndex(node_, &optCallback);
 
     auto onScrollIndex = eventHub->GetOnScrollIndex();
     EXPECT_NE(onScrollIndex, nullptr);
@@ -236,7 +236,8 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragStartTest, TestSize.Level1)
     };
     auto arkCallback =
         ArkValue<GridAttribute_onItemDragStart_event_type>(nullptr, onItemDragStartSyncFunc, expectedResourceId);
-    modifier_->setOnItemDragStart(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_GridAttribute_onItemDragStart_event_type>(arkCallback);
+    modifier_->setOnItemDragStart(node_, &optCallback);
 
     // imitate the test case
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
@@ -296,7 +297,8 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragStartInvalidTest, TestSize.Leve
     };
     auto arkCallback =
         ArkValue<GridAttribute_onItemDragStart_event_type>(nullptr, onItemDragStartSyncFunc, expectedResourceId);
-    modifier_->setOnItemDragStart(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_GridAttribute_onItemDragStart_event_type>(arkCallback);
+    modifier_->setOnItemDragStart(node_, &optCallback);
 
     // imitate the test case
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
@@ -336,7 +338,8 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragEnterTest, TestSize.Level1)
             };
         }
     };
-    modifier_->setOnItemDragEnter(node_, &onItemDragEnter);
+    auto optOnItemDragEnter = Converter::ArkValue<Opt_Callback_ItemDragInfo_Void>(onItemDragEnter);
+    modifier_->setOnItemDragEnter(node_, &optOnItemDragEnter);
 
     dragInfo.SetX(234);
     dragInfo.SetY(567);
@@ -381,7 +384,8 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragMoveTest, TestSize.Level1)
             }
     };
 
-    modifier_->setOnItemDragMove(node_, &onItemDragMove);
+    auto optOnItemDragMove = Converter::ArkValue<Opt_Callback_ItemDragInfo_Number_Number_Void>(onItemDragMove);
+    modifier_->setOnItemDragMove(node_, &optOnItemDragMove);
 
     dragInfo.SetX(987);
     dragInfo.SetY(654);
@@ -426,7 +430,8 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragLeaveTest, TestSize.Level1)
         }
     };
 
-    modifier_->setOnItemDragLeave(node_, &onItemDragLeave);
+    auto optOnItemDragLeave = Converter::ArkValue<Opt_Callback_ItemDragInfo_Number_Void>(onItemDragLeave);
+    modifier_->setOnItemDragLeave(node_, &optOnItemDragLeave);
 
     dragInfo.SetX(135);
     dragInfo.SetY(246);
@@ -474,7 +479,8 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDropTest, TestSize.Level1)
         }
     };
 
-    modifier_->setOnItemDrop(node_, &onItemDrop);
+    auto optOnItemDrop = Converter::ArkValue<Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void>(onItemDrop);
+    modifier_->setOnItemDrop(node_, &optOnItemDrop);
 
     dragInfo.SetX(975);
     dragInfo.SetY(864);
@@ -519,7 +525,8 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollTest, TestSize.Level1)
 
     auto onScroll = eventHub->GetOnScroll();
     EXPECT_EQ(onScroll, nullptr);
-    modifier_->setOnScroll(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Number_Number_Void>(arkCallback);
+    modifier_->setOnScroll(node_, &optCallback);
     onScroll = eventHub->GetOnScroll();
     EXPECT_NE(onScroll, nullptr);
 
@@ -560,7 +567,8 @@ HWTEST_F(GridModifierCallbacksTest, setOnReachStartTest, TestSize.Level1)
 
     auto onReachStart = eventHub->GetOnReachStart();
     EXPECT_EQ(onReachStart, nullptr);
-    modifier_->setOnReachStart(node_, &onReachStartCallback);
+    auto optOnReachStartCallback = Converter::ArkValue<Opt_Callback_Void>(onReachStartCallback);
+    modifier_->setOnReachStart(node_, &optOnReachStartCallback);
     onReachStart = eventHub->GetOnReachStart();
     EXPECT_NE(onReachStart, nullptr);
 
@@ -599,7 +607,8 @@ HWTEST_F(GridModifierCallbacksTest, setOnReachEndTest, TestSize.Level1)
 
     auto onReachEnd = eventHub->GetOnReachEnd();
     EXPECT_EQ(onReachEnd, nullptr);
-    modifier_->setOnReachEnd(node_, &onReachEndCallback);
+    auto optOnReachEndCallback = Converter::ArkValue<Opt_Callback_Void>(onReachEndCallback);
+    modifier_->setOnReachEnd(node_, &optOnReachEndCallback);
     onReachEnd = eventHub->GetOnReachEnd();
     EXPECT_NE(onReachEnd, nullptr);
 
@@ -638,7 +647,8 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollStartTest, TestSize.Level1)
 
     auto onScrollStart = eventHub->GetOnScrollStart();
     EXPECT_EQ(onScrollStart, nullptr);
-    modifier_->setOnScrollStart(node_, &onScrollStartCallback);
+    auto optOnScrollStartCallback = Converter::ArkValue<Opt_Callback_Void>(onScrollStartCallback);
+    modifier_->setOnScrollStart(node_, &optOnScrollStartCallback);
     onScrollStart = eventHub->GetOnScrollStart();
     EXPECT_NE(onScrollStart, nullptr);
 
@@ -677,7 +687,8 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollStopTest, TestSize.Level1)
 
     auto onScrollStop = eventHub->GetOnScrollStop();
     EXPECT_EQ(onScrollStop, nullptr);
-    modifier_->setOnScrollStop(node_, &onScrollStopCallback);
+    auto optOnScrollStopCallback = Converter::ArkValue<Opt_Callback_Void>(onScrollStopCallback);
+    modifier_->setOnScrollStop(node_, &optOnScrollStopCallback);
     onScrollStop = eventHub->GetOnScrollStop();
     EXPECT_NE(onScrollStop, nullptr);
 
@@ -715,7 +726,8 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollFrameBeginTest, TestSize.Level1)
     func = Converter::ArkValue<Callback_Number_ScrollState_Literal_Number_offsetRemain>(
         nullptr, onScrollFrameBegin, expectedResourceId
     );
-    modifier_->setOnScrollFrameBegin(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain>(func);
+    modifier_->setOnScrollFrameBegin(node_, &optFunc);
 
     auto fireOnScrollFrameBegin = eventHub->GetOnScrollFrameBegin();
     ASSERT_NE(fireOnScrollFrameBegin, nullptr);

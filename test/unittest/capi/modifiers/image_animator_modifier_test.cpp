@@ -111,7 +111,7 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestValidValues, TestSize.Level1)
 {
     auto array = new Ark_ImageFrameInfo[] {
         {
-            .src = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_String>(
+            .src = Converter::ArkUnion<Ark_Union_String_Resource_Image_PixelMap, Ark_String>(
                 ATTRIBUTE_IMAGES_SRC_TEST_VALUE),
             .width = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("auto"),
             .height = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("100px"),
@@ -120,7 +120,7 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestValidValues, TestSize.Level1)
             .duration = Converter::ArkValue<Opt_Number>(1),
         },
         {
-            .src = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_Resource>(
+            .src = Converter::ArkUnion<Ark_Union_String_Resource_Image_PixelMap, Ark_Resource>(
                 CreateResource(IMAGES_OK_STR.c_str(), Converter::ResourceType::STRING)),
             .width = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("auto"),
             .height = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("100px"),
@@ -130,14 +130,14 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestValidValues, TestSize.Level1)
         },
     };
     Array_ImageFrameInfo initValueImages = { .array = array, .length = 2 };
-
-    modifier_->setImages(node_, &initValueImages);
+    auto optInitValueImages = Converter::ArkValue<Opt_Array_ImageFrameInfo>(initValueImages);
+    modifier_->setImages(node_, &optInitValueImages);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
     std::unique_ptr<JsonValue> resultImages = GetAttrValue<std::unique_ptr<JsonValue>>(
         jsonValue, ATTRIBUTE_IMAGES_NAME);
-    
+
     if (resultImages->IsArray()) {
         int32_t count = resultImages->GetArraySize();
         for (int i = 0; i < count; i++) {
@@ -173,7 +173,7 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestPixelMap, TestSize.Level1)
     pixelMapPeer.pixelMap = pixelMap;
     auto array = new Ark_ImageFrameInfo[] {
         {
-            .src = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_PixelMap>(&pixelMapPeer),
+            .src = Converter::ArkUnion<Ark_Union_String_Resource_Image_PixelMap, Ark_PixelMap>(&pixelMapPeer),
             .width = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("auto"),
             .height = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("100px"),
             .top = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(ATTRIBUTE_SIZE_TEST_VALUE),
@@ -183,7 +183,8 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestPixelMap, TestSize.Level1)
     };
     Array_ImageFrameInfo initValueImages = { .array = array, .length = 1 };
 
-    modifier_->setImages(node_, &initValueImages);
+    auto optInitValueImages = Converter::ArkValue<Opt_Array_ImageFrameInfo>(initValueImages);
+    modifier_->setImages(node_, &optInitValueImages);
 
     auto imageAnimatorPattern_ = frameNode->GetPattern<ImageAnimatorPattern>();
     EXPECT_NE(imageAnimatorPattern_, nullptr);
@@ -256,7 +257,8 @@ HWTEST_F(ImageAnimatorModifierTest, setIterationsTestValidValues, TestSize.Level
 
     // Verifying attribute's  values
     for (auto& [input, value, expected]: iterationsIterationsValidValues) {
-        modifier_->setIterations(node_, &value);
+        auto optValue = Converter::ArkValue<Opt_Number>(value);
+        modifier_->setIterations(node_, &optValue);
         pattern->OnModifyDone();
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ITERATIONS_NAME);
@@ -289,13 +291,14 @@ HWTEST_F(ImageAnimatorModifierTest, setIterationsTestInvalidValues, TestSize.Lev
     InitPattern(pattern);
 
     // Verifying attribute's  values
-    for (auto& [imput, value]: iterationsIterationsInvalidValues) {
-        modifier_->setIterations(node_, &value);
+    for (auto& [input, value]: iterationsIterationsInvalidValues) {
+        auto optValue = Converter::ArkValue<Opt_Number>(value);
+        modifier_->setIterations(node_, &optValue);
         pattern->OnModifyDone();
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ITERATIONS_NAME);
         expectedStr = ATTRIBUTE_ITERATIONS_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << imput;
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
     }
 }
 
@@ -320,7 +323,8 @@ HWTEST_F(ImageAnimatorModifierTest, setOnStartTest, TestSize.Level1)
     };
     // setup the callback object via C-API
     Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
-    modifier_->setOnStart(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    modifier_->setOnStart(node_, &optCallback);
 
     isCalled = false;
     eventHub->GetStartEvent()();
@@ -348,7 +352,8 @@ HWTEST_F(ImageAnimatorModifierTest, setOnPauseTest, TestSize.Level1)
     };
     // setup the callback object via C-API
     Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
-    modifier_->setOnPause(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    modifier_->setOnPause(node_, &optCallback);
 
     isCalled = false;
     eventHub->GetPauseEvent()();
@@ -376,7 +381,8 @@ HWTEST_F(ImageAnimatorModifierTest, setOnRepeatTest, TestSize.Level1)
     };
     // setup the callback object via C-API
     Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
-    modifier_->setOnRepeat(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    modifier_->setOnRepeat(node_, &optCallback);
 
     isCalled = false;
     eventHub->GetRepeatEvent()();
@@ -404,7 +410,8 @@ HWTEST_F(ImageAnimatorModifierTest, setOnCancelTest, TestSize.Level1)
     };
     // setup the callback object via C-API
     Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
-    modifier_->setOnCancel(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    modifier_->setOnCancel(node_, &optCallback);
 
     isCalled = false;
     eventHub->GetCancelEvent()();
@@ -432,7 +439,8 @@ HWTEST_F(ImageAnimatorModifierTest, setOnFinishTest, TestSize.Level1)
     };
     // setup the callback object via C-API
     Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
-    modifier_->setOnFinish(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    modifier_->setOnFinish(node_, &optCallback);
 
     isCalled = false;
     eventHub->GetStopEvent()();

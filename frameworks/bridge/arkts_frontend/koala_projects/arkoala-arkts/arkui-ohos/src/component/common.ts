@@ -23,14 +23,14 @@ import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
-import { DrawContext, Edges } from "./arkui-graphics"
+import { DrawContext } from "./../Graphics"
 import { LengthMetrics } from "../Graphics"
 import { UnifiedData, UnifiedDataInternal, ComponentContent, Context, PointerStyle, ContextInternal, GestureOps, StateStylesOps } from "./arkui-custom"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { Summary, IntentionCode, CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
 import { Callback_Void } from "./abilityComponent"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransitionEffectType, GradientDirection, HorizontalAlign, VerticalAlign, TransitionType, FontWeight, FontStyle, TouchType, InteractionHand, CrownAction, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, IlluminatedType, MouseButton, MouseAction, AccessibilityHoverType, AxisAction, AxisModel, ScrollSource } from "./enums"
-import { ResourceColor, ConstraintSizeOptions, DirectionalEdgesT, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Bias, Font, EdgeStyles } from "./units"
+import { ResourceColor, ConstraintSizeOptions, DirectionalEdgesT, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Bias, Font, EdgeStyles, Edges } from "./units"
 import { Resource } from "global/resource"
 import { TextRange } from "./textCommon"
 import { ComponentBase } from "./../ComponentBase"
@@ -344,7 +344,7 @@ export interface BaseEvent {
     sourceTool: SourceTool
     deviceId?: number | undefined
     targetDisplayId?: number | undefined
-    getModifierKeyState(keys: Array<string>): boolean
+    getModifierKeyState?: ((keys: Array<string>) => boolean)
 }
 export class BaseEventInternal implements MaterializedBase,BaseEvent {
     peer?: Finalizable | undefined = undefined
@@ -428,6 +428,12 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         const targetDisplayId_NonNull  = (targetDisplayId as number)
         this.setTargetDisplayId(targetDisplayId_NonNull)
     }
+    get getModifierKeyState(): ((keys: Array<string>) => boolean) {
+        return this.getGetModifierKeyState();
+    }
+    set getModifierKeyState(getModifierKeyState: ((keys: Array<string>) => boolean) | undefined) {
+        // setter is not implemented
+    }
     static ctor_baseevent(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_ctor()
         return retval
@@ -439,9 +445,11 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._BaseEvent_getFinalizer()
     }
-    public getModifierKeyState(keys: Array<string>): boolean {
-        const keys_casted = keys as (Array<string>)
-        return this.getModifierKeyState_serialize(keys_casted)
+    private getGetModifierKeyState(): ((keys: Array<string>) => boolean) {
+        return (keys: Array<string>): boolean => {
+            const keys_casted = keys as (Array<string>)
+            return this.getModifierKeyState_serialize(keys_casted)
+        }
     }
     private getTarget(): EventTarget {
         return this.getTarget_serialize()
@@ -12144,12 +12152,12 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         let isAttributeUpdater: boolean = (modifier instanceof AttributeUpdater);
         if (isAttributeUpdater) {
             let attributeUpdater = modifier as object as AttributeUpdater<T, (...params: Object[]) => T>
-            if (this.getAttributeSet().peerNode_ == null) {
+            if (!attributeUpdater.peerNode_) {
                 attributeUpdater.initializeModifier(peerNode._attributeSet as T);
-            } else if (this.getPeer() != this.getAttributeSet().peerNode_) {
+            } else if (this.getPeer() !== attributeUpdater.peerNode_) {
                 attributeUpdater.onComponentChanged(peerNode._attributeSet as T);
             }
-            this.getAttributeSet().peerNode_ = this.getPeer();
+            attributeUpdater.peerNode_ = this.getPeer();
             attributeUpdater.attribute = this.getModifierHost() as T
             attributeUpdater.updateConstructorParams = (...params: Object[]) => {
                 let attribute = this.getModifierHost()! as T;
@@ -13506,7 +13514,7 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         this.setChangedTouches(changedTouches)
     }
     get stopPropagation(): (() => void) {
-        throw new Error("Not implemented")
+        return this.getStopPropagation();
     }
     set stopPropagation(stopPropagation: (() => void)) {
         this.setStopPropagation(stopPropagation)
@@ -13654,8 +13662,18 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         thisSerializer.release()
     }
     private getStopPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getStopPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getStopPropagation(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        
+        let returnResult = retvalDeserializer.readCallback_Void(true);
+        return returnResult;
     }
     private setStopPropagation_serialize(stopPropagation: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()

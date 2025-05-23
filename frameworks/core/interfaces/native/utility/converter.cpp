@@ -15,11 +15,13 @@
 
 #include <cerrno>
 #include <cstdint>
+#include "arkoala_api_generated.h"
 
 #include "converter.h"
 
 #include "bridge/common/utils/utils.h"
 #include "core/common/card_scope.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
@@ -1329,7 +1331,7 @@ NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src)
     options.blurStyleOption = Converter::OptConvert<BlurStyleOption>(src.backgroundBlurStyleOptions);
     options.blurStyleOption->blurStyle = Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle)
         .value_or(options.blurStyleOption->blurStyle);
-    options.effectOption = Converter::OptConvert<EffectOption>(src.backgroundEffect);;
+    options.effectOption = Converter::OptConvert<EffectOption>(src.backgroundEffect);
     return options;
 }
 
@@ -1344,7 +1346,7 @@ NG::NavigationBackgroundOptions Convert(const Ark_NavigationToolbarOptions& src)
     options.blurStyleOption = Converter::OptConvert<BlurStyleOption>(src.backgroundBlurStyleOptions);
     options.blurStyleOption->blurStyle = Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle)
         .value_or(options.blurStyleOption->blurStyle);
-    options.effectOption = Converter::OptConvert<EffectOption>(src.backgroundEffect);;
+    options.effectOption = Converter::OptConvert<EffectOption>(src.backgroundEffect);
     return options;
 }
 
@@ -1738,7 +1740,8 @@ PaddingProperty Convert(const Ark_LocalizedPadding& src)
     return dst;
 }
 
-static PaddingProperty PaddingPropertyFromCalcLength(const std::optional<CalcLength>& src) {
+static PaddingProperty PaddingPropertyFromCalcLength(const std::optional<CalcLength>& src)
+{
     PaddingProperty dst;
     if (src.has_value()) {
         dst.SetEdges(*src);
@@ -2511,6 +2514,18 @@ OHOS::Ace::TextMetrics Convert(const Ark_TextMetrics& src)
     return dst;
 }
 
+template<>
+std::set<SourceTool> Convert(const Array_SourceTool& src)
+{
+    std::set<SourceTool> dst = {};
+    auto length = Converter::Convert<int>(src.length);
+    for (int i = 0; i < length; i++) {
+        auto sourceToolItem = *(src.array + i);
+        SourceTool item = Converter::Convert<std::optional<SourceTool>>(sourceToolItem).value_or(SourceTool::UNKNOWN);
+        dst.insert(item);
+    }
+    return dst;
+}
 template<>
 std::set<std::string> Convert(const Array_uniformTypeDescriptor_UniformDataType& src)
 {

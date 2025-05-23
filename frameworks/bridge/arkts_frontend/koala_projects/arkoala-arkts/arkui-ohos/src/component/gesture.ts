@@ -199,60 +199,37 @@ export class PanGestureOptions implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    static ctor_pangestureoptions(value?: Literal_Number_distance_fingers_PanDirection_direction): KPointer {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
+    static ctor_pangestureoptions(value?: PanGestureHandlerOptions): KPointer {
+        const thisSerializer: Serializer = Serializer.hold()
+        let value_type: int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
+        thisSerializer.writeInt8(value_type)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            const value_value_fingers  = value_value.fingers
-            let value_value_fingers_type : int32 = RuntimeType.UNDEFINED
-            value_value_fingers_type = runtimeType(value_value_fingers)
-            thisSerializer.writeInt8(value_value_fingers_type as int32)
-            if ((RuntimeType.UNDEFINED) != (value_value_fingers_type)) {
-                const value_value_fingers_value  = value_value_fingers!
-                thisSerializer.writeNumber(value_value_fingers_value)
-            }
-            const value_value_direction  = value_value.direction
-            let value_value_direction_type : int32 = RuntimeType.UNDEFINED
-            value_value_direction_type = runtimeType(value_value_direction)
-            thisSerializer.writeInt8(value_value_direction_type as int32)
-            if ((RuntimeType.UNDEFINED) != (value_value_direction_type)) {
-                const value_value_direction_value  = (value_value_direction as PanDirection)
-                thisSerializer.writeInt32(TypeChecker.PanDirection_ToNumeric(value_value_direction_value))
-            }
-            const value_value_distance  = value_value.distance
-            let value_value_distance_type : int32 = RuntimeType.UNDEFINED
-            value_value_distance_type = runtimeType(value_value_distance)
-            thisSerializer.writeInt8(value_value_distance_type as int32)
-            if ((RuntimeType.UNDEFINED) != (value_value_distance_type)) {
-                const value_value_distance_value  = value_value_distance!
-                thisSerializer.writeNumber(value_value_distance_value)
-            }
+            const value_value = value!
+            thisSerializer.writePanGestureHandlerOptions(value_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._PanGestureOptions_ctor(thisSerializer.asBuffer(), thisSerializer.length())
+        const retval = ArkUIGeneratedNativeModule._PanGestureOptions_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-    constructor(value?: Literal_Number_distance_fingers_PanDirection_direction) {
-        const ctorPtr : KPointer = PanGestureOptions.ctor_pangestureoptions(value)
+    constructor(value?: PanGestureHandlerOptions) {
+        const ctorPtr: KPointer = PanGestureOptions.ctor_pangestureoptions(value)
         this.peer = new Finalizable(ctorPtr, PanGestureOptions.getFinalizer())
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._PanGestureOptions_getFinalizer()
     }
-    public setDirection(value: PanDirection): undefined {
+    public setDirection(value: PanDirection): void {
         const value_casted = value as (PanDirection)
-        return this.setDirection_serialize(value_casted)
+        this.setDirection_serialize(value_casted)
     }
-    public setDistance(value: number): undefined {
+    public setDistance(value: number): void {
         const value_casted = value as (number)
-        return this.setDistance_serialize(value_casted)
+        this.setDistance_serialize(value_casted)
     }
-    public setFingers(value: number): undefined {
+    public setFingers(value: number): void {
         const value_casted = value as (number)
-        return this.setFingers_serialize(value_casted)
+        this.setFingers_serialize(value_casted)
     }
     public getDirection(): PanDirection {
         return this.getDirection_serialize()
@@ -260,17 +237,14 @@ export class PanGestureOptions implements MaterializedBase {
     public getDistance(): number {
         return this.getDistance_serialize()
     }
-    private setDirection_serialize(value: PanDirection): undefined {
-        const retval  = ArkUIGeneratedNativeModule._PanGestureOptions_setDirection(this.peer!.ptr, TypeChecker.PanDirection_ToNumeric(value))
-        return retval
+    private setDirection_serialize(value: PanDirection): void {
+        ArkUIGeneratedNativeModule._PanGestureOptions_setDirection(this.peer!.ptr, TypeChecker.PanDirection_ToNumeric(value))
     }
-    private setDistance_serialize(value: number): undefined {
-        const retval  = ArkUIGeneratedNativeModule._PanGestureOptions_setDistance(this.peer!.ptr, value)
-        return retval
+    private setDistance_serialize(value: number): void {
+        ArkUIGeneratedNativeModule._PanGestureOptions_setDistance(this.peer!.ptr, value)
     }
-    private setFingers_serialize(value: number): undefined {
-        const retval  = ArkUIGeneratedNativeModule._PanGestureOptions_setFingers(this.peer!.ptr, value)
-        return retval
+    private setFingers_serialize(value: number): void {
+        ArkUIGeneratedNativeModule._PanGestureOptions_setFingers(this.peer!.ptr, value)
     }
     private getDirection_serialize(): PanDirection {
         const retval  = ArkUIGeneratedNativeModule._PanGestureOptions_getDirection(this.peer!.ptr)
@@ -1040,7 +1014,6 @@ export class GestureHandler {
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void { }
     addGestureToGroup(group: KPointer): void { }
 }
-// TODO: distanceThreshold
 export interface TapGestureHandlerOptions extends BaseHandlerOptions {
     count?: number;
     fingers?: number;
@@ -1069,6 +1042,9 @@ export class TapGestureHandler extends GestureHandler {
         }
         if (this.onActionCallback !== undefined) {
             GestureOps.setOnAction(this.pointer, this.onActionCallback as (((event: GestureEvent) => void)));
+        }
+        if (this.types !== undefined) {
+            GestureOps.setAllowedTypes(this.pointer, this.types as Array<SourceTool>);
         }
     }
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
@@ -1127,7 +1103,10 @@ export class LongPressGestureHandler extends GestureHandler {
             GestureOps.setOnActionEnd(this.pointer, this.onActionEndCallback as (Callback<GestureEvent>));
         }
         if (this.onActionCancelCallback !== undefined) {
-            GestureOps.setOnActionCancel(this.pointer, this.onActionCancelCallback as (() => void));
+            GestureOps.setOnActionCancel(this.pointer, this.onActionCancelCallback as (Callback<GestureEvent>));
+        }
+        if (this.types !== undefined) {
+            GestureOps.setAllowedTypes(this.pointer, this.types as Array<SourceTool>);
         }
     }
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
@@ -1194,7 +1173,10 @@ export class PanGestureHandler extends GestureHandler {
             GestureOps.setOnActionEnd(this.pointer, this.onActionEndCallback as (Callback<GestureEvent>));
         }
         if (this.onActionCancelCallback !== undefined) {
-            GestureOps.setOnActionCancel(this.pointer, this.onActionCancelCallback as (() => void));
+            GestureOps.setOnActionCancel(this.pointer, this.onActionCancelCallback as (Callback<GestureEvent>));
+        }
+        if (this.types !== undefined) {
+            GestureOps.setAllowedTypes(this.pointer, this.types as Array<SourceTool>);
         }
     }
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
@@ -1238,6 +1220,9 @@ export class SwipeGestureHandler extends GestureHandler {
         }
         if (this.onActionCallback !== undefined) {
             GestureOps.setOnAction(this.pointer, this.onActionCallback as ((Callback<GestureEvent>)));
+        }
+        if (this.types !== undefined) {
+            GestureOps.setAllowedTypes(this.pointer, this.types as Array<SourceTool>);
         }
     }
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
@@ -1301,7 +1286,10 @@ export class PinchGestureHandler extends GestureHandler {
             GestureOps.setOnActionEnd(this.pointer, this.onActionEndCallback as (Callback<GestureEvent>));
         }
         if (this.onActionCancelCallback !== undefined) {
-            GestureOps.setOnActionCancel(this.pointer, this.onActionCancelCallback as (() => void));
+            GestureOps.setOnActionCancel(this.pointer, this.onActionCancelCallback as (Callback<GestureEvent>));
+        }
+        if (this.types !== undefined) {
+            GestureOps.setAllowedTypes(this.pointer, this.types as Array<SourceTool>);
         }
     }
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
@@ -1365,7 +1353,10 @@ export class RotationGestureHandler extends GestureHandler {
             GestureOps.setOnActionEnd(this.pointer, this.onActionEndCallback as (Callback<GestureEvent>));
         }
         if (this.onActionCancelCallback !== undefined) {
-            GestureOps.setOnActionCancel(this.pointer, this.onActionCancelCallback as (() => void));
+            GestureOps.setOnActionCancel(this.pointer, this.onActionCancelCallback as (Callback<GestureEvent>));
+        }
+        if (this.types !== undefined) {
+            GestureOps.setAllowedTypes(this.pointer, this.types as Array<SourceTool>);
         }
     }
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
@@ -1405,9 +1396,18 @@ export class GestureGroupHandler extends GestureHandler {
         this.pointer = GestureOps.createGestureGroup(this.mode);
         return this.pointer;
     }
-    // TODO: check
     addGestureToGroup(group: KPointer): void {
         this.createGestureGroup();
+        for (let gesture of this.gestures) {
+            if (gesture instanceof Gesture) {
+                let singleGesture = gesture as Gesture;
+                singleGesture.addGestureToGroup(this.pointer);
+            }
+            if (gesture instanceof GestureGroup) {
+                let gestureGroup = gesture as GestureGroup;
+                gestureGroup.addGestureToGroup(this.pointer);
+            }
+        }
         GestureOps.addGestureToGroup(group, this.pointer);
     }
     addGestureGroupToNode(priority: number, node?: PeerNode, mask?: GestureMask): void {
@@ -1416,7 +1416,6 @@ export class GestureGroupHandler extends GestureHandler {
             GestureOps.setOnCancel(this.pointer, this.onCancelCallback as (() => void));
         }
         for (let gesture of this.gestures) {
-            // TODO: check
             if (gesture instanceof GestureGroupHandler) {
                 let gestureGroup = gesture as GestureGroupHandler;
                 gestureGroup.addGestureToGroup(this.pointer);
@@ -2467,6 +2466,9 @@ export class TapGesture extends Gesture {
         if (this.onActionCallback !== undefined) {
             GestureOps.setOnAction(this.pointer, this.onActionCallback as (Callback<GestureEvent>));
         }
+        if (this.types !== undefined) {
+            GestureOps.setAllowedTypes(this.pointer, this.types as Array<SourceTool>);
+        }
     }
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
         if (node) {
@@ -2520,7 +2522,10 @@ export class LongPressGesture extends Gesture {
             GestureOps.setOnActionEnd(this.pointer, this.onActionEndCallback as (Callback<GestureEvent>));
         }
         if (this.onActionCancelCallback !== undefined) {
-            GestureOps.setOnActionCancel(this.pointer, this.onActionCancelCallback as (() => void));
+            GestureOps.setOnActionCancel(this.pointer, this.onActionCancelCallback as (Callback<GestureEvent>));
+        }
+        if (this.types !== undefined) {
+            GestureOps.setAllowedTypes(this.pointer, this.types as Array<SourceTool>);
         }
     }
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
@@ -2540,6 +2545,7 @@ export class PanGesture extends Gesture {
     distance?: number;
     isFingerCountLimited?: boolean;
     pointer: KPointer = nullptr;
+    panGestureOptions?: PanGestureOptions;
     onActionStartCallback?: Callback<GestureEvent>;
     onActionUpdateCallback?: Callback<GestureEvent>;
     onActionEndCallback?: Callback<GestureEvent>;
@@ -2552,14 +2558,10 @@ export class PanGesture extends Gesture {
             pan.direction = options?.direction;
             pan.distance = options?.distance;
             pan.isFingerCountLimited = options?.isFingerCountLimited;
-        } else {
-            // TODO
-            // let panGestureOptions = value as PanGestureOptions;
-            // pan.finger = panGestureOptions?.;
-            // pan.direction = panGestureOptions?.direction;
-            // pan.distance = panGestureOptions?.distance;
+        } else if (value !== undefined) {
+            let panGestureOptions = value as PanGestureOptions;
+            pan.panGestureOptions = panGestureOptions;
         }
-        
         return pan;
     }
     onActionStart(event: Callback<GestureEvent>): this {
@@ -2579,7 +2581,11 @@ export class PanGesture extends Gesture {
         return this;
     }
     createAndSetPanGestureAttr(): void {
-        this.pointer = GestureOps.createPanGesture(this.finger ?? 1, this.direction ?? PanDirection.ALL, this.distance ?? 5, this.isFingerCountLimited ?? false);
+        if (this.panGestureOptions !== undefined) {
+            this.pointer = GestureOps.createPanGestureWithPanGestureOptions(this.panGestureOptions!.getPeer()!.ptr);
+        } else {
+            this.pointer = GestureOps.createPanGesture(this.finger ?? 1, this.direction ?? PanDirection.ALL, this.distance ?? 5, this.isFingerCountLimited ?? false);
+        }
         if (this.gestureTag !== undefined) {
             GestureOps.setGestureTag(this.pointer, this.gestureTag ?? "");
         }
@@ -2593,7 +2599,10 @@ export class PanGesture extends Gesture {
             GestureOps.setOnActionEnd(this.pointer, this.onActionEndCallback as (Callback<GestureEvent>));
         }
         if (this.onActionCancelCallback !== undefined) {
-            GestureOps.setOnActionCancel(this.pointer, this.onActionCancelCallback as (() => void));
+            GestureOps.setOnActionCancel(this.pointer, this.onActionCancelCallback as (Callback<GestureEvent>));
+        }
+        if (this.types !== undefined) {
+            GestureOps.setAllowedTypes(this.pointer, this.types as Array<SourceTool>);
         }
     }
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
@@ -2654,7 +2663,10 @@ export class PinchGesture extends Gesture {
             GestureOps.setOnActionEnd(this.pointer, this.onActionEndCallback as (Callback<GestureEvent>));
         }
         if (this.onActionCancelCallback !== undefined) {
-            GestureOps.setOnActionCancel(this.pointer, this.onActionCancelCallback as (() => void));
+            GestureOps.setOnActionCancel(this.pointer, this.onActionCancelCallback as (Callback<GestureEvent>));
+        }
+        if (this.types !== undefined) {
+            GestureOps.setAllowedTypes(this.pointer, this.types as Array<SourceTool>);
         }
     }
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
@@ -2715,7 +2727,10 @@ export class RotationGesture extends Gesture {
             GestureOps.setOnActionEnd(this.pointer, this.onActionEndCallback as (Callback<GestureEvent>));
         }
         if (this.onActionCancelCallback !== undefined) {
-            GestureOps.setOnActionCancel(this.pointer, this.onActionCancelCallback as (() => void));
+            GestureOps.setOnActionCancel(this.pointer, this.onActionCancelCallback as (Callback<GestureEvent>));
+        }
+        if (this.types !== undefined) {
+            GestureOps.setAllowedTypes(this.pointer, this.types as Array<SourceTool>);
         }
     }
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
@@ -2756,6 +2771,9 @@ export class SwipeGesture extends Gesture {
         if (this.onActionCallback !== undefined) {
             GestureOps.setOnAction(this.pointer, this.onActionCallback as ((Callback<GestureEvent>)));
         }
+        if (this.types !== undefined) {
+            GestureOps.setAllowedTypes(this.pointer, this.types as Array<SourceTool>);
+        }
     }
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
         if (node) {
@@ -2787,9 +2805,18 @@ export class GestureGroup {
         this.pointer = GestureOps.createGestureGroup(this.mode);
         return this.pointer;
     }
-    // TODO: check
     addGestureToGroup(group: KPointer): void {
         this.createGestureGroup();
+        for (let gesture of this.gestures) {
+            if (gesture instanceof Gesture) {
+                let singleGesture = gesture as Gesture;
+                singleGesture.addGestureToGroup(this.pointer);
+            }
+            if (gesture instanceof GestureGroup) {
+                let gestureGroup = gesture as GestureGroup;
+                gestureGroup.addGestureToGroup(this.pointer);
+            }
+        }
         GestureOps.addGestureToGroup(group, this.pointer);
     }
     addGestureGroupToNode(priority: number, node?: PeerNode, mask?: GestureMask): void {
@@ -2802,7 +2829,6 @@ export class GestureGroup {
                 let singleGesture = gesture as Gesture;
                 singleGesture.addGestureToGroup(this.pointer);
             }
-            // TODO: check
             if (gesture instanceof GestureGroup) {
                 let gestureGroup = gesture as GestureGroup;
                 gestureGroup.addGestureToGroup(this.pointer);

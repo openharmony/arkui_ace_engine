@@ -41,7 +41,7 @@ import { PixelMap, PixelMapInternal } from "./arkui-pixelmap"
 import { SymbolEffectStrategy, SymbolRenderingStrategy } from "./symbolglyph"
 import { Callback_GestureEvent_Void, GestureEvent } from "./gesture"
 import { OnHoverCallback, MenuCallback } from "./sdk-stubs"
-import { ColorMetrics } from "./arkui-external"
+import { ColorMetrics } from "../Graphics"
 
 import { CustomNodeBuilder } from "./customBuilder"
 export class RichEditorBaseControllerInternal {

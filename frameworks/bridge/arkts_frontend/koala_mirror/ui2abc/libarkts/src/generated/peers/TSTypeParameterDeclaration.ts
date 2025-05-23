@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { TSTypeParameter } from "./TSTypeParameter"
 export class TSTypeParameterDeclaration extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 118)
+        assertValidPeer(pointer, 119)
         super(pointer)
     }
     static createTSTypeParameterDeclaration(params: readonly TSTypeParameter[], requiredParams: number): TSTypeParameterDeclaration {

@@ -15,27 +15,14 @@
 
 #include "frameworks/core/pipeline/base/element_register.h"
 
-#include "core/common/multi_thread_build_manager.h"
 #include "core/components_v2/common/element_proxy.h"
 
 namespace OHOS::Ace {
 thread_local ElementRegister* ElementRegister::instance_ = nullptr;
 std::mutex ElementRegister::mutex_;
 
-ElementRegister* ElementRegister::GetGlobalInstance()
-{
-    if (!ElementRegister::instance_ && MultiThreadBuildManager::IsOnUIThread()) {
-        ElementRegister::instance_ = new ElementRegister();
-    }
-    static ElementRegister* globalInstance = ElementRegister::instance_;
-    return globalInstance;
-}
-
 ElementRegister* ElementRegister::GetInstance()
 {
-    if (MultiThreadBuildManager::IsThreadSafeScope()) {
-        return GetGlobalInstance();
-    }
     if (ElementRegister::instance_ == nullptr) {
         std::lock_guard<std::mutex> lock(mutex_);
         if (!ElementRegister::instance_) {
@@ -59,15 +46,8 @@ RefPtr<AceType> ElementRegister::GetNodeById(ElementIdType elementId)
     if (elementId == ElementRegister::UndefinedElementId) {
         return nullptr;
     }
-    if (!MultiThreadBuildManager::IsThreadSafeScopeOnSubThread()) {
-        auto position = itemMap_.find(elementId);
-        if (position != itemMap_.end()) {
-            return position->second.Upgrade();
-        }
-    }
-    std::lock_guard<std::mutex> lock(itemSafeMapMutex_);
-    auto position = itemSafeMap_.find(elementId);
-    return position == itemSafeMap_.end() ? nullptr : position->second.Upgrade();
+    auto position = itemMap_.find(elementId);
+    return position == itemMap_.end() ? nullptr : position->second.Upgrade();
 }
 
 RefPtr<V2::ElementProxy> ElementRegister::GetElementProxyById(ElementIdType elementId)
@@ -78,44 +58,19 @@ RefPtr<V2::ElementProxy> ElementRegister::GetElementProxyById(ElementIdType elem
 
 bool ElementRegister::Exists(ElementIdType elementId)
 {
-    return ExistsUnSafely(elementId) || ExistsSafely(elementId);
-}
-
-bool ElementRegister::ExistsUnSafely(ElementIdType elementId)
-{
     return (itemMap_.find(elementId) != itemMap_.end());
-}
-
-bool ElementRegister::ExistsSafely(ElementIdType elementId)
-{
-    std::lock_guard<std::mutex> lock(itemSafeMapMutex_);
-    return (itemSafeMap_.find(elementId) != itemSafeMap_.end());
 }
 
 void ElementRegister::UpdateRecycleElmtId(int32_t oldElmtId, int32_t newElmtId)
 {
-    auto node = GetNodeById(oldElmtId);
-    if (!node) {
+    if (!Exists(oldElmtId)) {
         return;
     }
-    if (ExistsUnSafely(oldElmtId)) {
+    auto node = GetNodeById(oldElmtId);
+    if (node) {
         itemMap_.erase(oldElmtId);
         AddReferenced(newElmtId, node);
-    } else {
-        std::lock_guard<std::mutex> lock(itemSafeMapMutex_);
-        itemSafeMap_.erase(oldElmtId);
-        AddReferencedSafely(newElmtId, node);
     }
-}
-
-bool ElementRegister::AddReferencedSafely(ElementIdType elmtId, const WeakPtr<AceType>& referenced)
-{
-    std::lock_guard<std::mutex> lock(itemSafeMapMutex_);
-    auto result = itemSafeMap_.emplace(elmtId, referenced);
-    if (!result.second) {
-        LOGE("Duplicate elmtId %{public}d error.", elmtId);
-    }
-    return result.second;
 }
 
 bool ElementRegister::AddReferenced(ElementIdType elmtId, const WeakPtr<AceType>& referenced)
@@ -158,15 +113,8 @@ RefPtr<NG::UINode> ElementRegister::GetUINodeById(ElementIdType elementId)
     if (elementId == ElementRegister::UndefinedElementId) {
         return nullptr;
     }
-    if (!MultiThreadBuildManager::IsThreadSafeScopeOnSubThread()) {
-        auto iter = itemMap_.find(elementId);
-        if (iter != itemMap_.end()) {
-            return AceType::DynamicCast<NG::UINode>(iter->second).Upgrade();
-        }
-    }
-    std::lock_guard<std::mutex> lock(itemSafeMapMutex_);
-    auto iter = itemSafeMap_.find(elementId);
-    return iter == itemSafeMap_.end() ? nullptr : AceType::DynamicCast<NG::UINode>(iter->second).Upgrade();
+    auto iter = itemMap_.find(elementId);
+    return iter == itemMap_.end() ? nullptr : AceType::DynamicCast<NG::UINode>(iter->second).Upgrade();
 }
 
 NG::FrameNode* ElementRegister::GetFrameNodePtrById(ElementIdType elementId)
@@ -174,15 +122,10 @@ NG::FrameNode* ElementRegister::GetFrameNodePtrById(ElementIdType elementId)
     if (elementId == ElementRegister::UndefinedElementId) {
         return nullptr;
     }
-    if (!MultiThreadBuildManager::IsThreadSafeScopeOnSubThread()) {
-        auto iter = itemMap_.find(elementId);
-        if (iter != itemMap_.end()) {
-            auto node = AceType::DynamicCast<NG::FrameNode>(iter->second.Upgrade());
-            return AceType::RawPtr(node);
-        }
+    auto iter = itemMap_.find(elementId);
+    if (iter == itemMap_.end()) {
+        return nullptr;
     }
-    std::lock_guard<std::mutex> lock(itemSafeMapMutex_);
-    auto iter = itemSafeMap_.find(elementId);
     auto node = AceType::DynamicCast<NG::FrameNode>(iter->second.Upgrade());
     return AceType::RawPtr(node); // warning: returning an unsafe rawptr !!!
 }
@@ -193,11 +136,7 @@ bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
         return false;
     }
 
-    if (node->IsMultiThreadNode()) {
-        return AddReferencedSafely(node->GetId(), node);
-    } else {
-        return AddReferenced(node->GetId(), node);
-    }
+    return AddReferenced(node->GetId(), node);
 }
 
 bool ElementRegister::RemoveItem(ElementIdType elementId)
@@ -205,18 +144,9 @@ bool ElementRegister::RemoveItem(ElementIdType elementId)
     if (elementId == ElementRegister::UndefinedElementId) {
         return false;
     }
-    bool removed = false;
-    if (!MultiThreadBuildManager::IsThreadSafeScopeOnSubThread()) {
-        removed = itemMap_.erase(elementId);
-        if (removed) {
-            removedItems_.insert(elementId);
-            return removed;
-        }
-    }
-    std::lock_guard<std::mutex> lock(itemSafeMapMutex_);
-    removed = itemSafeMap_.erase(elementId);
+    auto removed = itemMap_.erase(elementId);
     if (removed) {
-        removedSafelyItems_.insert(elementId);
+        removedItems_.insert(elementId);
     }
     return removed;
 }
@@ -226,26 +156,15 @@ bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
     if (elementId == ElementRegister::UndefinedElementId) {
         return false;
     }
-    bool removed = false;
-    if (!MultiThreadBuildManager::IsThreadSafeScopeOnSubThread()) {
-        removed = itemMap_.erase(elementId);
-    }
-    if (!removed) {
-        std::lock_guard<std::mutex> lock(itemSafeMapMutex_);
-        removed = itemSafeMap_.erase(elementId);
-    }
+
+    auto removed = itemMap_.erase(elementId);
     return removed;
 }
 
 void ElementRegister::MoveRemovedItems(RemovedElementsType& removedItems)
 {
-    if (!MultiThreadBuildManager::IsThreadSafeScopeOnSubThread()) {
-        removedItems = removedItems_;
-        removedItems_.clear();
-    }
-    std::lock_guard<std::mutex> lock(itemSafeMapMutex_);
-    removedItems.insert(removedSafelyItems_.begin(), removedSafelyItems_.end());
-    removedSafelyItems_.clear();
+    removedItems = removedItems_;
+    removedItems_.clear();
 }
 
 void ElementRegister::Clear()
@@ -253,15 +172,7 @@ void ElementRegister::Clear()
     itemMap_.clear();
     removedItems_.clear();
     geometryTransitionMap_.clear();
-    {
-        std::lock_guard<std::mutex> lock(pendingRemoveNodesMutex_);
-        pendingRemoveNodes_.clear();
-    }
-    {
-        std::lock_guard<std::mutex> lock(itemSafeMapMutex_);
-        itemSafeMap_.clear();
-        removedSafelyItems_.clear();
-    }
+    pendingRemoveNodes_.clear();
 }
 
 RefPtr<NG::GeometryTransition> ElementRegister::GetOrCreateGeometryTransition(
@@ -297,39 +208,30 @@ void ElementRegister::DumpGeometryTransition()
 
 void ElementRegister::ReSyncGeometryTransition(const WeakPtr<NG::FrameNode>& trigger, const AnimationOption& option)
 {
-    auto node = trigger.Upgrade();
-    MultiThreadBuildManager::TryExecuteUnSafeTask(AceType::RawPtr(node), [this, trigger, option]() {
-        for (auto iter = geometryTransitionMap_.begin(); iter != geometryTransitionMap_.end();) {
-            if (!iter->second || iter->second->IsInAndOutEmpty()) {
-                iter = geometryTransitionMap_.erase(iter);
-            } else {
-                iter->second->OnReSync(trigger, option);
-                ++iter;
-            }
+    for (auto iter = geometryTransitionMap_.begin(); iter != geometryTransitionMap_.end();) {
+        if (!iter->second || iter->second->IsInAndOutEmpty()) {
+            iter = geometryTransitionMap_.erase(iter);
+        } else {
+            iter->second->OnReSync(trigger, option);
+            ++iter;
         }
-    });
+    }
 }
 
 void ElementRegister::AddPendingRemoveNode(const RefPtr<NG::UINode>& node)
 {
-    std::lock_guard<std::mutex> lock(pendingRemoveNodesMutex_);
     pendingRemoveNodes_.emplace_back(node);
 }
 
 void ElementRegister::ClearPendingRemoveNodes()
 {
-    std::lock_guard<std::mutex> lock(pendingRemoveNodesMutex_);
     pendingRemoveNodes_.clear();
 }
 
 RefPtr<NG::FrameNode> ElementRegister::GetAttachedFrameNodeById(const std::string& key, bool willGetAll)
 {
     auto it = inspectorIdMap_.find(key);
-    if (it == inspectorIdMap_.end()) {
-        std::lock_guard<std::mutex> lock(inspectorIdSafeMapMutex_);
-        it = inspectorIdSafeMap_.find(key);
-        CHECK_NULL_RETURN(it != inspectorIdSafeMap_.end(), nullptr);
-    }
+    CHECK_NULL_RETURN(it != inspectorIdMap_.end(), nullptr);
     CHECK_NULL_RETURN(!it->second.empty(), nullptr);
     int32_t depth = INT32_MAX;
     RefPtr<NG::FrameNode> frameNode;
@@ -350,17 +252,6 @@ RefPtr<NG::FrameNode> ElementRegister::GetAttachedFrameNodeById(const std::strin
 
 void ElementRegister::AddFrameNodeByInspectorId(const std::string& key, const WeakPtr<NG::FrameNode>& node)
 {
-    if (node.Upgrade() && node.Upgrade()->IsMultiThreadNode()) {
-        std::lock_guard<std::mutex> lock(inspectorIdSafeMapMutex_);
-        auto it = inspectorIdSafeMap_.find(key);
-        if (it != inspectorIdSafeMap_.end()) {
-            it->second.push_back(node);
-        } else {
-            std::list<WeakPtr<NG::FrameNode>> nodeList = { node };
-            inspectorIdSafeMap_.try_emplace(key, nodeList);
-        }
-        return;
-    }
     auto it = inspectorIdMap_.find(key);
     if (it != inspectorIdMap_.end()) {
         it->second.push_back(node);
@@ -370,21 +261,8 @@ void ElementRegister::AddFrameNodeByInspectorId(const std::string& key, const We
     }
 }
 
-void ElementRegister::RemoveFrameNodeByInspectorId(const std::string& key, int32_t nodeId, bool isMultiThreadNode)
+void ElementRegister::RemoveFrameNodeByInspectorId(const std::string& key, int32_t nodeId)
 {
-    if (isMultiThreadNode) {
-        std::lock_guard<std::mutex> lock(inspectorIdSafeMapMutex_);
-        auto it = inspectorIdSafeMap_.find(key);
-        CHECK_NULL_VOID(it != inspectorIdSafeMap_.end());
-        CHECK_NULL_VOID(!it->second.empty());
-        it->second.remove_if([nodeId](const WeakPtr<NG::FrameNode>& node) {
-            return (!node.Upgrade()) || (node.Upgrade()->GetId() == nodeId);
-        });
-        if (it->second.empty()) {
-            inspectorIdSafeMap_.erase(it);
-        }
-        return;
-    }
     auto it = inspectorIdMap_.find(key);
     CHECK_NULL_VOID(it != inspectorIdMap_.end());
     CHECK_NULL_VOID(!it->second.empty());

@@ -33,7 +33,7 @@ import { Es2pandaTokenType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 export class UpdateExpression extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 148)
+        assertValidPeer(pointer, 149)
         super(pointer)
     }
     static createUpdateExpression(argument: Expression | undefined, updateOperator: Es2pandaTokenType, isPrefix: boolean): UpdateExpression {

@@ -32,13 +32,13 @@ class PanGestureOptionsAccessorTest : public AccessorTestCtorBase<GENERATED_ArkU
 public:
     void *CreatePeerInstance() override
     {
-        const Ark_Literal_Number_distance_fingers_PanDirection_direction ARK_DEFAULT_SETTINGS = {
+        const Ark_PanGestureHandlerOptions ARK_DEFAULT_SETTINGS = {
             .fingers = Converter::ArkValue<Opt_Number>(1),
             .direction = Converter::ArkValue<Opt_PanDirection>(ARK_PAN_DIRECTION_ALL),
             .distance = Converter::ArkValue<Opt_Number>(5),
         };
-        const Opt_Literal_Number_distance_fingers_PanDirection_direction DEFAULT_SETTINGS =
-            Converter::ArkValue<Opt_Literal_Number_distance_fingers_PanDirection_direction>(ARK_DEFAULT_SETTINGS);
+        const Opt_PanGestureHandlerOptions DEFAULT_SETTINGS =
+            Converter::ArkValue<Opt_PanGestureHandlerOptions>(ARK_DEFAULT_SETTINGS);
 
         return accessor_->ctor(&DEFAULT_SETTINGS);
     }

@@ -19,7 +19,7 @@
 import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { Rect } from "./arkui-graphics"
+import { Rect } from "./../Graphics"
 export enum Affinity {
     UPSTREAM = 0,
     DOWNSTREAM = 1

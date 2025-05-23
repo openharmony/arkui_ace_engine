@@ -96,8 +96,8 @@ HWTEST_F(WebModifierTest2, onOverScrollTest, TestSize.Level1)
 
     Callback_OnOverScrollEvent_Void arkCallback =
         Converter::ArkValue<Callback_OnOverScrollEvent_Void>(checkCallback, contextId);
-
-    modifier_->setOnOverScroll(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_OnOverScrollEvent_Void>(arkCallback);
+    modifier_->setOnOverScroll(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnOverScrollEvent(std::make_shared<WebOnOverScrollEvent>(xOffset, yOffset));
@@ -133,8 +133,8 @@ HWTEST_F(WebModifierTest2, onSafeBrowsingCheckResultTest, TestSize.Level1)
 
     OnSafeBrowsingCheckResultCallback arkCallback =
         Converter::ArkValue<OnSafeBrowsingCheckResultCallback>(checkCallback, contextId);
-
-    modifier_->setOnSafeBrowsingCheckResult(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_OnSafeBrowsingCheckResultCallback>(arkCallback);
+    modifier_->setOnSafeBrowsingCheckResult(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnSafeBrowsingCheckResultEvent(
@@ -183,8 +183,8 @@ HWTEST_F(WebModifierTest2, onNavigationEntryCommittedTest, TestSize.Level1)
 
     OnNavigationEntryCommittedCallback arkCallback =
         Converter::ArkValue<OnNavigationEntryCommittedCallback>(checkCallback, contextId);
-
-    modifier_->setOnNavigationEntryCommitted(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_OnNavigationEntryCommittedCallback>(arkCallback);
+    modifier_->setOnNavigationEntryCommitted(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnNavigationEntryCommittedEvent(
@@ -227,8 +227,8 @@ HWTEST_F(WebModifierTest2, onIntelligentTrackingPreventionResultTest, TestSize.L
 
     OnIntelligentTrackingPreventionCallback arkCallback =
         Converter::ArkValue<OnIntelligentTrackingPreventionCallback>(checkCallback, contextId);
-
-    modifier_->setOnIntelligentTrackingPreventionResult(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_OnIntelligentTrackingPreventionCallback>(arkCallback);
+    modifier_->setOnIntelligentTrackingPreventionResult(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnIntelligentTrackingPreventionResultEvent(
@@ -268,8 +268,8 @@ HWTEST_F(WebModifierTest2, onNativeEmbedVisibilityChangeTest, TestSize.Level1)
 
     OnNativeEmbedVisibilityChangeCallback arkCallback =
         Converter::ArkValue<OnNativeEmbedVisibilityChangeCallback>(checkCallback, contextId);
-
-    modifier_->setOnNativeEmbedVisibilityChange(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_OnNativeEmbedVisibilityChangeCallback>(arkCallback);
+    modifier_->setOnNativeEmbedVisibilityChange(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnNativeEmbedVisibilityChangeEvent(std::make_shared<NativeEmbedVisibilityInfo>(
@@ -316,8 +316,8 @@ HWTEST_F(WebModifierTest2, onOverrideUrlLoadingTest, TestSize.Level1)
 
     OnOverrideUrlLoadingCallback arkCallback =
         Converter::ArkValue<OnOverrideUrlLoadingCallback>(nullptr, checkCallback, contextId);
-
-    modifier_->setOnOverrideUrlLoading(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_OnOverrideUrlLoadingCallback>(arkCallback);
+    modifier_->setOnOverrideUrlLoading(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent.has_value());
     const auto event = webEventHub->GetOnOverrideUrlLoadingEvent();
@@ -365,8 +365,8 @@ HWTEST_F(WebModifierTest2, onRenderProcessNotRespondingTest, TestSize.Level1)
 
     OnRenderProcessNotRespondingCallback arkCallback =
         Converter::ArkValue<OnRenderProcessNotRespondingCallback>(checkCallback, contextId);
-
-    modifier_->setOnRenderProcessNotResponding(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_OnRenderProcessNotRespondingCallback>(arkCallback);
+    modifier_->setOnRenderProcessNotResponding(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnRenderProcessNotRespondingEvent(std::make_shared<RenderProcessNotRespondingEvent>(
@@ -402,8 +402,8 @@ HWTEST_F(WebModifierTest2, onRenderProcessRespondingTest, TestSize.Level1)
 
     OnRenderProcessRespondingCallback arkCallback =
         Converter::ArkValue<OnRenderProcessRespondingCallback>(checkCallback, contextId);
-
-    modifier_->setOnRenderProcessResponding(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_OnRenderProcessRespondingCallback>(arkCallback);
+    modifier_->setOnRenderProcessResponding(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnRenderProcessRespondingEvent(std::make_shared<BaseEventInfo>(type));
@@ -437,8 +437,8 @@ HWTEST_F(WebModifierTest2, onViewportFitChangedTest, TestSize.Level1)
 
     OnViewportFitChangedCallback arkCallback =
         Converter::ArkValue<OnViewportFitChangedCallback>(checkCallback, contextId);
-
-    modifier_->setOnViewportFitChanged(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_OnViewportFitChangedCallback>(arkCallback);
+    modifier_->setOnViewportFitChanged(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnViewportFitChangedEvent(std::make_shared<ViewportFitChangedEvent>(
@@ -483,8 +483,8 @@ HWTEST_F(WebModifierTest2, onInterceptKeyboardAttachTest, TestSize.Level1)
     };
 
     WebKeyboardCallback arkCallback = Converter::ArkValue<WebKeyboardCallback>(nullptr, checkCallback, contextId);
-
-    modifier_->setOnInterceptKeyboardAttach(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_WebKeyboardCallback>(arkCallback);
+    modifier_->setOnInterceptKeyboardAttach(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent.has_value());
     const auto event = webEventHub->GetOnInterceptKeyboardAttachEvent();
@@ -533,7 +533,8 @@ HWTEST_F(WebModifierTest2, setOnInterceptKeyEventTest, TestSize.Level1)
         CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(true));
     };
     auto arkCallback = Converter::ArkValue<Callback_KeyEvent_Boolean>(nullptr, checkCallback, contextId);
-    modifier_->setOnInterceptKeyEvent(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_KeyEvent_Boolean>(arkCallback);
+    modifier_->setOnInterceptKeyEvent(node_, &optCallback);
 
     auto callback = webEventHub->GetOnPreKeyEvent();
     ASSERT_NE(callback, nullptr);
@@ -577,8 +578,8 @@ HWTEST_F(WebModifierTest2, onAdsBlockedTest, TestSize.Level1)
     };
 
     OnAdsBlockedCallback arkCallback = Converter::ArkValue<OnAdsBlockedCallback>(checkCallback, contextId);
-
-    modifier_->setOnAdsBlocked(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_OnAdsBlockedCallback>(arkCallback);
+    modifier_->setOnAdsBlocked(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnAdsBlockedEvent(std::make_shared<AdsBlockedEvent>(url, adsBlocked));
@@ -618,8 +619,8 @@ HWTEST_F(WebModifierTest2, onNativeEmbedLifecycleChangeTest, TestSize.Level1)
 
     Callback_NativeEmbedDataInfo_Void arkCallback =
         Converter::ArkValue<Callback_NativeEmbedDataInfo_Void>(checkCallback, contextId);
-
-    modifier_->setOnNativeEmbedLifecycleChange(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_NativeEmbedDataInfo_Void>(arkCallback);
+    modifier_->setOnNativeEmbedLifecycleChange(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnNativeEmbedLifecycleChangeEvent(std::make_shared<NativeEmbedDataInfo>(
@@ -669,8 +670,8 @@ HWTEST_F(WebModifierTest2, onNativeEmbedGestureEventTest, TestSize.Level1)
 
     Callback_NativeEmbedTouchInfo_Void arkCallback =
         Converter::ArkValue<Callback_NativeEmbedTouchInfo_Void>(checkCallback, contextId);
-
-    modifier_->setOnNativeEmbedGestureEvent(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_NativeEmbedTouchInfo_Void>(arkCallback);
+    modifier_->setOnNativeEmbedGestureEvent(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     auto info = std::make_shared<NativeEmbeadTouchInfo>(embedId, touchEventInfo, param);

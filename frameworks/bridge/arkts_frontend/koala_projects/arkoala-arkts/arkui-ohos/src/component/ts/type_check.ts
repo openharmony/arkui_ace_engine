@@ -31,7 +31,7 @@ import { AutoCapitalizationMode, KeyboardAppearance, LayoutManager, PositionWith
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, GuideLinePosition, GuideLineStyle, LocalizedBarrierStyle } from "./../relativeContainer"
 import { BarStyle, LaunchMode, NavBarPosition, NavigationMenuItem, ToolbarItem, NavigationOperation, NavigationTitleOptions, NavigationMenuOptions, NavigationToolbarOptions, NavigationAttribute, Tuple_Dimension_Dimension, NavigationMode, NavigationTitleMode, Callback_NavigationTitleMode_Void, Callback_Boolean_Void, Callback_NavigationMode_Void, Callback_String_Opt_Object_Void, Type_NavigationAttribute_customNavContentTransition_delegate, NavContentInfo, NavigationAnimatedTransition, NavigationCommonTitle, NavigationCustomTitle, NavPathInfo, NavPathStack, NavigationOptions, Callback_PopInfo_Void, PopInfo, NavigationInterception, ToolbarItemStatus, Callback_NavigationTransitionProxy_Void, NavigationTransitionProxy, InterceptionShowCallback, NavBar, InterceptionModeCallback, MoreButtonOptions } from "./../navigation"
-import { BaseShape, CircleShape, ShapeSize, CommonShape, WebviewController, Summary, EllipseShape, ImageModifier, IntentionCode, RectWidthStyle, RectHeightStyle, SymbolGlyphModifier, PathShape, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShape, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, ColorMetrics, SnapshotOptions, LabelStyle } from "./../arkui-external"
+import { BaseShape, CircleShape, ShapeSize, CommonShape, WebviewController, Summary, EllipseShape, ImageModifier, IntentionCode, RectWidthStyle, RectHeightStyle, SymbolGlyphModifier, PathShape, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShape, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, SnapshotOptions, LabelStyle } from "./../arkui-external"
 import { ReplaceSymbolEffect, ScaleSymbolEffect, SymbolEffect, EffectDirection, EffectScope } from "../symbolglyph"
 import { FontOptions, FontInfo } from "@ohos/font/font"
 import { MeasureOptions } from "@ohos/measure"
@@ -53,8 +53,7 @@ import { ContentModifier, WrappedBuilder, CommonConfiguration, Callback_WrappedB
 import { ContentType, EnterKeyType, InputType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback, TextInputAttribute, OnSubmitCallback, TextInputStyle, PasswordIcon, UnderlineColor, TextInputController, TextInputOptions } from "./../textInput"
 import { CustomDialogController, CustomDialogControllerOptions } from "./../customDialogController"
 import { CustomSpan, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, GestureStyle, GestureStyleInterface, StyledString, MutableStyledString, StyleOptions, SpanStyle, ImageAttachment, StyledStringKey, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback, DecorationStyleInterface, UrlStyle, BaselineOffsetStyle, LetterSpacingStyle, LineHeightStyle, TextShadowStyle, DecorationStyle, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInterface, TextStyle_styled_string, TextStyleInterface, BackgroundColorStyle, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../styledString"
-import { DrawContext, Rect, LengthUnit, ShapeClip, RoundRect, Circle, CommandPath, ShapeMask, Size, Vector2, Vector3, BorderRadiuses_graphics, CornerRadius, Edges, Frame, Matrix4 } from "./../arkui-graphics"
-import { LengthMetrics, LengthMetricsUnit } from "../../Graphics"
+import { DrawContext, Rect, LengthUnit, ShapeClip, RoundRect, Circle, CommandPath, ShapeMask, Size, Vector2, Vector3, CornerRadius, Edges, Frame, Matrix4, ColorMetrics, LengthMetrics, LengthMetricsUnit } from "./../../Graphics"
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, ColorStop, LinearGradient, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
 import { DatePickerMode, DatePickerOptions, DatePickerResult, LunarSwitchStyle, DatePickerDialogOptions, Callback_DatePickerResult_Void } from "./../datePicker"
@@ -147,12 +146,11 @@ import { PluginComponentTemplate, PluginErrorData, PluginComponentOptions } from
 import { PolygonOptions } from "./../polygon"
 import { PolylineOptions } from "./../polyline"
 import { RatingOptions, StarStyleOptions } from "./../rating"
-import { RenderNode } from "./../arkui-rendernode"
+import { RenderNode } from "./../../RenderNode"
 import { RoundedRectOptions, RectOptions, RadiusItem } from "./../rect"
 import { RowOptions, RowOptionsV2 } from "./../row"
 import { StackOptions } from "./../stack"
 import { TransformationMatrix } from "./../arkui-common"
-import { VirtualScrollOptions } from "./../repeat"
 import { Want } from "./../ohos.app.ability"
 import { FlexSpaceOptions, FlexOptions } from "./../flex"
 import { ImageFrameInfo } from "./../imageAnimator"
@@ -18431,17 +18429,6 @@ export class TypeChecker {
         }
         else {
             throw new Error("Can not discriminate value typeof ViewportRect")
-        }
-    }
-    static isVirtualScrollOptions(value: Object | string | number | undefined | boolean, duplicated_totalCount: boolean, duplicated_reusable: boolean): boolean {
-        if ((!duplicated_totalCount) && (value?.hasOwnProperty("totalCount"))) {
-            return true
-        }
-        else if ((!duplicated_reusable) && (value?.hasOwnProperty("reusable"))) {
-            return true
-        }
-        else {
-            throw new Error("Can not discriminate value typeof VirtualScrollOptions")
         }
     }
     static isVisibility(value: Object | string | number | undefined | boolean): boolean {

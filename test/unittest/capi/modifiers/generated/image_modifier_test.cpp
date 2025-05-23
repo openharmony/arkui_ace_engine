@@ -339,15 +339,15 @@ HWTEST_F(ImageModifierTest, setAltTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ImageModifierTest, DISABLED_setAltTestAltValidValues, TestSize.Level1)
 {
-    Ark_Union_String_Resource_PixelMap initValueAlt;
+    Ark_Union_String_Resource_Image_PixelMap initValueAlt;
 
     // Initial setup
-    initValueAlt = ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_String>(
+    initValueAlt = ArkUnion<Ark_Union_String_Resource_Image_PixelMap, Ark_String>(
         std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueAlt](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_String_Resource_PixelMap& value) {
-        Ark_Union_String_Resource_PixelMap inputValueAlt = initValueAlt;
+                          const Ark_Union_String_Resource_Image_PixelMap& value) {
+        Ark_Union_String_Resource_Image_PixelMap inputValueAlt = initValueAlt;
 
         inputValueAlt = value;
         modifier_->setAlt(node_, &inputValueAlt);
@@ -357,7 +357,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setAltTestAltValidValues, TestSize.Level1)
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Ark_Union_String_Resource_Image_PixelMap, Ark_String>(value));
     }
     ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
 }
@@ -369,14 +369,14 @@ HWTEST_F(ImageModifierTest, DISABLED_setAltTestAltValidValues, TestSize.Level1)
  */
 HWTEST_F(ImageModifierTest, DISABLED_setAltTestAltInvalidValues, TestSize.Level1)
 {
-    Ark_Union_String_Resource_PixelMap initValueAlt;
+    Ark_Union_String_Resource_Image_PixelMap initValueAlt;
 
     // Initial setup
-    initValueAlt = ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_String>(
+    initValueAlt = ArkUnion<Ark_Union_String_Resource_Image_PixelMap, Ark_String>(
         std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
-    auto checkValue = [this, &initValueAlt](const std::string& input, const Ark_Union_String_Resource_PixelMap& value) {
-        Ark_Union_String_Resource_PixelMap inputValueAlt = initValueAlt;
+    auto checkValue = [this, &initValueAlt](const std::string& input, const Ark_Union_String_Resource_Image_PixelMap& value) {
+        Ark_Union_String_Resource_Image_PixelMap inputValueAlt = initValueAlt;
 
         modifier_->setAlt(node_, &inputValueAlt);
         inputValueAlt = value;
@@ -389,7 +389,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setAltTestAltInvalidValues, TestSize.Level1
 
     ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Ark_Union_String_Resource_Image_PixelMap, Ark_Empty>(nullptr));
 }
 
 /*

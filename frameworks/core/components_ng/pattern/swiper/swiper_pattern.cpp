@@ -35,7 +35,6 @@
 #include "core/animation/curves.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/container_scope.h"
-#include "core/common/multi_thread_build_manager.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -122,11 +121,7 @@ void SwiperPattern::OnAttachToFrameNode()
     auto indicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(indicatorTheme);
     renderContext->UpdateClipEdge(indicatorTheme->GetClipEdge());
-    MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->InitSurfaceChangedCallback();
-    });
+    InitSurfaceChangedCallback();
 }
 
 void SwiperPattern::OnDetachFromFrameNode(FrameNode* node)
@@ -1543,6 +1538,7 @@ void SwiperPattern::FireAnimationStartEvent(
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
+    host->SuggestOpIncGroup();
 }
 
 void SwiperPattern::FireAnimationEndEvent(
@@ -2125,15 +2121,6 @@ bool SwiperPattern::IsInFastAnimation() const
 
 void SwiperPattern::ChangeIndex(int32_t index, SwiperAnimationMode mode)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host), [weak = WeakClaim(this), index, mode]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->ChangeIndex(index, mode);
-    })) {
-        return;
-    }
     int32_t targetIndex = 0;
     if (!ComputeTargetIndex(index, targetIndex)) {
         return;
@@ -2180,14 +2167,6 @@ bool SwiperPattern::ComputeTargetIndex(int32_t index, int32_t& targetIndex) cons
 
 void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
 {
-    auto host = GetHost();
-    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host), [weak = WeakClaim(this), index, useAnimation]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->ChangeIndex(index, useAnimation);
-    })) {
-        return;
-    }
     int32_t targetIndex = 0;
     if (!ComputeTargetIndex(index, targetIndex)) {
         return;
@@ -2560,6 +2539,10 @@ SwiperPattern::PanEventFunction SwiperPattern::ActionStartTask()
         pattern->CheckAndReportEvent();
         TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag start. SourceTool: %{public}d, id:%{public}d",
             info.GetSourceTool(), pattern->swiperId_);
+        auto host = pattern->GetHost();
+        if (host) {
+            host->SuggestOpIncGroup();
+        }
         if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
             pattern->isFirstAxisAction_ = true;
             return;
@@ -3345,7 +3328,6 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
     }
 
     HandleScroll(static_cast<float>(mainDelta), SCROLL_FROM_UPDATE, NestedState::GESTURE, velocity);
-    UpdateItemRenderGroup(true);
     isTouchPad_ = false;
 }
 
@@ -3630,7 +3612,6 @@ bool SwiperPattern::CheckDragOutOfBoundary(double dragVelocity)
                 parent->HandleScrollVelocity(dragVelocity);
             }
             StartAutoPlay();
-            UpdateItemRenderGroup(false);
             return true;
         }
     }
@@ -3840,7 +3821,6 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
 
     // enable lazy load feature.
     SetLazyLoadFeature(true);
-    UpdateItemRenderGroup(true);
 }
 
 void SwiperPattern::UpdateOffsetAfterPropertyAnimation(float offset)
@@ -4161,7 +4141,6 @@ void SwiperPattern::PlayTranslateAnimation(
         });
 
     SetLazyLoadFeature(true);
-    UpdateItemRenderGroup(true);
 }
 
 void SwiperPattern::OnSpringAnimationStart(float velocity)
@@ -4263,7 +4242,6 @@ void SwiperPattern::OnSpringAndFadeAnimationFinish()
     FireAnimationEndEvent(GetLoopIndex(currentIndex_), info);
     currentIndexOffset_ = indexStartPos;
     springOffset_ = EstimateSpringOffset(currentIndexOffset_);
-    UpdateItemRenderGroup(false);
     NotifyParentScrollEnd();
 
     if (!isTouchDown_) {
@@ -5150,7 +5128,6 @@ void SwiperPattern::TriggerAnimationEndOnForceStop(bool isInterrupt)
             GetCustomPropertyOffset() + Dimension(-currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
     }
     FireAnimationEndEvent(GetLoopIndex(currentIndex_), info, isInterrupt);
-    UpdateItemRenderGroup(false);
 }
 
 void SwiperPattern::TriggerEventOnFinish(int32_t nextIndex)
@@ -5373,7 +5350,6 @@ void SwiperPattern::OnTranslateFinish(
     if (NeedAutoPlay() && isUserFinish_ && !forceStop) {
         PostTranslateTask(delayTime);
     }
-    UpdateItemRenderGroup(false);
 }
 
 void SwiperPattern::OnWindowShow()

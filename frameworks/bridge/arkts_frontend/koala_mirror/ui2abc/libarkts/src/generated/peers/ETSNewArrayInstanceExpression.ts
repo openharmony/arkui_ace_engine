@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 export class ETSNewArrayInstanceExpression extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 75)
+        assertValidPeer(pointer, 76)
         super(pointer)
     }
     static createETSNewArrayInstanceExpression(typeReference?: TypeNode, dimension?: Expression): ETSNewArrayInstanceExpression {

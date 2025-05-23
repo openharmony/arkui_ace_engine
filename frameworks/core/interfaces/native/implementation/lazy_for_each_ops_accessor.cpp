@@ -55,14 +55,13 @@ void SetCurrentIndexImpl(Ark_NativePointer node, Ark_Int32 index)
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 }
-void PrepareImpl(Ark_NativePointer node, Ark_Int32, Ark_Int32)
+void PrepareImpl(Ark_NativePointer node, Ark_Int32 totalCount, Ark_Int32 offset)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto* scrollWindowAdapter = frameNode->GetScrollWindowAdapter();
     CHECK_NULL_VOID(scrollWindowAdapter);
-    scrollWindowAdapter->Prepare(0);                           // use parameter when new Idl is generated
-    int32_t totalCount = scrollWindowAdapter->GetTotalCount(); // use parameter when new Idl is generated
+    scrollWindowAdapter->Prepare(offset);
     scrollWindowAdapter->SetTotalCount(totalCount);
 }
 void NotifyChangeImpl(Ark_NativePointer node, int32_t startIdx, int32_t endIdx, int32_t changeCnt)

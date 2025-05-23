@@ -12206,6 +12206,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_NativePointer CreatePanGestureWithPanGestureOptionsImpl(Ark_NativePointer panGestureOptions)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(panGestureOptions);
+        //auto convValue = Converter::OptConvert<type>(panGestureOptions); // for enums
+        //undefinedModelNG::SetCreatePanGestureWithPanGestureOptions(frameNode, convValue);
+        return {};
+    }
     Ark_NativePointer CreatePinchGestureImpl(const Ark_Number* fingers,
                                              const Ark_Number* distance,
                                              Ark_Boolean isFingerCountLimited)
@@ -12613,6 +12622,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                                              const Ark_Number* id)
     {
         return {};
+    }
+    void RecycleImpl(Ark_FrameNode peer)
+    {
+    }
+    void ReuseImpl(Ark_FrameNode peer)
+    {
     }
     Ark_Number Vp2pxImpl(Ark_UIContext peer,
                          const Ark_Number* value)
@@ -14034,6 +14049,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // TabsOpsAccessor
+    namespace UIContextImpAccessor {
+    void FreezeUINode0Impl(const Ark_String* id,
+                           Ark_Boolean isFrozen)
+    {
+    }
+    void FreezeUINode1Impl(const Ark_Number* id,
+                           Ark_Boolean isFrozen)
+    {
+    }
+    } // UIContextImpAccessor
     namespace GridItemOpsAccessor {
     Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
                                                     Ark_Boolean value,
@@ -20785,6 +20810,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GestureOpsAccessor::CreateTapGestureImpl,
             GestureOpsAccessor::CreateLongPressGestureImpl,
             GestureOpsAccessor::CreatePanGestureImpl,
+            GestureOpsAccessor::CreatePanGestureWithPanGestureOptionsImpl,
             GestureOpsAccessor::CreatePinchGestureImpl,
             GestureOpsAccessor::CreateRotationGestureImpl,
             GestureOpsAccessor::CreateSwipeGestureImpl,
@@ -21317,6 +21343,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeAccessor::GetAttachedFrameNodeByIdImpl,
             FrameNodeAccessor::GetFrameNodeByIdImpl,
             FrameNodeAccessor::GetFrameNodeByUniqueIdImpl,
+            FrameNodeAccessor::ReuseImpl,
+            FrameNodeAccessor::RecycleImpl,
         };
         return &FrameNodeAccessorImpl;
     }
@@ -21524,6 +21552,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TabsOpsAccessor::RegisterBarModeImpl,
         };
         return &TabsOpsAccessorImpl;
+    }
+    const GENERATED_ArkUIUIContextImpAccessor* GetUIContextImpAccessor()
+    {
+        static const GENERATED_ArkUIUIContextImpAccessor UIContextImpAccessorImpl {
+            UIContextImpAccessor::FreezeUINode0Impl,
+            UIContextImpAccessor::FreezeUINode1Impl,
+        };
+        return &UIContextImpAccessorImpl;
     }
 
     const GENERATED_ArkUIGridItemOpsAccessor* GetGridItemOpsAccessor()
@@ -24484,6 +24520,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetPixelMapAccessor,
             GetRenderNodeAccessor,
             GetTabsOpsAccessor,
+            GetUIContextImpAccessor,
             GetGridItemOpsAccessor,
             GetFilterAccessor,
             GetVisualEffectAccessor,

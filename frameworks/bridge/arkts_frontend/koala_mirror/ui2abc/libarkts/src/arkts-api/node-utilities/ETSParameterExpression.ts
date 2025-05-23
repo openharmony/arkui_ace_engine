@@ -23,7 +23,7 @@ export function createETSParameterExpression(
     initExpr?: Expression,
     typeAnnotation?: TypeNode,
     annotations?: readonly AnnotationUsage[]
-) {
+): ETSParameterExpression {
     const res = ETSParameterExpression.createETSParameterExpression(identOrSpread, isOptional)
     if (initExpr) {
         res.setInitializer(initExpr)
@@ -44,7 +44,7 @@ export function updateETSParameterExpression(
     initExpr?: Expression,
     typeAnnotation?: TypeNode,
     annotations?: readonly AnnotationUsage[],
-) {
+): ETSParameterExpression {
     if ((isSameNativeObject(identOrSpread, original.ident) || isSameNativeObject(identOrSpread, original.restParameter))
         && isSameNativeObject(isOptional, original.isOptional)
         && isSameNativeObject(initExpr, original.initializer)

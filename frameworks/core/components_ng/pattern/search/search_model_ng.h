@@ -170,7 +170,6 @@ public:
     static void SetOnCut(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
     static void SetOnPasteWithEvent(FrameNode* frameNode,
                                     std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func);
-    static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const std::u16string&)>&& onChangeEvent);
     static void SetMaxLength(FrameNode* frameNode, uint32_t value);
     static void ResetMaxLength(FrameNode* frameNode);
     static void SetType(FrameNode* frameNode, TextInputType value);
@@ -192,8 +191,7 @@ public:
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
     static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
-    static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-        const NG::OnMenuItemClickCallback&& onMenuItemClick);
+
 private:
     static RefPtr<SearchTheme> GetTheme(const RefPtr<SearchNode>& frameNode);
     static RefPtr<SearchNode> CreateSearchNode(int32_t nodeId, const std::optional<std::u16string>& value,

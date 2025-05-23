@@ -24,6 +24,7 @@ struct PanGestureOptionsInfo {
     std::optional<int32_t> fingers;
     std::optional<PanDirection> direction;
     std::optional<float> distance;
+    std::optional<bool> isFingerCountLimited;
 };
 
 namespace Converter {
@@ -34,6 +35,7 @@ void AssignCast(std::optional<PanGestureOptionsInfo>& dst, const Ark_PanGestureH
     result.fingers = Converter::OptConvert<int32_t>(src.fingers);
     result.direction = Converter::OptConvert<PanDirection>(src.direction);
     result.distance = Converter::OptConvert<float>(src.distance);
+    result.isFingerCountLimited = Converter::OptConvert<bool>(src.isFingerCountLimited);
     dst = result;
 }
 }
@@ -59,7 +61,7 @@ Ark_PanGestureOptions CtorImpl(const Opt_PanGestureHandlerOptions* value)
     auto fingers = DEFAULT_PAN_FINGERS;
     auto distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
     auto direction = DEFAULT_PAN_DIRECTION;
-
+    auto isFingerCountLimited = false;
     auto info = Converter::OptConvert<PanGestureOptionsInfo>(*value);
     if (info) {
         direction = info.value().direction.value_or(DEFAULT_PAN_DIRECTION);
@@ -71,12 +73,13 @@ Ark_PanGestureOptions CtorImpl(const Opt_PanGestureHandlerOptions* value)
         fingers = info.value().fingers.value_or(DEFAULT_PAN_FINGERS);
         fingers = fingers <= DEFAULT_PAN_FINGERS ? DEFAULT_PAN_FINGERS : fingers;
         fingers = fingers > DEFAULT_MAX_PAN_FINGERS ? DEFAULT_PAN_FINGERS : fingers;
+        isFingerCountLimited = info.value().isFingerCountLimited.value_or(false);
     }
 
     peer->handler->SetDirection(direction);
     peer->handler->SetDistance(distance);
     peer->handler->SetFingers(fingers);
-
+    peer->handler->SetIsLimitFingerCount(isFingerCountLimited);
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -127,7 +130,14 @@ Ark_PanDirection GetDirectionImpl(Ark_PanGestureOptions peer)
 }
 Ark_Number GetDistanceImpl(Ark_PanGestureOptions peer)
 {
-    return {};
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    CHECK_NULL_RETURN(peer->handler, errValue);
+    auto distance = peer->handler->GetDistance();
+    auto context = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, errValue);
+    auto distance_new = context->ConvertPxToVp(Dimension(distance, DimensionUnit::PX));
+    return Converter::ArkValue<Ark_Number>(distance_new);
 }
 } // PanGestureOptionsAccessor
 const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor()

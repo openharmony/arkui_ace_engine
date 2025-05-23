@@ -1978,7 +1978,7 @@ void ChainWeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto chainWeight = Converter::OptConvert<ChainWeightPair>(*value).value_or(ChainWeightPair{});
-    ViewAbstractModelNG::SetChainWeight(frameNode, chainWeight);
+    ViewAbstractModelStatic::SetChainWeight(frameNode, chainWeight);
 }
 void PaddingImpl(Ark_NativePointer node,
                  const Opt_Union_Padding_Length_LocalizedPadding* value)
@@ -3152,7 +3152,7 @@ void ScaleImpl(Ark_NativePointer node,
     ViewAbstract::SetPivot(frameNode, DimensionOffset(centerX, centerY));
 }
 void RotateImpl(Ark_NativePointer node,
-                 const Opt_RotateOptions* value)
+                const Opt_RotateOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3356,7 +3356,7 @@ void DisplayPriorityImpl(Ark_NativePointer node,
     auto result = Converter::OptConvert<int>(*value);
     if (result) {
         // TODO: Reset value
-        ViewAbstract::SetDisplayIndex(frameNode, result.value());
+        ViewAbstractModelStatic::SetDisplayIndex(frameNode, result.value());
     }
 }
 void ZIndexImpl(Ark_NativePointer node,
@@ -3842,7 +3842,7 @@ void MotionPathImpl(Ark_NativePointer node,
     ViewAbstract::SetMotionPath(frameNode, convValue);
 }
 void ShadowImpl(Ark_NativePointer node,
-                 const Opt_Union_ShadowOptions_ShadowStyle* value)
+                const Opt_Union_ShadowOptions_ShadowStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -4755,7 +4755,7 @@ void ChainModeImpl(Ark_NativePointer node,
         .direction = Converter::OptConvert<LineDirection>(*direction),
         .style = Converter::OptConvert<ChainStyle>(*style)
     };
-    ViewAbstractModelNG::SetChainStyle(frameNode, chainInfo);
+    ViewAbstractModelStatic::SetChainStyle(frameNode, chainInfo);
 }
 void DragPreviewOptionsImpl(Ark_NativePointer node,
                             const Opt_DragPreviewOptions* value,

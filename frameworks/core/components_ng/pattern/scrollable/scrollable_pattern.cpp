@@ -23,7 +23,6 @@
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "core/common/multi_thread_build_manager.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/observer_handler.h"
@@ -294,7 +293,10 @@ bool ScrollablePattern::OnScrollCallback(float offset, int32_t source)
         FireOnScrollStart();
         return true;
     }
-    SuggestOpIncGroup(true);
+    auto host = GetHost();
+    if (host) {
+        host->SuggestOpIncGroup();
+    }
     return UpdateCurrentOffset(offset, source);
 }
 
@@ -562,13 +564,7 @@ void ScrollablePattern::AddScrollEvent()
     });
     gestureHub->AddScrollableEvent(scrollableEvent_);
     InitTouchEvent(gestureHub);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->RegisterWindowStateChangedCallback();
-    });
+    RegisterWindowStateChangedCallback();
     if (!clickRecognizer_) {
         InitScrollBarClickEvent();
     }
@@ -1403,15 +1399,6 @@ void ScrollablePattern::GetParentModalSheet()
 
 void ScrollablePattern::StopAnimate()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->StopAnimate();
-    })) {
-        return;
-    }
     if (!IsScrollableStopped()) {
         StopScrollable();
     }
@@ -1751,7 +1738,10 @@ void ScrollablePattern::HandleDragStart(const GestureEvent& info)
     auto mouseOffsetY = static_cast<float>(info.GetRawGlobalLocation().GetY());
     mouseOffsetX -= info.GetOffsetX();
     mouseOffsetY -= info.GetOffsetY();
-    SuggestOpIncGroup(true);
+    auto host = GetHost();
+    if (host) {
+        host->SuggestOpIncGroup();
+    }
     if (!IsItemSelected(static_cast<float>(info.GetGlobalLocation().GetX()) - info.GetOffsetX(),
         static_cast<float>(info.GetGlobalLocation().GetY()) - info.GetOffsetY())) {
         ClearMultiSelect();
@@ -2666,15 +2656,11 @@ void ScrollablePattern::SetBackToTop(bool backToTop)
         return;
     }
     backToTop_ = backToTop;
-    auto host = GetHost();
-    MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host),
-        [weak = WeakClaim(this), eventProxy, backToTop = backToTop_]() {
-        if (backToTop) {
-            eventProxy->Register(weak);
-        } else {
-            eventProxy->UnRegister(weak);
-        }
-    });
+    if (backToTop_) {
+        eventProxy->Register(WeakClaim(this));
+    } else {
+        eventProxy->UnRegister(WeakClaim(this));
+    }
 }
 
 void ScrollablePattern::ResetBackToTop()
@@ -2734,15 +2720,6 @@ void ScrollablePattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
 
 void ScrollablePattern::Fling(double flingVelocity)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host), [weak = WeakClaim(this), flingVelocity]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->Fling(flingVelocity);
-    })) {
-        return;
-    }
     StopScrollableAndAnimate();
     CHECK_NULL_VOID(scrollableEvent_);
     auto scrollable = scrollableEvent_->GetScrollable();
@@ -2771,7 +2748,7 @@ void ScrollablePattern::FireOnScrollStart()
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(hub);
-    SuggestOpIncGroup(true);
+    host->SuggestOpIncGroup();
     if (scrollStop_ && !GetScrollAbort()) {
         OnScrollStop(hub->GetOnScrollStop());
     }
@@ -2906,28 +2883,6 @@ void ScrollablePattern::FireObserverOnDidScroll(float finalOffset)
         }
     };
     FireOnScroll(finalOffset, onScroll);
-}
-
-void ScrollablePattern::SuggestOpIncGroup(bool flag)
-{
-    if (!SystemProperties::IsOpIncEnable()) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (host->GetSuggestOpIncActivatedOnce()) {
-        return;
-    }
-    flag = flag && isVertical();
-    if (flag) {
-        ACE_SCOPED_TRACE("SuggestOpIncGroup %s", host->GetHostTag().c_str());
-        auto parent = host->GetAncestorNodeOfFrame(false);
-        CHECK_NULL_VOID(parent);
-        parent->SetSuggestOpIncActivatedOnce();
-        // get 1st layer
-        std::string path("\\>");
-        host->FindSuggestOpIncNode(path, host->GetGeometryNode()->GetFrameSize(), 0);
-    }
 }
 
 void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
@@ -3381,16 +3336,6 @@ void ScrollablePattern::HandleClickEvent()
 
 void ScrollablePattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host),
-        [weak = WeakClaim(this), reverse, smooth, scrollType]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->ScrollPage(reverse, smooth, scrollType);
-    })) {
-        return;
-    }
     float distance = reverse ? GetMainContentSize() : -GetMainContentSize();
     if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
         distance = distance / 2.f;

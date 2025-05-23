@@ -144,3 +144,15 @@ export function assertEqualsBinaryOutput(output: string, ctx: Mocha.Context): vo
         global.es2panda._DestroyContext(global.context)
     }
 }
+
+export function trimLines(value: string): string {
+    return value.split('\n').map(it => it.trim()).join('\n')
+}
+
+export function equalTrimming(value1: string, value2: string, message: string) {
+    return assert.equal(
+        trimLines(value1),
+        trimLines(value2),
+        message
+    )
+}

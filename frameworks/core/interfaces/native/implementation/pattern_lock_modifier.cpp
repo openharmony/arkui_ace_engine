@@ -150,7 +150,8 @@ void OnPatternCompleteImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        std::function<void(const BaseEventInfo* info)> func;
+        PatternLockModelNG::SetPatternComplete(frameNode, std::move(func));
         return;
     }
     auto call = [arkCallback = CallbackHelper(*optValue)](const BaseEventInfo* info) {
@@ -176,7 +177,8 @@ void OnDotConnectImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        std::function<void(int32_t)> func;
+        PatternLockModelNG::SetDotConnect(frameNode, std::move(func));
         return;
     }
     auto call = [arkCallback = CallbackHelper(*optValue)](int32_t index) {

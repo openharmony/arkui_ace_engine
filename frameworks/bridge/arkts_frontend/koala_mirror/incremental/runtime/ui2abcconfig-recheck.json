@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        "package": "@koalaui/runtime",
+        "outDir": "build/recheck",
+        "baseUrl": "./ets",
+        "paths": {
+            "@koalaui/common": ["../../common/src"],
+            "@koalaui/compat": ["../../compat/src/arkts"],
+            "@koalaui/runtime/annotations": ["../annotations"]
+        },
+        "plugins": [
+           {
+                "transform": "@koalaui/memo-plugin/ParserTransformer",
+                "stage": "parsed",
+                "contextImport": "../internals",
+                "name": "memo"
+            },
+            {
+                "transform": "@koalaui/memo-plugin",
+                "stage": "checked",
+                "contextImport": "../internals",
+                "name": "memo",
+                "manuallyDisableInsertingImport": true
+            }
+        ]
+    },
+    "include": ["ets/**/*.ts"],
+    "exclude": ["ets/index.ts", "ets/internals.ts"]
+}

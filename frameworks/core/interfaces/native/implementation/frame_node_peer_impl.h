@@ -17,10 +17,13 @@
 
 #include <vector>
 
-#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
-#include "core/components_ng/base/frame_node.h"
+#include "ui/base/referenced.h"
+
 #include "base/memory/referenced.h"
-#include "interfaces/inner_api/ace_kit/include/ui/base/referenced.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/render_node_peer_impl.h"
+
 
 struct FrameNodePeer {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> node;
@@ -88,6 +91,11 @@ struct FrameNodePeer {
         } else {
             return nullptr;
         }
+    }
+
+    RenderNodePeer* GetRenderNodePeer()
+    {
+        return RenderNodePeer::Create(node);
     }
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H

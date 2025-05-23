@@ -1303,14 +1303,14 @@ template<> void AssignCast(std::optional<ScrollSizeMode>& dst, const Ark_ScrollS
 }
 
 template<>
-void AssignCast(std::optional<OHOS::Ace::RenderingStrategy>& dst, const Ark_SymbolRenderingStrategy& src)
+void AssignCast(std::optional<Converter::RenderingStrategy>& dst, const Ark_SymbolRenderingStrategy& src)
 {
     switch (src) {
-        case ARK_SYMBOL_RENDERING_STRATEGY_SINGLE: dst = OHOS::Ace::RenderingStrategy::SINGLE; break;
+        case ARK_SYMBOL_RENDERING_STRATEGY_SINGLE: dst = Converter::RenderingStrategy::SINGLE; break;
         case ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_COLOR:
-            dst = OHOS::Ace::RenderingStrategy::MULTIPLE_COLOR; break;
+            dst = Converter::RenderingStrategy::MULTIPLE_COLOR; break;
         case ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_OPACITY:
-            dst = OHOS::Ace::RenderingStrategy::MULTIPLE_OPACITY; break;
+            dst = Converter::RenderingStrategy::MULTIPLE_OPACITY; break;
         default: LOGE("Unexpected enum value in Ark_SymbolRenderingStrategy: %{public}d", src);
     }
 }
@@ -2050,6 +2050,34 @@ void AssignCast(std::optional<LaunchMode>& dst, const Ark_LaunchMode& value)
         case ARK_LAUNCH_MODE_NEW_INSTANCE: dst = LaunchMode::NEW_INSTANCE; break;
         default: {
             LOGE("Unexpected enum value in Ark_LaunchMode: %{public}d", value);
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<SourceType>& dst, const Ark_SourceType& src)
+{
+    switch (src) {
+        case ARK_SOURCE_TYPE_UNKNOWN: dst = SourceType::NONE; break;
+        case ARK_SOURCE_TYPE_MOUSE: dst = SourceType::MOUSE; break;
+        case ARK_SOURCE_TYPE_TOUCH_SCREEN: dst = SourceType::TOUCH; break;
+        default: LOGE("Unexpected enum value in Ark_SourceType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<SourceTool>& dst, const Ark_SourceTool& src)
+{
+    switch (src) {
+        case ARK_SOURCE_TOOL_UNKNOWN: dst = SourceTool::UNKNOWN; break;
+        case ARK_SOURCE_TOOL_FINGER: dst = SourceTool::FINGER; break;
+        case ARK_SOURCE_TOOL_PEN: dst = SourceTool::PEN; break;
+        case ARK_SOURCE_TOOL_MOUSE: dst = SourceTool::MOUSE; break;
+        case ARK_SOURCE_TOOL_TOUCHPAD: dst = SourceTool::TOUCHPAD; break;
+        case ARK_SOURCE_TOOL_JOYSTICK: dst = SourceTool::JOYSTICK; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_SourceTool: %{public}d", src);
+            dst = std::nullopt;
         }
     }
 }

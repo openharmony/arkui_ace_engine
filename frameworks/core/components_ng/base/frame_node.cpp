@@ -43,7 +43,6 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
-#include "core/common/multi_thread_build_manager.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -84,7 +83,9 @@ constexpr uint8_t SUGGEST_OPINC_CHECKED_THROUGH = 1 << 4;
 // Node has rendergroup marked.
 constexpr uint8_t APP_RENDER_GROUP_MARKED_MASK = 1 << 7;
 // OPINC max ratio for scroll scope(height);
-constexpr float HIGHT_RATIO_LIMIT = 0.8;
+constexpr float HIGHT_RATIO_LIMIT = 0.8f;
+// OPINC max ratio for scroll scope(width);
+constexpr float WIDTH_RATIO_LIMIT = 1.0f;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
 constexpr char UPDATE_FLAG_KEY[] = "updateFlag";
@@ -2382,14 +2383,6 @@ void FrameNode::RebuildRenderContextTree()
     if (!needSyncRenderTree_) {
         return;
     }
-    if (MultiThreadBuildManager::TryPostUnSafeTask(this,
-        [weak = WeakClaim(this)]() {
-        auto frameNode = weak.Upgrade();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->RebuildRenderContextTree();
-    })) {
-        return;
-    }
     auto pipeline = GetContextRefPtr();
     if (pipeline && !pipeline->CheckThreadSafe()) {
         LOGW("RebuildRenderContextTree doesn't run on UI thread!");
@@ -2422,7 +2415,7 @@ void FrameNode::RebuildRenderContextTree()
     needSyncRenderTree_ = false;
 }
 
-void FrameNode::MarkModifyDoneInner()
+void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
     auto pipeline = PipelineContext::GetCurrentContextSafely();
@@ -2467,15 +2460,6 @@ void FrameNode::MarkModifyDoneInner()
 #endif
 }
 
-void FrameNode::MarkModifyDone()
-{
-    MultiThreadBuildManager::TryExecuteUnSafeTask(this, [weak = WeakClaim(this)]() {
-        auto host = weak.Upgrade();
-        CHECK_NULL_VOID(host);
-        host->MarkModifyDoneInner();
-    });
-}
-
 [[deprecated("using AfterMountToParent")]] void FrameNode::OnMountToParentDone()
 {
     pattern_->OnMountToParentDone();
@@ -2493,7 +2477,7 @@ void FrameNode::FlushUpdateAndMarkDirty()
     MarkDirtyNode();
 }
 
-void FrameNode::MarkDirtyNodeInner(PropertyChangeFlag extraFlag)
+void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
 {
     if (IsFreeze()) {
         // store the flag.
@@ -2512,15 +2496,6 @@ void FrameNode::MarkDirtyNodeInner(PropertyChangeFlag extraFlag)
         return;
     }
     MarkDirtyNode(IsMeasureBoundary(), IsRenderBoundary(), extraFlag);
-}
-
-void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
-{
-    MultiThreadBuildManager::TryExecuteUnSafeTask(this, [weak = WeakClaim(this), extraFlag]() {
-        auto host = weak.Upgrade();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNodeInner(extraFlag);
-    });
 }
 
 void FrameNode::ProcessFreezeNode()
@@ -2615,12 +2590,7 @@ void FrameNode::MarkNeedRender(bool isRenderBoundary)
     }
     isRenderDirtyMarked_ = true;
     if (isRenderBoundary) {
-        MultiThreadBuildManager::TryExecuteUnSafeTask(this,
-            [weak = WeakClaim(this), instanceId = context->GetInstanceId()]() {
-            auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
-            CHECK_NULL_VOID(context);
-            context->AddDirtyRenderNode(weak.Upgrade());
-        });
+        context->AddDirtyRenderNode(Claim(this));
         return;
     }
     auto parent = GetAncestorNodeOfFrame(false);
@@ -5120,18 +5090,13 @@ void FrameNode::OnInspectorIdUpdate(const std::string& id)
     if (parent && parent->GetTag() == V2::RELATIVE_CONTAINER_ETS_TAG) {
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    if (!Recorder::EventRecorder::Get().IsExposureRecordEnable()) {
-        return;
-    }
-    if (exposureProcessor_) {
-        return;
-    }
-    auto* context = GetContext();
-    CHECK_NULL_VOID(context);
-    auto unsafeTask = [weak = WeakClaim(this), id, instanceId = context->GetInstanceId()]() {
-        auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
+    if (Recorder::EventRecorder::Get().IsExposureRecordEnable()) {
+        if (exposureProcessor_) {
+            return;
+        }
+        auto* context = GetContext();
         CHECK_NULL_VOID(context);
-        context->AddAfterRenderTask([weak, inspectorId = id]() {
+        context->AddAfterRenderTask([weak = WeakClaim(this), inspectorId = id]() {
             auto host = weak.Upgrade();
             CHECK_NULL_VOID(host);
             auto pageUrl = Recorder::GetPageUrlByNode(host);
@@ -5141,8 +5106,7 @@ void FrameNode::OnInspectorIdUpdate(const std::string& id)
             }
             host->RecordExposureInner();
         });
-    };
-    MultiThreadBuildManager::TryExecuteUnSafeTask(this, std::move(unsafeTask));
+    }
 }
 
 void FrameNode::OnAutoEventParamUpdate(const std::string& value)
@@ -5919,44 +5883,41 @@ bool FrameNode::GetOpIncCheckedOnce()
 bool FrameNode::MarkSuggestOpIncGroup(bool suggest, bool calc)
 {
     CHECK_NULL_RETURN(renderContext_, false);
-    if (!GetSuggestOpIncMarked() && GetCanSuggestOpInc()) {
-        renderContext_->SuggestOpIncNode(suggest, calc);
-        SetSuggestOpIncMarked(true);
-    }
+    renderContext_->SuggestOpIncNode(suggest, calc);
+    SetSuggestOpIncMarked(suggest);
     return true;
 }
 
-OPINC_TYPE_E FrameNode::IsOpIncValidNode(const SizeF& boundary, int32_t childNumber)
+OPINC_TYPE_E FrameNode::IsOpIncValidNode(const SizeF& boundary, Axis axis, int32_t childNumber)
 {
-    auto ret = GetPattern()->OpIncType();
-    switch (ret) {
-        case OPINC_NODE:
-            SetCanSuggestOpInc(true);
-            break;
-        case OPINC_PARENT_POSSIBLE:
-            break;
-        case OPINC_NODE_POSSIBLE: {
-            int32_t height = static_cast<int>(GetGeometryNode()->GetFrameSize().Height());
-            int32_t width = static_cast<int>(GetGeometryNode()->GetFrameSize().Width());
-            int32_t heightBoundary = static_cast<int>(boundary.Height() * HIGHT_RATIO_LIMIT);
-            int32_t area = height * width;
-            if (area >= MIN_OPINC_AREA && height <= heightBoundary) {
-                SetCanSuggestOpInc(true);
-                ret = OPINC_NODE;
-            } else if (height > heightBoundary) {
-                ret = OPINC_PARENT_POSSIBLE;
-            } else {
-                ret = OPINC_SUGGESTED_OR_EXCLUDED;
-            }
-            break;
-        }
-        default:
-            break;
+    int32_t height = static_cast<int>(GetGeometryNode()->GetFrameSize().Height());
+    int32_t width = static_cast<int>(GetGeometryNode()->GetFrameSize().Width());
+    int32_t heightBoundary = static_cast<int>(boundary.Height() * HIGHT_RATIO_LIMIT);
+    int32_t widthBoundary = static_cast<int>(boundary.Width() * WIDTH_RATIO_LIMIT);
+    int32_t area = height * width;
+    if (area >= MIN_OPINC_AREA &&
+        ((axis == Axis::VERTICAL && height <= heightBoundary) ||
+        (axis == Axis::HORIZONTAL && width <= widthBoundary)) &&
+        HasMultipleChild()) {
+        return OPINC_NODE;
     }
-    return ret;
+    return OPINC_INVALID;
 }
 
-OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth)
+bool FrameNode::HasMultipleChild()
+{
+    if (GetChildren().empty()) {
+        return false;
+    }
+    if (GetChildren().size() > 1) {
+        return true;
+    }
+    auto child = AceType::DynamicCast<FrameNode>(GetChildByIndex(0));
+    CHECK_NULL_RETURN(child, false);
+    return child->HasMultipleChild();
+}
+
+OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth, Axis axis)
 {
     if (GetSuggestOpIncActivatedOnce()) {
         return OPINC_SUGGESTED_OR_EXCLUDED;
@@ -5966,7 +5927,7 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
     if (GetApplicationRenderGroupMarked()) {
         return OPINC_INVALID;
     }
-    auto status = IsOpIncValidNode(boundary);
+    auto status = IsOpIncValidNode(boundary, axis);
     if (SystemProperties::GetDebugEnabled()) {
         const auto& hostTag = GetHostTag();
         path = path + " --> " + hostTag;
@@ -5984,7 +5945,7 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
         GenerateOneDepthVisibleFrame(childrens);
         for (auto& child : childrens) {
             if (child) {
-                status = child->FindSuggestOpIncNode(path, boundary, depth + 1);
+                status = child->FindSuggestOpIncNode(path, boundary, depth + 1, axis);
             }
             if (status == OPINC_INVALID) {
                     return OPINC_INVALID;
@@ -5997,26 +5958,42 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
     return OPINC_SUGGESTED_OR_EXCLUDED;
 }
 
-void FrameNode::MarkAndCheckNewOpIncNode()
+void FrameNode::MarkAndCheckNewOpIncNode(Axis axis)
 {
+    if (!IsActive() || GetSuggestOpIncActivatedOnce() || GetApplicationRenderGroupMarked()) {
+        return;
+    }
     auto parent = GetAncestorNodeOfFrame(true);
     CHECK_NULL_VOID(parent);
-    if (parent->GetSuggestOpIncActivatedOnce() && !GetSuggestOpIncActivatedOnce()) {
+    if (parent->GetSuggestOpIncActivatedOnce()) {
         SetSuggestOpIncActivatedOnce();
-        if (!parent->GetOpIncCheckedOnce()) {
-            parent->SetOpIncCheckedOnce();
-            auto status = IsOpIncValidNode(parent->GetGeometryNode()->GetFrameSize());
-            if (status == OPINC_NODE) {
-                parent->SetOpIncGroupCheckedThrough(true);
-            } else {
-                parent->SetOpIncGroupCheckedThrough(false);
-            }
-        }
-        if (parent->GetOpIncGroupCheckedThrough()) {
+        auto status = IsOpIncValidNode(parent->GetGeometryNode()->GetFrameSize(), axis);
+        ACE_SCOPED_TRACE("MarkAndCheckNewOpIncNode id:%d, tag:%s, status: %d", GetId(), GetTag().c_str(), status);
+        if (status == OPINC_NODE) {
             SetCanSuggestOpInc(true);
             MarkSuggestOpIncGroup(true, true);
         }
     }
+}
+
+void FrameNode::SuggestOpIncGroup()
+{
+    if (!SystemProperties::IsOpIncEnable()) {
+        return;
+    }
+    if (GetSuggestOpIncActivatedOnce()) {
+        return;
+    }
+    auto parent = GetParent();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+    while (parent) {
+        if (frameNode && frameNode->GetSuggestOpIncMarked()) {
+            frameNode->MarkSuggestOpIncGroup(false, false);
+        }
+        parent = parent->GetParent();
+        frameNode = AceType::DynamicCast<FrameNode>(parent);
+    }
+    SetSuggestOpIncActivatedOnce();
 }
 
 int FrameNode::GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t thresh)
@@ -6122,7 +6099,7 @@ void FrameNode::OnSyncGeometryFrameFinish(const RectF& paintRect)
     syncedFramePaintRect_ = paintRect;
 }
 
-void FrameNode::AddFrameNodeChangeInfoFlagInner(FrameNodeChangeInfoFlag changeFlag)
+void FrameNode::AddFrameNodeChangeInfoFlag(FrameNodeChangeInfoFlag changeFlag)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
@@ -6137,15 +6114,6 @@ void FrameNode::AddFrameNodeChangeInfoFlagInner(FrameNodeChangeInfoFlag changeFl
         context->SetIsTransFlag(true);
     }
     changeInfoFlag_ = changeInfoFlag_ | changeFlag;
-}
-
-void FrameNode::AddFrameNodeChangeInfoFlag(FrameNodeChangeInfoFlag changeFlag)
-{
-    MultiThreadBuildManager::TryExecuteUnSafeTask(this, [weak = WeakClaim(this), changeFlag]() {
-        auto host = weak.Upgrade();
-        CHECK_NULL_VOID(host);
-        host->AddFrameNodeChangeInfoFlagInner(changeFlag);
-    });
 }
 
 void FrameNode::RegisterNodeChangeListener()
@@ -6589,22 +6557,12 @@ void FrameNode::CleanVisibleAreaUserCallback(bool isApproximate)
         eventHub_->CleanVisibleAreaCallback(true, isApproximate);
         if (!hasInnerCallback && !hasUserCallback && pipeline) {
             throttledCallbackOnTheWay_ = false;
-            MultiThreadBuildManager::TryExecuteUnSafeTask(this,
-                [id = GetId(), instanceId = pipeline->GetInstanceId()]() {
-                auto pipeline = NG::PipelineContext::GetContextByContainerId(instanceId);
-                CHECK_NULL_VOID(pipeline);
-                pipeline->RemoveVisibleAreaChangeNode(id);
-            });
+            pipeline->RemoveVisibleAreaChangeNode(GetId());
         }
     } else {
         eventHub_->CleanVisibleAreaCallback(true, false);
         if (!hasInnerCallback && !throttledVisibleAreaCallback.callback && pipeline) {
-            MultiThreadBuildManager::TryExecuteUnSafeTask(this,
-                [id = GetId(), instanceId = pipeline->GetInstanceId()]() {
-                auto pipeline = NG::PipelineContext::GetContextByContainerId(instanceId);
-                CHECK_NULL_VOID(pipeline);
-                pipeline->RemoveVisibleAreaChangeNode(id);
-            });
+            pipeline->RemoveVisibleAreaChangeNode(GetId());
         }
     }
 }

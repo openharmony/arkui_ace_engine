@@ -36,7 +36,7 @@ import { Identifier } from "./Identifier"
 import { TypeNode } from "./TypeNode"
 export class TSTypeParameter extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 117)
+        assertValidPeer(pointer, 118)
         super(pointer)
     }
     static create1TSTypeParameter(name: Identifier | undefined, constraint: TypeNode | undefined, defaultType: TypeNode | undefined, flags: Es2pandaModifierFlags): TSTypeParameter {

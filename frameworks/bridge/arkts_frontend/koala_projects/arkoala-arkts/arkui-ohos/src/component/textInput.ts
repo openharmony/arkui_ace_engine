@@ -402,15 +402,15 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (TypeChecker.isFontWeight(value_value)) {
+            if (TypeChecker.isFontWeight(value_value)) {
                 thisSerializer.writeInt8(1 as int32)
                 const value_value_1  = value_value as FontWeight
                 thisSerializer.writeInt32(TypeChecker.FontWeight_ToNumeric(value_value_1))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
             }
             else if (RuntimeType.STRING == value_value_type) {
                 thisSerializer.writeInt8(2 as int32)
@@ -2536,7 +2536,7 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements U
     public inputFilter(value: ResourceStr | undefined, error?: ((breakpoints: string) => void)): this {
         if (this.checkPriority("inputFilter")) {
             const value_casted = value as (ResourceStr | undefined)
-            const error_casted = error as (((breakpoints: string) => void))
+            const error_casted = error as (((breakpoints: string) => void) | undefined)
             this.getPeer()?.inputFilterAttribute(value_casted, error_casted)
             return this
         }
@@ -2546,7 +2546,7 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements U
     public customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
         if (this.checkPriority("customKeyboard")) {
             const value_casted = value as (CustomBuilder | undefined)
-            const options_casted = options as (KeyboardOptions)
+            const options_casted = options as (KeyboardOptions | undefined)
             this.getPeer()?.customKeyboardAttribute(value_casted, options_casted)
             return this
         }
@@ -2556,7 +2556,7 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements U
     public showCounter(value: boolean | undefined, options?: InputCounterOptions): this {
         if (this.checkPriority("showCounter")) {
             const value_casted = value as (boolean | undefined)
-            const options_casted = options as (InputCounterOptions)
+            const options_casted = options as (InputCounterOptions | undefined)
             this.getPeer()?.showCounterAttribute(value_casted, options_casted)
             return this
         }

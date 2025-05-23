@@ -34,7 +34,7 @@ import { TSTypeParameterInstantiation } from "./TSTypeParameterInstantiation"
 import { TemplateLiteral } from "./TemplateLiteral"
 export class TaggedTemplateExpression extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 140)
+        assertValidPeer(pointer, 141)
         super(pointer)
     }
     static createTaggedTemplateExpression(tag?: Expression, quasi?: TemplateLiteral, typeParams?: TSTypeParameterInstantiation): TaggedTemplateExpression {

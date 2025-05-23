@@ -22,7 +22,14 @@ public:
     LargeDeltaConverter() = default;
     virtual ~LargeDeltaConverter() = default;
 
-    // Converts a large delta to a jump index
-    virtual int32_t Convert(float delta) = 0;
+    /**
+     * @brief Converts a large delta to a jump index
+     *
+     * @return item index to jump to. Return -1 if conversion fails.
+     */
+    virtual int32_t Convert(float delta)
+    {
+        return -1;
+    }
 };
 } // namespace OHOS::Ace::NG

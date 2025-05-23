@@ -58,6 +58,8 @@ public:
     static void SetCustomKeyboard(FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance);
     static void SetStopBackPress(FrameNode* frameNode, const std::optional<bool>& isStopBackPress);
     static void SetKeyboardAppearance(FrameNode* frameNode, const std::optional<KeyboardAppearance>& value);
+    static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, std::optional<bool>& needToRequest);
     static void SetSelectionMenuHidden(FrameNode* frameNode, std::optional<bool>& selectionMenuHidden);
     static void SetEnablePreviewText(FrameNode* frameNode, std::optional<bool>& enablePreviewText);
@@ -65,6 +67,7 @@ public:
     static RefPtr<SearchTheme> GetTheme(const FrameNode *frameNode);
     static void SetSearchDefaultIcon(FrameNode *frameNode);
     static void SetCancelDefaultIcon(FrameNode* frameNode);
+    static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const std::u16string&)>&& onChangeEvent);
 
 private:
 

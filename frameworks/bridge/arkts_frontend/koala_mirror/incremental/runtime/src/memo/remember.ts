@@ -17,6 +17,7 @@ import { functionOverValue } from "@koalaui/common"
 import { __context, __id } from "../internals"
 import { scheduleCallback } from "../states/GlobalStateManager"
 import { ArrayState, ControlledScope, MutableState } from "../states/State"
+import { __memo_context_type, __memo_id_type } from "../internals"
 
 /**
  * It calculates the value of the given lambda and caches its result.
@@ -167,7 +168,8 @@ function applyPromiseToState<Value>(promise: Promise<Value>, state: MutableState
 /** @memo */
 export function rememberMutableAsyncState<Value>(compute: () => Promise<Value | undefined>, initial?: Value, onError?: (error: Error) => void): MutableState<Value | undefined> {
     const result = rememberMutableState<Value | undefined>(initial)
-    once(() => { applyPromiseToState<Value | undefined>(compute(), result, onError) })
+    const callback = () => { applyPromiseToState<Value | undefined>(compute(), result, onError) }
+    once(callback)
     return result
 }
 

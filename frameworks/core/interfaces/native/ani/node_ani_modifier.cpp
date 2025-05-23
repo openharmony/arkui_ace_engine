@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include "common_ani_modifier.h"
+#include "content_slot_ani_modifier.h"
 #include "image_ani_modifier.h"
 #include "web_ani_modifier.h"
-#include "common_ani_modifier.h"
 
 extern "C" {
 const ArkUIAniModifiers* GetArkUIAniModifiers()
@@ -25,6 +26,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getImageAniModifier = OHOS::Ace::NG::GetImageAniModifier,
         .getWebAniModifier = OHOS::Ace::NG::GetWebAniModifier,
         .getCommonAniModifier = OHOS::Ace::NG::GetCommonAniModifier,
+        .getContentSlotAniModifier = OHOS::Ace::NG::GetContentSlotAniModifier,
     };
     return &impl;
 }

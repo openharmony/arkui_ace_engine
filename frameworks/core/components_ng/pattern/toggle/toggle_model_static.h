@@ -26,6 +26,7 @@ public:
     static void SetPointRadius(FrameNode* frameNode, const std::optional<Dimension>& switchPointRadius);
     static void SetUnselectedColor(FrameNode* frameNode, const std::optional<Color>& unselectedColor);
     static void SetTrackBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& borderRadius);
+    static void OnChangeEvent(FrameNode* frameNode, ChangeEvent&& onChangeEvent);
 };
 
 } // namespace OHOS::Ace::NG

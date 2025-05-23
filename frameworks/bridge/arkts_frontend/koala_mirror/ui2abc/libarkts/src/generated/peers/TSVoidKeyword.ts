@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 export class TSVoidKeyword extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 93)
+        assertValidPeer(pointer, 94)
         super(pointer)
     }
     static createTSVoidKeyword(): TSVoidKeyword {

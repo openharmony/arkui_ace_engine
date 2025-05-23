@@ -3801,6 +3801,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _GestureOps_createPanGesture(fingers: number, direction: KInt, distance: number, isFingerCountLimited: KInt): KPointer
     @ani.unsafe.Direct
+    native static _GestureOps_createPanGestureWithPanGestureOptions(panGestureOptions: KPointer): KPointer
+    @ani.unsafe.Direct
     native static _GestureOps_createPinchGesture(fingers: number, distance: number, isFingerCountLimited: KInt): KPointer
     @ani.unsafe.Direct
     native static _GestureOps_createRotationGesture(fingers: number, angle: number, isFingerCountLimited: KInt): KPointer
@@ -4214,6 +4216,12 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _FrameNode_getFrameNodeByUniqueId(id: number): KPointer
     @ani.unsafe.Direct
+    native static _FrameNode_reuse(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _FrameNode_recycle(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _FrameNode_getRenderNode(ptr: KPointer): KPointer
+    @ani.unsafe.Direct
     native static _LengthMetrics_ctor(): KPointer
     @ani.unsafe.Direct
     native static _LengthMetrics_getFinalizer(): KPointer
@@ -4320,7 +4328,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _PixelMap_getIsStrideAlignment(ptr: KPointer): boolean
     @ani.unsafe.Direct
-    native static _RenderNode_ctor(): KPointer
+    native static _RenderNode_ctor(id: int32, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _RenderNode_getFinalizer(): KPointer
     @ani.unsafe.Direct
@@ -4345,6 +4353,26 @@ export class ArkUIGeneratedNativeModule {
     native static _RenderNode_invalidate(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _RenderNode_dispose(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _RenderNode_setRectMask(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32, fillColor: number, strokeColor: number, strokeWidth: number): void
+    @ani.unsafe.Direct
+    native static _RenderNode_setCircleMask(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32, fillColor: number, strokeColor: number, strokeWidth: number): void
+    @ani.unsafe.Direct
+    native static _RenderNode_setRoundRectMask(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32, fillColor: number, strokeColor: number, strokeWidth: number): void
+    @ani.unsafe.Direct
+    native static _RenderNode_setOvalMask(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32, fillColor: number, strokeColor: number, strokeWidth: number): void
+    @ani.unsafe.Direct
+    native static _RenderNode_setPath(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32, fillColor: number, strokeColor: number, strokeWidth: number): void
+    @ani.unsafe.Direct
+    native static _RenderNode_setRectClip(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RenderNode_setCircleClip(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RenderNode_setRoundRectClip(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RenderNode_setOvalClip(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RenderNode_setPathClip(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _RenderNode_getBackgroundColor(ptr: KPointer): number
     @ani.unsafe.Direct
@@ -4445,6 +4473,10 @@ export class ArkUIGeneratedNativeModule {
     native static _RenderNode_getLengthMetricsUnit(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _RenderNode_setLengthMetricsUnit(ptr: KPointer, lengthMetricsUnit: KInt): void
+    @ani.unsafe.Quick
+    native static _UIContextImp_freezeUINode0(id: KStringPtr, isFrozen: KInt): void
+    @ani.unsafe.Direct
+    native static _UIContextImp_freezeUINode1(id: number, isFrozen: KInt): void
     @ani.unsafe.Direct
     native static _TabsOps_registerBarMode(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
@@ -4840,8 +4872,8 @@ export class ArkUIGeneratedNativeModule {
     native static _TouchEvent_getChangedTouches(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _TouchEvent_setChangedTouches(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _TouchEvent_getStopPropagation(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _TouchEvent_getStopPropagation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _TouchEvent_setStopPropagation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct

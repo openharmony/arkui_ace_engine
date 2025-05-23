@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 export class TSTupleType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 133)
+        assertValidPeer(pointer, 134)
         super(pointer)
     }
     static createTSTupleType(elementTypes: readonly TypeNode[]): TSTupleType {

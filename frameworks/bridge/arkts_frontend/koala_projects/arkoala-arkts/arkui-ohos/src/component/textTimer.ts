@@ -56,14 +56,17 @@ export class TextTimerController implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._TextTimerController_getFinalizer()
     }
-    public start(): undefined {
-        return this.start_serialize()
+    public start(): void {
+        this.start_serialize();
+        return;
     }
-    public pause(): undefined {
-        return this.pause_serialize()
+    public pause(): void {
+        this.pause_serialize();
+        return;
     }
-    public reset(): undefined {
-        return this.reset_serialize()
+    public reset(): void {
+        this.reset_serialize();
+        return;
     }
     private start_serialize(): undefined {
         const retval  = ArkUIGeneratedNativeModule._TextTimerController_start(this.peer!.ptr)

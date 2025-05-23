@@ -16,7 +16,8 @@
 import { className, uint32 } from "@koalaui/common"
 import { __context, __id } from "../internals"
 import { IncrementalNode } from "../tree/IncrementalNode"
-import { memoEntry } from "./entry"
+import { memoEntry1 } from "./entry"
+import { __memo_context_type, __memo_id_type } from "../internals"
 
 /**
  * @param create - the node constructor is invoked only once,
@@ -41,7 +42,7 @@ export function NodeAttach<Node extends IncrementalNode>(
             update(__context().node as Node)
         else
             // reset ID addition to 0 to simplify the reuse process later
-            memoEntry(__context(), 0, () => { update(__context().node as Node) })
+            memoEntry1(__context(), 0, update, __context().node as Node)
     } finally {
         scope.recache()
     }

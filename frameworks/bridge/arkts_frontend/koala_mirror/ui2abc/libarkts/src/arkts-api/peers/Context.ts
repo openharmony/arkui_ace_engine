@@ -16,7 +16,6 @@
 import { ArktsObject } from "./ArktsObject"
 import { Program } from "./Program"
 import { global } from "../static/global"
-import { throwError } from "../../utils"
 import { passString } from "../utilities/private"
 import { KNativePointer } from "@koalaui/interop"
 
@@ -29,7 +28,7 @@ export class Context extends ArktsObject {
         source: string
     ): Context {
         if (!global.configIsInitialized()) {
-            throwError(`Config not initialized`)
+            throw new Error(`Config not initialized`)
         }
         return new Context(
             global.es2panda._CreateContextFromString(

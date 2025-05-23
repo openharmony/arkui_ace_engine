@@ -30,7 +30,7 @@ import { SourceTool, AnimateParam, SheetOptions, KeyEvent } from "./common"
 import { Callback_Void } from "./abilityComponent"
 import { TextPickerDialogOptions } from "./textPicker"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { Frame } from "./arkui-graphics"
+import { Frame } from "../Graphics"
 
 export class BaseContextInternal {
     public static fromPtr(ptr: KPointer): BaseContext {
@@ -234,6 +234,10 @@ export class GestureOps {
         const isFingerCountLimited_casted = isFingerCountLimited as (boolean)
         return GestureOps.createPanGesture_serialize(fingers_casted, direction_casted, distance_casted, isFingerCountLimited_casted)
     }
+    public static createPanGestureWithPanGestureOptions(panGestureOptions: KPointer): KPointer {
+        const panGestureOptions_casted = panGestureOptions as (KPointer)
+        return GestureOps.createPanGestureWithPanGestureOptions_serialize(panGestureOptions_casted)
+    }
     public static createPinchGesture(fingers: number, distance: number, isFingerCountLimited: boolean): KPointer {
         const fingers_casted = fingers as (number)
         const distance_casted = distance as (number)
@@ -341,6 +345,10 @@ export class GestureOps {
     }
     private static createPanGesture_serialize(fingers: number, direction: PanDirection, distance: number, isFingerCountLimited: boolean): KPointer {
         const retval  = ArkUIGeneratedNativeModule._GestureOps_createPanGesture(fingers, TypeChecker.PanDirection_ToNumeric(direction), distance, isFingerCountLimited ? 1 : 0)
+        return retval
+    }
+    private static createPanGestureWithPanGestureOptions_serialize(panGestureOptions: KPointer): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_createPanGestureWithPanGestureOptions(panGestureOptions)
         return retval
     }
     private static createPinchGesture_serialize(fingers: number, distance: number, isFingerCountLimited: boolean): KPointer {
@@ -932,8 +940,16 @@ export class UIContextAtomicServiceBar {
         return UIContextAtomicServiceBar.getBarRect_serialize()
     }
     private static getBarRect_serialize(): Frame {
-        const retval  = ArkUIGeneratedNativeModule._UIContextAtomicServiceBar_getBarRect()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._UIContextAtomicServiceBar_getBarRect() as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : Frame = retvalDeserializer.readFrame()
         return returnResult
     }

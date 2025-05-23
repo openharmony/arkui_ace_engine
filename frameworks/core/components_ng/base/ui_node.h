@@ -922,34 +922,6 @@ public:
         return true;
     }
 
-    bool IsMultiThreadNode() const
-    {
-        return isMultiThreadNode_;
-    }
-
-    void SetIsMultiThreadNode(bool isMultiThreadNode)
-    {
-        isMultiThreadNode_ = isMultiThreadNode;
-    }
-
-    void PostAfterAttachMainTreeTask(std::function<void()>&& task)
-    {
-        if (IsOnMainTree()) {
-            return;
-        }
-        afterAttachMainTreeTasks_.emplace_back(std::move(task));
-    }
-
-    void ExecuteAfterAttachMainTreeTasks()
-    {
-        for (auto& task : afterAttachMainTreeTasks_) {
-            if (task) {
-                task();
-            }
-        }
-        afterAttachMainTreeTasks_.clear();
-    }
-
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -1038,7 +1010,6 @@ private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
     bool CanAddChildWhenTopNodeIsModalUec(std::list<RefPtr<UINode>>::iterator& curIter);
-    virtual bool MaybeRelease() override;
 
     std::list<RefPtr<UINode>> children_;
     // disappearingChild、index、branchId
@@ -1055,9 +1026,7 @@ private:
     int32_t rootNodeId_ = 0; // host is Page or NavDestination
     int32_t themeScopeId_ = 0;
     bool isRoot_ = false;
-    std::atomic<bool> onMainTree_ = false;
-    bool isMultiThreadNode_ = false;
-    std::vector<std::function<void()>> afterAttachMainTreeTasks_;
+    bool onMainTree_ = false;
     bool removeSilently_ = true;
     bool isInDestroying_ = false;
     bool isDisappearing_ = false;

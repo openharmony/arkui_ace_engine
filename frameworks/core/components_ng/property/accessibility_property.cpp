@@ -16,7 +16,6 @@
 #include "accessibility_property.h"
 
 #include "core/accessibility/accessibility_constants.h"
-#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -68,14 +67,10 @@ void AccessibilityProperty::NotifyComponentChangeEvent(AccessibilityEventType ev
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         auto frameNode = host_.Upgrade();
         CHECK_NULL_VOID(frameNode);
-        MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(frameNode), [weak = host_]() {
-            auto frameNode = weak.Upgrade();
-            CHECK_NULL_VOID(frameNode);
-            auto pipeline = frameNode->GetContext();
-            CHECK_NULL_VOID(pipeline);
-            pipeline->AddAccessibilityCallbackEvent(AccessibilityCallbackEventId::ON_SEND_ELEMENT_INFO_CHANGE,
-                                                    frameNode->GetAccessibilityId());
-        });
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddAccessibilityCallbackEvent(AccessibilityCallbackEventId::ON_SEND_ELEMENT_INFO_CHANGE,
+                                                frameNode->GetAccessibilityId());
     }
 }
 

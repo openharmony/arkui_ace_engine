@@ -265,11 +265,12 @@ HWTEST_F(FlexModifierTest, setPointLightTestPointLightLightSourcePositionXValidV
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
 
     auto checkValue = [this, &initValuePointLight](
-                          const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Dimension& value) {
         Ark_PointLightStyle inputValuePointLight = initValuePointLight;
 
         WriteTo(inputValuePointLight.lightSource).positionX = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto optValue = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultLightSource =
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
@@ -308,11 +309,12 @@ HWTEST_F(FlexModifierTest, setPointLightTestPointLightLightSourcePositionYValidV
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
 
     auto checkValue = [this, &initValuePointLight](
-                          const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Dimension& value) {
         Ark_PointLightStyle inputValuePointLight = initValuePointLight;
 
         WriteTo(inputValuePointLight.lightSource).positionY = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto optValue = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultLightSource =
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
@@ -351,11 +353,12 @@ HWTEST_F(FlexModifierTest, setPointLightTestPointLightLightSourcePositionZValidV
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
 
     auto checkValue = [this, &initValuePointLight](
-                          const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Dimension& value) {
         Ark_PointLightStyle inputValuePointLight = initValuePointLight;
 
         WriteTo(inputValuePointLight.lightSource).positionZ = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto optValue = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultLightSource =
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
@@ -398,7 +401,8 @@ HWTEST_F(FlexModifierTest, setPointLightTestPointLightLightSourceIntensity, Test
         Ark_PointLightStyle inputValuePointLight = initValuePointLight;
 
         WriteTo(inputValuePointLight.lightSource).intensity = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto optValue = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultLightSource =
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
@@ -446,7 +450,8 @@ HWTEST_F(FlexModifierTest, setPointLightTestPointLightLightSourceColorValidValue
         Ark_PointLightStyle inputValuePointLight = initValuePointLight;
 
         WriteTo(inputValuePointLight.lightSource).color = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto optValue = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight =
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
@@ -497,10 +502,11 @@ HWTEST_F(FlexModifierTest, setPointLightTestPointLightLightSourceColorInvalidVal
 
     auto checkValue = [this, &initValuePointLight](const std::string& input, const Opt_ResourceColor& value) {
         Ark_PointLightStyle inputValuePointLight = initValuePointLight;
-
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto optValue = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optValue);
         WriteTo(inputValuePointLight.lightSource).color = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        optValue = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight =
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
@@ -549,7 +555,8 @@ HWTEST_F(FlexModifierTest, setPointLightTestPointLightIlluminatedValidValues, Te
         Ark_PointLightStyle inputValuePointLight = initValuePointLight;
 
         inputValuePointLight.illuminated = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto optValue = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_NAME);
@@ -588,7 +595,8 @@ HWTEST_F(FlexModifierTest, setPointLightTestPointLightIlluminatedInvalidValues, 
     auto checkValue = [this, &initValuePointLight](const std::string& input, const Opt_IlluminatedType& value) {
         Ark_PointLightStyle inputValuePointLight = initValuePointLight;
         inputValuePointLight.illuminated = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto optValue = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_NAME);
@@ -629,7 +637,8 @@ HWTEST_F(FlexModifierTest, setPointLightTestPointLightBloomValidValues, TestSize
         Ark_PointLightStyle inputValuePointLight = initValuePointLight;
 
         inputValuePointLight.bloom = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto optValue = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight =
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
@@ -672,10 +681,11 @@ HWTEST_F(FlexModifierTest, setPointLightTestPointLightBloomInvalidValues, TestSi
 
     auto checkValue = [this, &initValuePointLight](const std::string& input, const Opt_Number& value) {
         Ark_PointLightStyle inputValuePointLight = initValuePointLight;
-
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        auto optValue = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optValue);
         inputValuePointLight.bloom = value;
-        modifier_->setPointLight(node_, &inputValuePointLight);
+        optValue = Converter::ArkValue<Opt_PointLightStyle>(inputValuePointLight);
+        modifier_->setPointLight(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight =
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);

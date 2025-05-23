@@ -59,7 +59,7 @@ import { OnTimePickerChangeCallback, TimePickerFormat, TimePickerResult, Callbac
 import { PageTransitionCallback, RouteType, SlideEffect } from "./../pageTransition"
 import { PasteButtonCallback, PasteButtonOnClickResult, PasteDescription, PasteIconStyle, PasteButtonOptions } from "./../pasteButton"
 import { PluginErrorCallback, PluginErrorData, PluginComponentTemplate, PluginComponentOptions } from "./../pluginComponent"
-import { ReceiveCallback, BaseShape, BaseShapeInternal, CircleShape, CircleShapeInternal, ShapeSize, CommonShape, CommonShapeInternal, WebviewController, WebviewControllerInternal, Summary, EllipseShape, EllipseShapeInternal, ImageModifier, IntentionCode, RectWidthStyle, RectHeightStyle, SymbolGlyphModifier, PathShape, PathShapeInternal, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShape, RectShapeInternal, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, AsyncCallback_image_PixelMap_Void, ColorMetrics, ColorMetricsInternal, SnapshotOptions, LabelStyle } from "./../arkui-external"
+import { ReceiveCallback, BaseShape, BaseShapeInternal, CircleShape, CircleShapeInternal, ShapeSize, CommonShape, CommonShapeInternal, WebviewController, WebviewControllerInternal, Summary, EllipseShape, EllipseShapeInternal, ImageModifier, IntentionCode, RectWidthStyle, RectHeightStyle, SymbolGlyphModifier, PathShape, PathShapeInternal, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShape, RectShapeInternal, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, AsyncCallback_image_PixelMap_Void, SnapshotOptions, LabelStyle } from "./../arkui-external"
 import { SymbolEffect, SymbolEffectInternal, ReplaceSymbolEffect, ReplaceSymbolEffectInternal, ScaleSymbolEffect, ScaleSymbolEffectInternal } from "../symbolglyph"
 import { FontOptions, FontInfo } from "@ohos/font/font"
 import { MeasureOptions } from "@ohos/measure"
@@ -69,7 +69,7 @@ import { SelectedCallback } from "./../griditemops"
 import { SliderTriggerChangeCallback, SliderAttribute, Callback_Number_SliderChangeMode_Void, SliderChangeMode, SliderBlockStyle, SliderInteraction, SlideRange, SliderBlockType, SliderStyle, SliderOptions } from "./../slider"
 import { StyledStringMarshallCallback, StyledStringUnmarshallCallback, CustomSpan, CustomSpanInternal, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, GestureStyle, GestureStyleInternal, GestureStyleInterface, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, ImageAttachment, ImageAttachmentInternal, StyleOptions, StyledStringKey, SpanStyle, UserDataSpan, DecorationStyleInterface, UrlStyle, UrlStyleInternal, BaselineOffsetStyle, BaselineOffsetStyleInternal, LetterSpacingStyle, LetterSpacingStyleInternal, LineHeightStyle, LineHeightStyleInternal, TextShadowStyle, TextShadowStyleInternal, DecorationStyle, DecorationStyleInternal, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInternal, ParagraphStyleInterface, TextStyle_styled_string, TextStyle_styled_stringInternal, TextStyleInterface, BackgroundColorStyle, BackgroundColorStyleInternal, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../styledString"
 import { TextAreaSubmitCallback, TextAreaAttribute, Callback_EnterKeyType_Void, Callback_String_PasteEvent_Void, TextAreaType, Callback_ResourceStr_Void, TextAreaController, TextAreaControllerInternal, TextAreaOptions } from "./../textArea"
-import { VoidCallback, ResourceColor, Font, Position, Length, SizeOptions, Offset, ColorFilter, ColorFilterInternal, ResourceStr, Dimension, PX, VP, FP, LPX, Percentage, LengthConstrain, DividerStyleOptions, ConstraintSizeOptions, Area, AccessibilityOptions, Bias, BorderRadiuses, ChainWeightOptions, DirectionalEdgesT, EdgeOutlineStyles, EdgeOutlineWidths, EdgeWidths, OutlineRadiuses, Padding, EdgeColors, LocalizedBorderRadiuses, LocalizedEdgeColors, LocalizedEdges, LocalizedEdgeWidths, LocalizedPadding, LocalizedPosition, MarkStyle, BorderOptions, OutlineOptions, EdgeStyles } from "./../units"
+import { VoidCallback, ResourceColor, Font, Position, Length, SizeOptions, Offset, ColorFilter, ColorFilterInternal, ResourceStr, Dimension, PX, VP, FP, LPX, Percentage, LengthConstrain, DividerStyleOptions, ConstraintSizeOptions, Area, AccessibilityOptions, Bias, BorderRadiuses, ChainWeightOptions, DirectionalEdgesT, EdgeOutlineStyles, EdgeOutlineWidths, EdgeWidths, OutlineRadiuses, Padding, EdgeColors, LocalizedBorderRadiuses, LocalizedEdgeColors, LocalizedEdges, LocalizedEdgeWidths, LocalizedPadding, LocalizedPosition, MarkStyle, BorderOptions, OutlineOptions, EdgeStyles, Edges } from "./../units"
 import { WithThemeInterface, WithThemeAttribute, WithThemeOptions } from "./../withTheme"
 import { AccessibilityHoverType, Alignment, Color, AnimationStatus, AppRotation, ArrowPointPosition, Axis, AxisAction, AxisModel, BarState, BorderStyle, CheckBoxShape, ClickEffectLevel, ColoringStrategy, CopyOptions, CrownAction, CrownSensitivity, Curve, DialogButtonStyle, Direction, DividerMode, Edge, EdgeEffect, EllipsisMode, EmbeddedType, FillMode, FlexAlign, FlexDirection, FlexWrap, FocusDrawLevel, FoldStatus, FontStyle, FontWeight, FunctionKey, GradientDirection, HeightBreakpoint, HitTestMode, HorizontalAlign, HoverEffect, IlluminatedType, ImageFit, ImageRepeat, ImageSize, ImageSpanAlignment, InteractionHand, ItemAlign, KeySource, KeyType, LineBreakStrategy, LineCapStyle, LineJoinStyle, MarqueeUpdateStrategy, ModifierKey, MouseAction, MouseButton, NestedScrollMode, ObscuredReasons, OptionWidthMode, PageFlipMode, PixelRoundCalcPolicy, PixelRoundMode, Placement, PlayMode, RelateType, RenderFit, ResponseType, ScrollSource, TextAlign, SharedTransitionEffectType, TextOverflow, TextContentStyle, TextHeightAdaptivePolicy, WordBreak, TextCase, TextSelectableMode, TextDecorationStyle, TextDecorationType, TitleHeight, TouchType, TransitionType, VerticalAlign, Visibility, Week, WidthBreakpoint, XComponentType } from "./../enums"
 import { Affinity, LineMetrics, TextBox, RunMetrics, TextDirection } from "./../arkui-graphics-text"
@@ -87,8 +87,7 @@ import { Matrix2D, Matrix2DInternal } from "./../matrix2d"
 import { ColorMode, LayoutDirection } from "./../stateManagement"
 import { Component3DAttribute, ModelType, SceneOptions } from "./../component3d"
 import { CustomDialogController, CustomDialogControllerInternal, CustomDialogControllerOptions } from "./../customDialogController"
-import { DrawContext, Rect, LengthMetricsUnit, LengthUnit, ShapeClip, ShapeClipInternal, RoundRect, Circle, CommandPath, ShapeMask, ShapeMaskInternal, Size, Vector2, Vector3, BorderRadiuses_graphics, CornerRadius, Edges, Frame, Matrix4 } from "./../arkui-graphics"
-import { LengthMetrics, LengthMetricsInternal } from "../../Graphics"
+import { DrawContext, Rect, LengthMetricsUnit, LengthUnit, ColorMetrics, ColorMetricsInternal, ShapeClip, RoundRect, Circle, CommandPath, ShapeMask, Size, Vector2, Vector3, Corners, CornerRadius, Edges as EdgesT, Frame, Matrix4, LengthMetrics, LengthMetricsInternal, Position as GraphicsPosition } from "./../../Graphics"
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, LinearGradient, LinearGradientInternal, ColorStop, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
 import { DatePickerMode, Callback_DatePickerResult_Void, DatePickerResult, DatePickerOptions, LunarSwitchStyle, DatePickerDialogOptions } from "./../datePicker"
@@ -159,7 +158,7 @@ import { MarqueeOptions } from "./../marquee"
 import { PathOptions } from "./../path"
 import { PolygonOptions } from "./../polygon"
 import { PolylineOptions } from "./../polyline"
-import { RenderNode, RenderNodeInternal } from "./../arkui-rendernode"
+import { DrawCallback, RenderNode, RenderNodeInternal } from "../../RenderNode"
 import { RoundedRectOptions, RectOptions, RadiusItem } from "./../rect"
 import { RowOptions, RowOptionsV2 } from "./../row"
 import { StackOptions } from "./../stack"
@@ -170,6 +169,7 @@ import { MenuItemGroupOptions } from "./../menuItemGroup"
 import { MenuItemOptions } from "./../menuItem"
 import { TextBackgroundStyle } from "./../span"
 import { DividerStyle as DividerStyle_sidebar } from "./../sidebar"
+import { NodeContainer_AboutToResizeCallback } from "./../nodeContainer"
 
 export class Deserializer extends DeserializerBase {
     constructor(data: KSerializerBuffer | KUint8ArrayPtr, length: int32) {
@@ -870,16 +870,6 @@ export class Deserializer extends DeserializerBase {
     }
     readShapeAttribute(): ShapeAttribute {
         throw new Error("Interface with functions is not supported")
-    }
-    readShapeClip(): ShapeClip {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return ShapeClipInternal.fromPtr(ptr)
-    }
-    readShapeMask(): ShapeMask {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return ShapeMaskInternal.fromPtr(ptr)
     }
     readSize(): Size {
         let valueDeserializer : Deserializer = this
@@ -4215,6 +4205,21 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.release();
     return (_continuationValue as KPointer); }
     }
+    readDrawCallback(isSync: boolean = false): DrawCallback {
+        const _resource: CallbackResource = this.readCallbackResource()
+        const _call: KPointer = this.readPointer()
+        const _callSync: KPointer = this.readPointer()
+        return (context: DrawContext): void => {
+            const _argsSerializer: Serializer = Serializer.hold();
+            _argsSerializer.writeInt32(_resource.resourceId);
+            _argsSerializer.writePointer(_call);
+            _argsSerializer.writePointer(_callSync);
+            _argsSerializer.writeDrawContext(context);
+            (isSync) ? (InteropNativeModule._CallCallbackSync(-177744805, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-177744805, _argsSerializer.asBuffer(), _argsSerializer.length()));
+            _argsSerializer.release();
+            return;
+        }
+    }
     readEditableTextOnChangeCallback(isSync: boolean = false): EditableTextOnChangeCallback {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
@@ -4507,6 +4512,20 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     (isSync) ? (InteropNativeModule._CallCallbackSync(-588228933, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-588228933, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readNodeContainer_AboutToResizeCallback(isSync: boolean = false): NodeContainer_AboutToResizeCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (size: Size):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeSize(size);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1817630617, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1817630617, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -6212,13 +6231,13 @@ export class Deserializer extends DeserializerBase {
         let value : BorderRadiuses = ({topLeft: topLeft_result, topRight: topRight_result, bottomLeft: bottomLeft_result, bottomRight: bottomRight_result} as BorderRadiuses)
         return value
     }
-    readBorderRadiuses_graphics(): BorderRadiuses_graphics {
+    readBorderRadiuses_graphics(): Corners<number> {
         let valueDeserializer : Deserializer = this
         const topLeft_result : number = (valueDeserializer.readNumber() as number)
         const topRight_result : number = (valueDeserializer.readNumber() as number)
         const bottomLeft_result : number = (valueDeserializer.readNumber() as number)
         const bottomRight_result : number = (valueDeserializer.readNumber() as number)
-        let value : BorderRadiuses_graphics = ({topLeft: topLeft_result, topRight: topRight_result, bottomLeft: bottomLeft_result, bottomRight: bottomRight_result} as BorderRadiuses_graphics)
+        let value : Corners<number> = ({topLeft: topLeft_result, topRight: topRight_result, bottomLeft: bottomLeft_result, bottomRight: bottomRight_result} as Corners<number>)
         return value
     }
     readBounceSymbolEffect(): BounceSymbolEffect {
@@ -7300,6 +7319,39 @@ export class Deserializer extends DeserializerBase {
         }
         const right_result : Dimension | undefined = right_buf
         let value : Edges = ({top: top_result, left: left_result, bottom: bottom_result, right: right_result} as Edges)
+        return value
+    }
+    readEdgesNumber(): EdgesT<number> {
+        let valueDeserializer : Deserializer = this
+        const top_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let top_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
+        {
+            top_buf = (valueDeserializer.readNumber() as number)
+        }
+        const top_result : number | undefined = top_buf
+        const left_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let left_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (left_buf_runtimeType))
+        {
+            left_buf = (valueDeserializer.readNumber() as number)
+        }
+        const left_result : number | undefined = left_buf
+        const bottom_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let bottom_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
+        {
+            bottom_buf = (valueDeserializer.readNumber() as number)
+        }
+        const bottom_result : number | undefined = bottom_buf
+        const right_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let right_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (right_buf_runtimeType))
+        {
+            right_buf = (valueDeserializer.readNumber() as number)
+        }
+        const right_result : number | undefined = right_buf
+        let value : EdgesT<number> = ({top: top_result, left: left_result, bottom: bottom_result, right: right_result} as EdgesT<number>)
         return value
     }
     readEdgeStyles(): EdgeStyles {
@@ -9737,6 +9789,25 @@ export class Deserializer extends DeserializerBase {
         }
         const y_result : Length | undefined = y_buf
         let value : Position = ({x: x_result, y: y_result} as Position)
+        return value
+    }
+    readGraphicsPosition(): GraphicsPosition {
+        let valueDeserializer : Deserializer = this
+        const x_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let x_buf : Length | undefined
+        if ((RuntimeType.UNDEFINED) != (x_buf_runtimeType))
+        {
+            x_buf = (valueDeserializer.readLength() as Length)
+        }
+        const x_result : Length | undefined = x_buf
+        const y_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let y_buf : Length | undefined
+        if ((RuntimeType.UNDEFINED) != (y_buf_runtimeType))
+        {
+            y_buf = (valueDeserializer.readLength() as Length)
+        }
+        const y_result : Length | undefined = y_buf
+        let value: GraphicsPosition = ({ x: x_result as number, y: y_result as number } as GraphicsPosition)
         return value
     }
     readPosterOptions(): PosterOptions {

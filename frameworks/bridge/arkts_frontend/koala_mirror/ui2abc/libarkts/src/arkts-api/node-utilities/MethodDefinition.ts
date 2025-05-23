@@ -29,7 +29,7 @@ export function createMethodDefinition(
     modifiers: Es2pandaModifierFlags,
     isComputed: boolean,
     overloads?: readonly MethodDefinition[]
-) {
+): MethodDefinition {
     const res = MethodDefinition.createMethodDefinition(
         kind,
         key,
@@ -51,7 +51,7 @@ export function updateMethodDefinition(
     modifiers: Es2pandaModifierFlags,
     isComputed: boolean,
     overloads?: readonly MethodDefinition[]
-) {
+): MethodDefinition {
     if (isSameNativeObject(kind, original.kind)
         && isSameNativeObject(key, original.key)
         && isSameNativeObject(value, original.value)

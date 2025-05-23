@@ -35,7 +35,7 @@ import { TSTypeParameterInstantiation } from "./TSTypeParameterInstantiation"
 import { TypeNode } from "./TypeNode"
 export class ETSTypeReferencePart extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 72)
+        assertValidPeer(pointer, 73)
         super(pointer)
     }
     static createETSTypeReferencePart(name?: Expression, typeParams?: TSTypeParameterInstantiation, prev?: ETSTypeReferencePart): ETSTypeReferencePart {

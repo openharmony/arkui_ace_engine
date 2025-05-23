@@ -122,6 +122,7 @@ static std::vector<std::tuple<std::string, Array_Number, std::string>> setDataPa
 
 // Valid values for attribute 'max' of method 'setDataPanelOptions'
 static std::vector<std::tuple<std::string, Opt_Number, std::string>> setDataPanelOptionsMaxValidValues = {
+    {"100.000000", Converter::ArkValue<Opt_Number>(100), "100.000000"},
     {"1.000000", Converter::ArkValue<Opt_Number>(1), "1.000000"},
     {"2.000000", Converter::ArkValue<Opt_Number>(2.0f), "2.000000"},
 };
@@ -293,7 +294,8 @@ HWTEST_F(DataPanelModifierTest, setCloseEffectTestValidValues, TestSize.Level1)
     inputValueCloseEffect = initValueCloseEffect;
     for (auto&& value: closeEffectCloseEffectValidValues) {
         inputValueCloseEffect = std::get<1>(value);
-        modifier_->setCloseEffect(node_, inputValueCloseEffect);
+        auto optValue = Converter::ArkValue<Opt_Boolean>(inputValueCloseEffect);
+        modifier_->setCloseEffect(node_, &optValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CLOSE_EFFECT_NAME);
         expectedStr = std::get<2>(value);
@@ -340,7 +342,8 @@ HWTEST_F(DataPanelModifierTest, setStrokeWidthTestValidValues, TestSize.Level1)
     inputValueStrokeWidth = initValueStrokeWidth;
     for (auto&& value: strokeWidthStrokeWidthValidValues) {
         inputValueStrokeWidth = std::get<1>(value);
-        modifier_->setStrokeWidth(node_, &inputValueStrokeWidth);
+        auto optValue = Converter::ArkValue<Opt_Length>(inputValueStrokeWidth);
+        modifier_->setStrokeWidth(node_, &optValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_WIDTH_NAME);
         expectedStr = std::get<2>(value);
@@ -372,7 +375,8 @@ HWTEST_F(DataPanelModifierTest, setStrokeWidthTestResourceValues, TestSize.Level
     inputValueStrokeWidth = initValueStrokeWidth;
     for (auto&& value: strokeWidthStrokeWidthResourceValues) {
         inputValueStrokeWidth = std::get<1>(value);
-        modifier_->setStrokeWidth(node_, &inputValueStrokeWidth);
+        auto optValue = Converter::ArkValue<Opt_Length>(inputValueStrokeWidth);
+        modifier_->setStrokeWidth(node_, &optValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_WIDTH_NAME);
         expectedStr = std::get<2>(value);
@@ -404,7 +408,8 @@ HWTEST_F(DataPanelModifierTest, setStrokeWidthTestInvalidValues, TestSize.Level1
     inputValueStrokeWidth = initValueStrokeWidth;
     for (auto&& value: strokeWidthStrokeWidthInvalidValues) {
         inputValueStrokeWidth = std::get<1>(value);
-        modifier_->setStrokeWidth(node_, &inputValueStrokeWidth);
+        auto optValue = Converter::ArkValue<Opt_Length>(inputValueStrokeWidth);
+        modifier_->setStrokeWidth(node_, &optValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_WIDTH_NAME);
         expectedStr = std::get<2>(value);
@@ -457,7 +462,8 @@ HWTEST_F(DataPanelModifierTest, setTrackBackgroundColorTestValidValues, TestSize
     inputValueTrackBackgroundColor = initValueTrackBackgroundColor;
     for (auto&& value: trackBackgroundColorValidValues) {
         inputValueTrackBackgroundColor = std::get<1>(value);
-        modifier_->setTrackBackgroundColor(node_, &inputValueTrackBackgroundColor);
+        auto optValue = Converter::ArkValue<Opt_ResourceColor>(inputValueTrackBackgroundColor);
+        modifier_->setTrackBackgroundColor(node_, &optValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_BACKGROUND_COLOR_NAME);
         expectedStr = std::get<2>(value);
@@ -492,7 +498,8 @@ HWTEST_F(DataPanelModifierTest, setTrackBackgroundColorTestValidResourceValues, 
     inputValueTrackBackgroundColor = initValueTrackBackgroundColor;
     for (auto&& value: trackBackgroundColorValidResourceValues) {
         inputValueTrackBackgroundColor = std::get<1>(value);
-        modifier_->setTrackBackgroundColor(node_, &inputValueTrackBackgroundColor);
+        auto optValue = Converter::ArkValue<Opt_ResourceColor>(inputValueTrackBackgroundColor);
+        modifier_->setTrackBackgroundColor(node_, &optValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_BACKGROUND_COLOR_NAME);
         expectedStr = std::get<2>(value);
@@ -529,7 +536,8 @@ HWTEST_F(DataPanelModifierTest, setTrackBackgroundColorTestInvalidValues, TestSi
     inputValueTrackBackgroundColor = initValueTrackBackgroundColor;
     for (auto&& value: trackBackgroundColorInvalidValues) {
         inputValueTrackBackgroundColor = std::get<1>(value);
-        modifier_->setTrackBackgroundColor(node_, &inputValueTrackBackgroundColor);
+        auto optValue = Converter::ArkValue<Opt_ResourceColor>(inputValueTrackBackgroundColor);
+        modifier_->setTrackBackgroundColor(node_, &optValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_BACKGROUND_COLOR_NAME);
         expectedStr = std::get<2>(value);
@@ -581,8 +589,8 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestStringValidValues, TestSize.Le
 
     Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
     auto arkColorArray = colorArrayHolder.ArkValue();
-
-    modifier_->setValueColors(node_, &arkColorArray);
+    auto optValue = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
+    modifier_->setValueColors(node_, &optValue);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
@@ -622,8 +630,8 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestStringInvalidValues, TestSize.
 
     Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
     auto arkColorArray = colorArrayHolder.ArkValue();
-
-    modifier_->setValueColors(node_, &arkColorArray);
+    auto optValue = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
+    modifier_->setValueColors(node_, &optValue);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
@@ -663,8 +671,8 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestNumberValidValues, TestSize.Le
 
     Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
     auto arkColorArray = colorArrayHolder.ArkValue();
-
-    modifier_->setValueColors(node_, &arkColorArray);
+    auto optValue = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
+    modifier_->setValueColors(node_, &optValue);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
@@ -704,8 +712,8 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestEnumValidValues, TestSize.Leve
 
     Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
     auto arkColorArray = colorArrayHolder.ArkValue();
-
-    modifier_->setValueColors(node_, &arkColorArray);
+    auto optValue = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
+    modifier_->setValueColors(node_, &optValue);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
@@ -745,8 +753,8 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestEnumInvalidValues, TestSize.Le
 
     Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
     auto arkColorArray = colorArrayHolder.ArkValue();
-
-    modifier_->setValueColors(node_, &arkColorArray);
+    auto optValue = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
+    modifier_->setValueColors(node_, &optValue);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
@@ -786,8 +794,8 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestResourceValidValues, TestSize.
 
     Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
     auto arkColorArray = colorArrayHolder.ArkValue();
-
-    modifier_->setValueColors(node_, &arkColorArray);
+    auto optValue = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
+    modifier_->setValueColors(node_, &optValue);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
@@ -841,8 +849,8 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestLinearGradientValidValues, Tes
 
     Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
     auto arkColorArray = colorArrayHolder.ArkValue();
-
-    modifier_->setValueColors(node_, &arkColorArray);
+    auto optValue = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
+    modifier_->setValueColors(node_, &optValue);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
@@ -878,8 +886,8 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestLinearGradientInvalidValues, T
 
     Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
     auto arkColorArray = colorArrayHolder.ArkValue();
-
-    modifier_->setValueColors(node_, &arkColorArray);
+    auto optValue = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
+    modifier_->setValueColors(node_, &optValue);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
@@ -1024,7 +1032,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestRadiusValidValues, TestSize.Le
     inputValueTrackShadow = initValueTrackShadow;
     for (auto&& value: trackShadowRadiusValidValues) {
         inputValueTrackShadow.radius = std::get<1>(value);
-        modifier_->setTrackShadow(node_, &inputValueTrackShadow);
+        auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(inputValueTrackShadow);
+        modifier_->setTrackShadow(node_, &optValue);
         jsonValue = GetJsonValue(node_);
         resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_RADIUS_NAME);
@@ -1057,7 +1066,8 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestRadiusInvalidValues, 
     inputValueTrackShadow = initValueTrackShadow;
     for (auto&& value: trackShadowRadiusInvalidValues) {
         inputValueTrackShadow.radius = std::get<1>(value);
-        modifier_->setTrackShadow(node_, &inputValueTrackShadow);
+        auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(inputValueTrackShadow);
+        modifier_->setTrackShadow(node_, &optValue);
         jsonValue = GetJsonValue(node_);
         resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_RADIUS_NAME);
@@ -1090,7 +1100,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestOffsetXValidValues, TestSize.L
     inputValueTrackShadow = initValueTrackShadow;
     for (auto&& value: trackShadowOffsetXValidValues) {
         inputValueTrackShadow.offsetX = std::get<1>(value);
-        modifier_->setTrackShadow(node_, &inputValueTrackShadow);
+        auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(inputValueTrackShadow);
+        modifier_->setTrackShadow(node_, &optValue);
         jsonValue = GetJsonValue(node_);
         resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_X_NAME);
@@ -1123,7 +1134,8 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestOffsetXInvalidValues,
     inputValueTrackShadow = initValueTrackShadow;
     for (auto&& value: trackShadowOffsetXInvalidValues) {
         inputValueTrackShadow.offsetX = std::get<1>(value);
-        modifier_->setTrackShadow(node_, &inputValueTrackShadow);
+        auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(inputValueTrackShadow);
+        modifier_->setTrackShadow(node_, &optValue);
         jsonValue = GetJsonValue(node_);
         resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_X_NAME);
@@ -1156,7 +1168,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestOffsetYValidValues, TestSize.L
     inputValueTrackShadow = initValueTrackShadow;
     for (auto&& value: trackShadowOffsetYValidValues) {
         inputValueTrackShadow.offsetY = std::get<1>(value);
-        modifier_->setTrackShadow(node_, &inputValueTrackShadow);
+        auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(inputValueTrackShadow);
+        modifier_->setTrackShadow(node_, &optValue);
         jsonValue = GetJsonValue(node_);
         resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_NAME);
@@ -1189,7 +1202,8 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestOffsetYInvalidValues,
     inputValueTrackShadow = initValueTrackShadow;
     for (auto&& value: trackShadowOffsetYInvalidValues) {
         inputValueTrackShadow.offsetY = std::get<1>(value);
-        modifier_->setTrackShadow(node_, &inputValueTrackShadow);
+        auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(inputValueTrackShadow);
+        modifier_->setTrackShadow(node_, &optValue);
         jsonValue = GetJsonValue(node_);
         resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_NAME);
@@ -1229,8 +1243,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorStringValidValues, TestSi
     initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
     initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
-
-    modifier_->setTrackShadow(node_, &initValueTrackShadow);
+    auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(initValueTrackShadow);
+    modifier_->setTrackShadow(node_, &optValue);
 
     jsonValue = GetJsonValue(node_);
     jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
@@ -1285,8 +1299,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorStringInvalidValues, Test
     initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
     initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
-
-    modifier_->setTrackShadow(node_, &initValueTrackShadow);
+    auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(initValueTrackShadow);
+    modifier_->setTrackShadow(node_, &optValue);
 
     jsonValue = GetJsonValue(node_);
     jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
@@ -1341,8 +1355,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorNumberValidValues, TestSi
     initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
     initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
-
-    modifier_->setTrackShadow(node_, &initValueTrackShadow);
+    auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(initValueTrackShadow);
+    modifier_->setTrackShadow(node_, &optValue);
 
     jsonValue = GetJsonValue(node_);
     jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
@@ -1397,8 +1411,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorEnumValidValues, TestSize
     initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
     initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
-
-    modifier_->setTrackShadow(node_, &initValueTrackShadow);
+    auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(initValueTrackShadow);
+    modifier_->setTrackShadow(node_, &optValue);
 
     jsonValue = GetJsonValue(node_);
     jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
@@ -1453,8 +1467,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorEnumInvalidValues, TestSi
     initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
     initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
-
-    modifier_->setTrackShadow(node_, &initValueTrackShadow);
+    auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(initValueTrackShadow);
+    modifier_->setTrackShadow(node_, &optValue);
 
     jsonValue = GetJsonValue(node_);
     jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
@@ -1509,8 +1523,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorResourceValidValues, Test
     initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
     initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
-
-    modifier_->setTrackShadow(node_, &initValueTrackShadow);
+    auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(initValueTrackShadow);
+    modifier_->setTrackShadow(node_, &optValue);
 
     jsonValue = GetJsonValue(node_);
     jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
@@ -1565,8 +1579,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorLinearGradientValidValues
     initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
     initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
-
-    modifier_->setTrackShadow(node_, &initValueTrackShadow);
+    auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(initValueTrackShadow);
+    modifier_->setTrackShadow(node_, &optValue);
 
     jsonValue = GetJsonValue(node_);
     jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
@@ -1617,8 +1631,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorLinearGradientInvalidValu
     initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
     initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
-
-    modifier_->setTrackShadow(node_, &initValueTrackShadow);
+    auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(initValueTrackShadow);
+    modifier_->setTrackShadow(node_, &optValue);
 
     jsonValue = GetJsonValue(node_);
     jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);

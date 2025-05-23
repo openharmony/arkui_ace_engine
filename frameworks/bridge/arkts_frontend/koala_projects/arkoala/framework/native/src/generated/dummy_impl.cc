@@ -24088,6 +24088,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return nullptr;
     }
+    Ark_NativePointer CreatePanGestureWithPanGestureOptionsImpl(Ark_NativePointer panGestureOptions)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("createPanGestureWithPanGestureOptions(");
+        WriteToString(&out, panGestureOptions);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
     Ark_NativePointer CreatePinchGestureImpl(const Ark_Number* fingers,
                                              const Ark_Number* distance,
                                              Ark_Boolean isFingerCountLimited)
@@ -24912,6 +24923,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
         return {};
+    }
+    void ReuseImpl(Ark_FrameNode peer)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("reuse(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void RecycleImpl(Ark_FrameNode peer)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("recycle(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
     }
     Ark_Number Vp2pxImpl(Ark_UIContext peer,
                          const Ark_Number* value)
@@ -28109,6 +28136,32 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return nullptr;
     }
     } // TabsOpsAccessor
+    namespace UIContextImpAccessor {
+    void FreezeUINode0Impl(const Ark_String* id,
+                           Ark_Boolean isFrozen)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("freezeUINode(");
+        WriteToString(&out, id);
+        out.append(", ");
+        WriteToString(&out, isFrozen);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void FreezeUINode1Impl(const Ark_Number* id,
+                           Ark_Boolean isFrozen)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("freezeUINode(");
+        WriteToString(&out, id);
+        out.append(", ");
+        WriteToString(&out, isFrozen);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // UIContextImpAccessor
     namespace GridItemOpsAccessor {
     Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
                                                     Ark_Boolean value,
@@ -42979,6 +43032,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GestureOpsAccessor::CreateTapGestureImpl,
             GestureOpsAccessor::CreateLongPressGestureImpl,
             GestureOpsAccessor::CreatePanGestureImpl,
+            GestureOpsAccessor::CreatePanGestureWithPanGestureOptionsImpl,
             GestureOpsAccessor::CreatePinchGestureImpl,
             GestureOpsAccessor::CreateRotationGestureImpl,
             GestureOpsAccessor::CreateSwipeGestureImpl,
@@ -43513,6 +43567,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeAccessor::GetAttachedFrameNodeByIdImpl,
             FrameNodeAccessor::GetFrameNodeByIdImpl,
             FrameNodeAccessor::GetFrameNodeByUniqueIdImpl,
+            FrameNodeAccessor::Reuse,
+            FrameNodeAccessor::Recycle,
         };
         return &FrameNodeAccessorImpl;
     }
@@ -43713,6 +43769,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct RenderNodePeer {
         virtual ~RenderNodePeer() = default;
     };
+
     const GENERATED_ArkUITabsOpsAccessor* GetTabsOpsAccessor()
     {
         static const GENERATED_ArkUITabsOpsAccessor TabsOpsAccessorImpl {
@@ -43720,6 +43777,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TabsOpsAccessor::RegisterBarBackgroundBlurStyleImpl,
         };
         return &TabsOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUIUIContextImpAccessor* GetUIContextImpAccessor()
+    {
+        static const GENERATED_ArkUIUIContextImpAccessor UIContextImpAccessorImpl {
+            UIContextImpAccessor::FreezeUINode0Impl,
+            UIContextImpAccessor::FreezeUINode1Impl,
+        };
+        return &UIContextImpAccessorImpl;
     }
 
     const GENERATED_ArkUIFilterAccessor* GetFilterAccessor()
@@ -46672,6 +46738,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetPixelMapAccessor,
             GetRenderNodeAccessor,
             GetTabsOpsAccessor,
+            GetUIContextImpAccessor,
             GetFilterAccessor,
             GetVisualEffectAccessor,
             GetNavExtenderAccessor,

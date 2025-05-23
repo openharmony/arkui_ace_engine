@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 export class ETSPackageDeclaration extends Statement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 69)
+        assertValidPeer(pointer, 70)
         super(pointer)
     }
     static createETSPackageDeclaration(name?: Expression): ETSPackageDeclaration {

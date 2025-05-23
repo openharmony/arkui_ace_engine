@@ -17,6 +17,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
+#include "core/components_ng/pattern/image_animator/image_animator_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "arkoala_api_generated.h"
 
@@ -116,7 +117,7 @@ void StateImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto stateOpt = Converter::OptConvert<int32_t>(*value);
-    ImageAnimatorModelNG::SetState(frameNode, stateOpt);
+    ImageAnimatorModelStatic::SetState(frameNode, stateOpt);
 }
 void DurationImpl(Ark_NativePointer node,
                   const Opt_Number* value)
@@ -125,7 +126,7 @@ void DurationImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto durationOpt = Converter::OptConvert<int32_t>(*value);
     Validator::ValidateNonNegative(durationOpt);
-    ImageAnimatorModelNG::SetDuration(frameNode, durationOpt);
+    ImageAnimatorModelStatic::SetDuration(frameNode, durationOpt);
 }
 void ReverseImpl(Ark_NativePointer node,
                  const Opt_Boolean* value)
@@ -157,7 +158,7 @@ void FillModeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto fillModeOpt = Converter::OptConvert<int32_t>(*value);
-    ImageAnimatorModelNG::SetFillMode(frameNode, fillModeOpt);
+    ImageAnimatorModelStatic::SetFillMode(frameNode, fillModeOpt);
 }
 void IterationsImpl(Ark_NativePointer node,
                     const Opt_Number* value)
@@ -166,15 +167,18 @@ void IterationsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto iterationOpt = Converter::OptConvert<int32_t>(*value);
     Validator::ValidateGreatOrEqual(iterationOpt, -1);
-    ImageAnimatorModelNG::SetIteration(frameNode, iterationOpt);
+    ImageAnimatorModelStatic::SetIteration(frameNode, iterationOpt);
 }
 void MonitorInvisibleAreaImpl(Ark_NativePointer node,
                               const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ImageAnimatorModelNG::SetMonitorInvisibleArea(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    if (!convValue) {
+        return;
+    }
+    ImageAnimatorModelNG::SetAutoMonitorInvisibleArea(frameNode, *convValue);
 }
 void OnStartImpl(Ark_NativePointer node,
                  const Opt_Callback_Void* value)

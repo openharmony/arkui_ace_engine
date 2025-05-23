@@ -24,7 +24,7 @@ namespace HyperlinkModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = HyperlinkModelNG::CreateFrameNode(id);
+    auto frameNode = HyperlinkModelStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -41,7 +41,7 @@ void SetHyperlinkOptionsImpl(Ark_NativePointer node,
     auto convAddress = Converter::OptConvert<std::string>(*address);
     auto convContent = Converter::OptConvert<std::string>(*content);
     if (convAddress.has_value()) {
-        HyperlinkModelNG::SetTextStyle(frameNode, convAddress.value(), convContent);
+        HyperlinkModelStatic::SetTextStyle(frameNode, convAddress.value(), convContent);
     }
 }
 } // HyperlinkInterfaceModifier

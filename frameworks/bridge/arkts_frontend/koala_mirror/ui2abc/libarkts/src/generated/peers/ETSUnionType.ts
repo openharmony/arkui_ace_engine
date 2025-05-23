@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 export class ETSUnionType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 73)
+        assertValidPeer(pointer, 74)
         super(pointer)
     }
     static createETSUnionType(types: readonly TypeNode[]): ETSUnionType {

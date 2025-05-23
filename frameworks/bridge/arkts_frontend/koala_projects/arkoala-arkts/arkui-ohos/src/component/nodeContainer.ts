@@ -30,6 +30,7 @@ import { NodeController } from "../NodeController"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { FrameNode } from "../FrameNode"
 import { Size } from "../Graphics"
+export type NodeContainer_AboutToResizeCallback = (size: Size) => void;
 export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)

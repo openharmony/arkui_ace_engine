@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 export class TSExternalModuleReference extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 88)
+        assertValidPeer(pointer, 89)
         super(pointer)
     }
     static createTSExternalModuleReference(expr?: Expression): TSExternalModuleReference {

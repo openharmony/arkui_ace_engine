@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 export class BlockExpression extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 154)
+        assertValidPeer(pointer, 155)
         super(pointer)
     }
     static createBlockExpression(statements: readonly Statement[]): BlockExpression {

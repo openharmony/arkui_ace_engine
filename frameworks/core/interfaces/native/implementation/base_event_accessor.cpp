@@ -24,33 +24,6 @@
 #include "core/interfaces/native/implementation/base_event_peer.h"
 
 namespace OHOS::Ace::NG {
-
-namespace Converter {
-template<>
-void AssignCast(std::optional<SourceType>& dst, const Ark_SourceType& src)
-{
-    switch (src) {
-        case ARK_SOURCE_TYPE_UNKNOWN: dst = SourceType::NONE; break;
-        case ARK_SOURCE_TYPE_MOUSE: dst = SourceType::MOUSE; break;
-        case ARK_SOURCE_TYPE_TOUCH_SCREEN: dst = SourceType::TOUCH; break;
-        default: LOGE("Unexpected enum value in Ark_SourceType: %{public}d", src);
-    }
-}
-template<>
-void AssignCast(std::optional<SourceTool>& dst, const Ark_SourceTool& src)
-{
-    switch (src) {
-        case ARK_SOURCE_TOOL_UNKNOWN: dst = SourceTool::UNKNOWN; break;
-        case ARK_SOURCE_TOOL_FINGER: dst = SourceTool::FINGER; break;
-        case ARK_SOURCE_TOOL_PEN: dst = SourceTool::PEN; break;
-        case ARK_SOURCE_TOOL_MOUSE: dst = SourceTool::MOUSE; break;
-        case ARK_SOURCE_TOOL_TOUCHPAD: dst = SourceTool::TOUCHPAD; break;
-        case ARK_SOURCE_TOOL_JOYSTICK: dst = SourceTool::JOYSTICK; break;
-        default: LOGE("Unexpected enum value in Ark_SourceTool: %{public}d", src);
-    }
-}
-} // namespace Converter
-
 namespace GeneratedModifier {
 namespace BaseEventAccessor {
 

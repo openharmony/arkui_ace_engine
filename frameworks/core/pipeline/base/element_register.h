@@ -45,7 +45,6 @@ public:
     static constexpr ElementIdType UndefinedElementId = static_cast<ElementIdType>(-1);
 
     ACE_FORCE_EXPORT static ElementRegister* GetInstance();
-    static ElementRegister* GetGlobalInstance();
     RefPtr<Element> GetElementById(ElementIdType elementId);
     RefPtr<V2::ElementProxy> GetElementProxyById(ElementIdType elementId);
 
@@ -139,15 +138,13 @@ public:
 
     void AddFrameNodeByInspectorId(const std::string& key, const WeakPtr<NG::FrameNode>& node);
 
-    void RemoveFrameNodeByInspectorId(const std::string& key, int32_t nodeId, bool isMultiThreadNode = false);
+    void RemoveFrameNodeByInspectorId(const std::string& key, int32_t nodeId);
 
 private:
     // private constructor
     ElementRegister() = default;
+
     bool AddReferenced(ElementIdType elmtId, const WeakPtr<AceType>& referenced);
-    bool AddReferencedSafely(ElementIdType elmtId, const WeakPtr<AceType>& referenced);
-    bool ExistsUnSafely(ElementIdType elementId);
-    bool ExistsSafely(ElementIdType elementId);
 
     //  Singleton instance
     static thread_local ElementRegister* instance_;
@@ -155,30 +152,20 @@ private:
 
     // ElementID assigned during initial render
     // first to Component, then synced to Element
-    std::atomic<ElementIdType> nextUniqueElementId_ = 0;
+    ElementIdType nextUniqueElementId_ = 0;
 
     ElementIdType lastestElementId_ = 0;
 
     // Map for created elements
     std::unordered_map<ElementIdType, WeakPtr<AceType>> itemMap_;
- 
-    // Map for created elements async
-    std::mutex itemSafeMapMutex_;
-    std::unordered_map<ElementIdType, WeakPtr<AceType>> itemSafeMap_;
-    RemovedElementsType removedSafelyItems_;
 
     // Map for inspectorId
     std::unordered_map<std::string, std::list<WeakPtr<NG::FrameNode>>> inspectorIdMap_;
- 
-    // Map for inspectorId of async node
-    std::mutex inspectorIdSafeMapMutex_;
-    std::unordered_map<std::string, std::list<WeakPtr<NG::FrameNode>>> inspectorIdSafeMap_;
 
     RemovedElementsType removedItems_;
 
     std::unordered_map<std::string, RefPtr<NG::GeometryTransition>> geometryTransitionMap_;
 
-    std::mutex pendingRemoveNodesMutex_;
     std::list<RefPtr<NG::UINode>> pendingRemoveNodes_;
 
     std::function<void(int64_t)> jsCleanUpIdleTaskCallback_;

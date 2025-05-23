@@ -78,32 +78,18 @@ void SymbolSpanModelNG::SetSymbolEffect(const uint32_t effectStrategy)
     ACE_UPDATE_SYMBOL_SPAN_PROPERTY(SymbolEffectStrategy, effectStrategy);
 }
 
-RefPtr<UINode> SymbolSpanModelNG::CreateFrameNode(int32_t nodeId)
-{
-    auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, nodeId);
-    return spanNode;
-}
-
-void SymbolSpanModelNG::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& valueOpt)
+void SymbolSpanModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
 {
     auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
     CHECK_NULL_VOID(spanNode);
-    if (valueOpt.has_value()) {
-        spanNode->UpdateFontSize(valueOpt.value());
-    } else {
-        spanNode->ResetFontSize();
-    }
+    spanNode->UpdateFontSize(value);
 }
 
-void SymbolSpanModelNG::SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& valueOpt)
+void SymbolSpanModelNG::SetFontWeight(FrameNode* frameNode, FontWeight value)
 {
     auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
     CHECK_NULL_VOID(spanNode);
-    if (valueOpt.has_value()) {
-        spanNode->UpdateFontWeight(valueOpt.value());
-    } else {
-        spanNode->ResetFontWeight();
-    }
+    spanNode->UpdateFontWeight(value);
 }
 
 void SymbolSpanModelNG::SetFontColor(FrameNode* frameNode, std::vector<Color>& symbolColor)
@@ -112,27 +98,16 @@ void SymbolSpanModelNG::SetFontColor(FrameNode* frameNode, std::vector<Color>& s
     ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(SymbolColorList, symbolColor, frameNode);
 }
 
-void SymbolSpanModelNG::SetSymbolRenderingStrategy(FrameNode* frameNode,
-    const std::optional<uint32_t>& renderingStrategy)
+void SymbolSpanModelNG::SetSymbolRenderingStrategy(FrameNode* frameNode, const uint32_t renderingStrategy)
 {
     CHECK_NULL_VOID(frameNode);
-    if (renderingStrategy.has_value()) {
-        ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(SymbolRenderingStrategy, renderingStrategy.value(), frameNode);
-    } else {
-        auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
-        spanNode->ResetSymbolRenderingStrategy();
-    }
+    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(SymbolRenderingStrategy, renderingStrategy, frameNode);
 }
 
-void SymbolSpanModelNG::SetSymbolEffect(FrameNode* frameNode, const std::optional<uint32_t>& effectStrategy)
+void SymbolSpanModelNG::SetSymbolEffect(FrameNode* frameNode, const uint32_t effectStrategy)
 {
     CHECK_NULL_VOID(frameNode);
-    if (effectStrategy.has_value()) {
-        ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(SymbolEffectStrategy, effectStrategy.value(), frameNode);
-    } else {
-        auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
-        spanNode->ResetSymbolEffectStrategy();
-    }
+    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(SymbolEffectStrategy, effectStrategy, frameNode);
 }
 
 void SymbolSpanModelNG::InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode)

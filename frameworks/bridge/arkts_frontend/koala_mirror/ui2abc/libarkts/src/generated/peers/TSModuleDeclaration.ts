@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 export class TSModuleDeclaration extends Statement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 122)
+        assertValidPeer(pointer, 123)
         super(pointer)
     }
     static createTSModuleDeclaration(name: Expression | undefined, body: Statement | undefined, declare: boolean, _global: boolean): TSModuleDeclaration {

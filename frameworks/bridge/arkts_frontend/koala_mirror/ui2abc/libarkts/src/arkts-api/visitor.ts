@@ -21,6 +21,7 @@ import {
     isAssignmentExpression,
     isBlockExpression,
     isBlockStatement,
+    isBinaryExpression,
     isCallExpression,
     isChainExpression,
     isClassDeclaration,
@@ -52,10 +53,25 @@ import {
     isETSUnionType,
     isETSFunctionType,
     isWhileStatement,
+    isForUpdateStatement,
+    isForInStatement,
+    isForOfStatement,
+    isDoWhileStatement,
+    isSwitchStatement,
+    isSwitchCaseStatement,
+    isETSImportDeclaration,
+    isProperty,
+    isETSNewClassInstanceExpression,
+    isTSNonNullExpression,
+    isUpdateExpression,
+    isETSTypeReference,
+    isETSTypeReferencePart,
+    isTSTypeParameterInstantiation,
+    isTSTypeParameterDeclaration
 } from "../generated"
 import { updateETSModuleByStatements } from "./utilities/public"
 import { global } from "./static/global"
-import { Es2pandaScriptFunctionFlags } from "../generated/Es2pandaEnums"
+import { Es2pandaImportKinds, Es2pandaScriptFunctionFlags } from "../generated/Es2pandaEnums"
 
 type Visitor = (node: AstNode, options?: object) => AstNode
 
@@ -255,6 +271,20 @@ export function visitEachChild(
             node.isOptional
         )
     }
+    if (isSwitchStatement(node)) {
+        return factory.updateSwitchStatement(
+            node,
+            nodeVisitor(node.discriminant, visitor),
+            nodesVisitor(node.cases, visitor)
+        )
+    }
+    if (isSwitchCaseStatement(node)) {
+        return factory.updateSwitchCaseStatement(
+            node,
+            nodeVisitor(node.test, visitor),
+            nodesVisitor(node.consequent, visitor)
+        )
+    }
     if (isTSInterfaceDeclaration(node)) {
         return factory.updateInterfaceDeclaration(
             node,
@@ -263,7 +293,8 @@ export function visitEachChild(
             nodeVisitor(node.typeParams, visitor),
             nodeVisitor(node.body, visitor),
             node.isStatic,
-            node.isFromExternal
+            node.isFromExternal,
+            node.modifierFlags,
         )
     }
     if (isTSInterfaceBody(node)) {
@@ -340,6 +371,7 @@ export function visitEachChild(
             nodeVisitor(node.typeParams, visitor),
             nodeVisitor(node.typeAnnotation, visitor),
             nodesVisitor(node.annotations, visitor),
+            node.modifierFlags,
         )
     }
     if (isTryStatement(node)) {
@@ -398,7 +430,7 @@ export function visitEachChild(
             nodesVisitor(node.params, visitor),
             nodeVisitor(node.returnType, visitor),
             false, // TODO: how to get it?
-            Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_ARROW,
+            node.flags,
             nodesVisitor(node.annotations, visitor),
         )
     }
@@ -409,14 +441,39 @@ export function visitEachChild(
             nodeVisitor(node.value, visitor),
             nodeVisitor(node.typeAnnotation, visitor),
             node.modifierFlags,
+            node.isComputed,
+            node.annotations,
+        )
+    }
+    if (isProperty(node)) {
+        return factory.updateProperty(
+            node,
+            node.kind,
+            nodeVisitor(node.key, visitor),
+            nodeVisitor(node.value, visitor),
+            node.isMethod,
             node.isComputed
         )
+    }
+    if (isBinaryExpression(node)) {
+        return factory.updateBinaryExpression(
+            node,
+            nodeVisitor(node.left, visitor),
+            nodeVisitor(node.right, visitor),
+            node.operatorType)
     }
     if (isIdentifier(node)) {
         return factory.updateIdentifier(
             node,
             node.name,
             nodeVisitor(node.typeAnnotation, visitor)
+        )
+    }
+    if (isETSNewClassInstanceExpression(node)) {
+        return factory.updateETSNewClassInstanceExpression(
+            node,
+            nodeVisitor(node.typeRef, visitor),
+            nodesVisitor(node.arguments, visitor)
         )
     }
     if (isWhileStatement(node)) {
@@ -426,5 +483,94 @@ export function visitEachChild(
             nodeVisitor(node.body, visitor),
         )
     }
+    if (isDoWhileStatement(node)) {
+        return factory.updateDoWhileStatement(
+            node,
+            nodeVisitor(node.body, visitor),
+            nodeVisitor(node.test, visitor),
+        )
+    }
+    if (isForUpdateStatement(node)) {
+        return factory.updateForUpdateStatement(
+            node,
+            nodeVisitor(node.init, visitor),
+            nodeVisitor(node.test, visitor),
+            nodeVisitor(node.update, visitor),
+            nodeVisitor(node.body, visitor),
+        )
+    }
+    if (isForInStatement(node)) {
+        return factory.updateForInStatement(
+            node,
+            nodeVisitor(node.left, visitor),
+            nodeVisitor(node.right, visitor),
+            nodeVisitor(node.body, visitor),
+        )
+    }
+    if (isForOfStatement(node)) {
+        return factory.updateForOfStatement(
+            node,
+            nodeVisitor(node.left, visitor),
+            nodeVisitor(node.right, visitor),
+            nodeVisitor(node.body, visitor),
+            node.isAwait
+        )
+    }
+    if (isETSImportDeclaration(node)) {
+        return factory.updateETSImportDeclaration(
+            node,
+            nodeVisitor(node.source, visitor),
+            nodesVisitor(node.specifiers, visitor),
+            Es2pandaImportKinds.IMPORT_KINDS_ALL
+        )
+    }
+    if (isTSNonNullExpression(node)) {
+        return factory.updateTSNonNullExpression(
+            node,
+            nodeVisitor(node.expr, visitor)
+        )
+    }
+    if (isUpdateExpression(node)) {
+        return factory.updateUpdateExpression(
+            node,
+            nodeVisitor(node.argument, visitor),
+            node.operatorType,
+            node.isPrefix
+        )
+    }
+    if (isETSTypeReference(node)) {
+        return factory.updateETSTypeReference(
+            node,
+            nodeVisitor(node.part, visitor),
+        )
+    }
+    if (isETSTypeReferencePart(node)) {
+        return factory.updateETSTypeReferencePart(
+            node,
+            nodeVisitor(node.name, visitor),
+            nodeVisitor(node.typeParams, visitor),
+            nodeVisitor(node.previous, visitor),
+        )
+    }
+    if (isTSTypeParameterInstantiation(node)) {
+        return factory.updateTSTypeParameterInstantiation(
+            node,
+            nodesVisitor(node.params, visitor),
+        )
+    }
+    if (isTSTypeParameterDeclaration(node)) {
+        return factory.updateTSTypeParameterDeclaration(
+            node,
+            nodesVisitor(node.params, visitor),
+            node.requiredParams,
+        )
+    }
+    /** TODO: fix this case!
+    if (isClassStaticBlock(node)) {
+        return factory.updateClassStaticBlock(
+
+        )
+        nodeVisitor(node.function, visitor)
+    } */
     return node
 }

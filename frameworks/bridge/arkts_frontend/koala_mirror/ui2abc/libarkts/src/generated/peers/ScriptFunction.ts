@@ -189,6 +189,14 @@ export class ScriptFunction extends AstNode {
     get formalParamsLength(): number {
         return global.generatedEs2panda._ScriptFunctionFormalParamsLengthConst(global.context, this.peer)
     }
+    /** @deprecated */
+    setIsolatedDeclgenReturnType(type: string): this {
+        global.generatedEs2panda._ScriptFunctionSetIsolatedDeclgenReturnType(global.context, this.peer, type)
+        return this
+    }
+    get isolatedDeclgenReturnType(): string {
+        return unpackString(global.generatedEs2panda._ScriptFunctionGetIsolatedDeclgenReturnTypeConst(global.context, this.peer))
+    }
     get annotations(): readonly AnnotationUsage[] {
         return unpackNodeArray(global.generatedEs2panda._ScriptFunctionAnnotations(global.context, this.peer))
     }

@@ -25,27 +25,6 @@
 #include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 
-
-namespace OHOS::Ace::NG {
-namespace {
-#ifdef XCOMPONENT_SUPPORTED
-XComponentType ConvertToXComponentType(const std::string& type)
-{
-    if (type == "surface") {
-        return XComponentType::SURFACE;
-    }
-    if (type == "component") {
-        return XComponentType::COMPONENT;
-    }
-    if (type == "node") {
-        return XComponentType::NODE;
-    }
-    return XComponentType::SURFACE;
-}
-#endif // XCOMPONENT_SUPPORTED
-}
-}
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace XComponentModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -72,8 +51,8 @@ void SetXComponentOptions0Impl(Ark_NativePointer node,
     XComponentModelNG::SetXComponentId(frameNode, id);
 
     LOGE("XComponentInterfaceModifier::SetXComponentOptions0Impl - wrong input type");
-    auto typeStr = Converter::Convert<std::string>(value->type);
-    XComponentModelNG::SetXComponentType(frameNode, ConvertToXComponentType(typeStr));
+    auto type = Converter::OptConvert<XComponentType>(value->type).value_or(XComponentType::SURFACE);
+    XComponentModelNG::SetXComponentType(frameNode, type);
 
     auto libraryName = Converter::OptConvert<std::string>(value->libraryname);
     XComponentModelNG::SetXComponentLibraryname(frameNode, libraryName);

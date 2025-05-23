@@ -1455,6 +1455,8 @@ typedef struct NavDestinationTransitionDelegate NavDestinationTransitionDelegate
 typedef struct Opt_NavDestinationTransitionDelegate Opt_NavDestinationTransitionDelegate;
 typedef struct NavExtender_OnUpdateStack NavExtender_OnUpdateStack;
 typedef struct Opt_NavExtender_OnUpdateStack Opt_NavExtender_OnUpdateStack;
+typedef struct NodeContainer_AboutToResizeCallback NodeContainer_AboutToResizeCallback;
+typedef struct Opt_NodeContainer_AboutToResizeCallback Opt_NodeContainer_AboutToResizeCallback;
 typedef struct OnAdsBlockedCallback OnAdsBlockedCallback;
 typedef struct Opt_OnAdsBlockedCallback Opt_OnAdsBlockedCallback;
 typedef struct OnAlphabetIndexerPopupSelectCallback OnAlphabetIndexerPopupSelectCallback;
@@ -1796,6 +1798,8 @@ typedef struct Ark_EdgeOutlineWidths Ark_EdgeOutlineWidths;
 typedef struct Opt_EdgeOutlineWidths Opt_EdgeOutlineWidths;
 typedef struct Ark_Edges Ark_Edges;
 typedef struct Opt_Edges Opt_Edges;
+typedef struct Ark_EdgesNumber Ark_EdgesNumber;
+typedef struct Opt_EdgesNumber Opt_EdgesNumber;
 typedef struct Ark_EdgeStyles Ark_EdgeStyles;
 typedef struct Opt_EdgeStyles Opt_EdgeStyles;
 typedef struct Ark_EdgeWidths Ark_EdgeWidths;
@@ -3137,6 +3141,8 @@ typedef struct Ark_WithThemeOptions Ark_WithThemeOptions;
 typedef struct Opt_WithThemeOptions Opt_WithThemeOptions;
 typedef struct Ark_RichEditorSpan Ark_RichEditorSpan;
 typedef struct Opt_RichEditorSpan Opt_RichEditorSpan;
+typedef struct DrawCallbackFunc DrawCallbackFunc;
+typedef struct Opt_DrawCallbackFunc Opt_DrawCallbackFunc;
 typedef Ark_Object Ark_ContentModifier;
 typedef Opt_Object Opt_ContentModifier;
 typedef enum Ark_AccessibilityHoverType {
@@ -10766,6 +10772,15 @@ typedef struct Opt_NavExtender_OnUpdateStack {
     Ark_Tag tag;
     NavExtender_OnUpdateStack value;
 } Opt_NavExtender_OnUpdateStack;
+typedef struct NodeContainer_AboutToResizeCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Size size);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Size size);
+} NodeContainer_AboutToResizeCallback;
+typedef struct Opt_NodeContainer_AboutToResizeCallback {
+    Ark_Tag tag;
+    NodeContainer_AboutToResizeCallback value;
+} Opt_NodeContainer_AboutToResizeCallback;
 typedef struct OnAdsBlockedCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_AdsBlockedDetails details);
@@ -11534,6 +11549,15 @@ typedef struct WithThemeInterface {
     void (*call)(const Ark_Int32 resourceId, const Ark_WithThemeOptions options, const Callback_WithThemeAttribute_Void continuation);
     void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_WithThemeOptions options, const Callback_WithThemeAttribute_Void continuation);
 } WithThemeInterface;
+typedef struct DrawCallbackFunc {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_DrawContext context);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_DrawContext drawContext);
+} DrawCallbackFunc;
+typedef struct Opt_DrawCallbackFunc {
+    Ark_Tag tag;
+    DrawCallbackFunc value;
+} Opt_DrawCallbackFunc;
 typedef struct Opt_WithThemeInterface {
     Ark_Tag tag;
     WithThemeInterface value;
@@ -12220,6 +12244,16 @@ typedef struct Opt_Edges {
     Ark_Tag tag;
     Ark_Edges value;
 } Opt_Edges;
+typedef struct Ark_EdgesNumber {
+    Opt_Number top;
+    Opt_Number left;
+    Opt_Number bottom;
+    Opt_Number right;
+} Ark_EdgesNumber;
+typedef struct Opt_EdgesNumber {
+    Ark_Tag tag;
+    Ark_EdgesNumber value;
+} Opt_EdgesNumber;
 typedef struct Ark_EdgeStyles {
     Opt_BorderStyle top;
     Opt_BorderStyle right;
@@ -20902,7 +20936,7 @@ typedef struct GENERATED_ArkUINodeContainerModifier {
     void (*addNodeContainerRootNode)(Ark_NativePointer self, Ark_NativePointer value);
     void (*setAboutToAppear)(Ark_NativePointer self, const Callback_Void* value);
     void (*setAboutToDisappear)(Ark_NativePointer self, const Callback_Void* value);
-    void (*setAboutToResize)(Ark_NativePointer self, const Callback_Number_Number_Void* value);
+    void (*setAboutToResize)(Ark_NativePointer self, const NodeContainer_AboutToResizeCallback* value);
     void (*setOnAttach)(Ark_NativePointer self, const Callback_Void* value);
     void (*setOnDetach)(Ark_NativePointer self, const Callback_Void* value);
     void (*setOnTouchEvent)(Ark_NativePointer self, const Opt_Callback_TouchEvent_Void* value);
@@ -23230,6 +23264,7 @@ typedef struct GENERATED_ArkUIGestureOpsAccessor {
                                           Ark_PanDirection direction,
                                           const Ark_Number* distance,
                                           Ark_Boolean isFingerCountLimited);
+    Ark_NativePointer (*createPanGestureWithPanGestureOptions)(Ark_NativePointer panGestureOptions);
     Ark_NativePointer (*createPinchGesture)(const Ark_Number* fingers,
                                             const Ark_Number* distance,
                                             Ark_Boolean isFingerCountLimited);
@@ -23736,6 +23771,9 @@ typedef struct GENERATED_ArkUIFrameNodeAccessor {
     Ark_FrameNode (*getAttachedFrameNodeById)(const Ark_String* id);
     Ark_FrameNode (*getFrameNodeById)(const Ark_Number* id);
     Ark_FrameNode (*getFrameNodeByUniqueId)(const Ark_Number* id);
+    void (*reuse)(Ark_FrameNode peer);
+    void (*recycle)(Ark_FrameNode peer);
+    Ark_RenderNode (*getRenderNode)(Ark_FrameNode peer);
 } GENERATED_ArkUIFrameNodeAccessor;
 
 typedef struct GENERATED_ArkUILengthMetricsAccessor {
@@ -23843,7 +23881,7 @@ typedef struct GENERATED_ArkUIPixelMapAccessor {
 
 typedef struct GENERATED_ArkUIRenderNodeAccessor {
     void (*destroyPeer)(Ark_RenderNode peer);
-    Ark_RenderNode (*ctor)();
+    Ark_RenderNode (*ctor)(Ark_Int32 nodeId, const DrawCallbackFunc* callback);
     Ark_NativePointer (*getFinalizer)();
     void (*appendChild)(Ark_RenderNode peer,
                         Ark_RenderNode node);
@@ -23862,6 +23900,41 @@ typedef struct GENERATED_ArkUIRenderNodeAccessor {
                  const Ark_DrawContext* context);
     void (*invalidate)(Ark_RenderNode peer);
     void (*dispose)(Ark_RenderNode peer);
+    void (*setRectMask)(Ark_RenderNode peer,
+                        const Ark_Rect* rect,
+                        const Ark_Number* fillColor,
+                        const Ark_Number* strokeColor,
+                        const Ark_Number* strokeWidth);
+    void (*setCircleMask)(Ark_RenderNode peer,
+                          const Ark_Circle* circle,
+                          const Ark_Number* fillColor,
+                          const Ark_Number* strokeColor,
+                          const Ark_Number* strokeWidth);
+    void (*setRoundRectMask)(Ark_RenderNode peer,
+                             const Ark_RoundRect* roundRect,
+                             const Ark_Number* fillColor,
+                             const Ark_Number* strokeColor,
+                             const Ark_Number* strokeWidth);
+    void (*setOvalMask)(Ark_RenderNode peer,
+                        const Ark_Rect* rect,
+                        const Ark_Number* fillColor,
+                        const Ark_Number* strokeColor,
+                        const Ark_Number* strokeWidth);
+    void (*setPath)(Ark_RenderNode peer,
+                    const Ark_CommandPath* path,
+                    const Ark_Number* fillColor,
+                    const Ark_Number* strokeColor,
+                    const Ark_Number* strokeWidth);
+    void (*setRectClip)(Ark_RenderNode peer,
+                        const Ark_Rect* rect);
+    void (*setCircleClip)(Ark_RenderNode peer,
+                          const Ark_Circle* circle);
+    void (*setRoundRectClip)(Ark_RenderNode peer,
+                             const Ark_RoundRect* roundRect);
+    void (*setOvalClip)(Ark_RenderNode peer,
+                        const Ark_Rect* rect);
+    void (*setPathClip)(Ark_RenderNode peer,
+                        const Ark_CommandPath* path);
     Ark_Number (*getBackgroundColor)(Ark_RenderNode peer);
     void (*setBackgroundColor)(Ark_RenderNode peer,
                                const Ark_Number* backgroundColor);
@@ -23873,10 +23946,12 @@ typedef struct GENERATED_ArkUIRenderNodeAccessor {
                        const Ark_Number* opacity);
     Ark_Size (*getSize)(Ark_RenderNode peer);
     void (*setSize)(Ark_RenderNode peer,
-                    const Ark_Size* size);
+                    const Ark_Size* size,
+                    const Ark_Int32 unit);
     Ark_Position (*getPosition)(Ark_RenderNode peer);
     void (*setPosition)(Ark_RenderNode peer,
-                        const Ark_Position* position);
+                        const Ark_Position* position,
+                        const Ark_Int32 unit);
     Ark_Frame (*getFrame)(Ark_RenderNode peer);
     void (*setFrame)(Ark_RenderNode peer,
                      const Ark_Frame* frame);
@@ -23891,7 +23966,8 @@ typedef struct GENERATED_ArkUIRenderNodeAccessor {
                            const Ark_Vector2* translation);
     Ark_Vector3 (*getRotation)(Ark_RenderNode peer);
     void (*setRotation)(Ark_RenderNode peer,
-                        const Ark_Vector3* rotation);
+                        const Ark_Vector3* rotation,
+                        const Ark_Int32 unit);
     Ark_Matrix4 (*getTransform)(Ark_RenderNode peer);
     void (*setTransform)(Ark_RenderNode peer,
                          const Ark_Matrix4* transform);
@@ -23900,7 +23976,8 @@ typedef struct GENERATED_ArkUIRenderNodeAccessor {
                            const Ark_Number* shadowColor);
     Ark_Vector2 (*getShadowOffset)(Ark_RenderNode peer);
     void (*setShadowOffset)(Ark_RenderNode peer,
-                            const Ark_Vector2* shadowOffset);
+                            const Ark_Vector2* shadowOffset,
+                            const Ark_Int32 unit);
     Ark_String (*getLabel)(Ark_RenderNode peer);
     void (*setLabel)(Ark_RenderNode peer,
                      const Ark_String* label);
@@ -23916,15 +23993,17 @@ typedef struct GENERATED_ArkUIRenderNodeAccessor {
     Ark_EdgeStyles (*getBorderStyle)(Ark_RenderNode peer);
     void (*setBorderStyle)(Ark_RenderNode peer,
                            const Ark_EdgeStyles* borderStyle);
-    Ark_Edges (*getBorderWidth)(Ark_RenderNode peer);
+    Ark_EdgesNumber (*getBorderWidth)(Ark_RenderNode peer);
     void (*setBorderWidth)(Ark_RenderNode peer,
-                           const Ark_Edges* borderWidth);
-    Ark_Edges (*getBorderColor)(Ark_RenderNode peer);
+                           const Ark_EdgesNumber* borderWidth,
+                           const Ark_Int32 unit);
+    Ark_EdgesNumber (*getBorderColor)(Ark_RenderNode peer);
     void (*setBorderColor)(Ark_RenderNode peer,
-                           const Ark_Edges* borderColor);
+                           const Ark_EdgesNumber* borderColor);
     Ark_BorderRadiuses_graphics (*getBorderRadius)(Ark_RenderNode peer);
     void (*setBorderRadius)(Ark_RenderNode peer,
-                            const Ark_BorderRadiuses_graphics* borderRadius);
+                            const Ark_BorderRadiuses_graphics* borderRadius,
+                            const Ark_Int32 unit);
     Ark_ShapeMask (*getShapeMask)(Ark_RenderNode peer);
     void (*setShapeMask)(Ark_RenderNode peer,
                          Ark_ShapeMask shapeMask);
@@ -23947,6 +24026,13 @@ typedef struct GENERATED_ArkUITabsOpsAccessor {
                                                         const Opt_BlurStyle* style,
                                                         const Opt_BackgroundBlurStyleOptions* options);
 } GENERATED_ArkUITabsOpsAccessor;
+
+typedef struct GENERATED_ArkUIUIContextImpAccessor {
+    void (*freezeUINode0)(const Ark_String* id,
+                          Ark_Boolean isFrozen);
+    void (*freezeUINode1)(const Ark_Number* id,
+                          Ark_Boolean isFrozen);
+} GetRenderNodeAccessorGENERATED_ArkUIUIContextImpAccessor;
 
 typedef struct GENERATED_ArkUIGridItemOpsAccessor {
     Ark_NativePointer (*registerSelectedCallback)(Ark_NativePointer node,
@@ -25306,7 +25392,7 @@ typedef struct GENERATED_ArkUILongPressGestureInterfaceAccessor {
 
 typedef struct GENERATED_ArkUIPanGestureOptionsAccessor {
     void (*destroyPeer)(Ark_PanGestureOptions peer);
-    Ark_PanGestureOptions (*ctor)(const Opt_Literal_Number_distance_fingers_PanDirection_direction* value);
+    Ark_PanGestureOptions (*ctor)(const Opt_PanGestureHandlerOptions* value);
     Ark_NativePointer (*getFinalizer)();
     void (*setDirection)(Ark_PanGestureOptions peer,
                          Ark_PanDirection value);
@@ -26762,6 +26848,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIPixelMapAccessor* (*getPixelMapAccessor)();
     const GENERATED_ArkUIRenderNodeAccessor* (*getRenderNodeAccessor)();
     const GENERATED_ArkUITabsOpsAccessor* (*getTabsOpsAccessor)();
+    const GENERATED_ArkUIUIContextImpAccessor* (*getUIContextImpAccessor)();
     const GENERATED_ArkUIGridItemOpsAccessor* (*getGridItemOpsAccessor)();
     const GENERATED_ArkUIFilterAccessor* (*getFilterAccessor)();
     const GENERATED_ArkUIVisualEffectAccessor* (*getVisualEffectAccessor)();

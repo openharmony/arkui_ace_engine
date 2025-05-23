@@ -25,7 +25,9 @@
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_static.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/image/image_source_info.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG {
@@ -359,14 +361,19 @@ void OnPasteImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    auto onPaste = [arkCallback = CallbackHelper(*optValue)](const std::u16string& content) {
+    auto onPaste = [arkCallback = CallbackHelper(*optValue)](const std::u16string& content,
+        NG::TextCommonEvent& event) -> void {
         Converter::ConvContext ctx;
         auto arkContent = Converter::ArkValue<Ark_String>(content, &ctx);
-        Ark_PasteEvent arkEvent;
-        arkEvent.preventDefault = {};
+        auto keeper = CallbackKeeper::Claim<Callback_Void>([&event]() {
+            event.SetPreventDefault(true);
+        });
+        Ark_PasteEvent arkEvent = {
+            .preventDefault = Converter::ArkValue<Opt_Callback_Void>(keeper.ArkValue())
+        };
         arkCallback.Invoke(arkContent, arkEvent);
     };
-    TextFieldModelStatic::SetOnPaste(frameNode, std::move(onPaste));
+    TextFieldModelNG::SetOnPasteWithEvent(frameNode, std::move(onPaste));
 }
 void CopyOptionImpl(Ark_NativePointer node,
                     const Opt_CopyOptions* value)
@@ -461,7 +468,7 @@ void ShowUnitImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        TextFieldModelStatic::SetShowUnit(frameNode, nullptr);
         return;
     }
     CallbackHelper(*optValue).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
@@ -525,7 +532,7 @@ void MaxLinesImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<int>(*value);
-    TextFieldModelStatic::SetMaxLines(frameNode, convValue);
+    TextFieldModelStatic::SetMaxViewLines(frameNode, convValue);
 }
 void WordBreakImpl(Ark_NativePointer node,
                    const Opt_WordBreak* value)
@@ -548,7 +555,7 @@ void CancelButtonImpl(Ark_NativePointer node,
 {
 }
 void CancelButton0Impl(Ark_NativePointer node,
-                      const Opt_CancelButtonOptions* value)
+                       const Opt_CancelButtonOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -556,15 +563,34 @@ void CancelButton0Impl(Ark_NativePointer node,
     auto cleanButtonStyle = optValue ? Converter::OptConvert<CleanNodeStyle>(optValue->style) : std::nullopt;
     auto optIconOptions = optValue ? Converter::OptConvert<Ark_IconOptions>(optValue->icon) : std::nullopt;
     TextFieldModelStatic::SetCleanNodeStyle(frameNode, cleanButtonStyle);
-    if (optIconOptions) {
-        // TODO: Reset value
-        TextFieldModelStatic::SetCancelIconColor(frameNode, Converter::OptConvert<Color>(optIconOptions->color));
-        auto iconSize = Converter::OptConvert<CalcDimension>(optIconOptions->size);
-        Validator::ValidateNonNegative(iconSize);
-        Validator::ValidateNonPercent(iconSize);
-        TextFieldModelStatic::SetCancelIconSize(frameNode, iconSize);
-        TextFieldModelStatic::SetCanacelIconSrc(frameNode, Converter::OptConvert<std::string>(optIconOptions->src));
+    TextFieldModelNG::SetIsShowCancelButton(frameNode, true);
+    TextFieldModelNG::SetCancelButtonSymbol(frameNode, false);
+    if (!optIconOptions) {
+        return;
     }
+    // set icon size
+    auto iconSize = Converter::OptConvert<CalcDimension>(optIconOptions->size);
+    Validator::ValidateNonNegative(iconSize);
+    Validator::ValidateNonPercent(iconSize);
+    TextFieldModelStatic::SetCancelIconSize(frameNode, iconSize);
+    // set icon src
+    auto iconSrcOpt = Converter::OptConvert<Converter::Ark_Resource_Simple>(optIconOptions->src);
+    if (!iconSrcOpt) {
+        iconSrcOpt = Converter::Ark_Resource_Simple();
+    }
+    TextFieldModelStatic::SetCanacelIconSrc(frameNode, iconSrcOpt->content, iconSrcOpt->bundleName,
+        iconSrcOpt->moduleName);
+    // set icon color
+    auto info = ImageSourceInfo(iconSrcOpt->content, iconSrcOpt->bundleName, iconSrcOpt->moduleName);
+    if (info.IsSvg() && iconSrcOpt->content != "") {
+        // svg need not default color, otherwise multi color svg will render fault
+        return;
+    }
+    std::optional<Color> iconColor;
+    if (Container::CurrentColorMode() != ColorMode::DARK) {
+        iconColor = Converter::OptConvert<Color>(optIconOptions->color);
+    }
+    TextFieldModelStatic::SetCancelIconColor(frameNode, iconColor);
 }
 void CancelButton1Impl(Ark_NativePointer node,
                        const Opt_CancelButtonSymbolOptions* value)
@@ -575,6 +601,8 @@ void CancelButton1Impl(Ark_NativePointer node,
     auto cleanButtonStyle = optValue ? Converter::OptConvert<CleanNodeStyle>(optValue->style) : std::nullopt;
     auto symbol = optValue ? Converter::OptConvert<Ark_SymbolGlyphModifier>(optValue->icon) : std::nullopt;
     TextFieldModelStatic::SetCleanNodeStyle(frameNode, cleanButtonStyle);
+    TextFieldModelNG::SetIsShowCancelButton(frameNode, true);
+    TextFieldModelNG::SetCancelButtonSymbol(frameNode, true);
     if (symbol) {
         // TODO: Reset value
         TextFieldModelNG::SetCancelSymbolIcon(frameNode, nullptr);

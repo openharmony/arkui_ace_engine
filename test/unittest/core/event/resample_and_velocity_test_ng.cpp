@@ -288,22 +288,5 @@ double ResampleTestNg::CompareAccelarate(TestTouchTrackingMode mode, int32_t fra
     return 0.0;
 }
 
-/**
- * @tc.name: ResampleTest60HzCommon
- * @tc.desc: Construct touch events and test resample sequence in 60Hz vsync.
- * @tc.type: FUNC
- */
-HWTEST_F(ResampleTestNg, ResampleTest60HzFastFlick, TestSize.Level1)
-{
-    constexpr int32_t repeatTimes = 1;
-    int32_t failTimes = 0;
-    double accumulateVar = 0;
-    for (int32_t i = 0; i < repeatTimes; ++i) {
-        accumulateVar += CompareAccelarate(FAST_FLICK, 60);
-        if (accumulateVar < 0) {
-            ++failTimes;
-        }
-    }
-}
 }
 }

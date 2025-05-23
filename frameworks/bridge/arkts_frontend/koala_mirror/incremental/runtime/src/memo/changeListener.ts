@@ -17,6 +17,7 @@ import { KoalaCallsiteKey } from "@koalaui/common"
 import { scheduleCallback } from "../states/GlobalStateManager"
 import { StateContext } from "../states/State"
 import { __context, __id } from "../internals"
+import { __memo_context_type, __memo_id_type } from "../internals"
 
 /**
  * Executes the specified function if the given value has changed.
@@ -25,7 +26,7 @@ import { __context, __id } from "../internals"
  * @param listener - a function to perform if the given value has changed
  */
 /** @memo:intrinsic */
-export function OnChange<Value>(value: Value, listener: (value: Value) => void) {
+export function OnChange<Value>(value: Value, listener: (value: Value) => void): void {
     watch(__context(), __id(), false, value, listener)
 }
 
@@ -36,7 +37,7 @@ export function OnChange<Value>(value: Value, listener: (value: Value) => void) 
  * @param effect - a function to perform if the given value has changed or initialized
  */
 /** @memo:intrinsic */
-export function RunEffect<Value>(value: Value, effect: (value: Value) => void) {
+export function RunEffect<Value>(value: Value, effect: (value: Value) => void): void {
     watch(__context(), __id(), true, value, effect)
 }
 

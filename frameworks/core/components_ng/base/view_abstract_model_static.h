@@ -177,6 +177,7 @@ public:
     static void SetPixelRound(FrameNode* frameNode, uint16_t value);
     static void SetMaxWidth(FrameNode* frameNode, const CalcDimension& minWidth);
     static void SetMaxHeight(FrameNode* frameNode, const CalcDimension& minHeight);
+    static void SetDisplayIndex(FrameNode* frameNode, int32_t value);
 
 private:
     static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);

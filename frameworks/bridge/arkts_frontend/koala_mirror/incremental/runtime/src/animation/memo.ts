@@ -20,6 +20,7 @@ import { AnimatedState, ImplicitAnimationProvider, MutableAnimatedState, Paramet
 import { AnimationRange, NumberAnimationRange } from "./AnimationRange"
 import { Easing, EasingCurve } from "./Easing"
 import { AnimationSpec, TimeAnimation, animation, constAnimation, periodicAnimation, transition } from "./TimeAnimation"
+import { __memo_context_type, __memo_id_type } from "../internals"
 
 /**
  * Function allowing to sample particular function with given rate.
@@ -44,7 +45,7 @@ export function sampledValue<V>(sampleRate: uint32, generator: (tick: int64) => 
  */
 /** @memo */
 export function rememberAnimatedState<V>(animation: () => TimeAnimation<V>, startNow: boolean = false): AnimatedState<V> {
-    return remember(() => animatedState<V>(animation(), startNow))
+    return remember((): AnimatedState<V> => animatedState<V>(animation(), startNow))
 }
 
 /**
@@ -77,7 +78,7 @@ export function rememberNumberTransition(on: boolean, duration: uint32, easing: 
 /** @memo */
 export function rememberTransition<Value>(on: boolean, duration: uint32, easing: EasingCurve, compute: AnimationRange<Value>, initial: boolean = on): AnimatedState<Value> {
     const state = rememberAnimatedState<Value>((): TimeAnimation<Value> => transition<Value>(duration, easing, compute, initial ? 1 : 0), on)
-    RunEffect(!on, (paused: boolean): void => { state.paused = paused })
+    RunEffect(!on, (paused: boolean): void => { state.setPaused(paused) })
     return state
 }
 
@@ -91,7 +92,7 @@ export function rememberTransition<Value>(on: boolean, duration: uint32, easing:
  */
 /** @memo */
 export function rememberMutableAnimatedState<Value>(initial: Value, animationProvider: ImplicitAnimationProvider<Value>): MutableAnimatedState<Value> {
-    return remember(() => mutableAnimatedState<Value>(initial, animationProvider))
+    return remember((): MutableAnimatedState<Value>  => mutableAnimatedState<Value>(initial, animationProvider))
 }
 
 /**
@@ -104,7 +105,7 @@ export function rememberMutableAnimatedState<Value>(initial: Value, animationPro
  */
 /** @memo */
 export function rememberMutableAnimatedStateNumber(initial: float64, animationSpec: Partial<AnimationSpec>): MutableAnimatedState<float64> {
-    return remember(() => mutableAnimatedState(initial, (from: float64, to: float64) => from == to
+    return remember((): MutableAnimatedState<float64> => mutableAnimatedState(initial, (from: float64, to: float64) => from == to
         ? constAnimation(to)
         : animation(animationSpec, NumberAnimationRange(from, to))))
 }
@@ -120,5 +121,5 @@ export function rememberMutableAnimatedStateNumber(initial: float64, animationSp
  */
 /** @memo */
 export function rememberAnimator<P, V>(parameter: P, animationProvider: ParametrizedAnimationProvider<P, V>): StateAnimator<P, V> {
-    return remember(() => stateAnimator<P, V>(parameter, animationProvider))
+    return remember((): StateAnimator<P, V> => stateAnimator<P, V>(parameter, animationProvider))
 }

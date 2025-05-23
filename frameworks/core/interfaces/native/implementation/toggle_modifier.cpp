@@ -151,7 +151,7 @@ void _onChangeEvent_isOnImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(isOn));
     };
-    ToggleModelNG::OnChangeEvent(frameNode, std::move(onEvent));
+    ToggleModelStatic::OnChangeEvent(frameNode, std::move(onEvent));
 }
 #endif
 } // ToggleAttributeModifier
