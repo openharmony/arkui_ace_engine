@@ -66,6 +66,7 @@
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/render_node_peer_impl.h"
 #include "core/interfaces/native/implementation/submit_event_peer.h"
+#include "core/interfaces/native/implementation/swipe_recognizer_peer.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
@@ -336,6 +337,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src);
     void AssignArkValue(Ark_StyledStringKey& dst, OHOS::Ace::SpanType src);
     void AssignArkValue(Ark_SwipeActionState& dst, const SwipeActionState& src);
+    void AssignArkValue(Ark_SwipeDirection &dst, const OHOS::Ace::SwipeDirection &src);
     void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src);
     void AssignArkValue(Ark_SwiperContentWillScrollResult &dst, const SwiperContentWillScrollResult& src);
     void AssignArkValue(Ark_TextAlign& dst, const TextAlign& src);

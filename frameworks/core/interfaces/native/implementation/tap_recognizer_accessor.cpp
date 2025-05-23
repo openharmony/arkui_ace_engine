@@ -35,11 +35,9 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Number GetTapCountImpl(Ark_TapRecognizer peer)
 {
-    if (!peer || !peer->tapRecognizer) {
-        return Converter::ArkValue<Ark_Number>(0);
-    }
-    auto tapRecognizer = peer->tapRecognizer;
-    return Converter::ArkValue<Ark_Number>(tapRecognizer->GetCount());
+    auto errorValue = Converter::ArkValue<Ark_Number>(DEFAULT_COUNT);
+    CHECK_NULL_RETURN(peer, errorValue);
+    return Converter::ArkValue<Ark_Number>(peer->GetCount());
 }
 } // TapRecognizerAccessor
 const GENERATED_ArkUITapRecognizerAccessor* GetTapRecognizerAccessor()

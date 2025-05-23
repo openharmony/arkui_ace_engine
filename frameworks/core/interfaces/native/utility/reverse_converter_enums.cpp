@@ -660,6 +660,20 @@ void AssignArkValue(Ark_SwipeActionState& dst, const SwipeActionState& src)
     }
 }
 
+void AssignArkValue(Ark_SwipeDirection& dst, const OHOS::Ace::SwipeDirection& src)
+{
+    switch (src.type) {
+        case SwipeDirection::NONE: dst = ARK_SWIPE_DIRECTION_NONE; break;
+        case SwipeDirection::HORIZONTAL: dst = ARK_SWIPE_DIRECTION_HORIZONTAL; break;
+        case SwipeDirection::VERTICAL: dst = ARK_SWIPE_DIRECTION_VERTICAL; break;
+        case SwipeDirection::ALL: dst = ARK_SWIPE_DIRECTION_ALL; break;
+        default: {
+            dst = static_cast<Ark_SwipeDirection>(-1);
+            LOGE("Unexpected enum value in OHOS::Ace::SwipeDirection: %{public}d", src.type);
+        }
+    }
+}
+
 void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src)
 {
     switch (src) {

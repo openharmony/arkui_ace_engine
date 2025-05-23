@@ -28,9 +28,8 @@ using namespace testing;
 using namespace testing::ext;
 
 class PanRecognizerAccessorTest : public AccessorTestBase<GENERATED_ArkUIPanRecognizerAccessor,
-    &GENERATED_ArkUIAccessors::getPanRecognizerAccessor, PanRecognizerPeer> {
-};
- 
+                                      &GENERATED_ArkUIAccessors::getPanRecognizerAccessor, PanRecognizerPeer> {};
+
 /**
  * @tc.name: getPanGestureOptionsTest
  * @tc.desc:
@@ -41,15 +40,13 @@ HWTEST_F(PanRecognizerAccessorTest, getPanGestureOptionsTest, TestSize.Level1)
     ASSERT_NE(accessor_->getPanGestureOptions, nullptr);
 
     using TestStep = std::tuple<int32_t, double, PanDirection>;
-    static const std::vector<TestStep> testPlan = {
-        {1, 1.0f, { PanDirection::LEFT} },
-        {1, 4.0f, { PanDirection::VERTICAL } },
-        {2, 0.0f, { PanDirection::LEFT} },
-        {3, 4.0f, { PanDirection::NONE} },
-        {5, 10.0f, { PanDirection::RIGHT} } };
+    static const std::vector<TestStep> testPlan = { { 1, 1.0f, { PanDirection::LEFT } },
+        { 1, 4.0f, { PanDirection::VERTICAL } }, { 2, 0.0f, { PanDirection::LEFT } },
+        { 3, 4.0f, { PanDirection::NONE } }, { 5, 10.0f, { PanDirection::RIGHT } } };
 
-    for (auto [fingers, distance, direction]: testPlan) {
-        peer_->SetOptions(fingers, distance, direction);
+    for (auto [fingers, distance, direction] : testPlan) {
+        auto mockGestureRecognizer_ = AceType::MakeRefPtr<NG::PanRecognizer>(fingers, direction, distance);
+        peer_->Update(mockGestureRecognizer_);
         Ark_PanGestureOptions result = accessor_->getPanGestureOptions(peer_);
         ASSERT_NE(result, nullptr);
         ASSERT_NE(result->handler, nullptr);
@@ -60,4 +57,3 @@ HWTEST_F(PanRecognizerAccessorTest, getPanGestureOptionsTest, TestSize.Level1)
 }
 
 } // namespace OHOS::Ace::NG
- 

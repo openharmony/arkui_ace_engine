@@ -15,13 +15,32 @@
 
 #pragma once
 
-#include "frameworks/core/interfaces/native/utility/peer_utils.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
+#include "gesture_recognizer_peer_impl.h"
 
-struct TapRecognizerPeer final {
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::ClickRecognizer> tapRecognizer;
+const int32_t DEFAULT_COUNT = 1;
+
+struct TapRecognizerPeer : public MultiFingerRecognizerPeer {
+    void Update(const OHOS::Ace::RefPtr<OHOS::Ace::NG::ClickRecognizer>& recognizer)
+    {
+        MultiFingerRecognizerPeer::Update(recognizer);
+        count_ = recognizer->GetCount();
+    }
+
+    int32_t GetCount()
+    {
+        auto recognizer = GestureRecognizerPeer::GetRecognizer().Upgrade();
+        if (recognizer) {
+            return count_;
+        }
+        return DEFAULT_COUNT;
+    }
+
 protected:
-    TapRecognizerPeer() : tapRecognizer(OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::ClickRecognizer>()) {};
-    ~TapRecognizerPeer() = default;
+    TapRecognizerPeer() = default;
+    ~TapRecognizerPeer() override = default;
     friend OHOS::Ace::NG::PeerUtils;
+
+private:
+    int32_t count_ = DEFAULT_COUNT;
 };

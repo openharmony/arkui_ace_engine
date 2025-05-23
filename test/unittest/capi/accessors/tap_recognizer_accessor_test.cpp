@@ -36,7 +36,6 @@ HWTEST_F(TapRecognizerAccessorTest, CreatePeerTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->ctor, nullptr);
     ASSERT_NE(peer_, nullptr);
-    ASSERT_NE(peer_->tapRecognizer, nullptr);
 }
 
 /**
@@ -53,9 +52,9 @@ HWTEST_F(TapRecognizerAccessorTest, GetTapCountTest, TestSize.Level1)
     const int32_t expectedCount = 3;
     const double distanceThreshold = 4.0;
     const bool isLimitFingerCount = false;
-    peer_->tapRecognizer = AceType::MakeRefPtr<NG::ClickRecognizer>(fingers, expectedCount,
+    auto mockGestureRecognizer_ = AceType::MakeRefPtr<NG::ClickRecognizer>(fingers, expectedCount,
         distanceThreshold, isLimitFingerCount);
-    ASSERT_NE(peer_->tapRecognizer, nullptr);
+    peer_->Update(mockGestureRecognizer_);
 
     auto resultCount = Converter::Convert<int32_t>(accessor_->getTapCount(peer_));
     EXPECT_EQ(resultCount, expectedCount) << "Passed value is: " << expectedCount;

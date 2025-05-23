@@ -11,35 +11,39 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #pragma once
 
-#include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
+#include "core/components_ng/gestures/recognizers/pinch_recognizer.h"
+#include "core/pipeline/pipeline_context.h"
 #include "gesture_recognizer_peer_impl.h"
 
-const double DEFAULT_ANGLE = 1.0;
+const double DEFAULT_DISTANCE = 5.0;
 
-struct RotationRecognizerPeer : public MultiFingerRecognizerPeer {
-    void Update(const OHOS::Ace::RefPtr<OHOS::Ace::NG::RotationRecognizer>& recognizer)
+struct PinchRecognizerPeer : public MultiFingerRecognizerPeer {
+    void Update(const OHOS::Ace::RefPtr<OHOS::Ace::NG::PinchRecognizer>& recognizer)
     {
         MultiFingerRecognizerPeer::Update(recognizer);
-        angle_ = recognizer->GetAngle();
+        distance = recognizer->GetDistance();
     }
-    double GetAngle()
+    double GetDistance()
     {
         auto recognizer = GestureRecognizerPeer::GetRecognizer().Upgrade();
         if (recognizer) {
-            return angle_;
+            auto context = OHOS::Ace::PipelineContext::GetCurrentContextSafely();
+            CHECK_NULL_RETURN(context, DEFAULT_DISTANCE);
+            double value = context->ConvertPxToVp(OHOS::Ace::Dimension(distance, OHOS::Ace::DimensionUnit::PX));
+            return OHOS::Ace::RoundToMaxPrecision(value);
         }
-        return DEFAULT_ANGLE;
+        return DEFAULT_DISTANCE;
     }
 
 protected:
-    RotationRecognizerPeer() = default;
-    ~RotationRecognizerPeer() override = default;
+    PinchRecognizerPeer() = default;
+    ~PinchRecognizerPeer() override = default;
     friend OHOS::Ace::NG::PeerUtils;
 
 private:
-    double angle_ = DEFAULT_ANGLE;
+    double distance = DEFAULT_DISTANCE;
 };

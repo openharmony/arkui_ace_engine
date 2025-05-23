@@ -75,7 +75,7 @@ public:
         AccessorTestBase::SetUp();
         mockGestureRecognizer_ = AceType::MakeRefPtr<MockGestureRecognizer>();
         ASSERT_NE(mockGestureRecognizer_, nullptr);
-        peer_->SetRecognizer(mockGestureRecognizer_);
+        peer_->Update(mockGestureRecognizer_);
     }
 
     void TearDown() override
@@ -175,7 +175,7 @@ HWTEST_F(GestureRecognizerAccessorTest, GetEventTargetInfo, TestSize.Level1)
     eventTargetInfo->DecRefCount();
 
     mockGestureRecognizer_ = AceType::MakeRefPtr<MockGestureRecognizer>();
-    peer_->SetRecognizer(mockGestureRecognizer_);
+    peer_->Update(mockGestureRecognizer_);
     const auto swiperNode = SwiperModelNG::CreateFrameNode(0);
     mockGestureRecognizer_->AttachFrameNode(swiperNode);
     info = accessor_->getEventTargetInfo(peer_);
@@ -188,7 +188,7 @@ HWTEST_F(GestureRecognizerAccessorTest, GetEventTargetInfo, TestSize.Level1)
     scrollableTargetInfo->DecRefCount();
 
     mockGestureRecognizer_ = AceType::MakeRefPtr<MockGestureRecognizer>();
-    peer_->SetRecognizer(mockGestureRecognizer_);
+    peer_->Update(mockGestureRecognizer_);
     const auto buttonNode = ButtonModelNG::CreateFrameNode(0);
     mockGestureRecognizer_->AttachFrameNode(buttonNode);
     info = accessor_->getEventTargetInfo(peer_);
@@ -199,7 +199,7 @@ HWTEST_F(GestureRecognizerAccessorTest, GetEventTargetInfo, TestSize.Level1)
     eventTargetInfo->DecRefCount();
 
     mockGestureRecognizer_ = AceType::MakeRefPtr<MockGestureRecognizer>();
-    peer_->SetRecognizer(mockGestureRecognizer_);
+    peer_->Update(mockGestureRecognizer_);
     const auto scrollNode = ScrollModelNG::CreateFrameNode(0);
     mockGestureRecognizer_->AttachFrameNode(scrollNode);
     info = accessor_->getEventTargetInfo(peer_);
@@ -242,7 +242,9 @@ HWTEST_F(GestureRecognizerAccessorTest, GetTagTest, TestSize.Level1)
     const std::string expectedTag = "Test";
     auto info = AccessibilityManager::MakeRefPtr<GestureInfo>();
     info->SetTag(expectedTag);
-    peer_->GetRecognizer()->SetGestureInfo(info);
+    auto recognizer = peer_->GetRecognizer().Upgrade();
+    ASSERT_NE(recognizer, nullptr);
+    recognizer->SetGestureInfo(info);
     auto result = accessor_->getTag(peer_);
     EXPECT_EQ(Converter::Convert<std::string>(result), expectedTag);
 }

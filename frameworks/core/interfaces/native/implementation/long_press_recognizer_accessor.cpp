@@ -15,16 +15,19 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "long_press_recognizer_peer.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LongPressRecognizerAccessor {
 void DestroyPeerImpl(Ark_LongPressRecognizer peer)
 {
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_LongPressRecognizer CtorImpl()
 {
-    return nullptr;
+    return PeerUtils::CreatePeer<LongPressRecognizerPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,11 +35,15 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Boolean IsRepeatImpl(Ark_LongPressRecognizer peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_Boolean>(DEFAULT_REPEAT);
+    CHECK_NULL_RETURN(peer, errorValue);
+    return Converter::ArkValue<Ark_Boolean>(peer->GetRepeat());
 }
 Ark_Number GetDurationImpl(Ark_LongPressRecognizer peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_Number>(DEFAULT_DURATION);
+    CHECK_NULL_RETURN(peer, errorValue);
+    return Converter::ArkValue<Ark_Number>(peer->GetDuration());
 }
 } // LongPressRecognizerAccessor
 const GENERATED_ArkUILongPressRecognizerAccessor* GetLongPressRecognizerAccessor()

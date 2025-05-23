@@ -36,7 +36,6 @@ HWTEST_F(RotationRecognizerAccessorTest, CreatePeerTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->ctor, nullptr);
     ASSERT_NE(peer_, nullptr);
-    ASSERT_NE(peer_->rotationRecognizer, nullptr);
 }
 
 /**
@@ -52,9 +51,9 @@ HWTEST_F(RotationRecognizerAccessorTest, GetAngleTest, TestSize.Level1)
     const int32_t fingers = 2;
     const double expectedAngle = 3.0;
     const bool isLimitFingerCount = false;
-    peer_->rotationRecognizer  = AceType::MakeRefPtr<Ace::NG::RotationRecognizer>(fingers,
+    auto mockGestureRecognizer_ = AceType::MakeRefPtr<Ace::NG::RotationRecognizer>(fingers,
         expectedAngle, isLimitFingerCount);
-    ASSERT_NE(peer_->rotationRecognizer, nullptr);
+    peer_->Update(mockGestureRecognizer_);
 
     auto resultAngle = static_cast<double>(Converter::Convert<float>(accessor_->getAngle(peer_)));
     EXPECT_EQ(resultAngle, expectedAngle) << "Passed value is: " << expectedAngle;

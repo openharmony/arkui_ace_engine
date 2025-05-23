@@ -15,13 +15,11 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/peer_utils.h"
 #include "pan_recognizer_peer.h"
 #include "pan_gesture_options_peer.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor();
 namespace PanRecognizerAccessor {
 void DestroyPeerImpl(Ark_PanRecognizer peer)
 {
@@ -39,7 +37,7 @@ Ark_PanGestureOptions GetPanGestureOptionsImpl(Ark_PanRecognizer peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     auto panGestureOptionsPeer = PeerUtils::CreatePeer<PanGestureOptionsPeer>();
-    auto options = peer->GetOptions();
+    auto options = peer->GetPanGestureOptions();
     CHECK_NULL_RETURN(options, reinterpret_cast<Ark_PanGestureOptions>(panGestureOptionsPeer));
     panGestureOptionsPeer->handler = options;
     return reinterpret_cast<Ark_PanGestureOptions>(panGestureOptionsPeer);
