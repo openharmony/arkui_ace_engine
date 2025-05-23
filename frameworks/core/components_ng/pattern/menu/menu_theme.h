@@ -62,7 +62,7 @@ public:
             }
             theme->symbolId_ = themeConstants->GetSymbolByName("sys.symbol.checkmark");
             theme->embeddedExpandIconId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_down");
-            theme->stackExpandIconId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_right");
+            theme->stackExpandIconId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_forward");
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
