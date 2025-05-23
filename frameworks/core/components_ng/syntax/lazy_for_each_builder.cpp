@@ -1092,6 +1092,33 @@ namespace OHOS::Ace::NG {
         return cachedItems_;
     }
 
+    void LazyForEachBuilder::NotifyColorModeChange(uint32_t colorMode, bool rerenderable)
+    {
+        for (const auto& node : cachedItems_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
+            node.second.second->SetRerenderable(rerenderable);
+            node.second.second->NotifyColorModeChange(colorMode);
+        }
+        for (const auto& node : expiringItem_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
+            node.second.second->SetMeasureAnyway(rerenderable);
+            node.second.second->SetRerenderable(rerenderable);
+            node.second.second->NotifyColorModeChange(colorMode);
+        }
+        for (const auto& node : nodeList_) {
+            if (node.second == nullptr) {
+                continue;
+            }
+            node.second->SetMeasureAnyway(rerenderable);
+            node.second->SetRerenderable(rerenderable);
+            node.second->NotifyColorModeChange(colorMode);
+        }
+    }
+
     void LazyForEachBuilder::SetJSViewActive(bool active)
     {
         for (const auto& node : cachedItems_) {

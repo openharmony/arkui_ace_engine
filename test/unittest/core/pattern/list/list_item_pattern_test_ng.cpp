@@ -143,8 +143,8 @@ HWTEST_F(ListItemPatternTestNg, GetParentFrameNode003, TestSize.Level1)
         return std::make_pair(2, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
-    std::function<void(int32_t, int32_t, int32_t, int32_t, bool)> onActiveRange =
-        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache) {};
+    std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange =
+        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
     std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
     std::function<void()> onPurge = []() {};
     RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(

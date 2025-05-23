@@ -153,6 +153,20 @@ class WebOnScrollModifier extends ModifierWithKey<(event: { xOffset: number; yOf
   }
 }
 
+class WebGeolocationAccessModifier extends ModifierWithKey<boolean> {
+  constructor (value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webGeolocationAccessModifier');
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetGeolocationAccess(node);
+    } else {
+      getUINativeModule().web.setGeolocationAccess(node, this.value);
+    }
+  }
+}
+
 class WebOnOverScrollModifier extends ModifierWithKey<(result: { xOffset: number; yOffset: number }) => void> {
   constructor (value: (event: { xOffset: number; yOffset: number }) => void) {
     super(value)
@@ -163,6 +177,20 @@ class WebOnOverScrollModifier extends ModifierWithKey<(result: { xOffset: number
       getUINativeModule().web.resetOnOverScroll(node);
     } else {
       getUINativeModule().web.setOnOverScroll(node, this.value);
+    }
+  }
+}
+
+class WebDatabaseAccessModifier extends ModifierWithKey<boolean> {
+  constructor (value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webDatabaseAccessModifier');
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetDatabaseAccess(node);
+    } else {
+      getUINativeModule().web.setDatabaseAccess(node, this.value);
     }
   }
 }
@@ -181,6 +209,20 @@ class WebOnScaleChangeModifier extends ModifierWithKey<(result: { oldScale: numb
   }
 }
 
+class WebOverviewModeAccessModifier extends ModifierWithKey<boolean> {
+  constructor (value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOverviewModeAccessModifier');
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOverviewModeAccess(node);
+    } else {
+      getUINativeModule().web.setOverviewModeAccess(node, this.value);
+    }
+  }
+}
+
 class WebOnRequestSelectedModifier extends ModifierWithKey<() => void> {
   constructor (value: () => void) {
     super(value)
@@ -191,6 +233,20 @@ class WebOnRequestSelectedModifier extends ModifierWithKey<() => void> {
       getUINativeModule().web.resetOnRequestSelected(node);
     } else {
       getUINativeModule().web.setOnRequestSelected(node, this.value);
+    }
+  }
+}
+
+class WebForceDarkAccessModifier extends ModifierWithKey<boolean> {
+  constructor (value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webForceDarkAccessModifier');
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetForceDarkAccess(node);
+    } else {
+      getUINativeModule().web.setForceDarkAccess(node, this.value);
     }
   }
 }
@@ -209,6 +265,20 @@ class WebOnContextMenuHideModifier extends ModifierWithKey<OnContextMenuHideCall
   }
 }
 
+class WebPinchSmoothModifier extends ModifierWithKey<boolean> {
+  constructor (value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webPinchSmoothModifier');
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetPinchSmooth(node);
+    } else {
+      getUINativeModule().web.setPinchSmooth(node, this.value);
+    }
+  }
+}
+
 class WebKeyboardAvoidModeModifier extends ModifierWithKey<WebKeyboardAvoidMode> {
   constructor(value: WebKeyboardAvoidMode) {
     super(value);
@@ -219,6 +289,20 @@ class WebKeyboardAvoidModeModifier extends ModifierWithKey<WebKeyboardAvoidMode>
       getUINativeModule().web.resetKeyboardAvoidMode(node);
     } else {
       getUINativeModule().web.setKeyboardAvoidMode(node, this.value);
+    }
+  }
+}
+
+class WebMetaViewportModifier extends ModifierWithKey<boolean> {
+  constructor (value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webMetaViewportModifier');
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetMetaViewport(node);
+    } else {
+      getUINativeModule().web.setMetaViewport(node, this.value);
     }
   }
 }
@@ -237,6 +321,20 @@ class WebOnControllerAttachedModifier extends ModifierWithKey<() => void> {
   }
 }
 
+class WebEnableFollowSystemFontWeightModifier extends ModifierWithKey<boolean> {
+  constructor (value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webEnableFollowSystemFontWeightModifier');
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetEnableFollowSystemFontWeight(node);
+    } else {
+      getUINativeModule().web.setEnableFollowSystemFontWeight(node, this.value);
+    }
+  }
+}
+
 class WebVerticalScrollBarAccessModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -247,6 +345,20 @@ class WebVerticalScrollBarAccessModifier extends ModifierWithKey<boolean> {
       getUINativeModule().web.resetVerticalScrollBarAccess(node);
     } else {
       getUINativeModule().web.setVerticalScrollBarAccess(node, this.value);
+    }
+  }
+}
+
+class WebEnableNativeEmbedModeModifier extends ModifierWithKey<boolean> {
+  constructor (value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webEnableNativeEmbedModeModifier');
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetEnableNativeEmbedMode(node);
+    } else {
+      getUINativeModule().web.setEnableNativeEmbedMode(node, this.value);
     }
   }
 }
@@ -265,6 +377,20 @@ class WebHorizontalScrollBarAccessModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class WebMinFontSizeModifier extends ModifierWithKey<number> {
+  constructor (value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webMinFontSizeModifier');
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetMinFontSize(node);
+    } else {
+      getUINativeModule().web.setMinFontSize(node, this.value);
+    }
+  }
+}
+
 class WebTextZoomRatioModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -275,6 +401,20 @@ class WebTextZoomRatioModifier extends ModifierWithKey<number> {
       getUINativeModule().web.resetTextZoomRatio(node);
     } else {
       getUINativeModule().web.setTextZoomRatio(node, this.value);
+    }
+  }
+}
+
+class WebDefaultFontSizeModifier extends ModifierWithKey<number> {
+  constructor (value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webDefaultFontSizeModifier');
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetDefaultFontSize(node);
+    } else {
+      getUINativeModule().web.setDefaultFontSize(node, this.value);
     }
   }
 }
@@ -293,6 +433,76 @@ class WebInitialScaleModifier extends ModifierWithKey<number> {
   }
 }
 
+class WebDefaultFixedFontSizeModifier extends ModifierWithKey<number> {
+  constructor (value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webDefaultFixedFontSizeModifier');
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetDefaultFixedFontSize(node);
+    } else {
+      getUINativeModule().web.setDefaultFixedFontSize(node, this.value);
+    }
+  }
+}
+
+class WebMinLogicalFontSizeModifier extends ModifierWithKey<number> {
+  constructor (value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webMinLogicalFontSizeModifier');
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetMinLogicalFontSize(node);
+    } else {
+      getUINativeModule().web.setMinLogicalFontSize(node, this.value);
+    }
+  }
+}
+
+class WebStandardFontModifier extends ModifierWithKey<string> {
+  constructor (value: string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webStandardFontModifier');
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetWebStandardFont(node);
+    } else {
+      getUINativeModule().web.setWebStandardFont(node, this.value);
+    }
+  }
+}
+
+class WebSerifFontModifier extends ModifierWithKey<string> {
+  constructor (value: string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webSerifFontModifier');
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetWebSerifFont(node);
+    } else {
+      getUINativeModule().web.setWebSerifFont(node, this.value);
+    }
+  }
+}
+
+class WebSansSerifFontModifier extends ModifierWithKey<string> {
+  constructor (value: string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webSansSerifFontModifier');
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetWebSansSerifFont(node);
+    } else {
+      getUINativeModule().web.setWebSansSerifFont(node, this.value);
+    }
+  }
+}
+
 class ArkWebComponent extends ArkComponent implements WebAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -306,7 +516,8 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     return this;
   }
   onlineImageAccess(onlineImageAccess: boolean): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnlineImageAccessModifier.identity, WebOnlineImageAccessModifier, onlineImageAccess);
+    return this;
   }
   domStorageAccess(domStorageAccess: boolean): this {
     modifierWithKey(this._modifiersWithKeys, WebDomStorageAccessModifier.identity, WebDomStorageAccessModifier, domStorageAccess);
@@ -324,7 +535,8 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     return this;
   }
   geolocationAccess(geolocationAccess: boolean): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebGeolocationAccessModifier.identity, WebGeolocationAccessModifier, geolocationAccess);
+    return this;
   }
   javaScriptProxy(javaScriptProxy: { object: object; name: string; methodList: string[]; controller: any; }): this {
     throw new Error('Method not implemented.');
@@ -353,7 +565,8 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     throw new Error('Method not implemented.');
   }
   overviewModeAccess(overviewModeAccess: boolean): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOverviewModeAccessModifier.identity, WebOverviewModeAccessModifier, overviewModeAccess);
+    return this;
   }
   overScrollMode(mode: OverScrollMode): this {
     throw new Error('Method not implemented.');
@@ -366,7 +579,8 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     return this;
   }
   databaseAccess(databaseAccess: boolean): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebDatabaseAccessModifier.identity, WebDatabaseAccessModifier, databaseAccess);
+    return this;
   }
   initialScale(percent: number): this {
     modifierWithKey(this._modifiersWithKeys, WebInitialScaleModifier.identity, WebInitialScaleModifier, percent);
@@ -510,13 +724,16 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     throw new Error('Method not implemented.');
   }
   webStandardFont(family: string): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebStandardFontModifier.identity, WebStandardFontModifier, family);
+    return this;
   }
   webSerifFont(family: string): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebSerifFontModifier.identity, WebSerifFontModifier, family);
+    return this;
   }
   webSansSerifFont(family: string): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebSansSerifFontModifier.identity, WebSansSerifFontModifier, family);
+    return this;
   }
   webFixedFont(family: string): this {
     throw new Error('Method not implemented.');
@@ -528,16 +745,20 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     throw new Error('Method not implemented.');
   }
   defaultFixedFontSize(size: number): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebDefaultFixedFontSizeModifier.identity, WebDefaultFixedFontSizeModifier, size);
+    return this;
   }
   defaultFontSize(size: number): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebDefaultFontSizeModifier.identity, WebDefaultFontSizeModifier, size);
+    return this;
   }
   minFontSize(size: number): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebMinFontSizeModifier.identity, WebMinFontSizeModifier, size);
+    return this;
   }
   minLogicalFontSize(size: number): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebMinLogicalFontSizeModifier.identity, WebMinLogicalFontSizeModifier, size);
+    return this;
   }
   blockNetwork(block: boolean): this {
     throw new Error('Method not implemented.');
@@ -563,7 +784,20 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     throw new Error('Method not implemented.');
   }
   pinchSmooth(isEnabled: boolean): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebPinchSmoothModifier.identity, WebPinchSmoothModifier, isEnabled);
+    return this;
+  }
+  metaViewport(enabled: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebMetaViewportModifier.identity, WebMetaViewportModifier, enabled);
+    return this;
+  }
+  enableFollowSystemFontWeight(follow: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebEnableFollowSystemFontWeightModifier.identity, WebEnableFollowSystemFontWeightModifier, follow);
+    return this;
+  }
+  enableNativeEmbedMode(mode: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebEnableNativeEmbedModeModifier.identity, WebEnableNativeEmbedModeModifier, mode);
+    return this;
   }
   allowWindowOpenMethod(flag: boolean): this {
     modifierWithKey(this._modifiersWithKeys, WebAllowWindowOpenMethodModifier.identity, WebAllowWindowOpenMethodModifier, flag);

@@ -711,7 +711,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg015, TestSize.L
 
 /**
  * @tc.name: SessionWrapperImplNewTestNg016
- * @tc.desc: Test the method GetInstanceIdFromHost.
+ * @tc.desc: Test the method GetInstanceId.
  * @tc.type: FUNC
  */
 HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg016, TestSize.Level1)
@@ -727,12 +727,12 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg016, TestSize.L
 
     auto instanceId = pattern->GetInstanceIdFromHost();
     sessionWrapper->instanceId_  = 200;
-    auto ret = sessionWrapper->GetInstanceIdFromHost();
+    auto ret = sessionWrapper->GetInstanceId();
     EXPECT_EQ(ret, instanceId);
 
     sessionWrapper->hostPattern_ = nullptr;
     patternUpgrade = sessionWrapper->hostPattern_.Upgrade();
-    ret = sessionWrapper->GetInstanceIdFromHost();
+    ret = sessionWrapper->GetInstanceId();
     EXPECT_EQ(ret, INSTANCE_ID_UNDEFINED);
 }
 
@@ -1042,7 +1042,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg028, TestSize.L
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     sessionWrapper->isNotifyOccupiedAreaChange_ = true;
     auto pipeline = PipelineBase::GetCurrentContext();
-    auto container = Platform::AceContainer::GetContainer(sessionWrapper->GetInstanceIdFromHost());
+    auto container = Platform::AceContainer::GetContainer(sessionWrapper->GetInstanceId());
     info->rect_.height_ = 10;
     int32_t keyboardHeight = static_cast<int32_t>(info->rect_.height_);
     auto displayArea = sessionWrapper->GetDisplayAreaWithWindowScene();

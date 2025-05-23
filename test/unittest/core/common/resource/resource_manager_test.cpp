@@ -151,8 +151,14 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest002, TestSize.Level1)
     key = ResourceManager::GetInstance().MakeCacheKey(bundleName, moduleName, DEFAULT_INSTANCE_ID);
     EXPECT_EQ(key, MakeCacheKey(bundleName, moduleName, DEFAULT_INSTANCE_ID));
 
+    /**
+     * @tc.steps: step9. clear all cache.
+     * @tc.expect: cache not have default adapter.
+     */
     ResourceManager::GetInstance().Reset();
     ResourceManager::GetInstance().resourceAdapters_.clear();
+    auto result = ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName, DEFAULT_INSTANCE_ID);
+    EXPECT_FALSE(result);
 }
 
 /**

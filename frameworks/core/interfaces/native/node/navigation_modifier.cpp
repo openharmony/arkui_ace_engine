@@ -50,6 +50,22 @@ void ResetEnableModeChangeAnimation(ArkUINodeHandle node)
     NavigationModelNG::SetEnableModeChangeAnimation(frameNode, true);
 }
 
+void SetSplitPlaceholder(ArkUINodeHandle node, ArkUINodeHandle splitPlaceholder)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto splitPlaceholderNode = reinterpret_cast<FrameNode*>(splitPlaceholder);
+    CHECK_NULL_VOID(splitPlaceholderNode);
+    NavigationModelNG::SetSplitPlaceholder(frameNode, splitPlaceholderNode);
+}
+
+void ResetSplitPlaceholder(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::ResetSplitPlaceholder(frameNode);
+}
+
 void SetMinContentWidth(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -671,6 +687,8 @@ const ArkUINavigationModifier* GetNavigationModifier()
         .setOnCoordScrollEndAction = SetOnCoordScrollEndAction,
         .setSystemBarStyle = SetSystemBarStyle,
         .resetSystemBarStyle = ResetSystemBarStyle,
+        .setSplitPlaceholder = SetSplitPlaceholder,
+        .resetSplitPlaceholder = ResetSplitPlaceholder,
         .setEnableToolBarAdaptation = SetEnableToolBarAdaptation,
         .resetEnableToolBarAdaptation = ResetEnableToolBarAdaptation,
         .setOnNavigationModeChange = SetOnNavigationModeChange,

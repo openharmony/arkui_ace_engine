@@ -389,6 +389,7 @@ public:
     void UpdateImageSourceinfo(const ImageSourceInfo& sourceInfo);
     void UpdateImageFill(const Color& color);
     void UpdateImageAlt(const ImageSourceInfo& sourceInfo);
+    void OnColorModeChange(uint32_t colorMode) override;
 
 protected:
     void RegisterWindowStateChangedCallback();

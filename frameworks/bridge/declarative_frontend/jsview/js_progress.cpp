@@ -136,31 +136,57 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
     if (ConvertGradientColor(info[0], gradient)) {
         ProgressModel::GetInstance()->SetGradientColor(gradient);
     } else {
+        RefPtr<ResourceObject> resObj;
         Color endColor;
         Color beginColor;
-        if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal)) {
-            endColor = theme->GetRingProgressEndSideColor();
-            beginColor = theme->GetRingProgressBeginSideColor();
-            if (g_progressType == ProgressType::CAPSULE) {
-                colorVal = theme->GetCapsuleParseFailedSelectColor();
-            } else {
-                colorVal = theme->GetTrackParseFailedSelectedColor();
+        if (SystemProperties::ConfigChangePerform()) {
+            bool state = false;
+            if (!info[0]->IsNull() && !info[0]->IsUndefined()) {
+                state = ParseJsColor(info[0], colorVal, resObj);
             }
-        } else {
-            endColor = colorVal;
-            beginColor = colorVal;
-        }
+            if (resObj) {
+                ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::COLOR, resObj);
+            } else {
+                if (!state) {
+                    endColor = theme->GetRingProgressEndSideColor();
+                    beginColor = theme->GetRingProgressBeginSideColor();
+                    colorVal = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleParseFailedSelectColor()
+                                                                         : theme->GetTrackParseFailedSelectedColor();
+                }
+                NG::GradientColor endSideColor;
+                NG::GradientColor beginSideColor;
+                endSideColor.SetLinearColor(LinearColor(endColor));
+                endSideColor.SetDimension(Dimension(0.0f));
+                beginSideColor.SetLinearColor(LinearColor(beginColor));
+                beginSideColor.SetDimension(Dimension(1.0f));
+                gradient.AddColor(endSideColor);
+                gradient.AddColor(beginSideColor);
 
-        NG::GradientColor endSideColor;
-        NG::GradientColor beginSideColor;
-        endSideColor.SetLinearColor(LinearColor(endColor));
-        endSideColor.SetDimension(Dimension(0.0f));
-        beginSideColor.SetLinearColor(LinearColor(beginColor));
-        beginSideColor.SetDimension(Dimension(1.0f));
-        gradient.AddColor(endSideColor);
-        gradient.AddColor(beginSideColor);
-        ProgressModel::GetInstance()->SetGradientColor(gradient);
-        ProgressModel::GetInstance()->SetColor(colorVal);
+                ProgressModel::GetInstance()->SetGradientColor(gradient);
+                ProgressModel::GetInstance()->SetColor(colorVal);
+            } 
+        } else {
+            if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal)) {
+                endColor = theme->GetRingProgressEndSideColor();
+                beginColor = theme->GetRingProgressBeginSideColor();
+                colorVal = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleParseFailedSelectColor()
+                                                                     : theme->GetTrackParseFailedSelectedColor();
+            } else {
+                endColor = colorVal;
+                beginColor = colorVal;
+            }
+
+            NG::GradientColor endSideColor;
+            NG::GradientColor beginSideColor;
+            endSideColor.SetLinearColor(LinearColor(endColor));
+            endSideColor.SetDimension(Dimension(0.0f));
+            beginSideColor.SetLinearColor(LinearColor(beginColor));
+            beginSideColor.SetDimension(Dimension(1.0f));
+            gradient.AddColor(endSideColor);
+            gradient.AddColor(beginSideColor);
+            ProgressModel::GetInstance()->SetGradientColor(gradient);
+            ProgressModel::GetInstance()->SetColor(colorVal);
+        }
     }
 }
 
@@ -247,66 +273,77 @@ NG::ProgressStatus JSProgress::ConvertStrToProgressStatus(const std::string& val
 void JSProgress::JsSetRingStyleOptions(const JSCallbackInfo& info)
 {
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
-
+    ProcessRingStrokeWidth(paramObject);
     // Parse stroke width
-    CalcDimension strokeWidthDimension;
-    auto versionTenOrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
-    auto strokeWidth = paramObject->GetProperty("strokeWidth");
-    if (strokeWidth->IsUndefined() || strokeWidth->IsNull() ||
-        (versionTenOrLarger ? !ParseJsDimensionVpNG(strokeWidth, strokeWidthDimension)
-                            : !ParseJsDimensionVp(strokeWidth, strokeWidthDimension))) {
-        strokeWidthDimension = theme->GetTrackThickness();
-    }
-
-    if (LessOrEqual(strokeWidthDimension.Value(), 0.0f) || strokeWidthDimension.Unit() == DimensionUnit::PERCENT) {
-        strokeWidthDimension = theme->GetTrackThickness();
-    }
-
-    ProgressModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
+    bool state = false;
 
     // Parse shadow
     bool paintShadow = false;
+    RefPtr<ResourceObject> shadowResObj;
     auto shadow = paramObject->GetProperty("shadow");
-    if (shadow->IsUndefined() || shadow->IsNull() || !ParseJsBool(shadow, paintShadow)) {
+
+    if (shadow->IsUndefined() || shadow->IsNull()) {
+        paintShadow = false;
+    }
+    state = ParseJsBool(shadow, paintShadow, shadowResObj);
+    if (!state) {
         paintShadow = false;
     }
 
-    ProgressModel::GetInstance()->SetPaintShadow(paintShadow);
+    if (SystemProperties::ConfigChangePerform() && shadowResObj) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::RingShadow, shadowResObj);
+    } else {
+        ProgressModel::GetInstance()->SetPaintShadow(paintShadow);
+    }
 
     // Parse progress status
     std::string statusStr;
     NG::ProgressStatus progressStatus;
     auto status = paramObject->GetProperty("status");
-    if (status->IsUndefined() || status->IsNull() || !ParseJsString(status, statusStr)) {
+    RefPtr<ResourceObject> statusResObj;
+    if (status->IsUndefined() || status->IsNull()) {
         progressStatus = NG::ProgressStatus::PROGRESSING;
+    }
+    if (!ParseJsString(status, statusStr, statusResObj)) {
+        progressStatus = NG::ProgressStatus::PROGRESSING;
+    }
+    if (SystemProperties::ConfigChangePerform() && statusResObj) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::RingStatus, statusResObj);
     } else {
         progressStatus = ConvertStrToProgressStatus(statusStr);
+        ProgressModel::GetInstance()->SetProgressStatus(static_cast<NG::ProgressStatus>(progressStatus));
     }
-
-    ProgressModel::GetInstance()->SetProgressStatus(static_cast<NG::ProgressStatus>(progressStatus));
 
     auto jsSweepingEffect = paramObject->GetProperty("enableScanEffect");
     bool sweepingEffect = false;
-    if (!ParseJsBool(jsSweepingEffect, sweepingEffect)) {
+    RefPtr<ResourceObject> sweepingEffectResObj;
+    state = ParseJsBool(jsSweepingEffect, sweepingEffect, sweepingEffectResObj);
+    if (!state) {
         sweepingEffect = false;
     }
-    ProgressModel::GetInstance()->SetRingSweepingEffect(sweepingEffect);
+    if (SystemProperties::ConfigChangePerform() && sweepingEffectResObj) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(
+            JsProgressResourceType::RingSweepingEffect, sweepingEffectResObj);
+    } else {
+        ProgressModel::GetInstance()->SetRingSweepingEffect(sweepingEffect);
+    }
 }
 
 void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
 {
     Color colorVal;
-    if (!CheckColor(info[0], colorVal, V2::PROGRESS_ETS_TAG, V2::ATTRS_COMMON_BACKGROUND_COLOR)) {
+    RefPtr<ResourceObject> bgColorResObj;
+    bool state = CheckColor(info[0], colorVal, V2::PROGRESS_ETS_TAG, V2::ATTRS_COMMON_BACKGROUND_COLOR, bgColorResObj);
+    if (SystemProperties::ConfigChangePerform() && bgColorResObj) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::BackgroundColor, bgColorResObj);
+        return;
+    }
+    if (!state) {
         RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(theme);
-        if (g_progressType == ProgressType::CAPSULE) {
-            colorVal = theme->GetCapsuleParseFailedBgColor();
-        } else if (g_progressType == ProgressType::RING) {
-            colorVal = theme->GetRingProgressParseFailedBgColor();
-        } else {
-            colorVal = theme->GetTrackParseFailedBgColor();
-        }
+        colorVal = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleParseFailedBgColor()
+                  : (g_progressType == ProgressType::RING) ? theme->GetRingProgressParseFailedBgColor()
+                  : theme->GetTrackParseFailedBgColor();
     }
 
     ProgressModel::GetInstance()->SetBackgroundColor(colorVal);
@@ -323,39 +360,37 @@ void JSProgress::JsSetCapsuleStyle(const JSCallbackInfo& info)
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
 
-    auto jsBorderWidth = paramObject->GetProperty("borderWidth");
-    CalcDimension borderWidth;
-    if (!ParseJsDimensionVpNG(jsBorderWidth, borderWidth)) {
-        borderWidth = theme->GetBorderWidth();
-    }
-    if (LessNotEqual(borderWidth.Value(), 0.0) || borderWidth.Unit() == DimensionUnit::PERCENT) {
-        borderWidth = theme->GetBorderWidth();
-    }
-    ProgressModel::GetInstance()->SetBorderWidth(borderWidth);
-
-    auto jsBorderColor = paramObject->GetProperty("borderColor");
-    Color colorVal;
-    if (ParseJsColor(jsBorderColor, colorVal)) {
-        ProgressModel::GetInstance()->SetBorderColor(colorVal);
-    } else {
-        ProgressModel::GetInstance()->ResetBorderColor();
-    }
+    ProcessCapsuleBorderWidth(paramObject);
+    ProcessCapsuleBorderColor(paramObject);
 
     auto jsSweepingEffect = paramObject->GetProperty("enableScanEffect");
     bool sweepingEffect = false;
-    if (!ParseJsBool(jsSweepingEffect, sweepingEffect)) {
-        sweepingEffect = false;
+    RefPtr<ResourceObject> sweepingEffectResObj;
+    bool state = ParseJsBool(jsSweepingEffect, sweepingEffect, sweepingEffectResObj);
+    if (SystemProperties::ConfigChangePerform() && sweepingEffectResObj) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(
+            JsProgressResourceType::CapsuleSweepingEffect, sweepingEffectResObj);
+    } else {
+        if (!state) {
+            sweepingEffect = false;
+        }
+        ProgressModel::GetInstance()->SetSweepingEffect(sweepingEffect);
     }
-    ProgressModel::GetInstance()->SetSweepingEffect(sweepingEffect);
 
     auto jsShowDefaultPercentage = paramObject->GetProperty("showDefaultPercentage");
     bool showDefaultPercentage = false;
-    if (!ParseJsBool(jsShowDefaultPercentage, showDefaultPercentage)) {
-        showDefaultPercentage = false;
+    RefPtr<ResourceObject> showDefaultPercentageObj;
+    state = ParseJsBool(jsShowDefaultPercentage, showDefaultPercentage, showDefaultPercentageObj);
+    if (SystemProperties::ConfigChangePerform() && showDefaultPercentageObj) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(
+            JsProgressResourceType::ShowDefaultPercentage, showDefaultPercentageObj);
+    } else {
+        if (!state) {
+            showDefaultPercentage = false;
+        }
+        ProgressModel::GetInstance()->SetShowText(showDefaultPercentage);
     }
-    ProgressModel::GetInstance()->SetShowText(showDefaultPercentage);
 
     auto jsContext = paramObject->GetProperty("content");
     std::string text;
@@ -375,11 +410,16 @@ void JSProgress::JsSetCommonOptions(const JSCallbackInfo& info)
 
     // Parse smooth effect
     auto jsSmoothEffect = paramObject->GetProperty("enableSmoothEffect");
+    RefPtr<ResourceObject> smoothEffectResObj;
     bool enable = true;
-    if (!ParseJsBool(jsSmoothEffect, enable)) {
+    if (!ParseJsBool(jsSmoothEffect, enable, smoothEffectResObj)) {
         enable = true;
     }
-    ProgressModel::GetInstance()->SetSmoothEffect(enable);
+    if (SystemProperties::ConfigChangePerform() && smoothEffectResObj) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::SmoothEffect, smoothEffectResObj);
+    } else {
+        ProgressModel::GetInstance()->SetSmoothEffect(enable);
+    }
 }
 
 void JSProgress::JsSetFontStyle(const JSCallbackInfo& info)
@@ -387,7 +427,11 @@ void JSProgress::JsSetFontStyle(const JSCallbackInfo& info)
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto jsFontColor = paramObject->GetProperty("fontColor");
     Color fontColorVal;
-    if (!ParseJsColor(jsFontColor, fontColorVal)) {
+    RefPtr<ResourceObject> fontColorResObj;
+    bool state = ParseJsColor(jsFontColor, fontColorVal, fontColorResObj);
+    if (SystemProperties::ConfigChangePerform() && fontColorResObj) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::FontColor, fontColorResObj);
+    } else if (!state) {
         ProgressModel::GetInstance()->ResetFontColor();
     } else {
         ProgressModel::GetInstance()->SetFontColor(fontColorVal);
@@ -414,33 +458,28 @@ void JSProgress::JsSetFontDefault()
 
 void JSProgress::JsSetFont(const JSRef<JSObject>& textObject)
 {
-    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
-    CHECK_NULL_VOID(theme);
     RefPtr<TextTheme> textTheme = GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
-    auto size = textObject->GetProperty("size");
-    CalcDimension fontSize;
-    if (!ParseJsDimensionNG(size, fontSize, DimensionUnit::FP)) {
-        fontSize = theme->GetTextSize();
-    }
-    if (LessNotEqual(fontSize.Value(), 0.0) || fontSize.Unit() == DimensionUnit::PERCENT) {
-        fontSize = theme->GetTextSize();
-    }
-    ProgressModel::GetInstance()->SetFontSize(fontSize);
-
+    ProcessFontSizeOption(textObject);
     auto fontWeight = textObject->GetProperty("weight");
+    RefPtr<ResourceObject> weightResObj;
+    bool weightState = false;
     if (!fontWeight->IsNull()) {
         std::string weight;
         if (fontWeight->IsNumber()) {
             weight = std::to_string(fontWeight->ToNumber<int32_t>());
         } else {
-            ParseJsString(fontWeight, weight);
+            weightState = ParseJsString(fontWeight, weight, weightResObj);
         }
-        ProgressModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
+        if (SystemProperties::ConfigChangePerform() && weightResObj) {
+            ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::FontWeight, weightResObj);
+        } else {
+            auto fontWeightVal = ConvertStrToFontWeight(weight);
+            ProgressModel::GetInstance()->SetFontWeight(fontWeightVal);
+        }
     } else {
         ProgressModel::GetInstance()->SetFontWeight(textTheme->GetTextStyle().GetFontWeight());
     }
-
     auto family = textObject->GetProperty("family");
     if (!family->IsNull() && family->IsString()) {
         auto familyVal = family->ToString();
@@ -448,7 +487,6 @@ void JSProgress::JsSetFont(const JSRef<JSObject>& textObject)
     } else {
         ProgressModel::GetInstance()->SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
     }
-
     auto style = textObject->GetProperty("style");
     if (!style->IsNull() && style->IsNumber()) {
         auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
@@ -502,37 +540,38 @@ bool JSProgress::ConvertGradientColor(const JsiRef<JsiValue>& param, NG::Gradien
 void JSProgress::JsSetLinearStyleOptions(const JSCallbackInfo& info)
 {
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
-
+    ProcessLinearStrokeWidth(paramObject);
     // Parse stroke width
-    CalcDimension strokeWidthDimension;
-    auto versionTenOrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
-    auto strokeWidth = paramObject->GetProperty("strokeWidth");
-    if (strokeWidth->IsUndefined() || strokeWidth->IsNull() ||
-        (versionTenOrLarger ? !ParseJsDimensionVpNG(strokeWidth, strokeWidthDimension)
-                            : !ParseJsDimensionVp(strokeWidth, strokeWidthDimension))) {
-        strokeWidthDimension = theme->GetTrackThickness();
-    }
-
-    if (LessOrEqual(strokeWidthDimension.Value(), 0.0f) || strokeWidthDimension.Unit() == DimensionUnit::PERCENT) {
-        strokeWidthDimension = theme->GetTrackThickness();
-    }
-
-    ProgressModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
+    bool state = false;
+    RefPtr<ResourceObject> sweepingEffectResObj;
+    RefPtr<ResourceObject> strokeRadiusResObj;
 
     auto jsSweepingEffect = paramObject->GetProperty("enableScanEffect");
     bool sweepingEffect = false;
-    if (!ParseJsBool(jsSweepingEffect, sweepingEffect)) {
+    state = ParseJsBool(jsSweepingEffect, sweepingEffect, sweepingEffectResObj);
+    if (!state) {
         sweepingEffect = false;
     }
-    ProgressModel::GetInstance()->SetLinearSweepingEffect(sweepingEffect);
+    if (SystemProperties::ConfigChangePerform() && sweepingEffectResObj) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(
+            JsProgressResourceType::LSSweepingEffect, sweepingEffectResObj);
+    } else {
+        ProgressModel::GetInstance()->SetLinearSweepingEffect(sweepingEffect);
+    }
 
-    // Parse stroke radius
     CalcDimension strokeRadiusDimension;
     auto strokeRadius = paramObject->GetProperty("strokeRadius");
-    if (strokeRadius->IsUndefined() || strokeRadius->IsNull() ||
-        !ParseJsDimensionVpNG(strokeRadius, strokeRadiusDimension)) {
+    if (strokeRadius->IsUndefined() || strokeRadius->IsNull()) {
         ProgressModel::GetInstance()->ResetStrokeRadius();
+        return;
+    }
+    bool radiusState = ParseJsDimensionVpNG(strokeRadius, strokeRadiusDimension, strokeRadiusResObj);
+    if (!radiusState) {
+        ProgressModel::GetInstance()->ResetStrokeRadius();
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && strokeRadiusResObj) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::LSStrokeRadius, strokeRadiusResObj);
         return;
     }
 
@@ -540,7 +579,6 @@ void JSProgress::JsSetLinearStyleOptions(const JSCallbackInfo& info)
         ProgressModel::GetInstance()->ResetStrokeRadius();
         return;
     }
-
     ProgressModel::GetInstance()->SetStrokeRadius(strokeRadiusDimension);
 }
 
@@ -557,5 +595,122 @@ void JSProgress::JsSetBorderRadius(const JSRef<JSObject>& paramObject)
         return;
     }
     ProgressModel::GetInstance()->SetBorderRadius(radiusDimension);
+}
+
+void JSProgress::ProcessLinearStrokeWidth(const JSRef<JSObject>& paramObject)
+{
+    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(theme);
+    auto jsStrokeWidth = paramObject->GetProperty("strokeWidth");
+    CalcDimension strokeWidthDimension;
+    RefPtr<ResourceObject> strokeWidthResObj;
+    bool state = false;
+    if (jsStrokeWidth->IsUndefined() || jsStrokeWidth->IsNull()) {
+        strokeWidthDimension = theme->GetTrackThickness();
+    } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        state = ParseJsDimensionVpNG(jsStrokeWidth, strokeWidthDimension, strokeWidthResObj);
+    } else {
+        state = ParseJsDimensionVp(jsStrokeWidth, strokeWidthDimension, strokeWidthResObj);
+    }
+    if (!state) {
+        strokeWidthDimension = theme->GetTrackThickness();
+    }
+    if (LessOrEqual(strokeWidthDimension.Value(), 0.0f) || strokeWidthDimension.Unit() == DimensionUnit::PERCENT) {
+        strokeWidthDimension = theme->GetTrackThickness();
+    }
+    if (SystemProperties::ConfigChangePerform() && strokeWidthResObj) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(
+            JsProgressResourceType::LSStrokeWidth, strokeWidthResObj);
+    } else {
+        ProgressModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
+    }
+}
+
+void JSProgress::ProcessFontSizeOption(const JSRef<JSObject>& textObject)
+{
+    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(theme);
+    auto jsSize = textObject->GetProperty("size");
+    CalcDimension fontSize;
+    RefPtr<ResourceObject> fontSizeResObj;
+    bool sizeState = ParseJsDimensionNG(jsSize, fontSize, DimensionUnit::FP, fontSizeResObj);
+    if (SystemProperties::ConfigChangePerform() && fontSizeResObj) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(
+            JsProgressResourceType::FontSize, fontSizeResObj);
+    } else {
+        if (!sizeState || LessNotEqual(fontSize.Value(), 0.0f) || fontSize.Unit() == DimensionUnit::PERCENT) {
+            fontSize = theme->GetTextSize();
+        }
+        ProgressModel::GetInstance()->SetFontSize(fontSize);
+    }
+}
+
+void JSProgress::ProcessRingStrokeWidth(const JSRef<JSObject>& paramObject)
+{
+    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(theme);
+    auto jsStrokeWidth = paramObject->GetProperty("strokeWidth");
+    CalcDimension strokeWidthDimension;
+    RefPtr<ResourceObject> strokeWidthResObj;
+    bool state = false;
+    if (jsStrokeWidth->IsUndefined() || jsStrokeWidth->IsNull()) {
+        strokeWidthDimension = theme->GetTrackThickness();
+    } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        state = ParseJsDimensionVpNG(jsStrokeWidth, strokeWidthDimension, strokeWidthResObj);
+    } else {
+        state = ParseJsDimensionVp(jsStrokeWidth, strokeWidthDimension, strokeWidthResObj);
+    }
+    if (!state) {
+        strokeWidthDimension = theme->GetTrackThickness();
+    }
+    if (LessOrEqual(strokeWidthDimension.Value(), 0.0f) || strokeWidthDimension.Unit() == DimensionUnit::PERCENT) {
+        strokeWidthDimension = theme->GetTrackThickness();
+    }
+    if (SystemProperties::ConfigChangePerform() && strokeWidthResObj) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(
+            JsProgressResourceType::RingStrokeWidth, strokeWidthResObj);
+    } else {
+        ProgressModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
+    }
+}
+
+void JSProgress::ProcessCapsuleBorderWidth(const JSRef<JSObject>& paramObject)
+{
+    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(theme);
+    auto jsBorderWidth = paramObject->GetProperty("borderWidth");
+    CalcDimension borderWidth;
+    RefPtr<ResourceObject> borderWidthResObj;
+    bool state = ParseJsDimensionVpNG(jsBorderWidth, borderWidth, borderWidthResObj);
+    if (SystemProperties::ConfigChangePerform() && borderWidthResObj) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(
+            JsProgressResourceType::CapsuleBorderWidth, borderWidthResObj);
+    } else {
+        if (!state) {
+            borderWidth = theme->GetBorderWidth();
+        }
+        if (LessNotEqual(borderWidth.Value(), 0.0) || borderWidth.Unit() == DimensionUnit::PERCENT) {
+            borderWidth = theme->GetBorderWidth();
+        }
+        ProgressModel::GetInstance()->SetBorderWidth(borderWidth);
+    }
+}
+
+void JSProgress::ProcessCapsuleBorderColor(const JSRef<JSObject>& paramObject)
+{
+    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(theme);
+    auto jsBorderColor = paramObject->GetProperty("borderColor");
+    Color colorVal;
+    RefPtr<ResourceObject> borderColorResObj;
+    bool state = ParseJsColor(jsBorderColor, colorVal, borderColorResObj);
+    if (SystemProperties::ConfigChangePerform() && borderColorResObj) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(
+            JsProgressResourceType::CapsuleBorderColor, borderColorResObj);
+    } else if (state) {
+        ProgressModel::GetInstance()->SetBorderColor(colorVal);
+    } else {
+        ProgressModel::GetInstance()->ResetBorderColor();
+    }
 }
 } // namespace OHOS::Ace::Framework

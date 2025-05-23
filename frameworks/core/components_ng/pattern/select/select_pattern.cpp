@@ -1182,7 +1182,7 @@ void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps)
     textProps->UpdateFontSize(theme->GetFontSize());
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateTextColor(theme->GetFontColor());
-    textProps->UpdateTextDecoration(theme->GetTextDecoration());
+    textProps->UpdateTextDecoration({theme->GetTextDecoration()});
     textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textProps->UpdateMaxLines(SELECT_ITSELF_TEXT_LINES);
 }

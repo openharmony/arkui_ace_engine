@@ -29,58 +29,6 @@ void JSScrollableBase::JSFlingSpeedLimit(const JSCallbackInfo& info)
     NG::ScrollableModelNG::SetMaxFlingSpeed(max);
 }
 
-void JSScrollableBase::JsOnWillScroll(const JSCallbackInfo& args)
-{
-    if (args.Length() <= 0) {
-        return;
-    }
-    if (args[0]->IsFunction()) {
-        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                            const CalcDimension& scrollOffset, const ScrollState& scrollState,
-                            ScrollSource scrollSource) {
-            auto params = ConvertToJSValues(scrollOffset, scrollState, scrollSource);
-            ScrollFrameResult scrollRes { .offset = scrollOffset };
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollRes);
-            auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
-            if (result.IsEmpty()) {
-                return scrollRes;
-            }
-
-            if (!result->IsObject()) {
-                return scrollRes;
-            }
-
-            auto resObj = JSRef<JSObject>::Cast(result);
-            auto dxRemainValue = resObj->GetProperty("offsetRemain");
-            if (dxRemainValue->IsNumber()) {
-                scrollRes.offset = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
-            }
-            return scrollRes;
-        };
-        NG::ScrollableModelNG::SetOnWillScroll(std::move(onScroll));
-    } else {
-        NG::ScrollableModelNG::SetOnWillScroll(nullptr);
-    }
-}
-
-void JSScrollableBase::JsOnDidScroll(const JSCallbackInfo& args)
-{
-    if (args.Length() <= 0) {
-        return;
-    }
-    if (args[0]->IsFunction()) {
-        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                            const CalcDimension& scrollOffset, const ScrollState& scrollState) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(scrollOffset, scrollState);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-        };
-        NG::ScrollableModelNG::SetOnDidScroll(std::move(onScroll));
-    } else {
-        NG::ScrollableModelNG::SetOnDidScroll(nullptr);
-    }
-}
-
 void JSScrollableBase::SetFadingEdge(const JSCallbackInfo& info)
 {
     bool fadingEdge = false;
@@ -124,6 +72,7 @@ void JSScrollableBase::JSBind(BindingTarget globalObj)
     JSClass<JSScrollableBase>::StaticMethod("fadingEdge", &JSScrollableBase::SetFadingEdge);
     JSClass<JSScrollableBase>::StaticMethod("clipContent", &JSScrollableBase::JSClipContent);
     JSClass<JSScrollableBase>::StaticMethod("digitalCrownSensitivity", &JSScrollableBase::SetDigitalCrownSensitivity);
+    JSClass<JSScrollableBase>::StaticMethod("scrollBarMargin", &JSScrollableBase::SetScrollBarMargin);
     JSClass<JSScrollableBase>::StaticMethod("backToTop", &JSScrollableBase::JSBackToTop);
     JSClass<JSScrollableBase>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -149,6 +98,39 @@ void JSScrollableBase::JSClipContent(const JSCallbackInfo& info)
     }
     // default
     NG::ScrollableModelNG::SetContentClip(NG::ContentClipMode::DEFAULT, nullptr);
+}
+
+void JSScrollableBase::SetScrollBarMargin(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    ScrollBarMargin scrollBarMargin;
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    if (obj->IsUndefined()) {
+        NG::ScrollableModelNG::SetScrollBarMargin(scrollBarMargin);
+        return;
+    }
+    CalcDimension start;
+    CalcDimension end;
+    auto startObj = obj->GetProperty("start");
+    if (!(startObj->IsNull() || startObj->IsUndefined() || !startObj->IsObject())) {
+        if (JSViewAbstract::ParseJsLengthMetricsVp(startObj, start)) {
+            if (GreatOrEqual(start.Value(), 0.0)) {
+                scrollBarMargin.start_ = start;
+            }
+        }
+    }
+    auto endObj = obj->GetProperty("end");
+    if (!(endObj->IsNull() || endObj->IsUndefined() || !endObj->IsObject())) {
+        if (JSViewAbstract::ParseJsLengthMetricsVp(endObj, end)) {
+            if (GreatOrEqual(end.Value(), 0.0)) {
+                scrollBarMargin.end_ = end;
+            }
+        }
+    }
+
+    NG::ScrollableModelNG::SetScrollBarMargin(scrollBarMargin);
 }
 
 void JSScrollableBase::JSBackToTop(const JSCallbackInfo& info)

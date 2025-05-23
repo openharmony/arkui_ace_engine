@@ -2092,38 +2092,6 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest019, TestSize.Level1)
 
 #ifdef ARKUI_WEARABLE
 /**
- * @tc.name: DatePickerColumnPatternTest020
- * @tc.desc: Test GetContentDrawFunction.
- * @tc.type: FUNC
- */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest020, TestSize.Level1)
-{
-    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    ASSERT_NE(theme, nullptr);
-    theme->showCircleDial_ = true;
-    DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
-    ASSERT_NE(pickerProperty, nullptr);
-    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
-    ASSERT_NE(datePickerPattern, nullptr);
-    auto datePickerPaintMethod =
-        AceType::MakeRefPtr<DatePickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(datePickerPattern)));
-    ASSERT_NE(datePickerPaintMethod, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    auto renderContext = frameNode->GetRenderContext();
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, pickerPaintProperty);
-    auto canvasDrawFunction = datePickerPaintMethod->GetContentDrawFunction(paintWrapper);
-    ASSERT_NE(canvasDrawFunction, nullptr);
-    Testing::MockCanvas rsCanvas;
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
-    canvasDrawFunction(rsCanvas);
-}
-
-/**
  * @tc.name: DatePickerColumnPatternTest021
  * @tc.desc: Test DatePickerColumnPattern GetDigitalCrownSensitivity and SetDigitalCrownSensitivity.
  * @tc.type: FUNC
@@ -2373,44 +2341,6 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest027, TestSize.Level1)
     columnPattern->SetDigitalCrownSensitivity(1);
     EXPECT_EQ(columnPattern->GetDigitalCrownSensitivity(), DEFAULT_CROWNSENSITIVITY);
     EXPECT_EQ(columnPattern->crownSensitivity_, 1);
-}
-
-/**
- * @tc.name: DatePickerColumnPatternTest028
- * @tc.desc: Test DatePickerColumnPattern GetContentDrawFunction.
- * @tc.type: FUNC
- */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest028, TestSize.Level1)
-{
-    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    ASSERT_NE(theme, nullptr);
-    DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
-    ASSERT_NE(pickerProperty, nullptr);
-    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
-    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
-    auto datePickerPaintMethod =
-        AceType::MakeRefPtr<DatePickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(datePickerPattern)));
-    datePickerPaintMethod->SetEnabled(false);
-    ASSERT_NE(datePickerPattern, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    std::unique_ptr<PaintWrapper> paintWrapper =
-        std::make_unique<PaintWrapper>(renderContext, geometryNode, pickerPaintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
-    auto canvasDrawFunction = datePickerPaintMethod->GetContentDrawFunction(paintWrapper.get());
-    Testing::MockCanvas rsCanvas;
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawPath(_)).WillRepeatedly(Return());
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
-    canvasDrawFunction(rsCanvas);
 }
 
 /**

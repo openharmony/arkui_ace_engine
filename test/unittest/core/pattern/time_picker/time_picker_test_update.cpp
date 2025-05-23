@@ -53,7 +53,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
-#include "core/components_ng/pattern/time_picker/toss_animation_controller.h"
+#include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
@@ -1736,7 +1736,7 @@ HWTEST_F(TimePickerPatternTestUpdate, OnAroundButtonClick001, TestSize.Level1)
         RefPtr<FrameNode> childNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(i));
         CHECK_NULL_VOID(childNode);
 
-        RefPtr<TimePickerEventParam> param = AceType::MakeRefPtr<TimePickerEventParam>();
+        RefPtr<PickerEventParam> param = AceType::MakeRefPtr<PickerEventParam>();
         param->instance_ = childNode;
         param->itemIndex_ = i;
         param->itemTotalCounts_ = childSize;

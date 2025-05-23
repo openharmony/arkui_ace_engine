@@ -2464,12 +2464,14 @@ HWTEST_F(BubbleTestOneNg, UpdateScrollHeight, TestSize.Level1)
     /**
      * @tc.steps: step2. test UpdateScrollHeight.
      */
-    bubblePattern->enableHoverMode_ = true;
+    auto property = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateEnableHoverMode(true);
     bool showInSubwindow = true;
     layoutAlgorithm->UpdateScrollHeight(AceType::RawPtr(layoutWrapper), showInSubwindow);
     showInSubwindow = false;
     layoutAlgorithm->UpdateScrollHeight(AceType::RawPtr(layoutWrapper), showInSubwindow);
-    EXPECT_EQ(bubblePattern->enableHoverMode_, true);
+    EXPECT_EQ(property->GetEnableHoverModeValue(false), true);
 }
 
 /**
@@ -2591,10 +2593,12 @@ HWTEST_F(BubbleTestOneNg, InitWrapperRect, TestSize.Level1)
     /**
      * @tc.steps: step2. test InitWrapperRect.
      */
-    bubblePattern->enableHoverMode_ = true;
+    auto property = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateEnableHoverMode(true);
     layoutAlgorithm->isHalfFoldHover_ = true;
-    layoutAlgorithm->InitWrapperRect(AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(bubblePattern->enableHoverMode_, true);
+    layoutAlgorithm->InitWrapperRect(AceType::RawPtr(layoutWrapper), property);
+    EXPECT_EQ(property->GetEnableHoverModeValue(false), true);
 }
 
 /**

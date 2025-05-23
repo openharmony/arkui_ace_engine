@@ -33,6 +33,21 @@ constexpr bool DEFAULT_VERTICALSCROLL_BAR_ACCESS_ENABLED = true;
 constexpr bool DEFAULT_HORIZONTALSCROLL_BAR_ACCESS_ENABLED = true;
 constexpr int32_t DEFAULT_TEXT_ZOOM_RATIO = 100;
 constexpr float DEFAULT_INITIAL_SCALE = 100.0f;
+constexpr bool DEFAULT_GEOLOCATION_ACCESS_ENABLED = true;
+constexpr bool DEFAULT_DATABASE_ACCESS_ENABLED = false;
+constexpr bool DEFAULT_OVERVIEWMODE_ACCESS_ENABLED = true;
+constexpr bool DEFAULT_FORCEDARK_ACCESS_ENABLED = false;
+constexpr bool DEFAULT_PINCH_SMOOTH_ENABLED = false;
+constexpr bool DEFAULT_META_VIEWPORT_ENABLED = true;
+constexpr bool DEFAULT_ENABLE_FOLLOW_SYSTEM_FONT_WEIGHT = false;
+constexpr bool DEFAULT_NATIVE_EMBED_MODE_ENABLE = false;
+constexpr int32_t DEFAULT_MINFONT_SIZE = 8;
+constexpr int32_t DEFAULT_DEFAULTFONT_SIZE = 16;
+constexpr int32_t DEFAULT_DEFAULTFIXEDFONT_SIZE = 13;
+constexpr int32_t DEFAULT_MINLOGICALFONT_SIZE = 8;
+constexpr char DEFAULT_WEBSTANDARD_FONT[] = "sans serif";
+constexpr char DEFAULT_WEBSERIF_FONT[] = "serif";
+constexpr char DEFAULT_WEBSANSSERIF_FONT[] = "sans-serif";
 } // namespace
 
 void SetJavaScriptAccess(ArkUINodeHandle node, ArkUI_Bool value)
@@ -382,6 +397,216 @@ void ResetOnContextMenuHideCallBack(ArkUINodeHandle node)
     WebModelNG::SetOnContextMenuHide(frameNode, nullptr);
 }
 
+void SetGeolocationAccess(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetGeolocationAccessEnabled(frameNode, value);
+}
+
+void ResetGeolocationAccess(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetGeolocationAccessEnabled(frameNode, DEFAULT_GEOLOCATION_ACCESS_ENABLED);
+}
+
+void SetDatabaseAccess(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetDatabaseAccessEnabled(frameNode, value);
+}
+
+void ResetDatabaseAccess(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetDatabaseAccessEnabled(frameNode, DEFAULT_DATABASE_ACCESS_ENABLED);
+}
+
+void SetOverviewModeAccess(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOverviewModeAccessEnabled(frameNode, value);
+}
+
+void ResetOverviewModeAccess(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOverviewModeAccessEnabled(frameNode, DEFAULT_OVERVIEWMODE_ACCESS_ENABLED);
+}
+
+void SetForceDarkAccess(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetForceDarkAccess(frameNode, value);
+}
+
+void ResetForceDarkAccess(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetForceDarkAccess(frameNode, DEFAULT_FORCEDARK_ACCESS_ENABLED);
+}
+
+void SetPinchSmooth(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetPinchSmoothModeEnabled(frameNode, value);
+}
+
+void ResetPinchSmooth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetPinchSmoothModeEnabled(frameNode, DEFAULT_PINCH_SMOOTH_ENABLED);
+}
+
+void SetMetaViewport(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetMetaViewport(frameNode, value);
+}
+
+void ResetMetaViewport(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetMetaViewport(frameNode, DEFAULT_META_VIEWPORT_ENABLED);
+}
+
+void SetEnableFollowSystemFontWeight(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableFollowSystemFontWeight(frameNode, value);
+}
+
+void ResetEnableFollowSystemFontWeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableFollowSystemFontWeight(frameNode, DEFAULT_ENABLE_FOLLOW_SYSTEM_FONT_WEIGHT);
+}
+
+void SetEnableNativeEmbedMode(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetNativeEmbedModeEnabled(frameNode, value);
+}
+
+void ResetEnableNativeEmbedMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetNativeEmbedModeEnabled(frameNode, DEFAULT_NATIVE_EMBED_MODE_ENABLE);
+}
+
+void SetMinFontSize(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetMinFontSize(frameNode, value);
+}
+
+void ResetMinFontSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetMinFontSize(frameNode, DEFAULT_MINFONT_SIZE);
+}
+
+void SetDefaultFontSize(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetDefaultFontSize(frameNode, value);
+}
+
+void ResetDefaultFontSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetDefaultFontSize(frameNode, DEFAULT_DEFAULTFONT_SIZE);
+}
+
+void SetDefaultFixedFontSize(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetDefaultFixedFontSize(frameNode, value);
+}
+
+void ResetDefaultFixedFontSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetDefaultFixedFontSize(frameNode, DEFAULT_DEFAULTFIXEDFONT_SIZE);
+}
+
+void SetMinLogicalFontSize(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetMinLogicalFontSize(frameNode, value);
+}
+
+void ResetMinLogicalFontSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetMinLogicalFontSize(frameNode, DEFAULT_MINLOGICALFONT_SIZE);
+}
+
+void SetWebStandardFont(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetWebStandardFont(frameNode, std::string(value));
+}
+
+void ResetWebStandardFont(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetWebStandardFont(frameNode, DEFAULT_WEBSTANDARD_FONT);
+}
+
+void SetWebSerifFont(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetWebSerifFont(frameNode, std::string(value));
+}
+
+void ResetWebSerifFont(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetWebSerifFont(frameNode, DEFAULT_WEBSERIF_FONT);
+}
+
+void SetWebSansSerifFont(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetWebSansSerifFont(frameNode, std::string(value));
+}
+
+void ResetWebSansSerifFont(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetWebSansSerifFont(frameNode, DEFAULT_WEBSANSSERIF_FONT);
+}
+
 namespace NodeModifier {
 const ArkUIWebModifier* GetWebModifier()
 {
@@ -431,6 +656,36 @@ const ArkUIWebModifier* GetWebModifier()
         .resetOnRequestSelectedCallBack = ResetOnRequestSelectedCallBack,
         .setOnContextMenuHideCallBack= SetOnContextMenuHideCallBack,
         .resetOnContextMenuHideCallBack= ResetOnContextMenuHideCallBack,
+        .setGeolocationAccess = SetGeolocationAccess,
+        .resetGeolocationAccess = ResetGeolocationAccess,
+        .setDatabaseAccess = SetDatabaseAccess,
+        .resetDatabaseAccess = ResetDatabaseAccess,
+        .setOverviewModeAccess = SetOverviewModeAccess,
+        .resetOverviewModeAccess = ResetOverviewModeAccess,
+        .setForceDarkAccess = SetForceDarkAccess,
+        .resetForceDarkAccess = ResetForceDarkAccess,
+        .setPinchSmooth = SetPinchSmooth,
+        .resetPinchSmooth = ResetPinchSmooth,
+        .setMetaViewport = SetMetaViewport,
+        .resetMetaViewport = ResetMetaViewport,
+        .setEnableFollowSystemFontWeight = SetEnableFollowSystemFontWeight,
+        .resetEnableFollowSystemFontWeight = ResetEnableFollowSystemFontWeight,
+        .setEnableNativeEmbedMode = SetEnableNativeEmbedMode,
+        .resetEnableNativeEmbedMode = ResetEnableNativeEmbedMode,
+        .setMinFontSize = SetMinFontSize,
+        .resetMinFontSize = ResetMinFontSize,
+        .setDefaultFontSize = SetDefaultFontSize,
+        .resetDefaultFontSize = ResetDefaultFontSize,
+        .setDefaultFixedFontSize = SetDefaultFixedFontSize,
+        .resetDefaultFixedFontSize = ResetDefaultFixedFontSize,
+        .setMinLogicalFontSize = SetMinLogicalFontSize,
+        .resetMinLogicalFontSize = ResetMinLogicalFontSize,
+        .setWebStandardFont = SetWebStandardFont,
+        .resetWebStandardFont = ResetWebStandardFont,
+        .setWebSerifFont = SetWebSerifFont,
+        .resetWebSerifFont = ResetWebSerifFont,
+        .setWebSansSerifFont = SetWebSansSerifFont,
+        .resetWebSansSerifFont = ResetWebSansSerifFont,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -484,6 +739,36 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetOnRequestSelectedCallBack = ResetOnRequestSelectedCallBack,
         .setOnContextMenuHideCallBack= SetOnContextMenuHideCallBack,
         .resetOnContextMenuHideCallBack= ResetOnContextMenuHideCallBack,
+        .setGeolocationAccess = SetGeolocationAccess,
+        .resetGeolocationAccess = ResetGeolocationAccess,
+        .setDatabaseAccess = SetDatabaseAccess,
+        .resetDatabaseAccess = ResetDatabaseAccess,
+        .setOverviewModeAccess = SetOverviewModeAccess,
+        .resetOverviewModeAccess = ResetOverviewModeAccess,
+        .setForceDarkAccess = SetForceDarkAccess,
+        .resetForceDarkAccess = ResetForceDarkAccess,
+        .setPinchSmooth = SetPinchSmooth,
+        .resetPinchSmooth = ResetPinchSmooth,
+        .setMetaViewport = SetMetaViewport,
+        .resetMetaViewport = ResetMetaViewport,
+        .setEnableFollowSystemFontWeight = SetEnableFollowSystemFontWeight,
+        .resetEnableFollowSystemFontWeight = ResetEnableFollowSystemFontWeight,
+        .setEnableNativeEmbedMode = SetEnableNativeEmbedMode,
+        .resetEnableNativeEmbedMode = ResetEnableNativeEmbedMode,
+        .setMinFontSize = SetMinFontSize,
+        .resetMinFontSize = ResetMinFontSize,
+        .setDefaultFontSize = SetDefaultFontSize,
+        .resetDefaultFontSize = ResetDefaultFontSize,
+        .setDefaultFixedFontSize = SetDefaultFixedFontSize,
+        .resetDefaultFixedFontSize = ResetDefaultFixedFontSize,
+        .setMinLogicalFontSize = SetMinLogicalFontSize,
+        .resetMinLogicalFontSize = ResetMinLogicalFontSize,
+        .setWebStandardFont = SetWebStandardFont,
+        .resetWebStandardFont = ResetWebStandardFont,
+        .setWebSerifFont = SetWebSerifFont,
+        .resetWebSerifFont = ResetWebSerifFont,
+        .setWebSansSerifFont = SetWebSansSerifFont,
+        .resetWebSansSerifFont = ResetWebSansSerifFont,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

@@ -699,12 +699,12 @@ void ImageModelNG::ResetAutoResize(FrameNode* frameNode)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AutoResize, defaultAutoResize, frameNode);
 }
 
-void ImageModelNG::SetResizableSlice(const ImageResizableSlice& slice)
+void ImageModelNG::SetResizableSlice(ImageResizableSlice& slice)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableSlice, slice);
 }
 
-void ImageModelNG::SetResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice)
+void ImageModelNG::SetResizableSlice(FrameNode* frameNode, ImageResizableSlice& slice)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableSlice, slice, frameNode);
 }
@@ -1168,6 +1168,12 @@ void ImageModelNG::CreateWithResourceObj(ImageResourceType resourceType, const R
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObj(frameNode , resourceType, resObj);
+}
+
+void ImageModelNG::CreateWithResourceObj(
+    FrameNode* frameNode, ImageResourceType resourceType, const RefPtr<ResourceObject>& resObj)
+{
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
 

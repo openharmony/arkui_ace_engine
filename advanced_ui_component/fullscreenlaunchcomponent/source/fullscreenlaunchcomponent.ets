@@ -18,8 +18,10 @@ import common from '@ohos.app.ability.common';
 import { ErrorCallback, Callback, BusinessError } from '@ohos.base';
 import AtomicServiceOptions from '@ohos.app.ability.AtomicServiceOptions';
 import commonEventManager from '@ohos.commonEventManager';
+import { bundleManager } from '@kit.AbilityKit';
 import Base from '@ohos.base';
 
+const API20: number = 20;
 const errCodeAbnormal: number = 100014;
 const errCodeCapabilityNotSupported: number = 801;
 const requestComponentTerminateKey: string = 'ohos.param.key.requestComponentTerminate';
@@ -32,11 +34,26 @@ export struct FullScreenLaunchComponent {
   options?: AtomicServiceOptions
   @State private isShow: boolean = false;
   private subscriber: commonEventManager.CommonEventSubscriber | null = null;
+  private apiVersion: number = 0;
   onError?: ErrorCallback;
   onTerminated?: Callback<TerminationInfo>;
   onReceive?: Callback<Record<string, Object>>;
 
   aboutToAppear() {
+    let bundleFlags = bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION |
+        bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_METADATA;
+    try {
+        bundleManager.getBundleInfoForSelf(bundleFlags).then((data) => {
+            hilog.info(0x3900, 'FullScreenLaunchComponent', 'getBundleInfoForSelf success, data: %{public}s.', JSON.stringify(data.targetVersion % 1000));
+            this.apiVersion = data.targetVersion % 1000;
+        }).catch((err) => {
+            hilog.error(0x3900, 'FullScreenLaunchComponent', 'getBundleInfoForSelf fail_1, cause: %{public}s.', err.message);
+        });
+    }
+    catch (err) {
+        let message = err.message;
+        hilog.error(0x3900, 'FullScreenLaunchComponent', 'getBundleInfoForSelf fail_2, cause: %{public}s.', message);
+    }
     let subscribeInfo: commonEventManager.CommonEventSubscribeInfo = {
       events: [commonEventManager.Support.COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT],
     }
@@ -92,13 +109,15 @@ export struct FullScreenLaunchComponent {
       this.options.parameters['ohos.extra.param.key.showMode'] = 1;
       this.options.parameters['ability.want.params.IsNotifyOccupiedAreaChange'] = true;
       this.options.parameters['ability.want.params.IsModal'] = true;
+      this.options.parameters['ohos.extra.atomicservice.param.key.isFollowHostWindowMode'] = (this.apiVersion >= API20);
       hilog.info(0x3900, 'FullScreenLaunchComponent', 'replaced options is %{public}s !', JSON.stringify(this.options))
     } else {
       this.options = {
         parameters: {
           'ohos.extra.param.key.showMode': 1,
           'ability.want.params.IsNotifyOccupiedAreaChange': true,
-          'ability.want.params.IsModal': true
+          'ability.want.params.IsModal': true,
+          'ohos.extra.atomicservice.param.key.isFollowHostWindowMode': (this.apiVersion >= API20)
         }
       }
     }
@@ -152,10 +171,14 @@ export struct FullScreenLaunchComponent {
   @Builder
   uiExtensionBuilder() {
     UIExtensionComponent({
-      bundleName: `com.atomicservice.${this.appId}`,
-      flags: this.options?.flags,
-      parameters: this.options?.parameters
-    })
+        bundleName: `com.atomicservice.${this.appId}`,
+        flags: this.options?.flags,
+        parameters: this.options?.parameters
+      },
+      {
+        windowModeFollowStrategy: this.apiVersion >= API20 ? WindowModeFollowStrategy.FOLLOW_HOST_WINDOW_MODE :
+          WindowModeFollowStrategy.FOLLOW_UI_EXTENSION_ABILITY_WINDOW_MODE
+      })
       .height('100%')
       .width('100%')
       .backgroundColor($r(`sys.color.background_primary`))

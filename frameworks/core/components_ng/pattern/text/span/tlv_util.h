@@ -148,6 +148,8 @@ constexpr uint8_t TLV_FLOAT_TAG = 0x9B;
 constexpr uint8_t TLV_SPAN_FONT_STYLE_STROKEWIDTH = 0x9E;
 constexpr uint8_t TLV_SPAN_FONT_STYLE_STROKECOLOR = 0x9F;
 
+constexpr uint8_t TLV_SPAN_URL_CONTENT = 0X9C;
+
 #define TLV_DEFINE_ENUM_TYPE(type, tag) \
 public:                                                                     \
     static void Write##type(std::vector<uint8_t>& buff, type value)         \
@@ -222,6 +224,8 @@ public:
 
     static void WriteString(std::vector<uint8_t>& buff, const std::string& value);
     static std::string ReadString(std::vector<uint8_t>& buff, int32_t& cursor);
+    static void WriteU16String(std::vector<uint8_t>& buff, const std::u16string& value);
+    static std::u16string ReadU16String(std::vector<uint8_t>& buff, int32_t& cursor);
     static void WriteDouble(std::vector<uint8_t>& buff, double value);
     static double ReadDouble(std::vector<uint8_t>& buff, int32_t& cursor);
     static void WriteColor(std::vector<uint8_t>& buff, Color& value);
@@ -252,6 +256,8 @@ public:
     static ImageSpanAttribute ReadImageSpanAttribute(std::vector<uint8_t>& buff, int32_t& cursor);
     static void WriteLeadingMargin(std::vector<uint8_t>& buff, NG::LeadingMargin& value);
     static NG::LeadingMargin ReadLeadingMargin(std::vector<uint8_t>& buff, int32_t& cursor);
+    static void WriteTextDecorations(std::vector<uint8_t>& buff, const std::vector<TextDecoration>& values);
+    static std::vector<TextDecoration> ReadTextDecorations(std::vector<uint8_t>& buff, int32_t& cursor);
     static void WriteFloat(std::vector<uint8_t>& buff, float value);
     static float ReadFloat(std::vector<uint8_t>& buff, int32_t& cursor);
 };

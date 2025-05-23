@@ -338,6 +338,7 @@ public:
      * @param rect - offset of @c rect is relative to FrameRect.
      */
     virtual void SetContentClip(const std::variant<RectF, RefPtr<ShapeRect>>& rect) {}
+    virtual void ResetContentClip() {}
 
     // visual
     virtual void UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) {}

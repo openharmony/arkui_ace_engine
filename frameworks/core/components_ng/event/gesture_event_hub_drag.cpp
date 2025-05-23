@@ -879,7 +879,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
 
     std::map<std::string, int64_t> summary;
-    ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
+    std::map<std::string, int64_t> detailedSummary;
+    ret = UdmfClient::GetInstance()->GetSummary(udKey, summary, detailedSummary);
     if (ret != 0) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF get summary failed, return value is %{public}d", ret);
     }
@@ -918,6 +919,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     dragDropManager->ResetContextMenuDragPosition();
     RefPtr<Subwindow> subWindow = nullptr;
     data.dragPreviewRect = RectF(0, 0, pixelMap->GetWidth(), pixelMap->GetHeight());
+    data.deviceType = info.GetSourceDevice();
     if (!needChangeFwkForLeaveWindow && IsNeedSwitchToSubWindow(data)) {
         GestureEventHub::PrepareDragStartInfo(pipeline, data, frameNode);
         auto imageNode = overlayManager->GetPixelMapContentNode();
@@ -979,21 +981,22 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
         dragMoveLastPoint.GetScreenX(), dragMoveLastPoint.GetScreenY(), info.GetTargetDisplayId(),
-        windowId, true, false, summary };
+        windowId, true, false, summary, false, detailedSummary };
     if (AceApplicationInfo::GetInstance().IsMouseTransformEnable() && (info.GetSourceTool() == SourceTool::MOUSE) &&
         (info.GetSourceDevice() == SourceType::TOUCH)) {
         dragData.sourceType = static_cast<int32_t>(SourceType::MOUSE);
     }
     std::string summarys = DragDropFuncWrapper::GetSummaryString(summary);
+    std::string detailedSummarys = DragDropFuncWrapper::GetSummaryString(detailedSummary);
     DragDropBehaviorReporter::GetInstance().UpdateSummaryType(summarys);
     TAG_LOGI(AceLogTag::ACE_DRAG,
         "Start drag, frameNode is %{public}s, pixelMap width %{public}d height %{public}d, "
         "scale is %{public}f, udkey %{public}s, recordsSize %{public}d, extraInfo length %{public}d, "
         "pointerId %{public}d, displayId %{public}d, windowId %{public}d, summary %{public}s, "
-        "eventId %{public}d.",
+        "eventId %{public}d, detailedSummary %{public}s.",
         frameNode->GetTag().c_str(), width, height, scale, DragDropFuncWrapper::GetAnonyString(udKey).c_str(),
         recordsSize, static_cast<int32_t>(extraInfoLimited.length()), info.GetPointerId(),
-        info.GetTargetDisplayId(), windowId, summarys.c_str(), info.GetPointerEventId());
+        info.GetTargetDisplayId(), windowId, summarys.c_str(), info.GetPointerEventId(), detailedSummarys.c_str());
     dragDropManager->GetGatherPixelMap(dragData, scale, width, height);
     {
         ACE_SCOPED_TRACE("drag: call msdp start drag");

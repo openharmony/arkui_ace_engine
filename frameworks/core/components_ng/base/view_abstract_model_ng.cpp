@@ -47,6 +47,12 @@ void StartVirator(const MenuParam& menuParam, bool isMenu, const std::string& me
         VibratorUtils::StartViratorDirectly(menuHapticFeedback);
         return;
     }
+    if (menuParam.hapticFeedbackMode == HapticFeedbackMode::AUTO) {
+        if (menuParam.maskEnable.has_value() && menuParam.maskEnable.value()) {
+            VibratorUtils::StartViratorDirectly(menuHapticFeedback);
+            return;
+        }
+    }
     if (isMenu) {
         return;
     }

@@ -2210,7 +2210,7 @@ HWTEST_F(TextFieldUXTest, TextInputTextDecoration001, TestSize.Level1)
     /**
      * @tc.step: step2. test decoration
      */
-    EXPECT_EQ(layoutProperty_->GetTextDecoration(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(layoutProperty_->GetTextDecorationFirst(), TextDecoration::LINE_THROUGH);
     EXPECT_EQ(layoutProperty_->GetTextDecorationColor(), Color::BLUE);
     EXPECT_EQ(layoutProperty_->GetTextDecorationStyle(), TextDecorationStyle::DOTTED);
 }

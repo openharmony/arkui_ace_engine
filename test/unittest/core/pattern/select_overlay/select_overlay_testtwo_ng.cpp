@@ -47,6 +47,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/pipeline/base/constants.h"
+#include "ui/base/geometry/dimension.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1704,4 +1705,62 @@ HWTEST_F(SelectOverlayTestTwoNg, UpdateToolBarExtensionMenu, TestSize.Level1)
     EXPECT_EQ(selectOverlayNode->extensionMenuStatus_, FrameNodeStatus::GONE);
     EXPECT_EQ(selectOverlayNode->backButtonStatus_, FrameNodeStatus::GONE);
 }  
+
+/**
+ * @tc.name: BuildMoreOrBackButton
+ * @tc.desc: Test BuildMoreOrBackButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, BuildMoreOrBackButton, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextOverlayTheme::TypeId()) {
+            auto theme = AceType::MakeRefPtr<TextOverlayTheme>();
+            theme->menuButtonPadding_.left_.value_ = 500;
+            theme->menuButtonPadding_.right_.value_ = 500;
+            return theme;
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        }
+        return AceType::MakeRefPtr<TextOverlayTheme>();
+    });
+    SelectOverlayInfo selectInfo;
+    auto menuOptionItems = GetMenuOptionItems();
+    selectInfo.menuOptionItems = menuOptionItems;
+    auto onMenuItemClick = [](NG::MenuItemParam menuOptionsParam) -> bool { return false; };
+    selectInfo.onCreateCallback.onMenuItemClick = onMenuItemClick;
+    auto onCreateMenuCallback = [menuOptionItems](
+                                    const std::vector<NG::MenuItemParam>& menuItems) -> std::vector<MenuOptionsParam> {
+        return menuOptionItems;
+    };
+    selectInfo.onCreateCallback.onCreateMenuCallback = onCreateMenuCallback;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(infoPtr, nullptr);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    ASSERT_NE(frameNode, nullptr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+ 
+    float maxWidth = 1040.0f;
+    selectOverlayNode->CreateToolBar();
+    selectOverlayNode->AddMenuItemByCreateMenuCallback(infoPtr, maxWidth);
+    EXPECT_NE(selectOverlayNode->moreButton_, nullptr);
+    EXPECT_FALSE(selectOverlayNode->isExtensionMenu_);
+    auto gestureHub = selectOverlayNode->moreButton_->GetOrCreateGestureEventHub();
+    auto vector = gestureHub->GetResponseRegion();
+    EXPECT_NE(vector.size(), 0);
+    auto menuPadding = textOverlayTheme->GetMenuPadding();
+    auto buttonHeight = textOverlayTheme->GetMenuButtonHeight();
+    auto responseHeight = menuPadding.Bottom().Value() + menuPadding.Top().Value() + buttonHeight.Value();
+    EXPECT_EQ(vector.begin()->GetWidth().Value(), 40.0f);
+    EXPECT_EQ(vector.begin()->GetHeight().Value(), responseHeight);
+}
 } // namespace OHOS::Ace::NG

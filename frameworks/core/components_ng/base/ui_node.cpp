@@ -559,6 +559,18 @@ void UINode::DoAddChild(
     }
     MarkNeedSyncRenderTree(true);
     ProcessIsInDestroyingForReuseableNode(child);
+    // Forced update colormode when builderNode attach to main tree.
+    if (SystemProperties::ConfigChangePerform() && child->nodeStatus_ == NodeStatus::BUILDER_NODE_ON_MAINTREE &&
+        context_) {
+        auto colorMode = static_cast<int32_t>(context_->GetColorMode());
+        if (child->CheckIsDarkMode() != colorMode) {
+            context_->SetIsSystemColorChange(true);
+            SetRerenderable(true);
+            SetMeasureAnyway(true);
+            SetShouldClearCache(true);
+            NotifyColorModeChange(colorMode);
+        }
+    }
 }
 
 void UINode::GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent)

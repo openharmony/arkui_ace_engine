@@ -70,6 +70,11 @@ private:
         TimeStamp time;
     };
 
+    struct HandleTransparentCallbackParam {
+        int32_t currentHoveringId = 0;
+        int32_t lastHoveringId = 0;
+    };
+
     /*
     * Compute components which are hovered in accessibility mode.
     * And send hover enter/exit events to accessibility framework;
@@ -97,10 +102,11 @@ private:
 
     bool HandleAccessibilityHoverTransparentCallback(bool transform,
         const RefPtr<FrameNode>& root,
-        const int32_t& currentHoveringId,
-        const int32_t& lastHoveringId,
+        const HandleTransparentCallbackParam& param,
+        const PointF& point,
         const TouchEvent& event);
-    bool ExecuteChildNodeHoverTransparentCallback(const RefPtr<FrameNode>& root, const TouchEvent& event);
+    bool ExecuteChildNodeHoverTransparentCallback(const RefPtr<FrameNode>& root,  const PointF& point,
+        const TouchEvent& event);
 
     AccessibilityHoverState hoverState_;
 };

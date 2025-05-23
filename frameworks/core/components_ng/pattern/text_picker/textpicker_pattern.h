@@ -53,6 +53,14 @@ public:
         return true;
     }
 
+    void OnColorModeChange(uint32_t colorMode) override
+    {
+        LinearLayoutPattern::OnColorModeChange(colorMode);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkModifyDone();
+    }
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<TextPickerEventHub>();
@@ -527,6 +535,11 @@ public:
         isSingleRange_ = isSingleRange;
     }
 
+    void UpdateDisappearTextStyle(const PickerTextStyle& textStyle);
+    void UpdateNormalTextStyle(const PickerTextStyle& textStyle);
+    void UpdateSelectedTextStyle(const PickerTextStyle& textStyle);
+    void UpdateDefaultTextStyle(const PickerTextStyle& textStyle);
+
 private:
     void OnModifyDone() override;
     void InitCrownAndKeyEvent();
@@ -563,6 +576,7 @@ private:
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintFocusState();
     void SetButtonIdeaSize();
+    void CalculateButtonMetrics(RefPtr<UINode> child, RefPtr<PickerTheme> pickerTheme);
     std::string GetRangeStr() const;
     std::string GetOptionsMultiStr() const;
     std::string GetOptionsMultiStrInternal() const;
@@ -578,7 +592,7 @@ private:
     void SupplementOption(const std::vector<NG::TextCascadePickerOptions>& reOptions,
         std::vector<NG::RangeContent>& rangeContents, uint32_t patterIndex);
     void ProcessCascadeOptionsValues(const std::vector<std::string>& rangeResultValue, uint32_t index);
-    void SetFocusCornerRadius(RoundRect& paintRect);
+    void SetFocusCornerRadius(RoundRect& paintRect, const BorderRadiusProperty& radius);
     void UpdateButtonMargin(
         const RefPtr<FrameNode>& buttonNode, const RefPtr<DialogTheme>& dialogTheme, const bool isConfirmOrNextNode);
     void CheckFocusID(int32_t childSize);
@@ -590,6 +604,14 @@ private:
     float CalculateColumnSize(int32_t index, float childCount, const SizeF& pickerContentSize);
     int32_t CalculateIndex(RefPtr<FrameNode>& frameNode);
     void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext);
+    Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
+
+    void UpdateTextStyleCommon(
+        const PickerTextStyle& textStyle,
+        const TextStyle& defaultTextStyle,
+        std::function<void(const Color&)> updateTextColorFunc,
+        std::function<void(const Dimension&)> updateFontSizeFunc,
+        std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc);
 
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;

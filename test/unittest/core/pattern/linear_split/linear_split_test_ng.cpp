@@ -56,6 +56,17 @@ class LinearSplitTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    RefPtr<FrameNode> CreateLinearSplit(SplitType splitType, const std::function<void(LinearSplitModelNG)>& callback)
+    {
+        LinearSplitModelNG model;
+        model.Create(splitType);
+        if (callback) {
+            callback(model);
+        }
+        RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ViewStackProcessor::GetInstance()->PopContainer();
+        return AceType::DynamicCast<FrameNode>(element);
+    }
 };
 void LinearSplitTestNg::SetUpTestSuite()
 {
@@ -1171,5 +1182,50 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest012, TestSize.Level1)
     linearSplitPattern->isDragedMoving_ = true;
     auto info = GestureEvent();
     linearSplitPattern->HandlePanEnd(info);
+}
+
+/**
+ * @tc.name: MeasureSelfByLayoutPolicyTest01
+ * @tc.desc: Test MeasureSelfByLayoutPolicy function
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, MeasureSelfByLayoutPolicyTest01, TestSize.Level1)
+{
+    auto frameNode = CreateLinearSplit(SplitType::ROW_SPLIT, [this](LinearSplitModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LinearSplitLayoutAlgorithm algorithm(SplitType::ROW_SPLIT, {}, {}, false);
+    SizeF childTotalSize(100, 200);
+    SizeF childMaxSize(150, 250);
+    LayoutConstraintF layoutConstraint = {.parentIdealSize = {300, 350}};
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    auto selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), childTotalSize, childMaxSize);
+    EXPECT_EQ(selfSize, OptionalSizeF(300, 350)) << selfSize.ToString();
+
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+    selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), childTotalSize, childMaxSize);
+    EXPECT_EQ(selfSize, OptionalSizeF(std::nullopt, std::nullopt));
+
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+    selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), childTotalSize, childMaxSize);
+    EXPECT_EQ(selfSize, OptionalSizeF(std::nullopt, std::nullopt));
+    
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+    selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), childTotalSize, childMaxSize);
+    EXPECT_EQ(selfSize, OptionalSizeF(100, 250));
+
+    algorithm.splitType_ = SplitType::COLUMN_SPLIT;
+    selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), childTotalSize, childMaxSize);
+    EXPECT_EQ(selfSize, OptionalSizeF(150, 200));
+
+    layoutProperty->UpdateCalcMaxSize(CalcSize(CalcLength(50), CalcLength(50)));
+    selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), childTotalSize, childMaxSize);
+    EXPECT_EQ(selfSize, OptionalSizeF(50, 50));
 }
 } // namespace OHOS::Ace::NG

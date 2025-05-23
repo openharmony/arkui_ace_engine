@@ -26,7 +26,7 @@ namespace OHOS::Ace {
 class TouchEventInfo;
 
 namespace NG {
-
+class FrameNode;
 #define DEFINE_ACTION_FUNCTIONS(TYPE) \
 public: \
     void Set##TYPE(const Action##TYPE& action##TYPE) \
@@ -44,7 +44,8 @@ public: \
 protected: \
     Action##TYPE action##TYPE##_;
 
-using ActionNotifyChildAction = std::function<AccessibilityActionResult(NotifyChildActionType childActionType)>;
+using ActionNotifyChildAction = std::function<AccessibilityActionResult(const RefPtr<FrameNode>& node,
+    NotifyChildActionType childActionType)>;
 
 using ActionAccessibilityActionIntercept =
     std::function<AccessibilityActionInterceptResult(AccessibilityInterfaceAction action)>;
@@ -63,7 +64,8 @@ class ACE_FORCE_EXPORT AccessibilityPropertyInnerFunction {
      * @brief bubble up the action to ancestor after descendants handled accessibility action
      *
      * @details callback function prototype: ActionNotifyChildAction
-     *          register function: SetNotifyChildAction(const ActionNotifyChildAction& actionNotifyChildAction)
+     *          register function: SetNotifyChildAction(const RefPtr<FrameNode>& node,
+     *              const ActionNotifyChildAction& actionNotifyChildAction)
      *          use register function to register callback.
      *          when descendants handled accessibility action, will bubble up to the ancestor component, notifying the
      *          ancestor that accessibility action has occurred. The ancestor component can decide on subsequent

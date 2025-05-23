@@ -224,9 +224,80 @@ HWTEST_F(RichEditorPatternTestSevenNg, UpdateSelectionAndHandleVisibility001, Te
     richEditorPattern->textSelector_.Update(5, 10);
     richEditorPattern->caretPosition_ = 5;
     richEditorPattern->insertValueLength_ = 5;
+    richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->UpdateSelectionAndHandleVisibility();
     ASSERT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     ASSERT_EQ(richEditorPattern->textSelector_.destinationOffset, 5);
+}
+
+/**
+ * @tc.name: UpdateSelectionAndHandleVisibility002
+ * @tc.desc: test UpdateSelectionAndHandleVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSevenNg, UpdateSelectionAndHandleVisibility002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->sourceTool_ = SourceTool::MOUSE;
+    richEditorPattern->releaseInDrop_ = true;
+    AddSpan("test--test");
+
+    richEditorPattern->textSelector_.Update(5, 10);
+    richEditorPattern->lastCaretPosition_ = 5;
+    richEditorPattern->insertValueLength_ = 5;
+    richEditorPattern->isSpanStringMode_ = false;
+    richEditorPattern->UpdateSelectionAndHandleVisibility();
+    ASSERT_EQ(richEditorPattern->textSelector_.baseOffset, 5);
+    ASSERT_EQ(richEditorPattern->textSelector_.destinationOffset, 10);
+}
+
+/**
+ * @tc.name: ProvidePlaceHolderText001
+ * @tc.desc: test provide placeholder information to inputmethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSevenNg, ProvidePlaceHolderText, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+#if defined(ENABLE_STANDARD_INPUT)
+    auto miscTextConfig = richEditorPattern->GetMiscTextConfig();
+    auto textconfig = miscTextConfig.value();
+    auto placeholder = UtfUtils::Str16ToStr8(textconfig.inputAttribute.placeholder).c_str();
+    size_t count = 0;
+    size_t i = 0;
+    while (i < placeholder.size()) {
+        count++;
+        i += (placeholder[i] >= 0xD800 && placeholder[i] <= 0xDBFF) ? 2 : 1;
+    }
+    EXPECT_NE(count, 0);
+#endif
+}
+/**
+ * @tc.name: ProvideabilityNameText001
+ * @tc.desc: test provide abilityName information to inputmethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSevenNg, ProvideabilityNameText, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+#if defined(ENABLE_STANDARD_INPUT)
+    auto miscTextConfig = richEditorPattern->GetMiscTextConfig();
+    auto textconfig = miscTextConfig.value();
+    auto abilityName = UtfUtils::Str16ToStr8(textconfig.inputAttribute.abilityName).c_str();
+    size_t count = 0;
+    size_t i = 0;
+    while (i < abilityName.size()) {
+        count++;
+        i += (abilityName[i] >= 0xD800 && abilityName[i] <= 0xDBFF) ? 2 : 1;
+    }
+    EXPECT_NE(count, 0);
+#endif
 }
 
 } // namespace OHOS::Ace::NG

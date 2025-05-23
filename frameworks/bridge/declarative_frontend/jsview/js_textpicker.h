@@ -48,6 +48,7 @@ public:
     static bool ParseIconTextArray(const JSRef<JSObject>& paramObject,  ParseTextArrayParam& param);
     static bool ParseTextArray(const JSRef<JSObject>& paramObject, ParseTextArrayParam& param);
     static void ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle, const std::string& pos);
+    static void ParseTextStyleFontSize(const JSRef<JSVal>& fontSize, NG::PickerTextStyle& textStyle);
     static bool ParseMultiTextArray(const JSRef<JSObject>& paramObj, ParseTextArrayParam& param);
     static bool ParseCascadeTextArray(const JSRef<JSObject>& paramObj, std::vector<uint32_t>& selecteds,
         std::vector<std::string>& values, NG::TextCascadePickerOptionsAttr& attr);
@@ -78,6 +79,7 @@ public:
     static void IsUserDefinedFontFamily(const std::string& pos);
     static void ParseDefaultTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle);
     static bool ParseColumnWidths(const JSRef<JSObject>& paramObject, ParseTextArrayParam& param);
+    static void ParsePickerBackgroundStyle(const JSRef<JSObject>& paramObj, NG::PickerBackgroundStyle& bgStyle);
 };
 
 class JSTextPicker : public JSViewAbstract {
@@ -106,6 +108,7 @@ public:
     static void SetDisableTextStyleAnimation(const JSCallbackInfo& info);
     static void SetDefaultTextStyle(const JSCallbackInfo& info);
     static void SetEnableHapticFeedback(const JSCallbackInfo& info);
+    static void SetSelectedBackgroundStyle(const JSCallbackInfo& info);
 
 private:
     static size_t ProcessCascadeOptionDepth(const NG::TextCascadePickerOptions& option);

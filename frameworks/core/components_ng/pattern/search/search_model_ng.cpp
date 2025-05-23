@@ -1885,7 +1885,7 @@ void SearchModelNG::SetTextDecoration(Ace::TextDecoration value)
     CHECK_NULL_VOID(textFieldChild);
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    textFieldLayoutProperty->UpdateTextDecoration(value);
+    textFieldLayoutProperty->UpdateTextDecoration({value});
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1896,7 +1896,7 @@ void SearchModelNG::SetTextDecoration(FrameNode* frameNode, Ace::TextDecoration 
     CHECK_NULL_VOID(textFieldChild);
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    textFieldLayoutProperty->UpdateTextDecoration(value);
+    textFieldLayoutProperty->UpdateTextDecoration({value});
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 

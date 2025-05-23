@@ -1458,6 +1458,11 @@ void CalendarDialogPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(textLayoutProperty);
     
     textLayoutProperty->UpdateTextColor(theme->GetCalendarTitleFontColor());
+
+    if (SystemProperties::ConfigChangePerform()) {
+        titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        OnModifyDone();
+    }
 }
 
 void CalendarDialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

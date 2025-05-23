@@ -132,7 +132,7 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         GetSymbolEffectOptions().value_or(SymbolEffectOptions())).c_str());
 
     auto jsonDecoration = JsonUtil::Create(true);
-    std::string type = V2::ConvertWrapTextDecorationToStirng(GetTextDecoration().value_or(TextDecoration::NONE));
+    std::string type = V2::ConvertWrapTextDecorationToStirng(GetTextDecorationFirst());
     jsonDecoration->Put("type", type.c_str());
     jsonDecoration->Put("color", GetTextDecorationColor().value_or(Color::BLACK).ColorToString().c_str());
     std::string style =

@@ -795,7 +795,7 @@ HWTEST_F(OverlayTestNg, RemoveOverlayTest001, TestSize.Level1)
 }
 /**
  * @tc.name: RemoveOverlayTest002
- * @tc.desc:  Test OverlayManager::RemoveOverlay related functions.
+ * @tc.desc: Test OverlayManager::RemoveOverlay related functions.
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayTestNg, RemoveOverlayTest002, TestSize.Level1)

@@ -47,6 +47,11 @@ enum class ContextMenuRegisterType : char {
     CUSTOM_TYPE = 1,
 };
 
+struct MenuMaskType {
+    std::optional<Color> maskColor;
+    std::optional<BlurStyle> maskBackGroundBlueStyle;
+};
+
 struct MenuParam {
     std::string title;
     OffsetF positionOffset;
@@ -56,7 +61,7 @@ struct MenuParam {
     ContextMenuRegisterType contextMenuRegisterType = ContextMenuRegisterType::NORMAL_TYPE;
     std::function<void(const std::string&)> onStateChange;
     std::optional<Placement> placement;
-    bool enableHoverMode = false;
+    std::optional<bool> enableHoverMode = std::nullopt;
     std::function<void()> onAppear;
     std::function<void()> onDisappear;
     std::function<void()> aboutToAppear;
@@ -87,6 +92,8 @@ struct MenuParam {
     bool disappearScaleToTarget = false;
     std::optional<NG::BorderWidthProperty> outlineWidth;
     std::optional<NG::BorderColorProperty> outlineColor;
+    std::optional<bool> maskEnable;
+    std::optional<MenuMaskType> maskType;
 };
 
 } // namespace OHOS::Ace::NG

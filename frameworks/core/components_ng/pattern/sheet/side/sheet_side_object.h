@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHEET_SHEET_SIDE_OBJECT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHEET_SHEET_SIDE_OBJECT_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHEET_SIDE_SHEET_SIDE_OBJECT_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHEET_SIDE_SHEET_SIDE_OBJECT_H
 
 #include "core/components_ng/pattern/sheet/sheet_object.h"
 
@@ -23,9 +23,42 @@ namespace OHOS::Ace::NG {
 class SheetSideObject : public SheetObject {
 public:
     SheetSideObject(SheetType sheetType) : SheetObject(sheetType) {}
+    NG::BorderWidthProperty PostProcessBorderWidth(const NG::BorderWidthProperty& borderWidth) override;
+    void DirtyLayoutProcess(const RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper) override;
+    RefPtr<InterpolatingSpring> GetSheetTransitionCurve(float dragVelocity) const override;
+    std::function<void()> GetSheetTransitionFinishEvent(bool isTransitionIn) override;
+    std::function<void()> GetSheetAnimationEvent(bool isTransitionIn, float offset) override;
+    void ClipSheetNode() override;
+    void InitAnimationForOverlay(bool isTransitionIn, bool isFirstTransition) override;
+    void SetFinishEventForAnimationOption(
+        AnimationOption& option, bool isTransitionIn, bool isFirstTransition) override;
+    AnimationOption GetAnimationOptionForOverlay(bool isTransitionIn, bool isFirstTransition) override;
+    std::function<void()> GetAnimationPropertyCallForOverlay(bool isTransitionIn) override;
+    void OnLanguageConfigurationUpdate() override;
+    PaddingPropertyF GetSheetSafeAreaPadding() const override;
+    void HandleDragStart() override;
+    void HandleDragUpdate(const GestureEvent& info) override;
+    void HandleDragEnd(float dragVelocity) override;
+    void ModifyFireSheetTransition(float dragVelocity) override;
+    void CreatePropertyCallback() override;
 
-    BorderWidthProperty PostProcessBorderWidth(const BorderWidthProperty& borderWidth) override;
+    virtual uint32_t GetPanDirection() override
+    {
+        return PanDirection::HORIZONTAL;
+    }
+
+    float GetSheetWidhtBeforeDragUpdate() const;
+
+private:
+    void UpdateSidePosition();
+    void UpdateDragBarStatus();
+    void HandleDragEndForLTR(float dragVelocity);
+    void HandleDragEndForRTL(float dragVelocity);
+    void HandleDragUpdateForLTR(const GestureEvent& info);
+    void HandleDragUpdateForRTL(const GestureEvent& info);
+    void TransformTranslateEnter();
+    void TransformTranslateExit();
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHEET_SHEET_SIDE_OBJECT_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHEET_SIDE_SHEET_SIDE_OBJECT_H

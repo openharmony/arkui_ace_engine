@@ -386,6 +386,7 @@ enum class TextStyleAttribute {
     FONT_COLOR = 18,
     SHADOWS = 19,
     HALF_LEADING = 20,
+    FOREGROUND_BRUSH = 21,
     MAX_TEXT_STYLE
 };
 
@@ -443,6 +444,12 @@ public:                                                    \
             needReCreateParagraph_ = true;                 \
         }                                                  \
         prop##name##_ = newValue;                          \
+    }                                                      \
+    void Set##name(const std::optional<type>& value)       \
+    {                                                      \
+        if (value.has_value()) {                           \
+            Set##name(value.value());                      \
+        }                                                  \
     }
 
 #define ACE_DEFINE_TEXT_STYLE(name, type, changeflag)  \
@@ -558,28 +565,34 @@ public:                                                    \
 private:                                                   \
     type prop##name##_;
 
-#define ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(name, type, value, changeflag) \
-public:                                                                              \
-    const type& Get##name() const                                                    \
-    {                                                                                \
-        return prop##name##_;                                                        \
-    }                                                                                \
-    void Set##name(const type& newValue)                                             \
-    {                                                                                \
-        if (NearEqual(prop##name##_, newValue)) {                                    \
-            return;                                                                  \
-        }                                                                            \
-        auto flag = static_cast<int32_t>(changeflag);                                \
-        if (GreatOrEqual(flag, 0)) {                                                 \
-            reLayoutParagraphStyleBitmap_.set(flag);                                 \
-        } else {                                                                     \
-            needReCreateParagraph_ = true;                                           \
-        }                                                                            \
-        prop##name##_ = newValue;                                                    \
-    }                                                                                \
-                                                                                     \
-private:                                                                             \
-    type prop##name##_ = value;
+#define ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(name, type, initValue, changeflag) \
+public:                                                                                  \
+    const type& Get##name() const                                                        \
+    {                                                                                    \
+        return prop##name##_;                                                            \
+    }                                                                                    \
+    void Set##name(const type& newValue)                                                 \
+    {                                                                                    \
+        if (NearEqual(prop##name##_, newValue)) {                                        \
+            return;                                                                      \
+        }                                                                                \
+        auto flag = static_cast<int32_t>(changeflag);                                    \
+        if (GreatOrEqual(flag, 0)) {                                                     \
+            reLayoutParagraphStyleBitmap_.set(flag);                                     \
+        } else {                                                                         \
+            needReCreateParagraph_ = true;                                               \
+        }                                                                                \
+        prop##name##_ = newValue;                                                        \
+    }                                                                                    \
+    void Set##name(const std::optional<type>& newValue)                                  \
+    {                                                                                    \
+        if (newValue.has_value()) {                                                      \
+            Set##name(newValue.value());                                                 \
+        }                                                                                \
+    }                                                                                    \
+                                                                                         \
+private:                                                                                 \
+    type prop##name##_ = initValue;
 
 // For symbol
 #define ACE_DEFINE_SYMBOL_STYLE(name, type, changeflag) \
@@ -647,14 +660,14 @@ public:
         const NG::InspectorFilter& filter);
 
     static std::string GetDeclarationString(
-        const std::optional<Color>& color, const std::optional<TextDecoration>& textDecoration,
+        const std::optional<Color>& color, const std::vector<TextDecoration>& textDecorations,
         const std::optional<TextDecorationStyle>& textDecorationStyle, const std::optional<float>& lineThicknessScale);
 
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         TextBaseline, TextBaseline, TextBaseline::ALPHABETIC, TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_DIMENSION_STYLE(BaselineOffset, TextStyleAttribute::BASELINE_SHIFT);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
-        TextDecoration, TextDecoration, TextDecoration::NONE, TextStyleAttribute::DECRATION);
+        TextDecoration, std::vector<TextDecoration>, { TextDecoration::NONE }, TextStyleAttribute::DECRATION);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         TextDecorationStyle, TextDecorationStyle, TextDecorationStyle::SOLID, TextStyleAttribute::DECORATION_STYLE);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
@@ -768,6 +781,13 @@ public:
         reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::FONT_VARIATIONS));
     }
 
+    void SetFontWeight(const std::optional<FontWeight>& fontWeight) const
+    {
+        if (fontWeight.has_value()) {
+            SetFontWeight(fontWeight.value());
+        }
+    }
+
     const std::list<std::pair<std::string, int32_t>>& GetFontFeatures() const
     {
         return fontFeatures_;
@@ -780,6 +800,13 @@ public:
         }
         reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::FONT_FEATURES));
         fontFeatures_ = fontFeatures;
+    }
+
+    void SetFontFeatures(const std::optional<std::list<std::pair<std::string, int32_t>>>& fontFeatures)
+    {
+        if (fontFeatures.has_value()) {
+            SetFontFeatures(fontFeatures.value());
+        }
     }
 
     const Dimension& GetLineHeight() const
@@ -798,6 +825,18 @@ public:
         reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::HEIGHT_ONLY));
         lineHeight_ = newValue;
         hasHeightOverride_ = hasHeightOverride;
+    }
+
+    void SetTextDecoration(TextDecoration value)
+    {
+        std::vector<TextDecoration> array { value };
+        SetTextDecoration(array);
+    }
+
+    TextDecoration GetTextDecorationFirst() const
+    {
+        return GetTextDecoration().size() > 0 ?
+            GetTextDecoration()[0] : TextDecoration::NONE;
     }
 
     const Dimension& GetParagraphSpacing() const

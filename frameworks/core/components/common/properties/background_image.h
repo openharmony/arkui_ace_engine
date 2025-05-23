@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "base/geometry/animatable_dimension.h"
 #include "base/utils/macros.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 
@@ -66,11 +67,33 @@ public:
 
     std::string ToString() const;
 
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, BackgroundImageSize&)>&& updateFunc)
+    {
+        if (resObj && updateFunc) {
+            resMap_[key] = { resObj, std::move(updateFunc) };
+        }
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.obj, *this);
+        }
+    }
+
 private:
     BackgroundImageSizeType typeX_ { BackgroundImageSizeType::AUTO };
     double valueX_ = 0.0;
     BackgroundImageSizeType typeY_ { BackgroundImageSizeType::AUTO };
     double valueY_ = 0.0;
+    struct ResourceUpdater {
+        RefPtr<ResourceObject> obj;
+        std::function<void(const RefPtr<ResourceObject>&, BackgroundImageSize&)> updateFunc;
+    };
+    std::unordered_map<std::string, ResourceUpdater> resMap_;
 };
 
 enum class ACE_EXPORT BackgroundImagePositionType {
@@ -181,12 +204,34 @@ public:
 
     std::string ToString() const;
 
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, BackgroundImagePosition&)>&& updateFunc)
+    {
+        if (resObj && updateFunc) {
+            resMap_[key] = { resObj, std::move(updateFunc) };
+        }
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.obj, *this);
+        }
+    }
+
 private:
     BackgroundImagePositionType typeX_ { BackgroundImagePositionType::PX };
     BackgroundImagePositionType typeY_ { BackgroundImagePositionType::PX };
     AnimatableDimension valueX_ = AnimatableDimension(-1.0);
     AnimatableDimension valueY_ = AnimatableDimension(0.0);
     bool isAlign_ = false;
+    struct ResourceUpdater {
+        RefPtr<ResourceObject> obj;
+        std::function<void(const RefPtr<ResourceObject>&, BackgroundImagePosition&)> updateFunc;
+    };
+    std::unordered_map<std::string, ResourceUpdater> resMap_;
 };
 
 class ImageObjectPosition final : public BackgroundImagePosition {};

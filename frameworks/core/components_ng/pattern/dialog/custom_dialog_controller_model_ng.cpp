@@ -31,89 +31,88 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
         TAG_LOGE(AceLogTag::ACE_DIALOG, "Container is null.");
         return;
     }
-    
-    auto isSubContainer = container->IsSubContainer();
-    auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
-    if (!expandDisplay && isSubContainer && dialogProperties.isShowInSubWindow) {
-        TAG_LOGW(AceLogTag::ACE_DIALOG, "subwindow can not open dialog in subwindow");
-        return;
-    }
 
-    if (isSubContainer && (!dialogProperties.isShowInSubWindow || expandDisplay)) {
-        currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
-        container = AceEngine::Get().GetContainer(currentId);
-        if (!container) {
-            TAG_LOGE(AceLogTag::ACE_DIALOG, "ParentContainer is null.");
-            return;
-        }
-    }
-    ContainerScope scope(currentId);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
-        auto embeddedOverlay = NG::DialogManager::GetEmbeddedOverlay(dialogProperties.dialogLevelUniqueId, context);
-        if (embeddedOverlay) {
-            overlayManager = embeddedOverlay;
-        }
-    }
-    dialogProperties.onStatusChanged = [&isShown](bool isShownStatus) {
-        if (!isShownStatus) {
-            isShown = isShownStatus;
-        }
-    };
-    dialogProperties.isUserCreatedDialog = true;
     auto executor = context->GetTaskExecutor();
     if (!executor) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "Task executor is null.");
         return;
     }
     auto task = ParseOpenDialogTask(
-        currentId, controller, dialogProperties, dialogs, std::move(buildFunc), overlayManager, hasBind);
+        currentId, controller, dialogProperties, dialogs, std::move(buildFunc), hasBind, isShown);
     executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogShowCustomDialog");
+}
+
+void CustomDialogControllerModelNG::SetOpenDialogInTask(const RefPtr<OverlayManager>& overlayManager, const RefPtr<Container>& container,
+    const WeakPtr<AceType>& controller, RefPtr<NG::FrameNode>& dialog, DialogProperties& dialogProperties,
+    std::function<void()>&& func, bool& isShown)
+{
+    dialogProperties.onStatusChanged = [&isShown](bool isShownStatus) {
+        if (!isShownStatus) {
+            isShown = isShownStatus;
+        }
+    };
+    dialogProperties.isUserCreatedDialog = true;
+    auto controllerPtr = controller.Upgrade();
+    if (!controllerPtr) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "CustomDialogController is null.");
+        return;
+    }
+    if (dialogProperties.isShowInSubWindow) {
+        dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, std::move(func));
+        CHECK_NULL_VOID(dialog);
+        if (dialogProperties.isModal && !dialogProperties.isSceneBoardDialog &&
+            !container->IsUIExtensionWindow()) {
+            auto mask = overlayManager->SetDialogMask(dialogProperties);
+            if (!mask) {
+                TAG_LOGW(AceLogTag::ACE_DIALOG, "fail to set mask dialog.");
+                return;
+            }
+            overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
+        }
+    } else {
+        dialog = overlayManager->ShowDialog(dialogProperties, std::move(func), false);
+    }
 }
 
 TaskExecutor::Task CustomDialogControllerModelNG::ParseOpenDialogTask(int32_t currentId,
     const WeakPtr<AceType>& controller, DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs,
-    std::function<void()>&& buildFunc, const RefPtr<OverlayManager>& overlayManager, bool& hasBind)
+    std::function<void()>&& buildFunc, bool& hasBind, bool& isShown)
 {
     auto task = [currentId, controller, &dialogProperties, &dialogs, func = std::move(buildFunc),
-                    weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager)), &hasBind]() mutable {
-        ContainerScope scope(currentId);
-        RefPtr<NG::FrameNode> dialog;
-        auto overlayManager = weakOverlayManager.Upgrade();
-        if (!overlayManager) {
-            TAG_LOGE(AceLogTag::ACE_DIALOG, "OverlayManager is null.");
+            &hasBind, isShown]() mutable {
+        auto container = AceEngine::Get().GetContainer(currentId);
+        auto isSubContainer = container->IsSubContainer();
+        auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
+        if (!expandDisplay && isSubContainer && dialogProperties.isShowInSubWindow) {
+            TAG_LOGW(AceLogTag::ACE_DIALOG, "subwindow can not open dialog in subwindow");
             return;
         }
-        auto controllerPtr = controller.Upgrade();
-        if (!controllerPtr) {
-            TAG_LOGE(AceLogTag::ACE_DIALOG, "CustomDialogController is null.");
-            return;
-        }
-        auto container = Container::Current();
-        if (!container) {
-            TAG_LOGE(AceLogTag::ACE_DIALOG, "Current container is null.");
-            return;
-        }
-        if (dialogProperties.isShowInSubWindow) {
-            dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, std::move(func));
-            CHECK_NULL_VOID(dialog);
-            if (dialogProperties.isModal && !dialogProperties.isSceneBoardDialog &&
-                !container->IsUIExtensionWindow()) {
-                auto mask = overlayManager->SetDialogMask(dialogProperties);
-                if (!mask) {
-                    TAG_LOGW(AceLogTag::ACE_DIALOG, "fail to set mask dialog.");
-                    return;
-                }
-                overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
+        if (isSubContainer && (!dialogProperties.isShowInSubWindow || expandDisplay)) {
+            currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+            container = AceEngine::Get().GetContainer(currentId);
+            if (!container) {
+                TAG_LOGE(AceLogTag::ACE_DIALOG, "ParentContainer is null.");
+                return;
             }
-        } else {
-            dialog = overlayManager->ShowDialog(dialogProperties, std::move(func), false);
         }
+        ContainerScope scope(currentId);
+        auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+        CHECK_NULL_VOID(context);
+        auto overlayManager = context->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+            auto embeddedOverlay = NG::DialogManager::GetEmbeddedOverlay(dialogProperties.dialogLevelUniqueId, context);
+            if (embeddedOverlay) {
+                overlayManager = embeddedOverlay;
+            }
+        }
+        RefPtr<NG::FrameNode> dialog;
+        CustomDialogControllerModelNG::SetOpenDialogInTask(overlayManager, container, controller, dialog,
+            dialogProperties, std::move(func), isShown);
         if (!dialog) {
             TAG_LOGE(AceLogTag::ACE_DIALOG, "fail to show dialog.");
             return;

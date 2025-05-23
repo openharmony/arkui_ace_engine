@@ -334,6 +334,10 @@ HWTEST_F(SheetPresentationTestTwoNg, HandleDragUpdate001, TestSize.Level1)
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     SheetPresentationTestTwoNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
 
     EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_POPUP);
@@ -354,7 +358,10 @@ HWTEST_F(SheetPresentationTestTwoNg, HandleDragUpdate002, TestSize.Level1)
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     EXPECT_NE(sheetPattern->GetSheetType(), SheetType::SHEET_POPUP);
     EXPECT_TRUE(sheetPattern->sheetDetentHeight_.size() <= 0);
     GestureEvent info;
@@ -374,6 +381,10 @@ HWTEST_F(SheetPresentationTestTwoNg, HandleDragUpdate003, TestSize.Level1)
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     // Make detentSize greater than 0
     sheetPattern->sheetDetentHeight_.emplace_back(1800.0f);
     // Make height - currentOffset_ less than maxDetentSize
@@ -407,6 +418,10 @@ HWTEST_F(SheetPresentationTestTwoNg, HandleDragUpdate004, TestSize.Level1)
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     // Make detentSize greater than 0
     sheetPattern->sheetDetentHeight_.emplace_back(800.0f);
     // Make height - currentOffset_ greater than maxDetentSize
@@ -450,6 +465,10 @@ HWTEST_F(SheetPresentationTestTwoNg, HandleDragUpdate005, TestSize.Level1)
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     // Make detentSize greater than 0
     sheetPattern->sheetDetentHeight_.emplace_back(800.0f);
     // Make height - currentOffset_ greater than maxDetentSize
@@ -489,6 +508,10 @@ HWTEST_F(SheetPresentationTestTwoNg, HandleDragUpdate006, TestSize.Level1)
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     // Make detentSize greater than 0
     sheetPattern->sheetDetentHeight_.emplace_back(800.0f);
     // Make height - currentOffset_ greater than maxDetentSize
@@ -528,6 +551,10 @@ HWTEST_F(SheetPresentationTestTwoNg, HandleDragUpdate007, TestSize.Level1)
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     SheetPresentationTestTwoNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
     // Make detentSize greater than 0
     sheetPattern->sheetDetentHeight_.emplace_back(1800.0f);
@@ -1567,6 +1594,9 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset003, TestSize.Level1)
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
 
@@ -1657,6 +1687,7 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset004, TestSize.Level1)
      */
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     sheetTheme->isOuterBorderEnable_ = true;
+    SystemProperties::SetDeviceType(DeviceType::TWO_IN_ONE);
     sheetTheme->sheetOuterBorderWidth_ = Dimension(20.0);
     sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
     sheetTheme->sheetRadius_ = Dimension(10.0);
@@ -1711,6 +1742,10 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset006, TestSize.Level1)
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
 
@@ -1816,6 +1851,8 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus002, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
 
     /**
      * @tc.steps: step3. test hover mode status flag.
@@ -1833,11 +1870,12 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus002, TestSize.Level1)
         AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     ASSERT_NE(sheetLayoutAlgorithm, nullptr);
     sheetLayoutAlgorithm->sheetStyle_ = sheetStyle;
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
 
     /**
      * @tc.expected: isKeyBoardShow_ and isHoverMode_ are true.
      */
-    sheetLayoutAlgorithm->InitParameter();
+    sheetLayoutAlgorithm->InitParameter(Referenced::RawPtr(layoutWrapper));
     EXPECT_TRUE(sheetLayoutAlgorithm->isKeyBoardShow_);
     EXPECT_TRUE(sheetLayoutAlgorithm->isHoverMode_);
     EXPECT_EQ(sheetLayoutAlgorithm->hoverModeArea_, HoverModeAreaType::TOP_SCREEN);
@@ -1898,11 +1936,14 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus003, TestSize.Level1)
     SheetStyle sheetStyle1;
     SheetPresentationTestTwoNg::SetSheetTheme(sheetTheme1);
     sheetLayoutAlgorithm->sheetStyle_ = sheetStyle1;
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
 
     /**
      * @tc.expected: isHoverMode_ is false and hoverModeArea_ is BOTTOM_SCREEN.
      */
-    sheetLayoutAlgorithm->InitParameter();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    sheetLayoutAlgorithm->InitParameter(Referenced::RawPtr(layoutWrapper));
     EXPECT_FALSE(sheetLayoutAlgorithm->isHoverMode_);
     EXPECT_EQ(sheetLayoutAlgorithm->hoverModeArea_, HoverModeAreaType::BOTTOM_SCREEN);
 }
@@ -2440,7 +2481,9 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus004, TestSize.Level1)
      * @tc.steps: step4. set sheetType and run measure task.
      * @tc.expected: sheetHeight_ has been measured and is not zero.
      */
-    sheetLayoutAlgorithm->InitParameter();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    sheetLayoutAlgorithm->InitParameter(Referenced::RawPtr(layoutWrapper));
     EXPECT_TRUE(sheetLayoutAlgorithm->isHoverMode_);
     std::vector<Rect> rects;
     Rect rect;
@@ -2537,6 +2580,7 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus006, TestSize.Level1)
     SheetStyle sheetStyle;
     sheetStyle.enableHoverMode = true;
     sheetStyle.hoverModeArea = HoverModeAreaType::TOP_SCREEN;
+    sheetStyle.sheetType = SheetType::SHEET_CENTER;
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     CreateSheetBuilder();
@@ -2548,21 +2592,28 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus006, TestSize.Level1)
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->UpdateSheetObject(sheetPattern->GetSheetTypeNoProcess());
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->displayWindowRectInfo_.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
-    sheetTheme->isOuterBorderEnable_ = true;
-    
+    sheetTheme->isOuterBorderEnable_ = false;
+    sheetPattern->sheetThemeType_ = "popup";
+    Rect windowRect = { 0.0f, 0.0f, SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx(), 0.0f };
+    MockPipelineContext::SetCurrentWindowRect(windowRect);
+    sheetPattern->sheetKey_.hasValidTargetNode = true;
+    sheetTheme->sheetType_ = "popup";
+
     /**
      * @tc.steps: step3. Set sheet type and run IsCurSheetNeedHalfFoldHover.
      * @tc.expected: sheet is in half fold status.
      */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
     pipeline->isHalfFoldHoverStatus_ = true;
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->propSheetStyle_ = sheetStyle;
-    SheetPresentationTestTwoNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
-    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_CENTER);
     SheetPresentationTestTwoNg::SetSheetTheme(sheetTheme);
     EXPECT_TRUE(sheetPattern->IsCurSheetNeedHalfFoldHover());
 
@@ -2602,6 +2653,7 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus007, TestSize.Level1)
     SheetStyle sheetStyle;
     sheetStyle.enableHoverMode = true;
     sheetStyle.hoverModeArea = HoverModeAreaType::TOP_SCREEN;
+    sheetStyle.sheetType = SheetType::SHEET_CENTER;
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     CreateSheetBuilder();
@@ -2617,18 +2669,26 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus007, TestSize.Level1)
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
+    PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->displayWindowRectInfo_.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
-    sheetTheme->isOuterBorderEnable_ = true;
-    
+    sheetTheme->isOuterBorderEnable_ = false;
+    sheetPattern->sheetThemeType_ = "popup";
+    Rect windowRect = { 0.0f, 0.0f, SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx(), 0.0f };
+    MockPipelineContext::SetCurrentWindowRect(windowRect);
+    sheetPattern->sheetKey_.hasValidTargetNode = true;
+    sheetTheme->sheetType_ = "popup";
+
     /**
      * @tc.steps: step4. Set sheet type and run IsCurSheetNeedHalfFoldHover.
      * @tc.expected: sheet is in half fold status.
      */
-    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->isHalfFoldHoverStatus_ = true;
-    SheetPresentationTestTwoNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
-    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_CENTER);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->propSheetStyle_ = sheetStyle;
     SheetPresentationTestTwoNg::SetSheetTheme(sheetTheme);
     EXPECT_TRUE(sheetPattern->IsCurSheetNeedHalfFoldHover());
 

@@ -116,6 +116,8 @@ const OffsetF DEFAULT_NEGATIVE_CARET_OFFSET {-1.0f, -1.0f};
 constexpr Dimension FLOATING_CARET_SHOW_ORIGIN_CARET_DISTANCE = 10.0_vp;
 #if defined(ENABLE_STANDARD_INPUT)
 constexpr int32_t AUTO_FILL_CANCEL = 2;
+constexpr size_t MAX_PLACEHOLDER_SIZE = 255;
+constexpr size_t MAX_ABILITY_NAME_SIZE = 127;
 #endif
 
 // need to be moved to formatter
@@ -1327,7 +1329,14 @@ void TextFieldPattern::HandleSelect(CaretMoveIntent direction)
             HandleSelectionEnd();
             break;
         }
-        // SelectionParagraghBegin/SelectionParagraghEnd not supported yet
+        case CaretMoveIntent::ParagraghBegin: {
+            HandleSelectionParagraghBegin();
+            break;
+        }
+        case CaretMoveIntent::ParagraghEnd: {
+            HandleSelectionParagraghEnd();
+            break;
+        }
         default: {
             TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Unsupported select operation for text field");
         }
@@ -4611,9 +4620,11 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     ACE_LAYOUT_SCOPED_TRACE("RequestKeyboard[id:%d][WId:%u]", tmpHost->GetId(), textConfig.windowId);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
         "node:%{public}d, RequestKeyboard set calling window id:%{public}u"
-        " inputType:%{public}d, enterKeyType:%{public}d, needKeyboard:%{public}d, sourceType:%{public}u",
+        " inputType:%{public}d, enterKeyType:%{public}d, needKeyboard:%{public}d, sourceType:%{public}u"
+        " placeholderLength:%{public}zu",
         tmpHost->GetId(), textConfig.windowId, textConfig.inputAttribute.inputPattern,
-        textConfig.inputAttribute.enterKeyType, needShowSoftKeyboard, sourceType);
+        textConfig.inputAttribute.enterKeyType, needShowSoftKeyboard, sourceType,
+        CountUtf16Chars(textConfig.inputAttribute.placeholder));
 #ifdef WINDOW_SCENE_SUPPORTED
     auto systemWindowId = GetSCBSystemWindowId();
     if (systemWindowId) {
@@ -4703,6 +4714,9 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     auto textPaintOffset = GetPaintRectGlobalOffset();
     double height = selectController_->GetCaretRect().Bottom() + windowRect.Top() +
              textPaintOffset.GetY() + offset - positionY;
+    std::u16string placeholder = TruncateText(GetPlaceHolder(), MAX_PLACEHOLDER_SIZE);
+    std::u16string abilityName = TruncateText(UtfUtils::Str8ToStr16(AceApplicationInfo::GetInstance()
+        .GetAbilityName()), MAX_ABILITY_NAME_SIZE);
 
     GetInlinePositionYAndHeight(positionY, height);
 
@@ -4721,6 +4735,8 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         .enterKeyType = (int32_t)GetTextInputActionValue(GetDefaultTextInputAction()),
         .isTextPreviewSupported = hasSupportedPreviewText_,
         .immersiveMode = static_cast<int32_t>(keyboardAppearance_),
+        .placeholder = placeholder,
+        .abilityName = abilityName,
         .capitalizeMode = static_cast<MiscServices::CapitalizeMode>(GetAutoCapitalizationModeValue(AutoCapitalizationMode::NONE)) };
     MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
         .cursorInfo = cursorInfo,
@@ -6529,6 +6545,26 @@ void TextFieldPattern::HandleSelectionHome()
     AfterSelection();
 }
 
+void TextFieldPattern::HandleSelectionParagraghBegin()
+{
+    CHECK_NULL_VOID(selectController_);
+    if (selectController_->GetCaretIndex() == 0) {
+        return;
+    }
+    auto originCaretPosition = selectController_->GetCaretIndex();
+    auto newPos = GetLineBeginPosition(originCaretPosition, false);
+    if (newPos == originCaretPosition && originCaretPosition > 0) {
+        newPos = GetLineBeginPosition(originCaretPosition - 1, false);
+    }
+    if (!IsSelected()) {
+        UpdateSelection(selectController_->GetCaretIndex());
+        selectController_->MoveSecondHandleByKeyBoard(newPos);
+    } else {
+        selectController_->MoveSecondHandleByKeyBoard(newPos);
+    }
+    AfterSelection();
+}
+
 void TextFieldPattern::HandleSelectionRight()
 {
     // if currently not in select mode, reset baseOffset and move destinationOffset and caret position
@@ -6603,6 +6639,26 @@ void TextFieldPattern::HandleSelectionEnd()
         selectController_->MoveSecondHandleByKeyBoard(endPos);
     } else {
         selectController_->MoveSecondHandleByKeyBoard(endPos);
+    }
+    AfterSelection();
+}
+
+void TextFieldPattern::HandleSelectionParagraghEnd()
+{
+    CHECK_NULL_VOID(selectController_);
+    if (selectController_->GetCaretIndex() == static_cast<int32_t>(contentController_->GetTextUtf16Value().length())) {
+        return;
+    }
+    auto originCaretPosition = selectController_->GetCaretIndex();
+    auto newPos = GetLineEndPosition(originCaretPosition, false);
+    if (newPos == originCaretPosition && originCaretPosition > 0) {
+        newPos = GetLineEndPosition(originCaretPosition + 1, false);
+    }
+    if (!IsSelected()) {
+        UpdateSelection(selectController_->GetCaretIndex());
+        selectController_->MoveSecondHandleByKeyBoard(newPos);
+    } else {
+        selectController_->MoveSecondHandleByKeyBoard(newPos);
     }
     AfterSelection();
 }
@@ -9239,7 +9295,15 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (!hasPreviewText_) {
-        bodyTextInPreivewing_ = GetTextUtf16Value();
+        auto fullStr = GetTextUtf16Value();
+        if (IsSelected()) {
+            uint32_t startIndex = static_cast<uint32_t>(selectController_->GetStartIndex());
+            uint32_t endIndex = static_cast<uint32_t>(selectController_->GetEndIndex());
+            if (startIndex < fullStr.length() && endIndex <= fullStr.length()) {
+                fullStr.erase(startIndex, endIndex - startIndex);
+            }
+        }
+        bodyTextInPreivewing_ = fullStr;
     }
     auto rangeStart = info.range.start;
     auto rangeEnd = info.range.end;
@@ -9253,15 +9317,12 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
         end = (rangeEnd == PREVIEW_TEXT_RANGE_DEFAULT) ? end : rangeEnd;
     }
 
-    auto oldHasPreviewText = hasPreviewText_;
     ChangeValueInfo changeValueInfo;
     changeValueInfo.oldPreviewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
     changeValueInfo.oldPreviewText.value = GetPreviewTextValue();
     changeValueInfo.oldContent = GetBodyTextValue();
     changeValueInfo.rangeBefore = TextRange { GetPreviewTextStart(), GetPreviewTextStart() };
     changeValueInfo.rangeAfter = TextRange { GetPreviewTextStart(), GetPreviewTextStart() };
-    auto originCaretIndex =
-            TextRange { changeValueInfo.oldPreviewText.offset, changeValueInfo.oldPreviewText.offset };
     bool hasInsertValue = false;
     auto originLength = static_cast<int32_t>(contentController_->GetTextUtf16Value().length()) - (end - start);
     auto attemptInsertLength = static_cast<int32_t>(info.text.length()) - (end - start);
@@ -9286,12 +9347,7 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
     changeValueInfo.value = GetBodyTextValue();
     changeValueInfo.previewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
     changeValueInfo.previewText.value = GetPreviewTextValue();
-    bool isWillChange = FireOnWillChange(changeValueInfo);
-    if (!isWillChange && !info.isIme) {
-        RecoverTextValueAndCaret(changeValueInfo.oldContent, originCaretIndex);
-        hasPreviewText_ = oldHasPreviewText;
-        return;
-    }
+    FireOnWillChange(changeValueInfo);
     if (HasFocus()) {
         cursorVisible_ = true;
         StartTwinkling();
@@ -9328,9 +9384,6 @@ void TextFieldPattern::FinishTextPreviewOperation(bool triggerOnWillChange)
         HandleCountStyle();
     }
 
-    auto oldValue = contentController_->GetTextUtf16Value();
-    auto originCaretIndex =
-            TextRange { selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex() };
     ChangeValueInfo changeValueInfo;
     changeValueInfo.oldPreviewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
     changeValueInfo.oldPreviewText.value = GetPreviewTextValue();
@@ -9356,7 +9409,8 @@ void TextFieldPattern::FinishTextPreviewOperation(bool triggerOnWillChange)
         isWillChange = FireOnWillChange(changeValueInfo);
     }
     if (!isWillChange) {
-        RecoverTextValueAndCaret(oldValue, originCaretIndex);
+        contentController_->SetTextValueOnly(changeValueInfo.oldContent);
+        selectController_->UpdateHandleIndex(start, start);
         return;
     }
     if (HasFocus()) {

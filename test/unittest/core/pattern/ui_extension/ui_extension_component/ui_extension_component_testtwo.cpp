@@ -904,7 +904,7 @@ HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentTwoTest003, TestSize
     keyEvent.pressedCodes.push_back(KeyCode::KEY_TAB);
     keyEvent.isPreIme = true;
     focusHub->onKeyEventsInternal_[OnKeyEventType::DEFAULT].operator()(keyEvent);
-    EXPECT_EQ(pattern->forceProcessOnKeyEventInternal_, false);
+    EXPECT_EQ(pattern->GetForceProcessOnKeyEventInternal(), false);
 
     auto onError = [](int32_t code, const std::string& name, const std::string& message) {};
     pattern->lastError_.code = 1;
@@ -1056,6 +1056,55 @@ HWTEST_F(UIExtensionComponentTestTwoNg, RegisterUIExtensionManagerEvent001, Test
     EXPECT_NE(focusHub, nullptr);
     EXPECT_TRUE(focusHub->IsCurrentFocus());
     pattern->RegisterUIExtensionManagerEvent(instanceId);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test UIExtensionComponent tab focus
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentTabFocus, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->GetForceProcessOnKeyEventInternal(), false);
+    EXPECT_EQ(pattern->canFocusSendToUIExtension_, true);
+
+    pattern->AttachToFrameNode(uiExtensionNode);
+    pattern->OnModifyDone();
+
+    auto pipeline = uiExtensionNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->isFocusingByTab_ = false;
+    EXPECT_EQ(pipeline->GetIsFocusingByTab(), false);
+    pattern->HandleFocusEvent();
+    EXPECT_EQ(pattern->GetForceProcessOnKeyEventInternal(), true);
+
+    auto focusHub = uiExtensionNode->GetFocusHub();
+    pattern->InitKeyEventOnKeyEvent(focusHub);
+    KeyEvent keyEvent;
+    pattern->SetForceProcessOnKeyEventInternal(false);
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_TAB);
+    keyEvent.isPreIme = false;
+    focusHub->onKeyEventsInternal_[OnKeyEventType::DEFAULT].operator()(keyEvent);
+    EXPECT_EQ(pattern->GetForceProcessOnKeyEventInternal(), false);
+
+    pipeline->isFocusingByTab_ = false;
+    EXPECT_EQ(pipeline->GetIsFocusingByTab(), false);
+    pattern->HandleFocusEvent();
+    EXPECT_EQ(pattern->GetForceProcessOnKeyEventInternal(), true);
+
+    pattern->HandleBlurEvent();
+    EXPECT_EQ(pattern->GetForceProcessOnKeyEventInternal(), false);
 #endif
 }
 } // namespace OHOS::Ace::NG

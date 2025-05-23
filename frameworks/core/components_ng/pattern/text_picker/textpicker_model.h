@@ -98,7 +98,14 @@ public:
     virtual void SetDisableTextStyleAnimation(const bool value) = 0;
     virtual void SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value) = 0;
     virtual void SetEnableHapticFeedback(bool isEnableHapticFeedback) = 0;
+    virtual void SetSelectedBackgroundStyle(const NG::PickerBackgroundStyle& value) = 0;
     virtual void UpdateUserSetSelectColor() = 0;
+    virtual void ParseGradientHeight(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ParseDividerResObj() {};
+    virtual void ParseDisappearTextStyleResObj(const NG::PickerTextStyle& textStyleOpt) {};
+    virtual void ParseSelectedTextStyleResObj(const NG::PickerTextStyle& textStyleOpt) {};
+    virtual void ParseNormalTextStyleResObj(const NG::PickerTextStyle& textStyleOpt) {};
+    virtual void ParseDefaultTextStyleResObj(const NG::PickerTextStyle& textStyleOpt) {};
 private:
     static std::unique_ptr<TextPickerModel> textPickerInstance_;
     static std::once_flag onceFlag_;

@@ -260,6 +260,7 @@ public:
     void UpdateWindowFocusState(bool isFocused) override;
     void UpdateWindowActiveState(bool isActive) override;
     void SetContentClip(const std::variant<RectF, RefPtr<ShapeRect>>& rect) override;
+    void ResetContentClip() override;
 
     void SetSharedTranslate(float xTranslate, float yTranslate) override;
     void ResetSharedTranslate() override;
@@ -768,6 +769,7 @@ protected:
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_;
     RefPtr<MoonProgressModifier> moonProgressModifier_;
     std::shared_ptr<Rosen::RSClipBoundsModifier> clipBoundModifier_;
+    std::shared_ptr<Rosen::RSCustomClipToFrameModifier> customClipToFrameModifier_;
     std::shared_ptr<Rosen::RSMaskModifier> clipMaskModifier_;
     std::shared_ptr<FocusStateModifier> focusStateModifier_;
     std::shared_ptr<FocusStateModifier> accessibilityFocusStateModifier_;

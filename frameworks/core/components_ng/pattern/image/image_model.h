@@ -82,7 +82,7 @@ public:
     virtual void SetImageRenderMode(ImageRenderMode imageRenderMode) = 0;
     virtual bool IsSrcSvgImage() = 0;
     virtual void SetAutoResize(bool autoResize) = 0;
-    virtual void SetResizableSlice(const ImageResizableSlice& slice) = 0;
+    virtual void SetResizableSlice(ImageResizableSlice& slice) = 0;
     virtual void SetResizableLattice(const RefPtr<DrawingLattice>& lattice) = 0;
     virtual void ResetResizableLattice() = 0;
     virtual void SetSyncMode(bool syncMode) = 0;

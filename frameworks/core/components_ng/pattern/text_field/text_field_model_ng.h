@@ -330,6 +330,7 @@ public:
     static void ResetStrokeColor(FrameNode* frameNode);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
     static bool GetEnableAutoSpacing(FrameNode* frameNode);
+    static void SetOnSecurityStateChange(FrameNode* frameNode, std::function<void(bool)>&& func);
 
 private:
     void AddDragFrameNodeToManager() const;

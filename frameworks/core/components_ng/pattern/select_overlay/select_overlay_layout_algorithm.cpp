@@ -499,6 +499,29 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
     auto windowOffset = mainWindowOffset_ + containerModalOffset_;
     auto upPaint = upHandle.GetPaintRect() - offset + windowOffset;
     auto downPaint = downHandle.GetPaintRect() - offset + windowOffset;
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, menuOffset);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(theme, menuOffset);
+    // adjust y
+    auto defaultPositionY = theme->GetDefaultMenuPositionX();
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, menuOffset);
+    auto safeAreaBottom = safeAreaManager->GetSafeAreaWithoutProcess().bottom_.start;
+    safeAreaBottom = GreatNotEqual(safeAreaBottom, 0.0f) ? safeAreaBottom : pipeline->GetRootRect().Bottom();
+    auto keyboardInsert = safeAreaManager->GetKeyboardInset();
+    auto avoidKeyboardPosition = keyboardInsert.start - defaultPositionY - menuRect.Height();
+    avoidKeyboardPosition = GreatNotEqual(avoidKeyboardPosition, 0.0f) ? avoidKeyboardPosition : 0.0f;
+    auto shouldAvoidKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f) &&
+                               GreatNotEqual(menuRect.Bottom() + defaultPositionY, keyboardInsert.start);
+    auto rootRect = layoutWrapper->GetGeometryNode()->GetFrameRect();
+    auto shouldAvoidBottom =
+        GreatNotEqual(menuRect.Bottom(), rootRect.Height()) || GreatNotEqual(menuRect.Bottom(), safeAreaBottom);
+    auto menuSpace = NearEqual(upPaint.Top(), downPaint.Top()) ? spaceBetweenHandle : spaceBetweenText;
+    auto offsetY = downPaint.GetY() - menuSpace - menuRect.Height();
+    auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
+    auto avoidFromText =
+        spaceBetweenHandle + spaceBetweenText + theme->GetHandleDiameterStrokeWidth().ConvertToPx() / 2.0f;
     if (!info_->isSingleHandle && upHandle.isShow && !downHandle.isShow) {
         auto circleOffset = OffsetF(
             upPaint.GetX() - (spaceBetweenHandle - upPaint.Width()) / 2.0f, upPaint.GetY() - spaceBetweenHandle);
@@ -506,22 +529,8 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
         if (menuRect.IsIntersectWith(upPaint) || menuRect.IsIntersectWith(upCircleRect)) {
             menuOffset.SetY(upPaint.Bottom() + spaceBetweenText + spaceBetweenHandle);
         }
-        return menuOffset;
-    }
-    // avoid soft keyboard and root bottom
-    if ((!upHandle.isShow && downHandle.isShow) || info_->menuInfo.menuBuilder) {
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_RETURN(pipeline, menuOffset);
-        auto safeAreaManager = pipeline->GetSafeAreaManager();
-        CHECK_NULL_RETURN(safeAreaManager, menuOffset);
-        auto keyboardInsert = safeAreaManager->GetKeyboardInset();
-        auto shouldAvoidKeyboard =
-            GreatNotEqual(keyboardInsert.Length(), 0.0f) && GreatNotEqual(menuRect.Bottom(), keyboardInsert.start);
-        auto rootRect = layoutWrapper->GetGeometryNode()->GetFrameRect();
-        auto shouldAvoidBottom = GreatNotEqual(menuRect.Bottom(), rootRect.Height());
-        auto menuSpace = NearEqual(upPaint.Top(), downPaint.Top()) ? spaceBetweenHandle : spaceBetweenText;
-        auto offsetY = downPaint.GetY() - menuSpace - menuRect.Height();
-        auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
+    } else if ((!upHandle.isShow && downHandle.isShow) ||
+               info_->menuInfo.menuBuilder) { // avoid soft keyboard and root bottom
         if ((shouldAvoidKeyboard || shouldAvoidBottom) && GreatNotEqual(offsetY, 0)) {
             if (GreatNotEqual(topArea, offsetY)) {
                 offsetY = downPaint.Bottom() - spaceBetweenText - menuRect.Height();
@@ -533,6 +542,17 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
             }
             AdjustMenuOffsetAtSingleHandleBottom(downPaint, menuRect, menuOffset, spaceBetweenText);
         }
+    }
+    if (shouldAvoidBottom) {
+        menuOffset.SetY(offsetY);
+    } else if (shouldAvoidKeyboard) {
+        if (GreatNotEqual(menuOffset.GetY(), avoidKeyboardPosition)) {
+            menuOffset.SetY(avoidKeyboardPosition);
+        }
+    } else if (GreatNotEqual(upPaint.Top(), menuRect.Top())) {
+        menuOffset.SetY(upPaint.Top() - avoidFromText - menuRect.Height());
+    } else if (GreatNotEqual(menuRect.Bottom(), downPaint.Bottom())) {
+        menuOffset.SetY(downPaint.Bottom() + avoidFromText);
     }
     return menuOffset;
 }

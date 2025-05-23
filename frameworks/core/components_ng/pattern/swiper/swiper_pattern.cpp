@@ -6650,7 +6650,7 @@ void SwiperPattern::HandleTouchBottomLoopOnRTL()
         return;
     }
 
-    if (GetDisplayCount() > 1) {
+    if (GetDisplayCount() > 1 || IsAutoLinear()) {
         UpdateBottomTypeOnMultipleRTL(currentFirstIndex);
     }
 }
@@ -6724,7 +6724,7 @@ void SwiperPattern::HandleTouchBottomLoop()
         }
     }
 
-    if (GetDisplayCount() > 1) {
+    if (GetDisplayCount() > 1 || IsAutoLinear()) {
         UpdateBottomTypeOnMultiple(currentFirstIndex);
     }
 }

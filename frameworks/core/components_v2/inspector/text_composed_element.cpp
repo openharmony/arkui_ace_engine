@@ -102,7 +102,7 @@ std::string TextComposedElement::GetTextDecoration() const
 {
     auto renderText = GetRenderText();
     auto textDecoration =
-        renderText ? renderText->GetTextStyle().GetTextDecoration() : TextDecoration::NONE;
+        renderText ? renderText->GetTextStyle().GetTextDecorationFirst() : TextDecoration::NONE;
     auto textDecorationColor = renderText ? renderText->GetTextStyle().GetTextDecorationColor() : Color::BLACK;
     auto textDecorationStyle =
         renderText ? renderText->GetTextStyle().GetTextDecorationStyle() : TextDecorationStyle::SOLID;

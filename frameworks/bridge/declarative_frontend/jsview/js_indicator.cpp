@@ -41,13 +41,6 @@ IndicatorModel* IndicatorModel::GetInstance()
 
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
-namespace {
-JSRef<JSVal> SwiperChangeEventToJSValue(const SwiperChangeEvent& eventInfo)
-{
-    return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetIndex()));
-}
-
-} // namespace
 
 void JSIndicator::Create(const JSCallbackInfo& info)
 {
@@ -308,28 +301,6 @@ void JSIndicator::SetStyle(const JSCallbackInfo& info)
         IndicatorModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
         IndicatorModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
     }
-}
-
-void JSIndicator::SetOnChange(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-    auto changeHandler = AceType::MakeRefPtr<JsEventFunction<SwiperChangeEvent, 1>>(
-        JSRef<JSFunc>::Cast(info[0]), SwiperChangeEventToJSValue);
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onChange = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler), node = targetNode](
-                        const BaseEventInfo* info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
-        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
-        if (!swiperInfo) {
-            return;
-        }
-        PipelineContext::SetCallBackNode(node);
-        func->Execute(*swiperInfo);
-    };
-
-    IndicatorModel::GetInstance()->SetOnChange(std::move(onChange));
 }
 
 void JSIndicator::SetInitialIndex(const JSCallbackInfo& info)

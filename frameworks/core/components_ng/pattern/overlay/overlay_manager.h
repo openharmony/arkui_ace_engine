@@ -146,6 +146,8 @@ public:
     PopupInfo GetTipsInfo(int32_t targetId);
     void HideAllPopups();
     void HideCustomPopups();
+    void HideAllPopupsWithoutAnimation();
+    void HideAllMenusWithoutAnimation(bool showInSubwindow = false);
     void SetPopupHotAreas(RefPtr<FrameNode> popupNode);
     void ShowPopupAnimation(const RefPtr<FrameNode>& popupNode);
     void ShowPopupAnimationNG(const RefPtr<FrameNode>& popupNode);
@@ -421,7 +423,8 @@ public:
     void RemoveFilterWithNode(const RefPtr<FrameNode>& filterNode);
     void RemoveFilterAnimation();
     void RemoveMenuFilter(const RefPtr<FrameNode>& menuWrapper, bool hasAnimation = true);
-    void ShowFilterDisappearAnimation(const RefPtr<FrameNode>& filterNode);
+    void ShowFilterDisappearAnimation(
+        const RefPtr<FrameNode>& filterNode, const RefPtr<FrameNode>& menuWrapper = nullptr);
     void AddFilterOnDisappear(int32_t filterId);
     void RemoveFilterOnDisappear(int32_t filterId);
     bool IsFilterOnDisappear(int32_t filterId) const;
@@ -627,7 +630,7 @@ public:
         sheetHeight_ = height;
     }
 
-    float GetSheetHeight()
+    float GetSheetHeight() const
     {
         return sheetHeight_;
     }
@@ -702,7 +705,7 @@ public:
     bool CheckPageNeedAvoidKeyboard() const;
     void TriggerCustomKeyboardAvoid(int32_t targetId, float safeHeight);
     void AvoidCustomKeyboard(int32_t targetId, float safeHeight);
-    void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode);
+    void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& menuWrapperNode);
     void EraseMenuInfo(int32_t targetId)
     {
         if (menuMap_.find(targetId) != menuMap_.end()) {
@@ -751,11 +754,14 @@ public:
     RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
     bool IsCurrentNodeProcessRemoveOverlay(const RefPtr<FrameNode>& currentNode, bool skipModal);
     static Rect GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode, int32_t type);
+    static bool IsNeedAvoidFoldCrease(const RefPtr<FrameNode>& frameNode, bool checkSenboard, bool expandDisplay,
+        std::optional<bool> enableHoverMode);
     void SkipMenuShow(int32_t targetId);
     void ResumeMenuShow(int32_t targetId);
     bool CheckSkipMenuShow(int32_t targetId);
     bool IsTopOrder(std::optional<double> levelOrder);
     std::optional<double> GetLevelOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
+    void UpdateFilterMaskType(const RefPtr<FrameNode>& menuWrapperNode);
 
 private:
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,

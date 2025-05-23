@@ -162,6 +162,16 @@ public:
 
     void OnWillAppear();
 
+    bool IsOnAppearing() const
+    {
+        return isOnAppearing_;
+    }
+
+    bool IsOnDisappearing() const
+    {
+        return isOnDisappearing_;
+    }
+
     void UpdateOnHeightDidChange(std::function<void(const float)>&& onHeightDidChange)
     {
         onHeightDidChange_ = std::move(onHeightDidChange);
@@ -346,6 +356,7 @@ public:
     }
 
     bool GetWindowButtonRect(NG::RectF& floatButtons);
+    bool GetWindowButtonRectForAllAPI(NG::RectF& floatButtons);
 
     void SetBottomOffset(const SheetStyle &sheetStyle)
     {
@@ -396,7 +407,6 @@ public:
     bool IsWindowSizeChangedWithUndefinedReason(int32_t width, int32_t height, WindowSizeChangeReason type);
 
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
-    void WindowSizeChangedBehaviorOfNotSide(WindowSizeChangeReason type);
 
     bool HasTitleNode() const
     {
@@ -499,6 +509,9 @@ public:
         isAnimationProcess_ = isProcess;
     }
 
+    // Indicates whether the entrance or exit animation is currently in progress.
+    // It will only be false after the entrance or exit animation ends.
+    // But when true, it cannot distinguish whether it is the entrance or exit animation.
     bool GetAnimationProcess()
     {
         return isAnimationProcess_;
@@ -534,17 +547,17 @@ public:
         centerHeight_ = height;
     }
 
-    float GetCenterHeight()
+    float GetCenterHeight() const
     {
         return centerHeight_;
     }
 
-    float GetSheetOffsetX()
+    float GetSheetOffsetX() const
     {
         return sheetOffsetX_;
     }
 
-    float GetSheetOffsetY()
+    float GetSheetOffsetY() const
     {
         return sheetOffsetY_;
     }
@@ -564,7 +577,7 @@ public:
         windowChanged_ = change;
     }
 
-    float GetHeight()
+    float GetHeight() const
     {
         return height_;
     }
@@ -574,12 +587,12 @@ public:
         sheetHeightUp_ = value;
     }
 
-    float GetSheetHeightUp()
+    float GetSheetHeightUp() const
     {
         return sheetHeightUp_;
     }
 
-    bool GetIsScrolling()
+    bool GetIsScrolling() const
     {
        return isScrolling_;
     }
@@ -589,7 +602,7 @@ public:
        isScrolling_ = value;
     }
 
-    float GetScrollHeightNoProcess()
+    float GetScrollHeightNoProcess() const
     {
        return scrollHeight_;
     }
@@ -604,7 +617,7 @@ public:
         animation_ = ptr;
     }
 
-    bool GetIsDirectionUp()
+    bool GetIsDirectionUp() const
     {
         return isDirectionUp_;
     }
@@ -639,7 +652,7 @@ public:
         start_ = value;
     }
 
-    double GetStartProp()
+    double GetStartProp() const
     {
         return start_;
     }
@@ -649,7 +662,7 @@ public:
         detentsIndex_ = value;
     }
 
-    uint32_t GetDetentsIndex()
+    uint32_t GetDetentsIndex() const
     {
         return detentsIndex_;
     }
@@ -897,6 +910,7 @@ public:
     Shadow GetShadowFromTheme(ShadowStyle shadowStyle);
     void SetShadowStyle(bool isFocused);
     bool IsCurSheetNeedHalfFoldHover();
+    bool IsWaterfallWindowMode();
     float GetMaxSheetHeightBeforeDragUpdate();
     float GetSheetHeightBeforeDragUpdate();
     void FireHoverModeChangeCallback();
@@ -1130,6 +1144,8 @@ private:
     bool isDirectionUp_ = true;
     bool topSafeAreaChanged_ = false;
     bool typeChanged_ = false;
+    bool isOnAppearing_ = false;
+    bool isOnDisappearing_ = false;
     ScrollSizeMode scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT;
     SheetEffectEdge sheetEffectEdge_ = SheetEffectEdge::ALL;
 

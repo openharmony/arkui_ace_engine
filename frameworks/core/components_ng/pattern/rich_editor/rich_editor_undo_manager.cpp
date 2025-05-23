@@ -409,6 +409,7 @@ SymbolSpanOptions SpansUndoManager::CreateSymbolSpanOptions(const RefPtr<SpanIte
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, {});
     auto options = pattern->GetSymbolSpanOptions(item);
+    options.paraStyle = pattern->GetParagraphStyle(item);
     options.offset = item->rangeStart;
     return options;
 }

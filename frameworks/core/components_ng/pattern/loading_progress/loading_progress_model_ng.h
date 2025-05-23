@@ -38,6 +38,7 @@ public:
     void SetEnableLoading(bool enable) override;
     void ResetColor() override;
     void SetForegroundColorParseFailed(bool isParseFailed) override;
+    void CreateWithResourceObj(LoadingProgressResourceType LoadingProgressResourceType, const RefPtr<ResourceObject>& resObj) override;
     
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static uint32_t GetColor(FrameNode* frameNode);

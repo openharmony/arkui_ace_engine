@@ -135,4 +135,4 @@ globalThis.ListItem.attributeModifier = function (modifier: ArkComponent): void 
 globalThis.ListItem.onSelect = function (value: (isSelected: boolean) => void): void {
   let nodePtr = getUINativeModule().frameNode.getStackTopNode();
   getUINativeModule().listItem.setOnSelect(nodePtr, value);
-}
+};

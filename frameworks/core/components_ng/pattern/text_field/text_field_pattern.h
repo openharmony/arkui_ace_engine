@@ -30,6 +30,7 @@
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/utf_helper.h"
 #include "base/view_data/view_data_wrap.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/clipboard/clipboard.h"
@@ -685,6 +686,12 @@ public:
     void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true) override;
     void HandleExtendAction(int32_t action) override;
     void HandleSelect(CaretMoveIntent direction) override;
+
+    void HandleSelectExtend(CaretMoveIntent direction) override
+    {
+        HandleSelect(direction);
+    }
+
     OffsetF GetDragUpperLeftCoordinates() override;
 
     std::vector<RectF> GetTextBoxes() override
@@ -986,10 +993,12 @@ public:
     void HandleSelectionLeftWord();
     void HandleSelectionLineBegin();
     void HandleSelectionHome();
+    void HandleSelectionParagraghBegin();
     void HandleSelectionRight();
     void HandleSelectionRightWord();
     void HandleSelectionLineEnd();
     void HandleSelectionEnd();
+    void HandleSelectionParagraghEnd();
     bool HandleOnEscape() override;
     bool HandleOnTab(bool backward) override;
     void HandleOnEnter() override
@@ -997,6 +1006,12 @@ public:
         PerformAction(GetTextInputActionValue(GetDefaultTextInputAction()), false);
     }
     void HandleOnUndoAction() override;
+
+    void HandleOnExtendUndoAction() override
+    {
+        HandleOnUndoAction();
+    }
+    
     void HandleOnRedoAction() override;
     bool CanUndo();
     bool HasOperationRecords();

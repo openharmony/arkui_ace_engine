@@ -1133,6 +1133,10 @@ void UIExtensionPattern::HandleFocusEvent()
         }
 
         DispatchFocusState(true);
+        UIEXT_LOGD("focus by tab is %{public}d.", pipeline->GetIsFocusingByTab());
+        if (!pipeline->GetIsFocusingByTab()) {
+            SetForceProcessOnKeyEventInternal(true);
+        }
         needReSendFocusToUIExtension_ = false;
     } else {
         needReSendFocusToUIExtension_ = true;
@@ -1147,6 +1151,7 @@ void UIExtensionPattern::HandleBlurEvent()
 {
     DispatchFocusActiveEvent(false);
     DispatchFocusState(false);
+    SetForceProcessOnKeyEventInternal(false);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();

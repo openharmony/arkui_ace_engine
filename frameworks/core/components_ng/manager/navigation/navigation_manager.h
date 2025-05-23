@@ -224,7 +224,6 @@ private:
 
     bool IsOverlayValid(const RefPtr<UINode>& frameNode);
     bool IsCustomDialogValid(const RefPtr<UINode>& node);
-    std::string GetJsonIntentInfo(std::unique_ptr<JsonValue> intentJson);
     NavigationIntentInfo ParseNavigationIntentInfo(const std::string& intentInfoSerialized);
 
     std::unordered_map<std::string, WeakPtr<AceType>> recoverableNavigationMap_;

@@ -546,7 +546,7 @@ HWTEST_F(MenuLayout3TestNg, ModifyPositionToWrapper001, TestSize.Level1)
     OffsetF result = OffsetF(static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx()),
         static_cast<float>((CONTAINER_BORDER_WIDTH).ConvertToPx()));
     menuAlgorithm->ModifyPositionToWrapper(AceType::RawPtr(menuNode), result);
-    EXPECT_TRUE(NearZero(result.GetX()));
+    EXPECT_FALSE(NearZero(result.GetX()));
     EXPECT_TRUE(NearZero(result.GetY()));
 }
 
@@ -629,7 +629,6 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg049, TestSize.Level1)
     EXPECT_EQ(property->GetPositionOffset().value(), OffsetF());
 
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
-    layoutAlgorithm->isHalfFoldHover_ = true;
     
     auto container = Container::Current();
     ASSERT_NE(container, nullptr);
@@ -645,7 +644,7 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg049, TestSize.Level1)
     int32_t creaseYTop = CREASE_Y;
     layoutAlgorithm->targetOffset_ = OffsetF(MENU_X, MENU_Y_TOP);
     layoutAlgorithm->position_ = OffsetF(MENU_X, MENU_Y_TOP);
-    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern);
+    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0f);
 
     auto top = layoutAlgorithm->top_;
     auto left = layoutAlgorithm->left_;
@@ -690,7 +689,6 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg050, TestSize.Level1)
     EXPECT_EQ(property->GetPositionOffset().value(), OffsetF());
 
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
-    layoutAlgorithm->isHalfFoldHover_ = true;
     
     auto container = Container::Current();
     ASSERT_NE(container, nullptr);
@@ -707,7 +705,7 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg050, TestSize.Level1)
 
     layoutAlgorithm->targetOffset_ = OffsetF(MENU_X, MENU_Y_BOTTOM);
     layoutAlgorithm->position_ = OffsetF(MENU_X, MENU_Y_BOTTOM);
-    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern);
+    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0f);
 
     auto bottom = layoutAlgorithm->bottom_;
     auto left = layoutAlgorithm->left_;
@@ -755,7 +753,6 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg051, TestSize.Level1)
     EXPECT_EQ(property->GetPositionOffset().value(), OffsetF());
 
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
-    layoutAlgorithm->isHalfFoldHover_ = true;
 
     auto container = Container::Current();
     ASSERT_NE(container, nullptr);
@@ -770,7 +767,7 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg051, TestSize.Level1)
 
     layoutAlgorithm->targetOffset_ = OffsetF(MENU_X, MENU_Y_MIDDLE);
     layoutAlgorithm->position_ = OffsetF(MENU_X, MENU_Y_MIDDLE);
-    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern);
+    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0f);
 
     auto top = layoutAlgorithm->top_;
     auto bottom = layoutAlgorithm->bottom_;
@@ -1075,7 +1072,7 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg060, TestSize.Level1)
     double rectWidth = 10.0f;
     double rectHeight = 15.0f;
     layoutAlgorithm->LimitContainerModalMenuRect(rectWidth, rectHeight);
-    EXPECT_EQ(rectWidth, 6);
+    EXPECT_EQ(rectWidth, 10);
     EXPECT_EQ(rectHeight, 15);
 }
 

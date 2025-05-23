@@ -113,7 +113,7 @@ HWTEST_F(TextTestTwoNg, TextPaintMethodTest002, TestSize.Level1)
     textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
     textLayoutProperty->UpdateTextShadow({ textShadow });
     textLayoutProperty->UpdateTextDecorationColor(TEXT_COLOR_VALUE);
-    textLayoutProperty->UpdateTextDecoration(TextDecoration::OVERLINE);
+    textLayoutProperty->UpdateTextDecoration({TextDecoration::OVERLINE});
     textLayoutProperty->UpdateBaselineOffset(ADAPT_BASE_LINE_OFFSET_VALUE);
 
     /**
@@ -153,6 +153,7 @@ HWTEST_F(TextTestTwoNg, TextAccessibilityPropertyGetText001, TestSize.Level1)
     auto spanNode = SpanNode::GetOrCreateSpanNode(ElementRegister::GetInstance()->MakeUniqueId());
     frameNode->AddChild(spanNode);
     textPattern->textForDisplay_ = TEXT_U16CONTENT;
+
     EXPECT_EQ(textAccessibilityProperty->GetText(), TEXT_CONTENT);
 }
 
@@ -919,7 +920,7 @@ HWTEST_F(TextTestTwoNg, TextDecorationStyleTest002, TestSize.Level1)
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     textPattern->BeforeCreateLayoutWrapper();
-    EXPECT_EQ(spanTextStyle.GetTextDecoration(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(spanTextStyle.GetTextDecorationFirst(), TextDecoration::LINE_THROUGH);
     EXPECT_EQ(spanTextStyle.GetTextDecorationStyle(), TextDecorationStyle::DOUBLE);
     EXPECT_EQ(spanTextStyle.GetFontSize(), Dimension(20.0));
 }
@@ -992,9 +993,9 @@ HWTEST_F(TextTestTwoNg, TextDecorationStyleTest003, TestSize.Level1)
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     textPattern->BeforeCreateLayoutWrapper();
-    EXPECT_EQ(spanTextStyle1.GetTextDecoration(), TextDecoration::OVERLINE);
+    EXPECT_EQ(spanTextStyle1.GetTextDecorationFirst(), TextDecoration::OVERLINE);
     EXPECT_EQ(spanTextStyle1.GetTextDecorationStyle(), TextDecorationStyle::WAVY);
-    EXPECT_EQ(spanTextStyle2.GetTextDecoration(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(spanTextStyle2.GetTextDecorationFirst(), TextDecoration::LINE_THROUGH);
     EXPECT_EQ(spanTextStyle2.GetTextDecorationStyle(), TextDecorationStyle::DOUBLE);
 }
 
@@ -1163,7 +1164,7 @@ HWTEST_F(TextTestTwoNg, UpdateChildProperty001, TestSize.Level1)
         EXPECT_EQ(spanTextStyle.GetTextColor(), TEXT_COLOR_VALUE);
         EXPECT_EQ(spanTextStyle.GetFontStyle(), ITALIC_FONT_STYLE_VALUE);
         EXPECT_EQ(spanTextStyle.GetFontWeight(), FONT_WEIGHT_VALUE);
-        EXPECT_EQ(spanTextStyle.GetTextDecoration(), TEXT_DECORATION_VALUE);
+        EXPECT_EQ(spanTextStyle.GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
         EXPECT_EQ(spanTextStyle.GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
         EXPECT_EQ(spanTextStyle.GetTextCase(), TEXT_CASE_VALUE);
         EXPECT_EQ(spanTextStyle.GetLetterSpacing(), LETTER_SPACING);
@@ -1212,7 +1213,7 @@ HWTEST_F(TextTestTwoNg, UpdateChildProperty002, TestSize.Level1)
         EXPECT_EQ(spanNode->GetTextColor().value(), TEXT_COLOR_VALUE);
         EXPECT_EQ(spanNode->GetItalicFontStyle().value(), ITALIC_FONT_STYLE_VALUE);
         EXPECT_EQ(spanNode->GetFontWeight().value(), FONT_WEIGHT_VALUE);
-        EXPECT_EQ(spanNode->GetTextDecoration().value(), TEXT_DECORATION_VALUE);
+        EXPECT_EQ(spanNode->GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
         EXPECT_EQ(spanNode->GetTextDecorationColor().value(), TEXT_DECORATION_COLOR_VALUE);
         EXPECT_EQ(spanNode->GetTextCase().value(), TEXT_CASE_VALUE);
         EXPECT_EQ(spanNode->GetLetterSpacing().value(), LETTER_SPACING);

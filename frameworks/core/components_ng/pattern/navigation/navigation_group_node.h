@@ -78,6 +78,27 @@ public:
         return navBarNode_;
     }
 
+    void SetSplitPlaceholder(const RefPtr<NG::UINode>& splitPlaceholder);
+
+    void SetPlaceholderContentNode(const RefPtr<NG::UINode>& placeholderContentNode)
+    {
+        placeholderContentNode_ = placeholderContentNode;
+    }
+
+    RefPtr<UINode> GetPlaceholderContentNode() const
+    {
+        return placeholderContentNode_;
+    }
+
+    void ResetSplitPlaceholder()
+    {
+        if (placeholderContentNode_) {
+            RemoveChild(placeholderContentNode_);
+        }
+        placeholderContentNode_ = nullptr;
+        splitPlaceholder_ = nullptr;
+    }
+
     void SetContentNode(const RefPtr<UINode>& contentNode)
     {
         contentNode_ = contentNode;
@@ -343,6 +364,8 @@ private:
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
     RefPtr<UINode> dragBarNode_;
+    RefPtr<UINode> splitPlaceholder_;
+    RefPtr<UINode> placeholderContentNode_;
     WeakPtr<NavDestinationGroupNode> parentDestinationNode_;
     // dialog hideNodes, if is true, nodes need remove
     std::vector<std::pair<RefPtr<NavDestinationGroupNode>, bool>> hideNodes_;

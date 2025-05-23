@@ -473,7 +473,8 @@ public:
 
     TextDecoration GetTextDecoration() const
     {
-        return textStyle_.GetTextDecoration();
+        return textStyle_.GetTextDecoration().size() > 0 ?
+            textStyle_.GetTextDecoration()[0] : TextDecoration::NONE;
     }
 
     const TextStyle& GetTextStyle() const

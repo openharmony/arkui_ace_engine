@@ -44,12 +44,12 @@ namespace {
 const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
 const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 
-std::string GetDeclaration(const std::optional<Color>& color, const std::optional<TextDecoration>& textDecoration,
+std::string GetDeclaration(const std::optional<Color>& color, const std::vector<TextDecoration>& textDecorations,
     const std::optional<TextDecorationStyle>& textDecorationStyle)
 {
     auto jsonSpanDeclaration = JsonUtil::Create(true);
     jsonSpanDeclaration->Put(
-        "type", V2::ConvertWrapTextDecorationToStirng(textDecoration.value_or(TextDecoration::NONE)).c_str());
+        "type", V2::ConvertWrapTextDecorationToStirng(textDecorations).c_str());
     jsonSpanDeclaration->Put("color", (color.value_or(Color::BLACK).ColorToString()).c_str());
     jsonSpanDeclaration->Put("style",
         V2::ConvertWrapTextDecorationStyleToString(textDecorationStyle.value_or(TextDecorationStyle::SOLID))
@@ -107,7 +107,8 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
         json->PutExtAttr("font", GetFont().c_str(), filter);
         json->PutExtAttr("fontSize", textPattern->GetFontSizeWithThemeInJson(fontStyle->GetFontSize()).c_str(), filter);
         json->PutExtAttr("decoration", GetDeclaration(fontStyle->GetTextDecorationColor(),
-            fontStyle->GetTextDecoration(), fontStyle->GetTextDecorationStyle()).c_str(), filter);
+            fontStyle->GetTextDecoration().value_or(std::vector<TextDecoration>({TextDecoration::NONE})),
+            fontStyle->GetTextDecorationStyle()).c_str(), filter);
         json->PutExtAttr("letterSpacing",
             fontStyle->GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
         json->PutExtAttr("textCase",
@@ -339,14 +340,14 @@ void SpanItem::SpanDumpInfoAdvance()
     dumpLog.AddDesc(std::string("WordSpacing: ")
                         .append(textStyle->GetWordSpacing().ToString())
                         .append(" Decoration: ")
-                        .append(StringUtils::ToString(textStyle->GetTextDecoration()))
+                        .append(StringUtils::ToString(textStyle->GetTextDecorationFirst()))
                         .append(" ")
                         .append(StringUtils::ToString(textStyle->GetTextDecorationStyle()))
                         .append(" ")
                         .append(textStyle->GetTextDecorationColor().ColorToString())
                         .append(" self: ")
                         .append(fontStyle && fontStyle->HasTextDecoration()
-                                    ? StringUtils::ToString(fontStyle->GetTextDecorationValue())
+                                    ? StringUtils::ToString(fontStyle->GetTextDecorationFirst())
                                     : "Na")
                         .append(" ")
                         .append(fontStyle && fontStyle->HasTextDecorationStyle()
@@ -461,8 +462,9 @@ void SpanItem::UpdateReLayoutTextStyle(
     UPDATE_SPAN_TEXT_STYLE(fontStyle, AdaptMinFontSize, AdaptMinFontSize);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, AdaptMaxFontSize, AdaptMaxFontSize);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, LetterSpacing, LetterSpacing);
-
-    UPDATE_SPAN_TEXT_STYLE(fontStyle, TextColor, TextColor);
+    if (!urlOnRelease || (fontStyle && fontStyle->propTextColor.has_value())) {
+        UPDATE_SPAN_TEXT_STYLE(fontStyle, TextColor, TextColor);
+    }
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextShadow, TextShadows);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, ItalicFontStyle, FontStyle);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, FontWeight, FontWeight);
@@ -851,6 +853,7 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
     if (backgroundStyle.has_value()) {
         sameSpan->backgroundStyle = backgroundStyle;
     }
+    sameSpan->urlAddress = urlAddress;
     sameSpan->urlOnRelease = urlOnRelease;
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
@@ -887,7 +890,7 @@ bool SpanItem::EncodeTlv(std::vector<uint8_t>& buff)
     TLVUtil::WriteUint8(buff, TLV_SPANITEM_TAG);
     TLVUtil::WriteInt32(buff, interval.first);
     TLVUtil::WriteInt32(buff, interval.second);
-    TLVUtil::WriteString(buff, UtfUtils::Str16DebugToStr8(content));
+    TLVUtil::WriteU16String(buff, content);
     EncodeFontStyleTlv(buff);
     EncodeTextLineStyleTlv(buff);
     if (backgroundStyle.has_value()) {
@@ -904,6 +907,10 @@ bool SpanItem::EncodeTlv(std::vector<uint8_t>& buff)
     }
     WRITE_TLV_INHERIT(textLineStyle, ParagraphSpacing, TLV_SPAN_TEXT_LINE_STYLE_PARAGRAPH_SPACING, Dimension,
         ParagraphSpacing);
+    if (urlAddress.has_value()) {
+        TLVUtil::WriteUint8(buff, TLV_SPAN_URL_CONTENT);
+        TLVUtil::WriteU16String(buff, GetUrlAddress());
+    }
     TLVUtil::WriteUint8(buff, TLV_SPANITEM_END_TAG);
     return true;
 };
@@ -919,7 +926,6 @@ void SpanItem::EncodeFontStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TLV_INHERIT(fontStyle, FontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature, FontFeatures);
     WRITE_TLV_INHERIT(fontStyle, StrokeWidth, TLV_SPAN_FONT_STYLE_STROKEWIDTH, Dimension, StrokeWidth);
     WRITE_TLV_INHERIT(fontStyle, StrokeColor, TLV_SPAN_FONT_STYLE_STROKECOLOR, Color, StrokeColor);
-    WRITE_TLV_INHERIT(fontStyle, TextDecoration, TLV_SPAN_FONT_STYLE_TEXTDECORATION, TextDecoration, TextDecoration);
     WRITE_TLV_INHERIT(
         fontStyle, TextDecorationColor, TLV_SPAN_FONT_STYLE_TEXTDECORATIONCOLOR, Color, TextDecorationColor);
     WRITE_TLV_INHERIT(fontStyle, TextDecorationStyle, TLV_SPAN_FONT_STYLE_TEXTDECORATIONSTYLE, TextDecorationStyle,
@@ -930,6 +936,11 @@ void SpanItem::EncodeFontStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TLV_INHERIT(fontStyle, LetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension, LetterSpacing);
     WRITE_TLV_INHERIT(fontStyle, LineThicknessScale, TLV_SPAN_FONT_STYLE_LineThicknessScale, Float,
         LineThicknessScale);
+    if (fontStyle->HasTextDecoration()) {
+        TLVUtil::WriteTextDecorations(buff, fontStyle->GetTextDecoration().value());
+    } else if (textStyle_.has_value()) {
+        TLVUtil::WriteTextDecorations(buff, textStyle_->GetTextDecoration());
+    }
 }
 
 void SpanItem::EncodeTextLineStyleTlv(std::vector<uint8_t>& buff) const
@@ -977,7 +988,6 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             READ_TEXT_STYLE_TLV(fontStyle, UpdateFontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateStrokeWidth, TLV_SPAN_FONT_STYLE_STROKEWIDTH, Dimension);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateStrokeColor, TLV_SPAN_FONT_STYLE_STROKECOLOR, Color);
-            READ_TEXT_STYLE_TLV(fontStyle, UpdateTextDecoration, TLV_SPAN_FONT_STYLE_TEXTDECORATION, TextDecoration);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateTextDecorationColor, TLV_SPAN_FONT_STYLE_TEXTDECORATIONCOLOR, Color);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateTextDecorationStyle,
                 TLV_SPAN_FONT_STYLE_TEXTDECORATIONSTYLE, TextDecorationStyle);
@@ -986,6 +996,10 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             READ_TEXT_STYLE_TLV(fontStyle, UpdateAdaptMaxFontSize, TLV_SPAN_FONT_STYLE_ADPATMAXFONTSIZE, Dimension);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateLetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateLineThicknessScale, TLV_SPAN_FONT_STYLE_LineThicknessScale, Float);
+            case TLV_SPAN_FONT_STYLE_TEXTDECORATION: {
+                sameSpan->fontStyle->UpdateTextDecoration(TLVUtil::ReadTextDecorations(buff, cursor));
+                break;
+            }
 
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateLineHeight, TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHT, Dimension);
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateLineSpacing, TLV_SPAN_TEXT_LINE_STYLE_LINESPACING, Dimension);
@@ -1023,12 +1037,24 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             }
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateParagraphSpacing,
                 TLV_SPAN_TEXT_LINE_STYLE_PARAGRAPH_SPACING, Dimension);
+            case TLV_SPAN_URL_CONTENT: {
+                std::string address = TLVUtil::ReadString(buff, cursor);
+                sameSpan->urlAddress = UtfUtils::Str8DebugToStr16(address);
+                auto urlOnRelease = [address]() {
+                    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+                    CHECK_NULL_VOID(pipelineContext);
+                    pipelineContext->HyperlinkStartAbility(address);
+                };
+                sameSpan->SetUrlOnReleaseEvent(std::move(urlOnRelease));
+            }
             default:
                 break;
         }
     }
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
         sameSpan->textLineStyle->ResetParagraphSpacing();
+        sameSpan->urlAddress = std::nullopt;
+        sameSpan->urlOnRelease = nullptr;
     }
     return sameSpan;
 }
@@ -1067,14 +1093,14 @@ bool ImageSpanItem::EncodeTlv(std::vector<uint8_t>& buff)
         TLVUtil::WriteUint8(buff, TLV_SPANITEM_TAG);
         TLVUtil::WriteInt32(buff, interval.first);
         TLVUtil::WriteInt32(buff, interval.second);
-        TLVUtil::WriteString(buff, UtfUtils::Str16DebugToStr8(content));
+        TLVUtil::WriteU16String(buff, content);
         TLVUtil::WriteUint8(buff, TLV_SPANITEM_END_TAG);
         return true;
     }
     TLVUtil::WriteUint8(buff, TLV_IMAGESPANITEM_TAG);
     TLVUtil::WriteInt32(buff, interval.first);
     TLVUtil::WriteInt32(buff, interval.second);
-    TLVUtil::WriteString(buff, UtfUtils::Str16DebugToStr8(content));
+    TLVUtil::WriteU16String(buff, content);
     if (options.offset.has_value()) {
         TLVUtil::WriteUint8(buff, TLV_IMAGESPANOPTION_OFFSET_TAG);
         TLVUtil::WriteInt32(buff, options.offset.value());

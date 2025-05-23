@@ -1391,4 +1391,10 @@ ClickInfo GestureEventHub::GetClickInfo()
     CHECK_NULL_RETURN(clickRecognizer, ClickInfo(-1));
     return clickRecognizer->GetClickInfo();
 }
+
+bool GestureEventHub::TriggerTouchEvent(const TouchEvent& point)
+{
+    CHECK_NULL_RETURN(touchEventActuator_, false);
+    return touchEventActuator_->HandleEvent(point);
+}
 } // namespace OHOS::Ace::NG

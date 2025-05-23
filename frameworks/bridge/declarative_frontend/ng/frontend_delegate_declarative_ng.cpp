@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
@@ -818,6 +819,13 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
         dialogProperties.offset = dialogAttr.offset.value();
     }
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
+}
+
+void FrontendDelegateDeclarativeNG::RemoveCustomDialog(int32_t instanceId)
+{
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "Dismiss custom dialog, instanceId: %{public}d", instanceId);
+    ContainerScope scope(instanceId);
+    NG::ViewAbstract::DismissDialog();
 }
 
 void FrontendDelegateDeclarativeNG::ParsePartialPropertiesFromAttr(

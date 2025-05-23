@@ -524,4 +524,44 @@ HWTEST_F(CounterTestNg, CounterThemeWrapperTest001, TestSize.Level1)
     counterThemeWrapper->ApplyTokenTheme(*tokenTheme);
     EXPECT_EQ(counterTheme->GetContentTextStyle().GetTextColor(), colors[TokenColors::FONT_PRIMARY]);
 }
+
+/**
+ * @tc.name: CounterModelNGCreateWithResourceObjTest001
+ * @tc.desc: Test CreateWithResourceObj function with JsCounterResourceType::Height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest001, TestSize.Level1)
+{
+    CounterModelNG model;
+    model.Create();
+    GetInstance();
+
+    auto jsResourceType = JsCounterResourceType::Height;
+    auto resObj = AceType::MakeRefPtr<ResourceObject>();
+
+    model.CreateWithResourceObj(jsResourceType, resObj);
+
+    auto selfIdealSize = layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize;
+    EXPECT_NE(selfIdealSize->Height()->dimension_.Value(), 0.0);
+}
+
+/**
+ * @tc.name: CounterModelNGCreateWithResourceObjTest002
+ * @tc.desc: Test CreateWithResourceObj function with JsCounterResourceType::Width.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest002, TestSize.Level1)
+{
+    CounterModelNG model;
+    model.Create();
+    GetInstance();
+
+    auto jsResourceType = JsCounterResourceType::Width;
+    auto resObj = AceType::MakeRefPtr<ResourceObject>();
+
+    model.CreateWithResourceObj(jsResourceType, resObj);
+
+    auto selfIdealSize = layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize;
+    EXPECT_NE(selfIdealSize->Width()->dimension_.Value(), 0.0);
+}
 } // namespace OHOS::Ace::NG

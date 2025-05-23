@@ -19,6 +19,9 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 const hilog = requireNapi('hilog');
 const abilityManager = requireNapi('app.ability.abilityManager');
 const commonEventManager = requireNapi('commonEventManager');
+const bundleManager = requireNapi('bundle.bundleManager');
+const BusinessError = requireNapi('base');
+const api20 = 20;
 const t = 100014;
 const u = 801;
 const requestComponentTerminateKey = 'ohos.param.key.requestComponentTerminate';
@@ -36,6 +39,7 @@ export class FullScreenLaunchComponent extends ViewPU {
         this.options = undefined;
         this.__isShow = new ObservedPropertySimplePU(false, this, "isShow");
         this.subscriber = null;
+        this.apiVersion = 0;
         this.onError = undefined;
         this.onTerminated = undefined;
         this.onReceive = undefined;
@@ -60,6 +64,9 @@ export class FullScreenLaunchComponent extends ViewPU {
         }
         if (params.subscriber !== undefined) {
             this.subscriber = params.subscriber;
+        }
+        if (params.apiVersion !== undefined) {
+            this.apiVersion = params.apiVersion;
         }
         if (params.onError !== undefined) {
             this.onError = params.onError;
@@ -88,6 +95,20 @@ export class FullScreenLaunchComponent extends ViewPU {
         this.__isShow.set(newValue);
     }
     aboutToAppear() {
+        let bundleFlags = bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION |
+            bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_METADATA;
+        try {
+            bundleManager.getBundleInfoForSelf(bundleFlags).then((data) => {
+                hilog.info(0x3900, 'FullScreenLaunchComponent', 'getBundleInfoForSelf success, data: %{public}s.', JSON.stringify(data.targetVersion % 1000));
+                this.apiVersion = data.targetVersion % 1000;
+            }).catch((err) => {
+                hilog.error(0x3900, 'FullScreenLaunchComponent', 'getBundleInfoForSelf fail_1, cause: %{public}s.', err.message);
+            });
+        }
+        catch (err) {
+            let message = err.message;
+            hilog.error(0x3900, 'FullScreenLaunchComponent', 'getBundleInfoForSelf fail_2, cause: %{public}s.', message);
+        }
         let subscribeInfo = {
             events: [commonEventManager.Support.COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT],
         };
@@ -131,6 +152,7 @@ export class FullScreenLaunchComponent extends ViewPU {
             this.options.parameters['ohos.extra.param.key.showMode'] = 1;
             this.options.parameters['ability.want.params.IsNotifyOccupiedAreaChange'] = true;
             this.options.parameters['ability.want.params.IsModal'] = true;
+            this.options.parameters['ohos.extra.atomicservice.param.key.isFollowHostWindowMode'] = (this.apiVersion >= api20);
             hilog.info(0x3900, 'FullScreenLaunchComponent', 'replaced options is %{public}s !', JSON.stringify(this.options));
         }
         else {
@@ -138,7 +160,8 @@ export class FullScreenLaunchComponent extends ViewPU {
                 parameters: {
                     'ohos.extra.param.key.showMode': 1,
                     'ability.want.params.IsNotifyOccupiedAreaChange': true,
-                    'ability.want.params.IsModal': true
+                    'ability.want.params.IsModal': true,
+                    'ohos.extra.atomicservice.param.key.isFollowHostWindowMode': (this.apiVersion >= api20)
                 }
             };
         }
@@ -197,6 +220,9 @@ export class FullScreenLaunchComponent extends ViewPU {
                 bundleName: `com.atomicservice.${this.appId}`,
                 flags: this.options?.flags,
                 parameters: this.options?.parameters
+            }, {
+                windowModeFollowStrategy: this.apiVersion >= api20 ? WindowModeFollowStrategy.FOLLOW_HOST_WINDOW_MODE :
+                    WindowModeFollowStrategy.FOLLOW_UI_EXTENSION_ABILITY_WINDOW_MODE
             });
             UIExtensionComponent.height('100%');
             UIExtensionComponent.width('100%');

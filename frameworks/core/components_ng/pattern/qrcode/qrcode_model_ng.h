@@ -26,6 +26,7 @@ public:
     void SetQRCodeColor(const Color& color) override;
     void SetQRBackgroundColor(const Color& color) override;
     void SetContentOpacity(const double opacity) override;
+    void CreateWithResourceObj(QRCodeResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) override;
     
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetQRCodeValue(FrameNode* frameNode, const std::string& value);

@@ -821,6 +821,50 @@ HWTEST_F(TextTestThreeNg, SetTextSelection001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetTextSelection002
+ * @tc.desc: Test SetTextSelection when frameRect is empty (geometry node has no valid size).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, SetTextSelection002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+
+    /**
+     * @tc.steps: step2. force geometryNode's frameRect to be empty
+     */
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF()); // 强制设置空矩形
+
+    /**
+     * @tc.steps: step3. call SetTextSelection with valid selection range
+     * @tc.expected: textSelector_ remains unchanged (start/end = -1)
+     */
+    pattern->SetTextSelection(0, 4);
+    EXPECT_EQ(pattern->textSelector_.GetStart(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetEnd(), -1);
+
+    auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateCopyOption(CopyOptions::InApp);
+    geometryNode->SetFrameSize(SizeF(10, 10));
+    pattern->textForDisplay_ = CREATE_VALUE_W;
+
+    MockParagraph::enableCalcCaretMetricsByPosition_ = true;
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    pattern->SetTextSelection(0, 4);
+    EXPECT_EQ(pattern->textSelector_.GetStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetEnd(), 4);
+    MockParagraph::enableCalcCaretMetricsByPosition_ = false;
+}
+
+/**
  * @tc.name: TextFrameNodeCreator004
  * @tc.desc: Test onCopy event of text.
  * @tc.type: FUNC
@@ -1964,7 +2008,7 @@ HWTEST_F(TextTestThreeNg, TextModelNgProperty001, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetFontSize().value(), FONT_SIZE_VALUE);
     EXPECT_EQ(layoutProperty->GetLineHeight().value(), ADAPT_LINE_HEIGHT_VALUE);
     EXPECT_EQ(layoutProperty->GetTextOverflow().value(), TextOverflow::ELLIPSIS);
-    EXPECT_EQ(layoutProperty->GetTextDecoration().value(), TextDecoration::UNDERLINE);
+    EXPECT_EQ(layoutProperty->GetTextDecorationFirst(), TextDecoration::UNDERLINE);
     EXPECT_EQ(layoutProperty->GetTextDecorationColor().value(), Color::BLACK);
     EXPECT_EQ(layoutProperty->GetTextDecorationStyle().value(), TextDecorationStyle::SOLID);
     EXPECT_EQ(layoutProperty->GetTextCase().value(), TextCase::UPPERCASE);

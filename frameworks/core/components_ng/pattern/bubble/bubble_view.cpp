@@ -188,7 +188,11 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
     popupProp->UpdatePositionOffset(OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY()));
     popupProp->UpdateBlockEvent(param->IsBlockEvent());
     popupProp->UpdateIsCaretMode(param->IsCaretMode());
-    popupProp->UpdateEnableHoverMode(param->EnableHoverMode());
+    if (param->HasEnableHoverMode()) {
+        popupProp->UpdateEnableHoverMode(param->EnableHoverMode());
+    } else {
+        popupProp->ResetEnableHoverMode();
+    }
 
     if (param->GetArrowHeight().has_value()) {
         popupProp->UpdateArrowHeight(param->GetArrowHeight().value());
@@ -230,7 +234,6 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
     auto textColor = param->GetTextColor();
     bubblePattern->SetMessageColor(textColor.has_value());
     bubblePattern->SetHasTransition(param->GetHasTransition());
-    bubblePattern->SetEnableHoverMode(param->EnableHoverMode());
     bubblePattern->SetAvoidKeyboard(param->GetKeyBoardAvoidMode() == PopupKeyboardAvoidMode::DEFAULT);
     bubblePattern->SetOutlineLinearGradient(param->GetOutlineLinearGradient());
     bubblePattern->SetOutlineWidth(param->GetOutlineWidth());
@@ -369,7 +372,6 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
         bubbleHub->SetOnStateChange(param->GetOnStateChange());
     }
     auto popupPattern = popupNode->GetPattern<BubblePattern>();
-    popupPattern->SetEnableHoverMode(param->EnableHoverMode());
     popupPattern->SetCustomPopupTag(true);
     // update bubble props
     auto layoutProps = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
@@ -378,6 +380,12 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     layoutProps->UpdatePlacement(param->GetPlacement());
     layoutProps->UpdateShowInSubWindow(param->IsShowInSubWindow());
     layoutProps->UpdateBlockEvent(param->IsBlockEvent());
+    if (param->HasEnableHoverMode()) {
+        layoutProps->UpdateEnableHoverMode(param->EnableHoverMode());
+    } else {
+        layoutProps->ResetEnableHoverMode();
+    }
+    
     if (param->GetArrowHeight().has_value()) {
         layoutProps->UpdateArrowHeight(param->GetArrowHeight().value());
     }

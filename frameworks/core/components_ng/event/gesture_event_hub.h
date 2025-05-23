@@ -116,6 +116,7 @@ struct PreparedInfoForDrag {
     RectF originPreviewRect;
     RectF dragPreviewRect;
     BorderRadiusProperty borderRadius = BorderRadiusProperty(0.0_vp);
+    SourceType deviceType = SourceType::NONE;
 };
 
 struct PreparedAsyncCtxForAnimate {
@@ -391,6 +392,7 @@ public:
     void DumpVelocityInfoFroPanEvent(int32_t fingerId);
 
     bool IsDragNewFwk() const;
+    bool TriggerTouchEvent(const TouchEvent& point);
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,

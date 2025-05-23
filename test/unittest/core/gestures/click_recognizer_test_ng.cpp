@@ -1699,6 +1699,8 @@ HWTEST_F(ClickRecognizerTestNg, GetGestureEventInfoTest001, TestSize.Level1)
     touchEvent.SetTiltX(0);
     touchEvent.SetTiltY(0);
     touchEvent.rollAngle = 0;
+    touchEvent.convertInfo.first = UIInputEventType::AXIS;
+    touchEvent.convertInfo.second = UIInputEventType::TOUCH;
     clickRecognizer->AttachFrameNode(frameNode);
     clickRecognizer->touchPoints_[0] = touchEvent;
     GestureEvent result = clickRecognizer->GetGestureEventInfo();
@@ -1706,6 +1708,8 @@ HWTEST_F(ClickRecognizerTestNg, GetGestureEventInfoTest001, TestSize.Level1)
     EXPECT_EQ(result.GetTiltX(), 0);
     EXPECT_EQ(result.GetTiltY(), 0);
     EXPECT_EQ(result.GetRollAngle(), 0);
+    EXPECT_EQ(result.GetOriginUIInputEventType(), UIInputEventType::AXIS);
+    EXPECT_EQ(result.GetCurrentUIInputEventType(), UIInputEventType::TOUCH);
 }
 
 /**

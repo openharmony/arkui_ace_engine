@@ -1016,7 +1016,7 @@ void TextFieldModelNG::SetIsOnlyBetweenLines(bool isOnlyBetweenLines)
 
 void TextFieldModelNG::SetTextDecoration(Ace::TextDecoration value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, {value});
 }
 
 void TextFieldModelNG::SetTextDecorationColor(const Color& value)
@@ -1833,7 +1833,7 @@ void TextFieldModelNG::ResetTextInputPadding(FrameNode* frameNode)
 
 void TextFieldModelNG::SetTextDecoration(FrameNode* frameNode, TextDecoration value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, {value}, frameNode);
 }
 
 void TextFieldModelNG::SetTextDecorationColor(FrameNode* frameNode, const Color& value)
@@ -2471,5 +2471,13 @@ bool TextFieldModelNG::GetEnableAutoSpacing(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         TextFieldLayoutProperty, EnableAutoSpacing, value, frameNode, value);
     return value;
+}
+
+void TextFieldModelNG::SetOnSecurityStateChange(FrameNode* frameNode, std::function<void(bool)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSecurityStateChange(std::move(func));
 }
 } // namespace OHOS::Ace::NG

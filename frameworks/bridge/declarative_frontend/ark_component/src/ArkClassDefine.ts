@@ -61,6 +61,20 @@ class ArkBorderStyle {
   }
 }
 
+class ArkOnVisibleAreaChange {
+  ratios: Array<number>;
+  event: (isVisible: boolean, currentRatio: number) => void;
+
+  constructor(ratios: Array<number> | undefined, event: (isVisible: boolean, currentRatio: number) => void | undefined) {
+    this.ratios = ratios;
+    this.event = event;
+  }
+
+  isEqual(another: ArkOnVisibleAreaChange): boolean {
+    return this.ratios === another.ratios && this.event === another.event;
+  }
+}
+
 class ArkBorderColor {
   startColor: LocalizedEdgeColors;
   endColor: LocalizedEdgeColors;
@@ -141,6 +155,12 @@ class ArkBorderRadius {
   }
 
   isEqual(another: ArkBorderRadius): boolean {
+    if (this == undefined && another == undefined) {
+      return true;
+    }
+    if ((this == undefined && another != undefined) || (this != undefined && another == undefined)) {
+      return false
+    }
     return (
       (this.topLeft === another.topLeft &&
         this.topRight === another.topRight &&

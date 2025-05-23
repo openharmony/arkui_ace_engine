@@ -332,6 +332,58 @@ HWTEST_F(NavigationModelTestNg, RegisterToolbarHotZoneEvent001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RegisterToolbarHotZoneEvent002
+ * @tc.desc: Test RegisterToolbarHotZoneEvent and cover all conditions of the event callback SourceType::MOUSE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, RegisterToolbarHotZoneEvent002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+
+    std::vector<NG::BarItem> toolBarItems;
+    NG::BarItem newBars[MAXIMUM_TOOLBAR_ITEMS_IN_BAR + 1];
+    toolBarItems.insert(toolBarItems.end(), std::begin(newBars), std::end(newBars));
+    EXPECT_TRUE(toolBarItems.size() > MAXIMUM_TOOLBAR_ITEMS_IN_BAR);
+    navigationModel.SetToolbarConfiguration(std::move(toolBarItems));
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
+    ASSERT_NE(toolBarNode, nullptr);
+    ASSERT_FALSE(toolBarNode->children_.empty());
+    auto containerNode = toolBarNode->children_.back();
+    ASSERT_NE(containerNode, nullptr);
+    ASSERT_FALSE(containerNode->children_.empty());
+    auto toolBarItemNode = AceType::DynamicCast<FrameNode>(containerNode->children_.back());
+    ASSERT_NE(toolBarItemNode, nullptr);
+    
+    MenuParam menuParam;
+    menuParam.isShowInSubWindow = true;
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    selectTheme->expandDisplay_ = true;
+
+    GestureEvent info;
+    bool isClick = false;
+    newBars[0].action = [&isClick]() { isClick = !isClick; };
+    auto gestureEventHub = toolBarItemNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    info.SetSourceDevice(SourceType::MOUSE);
+    auto clickListener = gestureEventHub->clickEventActuator_->clickEvents_.back();
+    ASSERT_NE(clickListener, nullptr);
+    ASSERT_NE(clickListener->callback_, nullptr);
+    clickListener->callback_(info);
+    EXPECT_FALSE(isClick);
+}
+
+/**
  * @tc.name: CreateToolbarItemInContainer001
  * @tc.desc: Test CreateToolbarItemInContainer and cover all conditions (1st).
  * @tc.type: FUNC

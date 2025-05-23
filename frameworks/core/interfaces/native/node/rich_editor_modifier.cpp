@@ -621,6 +621,38 @@ void ResetRichEditorKeyboardAppearance(ArkUINodeHandle node)
     RichEditorModelNG::SetKeyboardAppearance(frameNode, value);
 }
 
+void SetRichEditorOnDidIMEInput(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto OnDidIMEInput = reinterpret_cast<std::function<void(TextRange)>*>(callback);
+        RichEditorModelNG::SetOnDidIMEInput(frameNode, std::move(*OnDidIMEInput));
+    } else {
+        RichEditorModelNG::SetOnDidIMEInput(frameNode, nullptr);
+    }
+}
+
+void ResetRichEditorOnDidIMEInput(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetOnDidIMEInput(frameNode, nullptr);
+}
+
+void SetRichEditorEnableHapticFeedback(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetEnableHapticFeedback(frameNode, static_cast<bool>(value));
+}
+
+void ResetRichEditorEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetEnableHapticFeedback(frameNode, true);
+}
 namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
@@ -684,6 +716,10 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .resetRichEditorStopBackPress = ResetRichEditorStopBackPress,
         .setRichEditorKeyboardAppearance = SetRichEditorKeyboardAppearance,
         .resetRichEditorKeyboardAppearance = ResetRichEditorKeyboardAppearance,
+        .setRichEditorOnDidIMEInput = SetRichEditorOnDidIMEInput,
+        .resetRichEditorOnDidIMEInput = ResetRichEditorOnDidIMEInput,
+        .setRichEditorEnableHapticFeedback = SetRichEditorEnableHapticFeedback,
+        .resetRichEditorEnableHapticFeedback = ResetRichEditorEnableHapticFeedback,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

@@ -29,6 +29,9 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_wrapper.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/theme/shadow_theme.h"
@@ -238,8 +241,68 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, updateColor);
 }
 
+void ViewAbstract::SetBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto &&updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject> &resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string backgroundColorStr = pattern->GetResCacheMapByKey("backgroundColor");
+        Color backgroundColor;
+        if (backgroundColorStr.empty()) {
+            ResourceParseUtils::ParseResColor(resObj, backgroundColor);
+            pattern->AddResCache("backgroundColor", backgroundColor.ColorToString());
+        } else {
+            Color::ParseColorString(backgroundColorStr, backgroundColor);
+        }
+        auto pipeline = frameNode->GetContext();
+        if (pipeline != nullptr) {
+            pipeline->CheckNeedUpdateBackgroundColor(backgroundColor);
+        }
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, backgroundColor, frameNode);
+    };
+    pattern->AddResObj("backgroundColor", resObj, std::move(updateFunc));
+
+    Color backgroundColor; 
+    ResourceParseUtils::ParseResColor(resObj, backgroundColor);
+    SetBackgroundColor(backgroundColor);
+}
+
 void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color)
 {
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
+}
+
+void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto &&updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject> &resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string backgroundColorStr = pattern->GetResCacheMapByKey("backgroundColor");
+        Color backgroundColor;
+        if (backgroundColorStr.empty()) {
+            ResourceParseUtils::ParseResColor(resObj, backgroundColor);
+            pattern->AddResCache("backgroundColor", backgroundColor.ColorToString());
+        } else {
+            Color::ParseColorString(backgroundColorStr, backgroundColor);
+        }
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, backgroundColor, frameNode);
+    };
+    pattern->AddResObj("backgroundColor", resObj, std::move(updateFunc));
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
 }
 
@@ -258,8 +321,94 @@ void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImage, src);
 }
 
+void ViewAbstract::SetBackgroundImageWithResourceObj(
+    const RefPtr<ResourceObject> &resObj, std::string &bundleName, std::string &moduleName)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto &&updateFunc = [weak = AceType::WeakClaim(frameNode), bundleName, moduleName](
+                            const RefPtr<ResourceObject> &resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string srcFromCache = pattern->GetResCacheMapByKey("backgroundImageSrc");
+        std::string src;
+        if (srcFromCache.empty()) {
+            ResourceParseUtils::ParseResMedia(resObj, src);
+            pattern->AddResCache("backgroundImageSrc", src);
+        } else {
+            src = srcFromCache;
+        }
+        auto pipeline = frameNode->GetContext();
+        if (pipeline != nullptr) {
+            bool disableSetImage = pipeline->CheckNeedDisableUpdateBackgroundImage();
+            if (disableSetImage) {
+                return;
+            }
+        }
+        auto imageSrc = ImageSourceInfo{src, bundleName, moduleName};
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImage, imageSrc, frameNode);
+
+        const auto& target = frameNode->GetRenderContext();
+        if (target) {
+            target->OnBackgroundImageUpdate(imageSrc);
+        }
+    };
+    pattern->AddResObj("backgroundImageSrc", resObj, std::move(updateFunc));
+    std::string src;
+    ResourceParseUtils::ParseResMedia(resObj, src);
+    SetBackgroundImage(ImageSourceInfo{src, bundleName, moduleName});
+}
+
 void ViewAbstract::SetBackgroundImage(FrameNode* frameNode, const ImageSourceInfo& src)
 {
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImage, src, frameNode);
+}
+
+void ViewAbstract::SetBackgroundImage(
+    FrameNode* frameNode, const ImageSourceInfo& src, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto &&updateFunc = [weak = AceType::WeakClaim(frameNode),
+                            bundleName = src.GetBundleName(),
+                            moduleName = src.GetModuleName()](const RefPtr<ResourceObject> &resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string srcFromCache = pattern->GetResCacheMapByKey("backgroundImageSrc");
+        std::string src;
+        if (srcFromCache.empty()) {
+            ResourceParseUtils::ParseResMedia(resObj, src);
+            pattern->AddResCache("backgroundImageSrc", src);
+        } else {
+            src = srcFromCache;
+        }
+        auto pipeline = frameNode->GetContext();
+        if (pipeline != nullptr) {
+            bool disableSetImage = pipeline->CheckNeedDisableUpdateBackgroundImage();
+            if (disableSetImage) {
+                return;
+            }
+        }
+        auto imageSrc = ImageSourceInfo{src, bundleName, moduleName};
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImage, imageSrc, frameNode);
+
+        const auto& target = frameNode->GetRenderContext();
+        if (target) {
+            target->OnBackgroundImageUpdate(imageSrc);
+        }
+    };
+    pattern->AddResObj("backgroundImageSrc", resObj, std::move(updateFunc));
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImage, src, frameNode);
 }
 
@@ -286,29 +435,84 @@ void ViewAbstract::SetBackgroundImageSyncMode(FrameNode* frameNode, bool syncMod
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSyncMode, syncMode, frameNode);
 }
 
-void ViewAbstract::SetBackgroundImageSize(const BackgroundImageSize& bgImgSize)
+void ViewAbstract::SetBackgroundImageSize(BackgroundImageSize& bgImgSize)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+        auto&& updateFunc = [bgImgSize, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            BackgroundImageSize &bgImgSizeValue = const_cast<BackgroundImageSize &>(bgImgSize);
+            bgImgSizeValue.ReloadResources();
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSize, bgImgSizeValue, frameNode);
+        };
+        pattern->AddResObj("backgroundImageSize", resObj, std::move(updateFunc));
+    }
+
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImageSize, bgImgSize);
 }
 
-void ViewAbstract::SetBackgroundImageSize(FrameNode* frameNode, const BackgroundImageSize& bgImgSize)
+void ViewAbstract::SetBackgroundImageSize(FrameNode* frameNode, BackgroundImageSize& bgImgSize)
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+        auto&& updateFunc = [bgImgSize, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            BackgroundImageSize &bgImgSizeValue = const_cast<BackgroundImageSize &>(bgImgSize);
+            bgImgSizeValue.ReloadResources();
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSize, bgImgSizeValue, frameNode);
+        };
+        pattern->AddResObj("backgroundImageSize", resObj, std::move(updateFunc));
+    }
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSize, bgImgSize, frameNode);
 }
 
-void ViewAbstract::SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition)
+void SetBackgroundImagePositionUpdateFunc(FrameNode* frameNode, BackgroundImagePosition& bgImgPosition)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    auto&& updateFunc = [bgImgPosition, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        BackgroundImagePosition &bgImgPositionValue = const_cast<BackgroundImagePosition &>(bgImgPosition);
+        bgImgPositionValue.ReloadResources();
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImagePosition, bgImgPositionValue, frameNode);
+    };
+    pattern->AddResObj("backgroundImagePosition", resObj, std::move(updateFunc));
+}
+
+void ViewAbstract::SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosition)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        SetBackgroundImagePositionUpdateFunc(frameNode, bgImgPosition);
+    }
+
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImagePosition, bgImgPosition);
 }
 
-void ViewAbstract::SetBackgroundImagePosition(FrameNode* frameNode, const BackgroundImagePosition& bgImgPosition)
+void ViewAbstract::SetBackgroundImagePosition(FrameNode* frameNode, BackgroundImagePosition& bgImgPosition)
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        SetBackgroundImagePositionUpdateFunc(frameNode, bgImgPosition);
+    }
+    
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImagePosition, bgImgPosition, frameNode);
 }
 
@@ -4865,6 +5069,14 @@ void ViewAbstract::FocusActivate(int32_t instanceId, bool isActive, bool isAutoI
     context->SetIsFocusActive(isActive, NG::FocusActiveReason::USE_API, isAutoInactive);
 }
 
+bool ViewAbstract::GetFocusActive()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    bool ret = pipeline->GetIsFocusActive();
+    return ret;
+}
+
 void ViewAbstract::SetAutoFocusTransfer(int32_t instanceId, bool isAutoFocusTransfer)
 {
     auto context = PipelineContext::GetContextByContainerId(instanceId);
@@ -5755,16 +5967,47 @@ void ViewAbstract::SetDisallowDropForcedly(bool isDisallowDropForcedly)
     frameNode->SetDisallowDropForcedly(isDisallowDropForcedly);
 }
 
-void ViewAbstract::SetBackgroundImageResizableSlice(const ImageResizableSlice& slice)
+void ViewAbstract::SetBackgroundImageResizableSlice(ImageResizableSlice& slice)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+        auto&& updateFunc = [slice, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            ImageResizableSlice &sliceValue = const_cast<ImageResizableSlice &>(slice);
+            sliceValue.ReloadResources();
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageResizableSlice, sliceValue, frameNode);
+        };
+        pattern->AddResObj("backgroundImageResizableSlice", resObj, std::move(updateFunc));
+    }
+
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImageResizableSlice, slice);
 }
 
-void ViewAbstract::SetBackgroundImageResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice)
+void ViewAbstract::SetBackgroundImageResizableSlice(FrameNode* frameNode, ImageResizableSlice& slice)
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+        auto&& updateFunc = [slice, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            ImageResizableSlice &sliceValue = const_cast<ImageResizableSlice &>(slice);
+            sliceValue.ReloadResources();
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageResizableSlice, sliceValue, frameNode);
+        };
+        pattern->AddResObj("backgroundImageResizableSlice", resObj, std::move(updateFunc));
+    }
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageResizableSlice, slice, frameNode);
 }
 
@@ -6170,6 +6413,14 @@ void ViewAbstract::SetDisableDataPrefetch(FrameNode* frameNode, bool disableData
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetDisableDataPrefetch(disableDataPrefetch);
+}
+
+void ViewAbstract::SetOnTouchTestFunc(FrameNode* frameNode, NG::OnChildTouchTestFunc&& onChildTouchTest)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnTouchTestFunc(std::move(onChildTouchTest));
 }
 
 void ViewAbstract::SetJSFrameNodeOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart)

@@ -68,6 +68,7 @@ constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_anima
 constexpr int32_t CONVERT_ASTC_THRESHOLD = 2;
 constexpr int32_t FOLD_TYPE_TWO = 2;
 constexpr int32_t FOLD_TYPE_FOUR = 4;
+constexpr float DEFAULT_SCROLL_COEFFICEIENT = 2.0f;
 
 bool IsOpIncEnabled()
 {
@@ -256,7 +257,10 @@ bool IsMouseTransformEnable()
 float ReadScrollCoefficients()
 {
     auto ret = system::GetParameter("persist.ace.scroll.coefficeient", "2.0");
-    return StringUtils::StringToFloat(ret);
+    if (StringUtils::IsNumber(ret)) {
+        return StringUtils::StringToFloat(ret);
+    }
+    return DEFAULT_SCROLL_COEFFICEIENT;
 }
 
 int64_t GetDebugFlags()

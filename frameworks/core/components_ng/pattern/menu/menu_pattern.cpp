@@ -176,6 +176,7 @@ void MenuPattern::OnAttachToFrameNode()
     RegisterOnTouch();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    MenuView::RegisterAccessibilityChildActionNotify(host);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     RegisterOnKeyEvent(focusHub);
@@ -241,7 +242,7 @@ int32_t MenuPattern::RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode)
         CHECK_NULL_VOID(menuWrapperNode);
         auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(menuWrapperPattern);
-        if (menuWrapperPattern->GetHoverMode() && pattern->IsSubMenu()) {
+        if (menuWrapperPattern->GetHoverMode().value_or(false) && pattern->IsSubMenu()) {
             menuWrapperPattern->HideSubMenu();
         }
         pipelineContext->FlushUITasks();

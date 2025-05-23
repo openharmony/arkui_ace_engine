@@ -26,7 +26,6 @@
 #include "core/components_ng/pattern/text_picker/textpicker_properties.h"
 #include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
-#include "core/components_ng/pattern/picker_utils/picker_paint_method_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,12 +33,7 @@ class ACE_EXPORT TextPickerPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(TextPickerPaintMethod, NodePaintMethod)
 public:
     TextPickerPaintMethod() = default;
-    ~TextPickerPaintMethod() override
-    {
-        if (circleUtils_) {
-            delete circleUtils_;
-        }
-    }
+    ~TextPickerPaintMethod() override {}
 
     TextPickerPaintMethod(const WeakPtr<Pattern>& pattern)
     {
@@ -79,7 +73,8 @@ private:
         const ItemDivider &divider, double dividerHeight);
     void PaintLine(const OffsetF& offset, const DividerInfo &info, RSCanvas& canvas);
     bool SetStrokeWidth(const ItemDivider &divider, double dividerHeight, DividerInfo& info);
-    PickerPaintMethodCircleUtils *circleUtils_ = NULL;
+    void PaintSelectedBackgroundColor(RSCanvas& canvas, std::list<RefPtr<UINode>> children, Color color,
+        NG::BorderRadiusProperty borderRadius);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_PICKER_TEXT_PICKER_PAINT_METHOD_H

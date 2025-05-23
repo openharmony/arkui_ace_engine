@@ -13,6 +13,7 @@
 * limitations under the License.
 */
 
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/text/span/tlv_util.h"
 
 
@@ -44,6 +45,16 @@ std::string TLVUtil::ReadString(std::vector<uint8_t>& buff, int32_t& cursor)
         ss << static_cast<char>(chVal);
     }
     return ss.str();
+}
+
+void TLVUtil::WriteU16String(std::vector<uint8_t>& buff, const std::u16string& value)
+{
+    WriteString(buff, UtfUtils::Str16DebugToStr8(value));
+}
+
+std::u16string TLVUtil::ReadU16String(std::vector<uint8_t>& buff, int32_t& cursor)
+{
+    return UtfUtils::Str8DebugToStr16(ReadString(buff, cursor));
 }
 
 void TLVUtil::WriteDouble(std::vector<uint8_t>& buff, double value)
@@ -203,6 +214,28 @@ std::vector<Shadow> TLVUtil::ReadTextShadows(std::vector<uint8_t>& buff, int32_t
     }
     return shadows;
 }
+
+void TLVUtil::WriteTextDecorations(std::vector<uint8_t>& buff, const std::vector<TextDecoration>& values)
+{
+    WriteUint8(buff, TLV_SPAN_FONT_STYLE_TEXTDECORATION);
+    WriteInt32(buff, values.size());
+    for (TextDecoration value: values) {
+        WriteInt32(buff, static_cast<int32_t>(value));
+    }
+}
+
+std::vector<TextDecoration> TLVUtil::ReadTextDecorations(std::vector<uint8_t>& buff, int32_t& cursor)
+{
+    std::vector<TextDecoration> textDecorations;
+    int32_t size = ReadInt32(buff, cursor);
+    std::cout << "ReadTextDecorations size:" << size << std::endl;
+    for (auto i = 0; i < size; i ++) {
+        int32_t value = ReadInt32(buff, cursor);
+        textDecorations.emplace_back(static_cast<TextDecoration>(value));
+    }
+    return textDecorations;
+}
+
 
 void TLVUtil::WriteFontFeature(std::vector<uint8_t>& buff, std::list<std::pair<std::string, int32_t>>& value)
 {

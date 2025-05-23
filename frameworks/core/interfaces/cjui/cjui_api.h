@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 struct CJUICommonModifier {
-    void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* bgColorRawPtr);
     void (*resetBackgroundColor)(ArkUINodeHandle node);
     void (*setWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
     void (*resetWidth)(ArkUINodeHandle node);
@@ -113,13 +113,13 @@ struct CJUICommonModifier {
         ArkUI_Bool isLocalizedBorderColor, ArkUI_Bool isLocalizedBorderRadius);
     void (*resetBorder)(ArkUINodeHandle node);
     void (*setBackgroundImagePosition)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* types,
-        ArkUI_Bool isAlign, ArkUI_Int32 size);
+        ArkUI_Bool isAlign, ArkUI_Int32 size, void* bgImageXRawPtr, void* bgImageYRawPtr);
     void (*resetBackgroundImagePosition)(ArkUINodeHandle node);
     void (*setBackgroundImageSize)(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
-        ArkUI_Int32 typeWidth, ArkUI_Int32 typeHeight);
+        ArkUI_Int32 typeWidth, ArkUI_Int32 typeHeight, void* bgImageSizeWidthRawPtr, void* bgImageSizeHeightRawPtr);
     void (*resetBackgroundImageSize)(ArkUINodeHandle node);
-    void (*setBackgroundImage)(
-        ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundle, ArkUI_CharPtr module, ArkUI_Int32 repeatIndex);
+    void (*setBackgroundImage)(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundle, ArkUI_CharPtr module,
+        ArkUI_Int32 repeatIndex, void* bgImageRawPtr);
     void (*resetBackgroundImage)(ArkUINodeHandle node);
     void (*setTranslate)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
@@ -417,7 +417,8 @@ struct CJUICommonModifier {
     ArkUIMoveTransitionType (*getMoveTransition)(ArkUINodeHandle node);
     void (*resetMask)(ArkUINodeHandle node);
     ArkUI_Float32 (*getAspectRatio)(ArkUINodeHandle node);
-    void (*setBackgroundImageResizable)(ArkUINodeHandle node, ArkUIStringAndFloat* options);
+    void (*setBackgroundImageResizable)(
+        ArkUINodeHandle node, ArkUIStringAndFloat* options, std::vector<void*>& bgImageResizableArray);
     void (*resetBackgroundImageResizable)(ArkUINodeHandle node);
     void (*setBackgroundImageSizeWithUnit)(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
         ArkUI_Int32 unit);
@@ -732,7 +733,7 @@ struct CJUIImageModifier {
     void (*setSrc)(ArkUINodeHandle node, ArkUI_CharPtr value);
     // Do we need resetSrc() ?
     void (*setImageShowSrc)(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName,
-        ArkUI_Bool isUriPureNumber);
+        ArkUI_Bool isUriPureNumber, void* srcRawPtr);
     void (*setCopyOption)(ArkUINodeHandle node, ArkUI_Int32 copyOption);
     void (*resetCopyOption)(ArkUINodeHandle node);
     void (*setAutoResize)(ArkUINodeHandle node, ArkUI_Bool autoResize);
@@ -751,9 +752,10 @@ struct CJUIImageModifier {
     void (*resetSourceSize)(ArkUINodeHandle node);
     void (*setMatchTextDirection)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetMatchTextDirection)(ArkUINodeHandle node);
-    void (*setFillColor)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*setFillColor)(ArkUINodeHandle node, ArkUI_Uint32 value, void* colorRawPtr);
     void (*resetFillColor)(ArkUINodeHandle node);
-    void (*setAlt)(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName);
+    void (*setAlt)(
+        ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName, void* srcRawPtr);
     void (*resetAlt)(ArkUINodeHandle node);
     void (*setImageInterpolation)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetImageInterpolation)(ArkUINodeHandle node);
@@ -1927,6 +1929,36 @@ struct CJUIWebModifier {
     void (*resetOnRequestSelectedCallBack)(ArkUINodeHandle node);
     void (*setOnContextMenuHideCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnContextMenuHideCallBack)(ArkUINodeHandle node);
+    void (*setGeolocationAccess)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetGeolocationAccess)(ArkUINodeHandle node);
+    void (*setDatabaseAccess)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetDatabaseAccess)(ArkUINodeHandle node);
+    void (*setOverviewModeAccess)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetOverviewModeAccess)(ArkUINodeHandle node);
+    void (*setForceDarkAccess)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetForceDarkAccess)(ArkUINodeHandle node);
+    void (*setPinchSmooth)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetPinchSmooth)(ArkUINodeHandle node);
+    void (*setMetaViewport)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetMetaViewport)(ArkUINodeHandle node);
+    void (*setEnableFollowSystemFontWeight)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableFollowSystemFontWeight)(ArkUINodeHandle node);
+    void (*setEnableNativeEmbedMode)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableNativeEmbedMode)(ArkUINodeHandle node);
+    void (*setMinFontSize)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetMinFontSize)(ArkUINodeHandle node);
+    void (*setDefaultFontSize)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetDefaultFontSize)(ArkUINodeHandle node);
+    void (*setDefaultFixedFontSize)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetDefaultFixedFontSize)(ArkUINodeHandle node);
+    void (*setMinLogicalFontSize)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetMinLogicalFontSize)(ArkUINodeHandle node);
+    void (*setWebStandardFont)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetWebStandardFont)(ArkUINodeHandle node);
+    void (*setWebSerifFont)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetWebSerifFont)(ArkUINodeHandle node);
+    void (*setWebSansSerifFont)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetWebSansSerifFont)(ArkUINodeHandle node);
 };
 
 struct CJUIBlankModifier {

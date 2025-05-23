@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -1591,11 +1592,20 @@ void FocusHub::GetPaintColorFromBox(Color& paintColor)
     CHECK_NULL_VOID(appTheme);
     if (box_.paintStyle_ && box_.paintStyle_->strokeColor) {
         paintColor = box_.paintStyle_->strokeColor.value();
-    } else if (HasPaintColor()) {
-        paintColor = GetPaintColor();
-    } else {
-        paintColor = appTheme->GetFocusColor();
+        return;
     }
+    if (HasPaintColor()) {
+        paintColor = GetPaintColor();
+        return;
+    }
+    auto themeScopeId = frameNode->GetThemeScopeId();
+    auto tokenTheme = TokenThemeStorage::GetInstance()->GetTheme(themeScopeId);
+    auto themeColors = tokenTheme ? tokenTheme->Colors() : nullptr;
+    if (themeColors) {
+        paintColor = themeColors->InteractiveFocus();
+        return;
+    }
+    paintColor = appTheme->GetFocusColor();
 }
 
 void FocusHub::GetPaintWidthFromBox(Dimension& paintWidth)
@@ -1741,21 +1751,9 @@ bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate
     auto appTheme = context->GetTheme<AppTheme>();
     CHECK_NULL_RETURN(appTheme, false);
     Color paintColor;
-    if (box_.paintStyle_ && box_.paintStyle_->strokeColor) {
-        paintColor = box_.paintStyle_->strokeColor.value();
-    } else if (HasPaintColor()) {
-        paintColor = GetPaintColor();
-    } else {
-        paintColor = appTheme->GetFocusColor();
-    }
+    GetPaintColorFromBox(paintColor);
     Dimension paintWidth;
-    if (box_.paintStyle_ && box_.paintStyle_->strokeWidth) {
-        paintWidth = box_.paintStyle_->strokeWidth.value();
-    } else if (HasPaintWidth()) {
-        paintWidth = GetPaintWidth();
-    } else {
-        paintWidth = appTheme->GetFocusWidthVp();
-    }
+    GetPaintWidthFromBox(paintWidth);
     renderContext->ClearFocusState();
     if (NEAR_ZERO(paintWidth.Value())) {
         return true;

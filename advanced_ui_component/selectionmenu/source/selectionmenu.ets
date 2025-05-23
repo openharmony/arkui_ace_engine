@@ -21,7 +21,7 @@ import { SymbolGlyphModifier } from '@kit.ArkUI';
 
 const WITHOUT_BUILDER = -2
 const MAX_FONT_STANDARD = 1.0
-const MAX_FONT_SCALE = 2.0
+const MAX_FONT_SCALE = 1.75
 const SYMBOL_SIZE: number = 24;
 
 export interface EditorMenuOptions {
@@ -365,6 +365,23 @@ struct SelectionMenuComponent {
     return sizeResult;
   }
 
+  updateMenuItemVisibility() {
+    if (!this.controller) {
+      return
+    }
+    let richEditorSelection = this.controller.getSelection()
+    let start = richEditorSelection.selection[0]
+    let end = richEditorSelection.selection[1]
+    if (start !== end) {
+      this.cutAndCopyEnable = true
+    }
+    if (start === 0 && this.controller.getSpans({ start: end + 1, end: end + 1 }).length === 0) {
+      this.visibilityValue = Visibility.None
+    } else {
+      this.visibilityValue = Visibility.Visible
+    }
+  }
+
   @Builder
   IconPanel() {
     Flex({ wrap: FlexWrap.Wrap }) {
@@ -585,25 +602,15 @@ struct SelectionMenuComponent {
         .constraintSize({
           minWidth: this.theme.defaultMenuWidth
         })
+        .onVisibleAreaChange([0.0, 1.0], () => {
+          this.updateMenuItemVisibility()
+        })
         .onAreaChange((oldValue: Area, newValue: Area) => {
           let newValueWidth = newValue.width as number
           this.customMenuWidth =
             this.fontScale > MAX_FONT_SCALE && newValueWidth > this.theme.defaultMenuWidth ? newValueWidth :
             this.theme.defaultMenuWidth
-          if (!this.controller) {
-            return
-          }
-          let richEditorSelection = this.controller.getSelection()
-          let start = richEditorSelection.selection[0]
-          let end = richEditorSelection.selection[1]
-          if (start !== end) {
-            this.cutAndCopyEnable = true
-          }
-          if (start === 0 && this.controller.getSpans({ start: end + 1, end: end + 1 }).length === 0) {
-            this.visibilityValue = Visibility.None
-          } else {
-            this.visibilityValue = Visibility.Visible
-          }
+          this.updateMenuItemVisibility()
         })
       } else if (this.showCustomerIndex > -1 && this.builder) {
         Column() {

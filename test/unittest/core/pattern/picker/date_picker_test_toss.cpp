@@ -15,8 +15,9 @@
 
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
-#include "core/components_ng/pattern/picker/toss_animation_controller.h"
+
 #include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
+#include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
 
 #define private public
 
@@ -128,8 +129,8 @@ HWTEST_F(DatePickerTestToss, TossAnimationControllerPlayValidVelocityTest, TestS
     controller_->timeStart_ = 1.f;
     column_->SetMainVelocity(4500.f);
     controller_->SetColumn(column_);
-    EXPECT_FALSE(controller_->Play());
-    EXPECT_EQ(controller_->speed_, 0.f);
+    EXPECT_TRUE(controller_->Play());
+    EXPECT_EQ(controller_->speed_, 4.5);
 }
 
 /**
