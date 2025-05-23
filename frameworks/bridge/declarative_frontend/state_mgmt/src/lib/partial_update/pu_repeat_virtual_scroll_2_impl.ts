@@ -1256,7 +1256,8 @@ class __RepeatVirtualScroll2Impl<T> {
         return true;
     }
 
-    private onActiveRange(nStart: number, nEnd: number, vStart: number, vEnd: number, isLoop: boolean): void {
+    private onActiveRange(nStart: number, nEnd: number, vStart: number, vEnd: number, isLoop: boolean,
+        forceUpdate: boolean): void {
         if (Number.isNaN(this.activeRange_[0])) {
             // first call to onActiveRange / no active node
             this.activeRange_ = [nStart, nEnd];
@@ -1270,7 +1271,7 @@ class __RepeatVirtualScroll2Impl<T> {
                 this.activeRange_ = [vStart, vEnd];
                 this.visibleRangeAdjustedStart_ = vStart;
             }
-            if (!isLoop) {
+            if (!isLoop && !forceUpdate) {
                 stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) onActiveRange`,
                     `(nStart: ${nStart}, nEnd: ${nEnd})`,
                     `data array length: ${this.arr_.length}, totalCount: ${this.totalCount()} - unchanged, skipping.`);
