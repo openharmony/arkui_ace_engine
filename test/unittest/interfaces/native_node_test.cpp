@@ -2360,6 +2360,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest020, TestSize.Level1)
     item.string = "#ff182431;14;normal;Arial;normal";
     nodeAPI->setAttribute(rootNode, NODE_DATE_PICKER_DISAPPEAR_TEXT_STYLE, &item);
     nodeAPI->setAttribute(rootNode, NODE_DATE_PICKER_TEXT_STYLE, &item);
+    nodeAPI->setAttribute(rootNode, NODE_DATE_PICKER_CAN_LOOP, &item);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_DATE_PICKER_SELECTED_TEXT_STYLE, &item),
         ARKUI_ERROR_CODE_NO_ERROR);
     item.string = "#ff182431;14;normal;Arial;test";
@@ -2372,6 +2373,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest020, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_DATE_PICKER_DISAPPEAR_TEXT_STYLE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_DATE_PICKER_TEXT_STYLE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_DATE_PICKER_SELECTED_TEXT_STYLE), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_DATE_PICKER_CAN_LOOP), ARKUI_ERROR_CODE_NO_ERROR);
 
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_DATE_PICKER_LUNAR), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_DATE_PICKER_START), nullptr);
@@ -2380,6 +2382,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest020, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_DATE_PICKER_DISAPPEAR_TEXT_STYLE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_DATE_PICKER_TEXT_STYLE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_DATE_PICKER_SELECTED_TEXT_STYLE), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_DATE_PICKER_CAN_LOOP), nullptr);
     nodeAPI->disposeNode(rootNode);
 }
 
