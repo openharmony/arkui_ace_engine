@@ -21,6 +21,8 @@
 
 #define protected public
 #define private public
+#include "base/ressched/ressched_report.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -2016,5 +2018,24 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_017, TestSize.Level1)
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
     navigationPattern->OnLanguageConfigurationUpdate();
     EXPECT_EQ(navigationPattern->isRightToLeft_, false);
+}
+
+/**
+ * @tc.name: NavigationPatternTest_018
+ * @tc.desc: Test Ability_or_page_switch and report to RSS
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_018, TestSize.Level1)
+{
+    EXPECT_NE(ResSchedReport::GetInstance().keyEventCountMS, 156);
+    PerfMonitor::GetPerfMonitor()->Start("ABILITY_OR_PAGE_SWITCH", PerfActionType::UNKNOWN_ACTION, "");
+    ResSchedReport::GetInstance().ResSchedDataReport("ability_or_page_switch_start");
+    EXPECT_EQ(ResSchedReport::GetInstance().keyEventCountMS, 156);
+
+    ResSchedReport::GetInstance().keyEventCountMS = -1;
+    EXPECT_NE(ResSchedReport::GetInstance().keyEventCountMS, 156);
+    PerfMonitor::GetPerfMonitor()->End("ABILITY_OR_PAGE_SWITCH", PerfActionType::UNKNOWN_ACTION);
+    ResSchedReport::GetInstance().ResSchedDataReport("ability_or_page_switch_end");
+    EXPECT_EQ(ResSchedReport::GetInstance().keyEventCountMS, 156);
 }
 } // namespace OHOS::Ace::NG

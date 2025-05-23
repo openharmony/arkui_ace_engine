@@ -26,6 +26,7 @@ constexpr uint32_t RES_TYPE_LOAD_PAGE       = 34;
 constexpr uint32_t RES_TYPE_KEY_EVENT       = 122;
 constexpr uint32_t RES_TYPE_AXIS_EVENT      = 123;
 constexpr uint32_t RES_TYPE_PAGE_TRANSITION = 140;
+constexpr uint32_t RES_TYPE_ABILITY_OR_PAGE_SWITCH = 156;
 constexpr uint32_t RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST = 504;
 #ifdef FFRT_EXISTS
 constexpr uint32_t RES_TYPE_LONG_FRAME     = 71;
@@ -49,6 +50,8 @@ constexpr int32_t AXIS_OFF_EVENT = 1;
 constexpr int32_t AXIS_IS_PAD = 0;
 constexpr int32_t AXIS_IS_MOUSE = 1;
 constexpr int64_t TIME_INTERVAL = 300;
+constexpr int32_t ABILITY_OR_PAGE_SWITCH_START_EVENT = 0;
+constexpr int32_t ABILITY_OR_PAGE_SWITCH_END_EVENT = 1;
 #ifdef FFRT_EXISTS
 constexpr int32_t LONG_FRAME_START_EVENT = 0;
 constexpr int32_t LONG_FRAME_END_EVENT = 1;
@@ -81,6 +84,8 @@ constexpr char AXIS_EVENT_TYPE[] = "axis_event_type";
 constexpr char FROM_PAGE_INFO[] = "from_page";
 constexpr char TO_PAGE_INFO[] = "to_page";
 constexpr char TRANSITION_MODE[] = "transition_mode";
+constexpr char ABILITY_OR_PAGE_SWITCH_START[] = "ability_or_page_switch_start";
+constexpr char ABILITY_OR_PAGE_SWITCH_END[] = "ability_or_page_switch_end";
 #ifdef FFRT_EXISTS
 constexpr char LONG_FRAME_START[] = "long_frame_start";
 constexpr char LONG_FRAME_END[] = "long_frame_end";
@@ -187,6 +192,18 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
                 [this](std::unordered_map<std::string, std::string>& payload) {
                     LoadAceApplicationContext(payload);
                     reportDataFunc_(RES_TYPE_OVERLAY, OVERLAY_REMOVE_EVENT, payload);
+                }
+            },
+            { ABILITY_OR_PAGE_SWITCH_START,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    LoadAceApplicationContext(payload);
+                    reportDataFunc_(RES_TYPE_ABILITY_OR_PAGE_SWITCH, ABILITY_OR_PAGE_SWITCH_START_EVENT, payload);
+                }
+            },
+            { ABILITY_OR_PAGE_SWITCH_END,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    LoadAceApplicationContext(payload);
+                    reportDataFunc_(RES_TYPE_ABILITY_OR_PAGE_SWITCH, ABILITY_OR_PAGE_SWITCH_END_EVENT, payload);
                 }
             },
         };
