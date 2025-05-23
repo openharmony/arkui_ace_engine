@@ -253,7 +253,7 @@ public:
 
     void SetOnAreaChangeCallback(OnAreaChangedFunc&& callback);
 
-    void TriggerOnAreaChangeCallback(uint64_t nanoTimestamp);
+    void TriggerOnAreaChangeCallback(uint64_t nanoTimestamp, int32_t areaChangeMinDepth = -1);
 
     void OnConfigurationUpdate(const ConfigurationChange& configurationChange) override;
 
@@ -291,7 +291,8 @@ public:
         eventHub_->CleanVisibleAreaCallback(false);
     }
 
-    void TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceDisappear = false);
+    void TriggerVisibleAreaChangeCallback(
+        uint64_t timestamp, bool forceDisappear = false, int32_t isVisibleChangeMinDepth = -1);
 
     void SetOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
@@ -1291,7 +1292,8 @@ public:
 
     void OnThemeScopeUpdate(int32_t themeScopeId) override;
 
-    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool logFlag = false);
+    OffsetF CalculateOffsetRelativeToWindow(
+        uint64_t nanoTimestamp, bool logFlag = false, int32_t areaChangeMinDepth = -1);
 
     bool IsDebugInspectorId();
 
@@ -1329,6 +1331,16 @@ public:
     bool CheckTopWindowBoundary() const
     {
         return topWindowBoundary_;
+    }
+
+    void ClearCachedGlobalOffset()
+    {
+        cachedGlobalOffset_ = { 0, OffsetF() };
+    }
+
+    void ClearCachedIsFrameDisappear()
+    {
+        cachedIsFrameDisappear_ = { 0, false };
     }
 
     void SetTopWindowBoundary(bool topWindowBoundary)
@@ -1487,8 +1499,8 @@ private:
         double lastVisibleRatio, bool isThrottled = false, bool isInner = false);
     void ProcessThrottledVisibleCallback(bool forceDisappear);
     bool IsFrameDisappear() const;
-    bool IsFrameDisappear(uint64_t timestamp);
-    bool IsFrameAncestorDisappear(uint64_t timestamp);
+    bool IsFrameDisappear(uint64_t timestamp, int32_t isVisibleChangeMinDepth = -1);
+    bool IsFrameAncestorDisappear(uint64_t timestamp, int32_t isVisibleChangeMinDepth = -1);
     void ThrottledVisibleTask();
 
     void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);

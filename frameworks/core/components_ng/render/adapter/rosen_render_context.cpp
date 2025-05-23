@@ -3908,6 +3908,13 @@ void RosenRenderContext::SetPositionToRSNode()
 
 void RosenRenderContext::OnPositionUpdate(const OffsetT<Dimension>& /*value*/)
 {
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetAreaChangeNodeMinDepth(frameNode->GetDepth());
+
     SetPositionToRSNode();
 }
 
