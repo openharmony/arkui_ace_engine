@@ -547,7 +547,7 @@ void MaxLinesImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<int>(*value);
-    TextFieldModelStatic::SetMaxLines(frameNode, convValue);
+    TextFieldModelStatic::SetMaxViewLines(frameNode, convValue);
 }
 void WordBreakImpl(Ark_NativePointer node,
                    const Opt_WordBreak* value)

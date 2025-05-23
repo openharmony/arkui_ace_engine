@@ -2018,7 +2018,7 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
     public inputFilter(value: ResourceStr | undefined, error?: ((breakpoints: string) => void)): this {
         if (this.checkPriority("inputFilter")) {
             const value_casted = value as (ResourceStr | undefined)
-            const error_casted = error as (((breakpoints: string) => void))
+            const error_casted = error as (((breakpoints: string) => void) | undefined)
             this.getPeer()?.inputFilterAttribute(value_casted, error_casted)
             return this
         }
@@ -2028,7 +2028,7 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
     public showCounter(value: boolean | undefined, options?: InputCounterOptions): this {
         if (this.checkPriority("showCounter")) {
             const value_casted = value as (boolean | undefined)
-            const options_casted = options as (InputCounterOptions)
+            const options_casted = options as (InputCounterOptions | undefined)
             this.getPeer()?.showCounterAttribute(value_casted, options_casted)
             return this
         }
