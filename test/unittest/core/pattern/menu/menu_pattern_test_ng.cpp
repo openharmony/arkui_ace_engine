@@ -1731,7 +1731,6 @@ HWTEST_F(MenuPatternTestNg, RegisterAccessibilityChildActionNotify001, TestSize.
     auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
     menuItemPattern->expandingMode_ = innerMenuLayoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
-
     /**
      * @tc.steps: step3. call ShowSubMenu to create submenu
      * @tc.expected: expect subMenu's showInSubwindow param is true
