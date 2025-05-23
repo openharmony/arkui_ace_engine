@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_XCOMPONENT_XCOMPONENT_PATTERN_V2_H
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_surface_holder.h"
+#include "core/accessibility/native_interface_accessibility_provider.h"
 
 namespace OHOS::Ace::NG {
 class XComponentPatternV2 : public XComponentPattern {
@@ -47,6 +48,20 @@ public:
         return true;
     }
 
+    void SetExpectedRateRange(int32_t min, int32_t max, int32_t expected);
+
+    void UpdateOnFrameEvent(void(*callback)(void*, uint64_t, uint64_t), void* arkuiNode);
+
+    void UnregisterOnFrameEvent();
+
+    void SetNeedSoftKeyboard(bool isNeedSoftKeyboard);
+
+    ArkUI_AccessibilityProvider* CreateAccessibilityProvider();
+
+    void DisposeAccessibilityProvider(ArkUI_AccessibilityProvider* provider);
+
+    static FrameNode* QueryAccessibilityProviderHost(void* provider, bool& isProviderValied);
+
 private:
     void OnAttachToFrameNode() override;
     void OnAttachToMainTree() override;
@@ -69,6 +84,11 @@ private:
     void XComponentSizeChange(const RectF& surfaceRect);
     void OnSurfaceChanged(const RectF& surfaceRect);
 
+    void OnSurfaceShow();
+    void OnSurfaceHide();
+
+    void ResetAndInitializeNodeHandleAccessibility();
+
     void UpdateUsesSuperMethod()
     {
         if (usesSuperMethod_) {
@@ -85,6 +105,8 @@ private:
     OH_ArkUI_SurfaceHolder* surfaceHolder_ = nullptr;
     XComponentNodeType nodeType_ = XComponentNodeType::UNKNOWN;
     Color bkColor_ = Color::BLACK;
+
+    static std::unordered_map<void*, WeakPtr<FrameNode>> XComponentAccessibilityProviderMap;
 };
 } // namespace OHOS::Ace::NG
 

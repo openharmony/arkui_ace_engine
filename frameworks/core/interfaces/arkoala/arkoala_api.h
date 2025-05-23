@@ -5992,6 +5992,14 @@ struct ArkUIXComponentModifier {
     ArkUI_Int32 (*isInitialized)(ArkUINodeHandle node, ArkUI_Bool* isInitialized);
     ArkUI_Int32 (*finalize)(ArkUINodeHandle node);
     ArkUI_Bool (*getXComponentIsBindNative)(ArkUINodeHandle node);
+    ArkUI_Int32 (*setExpectedFrameRateRange)(
+        ArkUINodeHandle node, ArkUI_Int32 min, ArkUI_Int32 max, ArkUI_Int32 expected);
+    ArkUI_Int32 (*registerOnFrameCallback)(ArkUINodeHandle node,
+        void(*callback)(void*, uint64_t, uint64_t), void* arkuiNode);
+    ArkUI_Int32 (*unregisterOnFrameCallback)(ArkUINodeHandle node);
+    ArkUI_Int32 (*setNeedSoftKeyboard)(ArkUINodeHandle node, bool needSoftKeyboard);
+    void* (*createAccessibilityProvider)(ArkUINodeHandle node);
+    void (*disposeAccessibilityProvider)(void* provider);
 };
 
 struct ArkUIStateModifier {

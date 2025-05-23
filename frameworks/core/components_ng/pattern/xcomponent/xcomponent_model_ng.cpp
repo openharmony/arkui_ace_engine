@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
 #include "base/display_manager/display_manager.h"
+#include "base/error/error_code.h"
 
 namespace OHOS::Ace::NG {
 const uint32_t DEFAULT_SURFACE_SIZE = 0;
@@ -618,5 +619,85 @@ bool XComponentModelNG::GetXComponentEnableAnalyzer(FrameNode* frameNode)
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_RETURN(xcPattern, false);
     return xcPattern->GetEnableAnalyzer();
+}
+
+int32_t XComponentModelNG::SetExpectedRateRange(FrameNode* frameNode, int32_t min, int32_t max, int32_t expected)
+{
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto xcPattern = frameNode->GetPattern<XComponentPatternV2>();
+    CHECK_NULL_RETURN(xcPattern, ERROR_CODE_PARAM_INVALID);
+    if (xcPattern->HasGotNativeXComponent()) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    xcPattern->SetExpectedRateRange(min, max, expected);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t XComponentModelNG::SetOnFrameCallback(FrameNode* frameNode,
+    void(*callback)(void*, uint64_t, uint64_t), void* arkuiNode)
+{
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto xcPattern = frameNode->GetPattern<XComponentPatternV2>();
+    CHECK_NULL_RETURN(xcPattern, ERROR_CODE_PARAM_INVALID);
+    if (xcPattern->HasGotNativeXComponent()) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    xcPattern->UpdateOnFrameEvent(callback, arkuiNode);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t XComponentModelNG::UnregisterOnFrameCallback(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto xcPattern = frameNode->GetPattern<XComponentPatternV2>();
+    CHECK_NULL_RETURN(xcPattern, ERROR_CODE_PARAM_INVALID);
+    if (xcPattern->HasGotNativeXComponent()) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    xcPattern->UpdateOnFrameEvent(nullptr, nullptr);
+    xcPattern->UnregisterOnFrameEvent();
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t XComponentModelNG::SetNeedSoftKeyboard(FrameNode* frameNode, bool needSoftKeyboard)
+{
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto xcPattern = frameNode->GetPattern<XComponentPatternV2>();
+    CHECK_NULL_RETURN(xcPattern, ERROR_CODE_PARAM_INVALID);
+    if (xcPattern->HasGotNativeXComponent()) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    xcPattern->SetNeedSoftKeyboard(needSoftKeyboard);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void* XComponentModelNG::CreateAccessibilityProvider(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto xcPattern = frameNode->GetPattern<XComponentPatternV2>();
+    CHECK_NULL_RETURN(xcPattern, nullptr);
+    if (xcPattern->HasGotNativeXComponent()) {
+        return nullptr;
+    }
+    return xcPattern->CreateAccessibilityProvider();
+}
+
+void XComponentModelNG::DisposeAccessibilityProvider(ArkUI_AccessibilityProvider* provider)
+{
+    CHECK_NULL_VOID(provider);
+    bool isProviderValied = false;
+    auto frameNode = XComponentPatternV2::QueryAccessibilityProviderHost(provider, isProviderValied);
+    if (!isProviderValied) {
+        return;
+    }
+    RefPtr<XComponentPatternV2> xcPattern = (frameNode == nullptr)
+                                            ? (nullptr)
+                                            : (frameNode->GetPattern<XComponentPatternV2>());
+    if (xcPattern) {
+        xcPattern->DisposeAccessibilityProvider(provider);
+        return;
+    }
+    delete provider;
+    provider = nullptr;
 }
 } // namespace OHOS::Ace::NG

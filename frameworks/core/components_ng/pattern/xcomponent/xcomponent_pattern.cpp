@@ -807,6 +807,17 @@ void XComponentPattern::UninitializeAccessibility(FrameNode* frameNode)
     accessibilityChildTreeCallback_ = nullptr;
 }
 
+ArkUI_AccessibilityProvider* XComponentPattern::GetNativeProvider()
+{
+    if(useNodeHandleAccessibilityProvider_) {
+        return arkuiAccessibilityProvider_;
+    }
+    auto pair = GetNativeXComponent();
+    auto nativeXComponentImpl = pair.first;
+    CHECK_NULL_RETURN(nativeXComponentImpl, nullptr);
+    return nativeXComponentImpl->GetAccessbilityProvider().get();
+}
+
 bool XComponentPattern::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId)
 {
     auto host = GetHost();
@@ -820,10 +831,7 @@ bool XComponentPattern::OnAccessibilityChildTreeRegister(uint32_t windowId, int3
             AceType::MakeRefPtr<XComponentAccessibilityProvider>(WeakClaim(this));
     }
 
-    auto pair = GetNativeXComponent();
-    auto nativeXComponentImpl = pair.first;
-    CHECK_NULL_RETURN(nativeXComponentImpl, false);
-    auto nativeProvider = nativeXComponentImpl->GetAccessbilityProvider();
+    auto nativeProvider = GetNativeProvider();
     CHECK_NULL_RETURN(nativeProvider, false);
     if (!nativeProvider->IsRegister()) {
         TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Not register native accessibility");
@@ -858,10 +866,7 @@ bool XComponentPattern::OnAccessibilityChildTreeDeregister()
     CHECK_NULL_RETURN(pipeline, false);
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_RETURN(accessibilityManager, false);
-    auto pair = GetNativeXComponent();
-    auto nativeXComponentImpl = pair.first;
-    CHECK_NULL_RETURN(nativeXComponentImpl, false);
-    auto nativeProvider = nativeXComponentImpl->GetAccessbilityProvider();
+    auto nativeProvider = GetNativeProvider();
     CHECK_NULL_RETURN(nativeProvider, false);
     nativeProvider->SetInnerAccessibilityProvider(nullptr);
     accessibilitySessionAdapter_ = nullptr;

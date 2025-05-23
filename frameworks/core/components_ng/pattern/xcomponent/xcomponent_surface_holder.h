@@ -27,6 +27,10 @@ struct OH_ArkUI_SurfaceCallback {
     void (*OnSurfaceChanged)(OH_ArkUI_SurfaceHolder* holder, uint64_t width, uint64_t height);
     /** Called when the surface is destroyed. */
     void (*OnSurfaceDestroyed)(OH_ArkUI_SurfaceHolder* holder);
+    /** Called when the surface is on foreground */
+    void (*onSurfaceShow)(OH_ArkUI_SurfaceHolder* surfaceHolder);
+    /** Called when the surface is on background */
+    void (*onSurfaceHide)(OH_ArkUI_SurfaceHolder* surfaceHolder);
 };
 
 struct OH_ArkUI_SurfaceHolder {
