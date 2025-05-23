@@ -231,6 +231,8 @@ void CheckSwiperDigitalParameters(SwiperDigitalParameters& p)
     ResetIfInvalid(p.fontSize);
     ResetIfInvalid(p.selectedFontSize);
 }
+
+constexpr float ARROW_SIZE_COEFFICIENT = 0.75f;
 } // namespace
 } // namespace OHOS::Ace::NG
 
@@ -701,13 +703,74 @@ void DisplayArrowImpl(Ark_NativePointer node,
         return;
     }
 
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+    SwiperArrowParameters swiperArrowParameters;
     if (auto arrowStylePtr = std::get_if<SwiperArrowParameters>(&(*optArrow)); arrowStylePtr) {
-        ResetIfInvalid(arrowStylePtr->backgroundSize);
-        ResetIfInvalid(arrowStylePtr->arrowSize);
-        SwiperModelNG::SetArrowStyle(frameNode, *arrowStylePtr);
+        swiperArrowParameters.isShowBackground =
+            arrowStylePtr->isShowBackground.value_or(swiperIndicatorTheme->GetIsShowArrowBackground());
+        swiperArrowParameters.isSidebarMiddle =
+            arrowStylePtr->isSidebarMiddle.value_or(swiperIndicatorTheme->GetIsSidebarMiddle());
+        auto isSidebarMiddle = arrowStylePtr->isSidebarMiddle;
+        if (isSidebarMiddle && isSidebarMiddle.value()) {
+            swiperArrowParameters.backgroundColor =
+                arrowStylePtr->backgroundColor.value_or(swiperIndicatorTheme->GetBigArrowBackgroundColor());
+            swiperArrowParameters.arrowColor =
+                arrowStylePtr->arrowColor.value_or(swiperIndicatorTheme->GetBigArrowColor());
+
+            auto backgroundSize = arrowStylePtr->backgroundSize;
+            swiperArrowParameters.backgroundSize = backgroundSize &&
+                                                           GreatNotEqual(backgroundSize.value().ConvertToVp(), 0.0) &&
+                                                           !(backgroundSize.value().Unit() == DimensionUnit::PERCENT)
+                                                       ? backgroundSize.value()
+                                                       : swiperIndicatorTheme->GetBigArrowBackgroundSize();
+
+            if (swiperArrowParameters.isShowBackground.value()) {
+                swiperArrowParameters.arrowSize = swiperArrowParameters.backgroundSize.value() * ARROW_SIZE_COEFFICIENT;
+            } else {
+                auto arrowSize = arrowStylePtr->arrowSize;
+                swiperArrowParameters.arrowSize = arrowSize && GreatNotEqual(arrowSize.value().ConvertToVp(), 0.0) &&
+                                                          !(arrowSize.value().Unit() == DimensionUnit::PERCENT)
+                                                      ? arrowSize.value()
+                                                      : swiperIndicatorTheme->GetBigArrowSize();
+                swiperArrowParameters.backgroundSize = swiperArrowParameters.arrowSize;
+            }
+        } else {
+            swiperArrowParameters.backgroundColor =
+                arrowStylePtr->backgroundColor.value_or(swiperIndicatorTheme->GetSmallArrowBackgroundColor());
+            swiperArrowParameters.arrowColor =
+                arrowStylePtr->arrowColor.value_or(swiperIndicatorTheme->GetSmallArrowColor());
+
+            auto backgroundSize = arrowStylePtr->backgroundSize;
+            swiperArrowParameters.backgroundSize = backgroundSize &&
+                                                           GreatNotEqual(backgroundSize.value().ConvertToVp(), 0.0) &&
+                                                           !(backgroundSize.value().Unit() == DimensionUnit::PERCENT)
+                                                       ? backgroundSize.value()
+                                                       : swiperIndicatorTheme->GetSmallArrowBackgroundSize();
+
+            if (swiperArrowParameters.isShowBackground.value()) {
+                swiperArrowParameters.arrowSize = swiperArrowParameters.backgroundSize.value() * ARROW_SIZE_COEFFICIENT;
+            } else {
+                auto arrowSize = arrowStylePtr->arrowSize;
+                swiperArrowParameters.arrowSize = arrowSize && GreatNotEqual(arrowSize.value().ConvertToVp(), 0.0) &&
+                                                          !(arrowSize.value().Unit() == DimensionUnit::PERCENT)
+                                                      ? arrowSize.value()
+                                                      : swiperIndicatorTheme->GetSmallArrowSize();
+                swiperArrowParameters.backgroundSize = swiperArrowParameters.arrowSize;
+            }
+        }
     } else {
-        SwiperModelNG::SetArrowStyle(frameNode, SwiperArrowParameters());
+        swiperArrowParameters.isShowBackground = swiperIndicatorTheme->GetIsShowArrowBackground();
+        swiperArrowParameters.isSidebarMiddle = swiperIndicatorTheme->GetIsSidebarMiddle();
+        swiperArrowParameters.backgroundSize = swiperIndicatorTheme->GetSmallArrowBackgroundSize();
+        swiperArrowParameters.backgroundColor = swiperIndicatorTheme->GetSmallArrowBackgroundColor();
+        swiperArrowParameters.arrowSize = swiperIndicatorTheme->GetSmallArrowSize();
+        swiperArrowParameters.arrowColor = swiperIndicatorTheme->GetSmallArrowColor();
     }
+
+    SwiperModelNG::SetArrowStyle(frameNode, swiperArrowParameters);
     SwiperModelNG::SetDisplayArrow(frameNode, true);
 }
 void DisplayCountImpl(Ark_NativePointer node,
