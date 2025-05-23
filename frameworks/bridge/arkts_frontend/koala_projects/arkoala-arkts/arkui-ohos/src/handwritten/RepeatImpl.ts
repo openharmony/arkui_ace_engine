@@ -22,7 +22,7 @@ import { RepeatItem, UIRepeatAttribute, RepeatArray, RepeatItemBuilder, Template
 import { IDataSource, DataChangeListener } from '../component/lazyForEach';
 import { LazyForEachImpl } from '../LazyForEach';
 import { RepeatType } from '../PeerNode';
-import { ArkColumnPeer } from '..';
+import { ArkColumnPeer } from '../component/column';
 
 class RepeatItemImpl<T> implements RepeatItem<T> {
     __item: T;
@@ -192,7 +192,11 @@ function virtualRender<T>(arr: RepeatArray<T>,
         }
         /** @memo */
         const itemBuilder = itemGenFuncs.get(_type)!;
-        if (reusable) { // wrap in reusable node
+        /**
+         * wrap in reusable node.
+         * To optimize performance, insert reuseKey through compiler plugin to the content of itemBuilder.
+         */
+        if (reusable) {
             NodeAttach(() => ArkColumnPeer.create(undefined), (node: ArkColumnPeer) => {
                 itemBuilder(ri);
             }, _type) // using type as reuseKey
