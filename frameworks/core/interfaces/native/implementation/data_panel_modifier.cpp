@@ -24,12 +24,16 @@
 
 namespace {
 constexpr float DATA_PANEL_VALUE_MIN = 0.0;
+constexpr double DATA_PANEL_VALUE_MAX = 100.0;
+constexpr size_t DATA_PANEL_COUNT_MAX = 9;
 }
 
 namespace OHOS::Ace::NG::Validator {
 void ValidateDataPanelValues(float& value)
 {
-    value = std::max(value, DATA_PANEL_VALUE_MIN);
+    if (LessOrEqual(value, DATA_PANEL_VALUE_MIN)) {
+        value = 0.0;
+    }
 }
 }
 
@@ -43,18 +47,32 @@ struct DataPanelOptions {
 template<>
 DataPanelOptions Convert(const Ark_DataPanelOptions& src)
 {
+    std::vector<double> doubleArray;
+    auto optMax = Converter::OptConvert<float>(src.max);
+    double max = optMax.has_value() ? optMax.value() : DATA_PANEL_VALUE_MAX;
     auto floatArray = Converter::OptConvert<std::vector<float>>(src.values);
     if (floatArray.has_value()) {
-        for (size_t idx = 0; idx < floatArray.value().size(); idx++) {
-            Validator::ValidateDataPanelValues(floatArray.value().at(idx));
+        double dataSum = 0.0;
+        size_t count = std::min(floatArray.value().size(), DATA_PANEL_COUNT_MAX);
+        for (size_t idx = 0; idx < count; idx++) {
+            float& value = floatArray.value().at(idx);
+            Validator::ValidateDataPanelValues(value);
+            // if the sum of values exceeds the maximum value, only fill in to the maximum value
+            if (GreatOrEqual(dataSum + value, max) && GreatNotEqual(max, DATA_PANEL_VALUE_MIN)) {
+                doubleArray.emplace_back(max - dataSum);
+                break;
+            }
+            dataSum += value;
+            doubleArray.emplace_back(value);
+        }
+        if (LessOrEqual(max, DATA_PANEL_VALUE_MIN)) {
+            max = dataSum;
         }
     }
-    std::vector<double> doubleArray;
-    std::copy(floatArray->begin(), floatArray->end(), std::back_inserter(doubleArray));
 
     return {
         .values = doubleArray,
-        .max = Converter::OptConvert<float>(src.max),
+        .max = max,
         .type = Converter::OptConvert<DataPanelType>(src.type)
     };
 }
