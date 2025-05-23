@@ -317,6 +317,7 @@ HWTEST_F(TextFieldPatternTestEight, UpdateRectByTextAlign001, TestSize.Level0)
 
     RectF textRect = RectF(0.0f, 0.0f, 0.0f, 0.0f);
     pattern_->UpdateRectByTextAlign(textRect);
+    EXPECT_EQ(pattern_->GetTextAlign(), TextAlign::LEFT);
 }
 
 /**
@@ -359,7 +360,8 @@ HWTEST_F(TextFieldPatternTestEight, GetDumpTextValue001, TestSize.Level0)
     });
     GetFocus();
 
-    pattern_->GetDumpTextValue();
+    auto result = pattern_->GetDumpTextValue();
+    EXPECT_EQ(result, "passwordLen:26");
 }
 
 /**
