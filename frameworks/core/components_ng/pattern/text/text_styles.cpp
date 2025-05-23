@@ -133,6 +133,7 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(fontStyle, FontFeature, SetFontFeatures);
         UPDATE_TEXT_STYLE(fontStyle, StrokeWidth, SetStrokeWidth);
         UPDATE_TEXT_STYLE(fontStyle, StrokeColor, SetStrokeColor);
+        UPDATE_TEXT_STYLE(fontStyle, Superscript, SetSuperscript);
         UPDATE_TEXT_STYLE(fontStyle, TextDecoration, SetTextDecoration);
         UPDATE_TEXT_STYLE(fontStyle, TextDecorationColor, SetTextDecorationColor);
         UPDATE_TEXT_STYLE(fontStyle, TextDecorationStyle, SetTextDecorationStyle);

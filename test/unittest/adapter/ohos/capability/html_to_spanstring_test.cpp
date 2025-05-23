@@ -1649,9 +1649,10 @@ HWTEST_F(HtmlConvertTestNg, HtmlConverter012, TestSize.Level1)
     std::string result =
         "<div ><p style=\"text-align: center;text-indent: 23.00px;word-break: break_all;text-overflow: ellipsis;\">"
         "<span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;font-family: "
-        "HarmonyOS Sans;stroke-width: 0.00px;stroke-color: #000000FF;\">段落标题</span></p><span "
-        "style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;"
-        "font-family: HarmonyOS Sans;stroke-width: 0.00px;stroke-color: #000000FF;\">正文第一段开始</span></div>";
+        "HarmonyOS Sans;stroke-width: 0.00px;stroke-color: #000000FF;font-superscript: normal;\">段落标题</span>"
+        "</p><span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;"
+        "font-family: HarmonyOS Sans;stroke-width: 0.00px;stroke-color: #000000FF;font-superscript: normal;\">"
+        "正文第一段开始</span></div>";
     EXPECT_EQ(out, result);
 }
 
@@ -1671,11 +1672,12 @@ HWTEST_F(HtmlConvertTestNg, HtmlConverter013, TestSize.Level1)
     auto out = convert.ToHtml(*spanString);
     std::string result =
         "<div ><span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;font-family: "
-        "HarmonyOS Sans;stroke-width: 0.00px;stroke-color: #000000FF;vertical-align: 20.00px;\">向上到顶</span>"
-        "<span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;"
-        "font-family: HarmonyOS Sans;stroke-width: 0.00px;stroke-color: #000000FF;vertical-align: "
-        "10.00px;\">适中</span><span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: "
-        "#000000FF;font-family: HarmonyOS Sans;stroke-width: 0.00px;stroke-color: #000000FF;\">向下到底</span></div>";
+        "HarmonyOS Sans;stroke-width: 0.00px;stroke-color: #000000FF;font-superscript: normal;vertical-align: "
+        "20.00px;\">向上到顶</span><span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: "
+        "#000000FF;font-family: HarmonyOS Sans;stroke-width: 0.00px;stroke-color: #000000FF;font-superscript: "
+        "normal;vertical-align: 10.00px;\">适中</span><span style=\"font-size: 16.00px;font-style: normal;"
+        "font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;stroke-width: 0.00px;"
+        "stroke-color: #000000FF;font-superscript: normal;\">向下到底</span></div>";
     EXPECT_EQ(out, result);
 }
 
@@ -2214,6 +2216,76 @@ HWTEST_F(HtmlConvertTestNg, MultiHtmlConvert, TestSize.Level1)
      */
     ++it;
     EXPECT_EQ((*it)->fontStyle->GetTextDecorationFirst(), TextDecoration::OVERLINE);
+}
+/**
+ * @tc.name: HtmlConvertTestSubscriptText
+ * @tc.desc: Test the conversion of subscript text (<sub>labels)
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlConvertTestSubscriptText, TestSize.Level1)
+{
+    const std::string html = "<html><body><p>This is <sub>sub</sub> text</p></body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    std::list<RefPtr<NG::SpanItem>> spans = dstSpan->GetSpanItems();
+    EXPECT_EQ(spans.size(), 3);
+    auto it = spans.begin();
+    ++it;
+    EXPECT_TRUE((*it)->fontStyle->GetSuperscript().has_value());
+    EXPECT_EQ((*it)->fontStyle->GetSuperscript().value(), OHOS::Ace::SuperscriptStyle::SUBSCRIPT);
+}
+
+/**
+ * @tc.name: HtmlConvertTestSuperscriptText
+ * @tc.desc: Test the conversion of superscript text (<sup>labels)
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlConvertTestSuperscriptText, TestSize.Level1)
+{
+    const std::string html = "<html><body><p>This is <sup>sup</sup> text</p></body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    std::list<RefPtr<NG::SpanItem>> spans = dstSpan->GetSpanItems();
+    EXPECT_EQ(spans.size(), 3);
+    auto it = spans.begin();
+    ++it;
+    EXPECT_TRUE((*it)->fontStyle->GetSuperscript().has_value());
+    EXPECT_EQ((*it)->fontStyle->GetSuperscript().value(), OHOS::Ace::SuperscriptStyle::SUPERSCRIPT);
+}
+
+/**
+ * @tc.name: HtmlConvertTestBlodText
+ * @tc.desc: Test the conversion of BLOD text (<b>labels)
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlConvertTestBlodText, TestSize.Level1)
+{
+    const std::string html = "<html><body><p>This is <b>b</b> text</p></body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    std::list<RefPtr<NG::SpanItem>> spans = dstSpan->GetSpanItems();
+    EXPECT_EQ(spans.size(), 3);
+    auto it = spans.begin();
+    ++it;
+    EXPECT_TRUE((*it)->fontStyle->GetFontWeight().has_value());
+    EXPECT_EQ((*it)->fontStyle->GetFontWeight().value(), FontWeight::BOLD);
+}
+
+/**
+ * @tc.name: HtmlConvertTestEmphasizeText
+ * @tc.desc: Test the conversion of emphasize text (<em>labels)
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlConvertTestEmphasizeText, TestSize.Level1)
+{
+    const std::string html = "<html><body><p>This is <em>em</em> text</p></body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    std::list<RefPtr<NG::SpanItem>> spans = dstSpan->GetSpanItems();
+    EXPECT_EQ(spans.size(), 3);
+    auto it = spans.begin();
+    ++it;
+    EXPECT_EQ((*it)->fontStyle->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
 }
 
 } // namespace OHOS::Ace::NG

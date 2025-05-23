@@ -1184,6 +1184,7 @@ RefPtr<FontSpan> SpanString::ToFontSpan(const RefPtr<NG::SpanItem>& spanItem, in
     font.fontWeight = spanItem->fontStyle->GetFontWeight();
     font.strokeWidth = spanItem->fontStyle->GetStrokeWidth();
     font.strokeColor = spanItem->fontStyle->GetStrokeColor();
+    font.superscript = spanItem->fontStyle->GetSuperscript();
     return AceType::MakeRefPtr<FontSpan>(font, start, end);
 }
 
