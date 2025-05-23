@@ -9875,6 +9875,7 @@ void JSViewAbstract::JsOnChildTouchTest(const JSCallbackInfo& info)
                                const std::vector<NG::TouchTestInfo>& touchInfo) -> NG::TouchResult {
         NG::TouchResult touchRes;
         NG::TouchResult defaultRes;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, defaultRes);
         defaultRes.strategy = NG::TouchTestStrategy::DEFAULT;
         defaultRes.id = "";
         auto ret = func->Execute(touchInfo);
