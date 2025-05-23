@@ -142,7 +142,7 @@ import { GaugeOptions, GaugeIndicatorOptions, GaugeShadowOptions, Tuple_Union_Re
 import { GridColColumnOption, GridColOptions } from "./../gridCol"
 import { ImageLoadResult } from "./../imageSpan"
 import { LineOptions } from "./../line"
-import { Literal_Number_index } from "./../stepper"
+import { StepperOptionalIndex } from "./../stepper"
 import { MarqueeOptions } from "./../marquee"
 import { PathOptions } from "./../path"
 import { PluginComponentTemplate, PluginErrorData, PluginComponentOptions } from "./../pluginComponent"
@@ -1547,7 +1547,7 @@ export class TypeChecker {
         return value instanceof Literal_Number_fingers_speed_SwipeDirection_direction
     }
     static isLiteral_Number_index(value: Object | string | number | undefined, arg0: boolean): boolean {
-        return value instanceof Literal_Number_index
+        return value instanceof StepperOptionalIndex
     }
     static isLiteral_Number_offset_span(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof Literal_Number_offset_span
