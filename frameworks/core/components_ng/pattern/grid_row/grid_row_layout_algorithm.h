@@ -65,6 +65,9 @@ public:
     }
 
 private:
+    float UpdateChildPositionWidthIgnoreLayoutSafeArea(
+        bool isRtl, const RefPtr<LayoutWrapper>& childLayoutWrapper, const OffsetF& originOffset);
+    void InitChildrenRowInLayout(LayoutWrapper* layoutWrapper);
     float MeasureNonMatchParentChildren(LayoutWrapper* layoutWrapper, V2::GridSizeType sizeType,
         std::list<RefPtr<LayoutWrapper>>& children);
     void DisableWidthLayoutPolicy(const RefPtr<LayoutWrapper>& child);

@@ -76,6 +76,8 @@ public:
     }
 
 private:
+    void UpdateChildPositionWidthIgnoreLayoutSafeArea(
+        const RefPtr<LayoutWrapper>& childLayoutWrapper, const OffsetF& originOffset);
     void DisableLayoutPolicy(const RefPtr<LayoutWrapper>& child);
     LayoutConstraintF CreateChildConstraint(LayoutWrapper* layoutWrapper);
     void MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, SizeF realSize);

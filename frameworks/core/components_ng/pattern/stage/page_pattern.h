@@ -68,6 +68,11 @@ public:
     {
         return false;
     }
+    
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
 
     const RefPtr<PageInfo>& GetPageInfo() const
     {

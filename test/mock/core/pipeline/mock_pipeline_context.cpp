@@ -665,6 +665,14 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     }
 }
 
+void PipelineContext::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle)
+{
+    if (MockPipelineContext::GetCurrent()->UseFlushUITasks()) 
+    {
+        taskScheduler_->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
+    }
+}
+
 void PipelineContext::AddPendingDeleteCustomNode(const RefPtr<CustomNode>& node) {}
 
 void PipelineContext::AddLayoutNode(const RefPtr<FrameNode>& layoutNode) {}

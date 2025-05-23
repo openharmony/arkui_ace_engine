@@ -362,6 +362,7 @@ void GridRowLayoutAlgorithm::LayoutChildrenRow(ChildrenRow& row, float width, co
         }
         OffsetF offset(offsetWidth, newLineOffset.offsetY + offsetYAdjust);
         childLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(offset + paddingOffset);
+        UpdateChildPositionWidthIgnoreLayoutSafeArea(isRightToLeft, childLayoutWrapper, offset + paddingOffset);
         childLayoutWrapper->Layout();
     }
 }
@@ -406,8 +407,74 @@ void GridRowLayoutAlgorithm::LayoutWithMatchParentInfo(LayoutWrapper* layoutWrap
     }
 }
 
+void GridRowLayoutAlgorithm::InitChildrenRowInLayout(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(host->GetIgnoreLayoutProcess());
+    std::list<RefPtr<LayoutWrapper>> children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    const auto& hostLayoutProperty = layoutWrapper->GetHostNode()->GetLayoutProperty<GridRowLayoutProperty>();
+    int32_t offset = 0;
+    float totalHeight = 0.0;
+    float currentRowHeight = 0.0;
+    SizeF maxSize;
+    V2::GridSizeType sizeType;
+    if (!GetSizeTypeAndMaxSize(layoutWrapper, maxSize, sizeType)) {
+        return;
+    }
+    ParseGridRowParams(layoutWrapper, sizeType, maxSize);
+    SortByGridColOrder(children, sizeType);
+    for (auto& child : children) {
+        if (child->GetHostTag() != V2::GRID_COL_ETS_TAG) {
+            continue;
+        }
+        auto gridCol = AceType::DynamicCast<GridColLayoutProperty>(child->GetLayoutProperty());
+        if (!gridCol) {
+            continue;
+        }
+        gridCol->UpdateSizeType(sizeType);
+        int32_t span = 0;
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+            span = std::min(gridCol->GetSpan(sizeType), columnNum_);
+        } else {
+            span = gridCol->GetSpan(sizeType) >= 0 ? std::min(gridCol->GetSpan(sizeType), columnNum_) : columnNum_;
+        }
+        NewLineOffset newLineOffset;
+        CalculateOffsetOfNewline(gridCol, span, columnNum_ - offset, columnNum_, sizeType, newLineOffset);
+        if (newLineOffset.newLineCount > 0) {
+            totalHeight += (currentRowHeight * newLineOffset.newLineCount + gutterInDouble_.second);
+        }
+        if (newLineOffset.newLineCount > 0) {
+            gridColChildrenRows_.emplace_back(gridColChildrenOfOneRow_);
+            CalcCrossAxisAlignment(layoutWrapper, *gridColChildrenRows_.rbegin(), currentRowHeight);
+            gridColChildrenOfOneRow_.clear();
+            currentRowHeight = child->GetGeometryNode()->GetFrameSize().Height();
+        } else {
+            newLineOffset.offset += offset;
+            auto childHeight = child->GetGeometryNode()->GetMarginFrameSize().Height();
+            currentRowHeight = std::max(currentRowHeight, childHeight);
+        }
+        offset = newLineOffset.offset + newLineOffset.span;
+        newLineOffset.offsetY = totalHeight;
+        gridColChildrenOfOneRow_.emplace_back(std::make_pair(child, newLineOffset));
+    }
+    if (!gridColChildrenOfOneRow_.empty()) {
+        gridColChildrenRows_.emplace_back(gridColChildrenOfOneRow_);
+        CalcCrossAxisAlignment(layoutWrapper, *gridColChildrenRows_.rbegin(), currentRowHeight);
+        gridColChildrenOfOneRow_.clear();
+    }
+}
+
 void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    if (host && !host->GetIgnoreLayoutProcess()) {
+        if (GetNeedPostponeForIgnore()) {
+            return;
+        }
+    }
+    InitChildrenRowInLayout(layoutWrapper);
     if (gridColChildrenRows_.empty()) {
         return;
     }
@@ -420,11 +487,15 @@ void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto padding = layoutProperty->CreatePaddingAndBorder();
     OffsetF paddingOffset = { padding.left.value_or(0.0f), padding.top.value_or(0.0f) };
 
+    bool firstLine = true;
+    float firstLineOffset = 0.0f;
     for (auto&& row : gridColChildrenRows_) {
         for (auto&& pair : row) {
             auto childLayoutWrapper = pair.first;
             auto& newLineOffset = pair.second;
-
+            if (!firstLine) {
+                newLineOffset.offsetY -= firstLineOffset;
+            }
             float offsetWidth = 0.0;
             if (IsRightToLeft(layoutWrapper)) {
                 offsetWidth = ((newLineOffset.span + newLineOffset.offset) * columnUnitWidth_ +
@@ -436,9 +507,36 @@ void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
             OffsetF offset(offsetWidth, newLineOffset.offsetY);
             childLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(offset + paddingOffset);
+            auto ignoreMatchOffset = UpdateChildPositionWidthIgnoreLayoutSafeArea(
+                IsRightToLeft(layoutWrapper), childLayoutWrapper, offset + paddingOffset);
+            if (firstLine) {
+                auto lineOffset =
+                    GreatNotEqual(childLayoutWrapper->GetGeometryNode()->GetFrameSize().Height() - ignoreMatchOffset,
+                        layoutWrapper->GetGeometryNode()->GetFrameSize().Height())
+                        ? 0.0f
+                        : ignoreMatchOffset;
+                firstLineOffset = std::max(firstLineOffset, lineOffset);
+            }
             childLayoutWrapper->Layout();
         }
+        firstLine = false;
     }
+}
+
+float GridRowLayoutAlgorithm::UpdateChildPositionWidthIgnoreLayoutSafeArea(
+    bool isRtl, const RefPtr<LayoutWrapper>& childLayoutWrapper, const OffsetF& originOffset)
+{
+    auto childNode = childLayoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(childNode, 0.0f);
+    CHECK_NULL_RETURN(childNode->GetLayoutProperty(), 0.0f);
+    CHECK_NULL_RETURN(childNode->GetLayoutProperty()->IsIgnoreOptsValid(), 0.0f);
+    IgnoreLayoutSafeAreaOpts& opts = *(childNode->GetLayoutProperty()->GetIgnoreLayoutSafeAreaOpts());
+    auto sae = childNode->GetAccumulatedSafeAreaExpand(false, opts);
+    auto offsetX = isRtl ? -sae.right.value_or(0.0f) : sae.left.value_or(0.0f);
+    auto offsetY = sae.top.value_or(0.0f);
+    OffsetF saeTrans = originOffset - OffsetF(offsetX, offsetY);
+    childLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(saeTrans);
+    return childNode->GetLayoutProperty()->IsExpandConstraintNeeded() ? offsetY : 0.0f;
 }
 
 OptionalSizeF GridRowLayoutAlgorithm::MeasureSelfByLayoutPolicy(LayoutWrapper* layoutWrapper, float childHeight,
@@ -465,6 +563,8 @@ void GridRowLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* layout
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto realSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     MinusPaddingToNonNegativeSize(padding, realSize);
+    auto host = layoutWrapper->GetHostNode();
+    IgnoreLayoutSafeAreaBundle bundle;
     for (const auto& child : layoutPolicyChildren_) {
         auto gridCol = AceType::DynamicCast<GridColLayoutProperty>(child->GetLayoutProperty());
         if (!gridCol) {
@@ -476,7 +576,19 @@ void GridRowLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* layout
         LayoutConstraintF parentConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
         parentConstraint.UpdateSelfMarginSizeWithCheck(ideaSize);
         parentConstraint.parentIdealSize.SetSize(realSize);
+        auto childNode = child->GetHostNode();
+        if (childNode && childNode->GetLayoutProperty() && childNode->GetLayoutProperty()->IsExpandConstraintNeeded()) {
+            bundle.first.emplace_back(childNode);
+            child->GetGeometryNode()->SetParentLayoutConstraint(parentConstraint);
+            SetNeedPostponeForIgnore();
+            continue;
+        }
         child->Measure(parentConstraint);
+    }
+    if (host && host->GetContext() && GetNeedPostponeForIgnore()) {
+        auto context = host->GetContext();
+        bundle.second = host;
+        context->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
     }
 }
 
