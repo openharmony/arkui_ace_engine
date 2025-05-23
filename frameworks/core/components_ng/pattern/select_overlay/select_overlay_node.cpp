@@ -80,6 +80,7 @@ constexpr Dimension MIN_DIAMETER = 1.5_vp;
 constexpr Dimension MIN_ARROWHEAD_DIAMETER = 2.0_vp;
 constexpr Dimension ANIMATION_TEXT_OFFSET = 12.0_vp;
 constexpr Dimension OVERLAY_MAX_WIDTH = 280.0_vp;
+constexpr Dimension MIN_HOTSPOT_WIDTH = 40.0_vp;
 constexpr float AGING_MIN_SCALE = 1.75f;
 
 std::unordered_map<TextDataDetectType, std::string> AI_TYPE_ID_MAP = {
@@ -153,6 +154,30 @@ enum class SelectOverlayMenuButtonType {
     NORMAL,
     AIBUTTON
 };
+
+void SetMoreOrBackButtonResponse(RefPtr<FrameNode>& node)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+        return;
+    }
+    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(textOverlayTheme);
+    auto gestureHub = node->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    std::vector<DimensionRect> vector;
+    auto menuPadding = textOverlayTheme->GetMenuPadding();
+    auto buttonWidth = textOverlayTheme->GetMenuButtonWidth();
+    auto top = menuPadding.Top();
+    auto responseHeight = top.Value() + menuPadding.Bottom().Value() + textOverlayTheme->GetMenuButtonHeight().Value();
+    auto responseWidth = std::max(buttonWidth, MIN_HOTSPOT_WIDTH);
+    constexpr int32_t centerDivider = 2;
+    vector.emplace_back(DimensionRect(responseWidth, Dimension(responseHeight, DimensionUnit::VP),
+        DimensionOffset(
+            Dimension(-(responseWidth - buttonWidth) / centerDivider), Dimension(-top.Value(), top.Unit()))));
+    gestureHub->SetResponseRegion(vector);
+}
 
 void SetResponseRegion(RefPtr<FrameNode>& node)
 {
@@ -629,6 +654,7 @@ RefPtr<FrameNode> BuildMoreOrBackButton(int32_t overlayId, bool isMoreButton)
 
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     button->MarkModifyDone();
+    SetMoreOrBackButtonResponse(button);
     return button;
 }
 

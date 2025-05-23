@@ -341,6 +341,11 @@ public:
     {
         return isBottomAnimationFinished_;
     }
+
+    RectF GetBoundsRect() const
+    {
+        return boundsRectF_;
+    }
     void FinishAnimationToTargetImmediately(std::pair<float, float> centerX);
 protected:
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
@@ -422,6 +427,7 @@ protected:
     Dimension paddingSide_;
     Dimension indicatorDotItemSpace_ = 8.0_vp;
     float scaleIndicator_ = 1.33f;
+    RectF boundsRectF_;
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
     ACE_DISALLOW_COPY_AND_MOVE(DotIndicatorModifier);
 };

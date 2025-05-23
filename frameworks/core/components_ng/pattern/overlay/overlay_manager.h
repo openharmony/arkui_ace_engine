@@ -146,6 +146,8 @@ public:
     PopupInfo GetTipsInfo(int32_t targetId);
     void HideAllPopups();
     void HideCustomPopups();
+    void HideAllPopupsWithoutAnimation();
+    void HideAllMenusWithoutAnimation(bool showInSubwindow = false);
     void SetPopupHotAreas(RefPtr<FrameNode> popupNode);
     void ShowPopupAnimation(const RefPtr<FrameNode>& popupNode);
     void ShowPopupAnimationNG(const RefPtr<FrameNode>& popupNode);
@@ -752,6 +754,8 @@ public:
     RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
     bool IsCurrentNodeProcessRemoveOverlay(const RefPtr<FrameNode>& currentNode, bool skipModal);
     static Rect GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode, int32_t type);
+    static bool IsNeedAvoidFoldCrease(const RefPtr<FrameNode>& frameNode, bool checkSenboard, bool expandDisplay,
+        std::optional<bool> enableHoverMode);
     void SkipMenuShow(int32_t targetId);
     void ResumeMenuShow(int32_t targetId);
     bool CheckSkipMenuShow(int32_t targetId);

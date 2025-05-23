@@ -534,7 +534,6 @@ static TouchType ConvertRawAxisActionToTouch(int32_t rawAxisAction)
             return TouchType::UP;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
             return TouchType::CANCEL;
-            break;
         default:
             return TouchType::UNKNOWN;
     }
@@ -603,8 +602,9 @@ void ConvertAxisEventToTouchEvent(const std::shared_ptr<MMI::PointerEvent>& poin
         .SetDeviceId(pointerEvent->GetDeviceId())
         .SetTargetDisplayId(pointerEvent->GetTargetDisplayId())
         .SetTouchEventId(pointerEvent->GetId())
-        .SetOriginInputEventType(InputEventType::AXIS)
         .SetPointerEvent(pointerEvent);
+    touchEvt.convertInfo.first = UIInputEventType::AXIS;
+    touchEvt.convertInfo.second = UIInputEventType::TOUCH;
 
     touchEvt.pointers.emplace_back(std::move(touchPoint));
 }

@@ -1381,4 +1381,185 @@ HWTEST_F(SheetPresentationTestThreeNg, UpdateMaxSizeWithPlacement006, TestSize.L
     EXPECT_EQ(maxHeight, 2000.0f);
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: InitParameter001
+ * @tc.desc: Branch: if (sheetTheme->IsOuterBorderEnable())
+ *           Condition: sheetTheme->IsOuterBorderEnable() = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, InitParameter001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(
+            ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG, std::move(callback)));
+    auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
+
+    /**
+     * @tc.steps: step2. set some parameters of sheetLayoutAlgorithm.
+     */
+    sheetLayoutAlgorithm->sheetType_ = SheetType::SHEET_CENTER;
+    sheetTheme_->isOuterBorderEnable_ = false;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->isHalfFoldHoverStatus_ = false;
+
+    /**
+     * @tc.steps: step3. excute InitParameter function.
+     * @tc.expected: isHoverMode_ is false
+     */
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    sheetLayoutAlgorithm->InitParameter(Referenced::RawPtr(layoutWrapper));
+    EXPECT_EQ(sheetLayoutAlgorithm->isHoverMode_, false);
+
+    /**
+     * @tc.steps: step4. excute InitParameter function.
+     * @tc.expected: isHoverMode_ is false
+     */
+    sheetTheme_->isOuterBorderEnable_ = true;
+    sheetLayoutAlgorithm->sheetStyle_.enableHoverMode = true;
+    sheetLayoutAlgorithm->InitParameter(Referenced::RawPtr(layoutWrapper));
+    EXPECT_EQ(sheetLayoutAlgorithm->isHoverMode_, false);
+
+    /**
+     * @tc.steps: step5. excute InitParameter function.
+     * @tc.expected: isHoverMode_ is true
+     */
+    pipeline->isHalfFoldHoverStatus_ = true;
+    sheetTheme_->isOuterBorderEnable_ = false;
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    sheetLayoutAlgorithm->sheetStyle_.enableHoverMode = true;
+    sheetLayoutAlgorithm->InitParameter(Referenced::RawPtr(layoutWrapper));
+    EXPECT_EQ(sheetLayoutAlgorithm->isHoverMode_, true);
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CalculateSheetHeightInOtherScenes001
+ * @tc.desc: Branch: if (sheetType_ != SheetType::SHEET_CENTER || !isHoverMode_)
+ *           Condition: sheetLayoutAlgorithm->isWaterfallWindowMode_ = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, CalculateSheetHeightInOtherScenes001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(
+            ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG, std::move(callback)));
+    auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
+
+    /**
+     * @tc.steps: step2. set some parameters of sheetLayoutAlgorithm.
+     */
+    sheetLayoutAlgorithm->sheetType_ = SheetType::SHEET_BOTTOM;
+    sheetTheme_->isOuterBorderEnable_ = false;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->isHalfFoldHoverStatus_ = false;
+    sheetLayoutAlgorithm->isWaterfallWindowMode_ = false;
+
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step3. excute CalculateSheetHeightInOtherScenes function.
+     * @tc.expected: 100.0f
+     */
+    auto heightBefore =
+        sheetLayoutAlgorithm->CalculateSheetHeightInOtherScenes(Referenced::RawPtr(layoutWrapper), 100.0f);
+    EXPECT_EQ(heightBefore, 100.0f);
+
+    /**
+     * @tc.steps: step4. set currentFoldCreaseRegion and compute height.
+     */
+    sheetLayoutAlgorithm->sheetType_ = SheetType::SHEET_CENTER;
+    sheetLayoutAlgorithm->isHoverMode_ = true;
+    sheetLayoutAlgorithm->hoverModeArea_ = HoverModeAreaType::TOP_SCREEN;
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    std::vector<Rect> currentFoldCreaseRegion;
+    Rect rect;
+    rect.SetRect(0, 2000.0f, 1000.0f, 200.0f);
+    currentFoldCreaseRegion.insert(currentFoldCreaseRegion.end(), rect);
+    sheetPattern->currentFoldCreaseRegion_ = currentFoldCreaseRegion;
+
+    auto upScreenHeight =
+        sheetLayoutAlgorithm->CalculateSheetHeightInOtherScenes(Referenced::RawPtr(layoutWrapper), 3000.0f);
+    EXPECT_EQ(upScreenHeight, 2000.0f - SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx());
+
+    sheetLayoutAlgorithm->sheetMaxHeight_ = 3000.0f;
+    sheetLayoutAlgorithm->hoverModeArea_ = HoverModeAreaType::BOTTOM_SCREEN;
+    auto downScreenHeight =
+        sheetLayoutAlgorithm->CalculateSheetHeightInOtherScenes(Referenced::RawPtr(layoutWrapper), 3000.0f);
+    EXPECT_EQ(downScreenHeight, 3000.0f - SHEET_HOVERMODE_DOWN_HEIGHT.ConvertToPx() - 2200.0f);
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CalculateSheetOffsetInOtherScenes001
+ * @tc.desc: Branch: if (sheetType_ != SheetType::SHEET_CENTER || !isHoverMode_)
+ *           Condition: sheetLayoutAlgorithm->isWaterfallWindowMode_ = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, CalculateSheetOffsetInOtherScenes001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(
+            ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG, std::move(callback)));
+    auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
+
+    /**
+     * @tc.steps: step2. set some parameters of sheetLayoutAlgorithm.
+     */
+    sheetLayoutAlgorithm->sheetType_ = SheetType::SHEET_CENTER;
+    sheetTheme_->isOuterBorderEnable_ = false;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->isHalfFoldHoverStatus_ = false;
+    sheetLayoutAlgorithm->isWaterfallWindowMode_ = false;
+
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    auto sheetGeometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(sheetGeometryNode, nullptr);
+    sheetGeometryNode->SetFrameSize(SizeF(100.0f, 300.0f));
+
+    /**
+     * @tc.steps: step3. set currentFoldCreaseRegion and compute sheetOffsetY.
+     */
+    sheetLayoutAlgorithm->isHoverMode_ = true;
+    sheetLayoutAlgorithm->hoverModeArea_ = HoverModeAreaType::TOP_SCREEN;
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    std::vector<Rect> currentFoldCreaseRegion;
+    Rect rect;
+    rect.SetRect(0, 2000.0f, 1000.0f, 200.0f);
+    currentFoldCreaseRegion.insert(currentFoldCreaseRegion.end(), rect);
+    sheetPattern->currentFoldCreaseRegion_ = currentFoldCreaseRegion;
+
+    sheetLayoutAlgorithm->CalculateSheetOffsetInOtherScenes(Referenced::RawPtr(layoutWrapper));
+    auto sheetOffsetY =
+        SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx() + (2000.0f - SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx() - 300.0f) / 2;
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, sheetOffsetY);
+
+    sheetLayoutAlgorithm->sheetMaxHeight_ = 3000.0f;
+    sheetLayoutAlgorithm->hoverModeArea_ = HoverModeAreaType::BOTTOM_SCREEN;
+    sheetLayoutAlgorithm->CalculateSheetOffsetInOtherScenes(Referenced::RawPtr(layoutWrapper));
+    sheetOffsetY = 2200.0f + (3000.0f - SHEET_HOVERMODE_DOWN_HEIGHT.ConvertToPx() - 2200.0f - 300.0f) / 2;
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, sheetOffsetY);
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
 } // namespace OHOS::Ace::NG

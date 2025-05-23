@@ -682,4 +682,24 @@ HWTEST_F(RepeatVirtual2TestNg, UpdateFrameChildIndexRecord001, TestSize.Level1)
     EXPECT_EQ(repeatNode->minFrameChildIndex_, 1);
     EXPECT_EQ(repeatNode->maxFrameChildIndex_, 3);
 }
+
+/**
+ * @tc.name: NotifyColorModeChange001
+ * @tc.desc: Test caches.NotifyColorModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, NotifyColorModeChange001, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(10);
+    repeatNode->caches_.l1Rid4Index_ = {
+        {0, 1}, {1, 2}, {2, 3}, {3, 4}
+    };
+    RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2016, AceType::MakeRefPtr<Pattern>());
+    CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
+    repeatNode->caches_.cacheItem4Rid_ = {
+        { 1, cacheItem }, { 2, cacheItem }, { 3, cacheItem }, { 4, cacheItem }
+    };
+    repeatNode->NotifyColorModeChange(1);
+    EXPECT_EQ(repeatNode->GetChildren().size(), 4);
+}
 } // namespace OHOS::Ace::NG

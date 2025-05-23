@@ -2531,6 +2531,53 @@ void OverlayManager::HideAllPopups()
     }
 }
 
+void OverlayManager::HideAllPopupsWithoutAnimation()
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide all popup without animation enter");
+    auto tempPopupMap = popupMap_;
+    for (const auto& popup : tempPopupMap) {
+        auto targetId = popup.first;
+        auto popupNode = popup.second.popupNode;
+        CHECK_NULL_CONTINUE(popupNode);
+        auto popupPattern = popupNode->GetPattern<BubblePattern>();
+        CHECK_NULL_CONTINUE(popupPattern);
+        popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
+        popupPattern->CallDoubleBindCallback("false");
+        popupNode->GetOrCreateEventHub<BubbleEventHub>()->FireChangeEvent(false);
+        popupNode->GetRenderContext()->UpdateChainedTransition(nullptr);
+        ErasePopup(targetId);
+    }
+}
+
+void OverlayManager::HideAllMenusWithoutAnimation(bool showInSubwindow)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide all menu without animation enter");
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto tempMenuMap = menuMap_;
+    for (const auto& menu : tempMenuMap) {
+        auto targetId = menu.first;
+        auto menuNode = menu.second;
+        CHECK_NULL_CONTINUE(menuNode);
+        auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_CONTINUE(menuWrapperPattern);
+        menuWrapperPattern->CallMenuAboutToAppearCallback();
+        menuWrapperPattern->CallMenuDisappearCallback();
+        menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
+        menuWrapperPattern->SetOnMenuDisappear(false);
+        menuWrapperPattern->CallMenuStateChangeCallback("false");
+        auto containerId = menuWrapperPattern->GetContainerId();
+        RemoveChildWithService(rootNode, menuNode);
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "hide menu without animation, targetId: %{public}d", targetId);
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        if (showInSubwindow) {
+            SubwindowManager::GetInstance()->DeleteHotAreas(containerId, menuNode->GetId(), SubwindowType::TYPE_MENU);
+        }
+        RemoveMenuFilter(menuNode, false);
+        EraseMenuInfo(targetId);
+    }
+}
+
 void OverlayManager::ErasePopup(int32_t targetId)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "erase popup enter, targetId: %{public}d", targetId);
@@ -5807,7 +5854,6 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
         std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
         std::move(onDetentsDidChange), std::move(onWidthDidChange),
         std::move(onTypeDidChange), std::move(sheetSpringBack));
-    sheetNode->MarkModifyDone();
     SaveSheetPageNode(sheetNode, sheetContentNode, targetNode, isStartByUIContext);
     InitSheetWrapperAction(sheetNode, targetNode, sheetStyle);
     auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
@@ -5866,6 +5912,7 @@ void OverlayManager::InitSheetWrapperAction(const RefPtr<FrameNode>& sheetNode, 
     if (IsTopOrder(levelOrder)) {
         FireModalPageShow();
     }
+    sheetNode->MarkModifyDone();
     auto rootNode = FindWindowScene(targetNode);
     CHECK_NULL_VOID(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -8679,5 +8726,49 @@ void OverlayManager::UpdateFilterMaskType(const RefPtr<FrameNode>& menuWrapperNo
         filterRenderContext->UpdateBackBlurStyle(styleOption);
         filterRenderContext->UpdateBackgroundColor(menuWrapperPattern->GetMenuMaskColor());
     }
+}
+
+bool OverlayManager::IsNeedAvoidFoldCrease(
+    const RefPtr<FrameNode>& frameNode, bool checkSenboard, bool expandDisplay, std::optional<bool> enableHoverMode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    if (!SystemProperties::IsSuperFoldDisplayDevice()) {
+        return false;
+    }
+
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
+
+    auto currentId = pipeline->GetInstanceId();
+    auto container = AceEngine::Get().GetContainer(currentId);
+    if (!container) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "container is null");
+        return false;
+    }
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(currentId);
+        if (!container) {
+            TAG_LOGW(AceLogTag::ACE_OVERLAY, "parent container is null");
+            return false;
+        }
+    }
+    // Check is half fold status
+    auto halfFoldStatus = container->GetFoldStatusFromListener() == FoldStatus::HALF_FOLD;
+    // Check is waterfall window
+    auto isWaterfallWindow = container->IsWaterfallWindow();
+    // Check whether the senboard scenario needs to be filtered for crease avoidance
+    auto isSceneBoard = checkSenboard && container->IsSceneBoardWindow();
+    TAG_LOGD(AceLogTag::ACE_OVERLAY,
+        "avoid foldCrease halfFoldStatus %{public}d, isWaterfallWindow %{public}d, isSceneBoard %{public}d",
+        halfFoldStatus, isWaterfallWindow, isSceneBoard);
+    // Judge whether to avoid the foldCrease according to the conditions
+    // Condition1. is isWaterfallWindow mode and user not set enableHoverMode or set true
+    // Condition2. isSceneBoard and halfFoldStatus and is pc mode and user not set enableHoverMode or set true
+    // Condition3. halfFoldStatus and is phone mode and user set enableHoverMode true
+    auto isNeedAvoidFoldCrease = (isWaterfallWindow && enableHoverMode.value_or(true)) ||
+        (isSceneBoard && halfFoldStatus && expandDisplay && enableHoverMode.value_or(true)) ||
+        (halfFoldStatus && !expandDisplay && enableHoverMode.value_or(false));
+    return isNeedAvoidFoldCrease;
 }
 } // namespace OHOS::Ace::NG

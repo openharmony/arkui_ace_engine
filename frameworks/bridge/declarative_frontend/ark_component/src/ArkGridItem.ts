@@ -170,4 +170,4 @@ globalThis.GridItem.attributeModifier = function (modifier: ArkComponent): void 
 globalThis.GridItem.onSelect = function (value: (isSelected: boolean) => void): void {
   let nodePtr = getUINativeModule().frameNode.getStackTopNode();
   getUINativeModule().gridItem.setGridItemOnSelected(nodePtr, value);
-}
+};

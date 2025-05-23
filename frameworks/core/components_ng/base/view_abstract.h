@@ -794,6 +794,7 @@ public:
     static bool GetNeedFocus(FrameNode* frameNode);
     static int RequestFocus(FrameNode* frameNode);
     static void ClearFocus(int32_t instanceId);
+    static bool GetFocusActive();
     static void FocusActivate(int32_t instanceId, bool isActive, bool isAutoInactive);
     static void SetAutoFocusTransfer(int32_t instanceId, bool isAutoFocusTransfer);
     static double GetOpacity(FrameNode* frameNode);

@@ -1731,4 +1731,25 @@ HWTEST_F(NavigationTestNg, NavigationSplitPlaceholderTest001, TestSize.Level1)
     ASSERT_NE(placeholderContentNode, nullptr);
     ASSERT_EQ(static_cast<int32_t>(placeholderContentNode->GetChildren().size()), 1);
 }
+
+/**
+ * @tc.name: NavigationCommonTitleTest001
+ * @tc.desc: Test Navigation CommonTitle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationCommonTitleTest001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("Title", true);
+    navigationModel.SetSubtitle("subTitle");
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+}
 } // namespace OHOS::Ace::NG

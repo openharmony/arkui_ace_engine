@@ -567,14 +567,19 @@ public:
         return isOpenMenu_;
     }
 
-    void SetHoverMode(bool enableFold)
+    void SetHoverMode(std::optional<bool> enableFold)
     {
         enableFold_ = enableFold;
     }
 
-    bool GetHoverMode() const
+    std::optional<bool> GetHoverMode() const
     {
-        return enableFold_.value_or(false);
+        return enableFold_;
+    }
+
+    bool HasHoverMode() const
+    {
+        return enableFold_.has_value();
     }
 
     bool GetIsSelectOverlaySubWindowWrapper() const

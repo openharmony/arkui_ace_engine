@@ -258,13 +258,14 @@ function observedV2Internal<T extends ConstructorV2>(BaseClass: T): T {
   // Use ID_REFS only if number of observed attrs is significant
   const attrList = Object.getOwnPropertyNames(BaseClass.prototype);
   const count = attrList.filter(attr => attr.startsWith(ObserveV2.OB_PREFIX)).length;
-  if (count > 5) {
-    stateMgmtConsole.log(`'@Observed class ${BaseClass?.name}' configured to use ID_REFS optimization`);
-    BaseClass.prototype[ObserveV2.ID_REFS] = {};
-  }
+
   const observedClass =  class extends BaseClass {
     constructor(...args) {
       super(...args);
+      if (count > 5) {
+        stateMgmtConsole.log(`'@Observed class ${BaseClass?.name}' configured to use ID_REFS optimization`);
+        (this as any)[ObserveV2.ID_REFS] = {};
+      }
       AsyncAddComputedV2.addComputed(this, BaseClass.name);
       AsyncAddMonitorV2.addMonitor(this, BaseClass.name);
     }

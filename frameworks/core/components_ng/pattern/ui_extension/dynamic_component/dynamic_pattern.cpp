@@ -724,5 +724,6 @@ void DynamicPattern::HandleVisibleAreaChange(bool visible, double ratio)
             dynamicComponentRenderer_->NotifyBackground();
         }
     }
+    TransferAccessibilityRectInfo();
 }
 } // namespace OHOS::Ace::NG

@@ -695,36 +695,6 @@ void JSTabContent::SetBottomTabBarStyle(const JSCallbackInfo& info)
     TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
 }
 
-void JSTabContent::SetOnWillShow(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1 || !info[0]->IsFunction()) {
-        return;
-    }
-    auto willShowHandler = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onWillShow = [executionContext = info.GetExecutionContext(), func = std::move(willShowHandler)]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
-        ACE_SCORING_EVENT("TabContent.onWillShow");
-        func->Execute();
-    };
-    TabContentModel::GetInstance()->SetOnWillShow(std::move(onWillShow));
-}
-
-void JSTabContent::SetOnWillHide(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1 || !info[0]->IsFunction()) {
-        return;
-    }
-    auto willHideHandler = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onWillHide = [executionContext = info.GetExecutionContext(), func = std::move(willHideHandler)]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
-        ACE_SCORING_EVENT("TabContent.onWillHide");
-        func->Execute();
-    };
-    TabContentModel::GetInstance()->SetOnWillHide(std::move(onWillHide));
-}
-
 void JSTabContent::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTabContent>::Declare("TabContent");

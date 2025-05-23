@@ -5069,6 +5069,14 @@ void ViewAbstract::FocusActivate(int32_t instanceId, bool isActive, bool isAutoI
     context->SetIsFocusActive(isActive, NG::FocusActiveReason::USE_API, isAutoInactive);
 }
 
+bool ViewAbstract::GetFocusActive()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    bool ret = pipeline->GetIsFocusActive();
+    return ret;
+}
+
 void ViewAbstract::SetAutoFocusTransfer(int32_t instanceId, bool isAutoFocusTransfer)
 {
     auto context = PipelineContext::GetContextByContainerId(instanceId);

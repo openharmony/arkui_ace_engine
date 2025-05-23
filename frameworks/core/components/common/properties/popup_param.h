@@ -250,9 +250,14 @@ public:
         enableArrow_ = enableArrow;
     }
 
+    bool HasEnableHoverMode() const
+    {
+        return enableHoverMode_.has_value();
+    }
+
     bool EnableHoverMode() const
     {
-        return enableHoverMode_;
+        return enableHoverMode_.value_or(false);
     }
 
     void SetEnableHoverMode(bool enableHoverMode)
@@ -653,7 +658,7 @@ private:
     bool focusable_ = false;
     bool interactiveDismiss_ = true;
     bool isCaretMode_ = true;
-    bool enableHoverMode_ = false;
+    std::optional<bool> enableHoverMode_ = std::nullopt;
     bool followTransformOfTarget_ = false;
     bool isTips_ = false;
     int32_t appearingTime_ = 700;

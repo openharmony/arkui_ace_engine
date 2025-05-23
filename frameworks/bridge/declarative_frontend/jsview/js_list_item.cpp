@@ -343,20 +343,6 @@ void JSListItem::ParseBuilder(const JSRef<JSObject>& obj, OnDeleteEvent&& onDele
     }
 }
 
-void JSListItem::SelectCallback(const JSCallbackInfo& args)
-{
-    if (!args[0]->IsFunction()) {
-        return;
-    }
-
-    RefPtr<JsMouseFunction> jsOnSelectFunc = AceType::MakeRefPtr<JsMouseFunction>(JSRef<JSFunc>::Cast(args[0]));
-    auto onSelect = [execCtx = args.GetExecutionContext(), func = std::move(jsOnSelectFunc)](bool isSelected) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        func->SelectExecute(isSelected);
-    };
-    ListItemModel::GetInstance()->SetSelectCallback(std::move(onSelect));
-}
-
 void JSListItem::JsBorderRadius(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsBorderRadius(info);

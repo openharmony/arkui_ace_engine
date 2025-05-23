@@ -55,6 +55,23 @@ public:
     void ResetStrokeRadius() override;
     void SetBorderRadius(const Dimension& value) override;
     void ResetBorderRadius() override;
+    void CreateWithResourceObj(JsProgressResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) override;
+    void SetProgressColor(const RefPtr<ResourceObject>& resObj);
+    void SetLSStrokeWidth(const RefPtr<ResourceObject>& resObj);
+    void SetLSSweepingEffect(const RefPtr<ResourceObject>& resObj);
+    void SetLSStrokeRadius(const RefPtr<ResourceObject>& resObj);
+    void SetSmoothResEffect(const RefPtr<ResourceObject>& resObj);
+    void SetRingStrokeWidth(const RefPtr<ResourceObject>& resObj);
+    void SetRingShadow(const RefPtr<ResourceObject>& resObj);
+    void SetRingStatus(const RefPtr<ResourceObject>& resObj);
+    void SetRingSweepingEffect(const RefPtr<ResourceObject>& resObj);
+    void SetCapsuleBorderWidth(const RefPtr<ResourceObject>& resObj);
+    void SetCapsuleBorderColor(const RefPtr<ResourceObject>& resObj);
+    void SetCapsuleSweepingEffect(const RefPtr<ResourceObject>& resObj);
+    void SetShowDefaultPercentage(const RefPtr<ResourceObject>& resObj);
+    void SetFontColorResource(const RefPtr<ResourceObject>& resObj);
+    void SetBackgroundColorResource(const RefPtr<ResourceObject>& resObj);
+    void SetFontWeightResource(const RefPtr<ResourceObject>& resObj);
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, double value, double max, NG::ProgressType type);
     static void SetValue(FrameNode* frameNode, double value);

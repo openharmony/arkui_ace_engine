@@ -349,4 +349,58 @@ HWTEST_F(TextFieldPatternTestSeven, ProcessThemePadding001, TestSize.Level0)
         ? pattern->GetUnderlinePadding(textFieldTheme, true, false) : textFieldTheme->GetPadding();
     ASSERT_EQ(themePadding.Left(), theme->GetPadding().Left());
 }
+
+/**
+ * @tc.name: ProvidePlaceHolderText001
+ * @tc.desc: test provide placeholder information to inputmethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, ProvidePlaceHolderText, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+#if defined(ENABLE_STANDARD_INPUT)
+    auto miscTextConfig = pattern->GetMiscTextConfig();
+    auto textconfig = miscTextConfig.value();
+    auto placeholder = UtfUtils::Str16ToStr8(textconfig.inputAttribute.placeholder).c_str();
+    size_t count = 0;
+    size_t i = 0;
+    while (i < placeholder.size()) {
+        count++;
+        i += (placeholder[i] >= 0xD800 && placeholder[i] <= 0xDBFF) ? 2 : 1;
+    }
+    EXPECT_NE(count, 0);
+#endif
+}
+
+/**
+ * @tc.name: ProvideabilityNameText001
+ * @tc.desc: test provide placeholder information to inputmethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, ProvideabilityNameText, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+#if defined(ENABLE_STANDARD_INPUT)
+    auto miscTextConfig = pattern->GetMiscTextConfig();
+    auto textconfig = miscTextConfig.value();
+    auto abilityName = UtfUtils::Str16ToStr8(textconfig.inputAttribute.abilityName).c_str();
+    size_t count = 0;
+    size_t i = 0;
+    while (i < abilityName.size()) {
+        count++;
+        i += (abilityName[i] >= 0xD800 && abilityName[i] <= 0xDBFF) ? 2 : 1;
+    }
+    EXPECT_NE(count, 0);
+#endif
+}
 }

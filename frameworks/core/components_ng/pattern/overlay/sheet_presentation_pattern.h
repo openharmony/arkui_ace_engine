@@ -356,6 +356,7 @@ public:
     }
 
     bool GetWindowButtonRect(NG::RectF& floatButtons);
+    bool GetWindowButtonRectForAllAPI(NG::RectF& floatButtons);
 
     void SetBottomOffset(const SheetStyle &sheetStyle)
     {
@@ -909,6 +910,7 @@ public:
     Shadow GetShadowFromTheme(ShadowStyle shadowStyle);
     void SetShadowStyle(bool isFocused);
     bool IsCurSheetNeedHalfFoldHover();
+    bool IsWaterfallWindowMode();
     float GetMaxSheetHeightBeforeDragUpdate();
     float GetSheetHeightBeforeDragUpdate();
     void FireHoverModeChangeCallback();

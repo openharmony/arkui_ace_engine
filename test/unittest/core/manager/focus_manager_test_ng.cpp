@@ -871,4 +871,29 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest023, TestSize.Level1)
     auto keyProcessingMode = focusManager->GetKeyProcessingMode();
     EXPECT_EQ(keyProcessingMode, KeyProcessingMode::FOCUS_NAVIGATION);
 }
+
+/**
+ * @tc.name: FocusManagerTest021
+ * @tc.desc: SyncWindowsFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusManagerTestNg, FocusManagerTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: initialize pipeline, properties.
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto focusManager = context->GetOrCreateFocusManager();
+    EXPECT_NE(focusManager, nullptr);
+
+    /**
+     * @tc.steps2: Call the function SyncWindowsFocus.
+     * @tc.expected: Test the stability of this function.
+     */
+    focusManager->isFocusActive_= true;
+    focusManager->SyncWindowsFocus(false, FocusActiveReason::KEY_TAB);
+    EXPECT_FALSE(focusManager->isFocusActive_);
+}
 } // namespace OHOS::Ace::NG

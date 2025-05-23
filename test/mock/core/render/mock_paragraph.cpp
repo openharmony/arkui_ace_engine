@@ -20,6 +20,7 @@
 namespace OHOS::Ace::NG {
 RefPtr<MockParagraph> MockParagraph::paragraph_;
 bool MockParagraph::enabled_ = true;
+bool MockParagraph::enableCalcCaretMetricsByPosition_ = false;
 
 RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
 {

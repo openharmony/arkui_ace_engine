@@ -1275,7 +1275,7 @@ void DragAnimationHelper::CreateTextNode(PreparedInfoForDrag& data)
         textNode = AceType::DynamicCast<FrameNode>(textRowNode->GetChildAtIndex(0));
         data.textNode = textNode;
     }
-    if (!data.gatherNode) {
+    if (!data.gatherNode || data.deviceType == SourceType::MOUSE) {
         DragAnimationHelper::SetNodeVisible(data.textNode, false);
     }
 }

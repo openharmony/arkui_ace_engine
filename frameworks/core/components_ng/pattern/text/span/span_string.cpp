@@ -1140,7 +1140,8 @@ void SpanString::UpdateSpansMap()
                 ToGestureSpan(spanItem, start, end),
                 ToParagraphStyleSpan(spanItem, start, end),
                 ToLineHeightSpan(spanItem, start, end),
-                ToBackgroundColorSpan(spanItem, start, end) };
+                ToBackgroundColorSpan(spanItem, start, end),
+                ToUrlSpan(spanItem, start, end) };
         for (auto& spanBase : spanBases) {
             if (!spanBase) {
                 continue;
@@ -1287,8 +1288,8 @@ RefPtr<BackgroundColorSpan> SpanString::ToBackgroundColorSpan(
 
 RefPtr<UrlSpan> SpanString::ToUrlSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end)
 {
-    CHECK_NULL_RETURN(spanItem && spanItem->urlOnRelease && !spanItem->urlAddress.empty(), nullptr);
-    std::string urlAddress = UtfUtils::Str16DebugToStr8(spanItem->urlAddress);
+    CHECK_NULL_RETURN(spanItem && spanItem->urlOnRelease && !spanItem->GetUrlAddress().empty(), nullptr);
+    std::string urlAddress = UtfUtils::Str16DebugToStr8(spanItem->GetUrlAddress());
     return AceType::MakeRefPtr<UrlSpan>(urlAddress, start, end);
 }
 

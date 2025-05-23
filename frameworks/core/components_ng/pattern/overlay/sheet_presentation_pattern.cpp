@@ -826,6 +826,24 @@ bool SheetPresentationPattern::GetWindowButtonRect(NG::RectF& floatButtons)
     return false;
 }
 
+bool SheetPresentationPattern::GetWindowButtonRectForAllAPI(NG::RectF& floatButtons)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto avoidInfoMgr = pipelineContext->GetAvoidInfoManager();
+    CHECK_NULL_RETURN(avoidInfoMgr, false);
+    NG::RectF floatContainerModal;
+    if (avoidInfoMgr->NeedAvoidContainerModal() &&
+        avoidInfoMgr->GetContainerModalButtonsRect(floatContainerModal, floatButtons)) {
+        TAG_LOGD(AceLogTag::ACE_SHEET, "When hidden, floatButtons rect is %{public}s", floatButtons.ToString().c_str());
+        return true;
+    };
+    TAG_LOGD(AceLogTag::ACE_SHEET, "Window title builder shown");
+    return false;
+}
+
 float SheetPresentationPattern::InitialSingleGearHeight(NG::SheetStyle& sheetStyle)
 {
     auto largeHeight = sheetMaxHeight_ - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
@@ -3191,6 +3209,32 @@ void SheetPresentationPattern::UpdateSheetWhenSheetTypeChanged()
     }
 }
 
+bool SheetPresentationPattern::IsWaterfallWindowMode()
+{
+    if (!SystemProperties::IsSuperFoldDisplayDevice()) {
+        return false;
+    }
+ 
+    auto container = Container::Current();
+    if (!container) {
+        TAG_LOGW(AceLogTag::ACE_DIALOG, "container is null");
+        return false;
+    }
+
+    if (container->IsSubContainer()) {
+        auto instanceId = SubwindowManager::GetInstance()->GetParentContainerId(GetSubWindowId());
+        container = AceEngine::Get().GetContainer(instanceId);
+        if (!container) {
+            TAG_LOGW(AceLogTag::ACE_DIALOG, "parent container is null");
+            return false;
+        }
+    }
+ 
+    auto halfFoldStatus = container->GetCurrentFoldStatus() == FoldStatus::HALF_FOLD;
+    auto isWaterfallWindow = container->IsWaterfallWindow();
+    return halfFoldStatus && isWaterfallWindow;
+}
+
 bool SheetPresentationPattern::IsCurSheetNeedHalfFoldHover()
 {
     auto host = GetHost();
@@ -3202,8 +3246,13 @@ bool SheetPresentationPattern::IsCurSheetNeedHalfFoldHover()
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
-    auto enableHoverMode = sheetStyle.enableHoverMode.value_or(sheetTheme->IsOuterBorderEnable() ? true : false);
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    auto enableHoverMode = sheetStyle.enableHoverMode.value_or((deviceType == DeviceType::TWO_IN_ONE) ? true : false);
     bool isHoverMode = enableHoverMode ? pipeline->IsHalfFoldHoverStatus() : false;
+    if (deviceType == DeviceType::TWO_IN_ONE) {
+        TAG_LOGD(AceLogTag::ACE_SHEET, "sheet IsOuterBorderEnable is true.");
+        isHoverMode = enableHoverMode ? IsWaterfallWindowMode() : false;
+    }
     return isHoverMode && GetSheetType() == SheetType::SHEET_CENTER;
 }
 
@@ -3234,20 +3283,15 @@ bool SheetPresentationPattern::IsShowInSubWindow() const
 
 void SheetPresentationPattern::InitFoldCreaseRegion()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
-    CHECK_NULL_VOID(sheetTheme);
-    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
-    auto enableHoverMode = sheetStyle.enableHoverMode.value_or(sheetTheme->IsOuterBorderEnable() ? true : false);
-    if (!enableHoverMode || !currentFoldCreaseRegion_.empty()) {
+    if (!currentFoldCreaseRegion_.empty()) {
         return;
     }
     auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (container->IsSubContainer()) {
+        auto instanceId = SubwindowManager::GetInstance()->GetParentContainerId(container->GetInstanceId());
+        container = AceEngine::Get().GetContainer(instanceId);
+    }
     CHECK_NULL_VOID(container);
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_VOID(displayInfo);

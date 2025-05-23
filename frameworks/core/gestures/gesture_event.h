@@ -226,17 +226,6 @@ public:
     {
         return inputEventType_;
     }
-
-    void SetOriginInputEventType(InputEventType type)
-    {
-        originInputEventType_ = type;
-    }
-
-    InputEventType GetOriginInputEventType() const
-    {
-        return originInputEventType_;
-    }
-    
     void SetPointerId(int32_t pointerId)
     {
         pointerId_ = pointerId;
@@ -381,7 +370,6 @@ private:
     Offset delta_;
     std::list<FingerInfo> fingerList_;
     InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
-    InputEventType originInputEventType_ = InputEventType::TOUCH_SCREEN;
     // Save historical touch point slope.
     bool isInterpolated_ = false;
     float inputXDeltaSlope_ = 0.0f;
