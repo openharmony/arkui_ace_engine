@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/navigation/navigation_toolbar_util.h"
 
 #include "base/i18n/localization.h"
+#include "base/subwindow/subwindow_manager.h"
+#include "base/utils/system_properties.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/container.h"
@@ -432,16 +434,18 @@ RefPtr<FrameNode> CreateToolbarMoreMenuNode(const RefPtr<BarItemNode>& barItemNo
     return toolBarItemNode;
 }
 
-void BuildToolbarMoreMenuNodeAction(
-    const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& barMenuNode, const RefPtr<FrameNode>& buttonNode)
+void BuildToolbarMoreMenuNodeAction(const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& barMenuNode, 
+    const RefPtr<FrameNode>& buttonNode, const MenuParam& menuParam)
 {
     auto eventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto context = PipelineContext::GetCurrentContext();
-    auto clickCallback = [weakContext = WeakPtr<PipelineContext>(context), id = barItemNode->GetId(),
-                             weakMenu = WeakPtr<FrameNode>(barMenuNode),
-                             weakBarItemNode = WeakPtr<BarItemNode>(barItemNode)]() {
+    auto clickCallback = [weakContext = WeakPtr<PipelineContext>(context),
+                            id = barItemNode->GetId(),                                     
+                            param = menuParam,
+                            weakMenu = WeakPtr<FrameNode>(barMenuNode),
+                            weakBarItemNode = WeakPtr<BarItemNode>(barItemNode)]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
 
@@ -478,6 +482,16 @@ void BuildToolbarMoreMenuNodeAction(
             imgOffset.SetX(imgOffset.GetX());
         }
         imgOffset.SetY(imgOffset.GetY() - imageSize.Height());
+        
+        if (param.isShowInSubWindow) {
+            auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+            if (wrapperPattern && wrapperPattern->GetMenuStatus() == MenuStatus::ON_HIDE_ANIMATION) {
+                //if on hide animation, avoid displaying the menu again
+                return;
+            }
+            SubwindowManager::GetInstance()->ShowMenuNG(menu, param, barItemNode, imgOffset);
+            return;
+        }
         overlayManager->ShowMenu(id, imgOffset, menu);
     };
     eventHub->SetItemAction(clickCallback);
@@ -496,6 +510,11 @@ bool CreateToolbarItemNodeAndMenuNode(BarItemNodeParam itemNodeParam, std::vecto
     BuildToolbarMoreItemNode(barItemNode, itemNodeParam.enabled, itemNodeParam.hideText);
     MenuParam menuParam;
     menuParam.isShowInSubWindow = false;
+     if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
+        menuParam.isShowInSubWindow = true;
+        menuParam.placement = Placement::TOP_LEFT;
+    }
+    
     if (barNode.nodeBase) {
         auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(barNode.nodeBase->GetToolBarNode());
         CHECK_NULL_RETURN(toolbarNode, false);
@@ -513,7 +532,7 @@ bool CreateToolbarItemNodeAndMenuNode(BarItemNodeParam itemNodeParam, std::vecto
         std::move(params), barItemNodeId, V2::BAR_ITEM_ETS_TAG, MenuType::NAVIGATION_MENU, menuParam);
     auto toolBarItemNode = CreateToolbarMoreMenuNode(barItemNode);
     CHECK_NULL_RETURN(toolBarItemNode, false);
-    BuildToolbarMoreMenuNodeAction(barItemNode, barMenuNode, toolBarItemNode);
+    BuildToolbarMoreMenuNodeAction(barItemNode, barMenuNode, toolBarItemNode, menuParam);
 
     // set Navigation/NavDestination toolBar "more" button InspectorId
     NavigationTitleUtil::SetInnerChildId(toolBarItemNode, fieldProperty.field,
