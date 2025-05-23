@@ -39,13 +39,41 @@ gen_obj("multinavigation_abc_preview") {
   snapshot_dep = [ ":gen_multinavigation_abc" ]
 }
 
+es2abc_gen_abc("gen_mock_multinavigation_abc") {
+  src_js = rebase_path("mock_multinavigation.js")
+  dst_file = rebase_path(target_out_dir + "/mock_multinavigation.abc")
+  in_puts = [ "mock_multinavigation.js" ]
+  out_puts = [ target_out_dir + "/mock_multinavigation.abc" ]
+  extra_args = [ "--module" ]
+}
+
+gen_js_obj("mock_multinavigation_abc") {
+  input = get_label_info(":gen_mock_multinavigation_abc", "target_out_dir") +
+          "/mock_multinavigation.abc"
+  output = target_out_dir + "/mock_multinavigation_abc.o"
+  dep = ":gen_mock_multinavigation_abc"
+}
+
+gen_obj("mock_multinavigation_abc_preview") {
+  input = get_label_info(":gen_mock_multinavigation_abc", "target_out_dir") +
+          "/mock_multinavigation.abc"
+  output = target_out_dir + "/mock_multinavigation_abc.c"
+  snapshot_dep = [ ":gen_mock_multinavigation_abc" ]
+}
+
 ohos_shared_library("multinavigation") {
   sources = [ "multinavigation.cpp" ]
 
   if (use_mingw_win || use_mac || use_linux) {
-    deps = [ ":gen_obj_src_multinavigation_abc_preview" ]
+    deps = [
+      ":gen_obj_src_mock_multinavigation_abc_preview",
+      ":gen_obj_src_multinavigation_abc_preview",
+    ]
   } else {
-    deps = [ ":multinavigation_abc" ]
+    deps = [ 
+      ":mock_multinavigation_abc",
+      ":multinavigation_abc",
+    ]
   }
 
   external_deps = [
