@@ -102,6 +102,7 @@ enum class FocusActiveReason : int32_t {
     USE_API = 2,
     KEY_TAB = 3,
     ACTIVE_MARK = 4,
+    JOYSTICK_DPAD = 5,
 };
 
 enum class FocusViewStackState : int32_t {
