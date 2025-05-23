@@ -285,6 +285,17 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
     return result;
 }
 
+bool UINode::RemoveChildSilently(const RefPtr<UINode>& child)
+{
+    CHECK_NULL_RETURN(child, false);
+    auto iter = std::find(children_.begin(), children_.end(), child);
+    if (IsDestroyingState() || iter == children_.end()) {
+        return false;
+    }
+    children_.erase(iter);
+    return true;
+}
+
 int32_t UINode::RemoveChildAndReturnIndex(const RefPtr<UINode>& child)
 {
     auto result = RemoveChild(child);

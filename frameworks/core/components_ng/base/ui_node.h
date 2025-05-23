@@ -117,6 +117,7 @@ public:
     void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
 
     std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child, bool allowTransition = false);
+    bool RemoveChildSilently(const RefPtr<UINode>& child);
     int32_t RemoveChildAndReturnIndex(const RefPtr<UINode>& child);
     void ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode);
     void MovePosition(int32_t slot);

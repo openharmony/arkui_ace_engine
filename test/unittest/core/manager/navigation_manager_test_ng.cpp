@@ -376,4 +376,84 @@ HWTEST_F(NavigationManagerTestNg, NavigationManagerTest007, TestSize.Level1)
     ASSERT_EQ(managerPreNode, nullptr);
     ASSERT_EQ(isInAnimation, false);
 }
+
+/**
+ * @tc.name: IsOuterMostNavigation001
+ * @tc.desc: Branch: if (dumpMap_.empty()) { => true;
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(NavigationManagerTestNg, IsOuterMostNavigation001, TestSize.Level1)
+{
+    auto manager = GetNavigationManager();
+    ASSERT_NE(manager, nullptr);
+    manager->dumpMap_.clear();
+
+    auto dest1 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest1, nullptr);
+    EXPECT_FALSE(manager->IsOuterMostNavigation(dest1->GetId(), dest1->GetDepth()));
+}
+
+/**
+ * @tc.name: IsOuterMostNavigation002
+ * @tc.desc: Branch: outerMostKey == DumpMapKey(nodeId, depth); => true;
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(NavigationManagerTestNg, IsOuterMostNavigation002, TestSize.Level1)
+{
+    auto manager = GetNavigationManager();
+    ASSERT_NE(manager, nullptr);
+    manager->dumpMap_.clear();
+
+    auto dest1 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest1, nullptr);
+    dest1->SetDepth(1);
+    auto dest2 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest2, nullptr);
+    dest2->SetDepth(2);
+    auto dest3 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest3, nullptr);
+    dest3->SetDepth(2);
+    manager->AddNavigationDumpCallback(dest1->GetId(), dest1->GetDepth(), [](int) {});
+    manager->AddNavigationDumpCallback(dest2->GetId(), dest2->GetDepth(), [](int) {});
+    manager->AddNavigationDumpCallback(dest3->GetId(), dest3->GetDepth(), [](int) {});
+
+    EXPECT_TRUE(manager->IsOuterMostNavigation(dest1->GetId(), dest1->GetDepth()));
+}
+
+/**
+ * @tc.name: IsOuterMostNavigation003
+ * @tc.desc: Branch: outerMostKey == DumpMapKey(nodeId, depth); => false;
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(NavigationManagerTestNg, IsOuterMostNavigation003, TestSize.Level1)
+{
+    auto manager = GetNavigationManager();
+    ASSERT_NE(manager, nullptr);
+    manager->dumpMap_.clear();
+
+    auto dest1 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest1, nullptr);
+    dest1->SetDepth(1);
+    auto dest2 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest2, nullptr);
+    dest2->SetDepth(2);
+    auto dest3 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest3, nullptr);
+    dest3->SetDepth(2);
+    manager->AddNavigationDumpCallback(dest1->GetId(), dest1->GetDepth(), [](int) {});
+    manager->AddNavigationDumpCallback(dest2->GetId(), dest2->GetDepth(), [](int) {});
+    manager->AddNavigationDumpCallback(dest3->GetId(), dest3->GetDepth(), [](int) {});
+
+    EXPECT_FALSE(manager->IsOuterMostNavigation(dest2->GetId(), dest2->GetDepth()));
+}
 } // namespace OHOS::Ace::NG

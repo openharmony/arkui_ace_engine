@@ -269,6 +269,8 @@ public:
 
     virtual void SetIsEntryByIndex(int32_t index, bool isEntry) {}
 
+    virtual void RemoveByIndexes(const std::vector<int32_t>& indexes) {}
+
     virtual void PushIntentNavDestination(const std::string& name, const std::string& params, bool needTransition) {}
 
 protected:

@@ -1843,6 +1843,7 @@ frameworks/core/common/font_loader.cpp @huawei_g_five
 frameworks/core/common/font_loader.h @huawei_g_five
 frameworks/core/common/font_manager.cpp @huawei_g_five
 frameworks/core/common/font_manager.h @huawei_g_five
+frameworks/core/common/force_split/ @arkui_superman
 frameworks/core/common/form_manager.cpp @huawei_g_five
 frameworks/core/common/form_manager.h @huawei_g_five
 frameworks/core/common/frontend.cpp @arkuiframework

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 
+#include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
@@ -1061,5 +1062,67 @@ RefPtr<UINode> NavDestinationGroupNode::GetNavigationNode()
     auto navDestinationPattern = GetPattern<NavDestinationPattern>();
     CHECK_NULL_RETURN(navDestinationPattern, nullptr);
     return navDestinationPattern->GetNavigationNode();
+}
+
+NavDestinationMode NavDestinationGroupNode::GetNavDestinationMode() const
+{
+    if (destType_ == NavDestinationType::PLACE_HOLDER) {
+        auto primaryNode = primaryNode_.Upgrade();
+        CHECK_NULL_RETURN(primaryNode, mode_);
+        return primaryNode->GetNavDestinationMode();
+    }
+    return mode_;
+}
+
+RefPtr<NavDestinationGroupNode> NavDestinationGroupNode::GetOrCreatePlaceHolder()
+{
+    if (placeHolderNode_) {
+        return placeHolderNode_;
+    }
+
+    auto context = GetContextRefPtr();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto phNode = ForceSplitUtils::CreatePlaceHolderNavDestination(context);
+    CHECK_NULL_RETURN(phNode, nullptr);
+    phNode->SetPrimaryNode(WeakClaim(this));
+    auto phPattern = phNode->GetPattern<NavDestinationGroupNode>();
+    CHECK_NULL_RETURN(phPattern, nullptr);
+    phPattern->SetIndex(index_, false);
+    placeHolderNode_ = phNode;
+    return placeHolderNode_;
+}
+
+void NavDestinationGroupNode::SetIndex(int32_t index, bool updatePrimary)
+{
+    index_ = index;
+    if (destType_ == NavDestinationType::PLACE_HOLDER && updatePrimary) {
+        auto primaryNode = primaryNode_.Upgrade();
+        CHECK_NULL_VOID(primaryNode);
+        primaryNode->SetIndex(index, false);
+    } else if (placeHolderNode_) {
+        placeHolderNode_->SetIndex(index, false);
+    }
+}
+
+void NavDestinationGroupNode::SetCanReused(bool canReused)
+{
+    if (destType_ == NavDestinationType::PLACE_HOLDER) {
+        auto primaryNode = primaryNode_.Upgrade();
+        if (primaryNode) {
+            primaryNode->SetCanReused(canReused);
+        }
+    }
+    canReused_ = canReused;
+}
+
+bool NavDestinationGroupNode::GetCanReused() const
+{
+    if (destType_ == NavDestinationType::PLACE_HOLDER) {
+        auto primaryNode = primaryNode_.Upgrade();
+        if (primaryNode) {
+            return primaryNode->GetCanReused();
+        }
+    }
+    return canReused_;
 }
 } // namespace OHOS::Ace::NG

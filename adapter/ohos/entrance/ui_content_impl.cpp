@@ -4952,19 +4952,25 @@ void UIContentImpl::SetForceSplitEnable(bool isForceSplit, const std::string& ho
     CHECK_NULL_VOID(context);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit, homePage]() {
+    auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit, homePage, isRouter]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
-        auto stageManager = context->GetStageManager();
-        CHECK_NULL_VOID(stageManager);
-        stageManager->SetForceSplitEnable(isForceSplit, homePage);
+        if (isRouter) {
+            auto stageManager = context->GetStageManager();
+            CHECK_NULL_VOID(stageManager);
+            stageManager->SetForceSplitEnable(isForceSplit, homePage);
+            return;
+        }
+        auto navManager = context->GetNavigationManager();
+        CHECK_NULL_VOID(navManager);
+        navManager->SetForceSplitEnable(isForceSplit, homePage);
     };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         forceSplitTask();
         return;
     }
     taskExecutor->PostTask(std::move(forceSplitTask), TaskExecutor::TaskType::UI,
-        "ArkUISetForceSplitEnable");
+        isRouter ? "ArkUISetForceSplitEnable" : "ArkUISetNavigationForceSplitEnable");
 }
 
 void UIContentImpl::ProcessDestructCallbacks()

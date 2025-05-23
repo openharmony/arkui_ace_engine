@@ -131,6 +131,8 @@ public:
     void ResetIsForceSetFlag(int32_t index) override;
     void PushIntentNavDestination(const std::string& name, const std::string& params, bool needTransition) override;
 
+    void RemoveByIndexes(const std::vector<int32_t>& indexes) override;
+
 protected:
     JSRef<JSObject> dataSourceObj_;
     JSRef<JSFunc> navDestBuilderFunc_;
