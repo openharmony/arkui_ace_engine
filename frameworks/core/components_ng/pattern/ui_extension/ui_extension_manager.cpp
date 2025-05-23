@@ -602,6 +602,28 @@ void UIExtensionManager::UpdateWMSUIExtProperty(UIContentBusinessCode code, cons
     }
 }
 
+void UIExtensionManager::UpdateWMSUIExtPropertyByPersistentId(UIContentBusinessCode code, const AAFwk::Want& data,
+    const std::unordered_set<int32_t>& persistentIds, RSSubsystemId subSystemId)
+{
+    CHECK_RUN_ON(UI);
+    for (const auto& it : aliveUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        CHECK_NULL_CONTINUE(uiExtension);
+        auto persistentId = uiExtension->GetSessionId();
+        if (persistentIds.find(persistentId) != persistentIds.end()) {
+            uiExtension->UpdateWMSUIExtProperty(code, data, subSystemId);
+        }
+    }
+    for (const auto& it : aliveSecurityUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        CHECK_NULL_CONTINUE(uiExtension);
+        auto persistentId = uiExtension->GetSessionId();
+        if (persistentIds.find(persistentId) != persistentIds.end()) {
+            uiExtension->UpdateWMSUIExtProperty(code, data, subSystemId);
+        }
+    }
+}
+
 void UIExtensionManager::RegisterListenerIfNeeded()
 {
     if (hasRegisterListener_) {

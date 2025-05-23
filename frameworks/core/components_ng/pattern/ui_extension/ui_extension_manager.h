@@ -176,6 +176,8 @@ public:
     void SendPageModeRequestToHost(const RefPtr<PipelineContext>& pipeline);
     void TransferAccessibilityRectInfo();
     void UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId);
+    void UpdateWMSUIExtPropertyByPersistentId(UIContentBusinessCode code, const AAFwk::Want& data,
+        const std::unordered_set<int32_t>& persistentIds, RSSubsystemId subSystemId);
     void SetInstanceId(int32_t id)
     {
         instanceId_ = id;

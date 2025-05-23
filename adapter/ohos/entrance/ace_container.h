@@ -848,7 +848,7 @@ public:
         foldStatusFromListener_ = GetCurrentFoldStatus();
     }
 
-    void DispatchExtensionDataToHostWindow(uint32_t code, const AAFwk::Want& data, int32_t persistenId);
+    void DispatchExtensionDataToHostWindow(uint32_t code, const AAFwk::Want& data, int32_t persistentId);
 
     void DistributeIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
         const std::function<void()>&& loadPageCallback);

@@ -4168,12 +4168,13 @@ void AceContainer::DispatchUIExtDataConsume(
     }
 }
 
-void AceContainer::DispatchExtensionDataToHostWindow(uint32_t code, const AAFwk::Want& data, int32_t persistenId)
+void AceContainer::DispatchExtensionDataToHostWindow(uint32_t code, const AAFwk::Want& data, int32_t persistentId)
 {
     CHECK_NULL_VOID(uiWindow_);
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-        "DispatchExtensionDataToHostWindow code=%{public}u, want=%{public}s, persistenId=%{public}d.",
-        code, data.ToString().c_str(), persistenId);
+        "DispatchExtensionDataToHostWindow code=%{public}u, want=%{public}s, persistentId=%{public}d.",
+        code, data.ToString().c_str(), persistentId);
+    uiWindow_->OnExtensionMessage(code, persistentId, data);
 }
 
 bool AceContainer::FireUIExtDataSendToHost(

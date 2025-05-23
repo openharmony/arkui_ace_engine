@@ -21,6 +21,7 @@
 #include <memory>
 #include <refbase.h>
 #include <string>
+#include <unordered_set>
 #include <vector>
 #include <list>
 
@@ -536,6 +537,12 @@ public:
     virtual void SetTopWindowBoundaryByID(const std::string& stringId) {};
 
     virtual bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId)
+    {
+        return false;
+    }
+
+    virtual bool SendUIExtProprtyByPersistentId(uint32_t code, const AAFwk::Want& data,
+        const std::unordered_set<int32_t>& persistentIds, uint8_t subSystemId)
     {
         return false;
     }
