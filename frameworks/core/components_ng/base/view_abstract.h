@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Rosen {
 class VisualEffect;
@@ -986,7 +987,7 @@ public:
         FrameNode* frameNode, const std::vector<AnimationPropertyType>& properties);
     // Get property value from rsNode
     static std::vector<float> GetRenderNodePropertyValue(FrameNode* frameNode, AnimationPropertyType property);
-
+    static void UpdatePopupParamRescource(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& frameNode);
 private:
     static void AddDragFrameNodeToManager();
     static void AddDragFrameNodeToManager(FrameNode* frameNode);

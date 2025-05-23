@@ -799,6 +799,7 @@ public:
     static void ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
     static void ParseDragSpringLoadingConfiguration(
         const JSRef<JSObject>& paramObj, const RefPtr<NG::DragSpringLoadingConfiguration>& config);
+    static void ParseDialogWidthAndHeight(DialogProperties& properties, const JSRef<JSObject>& obj);
 
 private:
     static bool ParseJsStrArrayInternal(const JSRef<JSVal>& jsValue, std::vector<std::string>& result,
@@ -825,6 +826,12 @@ private:
     static JSRef<JSObject> CreateJsTextMenuId(const std::string& id);
     static JSRef<JSArray> CreateJsOnMenuItemClick(const NG::MenuItemParam& menuItemParam);
     static JSRef<JSVal> CreateJsSystemMenuItems(const std::vector<NG::MenuItemParam>& systemMenuItems);
+    static void ParseMaskRectOffset(
+        const JSRef<JSVal>& offsetX, const JSRef<JSVal>& offsetY, DimensionOffset& options);
+    static void ParseMarkRectWidth(const JSRef<JSVal>& width, DimensionRect& options);
+    static void ParseMarkRectHeight(const JSRef<JSVal>& height, DimensionRect& options);
+    static void ParseMarkRectWidthWithResourceObj(const JSRef<JSVal>& width, DimensionRect& options);
+    static void ParseMaskRectHeightWithResourceObj(const JSRef<JSVal>& width, DimensionRect& options);
     static void CompleteResourceObjectInner(
         JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resIdValue);
     static bool ParseAllBorderRadiusesForOutLine(JSRef<JSObject>& object, NG::BorderRadiusProperty& borderRadius);
@@ -836,6 +843,24 @@ private:
     static void ParseRadialGradientCenter(NG::Gradient& newGradient, const JSRef<JSArray> centerArray);
     static void NewParseGradientColor(NG::Gradient& gradient, JSRef<JSArray>& subArray,
         NG::GradientColor& gradientColor, size_t& i, size_t& length);
+    static void SetBorderColorProps(const Color& color, NG::BorderColorProperty& props, const char* corner);
+    static void ParseBorderColorProps(
+        const JSRef<JSObject>& object, NG::BorderColorProperty& props, const char* propName);
+    static void GetBorderColors(const JSRef<JSObject>& object, NG::BorderColorProperty& borderColor);
+    static bool GetBorderColorsFromResource(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty);
+    static void SetBorderRadiusProps(const CalcDimension& dim, NG::BorderRadiusProperty& props, const char* propName);
+    static void GetBorderRadiusProps(
+        const JSRef<JSObject>& object, NG::BorderRadiusProperty& props, bool notNegative, const char* propName);
+    static bool GetBorderRadiusFromResource(const JSRef<JSVal>& args, NG::BorderRadiusProperty& props);
+    static void ParseBorderWidthFromResource(const JSRef<JSVal>& jsVal, NG::BorderWidthProperty& props);
+    static bool GetBorderWidthFromResource(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty);
+    static void GetBorderWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty);
+    static void GetBorderEndWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty);
+    static void GetBorderStartWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty);
+    static void GetBorderRightWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty);
+    static void GetBorderLeftWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty);
+    static void GetBorderTopWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty);
+    static void GetBorderBottomWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H

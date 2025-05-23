@@ -32,6 +32,8 @@
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
+#include "core/components_ng/pattern/dialog/alert_dialog_model.h"
+#include "core/components_ng/pattern/action_sheet/action_sheet_model.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -372,6 +374,23 @@ public:
     {
         return uecMaskNode_.Upgrade();
     }
+    void UpdateDialogColor(const Color& color, const DialogResourceType type);
+    void UpdateContentValue(std::string& text, const DialogResourceType type);
+    void UpdateLayoutContent(const CalcDimension& value, const DialogResourceType type);
+    void UpdateBackShadow(const Shadow& shadow);
+    void UpdateEffect(const EffectOption& option);
+    void UpdateBlurStyle(const BlurStyleOption& option);
+    void UpdateMaskRect(const DimensionRect& rect);
+    void UpdateBackGroundColor(std::string& content);
+    void UpdateBorderColor(std::string& content);
+    void UpdateContent(std::string& text, ActionSheetType type);
+    void UpdateContent(const Color& color, ActionSheetType type);
+    void UpdateBorderWidth(const NG::BorderWidthProperty& width);
+    void UpdateBorderColor(const NG::BorderColorProperty& color);
+    void UpdateCornerRadius(const NG::BorderRadiusProperty& radius);
+    void UpdateButtonBackgroundColor(const Color& color, int32_t buttonIndex);
+    void UpdateButtonFontColor(const std::string colorStr, int32_t buttonIndex);
+    void UpdateButtonText(const std::string text, int32_t buttonIndex);
 
 private:
     bool AvoidKeyboard() const override

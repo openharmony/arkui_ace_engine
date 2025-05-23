@@ -92,9 +92,17 @@ void SetPopupMessageOptions(const JSRef<JSObject> messageOptionsObj, const RefPt
 {
     auto colorValue = messageOptionsObj->GetProperty("textColor");
     Color textColor;
-    if (JSViewAbstract::ParseJsColor(colorValue, textColor)) {
-        if (popupParam) {
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (JSViewAbstract::ParseJsColor(colorValue, textColor, resObj)) {
+            popupParam->SetTextColorResourceObject(resObj);
             popupParam->SetTextColor(textColor);
+        }
+    } else {
+        if (JSViewAbstract::ParseJsColor(colorValue, textColor)) {
+            if (popupParam) {
+                popupParam->SetTextColor(textColor);
+            }
         }
     }
 
@@ -344,17 +352,35 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
     }
 
     JSRef<JSVal> maskValue = popupObj->GetProperty("mask");
-    if (maskValue->IsBoolean()) {
-        if (popupParam) {
-            popupParam->SetBlockEvent(maskValue->ToBoolean());
+    bool maskValueBool = false;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (JSViewAbstract::ParseJsBool(maskValue, maskValueBool, resObj)) {
+            popupParam->SetMasResourceObject(resObj);
+            popupParam->SetBlockEvent(maskValueBool);
+        }
+    } else {
+        if (maskValue->IsBoolean()) {
+            if (popupParam) {
+                popupParam->SetBlockEvent(maskValue->ToBoolean());
+            }
         }
     }
+
     if (maskValue->IsObject()) {
         auto maskObj = JSRef<JSObject>::Cast(maskValue);
         auto colorValue = maskObj->GetProperty("color");
         Color maskColor;
-        if (JSViewAbstract::ParseJsColor(colorValue, maskColor)) {
-            popupParam->SetMaskColor(maskColor);
+        if (SystemProperties::ConfigChangePerform()) {
+            RefPtr<ResourceObject> resObj;
+            if (JSViewAbstract::ParseJsColor(colorValue, maskColor, resObj)) {
+                popupParam->SetMaskColorResourceObject(resObj);
+                popupParam->SetTextColor(maskColor);
+            }
+        } else {
+            if (JSViewAbstract::ParseJsColor(colorValue, maskColor)) {
+                popupParam->SetMaskColor(maskColor);
+            }
         }
     }
 
@@ -402,8 +428,16 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
 
     Color backgroundColor;
     auto popupColorVal = popupObj->GetProperty("popupColor");
-    if (JSViewAbstract::ParseJsColor(popupColorVal, backgroundColor)) {
-        popupParam->SetBackgroundColor(backgroundColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (JSViewAbstract::ParseJsColor(popupColorVal, backgroundColor, resObj)) {
+            popupParam->SetPopupColorResourceObject(resObj);
+            popupParam->SetBackgroundColor(backgroundColor);
+        }
+    } else {
+        if (JSViewAbstract::ParseJsColor(popupColorVal, backgroundColor)) {
+            popupParam->SetBackgroundColor(backgroundColor);
+        }
     }
 
     auto autoCancelVal = popupObj->GetProperty("autoCancel");

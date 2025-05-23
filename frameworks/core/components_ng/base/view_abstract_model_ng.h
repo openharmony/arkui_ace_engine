@@ -1484,7 +1484,16 @@ public:
     void SetAccessibilityUseSamePage(const std::string& pageMode) override;
     void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) override;
     void SetAccessibilityFocusDrawLevel(int32_t drawLevel) override;
-
+    std::string PopupTypeStr(PopupType& type);
+    void UpdateColor(PopupType& type, const Color& color);
+    void CreateWithColorResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& ColorResObj, PopupType& type) override;
+    void CreateWithBoolResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& maskResObj) override;
+    virtual void CreateWithResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj, PopupType type) override;
+    virtual void CreateWithResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj) override;
     void SetForegroundColor(const Color& color) override
     {
         ViewAbstract::SetForegroundColor(color);

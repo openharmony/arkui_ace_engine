@@ -61,6 +61,7 @@ enum class ResponseType : int32_t {
     LONG_PRESS,
 };
 class SpanString;
+enum PopupType { POPUPTYPE_TEXTCOLOR, POPUPTYPE_POPUPCOLOR, POPUPTYPE_MASKCOLOR };
 class ACE_FORCE_EXPORT ViewAbstractModel {
 public:
     static ViewAbstractModel* GetInstance();
@@ -394,7 +395,7 @@ public:
 
     // toolbar
     virtual void SetToolbarBuilder(std::function<void()>&& buildFunc) = 0;
-    
+
     // background
     virtual void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) = 0;
 
@@ -490,6 +491,14 @@ public:
     virtual void SetMarkAnchorStart(Dimension& markAnchorStart) = 0;
     virtual void ResetMarkAnchorStart() = 0;
     virtual void SetOffsetLocalizedEdges(bool needLocalized) = 0;
+    virtual void CreateWithColorResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& ColorResObj, PopupType& type) = 0;
+    virtual void CreateWithBoolResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& maskResObj) = 0;
+    virtual void CreateWithResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj, PopupType type) = 0;
+    virtual void CreateWithResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_H

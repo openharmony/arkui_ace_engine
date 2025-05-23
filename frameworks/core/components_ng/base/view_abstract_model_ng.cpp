@@ -32,6 +32,9 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #endif
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/pattern/bubble/bubble_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -692,7 +695,7 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
 
     // delete Sheet when target node destroy
     SheetManager::GetInstance().RegisterDestroyCallback(targetNode, sheetStyle, instanceId);
-    
+
     if (sheetStyle.showInSubWindow.value_or(false)) {
         if (isShow) {
             SubwindowManager::GetInstance()->ShowBindSheetNG(isShow, std::move(callback), std::move(buildNodeFunc),
@@ -1167,5 +1170,102 @@ void ViewAbstractModelNG::SetOnAccessibilityHoverTransparent(FrameNode* frameNod
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
     accessibilityManager->AddHoverTransparentCallback(AceType::Claim(frameNode));
+}
+
+std::string ViewAbstractModelNG::PopupTypeStr(PopupType& type)
+{
+    switch (type) {
+        case PopupType::POPUPTYPE_TEXTCOLOR:
+            return "TextColor";
+        case PopupType::POPUPTYPE_POPUPCOLOR:
+            return "PopupColor";
+        case POPUPTYPE_MASKCOLOR:
+            return "MaskColor";
+        default:
+            return "";
+    }
+}
+
+void ViewAbstractModelNG::UpdateColor(PopupType& type, const Color& color)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(pattern);
+    switch (type) {
+        case POPUPTYPE_TEXTCOLOR:
+            pattern->UpdateBubbleText(color);
+            break;
+        case POPUPTYPE_POPUPCOLOR:
+            pattern->UpdateBubbleBackGroundColor(color);
+            break;
+        case POPUPTYPE_MASKCOLOR:
+            pattern->UpdateMaskColor(color);
+            break;
+        default:
+            break;
+    }
+}
+
+void ViewAbstractModelNG::CreateWithColorResourceObj(
+    const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& ColorResObj, PopupType& type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(pattern);
+    if (ColorResObj) {
+        std::string key = "popup" + PopupTypeStr(type);
+        auto&& updateFunc = [&](const RefPtr<ResourceObject>& ColorResObj) {
+            std::string color = pattern->GetResCacheMapByKey(key);
+            Color result;
+            if (color.empty()) {
+                ResourceParseUtils::ParseResColor(ColorResObj, result);
+                pattern->AddResCache(key, result.ColorToString());
+            } else {
+                result = Color::FromString(color);
+            }
+            UpdateColor(type, result);
+        };
+        updateFunc(ColorResObj);
+        pattern->AddResObj(key, ColorResObj, std::move(updateFunc));
+    }
+}
+
+void ViewAbstractModelNG::CreateWithBoolResourceObj(
+    const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& maskResObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(pattern);
+    if (maskResObj) {
+        std::string key = "popupMask";
+        auto&& updateFunc = [&](const RefPtr<ResourceObject>& maskResObj) {
+            std::string mask = pattern->GetResCacheMapByKey(key);
+            bool result;
+            if (mask.empty()) {
+                ResourceParseUtils::ParseResBool(maskResObj, result);
+                std::string maskValue = result ? "true" : "false";
+                pattern->AddResCache(key, maskValue);
+            } else {
+                result = mask == "true";
+            }
+            pattern->UpdateMask(result);
+        };
+        updateFunc(maskResObj);
+        pattern->AddResObj(key, maskResObj, std::move(updateFunc));
+    }
+}
+
+void ViewAbstractModelNG::CreateWithResourceObj(
+    const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj, PopupType type)
+{
+    CHECK_NULL_VOID(frameNode);
+    CreateWithColorResourceObj(frameNode, resourceObj, type);
+}
+void ViewAbstractModelNG::CreateWithResourceObj(
+    const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    CreateWithBoolResourceObj(frameNode, resourceObj);
 }
 } // namespace OHOS::Ace::NG
