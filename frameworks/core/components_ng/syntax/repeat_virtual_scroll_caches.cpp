@@ -194,9 +194,9 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Index(uint32_t index)
     if (!node4Key.value().isValid) {
         // impossible situation: TS onKeyIndex shoul;d have updated repeatItem.index already!
         TAG_LOGW(AceLogTag::ACE_REPEAT,
-            "index %{public}d -> %{public}s, templateId %{public}s, "
+            "index %{public}d, templateId %{public}s, "
             "found UINode %{public}s marked inValid. Internal error!",
-            static_cast<int32_t>(index), key.value().c_str(), ttype.value().c_str(), DumpUINode(uiNode).c_str());
+            static_cast<int32_t>(index), ttype.value().c_str(), DumpUINode(uiNode).c_str());
         UpdateSameKeyItem(key.value(), index);
         node4key_[key.value()].isValid = true;
     }
@@ -377,7 +377,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::CreateNewNode(uint32_t forIndex)
     }
     const auto& forKey = iter->second;
 
-    ACE_SCOPED_TRACE("RepeatVirtualScrollCaches::CreateNewNode index[%d] -> key[%s]",
+    ACE_SYNTAX_SCOPED_TRACE("RepeatVirtualScrollCaches::CreateNewNode index[%d] -> key[%s]",
         static_cast<int32_t>(forIndex), forKey.c_str());
 
     // see if node already created, just for safety
@@ -409,9 +409,9 @@ RefPtr<UINode> RepeatVirtualScrollCaches::CreateNewNode(uint32_t forIndex)
 
     if (!node4Index) {
         TAG_LOGE(AceLogTag::ACE_REPEAT,
-            "New Node create: For index %{public}d -> key %{public}s -> ttype %{public}s "
+            "New Node create: For index %{public}d -> ttype %{public}s "
             "item builder FAILED to gen FrameNode. ERROR",
-            forIndex, forKey.c_str(), ttype.c_str());
+            forIndex, ttype.c_str());
         return nullptr;
     }
 
@@ -439,7 +439,7 @@ void RepeatVirtualScrollCaches::ForEachL1IndexUINode(std::map<int32_t, RefPtr<UI
         const auto& cacheItem = node4key_[key];
         const auto& indexIter = index4Key_.find(key);
         if (indexIter == index4Key_.end()) {
-            TAG_LOGE(AceLogTag::ACE_REPEAT, "fail to get index for %{public}s key", key.c_str());
+            TAG_LOGD(AceLogTag::ACE_REPEAT, "fail to get index for %{public}s key", key.c_str());
             continue;
         }
         children.emplace(indexIter->second, cacheItem.item);
@@ -648,7 +648,7 @@ std::optional<std::string> RepeatVirtualScrollCaches::GetL1KeyToUpdate(const std
 RefPtr<UINode> RepeatVirtualScrollCaches::UINodeHasBeenUpdated(
     const std::string& ttype, const std::string& fromKey, const std::string& forKey)
 {
-    ACE_SCOPED_TRACE(
+    ACE_SYNTAX_SCOPED_TRACE(
         "RepeatVirtualScrollCaches::UINodeHasBeenUpdated ttype[%s] fromKey[%s] -> forKey[%s]",
         ttype.c_str(), fromKey.c_str(), forKey.c_str());
 
@@ -676,7 +676,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::UINodeHasBeenUpdated(
         node4key_.emplace(forKey, cachedItem);
         return cachedItem.item;
     }
-    TAG_LOGE(AceLogTag::ACE_REPEAT, "fail to update L2 : %{public}s, %{public}s, %{public}s, ", ttype.c_str(),
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "fail to update L2 : %{public}s, %{public}s, %{public}s, ", ttype.c_str(),
         fromKey.c_str(), forKey.c_str());
     return nullptr;
 }

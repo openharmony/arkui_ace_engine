@@ -904,7 +904,7 @@ class __RepeatVirtualScroll2Impl<T> {
             }
         }
         stateMgmtConsole.applicationError(`${this.constructor.name}(${this.repeatElmtId_}): `,
-            `Detected duplicate key ${origKey} for index ${curIndex}! `,
+            `Detected duplicate key for index ${curIndex}! `,
             `Generated random key will decrease Repeat performance. Fix the key gen function in your application!`);
         return curKey;
     }
