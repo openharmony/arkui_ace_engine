@@ -83,18 +83,26 @@ constexpr Dimension OVERLAY_MAX_WIDTH = 280.0_vp;
 constexpr Dimension MIN_HOTSPOT_WIDTH = 40.0_vp;
 constexpr float AGING_MIN_SCALE = 1.75f;
 
-std::unordered_map<TextDataDetectType, std::string> AI_TYPE_ID_MAP = {
-    { TextDataDetectType::PHONE_NUMBER, OH_DEFAULT_AI_MENU_PHONE },
-    { TextDataDetectType::URL, OH_DEFAULT_AI_MENU_URL },
-    { TextDataDetectType::EMAIL, OH_DEFAULT_AI_MENU_EMAIL },
-    { TextDataDetectType::ADDRESS, OH_DEFAULT_AI_MENU_ADDRESS },
-    { TextDataDetectType::DATE_TIME, OH_DEFAULT_AI_MENU_DATETIME }
+std::unordered_map<TextDataDetectType, std::pair<std::string, std::function<bool()>>> AI_TYPE_ID_MAP = {
+    { TextDataDetectType::PHONE_NUMBER, std::make_pair(OH_DEFAULT_AI_MENU_PHONE, &TextSystemMenu::IsShowAIPhone) },
+    { TextDataDetectType::URL, std::make_pair(OH_DEFAULT_AI_MENU_URL, &TextSystemMenu::IsShowAIUrl) },
+    { TextDataDetectType::EMAIL, std::make_pair(OH_DEFAULT_AI_MENU_EMAIL, &TextSystemMenu::IsShowAIEmail) },
+    { TextDataDetectType::ADDRESS, std::make_pair(OH_DEFAULT_AI_MENU_ADDRESS, &TextSystemMenu::IsShowAIAddress) },
+    { TextDataDetectType::DATE_TIME, std::make_pair(OH_DEFAULT_AI_MENU_DATETIME, &TextSystemMenu::IsShowAIDatetime) },
 };
 
 bool IsAIMenuOption(const std::string& id)
 {
     return id == OH_DEFAULT_AI_MENU_PHONE || id == OH_DEFAULT_AI_MENU_URL || id == OH_DEFAULT_AI_MENU_EMAIL ||
             id == OH_DEFAULT_AI_MENU_ADDRESS || id == OH_DEFAULT_AI_MENU_DATETIME;
+}
+
+bool IsShowAIMenuOption(OHOS::Ace::TextDataDetectType type)
+{
+    auto isShowAIMenu = type != TextDataDetectType::INVALID;
+    auto findIter = AI_TYPE_ID_MAP.find(type);
+    isShowAIMenu = isShowAIMenu && (findIter != AI_TYPE_ID_MAP.end()) && findIter->second.second();
+    return isShowAIMenu;
 }
 
 const std::unordered_map<std::string, std::function<bool(const SelectMenuInfo&)>> isMenuItemEnabledFuncMap = {
@@ -762,7 +770,8 @@ std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInf
                 "", info->menuInfo.showSearch);
         }
     }
-    if (info->menuInfo.aiMenuOptionType != TextDataDetectType::INVALID) {
+
+    if (IsShowAIMenuOption(info->menuInfo.aiMenuOptionType)) {
         auto inheritFunc = ConvertToVoidFunction(info->menuCallback.onAIMenuOption, "From_Right_Click");
         params.emplace_back(theme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType),
             GetMenuCallbackWithContainerId(inheritFunc), "", true);
@@ -2395,7 +2404,7 @@ void SelectOverlayNode::ShowCamera(
 void SelectOverlayNode::ShowAIMenuOptions(
     float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label)
 {
-    if (info->menuInfo.aiMenuOptionType != TextDataDetectType::INVALID) {
+    if (IsShowAIMenuOption(info->menuInfo.aiMenuOptionType)) {
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         float buttonWidth = 0.0f;
         auto button = BuildButton(label, info->menuCallback.onAIMenuOption, GetId(), buttonWidth,
@@ -2553,15 +2562,11 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
         OH_DEFAULT_CAMERA_INPUT, theme->GetCameraInput(), systemItemParams);
     AddMenuItemParamIf(menuInfo.showAIWrite && TextSystemMenu::IsShowAIWriter(), OH_DEFAULT_AI_WRITE,
         theme->GetAIWrite(), systemItemParams);
-    if (info->menuInfo.aiMenuOptionType != TextDataDetectType::INVALID) { // editMenuOptions route
-        MenuItemParam param;
-        MenuOptionsParam menuOptionsParam;
+
+    if (IsShowAIMenuOption(info->menuInfo.aiMenuOptionType)) {
         auto findIter = AI_TYPE_ID_MAP.find(info->menuInfo.aiMenuOptionType);
-        CHECK_EQUAL_RETURN(findIter, AI_TYPE_ID_MAP.end(), systemItemParams);
-        menuOptionsParam.id = findIter->second;
-        menuOptionsParam.content = theme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType);
-        param.menuOptionsParam = menuOptionsParam;
-        systemItemParams.emplace_back(param);
+        AddMenuItemParamIf(true, findIter->second.first,
+            theme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType), systemItemParams);
     }
     return systemItemParams;
 }
