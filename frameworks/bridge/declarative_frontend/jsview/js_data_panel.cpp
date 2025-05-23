@@ -17,14 +17,15 @@
 
 #include <vector>
 
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_data_panel_theme.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/data_panel_model_impl.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_data_panel_theme.h"
 #include "core/components/data_panel/data_panel_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/pattern/data_panel/data_panel_model.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 
 namespace OHOS::Ace {
@@ -178,12 +179,27 @@ void JSDataPanel::TrackBackground(const JSCallbackInfo& info)
         return;
     }
     Color color;
-    if (!ParseJsColor(info[0], color)) {
-        RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
-        color = theme->GetBackgroundColor();
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        bool state = ParseJsColor(info[0], color, resObj);
+        if (resObj) {
+            DataPanelModel::GetInstance()->CreateWithResourceObj(
+                OHOS::Ace::DataPanelResourceType::TRACK_BACKGROUND_COLOR, resObj);
+        } else if (state) {
+            DataPanelModel::GetInstance()->SetTrackBackground(color);
+        } else {
+            RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+            color = theme->GetBackgroundColor();
+            DataPanelModel::GetInstance()->SetTrackBackground(color);
+        }
+    } else {
+        RefPtr<ResourceObject> resObj;
+        if (!ParseJsColor(info[0], color)) {
+            RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+            color = theme->GetBackgroundColor();
+        }
+        DataPanelModel::GetInstance()->SetTrackBackground(color);
     }
-
-    DataPanelModel::GetInstance()->SetTrackBackground(color);
 }
 
 void JSDataPanel::StrokeWidth(const JSCallbackInfo& info)
@@ -194,8 +210,22 @@ void JSDataPanel::StrokeWidth(const JSCallbackInfo& info)
 
     RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
     CalcDimension strokeWidthDimension;
-    if (!ParseJsDimensionVp(info[0], strokeWidthDimension)) {
-        strokeWidthDimension = theme->GetThickness();
+    RefPtr<ResourceObject> resObj;
+    if (SystemProperties::ConfigChangePerform()) {
+        bool state = ParseJsDimensionVp(info[0], strokeWidthDimension, resObj);
+        if (resObj) {
+            DataPanelModel::GetInstance()->CreateWithResourceObj(
+                OHOS::Ace::DataPanelResourceType::STROKE_WIDTH, resObj);
+        } else if (state) {
+            DataPanelModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
+        } else {
+            strokeWidthDimension = theme->GetThickness();
+            DataPanelModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
+        }
+    } else {
+        if (!ParseJsDimensionVp(info[0], strokeWidthDimension)) {
+            strokeWidthDimension = theme->GetThickness();
+        }
     }
 
     // If the parameter value is string(''), parse result 0.
