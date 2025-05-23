@@ -262,6 +262,7 @@ void NavDestinationModelNG::Create()
     }
     CreateToolBarNode(navDestinationNode);
     stack->Push(navDestinationNode);
+    RegisterBackgroundColorUpdateCallback(navDestinationNode);
 }
 
 void NavDestinationModelNG::CreateImageButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode)
@@ -400,6 +401,23 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
     }
 }
 
+void NavDestinationModelNG::RegisterBackgroundColorUpdateCallback(
+    const RefPtr<NavDestinationGroupNode>& navDestinationNode)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto resourceObject = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+        auto&& updateFunc = [weakPattern = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                                const RefPtr<ResourceObject>& resObj) {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdateBackgroundColor();
+        };
+        pattern->AddResObj("navigation.navdesBGColorUpdate", resourceObject, std::move(updateFunc));
+    }
+}
+
 void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc, RefPtr<NG::NavDestinationContext> context)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -447,6 +465,7 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc, RefPt
     // toolbar node
     CreateToolBarNode(navDestinationNode);
     stack->Push(navDestinationNode);
+    RegisterBackgroundColorUpdateCallback(navDestinationNode);
 }
 
 void NavDestinationModelNG::SetHideTitleBar(bool hideTitleBar, bool animated)
@@ -487,7 +506,32 @@ void NavDestinationModelNG::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titleBarPattern);
-    titleBarPattern->SetTitlebarOptions(std::move(opt));
+    titleBarPattern->SetTitlebarOptions(opt);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [weakTitleBarNode = AceType::WeakClaim(AceType::RawPtr(titleBarNode)),
+                            weakTitleBarPattern = AceType::WeakClaim(AceType::RawPtr(titleBarPattern)),
+                            opt](const RefPtr<ResourceObject>& resObj) mutable {
+        opt.bgOptions.ReloadResources();
+        if (opt.bgOptions.blurStyleOption.has_value()) {
+            opt.bgOptions.blurStyleOption->ReloadResources();
+        }
+        if (opt.bgOptions.effectOption.has_value()) {
+            opt.bgOptions.effectOption->ReloadResources();
+        }
+        auto titleBarPattern = weakTitleBarPattern.Upgrade();
+        CHECK_NULL_VOID(titleBarPattern);
+        titleBarPattern->SetTitlebarOptions(opt);
+        auto titleBarNode = weakTitleBarNode.Upgrade();
+        CHECK_NULL_VOID(titleBarNode);
+        titleBarNode->MarkModifyDone();
+        titleBarNode->MarkDirtyNode();
+    };
+    auto pattern = titleBarNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj("navDestination.navigationTitlebarOptions", resObj, std::move(updateFunc));
 }
 
 void NavDestinationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
@@ -956,6 +1000,28 @@ void NavDestinationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
     navDestinationPattern->SetMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
     navDestinationPattern->SetLandscapeMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
     navDestinationGroupNode->UpdatePrevMenuIsCustom(false);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    RefPtr<ResourceObject> resObj;
+    auto&& updateFunc = [wekFrameNode = AceType::WeakClaim(frameNode),
+                            menuItems](const RefPtr<ResourceObject>& resObj) {
+        for (BarItem item : menuItems) {
+            item.ReloadResources();
+        }
+        auto frameNode = wekFrameNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+        CHECK_NULL_VOID(navDestinationGroupNode);
+        auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_VOID(navDestinationPattern);
+        navDestinationPattern->SetTitleBarMenuItems(menuItems);
+        navDestinationGroupNode->MarkModifyDone();
+        navDestinationGroupNode->MarkDirtyNode();
+    };
+    auto pattern = navDestinationGroupNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj("navDestination.menuItems", resObj, std::move(updateFunc));
 }
 
 void NavDestinationModelNG::SetCustomMenu(const RefPtr<AceType>& customNode)
@@ -991,7 +1057,35 @@ void NavDestinationModelNG::SetMenuOptions(NavigationMenuOptions&& opt)
     CHECK_NULL_VOID(navDestinationNode);
     auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
     CHECK_NULL_VOID(navDestinationPattern);
-    navDestinationPattern->SetMenuOptions(std::move(opt));
+    navDestinationPattern->SetMenuOptions(opt);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [weakFrameNode = AceType::WeakClaim(frameNode),
+                            weakNavDestinationPattern = AceType::WeakClaim(AceType::RawPtr(navDestinationPattern)),
+                            opt](const RefPtr<ResourceObject>& resObj) mutable {
+        opt.mbOptions.bgOptions.ReloadResources();
+        if (opt.mbOptions.bgOptions.blurStyleOption.has_value()) {
+            opt.mbOptions.bgOptions.blurStyleOption->ReloadResources();
+        }
+        if (opt.mbOptions.bgOptions.effectOption.has_value()) {
+            opt.mbOptions.bgOptions.effectOption->ReloadResources();
+        }
+        auto navDestinationPattern = weakNavDestinationPattern.Upgrade();
+        CHECK_NULL_VOID(navDestinationPattern);
+
+        navDestinationPattern->SetMenuOptions(opt);
+        auto frameNode = weakFrameNode.Upgrade();
+        auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+        CHECK_NULL_VOID(navDestinationNode);
+        navDestinationNode->MarkModifyDone();
+        navDestinationNode->MarkDirtyNode();
+    };
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj("navDestination.navigationMenuOptions", resObj, std::move(updateFunc));
 }
 
 void NavDestinationModelNG::SetBackgroundColor(const Color& color, bool isVaild)
@@ -1181,7 +1275,7 @@ void NavDestinationModelNG::SetTitlebarOptions(FrameNode* frameNode, NavigationT
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titleBarPattern);
-    titleBarPattern->SetTitlebarOptions(std::move(opt));
+    titleBarPattern->SetTitlebarOptions(opt);
 }
 
 void NavDestinationModelNG::SetHideToolBar(bool hideToolBar, bool animated)
@@ -1204,6 +1298,55 @@ void NavDestinationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBa
     CHECK_NULL_VOID(navDestinationLayoutProperty);
     navDestinationLayoutProperty->UpdateHideToolBar(hideToolBar);
     navDestinationLayoutProperty->UpdateIsAnimatedToolBar(animated);
+}
+
+void NavDestinationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems, MoreButtonOptions&& opt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navdestinationGroupNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(navdestinationGroupNode);
+    auto localOpt = opt;
+    NavigationToolbarUtil::SetToolbarMoreButtonOptions(navdestinationGroupNode, std::move(opt));
+    bool enabled = false;
+    auto hub = navdestinationGroupNode->GetOrCreateEventHub<EventHub>();
+    if (hub) {
+        enabled = hub->IsEnabled();
+    }
+    FieldProperty fieldProperty;
+    fieldProperty.parentId = navdestinationGroupNode->GetInspectorId().value_or("");
+    fieldProperty.field = NG::DES_FIELD;
+    auto localToolBarItems = toolBarItems;
+    NavigationToolbarUtil::SetToolbarConfiguration(
+        navdestinationGroupNode, std::move(toolBarItems), enabled, fieldProperty);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [enabled, weak = AceType::WeakClaim(AceType::RawPtr(navdestinationGroupNode)),
+        fieldProperty, localToolBarItems, localOpt](const RefPtr<ResourceObject>& resObj) mutable {
+        auto navdestinationGroupNode = weak.Upgrade();
+        CHECK_NULL_VOID(navdestinationGroupNode);
+        if (localOpt.bgOptions.blurStyleOption.has_value()) {
+            localOpt.bgOptions.blurStyleOption->ReloadResources();
+        }
+        if (localOpt.bgOptions.effectOption.has_value()) {
+            localOpt.bgOptions.effectOption->ReloadResources();
+        }
+        auto localOptCopy = localOpt;
+        NavigationToolbarUtil::SetToolbarMoreButtonOptions(navdestinationGroupNode, std::move(localOptCopy));
+        for (auto& item : localToolBarItems) {
+            item.ReloadResources();
+        }
+        auto toolBarItemCopy = localToolBarItems;
+        NavigationToolbarUtil::SetToolbarConfiguration(
+            navdestinationGroupNode, std::move(toolBarItemCopy), enabled, fieldProperty);
+        navdestinationGroupNode->MarkModifyDone();
+        navdestinationGroupNode->MarkDirtyNode();
+    };
+    auto pattern = navdestinationGroupNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj("navDestination.toolbarConfiguration", resObj, std::move(updateFunc));
 }
 
 void NavDestinationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems)

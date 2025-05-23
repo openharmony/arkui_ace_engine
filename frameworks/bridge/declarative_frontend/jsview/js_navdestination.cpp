@@ -676,8 +676,13 @@ void JSNavDestination::SetToolBarConfiguration(const JSCallbackInfo& info)
             auto moreButtonProperty = optObj->GetProperty(MORE_BUTTON_OPTIONS_PROPERTY);
             JSNavigationUtils::ParseToolBarMoreButtonOptions(moreButtonProperty, toolbarMoreButtonOptions);
         }
-        NavDestinationModel::GetInstance()->SetToolbarMorebuttonOptions(std::move(toolbarMoreButtonOptions));
-        NavDestinationModel::GetInstance()->SetToolbarConfiguration(std::move(toolBarItems));
+        if (SystemProperties::ConfigChangePerform()) {
+            NavDestinationModel::GetInstance()->SetToolbarConfiguration(
+                std::move(toolBarItems), std::move(toolbarMoreButtonOptions));
+        } else {
+            NavDestinationModel::GetInstance()->SetToolbarMorebuttonOptions(std::move(toolbarMoreButtonOptions));
+            NavDestinationModel::GetInstance()->SetToolbarConfiguration(std::move(toolBarItems));
+        }
     } else if (info[0]->IsObject()) {
         auto builderFuncParam = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
         if (builderFuncParam->IsFunction()) {

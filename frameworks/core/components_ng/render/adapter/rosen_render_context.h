@@ -650,6 +650,7 @@ protected:
     void PaintPixmapBgImage();
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
+    void UpdateBlurStyleForColorMode(const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions);
     void SetBackBlurFilter();
     void SetFrontBlurFilter();
     bool UpdateBlurBackgroundColor(const std::optional<BlurStyleOption>& bgBlurStyle);

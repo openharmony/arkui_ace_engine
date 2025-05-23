@@ -50,6 +50,7 @@ public:
     virtual void StartTransition(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage, RouteType type);
 
     void PageChangeCloseKeyboard();
+    void UpdateColorModeForPage(const RefPtr<FrameNode>& page);
 
     static void FirePageHide(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
     static void FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE,
