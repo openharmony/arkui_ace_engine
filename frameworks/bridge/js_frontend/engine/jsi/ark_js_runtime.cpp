@@ -355,16 +355,6 @@ void ArkJSRuntime::ThrowError(const std::string& msg, int32_t code)
 void ArkJSRuntime::RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback)
 {
     JSNApi::EnableUserUncaughtErrorHandler(vm_);
-    std::weak_ptr<ArkJSRuntime> weakThis = shared_from_this();
-    JSNApi::RegisterUncatchableErrorHandler(vm_,
-        [weakThis](auto& tryCatch) {
-            auto sharedThis = weakThis.lock();
-            if (sharedThis) {
-                sharedThis->HandleUncaughtExceptionWithoutNativeEngine(tryCatch, nullptr);
-            } else {
-                LOGE("ArkJSRuntime has been destructed.");
-            }
-        });
     uncaughtErrorHandler_ = callback;
 }
 
