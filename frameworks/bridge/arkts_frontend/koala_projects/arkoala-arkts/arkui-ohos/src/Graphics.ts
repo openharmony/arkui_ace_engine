@@ -23,7 +23,7 @@ import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./component"
 import { ResourceColor } from "./component/units"
-import { Color } from "./component/enums"
+import { Color, BorderStyle } from "./component/enums"
 import { DrawingCanvas } from "./component/arkui-drawing"
 import { Dimension } from "./component/units"
 import { common2D } from "@ohos/graphics/common2D"
@@ -55,7 +55,7 @@ export enum LengthUnit {
 }
 export class LengthMetricsInternal {
     public static fromPtr(ptr: KPointer): LengthMetrics {
-        const obj : LengthMetrics = new LengthMetrics(0)
+        const obj: LengthMetrics = new LengthMetrics(0)
         obj.peer = new Finalizable(ptr, LengthMetrics.getFinalizer())
         return obj
     }
@@ -68,14 +68,14 @@ export class LengthMetrics implements MaterializedBase {
         return this.peer
     }
     static ctor_lengthmetrics(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._LengthMetrics_ctor()
+        const retval = ArkUIGeneratedNativeModule._LengthMetrics_ctor()
         return retval
     }
     constructor(value: number, unit?: LengthUnit) {
         // Constructor does not have parameters.
         // It means that the static method call invokes ctor method as well
         // when all arguments are undefined.
-        const ctorPtr : KPointer = LengthMetrics.ctor_lengthmetrics()
+        const ctorPtr: KPointer = LengthMetrics.ctor_lengthmetrics()
         this.peer = new Finalizable(ctorPtr, LengthMetrics.getFinalizer())
         if (unit === undefined) {
             this.setUnit(LengthUnit.VP);
@@ -101,42 +101,42 @@ export class LengthMetrics implements MaterializedBase {
     }
     public static px(value: number): LengthMetrics {
         const value_casted = value as (number)
-        const obj : LengthMetrics = LengthMetrics.px_serialize(value_casted)
+        const obj: LengthMetrics = LengthMetrics.px_serialize(value_casted)
         obj.unit = LengthUnit.PX
         obj.value = value
         return obj
     }
     public static vp(value: number): LengthMetrics {
         const value_casted = value as (number)
-        const obj : LengthMetrics = LengthMetrics.vp_serialize(value_casted)
+        const obj: LengthMetrics = LengthMetrics.vp_serialize(value_casted)
         obj.unit = LengthUnit.VP
         obj.value = value
         return obj
     }
     public static fp(value: number): LengthMetrics {
         const value_casted = value as (number)
-        const obj : LengthMetrics = LengthMetrics.fp_serialize(value_casted)
+        const obj: LengthMetrics = LengthMetrics.fp_serialize(value_casted)
         obj.unit = LengthUnit.FP
         obj.value = value
         return obj
     }
     public static percent(value: number): LengthMetrics {
         const value_casted = value as (number)
-        const obj : LengthMetrics = LengthMetrics.percent_serialize(value_casted)
+        const obj: LengthMetrics = LengthMetrics.percent_serialize(value_casted)
         obj.unit = LengthUnit.PERCENT
         obj.value = value
         return obj
     }
     public static lpx(value: number): LengthMetrics {
         const value_casted = value as (number)
-        const obj : LengthMetrics = LengthMetrics.lpx_serialize(value_casted)
+        const obj: LengthMetrics = LengthMetrics.lpx_serialize(value_casted)
         obj.unit = LengthUnit.LPX
         obj.value = value
         return obj
     }
     public static resource(value: Resource): LengthMetrics {
         const value_casted = value as (Resource)
-        const obj : LengthMetrics = LengthMetrics.resource_serialize(value_casted)
+        const obj: LengthMetrics = LengthMetrics.resource_serialize(value_casted)
         obj.unit = obj.getUnit()
         obj.value = obj.getValue()
         return obj
@@ -158,47 +158,47 @@ export class LengthMetrics implements MaterializedBase {
         return
     }
     private static px_serialize(value: number): LengthMetrics {
-        const retval  = ArkUIGeneratedNativeModule._LengthMetrics_px(value)
-        const obj : LengthMetrics = LengthMetricsInternal.fromPtr(retval)
+        const retval = ArkUIGeneratedNativeModule._LengthMetrics_px(value)
+        const obj: LengthMetrics = LengthMetricsInternal.fromPtr(retval)
         return obj
     }
     private static vp_serialize(value: number): LengthMetrics {
-        const retval  = ArkUIGeneratedNativeModule._LengthMetrics_vp(value)
-        const obj : LengthMetrics = LengthMetricsInternal.fromPtr(retval)
+        const retval = ArkUIGeneratedNativeModule._LengthMetrics_vp(value)
+        const obj: LengthMetrics = LengthMetricsInternal.fromPtr(retval)
         return obj
     }
     private static fp_serialize(value: number): LengthMetrics {
-        const retval  = ArkUIGeneratedNativeModule._LengthMetrics_fp(value)
-        const obj : LengthMetrics = LengthMetricsInternal.fromPtr(retval)
+        const retval = ArkUIGeneratedNativeModule._LengthMetrics_fp(value)
+        const obj: LengthMetrics = LengthMetricsInternal.fromPtr(retval)
         return obj
     }
     private static percent_serialize(value: number): LengthMetrics {
-        const retval  = ArkUIGeneratedNativeModule._LengthMetrics_percent(value)
-        const obj : LengthMetrics = LengthMetricsInternal.fromPtr(retval)
+        const retval = ArkUIGeneratedNativeModule._LengthMetrics_percent(value)
+        const obj: LengthMetrics = LengthMetricsInternal.fromPtr(retval)
         return obj
     }
     private static lpx_serialize(value: number): LengthMetrics {
-        const retval  = ArkUIGeneratedNativeModule._LengthMetrics_lpx(value)
-        const obj : LengthMetrics = LengthMetricsInternal.fromPtr(retval)
+        const retval = ArkUIGeneratedNativeModule._LengthMetrics_lpx(value)
+        const obj: LengthMetrics = LengthMetricsInternal.fromPtr(retval)
         return obj
     }
     private static resource_serialize(value: Resource): LengthMetrics {
-        const thisSerializer : Serializer = Serializer.hold()
+        const thisSerializer: Serializer = Serializer.hold()
         thisSerializer.writeResource(value)
-        const retval  = ArkUIGeneratedNativeModule._LengthMetrics_resource(thisSerializer.asBuffer(), thisSerializer.length())
+        const retval = ArkUIGeneratedNativeModule._LengthMetrics_resource(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        const obj : LengthMetrics = LengthMetricsInternal.fromPtr(retval)
+        const obj: LengthMetrics = LengthMetricsInternal.fromPtr(retval)
         return obj
     }
     private getUnit_serialize(): LengthUnit {
-        const retval  = ArkUIGeneratedNativeModule._LengthMetrics_getUnit(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._LengthMetrics_getUnit(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
     private setUnit_serialize(unit: LengthUnit): void {
         ArkUIGeneratedNativeModule._LengthMetrics_setUnit(this.peer!.ptr, unit.valueOf())
     }
     private getValue_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._LengthMetrics_getValue(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._LengthMetrics_getValue(this.peer!.ptr)
         return retval
     }
     private setValue_serialize(value: number): void {
@@ -208,7 +208,7 @@ export class LengthMetrics implements MaterializedBase {
 
 export class ColorMetricsInternal {
     public static fromPtr(ptr: KPointer): ColorMetrics {
-        const obj : ColorMetrics = new ColorMetrics()
+        const obj: ColorMetrics = new ColorMetrics()
         obj.peer = new Finalizable(ptr, ColorMetrics.getFinalizer())
         return obj
     }
@@ -234,14 +234,14 @@ export class ColorMetrics implements MaterializedBase {
         return this.getAlpha()
     }
     static ctor_colormetrics(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._ColorMetrics_ctor()
+        const retval = ArkUIGeneratedNativeModule._ColorMetrics_ctor()
         return retval
     }
     constructor() {
         // Constructor does not have parameters.
         // It means that the static method call invokes ctor method as well
         // when all arguments are undefined.
-        const ctorPtr : KPointer = ColorMetrics.ctor_colormetrics()
+        const ctorPtr: KPointer = ColorMetrics.ctor_colormetrics()
         this.peer = new Finalizable(ctorPtr, ColorMetrics.getFinalizer())
     }
     static getFinalizer(): KPointer {
@@ -282,76 +282,76 @@ export class ColorMetrics implements MaterializedBase {
         return this.getAlpha_serialize()
     }
     private static numeric_serialize(value: number): ColorMetrics {
-        const retval  = ArkUIGeneratedNativeModule._ColorMetrics_numeric(value)
-        const obj : ColorMetrics = ColorMetricsInternal.fromPtr(retval)
+        const retval = ArkUIGeneratedNativeModule._ColorMetrics_numeric(value)
+        const obj: ColorMetrics = ColorMetricsInternal.fromPtr(retval)
         return obj
     }
     private static rgba_serialize(red: number, green: number, blue: number, alpha?: number): ColorMetrics {
-        const thisSerializer : Serializer = Serializer.hold()
-        let alpha_type : int32 = RuntimeType.UNDEFINED
+        const thisSerializer: Serializer = Serializer.hold()
+        let alpha_type: int32 = RuntimeType.UNDEFINED
         alpha_type = runtimeType(alpha)
         thisSerializer.writeInt8(alpha_type as int32)
         if ((RuntimeType.UNDEFINED) != (alpha_type)) {
-            const alpha_value  = alpha!
+            const alpha_value = alpha!
             thisSerializer.writeNumber(alpha_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._ColorMetrics_rgba(red, green, blue, thisSerializer.asBuffer(), thisSerializer.length())
+        const retval = ArkUIGeneratedNativeModule._ColorMetrics_rgba(red, green, blue, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        const obj : ColorMetrics = ColorMetricsInternal.fromPtr(retval)
+        const obj: ColorMetrics = ColorMetricsInternal.fromPtr(retval)
         return obj
     }
     private static resourceColor_serialize(color: ResourceColor): ColorMetrics {
-        const thisSerializer : Serializer = Serializer.hold()
-        let color_type : int32 = RuntimeType.UNDEFINED
+        const thisSerializer: Serializer = Serializer.hold()
+        let color_type: int32 = RuntimeType.UNDEFINED
         color_type = runtimeType(color)
         if (TypeChecker.isColor(color)) {
             thisSerializer.writeInt8(0 as int32)
-            const color_0  = color as Color
+            const color_0 = color as Color
             thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(color_0))
         }
         else if (RuntimeType.NUMBER == color_type) {
             thisSerializer.writeInt8(1 as int32)
-            const color_1  = color as number
+            const color_1 = color as number
             thisSerializer.writeNumber(color_1)
         }
         else if (RuntimeType.STRING == color_type) {
             thisSerializer.writeInt8(2 as int32)
-            const color_2  = color as string
+            const color_2 = color as string
             thisSerializer.writeString(color_2)
         }
         else if (RuntimeType.OBJECT == color_type) {
             thisSerializer.writeInt8(3 as int32)
-            const color_3  = color as Resource
+            const color_3 = color as Resource
             thisSerializer.writeResource(color_3)
         }
-        const retval  = ArkUIGeneratedNativeModule._ColorMetrics_resourceColor(thisSerializer.asBuffer(), thisSerializer.length())
+        const retval = ArkUIGeneratedNativeModule._ColorMetrics_resourceColor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        const obj : ColorMetrics = ColorMetricsInternal.fromPtr(retval)
+        const obj: ColorMetrics = ColorMetricsInternal.fromPtr(retval)
         return obj
     }
     private blendColor_serialize(overlayColor: ColorMetrics): ColorMetrics {
-        const retval  = ArkUIGeneratedNativeModule._ColorMetrics_blendColor(this.peer!.ptr, toPeerPtr(overlayColor))
-        const obj : ColorMetrics = ColorMetricsInternal.fromPtr(retval)
+        const retval = ArkUIGeneratedNativeModule._ColorMetrics_blendColor(this.peer!.ptr, toPeerPtr(overlayColor))
+        const obj: ColorMetrics = ColorMetricsInternal.fromPtr(retval)
         return obj
     }
     private getColor_serialize(): string {
-        const retval  = ArkUIGeneratedNativeModule._ColorMetrics_getColor(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._ColorMetrics_getColor(this.peer!.ptr)
         return retval
     }
     private getRed_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._ColorMetrics_getRed(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._ColorMetrics_getRed(this.peer!.ptr)
         return retval
     }
     private getGreen_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._ColorMetrics_getGreen(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._ColorMetrics_getGreen(this.peer!.ptr)
         return retval
     }
     private getBlue_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._ColorMetrics_getBlue(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._ColorMetrics_getBlue(this.peer!.ptr)
         return retval
     }
     private getAlpha_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._ColorMetrics_getAlpha(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._ColorMetrics_getAlpha(this.peer!.ptr)
         return retval
     }
 }
@@ -504,3 +504,19 @@ export type Pivot = Vector2;
 export type Scale = Vector2;
 export type Translation = Vector2;
 export type Rotation = Vector3;
+
+export function edgeColors(all: number): Edges<number> {
+    return { left: all, top: all, right: all, bottom: all };
+}
+
+export function edgeWidths(all: number): Edges<number> {
+    return { left: all, top: all, right: all, bottom: all };
+}
+
+export function borderStyles(all: BorderStyle): Edges<BorderStyle> {
+    return { left: all, top: all, right: all, bottom: all };
+}
+
+export function borderRadiuses(all: number): Corners<number> {
+    return { topLeft: all, topRight: all, bottomLeft: all, bottomRight: all };
+}

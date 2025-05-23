@@ -133,7 +133,7 @@ export class RenderNode implements MaterializedBase {
         }
     }
     get pivot(): Vector2 {
-        return this.getPivot()
+        return this.pivotValue
     }
     set pivot(pivot: Vector2) {
         if (pivot === undefined || pivot === null) {
@@ -255,7 +255,7 @@ export class RenderNode implements MaterializedBase {
         this.setBorderStyle(borderStyle!)
     }
     get borderWidth(): Edges<number> {
-        return this.getBorderWidth()
+        return this.borderWidthValue
     }
     set borderWidth(borderWidth: Edges<number>) {
         if (borderWidth === undefined || borderWidth === null) {
@@ -291,25 +291,25 @@ export class RenderNode implements MaterializedBase {
         this.setBorderRadius(borderRadius_casted)
     }
     get shapeMask(): ShapeMask {
-        return this.getShapeMask()
+        return this.shapeMaskValue!
     }
     set shapeMask(shapeMask: ShapeMask) {
         this.setShapeMask(shapeMask)
     }
     get shapeClip(): ShapeClip {
-        return this.getShapeClip()
+        return this.shapeClipValue!
     }
     set shapeClip(shapeClip: ShapeClip) {
         this.setShapeClip(shapeClip)
     }
     get markNodeGroup(): boolean {
-        return this.getMarkNodeGroup()
+        return this.markNodeGroupValue
     }
     set markNodeGroup(markNodeGroup: boolean) {
         this.setMarkNodeGroup(markNodeGroup)
     }
     get lengthMetricsUnit(): LengthMetricsUnit {
-        return this.getLengthMetricsUnit()
+        return this.lengthMetricsUnitValue
     }
     set lengthMetricsUnit(lengthMetricsUnit: LengthMetricsUnit) {
         this.setLengthMetricsUnit(lengthMetricsUnit)
@@ -434,9 +434,9 @@ export class RenderNode implements MaterializedBase {
         this.invalidate_serialize()
         return
     }
-    public dispose(): void {
-        this.dispose_serialize()
-        return
+    dispose() {
+        this.frameNode_?.deref()?.dispose()
+        this.peer?.release()
     }
     private getBackgroundColor(): number {
         return this.getBackgroundColor_serialize()
@@ -652,10 +652,11 @@ export class RenderNode implements MaterializedBase {
         }
     }
     private getMarkNodeGroup(): boolean {
-        return this.getMarkNodeGroup_serialize()
+        return this.markNodeGroupValue
     }
     private setMarkNodeGroup(markNodeGroup: boolean): void {
-        const markNodeGroup_casted = markNodeGroup as (boolean)
+        this.markNodeGroupValue = markNodeGroup;
+        const markNodeGroup_casted = this.markNodeGroupValue as (boolean)
         this.setMarkNodeGroup_serialize(markNodeGroup_casted)
         return
     }
@@ -663,8 +664,7 @@ export class RenderNode implements MaterializedBase {
         return this.getLengthMetricsUnit_serialize()
     }
     private setLengthMetricsUnit(lengthMetricsUnit: LengthMetricsUnit): void {
-        const lengthMetricsUnit_casted = lengthMetricsUnit as (LengthMetricsUnit)
-        this.setLengthMetricsUnit_serialize(lengthMetricsUnit_casted)
+        this.lengthMetricsUnitValue = lengthMetricsUnit
         return
     }
     private appendChild_serialize(node: RenderNode): void {
