@@ -25,9 +25,6 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_property.h"
-#ifdef SECURITY_COMPONENT_ENABLE
-#include "core/image/image_loader.h"
-#endif
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/custom_paint/rosen_render_custom_paint.h"
@@ -60,19 +57,15 @@ void IconLayoutElement::Init(const RefPtr<SecurityComponentLayoutProperty>& prop
     auto theme = pipeline->GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
     minIconSize_ = theme->GetMinIconSize().ConvertToPx();
+    auto iconNode = iconWrap_->GetHostNode();
+    CHECK_NULL_VOID(iconNode);
 
     if (property->GetImageSourceInfo().has_value()) {
-#ifdef SECURITY_COMPONENT_ENABLE
-        auto image = property->GetImageSourceInfo().value();
-        auto imageLoader = ImageLoader::CreateImageLoader(image);
-        CHECK_NULL_VOID(imageLoader);
-        ImageErrorInfo imageErrInfo;
-        RefPtr<ImageData> data = imageLoader->GetImageData(image, imageErrInfo, Referenced::WeakClaim(Referenced::RawPtr(pipeline)));
-        RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(image, imageErrInfo, data);
-        CHECK_NULL_VOID(imageObj);
-        auto size = imageObj->GetImageSize();
-        alpha_ = (NearEqual(size.Width(), 0.0) || NearEqual(size.Height(), 0.0)) ? 1.0 : size.Height() / size.Width();
-#endif
+        auto imagePattern = iconNode->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(imagePattern);
+        auto size = imagePattern->GetRawImageSize();
+        alpha_ =
+            (LessOrEqual(size.Width(), 0.0) || LessOrEqual(size.Height(), 0.0)) ? 1.0 : size.Height() / size.Width();
     }
 
     width_ = isSymbolIcon ? Dimension(DEFAULT_SIZE_24, DimensionUnit::VP).ConvertToPx() :
@@ -85,7 +78,6 @@ void IconLayoutElement::Init(const RefPtr<SecurityComponentLayoutProperty>& prop
     propWidth.emplace(Dimension(Dimension(width_).ConvertToVp(), DimensionUnit::VP));
     std::optional<NG::CalcLength> propHeight;
     propHeight.emplace(Dimension(Dimension(height_).ConvertToVp(), DimensionUnit::VP));
-    auto iconNode = iconWrap_->GetHostNode();
     auto iconLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(iconLayoutProperty);
     iconLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(propWidth, propHeight));

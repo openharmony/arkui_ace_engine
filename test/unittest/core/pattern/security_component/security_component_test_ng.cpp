@@ -327,24 +327,21 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPasteButtonSymbolTest001
     ASSERT_NE(frameNode, nullptr);
     property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     textIconSpace = property->GetTextIconSpace();
-    ASSERT_EQ(textIconSpace.has_value(), true);
-    ASSERT_EQ(NearEqual(textIconSpace->Value(), 0.0f), true);
+    ASSERT_EQ(textIconSpace.has_value(), false);
 
     frameNode = PasteButtonModelNG::GetInstance()->CreateNode(
         -1, 0, static_cast<int32_t>(ButtonType::CAPSULE), true, -1);
     ASSERT_NE(frameNode, nullptr);
     property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     textIconSpace = property->GetTextIconSpace();
-    ASSERT_EQ(textIconSpace.has_value(), true);
-    ASSERT_EQ(NearEqual(textIconSpace->Value(), 0.0f), true);
+    ASSERT_EQ(textIconSpace.has_value(), false);
 
     frameNode = PasteButtonModelNG::GetInstance()->CreateNode(
         -1, -1, static_cast<int32_t>(ButtonType::CAPSULE), true, 1);
     ASSERT_NE(frameNode, nullptr);
     property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     textIconSpace = property->GetTextIconSpace();
-    ASSERT_EQ(textIconSpace.has_value(), true);
-    ASSERT_EQ(NearEqual(textIconSpace->Value(), 0.0f), true);
+    ASSERT_EQ(textIconSpace.has_value(), false);
 }
 
 /**

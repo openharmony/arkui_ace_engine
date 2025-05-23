@@ -465,17 +465,22 @@ FocusPattern SecurityComponentPattern::GetFocusPattern() const
 void SecurityComponentPattern::UpdateIconProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& iconNode)
 {
     auto iconLayoutProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(iconLayoutProp);
     auto iconRenderProperty = iconNode->GetPaintPropertyPtr<ImageRenderProperty>();
+    CHECK_NULL_VOID(iconRenderProperty);
     auto iconRenderContext = iconNode->GetRenderContext();
+    CHECK_NULL_VOID(iconRenderContext);
     auto scLayoutProp = scNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_VOID(scLayoutProp);
 
     if (scLayoutProp->GetImageSourceInfo().has_value()) {
         iconLayoutProp->UpdateImageSourceInfo(scLayoutProp->GetImageSourceInfo().value());
         auto host = GetHost();
+        CHECK_NULL_VOID(host);
         auto* pipeline = host->GetContextWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto secCompTheme = pipeline->GetTheme<SecurityComponentTheme>();
+        CHECK_NULL_VOID(secCompTheme);
         iconLayoutProp->UpdateUserDefinedIdealSize(
             CalcSize(NG::CalcLength(secCompTheme->GetIconSize()), std::nullopt));
     }
@@ -650,6 +655,7 @@ void SecurityComponentPattern::OnModifyDone()
     }
 
     auto scLayoutProp = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_VOID(scLayoutProp);
     auto symbolIconNode = GetSecCompChildNode(frameNode, V2::SYMBOL_ETS_TAG);
     if (((iconNode == nullptr) && (symbolIconNode == nullptr)) || (textNode == nullptr)) {
         scLayoutProp->UpdateTextIconSpace(Dimension(0.0));
