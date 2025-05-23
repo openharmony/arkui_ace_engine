@@ -3321,5 +3321,32 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg237, TestSize.Level1)
     EXPECT_EQ(frontend->GetComponentId(), TEST_TAG);
     context_->weakFrontend_.Reset();
 }
+
+/**
+ * @tc.name: PipelineContextTestNg238
+ * @tc.desc: Test the function UpdateOcclusionCullingStatus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg238, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Add keyOcclusion node's id to occlusion map.
+     * @tc.expected: The occlusion map's size is equal to the number of added nodes.
+     */
+    ASSERT_NE(context_, nullptr);
+    RefPtr<FrameNode> frameNode1 = FrameNode::CreateFrameNode("test1", 1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> frameNode2 = FrameNode::CreateFrameNode("test2", 2, AceType::MakeRefPtr<Pattern>());
+    context_->AddToOcclusionMap(1, true);
+    context_->AddToOcclusionMap(2, false);
+    context_->AddToOcclusionMap(3, false);
+    EXPECT_EQ(context_->keyOcclusionNodes_.size(), 3);
+
+    /**
+     * @tc.steps2: Call the function UpdateOcclusionCullingStatus.
+     * @tc.expected: The occlusion map's size is equal to 0.
+     */
+    context_->UpdateOcclusionCullingStatus();
+    EXPECT_TRUE(context_->keyOcclusionNodes_.empty());
+}
 } // namespace NG
 } // namespace OHOS::Ace

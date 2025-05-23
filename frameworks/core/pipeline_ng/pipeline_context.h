@@ -1094,7 +1094,6 @@ public:
 
     void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
     bool CheckThreadSafe();
-    void UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode);
 
     bool IsHoverModeChange() const
     {
@@ -1209,6 +1208,11 @@ public:
     void NotifyDragTouchEvent(const TouchEvent& event);
     void NotifyDragMouseEvent(const MouseEvent& event);
     void NotifyDragOnHide();
+
+    void AddToOcclusionMap(int32_t frameNodeId, bool enable)
+    {
+        keyOcclusionNodes_[frameNodeId] = enable;
+    }
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1355,6 +1359,8 @@ private:
     bool FlushModifierAnimation(uint64_t nanoTimestamp);
 
     void FlushAnimationDirtysWhenExist(const AnimationOption& option);
+
+    void UpdateOcclusionCullingStatus();
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
@@ -1532,6 +1538,7 @@ private:
     friend class FormGestureManager;
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = nullptr;
     std::set<WeakPtr<NG::UINode>> needRenderForDrawChildrenNodes_;
+    std::unordered_map<int32_t, bool> keyOcclusionNodes_;
 };
 
 /**

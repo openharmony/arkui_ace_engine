@@ -448,7 +448,7 @@ public:
     Matrix4 GetRevertMatrix() override;
     void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) override;
     void SetOpacityMultiplier(float opacity) override;
-    void UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode) override;
+    void UpdateOcclusionCullingStatus(bool enable) override;
     bool IsDisappearing() const override
     {
         return isDisappearing_;

@@ -1385,6 +1385,15 @@ public:
 
     bool HasMultipleChild();
 
+    void UpdateOcclusionCullingStatus(bool enable)
+    {
+        if (renderContext_) {
+            renderContext_->UpdateOcclusionCullingStatus(enable);
+        }
+    }
+
+    void AddToOcclusionMap(bool enable);
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;

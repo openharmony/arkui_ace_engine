@@ -804,7 +804,7 @@ public:
 
     virtual void SetDrawNode() {}
 
-    virtual void UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode) {}
+    virtual void UpdateOcclusionCullingStatus(bool enable) {}
 
     virtual void SetAnimationPropertyValue(AnimationPropertyType property, const std::vector<float>& value) {}
 

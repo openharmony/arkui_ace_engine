@@ -1320,8 +1320,6 @@ bool NG::PipelineContext::GetContainerControlButtonVisible()
 
 void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}
 
-void NG::PipelineContext::UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode) {}
-
 RefPtr<Kit::UIContext> NG::PipelineContext::GetUIContext()
 {
     return nullptr;
