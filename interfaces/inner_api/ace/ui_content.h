@@ -64,6 +64,7 @@ enum class AvoidAreaType : uint32_t;
 class AvoidArea;
 struct DecorButtonStyle;
 struct SingleHandTransform;
+class OccupiedAreaChangeInfo;
 } // namespace Rosen
 
 namespace AAFwk {
@@ -177,7 +178,8 @@ public:
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) = 0;
     virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
-        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {}) {};
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {},
+        const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info = nullptr) {};
     virtual void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) = 0;
     virtual void NotifyWindowMode(OHOS::Rosen::WindowMode mode) {};
     virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) = 0;
