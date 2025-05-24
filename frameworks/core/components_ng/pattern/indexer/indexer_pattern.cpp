@@ -1297,6 +1297,7 @@ void IndexerPattern::UpdateBubbleListView()
     auto listPaintProperty = listNode->GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(listPaintProperty);
     listPaintProperty->UpdateScrollBarMode(DisplayMode::OFF);
+    listPaintProperty->UpdateFadingEdge(false);
     auto listRenderContext = listNode->GetRenderContext();
     CHECK_NULL_VOID(listRenderContext);
     listRenderContext->SetClipToBounds(true);
