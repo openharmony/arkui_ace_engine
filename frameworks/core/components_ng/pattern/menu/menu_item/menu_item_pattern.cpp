@@ -67,6 +67,7 @@ constexpr Dimension MIN_OPTION_WIDTH = 56.0_vp;
 constexpr Dimension OPTION_MARGIN = 8.0_vp;
 constexpr int32_t COLUMN_NUM = 2;
 constexpr Dimension BORDER_DEFAULT_WIDTH = 0.0_vp;
+constexpr Dimension STACK_EXPAND_ICON_PADDING = 2.0_vp;
 #if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
 constexpr const char* MENU_STATE_COLLAPSED = "collapsed";
 constexpr const char* MENU_STATE_EXPANDED = "expanded";
@@ -1959,16 +1960,6 @@ void MenuItemPattern::AddExpandIcon(RefPtr<FrameNode>& row)
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
         CHECK_NULL_VOID(expandIcon_);
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(selectTheme);
-    auto props = expandIcon_->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(props);
-    props->UpdateFontSize(selectTheme->GetIconSideLength());
-    props->UpdateSymbolColorList({ selectTheme->GetMenuIconColor() });
     auto menuNode = GetMenu();
     auto menuProperty = menuNode ? menuNode->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
     CHECK_NULL_VOID(menuProperty);
@@ -1976,10 +1967,29 @@ void MenuItemPattern::AddExpandIcon(RefPtr<FrameNode>& row)
     if (symbol) {
         symbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(expandIcon_)));
     } else {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto selectTheme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(selectTheme);
         auto menuTheme = pipeline->GetTheme<MenuTheme>();
         CHECK_NULL_VOID(menuTheme);
-        auto symbolId = expandingMode_ == SubMenuExpandingMode::STACK ? menuTheme->GetStackExpandIconId()
-                                                                      : menuTheme->GetEmbeddedExpandIconId();
+        auto props = expandIcon_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(props);
+        uint32_t symbolId = 0;
+        if (expandingMode_ == SubMenuExpandingMode::STACK) {
+            symbolId = menuTheme->GetStackExpandIconId();
+            PaddingProperty padding;
+            padding.SetEdges(CalcLength(STACK_EXPAND_ICON_PADDING));
+            props->UpdatePadding(padding);
+            props->UpdateFontSize(
+                selectTheme->GetIconSideLength() - STACK_EXPAND_ICON_PADDING - STACK_EXPAND_ICON_PADDING);
+        } else {
+            symbolId = menuTheme->GetEmbeddedExpandIconId();
+            props->UpdateFontSize(selectTheme->GetIconSideLength());
+        }
+        props->UpdateSymbolColorList({ selectTheme->GetMenuIconColor() });
         props->UpdateSymbolSourceInfo(SymbolSourceInfo(symbolId));
     }
     auto expandIconIndex = row->GetChildren().size();
