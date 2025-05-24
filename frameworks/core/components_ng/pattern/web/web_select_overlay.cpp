@@ -799,8 +799,9 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
 {
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
-    if (id != OptionMenuActionId::SELECT_ALL && id != OptionMenuActionId::COPY)
+    if (id != OptionMenuActionId::SELECT_ALL && id != OptionMenuActionId::COPY) {
         isSelectAll_ = false;
+    }
     if (!quickMenuCallback_) {
         pattern->CloseSelectOverlay();
         return;
