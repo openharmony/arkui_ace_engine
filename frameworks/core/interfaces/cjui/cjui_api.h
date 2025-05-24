@@ -3649,7 +3649,7 @@ struct CJUINodeAdapterAPI {
     ArkUI_Int32 (*notifyItemMoved)(ArkUINodeAdapterHandle handle, ArkUI_Uint32 from, ArkUI_Uint32 to);
     ArkUI_Int32 (*getAllItem)(ArkUINodeAdapterHandle handle, ArkUINodeHandle** items, ArkUI_Uint32* size);
 
-    void (*attachHostNode)(ArkUINodeAdapterHandle handle, ArkUINodeHandle host);
+    ArkUI_Bool (*attachHostNode)(ArkUINodeAdapterHandle handle, ArkUINodeHandle host);
     void (*detachHostNode)(ArkUINodeHandle host);
     ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle host);
 };

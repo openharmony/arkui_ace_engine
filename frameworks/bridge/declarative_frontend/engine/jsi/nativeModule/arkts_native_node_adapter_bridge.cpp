@@ -296,12 +296,9 @@ ArkUINativeModuleValue NodeAdapterBridge::AttachNodeAdapter(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(!nodeArg.IsNull(), panda::BooleanRef::New(vm, false));
     auto* frameNode = reinterpret_cast<FrameNode*>(nodeArg->ToNativePointer(vm)->Value());
     CHECK_NULL_RETURN(frameNode, panda::BooleanRef::New(vm, false));
-    if (frameNode->GetFirstChild()) {
-        return panda::BooleanRef::New(vm, false);
-    }
     auto* nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    GetArkUIFullNodeAPI()->getNodeAdapterAPI()->attachHostNode(adapter->GetHandle(), nativeNode);
-    return panda::BooleanRef::New(vm, true);
+    bool ret = GetArkUIFullNodeAPI()->getNodeAdapterAPI()->attachHostNode(adapter->GetHandle(), nativeNode);
+    return panda::BooleanRef::New(vm, ret);
 }
 
 ArkUINativeModuleValue NodeAdapterBridge::DetachNodeAdapter(ArkUIRuntimeCallInfo* runtimeCallInfo)

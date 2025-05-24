@@ -382,16 +382,25 @@ ArkUI_Int32 GetAllItem(ArkUINodeAdapterHandle handle, ArkUINodeHandle** items, A
     return handle->builder->GetAllItem(items, size);
 }
 
-void AttachHostNode(ArkUINodeAdapterHandle handle, ArkUINodeHandle host)
+ArkUI_Bool AttachHostNode(ArkUINodeAdapterHandle handle, ArkUINodeHandle host)
 {
-    CHECK_NULL_VOID(handle);
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(handle, true);
+    CHECK_NULL_RETURN(host, true);
     if (!handle->node) {
         handle->node =
             NG::LazyForEachNode::CreateLazyForEachNode(ElementRegister::GetInstance()->MakeUniqueId(), handle->builder);
     }
     auto* uiNode = reinterpret_cast<NG::UINode*>(host);
-    uiNode->AddChild(handle->node);
+    if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
+        auto* frameNode = reinterpret_cast<NG::FrameNode*>(uiNode);
+        if (frameNode->GetPattern()->OnAttachAtapter(Referenced::Claim(frameNode), handle->node)) {
+            return true;
+        } else if (frameNode->GetFirstChild() == nullptr) {
+            uiNode->AddChild(handle->node);
+            return true;
+        }
+    }
+    return false;
 }
 
 void DetachHostNode(ArkUINodeHandle host)
