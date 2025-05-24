@@ -2289,10 +2289,10 @@ void RichEditorPattern::UpdateDecoration(
 {
     if (updateSpanStyle.updateTextDecoration.has_value()) {
         spanNode->UpdateTextDecoration(textStyle.GetTextDecoration());
-        spanNode->GetSpanItem()->useThemeDecorationColor = false;
     }
     if (updateSpanStyle.updateTextDecorationColor.has_value()) {
         spanNode->UpdateTextDecorationColorWithoutCheck(textStyle.GetTextDecorationColor());
+        spanNode->GetSpanItem()->useThemeDecorationColor = false;
     }
     if (updateSpanStyle.updateTextDecorationStyle.has_value()) {
         spanNode->UpdateTextDecorationStyle(textStyle.GetTextDecorationStyle());
