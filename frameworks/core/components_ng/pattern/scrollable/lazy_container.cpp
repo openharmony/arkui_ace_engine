@@ -66,8 +66,8 @@ ScrollWindowAdapter* LazyContainer::GetScrollWindowAdapter()
 
 RefPtr<FrameNode> LazyContainer::GetOrCreateChildByIndex(uint32_t index)
 {
-    if (adapter_) {
-        return adapter_->GetChildByIndex(index);
+    if (newAdapter_) {
+        newAdapter_->GetChild(index);
     }
     return nullptr;
 }

@@ -18,7 +18,7 @@
 
 import { __context, __id } from "@koalaui/runtime"
 import { DynamicNode } from "./common"
-import { LazyForEachImpl } from "../LazyForEach"
+import { LazyForEachImpl } from "../handwritten/LazyForEachImpl"
 
 export enum DataOperationType {
     ADD = "add",

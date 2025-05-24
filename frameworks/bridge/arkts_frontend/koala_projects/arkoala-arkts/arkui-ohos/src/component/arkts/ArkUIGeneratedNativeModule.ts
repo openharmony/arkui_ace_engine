@@ -3785,6 +3785,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _LazyForEachOps_NotifyChange(node: KPointer, startIndex: KInt, endIndex: KInt, count: KInt): void
     @ani.unsafe.Direct
+    native static _LazyForEachOps_Sync(node: KPointer, totalCount: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _SystemOps_StartFrame(): KPointer
     @ani.unsafe.Direct
     native static _SystemOps_EndFrame(root: KPointer): void

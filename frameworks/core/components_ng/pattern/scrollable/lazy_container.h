@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_LAZY_CONTAINER_H
 #include "core/components_ng/base/scroll_window_adapter.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scrollable/lazy_compose_adapter.h"
 namespace OHOS::Ace::NG {
 /**
  * @brief Base class of all components that support lazy load in ArkUI 2.0 (Arkoala)
@@ -45,6 +46,15 @@ public:
     virtual int32_t ConvertLargeDelta(float delta)
     {
         return -1;
+    }
+
+    void Synchronize(LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount)
+    {
+        if (!newAdapter_) {
+            newAdapter_ = std::make_unique<LazyComposeAdapter>();
+        }
+        newAdapter_->SetCallbacks(std::move(creator), std::move(updater));
+        newAdapter_->SetTotalCount(totalCount);
     }
 
 protected:
@@ -86,6 +96,8 @@ private:
     virtual RefPtr<FillAlgorithm> CreateFillAlgorithm() = 0;
 
     RefPtr<ScrollWindowAdapter> adapter_;
+
+    std::unique_ptr<LazyComposeAdapter> newAdapter_;
 };
 
 /**

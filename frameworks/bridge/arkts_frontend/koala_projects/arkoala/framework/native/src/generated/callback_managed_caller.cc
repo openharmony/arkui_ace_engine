@@ -536,6 +536,32 @@ void callManagedCallback_CopyEvent_VoidSync(Ark_VMContext vmContext, Ark_Int32 r
     argsSerializer.writeCopyEvent(parameter);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
+void callManagedCallback_CreateItem(Ark_Int32 resourceId, Ark_Int32 index, Callback_Pointer_Void continuation)
+{
+    CallbackBuffer _buffer = {{}, {}};
+    const Ark_CallbackResource _callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    _buffer.resourceHolder.holdCallbackResource(&_callbackResourceSelf);
+    Serializer argsSerializer = Serializer((KSerializerBuffer)&(_buffer.buffer), sizeof(_buffer.buffer), &(_buffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_Callback_CreateItem);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(index);
+    argsSerializer.writeCallbackResource(continuation.resource);
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
+    enqueueCallback(&_buffer);
+}
+void callManagedCallback_CreateItemSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 index, Callback_Pointer_Void continuation)
+{
+    uint8_t _buffer[4096];
+    Serializer argsSerializer = Serializer((KSerializerBuffer)&_buffer, sizeof(_buffer), nullptr);
+    argsSerializer.writeInt32(Kind_Callback_CreateItem);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(index);
+    argsSerializer.writeCallbackResource(continuation.resource);
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
+}
 void callManagedCallback_CrownEvent_Void(Ark_Int32 resourceId, Ark_CrownEvent parameter)
 {
     CallbackBuffer _buffer = {{}, {}};
@@ -7277,6 +7303,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_ClickEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ClickEvent_Void);
         case Kind_Callback_ComputedBarAttribute_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ComputedBarAttribute_Void);
         case Kind_Callback_CopyEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_CopyEvent_Void);
+        case Kind_Callback_CreateItem: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_CreateItem);
         case Kind_Callback_CrownEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_CrownEvent_Void);
         case Kind_Callback_CustomBuilder_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_CustomBuilder_Void);
         case Kind_Callback_CutEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_CutEvent_Void);
@@ -7570,6 +7597,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_ClickEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ClickEvent_VoidSync);
         case Kind_Callback_ComputedBarAttribute_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ComputedBarAttribute_VoidSync);
         case Kind_Callback_CopyEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_CopyEvent_VoidSync);
+        case Kind_Callback_CreateItem: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_CreateItemSync);
         case Kind_Callback_CrownEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_CrownEvent_VoidSync);
         case Kind_Callback_CustomBuilder_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_CustomBuilder_VoidSync);
         case Kind_Callback_CutEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_CutEvent_VoidSync);
