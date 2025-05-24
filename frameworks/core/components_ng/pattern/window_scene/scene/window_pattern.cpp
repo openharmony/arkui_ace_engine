@@ -143,6 +143,13 @@ public:
         windowPattern->OnAppRemoveStartingWindow();
     }
 
+    void OnUpdateSnapshotWindow() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnUpdateSnapshotWindow();
+    }
+
 private:
     WeakPtr<WindowPattern> windowPattern_;
 };

@@ -385,6 +385,32 @@ HWTEST_F(WindowSceneTest, OnAppRemoveStartingWindow04, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnUpdateSnapshotWindow
+ * @tc.desc: update snapshot window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, OnUpdateSnapshotWindow, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create windowScene.
+     */
+    auto windowScene = CreateWindowSceneForStartingWindowTest();
+    ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+
+    /**
+     * @tc.steps: step2. Test and check snapshot window.
+     */
+    windowScene->OnUpdateSnapshotWindow();
+    EXPECT_EQ(windowScene->session_->GetSnapshot(), nullptr);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_NE(windowScene->snapshotWindow_, nullptr);
+}
+
+/**
  * @tc.name: OnAddRemoveSnapshot
  * @tc.desc: add and remove snapshot
  * @tc.type: FUNC
