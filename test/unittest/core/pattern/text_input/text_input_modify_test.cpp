@@ -636,11 +636,12 @@ HWTEST_F(TextFieldModifyTest, DoCallback007, TestSize.Level1)
      * @tc.expected: Check if return true.
      */
     bool isHover = true;
+    HoverInfo hoverInfo;
 
     /**
      * @tc.steps: step3. mock mouse hover.
      */
-    pattern_->hoverEvent_->operator()(isHover);
+    pattern_->hoverEvent_->operator()(isHover, hoverInfo);
     EXPECT_TRUE(pattern_->isOnHover_);
 
     FlushLayoutTask(frameNode_);
@@ -650,7 +651,7 @@ HWTEST_F(TextFieldModifyTest, DoCallback007, TestSize.Level1)
      * @tc.steps: step4. mock mouse not hover.
      */
     isHover = false;
-    pattern_->hoverEvent_->operator()(isHover);
+    pattern_->hoverEvent_->operator()(isHover, hoverInfo);
     EXPECT_FALSE(pattern_->isOnHover_);
 }
 
