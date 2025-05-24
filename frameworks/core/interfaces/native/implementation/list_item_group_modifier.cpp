@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
+#include "core/components_ng/pattern/list/list_item_group_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
@@ -77,7 +78,7 @@ void DividerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
-    ListItemGroupModelNG::SetDivider(frameNode, divider);
+    ListItemGroupModelStatic::SetDivider(frameNode, divider);
 }
 void ChildrenMainSizeImpl(Ark_NativePointer node,
                           const Opt_ChildrenMainSize* value)

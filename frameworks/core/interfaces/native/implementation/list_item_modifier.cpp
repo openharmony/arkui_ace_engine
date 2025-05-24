@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
+#include "core/components_ng/pattern/list/list_item_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -161,7 +162,7 @@ void StickyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ListItemModelNG::SetSticky(frameNode, Converter::OptConvert<V2::StickyMode>(*value));
+    ListItemModelStatic::SetSticky(frameNode, Converter::OptConvert<V2::StickyMode>(*value));
 }
 void EditableImpl(Ark_NativePointer node,
                   const Opt_Union_Boolean_EditMode* value)
