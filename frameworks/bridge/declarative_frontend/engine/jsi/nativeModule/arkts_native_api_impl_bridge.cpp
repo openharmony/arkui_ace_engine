@@ -464,6 +464,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetTransform));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTransform"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetTransform));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTransform3D"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetTransform3D));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTransform3D"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetTransform3D));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBorderColor));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBorderColor"),

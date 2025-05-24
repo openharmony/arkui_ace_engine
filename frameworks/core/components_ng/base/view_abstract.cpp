@@ -3205,6 +3205,14 @@ void ViewAbstract::UpdatePopupParamRescource(const RefPtr<PopupParam>& param, co
 #endif
 }
 
+void ViewAbstract::SetTransform3DMatrix(const Matrix4& matrix)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(Transform3DMatrix, matrix);
+}
+
 void ViewAbstract::BindPopup(
     const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode)
 {
@@ -5306,6 +5314,11 @@ void ViewAbstract::ResetPosition(FrameNode* frameNode)
 void ViewAbstract::SetTransformMatrix(FrameNode* frameNode, const Matrix4& matrix)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(TransformMatrix, matrix, frameNode);
+}
+
+void ViewAbstract::SetTransform3DMatrix(FrameNode* frameNode, const Matrix4& matrix)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(Transform3DMatrix, matrix, frameNode);
 }
 
 void ViewAbstract::SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode)

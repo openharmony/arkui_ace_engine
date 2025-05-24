@@ -576,6 +576,23 @@ class TransformModifier extends ModifierWithKey<object> {
   }
 }
 
+class Transform3DModifier extends ModifierWithKey<object> {
+  constructor(value: Matrix4Transit | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('transform3D');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetTransform3D(node);
+    } else {
+      getUINativeModule().common.setTransform3D(node, (this.value as Matrix).matrix4x4);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !deepCompareArrays((this.stageValue as Matrix).matrix4x4, (this.value as Matrix).matrix4x4);
+  }
+}
+
 class BorderStyleModifier extends ModifierWithKey<BorderStyle | EdgeStyles> {
   constructor(value: BorderStyle | EdgeStyles) {
     super(value);

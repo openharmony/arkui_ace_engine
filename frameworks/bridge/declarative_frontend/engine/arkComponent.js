@@ -422,6 +422,23 @@ class TransformModifier extends ModifierWithKey {
   }
 }
 TransformModifier.identity = Symbol('transform');
+class Transform3DModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetTransform3D(node);
+    }
+    else {
+      getUINativeModule().common.setTransform3D(node, this.value.matrix4x4);
+    }
+  }
+  checkObjectDiff() {
+    return !deepCompareArrays(this.stageValue.matrix4x4, this.value.matrix4x4);
+  }
+}
+Transform3DModifier.identity = Symbol('transform3D');
 class BorderStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -4488,6 +4505,10 @@ class ArkComponent {
   }
   transform(value) {
     modifierWithKey(this._modifiersWithKeys, TransformModifier.identity, TransformModifier, value);
+    return this;
+  }
+  transform3D(value) {
+    modifierWithKey(this._modifiersWithKeys, Transform3DModifier.identity, Transform3DModifier, value);
     return this;
   }
   onAppear(event) {
@@ -12161,6 +12182,9 @@ class ArkSpanComponent {
     throw new Error('Method not implemented.');
   }
   transform(value) {
+    throw new Error('Method not implemented.');
+  }
+  transform3D(value) {
     throw new Error('Method not implemented.');
   }
   onAppear(event) {

@@ -567,6 +567,7 @@ public:
     virtual void PaintDebugBoundary(bool flag) {}
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Transform3DMatrix, Matrix4);
 
     // Transform
     ACE_DEFINE_PROPERTY_GROUP(Transform, TransformProperty);
@@ -869,6 +870,7 @@ protected:
 
     virtual void OnTransformRotateUpdate(const Vector5F& value) {}
     virtual void OnTransformMatrixUpdate(const Matrix4& matrix) {}
+    virtual void OnTransform3DMatrixUpdate(const Matrix4& matrix) {}
 
     virtual void OnAnchorUpdate(const OffsetT<Dimension>& value) {}
 
