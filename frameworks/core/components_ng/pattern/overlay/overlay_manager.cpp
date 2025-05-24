@@ -8732,9 +8732,6 @@ bool OverlayManager::IsNeedAvoidFoldCrease(
     const RefPtr<FrameNode>& frameNode, bool checkSenboard, bool expandDisplay, std::optional<bool> enableHoverMode)
 {
     CHECK_NULL_RETURN(frameNode, false);
-    if (!SystemProperties::IsSuperFoldDisplayDevice()) {
-        return false;
-    }
 
     auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, false);
