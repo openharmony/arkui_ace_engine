@@ -326,7 +326,7 @@ void CalendarPickerModelNG::SetEdgeAlign(const CalendarEdgeAlign& alignType, con
 
         DimensionOffset offsetNew = DimensionOffset(dx, dy);
 
-        calendarPickerPattern->SetCalendarDialogOffset(offset);
+        calendarPickerPattern->SetCalendarDialogOffset(offsetNew);
         ACE_UPDATE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogOffset, offsetNew);
     };
 
@@ -919,7 +919,9 @@ void CalendarPickerModelNG::ParseNormalTextStyleResObj(const PickerTextStyle& te
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
 
-    auto&& updateFunc = [textStyleOpt, frameNode](const RefPtr<ResourceObject> resObj) {
+    auto&& updateFunc = [textStyleOpt, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject> resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         PickerTextStyle textStyle;
         auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
         CHECK_NULL_VOID(pickerPattern);

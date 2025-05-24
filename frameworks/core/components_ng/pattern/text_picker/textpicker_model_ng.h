@@ -103,6 +103,12 @@ public:
     void ParseSelectedTextStyleResObj(const PickerTextStyle& textStyleOpt) override;
     void ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt) override;
     void ParseDefaultTextStyleResObj(const PickerTextStyle& textStyleOpt) override;
+    void ParseColumnWidthsResourceObj(const std::vector<RefPtr<ResourceObject>>& widthResObjs) override;
+    void ParseSingleRangeResourceObj(const RefPtr<ResourceObject>& resultResObj,
+        const RefPtr<ResourceObject>& valueResObj) override;
+    void ParseSingleIconTextResourceObj(const std::vector<NG::RangeContent>& value) override;
+    void ParseCascadeResourceObj(const std::vector<NG::TextCascadePickerOptions>& options,
+        const std::vector<RefPtr<ResourceObject>>& valueArrResObj) override;
 
     static void SetCanLoop(FrameNode* frameNode, const bool value);
     static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);

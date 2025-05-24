@@ -477,7 +477,7 @@ void ParseJsLengthMetricsToDimension(const JSRef<JSObject>& obj, Dimension& resu
     result = dimension;
     auto jsRes = obj->GetProperty("res");
     if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() &&
-        !jsRes->IsNull() && !jsRes->IsObject()) {
+        !jsRes->IsNull() && jsRes->IsObject()) {
         JSRef<JSObject> resObj = JSRef<JSObject>::Cast(jsRes);
         JSViewAbstract::CompleteResourceObject(resObj);
         resourceObj = JSViewAbstract::GetResourceObject(resObj);
@@ -5726,7 +5726,7 @@ bool JSViewAbstract::ParseJsStrArrayInternal(const JSRef<JSVal>& jsValue, std::v
             result.emplace_back(value->ToString());
         } else if (value->IsObject()) {
             std::string singleResStr;
-            if (ParseJsString(value, singleResStr)) {
+            if (ParseJsString(value, singleResStr, resObj)) {
                 result.emplace_back(singleResStr);
             } else {
                 resObjArray.clear();

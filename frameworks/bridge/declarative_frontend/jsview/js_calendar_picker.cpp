@@ -299,12 +299,9 @@ void JSCalendarPicker::SetTextStyle(const JSCallbackInfo& info)
     textStyle.fontSize = calendarTheme->GetEntryFontSize();
     textStyle.textColor = calendarTheme->GetEntryFontColor();
     textStyle.fontWeight = FontWeight::NORMAL;
-    if (!info[0]->IsObject()) {
-        CalendarPickerModel::GetInstance()->SetTextStyle(textStyle);
-        return;
+    if (info[0]->IsObject()) {
+        JSCalendarPicker::ParseTextStyle(info[0], textStyle);
     }
-
-    JSCalendarPicker::ParseTextStyle(info[0], textStyle);
 
     if (SystemProperties::ConfigChangePerform()) {
         CalendarPickerModel::GetInstance()->ParseNormalTextStyleResObj(textStyle);

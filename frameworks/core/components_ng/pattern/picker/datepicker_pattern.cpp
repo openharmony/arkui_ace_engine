@@ -640,16 +640,14 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(pickerTheme);
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
-    if (!SystemProperties::ConfigChangePerform()) {
-        auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
-        auto normalStyle = pickerTheme->GetOptionStyle(false, false);
-        auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
-        CHECK_NULL_VOID(pickerProperty);
-        pickerProperty->UpdateColor(
-            GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
-        pickerProperty->UpdateDisappearColor(
-            GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
-    }
+    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
+    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
+    auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    pickerProperty->UpdateColor(
+        GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+    pickerProperty->UpdateDisappearColor(
+        GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
     if (isPicker_) {
         if (!SystemProperties::ConfigChangePerform()) {
             OnModifyDone();

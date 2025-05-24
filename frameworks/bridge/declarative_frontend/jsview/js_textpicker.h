@@ -21,6 +21,7 @@
 #include "core/components/picker/picker_text_component.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -41,6 +42,11 @@ struct ParseTextArrayParam {
     std::vector<std::string> values;
     JSRef<JSVal> valueChangeEventVal;
     JSRef<JSVal> selectedChangeEventVal;
+
+    RefPtr<ResourceObject> resultResObj;
+    RefPtr<ResourceObject> valueResObj;
+    std::vector<RefPtr<ResourceObject>> columnWidthResObjs;
+    std::vector<RefPtr<ResourceObject>> valueArrResObj;
 };
 
 class JSTextPickerParser : public JSViewAbstract {
@@ -50,8 +56,8 @@ public:
     static void ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle, const std::string& pos);
     static void ParseTextStyleFontSize(const JSRef<JSVal>& fontSize, NG::PickerTextStyle& textStyle);
     static bool ParseMultiTextArray(const JSRef<JSObject>& paramObj, ParseTextArrayParam& param);
-    static bool ParseCascadeTextArray(const JSRef<JSObject>& paramObj, std::vector<uint32_t>& selecteds,
-        std::vector<std::string>& values, NG::TextCascadePickerOptionsAttr& attr);
+    static bool ParseCascadeTextArray(const JSRef<JSObject>& paramObj, ParseTextArrayParam& param,
+        NG::TextCascadePickerOptionsAttr& attr);
     static bool GenerateCascadeOptions(const JSRef<JSArray>& array,
         std::vector<NG::TextCascadePickerOptions>& options);
     static bool GenerateCascadeOptionsInternal(const JSRef<JSObject>& jsObj,
