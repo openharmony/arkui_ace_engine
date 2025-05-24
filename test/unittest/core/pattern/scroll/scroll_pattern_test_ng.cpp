@@ -418,4 +418,487 @@ HWTEST_F(ScrollPatternTestNg, StartSnapAnimation012, TestSize.Level1)
     auto result = scrollPattern->StartSnapAnimation(options);
     EXPECT_EQ(result, false);
 }
+
+/**
+ * @tc.name: NeedScrollSnapToSide001
+ * @tc.desc: Test NeedScrollSnapToSide
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, NeedScrollSnapToSide001, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::START);
+    frameNode->layoutProperty_ = layoutProperty;
+    scrollPattern->frameNode_ = frameNode;
+    Dimension dimension(2.F);
+    scrollPattern->snapPaginations_ = { dimension };
+    scrollPattern->snapOffsets_ = { 2.0f, 1.0f, 9.0f, 4.0f };
+    scrollPattern->currentOffset_ = 2.0f;
+    scrollPattern->enableSnapToSide_ = { false, true };
+    auto result = scrollPattern->NeedScrollSnapToSide(-2.0f);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: NeedScrollSnapToSide002
+ * @tc.desc: Test NeedScrollSnapToSide
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, NeedScrollSnapToSide002, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::START);
+    frameNode->layoutProperty_ = layoutProperty;
+    scrollPattern->frameNode_ = frameNode;
+    Dimension dimension(2.F);
+    scrollPattern->snapPaginations_ = { dimension };
+    scrollPattern->snapOffsets_ = { 2.0f, 1.0f, 9.0f, 4.0f };
+    scrollPattern->currentOffset_ = 2.0f;
+    scrollPattern->enableSnapToSide_ = { true, true };
+    auto result = scrollPattern->NeedScrollSnapToSide(-2.0f);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: NeedScrollSnapToSide003
+ * @tc.desc: Test NeedScrollSnapToSide
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, NeedScrollSnapToSide003, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::START);
+    frameNode->layoutProperty_ = layoutProperty;
+    scrollPattern->frameNode_ = frameNode;
+    Dimension dimension(2.F);
+    scrollPattern->snapPaginations_ = { dimension };
+    scrollPattern->snapOffsets_ = { 2.0f, 1.0f, 9.0f, 4.0f };
+    scrollPattern->currentOffset_ = 2.0f;
+    scrollPattern->enableSnapToSide_ = { false, true };
+    auto result = scrollPattern->NeedScrollSnapToSide(2.0f);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: NeedScrollSnapToSide004
+ * @tc.desc: Test NeedScrollSnapToSide
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, NeedScrollSnapToSide004, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::START);
+    frameNode->layoutProperty_ = layoutProperty;
+    scrollPattern->frameNode_ = frameNode;
+    Dimension dimension(2.F);
+    scrollPattern->snapPaginations_ = { dimension };
+    scrollPattern->snapOffsets_ = { 2.0f, 5.0f, 9.0f, 4.0f };
+    scrollPattern->currentOffset_ = 2.0f;
+    scrollPattern->enableSnapToSide_ = { false, true };
+    auto result = scrollPattern->NeedScrollSnapToSide(2.0f);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: NeedScrollSnapToSide005
+ * @tc.desc: Test NeedScrollSnapToSide
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, NeedScrollSnapToSide005, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::START);
+    frameNode->layoutProperty_ = layoutProperty;
+    scrollPattern->frameNode_ = frameNode;
+    Dimension dimension(2.F);
+    scrollPattern->snapPaginations_ = { dimension };
+    scrollPattern->snapOffsets_ = { 2.0f, 3.0f, 9.0f, 4.0f };
+    scrollPattern->currentOffset_ = 2.0f;
+    scrollPattern->enableSnapToSide_ = { false, true };
+    auto result = scrollPattern->NeedScrollSnapToSide(2.0f);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: NeedScrollSnapToSide006
+ * @tc.desc: Test NeedScrollSnapToSide
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, NeedScrollSnapToSide006, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::START);
+    frameNode->layoutProperty_ = layoutProperty;
+    scrollPattern->frameNode_ = frameNode;
+    Dimension dimension(2.F);
+    scrollPattern->snapPaginations_ = { dimension };
+    scrollPattern->snapOffsets_ = { 2.0f, 3.0f, 3.0f, 4.0f };
+    scrollPattern->currentOffset_ = 2.0f;
+    scrollPattern->enableSnapToSide_ = { true, false };
+    auto result = scrollPattern->NeedScrollSnapToSide(2.0f);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: NeedScrollSnapToSide007
+ * @tc.desc: Test NeedScrollSnapToSide
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, NeedScrollSnapToSide007, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::START);
+    frameNode->layoutProperty_ = layoutProperty;
+    scrollPattern->frameNode_ = frameNode;
+    Dimension dimension(2.F);
+    scrollPattern->snapPaginations_ = { dimension };
+    scrollPattern->snapOffsets_ = { 2.0f, 5.0f, 5.0f, 4.0f };
+    scrollPattern->currentOffset_ = 2.0f;
+    scrollPattern->enableSnapToSide_ = { true, false };
+    auto result = scrollPattern->NeedScrollSnapToSide(2.0f);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: NeedScrollSnapToSide008
+ * @tc.desc: Test NeedScrollSnapToSide
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, NeedScrollSnapToSide008, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::START);
+    frameNode->layoutProperty_ = layoutProperty;
+    scrollPattern->frameNode_ = frameNode;
+    Dimension dimension(2.F);
+    scrollPattern->snapPaginations_ = { dimension };
+    scrollPattern->snapOffsets_ = { 2.0f, 1.0f, 1.0f, 4.0f };
+    scrollPattern->currentOffset_ = 2.0f;
+    scrollPattern->enableSnapToSide_ = { true, false };
+    auto result = scrollPattern->NeedScrollSnapToSide(2.0f);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: NeedScrollSnapToSide009
+ * @tc.desc: Test NeedScrollSnapToSide
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, NeedScrollSnapToSide009, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::START);
+    frameNode->layoutProperty_ = layoutProperty;
+    scrollPattern->frameNode_ = frameNode;
+    Dimension dimension(2.F);
+    scrollPattern->snapPaginations_ = { dimension };
+    scrollPattern->snapOffsets_ = { 2.0f, 1.0f, 1.0f, 4.0f };
+    scrollPattern->currentOffset_ = 2.0f;
+    scrollPattern->enableSnapToSide_ = { true, false };
+    auto result = scrollPattern->NeedScrollSnapToSide(-2.0f);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CaleSnapOffsetsByPaginations001
+ * @tc.desc: Test CaleSnapOffsetsByPaginations
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByPaginations001, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    SizeF viewPort(2.0f, 4.0f);
+    scrollPattern->viewPort_ = viewPort;
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    frameNode->layoutProperty_ = layoutProperty;
+    SizeF viewPortExtent(4.0f, 8.0f);
+    scrollPattern->viewPortExtent_ = viewPortExtent;
+    scrollPattern->scrollableDistance_ = -2.0f;
+    Dimension dimension(2.0f);
+    scrollPattern->snapPaginations_ = { dimension };
+    scrollPattern->snapOffsets_ = { 2.0f, 3.0f, 4.0f, 5.0f };
+    scrollPattern->CaleSnapOffsetsByPaginations(ScrollSnapAlign::START);
+    EXPECT_EQ(*(scrollPattern->snapOffsets_.rbegin()), 2.0f);
+}
+
+/**
+ * @tc.name: CaleSnapOffsetsByPaginations002
+ * @tc.desc: Test CaleSnapOffsetsByPaginations
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByPaginations002, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    SizeF viewPort(2.0f, 4.0f);
+    scrollPattern->viewPort_ = viewPort;
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    frameNode->layoutProperty_ = layoutProperty;
+    SizeF viewPortExtent(4.0f, 8.0f);
+    scrollPattern->viewPortExtent_ = viewPortExtent;
+    scrollPattern->scrollableDistance_ = 4.0f;
+    Dimension dimension(2.0f);
+    scrollPattern->snapPaginations_ = { dimension };
+    scrollPattern->snapOffsets_ = { 2.0f, 3.0f, 4.0f, 5.0f };
+    scrollPattern->CaleSnapOffsetsByPaginations(ScrollSnapAlign::CENTER);
+    EXPECT_EQ(*(scrollPattern->snapOffsets_.rbegin()), -4.0f);
+    EXPECT_EQ(*(scrollPattern->snapOffsets_.rbegin() + 1), -3.0f);
+}
+
+/**
+ * @tc.name: CaleSnapOffsetsByPaginations003
+ * @tc.desc: Test CaleSnapOffsetsByPaginations
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByPaginations003, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    SizeF viewPort(2.0f, 4.0f);
+    scrollPattern->viewPort_ = viewPort;
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    frameNode->layoutProperty_ = layoutProperty;
+    SizeF viewPortExtent(4.0f, 8.0f);
+    scrollPattern->viewPortExtent_ = viewPortExtent;
+    scrollPattern->scrollableDistance_ = -2.0f;
+    Dimension dimension(2.0f);
+    scrollPattern->snapPaginations_ = { dimension };
+    scrollPattern->snapOffsets_ = { 2.0f, 3.0f, 4.0f, 5.0f };
+    scrollPattern->CaleSnapOffsetsByPaginations(ScrollSnapAlign::END);
+    EXPECT_EQ(*(scrollPattern->snapOffsets_.rbegin()), 2.0f);
+}
+
+/**
+ * @tc.name: CaleSnapOffsetsByPaginations004
+ * @tc.desc: Test CaleSnapOffsetsByPaginations
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByPaginations004, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    SizeF viewPort(2.0f, 4.0f);
+    scrollPattern->viewPort_ = viewPort;
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    frameNode->layoutProperty_ = layoutProperty;
+    SizeF viewPortExtent(4.0f, 8.0f);
+    scrollPattern->viewPortExtent_ = viewPortExtent;
+    scrollPattern->scrollableDistance_ = -2.0f;
+    Dimension dimension(2.0f);
+    scrollPattern->snapPaginations_ = { dimension };
+    scrollPattern->snapOffsets_ = { 2.0f, 3.0f, 4.0f, 5.0f };
+    scrollPattern->CaleSnapOffsetsByPaginations(ScrollSnapAlign::NONE);
+    EXPECT_EQ(*(scrollPattern->snapOffsets_.rbegin()), 2.0f);
+}
+
+/**
+ * @tc.name: GetScrollPagingStatusDumpInfo001
+ * @tc.desc: Test GetScrollPagingStatusDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, GetScrollPagingStatusDumpInfo001, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    ScrollPagingStatus enablePagingStatus = ScrollPagingStatus::NONE;
+    scrollPattern->SetEnablePaging(enablePagingStatus);
+    auto json = JsonUtil::Create(true);
+    scrollPattern->GetScrollPagingStatusDumpInfo(json);
+    EXPECT_EQ(json->GetString("enablePaging"), "ScrollPagingStatus::NONE");
+}
+
+/**
+ * @tc.name: GetScrollPagingStatusDumpInfo002
+ * @tc.desc: Test GetScrollPagingStatusDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, GetScrollPagingStatusDumpInfo002, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    ScrollPagingStatus enablePagingStatus = ScrollPagingStatus::INVALID;
+    scrollPattern->SetEnablePaging(enablePagingStatus);
+    auto json = JsonUtil::Create(true);
+    scrollPattern->GetScrollPagingStatusDumpInfo(json);
+    EXPECT_EQ(json->GetString("enablePaging"), "ScrollPagingStatus::INVALID");
+}
+
+/**
+ * @tc.name: GetScrollPagingStatusDumpInfo003
+ * @tc.desc: Test GetScrollPagingStatusDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, GetScrollPagingStatusDumpInfo003, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    ScrollPagingStatus enablePagingStatus = ScrollPagingStatus::VALID;
+    scrollPattern->SetEnablePaging(enablePagingStatus);
+    auto json = JsonUtil::Create(true);
+    scrollPattern->GetScrollPagingStatusDumpInfo(json);
+    EXPECT_EQ(json->GetString("enablePaging"), "ScrollPagingStatus::VALID");
+}
+
+/**
+ * @tc.name: GetScrollPagingStatusDumpInfo004
+ * @tc.desc: Test GetScrollPagingStatusDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, GetScrollPagingStatusDumpInfo004, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    int32_t number = 6;
+    ScrollPagingStatus enablePagingStatus = static_cast<ScrollPagingStatus>(number);
+    scrollPattern->SetEnablePaging(enablePagingStatus);
+    auto json = JsonUtil::Create(true);
+    scrollPattern->GetScrollPagingStatusDumpInfo(json);
+    EXPECT_EQ(json->GetString("enablePaging"), "");
+}
+
+/**
+ * @tc.name: GetScrollSnapAlignDumpInfo001
+ * @tc.desc: Test GetScrollSnapAlignDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, GetScrollSnapAlignDumpInfo001, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::NONE);
+    frameNode->layoutProperty_ = layoutProperty;
+    scrollPattern->frameNode_ = frameNode;
+    auto json = JsonUtil::Create(true);
+    scrollPattern->GetScrollSnapAlignDumpInfo(json);
+    EXPECT_EQ(json->GetString("snapAlign"), "ScrollSnapAlign::NONE");
+}
+
+/**
+ * @tc.name: GetScrollSnapAlignDumpInfo002
+ * @tc.desc: Test GetScrollSnapAlignDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, GetScrollSnapAlignDumpInfo002, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::START);
+    frameNode->layoutProperty_ = layoutProperty;
+    scrollPattern->frameNode_ = frameNode;
+    auto json = JsonUtil::Create(true);
+    scrollPattern->GetScrollSnapAlignDumpInfo(json);
+    EXPECT_EQ(json->GetString("snapAlign"), "ScrollSnapAlign::START");
+}
+
+/**
+ * @tc.name: GetScrollSnapAlignDumpInfo003
+ * @tc.desc: Test GetScrollSnapAlignDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, GetScrollSnapAlignDumpInfo003, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::CENTER);
+    frameNode->layoutProperty_ = layoutProperty;
+    scrollPattern->frameNode_ = frameNode;
+    auto json = JsonUtil::Create(true);
+    scrollPattern->GetScrollSnapAlignDumpInfo(json);
+    EXPECT_EQ(json->GetString("snapAlign"), "ScrollSnapAlign::CENTER");
+}
+
+/**
+ * @tc.name: GetScrollSnapAlignDumpInfo004
+ * @tc.desc: Test GetScrollSnapAlignDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, GetScrollSnapAlignDumpInfo004, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::END);
+    frameNode->layoutProperty_ = layoutProperty;
+    scrollPattern->frameNode_ = frameNode;
+    auto json = JsonUtil::Create(true);
+    scrollPattern->GetScrollSnapAlignDumpInfo(json);
+    EXPECT_EQ(json->GetString("snapAlign"), "ScrollSnapAlign::END");
+}
+
+/**
+ * @tc.name: GetScrollSnapAlignDumpInfo005
+ * @tc.desc: Test GetScrollSnapAlignDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, GetScrollSnapAlignDumpInfo005, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    int32_t number = 6;
+    layoutProperty->UpdateScrollSnapAlign(static_cast<ScrollSnapAlign>(number));
+    frameNode->layoutProperty_ = layoutProperty;
+    scrollPattern->frameNode_ = frameNode;
+    auto json = JsonUtil::Create(true);
+    scrollPattern->GetScrollSnapAlignDumpInfo(json);
+    EXPECT_EQ(json->GetString("snapAlign"), "");
+}
 } // namespace OHOS::Ace::NG
