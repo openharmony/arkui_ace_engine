@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_surface_holder.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_inner_surface_controller.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
@@ -92,6 +93,35 @@ const float SURFACE_OFFSETX = 10.0f;
 const float SURFACE_OFFSETY = 20.0f;
 bool isAxis = false;
 bool isLock = true;
+const RenderFit g_renderFitCases[] = {
+    RenderFit::CENTER,
+    RenderFit::TOP,
+    RenderFit::BOTTOM,
+    RenderFit::LEFT,
+    RenderFit::RIGHT,
+    RenderFit::TOP_LEFT,
+    RenderFit::TOP_RIGHT,
+    RenderFit::BOTTOM_LEFT,
+    RenderFit::BOTTOM_RIGHT,
+    RenderFit::RESIZE_FILL,
+    RenderFit::RESIZE_CONTAIN,
+    RenderFit::RESIZE_CONTAIN_TOP_LEFT,
+    RenderFit::RESIZE_CONTAIN_BOTTOM_RIGHT,
+    RenderFit::RESIZE_COVER,
+    RenderFit::RESIZE_COVER_TOP_LEFT,
+    RenderFit::RESIZE_COVER_BOTTOM_RIGHT,
+};
+const bool g_isEnableNewVersionRenderFitCases[] = {true, false};
+const std::string INVALID_SURFACE_ID = "null";
+const int NUM_SIXTEEN = 16;
+const int NUM_TWO = 2;
+
+class XComponentMockRenderContext : public RenderContext {
+    void SetRenderFit(RenderFit renderFit) override
+    {
+        propRenderFit_ = renderFit;
+    }
+};
 
 TouchType ConvertXComponentTouchType(const OH_NativeXComponent_TouchEventType& type)
 {
@@ -1374,5 +1404,62 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
      */
     pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
     EXPECT_STREQ(SURFACE_ID.c_str(), onSurfaceDestroyedSurfaceId.c_str());
+}
+
+/**
+ * @tc.name: SetAndGetRenderFitBySurfaceIdTest
+ * @tc.desc: Test innerAPI SetRenderFitBySurfaceId and GetRenderFitBySurfaceId
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, SetAndGetRenderFitBySurfaceIdTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent pattern
+     * @tc.expected: xcomponent pattern created
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    testProperty.xcId = std::nullopt;
+    testProperty.libraryName = std::nullopt;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->surfaceId_ = SURFACE_ID;
+    int32_t code;
+    pattern->handlingSurfaceRenderContext_ = AceType::MakeRefPtr<XComponentMockRenderContext>();
+    /**
+     * @tc.steps: step2. Set and get eenderFit by surfaceId with valid surfaceId and valid renderfit number
+     * @tc.expected: the return value equals 0 and the set renderfit function is called
+     */
+    XComponentInnerSurfaceController::RegisterSurfaceRenderContext(
+        SURFACE_ID, pattern->handlingSurfaceRenderContext_);
+    for (int i = 0; i < NUM_SIXTEEN; ++i) {
+        for (int j = 0; j < NUM_TWO; ++j) {
+            code = XComponentInnerSurfaceController::SetRenderFitBySurfaceId(SURFACE_ID, g_renderFitCases[i],
+                g_isEnableNewVersionRenderFitCases[j]);
+            EXPECT_EQ(code, 0);
+            int32_t renderFitNumber = 0;
+            bool isEnable = false;
+            code = XComponentInnerSurfaceController::GetRenderFitBySurfaceId(SURFACE_ID, renderFitNumber, isEnable);
+            EXPECT_EQ(code, 0);
+            EXPECT_EQ(renderFitNumber, static_cast<int32_t>(g_renderFitCases[i]));
+        }
+    }
+    /**
+     * @tc.steps: step3. call SetAndGetRenderFitBySurfaceId with invalid surfaceId and valid renderfit number
+     * @tc.expected: the return value equals 1
+     */
+    for (int i = 0; i < NUM_SIXTEEN; ++i) {
+        for (int j = 0; j < NUM_TWO; ++j) {
+            code = XComponentInnerSurfaceController::SetRenderFitBySurfaceId(INVALID_SURFACE_ID, g_renderFitCases[i],
+                g_isEnableNewVersionRenderFitCases[j]);
+            EXPECT_EQ(code, 1);
+            int32_t renderFitNumber = 0;
+            bool isEnable = false;
+            code = XComponentInnerSurfaceController::GetRenderFitBySurfaceId(INVALID_SURFACE_ID,
+                renderFitNumber, isEnable);
+            EXPECT_EQ(code, 1);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
