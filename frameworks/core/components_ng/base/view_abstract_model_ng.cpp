@@ -558,16 +558,35 @@ void ViewAbstractModelNG::SetToolbarBuilder(std::function<void()>&& buildFunc)
 
 void ViewAbstractModelNG::BindBackground(std::function<void()>&& buildFunc, const Alignment& align)
 {
-    auto buildNodeFunc = [buildFunc = std::move(buildFunc)]() -> RefPtr<UINode> {
-        NG::ScopedViewStackProcessor builderViewStackProcessor;
-        buildFunc();
-        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-        return customNode;
-    };
+    SetBackground(std::move(buildFunc));
+    NG::ViewAbstract::SetBackgroundAlign(align);
+}
+
+void ViewAbstractModelNG::SetBackground(std::function<void()>&& buildFunc)
+{
+    std::function<RefPtr<UINode>()> buildNodeFunc;
+    if (buildFunc) {
+        buildNodeFunc = [buildFunc = std::move(buildFunc)]() -> RefPtr<UINode> {
+            NG::ScopedViewStackProcessor builderViewStackProcessor;
+            buildFunc();
+            auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+            return customNode;
+        };
+    }
+
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
     targetNode->SetBackgroundFunction(std::move(buildNodeFunc));
-    NG::ViewAbstract::SetBackgroundAlign(align);
+}
+
+void ViewAbstractModelNG::SetCustomBackgroundColor(const Color& color)
+{
+    NG::ViewAbstract::SetCustomBackgroundColor(color);
+}
+
+void ViewAbstractModelNG::SetBackgroundIgnoresLayoutSafeAreaEdges(const uint32_t edges)
+{
+    NG::ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(edges);
 }
 
 void ViewAbstractModelNG::SetPivot(const Dimension& x, const Dimension& y, const Dimension& z)

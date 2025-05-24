@@ -613,6 +613,9 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(CustomBackground, CustomBackgroundProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, BackgroundPixelMap, RefPtr<PixelMap>);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, BackgroundAlign, Alignment);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, CustomBackgroundColor, Color);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, IsTransitionBackground, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, IsBuilderBackground, bool);
 
     // Graphics
     ACE_DEFINE_PROPERTY_GROUP(Graphics, GraphicsProperty);
@@ -838,6 +841,9 @@ protected:
 
     virtual void OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& value) {}
     virtual void OnBackgroundAlignUpdate(const Alignment& align) {}
+    virtual void OnCustomBackgroundColorUpdate(const Color& color) {}
+    virtual void OnIsTransitionBackgroundUpdate(bool isTransitionBackground) {}
+    virtual void OnIsBuilderBackgroundUpdate(bool isBuilderBackground) {}
 
     virtual void OnBorderImageUpdate(const RefPtr<BorderImage>& borderImage) {}
     virtual void OnBorderImageSourceUpdate(const ImageSourceInfo& borderImageSourceInfo) {}

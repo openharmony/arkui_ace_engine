@@ -257,6 +257,7 @@ public:
     RectF GetFrameRectWithSafeArea(bool checkPosition = false) const;
     void AddChildToExpandListIfNeeded(const WeakPtr<FrameNode>& node);
     void ApplyConstraintWithoutMeasure(const std::optional<LayoutConstraintF>& constraint);
+    RectF GetBackGroundAccumulatedSafeAreaExpand();
 
     bool GetIgnoreLayoutProcess()
     {

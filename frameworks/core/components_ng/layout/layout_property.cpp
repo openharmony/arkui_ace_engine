@@ -156,6 +156,7 @@ void LayoutProperty::Reset()
     layoutDirection_.reset();
     propVisibility_.reset();
     propIsBindOverlay_.reset();
+    backgroundIgnoresLayoutSafeAreaEdges_.reset();
     CleanDirty();
 }
 
@@ -396,6 +397,7 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     isOverlayNode_ = layoutProperty->isOverlayNode_;
     overlayOffsetX_ = layoutProperty->overlayOffsetX_;
     overlayOffsetY_ = layoutProperty->overlayOffsetY_;
+    backgroundIgnoresLayoutSafeAreaEdges_ = layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_;
 }
 
 void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
@@ -1150,6 +1152,15 @@ void LayoutProperty::UpdateLayoutDirection(TextDirection value)
     layoutDirection_ = value;
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     OnPropertyChangeMeasure();
+}
+
+void LayoutProperty::UpdateBackgroundIgnoresLayoutSafeAreaEdges(uint32_t value)
+{
+    if (backgroundIgnoresLayoutSafeAreaEdges_ == value) {
+        return;
+    }
+    backgroundIgnoresLayoutSafeAreaEdges_ = value;
+    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
 }
 
 TextDirection LayoutProperty::GetNonAutoLayoutDirection() const

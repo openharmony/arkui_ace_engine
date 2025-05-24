@@ -48,6 +48,7 @@
 
 namespace OHOS::Ace::NG {
 class BackgroundModifier;
+class TransitionModifier;
 class BorderImageModifier;
 class DebugBoundaryModifier;
 class MouseSelectModifier;
@@ -378,7 +379,10 @@ public:
 
     void OnBackgroundAlignUpdate(const Alignment& align) override;
     void OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& value) override;
+    void OnCustomBackgroundColorUpdate(const Color& color) override;
     void CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode) override;
+    void OnIsTransitionBackgroundUpdate(bool isTransitionBackground) override {}
+    void OnIsBuilderBackgroundUpdate(bool isBuilderBackground) override;
 
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnOpacityUpdate(double opacity) override;
@@ -717,6 +721,8 @@ protected:
     void InitAccessibilityFocusModidifer(const RoundRect&, const Color&, float);
     void InitFocusStateModidifer(const RoundRect&, const Color&, float);
     void InitFocusAnimationModidifer(const RoundRect&, const Color&, float);
+    std::shared_ptr<TransitionModifier> GetOrCreateTransitionModifier();
+    std::shared_ptr<BackgroundModifier> GetOrCreateBackgroundModifier();
 
     std::shared_ptr<Rosen::RSNode> CreateHardwareSurface(const std::optional<ContextParam>& param,
         bool isTextureExportNode, std::shared_ptr<Rosen::RSUIContext>& rsUIContext);
@@ -752,7 +758,7 @@ protected:
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;
     static constexpr int32_t INVALID_PARENT_ID = -2100000;
-    static constexpr uint32_t DRAW_REGION_RECT_COUNT = 7;
+    static constexpr uint32_t DRAW_REGION_RECT_COUNT = 8;
     std::map<std::string, RefPtr<ImageLoadingContext>> particleImageContextMap_;
     std::map<std::string, RefPtr<CanvasImage>> particleImageMap_;
     Color blendColor_ = Color::TRANSPARENT;
@@ -764,6 +770,7 @@ protected:
     TransitionFinishCallback transitionUserCallback_;
     std::shared_ptr<DebugBoundaryModifier> debugBoundaryModifier_;
     std::shared_ptr<BackgroundModifier> backgroundModifier_;
+    std::shared_ptr<TransitionModifier> transitionModifier_;
     std::shared_ptr<BorderImageModifier> borderImageModifier_;
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_;
     RefPtr<MoonProgressModifier> moonProgressModifier_;

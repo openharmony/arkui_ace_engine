@@ -441,6 +441,36 @@ void ViewAbstract::SetBackgroundAlign(const Alignment& align)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundAlign, align);
 }
 
+void ViewAbstract::SetCustomBackgroundColor(const Color& color)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+
+    ACE_UPDATE_RENDER_CONTEXT(CustomBackgroundColor, color);
+}
+
+void ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(const uint32_t layoutSafeAreaEdges)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BackgroundIgnoresLayoutSafeAreaEdges, layoutSafeAreaEdges);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_RENDER);
+}
+
+void ViewAbstract::SetIsTransitionBackground(bool val)
+{
+    ACE_UPDATE_RENDER_CONTEXT(IsTransitionBackground, val);
+}
+
+void ViewAbstract::SetIsBuilderBackground(bool val)
+{
+    ACE_UPDATE_RENDER_CONTEXT(IsBuilderBackground, val);
+}
+
 void ViewAbstract::SetBackgroundColor(const Color& color)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

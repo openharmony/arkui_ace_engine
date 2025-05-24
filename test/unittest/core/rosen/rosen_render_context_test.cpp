@@ -1396,4 +1396,20 @@ HWTEST_F(RosenRenderContextTest, SetAlwaysSnapshot001, TestSize.Level1)
     rosenRenderContext->SetAlwaysSnapshot(true);
     EXPECT_EQ(rosenRenderContext->rsNode_->GetStagingProperties().GetAlwaysSnapshot(), false);
 }
+
+/**
+ * @tc.name: OnCustomBackgroundColorUpdate001
+ * @tc.desc: Test OnCustomBackgroundColorUpdate Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, OnCustomBackgroundColorUpdate001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    const Color value = Color::RED;
+    rosenRenderContext->OnCustomBackgroundColorUpdate(value);
+}
 } // namespace OHOS::Ace::NG

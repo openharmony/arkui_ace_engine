@@ -1687,10 +1687,11 @@ void FrameNode::SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNod
     CHECK_NULL_VOID(customNode);
     LayoutConstraintF layoutConstraint;
     layoutConstraint.scaleProperty = ScaleProperty::CreateScaleProperty();
-    layoutConstraint.percentReference.SetWidth(geometryNode_->GetFrameSize().Width());
-    layoutConstraint.percentReference.SetHeight(geometryNode_->GetFrameSize().Height());
-    layoutConstraint.maxSize.SetWidth(geometryNode_->GetFrameSize().Width());
-    layoutConstraint.maxSize.SetHeight(geometryNode_->GetFrameSize().Height());
+    auto paintRect = renderContext_->GetPaintRectWithoutTransform();
+    layoutConstraint.percentReference.SetWidth(paintRect.Width());
+    layoutConstraint.percentReference.SetHeight(paintRect.Height());
+    layoutConstraint.maxSize.SetWidth(paintRect.Width());
+    layoutConstraint.maxSize.SetHeight(paintRect.Height());
     customNode->GetGeometryNode()->SetParentLayoutConstraint(layoutConstraint);
 }
 

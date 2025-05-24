@@ -139,6 +139,11 @@ public:
 
     TextDirection GetNonAutoLayoutDirection() const;
 
+    uint32_t GetBackgroundIgnoresLayoutSafeAreaEdges() const
+    {
+        return backgroundIgnoresLayoutSafeAreaEdges_.value_or(NG::SAFE_AREA_EDGE_NONE);
+    }
+
     RefPtr<GeometryTransition> GetGeometryTransition() const;
 
     MeasureType GetMeasureType(MeasureType defaultType = MeasureType::MATCH_CONTENT) const
@@ -173,6 +178,7 @@ public:
     }
 
     void UpdateLayoutDirection(TextDirection value);
+    void UpdateBackgroundIgnoresLayoutSafeAreaEdges(uint32_t value);
 
     void UpdateGeometryTransition(const std::string& id,
         bool followWithoutTransition = false, bool doRegisterSharedTransition = true);
@@ -495,6 +501,7 @@ private:
     std::optional<TextDirection> layoutDirection_;
     std::optional<RectF> layoutRect_;
     std::optional<Dimension> markAnchorStart_;
+    std::optional<uint32_t> backgroundIgnoresLayoutSafeAreaEdges_;
 
     WeakPtr<GeometryTransition> geometryTransition_;
 
