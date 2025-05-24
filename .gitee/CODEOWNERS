@@ -3229,3 +3229,5 @@ test/unittest/core/svg/ @arkui_image
 test/unittest/core/syntax/ @arkuistatemgmt
 test/unittest/interfaces/ @arkuiframework
 test/unittest/interfaces/ui_input_event_test.cpp @arkuievent
+test/unittest/interfaces/ace_ui_input_event/ @arkuievent
+test/unittest/interfaces/ace_gesture/ @arkuievent
