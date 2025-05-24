@@ -72,6 +72,12 @@
             ],
             "@ohos/graphics/common2D": [
                 "./ohos.graphics.common2D.ts"
+            ],
+            "@ohos/graphics/drawing": [
+                "./ohos.graphics.drawing.ts"
+            ],
+            "@ohos/arkui/graphics": [
+                "./ohos.arkui.graphics.ts"
             ]
         },
         "rootDir": "."
@@ -87,7 +93,9 @@
         "./global/**/*.ts",
         "./ohos.router.ts",
         "./ohos.observer.ts",
-        "./ohos.graphics.common2D.ts"
+        "./ohos.graphics.common2D.ts",
+        "./ohos.graphics.drawing.ts",
+        "./ohos.arkui.graphics.ts"
     ],
     "exclude": [
         "./src/component/arkts",

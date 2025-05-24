@@ -101,6 +101,8 @@
       "OHOS::Ace::AnimatableColor::AnimatableColor()";
       "OHOS::Ace::AnimatableColor::~AnimatableColor()";
       "OHOS::Ace::NG::LayoutProperty::~LayoutProperty()";
+      OHOS::Ace::NG::Modifier::*;
+      OHOS::Ace::NG::ModifierAdapter::*;
 
       OHOS::Ace::ColumnModel::*;
       OHOS::Ace::FlexModel::*;

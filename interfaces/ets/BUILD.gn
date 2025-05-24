@@ -48,5 +48,7 @@ group("ace_ani_package") {
     "${ace_root}/interfaces/ets/ani/systemprompt:systemprompt_etc",
     "${ace_root}/interfaces/ets/ani/observer:observer_ani",
     "${ace_root}/interfaces/ets/ani/observer:observer_etc",
+    "${ace_root}/interfaces/ets/ani/renderNode:renderNode_ani",
+    "${ace_root}/interfaces/ets/ani/renderNode:renderNode_etc",
   ]
 }

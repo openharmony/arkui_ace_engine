@@ -19,7 +19,7 @@
 // import { LengthUnit } from "./component/ArkArkuiExternalInterfaces"
 import { Resource } from "global/resource"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, pointer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./component"
 import { ResourceColor } from "./component/units"
@@ -27,9 +27,18 @@ import { Color, BorderStyle } from "./component/enums"
 import { DrawingCanvas } from "./component/arkui-drawing"
 import { Dimension } from "./component/units"
 import { common2D } from "@ohos/graphics/common2D"
+import { drawing } from "@ohos/graphics/drawing"
 export interface Size {
     width: number;
     height: number;
+}
+export class SizeInternal implements Size {
+    width: number;
+    height: number;
+    constructor(width: number, height: number) {
+        this.width = width
+        this.height = height
+    }
 }
 export interface Frame {
     x: number;
@@ -442,11 +451,17 @@ export class ShapeClip {
         this.roundRect = null;
     }
 }
-export interface DrawContext {
+export class DrawContext {
     size: Size;
     sizeInPixel: Size;
-    canvas: DrawingCanvas;
-}export interface Vector2T {
+    canvas: drawing.Canvas;
+    constructor() {
+        this.size = { width: 0, height: 0 }
+        this.sizeInPixel = { width: 0, height: 0 }
+        this.canvas = new drawing.Canvas();
+    }
+}
+export interface Vector2T {
     x: number;
     y: number;
 }
