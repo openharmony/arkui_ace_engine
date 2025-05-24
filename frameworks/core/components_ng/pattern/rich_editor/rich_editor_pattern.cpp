@@ -12712,4 +12712,10 @@ const TextEditingValue& RichEditorPattern::GetInputEditingValue() const
     return value;
 }
 #endif
+
+bool RichEditorPattern::IsSelectAll()
+{
+    return textSelector_.GetTextStart() == 0 && textSelector_.GetTextEnd() == GetTextContentLength();
+}
+
 } // namespace OHOS::Ace::NG
