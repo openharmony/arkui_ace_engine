@@ -282,6 +282,11 @@ Rect AceContainer::GetDisplayAvailableRect() const
     return Rect();
 }
 
+Rect AceContainer::GetFoldExpandAvailableRect() const
+{
+    return Rect();
+}
+
 bool AceContainer::IsCrossAxisWindow()
 {
     return false;

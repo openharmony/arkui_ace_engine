@@ -824,6 +824,9 @@ public:
     bool GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent) override;
 
     Rect GetDisplayAvailableRect() const override;
+    
+    // Get the available rect of the full screen.
+    Rect GetFoldExpandAvailableRect() const override;
 
     void GetExtensionConfig(AAFwk::WantParams& want);
 

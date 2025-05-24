@@ -18,6 +18,7 @@
 #include "display_manager.h"
 
 namespace OHOS::Ace {
+constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
 RefPtr<DisplayInfo> DisplayInfoUtils::GetDisplayInfo(int32_t displayId)
 {
     auto displayManager = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
@@ -103,5 +104,17 @@ Rect DisplayInfoUtils::GetDisplayAvailableRect(int32_t displayId) const
     }
 
     return Rect(availableArea.posX_, availableArea.posY_, availableArea.width_, availableArea.height_);
+}
+
+Rect DisplayInfoUtils::GetFoldExpandAvailableRect() const
+{
+    Rosen::DMRect rect;
+    Rosen::DMError ret = Rosen::DisplayManager::GetInstance().GetExpandAvailableArea(DEFAULT_DISPLAY_ID, rect);
+    if (ret != Rosen::DMError::DM_OK) {
+        TAG_LOGW(AceLogTag::ACE_WINDOW, "failed to get expandAvailableArea");
+        return Rect();
+    }
+
+    return Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
 } // namespace OHOS::Ace::DisplayInfoUtils

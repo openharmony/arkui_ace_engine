@@ -4280,6 +4280,11 @@ Rect AceContainer::GetDisplayAvailableRect() const
     return displayManager_->GetDisplayAvailableRect(uiWindow_->GetDisplayId());
 }
 
+Rect AceContainer::GetFoldExpandAvailableRect() const
+{
+    return displayManager_->GetFoldExpandAvailableRect();
+}
+
 void AceContainer::GetExtensionConfig(AAFwk::WantParams& want)
 {
     CHECK_NULL_VOID(uiWindow_);

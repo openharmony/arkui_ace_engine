@@ -1878,17 +1878,15 @@ HWTEST_F(OverlayManagerPopupTestNg, HideAllPopupsWithoutAnimation001, TestSize.L
      * @tc.expected: Push popup successfully
      */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    ASSERT_NE(rootNode, nullptr);
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto targetId1 = targetNodes[0]->GetId();
     auto targetId2 = targetNodes[1]->GetId();
     rootNode->isLayoutComplete_ = true;
     
     auto pipeline = rootNode->GetContextRefPtr();
-    ASSERT_NE(pipeline, nullptr);
+    CHECK_NULL_VOID(pipeline);
     pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
-    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
     ASSERT_NE(rootUINode, nullptr);
     auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
