@@ -108,7 +108,7 @@ class LazyForEachIdentifier {
  * @returns item offset of LazyForEach in parent's children
  */
 /** @memo */
-function getOffset(parent: PeerNode, id: KoalaCallsiteKey): int32 {
+export function getOffset(parent: PeerNode, id: KoalaCallsiteKey): int32 {
     let offset = 0
     for (let child = parent.firstChild; child; child = child!.nextSibling) {
         // corresponding DataNode is attached after the component items
