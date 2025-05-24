@@ -19,6 +19,7 @@
 #include "gmock/gmock.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/base/node_render_status_monitor.h"
 
 namespace OHOS::Ace::NG {
 class MockPipelineContext : public PipelineContext {
