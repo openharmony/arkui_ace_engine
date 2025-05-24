@@ -17,6 +17,7 @@ import { KPointer, KInt } from "@koalaui/interop"
 import image from "@ohos.multimedia.image"
 import webview from "@ohos.web.webview"
 import common from "@ohos.app.ability.common"
+import { DrawContext } from "arkui/Graphics"
 
 export class ArkUIAniModule {
     static {
@@ -39,4 +40,6 @@ export class ArkUIAniModule {
     native static _ContentSlot_construct(id: KInt): KPointer
 
     native static _ContentSlotInterface_setContentSlotOptions(slot: KPointer, content: KPointer): void
+
+    native static _SetDrawCallback(ptr: KPointer, callback: ((context: DrawContext) => void)): void
 }

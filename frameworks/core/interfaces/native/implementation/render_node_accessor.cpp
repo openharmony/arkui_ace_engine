@@ -16,7 +16,6 @@
 #include <cstdint>
 #include <optional>
 
-#include "ani.h"
 #include "arkoala_api_generated.h"
 #include "ui/base/utils/utils.h"
 

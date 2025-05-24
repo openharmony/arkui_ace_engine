@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <string>
+#include <cstdint>
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,6 +31,10 @@ struct _ArkUINode;
 struct _ArkUIContentSlot;
 struct _ArkUINodeContent;
 typedef class __ani_ref* ani_ref;
+typedef class __ani_object* ani_object;
+typedef struct __ani_env ani_env;
+typedef int64_t ani_long;
+typedef class __ani_fn_object *ani_fn_object;
 typedef _ArkUINode* ArkUINodeHandle;
 typedef int ArkUI_Int32;
 typedef _ArkUIContentSlot* ArkUIContentSlot;
@@ -48,6 +53,7 @@ struct ArkUIAniCommonModifier {
     ani_ref* (*getHostContext)();
     void (*syncInstanceId)(ArkUI_Int32 id);
     void (*restoreInstanceId)();
+    void (*setDrawCallback)(ani_env* env, ani_long ptr, ani_fn_object fnObj);
 };
 struct ArkUIAniContentSlotModifier {
     ArkUIContentSlot (*construct)(ArkUI_Int32 id);

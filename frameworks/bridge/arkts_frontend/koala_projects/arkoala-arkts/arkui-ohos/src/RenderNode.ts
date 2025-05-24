@@ -28,6 +28,7 @@ import { CallbackTransformer } from "./component/peers/CallbackTransformer"
 import { PeerNode } from "./PeerNode"
 import { FrameNode } from "./FrameNode"
 import { Utils } from "@ohos/arkui/graphics"
+import { ArkUIAniModule } from "arkui.ani"
 export type DrawCallback = (context: DrawContext) => void;
 export class RenderNodeInternal {
     public static fromPtr(ptr: KPointer): RenderNode {
@@ -327,7 +328,7 @@ export class RenderNode implements MaterializedBase {
         }
         const peerId = PeerNode.nextId()
         const ctorPtr: KPointer = RenderNode.ctor_rendernode(peerId, this.draw)
-        Utils.setDrawCallback(ctorPtr, this.draw)
+        ArkUIAniModule._SetDrawCallback(ctorPtr, this.draw)
         this.peer = new Finalizable(ctorPtr, RenderNode.getFinalizer())
         this.setClipToFrame(true)
     }

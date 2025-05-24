@@ -97,6 +97,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "JJ:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetContentSlotOptions)
         },
+        ani_native_function {
+            "_SetDrawCallback",
+            "JLstd/core/Function1;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetDrawCallback)
+        },
     };
 
     env->Class_BindNativeMethods(cls, methods.data(), methods.size());

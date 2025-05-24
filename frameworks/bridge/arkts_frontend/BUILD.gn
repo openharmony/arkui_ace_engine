@@ -40,6 +40,7 @@ template("arkts_frontend") {
 
     sources = [
       "ani_context_module.cpp",
+      "ani_graphics_module.cpp",
       "arkts_ani_utils.cpp",
       "arkts_frontend.cpp",
       "arkts_plugin_frontend.cpp",
@@ -47,8 +48,11 @@ template("arkts_frontend") {
     ]
     external_deps = [
       "hilog:libhilog",
-      "runtime_core:ani"
+      "runtime_core:ani",
     ]
+    if (current_os == "ohos") {
+      external_deps += [ "graphic_2d:drawing_ani" ]
+    }
   }
 }
 

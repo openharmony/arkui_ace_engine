@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,24 +13,69 @@
  * limitations under the License.
  */
 
+#include "bridge/arkts_frontend/ani_graphics_module.h"
+
 #include <ani.h>
-#include <array>
-#include <string>
-#include <unistd.h>
-#include <vector>
 
+#if !defined(PREVIEW)
 #include "canvas_ani/ani_canvas.h"
+#endif
 
-#include "base/log/log.h"
-#include "bridge/arkts_frontend/arkts_frontend.h"
-#include "core/common/container.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 #include "core/interfaces/native/implementation/render_node_peer_impl.h"
+#include "core/pipeline/pipeline_base.h"
 
-namespace OHOS::Ace {
+namespace OHOS::Ace::Framework {
 namespace {
-ani_object CreateDrawingContext(ani_env* env, const NG::DrawingContext& context)
+ani_object CreateSizeObject(ani_env* env, const NG::DrawingContext& context)
+{
+    ani_status status;
+    ani_class sizeClass;
+    if ((status = env->FindClass("Larkui/Graphics/SizeInternal;", &sizeClass)) != ANI_OK) {
+        LOGE("FindClass Size failed, %{public}d", status);
+        return nullptr;
+    }
+    ani_method sizeCtor;
+    if ((status = env->Class_FindMethod(sizeClass, "<ctor>", "DD:V", &sizeCtor)) != ANI_OK) {
+        LOGE("Class_FindMethod sizeClass ctor failed, %{public}d", status);
+        return nullptr;
+    }
+    ani_object sizeObject;
+    ani_float width = PipelineBase::Px2VpWithCurrentDensity(context.height);
+    ani_float height = PipelineBase::Px2VpWithCurrentDensity(context.width);
+    if ((status = env->Object_New(sizeClass, sizeCtor, &sizeObject, width, height)) != ANI_OK) {
+        LOGE("New Size object failed, %{public}d", status);
+        return nullptr;
+    }
+    return sizeObject;
+}
+
+ani_object CreateSizeInPixelObject(ani_env* env, const NG::DrawingContext& context)
+{
+    ani_status status;
+    ani_class sizeInPixelClass;
+    if ((status = env->FindClass("Larkui/Graphics/SizeInternal;", &sizeInPixelClass)) != ANI_OK) {
+        LOGE("FindClass Size failed, %{public}d", status);
+        return nullptr;
+    }
+    ani_method sizeInPixelCtor;
+    if ((status = env->Class_FindMethod(sizeInPixelClass, "<ctor>", "DD:V", &sizeInPixelCtor)) != ANI_OK) {
+        LOGE("Class_FindMethod sizeInPixelClass ctor failed, %{public}d", status);
+        return nullptr;
+    }
+    ani_object sizeInPixelObject;
+    ani_float widthInPixel = context.width;
+    ani_float heightInPixel = context.height;
+    if ((status = env->Object_New(
+             sizeInPixelClass, sizeInPixelCtor, &sizeInPixelObject, widthInPixel, heightInPixel)) != ANI_OK) {
+        LOGE("New SizeInPixel object failed, %{public}d", status);
+        return nullptr;
+    }
+    return sizeInPixelObject;
+}
+} // namespace
+
+ani_object AniGraphicsModule::CreateDrawingContext(ani_env* env, const NG::DrawingContext& context)
 {
     ani_status status;
     ani_object result = nullptr;
@@ -52,58 +97,26 @@ ani_object CreateDrawingContext(ani_env* env, const NG::DrawingContext& context)
     }
 
     // Size object
-    ani_class sizeClass;
-    if ((status = env->FindClass("Larkui/Graphics/SizeInternal;", &sizeClass)) != ANI_OK) {
-        LOGE("FindClass Size failed, %{public}d", status);
-        return nullptr;
-    }
-    ani_method sizeCtor;
-    if ((status = env->Class_FindMethod(sizeClass, "<ctor>", "DD:V", &sizeCtor)) != ANI_OK) {
-        LOGE("Class_FindMethod sizeClass ctor failed, %{public}d", status);
-        return nullptr;
-    }
-    ani_object sizeObject;
-    ani_float width = PipelineBase::Px2VpWithCurrentDensity(context.height);
-    ani_float height = PipelineBase::Px2VpWithCurrentDensity(context.width);
-    if ((status = env->Object_New(sizeClass, sizeCtor, &sizeObject, width, height)) != ANI_OK) {
-        LOGE("New Size object failed, %{public}d", status);
-        return nullptr;
-    }
+    ani_object sizeObject = CreateSizeObject(env, context);
     env->Object_SetPropertyByName_Ref(result, "size_", (ani_ref)sizeObject);
 
     // sizeInPixel Object
-    ani_class sizeInPixelClass;
-    if ((status = env->FindClass("Larkui/Graphics/SizeInternal;", &sizeInPixelClass)) != ANI_OK) {
-        LOGE("FindClass Size failed, %{public}d", status);
-        return nullptr;
-    }
-    ani_method sizeInPixelCtor;
-    if ((status = env->Class_FindMethod(sizeInPixelClass, "<ctor>", "DD:V", &sizeInPixelCtor)) != ANI_OK) {
-        LOGE("Class_FindMethod sizeInPixelClass ctor failed, %{public}d", status);
-        return nullptr;
-    }
-    ani_object sizeInPixelObject;
-    ani_float widthInPixel = context.width;
-    ani_float heightInPixel = context.height;
-    if ((status = env->Object_New(
-             sizeInPixelClass, sizeInPixelCtor, &sizeInPixelObject, widthInPixel, heightInPixel)) != ANI_OK) {
-        LOGE("New SizeInPixel object failed, %{public}d", status);
-        return nullptr;
-    }
+    ani_object sizeInPixelObject = CreateSizeInPixelObject(env, context);
     env->Object_SetPropertyByName_Ref(result, "sizeInPixel_", (ani_ref)sizeInPixelObject);
 
     // canvas Object
+#if !defined(PREVIEW)
     ani_object aniCanvas = OHOS::Rosen::Drawing::AniCanvas::CreateAniCanvas(env, &context.canvas);
     if (!aniCanvas) {
-        LOGE("FZY Create AniCanvas failed !");
+        LOGE("Create AniCanvas failed !");
     }
     env->Object_SetPropertyByName_Ref(result, "canvas_", (ani_ref)aniCanvas);
+#endif
 
     return result;
 }
-} // namespace
-static void SetDrawCallback(
-    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_long ptr, [[maybe_unused]] ani_fn_object fnObj)
+
+void AniGraphicsModule::SetDrawCallback(ani_env* env, ani_long ptr, ani_fn_object fnObj)
 {
     if (fnObj == nullptr) {
         LOGE("Draw callback is undefined.");
@@ -132,38 +145,4 @@ static void SetDrawCallback(
         pattern->SetDrawCallback(drawCallbackFunc);
     }
 }
-} // namespace OHOS::Ace
-
-bool ANI_ConstructorForAni(ani_env* env)
-{
-    LOGE("FZY renderNode-ani ANI_ConstructorForAni");
-    ani_class cls;
-    if (ANI_OK != env->FindClass("L@ohos/arkui/graphics/Utils;", &cls)) {
-        LOGE("renderNode-ani Not found graphics");
-        return false;
-    }
-    std::array methods = {
-        ani_native_function { "setDrawCallback", "JLstd/core/Function1;:V", reinterpret_cast<void*>(OHOS::Ace::SetDrawCallback) },
-    };
-
-    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
-        LOGE("renderNode-ani Module_BindNativeFunctions error");
-        return false;
-    }
-
-    return true;
-}
-
-ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
-{
-    ani_env* env;
-    if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
-        LOGE("renderNode-ani Unsupported ANI_VERSION_1");
-        return ANI_ERROR;
-    }
-    if (ANI_ConstructorForAni(env)) {
-        *result = ANI_VERSION_1;
-        return ANI_OK;
-    }
-    return ANI_ERROR;
-}
+} // namespace OHOS::Ace::Framework
