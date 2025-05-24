@@ -50,6 +50,7 @@ public:
     MOCK_METHOD1(Layout, void(float width));
     MOCK_METHOD3(ReLayout, void(float width, const ParagraphStyle& paraStyle,
         const std::vector<TextStyle>& textStyles));
+    MOCK_METHOD1(ReLayoutForeground, void(const TextStyle& style));
     MOCK_METHOD1(AddPlaceholder, int32_t(const PlaceholderRun& span));
     MOCK_METHOD1(GetRectsForPlaceholders, void(std::vector<RectF>& selectedRects));
     MOCK_METHOD1(SetIndents, void(const std::vector<float>& indents));

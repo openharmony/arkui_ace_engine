@@ -167,6 +167,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
             return std::nullopt;
         }
     }
+    UpdateRelayoutShaderStyle(pattern, textLayoutProperty);
     baselineOffset_ = textStyle_.GetBaselineOffset().ConvertToPxDistribute(
         textStyle_.GetMinFontScale(), textStyle_.GetMaxFontScale(), textStyle_.IsAllowScale());
     if (NearZero(contentConstraint.maxSize.Height()) || NearZero(contentConstraint.maxSize.Width())) {
@@ -202,6 +203,59 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         return SizeF {};
     }
     return SizeF(maxWidth, heightFinal);
+}
+
+void TextLayoutAlgorithm::UpdateRelayoutShaderStyle(
+    const RefPtr<TextPattern>& pattern, const RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    if (textStyle_.GetGradient().has_value() && !pattern->GetExternalParagraph()) {
+        auto gradient = textStyle_.GetGradient().value();
+        OHOS::Ace::GradientType type = gradient.GetType();
+        if (type == OHOS::Ace::GradientType::LINEAR) {
+            RelayoutShaderStyle(textLayoutProperty);
+        }
+    }
+}
+
+void TextLayoutAlgorithm::RelayoutShaderStyle(const RefPtr<TextLayoutProperty>& layoutProperty)
+{
+    CHECK_NULL_VOID(paragraphManager_);
+    auto paragraphs = paragraphManager_->GetParagraphs();
+    if (spans_.empty()) {
+        for (auto pIter = paragraphs.begin(); pIter != paragraphs.end(); pIter++) {
+            auto paragraph = pIter->paragraph;
+            if (!paragraph) {
+                continue;
+            }
+            auto textStyle = textStyle_;
+            textStyle.SetForeGroundBrushBitMap();
+            paragraph->ReLayoutForeground(textStyle);
+        }
+        return;
+    }
+    if (!spans_.empty()) {
+        size_t itemIndex = -1;
+        for (auto pIter = paragraphs.begin(); pIter != paragraphs.end(); pIter++) {
+            ++itemIndex;
+            auto paragraph = pIter->paragraph;
+            if (!paragraph) {
+                continue;
+            }
+            if (itemIndex >= spans_.size()) {
+                return;
+            }
+            auto spans = spans_[itemIndex];
+            TextStyle textStyle;
+            if (!spans.empty() && spans.front() && spans.front()->GetTextStyle() &&
+                spans.front()->GetTextStyle()->GetGradient().has_value()) {
+                textStyle = spans.front()->GetTextStyle().value();
+            } else {
+                textStyle = textStyle_;
+            }
+            textStyle.SetForeGroundBrushBitMap();
+            paragraph->ReLayoutForeground(textStyle);
+        }
+    }
 }
 
 bool TextLayoutAlgorithm::AddPropertiesAndAnimations(TextStyle& textStyle,

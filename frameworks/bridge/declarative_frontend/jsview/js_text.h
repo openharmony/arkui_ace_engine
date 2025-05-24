@@ -50,6 +50,7 @@ public:
     static void SetLineHeight(const JSCallbackInfo& info);
     static void SetLineSpacing(const JSCallbackInfo& info);
     static void SetOptimizeTrailingSpace(const JSCallbackInfo& info);
+    static void SetShaderStyle(const JSCallbackInfo& info);
     static void SetFontFamily(const JSCallbackInfo& info);
     static void SetMinFontSize(const JSCallbackInfo& info);
     static void SetMaxFontSize(const JSCallbackInfo& info);
@@ -80,6 +81,7 @@ public:
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
     static void ParseMenuParam(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::SelectMenuParam& menuParam);
+    static void ParseShaderStyle(const JSCallbackInfo& info, NG::Gradient& gradient);
     static std::function<void(int32_t, int32_t)> ParseMenuCallback(const WeakPtr<NG::FrameNode>& frameNode,
         const JSRef<JSObject>& menuOptions, const JSCallbackInfo& info, const std::string& name);
     static NG::PreviewMenuOptions ParsePreviewMenuOptions(const JSRef<JSObject>& menuOptions);

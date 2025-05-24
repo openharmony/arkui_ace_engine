@@ -770,6 +770,14 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     marqueeOptions(value: MarqueeOptions): TextAttribute;
     onMarqueeStateChange(callback: (value: MarqueeState) => void): TextAttribute;
+    shaderStyle(value: {
+        center: Array<any>;
+        radius: number | string;
+        angle?: number | string;
+        direction?: GradientDirection;
+        colors: Array<any>;
+        repeating?: boolean;
+    }): this;
 }
 declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);

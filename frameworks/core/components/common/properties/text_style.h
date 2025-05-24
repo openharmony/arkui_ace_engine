@@ -30,6 +30,7 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/pipeline/base/render_component.h"
 #include "frameworks/core/components_ng/pattern/symbol/symbol_effect_options.h"
+#include "frameworks/core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace {
 // The normal weight is W400, the larger the number after W, the thicker the font will be.
@@ -1069,6 +1070,22 @@ public:
         symbolUid_ = symbolUid;
     }
 
+    void SetGradient(const std::optional<Gradient>& gradient)
+    {
+        gradient_ = gradient;
+        reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::FOREGROUND_BRUSH));
+    }
+
+    void SetForeGroundBrushBitMap()
+    {
+        reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::FOREGROUND_BRUSH));
+    }
+
+    const std::optional<Gradient>& GetGradient() const
+    {
+        return gradient_;
+    }
+
 private:
     std::bitset<static_cast<size_t>(TextStyleAttribute::MAX_TEXT_STYLE)> reLayoutTextStyleBitmap_;
     std::bitset<static_cast<size_t>(ParagraphStyleAttribute::MAX_TEXT_STYLE)> reLayoutParagraphStyleBitmap_;
@@ -1079,6 +1096,7 @@ private:
     std::list<std::pair<std::string, int32_t>> fontFeatures_;
     std::vector<Dimension> preferFontSizes_;
     std::vector<TextSizeGroup> preferTextSizeGroups_;
+    std::optional<Gradient> gradient_;
     // use 14px for normal font size.
     DimensionWithActual fontSize_ { Dimension(14, DimensionUnit::PX), 14.0f };
     FontWeight fontWeight_ { FontWeight::NORMAL };

@@ -504,6 +504,8 @@ void SpanItem::UpdateReLayoutTextStyle(
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineBreakStrategy, LineBreakStrategy);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, IsOnlyBetweenLines, IsOnlyBetweenLines);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, ParagraphSpacing, ParagraphSpacing);
+    auto gradient = textStyle.GetGradient();
+    spanTextStyle.SetGradient(gradient);
 }
 
 bool SpanItem::UpdateSymbolSpanFontFamily(TextStyle& symbolSpanStyle)

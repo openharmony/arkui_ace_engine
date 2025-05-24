@@ -12896,6 +12896,182 @@ const ArkUI_AttributeItem* GetLineHeight(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetTextLinearGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size < NUM_3) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (item->object == nullptr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    //save direction value in node;
+    node->linearGradientDirection = item->value[NUM_1].i32;
+    auto* fullImpl = GetFullImpl();
+    const ArkUI_ColorStop* colorStop = reinterpret_cast<ArkUI_ColorStop*>(item->object);
+    int size = colorStop->size;
+    ArkUIInt32orFloat32 colors[size * NUM_3];
+    for (int i = 0; i < size; i++) {
+        colors[i * NUM_3 + NUM_0].u32 = colorStop->colors[i];
+        colors[i * NUM_3 + NUM_1].i32 = true;
+        colors[i * NUM_3 + NUM_2].f32 = colorStop->stops[i] < 0 ? 0 : colorStop->stops[i];
+    }
+
+    auto isCustomDirection = item->value[NUM_1].i32 == static_cast<ArkUI_Int32>(ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM);
+    ArkUIInt32orFloat32 values[NUM_4] = {
+        {.i32 = static_cast<ArkUI_Int32>(isCustomDirection)}, //angleHasValue
+        {.f32 = item->value[NUM_0].f32}, //angleValue
+        {.i32 = item->value[NUM_1].i32}, //directionValue
+        {.i32 = item->value[NUM_2].i32}  //repeating
+    };
+
+    fullImpl->getNodeModifiers()->getTextModifier()->setLinearGradient(
+        node->uiNodeHandle, values, NUM_4, colors, size * NUM_3);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetTextLinearGradient(ArkUI_NodeHandle node)
+{
+    //default size 3
+    ArkUI_Float32 values[NUM_3];
+    //default size 10
+    ArkUI_Uint32 colors[NUM_10];
+    //default size 10
+    ArkUI_Float32 stops[NUM_10];
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getTextModifier()->getLinearGradient(
+        node->uiNodeHandle, &values, &colors, &stops);
+    //angle
+    g_numberValues[0].f32 = values[0];
+    //direction
+    g_numberValues[1].i32 = node->linearGradientDirection > -1 ? node->linearGradientDirection : values[1];
+    //repeated
+    g_numberValues[2].i32 = values[2];
+    //size
+    g_attributeItem.size = NUM_3;
+    if (resultValue < NUM_1) {
+        return &g_attributeItem;
+    }
+
+    static ArkUI_ColorStop colorStop;
+    static uint32_t gradientColors[NUM_10];
+    static float gradientStops[NUM_10];
+    for (int i = 0; i < resultValue; i++) {
+        gradientColors[i] = colors[i];
+        gradientStops[i] = stops[i] / 100.0f; //百分比转换为小数
+    }
+    colorStop.colors = gradientColors;
+    colorStop.stops = gradientStops;
+    colorStop.size = resultValue;
+    g_attributeItem.object = &colorStop;
+    return &g_attributeItem;
+}
+
+void ResetTextLinearGradient(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+
+    fullImpl->getNodeModifiers()->getTextModifier()->resetTextGradient(node->uiNodeHandle);
+}
+
+int32_t SetTextRadialGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (item->object == nullptr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    const ArkUI_ColorStop* colorStop = reinterpret_cast<ArkUI_ColorStop*>(item->object);
+    int size = colorStop->size;
+    ArkUIInt32orFloat32 colors[size * NUM_3];
+    int32_t unit = GetDefaultUnit(node, UNIT_VP);
+    for (int i = 0; i < size; i++) {
+        colors[i * NUM_3 + NUM_0].u32 = colorStop->colors[i];
+        colors[i * NUM_3 + NUM_1].i32 = true;
+        colors[i * NUM_3 + NUM_2].f32 = colorStop->stops[i];
+    }
+
+    ArkUIInt32orFloat32 values[NUM_10] = {
+        {.i32 = static_cast<ArkUI_Int32>(false) },
+        {.f32 = static_cast<ArkUI_Float32>(DEFAULT_X) },
+        {.i32 = static_cast<ArkUI_Float32>(unit) },
+        {.i32 = static_cast<ArkUI_Int32>(false) },
+        {.f32 = static_cast<ArkUI_Float32>(DEFAULT_Y) },
+        {.i32 = static_cast<ArkUI_Float32>(unit) },
+        {.i32 = static_cast<ArkUI_Int32>(false) },
+        {.f32 = static_cast<ArkUI_Float32>(NUM_0) },
+        {.i32 = static_cast<ArkUI_Float32>(unit) },
+        {.i32 = static_cast<ArkUI_Int32>(false) }
+    };
+
+    if (item->size > NUM_0) {
+        values[NUM_0].i32 = static_cast<ArkUI_Int32>(true);
+        values[NUM_1].f32 = item->value[NUM_0].f32;
+    }
+
+    if (item->size > NUM_1) {
+        values[NUM_3].i32 = static_cast<ArkUI_Int32>(true);
+        values[NUM_4].f32 = item->value[NUM_1].f32;
+    }
+
+    if (item->size > NUM_2) {
+        values[NUM_6].i32 = static_cast<ArkUI_Int32>(true);
+        values[NUM_7].f32 = item->value[NUM_2].f32;
+    }
+
+    values[NUM_9].i32 = item->size > NUM_3 ? item->value[NUM_3].i32 : static_cast<ArkUI_Int32>(false);
+    fullImpl->getNodeModifiers()->getTextModifier()->setRadialGradient(
+        node->uiNodeHandle, values, NUM_10, colors, size * NUM_3);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTextRadialGradient(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->resetTextGradient(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetTextRadialGradient(ArkUI_NodeHandle node)
+{
+    //default size 4
+    ArkUI_Float32 values[NUM_4];
+    //default size 10
+    ArkUI_Uint32 colors[NUM_10];
+    //default size 10
+    ArkUI_Float32 stops[NUM_10];
+
+    ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getTextModifier()->getRadialGradient(
+        node->uiNodeHandle, &values, &colors, &stops, unit);
+    //centerX
+    g_numberValues[NUM_0].f32 = values[NUM_0];
+    //centerY
+    g_numberValues[NUM_1].f32 = values[NUM_1];
+    //radius
+    g_numberValues[NUM_2].f32 = values[NUM_2];
+    //repeating
+    g_numberValues[NUM_3].i32 = values[NUM_3];
+    //size
+    g_attributeItem.size = NUM_3;
+    if (resultValue < NUM_1) {
+        return &g_attributeItem;
+    }
+
+    static ArkUI_ColorStop colorStop;
+    static uint32_t gradientColors[NUM_10];
+    static float gradientStops[NUM_10];
+    for (int i = 0; i < resultValue; i++) {
+        gradientColors[i] = colors[i];
+        gradientStops[i] = stops[i] / 100.0f; //百分比转换为小数
+    }
+    colorStop.colors = gradientColors;
+    colorStop.stops = gradientStops;
+    colorStop.size = resultValue;
+    g_attributeItem.object = &colorStop;
+    return &g_attributeItem;
+}
+
 const ArkUI_AttributeItem* GetDecoration(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
@@ -15334,7 +15510,8 @@ int32_t SetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
         SetTextCopyOption, SetBaseLineOffset, SetTextShadow, SetTextMinFontSize, SetTextMaxFontSize, SetTextFont,
         SetTextHeightAdaptivePolicy, SetTextIndent, SetTextWordBreak, SetTextEllipsisMode, SetLineSpacing,
         SetFontFeature, SetTextEnableDateDetector, SetTextDataDetectorConfig, SetTextSelectedBackgroundColor,
-        SetTextContentWithStyledString, SetHalfLeading, SetImmutableFontWeight, SetLineCount, SetOptimizeTrailingSpace };
+        SetTextContentWithStyledString, SetHalfLeading, SetImmutableFontWeight, SetLineCount, SetOptimizeTrailingSpace,
+        SetTextLinearGradient, SetTextRadialGradient };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -15349,7 +15526,8 @@ const ArkUI_AttributeItem* GetTextAttribute(ArkUI_NodeHandle node, int32_t subTy
         GetTextCopyOption, GetBaseLineOffset, GetTextShadow, GetTextMinFontSize, GetTextMaxFontSize, GetTextFont,
         GetTextHeightAdaptivePolicy, GetTextIndent, GetTextWordBreak, GetTextEllipsisMode, GetLineSpacing,
         GetFontFeature, GetTextEnableDateDetector, GetTextDataDetectorConfig, GetTextSelectedBackgroundColor, nullptr,
-        GetHalfLeading, GetFontWeight, GetLineCount, GetOptimizeTrailingSpace };
+        GetHalfLeading, GetFontWeight, GetLineCount, GetOptimizeTrailingSpace, GetTextLinearGradient,
+        GetTextRadialGradient };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*) || !getters[subTypeId]) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -15366,7 +15544,8 @@ void ResetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTextMinFontSize, ResetTextMaxFontSize, ResetTextFont, ResetTextHeightAdaptivePolicy, ResetTextIndent,
         ResetTextWordBreak, ResetTextEllipsisMode, ResetLineSpacing, ResetFontFeature, ResetTextEnableDateDetector,
         ResetTextDataDetectorConfig, ResetTextSelectedBackgroundColor, ResetTextContentWithStyledString,
-        ResetHalfLeading, ResetFontWeight, ResetLineCount, ResetOptimizeTrailingSpace };
+        ResetHalfLeading, ResetFontWeight, ResetLineCount, ResetOptimizeTrailingSpace, ResetTextLinearGradient, 
+        ResetTextRadialGradient };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
