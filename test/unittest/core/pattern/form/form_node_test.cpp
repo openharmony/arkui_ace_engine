@@ -166,7 +166,7 @@ HWTEST_F(FormNodeTest, FormNodeTest_003, TestSize.Level1)
     OffsetF res = formNode->GetFormOffset();
     EXPECT_EQ(res, OffsetF());
     formNode->renderContext_ = renderContext;
-    
+
     formNode->SetParent(nullptr);
     res = formNode->GetFormOffset();
     EXPECT_EQ(res, OffsetF());

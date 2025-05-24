@@ -269,6 +269,8 @@ private:
     void ReAddStaticFormSnapshotTimer();
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     void enhancesSubContainer(bool hasContainer);
+    bool GetFormDumpInfo(std::vector<std::string> &dumpInfo);
+
     RefPtr<RenderContext> externalRenderContext_;
 
     RefPtr<SubContainer> subContainer_;

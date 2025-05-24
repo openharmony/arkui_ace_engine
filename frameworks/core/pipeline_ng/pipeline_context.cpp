@@ -3219,7 +3219,7 @@ void PipelineContext::DumpData(
     uint32_t used_id_flag = hasJson ? USED_JSON_PARAM : USED_ID_FIND_FLAG;
     auto paramSize = params.size();
     auto container = Container::GetContainer(instanceId_);
-    if (container && (container->IsUIExtensionWindow())) {
+    if (container && (container->IsUIExtensionWindow() || container->IsFormRender())) {
         paramSize =
             static_cast<uint32_t>(std::distance(params.begin(), std::find(params.begin(), params.end(), PID_FLAG)));
     }
