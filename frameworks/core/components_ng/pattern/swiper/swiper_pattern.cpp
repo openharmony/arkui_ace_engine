@@ -7582,8 +7582,42 @@ void SwiperPattern::NotifyDataChange(int32_t index, int32_t count)
     }
 }
 
+void SwiperPattern::UpdateDefaultColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto swiperIndicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+    auto props = host->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    if (swiperDigitalParameters_ && !swiperDigitalParameters_->parametersByUser.count("fontColor")) {
+        swiperDigitalParameters_->fontColor = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+    }
+    if (swiperDigitalParameters_ && !swiperDigitalParameters_->parametersByUser.count("selectedFontColor")) {
+        swiperDigitalParameters_->selectedFontColor =
+            swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+    }
+    if (swiperArrowParameters_ && !swiperArrowParameters_->parametersByUser.count("backgroundColor")) {
+        if (props->GetIsSidebarMiddleValue()) {
+            props->UpdateBackgroundColor(swiperIndicatorTheme->GetBigArrowBackgroundColor());
+        } else {
+            props->UpdateBackgroundColor(swiperIndicatorTheme->GetSmallArrowBackgroundColor());
+        }
+    }
+    if (swiperArrowParameters_ && !swiperArrowParameters_->parametersByUser.count("arrowColor")) {
+        if (props->GetIsSidebarMiddleValue()) {
+            props->UpdateArrowColor(swiperIndicatorTheme->GetBigArrowColor());
+        } else {
+            props->UpdateArrowColor(swiperIndicatorTheme->GetSmallArrowColor());
+        }
+    }
+}
+
 void SwiperPattern::OnColorModeChange(uint32_t colorMode)
 {
+    UpdateDefaultColor();
     Pattern::OnColorModeChange(colorMode);
     auto swiperNode = GetHost();
     CHECK_NULL_VOID(swiperNode);

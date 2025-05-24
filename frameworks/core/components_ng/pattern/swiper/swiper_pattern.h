@@ -332,6 +332,11 @@ public:
         swiperParameters_ = std::make_shared<SwiperParameters>(swiperParameters);
     }
 
+    void SetSwiperArrowParameters(const SwiperArrowParameters& swiperArrowParameters)
+    {
+        swiperArrowParameters_ = std::make_shared<SwiperArrowParameters>(swiperArrowParameters);
+    }
+
     void SetSwiperDigitalParameters(const SwiperDigitalParameters& swiperDigitalParameters)
     {
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>(swiperDigitalParameters);
@@ -1279,6 +1284,7 @@ private:
     void UpdateBottomTypeOnMultiple(int32_t currentFirstIndex);
     void UpdateBottomTypeOnMultipleRTL(int32_t currentFirstIndex);
     void CheckTargetPositon(float& correctOffset);
+    void UpdateDefaultColor();
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
@@ -1362,6 +1368,7 @@ private:
     AnimationEndEventPtr animationEndEvent_;
 
     mutable std::shared_ptr<SwiperParameters> swiperParameters_;
+    mutable std::shared_ptr<SwiperArrowParameters> swiperArrowParameters_;
     mutable std::shared_ptr<SwiperDigitalParameters> swiperDigitalParameters_;
 
     WeakPtr<FrameNode> lastWeakShowNode_;

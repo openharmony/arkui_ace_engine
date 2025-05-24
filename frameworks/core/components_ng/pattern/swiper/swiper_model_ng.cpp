@@ -480,6 +480,11 @@ void SwiperModelNG::SetArrowStyle(const SwiperArrowParameters& swiperArrowParame
             SwiperLayoutProperty, IsSidebarMiddle, swiperArrowParameters.isSidebarMiddle.value());
     }
     if (SystemProperties::ConfigChangePerform()) {
+        auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(swiperNode);
+        auto pattern = swiperNode->GetPattern<SwiperPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetSwiperArrowParameters(swiperArrowParameters);
         CreateArrowWithResourceObj(swiperArrowParameters);
     }
 }
@@ -774,6 +779,10 @@ void SwiperModelNG::SetArrowStyle(FrameNode* frameNode, const SwiperArrowParamet
             SwiperLayoutProperty, IsSidebarMiddle, swiperArrowParameters.isSidebarMiddle.value(), frameNode);
     }
     if (SystemProperties::ConfigChangePerform()) {
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<SwiperPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetSwiperArrowParameters(swiperArrowParameters);
         CreateArrowWithResourceObj(swiperArrowParameters);
     }
 }
@@ -1166,6 +1175,15 @@ void SwiperModelNG::ResetArrowStyle(FrameNode* frameNode)
     ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowSize, frameNode);
     ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowColor, frameNode);
     ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, IsSidebarMiddle, frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(swiperNode);
+        auto pattern = swiperNode->GetPattern<SwiperPattern>();
+        CHECK_NULL_VOID(pattern);
+        SwiperArrowParameters swiperArrowParameters;
+        pattern->SetSwiperArrowParameters(swiperArrowParameters);
+        CreateArrowWithResourceObj(swiperArrowParameters);
+    }
 }
 
 void SwiperModelNG::ResetIndicatorStyle(FrameNode* frameNode)
@@ -1175,6 +1193,11 @@ void SwiperModelNG::ResetIndicatorStyle(FrameNode* frameNode)
     CHECK_NULL_VOID(pattern);
     pattern->ResetIndicatorParameters();
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (SystemProperties::ConfigChangePerform()) {
+        static_cast<SwiperIndicatorType>(GetIndicatorType(frameNode)) == SwiperIndicatorType::DOT
+            ? CreateDotWithResourceObj(frameNode, SwiperParameters())
+            : CreateDigitWithResourceObj(frameNode, SwiperDigitalParameters());
+    }
 }
 
 int SwiperModelNG::GetSwipeByGroup(FrameNode* frameNode)
@@ -1237,10 +1260,10 @@ void ParseType(const RefPtr<ResourceObject>& resObj, T& result)
 
 #define UPDATE_DOT_VALUE(frameNode, name, resObj, resultType)                                                  \
     do {                                                                                                       \
+        CHECK_NULL_VOID(frameNode);                                                                            \
+        auto pattern = frameNode->GetPattern<SwiperPattern>();                                                 \
+        CHECK_NULL_VOID(pattern);                                                                              \
         if (resObj) {                                                                                          \
-            CHECK_NULL_VOID(frameNode);                                                                        \
-            auto pattern = frameNode->GetPattern<SwiperPattern>();                                             \
-            CHECK_NULL_VOID(pattern);                                                                          \
             auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) { \
                 auto node = weak.Upgrade();                                                                    \
                 CHECK_NULL_VOID(node);                                                                         \
@@ -1251,15 +1274,17 @@ void ParseType(const RefPtr<ResourceObject>& resObj, T& result)
                 params->name = result;                                                                         \
             };                                                                                                 \
             pattern->AddResObj("swiper." #name, resObj, std::move(updateFunc));                                \
+        } else {                                                                                               \
+            pattern->RemoveResObj("swiper." #name);                                                            \
         }                                                                                                      \
-    } while (false)                                                                                            \
+    } while (false)
 
 #define UPDATE_DIGITAL_VALUE(frameNode, name, resObj, resultType)                                              \
     do {                                                                                                       \
+        CHECK_NULL_VOID(frameNode);                                                                            \
+        auto pattern = frameNode->GetPattern<SwiperPattern>();                                                 \
+        CHECK_NULL_VOID(pattern);                                                                              \
         if (resObj) {                                                                                          \
-            CHECK_NULL_VOID(frameNode);                                                                        \
-            auto pattern = frameNode->GetPattern<SwiperPattern>();                                             \
-            CHECK_NULL_VOID(pattern);                                                                          \
             auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) { \
                 auto node = weak.Upgrade();                                                                    \
                 CHECK_NULL_VOID(node);                                                                         \
@@ -1270,15 +1295,17 @@ void ParseType(const RefPtr<ResourceObject>& resObj, T& result)
                 params->name = result;                                                                         \
             };                                                                                                 \
             pattern->AddResObj("swiper." #name, resObj, std::move(updateFunc));                                \
+        } else {                                                                                               \
+            pattern->RemoveResObj("swiper." #name);                                                            \
         }                                                                                                      \
-    } while (false)                                                                                            \
+    } while (false)
 
 #define UPDATE_ARROW_VALUE(frameNode, name, resObj, resultType)                                                \
     do {                                                                                                       \
+        CHECK_NULL_VOID(frameNode);                                                                            \
+        auto pattern = frameNode->GetPattern<SwiperPattern>();                                                 \
+        CHECK_NULL_VOID(pattern);                                                                              \
         if (resObj) {                                                                                          \
-            CHECK_NULL_VOID(frameNode);                                                                        \
-            auto pattern = frameNode->GetPattern<SwiperPattern>();                                             \
-            CHECK_NULL_VOID(pattern);                                                                          \
             auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) { \
                 auto node = weak.Upgrade();                                                                    \
                 CHECK_NULL_VOID(node);                                                                         \
@@ -1288,8 +1315,10 @@ void ParseType(const RefPtr<ResourceObject>& resObj, T& result)
                 ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, name, result, node);                     \
             };                                                                                                 \
             pattern->AddResObj("swiper." #name, resObj, std::move(updateFunc));                                \
+        } else {                                                                                               \
+            pattern->RemoveResObj("swiper." #name);                                                            \
         }                                                                                                      \
-    } while (false)                                                                                            \
+    } while (false)
 
 void SwiperModelNG::ProcessNextMarginwithResourceObj(const RefPtr<ResourceObject>& resObj)
 {
@@ -1299,7 +1328,6 @@ void SwiperModelNG::ProcessNextMarginwithResourceObj(const RefPtr<ResourceObject
     CHECK_NULL_VOID(pattern);
     if (resObj) {
         auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
-            std::string key = "swiper.nextMargin";
             auto node = weak.Upgrade();
             CHECK_NULL_VOID(node);
             auto pattern = node->GetPattern<SwiperPattern>();
@@ -1310,6 +1338,8 @@ void SwiperModelNG::ProcessNextMarginwithResourceObj(const RefPtr<ResourceObject
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, result, node);
         };
         pattern->AddResObj("swiper.nextMargin", resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("swiper.nextMargin");
     }
 }
 
@@ -1321,7 +1351,6 @@ void SwiperModelNG::ProcessPreviousMarginwithResourceObj(const RefPtr<ResourceOb
     CHECK_NULL_VOID(pattern);
     if (resObj) {
         auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
-            std::string key = "swiper.prevMargin";
             auto node = weak.Upgrade();
             CHECK_NULL_VOID(node);
             auto pattern = node->GetPattern<SwiperPattern>();
@@ -1332,6 +1361,8 @@ void SwiperModelNG::ProcessPreviousMarginwithResourceObj(const RefPtr<ResourceOb
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, result, node);
         };
         pattern->AddResObj("swiper.prevMargin", resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("swiper.prevMargin");
     }
 }
 
@@ -1363,7 +1394,6 @@ void SwiperModelNG::CreateDotWithResourceObj(FrameNode* frameNode, const SwiperP
     resObj = swiperParameters.resourceItemSizeValueObject;
     if (resObj) {
         auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
-            std::string key = "swiper.ItemSize";
             auto node = weak.Upgrade();
             CHECK_NULL_VOID(node);
             auto pattern = node->GetPattern<SwiperPattern>();
@@ -1377,6 +1407,8 @@ void SwiperModelNG::CreateDotWithResourceObj(FrameNode* frameNode, const SwiperP
             params->selectedItemHeight = result;
         };
         pattern->AddResObj("swiper.ItemSize", resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("swiper.ItemSize");
     }
 }
 
