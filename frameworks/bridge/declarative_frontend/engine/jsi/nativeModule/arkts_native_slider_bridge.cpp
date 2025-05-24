@@ -30,8 +30,7 @@ constexpr int SLIDER_MAX = 100;
 constexpr int PARAM_ARR_LENGTH_2 = 2;
 const char* SLIDER_NODEPTR_OF_UINODE = "nodePtr_";
 namespace {
-bool ConvertProgressResourceColor(
-    const EcmaVM* vm, const Local<JSValueRef>& value, OHOS::Ace::NG::Gradient& gradient)
+bool ConvertSliderGradientColor(const EcmaVM* vm, const Local<JSValueRef>& value, OHOS::Ace::NG::Gradient& gradient)
 {
     if (!value->IsObject(vm)) {
         return false;
@@ -336,9 +335,9 @@ ArkUINativeModuleValue SliderBridge::SetTrackBackgroundColor(ArkUIRuntimeCallInf
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    Gradiant gradient;
+    Gradient gradient;
     Color color;
-    if (ConvertProgressResourceColor(vm, secondArg, gradient)) {
+    if (ConvertSliderGradientColor(vm, secondArg, gradient)) {
         ArkUIGradientType gradientObj;
         auto colorLength = gradient.GetColors().size();
         std::vector<uint32_t> colorValues;
@@ -384,9 +383,9 @@ ArkUINativeModuleValue SliderBridge::SetSelectColor(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    Gradiant gradient;
+    Gradient gradient;
     Color color;
-    if (ConvertProgressResourceColor(vm, secondArg, gradient)) {
+    if (ConvertSliderGradientColor(vm, secondArg, gradient)) {
         ArkUIGradientType gradientObj;
         auto colorLength = gradient.GetColors().size();
         std::vector<uint32_t> colorValues;
