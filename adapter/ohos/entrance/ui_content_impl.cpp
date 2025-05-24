@@ -2361,6 +2361,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     OHOS::Rosen::DisplayManager::GetInstance().RegisterFoldStatusListener(foldStatusListener_);
     foldDisplayModeListener_ = new FoldDisplayModeListener(instanceId_);
     OHOS::Rosen::DisplayManager::GetInstance().RegisterDisplayModeListener(foldDisplayModeListener_);
+    if (window_->GetType() == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
+        windowRectChangeListener_ = new WindowRectChangeListener(instanceId_);
+        window_->RegisterHostWindowRectChangeListener(windowRectChangeListener_);
+    } else {
+        windowRectChangeListener_ = new WindowRectChangeListener(instanceId_);
+        window_->RegisterWindowRectChangeListener(windowRectChangeListener_);
+    }
 
     // create ace_view
     auto aceView =
@@ -2714,6 +2721,14 @@ void UIContentImpl::Destroy()
 
     if (window_) {
         window_->UnregisterWaterfallModeChangeListener(waterfallModeChangeListener_);
+        if (windowRectChangeListener_) {
+            if (window_->GetType() == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
+                window_->UnregisterHostWindowRectChangeListener(windowRectChangeListener_);
+            } else {
+                window_->UnregisterWindowRectChangeListener(windowRectChangeListener_);
+            }
+            windowRectChangeListener_ = nullptr;
+        }
     }
 }
 
@@ -4124,10 +4139,6 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     OHOS::Rosen::DisplayManager::GetInstance().RegisterFoldStatusListener(foldStatusListener_);
     foldDisplayModeListener_ = new FoldDisplayModeListener(instanceId_, isDialog);
     OHOS::Rosen::DisplayManager::GetInstance().RegisterDisplayModeListener(foldDisplayModeListener_);
-    if (window_->GetType() != Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
-        windowRectChangeListener_ = new WindowRectChangeListener(instanceId_);
-        window_->RegisterWindowRectChangeListener(windowRectChangeListener_);
-    }
 
     auto isAppOrSystemWindow = window_->IsAppWindow() || window_->IsSystemWindow();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && isAppOrSystemWindow) {
