@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_paint_method.h"
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
+#include "core/components_ng/pattern/slider/slider_custom_content_options.h"
 
 namespace OHOS::Ace::NG {
 class SliderPattern : public Pattern {
@@ -68,8 +69,28 @@ public:
         if (layoutProperty) {
             textDirection = layoutProperty->GetLayoutDirection();
         }
+        if ((HasPrefix() || HasSuffix()) && !contentModifierNode_) {
+            endsInitFlag_ = true;
+            InitSliderEndsState();
+        }
         return MakeRefPtr<SliderPaintMethod>(sliderContentModifier_, paintParameters, sliderLength_, borderBlank_,
             sliderTipModifier_, tipParameters, textDirection);
+    }
+
+    void InitSliderEndsState()
+    {
+        CHECK_NULL_VOID(sliderContentModifier_);
+        if (HasPrefix()) {
+            CHECK_NULL_VOID(prefixNodeStack_);
+            prefixSize_ = prefixNodeStack_->GetGeometryNode()->GetFrameSize();
+            sliderContentModifier_->SetHasPrefix(true);
+        }
+        if (HasSuffix()) {
+            CHECK_NULL_VOID(suffixNodeStack_);
+            suffixSize_ = suffixNodeStack_->GetGeometryNode()->GetFrameSize();
+            sliderContentModifier_->SetHasSuffix(true);
+        }
+        InitSliderEnds();
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -152,7 +173,24 @@ public:
         return isEnableHaptic_;
     }
 
+    bool HasPrefix() const
+    {
+        if (contentModifierNode_) {
+            return false;
+        }
+        return prefix_.Upgrade() != nullptr;
+    };
+
+    bool HasSuffix() const
+    {
+        if (contentModifierNode_) {
+            return false;
+        }
+        return suffix_.Upgrade() != nullptr;
+    };
+
     void SetSliderValue(double value, int32_t mode);
+    void InitSliderEnds();
     void InitAccessibilityVirtualNodeTask();
     void SetIsAccessibilityOn(bool value)
     {
@@ -161,6 +199,18 @@ public:
     void PlayHapticFeedback(bool isShowSteps, float step, float oldValue);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void DumpInfo() override;
+
+    void InitPrefixSuffixRow();
+    void SetPrefix(const RefPtr<NG::UINode>& prefix, const NG::SliderPrefixOptions& options);
+    void SetSuffix(const RefPtr<NG::UINode>& suffix, const NG::SliderSuffixOptions& options);
+    void ResetPrefix();
+    void ResetSuffix();
+    void UpdatePrefixPosition();
+    void UpdateSuffixPosition();
+    void UpdateEndsIsShowStepsPosition(
+        PointF& EndsPosition, PointF& block, SizeF& endsSize, float outsetoffset, bool side);
+    void UpdateEndsNotShowStepsPosition(
+        PointF& EndsPosition, PointF& block, SizeF& endsSize, float noneOffset, float outsetOffset);
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
@@ -355,9 +405,9 @@ private:
     SizeF GetStepPointAccessibilityVirtualNodeSize();
     void UpdateStepPointsAccessibilityVirtualNodeSelected();
     void SetStepPointsAccessibilityVirtualNodeEvent(
-        const RefPtr<FrameNode>& pointNode, uint32_t index, bool isClickAbled, bool reverse);
-    void SetStepPointAccessibilityVirtualNode(
-        const RefPtr<FrameNode>& pointNode, const SizeF& size, const PointF& point, const std::string& txt);
+        const RefPtr<FrameNode>& pointNode, uint32_t index, bool isClickAbled, bool reverse, bool isDisabledDesc);
+    void SetStepPointAccessibilityVirtualNode(const RefPtr<FrameNode>& pointNode, const SizeF& size,
+        const PointF& point, const std::string& txt, uint32_t index);
     void SendAccessibilityValueEvent(int32_t mode);
     void ClearSliderVirtualNode();
     void InitOrRefreshSlipFactor();
@@ -429,6 +479,26 @@ private:
     RefPtr<PanEvent> panEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
+    RefPtr<FrameNode> parentPrefixSuffixNode_;
+    std::vector<PointF> stepPoints_;
+    PointF blockStart_ = { 0.0f, 0.0f };
+    PointF blockEnd_ = { 0.0f, 0.0f };
+    PointF prefixPosition_ = { 0.0f, 0.0f };
+    PointF suffixPosition_ = { 0.0f, 0.0f };
+    SizeF prefixSize_ = { 0.0f, 0.0f };
+    SizeF suffixSize_ = { 0.0f, 0.0f };
+    RSRect trackRect_;
+    bool isShowSteps_ = false;
+    bool side_ = true;
+    bool endsInitFlag_ = false;
+    float outsetOffset_ = 0.0f;
+
+    NG::SliderPrefixOptions prefixAccessibilityoptions_;
+    NG::SliderSuffixOptions suffixAccessibilityoptions_;
+    WeakPtr<UINode> prefix_;
+    WeakPtr<UINode> suffix_;
+    RefPtr<FrameNode> prefixNodeStack_;
+    RefPtr<FrameNode> suffixNodeStack_;
 
     RefPtr<SliderContentModifier> sliderContentModifier_;
     bool isTouchUpFlag_ = false;
