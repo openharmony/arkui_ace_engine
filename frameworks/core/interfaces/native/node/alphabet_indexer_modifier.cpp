@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
+#include "ui/base/ace_type.h"
 
+#include "core/common/resource/resource_object.h"
+#include "core/components_ng/pattern/indexer/indexer_model.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "core/components/indexer/indexer_theme.h"
@@ -600,6 +603,16 @@ void ResetOnPopupSelected(ArkUINodeHandle node)
     IndexerModelNG::SetOnPopupSelected(frameNode, nullptr);
 }
 
+void CreateWithResourceObj(ArkUINodeHandle node, ArkUI_Int32 jsType, void* resObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(resObj);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    IndexerModelNG::CreateWithResourceObj(
+        frameNode, static_cast<IndexerJsResourceType>(jsType), AceType::Claim(resourceObj));
+}
+
 namespace NodeModifier {
 const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
 {
@@ -663,6 +676,7 @@ const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
         .resetOnRequestPopupData = ResetOnRequestPopupData,
         .setOnPopupSelected = SetOnPopupSelected,
         .resetOnPopupSelected = ResetOnPopupSelected,
+        .createWithResourceObj = CreateWithResourceObj
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

@@ -20,6 +20,7 @@
 
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_v2/indexer/indexer_component.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -29,6 +30,31 @@ const std::vector<V2::AlignStyle> ALIGN_STYLE = { V2::AlignStyle::LEFT, V2::Alig
 const std::vector<NG::AlignStyle> NG_ALIGN_STYLE = { NG::AlignStyle::LEFT, NG::AlignStyle::RIGHT, NG::AlignStyle::START,
     NG::AlignStyle::END };
 }; // namespace
+
+enum class IndexerJsResourceType : int32_t {
+    COLOR,
+    SELECTED_COLOR,
+    POPUP_COLOR,
+    SELECTED_BACKGROUND_COLOR,
+    POPUP_BACKGROUND,
+    SELECTED_FONT_SIZE,
+    SELECTED_FONT_FAMILY,
+    POPUP_FONT_SIZE,
+    POPUP_FONT_FAMILY,
+    FONT_SIZE,
+    FONT_FAMILY,
+    ALIGN_OFFSET,
+    POPUP_POSITION_X,
+    POPUP_POSITION_Y,
+    POPUP_SELECTED_COLOR,
+    POPUP_UNSELECTED_COLOR,
+    POPUP_ITEM_FONT_SIZE,
+    POPUP_ITEM_FONT_FAMILY,
+    POPUP_ITEM_BACKGROUND_COLOR,
+    POPUP_TITLE_BACKGROUND,
+    POPUP_HORIZONTAL_SPACE,
+};
+
 class ACE_FORCE_EXPORT IndexerModel {
 public:
     static IndexerModel* GetInstance();
@@ -73,6 +99,7 @@ public:
     virtual void SetPopupTitleBackground(const std::optional<Color>& color) {};
     virtual void SetAdaptiveWidth(bool state) {};
     virtual void SetEnableHapticFeedback(bool state) = 0;
+    virtual void CreateWithResourceObj(IndexerJsResourceType jsType, const RefPtr<ResourceObject>& resObj) {};
 
 private:
     static std::unique_ptr<IndexerModel> instance_;

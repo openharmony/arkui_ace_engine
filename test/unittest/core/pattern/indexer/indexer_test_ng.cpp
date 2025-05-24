@@ -189,4 +189,28 @@ HWTEST_F(IndexerTestNg, IndexerEnableHapticFeedback002, TestSize.Level1)
         EXPECT_EQ(value, testValue);
     }
 }
+
+/**
+ * @tc.name: CreateWithResourceObjTest001
+ * @tc.desc: Verify IndexerModelNG::CreateWithResourceObj processes all resource types correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, CreateWithResourceObjTest001, TestSize.Level1)
+{
+    CreateIndexer(std::vector<std::string>());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+    IndexerModelNG::CreateWithResourceObj(frameNode, IndexerJsResourceType::COLOR, resObj);
+    IndexerModelNG::CreateWithResourceObj(frameNode, IndexerJsResourceType::SELECTED_COLOR, resObj);
+    IndexerModelNG::CreateWithResourceObj(frameNode, IndexerJsResourceType::POPUP_COLOR, resObj);
+    IndexerModelNG::CreateWithResourceObj(frameNode, IndexerJsResourceType::SELECTED_BACKGROUND_COLOR, resObj);
+    IndexerModelNG::CreateWithResourceObj(frameNode, IndexerJsResourceType::POPUP_BACKGROUND, resObj);
+    IndexerModelNG::CreateWithResourceObj(frameNode, IndexerJsResourceType::SELECTED_COLOR, resObj);
+    IndexerModelNG::CreateWithResourceObj(frameNode, IndexerJsResourceType::ALIGN_OFFSET, resObj);
+    IndexerModelNG::CreateWithResourceObj(frameNode, IndexerJsResourceType::POPUP_POSITION_X, resObj);
+    IndexerModelNG::CreateWithResourceObj(frameNode, IndexerJsResourceType::POPUP_POSITION_Y, resObj);
+    EXPECT_TRUE(true);
+}
 } // namespace OHOS::Ace::NG

@@ -5004,6 +5004,7 @@ struct ArkUIAlphabetIndexerModifier {
     void (*resetOnRequestPopupData)(ArkUINodeHandle node);
     void (*setOnPopupSelected)(ArkUINodeHandle node, void* callback);
     void (*resetOnPopupSelected)(ArkUINodeHandle node);
+    void (*createWithResourceObj)(ArkUINodeHandle frameNode, ArkUI_Int32 jsType, void* resObj);
 };
 
 struct ArkUILoadingProgressModifier {
