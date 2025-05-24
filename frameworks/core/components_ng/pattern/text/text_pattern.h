@@ -828,6 +828,11 @@ public:
     virtual void UpdateAIMenuOptions();
     bool PrepareAIMenuOptions(std::unordered_map<TextDataDetectType, AISpan>& aiMenuOptions);
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
 protected:
     int32_t GetClickedSpanPosition()
     {
