@@ -2114,4 +2114,22 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage074, TestSi
     ret = dragDropManager->IsDropAllowed(frameNode);
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage075
+ * @tc.desc: Test ResetBundleInfo
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage075, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    dragDropManager->dragBundleInfo_.isRemoteDev = true;
+
+    dragDropManager->ResetBundleInfo();
+
+    EXPECT_EQ(dragDropManager->dragBundleInfo_.isRemoteDev, false);
+}
 } // namespace OHOS::Ace::NG
