@@ -558,6 +558,40 @@ uint32_t ParseStrToUint(std::string safeAreaTypeStr)
     return uintType;
 }
 
+uint32_t ParseLayoutSafeAreaTypeStr(std::string safeAreaTypeStr)
+{
+    uint32_t uintType = NG::LAYOUT_SAFE_AREA_TYPE_NONE;
+    std::string delimiter = "|";
+    std::string type;
+    size_t pos = 0;
+    while ((pos = safeAreaTypeStr.find(delimiter)) != std::string::npos) {
+        type = safeAreaTypeStr.substr(0, pos);
+        uintType |= IgnoreLayoutSafeAreaOpts::TypeToMask(StringUtils::StringToUint(type));
+        safeAreaTypeStr.erase(0, pos + delimiter.length());
+    }
+    if (safeAreaTypeStr != "") {
+        uintType |= IgnoreLayoutSafeAreaOpts::TypeToMask(StringUtils::StringToUint(safeAreaTypeStr));
+    }
+    return uintType;
+}
+
+uint32_t ParseLayoutSafeAreaEdgesStr(std::string safeAreaEdgeStr)
+{
+    uint32_t uintType = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+    std::string delimiter = "|";
+    std::string type;
+    size_t pos = 0;
+    while ((pos = safeAreaEdgeStr.find(delimiter)) != std::string::npos) {
+        type = safeAreaEdgeStr.substr(0, pos);
+        uintType |= IgnoreLayoutSafeAreaOpts::EdgeToMask(StringUtils::StringToUint(type));
+        safeAreaEdgeStr.erase(0, pos + delimiter.length());
+    }
+    if (safeAreaEdgeStr != "") {
+        uintType |= IgnoreLayoutSafeAreaOpts::EdgeToMask(StringUtils::StringToUint(safeAreaEdgeStr));
+    }
+    return uintType;
+}
+
 RefPtr<NG::ChainedTransitionEffect> ParseChainedTranslateTransition(
     const Framework::JSRef<Framework::JSVal>& effectOption, const JSExecutionContext& context)
 {
@@ -5197,10 +5231,22 @@ ArkUINativeModuleValue CommonBridge::SetIgnoreLayoutSafeArea(ArkUIRuntimeCallInf
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    std::string typeCppStr = "";
+    std::string edgesCppStr = "";
     LayoutSafeAreaType layoutSafeAreaType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM;
-    LayoutSafeAreaEdge layoutSafeAreaEdge = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
+    LayoutSafeAreaEdge layoutSafeAreaEdges = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
+    if (secondArg->IsString(vm)) {
+        typeCppStr = secondArg->ToString(vm)->ToString(vm);
+        layoutSafeAreaType = ParseLayoutSafeAreaTypeStr(typeCppStr);
+    }
+    if (thirdArg->IsString(vm)) {
+        edgesCppStr = thirdArg->ToString(vm)->ToString(vm);
+        layoutSafeAreaEdges = ParseLayoutSafeAreaEdgesStr(edgesCppStr);
+    }
     GetArkUINodeModifiers()->getCommonModifier()->setIgnoreLayoutSafeArea(
-        nativeNode, layoutSafeAreaType, layoutSafeAreaEdge);
+        nativeNode, layoutSafeAreaType, layoutSafeAreaEdges);
     return panda::JSValueRef::Undefined(vm);
 }
 

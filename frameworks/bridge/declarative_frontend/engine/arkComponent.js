@@ -119,6 +119,8 @@ const SAFE_AREA_TYPE_LIMIT = 3;
 const SAFE_AREA_EDGE_LIMIT = 4;
 const DIRECTION_RANGE = 3;
 const SAFE_AREA_LOWER_LIMIT = 0;
+const LAYOUT_SAFE_AREA_TYPE_LIMIT = 2;
+const LAYOUT_SAFE_AREA_EDGE_LIMIT = 6;
 class ModifierWithKey {
   constructor(value) {
     this.stageValue = value;
@@ -2320,6 +2322,24 @@ class SafeAreaPaddingModifier extends ModifierWithKey {
   }
 }
 SafeAreaPaddingModifier.identity = Symbol('safeAreaPadding');
+class IgnoreLayoutSafeAreaCommonModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetIgnoreLayoutSafeArea(node);
+    }
+    else {
+      getUINativeModule().common.setIgnoreLayoutSafeArea(node, this.value.type, this.value.edges);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.type, this.value.type) ||
+      !isBaseOrResourceEqual(this.stageValue.edges, this.value.edges);
+  }
+}
+IgnoreLayoutSafeAreaCommonModifier.identity = Symbol('ignoreLayoutSafeAreaCommon');
 class VisibilityModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3899,6 +3919,50 @@ class ArkComponent {
     }
     else {
       modifierWithKey(this._modifiersWithKeys, SafeAreaPaddingModifier.identity, SafeAreaPaddingModifier, undefined);
+    }
+    return this;
+  }
+  ignoreLayoutSafeArea(types, edges) {
+    let opts = new ArkSafeAreaExpandOpts();
+    if (types && types.length >= 0) {
+      let safeAreaType = '';
+      for (let param of types) {
+        if (!isNumber(param) || param > LAYOUT_SAFE_AREA_TYPE_LIMIT || param < SAFE_AREA_LOWER_LIMIT) {
+          safeAreaType = undefined;
+          break;
+        }
+        if (safeAreaType) {
+          safeAreaType += '|';
+          safeAreaType += param.toString();
+        }
+        else {
+          safeAreaType += param.toString();
+        }
+      }
+      opts.type = safeAreaType;
+    }
+    if (edges && edges.length >= 0) {
+      let safeAreaEdge = '';
+      for (let param of edges) {
+        if (!isNumber(param) || param > LAYOUT_SAFE_AREA_EDGE_LIMIT || param < SAFE_AREA_LOWER_LIMIT) {
+          safeAreaEdge = undefined;
+          break;
+        }
+        if (safeAreaEdge) {
+          safeAreaEdge += '|';
+          safeAreaEdge += param.toString();
+        }
+        else {
+          safeAreaEdge += param.toString();
+        }
+      }
+      opts.edges = safeAreaEdge;
+    }
+    if (opts.type === undefined && opts.edges === undefined) {
+      modifierWithKey(this._modifiersWithKeys, IgnoreLayoutSafeAreaCommonModifier.identity, IgnoreLayoutSafeAreaCommonModifier, undefined);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, IgnoreLayoutSafeAreaCommonModifier.identity, IgnoreLayoutSafeAreaCommonModifier, opts);
     }
     return this;
   }

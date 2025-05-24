@@ -8673,21 +8673,7 @@ void JSViewAbstract::JsExpandSafeArea(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsIgnoreLayoutSafeArea(const JSCallbackInfo& info)
 {
-    static std::vector<uint32_t> LayoutTypeEnum {
-        NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
-        NG::LAYOUT_SAFE_AREA_TYPE_KEYBOARD,
-        NG::LAYOUT_SAFE_AREA_TYPE_ALL
-    };
-    static std::vector<uint32_t> LayoutEdgeEnum {
-        NG::LAYOUT_SAFE_AREA_EDGE_TOP,
-        NG::LAYOUT_SAFE_AREA_EDGE_BOTTOM,
-        NG::LAYOUT_SAFE_AREA_EDGE_START,
-        NG::LAYOUT_SAFE_AREA_EDGE_END,
-        NG::LAYOUT_SAFE_AREA_EDGE_VERTICAL,
-        NG::LAYOUT_SAFE_AREA_EDGE_HORIZONTAL,
-        NG::LAYOUT_SAFE_AREA_EDGE_ALL
-    };
-    NG::IgnoreLayoutSafeAreaOpts opts { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    NG::IgnoreLayoutSafeAreaOpts opts { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .rawEdges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
     if (info.Length() >= PARAMETER_LENGTH_FIRST && info[0]->IsArray()) {
         auto paramArray = JSRef<JSArray>::Cast(info[0]);
         uint32_t layoutSafeAreaType = NG::LAYOUT_SAFE_AREA_TYPE_NONE;
@@ -8697,7 +8683,7 @@ void JSViewAbstract::JsIgnoreLayoutSafeArea(const JSCallbackInfo& info)
                 layoutSafeAreaType = NG::SAFE_AREA_TYPE_SYSTEM;
                 break;
             }
-            layoutSafeAreaType |= LayoutTypeEnum[paramArray->GetValueAt(i)->ToNumber<uint32_t>()];
+            layoutSafeAreaType |= NG::IgnoreLayoutSafeAreaOpts::TypeToMask(paramArray->GetValueAt(i)->ToNumber<uint32_t>());
         }
         opts.type = layoutSafeAreaType;
     }
@@ -8710,9 +8696,10 @@ void JSViewAbstract::JsIgnoreLayoutSafeArea(const JSCallbackInfo& info)
                 layoutSafeAreaEdge = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
                 break;
             }
-            layoutSafeAreaEdge |= LayoutEdgeEnum[paramArray->GetValueAt(i)->ToNumber<uint32_t>()];
+            layoutSafeAreaEdge |= 
+                NG::IgnoreLayoutSafeAreaOpts::EdgeToMask(paramArray->GetValueAt(i)->ToNumber<uint32_t>());
         }
-        opts.edges = layoutSafeAreaEdge;
+        opts.rawEdges = layoutSafeAreaEdge;
     }
 
     ViewAbstractModel::GetInstance()->UpdateIgnoreLayoutSafeAreaOpts(opts);

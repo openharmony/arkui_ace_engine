@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace OHOS::Ace::NG {
 /**
@@ -203,6 +204,7 @@ inline constexpr LayoutSafeAreaType LAYOUT_SAFE_AREA_TYPE_SYSTEM = 1;
 inline constexpr LayoutSafeAreaType LAYOUT_SAFE_AREA_TYPE_KEYBOARD = 1 << 1;
 inline constexpr LayoutSafeAreaType LAYOUT_SAFE_AREA_TYPE_ALL =
     LAYOUT_SAFE_AREA_TYPE_SYSTEM | LAYOUT_SAFE_AREA_TYPE_KEYBOARD;
+const uint32_t TYPE_MASK_LIMIT = 2;
 
 using LayoutSafeAreaEdge = uint32_t;
 inline constexpr LayoutSafeAreaEdge LAYOUT_SAFE_AREA_EDGE_NONE = 0;
@@ -216,14 +218,21 @@ inline constexpr LayoutSafeAreaEdge LAYOUT_SAFE_AREA_EDGE_HORIZONTAL =
     LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_END;
 inline constexpr LayoutSafeAreaEdge LAYOUT_SAFE_AREA_EDGE_ALL =
     LAYOUT_SAFE_AREA_EDGE_VERTICAL | LAYOUT_SAFE_AREA_EDGE_HORIZONTAL;
+const uint32_t EDGE_MASK_LIMIT = 6;
 
 struct IgnoreLayoutSafeAreaOpts {
     LayoutSafeAreaType type = LAYOUT_SAFE_AREA_TYPE_NONE;
     LayoutSafeAreaEdge edges = LAYOUT_SAFE_AREA_EDGE_NONE;
+    LayoutSafeAreaEdge rawEdges = LAYOUT_SAFE_AREA_EDGE_NONE;
 
     bool operator==(const IgnoreLayoutSafeAreaOpts& other) const
     {
         return type == other.type && edges == other.edges;
+    }
+
+    bool NeedUpdateWithCheck(const IgnoreLayoutSafeAreaOpts& other) const
+    {
+        return (type != other.type) || (rawEdges != other.rawEdges);
     }
 
     bool operator!=(const IgnoreLayoutSafeAreaOpts& other) const
@@ -284,6 +293,30 @@ struct IgnoreLayoutSafeAreaOpts {
             default:
                 return "LAYOUT_SAFE_AREA_EDGE_OTHERS_" + std::to_string(edges);
         }
+    }
+
+    static LayoutSafeAreaType TypeToMask(uint32_t index)
+    {
+        static std::vector<LayoutSafeAreaType> LayoutTypeEnum {
+            NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+            NG::LAYOUT_SAFE_AREA_TYPE_KEYBOARD,
+            NG::LAYOUT_SAFE_AREA_TYPE_ALL
+        };
+        return index > TYPE_MASK_LIMIT ? 0 : LayoutTypeEnum[index];
+    }
+
+    static LayoutSafeAreaType EdgeToMask(uint32_t index)
+    {
+        static std::vector<LayoutSafeAreaType> LayoutEdgeEnum {
+            NG::LAYOUT_SAFE_AREA_EDGE_TOP,
+            NG::LAYOUT_SAFE_AREA_EDGE_BOTTOM,
+            NG::LAYOUT_SAFE_AREA_EDGE_START,
+            NG::LAYOUT_SAFE_AREA_EDGE_END,
+            NG::LAYOUT_SAFE_AREA_EDGE_VERTICAL,
+            NG::LAYOUT_SAFE_AREA_EDGE_HORIZONTAL,
+            NG::LAYOUT_SAFE_AREA_EDGE_ALL
+        };
+        return index > EDGE_MASK_LIMIT ? 0 : LayoutEdgeEnum[index];
     }
 };
 } // namespace OHOS::Ace::NG

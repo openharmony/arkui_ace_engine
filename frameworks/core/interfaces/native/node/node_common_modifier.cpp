@@ -3518,14 +3518,14 @@ void ResetExpandSafeArea(ArkUINodeHandle node)
     ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
 }
 
-void SetIgnoreLayoutSafeArea(ArkUINodeHandle node, ArkUI_Uint32 layoutSafeAreaType, ArkUI_Uint32 layoutSafeAreaEdge)
+void SetIgnoreLayoutSafeArea(ArkUINodeHandle node, ArkUI_Uint32 layoutSafeAreaType, ArkUI_Uint32 layoutSafeAreaEdges)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::IgnoreLayoutSafeAreaOpts opts { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
-        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+        .rawEdges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
     opts.type = layoutSafeAreaType;
-    opts.edges = layoutSafeAreaEdge;
+    opts.rawEdges = layoutSafeAreaEdges;
     ViewAbstract::UpdateIgnoreLayoutSafeAreaOpts(frameNode, opts);
 }
 
@@ -3533,9 +3533,8 @@ void ResetIgnoreLayoutSafeArea(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NG::IgnoreLayoutSafeAreaOpts opts;
-    opts.type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM;
-    opts.edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
+    NG::IgnoreLayoutSafeAreaOpts opts { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .rawEdges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
     ViewAbstract::UpdateIgnoreLayoutSafeAreaOpts(frameNode, opts);
 }
 

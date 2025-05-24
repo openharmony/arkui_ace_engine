@@ -214,7 +214,7 @@ public:
 
     std::pair<std::vector<std::string>, std::vector<std::string>> CalcToString(const CalcSize& calcSize);
 
-    void ExpandConstraintWithSafeArea();
+    virtual void ExpandConstraintWithSafeArea();
 
     void UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint);
 
@@ -433,6 +433,7 @@ public:
     void CheckLocalizedBorderImageWidth(const TextDirection& direction);
     void CheckLocalizedBorderImageOutset(const TextDirection& direction);
     void CheckLocalizedSafeAreaPadding(const TextDirection& direction);
+    void CheckIgnoreLayoutSafeArea(const TextDirection& direction);
 
     virtual void OnPropertyChangeMeasure() {}
 

@@ -3312,12 +3312,19 @@ let SafeAreaEdge;
 let LayoutSafeAreaType;
 (function (LayoutSafeAreaType) {
   LayoutSafeAreaType[LayoutSafeAreaType.SYSTEM = 0] = 'SYSTEM';
+  LayoutSafeAreaType[LayoutSafeAreaType.KEYBOARD = 1] = 'KEYBOARD';
+  LayoutSafeAreaType[LayoutSafeAreaType.ALL = 2] = 'ALL';
 })(LayoutSafeAreaType || (LayoutSafeAreaType = {}));
 
 let LayoutSafeAreaEdge;
 (function (LayoutSafeAreaEdge) {
   LayoutSafeAreaEdge[LayoutSafeAreaEdge.TOP = 0] = 'TOP';
   LayoutSafeAreaEdge[LayoutSafeAreaEdge.BOTTOM = 1] = 'BOTTOM';
+  LayoutSafeAreaEdge[LayoutSafeAreaEdge.START = 2] = 'START';
+  LayoutSafeAreaEdge[LayoutSafeAreaEdge.END = 3] = 'END';
+  LayoutSafeAreaEdge[LayoutSafeAreaEdge.VERTICAL = 4] = 'VERTICAL';
+  LayoutSafeAreaEdge[LayoutSafeAreaEdge.HORIZONTAL = 5] = 'HORIZONTAL';
+  LayoutSafeAreaEdge[LayoutSafeAreaEdge.ALL = 6] = 'ALL';
 })(LayoutSafeAreaEdge || (LayoutSafeAreaEdge = {}));
 
 let RenderFit;

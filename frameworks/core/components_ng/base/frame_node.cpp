@@ -2195,11 +2195,9 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread, LayoutType layoutTaskT
             Measure(layoutConstraint);
             ResetIgnoreLayoutProcess();
         } else {
-            TAG_LOGI(ACE_LAYOUT,
-                "LayoutTask for postponed layouting on ignoreLayoutSafeArea-container [%s][self:%d], should skip "
-                "measuring.",
-                GetTag().c_str(), GetId());
+            // LayoutTask for postponed layouting on ignoreLayoutSafeArea-container node, which should skip measuring.
         }
+
         {
             ACE_SCOPED_TRACE_COMMERCIAL("CreateTaskLayout[%s][self:%d][parent:%d][layoutPriority:%d]"
                              "[pageId:%d][depth:%d]",
