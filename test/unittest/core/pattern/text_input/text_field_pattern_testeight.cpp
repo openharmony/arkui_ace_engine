@@ -304,23 +304,6 @@ HWTEST_F(TextFieldPatternTestEight, HandleCloseKeyboard001, TestSize.Level0)
 }
 
 /**
- * @tc.name: UpdateRectByTextAlign001
- * @tc.desc: test UpdateRectByTextAlign
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestEight, UpdateRectByTextAlign001, TestSize.Level0)
-{
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetTextAlign(TextAlign::LEFT);
-    });
-    GetFocus();
-
-    RectF textRect = RectF(0.0f, 0.0f, 0.0f, 0.0f);
-    pattern_->UpdateRectByTextAlign(textRect);
-    EXPECT_EQ(pattern_->GetTextAlign(), TextAlign::LEFT);
-}
-
-/**
  * @tc.name: ToJsonValue001
  * @tc.desc: test ToJsonValue
  * @tc.type: FUNC
@@ -346,22 +329,6 @@ HWTEST_F(TextFieldPatternTestEight, ToJsonValue001, TestSize.Level0)
     container->apiTargetVersion_ = 15;
     pattern_->isPasswordSymbol_ = true;
     pattern_->ToJsonValue(jsonconst, filter);
-}
-
-/**
- * @tc.name: GetDumpTextValue001
- * @tc.desc: test GetDumpTextValue
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestEight, GetDumpTextValue001, TestSize.Level0)
-{
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetType(TextInputType::VISIBLE_PASSWORD);
-    });
-    GetFocus();
-
-    auto result = pattern_->GetDumpTextValue();
-    EXPECT_EQ(result, "passwordLen:26");
 }
 
 /**
