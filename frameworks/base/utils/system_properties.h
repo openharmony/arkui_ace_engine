@@ -706,6 +706,8 @@ public:
 
     static bool GetMultiInstanceEnabled();
 
+    static void SetMultiInstanceEnabled(bool enabled);
+
     static bool GetTaskPriorityAdjustmentEnable()
     {
         return taskPriorityAdjustmentEnable_;

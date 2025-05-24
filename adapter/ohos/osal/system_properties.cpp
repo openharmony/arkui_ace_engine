@@ -831,6 +831,11 @@ ACE_WEAK_SYM bool SystemProperties::GetMultiInstanceEnabled()
     return multiInstanceEnabled_;
 }
 
+ACE_WEAK_SYM void SystemProperties::SetMultiInstanceEnabled(bool enabled)
+{
+    multiInstanceEnabled_ = enabled;
+}
+
 std::string SystemProperties::GetLanguage()
 {
     return system::GetParameter("const.global.language", INVALID_PARAM);

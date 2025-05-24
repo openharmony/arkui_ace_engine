@@ -62,10 +62,40 @@ ohos_unittest("layout_inspector_test") {
   ]
 }
 
+ohos_unittest("rs_adapter_test") {
+  module_out_path = adapter_test_output_path
+  sources = [ "rs_adapter_test.cpp" ]
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  deps = [
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_event",
+    "$ace_root/test/unittest:ace_components_gestures",
+    "$ace_root/test/unittest:ace_components_layout",
+    "$ace_root/test/unittest:ace_components_manager",
+    "$ace_root/test/unittest:ace_components_mock",
+    "$ace_root/test/unittest:ace_components_pattern",
+    "$ace_root/test/unittest:ace_components_property",
+    "$ace_root/test/unittest:ace_components_render",
+    "$ace_root/test/unittest:ace_components_syntax",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
+    "$ace_root/test/unittest:ace_unittest_log",
+  ]
+  external_deps = [
+    "googletest:gmock_main",
+    "window_manager:libwm",
+    "graphic_2d:librender_service_client",
+  ]
+}
+
 group("entrance_unittest") {
   testonly = true
   deps = [
      ":container_test" ,
-     ":layout_inspector_test"
+     ":layout_inspector_test",
+     ":rs_adapter_test"
   ]
 }
