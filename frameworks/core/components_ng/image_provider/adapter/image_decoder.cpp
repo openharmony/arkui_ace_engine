@@ -36,8 +36,7 @@ std::unordered_map<std::string, WeakPtr<PixelMap>> ImageDecoder::weakPixelMapCac
 
 WeakPtr<PixelMap> ImageDecoder::GetFromPixelMapCache(const ImageSourceInfo& imageSourceInfo, const SizeF& size)
 {
-    // only support network image
-    if (imageSourceInfo.GetSrcType() != SrcType::NETWORK) {
+    if (!imageSourceInfo.IsSurportCachePixelmap()) {
         return nullptr;
     }
     std::shared_lock<std::shared_mutex> lock(pixelMapMtx_);
@@ -66,8 +65,7 @@ void ImageDecoder::ClearPixelMapCache()
 void ImageDecoder::AddToPixelMapCache(
     const ImageSourceInfo& imageSourceInfo, const SizeF& size, WeakPtr<PixelMap> weakPixelMap)
 {
-    // only cache network image
-    if (imageSourceInfo.GetSrcType() != SrcType::NETWORK) {
+    if (!imageSourceInfo.IsSurportCachePixelmap()) {
         return;
     }
     std::unique_lock<std::shared_mutex> lock(pixelMapMtx_);

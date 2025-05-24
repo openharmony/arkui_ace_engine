@@ -141,6 +141,11 @@ public:
         return imageDfxConfig_;
     }
 
+    bool IsSurportCachePixelmap() const
+    {
+        return srcType_ == SrcType::NETWORK || srcType_ == SrcType::RESOURCE;
+    }
+
 private:
     SrcType ResolveSrcType() const;
 
