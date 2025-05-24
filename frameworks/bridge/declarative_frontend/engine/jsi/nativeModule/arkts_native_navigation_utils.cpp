@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_utils.h"
 
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 void NativeNavigationUtils::ParseBarItems(
@@ -30,20 +31,8 @@ void NativeNavigationUtils::ParseBarItems(
         }
         auto obj = item->ToObject(vm);
         ArkUIBarItem menuItem;
-        std::string value;
-        auto itemValueObject = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "value"));
-        if (ArkTSUtils::ParseJsString(vm, itemValueObject, value)) {
-            menuItem.text.isSet = 1;
-            menuItem.text.value = new char[value.length() + 1];
-            DeepCopyStringValue(menuItem.text.value, value.length() + 1, value);
-        }
-        std::string icon;
-        auto itemIconObject = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "icon"));
-        if (ArkTSUtils::ParseJsMedia(vm, itemIconObject, icon)) {
-            menuItem.icon.isSet = 1;
-            menuItem.icon.value = new char[icon.length() + 1];
-            DeepCopyStringValue(menuItem.icon.value, icon.length() + 1, icon);
-        }
+        ParseBarItemsValue(vm, obj, menuItem);
+        ParseBarItemsIcon(vm, obj, menuItem);
         auto itemEnabledObject = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isEnabled"));
         if (itemEnabledObject->IsBoolean()) {
             menuItem.isEnable = { 1, itemEnabledObject->ToBoolean(vm)->Value() };
@@ -52,15 +41,79 @@ void NativeNavigationUtils::ParseBarItems(
     }
 }
 
+void NativeNavigationUtils::ParseBarItemsValue(
+    EcmaVM* vm, const Local<panda::ObjectRef>& itemObject, ArkUIBarItem& toolBarItem)
+{
+    std::string value;
+    auto itemValueObject = itemObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "value"));
+    toolBarItem.isStringText = true;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> itemValueResObj;
+        if (ArkTSUtils::ParseJsString(vm, itemValueObject, value, itemValueResObj)) {
+            toolBarItem.text.isSet = 1;
+            toolBarItem.text.value = new char[value.length() + 1];
+            DeepCopyStringValue(toolBarItem.text.value, value.length() + 1, value);
+        }
+        if (itemValueResObj) {
+            toolBarItem.isStringText = false;
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& itemValueResObj, ArkUIBarItem& toolBarItem) {
+                std::string valueResult;
+                if (ResourceParseUtils::ParseResString(itemValueResObj, valueResult)) {
+                    toolBarItem.text.isSet = 1;
+                    toolBarItem.text.value = new char[valueResult.length() + 1];
+                    DeepCopyStringValue(toolBarItem.text.value, valueResult.length() + 1, valueResult);
+                }
+            };
+            toolBarItem.AddResource("toolBarItem.value", itemValueResObj, std::move(updateFunc));
+        }
+    } else {
+        if (ArkTSUtils::ParseJsString(vm, itemValueObject, value)) {
+            toolBarItem.text.isSet = 1;
+            toolBarItem.text.value = new char[value.length() + 1];
+            DeepCopyStringValue(toolBarItem.text.value, value.length() + 1, value);
+        }
+    }
+}
+
+void NativeNavigationUtils::ParseBarItemsIcon(
+    EcmaVM* vm, const Local<panda::ObjectRef>& itemObject, ArkUIBarItem& toolBarItem)
+{
+    std::string icon;
+    auto itemIconObject = itemObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "icon"));
+    toolBarItem.isStringIcon = true;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> itemIconResObj;
+        if (ArkTSUtils::ParseJsMedia(vm, itemIconObject, icon, itemIconResObj)) {
+            toolBarItem.icon.isSet = 1;
+            toolBarItem.icon.value = new char[icon.length() + 1];
+            DeepCopyStringValue(toolBarItem.icon.value, icon.length() + 1, icon);
+        }
+        if (itemIconResObj) {
+            toolBarItem.isStringIcon = false;
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& itemIconResObj, ArkUIBarItem& toolBarItem) {
+                std::string iconResult;
+                if (ResourceParseUtils::ParseResMedia(itemIconResObj, iconResult)) {
+                    toolBarItem.icon.isSet = 1;
+                    toolBarItem.icon.value = new char[iconResult.length() + 1];
+                    DeepCopyStringValue(toolBarItem.icon.value, iconResult.length() + 1, iconResult);
+                }
+            };
+            toolBarItem.AddResource("navigation.barItem.icon", itemIconResObj, std::move(updateFunc));
+        }
+    } else {
+        if (ArkTSUtils::ParseJsMedia(vm, itemIconObject, icon)) {
+            toolBarItem.icon.isSet = 1;
+            toolBarItem.icon.value = new char[icon.length() + 1];
+            DeepCopyStringValue(toolBarItem.icon.value, icon.length() + 1, icon);
+        }
+    }
+}
+
 void NativeNavigationUtils::ParseTitleOptions(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
     ArkUINavigationTitlebarOptions& options)
 {
     auto obj = jsValue->ToObject(vm);
-    auto colorProperty = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "backgroundColor"));
-    Color color;
-    if (ArkTSUtils::ParseJsColor(vm, colorProperty, color)) {
-        options.colorValue = ArkUIOptionalUint { 1, color.GetValue() };
-    }
+    UpdateNavigationBackgroundColor(vm, obj, options);
     auto blurProperty = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "backgroundBlurStyle"));
     if (blurProperty->IsNumber()) {
         auto blurStyle = blurProperty->Int32Value(vm);
@@ -98,6 +151,40 @@ void NativeNavigationUtils::ParseTitleOptions(const EcmaVM* vm, const Local<JSVa
         options.enableHoverMode.isSet = 1;
         options.enableHoverMode.value = enableHoverModeProperty->ToBoolean(vm)->Value();
     }
+}
+
+void NativeNavigationUtils::UpdateNavigationBackgroundColor(
+    const EcmaVM* vm, const Local<panda::ObjectRef>& obj, ArkUINavigationTitlebarOptions& options)
+{
+    auto colorProperty = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "backgroundColor"));
+    Color color;
+    if (!SystemProperties::ConfigChangePerform()) {
+        if (ArkTSUtils::ParseJsColor(vm, colorProperty, color)) {
+            options.colorValue = ArkUIOptionalUint { 1, color.GetValue() };
+        }
+        return;
+    }
+    RefPtr<ResourceObject> backgroundColorResObj;
+    if (ArkTSUtils::ParseJsColor(vm, colorProperty, color, backgroundColorResObj)) {
+        options.colorValue = ArkUIOptionalUint { 1, color.GetValue() };
+    }
+    if (backgroundColorResObj) {
+        AddBackgroundColorResource(backgroundColorResObj, options);
+    }
+}
+
+void NativeNavigationUtils::AddBackgroundColorResource(
+    const RefPtr<ResourceObject>& backgroundColorResObj, ArkUINavigationTitlebarOptions& options)
+{
+    auto&& updateBackgroundColorFunc = [](const RefPtr<ResourceObject>& resObj,
+                                           ArkUINavigationTitlebarOptions& options) {
+        Color backgroundColor;
+        if (ResourceParseUtils::ParseResColor(resObj, backgroundColor)) {
+            options.colorValue = ArkUIOptionalUint { 1, backgroundColor.GetValue() };
+        }
+    };
+    options.AddResource(
+        "navigationTitleOptionsModifier.backgroundColor", backgroundColorResObj, std::move(updateBackgroundColorFunc));
 }
 
 void NativeNavigationUtils::ParseAndSendFunctionParam(ArkUIRuntimeCallInfo* runtimeCallInfo,

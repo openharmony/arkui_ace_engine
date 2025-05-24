@@ -118,13 +118,19 @@ public:
     static void SetSplitPlaceholder(FrameNode* frameNode, FrameNode* splitPlaceholder);
     static void ResetSplitPlaceholder(FrameNode* frameNode);
     static void SetMinContentWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetMinContentWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& minContentWidthResObj);
     static void SetMinNavBarWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetMinNavBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& minNavBarWidthResObj);
     static void SetMaxNavBarWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetMaxNavBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& maxNavBarWidthResObj);
     static void SetNavBarWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetNavBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& navBarWidthResObj);
     static void SetNavBarPosition(FrameNode* frameNode, NG::NavBarPosition mode);
     static void SetUsrNavigationMode(FrameNode* frameNode, NavigationMode mode);
     static void SetBackButtonIcon(FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
         const std::string& src, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap);
+    static void SetBackButtonIcon(FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const ImageOption& imageOption, RefPtr<PixelMap>& pixMap, const RefPtr<ResourceObject>& backButtonIconResObj);
     static void SetHideNavBar(FrameNode* frameNode, bool hideNavBar);
     static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated);
     static void SetSubtitle(FrameNode* frameNode, const std::string& subtitle);
@@ -139,6 +145,13 @@ public:
     void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) override;
     static void ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo,
         bool ignoreMainTitle = false);
+    static void ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo,
+        const RefPtr<ResourceObject>& titleResObj, const RefPtr<ResourceObject>& subtitleResObj,
+        bool ignoreMainTitle = false);
+    static void UpdateMainTitleInfo(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj);
+    static void UpdateSubTitleInfo(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& subResObj);
     static void SetTitlebarOptions(FrameNode* frameNode, NavigationTitlebarOptions&& opt);
     static void SetMenuItems(FrameNode* frameNode, std::vector<NG::BarItem>&& menuItems);
     static void SetMenuItemAction(FrameNode* frameNode, std::function<void()>&& action, uint32_t index);
