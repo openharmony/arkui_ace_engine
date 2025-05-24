@@ -278,6 +278,7 @@ public:
     int GetInputFieldType() const override;
     std::string GetSelectionText() const override;
     void GetImageRect(int32_t& x, int32_t& y, int32_t& width, int32_t& height) const override;
+    bool IsAILink() const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param_;
@@ -1216,6 +1217,7 @@ public:
     void SetDataDetectorEnable(bool enable);
     void OnDataDetectorSelectText();
     void OnDataDetectorCopy(const std::vector<std::string>& recordMix);
+    int GetHitTestResult();
 
 private:
     void InitWebEvent();
@@ -1251,7 +1253,6 @@ private:
     bool ZoomIn();
     bool ZoomOut();
     int ConverToWebHitTestType(int hitType);
-    int GetHitTestResult();
     void GetHitTestValue(HitTestResult& result);
     int GetPageHeight();
     std::string GetTitle();

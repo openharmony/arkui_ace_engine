@@ -564,6 +564,14 @@ void ContextMenuParamOhos::GetImageRect(int32_t& x, int32_t& y, int32_t& width, 
     }
 }
 
+bool ContextMenuParamOhos::IsAILink() const
+{
+    if (param_) {
+        return param_->IsAILink();
+    }
+    return false;
+}
+
 void ContextMenuResultOhos::Cancel() const
 {
     if (callback_) {

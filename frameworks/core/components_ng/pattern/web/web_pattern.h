@@ -796,6 +796,7 @@ private:
 
     void GetPreviewImageOffsetAndSize(bool isImage, Offset& previewOffset, SizeF& previewSize);
     RefPtr<FrameNode> CreatePreviewImageFrameNode(bool isImage);
+    void ShowPreviewMenu(WebElementType type);
     void ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
         TextResponseType responseType = TextResponseType::RIGHT_CLICK, bool handleReverse = false);
     void CloseContextSelectionMenu();

@@ -3381,16 +3381,31 @@ NG::MenuParam GetSelectionMenuParam(
     return menuParam;
 }
 
-void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
+bool CheckSelectionMenuParam(const JSCallbackInfo &info)
 {
     if (info.Length() < SELECTION_MENU_OPTION_PARAM_INDEX || !info[0]->IsNumber() || !info[1]->IsObject() ||
         !info[SELECTION_MENU_CONTENT_PARAM_INDEX]->IsNumber()) {
-        return;
+        return false;
     }
-    if (info[0]->ToNumber<int32_t>() != static_cast<int32_t>(WebElementType::IMAGE) ||
-        info[SELECTION_MENU_CONTENT_PARAM_INDEX]->ToNumber<int32_t>() !=
+    std::vector<WebElementType> supportType = {WebElementType::IMAGE, WebElementType::LINK};
+    int32_t elementType = info[0]->ToNumber<int32_t>();
+    auto supportType_iter = std::find_if(supportType.begin(), supportType.end(), [elementType](auto &type) {
+        return static_cast<int32_t>(type) == elementType;
+    });
+    if (supportType_iter == supportType.end()) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "WebElementType param err");
+        return false;
+    }
+    if (info[SELECTION_MENU_CONTENT_PARAM_INDEX]->ToNumber<int32_t>() !=
         static_cast<int32_t>(ResponseType::LONG_PRESS)) {
-        TAG_LOGW(AceLogTag::ACE_WEB, "WebElementType or WebResponseType param err");
+        TAG_LOGW(AceLogTag::ACE_WEB, "WebResponseType param err");
+        return false;
+    }
+    return true;
+}
+void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
+{
+    if (!CheckSelectionMenuParam(info)) {
         return;
     }
     WebElementType elementType = static_cast<WebElementType>(info[0]->ToNumber<int32_t>());

@@ -541,20 +541,27 @@ std::shared_ptr<WebPreviewSelectionMenuParam> WebPattern::GetPreviewSelectionMen
 
 void WebPattern::GetPreviewImageOffsetAndSize(bool isImage, Offset& previewOffset, SizeF& previewSize)
 {
+    CHECK_NULL_VOID(contextMenuParam_);
+    int32_t x = 0;
+    int32_t y = 0;
+    int32_t width = 0;
+    int32_t height = 0;
+    contextMenuParam_->GetImageRect(x, y, width, height);
     if (isImage) {
-        CHECK_NULL_VOID(contextMenuParam_);
-        int32_t x = 0;
-        int32_t y = 0;
-        int32_t width = 0;
-        int32_t height = 0;
-        contextMenuParam_->GetImageRect(x, y, width, height);
         previewOffset.SetX((float)x);
         previewOffset.SetY((float)y);
         previewSize.SetWidth((float)width);
         previewSize.SetHeight((float)height);
     } else {
-        previewSize.SetWidth(drawSize_.Width());
-        previewSize.SetHeight(drawSize_.Height());
+        previewOffset.SetX((float)x);
+        previewOffset.SetY((float)y);
+        if (width == 0 && height == 0) {
+            previewSize.SetWidth(drawSize_.Width());
+            previewSize.SetHeight(drawSize_.Height());
+        } else {
+            previewSize.SetWidth((float)width);
+            previewSize.SetHeight((float)height);
+        }
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -654,6 +661,38 @@ void WebPattern::UpdateImagePreviewParam()
 #endif
 }
 
+void WebPattern::ShowPreviewMenu(WebElementType type) {
+    auto sourceType = contextMenuParam_->GetSourceType();
+    if (sourceType == OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_MOUSE) {
+        curResponseType_ = ResponseType::RIGHT_CLICK;
+    } else if (sourceType == OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_LONG_PRESS) {
+        curResponseType_ = ResponseType::LONG_PRESS;
+    } else {
+        return;
+    }
+    curElementType_ = type;
+    CHECK_NULL_VOID(GetPreviewSelectionMenuParams(curElementType_, curResponseType_));
+    auto host = GetHost();
+    if (!host) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "GetHost failed");
+        delegate_->OnContextMenuHide("");
+        return;
+    }
+    auto previewNode = CreatePreviewImageFrameNode(type == WebElementType::IMAGE);
+    if (!previewNode) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "CreatePreviewImageFrameNode failed");
+        previewImageNodeId_.reset();
+        delegate_->OnContextMenuHide("");
+        return;
+    }
+
+    host->AddChild(previewNode);
+    previewNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    previewNode->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkModifyDone();
+}
+
 void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, bool isRichtext, bool result)
 {
     TAG_LOGI(AceLogTag::ACE_WEB,
@@ -665,6 +704,37 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
     CHECK_NULL_VOID(contextMenuParam_);
     contextMenuResult_ = eventInfo->GetContextMenuResult();
     CHECK_NULL_VOID(contextMenuResult_);
+    bool isImage = false;
+    bool isHyperLink = false;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        int hitTestResult = delegate_->GetHitTestResult();
+        TAG_LOGI(AceLogTag::ACE_WEB, "OnContextMenuShow hitTestResult:%{public}d, isAILink:%{public}d", hitTestResult,
+            contextMenuParam_->IsAILink());
+        switch (static_cast<WebHitTestType>(hitTestResult)) {
+            case WebHitTestType::IMG:
+                isImage = true;
+                break;
+            case WebHitTestType::HTTP_IMG:
+                isImage = true;
+                isHyperLink = true;
+                break;
+            case WebHitTestType::HTTP:
+                isHyperLink = true;
+                break;
+            default:
+                break;
+        }
+
+        // since async hittest, reconfirm
+        isImage = isImage && contextMenuParam_->GetMediaType() ==
+                                 OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_IMAGE;
+        isHyperLink =
+            isHyperLink && !isImage && !contextMenuParam_->GetLinkUrl().empty() && !contextMenuParam_->IsAILink();
+    } else {
+        isImage = (contextMenuParam_->GetLinkUrl().empty() &&
+                   (contextMenuParam_->GetMediaType() ==
+                       OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_IMAGE));
+    }
     if (isRichtext) {
         if (!contextSelectOverlay_) {
             contextSelectOverlay_ = AceType::MakeRefPtr<WebContextSelectOverlay>(WeakClaim(this));
@@ -673,39 +743,10 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
         return;
     }
     CHECK_NULL_VOID(isNewDragStyle_ && result);
-    bool isImage =
-        ((contextMenuParam_->GetMediaType() == OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_IMAGE) &&
-            (contextMenuParam_->GetLinkUrl().empty()));
     if (isImage) {
-        auto sourceType = contextMenuParam_->GetSourceType();
-        if (sourceType == OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_MOUSE) {
-            curResponseType_ = ResponseType::RIGHT_CLICK;
-        } else if (sourceType == OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_LONG_PRESS) {
-            curResponseType_ = ResponseType::LONG_PRESS;
-        } else {
-            return;
-        }
-        curElementType_ = WebElementType::IMAGE;
-        CHECK_NULL_VOID(GetPreviewSelectionMenuParams(curElementType_, curResponseType_));
-        auto host = GetHost();
-        if (!host) {
-            TAG_LOGE(AceLogTag::ACE_WEB, "GetHost failed");
-            delegate_->OnContextMenuHide("");
-            return;
-        }
-        auto previewNode = CreatePreviewImageFrameNode(isImage);
-        if (!previewNode) {
-            TAG_LOGI(AceLogTag::ACE_WEB, "CreatePreviewImageFrameNode failed");
-            previewImageNodeId_.reset();
-            delegate_->OnContextMenuHide("");
-            return;
-        }
-
-        host->AddChild(previewNode);
-        previewNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        previewNode->MarkModifyDone();
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        host->MarkModifyDone();
+        ShowPreviewMenu(WebElementType::IMAGE);
+    } else if (isHyperLink) {
+        ShowPreviewMenu(WebElementType::LINK);
     }
 }
 

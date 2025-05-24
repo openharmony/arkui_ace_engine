@@ -83,6 +83,7 @@ enum class WebKeyboardAvoidMode : int32_t {
 enum class WebElementType : int32_t {
     TEXT = 0,
     IMAGE,
+    LINK,
     MIXED,
     NONE,
 };
