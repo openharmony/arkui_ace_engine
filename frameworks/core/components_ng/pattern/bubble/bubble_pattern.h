@@ -169,7 +169,10 @@ public:
     void AddPipelineCallBack();
     void UpdateAgingTextSize();
     void DumpInfo() override;
-
+    void UpdateBubbleText(const Color& value);
+    void UpdateBubbleBackGroundColor(const Color& value);
+    void UpdateMaskColor(const Color& value);
+    void UpdateMask(bool maskValue);
     void SetMessageColor(bool isSetMessageColor)
     {
         isSetMessageColor_ = isSetMessageColor;
