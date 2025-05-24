@@ -37,11 +37,6 @@ std::shared_ptr<SubwindowManager> SubwindowManager::GetInstance()
         instance_ = std::make_shared<SubwindowManager>();
         if (instance_) {
             instance_->isSuperFoldDisplayDevice_ = SystemProperties::IsSuperFoldDisplayDevice();
-            auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-            CHECK_NULL_RETURN(pipeline, instance_);
-            auto theme = pipeline->GetTheme<SelectTheme>();
-            CHECK_NULL_RETURN(theme, instance_);
-            instance_->expandDisplay_ = theme->GetExpandDisplay();
         }
     }
     return instance_;
@@ -1721,7 +1716,11 @@ const std::vector<RefPtr<Subwindow>> SubwindowManager::GetSortSubwindow(int32_t 
 
 bool SubwindowManager::GetIsExpandDisplay()
 {
-    return expandDisplay_;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    return theme->GetExpandDisplay();
 }
 
 RefPtr<Subwindow> SubwindowManager::GetOrCreateMenuSubWindow(int32_t instanceId)
