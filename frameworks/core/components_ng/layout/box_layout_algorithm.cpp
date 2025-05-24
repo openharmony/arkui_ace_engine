@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 
 #include "core/components_ng/base/frame_node.h"
@@ -54,6 +55,12 @@ void BoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void BoxLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    if (host && !host->GetIgnoreLayoutProcess()) {
+        if (GetNeedPostponeForIgnore()) {
+            return;
+        }
+    }
     PerformLayout(layoutWrapper);
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Layout();
@@ -163,8 +170,22 @@ void BoxLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrap
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToNonNegativeSize(padding, frameSize);
     layoutConstraint.parentIdealSize.SetSize(frameSize);
+    auto host = layoutWrapper->GetHostNode();
+    IgnoreLayoutSafeAreaBundle bundle;
     for (const auto& child : layoutPolicyChildren_) {
+        auto childNode = child->GetHostNode();
+        if (childNode && childNode->GetLayoutProperty() && childNode->GetLayoutProperty()->IsExpandConstraintNeeded()) {
+            bundle.first.emplace_back(childNode);
+            child->GetGeometryNode()->SetParentLayoutConstraint(layoutConstraint);
+            SetNeedPostponeForIgnore();
+            continue;
+        }
         child->Measure(layoutConstraint);
+    }
+    if (host && host->GetContext() && GetNeedPostponeForIgnore()) {
+        auto context = host->GetContext();
+        bundle.second = host;
+        context->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
     }
 }
 
@@ -186,8 +207,20 @@ void BoxLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     // Update child position.
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
-        auto translate = Alignment::GetAlignPosition(size, childSize, align) + paddingOffset;
-        child->GetGeometryNode()->SetMarginFrameOffset(translate);
+        auto host = layoutWrapper->GetHostNode();
+        auto childNode = child->GetHostNode();
+        if (host && childNode && childNode->GetLayoutProperty() &&
+            childNode->GetLayoutProperty()->IsIgnoreOptsValid()) {
+            IgnoreLayoutSafeAreaOpts& opts = *(childNode->GetLayoutProperty()->GetIgnoreLayoutSafeAreaOpts());
+            auto sae = host->GetAccumulatedSafeAreaExpand(true, opts);
+            auto adjustSize = size + sae.Size();
+            auto translate = Alignment::GetAlignPosition(adjustSize, childSize, align) + paddingOffset;
+            translate -= sae.Offset();
+            child->GetGeometryNode()->SetMarginFrameOffset(translate);
+        } else {
+            auto translate = Alignment::GetAlignPosition(size, childSize, align) + paddingOffset;
+            child->GetGeometryNode()->SetMarginFrameOffset(translate);
+        }
     }
     // Update content position.
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();

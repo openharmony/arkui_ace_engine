@@ -349,8 +349,21 @@ void FlexLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWra
         MinusPaddingToNonNegativeSize(padding, realSize);
     }
     layoutConstraint.parentIdealSize.SetSize(realSize);
+    auto context = host->GetContext();
+    IgnoreLayoutSafeAreaBundle bundle;
     for (const auto& child : layoutPolicyChildren_) {
         child->Measure(layoutConstraint);
+        auto childNode = child->GetHostNode();
+        if (childNode && childNode->GetLayoutProperty() && childNode->GetLayoutProperty()->IsExpandConstraintNeeded()) {
+            bundle.first.emplace_back(childNode);
+            child->GetGeometryNode()->SetParentLayoutConstraint(layoutConstraint);
+            SetNeedPostponeForIgnore();
+            continue;
+        }
+    }
+    if (context && GetNeedPostponeForIgnore()) {
+        bundle.second = host;
+        context->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
     }
 }
 
@@ -1111,6 +1124,13 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (children.empty()) {
         return;
     }
+    auto host = layoutWrapper->GetHostNode();
+    if (host && !host->GetIgnoreLayoutProcess()) {
+        if (GetNeedPostponeForIgnore()) {
+            return;
+        }
+    }
+
     if (!hasMeasured_) {
         ApplyPatternOperation(layoutWrapper, FlexOperatorType::RESTORE_MEASURE_RESULT);
     }
@@ -1184,23 +1204,24 @@ void FlexLayoutAlgorithm::CalculateSpace(float remainSpace, float& frontSpace, f
     }
 }
 
-void FlexLayoutAlgorithm::SetCrossPos(const RefPtr<LayoutWrapper>& layoutWrapper, float& crossPos)
+void FlexLayoutAlgorithm::SetCrossPos(const RefPtr<LayoutWrapper>& layoutWrapper, float& crossPos, const float& crossAxisSize)
 {
     auto alignItem = GetSelfAlign(layoutWrapper);
     auto crossDirection = FlipAxis(direction_);
+    auto childCrossAxisSize = GetChildCrossAxisSize(layoutWrapper);
     switch (alignItem) {
         case FlexAlign::FLEX_START:
         case FlexAlign::FLEX_END:
             crossPos = (IsStartTopLeft(crossDirection, textDir_) == (alignItem == FlexAlign::FLEX_START))
                            ? 0.0f
-                           : crossAxisSize_ - GetChildCrossAxisSize(layoutWrapper);
+                           : crossAxisSize - childCrossAxisSize;
             break;
         case FlexAlign::CENTER:
-            crossPos = crossAxisSize_ * HALF - GetChildCrossAxisSize(layoutWrapper) * HALF;
+            crossPos = crossAxisSize * HALF - childCrossAxisSize * HALF;
             break;
         case FlexAlign::STRETCH:
             crossPos =
-                IsStartTopLeft(crossDirection, textDir_) ? 0.0f : crossAxisSize_ - GetChildCrossAxisSize(layoutWrapper);
+                IsStartTopLeft(crossDirection, textDir_) ? 0.0f : crossAxisSize - childCrossAxisSize;
             break;
         case FlexAlign::BASELINE:
             crossPos = 0.0;
@@ -1220,6 +1241,7 @@ void FlexLayoutAlgorithm::PlaceChildren(
     float childMainPos = IsStartTopLeft(direction_, textDir_) ? frontSpace : mainAxisSize_ - frontSpace;
     float childCrossPos = 0.0f;
     const auto& children = layoutWrapper->GetAllChildrenWithBuild(false);
+    bool needExpandMainAxis = true;
     for (const auto& child : children) {
         if (child->IsOutOfLayout() || !child->IsActive()) {
             // adjust by postion property.
@@ -1230,27 +1252,76 @@ void FlexLayoutAlgorithm::PlaceChildren(
         if (IsVisibleGone(child)) {
             continue;
         }
-        SetCrossPos(child, childCrossPos);
+        SetCrossPos(child, childCrossPos, crossAxisSize_);
         OffsetF offset;
         if (IsHorizontal(direction_)) {
             offset = OffsetF(childMainPos, childCrossPos);
         } else {
             offset = OffsetF(childCrossPos, childMainPos);
         }
-
+        float maxAxisAdjust = 0.0f;
         if (!IsStartTopLeft(direction_, textDir_)) {
             if (direction_ != FlexDirection::COLUMN_REVERSE) {
                 offset.SetX(offset.GetX() - GetChildMainAxisSize(child));
             } else {
                 offset.SetY(offset.GetY() - GetChildMainAxisSize(child));
             }
-            child->GetGeometryNode()->SetMarginFrameOffset(offset + paddingOffset);
+            auto childPos = offset + paddingOffset;
+            child->GetGeometryNode()->SetMarginFrameOffset(childPos);
+            maxAxisAdjust = UpdateChildPositionWidthIgnoreLayoutSafeArea(
+                layoutWrapper->GetHostNode(), child, childPos, paddingOffset, needExpandMainAxis);
             childMainPos -= GetChildMainAxisSize(child) + betweenSpace;
         } else {
-            child->GetGeometryNode()->SetMarginFrameOffset(offset + paddingOffset);
+            auto childPos = offset + paddingOffset;
+            child->GetGeometryNode()->SetMarginFrameOffset(childPos);
+            maxAxisAdjust = UpdateChildPositionWidthIgnoreLayoutSafeArea(
+                layoutWrapper->GetHostNode(), child, childPos, paddingOffset, needExpandMainAxis);
             childMainPos += GetChildMainAxisSize(child) + betweenSpace;
         }
+        if (needExpandMainAxis) {
+            childMainPos -= maxAxisAdjust;
+        }
+        needExpandMainAxis = false;
     }
+}
+
+float FlexLayoutAlgorithm::UpdateChildPositionWidthIgnoreLayoutSafeArea(const RefPtr<FrameNode>& host,
+    const RefPtr<LayoutWrapper>& childLayoutWrapper, const OffsetF& originOffset, const OffsetF& paddingOffset,
+    bool needExpandMainAxis)
+{
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto childNode = childLayoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(childNode, 0.0f);
+    CHECK_NULL_RETURN(childNode->GetLayoutProperty()->IsIgnoreOptsValid(), 0.0f);
+    IgnoreLayoutSafeAreaOpts& opts = *(childNode->GetLayoutProperty()->GetIgnoreLayoutSafeAreaOpts());
+    auto sae = host->GetAccumulatedSafeAreaExpand(true, opts);
+    float offsetX = 0.0f;
+    float offsetY = 0.0f;
+    float offsetEdgeExpand = 0.0f;
+    if (IsHorizontal(direction_)) {
+        offsetX = originOffset.GetX();
+        offsetEdgeExpand = needExpandMainAxis ? (IsStartTopLeft(direction_, textDir_) ? sae.left.value_or(0.0f)
+                                                                                      : -sae.right.value_or(0.0f))
+                                              : 0.0f;
+        offsetX -= offsetEdgeExpand;
+        auto adjustedChildPos = crossAxisSize_ + sae.Height();
+        SetCrossPos(childLayoutWrapper, offsetY, adjustedChildPos);
+        offsetY -= (sae.top.value_or(0.0f) - paddingOffset.GetY());
+    } else {
+        offsetY = originOffset.GetY();
+        offsetEdgeExpand = needExpandMainAxis ? (IsStartTopLeft(direction_, textDir_) ? sae.top.value_or(0.0f)
+                                                                                      : -sae.bottom.value_or(0.0f))
+                                              : 0.0f;
+        offsetY -= offsetEdgeExpand;
+        auto adjustedChildPos = crossAxisSize_ + sae.Width();
+        SetCrossPos(childLayoutWrapper, offsetX, adjustedChildPos);
+        offsetX -= (sae.left.value_or(0.0f) - paddingOffset.GetX());
+    }
+    OffsetF saeTrans = OffsetF(offsetX, offsetY);
+    childLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(saeTrans);
+    if (childNode->GetLayoutProperty()->IsExpandConstraintNeeded()) {
+    }
+    return childNode->GetLayoutProperty()->IsExpandConstraintNeeded() ? offsetEdgeExpand : 0.0f;
 }
 
 FlexAlign FlexLayoutAlgorithm::GetSelfAlign(const RefPtr<LayoutWrapper>& layoutWrapper) const
