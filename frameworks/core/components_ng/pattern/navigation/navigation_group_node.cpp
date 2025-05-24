@@ -146,7 +146,7 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
     if (pattern->GetIsPreForceSetList()) {
         // if page is force set, some node may not on the tree, so we need get page from preNavPathList.
         auto preNodes = pattern->GetAllNavDestinationNodesPrev();
-        if (beforeLastStandardIndex < preNodes.size() && beforeLastStandardIndex >= 0) {
+        if (beforeLastStandardIndex < static_cast<int32_t>(preNodes.size()) && beforeLastStandardIndex >= 0) {
             preLastStandardNode = AceType::DynamicCast<NavDestinationGroupNode>(
                 NavigationGroupNode::GetNavDestinationNode(preNodes[beforeLastStandardIndex].second.Upgrade()));
         }

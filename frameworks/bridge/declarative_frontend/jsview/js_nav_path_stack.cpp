@@ -154,6 +154,11 @@ void JSNavPathStack::GetPathStack(const JSCallbackInfo& info)
         info.SetReturnValue(empty);
         return;
     }
+    if (!info[0]->IsObject()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "invalid input params navPathStack");
+        info.SetReturnValue(empty);
+        return;
+    }
     auto navPathStack = JSRef<JSObject>::Cast(info[0]);
     if (navPathStack->IsEmpty() || navPathStack->IsUndefined()) {
         info.SetReturnValue(empty);
@@ -176,7 +181,11 @@ void JSNavPathStack::GetPathStack(const JSCallbackInfo& info)
 
 void JSNavPathStack::CopyPathInfo(const JSRef<JSArray>& origin, JSRef<JSArray>& dest, size_t index)
 {
-    auto originObj = JSRef<JSObject>::Cast(origin->GetValueAt(index));
+    auto indexedValue = origin->GetValueAt(index);
+    if (!indexedValue->IsObject()) {
+        return;
+    }
+    auto originObj = JSRef<JSObject>::Cast(indexedValue);
     if (originObj->IsEmpty() || originObj->IsUndefined()) {
         return;
     }
@@ -200,7 +209,15 @@ void JSNavPathStack::SetPathStack(const JSCallbackInfo& info)
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "invalid input length");
         return;
     }
+    if (!info[0]->IsObject()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "invalid input params navPathStack");
+        return;
+    }
     auto navPathStack = JSRef<JSObject>::Cast(info[0]);
+    if (!info[1]->IsArray()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "invalid input params navPathArray");
+        return;
+    }
     auto setPathArray = JSRef<JSArray>::Cast(info[1]);
     auto animated = info[2];
     if (navPathStack->IsEmpty() || navPathStack->IsUndefined()) {
@@ -228,7 +245,12 @@ void JSNavPathStack::SetPathStack(const JSCallbackInfo& info)
          *  otherwise, set id as undefined.
          * step4. set isForceSet flag as true.
          */
-        auto setPathInfo = JSRef<JSObject>::Cast(setPathArray->GetValueAt(index));
+        auto indexedValue = setPathArray->GetValueAt(index);
+        if (!indexedValue->IsObject()) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "value at index %{public}zu in set navPathArray is invalid", index);
+            continue;
+        }
+        auto setPathInfo = JSRef<JSObject>::Cast(indexedValue);
         JSRef<JSObject> pathInfo = JSRef<JSObject>::Make(setPathInfo.Get());
         auto navDestinationId = setPathInfo->GetProperty(JS_NAV_PATH_NAVDESTINATIONID_NAME);
         auto name = setPathInfo->GetProperty(JS_NAV_PATH_NAME_NAME);
@@ -266,7 +288,12 @@ bool JSNavPathStack::FindNavInfoInPreArray(
 {
     auto curPathLength = originArray->Length();
     for (size_t i = 0; i < curPathLength; i++) {
-        auto curPathInfo = JSRef<JSObject>::Cast(originArray->GetValueAt(i));
+        auto indexedValue = originArray->GetValueAt(i);
+        if (!indexedValue->IsObject()) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "value at index %{public}zu in pre navPathArray is invalid", i);
+            continue;
+        }
+        auto curPathInfo = JSRef<JSObject>::Cast(indexedValue);
         auto curNavDestinationId = curPathInfo->GetProperty(JS_NAV_PATH_NAVDESTINATIONID_NAME);
         std::string curNavIdStr;
         if (!curNavDestinationId->IsEmpty() && curNavDestinationId->IsString()) {

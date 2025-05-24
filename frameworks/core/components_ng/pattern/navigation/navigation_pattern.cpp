@@ -3744,7 +3744,7 @@ void NavigationPattern::FireNavigationLifecycle(const RefPtr<UINode>& uiNode, Na
 
 void NavigationPattern::GenerateLastStandardPage(NavPathList& navPathList)
 {
-    int64_t lastPageIndex = navPathList.size() - 1;
+    int64_t lastPageIndex = static_cast<int64_t>(navPathList.size()) - 1;
     // if top page is nullptr or is dialog node, we need to generate node util standard page is found.
     while (lastPageIndex >= 0 &&
         (navPathList[lastPageIndex].second == nullptr || !IsStandardPage(navPathList[lastPageIndex].second))) {
