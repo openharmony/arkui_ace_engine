@@ -115,9 +115,9 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
     public setNodeContainerOptions(controller: NodeController): this {
         if (this.checkPriority("setNodeContainerOptions")) {
             if (this.controller) {
-                this.controller!.onWillUnBind(this.getPeer().getId())
+                this.controller!.onWillUnbind(this.getPeer().getId())
                 this.controller!.resetInternalField()
-                this.controller!.onUnBind(this.getPeer().getId())
+                this.controller!.onUnbind(this.getPeer().getId())
                 this.controller = null
             }
             controller.onWillBind(this.getPeer().getId())
