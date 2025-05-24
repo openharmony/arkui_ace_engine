@@ -452,13 +452,22 @@ export class ShapeClip {
     }
 }
 export class DrawContext {
-    size: Size;
-    sizeInPixel: Size;
-    canvas: drawing.Canvas;
+    size_: Size;
+    sizeInPixel_: Size;
+    canvas_: drawing.Canvas;
     constructor() {
-        this.size = { width: 0, height: 0 }
-        this.sizeInPixel = { width: 0, height: 0 }
-        this.canvas = new drawing.Canvas();
+        this.size_ = { width: 0, height: 0 }
+        this.sizeInPixel_ = { width: 0, height: 0 }
+        this.canvas_ = new drawing.Canvas();
+    }
+    get size(): Size {
+        return this.size_;
+    }
+    get sizeInPixel(): Size {
+        return this.sizeInPixel_;
+    }
+    get canvas(): drawing.Canvas {
+        return this.canvas_
     }
 }
 export interface Vector2T {

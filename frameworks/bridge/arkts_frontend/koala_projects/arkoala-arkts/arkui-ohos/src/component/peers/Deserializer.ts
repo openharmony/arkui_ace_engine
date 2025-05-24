@@ -7191,7 +7191,7 @@ export class Deserializer extends DeserializerBase {
         const size_result : Size = valueDeserializer.readSize()
         const sizeInPixel_result : Size = valueDeserializer.readSize()
         const canvas_result : drawing.Canvas = (valueDeserializer.readDrawingCanvas() as drawing.Canvas)
-        let value : DrawContext = ({size: size_result, sizeInPixel: sizeInPixel_result, canvas: canvas_result} as DrawContext)
+        let value : DrawContext = ({size_: size_result, sizeInPixel_: sizeInPixel_result, canvas_: canvas_result} as DrawContext)
         return value
     }
     readDrawingRenderingContext(): DrawingRenderingContext {

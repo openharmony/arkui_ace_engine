@@ -55,23 +55,6 @@ Ark_RenderNode CtorImpl(Ark_Int32 nodeId, const DrawCallbackFunc* value)
         V2::RENDER_NODE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NG::RenderNodePattern>(); });
     frameNode->SetIsArkTsRenderNode(true);
     auto renderNodePeer = RenderNodePeer::Create(frameNode);
-
-    auto drawCallbackFunc = [callback = CallbackHelper(*value)](const NG::DrawingContext& context) -> void {
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        auto frontend = AceType::DynamicCast<ArktsFrontend>(container->GetFrontend());
-        CHECK_NULL_VOID(frontend);
-        auto drawingContext = frontend->CreateDrawingContext(context);
-        if (!drawingContext) {
-            LOGW("Create drawing context failed !");
-            return;
-        }
-    };
-    auto pattern = frameNode->GetPattern<NG::RenderNodePattern>();
-    if (pattern) {
-        pattern->SetDrawCallback(drawCallbackFunc);
-    }
-
     return renderNodePeer;
 }
 Ark_NativePointer GetFinalizerImpl()

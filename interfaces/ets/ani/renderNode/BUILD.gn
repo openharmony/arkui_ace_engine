@@ -26,10 +26,9 @@ config("ani_config") {
 #构建ANI库
 ohos_shared_library("renderNode_ani") {
   deps = [ "$ace_root/build:libace_compatible" ]
-  sources = [
-    "./src/sts_renderNode.cpp",
-  ]
+  sources = [ "./src/sts_renderNode.cpp" ]
   external_deps = [
+    "graphic_2d:drawing_ani",
     "napi:ace_napi",
     "runtime_core:ani",
   ]

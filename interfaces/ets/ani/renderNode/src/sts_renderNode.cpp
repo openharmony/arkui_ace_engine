@@ -19,6 +19,8 @@
 #include <unistd.h>
 #include <vector>
 
+#include "canvas_ani/ani_canvas.h"
+
 #include "base/log/log.h"
 #include "bridge/arkts_frontend/arkts_frontend.h"
 #include "core/common/container.h"
@@ -67,7 +69,7 @@ ani_object CreateDrawingContext(ani_env* env, const NG::DrawingContext& context)
         LOGE("New Size object failed, %{public}d", status);
         return nullptr;
     }
-    env->Object_SetPropertyByName_Ref(result, "size", (ani_ref)sizeObject);
+    env->Object_SetPropertyByName_Ref(result, "size_", (ani_ref)sizeObject);
 
     // sizeInPixel Object
     ani_class sizeInPixelClass;
@@ -88,7 +90,14 @@ ani_object CreateDrawingContext(ani_env* env, const NG::DrawingContext& context)
         LOGE("New SizeInPixel object failed, %{public}d", status);
         return nullptr;
     }
-    env->Object_SetPropertyByName_Ref(result, "sizeInPixel", (ani_ref)sizeInPixelObject);
+    env->Object_SetPropertyByName_Ref(result, "sizeInPixel_", (ani_ref)sizeInPixelObject);
+
+    // canvas Object
+    ani_object aniCanvas = OHOS::Rosen::Drawing::AniCanvas::CreateAniCanvas(env, &context.canvas);
+    if (!aniCanvas) {
+        LOGE("FZY Create AniCanvas failed !");
+    }
+    env->Object_SetPropertyByName_Ref(result, "canvas_", (ani_ref)aniCanvas);
 
     return result;
 }
