@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -117,6 +118,8 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         stackRootDialogOffsetY_ = GetStackRootDialogOffsetY(hostNode);
     }
+    auto currentWindowOffset = pipeline->GetCurrentWindowRect().GetOffset();
+    wrapperOffset_ = OffsetF(currentWindowOffset.GetX(), currentWindowOffset.GetY() + stackRootDialogOffsetY_);
     layoutWrapper->GetGeometryNode()->SetFrameSize(realSize.ConvertToSizeT());
     layoutWrapper->GetGeometryNode()->SetContentSize(realSize.ConvertToSizeT());
     // update child layout constraint
@@ -159,7 +162,7 @@ void DialogLayoutAlgorithm::AdjustHoverModeForWaterfall(const RefPtr<FrameNode>&
     auto dialogProp = DynamicCast<DialogLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(dialogProp);
     auto enableHoverMode = dialogProp->GetEnableHoverMode().value_or(false);
-    if (!pattern->IsWaterfallWindowMode()) {
+    if (!OverlayManager::IsNeedAvoidFoldCrease(frameNode, false, expandDisplay_, dialogProp->GetEnableHoverMode())) {
         return;
     }
     TAG_LOGI(AceLogTag::ACE_DIALOG, "enableHoverMode for waterfallMode, isShowInSubWindow: %{public}d",
@@ -395,7 +398,7 @@ bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& inner
 
 bool DialogLayoutAlgorithm::IsGetExpandDisplayValidHeight(const RefPtr<DialogLayoutProperty>& dialogProp)
 {
-    CHECK_NULL_RETURN(expandDisplay_ && isShowInSubWindow_, false);
+    CHECK_NULL_RETURN(expandDisplay_ && isShowInSubWindow_ && dialogProp, false);
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto dialog = dialogProp->GetHost();
@@ -657,20 +660,40 @@ void DialogLayoutAlgorithm::AvoidScreen(
     OffsetF& topLeftPoint, const RefPtr<DialogLayoutProperty>& dialogProp, SizeF childSize)
 {
     CHECK_NULL_VOID(dialogProp);
-    auto availableRect = OverlayManager::GetDisplayAvailableRect(
-        dialogProp->GetHost(), static_cast<int32_t>(SubwindowType::TYPE_DIALOG));
+    auto dialogNode = dialogProp->GetHost();
+    CHECK_NULL_VOID(dialogNode);
+    auto pipelineContext = dialogNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto containerId = pipelineContext->GetInstanceId();
+    auto container = AceEngine::Get().GetContainer(containerId);
+    Rect availableRect;
+    // In superFoldDisplayDevice, the rect is the full screen's available rect when the displayId is 0.
+    if (SystemProperties::IsSuperFoldDisplayDevice() && container->GetDisplayId() == 0 && !isShowInSubWindow_) {
+        availableRect = container->GetFoldExpandAvailableRect();
+    } else {
+        availableRect = OverlayManager::GetDisplayAvailableRect(dialogNode,
+            static_cast<int32_t>(SubwindowType::TYPE_DIALOG));
+    }
     auto overScreen = LessNotEqual(availableRect.Width(), childSize.Width()) ||
                       LessNotEqual(availableRect.Height(), childSize.Height());
-    auto needAvoidScreen = SystemProperties::IsSuperFoldDisplayDevice() && isUIExtensionSubWindow_ && !overScreen;
+    auto needAvoidScreen = DialogManager::GetInstance().IfNeedAvoidDock(dialogNode) && !overScreen;
     if (!needAvoidScreen) {
         return;
     }
-    auto left = std::clamp(topLeftPoint.GetX(), static_cast<float>(availableRect.Left()),
+    auto realTopLeftPoint = topLeftPoint + wrapperOffset_;
+    auto left = std::clamp(realTopLeftPoint.GetX(), static_cast<float>(availableRect.Left()),
         static_cast<float>(availableRect.Right() - childSize.Width()));
-    auto top = std::clamp(topLeftPoint.GetY(), static_cast<float>(availableRect.Top()),
+    auto top = std::clamp(realTopLeftPoint.GetY(), static_cast<float>(availableRect.Top()),
         static_cast<float>(availableRect.Bottom() - childSize.Height()));
+    left = std::clamp(static_cast<float>(left - wrapperOffset_.GetX()), 0.0f,
+        static_cast<float>(wrapperSize_.Width() - childSize.Width()));
+    top = std::clamp(static_cast<float>(top - wrapperOffset_.GetY()), 0.0f,
+        static_cast<float>(wrapperSize_.Height() - childSize.Height()));
     topLeftPoint.SetX(left);
     topLeftPoint.SetY(top);
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "dialog avoid screen, wrapperOffset_: %{public}s, realTopLeftPoint: %{public}s, "
+        "topLeftPoint: %{public}s, stackRootDialogOffsetY_: %{public}f", wrapperOffset_.ToString().c_str(),
+        realTopLeftPoint.ToString().c_str(), topLeftPoint.ToString().c_str(), stackRootDialogOffsetY_);
 }
 
 void DialogLayoutAlgorithm::ParseSubwindowId(const RefPtr<DialogLayoutProperty>& dialogProp)
@@ -799,6 +822,7 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     OffsetF dialogOffset = OffsetF(dialogOffsetX.value_or(0.0), dialogOffsetY.value_or(0.0));
     auto isHostWindowAlign = isUIExtensionSubWindow_ && expandDisplay_ && hostWindowRect_.GetSize().IsPositive();
     auto maxSize = isHostWindowAlign ? hostWindowRect_.GetSize() : layoutConstraint->maxSize;
+    wrapperSize_ = maxSize;
     if (!SetAlignmentSwitch(maxSize, childSize, topLeftPoint)) {
         topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / HALF;
     }

@@ -24,6 +24,7 @@ namespace OHOS::Ace::NG {
 struct ContentCoverParam {
     std::function<void(int32_t)> onWillDismiss;
     RefPtr<ChainedTransitionEffect> transitionEffect;
+    bool enableSafeArea;
 };
 } // namespace OHOS::Ace::NG
 

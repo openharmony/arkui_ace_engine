@@ -61,6 +61,20 @@ class ArkBorderStyle {
   }
 }
 
+class ArkOnVisibleAreaChange {
+  ratios: Array<number>;
+  event: (isVisible: boolean, currentRatio: number) => void;
+
+  constructor(ratios: Array<number> | undefined, event: (isVisible: boolean, currentRatio: number) => void | undefined) {
+    this.ratios = ratios;
+    this.event = event;
+  }
+
+  isEqual(another: ArkOnVisibleAreaChange): boolean {
+    return this.ratios === another.ratios && this.event === another.event;
+  }
+}
+
 class ArkBorderColor {
   startColor: LocalizedEdgeColors;
   endColor: LocalizedEdgeColors;
@@ -141,6 +155,12 @@ class ArkBorderRadius {
   }
 
   isEqual(another: ArkBorderRadius): boolean {
+    if (this == undefined && another == undefined) {
+      return true;
+    }
+    if ((this == undefined && another != undefined) || (this != undefined && another == undefined)) {
+      return false
+    }
     return (
       (this.topLeft === another.topLeft &&
         this.topRight === another.topRight &&
@@ -451,6 +471,20 @@ class ArkMenuAlignType {
   }
 }
 
+class ArkPrefixOrSuffix {
+  value: CustomBuilder;
+  options: SliderCustomContentOptions;
+
+  constructor(value: CustomBuilder, options?:SliderCustomContentOptions) {
+    this.value = value;
+    this.options = options;
+  }
+
+  isEqual(another: ArkPrefixOrSuffix): boolean {
+    return this.value === another.value && this.options === another.options;
+  }
+}
+
 class ArkSliderTips {
   showTip: boolean;
   tipText: string | ResourceStr;
@@ -482,6 +516,21 @@ class ArkStarStyle {
       this.foregroundUri === another.foregroundUri &&
       this.secondaryUri === another.secondaryUri
     );
+  }
+}
+
+class ArkRegisterNativeEmbedRule {
+  tag: string | undefined;
+  type: string | undefined;
+
+  constructor () {
+    this.tag = undefined;
+    this.type = undefined;
+  }
+
+  isEqual (another: ArkRegisterNativeEmbedRule): boolean {
+    return (this.tag === another.tag &&
+           this.type === another.type);
   }
 }
 
@@ -1566,6 +1615,72 @@ class ArkDragPreview {
       this.onlyForLifting === another.onlyForLifting && 
       this.pixelMap === another.pixelMap &&
       this.extraInfo === another.extraInfo
+    );
+  }
+}
+
+class ArkDragSpringLoading {
+  callback: (context: ArkSpringLoadingContext) => void;
+  configuration: ArkDragSpringLoadingConfiguration | undefined;
+  constructor() {
+    this.configuration = undefined;
+    this.callback = undefined;
+  }
+
+  isEqual(another: ArkDragSpringLoading): boolean {
+    return (
+      this.callback === another.callback &&
+      this.configuration.isEqual(another.configuration)
+    );
+  }
+}
+
+class ArkSpringLoadingContext {
+  state: DragSpringLoadingState | undefined;
+  currentNotifySequence: number | undefined;
+  dragInfos: SpringLoadingDragInfos | undefined;
+  currentConfig: ArkDragSpringLoadingConfiguration | undefined;
+  abort: () => void;
+  updateConfiguration: (config: ArkDragSpringLoadingConfiguration) => void;
+  constructor() {
+    this.state = undefined;
+    this.currentNotifySequence = undefined;
+    this.dragInfos = undefined;
+    this.currentConfig = undefined;
+    this.abort = undefined;
+    this.updateConfiguration = undefined;
+  }
+
+  isEqual(another: ArkSpringLoadingContext): boolean {
+    return (
+      this.state === another.state &&
+      this.currentNotifySequence === another.currentNotifySequence &&
+      this.dragInfos === another.dragInfos &&
+      this.currentConfig.isEqual(another.currentConfig) &&
+      this.abort === another.abort &&
+      this.updateConfiguration === another.updateConfiguration
+    );
+  }
+}
+
+class ArkDragSpringLoadingConfiguration {
+  stillTimeLimit: number | undefined;
+  updateInterval: number | undefined;
+  updateNotifyCount: number | undefined;
+  updateToFinishInterval: number | undefined;
+  constructor() {
+    this.stillTimeLimit = undefined;
+    this.updateInterval = undefined;
+    this.updateNotifyCount = undefined;
+    this.updateToFinishInterval = undefined;
+  }
+
+  isEqual(another: ArkDragSpringLoadingConfiguration): boolean {
+    return (
+      this.stillTimeLimit === another.stillTimeLimit &&
+      this.updateInterval === another.updateInterval &&
+      this.updateNotifyCount === another.updateNotifyCount &&
+      this.updateToFinishInterval === another.updateToFinishInterval
     );
   }
 }

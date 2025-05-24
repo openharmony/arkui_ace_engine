@@ -143,6 +143,7 @@ const char NAVIGATION_MENU_ETS_TAG[] = "NavigationMenu";
 const char BACK_BUTTON_ETS_TAG[] = "BackButton";
 const char BACK_BUTTON_IMAGE_ETS_TAG[] = "BackButtonImage";
 const char NAVBAR_CONTENT_ETS_TAG[] = "NavBarContent";
+const char SPLIT_PLACEHOLDER_CONTENT_ETS_TAG[] = "SplitPlaceholderContentNode";
 const char NAVBAR_ETS_TAG[] = "NavBar";
 
 // navRouter view

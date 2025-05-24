@@ -36,6 +36,7 @@ build_component_ng("web_pattern_ng") {
       "web_accessibility_session_adapter.cpp",
       "web_content_modifier.cpp",
       "web_context_select_overlay.cpp",
+      "web_data_detector_adapter.cpp",
       "web_layout_algorithm.cpp",
       "web_model_ng.cpp",
       "web_paint_method.cpp",

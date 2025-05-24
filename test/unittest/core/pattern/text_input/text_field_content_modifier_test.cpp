@@ -507,7 +507,7 @@ HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierUTSuit004, TestSi
     textStyle.SetTextDecoration(TextDecoration::LINE_THROUGH);
     textStyle.SetTextDecorationColor(Color::GREEN);
     textFieldContentModifier->ModifyDecorationInTextStyle(textStyle);
-    EXPECT_EQ(textStyle.GetTextDecoration(), TextDecoration::NONE);
+    EXPECT_EQ(textStyle.GetTextDecorationFirst(), TextDecoration::NONE);
     EXPECT_EQ(textStyle.GetTextDecorationColor(), Color::GRAY);
 }
 } // namespace OHOS::Ace::NG

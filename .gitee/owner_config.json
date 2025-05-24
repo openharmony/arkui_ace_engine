@@ -110,6 +110,9 @@
             "https://gitee.com/sdgszsd",
             "https://gitee.com/kun641",
             "https://gitee.com/ancrs"
+        ],
+        "https://gitee.com/form_framework": [
+            "https://gitee.com/cx983299475"
         ]
     },
     "userInfos": {
@@ -440,6 +443,10 @@
         "https://gitee.com/ancrs": {
             "info": "[cjfrontend cuitengfei]",
             "group": "https://gitee.com/arkui_cj"
+        },
+        "https://gitee.com/cx983299475": {
+            "info": "[卡片框架 chenxuan]",
+            "group": "https://gitee.com/form_framework"
         }
     }
 }

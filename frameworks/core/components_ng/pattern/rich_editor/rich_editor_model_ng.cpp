@@ -48,6 +48,13 @@ void RichEditorModelNG::Create(bool isStyledStringMode)
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
+    auto richEditorTheme = pipelineContext->GetTheme<RichEditorTheme>();
+    CHECK_NULL_VOID(richEditorTheme);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto radius = richEditorTheme->GetBorderRadius();
+    BorderRadiusProperty borderRadius(radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX());
+    renderContext->UpdateBorderRadius(borderRadius);
     richEditorPattern->SetSupportPreviewText(pipelineContext->GetSupportPreviewText());
     if (frameNode->IsFirstBuilding()) {
         auto draggable = pipelineContext->GetDraggable<RichEditorTheme>();
@@ -644,5 +651,13 @@ void RichEditorModelNG::SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppe
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetKeyboardAppearance(value);
+}
+
+void RichEditorModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetEnableHapticFeedback(isEnabled);
 }
 } // namespace OHOS::Ace::NG

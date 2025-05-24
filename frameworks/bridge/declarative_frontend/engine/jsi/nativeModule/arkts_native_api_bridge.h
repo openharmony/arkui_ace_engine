@@ -113,6 +113,7 @@ private:
     static void RegisterLazyVGridLayoutAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterCanvasAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterVideoAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterStepperAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListAttributesForm(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListItemAttributesForm(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSwiperAttributesForm(Local<panda::ObjectRef> object, EcmaVM* vm);

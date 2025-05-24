@@ -102,7 +102,7 @@ public:
 
     bool NeedSoftKeyboard() const override
     {
-        return nativeXComponentImpl_ ? nativeXComponentImpl_->IsNeedSoftKeyboard() : false;
+        return (nativeXComponentImpl_ ? nativeXComponentImpl_->IsNeedSoftKeyboard() : false) || isNeedSoftKeyboard_;
     }
 
     std::pair<RefPtr<OHOS::Ace::NativeXComponentImpl>, std::weak_ptr<OH_NativeXComponent>> GetNativeXComponent()
@@ -118,7 +118,8 @@ public:
 
     void NativeXComponentDispatchTouchEvent(const OH_NativeXComponent_TouchEvent& touchEvent,
         const std::vector<XComponentTouchPoint>& xComponentTouchPoints);
-    void NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent);
+    void NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent,
+        const OH_NativeXComponent_ExtraMouseEventInfo& extraMouseEventInfo);
     void NativeXComponentDispatchAxisEvent(AxisEvent* axisEvent);
 
     void InitXComponent();
@@ -295,6 +296,11 @@ public:
         return false;
     }
 
+    bool IsNativeXComponentDisabled() const
+    {
+        return isNativeXComponentDisabled_;
+    }
+
     void SetExportTextureSurfaceId(const std::string& surfaceId);
     void FireExternalEvent(RefPtr<NG::PipelineContext> context,
         const std::string& componentId, const uint32_t nodeId, const bool isDestroy);
@@ -345,6 +351,7 @@ public:
     void NativeStartImageAnalyzer(std::function<void(int32_t)>& callback);
     RSCanvas* LockCanvas();
     void UnlockCanvasAndPost(RSCanvas* canvas);
+    ArkUI_AccessibilityProvider* GetNativeProvider();
 
 protected:
     void OnAttachToMainTree() override;
@@ -369,7 +376,9 @@ protected:
     XComponentType type_;
     bool hasGotSurfaceHolder_ = false;
     bool hasGotNativeXComponent_ = false;
+    bool isNativeXComponentDisabled_ = false;
     bool isCNode_ = false;
+    bool useNodeHandleAccessibilityProvider_ = false;
     RefPtr<RenderSurface> renderSurface_;
     OffsetF localPosition_;
     OffsetF surfaceOffset_;
@@ -387,6 +396,11 @@ protected:
     bool isEnableSecure_ = false;
     bool isSurfaceLock_ = false;
     RenderFit renderFit_ = RenderFit::RESIZE_FILL;
+    RefPtr<UIDisplaySync> displaySync_ = AceType::MakeRefPtr<UIDisplaySync>(UIObjectType::DISPLAYSYNC_XCOMPONENT);
+    bool needRecoverDisplaySync_ = false;
+    std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
+    ArkUI_AccessibilityProvider* arkuiAccessibilityProvider_ = nullptr;
+    bool isNeedSoftKeyboard_ = false;
 
 private:
     void OnAreaChangedInner() override;
@@ -447,6 +461,7 @@ private:
     void SetRotation(uint32_t rotation);
     void RegisterSurfaceCallbackModeEvent();
     void RegisterTransformHintCallback(PipelineContext* context);
+    void RegisterSurfaceRenderContext();
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);
@@ -477,7 +492,6 @@ private:
     RefPtr<XComponentExtSurfaceCallbackClient> extSurfaceClient_;
     SizeF initSize_;
     OffsetF globalPosition_;
-    RefPtr<UIDisplaySync> displaySync_ = AceType::MakeRefPtr<UIDisplaySync>(UIObjectType::DISPLAYSYNC_XCOMPONENT);
 
 #ifdef ENABLE_ROSEN_BACKEND
     FrameRateRange lastFrameRateRange_;
@@ -490,7 +504,6 @@ private:
 
     uint32_t windowId_ = 0;
     int32_t treeId_ = 0;
-    std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
     RefPtr<XComponentAccessibilityProvider> accessibilityProvider_;
     RefPtr<AccessibilitySessionAdapter> accessibilitySessionAdapter_;
 
@@ -506,7 +519,6 @@ private:
     SurfaceCallbackMode surfaceCallbackMode_ = SurfaceCallbackMode::DEFAULT;
     std::function<void(SurfaceCallbackMode)> surfaceCallbackModeChangeEvent_;
     // record displaySync_->DelFromPipelineOnContainer() from OnDetachFromMainTree
-    bool needRecoverDisplaySync_ = false;
     bool isNativeImageAnalyzing_ = false;
     WeakPtr<PipelineContext> initialContext_ = nullptr;
 };

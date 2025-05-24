@@ -20,6 +20,7 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
@@ -250,9 +251,14 @@ public:
         enableArrow_ = enableArrow;
     }
 
+    bool HasEnableHoverMode() const
+    {
+        return enableHoverMode_.has_value();
+    }
+
     bool EnableHoverMode() const
     {
-        return enableHoverMode_;
+        return enableHoverMode_.value_or(false);
     }
 
     void SetEnableHoverMode(bool enableHoverMode)
@@ -638,6 +644,46 @@ public:
         return innerBorderWidth_;
     }
 
+    void SetTextColorResourceObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceTextColorObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GetTextColorResourceObject()
+    {
+        return resourceTextColorObj_;
+    }
+
+    void SetPopupColorResourceObject(RefPtr<ResourceObject>& obj)
+    {
+        resourcePopupColorObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GetPopupColorResourceObject()
+    {
+        return resourcePopupColorObj_;
+    }
+
+    void SetMaskColorResourceObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceMaskColorObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GetMaskColorResourceObject()
+    {
+        return resourceMaskColorObj_;
+    }
+
+    void SetMasResourceObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceMaskObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GetMasResourceObject()
+    {
+        return resourceMaskObj_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -653,7 +699,7 @@ private:
     bool focusable_ = false;
     bool interactiveDismiss_ = true;
     bool isCaretMode_ = true;
-    bool enableHoverMode_ = false;
+    std::optional<bool> enableHoverMode_ = std::nullopt;
     bool followTransformOfTarget_ = false;
     bool isTips_ = false;
     int32_t appearingTime_ = 700;
@@ -699,6 +745,10 @@ private:
     std::optional<Dimension> innerBorderWidth_;
     PopupLinearGradientProperties outlineLinearGradient_;
     PopupLinearGradientProperties innerBorderLinearGradient_;
+    RefPtr<ResourceObject> resourceTextColorObj_;
+    RefPtr<ResourceObject> resourcePopupColorObj_;
+    RefPtr<ResourceObject> resourceMaskColorObj_;
+    RefPtr<ResourceObject> resourceMaskObj_;
 };
 
 } // namespace OHOS::Ace

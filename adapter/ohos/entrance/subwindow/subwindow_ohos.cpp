@@ -303,6 +303,7 @@ void SubwindowOhos::InitContainer()
         window_->RegisterWindowAttachStateChangeListener(new MenuWindowSceneListener(WeakClaim(this)));
         window_->SetFollowScreenChange(needFollowScreen);
         defaultDisplayId_ = displayId;
+        window_->SetSubWindowSource(Rosen::SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
     }
     std::string url = "";
     auto subSurface = window_->GetSurfaceNode();
@@ -1464,6 +1465,7 @@ bool SubwindowOhos::InitToastDialogWindow(int32_t& width, int32_t& height, int32
     }
     CHECK_NULL_RETURN(dialogWindow_, false);
     dialogWindow_->SetLayoutFullScreen(true);
+    dialogWindow_->SetSubWindowSource(Rosen::SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
     auto focusWindowId = dialogWindow_->GetDisplayId();
     auto focusDisplayInfo = Rosen::DisplayManager::GetInstance().GetDisplayById(focusWindowId);
     CHECK_NULL_RETURN(focusDisplayInfo, false);
@@ -2194,6 +2196,7 @@ bool SubwindowOhos::CheckHostWindowStatus() const
 
 bool SubwindowOhos::Close()
 {
+    // prevent repeated closure when subWindow's container is destroying
     if (isClosing_) {
         return true;
     }
@@ -2201,7 +2204,7 @@ bool SubwindowOhos::Close()
     CHECK_NULL_RETURN(window_, false);
     window_->UnregisterSwitchFreeMultiWindowListener(freeMultiWindowListener_);
     isClosing_ = true;
-    OHOS::Rosen::WMError ret = window_->Close();
+    OHOS::Rosen::WMError ret = window_->Destroy();
     isClosing_ = false;
     if (ret != OHOS::Rosen::WMError::WM_OK) {
         TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "SubwindowOhos failed to close the dialog subwindow.");
@@ -2413,7 +2416,8 @@ void SubwindowOhos::SwitchFollowParentWindowLayout(bool freeMultiWindowEnable)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
         "subwindow switch followParentWindowLayout, enable: %{public}d", freeMultiWindowEnable);
-    if (NeedFollowParentWindowLayout() && !freeMultiWindowEnable) {
+    auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
+    if (NeedFollowParentWindowLayout() && !expandDisplay && !freeMultiWindowEnable) {
         SetFollowParentWindowLayoutEnabled(true);
     } else {
         SetFollowParentWindowLayoutEnabled(false);

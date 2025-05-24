@@ -26,6 +26,7 @@ public:
     void SetBlankMin(const Dimension& blankMin) override;
     void SetHeight(const Dimension& height) override;
     void SetColor(const Color& color) override;
+    void SetColor(const RefPtr<ResourceObject>& resobj) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetColor(FrameNode* frameNode, const Color& color);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);

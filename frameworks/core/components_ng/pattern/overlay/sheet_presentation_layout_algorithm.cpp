@@ -22,38 +22,66 @@ namespace {
 constexpr int32_t DOUBLE_SIZE = 2;
 } // namespace
 
-void SheetPresentationLayoutAlgorithm::InitParameter()
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
-    CHECK_NULL_VOID(sheetTheme);
-    // if 2in1, enableHoverMode is true by default.
-    auto enableHoverMode = sheetStyle_.enableHoverMode.value_or(sheetTheme->IsOuterBorderEnable() ? true : false);
-    hoverModeArea_ = sheetStyle_.hoverModeArea.value_or(
-        sheetTheme->IsOuterBorderEnable() ? HoverModeAreaType::TOP_SCREEN : HoverModeAreaType::BOTTOM_SCREEN);
-    auto safeAreaManager = pipeline->GetSafeAreaManager();
-    auto keyboardInsert = safeAreaManager->GetKeyboardInset();
-    isKeyBoardShow_ = keyboardInsert.IsValid();
-    isHoverMode_ = enableHoverMode ? pipeline->IsHalfFoldHoverStatus() : false;
-}
-
-void SheetPresentationLayoutAlgorithm::CalculateSheetHeightInOtherScenes(LayoutWrapper* layoutWrapper)
+void SheetPresentationLayoutAlgorithm::InitParameter(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
-    auto foldCreaseRect = sheetPattern->GetFoldScreenRect();
-    if (sheetType_ == SheetType::SHEET_CENTER && isHoverMode_) {
-        float upScreenHeight = foldCreaseRect.Top() - SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx();
-        float downScreenHeight = sheetMaxHeight_ - SHEET_HOVERMODE_DOWN_HEIGHT.ConvertToPx() - foldCreaseRect.Bottom();
-        TAG_LOGD(AceLogTag::ACE_SHEET, "upScreenHeight: %{public}f, downScreenHeight: %{public}f.", upScreenHeight,
-            downScreenHeight);
-        sheetHeight_ = std::min(sheetHeight_,
-            (hoverModeArea_ == HoverModeAreaType::TOP_SCREEN || isKeyBoardShow_) ? upScreenHeight : downScreenHeight);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+
+    // if 2in1, enableHoverMode is true by default.
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    auto enableHoverMode = sheetStyle_.enableHoverMode.value_or((deviceType == DeviceType::TWO_IN_ONE) ? true : false);
+    hoverModeArea_ = sheetStyle_.hoverModeArea.value_or(
+        (deviceType == DeviceType::TWO_IN_ONE) ? HoverModeAreaType::TOP_SCREEN : HoverModeAreaType::BOTTOM_SCREEN);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    auto keyboardInsert = safeAreaManager->GetKeyboardInset();
+    isKeyBoardShow_ = keyboardInsert.IsValid();
+    isHoverMode_ = enableHoverMode ? pipeline->IsHalfFoldHoverStatus() : false;
+    if (deviceType == DeviceType::TWO_IN_ONE) {
+        // if 2in1 WaterfallWindowMode, enableHoverMode is true by default.
+        isWaterfallWindowMode_ = sheetPattern->IsWaterfallWindowMode();
+        isHoverMode_ = enableHoverMode ? isWaterfallWindowMode_ : false;
     }
+}
+
+float SheetPresentationLayoutAlgorithm::CalculateSheetHeightInOtherScenes(
+    LayoutWrapper* layoutWrapper, const float heightBefore) const
+{
+    auto height = heightBefore;
+    CHECK_NULL_RETURN(layoutWrapper, height);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, height);
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_RETURN(sheetPattern, height);
+    auto foldCreaseRect = sheetPattern->GetFoldScreenRect(); // relative window
+    if (sheetType_ != SheetType::SHEET_CENTER || !isHoverMode_) {
+        return height;
+    }
+    float upScreenHeight = foldCreaseRect.Top() - SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx();
+    float downScreenHeight = sheetMaxHeight_ - SHEET_HOVERMODE_DOWN_HEIGHT.ConvertToPx() - foldCreaseRect.Bottom();
+    NG::RectF floatButtons;
+    if (isWaterfallWindowMode_) {
+        auto sheetWrapper = host->GetParent();
+        CHECK_NULL_RETURN(sheetWrapper, height);
+        auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetWrapper);
+        CHECK_NULL_RETURN(sheetWrapperNode, height);
+        upScreenHeight = foldCreaseRect.Top() - sheetWrapperNode->GetOffsetRelativeToWindow().GetY() -
+                         DOUBLE_SIZE * (SHEET_BLANK_MINI_HEIGHT.ConvertToPx());
+        if (sheetPattern->GetWindowButtonRectForAllAPI(floatButtons)) {
+            upScreenHeight =
+                foldCreaseRect.Top() - DOUBLE_SIZE * (floatButtons.Height() + SHEET_BLANK_MINI_HEIGHT.ConvertToPx());
+        }
+    }
+    TAG_LOGD(AceLogTag::ACE_SHEET, "upScreenHeight: %{public}f, downScreenHeight: %{public}f.", upScreenHeight,
+        downScreenHeight);
+    return std::min(height,
+        (hoverModeArea_ == HoverModeAreaType::TOP_SCREEN || isKeyBoardShow_) ? upScreenHeight : downScreenHeight);
 }
 
 void SheetPresentationLayoutAlgorithm::CalculateSheetOffsetInOtherScenes(LayoutWrapper* layoutWrapper)
@@ -65,15 +93,32 @@ void SheetPresentationLayoutAlgorithm::CalculateSheetOffsetInOtherScenes(LayoutW
     CHECK_NULL_VOID(sheetPattern);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto foldCreaseRect = sheetPattern->GetFoldScreenRect();
+    auto foldCreaseRect = sheetPattern->GetFoldScreenRect(); // relative window
     auto frameSizeHeight = geometryNode->GetFrameSize().Height();
-    if (sheetType_ == SheetType::SHEET_CENTER && isHoverMode_) {
-        float upScreenHeight = foldCreaseRect.Top() - SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx();
-        float downScreenHeight = sheetMaxHeight_ - SHEET_HOVERMODE_DOWN_HEIGHT.ConvertToPx() - foldCreaseRect.Bottom();
-        sheetOffsetY_ = (hoverModeArea_ == HoverModeAreaType::TOP_SCREEN || isKeyBoardShow_)
-                            ? (SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx() +
-                                  (upScreenHeight - frameSizeHeight) / DOUBLE_SIZE)
-                            : (foldCreaseRect.Bottom() + (downScreenHeight - frameSizeHeight) / DOUBLE_SIZE);
+    if (sheetType_ != SheetType::SHEET_CENTER || !isHoverMode_) {
+        return;
+    }
+    float upScreenHeight = foldCreaseRect.Top() - SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx();
+    float downScreenHeight = sheetMaxHeight_ - SHEET_HOVERMODE_DOWN_HEIGHT.ConvertToPx() - foldCreaseRect.Bottom();
+    float topStartOffsetY = SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx();
+    NG::RectF floatButtons;
+    if (isWaterfallWindowMode_) {
+        auto sheetWrapper = host->GetParent();
+        CHECK_NULL_VOID(sheetWrapper);
+        auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetWrapper);
+        CHECK_NULL_VOID(sheetWrapperNode);
+        upScreenHeight = foldCreaseRect.Top() - sheetWrapperNode->GetOffsetRelativeToWindow().GetY();
+        topStartOffsetY = SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
+        if (sheetPattern->GetWindowButtonRectForAllAPI(floatButtons)) {
+            upScreenHeight =
+                foldCreaseRect.Top() - DOUBLE_SIZE * (floatButtons.Height() + SHEET_BLANK_MINI_HEIGHT.ConvertToPx());
+            topStartOffsetY = floatButtons.Height() + SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
+        }
+    }
+    if (hoverModeArea_ == HoverModeAreaType::TOP_SCREEN || isKeyBoardShow_) {
+        sheetOffsetY_ = topStartOffsetY + (upScreenHeight - frameSizeHeight) / DOUBLE_SIZE;
+    } else {
+        sheetOffsetY_ = foldCreaseRect.Bottom() + (downScreenHeight - frameSizeHeight) / DOUBLE_SIZE;
     }
 }
 
@@ -138,10 +183,9 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         TAG_LOGE(AceLogTag::ACE_SHEET, "fail to measure sheet due to layoutConstraint is nullptr");
         return;
     }
-    InitParameter();
+    InitParameter(layoutWrapper);
     if (layoutWrapper->GetGeometryNode() && layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()) {
         ComputeWidthAndHeight(layoutWrapper);
-        CalculateSheetHeightInOtherScenes(layoutWrapper);
         AddArrowHeightToSheetSize();
         SizeF idealSize(sheetWidth_, sheetHeight_);
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
@@ -454,7 +498,7 @@ float SheetPresentationLayoutAlgorithm::GetHeightByScreenSizeType(const float pa
         default:
             break;
     }
-
+    height = CalculateSheetHeightInOtherScenes(layoutWrapper, height);
     return height;
 }
 

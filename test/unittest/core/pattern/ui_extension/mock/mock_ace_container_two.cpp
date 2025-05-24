@@ -114,17 +114,6 @@ bool AceContainer::IsKeyboard()
     return true;
 }
 
-void AceContainer::SetAppRunningUniqueId(const std::string& uniqueId)
-{
-    return;
-}
-
-const std::string& AceContainer::GetAppRunningUniqueId() const
-{
-    static const std::string res;
-    return res;
-}
-
 void AceContainer::DestroyView() {}
 
 void AceContainer::Dispatch(const std::string& group, std::vector<uint8_t>&& data,
@@ -293,6 +282,11 @@ Rect AceContainer::GetDisplayAvailableRect() const
     return Rect();
 }
 
+Rect AceContainer::GetFoldExpandAvailableRect() const
+{
+    return Rect();
+}
+
 bool AceContainer::IsCrossAxisWindow()
 {
     return false;
@@ -301,7 +295,7 @@ bool AceContainer::IsCrossAxisWindow()
 void AceContainer::GetExtensionConfig(AAFwk::WantParams& want) {}
 
 void AceContainer::DispatchExtensionDataToHostWindow(
-    uint32_t code, const AAFwk::Want& data, int32_t persistenId)
+    uint32_t code, const AAFwk::Want& data, int32_t persistentId)
 {
 }
 

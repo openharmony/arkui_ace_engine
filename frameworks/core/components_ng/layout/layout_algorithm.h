@@ -81,9 +81,20 @@ public:
         return hasMeasured_;
     }
 
+    void SetNeedPostponeForIgnore(bool needed = true)
+    {
+        postponeForIgnore_ = needed;
+    }
+
+    bool GetNeedPostponeForIgnore() const
+    {
+        return postponeForIgnore_;
+    }
+
 protected:
     virtual void OnReset() {}
     bool hasMeasured_ = false;
+    bool postponeForIgnore_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutAlgorithm);
 };

@@ -68,6 +68,7 @@ public:
     virtual void SetSelectedDate(const PickerDate& value) = 0;
     virtual void SetMode(const DatePickerMode& value) = 0;
     virtual void SetShowLunar(bool lunar) = 0;
+    virtual void SetCanLoop(bool isLoop) = 0;
     virtual void SetOnChange(DateChangeEvent&& onChange) = 0;
     virtual void SetOnDateChange(DateChangeEvent&& onChange) = 0;
     virtual void SetSelectedTime(const PickerTime& selectedTime) = 0;
@@ -84,6 +85,9 @@ public:
     virtual void SetEnableHapticFeedback(bool isEnableHapticFeedback) {};
     virtual void SetDigitalCrownSensitivity(int32_t value) = 0;
     virtual void UpdateUserSetSelectColor() = 0;
+    virtual void ParseDisappearTextStyleResObj(const NG::PickerTextStyle& textStyleOpt) {};
+    virtual void ParseSelectedTextStyleResObj(const NG::PickerTextStyle& textStyleOpt) {};
+    virtual void ParseNormalTextStyleResObj(const NG::PickerTextStyle& textStyleOpt) {};
 private:
     static std::unique_ptr<DatePickerModel> datePickerInstance_;
     static std::once_flag onceFlag_;

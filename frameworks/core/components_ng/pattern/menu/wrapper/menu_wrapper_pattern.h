@@ -120,6 +120,7 @@ public:
     }
 
     void HideSubMenu();
+    void ShowSubMenuDisappearAnimation(const RefPtr<FrameNode>& host, const RefPtr<UINode>& subMenu);
     void HideStackExpandMenu(const RefPtr<UINode>& subMenu);
     void GetExpandingMode(const RefPtr<UINode>& subMenu, SubMenuExpandingMode& expandingMode, bool& hasAnimation);
     RefPtr<FrameNode> GetMenu() const
@@ -566,14 +567,19 @@ public:
         return isOpenMenu_;
     }
 
-    void SetHoverMode(bool enableFold)
+    void SetHoverMode(std::optional<bool> enableFold)
     {
         enableFold_ = enableFold;
     }
 
-    bool GetHoverMode() const
+    std::optional<bool> GetHoverMode() const
     {
-        return enableFold_.value_or(false);
+        return enableFold_;
+    }
+
+    bool HasHoverMode() const
+    {
+        return enableFold_.has_value();
     }
 
     bool GetIsSelectOverlaySubWindowWrapper() const
@@ -605,6 +611,14 @@ public:
     {
         hasCustomOutlineColor_ = hasCustomOutlineColor;
     }
+
+    bool GetMenuMaskEnable();
+    Color GetMenuMaskColor();
+    BlurStyle GetMenuMaskblurStyle();
+    void SetMenuMaskEnable(bool maskEnable);
+    void SetMenuMaskColor(Color maskColor);
+    void SetMenuMaskblurStyle(BlurStyle maskBlurStyle);
+    void UpdateFilterMaskType();
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -643,8 +657,12 @@ private:
     void SetExitAnimation(const RefPtr<FrameNode>& host);
     void SendToAccessibility(const RefPtr<UINode>& subMenu, bool isShow);
     bool CheckPointInMenuZone(const RefPtr<FrameNode>& node, const PointF& point);
+    bool HasSideSubMenu();
+    bool IsTouchWithinParentMenuItemZone(std::list<RefPtr<UINode>>::reverse_iterator& child,
+        const std::list<RefPtr<UINode>>& children, const PointF& position);
     RefPtr<FrameNode> GetParentMenu(const RefPtr<UINode>& subMenu);
     void MenuFocusViewShow(const RefPtr<FrameNode>& menuNode);
+    void EnsureMenuMaskTypeInitialized();
     std::function<void()> onAppearCallback_ = nullptr;
     std::function<void()> onDisappearCallback_ = nullptr;
     std::function<void()> aboutToAppearCallback_ = nullptr;

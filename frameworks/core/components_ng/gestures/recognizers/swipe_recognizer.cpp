@@ -78,7 +78,10 @@ void SwipeRecognizer::OnAccepted()
     }
     localMatrix_ = NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false,
         isPostEventResult_, touchPoint.postEventNodeId);
-    SendCallbackMsg(onAction_, GestureCallbackType::ACTION);
+    {
+        ACE_SCOPED_TRACE("SwipeRecognizer onAction, result speed: %f", resultSpeed_);
+        SendCallbackMsg(onAction_, GestureCallbackType::ACTION);
+    }
     int64_t overTime = GetSysTimestamp();
     if (SystemProperties::GetTraceInputEventEnabled()) {
         ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:SwipeGesture",
@@ -332,6 +335,7 @@ void SwipeRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
+        ACE_SCOPED_TRACE("SwipeRecognizer onActionCancel");
         SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
     }
 }
@@ -344,6 +348,7 @@ void SwipeRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
+        ACE_SCOPED_TRACE("SwipeRecognizer onActionCancel");
         SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
     }
 }
@@ -419,9 +424,11 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
             info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
             info.SetSourceTool(lastAxisEvent_.sourceTool);
             info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
+            info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
         } else {
             info.SetSourceTool(lastTouchEvent_.sourceTool);
             info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
+            info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
         }
         info.SetPointerEvent(lastPointEvent_);
         if (prevAngle_) {

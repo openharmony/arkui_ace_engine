@@ -278,7 +278,19 @@ void JSSpanString::GetSpans(const JSCallbackInfo& info)
     JSRef<JSArray> spanObjectArray = JSRef<JSArray>::New();
     uint32_t idx = 0;
     for (const RefPtr<SpanBase>& spanObject : spans) {
-        spanObjectArray->SetValueAt(idx++, CreateJsSpanBaseObject(spanObject));
+        auto decorationSpan = AceType::DynamicCast<DecorationSpan>(spanObject);
+        if (decorationSpan) {
+            auto types = decorationSpan->GetTextDecorationTypes();
+            for (TextDecoration type : types) {
+                auto tempSpan = decorationSpan->GetSubSpan(
+                    decorationSpan->GetStartIndex(), decorationSpan->GetEndIndex());
+                auto tempDecorationSpan = AceType::DynamicCast<DecorationSpan>(tempSpan);
+                tempDecorationSpan->SetTextDecorationTypes({type});
+                spanObjectArray->SetValueAt(idx++, CreateJsSpanBaseObject(tempSpan));
+            }
+        } else {
+            spanObjectArray->SetValueAt(idx++, CreateJsSpanBaseObject(spanObject));
+        }
     }
     info.SetReturnValue(JSRef<JSVal>::Cast(spanObjectArray));
 }
@@ -487,9 +499,13 @@ RefPtr<SpanBase> JSSpanString::ParseJsDecorationSpan(int32_t start, int32_t leng
     auto* base = obj->Unwrap<AceType>();
     auto* decorationSpan = AceType::DynamicCast<JSDecorationSpan>(base);
     if (decorationSpan && decorationSpan->GetDecorationSpan()) {
-        return AceType::MakeRefPtr<DecorationSpan>(decorationSpan->GetDecorationSpan()->GetTextDecorationType(),
+        return AceType::MakeRefPtr<DecorationSpan>(
+            decorationSpan->GetDecorationSpan()->GetTextDecorationTypes(),
             decorationSpan->GetDecorationSpan()->GetColor(),
-            decorationSpan->GetDecorationSpan()->GetTextDecorationStyle(), start, start + length);
+            decorationSpan->GetDecorationSpan()->GetTextDecorationStyle(),
+            decorationSpan->GetDecorationSpan()->GetLineThicknessScale(),
+            decorationSpan->GetDecorationSpan()->GetTextDecorationOptions(),
+            start, start + length);
     }
     return nullptr;
 }

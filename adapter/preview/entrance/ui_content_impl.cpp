@@ -19,6 +19,8 @@
 #include <ui/rs_ui_director.h>
 
 #include "include/core/SkFontMgr.h"
+#include "js_native_api.h"
+#include "js_native_api_types.h"
 
 #include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
 #include "adapter/ohos/entrance/platform_event_callback.h"
@@ -239,6 +241,8 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     : instanceId_(ACE_INSTANCE_ID), runtime_(runtime)
 {
     // 基于Options的方式传递参数
+    CHECK_NULL_VOID(context);
+    context_ = context->weak_from_this();
     auto options = context->GetOptions();
     assetPath_ = options.assetPath;
     systemResourcesPath_ = options.systemResourcePath;
@@ -346,6 +350,7 @@ std::string UIContentImpl::GetContentInfo(ContentInfoType type) const
 UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
     const std::string& contentInfo, napi_value storage)
 {
+    auto context = context_.lock();
     static std::once_flag onceFlag;
     std::call_once(onceFlag, []() {
 #ifdef INIT_ICU_DATA_PATH
@@ -370,6 +375,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
     AceContainer::CreateContainer(instanceId_, FrontendType::DECLARATIVE_JS, useNewPipeline_);
     auto container = AceContainer::GetContainerInstance(instanceId_);
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
+    container->SetAbilityContext(context_);
     container->SetContainerSdkPath(containerSdkPath_);
     container->SetIsFRSCardContainer(false);
     container->SetBundleName(bundleName_);
@@ -452,6 +458,17 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
     avoidAreaChangedListener_->OnAvoidAreaChanged(avoidArea, OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM);
     rsWindow_->GetAvoidAreaByType(OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR, avoidArea);
     avoidAreaChangedListener_->OnAvoidAreaChanged(avoidArea, OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+    if (runtime_) {
+        auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
+        if (!storage) {
+            container->SetLocalStorage(nullptr, context);
+        } else {
+            auto env = reinterpret_cast<napi_env>(nativeEngine);
+            napi_ref ref = nullptr;
+            napi_create_reference(env, storage, 1, &ref);
+            container->SetLocalStorage(reinterpret_cast<NativeReference*>(ref), context);
+        }
+    }
     return UIContentErrorCode::NO_ERRORS;
 }
 
@@ -561,7 +578,8 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
-    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
+    const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
 {
     LOGI("ViewportConfig: %{public}s", config.ToString().c_str());
     auto container = AceContainer::GetContainerInstance(instanceId_);

@@ -29,7 +29,9 @@ namespace {
 const InspectorFilter filter;
 const std::string CREATE_VALUE = "Hello World";
 const std::u16string CREATE_VALUE_W = u"Hello World";
+const std::u16string STRING_HELLO = u"Hello World";
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
+const Dimension FONT_SIZE_THIRTY = Dimension(30.1, DimensionUnit::PX);
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const Ace::FontStyle ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
@@ -41,6 +43,7 @@ const std::vector<Shadow> TEXT_SHADOWS { TEXT_SHADOW1, TEXT_SHADOW2 };
 const Ace::TextCase TEXT_CASE_VALUE = Ace::TextCase::LOWERCASE;
 const Dimension LETTER_SPACING = Dimension(10, DimensionUnit::PX);
 void onClickFunc(const BaseEventInfo* info) {};
+const int32_t SPAN_NODE_ID = 10;
 const std::string FONT_SIZE = "fontSize";
 const std::string FONT_DEFAULT_VALUE = "{\"style\":\"FontStyle.Normal\",\"size\":\"14.00px\",\"weight\":"
                                        "\"FontWeight.Normal\",\"family\":\"HarmonyOS Sans\"}";
@@ -55,8 +58,11 @@ constexpr int32_t AI_SPAN_END = 18;
 constexpr int32_t AI_SPAN_START_II = 24;
 constexpr int32_t AI_SPAN_END_II = 37;
 const uint32_t SYMBOL_ID = 1;
+const uint32_t SYMBOL_ID_NEW = 28;
 std::vector<Color> SYMBOL_COLOR = { Color::FromRGB(255, 100, 100) };
+std::vector<Color> SYMBOL_COLOR_RED = { Color::RED };
 std::vector<Color> SYMBOL_COLOR_LIST = { Color::FromRGB(255, 100, 100), Color::FromRGB(255, 255, 100) };
+std::vector<Color> SYMBOL_COLOR_RIGION = { Color::FromRGB(255, 50, 100), Color::FromRGB(255, 255, 100) };
 const uint32_t RENDER_STRATEGY_SINGLE = 0;
 const uint32_t RENDER_STRATEGY_MULTI_COLOR = 1;
 const uint32_t RENDER_STRATEGY_MULTI_OPACITY = 2;
@@ -71,6 +77,8 @@ constexpr double IMAGE_SOURCESIZE_HEIGHT = 200.0;
 constexpr double WIDTH = 400.0;
 constexpr double HEIGHT = 500.0;
 const std::string SYMBOL_SPAN_FONT_FAMILY = "Symbol Test";
+const std::string SYMBOL_SPAN_FONT_ONE = "Symbol Test One";
+const std::string SYMBOL_SPAN_FONT_TWO = "Symbol Test Two";
 } // namespace
 
 class SpanTestNg : public testing::Test {
@@ -134,7 +142,7 @@ HWTEST_F(SpanTestNg, SpanFrameNodeCreator001, TestSize.Level1)
     spanModelNG.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
     spanModelNG.SetTextCase(TEXT_CASE_VALUE);
     spanModelNG.SetLetterSpacing(LETTER_SPACING);
-    EXPECT_EQ(spanNode->GetTextDecoration(), TEXT_DECORATION_VALUE);
+    EXPECT_EQ(spanNode->GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
     EXPECT_EQ(spanNode->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
     EXPECT_EQ(spanNode->GetTextCase(), TEXT_CASE_VALUE);
     EXPECT_EQ(spanNode->GetLetterSpacing(), LETTER_SPACING);
@@ -1400,11 +1408,11 @@ HWTEST_F(SpanTestNg, SpanNodeDumpInfo001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SpanOnHoverEvent
+ * @tc.name: SpanOnHoverEvent001
  * @tc.desc: test text_select_overlay.cpp on hover event
  * @tc.type: FUNC
  */
-HWTEST_F(SpanTestNg, SpanOnHoverEvent, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanOnHoverEvent001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create textFrameNode.
@@ -1435,6 +1443,622 @@ HWTEST_F(SpanTestNg, SpanOnHoverEvent, TestSize.Level1)
 
     EXPECT_EQ(textPattern->HasSpanOnHoverEvent(), true);
     textPattern->InitSpanMouseEvent();
+    textPattern->TriggerSpansOnHover(HoverInfo(), PointF(0.0f, 0.0f));
+    textPattern->ExitSpansForOnHoverEvent(HoverInfo());
+    EXPECT_EQ(textPattern->spanMouseEventInitialized_, false);
+}
+
+/**
+ * @tc.name: SymbolSpanEffectStrategy001
+ * @tc.desc: Test render strategy and effect strategy of symbolspan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SymbolSpanEffectStrategy001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol span node
+     */
+    SymbolSpanModelNG symbolSpanModelNG;
+    symbolSpanModelNG.Create(SYMBOL_ID_NEW);
+
+    /**
+     * @tc.steps: step2. get span node
+     */
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test symbol rendering strategy property
+     */
+    symbolSpanModelNG.SetSymbolRenderingStrategy(RENDER_STRATEGY_SINGLE);
+    EXPECT_EQ(spanNode->GetSymbolRenderingStrategy(), RENDER_STRATEGY_SINGLE);
+    symbolSpanModelNG.SetSymbolRenderingStrategy(RENDER_STRATEGY_MULTI_COLOR);
+    EXPECT_EQ(spanNode->GetSymbolRenderingStrategy(), RENDER_STRATEGY_MULTI_COLOR);
+    symbolSpanModelNG.SetSymbolRenderingStrategy(RENDER_STRATEGY_MULTI_OPACITY);
+    EXPECT_EQ(spanNode->GetSymbolRenderingStrategy(), RENDER_STRATEGY_MULTI_OPACITY);
+
+    /**
+     * @tc.steps: step4. test symbol effect strategy property
+     */
+    symbolSpanModelNG.SetSymbolEffect(EFFECT_STRATEGY_NONE);
+    EXPECT_EQ(spanNode->GetSymbolEffectStrategy(), EFFECT_STRATEGY_NONE);
+    symbolSpanModelNG.SetSymbolEffect(EFFECT_STRATEGY_SCALE);
+    EXPECT_EQ(spanNode->GetSymbolEffectStrategy(), EFFECT_STRATEGY_SCALE);
+    symbolSpanModelNG.SetSymbolEffect(EFFECT_STRATEGY_HIERARCHICAL);
+    EXPECT_EQ(spanNode->GetSymbolEffectStrategy(), EFFECT_STRATEGY_HIERARCHICAL);
+}
+
+/**
+ * @tc.name: SymbolSpanFontFamily001
+ * @tc.desc: Test fontSize and fonColor property of symbolspan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SymbolSpanFontFamily001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol span node
+     */
+    SymbolSpanModelNG symbolSpanModelNG;
+    symbolSpanModelNG.Create(SYMBOL_ID_NEW);
+
+    /**
+     * @tc.steps: step2. get span node
+     */
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test fontSize property
+     */
+    symbolSpanModelNG.SetFontSize(FONT_SIZE_THIRTY);
+    EXPECT_EQ(spanNode->GetFontSize(), FONT_SIZE_THIRTY);
+
+    /**
+     * @tc.steps: step4. test fontColor property
+     */
+    symbolSpanModelNG.SetFontColor(SYMBOL_COLOR_RED);
+    EXPECT_EQ(spanNode->GetSymbolColorList(), SYMBOL_COLOR_RED);
+
+    symbolSpanModelNG.SetFontColor(SYMBOL_COLOR_RIGION);
+    EXPECT_EQ(spanNode->GetSymbolColorList(), SYMBOL_COLOR_RIGION);
+}
+
+/**
+ * @tc.name: SymbolSpanFontFamily002
+ * @tc.desc: Test fontWeight property of symbolspan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SymbolSpanFontFamily002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol span node
+     */
+    SymbolSpanModelNG symbolSpanModelNG;
+    symbolSpanModelNG.Create(SYMBOL_ID_NEW);
+
+    /**
+     * @tc.steps: step2. get span node
+     */
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test fontWeight property
+     */
+    symbolSpanModelNG.SetFontWeight(FontWeight::LIGHTER);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::LIGHTER);
+    symbolSpanModelNG.SetFontWeight(FontWeight::REGULAR);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::REGULAR);
+    symbolSpanModelNG.SetFontWeight(FontWeight::NORMAL);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::NORMAL);
+    symbolSpanModelNG.SetFontWeight(FontWeight::MEDIUM);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::MEDIUM);
+    symbolSpanModelNG.SetFontWeight(FontWeight::BOLD);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::BOLD);
+    symbolSpanModelNG.SetFontWeight(FontWeight::BOLDER);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::BOLDER);
+
+    symbolSpanModelNG.SetFontWeight(FontWeight::W100);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W100);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W200);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W200);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W300);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W300);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W400);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W400);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W500);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W500);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W600);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W600);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W700);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W700);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W800);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W800);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W900);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W900);
+}
+
+/**
+ * @tc.name: SymbolSpanFontFamily003
+ * @tc.desc: Test symbolType and fontFamily of symbolspan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SymbolSpanFontFamily003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol span node
+     */
+    SymbolSpanModelNG symbolSpanModelNG;
+    symbolSpanModelNG.Create(SYMBOL_ID_NEW);
+
+    /**
+     * @tc.steps: step2. get span node
+     */
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test symbolType and fontFamilies property
+     */
+    symbolSpanModelNG.SetSymbolType(SymbolType::SYSTEM);
+    EXPECT_EQ(spanNode->GetSymbolType(), SymbolType::SYSTEM);
+
+    std::vector<std::string> testFontFamilies;
+    testFontFamilies.push_back(SYMBOL_SPAN_FONT_ONE);
+    symbolSpanModelNG.SetFontFamilies(testFontFamilies);
+
+    auto fontFamilies = spanNode->GetFontFamily();
+    ASSERT_GT(fontFamilies->size(), 0);
+    auto familyNameValue = fontFamilies->front();
+    EXPECT_EQ(familyNameValue, SYMBOL_SPAN_FONT_ONE);
+}
+
+/**
+ * @tc.name: SymbolSpanFontFamily004
+ * @tc.desc: Test InitialCustomSymbol of symbolspan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SymbolSpanFontFamily004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol span node
+     */
+    auto node = SpanNode::GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, 1);
+
+    auto* frameNode = reinterpret_cast<FrameNode*>(Referenced::RawPtr(node));
+
+    ASSERT_NE(frameNode, nullptr);
+    SymbolSpanModelNG::InitialCustomSymbol(frameNode, SYMBOL_ID_NEW, SYMBOL_SPAN_FONT_ONE.c_str());
+    
+    /**
+     * @tc.steps: step2. get span node
+     */
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test symbolType and fontFamilies property
+     */
+    EXPECT_EQ(spanNode->GetSymbolType(), SymbolType::CUSTOM);
+
+    auto fontFamilies = spanNode->GetFontFamily();
+    ASSERT_NE(fontFamilies->size(), 0);
+    auto familyNameValue = fontFamilies->front();
+    EXPECT_EQ(familyNameValue, SYMBOL_SPAN_FONT_ONE);
+}
+
+/**
+ * @tc.name: ImageSpanImageErrorInfo001
+ * @tc.desc: Test ImageSpan onComplete event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, ImageSpanImageErrorInfo001, TestSize.Level1)
+{
+    ImageModelNG imageModelNG;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    RefPtr<PixelMap> pixMap = nullptr;
+    imageModelNG.Create(imageInfoConfig, pixMap);
+    NG::ImageSpanView::Create();
+    bool isTrigger = false;
+    auto onComplete = [&isTrigger](const LoadImageSuccessEvent& info) { isTrigger = true; };
+    imageModelNG.SetOnComplete(std::move(onComplete));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT,
+        WIDTH, HEIGHT, 1);
+    eventHub->FireCompleteEvent(loadImageSuccessEvent);
+    EXPECT_EQ(isTrigger, true);
+}
+
+/**
+ * @tc.name: ImageSpanImageErrorInfo002
+ * @tc.desc: Test ImageSpan onError event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, ImageSpanImageErrorInfo002, TestSize.Level1)
+{
+    ImageModelNG imageSpan;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    RefPtr<PixelMap> pixMap = nullptr;
+    imageSpan.Create(imageInfoConfig, pixMap);
+    NG::ImageSpanView::Create();
+    bool isTrigger = false;
+    auto onError = [&isTrigger](const LoadImageFailEvent& info) { isTrigger = true; };
+    imageSpan.SetOnError(std::move(onError));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    ImageErrorInfo imageErrorInfo;
+    imageErrorInfo.errorCode = ImageErrorCode::GET_IMAGE_DATA_PROVIDER_READ_FAILED;
+    imageErrorInfo.errorMessage = "image read failed!";
+    LoadImageFailEvent loadImageFailEvent(WIDTH, HEIGHT, "Image load failed!", imageErrorInfo);
+    eventHub->FireErrorEvent(loadImageFailEvent);
+    EXPECT_EQ(isTrigger, true);
+}
+
+/**
+ * @tc.name: ImageSpanImageErrorInfo003
+ * @tc.desc: Test ImageSpan onError event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, ImageSpanImageErrorInfo003, TestSize.Level1)
+{
+    ImageModelNG imageSpan;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    RefPtr<PixelMap> pixMap = nullptr;
+    imageSpan.Create(imageInfoConfig, pixMap);
+    NG::ImageSpanView::Create();
+    bool isTrigger = false;
+    auto onError = [&isTrigger](const LoadImageFailEvent& info) { isTrigger = true; };
+    imageSpan.SetOnError(std::move(onError));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    ImageErrorInfo imageErrorInfo;
+    imageErrorInfo.errorCode = ImageErrorCode::GET_IMAGE_DATA_PROVIDER_READ_FAILED;
+    imageErrorInfo.errorMessage = "image read failed!";
+    LoadImageFailEvent loadImageFailEvent(WIDTH, HEIGHT, "Image load failed!", imageErrorInfo);
+    eventHub->FireErrorEvent(loadImageFailEvent);
+    EXPECT_EQ(isTrigger, true);
+}
+
+/**
+ * @tc.name: SpanClickEvent001
+ * @tc.desc: Test OnClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanClickEvent001, TestSize.Level1)
+{
+    auto node = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, SPAN_NODE_ID);
+    auto* frameNode = reinterpret_cast<FrameNode*>(Referenced::RawPtr(node));
+    ASSERT_NE(frameNode, nullptr);
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    ASSERT_NE(spanNode, nullptr);
+    auto spanOnClickFunc = [](GestureEvent& info) {};
+    spanNode->UpdateOnClickEvent(std::move(spanOnClickFunc));
+    EXPECT_NE(spanNode->spanItem_->onClick, nullptr);
+}
+
+/**
+ * @tc.name: SpanClickEvent002
+ * @tc.desc: Test OnClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanClickEvent002, TestSize.Level1)
+{
+    auto node = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    ASSERT_NE(frameNode, nullptr);
+    auto imageSpanItem = AceType::MakeRefPtr<ImageSpanItem>();
+    imageSpanItem->nodeId_ = frameNode->GetId();
+    imageSpanItem->UpdatePlaceholderBackgroundStyle(frameNode);
+    auto spanOnClickFunc = [](GestureEvent& info) {};
+    imageSpanItem->SetOnClickEvent(std::move(spanOnClickFunc));
+    EXPECT_NE(imageSpanItem->onClick, nullptr);
+}
+
+/**
+ * @tc.name: SpanClickEvent003
+ * @tc.desc: Test OnClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanClickEvent003, TestSize.Level1)
+{
+    auto node = CustomSpanNode::GetOrCreateSpanNode(V2::CUSTOM_SPAN_NODE_ETS_TAG, SPAN_NODE_ID);
+    auto customSpanNode = AceType::DynamicCast<CustomSpanNode>(node);
+    ASSERT_NE(customSpanNode, nullptr);
+    auto customSpan = customSpanNode->GetSpanItem();
+    customSpan->placeholderSpanNodeId = customSpanNode->GetId();
+    auto spanOnClickFunc = [](GestureEvent& info) {};
+    customSpan->SetOnClickEvent(std::move(spanOnClickFunc));
+    EXPECT_NE(customSpan->onClick, nullptr);
+}
+
+/**
+ * @tc.name: SpanLongPressEvent001
+ * @tc.desc: Test OnLongPress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanLongPressEvent001, TestSize.Level1)
+{
+    auto node = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, SPAN_NODE_ID);
+    auto* frameNode = reinterpret_cast<FrameNode*>(Referenced::RawPtr(node));
+    ASSERT_NE(frameNode, nullptr);
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    ASSERT_NE(spanNode, nullptr);
+    auto spanOnLongPressFunc = [](GestureEvent& info) {};
+    spanNode->UpdateOnLongPressEvent(std::move(spanOnLongPressFunc));
+    EXPECT_NE(spanNode->spanItem_->onLongPress, nullptr);
+}
+
+/**
+ * @tc.name: SpanLongPressEvent002
+ * @tc.desc: Test OnLongPress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanLongPressEvent002, TestSize.Level1)
+{
+    auto node = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    ASSERT_NE(frameNode, nullptr);
+    auto imageSpanItem = AceType::MakeRefPtr<ImageSpanItem>();
+    imageSpanItem->nodeId_ = frameNode->GetId();
+    imageSpanItem->UpdatePlaceholderBackgroundStyle(frameNode);
+    auto spanOnLongpressFunc = [](GestureEvent& info) {};
+    imageSpanItem->SetLongPressEvent(std::move(spanOnLongpressFunc));
+    EXPECT_NE(imageSpanItem->onLongPress, nullptr);
+}
+
+/**
+ * @tc.name: SpanLongPressEvent003
+ * @tc.desc: Test OnLongPress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanLongPressEvent003, TestSize.Level1)
+{
+    auto node = CustomSpanNode::GetOrCreateSpanNode(V2::CUSTOM_SPAN_NODE_ETS_TAG, 1);
+    auto customSpanNode = AceType::DynamicCast<CustomSpanNode>(node);
+    ASSERT_NE(customSpanNode, nullptr);
+    auto customSpan = customSpanNode->GetSpanItem();
+    customSpan->placeholderSpanNodeId = customSpanNode->GetId();
+    auto spanOnLongpressFunc = [](GestureEvent& info) {};
+    customSpan->SetLongPressEvent(std::move(spanOnLongpressFunc));
+    EXPECT_NE(customSpan->onLongPress, nullptr);
+}
+
+
+/**
+ * @tc.name: SpanDumpLog001
+ * @tc.desc: Test SpanNode DumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanDumpLog001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanNode
+     */
+    DumpLog::GetInstance().description_.clear();
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto symbolNode = spanNode->GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, SPAN_NODE_ID);
+    /**
+     * @tc.steps: step2. call DumpInfo
+     * @tc.expected: cover branch textStyle is null
+     */
+    spanNode->DumpInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 1);
+}
+
+/**
+ * @tc.name: SpanDumpLog002
+ * @tc.desc: Test SpanNode DumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanDumpLog002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanNode
+     */
+    DumpLog::GetInstance().description_.clear();
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto symbolNode = spanNode->GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, SPAN_NODE_ID);
+    /**
+     * @tc.steps: step2. call DumpInfo
+     * @tc.expected: cover branch textStyle has value
+     */
+    DumpLog::GetInstance().description_.clear();
+    std::optional<TextStyle> textStyle;
+    textStyle = std::optional<TextStyle>(TextStyle());
+    spanNode->spanItem_->content = u"";
+    spanNode->spanItem_->SetTextStyle(textStyle);
+    spanNode->spanItem_->SetIsParentText(false);
+    spanNode->DumpInfo();
+    EXPECT_GT(DumpLog::GetInstance().description_.size(), 1);
+}
+
+/**
+ * @tc.name: SpanDumpLog003
+ * @tc.desc: Test SpanNode DumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanDumpLog003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanNode
+     */
+    DumpLog::GetInstance().description_.clear();
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto symbolNode = spanNode->GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, SPAN_NODE_ID);
+
+    /**
+     * @tc.steps: step2. call DumpInfo
+     * @tc.expected: cover branch Tag is SYMBOL_SPAN_ETS_TAG
+     */
+    DumpLog::GetInstance().description_.clear();
+    std::optional<TextStyle> textStyle;
+    textStyle = std::optional<TextStyle>(TextStyle());
+    symbolNode->spanItem_->SetTextStyle(textStyle);
+    symbolNode->spanItem_->SetNeedRemoveNewLine(false);
+    symbolNode->DumpInfo();
+    EXPECT_EQ(symbolNode->GetTag(), V2::SYMBOL_SPAN_ETS_TAG);
+    EXPECT_GT(DumpLog::GetInstance().description_.size(), 1);
+}
+
+/**
+ * @tc.name: SpanDumpLog004
+ * @tc.desc: Test SpanNode DumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanDumpLog004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanNode
+     */
+    DumpLog::GetInstance().description_.clear();
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto symbolNode = spanNode->GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, 1);
+    /**
+     * @tc.steps: step2. call DumpInfo
+     * @tc.expected: cover branch textStyle is null
+     */
+    spanNode->DumpInfo();
+    EXPECT_GT(DumpLog::GetInstance().description_.size(), 0);
+}
+
+/**
+ * @tc.name: SpanDumpLog005
+ * @tc.desc: Test SpanNode DumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanDumpLog005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanNode
+     */
+    DumpLog::GetInstance().description_.clear();
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto symbolNode = spanNode->GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, 1);
+    /**
+     * @tc.steps: step2. call DumpInfo
+     * @tc.expected: cover branch Tag is SYMBOL_SPAN_ETS_TAG
+     */
+    DumpLog::GetInstance().description_.clear();
+    std::optional<TextStyle> textStyle;
+    textStyle = std::optional<TextStyle>(TextStyle());
+    symbolNode->spanItem_->SetTextStyle(textStyle);
+    symbolNode->DumpInfo();
+    EXPECT_EQ(symbolNode->GetTag(), V2::SYMBOL_SPAN_ETS_TAG);
+    EXPECT_GT(DumpLog::GetInstance().description_.size(), 1);
+}
+
+/**
+ * @tc.name: SpanMouseHoverEvent001
+ * @tc.desc: test text_select_overlay.cpp on hover event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanMouseHoverEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. case.
+     */
+    std::list<RefPtr<SpanItem>> spans;
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(STRING_HELLO);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    OnHoverFunc callback = [](bool isHover, HoverInfo& info) {
+        isHover = false;
+    };
+    spanModelNG.SetOnHover(std::move(callback));
+    spans.emplace_back(spanNode->spanItem_);
+    EXPECT_EQ(spans.size(), 1);
+    textPattern->spans_ = spans;
+
+    EXPECT_EQ(textPattern->HasSpanOnHoverEvent(), true);
+    textPattern->InitSpanMouseEvent();
+    textPattern->TriggerSpansOnHover(HoverInfo(), PointF());
+    textPattern->ExitSpansForOnHoverEvent(HoverInfo());
+    EXPECT_EQ(textPattern->spanMouseEventInitialized_, false);
+}
+
+/**
+ * @tc.name: SpanMouseHoverEvent002
+ * @tc.desc: test text_select_overlay.cpp on hover event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanMouseHoverEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. case.
+     */
+    std::list<RefPtr<SpanItem>> spans;
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(STRING_HELLO);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    OnHoverFunc callback = [](bool isHover, HoverInfo& info) {
+        isHover = true;
+    };
+    spanModelNG.SetOnHover(std::move(callback));
+    spans.emplace_back(spanNode->spanItem_);
+    EXPECT_EQ(spans.size(), 1);
+    textPattern->spans_ = spans;
+
+    EXPECT_EQ(textPattern->HasSpanOnHoverEvent(), true);
+    textPattern->InitSpanMouseEvent();
+    EXPECT_NE(textPattern->spanMouseEventInitialized_, true);
     textPattern->TriggerSpansOnHover(HoverInfo(), PointF());
     textPattern->ExitSpansForOnHoverEvent(HoverInfo());
     EXPECT_EQ(textPattern->spanMouseEventInitialized_, false);

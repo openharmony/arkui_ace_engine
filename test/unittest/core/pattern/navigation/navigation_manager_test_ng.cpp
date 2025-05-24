@@ -35,6 +35,25 @@ namespace {
 const std::string NAVIGATION_ID1 = "Navigation1";
 const std::string PAGE1 = "Page1";
 const std::string PARAM1 = "Param1";
+constexpr char INTENT_PARAM_KEY[] = "ohos.insightIntent.executeParam.param";
+constexpr char INTENT_NAVIGATION_ID_KEY[] = "ohos.insightIntent.pageParam.navigationId";
+constexpr char INTENT_NAVDESTINATION_NAME_KEY[] = "ohos.insightIntent.pageParam.navDestinationName";
+
+RefPtr<NavigationManager> GetNavigationManager()
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    return pipeline ? pipeline->GetNavigationManager() : nullptr;
+}
+
+std::string BuildSerializedIntentInfo(
+    const std::string& navigationInspectorId, const std::string& navDestinationName, const std::string& param)
+{
+    auto intentJson = JsonUtil::Create(true);
+    intentJson->Put(INTENT_PARAM_KEY, JsonUtil::ParseJsonString(param));
+    intentJson->Put(INTENT_NAVIGATION_ID_KEY, navigationInspectorId.c_str());
+    intentJson->Put(INTENT_NAVDESTINATION_NAME_KEY, navDestinationName.c_str());
+    return intentJson->ToString();
+}
 } // namespace
 
 class NavigationManagerTestNg : public testing::Test {
@@ -198,6 +217,32 @@ HWTEST_F(NavigationManagerTestNg, GetNavigationInfo003, TestSize.Level1)
     ASSERT_NE(navigationManager, nullptr);
     auto navigationInfo = navigationManager->GetNavigationInfo(navBarNode);
     EXPECT_EQ(navigationInfo, nullptr);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: GetNavigationInfo004
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, GetNavigationInfo004, TestSize.Level1)
+{
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG);
+    customNode->SetNavigationNode(AceType::WeakClaim(AceType::RawPtr(navigationGroupNode)));
+
+    auto pipelineContext = customNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    auto navigationInfo = navigationManager->GetNavigationInfo(customNode);
+    ASSERT_NE(navigationInfo, nullptr);
+    EXPECT_EQ(navigationInfo->uniqueId, navigationGroupNode->GetId());
     NavigationManagerTestNg::TearDownTestSuite();
 }
 
@@ -596,5 +641,64 @@ HWTEST_F(NavigationManagerTestNg, CheckNodeNeedCacheTest006, TestSize.Level1)
      */
     ASSERT_NE(navigationManager, nullptr);
     ASSERT_EQ(navigationManager->CheckNodeNeedCache(navigationGroupNode), false);
+}
+
+/**
+ * @tc.name: ParseNavigationIntentInfo001
+ * @tc.desc: Branch: if serializedIntentInfo is valid
+ * @tc.expect: can parse serializedIntentInfo properly
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(NavigationManagerTestNg, ParseNavigationIntentInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get navigation manager.
+     */
+    auto navigationManager = GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    /**
+     * @tc.steps: step2. build serialized intent info.
+     */
+    const std::string navigationInspectorId = "navigation";
+    const std::string navDestinationName = "name";
+    const std::string param = "{\"param\":\"\"}";
+    const std::string serializedIntentInfo =
+        BuildSerializedIntentInfo(navigationInspectorId, navDestinationName, param);
+    /**
+     * @tc.steps: step3. parse target serialized intentInfo and do verify.
+     */
+    NavigationIntentInfo intentInfo = navigationManager->ParseNavigationIntentInfo(serializedIntentInfo);
+    ASSERT_EQ(intentInfo.navigationInspectorId, navigationInspectorId);
+    ASSERT_EQ(intentInfo.navDestinationName, navDestinationName);
+    ASSERT_EQ(intentInfo.param, param);
+}
+
+/**
+ * @tc.name: ParseNavigationIntentInfo002
+ * @tc.desc: Branch: if serializedIntentInfo is invalid
+ * @tc.expect: no any cpp-crash
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(NavigationManagerTestNg, ParseNavigationIntentInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get navigation manager.
+     */
+    auto navigationManager = GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    /**
+     * @tc.steps: step2. build an empty serialized intent info.
+     */
+    const auto intentJson = JsonUtil::Create(true);
+    const std::string serializedIntentInfo = intentJson->ToString();
+    /**
+     * @tc.steps: step3. parse target serialized intentInfo and do verify.
+     */
+    NavigationIntentInfo intentInfo = navigationManager->ParseNavigationIntentInfo(serializedIntentInfo);
+    ASSERT_EQ(intentInfo.navigationInspectorId, "");
+    ASSERT_EQ(intentInfo.navDestinationName, "");
+    ASSERT_EQ(intentInfo.param, "");
 }
 } // namespace OHOS::Ace::NG

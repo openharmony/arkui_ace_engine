@@ -877,4 +877,41 @@ HWTEST_F(TabsTestNg, SetOnTabBarClickTest001, TestSize.Level1)
     HandleClick(1);
     EXPECT_EQ(currentIndex, 1);
 }
+
+/**
+ * @tc.name: TabContentCreatePaddingWithResourceObj001
+ * @tc.desc: test CreatePaddingWithResourceObj of TabContentModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentCreatePaddingWithResourceObj001, TestSize.Level1)
+{
+    CreateTabContent();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingLeftWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingRightWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingTopWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingBottomWithResourceObj(frameNode, nullptr));
+
+    RefPtr<ResourceObject> resObjLeft;
+    RefPtr<ResourceObject> resObjRight;
+    RefPtr<ResourceObject> resObjTop;
+    RefPtr<ResourceObject> resObjBottom;
+
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingLeftWithResourceObj(frameNode, resObjLeft));
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingRightWithResourceObj(frameNode, resObjRight));
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingTopWithResourceObj(frameNode, resObjTop));
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingBottomWithResourceObj(frameNode, resObjBottom));
+
+    resObjLeft = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+    resObjRight = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+    resObjTop = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+    resObjBottom = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingLeftWithResourceObj(frameNode, resObjLeft));
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingRightWithResourceObj(frameNode, resObjRight));
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingTopWithResourceObj(frameNode, resObjTop));
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingBottomWithResourceObj(frameNode, resObjBottom));
+}
 } // namespace OHOS::Ace::NG

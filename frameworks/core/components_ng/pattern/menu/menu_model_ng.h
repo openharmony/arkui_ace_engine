@@ -34,6 +34,7 @@ public:
     void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
         const std::optional<Dimension>& radiusBottomLeft, const std::optional<Dimension>& radiusBottomRight) override;
     void SetExpandingMode(const SubMenuExpandingMode& expandingMode) override;
+    void SetExpandSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& expandSymbol) override;
     void SetItemDivider(const V2::ItemDivider& divider, const DividerMode& mode) override;
     void SetItemGroupDivider(const V2::ItemDivider& divider, const DividerMode& mode) override;
     static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& color);
@@ -50,6 +51,8 @@ public:
     static void SetItemDivider(FrameNode* frameNode, const V2::ItemDivider& divider, const DividerMode& mode);
     static void SetItemGroupDivider(FrameNode* frameNode, const V2::ItemDivider& divider, const DividerMode& mode);
     static void SetExpandingMode(FrameNode* frameNode, const SubMenuExpandingMode& expandingMode);
+    static void SetExpandSymbol(FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& expandSymbol);
+    static RefPtr<FrameNode> CreateMenu();
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_MODEL_NG_H

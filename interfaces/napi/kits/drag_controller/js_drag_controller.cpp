@@ -780,7 +780,7 @@ bool JudgeCoordinateCanDrag(Msdp::DeviceStatus::ShadowInfo& shadowInfo)
 }
 
 int32_t SetUnifiedData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::string& udKey,
-    std::map<std::string, int64_t>& summary)
+    std::map<std::string, int64_t>& summary, std::map<std::string, int64_t>& detailedSummary)
 {
     int32_t dataSize = 1;
     CHECK_NULL_RETURN(asyncCtx, dataSize);
@@ -789,7 +789,7 @@ int32_t SetUnifiedData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::st
         if (ret != 0) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "udmf set data failed, return value is %{public}d", ret);
         } else {
-            ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
+            ret = UdmfClient::GetInstance()->GetSummary(udKey, summary, detailedSummary);
             if (ret != 0) {
                 TAG_LOGI(AceLogTag::ACE_DRAG, "get summary failed, return value is %{public}d", ret);
             }
@@ -830,7 +830,8 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     }
     std::string udKey;
     std::map<std::string, int64_t> summary;
-    int32_t dataSize = SetUnifiedData(asyncCtx, udKey, summary);
+    std::map<std::string, int64_t> detailedSummary;
+    int32_t dataSize = SetUnifiedData(asyncCtx, udKey, summary, detailedSummary);
     int32_t recordSize = (dataSize != 0 ? dataSize : static_cast<int32_t>(shadowInfos.size()));
     auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
     if (badgeNumber.has_value()) {
@@ -845,7 +846,7 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
         asyncCtx->dragPointerEvent.sourceType, recordSize, asyncCtx->dragPointerEvent.pointerId,
         asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY,
-        asyncCtx->dragPointerEvent.displayId, windowId, true, false, summary };
+        asyncCtx->dragPointerEvent.displayId, windowId, true, false, summary, false, detailedSummary };
     return true;
 }
 
@@ -1137,8 +1138,8 @@ void ExecuteHandleOnDragStart(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     }
 }
 
-void GetParams(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t& dataSize,
-    std::string& udKey, std::map<std::string, int64_t>& summary)
+void GetParams(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t& dataSize, std::string& udKey,
+    std::map<std::string, int64_t>& summary, std::map<std::string, int64_t>& detailedSummary)
 {
     CHECK_NULL_VOID(asyncCtx);
     if (asyncCtx->unifiedData) {
@@ -1146,7 +1147,7 @@ void GetParams(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t& dataSi
         if (ret != 0) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "udmf set data failed, return value is %{public}d", ret);
         } else {
-            ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
+            ret = UdmfClient::GetInstance()->GetSummary(udKey, summary, detailedSummary);
             if (ret != 0) {
                 TAG_LOGI(AceLogTag::ACE_DRAG, "get summary failed, return value is %{public}d", ret);
             }
@@ -1167,7 +1168,8 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     int32_t dataSize = 1;
     std::string udKey;
     std::map<std::string, int64_t> summary;
-    GetParams(asyncCtx, dataSize, udKey, summary);
+    std::map<std::string, int64_t> detailedSummary;
+    GetParams(asyncCtx, dataSize, udKey, summary, detailedSummary);
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
     CHECK_NULL_RETURN(container, false);
     if (!container->GetLastMovingPointerPosition(asyncCtx->dragPointerEvent)) {
@@ -1186,7 +1188,7 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
         arkExtraInfoJson->ToString(), asyncCtx->dragPointerEvent.sourceType, dataSize,
         asyncCtx->dragPointerEvent.pointerId, asyncCtx->dragPointerEvent.displayX,
         asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
-        windowId, true, false, summary };
+        windowId, true, false, summary, false, detailedSummary };
     return true;
 }
 

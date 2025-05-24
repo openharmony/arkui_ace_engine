@@ -1784,7 +1784,7 @@ void JSTextField::SetDecoration(const JSCallbackInfo& info)
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
-        TextDecoration textDecoration = theme->GetTextStyle().GetTextDecoration();
+        TextDecoration textDecoration = theme->GetTextDecoration();
         if (typeValue->IsNumber()) {
             textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
         }
@@ -2129,6 +2129,15 @@ void JSTextField::SetOnWillChange(const JSCallbackInfo& info)
         return true;
     };
     TextFieldModel::GetInstance()->SetOnWillChangeEvent(std::move(onWillChange));
+}
+
+void JSTextField::SetEnableAutoSpacing(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    TextFieldModel::GetInstance()->SetEnableAutoSpacing(enabled);
 }
 
 void JSTextField::SetStrokeWidth(const JSCallbackInfo& info)

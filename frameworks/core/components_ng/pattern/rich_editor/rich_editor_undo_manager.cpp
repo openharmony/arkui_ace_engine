@@ -65,10 +65,13 @@ void RichEditorUndoManager::RedoByRecords()
     CHECK_NULL_VOID(!pattern->IsPreviewTextInputting());
     auto record = redoRecords_.back();
     redoRecords_.pop_back();
-    CHECK_NULL_VOID(BeforeChangeByRecord(record));
+    bool isPreventChange = !record.isOnlyStyleChange && !BeforeChangeByRecord(record);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "RedoByRecords [%{public}s] isPreventChange=%{public}d",
+        record.ToString().c_str(), isPreventChange);
+    CHECK_NULL_VOID(!isPreventChange);
     pattern->ProcessStyledRedo(record);
     RecordOperation(record, true);
-    AfterChangeByRecord(record);
+    IF_TRUE(!record.isOnlyStyleChange, AfterChangeByRecord(record));
 }
 
 void RichEditorUndoManager::RecordSelectionBefore()
@@ -260,6 +263,37 @@ bool SpansUndoManager::BeforeChangeByRecord(const UndoRedoRecord& record, bool i
     return pattern->BeforeSpansChange(record, isUndo);
 }
 
+void SpansUndoManager::RemoveBuilderSpanOptions(const RefPtr<NG::UINode> customNode)
+{
+    CHECK_NULL_VOID(customNode);
+    RemoveBuilderSpanOptions(undoRecords_, customNode);
+    RemoveBuilderSpanOptions(redoRecords_, customNode);
+}
+
+void SpansUndoManager::RemoveBuilderSpanOptions(std::deque<UndoRedoRecord>& records,
+    const RefPtr<NG::UINode> customNode)
+{
+    CHECK_NULL_VOID(customNode);
+    for (auto& record : records) {
+        CHECK_NULL_CONTINUE(record.IsRestoreBuilderSpan());
+        IF_TRUE(record.optionsListBefore.has_value(),
+            RemoveBuilderSpanOptions(record.optionsListBefore.value(), customNode));
+        IF_TRUE(record.optionsListAfter.has_value(),
+            RemoveBuilderSpanOptions(record.optionsListAfter.value(), customNode));
+    }
+}
+
+void SpansUndoManager::RemoveBuilderSpanOptions(OptionsList& optionsList, const RefPtr<NG::UINode> customNode)
+{
+    CHECK_NULL_VOID(customNode);
+    for (auto& option : optionsList) {
+        if (const auto* builderOpt = std::get_if<BuilderSpanOptions>(&option)) {
+            bool needRemove = builderOpt->customNode && builderOpt->customNode == customNode;
+            IF_TRUE(needRemove, (option = TextSpanOptions{ .offset = builderOpt->offset, .value = u" " }));
+        }
+    }
+}
+
 void SpansUndoManager::AfterChangeByRecord(const UndoRedoRecord& record, bool isUndo)
 {
     auto pattern = pattern_.Upgrade();
@@ -409,6 +443,7 @@ SymbolSpanOptions SpansUndoManager::CreateSymbolSpanOptions(const RefPtr<SpanIte
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, {});
     auto options = pattern->GetSymbolSpanOptions(item);
+    options.paraStyle = pattern->GetParagraphStyle(item);
     options.offset = item->rangeStart;
     return options;
 }

@@ -93,6 +93,7 @@ public:
     {
         return contentModifierNode_ != nullptr;
     }
+    void UpdateColor(const Color& color, bool isFristLoad = false);
 
     void SetForegroundColorParseFailed(bool isParseFailed)
     {

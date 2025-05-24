@@ -51,7 +51,7 @@ public:
     void SetImageRenderMode(ImageRenderMode imageRenderMode) override;
     bool IsSrcSvgImage() override;
     void SetAutoResize(bool autoResize) override;
-    void SetResizableSlice(const ImageResizableSlice& slice) override {};
+    void SetResizableSlice(ImageResizableSlice& slice) override {};
     void SetResizableLattice(const RefPtr<DrawingLattice>& lattice) override {};
     void ResetResizableLattice() override {};
     void SetSyncMode(bool syncMode) override;
@@ -77,6 +77,7 @@ public:
     void SetOrientation(ImageRotateOrientation orientation) override {}
     void CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) override {}
     bool GetIsAnimation() override;
+    void CreateWithResourceObj(ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject) override {};
 };
 
 } // namespace OHOS::Ace::Framework

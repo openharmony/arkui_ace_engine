@@ -73,11 +73,16 @@ void JSDivider::SetDividerColor(const JSCallbackInfo& info)
     auto theme = GetTheme<DividerTheme>();
     CHECK_NULL_VOID(theme);
     Color dividerColor = theme->GetColor();
-    if (!ParseJsColor(info[0], dividerColor)) {
+    RefPtr<ResourceObject> dividerResObj;
+    if (!ParseJsColor(info[0], dividerColor, dividerResObj)) {
         DividerModel::GetInstance()->ResetDividerColor();
         return;
     }
-    DividerModel::GetInstance()->DividerColor(dividerColor);
+    if (SystemProperties::ConfigChangePerform() && dividerResObj) {
+        DividerModel::GetInstance()->DividerColor(dividerResObj);
+    } else {
+        DividerModel::GetInstance()->DividerColor(dividerColor);
+    }
 }
 
 void JSDivider::SetStrokeWidth(const JSCallbackInfo& info)

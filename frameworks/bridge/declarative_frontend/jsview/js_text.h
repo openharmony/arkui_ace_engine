@@ -49,6 +49,7 @@ public:
     static void SetTextAlign(int32_t value);
     static void SetLineHeight(const JSCallbackInfo& info);
     static void SetLineSpacing(const JSCallbackInfo& info);
+    static void SetOptimizeTrailingSpace(const JSCallbackInfo& info);
     static void SetFontFamily(const JSCallbackInfo& info);
     static void SetMinFontSize(const JSCallbackInfo& info);
     static void SetMaxFontSize(const JSCallbackInfo& info);
@@ -92,6 +93,7 @@ public:
     static void JsResponseRegion(const JSCallbackInfo& info);
     static void SetHalfLeading(const JSCallbackInfo& info);
     static void SetEnableHapticFeedback(const JSCallbackInfo& info);
+    static void SetEnableAutoSpacing(const JSCallbackInfo& info);
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

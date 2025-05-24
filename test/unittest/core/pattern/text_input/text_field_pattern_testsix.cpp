@@ -18,6 +18,7 @@
 #include "test/mock/core/common/mock_container.h"
 
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/text_field/text_content_type.h"
 
 namespace OHOS::Ace::NG {
 
@@ -436,5 +437,17 @@ HWTEST_F(TextFieldPatternTestSix, BeforeAutoFillAnimation005, TestSize.Level0)
     EXPECT_EQ(StringUtils::Str16ToStr8(pattern_->autoFillController_->GetAutoFillTextUtf16Value()),
         StringUtils::Str16ToStr8(content));
     EXPECT_EQ(pattern_->autoFillController_->GetAutoFillAnimationStatus(), AutoFillAnimationStatus::INIT);
+}
+
+/**
+ * @tc.name: IsTriggerAutoFillPassword001
+ * @tc.desc: test testInput text IsTriggerAutoFillPassword
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSix, IsTriggerAutoFillPassword001, TestSize.Level0)
+{
+    CreateTextField();
+    layoutProperty_->UpdateTextContentType(TextContentType::CITY_ADDRESS);
+    EXPECT_EQ(pattern_->IsTriggerAutoFillPassword(), false);
 }
 } // namespace OHOS::Ace::NG

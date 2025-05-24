@@ -260,6 +260,7 @@ public:
     void UpdateWindowFocusState(bool isFocused) override;
     void UpdateWindowActiveState(bool isActive) override;
     void SetContentClip(const std::variant<RectF, RefPtr<ShapeRect>>& rect) override;
+    void ResetContentClip() override;
 
     void SetSharedTranslate(float xTranslate, float yTranslate) override;
     void ResetSharedTranslate() override;
@@ -447,7 +448,7 @@ public:
     Matrix4 GetRevertMatrix() override;
     void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) override;
     void SetOpacityMultiplier(float opacity) override;
-    void UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode) override;
+    void UpdateOcclusionCullingStatus(bool enable) override;
     bool IsDisappearing() const override
     {
         return isDisappearing_;
@@ -649,6 +650,7 @@ protected:
     void PaintPixmapBgImage();
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
+    void UpdateBlurStyleForColorMode(const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions);
     void SetBackBlurFilter();
     void SetFrontBlurFilter();
     bool UpdateBlurBackgroundColor(const std::optional<BlurStyleOption>& bgBlurStyle);
@@ -749,8 +751,6 @@ protected:
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;
-    int32_t densityChangedCallbackId_ = DEFAULT_CALLBACK_ID;
-    static constexpr int32_t DEFAULT_CALLBACK_ID = -1;
     static constexpr int32_t INVALID_PARENT_ID = -2100000;
     static constexpr uint32_t DRAW_REGION_RECT_COUNT = 7;
     std::map<std::string, RefPtr<ImageLoadingContext>> particleImageContextMap_;
@@ -768,6 +768,7 @@ protected:
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_;
     RefPtr<MoonProgressModifier> moonProgressModifier_;
     std::shared_ptr<Rosen::RSClipBoundsModifier> clipBoundModifier_;
+    std::shared_ptr<Rosen::RSCustomClipToFrameModifier> customClipToFrameModifier_;
     std::shared_ptr<Rosen::RSMaskModifier> clipMaskModifier_;
     std::shared_ptr<FocusStateModifier> focusStateModifier_;
     std::shared_ptr<FocusStateModifier> accessibilityFocusStateModifier_;

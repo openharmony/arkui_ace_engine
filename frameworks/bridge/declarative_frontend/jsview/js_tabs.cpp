@@ -254,10 +254,11 @@ void JSTabs::SetBarWidth(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-
+    RefPtr<ResourceObject> widthResObj;
     CalcDimension width = Dimension(-1.0, DimensionUnit::VP);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::BAR_WIDTH, nullptr);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (!ParseJsDimensionVpNG(info[0], width)) {
+        if (!ParseJsDimensionVpNG(info[0], width, widthResObj)) {
             width = Dimension(-1.0, DimensionUnit::VP);
             TabsModel::GetInstance()->SetTabBarWidth(width);
             return;
@@ -265,8 +266,8 @@ void JSTabs::SetBarWidth(const JSCallbackInfo& info)
     } else {
         ParseJsDimensionVp(info[0], width);
     }
-
     TabsModel::GetInstance()->SetTabBarWidth(width);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::BAR_WIDTH, widthResObj);
 }
 
 void JSTabs::SetBarHeight(const JSCallbackInfo& info)
@@ -275,6 +276,7 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
         return;
     }
     CalcDimension height = Dimension(-1.0, DimensionUnit::VP);
+    RefPtr<ResourceObject> heightResObj;
     bool adaptiveHeight = false;
     bool noMinHeightLimit = false;
     auto barHeightInfo = info[0];
@@ -289,7 +291,7 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
         adaptiveHeight = true;
     } else {
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            if (!ParseJsDimensionVpNG(barHeightInfo, height)) {
+            if (!ParseJsDimensionVpNG(barHeightInfo, height, heightResObj)) {
                 height = Dimension(-1.0, DimensionUnit::VP);
             }
         } else {
@@ -299,6 +301,7 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetBarAdaptiveHeight(adaptiveHeight);
     TabsModel::GetInstance()->SetNoMinHeightLimit(noMinHeightLimit);
     TabsModel::GetInstance()->SetTabBarHeight(height);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::BAR_HEIGHT, heightResObj);
 }
 
 void JSTabs::SetWidth(const JSCallbackInfo& info)
@@ -391,9 +394,13 @@ void JSTabs::SetBarOverlap(const JSCallbackInfo& info)
 
 void JSTabs::SetBarBackgroundColor(const JSCallbackInfo& info)
 {
+    RefPtr<ResourceObject> resObj;
     Color backgroundColor = Color::BLACK.BlendOpacity(0.0f);
     if (info.Length() > 0) {
-        ConvertFromJSValue(info[0], backgroundColor);
+        ConvertFromJSValue(info[0], backgroundColor, resObj);
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::BAR_BACKGROUND_COLOR, resObj);
     }
     TabsModel::GetInstance()->SetBarBackgroundColor(backgroundColor);
 }
@@ -411,11 +418,16 @@ void JSTabs::SetBarBackgroundBlurStyle(const JSCallbackInfo& info)
             styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
         }
     }
+    RefPtr<ResourceObject> inactiveColorStrObj;
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
         ParseBlurStyleOption(jsOption, styleOption);
+        if (SystemProperties::ConfigChangePerform()) {
+            ParseJsColor(jsOption->GetProperty("inactiveColor"), styleOption.inactiveColor, inactiveColorStrObj);
+        }
     }
     TabsModel::GetInstance()->SetBarBackgroundBlurStyle(styleOption);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::BlurStyle_INACTIVE_COLOR, inactiveColorStrObj);
 }
 
 void JSTabs::SetDivider(const JSCallbackInfo& info)
@@ -426,6 +438,10 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
     CalcDimension dividerEndMargin;
     RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
+    RefPtr<ResourceObject> widthResObj;
+    RefPtr<ResourceObject> colorResObj;
+    RefPtr<ResourceObject> startMarginResObj;
+    RefPtr<ResourceObject> endMarginResObj;
 
     if (info.Length() > 0) {
         auto dividerInfo = info[0];
@@ -436,22 +452,26 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
         if (dividerInfo->IsNull()) {
             divider.isNull = true;
         } else {
-            if (!dividerInfo->IsObject() || !ParseJsDimensionVp(obj->GetProperty("strokeWidth"), dividerStrokeWidth) ||
+            if (!dividerInfo->IsObject() ||
+                !ParseJsDimensionVp(obj->GetProperty("strokeWidth"), dividerStrokeWidth, widthResObj) ||
                 dividerStrokeWidth.Value() < 0.0f || dividerStrokeWidth.Unit() == DimensionUnit::PERCENT) {
                 divider.strokeWidth.Reset();
             } else {
                 divider.strokeWidth = dividerStrokeWidth;
             }
-            if (!dividerInfo->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+            if (!dividerInfo->IsObject() ||
+                !ConvertFromJSValue(obj->GetProperty("color"), divider.color, colorResObj)) {
                 divider.color = tabTheme->GetDividerColor();
             }
-            if (!dividerInfo->IsObject() || !ParseJsDimensionVp(obj->GetProperty("startMargin"), dividerStartMargin) ||
+            if (!dividerInfo->IsObject() ||
+                !ParseJsDimensionVp(obj->GetProperty("startMargin"), dividerStartMargin, startMarginResObj) ||
                 dividerStartMargin.Value() < 0.0f || dividerStartMargin.Unit() == DimensionUnit::PERCENT) {
                 divider.startMargin.Reset();
             } else {
                 divider.startMargin = dividerStartMargin;
             }
-            if (!dividerInfo->IsObject() || !ParseJsDimensionVp(obj->GetProperty("endMargin"), dividerEndMargin) ||
+            if (!dividerInfo->IsObject() ||
+                !ParseJsDimensionVp(obj->GetProperty("endMargin"), dividerEndMargin, endMarginResObj) ||
                 dividerEndMargin.Value() < 0.0f || dividerEndMargin.Unit() == DimensionUnit::PERCENT) {
                 divider.endMargin.Reset();
             } else {
@@ -460,6 +480,10 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
         }
     }
     TabsModel::GetInstance()->SetDivider(divider);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::DIVIDER_STROKE_WIDTH, widthResObj);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::DIVIDER_COLOR, colorResObj);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::DIVIDER_START_MARGIN, startMarginResObj);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::DIVIDER_END_MARGIN, endMarginResObj);
 }
 
 void JSTabs::SetClip(const JSCallbackInfo& info)
@@ -476,15 +500,15 @@ void JSTabs::SetClip(const JSCallbackInfo& info)
 void JSTabs::SetScrollableBarModeOptions(const JSRef<JSVal>& info)
 {
     ScrollableBarModeOptions option;
+    RefPtr<ResourceObject> resObj;
     auto optionParam = JSRef<JSObject>::Cast(info);
     CalcDimension margin = Dimension(0.0, DimensionUnit::VP);
-    if (!ParseJsDimensionVp(optionParam->GetProperty("margin"), margin) || Negative(margin.Value()) ||
+    if (!ParseJsDimensionVp(optionParam->GetProperty("margin"), margin, resObj) || Negative(margin.Value()) ||
         margin.Unit() == DimensionUnit::PERCENT) {
         option.margin = 0.0_vp;
     } else {
         option.margin = margin;
     }
-
     auto nonScrollableLayoutStyle = optionParam->GetProperty("nonScrollableLayoutStyle");
     int32_t layoutStyle;
     if (!ConvertFromJSValue(nonScrollableLayoutStyle, layoutStyle) ||
@@ -495,11 +519,14 @@ void JSTabs::SetScrollableBarModeOptions(const JSRef<JSVal>& info)
         option.nonScrollableLayoutStyle = (static_cast<LayoutStyle>(layoutStyle));
     }
     TabsModel::GetInstance()->SetScrollableBarModeOptions(option);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::SCROLLABLE_BAR_MARGIN, resObj);
 }
 
 void JSTabs::SetBarGridAlign(const JSCallbackInfo& info)
 {
     BarGridColumnOptions columnOption;
+    RefPtr<ResourceObject> gutterResObj;
+    RefPtr<ResourceObject> marginResObj;
     if (info.Length() > 0 && info[0]->IsObject()) {
         auto gridParam = JSRef<JSObject>::Cast(info[0]);
         auto sm = gridParam->GetProperty("sm");
@@ -518,17 +545,19 @@ void JSTabs::SetBarGridAlign(const JSCallbackInfo& info)
             columnOption.lg = lg->ToNumber<int32_t>();
         }
         CalcDimension columnGutter;
-        if (ParseJsDimensionVp(gridParam->GetProperty("gutter"), columnGutter) && NonNegative(columnGutter.Value()) &&
-            columnGutter.Unit() != DimensionUnit::PERCENT) {
+        if (ParseJsDimensionVp(gridParam->GetProperty("gutter"), columnGutter, gutterResObj) &&
+            NonNegative(columnGutter.Value()) && columnGutter.Unit() != DimensionUnit::PERCENT) {
             columnOption.gutter = columnGutter;
         }
         CalcDimension columnMargin;
-        if (ParseJsDimensionVp(gridParam->GetProperty("margin"), columnMargin) && NonNegative(columnMargin.Value()) &&
-            columnMargin.Unit() != DimensionUnit::PERCENT) {
+        if (ParseJsDimensionVp(gridParam->GetProperty("margin"), columnMargin, marginResObj) &&
+            NonNegative(columnMargin.Value()) && columnMargin.Unit() != DimensionUnit::PERCENT) {
             columnOption.margin = columnMargin;
         }
     }
     TabsModel::GetInstance()->SetBarGridAlign(columnOption);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::BAR_GRID_GUTTER, gutterResObj);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::BAR_GRID_MARGIN, marginResObj);
 }
 
 void JSTabs::SetAnimateMode(const JSCallbackInfo& info)
@@ -561,11 +590,19 @@ void JSTabs::SetBarBackgroundEffect(const JSCallbackInfo& info)
         return;
     }
     EffectOption option;
+    RefPtr<ResourceObject> colorStrObj;
+    RefPtr<ResourceObject> inactiveColorStrObj;
     if (info[0]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
         ParseEffectOption(jsOption, option);
+        if (SystemProperties::ConfigChangePerform()) {
+            ParseJsColor(jsOption->GetProperty("color"), option.color, colorStrObj);
+            ParseJsColor(jsOption->GetProperty("inactiveColor"), option.inactiveColor, inactiveColorStrObj);
+        }
     }
     TabsModel::GetInstance()->SetBarBackgroundEffect(option);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::COLOR, colorStrObj);
+    TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::INACTIVE_COLOR, inactiveColorStrObj);
 }
 
 void JSTabs::SetPageFlipMode(const JSCallbackInfo& info)

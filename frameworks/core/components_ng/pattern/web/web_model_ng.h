@@ -230,6 +230,8 @@ public:
     void SetEnabledHapticFeedback(bool isEnabled) override;
     void SetOptimizeParserBudgetEnabled(bool enable) override;
     void SetWebMediaAVSessionEnabled(bool isEnabled) override;
+    void SetEnableDataDetector(bool isEnabled) override;
+    void SetDataDetectorConfig(const TextDetectConfig& config) override;
     void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) override;
 
     static void SetJsEnabled(FrameNode* frameNode, bool isJsEnabled);
@@ -241,6 +243,51 @@ public:
     static void SetDarkMode(FrameNode* frameNode, WebDarkMode mode);
     static void SetMultiWindowAccessEnabled(FrameNode* frameNode, bool isMultiWindowAccessEnable);
     static void SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod);
+    static void SetKeyboardAvoidMode(FrameNode* frameNode, const WebKeyboardAvoidMode& mode);
+    static void SetOnControllerAttached(FrameNode* frameNode, std::function<void()>&& callback);
+    static void SetVerticalScrollBarAccessEnabled(FrameNode* frameNode, bool isVerticalScrollBarAccessEnabled);
+    static void SetHorizontalScrollBarAccessEnabled(FrameNode* frameNode, bool isHorizontalScrollBarAccessEnabled);
+    static void SetTextZoomRatio(FrameNode* frameNode, int32_t textZoomRatioNum);
+    static void InitialScale(FrameNode* frameNode, float scale);
+    static void SetOnScroll(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnOverScroll(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnScaleChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnRequestFocus(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnContextMenuHide(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetGeolocationAccessEnabled(FrameNode* frameNode, bool isGeolocationAccessEnabled);
+    static void SetDatabaseAccessEnabled(FrameNode* frameNode, bool isDatabaseAccessEnabled);
+    static void SetOverviewModeAccessEnabled(FrameNode* frameNode, bool isOverviewModeAccessEnabled);
+    static void SetForceDarkAccess(FrameNode* frameNode, bool isForceDarkAccess);
+    static void SetPinchSmoothModeEnabled(FrameNode* frameNode, bool isPinchSmoothModeEnabled);
+    static void SetMetaViewport(FrameNode* frameNode, bool isMetaViewport);
+    static void SetEnableFollowSystemFontWeight(FrameNode* frameNode, bool isEnableFollowSystemFontWeight);
+    static void SetNativeEmbedModeEnabled(FrameNode* frameNode, bool isNativeEmbedModeEnabled);
+    static void SetMinFontSize(FrameNode* frameNode, int32_t minFontSize);
+    static void SetDefaultFontSize(FrameNode* frameNode, int32_t defaultFontSize);
+    static void SetDefaultFixedFontSize(FrameNode* frameNode, int32_t defaultFixedFontSize);
+    static void SetMinLogicalFontSize(FrameNode* frameNode, int32_t minLogicalFontSize);
+    static void SetWebStandardFont(FrameNode* frameNode, const std::string& standardFontFamily);
+    static void SetWebSerifFont(FrameNode* frameNode, const std::string& serifFontFamily);
+    static void SetWebSansSerifFont(FrameNode* frameNode, const std::string& sansSerifFontFamily);
+    
+    static void SetWebFixedFont(FrameNode* frameNode, const std::string& fixedFontFamily);
+    static void SetWebFantasyFont(FrameNode* frameNode, const std::string& fixedFontFamily);
+    static void SetWebCursiveFont(FrameNode* frameNode, const std::string& cursiveFontFamily);
+    static void SetLayoutMode(FrameNode* frameNode, WebLayoutMode mode);
+    static void SetNativeEmbedLifecycleChangeId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void RegisterNativeEmbedRule(FrameNode* frameNode, const std::string& tag, const std::string& type);
+    static void SetNativeEmbedOptions(FrameNode* frameNode, bool isIntrinsicSizeEnabled);
+    static void SetFirstContentfulPaintId(
+        FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstContentfulPaintId);
+    static void SetAudioStateChangedId(
+        FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& audioStateChanged);
+    static void SetOnFullScreenExit(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetImageAccessEnabled(FrameNode* frameNode, bool isImageAccessEnabled);
+    static void SetOnLineImageAccessEnabled(FrameNode* frameNode, bool isOnLineImageAccessEnabled);
+    static void SetMediaPlayGestureAccess(FrameNode* frameNode, bool isNeedGestureAccess);
+    static void SetAudioResumeInterval(FrameNode* frameNode, int32_t resumeInterval);
+    static void SetAudioExclusive(FrameNode* frameNode, bool audioExclusive);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

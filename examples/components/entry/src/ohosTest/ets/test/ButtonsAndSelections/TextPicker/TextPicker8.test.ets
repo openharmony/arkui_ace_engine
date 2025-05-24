@@ -31,8 +31,8 @@ import { TextPickerStart } from './TextPicker';
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();
 
-export default function TimePicker8() {
-  describe('TimePicker8', () => {
+export default function TextPicker8() {
+  describe('TextPicker8', () => {
 
     beforeAll(async (done: Function) => {
       await TextPickerStart(done)

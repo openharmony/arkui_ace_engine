@@ -564,6 +564,14 @@ void ContextMenuParamOhos::GetImageRect(int32_t& x, int32_t& y, int32_t& width, 
     }
 }
 
+bool ContextMenuParamOhos::IsAILink() const
+{
+    if (param_) {
+        return param_->IsAILink();
+    }
+    return false;
+}
+
 void ContextMenuResultOhos::Cancel() const
 {
     if (callback_) {
@@ -783,8 +791,8 @@ void WebWindowFocusChangedListener::AfterFocused()
     TAG_LOGI(AceLogTag::ACE_WEB, "Dragdrop, AfterFocused, end attach ime, remove listener");
 }
 
-void WebAvoidAreaChangedListener::OnAvoidAreaChanged(
-    const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
+void WebAvoidAreaChangedListener::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea,
+    OHOS::Rosen::AvoidAreaType type, const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
 {
     auto context = context_.Upgrade();
     if (!context) {
@@ -1296,7 +1304,11 @@ bool WebDelegate::LoadDataWithRichText()
                     return;
                 }
                 if (delegate->nweb_) {
-                    delegate->nweb_->LoadWithDataAndBaseUrl("resource://rawfile", data, "", "", "");
+                    if (data.find("resource:/") == 0) {
+                        delegate->nweb_->Load(data);
+                    } else {
+                        delegate->nweb_->LoadWithDataAndBaseUrl("resource://rawfile", data, "", "", "");
+                    }
                 }
             },
             TaskExecutor::TaskType::PLATFORM, "ArkUIWebLoadDataWithRichText");
@@ -1316,7 +1328,11 @@ bool WebDelegate::LoadDataWithRichText()
                 return;
             }
             if (delegate->nweb_) {
-                delegate->nweb_->LoadWithDataAndBaseUrl("resource://rawfile", data, "", "", "");
+                if (data.find("resource:/") == 0) {
+                    delegate->nweb_->Load(data);
+                } else {
+                    delegate->nweb_->LoadWithDataAndBaseUrl("resource://rawfile", data, "", "", "");
+                }
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebLoadDataWithRichText");
@@ -3238,6 +3254,9 @@ void WebDelegate::InitWebViewWithSurface()
             auto spanstringConvertHtmlImpl = std::make_shared<SpanstringConvertHtmlImpl>(Container::CurrentId());
             spanstringConvertHtmlImpl->SetWebDelegate(weak);
             delegate->nweb_->PutSpanstringConvertHtmlCallback(spanstringConvertHtmlImpl);
+            auto pattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->InitDataDetector();
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebInitWebViewWithSurface");
 }
@@ -4809,6 +4828,8 @@ void WebDelegate::OnPageStarted(const std::string& param)
             CHECK_NULL_VOID(webEventHub);
             webEventHub->FireOnPageStartedEvent(std::make_shared<LoadWebPageStartEvent>(param));
             delegate->RecordWebEvent(Recorder::EventType::WEB_PAGE_BEGIN, param);
+            delegate->ResetStateOfDataDetectorJS();
+            webPattern->InitDataDetector();
         },
         TaskExecutor::TaskType::JS, "ArkUIWebPageStarted");
     auto pattern = webPattern_.Upgrade();
@@ -4836,6 +4857,7 @@ void WebDelegate::OnPageFinished(const std::string& param)
                 TAG_LOGI(AceLogTag::ACE_WEB, "OnPageFinished:Start to RunJsInit.");
                 webPattern->RunJsInit();
             }
+            delegate->RunDataDetectorJS();
         },
         TaskExecutor::TaskType::JS, "ArkUIWebPageFinished");
     
@@ -5405,6 +5427,10 @@ void WebDelegate::AccessibilitySendPageChange()
             }
             if (webNode->IsOnMainTree()) {
                 if (!accessibilityManager->CheckAccessibilityVisible(webNode)) {
+                    TAG_LOGI(AceLogTag::ACE_WEB,
+                        "WebDelegate::AccessibilitySendPageChange CheckAcceessibilityVisible accessibilityId = "
+                        "%{public}" PRId64,
+                        webNode->GetAccessibilityId());
                     return;
                 }
                 if (accessibilityManager->CheckPageEventCached(webNode, false)) {
@@ -6358,6 +6384,13 @@ void WebDelegate::ChangeVisibilityOfQuickMenu()
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     webPattern->ChangeVisibilityOfQuickMenu();
+}
+
+bool WebDelegate::ChangeVisibilityOfQuickMenuV2()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    return webPattern->ChangeVisibilityOfQuickMenuV2();
 }
 
 void WebDelegate::OnQuickMenuDismissed()
@@ -8037,6 +8070,59 @@ void WebDelegate::SetNativeInnerWeb(bool isInnerWeb)
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
         nweb_->SetNativeInnerWeb(isInnerWeb);
+    }
+}
+
+void WebDelegate::ResetStateOfDataDetectorJS()
+{
+    initDataDetectorJS_ = false;
+}
+
+void WebDelegate::RunDataDetectorJS()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    if (!webPattern->GetDataDetectorEnable()) {
+        return;
+    }
+    if (initDataDetectorJS_) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::RunDataDetectorJS");
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            delegate->nweb_->RunDataDetectorJS();
+        },
+        TaskExecutor::TaskType::PLATFORM, "RunDataDetectorJS");
+    initDataDetectorJS_ = true;
+}
+
+void WebDelegate::SetDataDetectorEnable(bool enable)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::SetDataDetectorEnable enable: %{public}d", enable);
+    if (nweb_) {
+        nweb_->SetDataDetectorEnable(enable);
+    }
+}
+
+void WebDelegate::OnDataDetectorSelectText()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnDataDetectorSelectText");
+    if (nweb_) {
+        nweb_->OnDataDetectorSelectText();
+    }
+}
+
+void WebDelegate::OnDataDetectorCopy(const std::vector<std::string>& recordMix)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnDataDetectorCopy");
+    if (nweb_) {
+        nweb_->OnDataDetectorCopy(recordMix);
     }
 }
 

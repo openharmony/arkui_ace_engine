@@ -21,6 +21,7 @@
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/grid_row_model_impl.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
 #include "core/components_v2/grid_layout/grid_container_util_class.h"
@@ -53,6 +54,10 @@ constexpr size_t MD = 2;
 constexpr size_t LG = 3;
 constexpr size_t XL = 4;
 constexpr size_t XXL = 5;
+constexpr int32_t PARAMS_NUM_TOW = 2;
+constexpr int32_t PARAMS_NUM_THREE = 3;
+constexpr int32_t PARAMS_NUM_FOUR = 4;
+constexpr int32_t PARAMS_NUM_FIVE = 5;
 
 void InheritGridRowOption(const RefPtr<V2::GridContainerSize>& gridContainerSize,
     std::optional<int32_t> (&containerSizeArray)[MAX_NUMBER_BREAKPOINT])
@@ -96,8 +101,137 @@ void InheritGridColumns(const RefPtr<V2::GridContainerSize>& gridContainerSize,
     gridContainerSize->xxl = containerSizeArray[XXL].value();
 }
 
+void SaveGridRowGutterOptionxResObjXsSmMd(const RefPtr<V2::Gutter>& gutter,
+    RefPtr<ResourceObject> (&gutterSizeArrayResObj)[MAX_NUMBER_BREAKPOINT])
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (gutterSizeArrayResObj[0]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->xXs = result;
+        };
+        gutter->AddResource("gridrow.gutter.xXs", gutterSizeArrayResObj[0], std::move(updateFunc));
+    }
+    if (gutterSizeArrayResObj[1]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->xSm = result;
+        };
+        gutter->AddResource("gridrow.gutter.xSm", gutterSizeArrayResObj[1], std::move(updateFunc));
+    }
+    if (gutterSizeArrayResObj[PARAMS_NUM_TOW]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->xMd = result;
+        };
+        gutter->AddResource("gridrow.gutter.xMd", gutterSizeArrayResObj[PARAMS_NUM_TOW], std::move(updateFunc));
+    }
+}
+
+void SaveGridRowGutterOptionxResObjLgXlXXl(const RefPtr<V2::Gutter>& gutter,
+    RefPtr<ResourceObject> (&gutterSizeArrayResObj)[MAX_NUMBER_BREAKPOINT])
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (gutterSizeArrayResObj[PARAMS_NUM_THREE]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->xLg = result;
+        };
+        gutter->AddResource("gridrow.gutter.xLg", gutterSizeArrayResObj[PARAMS_NUM_THREE], std::move(updateFunc));
+    }
+    if (gutterSizeArrayResObj[PARAMS_NUM_FOUR]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->xXl = result;
+        };
+        gutter->AddResource("gridrow.gutter.xXl", gutterSizeArrayResObj[PARAMS_NUM_FOUR], std::move(updateFunc));
+    }
+    if (gutterSizeArrayResObj[PARAMS_NUM_FIVE]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->xXXl = result;
+        };
+        gutter->AddResource("gridrow.gutter.xXXl", gutterSizeArrayResObj[PARAMS_NUM_FIVE], std::move(updateFunc));
+    }
+}
+
+void SaveGridRowGutterOptionyResObjXsSmMd(const RefPtr<V2::Gutter>& gutter,
+    RefPtr<ResourceObject> (&gutterSizeArrayResObj)[MAX_NUMBER_BREAKPOINT])
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (gutterSizeArrayResObj[0]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->yXs = result;
+        };
+        gutter->AddResource("gridrow.gutter.yXs", gutterSizeArrayResObj[0], std::move(updateFunc));
+    }
+    if (gutterSizeArrayResObj[1]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->ySm = result;
+        };
+        gutter->AddResource("gridrow.gutter.ySm", gutterSizeArrayResObj[1], std::move(updateFunc));
+    }
+    if (gutterSizeArrayResObj[PARAMS_NUM_TOW]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->yMd = result;
+        };
+        gutter->AddResource("gridrow.gutter.yMd", gutterSizeArrayResObj[PARAMS_NUM_TOW], std::move(updateFunc));
+    }
+}
+
+void SaveGridRowGutterOptionyResObjLgXlXXl(const RefPtr<V2::Gutter>& gutter,
+    RefPtr<ResourceObject> (&gutterSizeArrayResObj)[MAX_NUMBER_BREAKPOINT])
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (gutterSizeArrayResObj[PARAMS_NUM_THREE]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->yLg = result;
+        };
+        gutter->AddResource("gridrow.gutter.yLg", gutterSizeArrayResObj[PARAMS_NUM_THREE], std::move(updateFunc));
+    }
+    if (gutterSizeArrayResObj[PARAMS_NUM_FOUR]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->yXl = result;
+        };
+        gutter->AddResource("gridrow.gutter.yXl", gutterSizeArrayResObj[PARAMS_NUM_FOUR], std::move(updateFunc));
+    }
+    if (gutterSizeArrayResObj[PARAMS_NUM_FIVE]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->yXXl = result;
+        };
+        gutter->AddResource("gridrow.gutter.yXXl", gutterSizeArrayResObj[PARAMS_NUM_FIVE], std::move(updateFunc));
+    }
+}
+
 void InheritGridRowGutterOption(const RefPtr<V2::Gutter>& gutter,
-    std::optional<CalcDimension> (&gutterSizeArray)[MAX_NUMBER_BREAKPOINT], bool isHorizontal)
+    std::optional<CalcDimension> (&gutterSizeArray)[MAX_NUMBER_BREAKPOINT],
+    RefPtr<ResourceObject> (&gutterSizeArrayResObj)[MAX_NUMBER_BREAKPOINT], bool isHorizontal)
 {
     if (!gutterSizeArray[0].has_value()) {
         gutterSizeArray[0] = CalcDimension(0);
@@ -105,6 +239,9 @@ void InheritGridRowGutterOption(const RefPtr<V2::Gutter>& gutter,
     for (size_t i = 1; i < MAX_NUMBER_BREAKPOINT; i++) {
         if (!gutterSizeArray[i].has_value()) {
             gutterSizeArray[i] = gutterSizeArray[i - 1].value();
+        }
+        if (!gutterSizeArrayResObj[i]) {
+            gutterSizeArrayResObj[i] = gutterSizeArrayResObj[i - 1];
         }
     }
     if (isHorizontal) {
@@ -114,6 +251,8 @@ void InheritGridRowGutterOption(const RefPtr<V2::Gutter>& gutter,
         gutter->xLg = gutterSizeArray[3].value();
         gutter->xXl = gutterSizeArray[4].value();
         gutter->xXXl = gutterSizeArray[5].value();
+        SaveGridRowGutterOptionxResObjXsSmMd(gutter, gutterSizeArrayResObj);
+        SaveGridRowGutterOptionxResObjLgXlXXl(gutter, gutterSizeArrayResObj);
         return;
     }
     gutter->yXs = gutterSizeArray[0].value();
@@ -122,51 +261,109 @@ void InheritGridRowGutterOption(const RefPtr<V2::Gutter>& gutter,
     gutter->yLg = gutterSizeArray[3].value();
     gutter->yXl = gutterSizeArray[4].value();
     gutter->yXXl = gutterSizeArray[5].value();
+    SaveGridRowGutterOptionyResObjXsSmMd(gutter, gutterSizeArrayResObj);
+    SaveGridRowGutterOptionyResObjLgXlXXl(gutter, gutterSizeArrayResObj);
+}
+
+void ParseGutterObjectSub(const JSRef<JSVal>& gutterObject, RefPtr<V2::Gutter>& gutter, bool isHorizontal)
+{
+    std::optional<CalcDimension> gutterOptions[MAX_NUMBER_BREAKPOINT];
+    RefPtr<ResourceObject> gutterOptionsResObj[MAX_NUMBER_BREAKPOINT];
+    auto gutterParam = JSRef<JSObject>::Cast(gutterObject);
+    auto xs = gutterParam->GetProperty("xs");
+    CalcDimension xsDimension;
+    RefPtr<ResourceObject> xsDimensionResObj;
+    if (JSContainerBase::ParseJsDimensionVp(xs, xsDimension, xsDimensionResObj)) {
+        gutterOptions[0] = xsDimension;
+    }
+    auto sm = gutterParam->GetProperty("sm");
+    CalcDimension smDimension;
+    RefPtr<ResourceObject> smDimensionnResObj;
+    if (JSContainerBase::ParseJsDimensionVp(sm, smDimension, smDimensionnResObj)) {
+        gutterOptions[1] = smDimension;
+    }
+    auto md = gutterParam->GetProperty("md");
+    CalcDimension mdDimension;
+    RefPtr<ResourceObject> mdDimensionResObj;
+    if (JSContainerBase::ParseJsDimensionVp(md, mdDimension, mdDimensionResObj)) {
+        gutterOptions[PARAMS_NUM_TOW] = mdDimension;
+    }
+    auto lg = gutterParam->GetProperty("lg");
+    CalcDimension lgDimension;
+    RefPtr<ResourceObject> lgDimensionResObj;
+    if (JSContainerBase::ParseJsDimensionVp(lg, lgDimension, lgDimensionResObj)) {
+        gutterOptions[PARAMS_NUM_THREE] = lgDimension;
+    }
+    auto xl = gutterParam->GetProperty("xl");
+    CalcDimension xlDimension;
+    RefPtr<ResourceObject> xlDimensionResObj;
+    if (JSContainerBase::ParseJsDimensionVp(xl, xlDimension, xlDimensionResObj)) {
+        gutterOptions[PARAMS_NUM_FOUR] = xlDimension;
+    }
+    auto xxl = gutterParam->GetProperty("xxl");
+    CalcDimension xxlDimension;
+    RefPtr<ResourceObject> xxlDimensionResObj;
+    if (JSContainerBase::ParseJsDimensionVp(xxl, xxlDimension, xxlDimensionResObj)) {
+        gutterOptions[PARAMS_NUM_FIVE] = xxlDimension;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        gutterOptionsResObj[0] = xsDimensionResObj;
+        gutterOptionsResObj[1] = smDimensionnResObj;
+        gutterOptionsResObj[PARAMS_NUM_TOW] = mdDimensionResObj;
+        gutterOptionsResObj[PARAMS_NUM_THREE] = lgDimensionResObj;
+        gutterOptionsResObj[PARAMS_NUM_FOUR] = xlDimensionResObj;
+        gutterOptionsResObj[PARAMS_NUM_FIVE] = xxlDimensionResObj;
+    }
+    
+    InheritGridRowGutterOption(gutter, gutterOptions, gutterOptionsResObj, isHorizontal);
+}
+
+void SetXGutterResObj(RefPtr<ResourceObject> xDimension, RefPtr<V2::Gutter>& gutter)
+{
+    auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+        CalcDimension result;
+        ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+        gutter->xXs = result;
+        gutter->xSm = result;
+        gutter->xMd = result;
+        gutter->xLg = result;
+        gutter->xXl = result;
+        gutter->xXXl = result;
+    };
+    gutter->AddResource("gridrow.gutter.x", xDimension, std::move(updateFunc));
+}
+
+void SetYGutterResObj(RefPtr<ResourceObject> yDimension, RefPtr<V2::Gutter>& gutter)
+{
+    auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+        CalcDimension result;
+        ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+        gutter->yXs = result;
+        gutter->ySm = result;
+        gutter->yMd = result;
+        gutter->yLg = result;
+        gutter->yXl = result;
+        gutter->yXXl = result;
+    };
+    gutter->AddResource("gridrow.gutter.y", yDimension, std::move(updateFunc));
 }
 
 void ParseGutterObject(const JSRef<JSVal>& gutterObject, RefPtr<V2::Gutter>& gutter, bool isHorizontal)
 {
     CalcDimension dim;
-    if (JSContainerBase::ParseJsDimensionVp(gutterObject, dim)) {
-        isHorizontal ? gutter->SetXGutter(dim) : gutter->SetYGutter(dim);
-        return;
+    RefPtr<ResourceObject> dimResObj;
+    if (JSContainerBase::ParseJsDimensionVp(gutterObject, dim, dimResObj)) {
+        if (SystemProperties::ConfigChangePerform() && dimResObj) {
+            isHorizontal ? SetXGutterResObj(dimResObj, gutter) : SetYGutterResObj(dimResObj, gutter);
+        } else {
+            isHorizontal ? gutter->SetXGutter(dim) : gutter->SetYGutter(dim);
+            return;
+        }
     }
     if (!gutterObject->IsObject()) {
         return;
     }
-    std::optional<CalcDimension> gutterOptions[MAX_NUMBER_BREAKPOINT];
-    auto gutterParam = JSRef<JSObject>::Cast(gutterObject);
-    auto xs = gutterParam->GetProperty("xs");
-    CalcDimension xsDimension;
-    if (JSContainerBase::ParseJsDimensionVp(xs, xsDimension)) {
-        gutterOptions[0] = xsDimension;
-    }
-    auto sm = gutterParam->GetProperty("sm");
-    CalcDimension smDimension;
-    if (JSContainerBase::ParseJsDimensionVp(sm, smDimension)) {
-        gutterOptions[1] = smDimension;
-    }
-    auto md = gutterParam->GetProperty("md");
-    CalcDimension mdDimension;
-    if (JSContainerBase::ParseJsDimensionVp(md, mdDimension)) {
-        gutterOptions[2] = mdDimension;
-    }
-    auto lg = gutterParam->GetProperty("lg");
-    CalcDimension lgDimension;
-    if (JSContainerBase::ParseJsDimensionVp(lg, lgDimension)) {
-        gutterOptions[3] = lgDimension;
-    }
-    auto xl = gutterParam->GetProperty("xl");
-    CalcDimension xlDimension;
-    if (JSContainerBase::ParseJsDimensionVp(xl, xlDimension)) {
-        gutterOptions[4] = xlDimension;
-    }
-    auto xxl = gutterParam->GetProperty("xxl");
-    CalcDimension xxlDimension;
-    if (JSContainerBase::ParseJsDimensionVp(xxl, xxlDimension)) {
-        gutterOptions[5] = xxlDimension;
-    }
-    InheritGridRowGutterOption(gutter, gutterOptions, isHorizontal);
+    ParseGutterObjectSub(gutterObject, gutter, isHorizontal);
 }
 
 RefPtr<V2::Gutter> ParserGutter(const JSRef<JSVal>& jsValue)

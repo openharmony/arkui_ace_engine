@@ -272,15 +272,12 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
         option.GetOnFinishEvent());
 }
 
-void DragAnimationHelper::ShowMenuHideAnimation(const RefPtr<FrameNode>& imageNode, const PreparedInfoForDrag& data)
+void DragAnimationHelper::ShowMenuHideAnimation(const PreparedInfoForDrag& data)
 {
-    CHECK_NULL_VOID(imageNode);
-    if (imageNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT) {
+    if (data.sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT) {
         return;
     }
-    auto menuNode = data.menuNode;
-    CHECK_NULL_VOID(menuNode);
-    MenuView::ExcuteMenuDisappearAnimation(menuNode, data);
+    MenuView::ExecuteMenuDisappearAnimation(data);
 }
 
 void DragAnimationHelper::ShowBadgeAnimation(const RefPtr<FrameNode>& textNode)
@@ -1278,7 +1275,7 @@ void DragAnimationHelper::CreateTextNode(PreparedInfoForDrag& data)
         textNode = AceType::DynamicCast<FrameNode>(textRowNode->GetChildAtIndex(0));
         data.textNode = textNode;
     }
-    if (!data.gatherNode) {
+    if (!data.gatherNode || data.deviceType == SourceType::MOUSE) {
         DragAnimationHelper::SetNodeVisible(data.textNode, false);
     }
 }

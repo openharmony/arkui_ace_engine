@@ -50,12 +50,14 @@ struct Font {
     std::optional<bool> enableVariableFontWeight;
     std::optional<Dimension> strokeWidth;
     std::optional<Color> strokeColor;
+    std::optional<SuperscriptStyle> superscript;
 
     bool IsEqual(const Font& other) const
     {
         bool flag = fontWeight == other.fontWeight && fontSize == other.fontSize && fontStyle == other.fontStyle &&
                     fontColor == other.fontColor && enableVariableFontWeight == other.enableVariableFontWeight &&
-                    strokeWidth == other.strokeWidth && strokeColor == other.strokeColor;
+                    strokeWidth == other.strokeWidth && strokeColor == other.strokeColor &&
+                    superscript == other.superscript;
         if (!flag) {
             return false;
         }
@@ -117,6 +119,11 @@ struct Font {
     std::optional<FontStyle> GetFontStyle() const
     {
         return fontStyle;
+    }
+
+    std::optional<SuperscriptStyle> GetSuperscript() const
+    {
+        return superscript;
     }
 };
 
@@ -400,6 +407,7 @@ public:
     virtual void SetStrokeWidth(const Dimension& value) {};
     virtual void SetStrokeColor(const Color& value) {};
     virtual void ResetStrokeColor() {};
+    virtual void SetEnableAutoSpacing(bool enabled) = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_inner_surface_controller.h"
 
 namespace OHOS::Ace::NG {
 extern "C" ACE_FORCE_EXPORT XComponentControllerErrorCode OHOS_ACE_ChangeXComponentSurfaceCallbackMode(
@@ -28,6 +29,27 @@ extern "C" ACE_FORCE_EXPORT XComponentControllerErrorCode OHOS_ACE_ChangeXCompon
     CHECK_NULL_RETURN(xcPattern, XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER);
     xcPattern->ChangeSurfaceCallbackMode(static_cast<SurfaceCallbackMode>(mode));
     return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_NO_ERROR;
+}
+
+extern "C" ACE_FORCE_EXPORT XComponentControllerErrorCode OHOS_ACE_SetRenderFitBySurfaceId(
+    const std::string& surfaceId, int32_t renderFitNumber, bool isRenderFitNewVersionEnabled)
+{
+    if (renderFitNumber < static_cast<int32_t>(RenderFit::CENTER) ||
+        renderFitNumber > static_cast<int32_t>(RenderFit::RESIZE_COVER_BOTTOM_RIGHT)) {
+        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
+    }
+    auto renderFit = static_cast<RenderFit>(renderFitNumber);
+    return static_cast<XComponentControllerErrorCode>(XComponentInnerSurfaceController::SetRenderFitBySurfaceId(
+        surfaceId, renderFit, isRenderFitNewVersionEnabled
+    ));
+}
+
+extern "C" ACE_FORCE_EXPORT XComponentControllerErrorCode OHOS_ACE_GetRenderFitBySurfaceId(
+    const std::string& surfaceId, int32_t& renderFitNumber, bool& isRenderFitNewVersionEnabled)
+{
+    return static_cast<XComponentControllerErrorCode>(XComponentInnerSurfaceController::GetRenderFitBySurfaceId(
+        surfaceId, renderFitNumber, isRenderFitNewVersionEnabled
+    ));
 }
 
 XComponentControllerErrorCode XComponentControllerNG::GetGlobalPosition(float& offsetX, float& offsetY)

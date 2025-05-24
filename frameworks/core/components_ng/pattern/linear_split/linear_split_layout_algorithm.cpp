@@ -34,7 +34,7 @@ void LinearSplitLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasureBeforeAPI10(layoutWrapper);
         return;
     }
-
+    layoutPolicyChildren_.clear();
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
     const auto& minSize = layoutConstraint->minSize;
     const auto& maxSize = layoutConstraint->maxSize;
@@ -87,6 +87,12 @@ void LinearSplitLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         layoutWrapper->GetGeometryNode()->SetFrameSize((realSize.ConvertToSizeT()));
     }
+    auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicy.has_value());
+    auto policySize = MeasureSelfByLayoutPolicy(layoutWrapper, childTotalSize, childMaxSize);
+    realSize.UpdateSizeWithCheck(policySize);
+    layoutWrapper->GetGeometryNode()->SetFrameSize((realSize.ConvertToSizeT()));
+    MeasureAdaptiveLayoutChildren(layoutWrapper, realSize.ConvertToSizeT());
 }
 
 void LinearSplitLayoutAlgorithm::MeasureBeforeAPI10(LayoutWrapper* layoutWrapper)
@@ -139,38 +145,27 @@ void LinearSplitLayoutAlgorithm::MeasureBeforeAPI10(LayoutWrapper* layoutWrapper
 
 std::pair<SizeF, SizeF> LinearSplitLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper)
 {
-    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
-    const auto& maxSize = layoutConstraint->maxSize;
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-
     // Get Max Size for children.
-    OptionalSizeF optionalMaxSize;
-    optionalMaxSize.UpdateIllegalSizeWithCheck(maxSize);
-    auto maxSizeT = optionalMaxSize.ConvertToSizeT();
-    MinusPaddingToSize(padding, maxSizeT);
-
-    auto childConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    childConstraint.maxSize = layoutConstraint->selfIdealSize.ConvertToSizeT();
-    if (childConstraint.maxSize.Height() < 0.0) {
-        childConstraint.maxSize.SetHeight(maxSizeT.Height());
-    }
-    if (childConstraint.maxSize.Width() < 0.0) {
-        childConstraint.maxSize.SetWidth(maxSizeT.Width());
-    }
-
     float allocatedSize = 0.0f;
     float crossSize = 0.0f;
     float childMaxWidth = 0.0f;
     float childMaxHeight = 0.0f;
     const auto [startMargin, endMargin] = GetDividerMargin(layoutWrapper);
-
+    auto childConstraint = CreateChildConstraint(layoutWrapper);
     // measure normal node.
     int32_t index = 0;
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         if (child->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
             continue;
         }
-        child->Measure(GetChildConstrain(layoutWrapper, childConstraint, index));
+        DisableLayoutPolicy(child);
+        auto adjustedChildConstraint = GetChildConstrain(layoutWrapper, childConstraint, index);
+        if (IsChildMatchParent(child)) {
+            layoutPolicyChildren_.emplace_back(child, adjustedChildConstraint);
+            continue;
+        }
+        child->Measure(adjustedChildConstraint);
         float childWidth = child->GetGeometryNode()->GetMarginFrameSize().Width();
         float childHeight = child->GetGeometryNode()->GetMarginFrameSize().Height();
         allocatedSize += childWidth;
@@ -261,6 +256,12 @@ void LinearSplitLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         LayoutBeforeAPI10(layoutWrapper);
         return;
     }
+    auto host = layoutWrapper->GetHostNode();
+    if (host && !host->GetIgnoreLayoutProcess()) {
+        if (GetNeedPostponeForIgnore()) { 
+            return;
+        }
+    }
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     float childTotalWidth = 0.0f;
     float childTotalHeight = 0.0f;
@@ -298,6 +299,23 @@ void LinearSplitLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 }
 
+void LinearSplitLayoutAlgorithm::UpdateChildPositionWidthIgnoreLayoutSafeArea(const RefPtr<LayoutWrapper>& childLayoutWrapper, const OffsetF& originOffset)
+{
+    auto childNode = childLayoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(childNode);
+    CHECK_NULL_VOID(childNode->GetLayoutProperty());
+    CHECK_NULL_VOID(childNode->GetLayoutProperty()->IsIgnoreOptsValid());
+    auto saeCorrect = originOffset;
+    IgnoreLayoutSafeAreaOpts& opts = *(childNode->GetLayoutProperty()->GetIgnoreLayoutSafeAreaOpts());
+    auto sae =
+        childNode->GetAccumulatedSafeAreaExpand(false, opts);
+    auto offsetX = sae.left.value_or(0.0f);
+    auto offsetY = sae.top.value_or(0.0f);
+    OffsetF saeTrans = OffsetF(offsetX , offsetY);
+    saeCorrect -= saeTrans;
+    childLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(saeCorrect);
+}
+
 void LinearSplitLayoutAlgorithm::LayoutRowSplit(
     LayoutWrapper* layoutWrapper, float childOffsetMain, float childOffsetCross)
 {
@@ -330,6 +348,7 @@ void LinearSplitLayoutAlgorithm::LayoutRowSplit(
             childOffsetMain = childrenDragPos_[index];
         }
         item->GetGeometryNode()->SetMarginFrameOffset(OffsetF(childOffsetMain, childOffsetCross));
+        UpdateChildPositionWidthIgnoreLayoutSafeArea(item, OffsetF(childOffsetMain, childOffsetCross));
         item->Layout();
         childOffsetMain +=
             item->GetGeometryNode()->GetMarginFrameSize().Width() + static_cast<float>(DEFAULT_SPLIT_HEIGHT);
@@ -585,5 +604,118 @@ float LinearSplitLayoutAlgorithm::GetItemMinSize(const RefPtr<LayoutWrapper>& it
     auto paddingWithBorder = layoutProperty->CreatePaddingAndBorder();
     return splitType_ == SplitType::ROW_SPLIT ? std::max(minSizeF, paddingWithBorder.Width())
                                               : std::max(minSizeF, paddingWithBorder.Height());
+}
+
+OptionalSizeF LinearSplitLayoutAlgorithm::MeasureSelfByLayoutPolicy(LayoutWrapper* layoutWrapper,
+    const SizeF& childTotalSize, const SizeF& childMaxSize)
+{
+    auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
+    CHECK_NULL_RETURN(layoutPolicy.has_value(), {});
+    OptionalSizeF realSize;
+    auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+    auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    auto matchParentSize = ConstrainIdealSizeByLayoutPolicy(layoutConstraint.value(),
+        widthLayoutPolicy, heightLayoutPolicy, Axis::HORIZONTAL).ConvertToSizeT();
+    realSize.UpdateSizeWithCheck(matchParentSize);
+    if (widthLayoutPolicy != LayoutCalPolicy::FIX_AT_IDEAL_SIZE &&
+        heightLayoutPolicy != LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+        return realSize;
+    }
+    auto width = splitType_ == SplitType::COLUMN_SPLIT ? childMaxSize.Width() : childTotalSize.Width();
+    auto height = splitType_ == SplitType::COLUMN_SPLIT ? childTotalSize.Height() : childMaxSize.Height();
+    auto fixIdealSize = UpdateOptionSizeByCalcLayoutConstraint({width, height},
+        layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
+        layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
+    if (widthLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+        realSize.SetWidth(fixIdealSize.Width());
+    }
+    if (heightLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+        realSize.SetHeight(fixIdealSize.Height());
+    }
+    return realSize;
+}
+
+void LinearSplitLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, SizeF realSize)
+{
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    MinusPaddingToNonNegativeSize(padding, realSize);
+    auto host = layoutWrapper->GetHostNode();
+    IgnoreLayoutSafeAreaBundle bundle;
+    for (auto& pair : layoutPolicyChildren_) {
+        auto child = pair.first;
+        auto layoutConstraint = pair.second;
+        if (splitType_ == SplitType::COLUMN_SPLIT) {
+            layoutConstraint.parentIdealSize.SetWidth(realSize.Width());
+        } else if (splitType_ == SplitType::ROW_SPLIT) {
+            layoutConstraint.parentIdealSize.SetHeight(realSize.Height());
+        }
+        auto childNode = child->GetHostNode();
+        if (childNode && childNode->GetLayoutProperty() && childNode->GetLayoutProperty()->IsExpandConstraintNeeded()) {
+            bundle.first.emplace_back(childNode);
+            child->GetGeometryNode()->SetParentLayoutConstraint(layoutConstraint);
+            SetNeedPostponeForIgnore();
+            continue;
+        }
+        child->Measure(layoutConstraint);
+    }
+    if (host && host->GetContext() && GetNeedPostponeForIgnore()) {
+        auto context = host->GetContext();
+        bundle.second = host;
+        context->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
+    }
+}
+
+bool LinearSplitLayoutAlgorithm::IsChildMatchParent(const RefPtr<LayoutWrapper>& child)
+{
+    CHECK_NULL_RETURN(child, false);
+    auto childLayoutProperty = child->GetLayoutProperty();
+    CHECK_NULL_RETURN(childLayoutProperty, false);
+    auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_RETURN(layoutPolicy, false);
+    auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_;
+    auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_;
+    if (splitType_ == SplitType::ROW_SPLIT) {
+        return heightLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH) == LayoutCalPolicy::MATCH_PARENT;
+    }
+    return widthLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH) == LayoutCalPolicy::MATCH_PARENT;
+}
+
+void LinearSplitLayoutAlgorithm::DisableLayoutPolicy(const RefPtr<LayoutWrapper>& child)
+{
+    CHECK_NULL_VOID(child);
+    auto childLayoutProperty = child->GetLayoutProperty();
+    CHECK_NULL_VOID(childLayoutProperty);
+    auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicy);
+    if (splitType_ == SplitType::ROW_SPLIT && layoutPolicy.value().widthLayoutPolicy_.has_value()) {
+        childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+        return;
+    }
+    if (splitType_ == SplitType::COLUMN_SPLIT && layoutPolicy.value().heightLayoutPolicy_.has_value()) {
+        childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+    }
+}
+
+LayoutConstraintF LinearSplitLayoutAlgorithm::CreateChildConstraint(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, LayoutConstraintF());
+    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    const auto& maxSize = layoutConstraint->maxSize;
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    OptionalSizeF optionalMaxSize;
+    optionalMaxSize.UpdateIllegalSizeWithCheck(maxSize);
+    auto maxSizeT = optionalMaxSize.ConvertToSizeT();
+    MinusPaddingToSize(padding, maxSizeT);
+
+    auto childConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childConstraint.maxSize = layoutConstraint->selfIdealSize.ConvertToSizeT();
+    if (childConstraint.maxSize.Height() < 0.0) {
+        childConstraint.maxSize.SetHeight(maxSizeT.Height());
+    }
+    if (childConstraint.maxSize.Width() < 0.0) {
+        childConstraint.maxSize.SetWidth(maxSizeT.Width());
+    }
+    return childConstraint;
 }
 } // namespace OHOS::Ace::NG

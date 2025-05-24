@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/qrcode/qrcode_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -93,5 +94,77 @@ void QRCodePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("Color", paintProperty->GetColorValue(Color::TRANSPARENT).ColorToString().c_str());
     json->Put("ContentOpacity", std::to_string(paintProperty->GetOpacityValue(1.0f)).c_str());
     json->Put("ContentString", paintProperty->GetValueValue(" ").c_str());
+}
+
+void QRCodePattern::UpdateQRCodeCreate(const std::string& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = host->GetPaintProperty<QRCodePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (pipelineContext->IsSystmColorChange()) {
+        paintProperty->UpdateValue(value);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void QRCodePattern::UpdateColor(const Color& color, bool isFristLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = host->GetPaintProperty<QRCodePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (pipelineContext->IsSystmColorChange() || isFristLoad) {
+        paintProperty->UpdateColor(color);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateForegroundColor(color);
+        renderContext->ResetForegroundColorStrategy();
+        renderContext->UpdateForegroundColorFlag(true);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void QRCodePattern::UpdateBackgroundColor(const Color& color, bool isFristLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = host->GetPaintProperty<QRCodePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (pipelineContext->IsSystmColorChange() || isFristLoad) {
+        paintProperty->UpdateBackgroundColor(color);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBackgroundColor(color);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void QRCodePattern::UpdateContentOpacity(double opacity, bool isFristLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = host->GetPaintProperty<QRCodePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (pipelineContext->IsSystmColorChange() || isFristLoad) {
+        paintProperty->UpdateOpacity(opacity);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 } // namespace OHOS::Ace::NG

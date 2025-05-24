@@ -31,6 +31,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_spring_loading/drag_drop_spring_loading_detector.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
@@ -417,7 +418,8 @@ bool DragDropManager::CheckFrameNodeCanDrop(const RefPtr<FrameNode>& node)
     CHECK_NULL_RETURN(node, false);
     auto eventHub = node->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, false);
-    if ((eventHub->HasOnDrop()) || (eventHub->HasOnItemDrop()) || (eventHub->HasCustomerOnDrop())) {
+    if ((eventHub->HasOnDrop()) || (eventHub->HasOnItemDrop()) || (eventHub->HasCustomerOnDrop()) ||
+        (eventHub->HasCustomerOnDragSpringLoading())) {
         return true;
     }
     if ((V2::UI_EXTENSION_COMPONENT_ETS_TAG == node->GetTag() ||
@@ -1121,6 +1123,7 @@ void DragDropManager::HandleOnDragEnd(const DragPointerEvent& pointerEvent, cons
     const RefPtr<FrameNode>& dragFrameNode)
 {
     CHECK_NULL_VOID(dragFrameNode);
+    NotifyDragSpringLoadingIntercept(extraInfo);
     Point point = pointerEvent.GetPoint();
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -1250,8 +1253,10 @@ bool DragDropManager::IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode)
     DragDropBehaviorReporter::GetInstance().UpdateAllowDropType(dragFrameNodeAllowDrop);
     for (const auto& it : summaryMap_) {
         // if one matched found, allow drop
-        if (dragFrameNodeAllowDrop.find(it.first) != dragFrameNodeAllowDrop.end()) {
-            return true;
+        for (const auto& element : dragFrameNodeAllowDrop) {
+            if (element == it.first || UdmfClient::GetInstance()->IsBelongsTo(it.first, element)) {
+                return true;
+            }
         }
     }
     return false;
@@ -1647,6 +1652,27 @@ void DragDropManager::FireOnDragEventWithDragType(const RefPtr<EventHub>& eventH
     }
 }
 
+void DragDropManager::FireOnDragSpringLoadingEventWithDragType(const RefPtr<FrameNode>& frameNode,
+    const RefPtr<EventHub>& eventHub, DragEventType type, const std::string& extraParams)
+{
+    if (!eventHub->HasCustomerOnDragSpringLoading()) {
+        return;
+    }
+    switch (type) {
+        case DragEventType::ENTER:
+        case DragEventType::MOVE: {
+            NotifyDragSpringLoadingMove(frameNode, extraParams);
+            break;
+        }
+        case DragEventType::LEAVE: {
+            NotifyDragSpringLoadingIntercept(extraParams);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 void DragDropManager::FireOnDragEvent(
     const RefPtr<FrameNode>& frameNode, const DragPointerEvent& pointerEvent,
     DragEventType type, const std::string& extraInfo)
@@ -1658,7 +1684,8 @@ void DragDropManager::FireOnDragEvent(
     }
     auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    if (!eventHub->HasOnDrop() && !eventHub->HasOnItemDrop() && !eventHub->HasCustomerOnDrop()) {
+    if (!eventHub->HasOnDrop() && !eventHub->HasOnItemDrop() && !eventHub->HasCustomerOnDrop() &&
+        !eventHub->HasCustomerOnDragSpringLoading()) {
         return;
     }
     auto point = pointerEvent.GetPoint();
@@ -1668,6 +1695,7 @@ void DragDropManager::FireOnDragEvent(
     UpdateDragEvent(event, pointerEvent);
 
     FireOnEditableTextComponent(frameNode, type);
+    FireOnDragSpringLoadingEventWithDragType(frameNode, eventHub, type, extraParams);
     FireOnDragEventWithDragType(eventHub, type, event, extraParams);
 
     UpdateDragCursorStyle(frameNode, event, pointerEvent.pointerEventId);
@@ -2147,6 +2175,7 @@ void DragDropManager::CopyPreparedInfoForDrag(DragPreviewInfo& dragPreviewInfo, 
     dragPreviewInfo.relativeContainerNode = data.relativeContainerNode;
     dragPreviewInfo.stackNode = data.stackNode;
     dragPreviewInfo.sizeChangeEffect = data.sizeChangeEffect;
+    dragPreviewInfo.menuNode = data.menuNode;
 }
 
 bool DragDropManager::IsNeedDoDragMoveAnimate(const DragPointerEvent& pointerEvent)
@@ -2382,9 +2411,18 @@ void DragDropManager::DragMoveTransitionAnimation(const RefPtr<OverlayManager>& 
     option.SetCurve(DRAG_TRANSITION_ANIMATION_CURVE);
     auto renderContext = info_.imageNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto offset = OffsetF(point.GetX(), point.GetY());
+    auto menuWrapperNode = GetMenuWrapperNodeFromDrag();
+    CHECK_NULL_VOID(overlayManager);
+    auto menuPosition = overlayManager->CalculateMenuPosition(menuWrapperNode, offset);
+    auto menuRenderContext = GetMenuRenderContextFromMenuWrapper(menuWrapperNode);
     AnimationUtils::Animate(
         option,
-        [overlayManager, info, newOffset]() {
+        [overlayManager, info, newOffset, menuRenderContext, menuPosition]() {
+            if (menuRenderContext && !menuPosition.NonOffset() && !info.menuNode) {
+                menuRenderContext->UpdatePosition(
+                    OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
+            }
             CHECK_NULL_VOID(overlayManager);
             auto relativeContainerNodeRenderContext = info.relativeContainerNode->GetRenderContext();
             CHECK_NULL_VOID(relativeContainerNodeRenderContext);
@@ -3238,5 +3276,21 @@ void DragDropManager::RequireBundleInfo()
     DragBundleInfo dragBundleInfo;
     InteractionInterface::GetInstance()->GetDragBundleInfo(dragBundleInfo);
     dragBundleInfo_ = dragBundleInfo;
+}
+
+void DragDropManager::NotifyDragSpringLoadingMove(const RefPtr<FrameNode>& dragFrameNode, const std::string& extraInfo)
+{
+    if (!dragDropSpringLoadingDetector_) {
+        dragDropSpringLoadingDetector_ = MakeRefPtr<DragDropSpringLoadingDetector>();
+    }
+    dragDropSpringLoadingDetector_->NotifyMove({ preMovePoint_, dragFrameNode, preTimeStamp_, extraInfo });
+}
+
+void DragDropManager::NotifyDragSpringLoadingIntercept(std::string_view extraParams)
+{
+    if (!dragDropSpringLoadingDetector_) {
+        dragDropSpringLoadingDetector_ = MakeRefPtr<DragDropSpringLoadingDetector>();
+    }
+    dragDropSpringLoadingDetector_->NotifyIntercept(extraParams);
 }
 } // namespace OHOS::Ace::NG

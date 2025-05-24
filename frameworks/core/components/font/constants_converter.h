@@ -74,7 +74,7 @@ OHOS::Rosen::TextRectWidthStyle ConvertTxtRectWidthStyle(RectWidthStyle widthSty
 
 OHOS::Rosen::TextDirection ConvertTxtTextDirection(TextDirection textDirection);
 
-OHOS::Rosen::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration);
+OHOS::Rosen::TextDecoration ConvertTxtTextDecoration(std::vector<TextDecoration>& textDecoration);
 
 OHOS::Rosen::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationStyle textDecorationStyle);
 

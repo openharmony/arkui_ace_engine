@@ -27,6 +27,7 @@ public:
 
     static void StartRender();
     static void FinishRender(const JSCallbackInfo& info);
+    static void IsInAnimation(const JSCallbackInfo& info);
     // signature is
     // fromIndex: number
     static void MoveChild(const JSCallbackInfo& info);
@@ -40,7 +41,7 @@ public:
     static void CreateNewChildFinish(const JSCallbackInfo& info);
     static void AfterAddChild();
     static void OnMove(const JSCallbackInfo& info);
-    static void JsParseItemDragEventHandler(const JsiExecutionContext& context, const JSRef<JSVal>& jsValue);
+    static void JsParseItemDragEventHandler(const JsiExecutionContext& context, const JSRef<JSObject>& itemDragEventObj);
 };
 
 } // namespace OHOS::Ace::Framework

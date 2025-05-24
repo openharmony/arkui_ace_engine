@@ -684,6 +684,36 @@ ArkUINativeModuleValue GridBridge::ResetFriction(ArkUIRuntimeCallInfo* runtimeCa
     GetArkUINodeModifiers()->getGridModifier()->resetFriction(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+ArkUINativeModuleValue GridBridge::SetFocusWrapMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> arg_focusWrapMode = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    if (!arg_focusWrapMode->IsNull() && arg_focusWrapMode->IsNumber()) {
+        int32_t focusWrapMode = arg_focusWrapMode->Int32Value(vm);
+        if (focusWrapMode < 0 || focusWrapMode > 1) {
+            GetArkUINodeModifiers()->getGridModifier()->resetGridFocusWrapMode(nativeNode);
+        } else {
+            GetArkUINodeModifiers()->getGridModifier()->setGridFocusWrapMode(nativeNode, focusWrapMode);
+        }
+    } else {
+        GetArkUINodeModifiers()->getGridModifier()->resetGridFocusWrapMode(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue GridBridge::ResetFocusWrapMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getGridModifier()->resetGridFocusWrapMode(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 ArkUINativeModuleValue GridBridge::SetAlignItems(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

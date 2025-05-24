@@ -278,6 +278,7 @@ public:
     int GetInputFieldType() const override;
     std::string GetSelectionText() const override;
     void GetImageRect(int32_t& x, int32_t& y, int32_t& width, int32_t& height) const override;
+    bool IsAILink() const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param_;
@@ -603,7 +604,8 @@ public:
         : webDelegate_(webDelegate), context_(context) {}
     ~WebAvoidAreaChangedListener() = default;
 
-    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override;
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type,
+        const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info) override;
 private:
     WeakPtr<WebDelegate> webDelegate_;
     WeakPtr<PipelineBase> context_;
@@ -893,6 +895,7 @@ public:
     void OnQuickMenuDismissed();
     void HideHandleAndQuickMenuIfNecessary(bool hide);
     void ChangeVisibilityOfQuickMenu();
+    bool ChangeVisibilityOfQuickMenuV2();
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
@@ -1209,6 +1212,13 @@ public:
 
     void SetNativeInnerWeb(bool isInnerWeb);
 
+    void ResetStateOfDataDetectorJS();
+    void RunDataDetectorJS();
+    void SetDataDetectorEnable(bool enable);
+    void OnDataDetectorSelectText();
+    void OnDataDetectorCopy(const std::vector<std::string>& recordMix);
+    int GetHitTestResult();
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1243,7 +1253,6 @@ private:
     bool ZoomIn();
     bool ZoomOut();
     int ConverToWebHitTestType(int hitType);
-    int GetHitTestResult();
     void GetHitTestValue(HitTestResult& result);
     int GetPageHeight();
     std::string GetTitle();
@@ -1435,6 +1444,10 @@ private:
     double dragResize_preHight_ = 0.0;
     double dragResize_preWidth_ = 0.0;
     bool enableFollowSystemFontWeight_ = false;
+
+    // data detector js state
+    bool initDataDetectorJS_ = false;
+
 #endif
 };
 

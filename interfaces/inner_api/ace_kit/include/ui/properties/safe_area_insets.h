@@ -196,5 +196,95 @@ struct SafeAreaExpandOpts {
         }
     }
 };
+
+using LayoutSafeAreaType = uint32_t;
+inline constexpr LayoutSafeAreaType LAYOUT_SAFE_AREA_TYPE_NONE = 0;
+inline constexpr LayoutSafeAreaType LAYOUT_SAFE_AREA_TYPE_SYSTEM = 1;
+inline constexpr LayoutSafeAreaType LAYOUT_SAFE_AREA_TYPE_KEYBOARD = 1 << 1;
+inline constexpr LayoutSafeAreaType LAYOUT_SAFE_AREA_TYPE_ALL =
+    LAYOUT_SAFE_AREA_TYPE_SYSTEM | LAYOUT_SAFE_AREA_TYPE_KEYBOARD;
+
+using LayoutSafeAreaEdge = uint32_t;
+inline constexpr LayoutSafeAreaEdge LAYOUT_SAFE_AREA_EDGE_NONE = 0;
+inline constexpr LayoutSafeAreaEdge LAYOUT_SAFE_AREA_EDGE_TOP = 1;
+inline constexpr LayoutSafeAreaEdge LAYOUT_SAFE_AREA_EDGE_BOTTOM = 1 << 1;
+inline constexpr LayoutSafeAreaEdge LAYOUT_SAFE_AREA_EDGE_START = 1 << 2;
+inline constexpr LayoutSafeAreaEdge LAYOUT_SAFE_AREA_EDGE_END = 1 << 3;
+inline constexpr LayoutSafeAreaEdge LAYOUT_SAFE_AREA_EDGE_VERTICAL =
+    LAYOUT_SAFE_AREA_EDGE_TOP | LAYOUT_SAFE_AREA_EDGE_BOTTOM;
+inline constexpr LayoutSafeAreaEdge LAYOUT_SAFE_AREA_EDGE_HORIZONTAL =
+    LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_END;
+inline constexpr LayoutSafeAreaEdge LAYOUT_SAFE_AREA_EDGE_ALL =
+    LAYOUT_SAFE_AREA_EDGE_VERTICAL | LAYOUT_SAFE_AREA_EDGE_HORIZONTAL;
+
+struct IgnoreLayoutSafeAreaOpts {
+    LayoutSafeAreaType type = LAYOUT_SAFE_AREA_TYPE_NONE;
+    LayoutSafeAreaEdge edges = LAYOUT_SAFE_AREA_EDGE_NONE;
+
+    bool operator==(const IgnoreLayoutSafeAreaOpts& other) const
+    {
+        return type == other.type && edges == other.edges;
+    }
+
+    bool operator!=(const IgnoreLayoutSafeAreaOpts& other) const
+    {
+        return !(*this == other);
+    }
+
+    bool NeedIgnoreLayoutSafeArea() const
+    {
+        return (type != LAYOUT_SAFE_AREA_TYPE_NONE) && (edges != LAYOUT_SAFE_AREA_EDGE_NONE);
+    }
+
+    bool IsTrivial() const
+    {
+        return type == LAYOUT_SAFE_AREA_TYPE_SYSTEM;
+    }
+
+    const std::string ToString()
+    {
+        return "IgnoreLayoutSafeAreaOpts: type:" + TypeToString() + ", edges: " + EdgeToString();
+    }
+
+    const std::string TypeToString()
+    {
+        switch (type) {
+            case LAYOUT_SAFE_AREA_TYPE_NONE:
+                return "LAYOUT_SAFE_AREA_TYPE_NONE";
+            case LAYOUT_SAFE_AREA_TYPE_SYSTEM:
+                return "LAYOUT_SAFE_AREA_TYPE_SYSTEM";
+            case LAYOUT_SAFE_AREA_TYPE_KEYBOARD:
+                return "LAYOUT_SAFE_AREA_TYPE_KEYBOARD";
+            case LAYOUT_SAFE_AREA_TYPE_ALL:
+                return "LAYOUT_SAFE_AREA_TYPE_ALL";
+            default:
+                return "LAYOUT_SAFE_AREA_TYPE_OTHERS_" + std::to_string(type);
+        }
+    }
+
+    const std::string EdgeToString()
+    {
+        switch (edges) {
+            case LAYOUT_SAFE_AREA_EDGE_NONE:
+                return "LAYOUT_SAFE_AREA_EDGE_NONE";
+            case LAYOUT_SAFE_AREA_EDGE_TOP:
+                return "LAYOUT_SAFE_AREA_EDGE_TOP";
+            case LAYOUT_SAFE_AREA_EDGE_BOTTOM:
+                return "LAYOUT_SAFE_AREA_EDGE_BOTTOM";
+            case LAYOUT_SAFE_AREA_EDGE_START:
+                return "LAYOUT_SAFE_AREA_EDGE_START";
+            case LAYOUT_SAFE_AREA_EDGE_END:
+                return "LAYOUT_SAFE_AREA_EDGE_END";
+            case LAYOUT_SAFE_AREA_EDGE_VERTICAL:
+                return "LAYOUT_SAFE_AREA_EDGE_VERTICAL";
+            case LAYOUT_SAFE_AREA_EDGE_HORIZONTAL:
+                return "LAYOUT_SAFE_AREA_EDGE_HORIZONTAL";
+            case LAYOUT_SAFE_AREA_EDGE_ALL:
+                return "LAYOUT_SAFE_AREA_EDGE_ALL";
+            default:
+                return "LAYOUT_SAFE_AREA_EDGE_OTHERS_" + std::to_string(edges);
+        }
+    }
+};
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_PROPERTIES_SAFE_AREA_INSETS_H

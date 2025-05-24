@@ -490,7 +490,7 @@ void ArcListLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper, const Of
     }
     auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
     if (frameNode) {
-        frameNode->MarkAndCheckNewOpIncNode();
+        frameNode->MarkAndCheckNewOpIncNode(axis_);
         auto renderContext = frameNode->GetRenderContext();
         if (renderContext) {
             renderContext->UpdateOpacity(transparency);

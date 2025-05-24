@@ -188,6 +188,26 @@ struct NestedScrollOptionsExt {
     }
 };
 
+struct ScrollBarMargin {
+    Dimension start_;
+    Dimension end_;
+
+    bool operator==(const ScrollBarMargin& other) const
+    {
+        return this->start_ == other.start_ && this->end_ == other.end_;
+    }
+
+    bool operator!=(const ScrollBarMargin& other) const
+    {
+        return !(*this == other);
+    }
+
+    std::string ToString() const
+    {
+        return "ScrollBarMargin start: " + start_.ToString() + ", end: " + end_.ToString();
+    }
+};
+
 struct ListItemIndex {
     int32_t index = -1;
     int32_t area = -1;

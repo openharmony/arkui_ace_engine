@@ -233,6 +233,25 @@ void ResetSideBarContainerDivider(ArkUINodeHandle node)
     SideBarContainerModelNG::SetDividerEndMargin(frameNode, DEFAULT_END_MARGIN);
 }
 
+void SetSideBarOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto sideBarOnChange = reinterpret_cast<std::function<void(bool)>*>(callback);
+        SideBarContainerModelNG::SetOnChange(frameNode, std::move(*sideBarOnChange));
+    } else {
+        SideBarContainerModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
+void ResetSideBarOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SideBarContainerModelNG::SetOnChange(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUISideBarContainerModifier* GetSideBarContainerModifier()
 {
@@ -258,6 +277,8 @@ const ArkUISideBarContainerModifier* GetSideBarContainerModifier()
         .resetShowSideBar = ResetShowSideBar,
         .setSideBarContainerDivider = SetSideBarContainerDivider,
         .resetSideBarContainerDivider = ResetSideBarContainerDivider,
+        .setSideBarOnChange = SetSideBarOnChange,
+        .resetSideBarOnChange = ResetSideBarOnChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

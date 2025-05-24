@@ -27,6 +27,8 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "core/components_ng/pattern/action_sheet/action_sheet_model.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<ActionSheetModel> ActionSheetModel::instance_ = nullptr;
@@ -112,25 +114,50 @@ ActionSheetInfo ParseSheetInfo(const JsiExecutionContext& execContext, JSRef<JSV
 
 void ParseTitleAndMessage(DialogProperties& properties, JSRef<JSObject> obj)
 {
-    // Parse title.
-    auto titleValue = obj->GetProperty("title");
-    std::string title;
-    if (JSActionSheet::ParseJsString(titleValue, title)) {
-        properties.title = title;
-    }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto titleValue = obj->GetProperty("title");
+        RefPtr<ResourceObject> titleResObj;
+        std::string title;
+        if (JSViewAbstract::ParseJsString(titleValue, title, titleResObj)) {
+            properties.resourceTitleObj = titleResObj;
+            properties.title = title;
+        }
 
-    // Parse subtitle.
-    auto subtitleValue = obj->GetProperty("subtitle");
-    std::string subtitle;
-    if (JSActionSheet::ParseJsString(subtitleValue, subtitle)) {
-        properties.subtitle = subtitle;
-    }
+        auto subtitleValue = obj->GetProperty("subtitle");
+        RefPtr<ResourceObject> subtitleResObj;
+        std::string subtitle;
+        if (JSViewAbstract::ParseJsString(subtitleValue, subtitle, subtitleResObj)) {
+            properties.resourceSubTitleObj = subtitleResObj;
+            properties.subtitle = subtitle;
+        }
 
-    // Parses message.
-    auto messageValue = obj->GetProperty("message");
-    std::string message;
-    if (JSActionSheet::ParseJsString(messageValue, message)) {
-        properties.content = message;
+        auto messageValue = obj->GetProperty("message");
+        RefPtr<ResourceObject> messageResObj;
+        std::string message;
+        if (JSViewAbstract::ParseJsString(messageValue, message, messageResObj)) {
+            properties.resourceContentObj = messageResObj;
+            properties.content = message;
+        }
+    } else {
+        // Parse title.
+        auto titleValue = obj->GetProperty("title");
+        std::string title;
+        if (JSActionSheet::ParseJsString(titleValue, title)) {
+            properties.title = title;
+        }
+        // Parse subtitle.
+        auto subtitleValue = obj->GetProperty("subtitle");
+        std::string subtitle;
+        if (JSActionSheet::ParseJsString(subtitleValue, subtitle)) {
+            properties.subtitle = subtitle;
+        }
+
+        // Parses message.
+        auto messageValue = obj->GetProperty("message");
+        std::string message;
+        if (JSActionSheet::ParseJsString(messageValue, message)) {
+            properties.content = message;
+        }
     }
 }
 
@@ -207,11 +234,24 @@ void ParseBorderWidthAndColor(DialogProperties& properties, JSRef<JSObject> obj)
         properties.borderWidth = borderWidth;
         auto colorValue = obj->GetProperty("borderColor");
         NG::BorderColorProperty borderColor;
-        if (JSActionSheet::ParseBorderColorProps(colorValue, borderColor)) {
-            properties.borderColor = borderColor;
+        if (SystemProperties::ConfigChangePerform()) {
+            RefPtr<ResourceObject> borderColorResObj;
+            Color border;
+            if (JSViewAbstract::ParseJsColor(colorValue, border, borderColorResObj)) {
+                properties.resourceBdColorObj = borderColorResObj;
+                borderColor.SetColor(border);
+                properties.borderColor = borderColor;
+            } else {
+                borderColor.SetColor(Color::BLACK);
+                properties.borderColor = borderColor;
+            }
         } else {
-            borderColor.SetColor(Color::BLACK);
-            properties.borderColor = borderColor;
+            if (JSActionSheet::ParseBorderColorProps(colorValue, borderColor)) {
+                properties.borderColor = borderColor;
+            } else {
+                borderColor.SetColor(Color::BLACK);
+                properties.borderColor = borderColor;
+            }
         }
     }
 }
@@ -392,12 +432,11 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     ParseMaskRect(properties, obj);
     ParseDialogLevelMode(properties, obj);
 
-    auto onLanguageChange = [execContext, obj, parseContent = ParseTitleAndMessage, parseButton = ParseConfirmButton,
-                                parseShadow = ParseShadow, parseBorderProps = ParseBorderWidthAndColor,
-                                parseRadius = ParseRadius, parseAlignment = ParseDialogAlignment,
-                                parseOffset = ParseOffset,  parseMaskRect = ParseMaskRect,
-                                parseDialogLevelMode = ParseDialogLevelMode,
-                                node = dialogNode](DialogProperties& dialogProps) {
+    auto onLanguageChange =
+        [execContext, obj, parseContent = ParseTitleAndMessage, parseButton = ParseConfirmButton,
+            parseShadow = ParseShadow, parseBorderProps = ParseBorderWidthAndColor, parseRadius = ParseRadius,
+            parseAlignment = ParseDialogAlignment, parseOffset = ParseOffset, parseMaskRect = ParseMaskRect,
+            parseDialogLevelMode = ParseDialogLevelMode, node = dialogNode](DialogProperties& dialogProps) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
         ACE_SCORING_EVENT("ActionSheet.property.onLanguageChange");
         auto pipelineContext = PipelineContext::GetCurrentContextSafely();
@@ -489,8 +528,16 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
 
     auto backgroundColorValue = obj->GetProperty("backgroundColor");
     Color backgroundColor;
-    if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor)) {
-        properties.backgroundColor = backgroundColor;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> backGroundColorResObj;
+        if (ParseJsColor(backgroundColorValue, backgroundColor, backGroundColorResObj)) {
+            properties.resourceBgColorObj = backGroundColorResObj;
+            properties.backgroundColor = backgroundColor;
+        }
+    } else {
+        if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor)) {
+            properties.backgroundColor = backgroundColor;
+        }
     }
 
     auto backgroundBlurStyle = obj->GetProperty("backgroundBlurStyle");

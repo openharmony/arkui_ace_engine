@@ -2464,12 +2464,14 @@ HWTEST_F(BubbleTestOneNg, UpdateScrollHeight, TestSize.Level1)
     /**
      * @tc.steps: step2. test UpdateScrollHeight.
      */
-    bubblePattern->enableHoverMode_ = true;
+    auto property = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateEnableHoverMode(true);
     bool showInSubwindow = true;
     layoutAlgorithm->UpdateScrollHeight(AceType::RawPtr(layoutWrapper), showInSubwindow);
     showInSubwindow = false;
     layoutAlgorithm->UpdateScrollHeight(AceType::RawPtr(layoutWrapper), showInSubwindow);
-    EXPECT_EQ(bubblePattern->enableHoverMode_, true);
+    EXPECT_EQ(property->GetEnableHoverModeValue(false), true);
 }
 
 /**
@@ -2591,10 +2593,12 @@ HWTEST_F(BubbleTestOneNg, InitWrapperRect, TestSize.Level1)
     /**
      * @tc.steps: step2. test InitWrapperRect.
      */
-    bubblePattern->enableHoverMode_ = true;
+    auto property = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateEnableHoverMode(true);
     layoutAlgorithm->isHalfFoldHover_ = true;
-    layoutAlgorithm->InitWrapperRect(AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(bubblePattern->enableHoverMode_, true);
+    layoutAlgorithm->InitWrapperRect(AceType::RawPtr(layoutWrapper), property);
+    EXPECT_EQ(property->GetEnableHoverModeValue(false), true);
 }
 
 /**
@@ -2645,5 +2649,37 @@ HWTEST_F(BubbleTestOneNg, CreateBubbleNode001, TestSize.Level1)
     EXPECT_EQ(property->GetRadius().value(), radius);
     EXPECT_EQ(property->GetArrowHeight().value(), arrowHeight);
     EXPECT_EQ(property->GetArrowWidth().value(), arrowWidth);
+}
+
+/**
+ * @tc.name: FitAvailableRect001
+ * @tc.desc: Test CreateBubbleNode with istips Offset, Radius, ArrowHeight, ArrowWidth and Shadow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestOneNg, FitAvailableRect001, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto id = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(id, targetTag));
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto bubbleLayoutProperty = bubblePattern->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(bubbleLayoutProperty, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto pipelineContext = frameNode->GetContextRefPtr();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->UpdateDisplayAvailableRect(Rect(0.0f, 0.0f, 0.0f, 0.0f));
+    layoutAlgorithm->FitAvailableRect(AceType::RawPtr(layoutWrapper), false);
+    layoutAlgorithm->FitAvailableRect(AceType::RawPtr(layoutWrapper), true);
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0.0f, 0.0f));
 }
 } // namespace OHOS::Ace::NG

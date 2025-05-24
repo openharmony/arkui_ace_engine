@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 #include <cstdint>
+#include <future>
 #include <iterator>
 #include <stack>
 #include <string>
@@ -42,6 +43,8 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
+#include "core/components_ng/pattern/text/text_styles.h"
+#include "core/text/html_utils.h"
 #include "core/text/text_emoji_processor.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/custom_paint/rosen_render_custom_paint.h"
@@ -664,21 +667,178 @@ void TextPattern::HandleAIMenuOption(const std::string& labelInfo)
     HiddenMenu();
     dataDetectorAdapter_->OnClickAIMenuOption(aiSpan, *menuOptionAndActions.begin(), nullptr);
 }
+    
+void TextPattern::GetSpanItemAttributeUseForHtml(NG::FontStyle& fontStyle,
+    NG::TextLineStyle& textLineStyle, const std::optional<TextStyle>& textStyle)
+{
+    if (!textStyle.has_value()) {
+        return;
+    }
+    fontStyle.UpdateFontSize(textStyle->GetFontSize());
+    fontStyle.UpdateTextColor(textStyle->GetTextColor());
+    fontStyle.UpdateTextShadow(textStyle->GetTextShadows());
+    fontStyle.UpdateItalicFontStyle(textStyle->GetFontStyle());
+    fontStyle.UpdateFontWeight(textStyle->GetFontWeight());
+    fontStyle.UpdateVariableFontWeight(textStyle->GetVariableFontWeight());
+    fontStyle.UpdateEnableVariableFontWeight(textStyle->GetEnableVariableFontWeight());
+    fontStyle.UpdateFontFamily(textStyle->GetFontFamilies());
+    fontStyle.UpdateFontFeature(textStyle->GetFontFeatures());
+    fontStyle.UpdateTextDecoration(textStyle->GetTextDecoration());
+    fontStyle.UpdateTextDecorationColor(textStyle->GetTextDecorationColor());
+    fontStyle.UpdateTextDecorationStyle(textStyle->GetTextDecorationStyle());
+    fontStyle.UpdateTextCase(textStyle->GetTextCase());
+    fontStyle.UpdateAdaptMinFontSize(textStyle->GetAdaptMinFontSize());
+    fontStyle.UpdateAdaptMaxFontSize(textStyle->GetAdaptMaxFontSize());
+    fontStyle.UpdateLetterSpacing(textStyle->GetLetterSpacing());
+    fontStyle.UpdateSymbolColorList(textStyle->GetSymbolColorList());
+    fontStyle.UpdateSymbolType(textStyle->GetSymbolType());
+    textLineStyle.UpdateLineHeight(textStyle->GetLineHeight());
+    textLineStyle.UpdateTextBaseline(textStyle->GetTextBaseline());
+    textLineStyle.UpdateBaselineOffset(textStyle->GetBaselineOffset());
+    textLineStyle.UpdateTextOverflow(textStyle->GetTextOverflow());
+    textLineStyle.UpdateTextAlign(textStyle->GetTextAlign());
+    textLineStyle.UpdateMaxLines(textStyle->GetMaxLines());
+    textLineStyle.UpdateTextIndent(textStyle->GetTextIndent());
+    textLineStyle.UpdateWordBreak(textStyle->GetWordBreak());
+    textLineStyle.UpdateEllipsisMode(textStyle->GetEllipsisMode());
+    textLineStyle.UpdateLineSpacing(textStyle->GetLineSpacing());
+    textLineStyle.UpdateLineBreakStrategy(textStyle->GetLineBreakStrategy());
+    textLineStyle.UpdateHalfLeading(textStyle->GetHalfLeading());
+    textLineStyle.UpdateAllowScale(textStyle->IsAllowScale());
+    textLineStyle.UpdateParagraphSpacing(textStyle->GetParagraphSpacing());
+}
+
+RefPtr<TaskExecutor> TextPattern::GetTaskExecutorItem()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return pipeline->GetTaskExecutor();
+}
+
+void TextPattern::AsyncHandleOnCopySpanStringHtml(RefPtr<SpanString>& subSpanString)
+{
+    auto taskExecutor = GetTaskExecutorItem();
+    CHECK_NULL_VOID(taskExecutor);
+    std::list<RefPtr<SpanItem>> spans = GetSpanSelectedContent();
+    taskExecutor->PostTask(
+        [spans, subSpanString, weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor))]() {
+            auto multiTypeRecordImpl = AceType::MakeRefPtr<MultiTypeRecordImpl>();
+            subSpanString->EncodeTlv(multiTypeRecordImpl->GetSpanStringBuffer());
+            multiTypeRecordImpl->SetPlainText(subSpanString->GetString());
+            std::string htmlText = HtmlUtils::ToHtml(spans);
+            multiTypeRecordImpl->SetHtmlText(htmlText);
+
+            auto uiTaskExecutor = task.Upgrade();
+            CHECK_NULL_VOID(uiTaskExecutor);
+            uiTaskExecutor->PostTask(
+                [weak, multiTypeRecordImpl]() {
+                    auto textPattern = weak.Upgrade();
+                    CHECK_NULL_VOID(textPattern);
+                    RefPtr<PasteDataMix> pasteData = textPattern->clipboard_->CreatePasteDataMix();
+                    textPattern->clipboard_->AddMultiTypeRecord(pasteData, multiTypeRecordImpl);
+                    textPattern->clipboard_->SetData(pasteData, textPattern->copyOption_);
+                }, TaskExecutor::TaskType::UI, "AsyncHandleOnCopySpanStringHtmlSetClipboardData");
+        }, TaskExecutor::TaskType::BACKGROUND, "AsyncHandleOnCopySpanStringHtml");
+}
 
 void TextPattern::HandleOnCopySpanString()
 {
     auto subSpanString = styledString_->GetSubSpanString(textSelector_.GetTextStart(),
         textSelector_.GetTextEnd() - textSelector_.GetTextStart());
+    subSpanString->isFromStyledStringMode = true;
 #if defined(PREVIEW)
     clipboard_->SetData(subSpanString->GetString(), copyOption_);
     return;
 #endif
-    RefPtr<PasteDataMix> pasteData = clipboard_->CreatePasteDataMix();
-    std::vector<uint8_t> tlvData;
-    subSpanString->EncodeTlv(tlvData);
-    clipboard_->AddSpanStringRecord(pasteData, tlvData);
-    clipboard_->AddTextRecord(pasteData, subSpanString->GetString());
-    clipboard_->SetData(pasteData, copyOption_);
+    AsyncHandleOnCopySpanStringHtml(subSpanString);
+}
+
+std::list<RefPtr<SpanItem>> TextPattern::GetSpanSelectedContent()
+{
+    std::list<RefPtr<SpanItem>> spans;
+    auto selectStart = textSelector_.GetTextStart();
+    auto selectEnd = textSelector_.GetTextEnd();
+    int32_t tag = 0;
+    for (const auto& item : spans_) {
+        if (item->GetSymbolUnicode() != 0) {
+            tag = item->position == -1 ? tag + 1 : item->position;
+            continue;
+        }
+        std::u16string spanSelectedContent;
+        if (item->position - 1 >= selectStart && item->placeholderIndex == -1 && item->position != -1) {
+            auto wideString = item->GetSpanContent();
+            auto max = std::min(item->position, selectEnd);
+            auto min = std::max(selectStart, tag);
+            spanSelectedContent = TextEmojiProcessor::SubU16string(
+                std::clamp((min - tag), 0, static_cast<int32_t>(wideString.length())),
+                std::clamp((max - min), 0, static_cast<int32_t>(wideString.length())),
+                wideString, false, false);
+            auto spanItem = MakeRefPtr<SpanItem>();
+            NG::FontStyle fontStyle;
+            NG::TextLineStyle textLineStyle;
+            GetSpanItemAttributeUseForHtml(fontStyle, textLineStyle, item->GetTextStyle());
+            spanItem->fontStyle = std::make_unique<FontStyle>(fontStyle);
+            spanItem->textLineStyle = std::make_unique<TextLineStyle>(textLineStyle);
+            spanItem->content = spanSelectedContent;
+            spanItem->spanItemType = item->spanItemType;
+            spans.emplace_back(spanItem);
+        } else if (item->position - 1 >= selectStart && item->position != -1) {
+            spanSelectedContent = u" ";
+            auto spanItem = item->GetSameStyleSpanItem(true);
+            spanItem->content = spanSelectedContent;
+            spanItem->spanItemType = item->spanItemType;
+            spans.emplace_back(spanItem);
+        }
+        tag = item->position == -1 ? tag + 1 : item->position;
+        if (item->position >= selectEnd) {
+            break;
+        }
+    }
+    return spans;
+}
+
+void TextPattern::AsyncHandleOnCopyWithoutSpanStringHtml(const std::string& pasteData)
+{
+    auto multiTypeRecordImpl = AceType::MakeRefPtr<MultiTypeRecordImpl>();
+    std::list<RefPtr<SpanItem>> spans;
+    NG::FontStyle fontStyle;
+    NG::TextLineStyle textLineStyle;
+    if (spans_.empty()) {
+        EncodeTlvNoChild(pasteData, multiTypeRecordImpl->GetSpanStringBuffer());
+        GetSpanItemAttributeUseForHtml(fontStyle, textLineStyle, textStyle_);
+    } else {
+        EncodeTlvSpanItems(pasteData, multiTypeRecordImpl->GetSpanStringBuffer());
+        spans = GetSpanSelectedContent();
+    }
+    auto taskExecutor = GetTaskExecutorItem();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [pasteData, multiTypeRecordImpl, fontStyle, textLineStyle, spans,
+            weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor))]() {
+            auto textPattern = weak.Upgrade();
+            CHECK_NULL_VOID(textPattern);
+            multiTypeRecordImpl->SetPlainText(pasteData);
+            std::string htmlText = "";
+            if (!textPattern->spans_.empty()) {
+                htmlText = HtmlUtils::ToHtml(spans);
+            } else {
+                std::u16string content = UtfUtils::Str8DebugToStr16(pasteData);
+                htmlText = HtmlUtils::ToHtmlForNormalType(fontStyle, textLineStyle, content);
+            }
+            multiTypeRecordImpl->SetHtmlText(htmlText);
+            auto uiTaskExecutor = task.Upgrade();
+            CHECK_NULL_VOID(uiTaskExecutor);
+            uiTaskExecutor->PostTask(
+                [weak, multiTypeRecordImpl]() {
+                    auto textPattern = weak.Upgrade();
+                    CHECK_NULL_VOID(textPattern);
+                    RefPtr<PasteDataMix> pasteDataMix = textPattern->clipboard_->CreatePasteDataMix();
+                    textPattern->clipboard_->AddMultiTypeRecord(pasteDataMix, multiTypeRecordImpl);
+                    textPattern->clipboard_->SetData(pasteDataMix, textPattern->copyOption_);
+                }, TaskExecutor::TaskType::UI, "AsyncHandleOnCopyWithoutSpanStringSetClipboardData");
+        }, TaskExecutor::TaskType::BACKGROUND, "AsyncHandleOnCopyWithoutSpanStringHtml");
 }
 
 void TextPattern::HandleOnCopyWithoutSpanString(const std::string& pasteData)
@@ -687,16 +847,7 @@ void TextPattern::HandleOnCopyWithoutSpanString(const std::string& pasteData)
     clipboard_->SetData(pasteData, copyOption_);
     return;
 #endif
-    RefPtr<PasteDataMix> pasteDataMix = clipboard_->CreatePasteDataMix();
-    auto multiTypeRecordImpl = AceType::MakeRefPtr<MultiTypeRecordImpl>();
-    if (spans_.empty()) {
-        EncodeTlvNoChild(pasteData, multiTypeRecordImpl->GetSpanStringBuffer());
-    } else {
-        EncodeTlvSpanItems(pasteData, multiTypeRecordImpl->GetSpanStringBuffer());
-    }
-    multiTypeRecordImpl->SetPlainText(pasteData);
-    clipboard_->AddMultiTypeRecord(pasteDataMix, multiTypeRecordImpl);
-    clipboard_->SetData(pasteDataMix, copyOption_);
+    AsyncHandleOnCopyWithoutSpanStringHtml(pasteData);
 }
 
 #define WRITE_TLV_INHERIT(group, name, tag, type, inheritName)   \
@@ -749,7 +900,6 @@ void TextPattern::EncodeTlvFontStyleNoChild(std::vector<uint8_t>& buff)
     WRITE_TLV_INHERIT(fontStyle, FontWeight, TLV_SPAN_FONT_STYLE_FONTWEIGHT, FontWeight, FontWeight);
     WRITE_TLV_INHERIT(fontStyle, FontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily, FontFamilies);
     WRITE_TLV_INHERIT(fontStyle, FontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature, FontFeatures);
-    WRITE_TLV_INHERIT(fontStyle, TextDecoration, TLV_SPAN_FONT_STYLE_TEXTDECORATION, TextDecoration, TextDecoration);
     WRITE_TLV_INHERIT(
         fontStyle, TextDecorationColor, TLV_SPAN_FONT_STYLE_TEXTDECORATIONCOLOR, Color, TextDecorationColor);
     WRITE_TLV_INHERIT(fontStyle, TextDecorationStyle, TLV_SPAN_FONT_STYLE_TEXTDECORATIONSTYLE, TextDecorationStyle,
@@ -758,6 +908,13 @@ void TextPattern::EncodeTlvFontStyleNoChild(std::vector<uint8_t>& buff)
     WRITE_TLV_INHERIT(fontStyle, AdaptMinFontSize, TLV_SPAN_FONT_STYLE_ADPATMINFONTSIZE, Dimension, AdaptMinFontSize);
     WRITE_TLV_INHERIT(fontStyle, AdaptMaxFontSize, TLV_SPAN_FONT_STYLE_ADPATMAXFONTSIZE, Dimension, AdaptMaxFontSize);
     WRITE_TLV_INHERIT(fontStyle, LetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension, LetterSpacing);
+    WRITE_TLV_INHERIT(fontStyle, LineThicknessScale, TLV_SPAN_FONT_STYLE_LineThicknessScale, Float,
+        LineThicknessScale);
+    if (fontStyle->HasTextDecoration()) {
+        TLVUtil::WriteTextDecorations(buff, fontStyle->GetTextDecoration().value());
+    } else if (textStyle_.has_value()) {
+        TLVUtil::WriteTextDecorations(buff, textStyle_->GetTextDecoration());
+    }
 }
 
 void TextPattern::EncodeTlvTextLineStyleNoChild(std::vector<uint8_t>& buff)
@@ -852,22 +1009,16 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
         context->AddAfterLayoutTask([weak = WeakClaim(this), selectionStart, selectionEnd, eventHub]() {
             auto textPattern = weak.Upgrade();
             CHECK_NULL_VOID(textPattern);
+            auto host = textPattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto geometryNode = host->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            auto frameRect = geometryNode->GetFrameRect();
+            if (frameRect.IsEmpty()) {
+                return;
+            }
             auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
-            if (textLayoutProperty->GetCalcLayoutConstraint() &&
-                textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.has_value()) {
-                auto selfIdealSizeWidth = textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Width();
-                auto selfIdealSizeHeight = textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height();
-                auto constraint = textLayoutProperty->GetLayoutConstraint();
-                if ((selfIdealSizeWidth.has_value() && NearZero(selfIdealSizeWidth->GetDimension().ConvertToPxWithSize(
-                            constraint->percentReference.Width()))) ||
-                    (selfIdealSizeHeight.has_value() &&
-                        NearZero(selfIdealSizeHeight->GetDimension().ConvertToPxWithSize(
-                            constraint->percentReference.Height())))) {
-                    return;
-                }
-            }
-
             auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
             if (mode == TextSelectableMode::UNSELECTABLE ||
                 textLayoutProperty->GetCopyOptionValue(CopyOptions::None) == CopyOptions::None ||
@@ -1776,15 +1927,17 @@ void TextPattern::TriggerSpansOnHover(const HoverInfo& info, const PointF& textO
         int32_t end = isSpanStringMode_ && item->position == -1 ? item->interval.second : item->position;
         int32_t start = end - item->content.length();
         auto selectedRects = GetSelectedRects(start, end);
+        bool isOnHover = false;
         for (auto&& rect : selectedRects) {
-            bool isOnHover = rect.IsInRegion(textOffset);
-            if (!isOnHover && item->isOnHover != isOnHover) {
-                exitItem = item;
-                break;
-            } else if (isOnHover && item->isOnHover != isOnHover) {
-                enterItem = item;
+            isOnHover = rect.IsInRegion(textOffset);
+            if (isOnHover) {
                 break;
             }
+        }
+        if (!isOnHover && item->isOnHover != isOnHover) {
+            exitItem = item;
+        } else if (isOnHover && item->isOnHover != isOnHover) {
+            enterItem = item;
         }
         if (exitItem && enterItem) {
             break;
@@ -3014,9 +3167,10 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     fontFamilyValue =
         fontFamilyValue.substr(0, !fontFamilyValue.empty() ? static_cast<int32_t>(fontFamilyValue.size()) - 1 : 0);
     textStyle.fontFamily = !fontFamilyValue.empty() ? fontFamilyValue : defaultFontFamily.front();
-    textStyle.decorationType = static_cast<int32_t>(node->GetTextDecorationValue(TextDecoration::NONE));
+    textStyle.decorationType = static_cast<int32_t>(node->GetTextDecorationFirst());
     textStyle.decorationColor = node->GetTextDecorationColorValue(Color::BLACK).ColorToString();
     textStyle.decorationStyle = static_cast<int32_t>(node->GetTextDecorationStyleValue(TextDecorationStyle::SOLID));
+    textStyle.lineThicknessScale = node->GetLineThicknessScaleValue(1.0f);
     textStyle.textAlign = static_cast<int32_t>(node->GetTextAlignValue(TextAlign::START));
     auto lm = node->GetLeadingMarginValue({});
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -3030,6 +3184,7 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
         textStyle.letterSpacing = node->GetLetterSpacingValue(Dimension()).ConvertToVp();
         textStyle.lineSpacing = node->GetLineSpacingValue(Dimension()).ConvertToVp();
     }
+    textStyle.optimizeTrailingSpace = node->GetOptimizeTrailingSpaceValue(false);
     textStyle.halfLeading = node->GetHalfLeadingValue(false);
     textStyle.fontFeature = node->GetFontFeatureValue(ParseFontFeatureSettings("\"pnum\" 1"));
     textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_START] = lm.size.Width().ToString();
@@ -4258,9 +4413,9 @@ void TextPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
 {
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
-    auto textValue = UtfUtils::Str16DebugToStr8(textLayoutProp->GetContent().value_or(u" ")).c_str();
+    auto textValue = UtfUtils::Str16DebugToStr8(textLayoutProp->GetContent().value_or(u" "));
     if (!IsSetObscured() && textValue[0] != '\0') {
-        json->Put("content", textValue);
+        json->Put("content", textValue.c_str());
         return;
     }
 
@@ -4521,7 +4676,7 @@ void TextPattern::DumpTextStyleInfo4()
             std::string("Decoration: ")
                 .append(StringUtils::ToString(textStyle_->GetTextDecorationStyle()))
                 .append(" ")
-                .append(StringUtils::ToString(textStyle_->GetTextDecoration()))
+                .append(StringUtils::ToString(textStyle_->GetTextDecorationFirst()))
                 .append(" ")
                 .append(textStyle_->GetTextDecorationColor().ColorToString())
                 .append(" self: ")
@@ -4531,7 +4686,7 @@ void TextPattern::DumpTextStyleInfo4()
                         : "Na")
                 .append(" ")
                 .append(textLayoutProp->HasTextDecoration()
-                            ? StringUtils::ToString(textLayoutProp->GetTextDecorationValue(TextDecoration::NONE))
+                            ? StringUtils::ToString(textLayoutProp->GetTextDecorationFirst())
                             : "Na")
                 .append(" ")
                 .append(textLayoutProp->HasTextDecorationColor()
@@ -4847,9 +5002,14 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
         return paintMethod;
     }
     CHECK_NULL_RETURN(pManager_, paintMethod);
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    auto thickness = textLayoutProperty->GetLineThicknessScale().value_or(1.0f);
     RectF boundsRect = overlayMod_->GetBoundsRect();
     auto boundsWidth = contentRect_.GetX() + std::ceil(pManager_->GetLongestLineWithIndent());
     auto boundsHeight = contentRect_.GetY() + static_cast<float>(pManager_->GetHeight() + std::fabs(baselineOffset_));
+    if (GreatNotEqual(thickness, 1.0f)) {
+        boundsHeight += thickness;
+    }
     boundsRect.SetWidth(boundsWidth);
     boundsRect.SetHeight(boundsHeight);
     SetResponseRegion(frameSize, boundsRect.GetSize());

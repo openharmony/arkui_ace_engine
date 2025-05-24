@@ -64,6 +64,7 @@
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/simulator/ability_simulator/include/ability_context.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -74,6 +75,20 @@ const char UNICODE_SETTING_TAG[] = "unicodeSetting";
 const char LOCALE_DIR_LTR[] = "ltr";
 const char LOCALE_DIR_RTL[] = "rtl";
 const char LOCALE_KEY[] = "locale";
+
+void ReleaseStorageReference(void* sharedRuntime, NativeReference* storage)
+{
+    if (sharedRuntime && storage) {
+        auto nativeEngine = reinterpret_cast<NativeEngine*>(sharedRuntime);
+        auto env = reinterpret_cast<napi_env>(nativeEngine);
+        napi_delete_reference(env, reinterpret_cast<napi_ref>(storage));
+    }
+}
+
+std::string EncodeBundleAndModule(const std::string& bundleName, const std::string& moduleName)
+{
+    return bundleName + " " + moduleName;
+}
 
 void SaveResourceAdapter(const std::string& bundleName, const std::string& moduleName, int32_t instanceId,
     RefPtr<ResourceAdapter>& resourceAdapter)
@@ -1135,5 +1150,70 @@ void AceContainer::NotifyConfigurationChange(bool, const ConfigurationChange& co
             pipeline->FlushReload(configurationChange);
         },
         TaskExecutor::TaskType::UI, "ArkUINotifyConfigurationChange");
+}
+
+void AceContainer::SetLocalStorage(
+    NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context)
+{
+    ContainerScope scope(instanceId_);
+    taskExecutor_->PostSyncTask(
+        [frontend = WeakPtr<Frontend>(frontend_), storage,
+            contextWeak = std::weak_ptr<OHOS::AbilityRuntime::Context>(context), id = instanceId_,
+            sharedRuntime = sharedRuntime_] {
+            auto sp = frontend.Upgrade();
+            auto contextRef = contextWeak.lock();
+            if (!sp || !contextRef) {
+                ReleaseStorageReference(sharedRuntime, storage);
+                return;
+            }
+#ifdef NG_BUILD
+            auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(sp);
+#else
+            auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(sp);
+#endif
+            if (!declarativeFrontend) {
+                ReleaseStorageReference(sharedRuntime, storage);
+                return;
+            }
+            auto jsEngine = declarativeFrontend->GetJsEngine();
+            if (!jsEngine) {
+                ReleaseStorageReference(sharedRuntime, storage);
+                return;
+            }
+            if (contextRef->GetBindingObject() && contextRef->GetBindingObject()->Get<NativeReference>()) {
+                jsEngine->SetContext(id, contextRef->GetBindingObject()->Get<NativeReference>());
+            }
+            if (storage) {
+                jsEngine->SetLocalStorage(id, storage);
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUISetLocalStorage");
+}
+
+std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextByModule(
+    const std::string& bundle, const std::string& module)
+{
+    auto context = runtimeContext_.lock();
+    CHECK_NULL_RETURN(context, nullptr);
+    if (!bundle.empty() && !module.empty()) {
+        std::string encode = EncodeBundleAndModule(bundle, module);
+        if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+            RecordResAdapter(encode);
+        } else {
+            taskExecutor_->PostTask(
+                [encode, instanceId = instanceId_]() -> void {
+                    auto container = AceContainer::GetContainerInstance(instanceId);
+                    CHECK_NULL_VOID(container);
+                    container->RecordResAdapter(encode);
+                },
+                TaskExecutor::TaskType::UI, "ArkUIRecordResAdapter");
+        }
+    }
+    return context->CreateModuleContext(bundle, module);
+}
+
+void AceContainer::SetAbilityContext(const std::weak_ptr<OHOS::AbilityRuntime::Context>& context)
+{
+    runtimeContext_ = context;
 }
 } // namespace OHOS::Ace::Platform

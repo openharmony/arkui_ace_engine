@@ -27,6 +27,8 @@ public:
 
     static void OnStart(const JSCallbackInfo& info);
     static void OnComplete(const JSCallbackInfo& info);
+    protected:
+    static void ParseRawfileWebSrc(const JSRef<JSVal>& srcValue, std::string& webSrc);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_RICHTEXT_H

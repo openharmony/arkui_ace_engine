@@ -37,6 +37,11 @@ std::shared_ptr<SubwindowManager> SubwindowManager::GetInstance()
         instance_ = std::make_shared<SubwindowManager>();
         if (instance_) {
             instance_->isSuperFoldDisplayDevice_ = SystemProperties::IsSuperFoldDisplayDevice();
+            auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+            CHECK_NULL_RETURN(pipeline, instance_);
+            auto theme = pipeline->GetTheme<SelectTheme>();
+            CHECK_NULL_RETURN(theme, instance_);
+            instance_->expandDisplay_ = theme->GetExpandDisplay();
         }
     }
     return instance_;
@@ -397,6 +402,24 @@ void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId, bool isForceCle
     }
     if (subwindow) {
         subwindow->ClearPopupNG(isForceClear);
+    }
+}
+
+void SubwindowManager::ClearAllMenuPopup(int32_t instanceId)
+{
+    auto allSubcontainerId = GetAllSubContainerId(instanceId);
+    for (auto subContainerId : allSubcontainerId) {
+        auto subContainer = Container::GetContainer(subContainerId);
+        CHECK_NULL_CONTINUE(subContainer);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(subContainer->GetPipelineContext());
+        CHECK_NULL_CONTINUE(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_CONTINUE(overlayManager);
+        overlayManager->HideAllPopupsWithoutAnimation();
+        overlayManager->HideAllMenusWithoutAnimation(true);
+        auto subwindow = GetSubwindowById(subContainerId);
+        CHECK_NULL_CONTINUE(subwindow);
+        subwindow->HideSubWindowNG();
     }
 }
 
@@ -1698,11 +1721,7 @@ const std::vector<RefPtr<Subwindow>> SubwindowManager::GetSortSubwindow(int32_t 
 
 bool SubwindowManager::GetIsExpandDisplay()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_RETURN(theme, false);
-    return theme->GetExpandDisplay();
+    return expandDisplay_;
 }
 
 RefPtr<Subwindow> SubwindowManager::GetOrCreateMenuSubWindow(int32_t instanceId)

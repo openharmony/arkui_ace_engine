@@ -18,5 +18,6 @@ ace_unittest("data_panel_test_ng") {
   sources = [
     "data_panel_content_modifier_test_ng.cpp",
     "data_panel_test_ng.cpp",
+    "data_panel_pattern_test_ng.cpp",
   ]
 }

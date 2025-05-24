@@ -335,13 +335,6 @@ void SheetPresentationPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     InitFoldState();
-    auto sheetType = GetSheetType();
-    if (GetSheetType() == SheetType::SHEET_SIDE) {
-        sheetObject_ = AceType::MakeRefPtr<SheetSideObject>(sheetType);
-    } else {
-        sheetObject_ = AceType::MakeRefPtr<SheetObject>(sheetType);
-    }
-    sheetObject_->BindPattern(WeakClaim(this));
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
@@ -833,6 +826,24 @@ bool SheetPresentationPattern::GetWindowButtonRect(NG::RectF& floatButtons)
     return false;
 }
 
+bool SheetPresentationPattern::GetWindowButtonRectForAllAPI(NG::RectF& floatButtons)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto avoidInfoMgr = pipelineContext->GetAvoidInfoManager();
+    CHECK_NULL_RETURN(avoidInfoMgr, false);
+    NG::RectF floatContainerModal;
+    if (avoidInfoMgr->NeedAvoidContainerModal() &&
+        avoidInfoMgr->GetContainerModalButtonsRect(floatContainerModal, floatButtons)) {
+        TAG_LOGD(AceLogTag::ACE_SHEET, "When hidden, floatButtons rect is %{public}s", floatButtons.ToString().c_str());
+        return true;
+    };
+    TAG_LOGD(AceLogTag::ACE_SHEET, "Window title builder shown");
+    return false;
+}
+
 float SheetPresentationPattern::InitialSingleGearHeight(NG::SheetStyle& sheetStyle)
 {
     auto largeHeight = sheetMaxHeight_ - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
@@ -1097,12 +1108,13 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
 
 void SheetPresentationPattern::SheetTransitionForOverlay(bool isTransitionIn, bool isFirstTransition)
 {
-    // current sheet animation
+    // get sheet animation option and finishCallback
     AnimationOption option = sheetObject_->GetAnimationOptionForOverlay(isTransitionIn, isFirstTransition);
+    // Init other animation information, includes the starting point of the animation.
     sheetObject_->InitAnimationForOverlay(isTransitionIn, isFirstTransition);
     AnimationUtils::Animate(
         option,
-        sheetObject_->GetAnimationPropertyCallForOverlay(isTransitionIn),
+        sheetObject_->GetAnimationPropertyCallForOverlay(isTransitionIn), // Moving effect end point
         option.GetOnFinishEvent());
 }
 
@@ -3197,6 +3209,32 @@ void SheetPresentationPattern::UpdateSheetWhenSheetTypeChanged()
     }
 }
 
+bool SheetPresentationPattern::IsWaterfallWindowMode()
+{
+    if (!SystemProperties::IsSuperFoldDisplayDevice()) {
+        return false;
+    }
+ 
+    auto container = Container::Current();
+    if (!container) {
+        TAG_LOGW(AceLogTag::ACE_DIALOG, "container is null");
+        return false;
+    }
+
+    if (container->IsSubContainer()) {
+        auto instanceId = SubwindowManager::GetInstance()->GetParentContainerId(GetSubWindowId());
+        container = AceEngine::Get().GetContainer(instanceId);
+        if (!container) {
+            TAG_LOGW(AceLogTag::ACE_DIALOG, "parent container is null");
+            return false;
+        }
+    }
+ 
+    auto halfFoldStatus = container->GetCurrentFoldStatus() == FoldStatus::HALF_FOLD;
+    auto isWaterfallWindow = container->IsWaterfallWindow();
+    return halfFoldStatus && isWaterfallWindow;
+}
+
 bool SheetPresentationPattern::IsCurSheetNeedHalfFoldHover()
 {
     auto host = GetHost();
@@ -3208,8 +3246,13 @@ bool SheetPresentationPattern::IsCurSheetNeedHalfFoldHover()
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
-    auto enableHoverMode = sheetStyle.enableHoverMode.value_or(sheetTheme->IsOuterBorderEnable() ? true : false);
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    auto enableHoverMode = sheetStyle.enableHoverMode.value_or((deviceType == DeviceType::TWO_IN_ONE) ? true : false);
     bool isHoverMode = enableHoverMode ? pipeline->IsHalfFoldHoverStatus() : false;
+    if (deviceType == DeviceType::TWO_IN_ONE) {
+        TAG_LOGD(AceLogTag::ACE_SHEET, "sheet IsOuterBorderEnable is true.");
+        isHoverMode = enableHoverMode ? IsWaterfallWindowMode() : false;
+    }
     return isHoverMode && GetSheetType() == SheetType::SHEET_CENTER;
 }
 
@@ -3240,20 +3283,15 @@ bool SheetPresentationPattern::IsShowInSubWindow() const
 
 void SheetPresentationPattern::InitFoldCreaseRegion()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
-    CHECK_NULL_VOID(sheetTheme);
-    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
-    auto enableHoverMode = sheetStyle.enableHoverMode.value_or(sheetTheme->IsOuterBorderEnable() ? true : false);
-    if (!enableHoverMode || !currentFoldCreaseRegion_.empty()) {
+    if (!currentFoldCreaseRegion_.empty()) {
         return;
     }
     auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (container->IsSubContainer()) {
+        auto instanceId = SubwindowManager::GetInstance()->GetParentContainerId(container->GetInstanceId());
+        container = AceEngine::Get().GetContainer(instanceId);
+    }
     CHECK_NULL_VOID(container);
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_VOID(displayInfo);
@@ -3643,15 +3681,19 @@ void SheetPresentationPattern::RecoverScrollOrResizeAvoidStatus()
 
 void SheetPresentationPattern::OnWillAppear()
 {
+    isOnAppearing_ = true;
     TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onWillAppear state.");
     if (onWillAppear_) {
         onWillAppear_();
     }
+    // "SendMessagesBeforeXX" and "SendMessagesAfterXX" need to be called in conjunction.
+    // Currently, this is ensured through the lifecycle, and it is not recommended to call them separately.
     SendMessagesBeforeFirstTransitionIn(true);
 }
 
 void SheetPresentationPattern::OnAppear()
 {
+    isOnAppearing_ = false;
     TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onAppear state.");
     if (onAppear_) {
         onAppear_();
@@ -3663,6 +3705,7 @@ void SheetPresentationPattern::OnAppear()
 
 void SheetPresentationPattern::OnWillDisappear()
 {
+    isOnDisappearing_ = true;
     TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onWillDisappear state.");
     if (onWillDisappear_) {
         onWillDisappear_();
@@ -3680,6 +3723,7 @@ void SheetPresentationPattern::OnWillDisappear()
 
 void SheetPresentationPattern::OnDisappear()
 {
+    isOnDisappearing_ = false;
     TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onDisappear state.");
     if (onDisappear_) {
         isExecuteOnDisappear_ = true;
@@ -3731,6 +3775,8 @@ void SheetPresentationPattern::UnRegisterAvoidInfoChangeListener(FrameNode* host
 /**
  * @brief Update and Send messages in other fields before the sheet entrance animation starts.
  * Its timing is equivalent to the callback "onWillAppear".
+ * "SendMessagesBeforeXX" and "SendMessagesAfterXX" need to be called in conjunction.
+ * Currently, this is ensured through the lifecycle, and it is not recommended to call them separately.
  */
 void SheetPresentationPattern::SendMessagesBeforeFirstTransitionIn(bool isFirstTransition)
 {
@@ -3757,10 +3803,8 @@ void SheetPresentationPattern::SendMessagesBeforeFirstTransitionIn(bool isFirstT
         host->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN,
             WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     }
-    auto pipelineContext = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->UpdateOcclusionCullingStatus(true, host);
     ACE_SCOPED_TRACE("Sheet BeforeFirstTransitionIn end");
+    host->AddToOcclusionMap(true);
 }
 
 /**
@@ -3779,9 +3823,6 @@ void SheetPresentationPattern::SendMessagesAfterFirstTransitionIn(bool isFirstTr
     CHECK_NULL_VOID(context);
     context->UpdateRenderGroup(false, false, true);
     TAG_LOGD(AceLogTag::ACE_SHEET, "UpdateRenderGroup finished");
-    auto pipelineContext = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->UpdateOcclusionCullingStatus(false, nullptr);
     ACE_SCOPED_TRACE("Sheet AfterFirstTransitionIn end");
 }
 
@@ -3795,9 +3836,6 @@ void SheetPresentationPattern::SendMessagesBeforeTransitionOut()
     CHECK_NULL_VOID(host);
     host->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-    auto pipelineContext = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->UpdateOcclusionCullingStatus(true, host);
     // supports Gesture durring transition
     auto sheetParent = DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_VOID(sheetParent);
@@ -3816,10 +3854,8 @@ void SheetPresentationPattern::SendMessagesAfterTransitionOut(FrameNode* sheetNo
     CHECK_NULL_VOID(sheetNode);
     // WindowMaximize
     SetWindowUseImplicitAnimation(sheetNode, false);
-    auto pipelineContext = sheetNode->GetContextWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->UpdateOcclusionCullingStatus(false, nullptr);
     ACE_SCOPED_TRACE("Sheet AfterTransitionOut end");
+    sheetNode->AddToOcclusionMap(false);
 }
 
 void SheetPresentationPattern::UpdateSheetType()
@@ -3834,6 +3870,8 @@ void SheetPresentationPattern::UpdateSheetType()
 
 void SheetPresentationPattern::UpdateSheetObject(SheetType type)
 {
+    // The first CreateObject must be later than UpdateSheetStyle, must be earlier than MarkModifyDone.
+    // And must be earlier than the entry animation.
     RefPtr<SheetObject> sheetObject = sheetObject_;
     if (sheetObject && sheetObject->GetSheetType() == type) {
         return;
@@ -3845,10 +3883,11 @@ void SheetPresentationPattern::UpdateSheetObject(SheetType type)
     }
     if (sheetObject_) {
         sheetObject->CopyData(sheetObject_);
+        // start clear old sheet data
+        RemovePanEvent();
     }
     SetSheetObject(sheetObject);
     sheetObject_->BindPattern(WeakClaim(this));
-    RemovePanEvent();
     InitPanEvent();
 }
 

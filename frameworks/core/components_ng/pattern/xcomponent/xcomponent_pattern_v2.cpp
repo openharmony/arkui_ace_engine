@@ -18,7 +18,10 @@
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_session_adapter.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_child_tree_callback.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_inner_surface_controller.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "transaction/rs_transaction_proxy.h"
 #endif
@@ -88,6 +91,12 @@ void XComponentPatternV2::OnAttachToMainTree()
     isOnTree_ = true;
     if (autoInitialize_) {
         HandleSurfaceCreated();
+    }
+    if (needRecoverDisplaySync_ && displaySync_ && !displaySync_->IsOnPipeline()) {
+        TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnAttachToMainTree:recover displaySync: "
+            "%{public}s(%{public}" PRIu64 ")", GetId().c_str(), displaySync_->GetId());
+        displaySync_->AddToPipelineOnContainer();
+        needRecoverDisplaySync_ = false;
     }
 }
 
@@ -200,6 +209,12 @@ void XComponentPatternV2::OnDetachFromMainTree()
     if (autoInitialize_) {
         HandleSurfaceDestroyed();
     }
+    if (displaySync_ && displaySync_->IsOnPipeline()) {
+        TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnDetachFromMainTree:remove displaySync: "
+            "%{public}s(%{public}" PRIu64 ")", GetId().c_str(), displaySync_->GetId());
+        displaySync_->DelFromPipelineOnContainer();
+        needRecoverDisplaySync_ = true;
+    }
 }
 
 void XComponentPatternV2::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -266,10 +281,19 @@ void XComponentPatternV2::InitSurface()
         surfaceHolder_->nativeWindow_ = reinterpret_cast<OHNativeWindow*>(nativeWindow_);
     }
     surfaceId_ = renderSurface_->GetUniqueId();
+    if (type_ == XComponentType::SURFACE) {
+        XComponentInnerSurfaceController::RegisterSurfaceRenderContext(
+            surfaceId_, WeakPtr(renderContextForSurface_));
+    }
 }
 
 void XComponentPatternV2::DisposeSurface()
 {
+    if (type_ == XComponentType::SURFACE) {
+        XComponentInnerSurfaceController::UnregisterSurfaceRenderContext(
+            surfaceId_);
+        surfaceId_ = "";
+    }
     if (renderSurface_) {
         renderSurface_->ReleaseSurfaceBuffers();
         renderSurface_->UnregisterSurface();
@@ -377,6 +401,7 @@ void XComponentPatternV2::OnWindowHide()
     if (renderSurface_) {
         renderSurface_->OnWindowStateChange(false);
     }
+    OnSurfaceHide();
     hasReleasedSurface_ = true;
 }
 
@@ -390,6 +415,7 @@ void XComponentPatternV2::OnWindowShow()
     if (renderSurface_) {
         renderSurface_->OnWindowStateChange(true);
     }
+    OnSurfaceShow();
     hasReleasedSurface_ = false;
 }
 
@@ -469,5 +495,180 @@ void XComponentPatternV2::DumpInfo()
         std::string("xcomponentType: ").append(XComponentPattern::XComponentTypeToString(type_)));
     DumpLog::GetInstance().AddDesc(std::string("surfaceId: ").append(surfaceId_));
     DumpLog::GetInstance().AddDesc(std::string("surfaceRect: ").append(paintRect_.ToString()));
+}
+
+void XComponentPatternV2::SetExpectedRateRange(int32_t min, int32_t max, int32_t expected)
+{
+    if (hasGotNativeXComponent_) {
+        return;
+    }
+    isNativeXComponentDisabled_ = true;
+    CHECK_NULL_VOID(displaySync_);
+    FrameRateRange frameRateRange;
+    frameRateRange.Set(min, max, expected);
+    displaySync_->SetExpectedFrameRateRange(frameRateRange);
+    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " SetExpectedFrameRateRange"
+        "{%{public}d, %{public}d, %{public}d}", displaySync_->GetId(), min, max, expected);
+}
+
+void XComponentPatternV2::UpdateOnFrameEvent(void(*callback)(void*, uint64_t, uint64_t), void* arkuiNode)
+{
+    if (hasGotNativeXComponent_) {
+        return;
+    }
+    isNativeXComponentDisabled_ = true;
+    CHECK_NULL_VOID(displaySync_);
+    displaySync_->RegisterOnFrameWithData([weak = AceType::WeakClaim(this),
+        callback, arkuiNode](RefPtr<DisplaySyncData> displaySyncData) {
+        auto xComponentPattern = weak.Upgrade();
+        CHECK_NULL_VOID(xComponentPattern);
+        CHECK_NULL_VOID(callback);
+        CHECK_NULL_VOID(arkuiNode);
+        CHECK_NULL_VOID(displaySyncData);
+        callback(arkuiNode, displaySyncData->GetTimestamp(), displaySyncData->GetTargetTimestamp());
+    });
+    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " RegisterOnFrame",
+        displaySync_->GetId());
+    displaySync_->AddToPipelineOnContainer();
+}
+
+void XComponentPatternV2::UnregisterOnFrameEvent()
+{
+    if (hasGotNativeXComponent_) {
+        return;
+    }
+    isNativeXComponentDisabled_ = true;
+    CHECK_NULL_VOID(displaySync_);
+    displaySync_->UnregisterOnFrame();
+    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " UnregisterOnFrame",
+        displaySync_->GetId());
+    displaySync_->DelFromPipelineOnContainer();
+    needRecoverDisplaySync_ = false;
+}
+
+void XComponentPatternV2::SetNeedSoftKeyboard(bool isNeedSoftKeyboard)
+{
+    if (hasGotNativeXComponent_) {
+        return;
+    }
+    isNativeXComponentDisabled_ = true;
+    isNeedSoftKeyboard_ = isNeedSoftKeyboard;
+}
+
+void XComponentPatternV2::OnSurfaceShow()
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(surfaceHolder_);
+    auto callbackList = surfaceHolder_->surfaceCallbackList_;
+    for (const auto& iter : callbackList) {
+        auto callback = iter->onSurfaceShow;
+        if (callback) {
+            callback(surfaceHolder_);
+        }
+    }
+}
+
+void XComponentPatternV2::OnSurfaceHide()
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(surfaceHolder_);
+    auto callbackList = surfaceHolder_->surfaceCallbackList_;
+    bool hasCallback = false;
+    for (const auto& iter : callbackList) {
+        auto callback = iter->onSurfaceHide;
+        if (callback) {
+            callback(surfaceHolder_);
+            hasCallback = true;
+        }
+    }
+    if (hasCallback) {
+        CHECK_NULL_VOID(renderSurface_);
+        renderSurface_->ReleaseSurfaceBuffers();
+    }
+}
+
+void XComponentPatternV2::ResetAndInitializeNodeHandleAccessibility()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    if (accessibilityChildTreeCallback_) {
+        accessibilityManager->DeregisterAccessibilityChildTreeCallback(
+            accessibilityChildTreeCallback_->GetAccessibilityId()
+        );
+        accessibilityChildTreeCallback_.reset();
+        accessibilityChildTreeCallback_ = nullptr;
+    }
+
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "InitializeNodeHandleAccessibility");
+    CHECK_NULL_VOID(arkuiAccessibilityProvider_);
+    arkuiAccessibilityProvider_->SetRegisterCallback(
+        [weak = WeakClaim(this)] (bool isRegister) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleRegisterAccessibilityEvent(isRegister);
+        });
+    int64_t accessibilityId = host->GetAccessibilityId();
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT,
+        "InitializeNodeHandleAccessibility accessibilityId: %{public}" PRId64 "", accessibilityId);
+    accessibilityChildTreeCallback_ = std::make_shared<XComponentAccessibilityChildTreeCallback>(
+        WeakClaim(this), host->GetAccessibilityId());
+    accessibilityManager->RegisterAccessibilityChildTreeCallback(
+        accessibilityId, accessibilityChildTreeCallback_);
+    if (accessibilityManager->IsRegister()) {
+        accessibilityChildTreeCallback_->OnRegister(
+            pipeline->GetWindowId(), accessibilityManager->GetTreeId());
+    }
+}
+
+ArkUI_AccessibilityProvider* XComponentPatternV2::CreateAccessibilityProvider()
+{
+    if (hasGotNativeXComponent_) {
+        return nullptr;
+    }
+    isNativeXComponentDisabled_ = true;
+    useNodeHandleAccessibilityProvider_ = true;
+    if (arkuiAccessibilityProvider_) {
+        return arkuiAccessibilityProvider_;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    arkuiAccessibilityProvider_ = new ArkUI_AccessibilityProvider();
+    XComponentPatternV2::XComponentAccessibilityProviderMap[arkuiAccessibilityProvider_] = WeakPtr(host);
+    ResetAndInitializeNodeHandleAccessibility();
+    return arkuiAccessibilityProvider_;
+}
+
+void XComponentPatternV2::DisposeAccessibilityProvider(ArkUI_AccessibilityProvider* provider)
+{
+    if (hasGotNativeXComponent_ || (provider != arkuiAccessibilityProvider_)) {
+        return;
+    }
+    CHECK_NULL_VOID(arkuiAccessibilityProvider_);
+    isNativeXComponentDisabled_ = true;
+    XComponentPatternV2::XComponentAccessibilityProviderMap.erase(arkuiAccessibilityProvider_);
+    auto host = GetHost();
+    UninitializeAccessibility(AceType::RawPtr(host));
+    delete arkuiAccessibilityProvider_;
+    arkuiAccessibilityProvider_ = nullptr;
+}
+
+std::unordered_map<void*, WeakPtr<FrameNode>> XComponentPatternV2::XComponentAccessibilityProviderMap;
+
+FrameNode* XComponentPatternV2::QueryAccessibilityProviderHost(void* provider, bool& isProviderValied)
+{
+    auto it = XComponentAccessibilityProviderMap.find(provider);
+    if (it == XComponentAccessibilityProviderMap.end()) {
+        isProviderValied = false;
+        return nullptr;
+    }
+    isProviderValied = true;
+    auto weakHost = it->second;
+    auto host = weakHost.Upgrade();
+    CHECK_NULL_RETURN(host, nullptr);
+    return AceType::RawPtr(host);
 }
 } // namespace OHOS::Ace::NG

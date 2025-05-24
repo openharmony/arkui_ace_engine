@@ -148,10 +148,12 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
 
     std::string src;
     bool srcValid = false;
+    RefPtr<ResourceObject> resObj;
     if (args[0]->IsString()) {
         src = args[0]->ToString();
     } else {
         srcValid = ParseJsMedia(args[0], src);
+        srcValid = ParseJsMedia(args[0], src, resObj);
     }
     if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
         return;
@@ -179,6 +181,9 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
     auto srcInfo = CreateSourceInfo(srcRef, pixmap, bundleName, moduleName);
     srcInfo.SetIsUriPureNumber((resId == -1));
     ImageModel::GetInstance()->SetAlt(srcInfo);
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        ImageModel::GetInstance()->CreateWithResourceObj(ImageResourceType::ALT, resObj);
+    }
 }
 
 void JSImage::SetObjectFit(const JSCallbackInfo& args)
@@ -391,7 +396,8 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
     std::string src;
     auto imageInfo = info[0];
     int32_t resId = 0;
-    bool srcValid = ParseJsMediaWithBundleName(imageInfo, src, bundleName, moduleName, resId);
+    RefPtr<ResourceObject> resObj;
+    bool srcValid = ParseJsMediaWithBundleName(imageInfo, src, bundleName, moduleName, resId, resObj);
     CHECK_EQUAL_VOID(CheckResetImage(srcValid, info), true);
     CheckIsCard(src, imageInfo);
     RefPtr<PixelMap> pixmap = nullptr;
@@ -435,6 +441,9 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
     config.isImageSpan = isImageSpan;
     ImageModel::GetInstance()->Create(config, pixmap);
     ParseImageAIOptions(info);
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        ImageModel::GetInstance()->CreateWithResourceObj(ImageResourceType::SRC, resObj);
+    }
 }
 
 void JSImage::ParseImageAIOptions(const JSCallbackInfo& info)
@@ -562,7 +571,8 @@ void JSImage::JsImageResizable(const JSCallbackInfo& info)
     }
     auto infoObj = info[0];
     if (!infoObj->IsObject()) {
-        ImageModel::GetInstance()->SetResizableSlice(ImageResizableSlice());
+        auto slice = ImageResizableSlice();
+        ImageModel::GetInstance()->SetResizableSlice(slice);
         return;
     }
     JSRef<JSObject> resizableObject = JSRef<JSObject>::Cast(infoObj);
@@ -651,7 +661,9 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
     }
 
     Color color;
-    if (!ParseJsColor(info[0], color)) {
+    RefPtr<ResourceObject> resObj;
+    bool status = ParseJsColor(info[0], color, resObj);
+    if (!status) {
         if (ParseColorContent(info[0])) {
             ImageModel::GetInstance()->ResetImageFill();
             return;
@@ -666,6 +678,10 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
         color = theme->GetFillColor();
     }
     ImageModel::GetInstance()->SetImageFill(color);
+
+    if (SystemProperties::ConfigChangePerform()&&resObj) {
+        ImageModel::GetInstance()->CreateWithResourceObj(ImageResourceType::FILL_COLOR, resObj);
+    }
 }
 
 void JSImage::SetImageRenderMode(const JSCallbackInfo& info)

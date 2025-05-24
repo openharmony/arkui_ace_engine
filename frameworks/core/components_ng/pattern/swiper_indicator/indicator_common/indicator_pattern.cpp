@@ -544,6 +544,15 @@ void IndicatorPattern::HandleDragEnd(double dragVelocity)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+RectF IndicatorPattern::CalcBoundsRect() const
+{
+    RectF boundsRect;
+    if (GetDotIndicatorModifier()) {
+        boundsRect = GetDotIndicatorModifier()->GetBoundsRect();
+    }
+    return boundsRect;
+}
+
 void IndicatorPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     SwiperIndicatorPattern::InitTouchEvent(gestureHub);

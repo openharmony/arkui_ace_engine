@@ -21,7 +21,8 @@
 extern "C" {
 CJ_EXPORT void FfiFontManagerRegisterFont(const char* familyName, const char* familySrc);
 CJ_EXPORT VectorStringHandle FfiFontManagerGetSystemFontList();
-CJ_EXPORT NativeFontInfo4Font* FfiFontManagerGetFontByName(const char* fontName);
+CJ_EXPORT NativeOptionFontInfo FfiFontManagerGetFontByName(const char* fontName);
+CJ_EXPORT NativeFontInfo4Font* FfiFontManagerGetFontByNameV2(const char* fontName);
 CJ_EXPORT NativeUIFontConfig FfiFontManagerGetUIFontConfig();
 }
 

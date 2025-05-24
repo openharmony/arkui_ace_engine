@@ -383,6 +383,44 @@ HWTEST_F(FrameNodeTestNg, FrameNodeDumpCommonInfo01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FrameNodeDumpCommonInfo02
+ * @tc.desc: Test frameNode DumpCommonInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeDumpCommonInfo02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. call DumpCommonInfo.
+     * @tc.expected: expect description_[12] is BorderRadius.
+     */
+    frameNode->geometryNode_->frame_.rect_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    LayoutConstraintF parentLayoutConstraint;
+    frameNode->geometryNode_->parentLayoutConstraint_ = parentLayoutConstraint;
+    frameNode->isFreeze_ = true;
+    frameNode->userFreeze_ = true;
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->propVisibility_ = VisibleType::INVISIBLE;
+    layoutProperty->padding_ = std::make_unique<PaddingProperty>();
+    layoutProperty->safeAreaPadding_ = std::make_unique<PaddingProperty>();
+    layoutProperty->borderWidth_ = std::make_unique<BorderWidthProperty>();
+    frameNode->layoutProperty_ = layoutProperty;
+    Dimension radius(10.0f);
+    BorderRadiusProperty borderRadiusProperty { radius, radius, radius, radius };
+    frameNode->renderContext_->UpdateBorderRadius(borderRadiusProperty);
+    DumpLog::GetInstance().description_.clear();
+    frameNode->DumpCommonInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_[11],
+        "BorderRadius: radiusTopLeft: [10.00px]radiusTopRight: "
+        "[10.00px]radiusBottomLeft: [10.00px]radiusBottomRight: [10.00px]\n");
+}
+
+/**
  * @tc.name: FrameNodeDumpOnSizeChangeInfo01
  * @tc.desc: Test the function DumpOnSizeChangeInfo
  * @tc.type: FUNC
@@ -2482,5 +2520,47 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionListByTraversal01, TestSize.
     responseRegionList.emplace_back(responseRect);
     auto context = MockPipelineContext::GetCurrentContext();
     frameNode->GetResponseRegionListByTraversal(responseRegionList, responseRect);
+}
+
+/**
+ * @tc.name: OnLayoutFinish001
+ * @tc.desc: Test frameNode OnLayoutFinish
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, OnLayoutFinish001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnLayoutFinish.
+     * @tc.expected: expect BorderRadius radiusTopLeft is 10, OuterBorderRadius radiusTopRight is 20
+     * and result return true.
+     */
+    auto context = AceType::MakeRefPtr<PipelineContext>();
+    frameNode->context_ = AceType::RawPtr(context);
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    auto geometryTransition = AceType::MakeRefPtr<GeometryTransition>("active");
+    layoutProperty->geometryTransition_ = geometryTransition;
+    frameNode->layoutProperty_ = layoutProperty;
+    frameNode->isActive_ = true;
+    Dimension radius(10.0f);
+    Dimension dimension(20.0f);
+    BorderRadiusProperty borderRadiusProperty;
+    BorderRadiusProperty outerBorderRadiusProperty;
+    borderRadiusProperty.radiusTopLeft = radius;
+    outerBorderRadiusProperty.radiusTopRight = dimension;
+    frameNode->renderContext_->UpdateBorderRadius(borderRadiusProperty);
+    frameNode->renderContext_->UpdateOuterBorderRadius(outerBorderRadiusProperty);
+    bool needSyncRsNode = true;
+    DirtySwapConfig config;
+    auto result = frameNode->OnLayoutFinish(needSyncRsNode, config);
+    frameNode->context_ = nullptr;
+    EXPECT_EQ(frameNode->renderContext_->GetBorderRadius()->radiusTopLeft.value().Value(), 10.0f);
+    EXPECT_EQ(frameNode->renderContext_->GetOuterBorderRadius()->radiusTopRight.value().Value(), 20.0f);
+    EXPECT_FALSE(result);
 }
 } // namespace OHOS::Ace::NG

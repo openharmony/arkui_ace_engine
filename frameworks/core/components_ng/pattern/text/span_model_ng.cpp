@@ -153,7 +153,7 @@ void SpanModelNG::ResetFontFamily()
 
 void SpanModelNG::SetTextDecoration(Ace::TextDecoration value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(TextDecoration, value);
+    ACE_UPDATE_SPAN_PROPERTY(TextDecoration, {value});
 }
 
 void SpanModelNG::SetTextDecorationStyle(Ace::TextDecorationStyle value)
@@ -164,6 +164,11 @@ void SpanModelNG::SetTextDecorationStyle(Ace::TextDecorationStyle value)
 void SpanModelNG::SetTextDecorationColor(const Color& value)
 {
     ACE_UPDATE_SPAN_PROPERTY(TextDecorationColor, value);
+}
+
+void SpanModelNG::SetLineThicknessScale(float value)
+{
+    ACE_UPDATE_SPAN_PROPERTY(LineThicknessScale, value);
 }
 
 void SpanModelNG::SetTextCase(Ace::TextCase value)
@@ -363,7 +368,7 @@ void SpanModelNG::SetTextDecoration(UINode* uiNode, TextDecoration value)
 {
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
     CHECK_NULL_VOID(spanNode);
-    spanNode->UpdateTextDecoration(value);
+    spanNode->UpdateTextDecoration({value});
 }
 
 void SpanModelNG::ResetTextDecoration(UINode *uiNode)
@@ -393,6 +398,18 @@ void SpanModelNG::SetTextDecorationColor(UINode* uiNode, const Color& value)
 void SpanModelNG::ResetTextDecorationColor(UINode *uiNode)
 {
     ACE_RESET_NODE_SPAN_PROPERTY(TextDecorationColor, uiNode);
+}
+
+void SpanModelNG::SetLineThicknessScale(UINode *uiNode, float value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateLineThicknessScale(value);
+}
+
+void SpanModelNG::ResetLineThicknessScale(UINode* uiNode)
+{
+    ACE_RESET_NODE_SPAN_PROPERTY(LineThicknessScale, uiNode);
 }
 
 void SpanModelNG::SetTextColor(UINode* uiNode, const Color& value)
@@ -501,7 +518,7 @@ Ace::TextDecoration SpanModelNG::GetTextDecoration(UINode* uiNode)
 {
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
     CHECK_NULL_RETURN(spanNode, TextDecoration::NONE);
-    return spanNode->GetTextDecoration().value_or(TextDecoration::NONE);
+    return spanNode->GetTextDecorationFirst();
 }
 
 Color SpanModelNG::GetTextDecorationColor(UINode* uiNode)

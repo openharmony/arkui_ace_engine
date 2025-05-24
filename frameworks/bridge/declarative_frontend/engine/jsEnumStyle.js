@@ -507,6 +507,12 @@ let EffectEdge;
   EffectEdge[EffectEdge.ALL = 3] = 'ALL';
 })(EffectEdge || (EffectEdge = {}));
 
+let FocusWrapMode;
+(function (FocusWrapMode) {
+  FocusWrapMode[FocusWrapMode.DEFAULT = 0] = 'DEFAULT';
+  FocusWrapMode[FocusWrapMode.WRAP_WITH_ARROW = 1] = 'WRAP_WITH_ARROW';
+})(FocusWrapMode || (FocusWrapMode = {}));
+
 let SwipeEdgeEffect;
 (function (SwipeEdgeEffect) {
   SwipeEdgeEffect[SwipeEdgeEffect.Spring = 0] = 'Spring';
@@ -3695,6 +3701,13 @@ let TextDeleteDirection;
     TextDeleteDirection[TextDeleteDirection.FORWARD = 1] = 'FORWARD';
 })(TextDeleteDirection || (TextDeleteDirection = {}));
 
+let SuperscriptStyle;
+(function (SuperscriptStyle) {
+  SuperscriptStyle[SuperscriptStyle.NORMAL = 0] = 'NORMAL';
+  SuperscriptStyle[SuperscriptStyle.SUPERSCRIPT = 1] = 'SUPERSCRIPT';
+  SuperscriptStyle[SuperscriptStyle.SUBSCRIPT = 2] = 'SUBSCRIPT';
+})(SuperscriptStyle || (SuperscriptStyle = {}));
+
 let GestureRecognizerState;
 (function (GestureRecognizerState) {
   GestureRecognizerState[GestureRecognizerState.READY = 0] = 'READY';
@@ -3874,6 +3887,7 @@ let HeightBreakpoint;
 let WebElementType;
 (function (WebElementType) {
   WebElementType[WebElementType.IMAGE = 1] = 'IMAGE';
+  WebElementType[WebElementType.LINK = 2] = 'LINK';
 })(WebElementType || (WebElementType = {}));
 
 let WebResponseType;
@@ -3982,6 +3996,16 @@ let AxisAction;
   AxisAction[AxisAction.CANCEL = 4] = 'CANCEL';
 })(AxisAction || (AxisAction = {}));
 
+let CommonState;
+(function (CommonState) {
+  CommonState[CommonState.UNINITIALIZED = 0] = 'UNINITIALIZED';
+  CommonState[CommonState.INITIALIZED = 1] = 'INITIALIZED';
+  CommonState[CommonState.APPEARING = 2] = 'APPEARING';
+  CommonState[CommonState.APPEARED = 3] = 'APPEARED';
+  CommonState[CommonState.DISAPPEARING = 4] = 'DISAPPEARING';
+  CommonState[CommonState.DISAPPEARED = 5] = 'DISAPPEARED';
+})(CommonState || (CommonState = {}));
+
 let EventQueryType;
 (function (EventQueryType) {
   EventQueryType[EventQueryType.ON_CLICK = 0] = 'ON_CLICK';
@@ -4007,3 +4031,11 @@ let AnimationPropertyType;
     AnimationPropertyType[AnimationPropertyType["SCALE"] = 2] = "SCALE";
     AnimationPropertyType[AnimationPropertyType["OPACITY"] = 3] = "OPACITY";
 })(AnimationPropertyType || (AnimationPropertyType = {}));
+
+let DragSpringLoadingState;
+(function (DragSpringLoadingState) {
+  DragSpringLoadingState.BEGIN = 0;
+  DragSpringLoadingState.UPDATE = 1;
+  DragSpringLoadingState.END = 2;
+  DragSpringLoadingState.CANCEL = 3;
+})(DragSpringLoadingState || (DragSpringLoadingState = {}));

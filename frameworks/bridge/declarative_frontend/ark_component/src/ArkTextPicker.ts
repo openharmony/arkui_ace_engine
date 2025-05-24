@@ -85,6 +85,12 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
     return this;
   }
 
+  selectedBackgroundStyle(value: PickerBackgroundStyle): this {
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerSelectedBackgroundStyleModifier.identity, TextpickerSelectedBackgroundStyleModifier, value);
+    return this;
+  }
+
   digitalCrownSensitivity(sensitivity: Optional<CrownSensitivity>): this {
     modifierWithKey(
       this._modifiersWithKeys, TextpickerDigitalCrownSensitivityModifier.identity, TextpickerDigitalCrownSensitivityModifier, value);
@@ -349,6 +355,72 @@ class TextpickerEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
     } else {
       getUINativeModule().textpicker.setTextpickerEnableHapticFeedback(node, this.value!);
     }
+  }
+}
+
+class TextpickerSelectedBackgroundStyleModifier extends ModifierWithKey<PickerBackgroundStyle> {
+  constructor(value: PickerBackgroundStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textpickerSelectedBackgroundStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetTextpickerSelectedBackgroundStyle(node);
+    } else if (this.value == null) {
+      getUINativeModule().textpicker.setTextpickerSelectedBackgroundStyle(node, undefined, undefined, undefined,
+        undefined, undefined);
+    } else {
+      const { color, borderRadius } = this.value;
+      if (borderRadius != null) {
+        const borderRadiusKeys = Object.keys(borderRadius);
+        let topLeft, topRight, bottomLeft, bottomRight;
+        if (borderRadiusKeys.indexOf('value') >= 0) {
+          topLeft = topRight = bottomLeft = bottomRight = borderRadius;
+        } else if (borderRadiusKeys.indexOf('topLeft') >= 0) {
+          topLeft = (borderRadius as BorderRadiuses).topLeft;
+          topRight = (borderRadius as BorderRadiuses).topRight;
+          bottomLeft = (borderRadius as BorderRadiuses).bottomLeft;
+          bottomRight = (borderRadius as BorderRadiuses).bottomRight;
+        } else if (borderRadiusKeys.indexOf('topStart') >= 0) {
+          topLeft = (borderRadius as LocalizedBorderRadiuses).topStart;
+          topRight = (borderRadius as LocalizedBorderRadiuses).topEnd;
+          bottomLeft = (borderRadius as LocalizedBorderRadiuses).bottomStart;
+          bottomRight = (borderRadius as LocalizedBorderRadiuses).bottomEnd;
+        }
+        getUINativeModule().textpicker.setTextpickerSelectedBackgroundStyle(node, color, topLeft, topRight, bottomLeft,
+          bottomRight);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    if (!(this.stageValue.color === this.value.color)) {
+      return true;
+    } else if (Object.keys(this.value.borderRadius).indexOf('value') >= 0) {
+      return !(
+        (this.stageValue.borderRadius as LengthMetrics).value === (this.value.borderRadius as LengthMetrics).value &&
+        (this.stageValue.borderRadius as LengthMetrics).unit === (this.value.borderRadius as LengthMetrics).unit);
+    } else if (Object.keys(this.value.borderRadius).indexOf('topLeft') >= 0) {
+      return !(
+        (this.stageValue.borderRadius as BorderRadiuses).topLeft ===
+        (this.value.borderRadius as BorderRadiuses).topLeft &&
+        (this.stageValue.borderRadius as BorderRadiuses).topRight ===
+        (this.value.borderRadius as BorderRadiuses).topRight &&
+        (this.stageValue.borderRadius as BorderRadiuses).bottomLeft ===
+        (this.value.borderRadius as BorderRadiuses).bottomLeft &&
+        (this.stageValue.borderRadius as BorderRadiuses).bottomRight ===
+        (this.value.borderRadius as BorderRadiuses).bottomRight);
+    } else if (Object.keys(this.value.borderRadius).indexOf('topStart') >= 0) {
+      return !(
+        (this.stageValue.borderRadius as LocalizedBorderRadiuses).topStart ===
+        (this.value.borderRadius as LocalizedBorderRadiuses).topStart &&
+        (this.stageValue.borderRadius as LocalizedBorderRadiuses).topEnd ===
+        (this.value.borderRadius as LocalizedBorderRadiuses).topEnd &&
+        (this.stageValue.borderRadius as LocalizedBorderRadiuses).bottomStart ===
+        (this.value.borderRadius as LocalizedBorderRadiuses).bottomStart &&
+        (this.stageValue.borderRadius as LocalizedBorderRadiuses).bottomEnd ===
+        (this.value.borderRadius as LocalizedBorderRadiuses).bottomEnd);
+    }
+    return true;
   }
 }
 class TextpickerOnChangeModifier extends ModifierWithKey<Optional<OnTextPickerChangeCallback>>{

@@ -72,6 +72,7 @@ class Pattern;
 class StateModifyTask;
 class UITask;
 struct DirtySwapConfig;
+class DragDropRelatedConfigurations;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
@@ -240,7 +241,7 @@ public:
     RefPtr<LayoutWrapperNode> UpdateLayoutWrapper(
         RefPtr<LayoutWrapperNode> layoutWrapper, bool forceMeasure = false, bool forceLayout = false);
 
-    void CreateLayoutTask(bool forceUseMainThread = false);
+    void CreateLayoutTask(bool forceUseMainThread = false, LayoutType layoutTaskType = LayoutType::NONE);
 
     std::optional<UITask> CreateRenderTask(bool forceUseMainThread = false);
 
@@ -401,6 +402,8 @@ public:
     const RefPtr<FocusHub>& GetOrCreateFocusHub(FocusType type, bool focusable, FocusStyleType focusStyleType,
         const std::unique_ptr<FocusPaintParam>& paintParamsPtr);
     const RefPtr<FocusHub>& GetOrCreateFocusHub(const FocusPattern& focusPattern);
+
+    const RefPtr<DragDropRelatedConfigurations>& GetOrCreateDragDropRelatedConfigurations();
 
     void CreateEventHubInner();
 
@@ -1163,9 +1166,9 @@ public:
     bool GetOpIncGroupCheckedThrough();
     void SetOpIncCheckedOnce();
     bool GetOpIncCheckedOnce();
-    void MarkAndCheckNewOpIncNode();
+    void MarkAndCheckNewOpIncNode(Axis axis);
     ChildrenListWithGuard GetAllChildren();
-    OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth);
+    OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth, Axis axis);
     void GetInspectorValue() override;
     void NotifyWebPattern(bool isRegister) override;
 
@@ -1380,6 +1383,17 @@ public:
         }
     }
 
+    bool HasMultipleChild();
+
+    void UpdateOcclusionCullingStatus(bool enable)
+    {
+        if (renderContext_) {
+            renderContext_->UpdateOcclusionCullingStatus(enable);
+        }
+    }
+
+    void AddToOcclusionMap(bool enable);
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1390,7 +1404,7 @@ protected:
 private:
     void MarkDirtyNode(
         bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
-    OPINC_TYPE_E IsOpIncValidNode(const SizeF& boundary, int32_t childNumber = 0);
+    OPINC_TYPE_E IsOpIncValidNode(const SizeF& boundary, Axis axis, int32_t childNumber = 0);
     static int GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t thresh);
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
@@ -1536,6 +1550,7 @@ private:
     const char* GetLayoutPropertyTypeName() const;
     const char* GetPaintPropertyTypeName() const;
     void AddNodeToRegisterTouchTest();
+    void CleanupPipelineResources();
 
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
@@ -1695,6 +1710,7 @@ private:
     std::unordered_map<uint32_t, std::function<void()>> removeToolbarItemCallbacks_;
 
     RefPtr<FrameNode> cornerMarkNode_ = nullptr;
+    RefPtr<DragDropRelatedConfigurations> dragDropRelatedConfigurations_;
 };
 } // namespace OHOS::Ace::NG
 

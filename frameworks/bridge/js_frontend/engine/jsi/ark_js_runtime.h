@@ -63,8 +63,6 @@ public:
 #if !defined(PREVIEW)
     void StartDebuggerForSocketPair(std::string& option, uint32_t socketFd);
 #endif
-    void SetUniqueId(const std::string& uniqueId) override;
-    const std::string& GetUniqueId() const override;
     bool Initialize(const std::string& libraryPath, bool isDebugMode, int32_t instanceId) override;
     bool InitializeFromExistVM(EcmaVM* vm);
     void Reset() override;
@@ -252,7 +250,6 @@ public:
 private:
     EcmaVM* vm_ = nullptr;
     int32_t instanceId_ = 0;
-    std::string uniqueId_;
     std::string language_;
     LOG_PRINT print_ { nullptr };
     UncaughtExceptionCallback uncaughtErrorHandler_ { nullptr };

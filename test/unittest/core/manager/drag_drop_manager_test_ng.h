@@ -49,6 +49,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/render_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_spring_loading/drag_drop_spring_loading_detector.h"
 
 namespace OHOS::Ace::NG {
 namespace {

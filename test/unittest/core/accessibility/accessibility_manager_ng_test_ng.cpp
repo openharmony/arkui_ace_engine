@@ -483,6 +483,110 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest009, TestSize.L
 }
 
 /**
+ * @tc.name: AccessibilityManagerNgTest010
+ * @tc.desc: NotifyHoverEventToNodeSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest010, TestSize.Level1)
+{
+    AccessibilityManagerNG accessibilityManagerNg{};
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    int32_t x = 100;
+    int32_t y = 100;
+    NG::PointF hoverPoint(x, y);
+    TimeStamp time;
+
+    auto ret = accessibilityManagerNg.NotifyHoverEventToNodeSession(frameNode, frameNode,
+        hoverPoint, SourceType::MOUSE, AccessibilityHoverEventType::ENTER, time);
+    EXPECT_FALSE(ret);
+
+    ret = accessibilityManagerNg.NotifyHoverEventToNodeSession(frameNode, nullptr,
+        hoverPoint, SourceType::MOUSE, AccessibilityHoverEventType::ENTER, time);
+    EXPECT_FALSE(ret);
+
+    auto testNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MockAccessibilityTestPattern>());
+    auto pattern = testNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    testNode->eventHub_ = pattern->CreateEventHub();
+    auto eventHub = testNode->eventHub_;
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabledInternal(true);
+    ret = accessibilityManagerNg.NotifyHoverEventToNodeSession(testNode, testNode,
+        hoverPoint, SourceType::TOUCH, AccessibilityHoverEventType::ENTER, time);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: AccessibilityManagerNgTest011
+ * @tc.desc: HandleAccessibilityHoverTransparentCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest011, TestSize.Level1)
+{
+    AccessibilityManagerNG accessibilityManagerNg{};
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    AccessibilityManagerNG::HandleTransparentCallbackParam param = {0, 1};
+    PointF point;
+    TouchEvent touchEvent;
+
+    auto ret = accessibilityManagerNg.HandleAccessibilityHoverTransparentCallback(true,
+        frameNode,
+        param,
+        point,
+        touchEvent);
+    EXPECT_FALSE(ret);
+
+    ret = accessibilityManagerNg.HandleAccessibilityHoverTransparentCallback(false,
+        frameNode,
+        param,
+        point,
+        touchEvent);
+    EXPECT_FALSE(ret);
+
+    param = {-1, -1};
+    ret = accessibilityManagerNg.HandleAccessibilityHoverTransparentCallback(false,
+        frameNode,
+        param,
+        point,
+        touchEvent);
+    EXPECT_TRUE(ret);
+
+    ret = accessibilityManagerNg.HandleAccessibilityHoverTransparentCallback(false,
+        nullptr,
+        param,
+        point,
+        touchEvent);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: AccessibilityManagerNgTest012
+ * @tc.desc: ExecuteChildNodeHoverTransparentCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest012, TestSize.Level1)
+{
+    AccessibilityManagerNG accessibilityManagerNg{};
+    TouchEvent touchEvent;
+
+    PointF point;
+    auto ret = accessibilityManagerNg.ExecuteChildNodeHoverTransparentCallback(nullptr, point, touchEvent);
+    EXPECT_FALSE(ret);
+
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    ret = accessibilityManagerNg.ExecuteChildNodeHoverTransparentCallback(frameNode, point, touchEvent);
+    EXPECT_TRUE(ret);
+}
+
+/**
 * @tc.name: AccessibilityRectTest001
 * @tc.desc: AccessibilityRect
 * @tc.type: FUNC

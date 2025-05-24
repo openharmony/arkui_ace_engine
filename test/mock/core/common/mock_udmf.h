@@ -35,7 +35,8 @@ public:
     MOCK_METHOD(RefPtr<UnifiedData>, CreateUnifiedData, (), (override));
     MOCK_METHOD(int32_t, SetData, (const RefPtr<UnifiedData>& unifiedData, std::string& key), (override));
     MOCK_METHOD(int32_t, GetData, (const RefPtr<UnifiedData>& unifiedData, const std::string& key), (override));
-    MOCK_METHOD(int32_t, GetSummary, (std::string& key, (std::map<std::string, int64_t>& summaryMap)), (override));
+    MOCK_METHOD(int32_t, GetSummary, (std::string & key, (std::map<std::string, int64_t> & summaryMap),
+        (std::map<std::string, int64_t> & detailedSummaryMap)), (override));
     MOCK_METHOD(bool, GetRemoteStatus, (std::string& key), (override));
     MOCK_METHOD(void, AddFormRecord,
         (const RefPtr<UnifiedData>& unifiedData, int32_t formId, const RequestFormInfo& cardInfo), (override));
@@ -76,6 +77,7 @@ public:
     MOCK_METHOD(
         bool, GetFileUriEntry, (const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri), (override));
     MOCK_METHOD(std::vector<uint8_t>, GetSpanStringEntry, (const RefPtr<UnifiedData>& unifiedData), (override));
+    MOCK_METHOD(bool, IsBelongsTo, (const std::string& summary, const std::string& allowDropType), (override));
 };
 class MockUnifiedData : public UnifiedData {
     DECLARE_ACE_TYPE(MockUnifiedData, UnifiedData);

@@ -495,7 +495,7 @@ void SetTextInputAutoCapitalizationMode(ArkUINodeHandle node, ArkUI_Int32 value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetAutoCapitalizationMode(frameNode, static_cast<AutoCapitalizationMode>(value));
+    TextFieldModelNG::SetAutoCapitalizationMode(frameNode, CastToAutoCapitalizationMode(value));
 }
 
 void ResetTextInputAutoCapitalizationMode(ArkUINodeHandle node)
@@ -1978,6 +1978,13 @@ void ResetTextInputOnWillChange(ArkUINodeHandle node)
     TextFieldModelNG::SetOnWillChangeEvent(frameNode, nullptr);
 }
 
+void ResetTextInputOnSecurityStateChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnSecurityStateChange(frameNode, nullptr);
+}
+
 void SetTextInputStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2018,6 +2025,20 @@ ArkUI_Uint32 GetTextInputStrokeColor(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
     return TextFieldModelNG::GetStrokeColor(frameNode).GetValue();
+}
+
+void SetEnableAutoSpacing(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnableAutoSpacing(frameNode, static_cast<bool>(enableAutoSpacing));
+}
+
+void ResetEnableAutoSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnableAutoSpacing(frameNode, false);
 }
 } // namespace
 namespace NodeModifier {
@@ -2243,6 +2264,9 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .setTextInputStrokeColor = SetTextInputStrokeColor,
         .resetTextInputStrokeColor = ResetTextInputStrokeColor,
         .getTextInputStrokeColor = GetTextInputStrokeColor,
+        .setEnableAutoSpacing = SetEnableAutoSpacing,
+        .resetEnableAutoSpacing = ResetEnableAutoSpacing,
+        .resetTextInputOnSecurityStateChange = ResetTextInputOnSecurityStateChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2473,6 +2497,26 @@ void SetOnTextInputChangeWithPreviewText(ArkUINodeHandle node, void* extraParam)
         SendArkUISyncEvent(&eventWithPreview);
     };
     TextFieldModelNG::SetOnChange(frameNode, std::move(onChange));
+}
+
+void SetOnTextInputWillChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onWillChange = [node, extraParam](const ChangeValueInfo& info) -> bool {
+        ArkUINodeEvent event;
+        event.kind = TEXT_INPUT_CHANGE;
+        std::string utf8StrValue = UtfUtils::Str16DebugToStr8(info.value);
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(info.previewText.value);
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.textChangeEvent.subKind = ON_TEXT_INPUT_WILL_CHANGE;
+        event.textChangeEvent.nativeStringPtr = const_cast<char*>(utf8StrValue.c_str());
+        event.textChangeEvent.extendStringPtr = const_cast<char*>(utf8Str.c_str());
+        event.textChangeEvent.numArgs = info.previewText.offset;
+        SendArkUISyncEvent(&event);
+        return true;
+    };
+    TextFieldModelNG::SetOnWillChangeEvent(frameNode, std::move(onWillChange));
 }
 
 void SetTextInputOnSubmit(ArkUINodeHandle node, void* extraParam)
@@ -2728,6 +2772,10 @@ void ResetOnTextInputInputFilterError(ArkUINodeHandle node)
 void ResetTextInputOnTextContentScroll(ArkUINodeHandle node)
 {
     GetTextInputModifier()->resetTextInputOnContentScroll(node);
+}
+void ResetOnTextInputWillChange(ArkUINodeHandle node)
+{
+    GetTextInputModifier()->resetTextInputOnWillChange(node);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

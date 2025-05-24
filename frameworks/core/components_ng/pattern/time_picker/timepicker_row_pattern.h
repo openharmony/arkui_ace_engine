@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_paint_method.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_accessibility_property.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/components_ng/pattern/picker_utils/picker_column_pattern.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
 #endif
@@ -53,6 +54,14 @@ public:
     bool IsAtomicNode() const override
     {
         return true;
+    }
+
+    void OnColorModeChange(uint32_t colorMode) override
+    {
+        LinearLayoutPattern::OnColorModeChange(colorMode);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkModifyDone();
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -663,6 +672,10 @@ public:
     void SetDigitalCrownSensitivity(int32_t crownSensitivity);
     bool IsStartEndTimeDefined();
     void UpdateUserSetSelectColor();
+    void UpdateDisappearTextStyle(const PickerTextStyle& textStyle);
+    void UpdateNormalTextStyle(const PickerTextStyle& textStyle);
+    void UpdateSelectedTextStyle(const PickerTextStyle& textStyle);
+
 private:
     void SetDefaultColoumnFocus(std::unordered_map<std::string, WeakPtr<FrameNode>>::iterator& it,
         const std::string &id, bool& focus, const std::function<void(const std::string&)>& call);
@@ -731,6 +744,14 @@ private:
     void InitFocusEvent();
     void SetCallBack();
     void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext);
+    Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
+
+    void UpdateTextStyleCommon(
+        const PickerTextStyle& textStyle,
+        const TextStyle& defaultTextStyle,
+        std::function<void(const Color&)> updateTextColorFunc,
+        std::function<void(const Dimension&)> updateFontSizeFunc,
+        std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc);
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;

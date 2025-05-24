@@ -22,6 +22,10 @@
 
 #include "core/components_ng/base/observer_handler.h"
 
+namespace OHOS::Ace::NG {
+enum class NodeRenderState;
+}
+
 namespace OHOS::Ace::Napi {
 class UIObserverListener {
 public:
@@ -47,6 +51,7 @@ public:
     void OnPanGestureStateChange(const GestureEvent& gestureEventInfo, const RefPtr<NG::PanRecognizer>& current,
         const RefPtr<NG::FrameNode> frameNode);
     void OnTabContentStateChange(const NG::TabContentInfo& tabContentInfo);
+    void OnNodeRenderStateChange(NG::FrameNode* frameNode, NG::NodeRenderState nodeRenderState);
     void OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo);
     bool NapiEqual(napi_value cb);
     void OnDrawOrLayout();
@@ -64,6 +69,7 @@ private:
     void AddGestureEventInfoFour(napi_value objValueEvent, const GestureEvent& gestureEventInfo);
     void AddTapLocationInfo(napi_value objTapGestureEventInfo, const GestureEvent& gestureEventInfo);
     void AddFingerListInfo(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo);
+    void AddFingerInfosInfo(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo);
     void AddClickEventInfoOne(napi_value objValueClickEvent, const ClickInfo& clickInfo);
     void AddClickEventInfoTwo(napi_value objValueClickEvent, const ClickInfo& clickInfo);
     void AddFingerObjectInfo(napi_value napiFinger, const FingerInfo& finger);

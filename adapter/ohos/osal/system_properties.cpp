@@ -59,6 +59,7 @@ constexpr float DEFAULT_ANIMATION_SCALE = 1.0f;
 float animationScale_ = DEFAULT_ANIMATION_SCALE;
 constexpr int32_t DEFAULT_DRAG_START_DAMPING_RATIO = 20;
 constexpr int32_t DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD_IN_VP = 10;
+constexpr int32_t DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD = 20;
 std::shared_mutex mutex_;
 const std::regex FOLD_TYPE_REGEX("^(\\d+)(,\\d+){3,}$");
 #ifdef ENABLE_ROSEN_BACKEND
@@ -68,6 +69,7 @@ constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_anima
 constexpr int32_t CONVERT_ASTC_THRESHOLD = 2;
 constexpr int32_t FOLD_TYPE_TWO = 2;
 constexpr int32_t FOLD_TYPE_FOUR = 4;
+constexpr float DEFAULT_SCROLL_COEFFICEIENT = 2.0f;
 
 bool IsOpIncEnabled()
 {
@@ -256,7 +258,10 @@ bool IsMouseTransformEnable()
 float ReadScrollCoefficients()
 {
     auto ret = system::GetParameter("persist.ace.scroll.coefficeient", "2.0");
-    return StringUtils::StringToFloat(ret);
+    if (StringUtils::IsNumber(ret)) {
+        return StringUtils::StringToFloat(ret);
+    }
+    return DEFAULT_SCROLL_COEFFICEIENT;
 }
 
 int64_t GetDebugFlags()
@@ -605,6 +610,7 @@ int32_t SystemProperties::dragDropFrameworkStatus_ = ReadDragDropFrameworkStatus
 int32_t SystemProperties::touchAccelarate_ = ReadTouchAccelarateMode();
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
 bool SystemProperties::formSkeletonBlurEnabled_ = true;
+int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -761,11 +767,12 @@ void SystemProperties::InitDeviceInfo(
     gridCacheEnabled_ = IsGridCacheEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
     acePerformanceMonitorEnable_.store(IsAcePerformanceMonitorEnabled());
-    focusCanBeActive_.store(IsFocusCanBeActive());
     faultInjectEnabled_  = IsFaultInjectEnabled();
     windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
     taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
     formSkeletonBlurEnabled_ = system::GetBoolParameter("const.form.skeleton_view.blur_style_enable", true);
+    formSharedImageCacheThreshold_ =
+        system::GetIntParameter("const.form.shared_image.cache_threshold", DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD);
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -822,6 +829,11 @@ ACE_WEAK_SYM bool SystemProperties::GetLayoutDetectEnabled()
 ACE_WEAK_SYM bool SystemProperties::GetMultiInstanceEnabled()
 {
     return multiInstanceEnabled_;
+}
+
+ACE_WEAK_SYM void SystemProperties::SetMultiInstanceEnabled(bool enabled)
+{
+    multiInstanceEnabled_ = enabled;
 }
 
 std::string SystemProperties::GetLanguage()
@@ -1208,4 +1220,8 @@ bool SystemProperties::IsFormSkeletonBlurEnabled()
     return formSkeletonBlurEnabled_;
 }
 
+int32_t SystemProperties::getFormSharedImageCacheThreshold()
+{
+    return formSharedImageCacheThreshold_;
+}
 } // namespace OHOS::Ace

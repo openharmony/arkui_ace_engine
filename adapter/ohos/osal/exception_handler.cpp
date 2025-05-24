@@ -41,7 +41,7 @@ static void KillApplicationByUid()
 }
 
 void ExceptionHandler::HandleJsException(
-    const std::string& exceptionMsg, const JsErrorObject& errorInfo, bool isStageModel)
+    const std::string& exceptionMsg, const JsErrorObject& errorInfo)
 {
     AppExecFwk::ErrorObject errorObject = {
         .name = errorInfo.name,
@@ -51,11 +51,7 @@ void ExceptionHandler::HandleJsException(
     auto hasErrorObserver = AppExecFwk::ApplicationDataManager::GetInstance().NotifyUnhandledException(exceptionMsg);
     auto isNotifySuccess = AppExecFwk::ApplicationDataManager::GetInstance().NotifyExceptionObject(errorObject);
     if (!hasErrorObserver && !isNotifySuccess) {
-        if (isStageModel) {
-            _exit(0);
-        } else {
-            KillApplicationByUid();
-        }
+        KillApplicationByUid();
     }
 }
 } // namespace OHOS::Ace

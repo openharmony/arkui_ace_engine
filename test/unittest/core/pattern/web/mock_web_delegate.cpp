@@ -405,8 +405,8 @@ void WebDelegateObserver::OnDetachContext() {}
 void GestureEventResultOhos::SetGestureEventResult(bool result) {}
 void GestureEventResultOhos::SetGestureEventResult(bool result, bool stopPropagation) {}
 void WebAvoidAreaChangedListener::OnAvoidAreaChanged(
-    const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
-{}
+    const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type,
+    const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info) {}
 WebDelegate::~WebDelegate() {}
 void WebDelegate::ReleasePlatformResource() {}
 void WebGeolocationOhos::Invoke(const std::string& origin, const bool& allow, const bool& retain) {}
@@ -1238,6 +1238,13 @@ void WebDelegate::UnRegisterWebWindowFocusChangedListener() {}
 void WebDelegate::OnDragAttach() {}
 bool WebDelegate::IsNWebEx() { return false; }
 void WebDelegate::SetNativeInnerWeb(bool isInnerWeb) {}
+
+void WebDelegate::ResetStateOfDataDetectorJS() {}
+void WebDelegate::RunDataDetectorJS() {}
+void WebDelegate::SetDataDetectorEnable(bool enable) {}
+void WebDelegate::OnDataDetectorSelectText() {}
+void WebDelegate::OnDataDetectorCopy(const std::vector<std::string>& recordMix) {}
+
 bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
 {
     return false;

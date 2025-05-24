@@ -168,6 +168,7 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("stopBackPress", &JSSearch::SetStopBackPress);
     JSClass<JSSearch>::StaticMethod("keyboardAppearance", &JSSearch::SetKeyboardAppearance);
     JSClass<JSSearch>::StaticMethod("onWillChange", &JSSearch::SetOnWillChange);
+    JSClass<JSSearch>::StaticMethod("enableAutoSpacing", &JSSearch::SetEnableAutoSpacing);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -1296,7 +1297,7 @@ void JSSearch::SetDecoration(const JSCallbackInfo& info)
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<SearchTheme>();
         CHECK_NULL_VOID(theme);
-        TextDecoration textDecoration = theme->GetTextStyle().GetTextDecoration();
+        TextDecoration textDecoration = theme->GetTextDecoration();
         if (typeValue->IsNumber()) {
             textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
         }
@@ -1539,5 +1540,14 @@ void JSSearch::SetStrokeColor(const JSCallbackInfo& info)
         return;
     }
     SearchModel::GetInstance()->SetStrokeColor(strokeColor);
+}
+
+void JSSearch::SetEnableAutoSpacing(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    SearchModel::GetInstance()->SetEnableAutoSpacing(enabled);
 }
 } // namespace OHOS::Ace::Framework

@@ -16,7 +16,5 @@
 #include "base/log/exception_handler.h"
 
 namespace OHOS::Ace {
-void ExceptionHandler::HandleJsException(
-    const std::string& exceptionMsg, const JsErrorObject& errorInfo, bool isStageModel)
-{}
+void ExceptionHandler::HandleJsException(const std::string& exceptionMsg, const JsErrorObject& errorInfo) {}
 } // namespace OHOS::Ace

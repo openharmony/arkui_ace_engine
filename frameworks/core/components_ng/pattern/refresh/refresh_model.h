@@ -24,6 +24,8 @@
 #include "frameworks/core/components/common/properties/color.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_pattern.h"
 
+#include "core/common/resource/resource_object.h"
+
 namespace OHOS::Ace {
 
 class ACE_FORCE_EXPORT RefreshModel {
@@ -63,7 +65,7 @@ public:
     virtual void SetRefreshOffset(const Dimension& offset) = 0;
     virtual void SetPullToRefresh(bool isPullToRefresh) = 0;
     virtual void SetIsCustomBuilderExist(bool isCustomBuilderExist) {}
-
+    virtual void CreateWithResourceObj(const RefPtr<ResourceObject>& resObj) {};
 private:
     static std::unique_ptr<RefreshModel> instance_;
     static std::mutex mutex_;

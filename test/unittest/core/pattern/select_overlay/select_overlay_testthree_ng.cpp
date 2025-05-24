@@ -23,7 +23,12 @@
 
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #undef protected
 #undef private
 
@@ -40,7 +45,22 @@ namespace {} // namespace
 
 class SelectOverlayPatternTestNg : public testing::Test {
 public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
 };
+
+void SelectOverlayPatternTestNg::SetUpTestCase()
+{
+    MockPipelineContext::SetUp();
+    // set SelectTheme to themeManager before using themeManager to get SelectTheme
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+}
+
+void SelectOverlayPatternTestNg::TearDownTestCase()
+{
+    MockPipelineContext::TearDown();
+}
 
 void ResetCallback()
 {
@@ -443,5 +463,96 @@ HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_FindWindowScene004, Tes
     targetNode->tag_ = V2::WINDOW_SCENE_ETS_TAG;
     auto result = controller.FindWindowScene(targetNode);
     EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: TextMenuController.disableSystemServiceMenuItems
+ * @tc.desc: test disableSystemServiceMenuItems
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, DisableSystemServiceMenuItems, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    SelectOverlayInfo overlayInfo;
+    SelectMenuInfo menuInfo;
+    menuInfo.showCopy = false;
+    menuInfo.showPaste = false;
+    menuInfo.showCopyAll = false;
+    menuInfo.showCut = false;
+    menuInfo.showAIWrite = true;
+    menuInfo.showTranslate = true;
+    menuInfo.showSearch = true;
+    menuInfo.showCameraInput = true;
+    menuInfo.showShare = true;
+    overlayInfo.menuInfo = menuInfo;
+    std::shared_ptr<SelectOverlayInfo> shareInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(
+        SelectOverlayNode::CreateSelectOverlayNode(shareInfo, SelectOverlayMode::MENU_ONLY));
+    ASSERT_NE(selectOverlayNode, nullptr);
+    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetChildren().size(), 5);
+
+    AceApplicationInfo::GetInstance().AddTextMenuDisableFlag(NG::DISABLE_ALL_FLAG);
+    selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(
+        SelectOverlayNode::CreateSelectOverlayNode(shareInfo, SelectOverlayMode::MENU_ONLY));
+    ASSERT_NE(selectOverlayNode, nullptr);
+    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetChildren().size(), 0);
+
+    AceApplicationInfo::GetInstance().SetTextMenuDisableFlags(~NG::DISABLE_ALL_FLAG);
+    selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(
+        SelectOverlayNode::CreateSelectOverlayNode(shareInfo, SelectOverlayMode::MENU_ONLY));
+    ASSERT_NE(selectOverlayNode, nullptr);
+    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetChildren().size(), 5);
+}
+
+/**
+ * @tc.name: TextMenuController.DisableMenuItems
+ * @tc.desc: test DisableMenuItems
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, DisableMenuItems, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    SelectOverlayInfo overlayInfo;
+    SelectMenuInfo menuInfo;
+    menuInfo.showCopy = false;
+    menuInfo.showPaste = false;
+    menuInfo.showCopyAll = false;
+    menuInfo.showCut = false;
+    menuInfo.showAIWrite = true;
+    menuInfo.showTranslate = true;
+    menuInfo.showSearch = true;
+    menuInfo.showCameraInput = true;
+    menuInfo.showShare = true;
+    menuInfo.aiMenuOptionType = TextDataDetectType::ADDRESS;
+    overlayInfo.menuInfo = menuInfo;
+    std::shared_ptr<SelectOverlayInfo> shareInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(
+        SelectOverlayNode::CreateSelectOverlayNode(shareInfo, SelectOverlayMode::MENU_ONLY));
+    ASSERT_NE(selectOverlayNode, nullptr);
+    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetTotalChildCount(), 6);
+
+    AceApplicationInfo::GetInstance().AddTextMenuDisableFlag(NG::DISABLE_AI_WRITER_FLAG|NG::DISABLE_TRANSLATE_FLAG);
+    selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(
+        SelectOverlayNode::CreateSelectOverlayNode(shareInfo, SelectOverlayMode::MENU_ONLY));
+    ASSERT_NE(selectOverlayNode, nullptr);
+    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetTotalChildCount(), 4);
+
+    AceApplicationInfo::GetInstance().AddTextMenuDisableFlag(
+        DISABLE_TRANSLATE_FLAG | DISABLE_SEARCH_FLAG | DISABLE_SHARE_FLAG | DISABLE_CAMERA_INPUT_FLAG |
+        DISABLE_AI_WRITER_FLAG | DISABLE_COLLABORATION_SERVICE_FLAG | DISABLE_AI_MENU_ADDRESS_FLAG);
+    selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(
+            SelectOverlayNode::CreateSelectOverlayNode(shareInfo, SelectOverlayMode::MENU_ONLY));
+    ASSERT_NE(selectOverlayNode, nullptr);
+    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetTotalChildCount(), 0);
+
+    AceApplicationInfo::GetInstance().SetTextMenuDisableFlags(NG::DISABLE_ALL_FLAG);
+    selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(
+        SelectOverlayNode::CreateSelectOverlayNode(shareInfo, SelectOverlayMode::MENU_ONLY));
+    ASSERT_NE(selectOverlayNode, nullptr);
+    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetTotalChildCount(), 6);
 }
 } // namespace OHOS::Ace::NG

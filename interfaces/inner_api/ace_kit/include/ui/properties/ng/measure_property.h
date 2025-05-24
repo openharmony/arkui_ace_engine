@@ -16,9 +16,12 @@
 #ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_PROPERTIES_NG_MEASURE_PROPERTY_H
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_PROPERTIES_NG_MEASURE_PROPERTY_H
 
+#include <functional>
+
 #include "json/json_util.h"
 #include "ui/base/inspector_filter.h"
 #include "ui/properties/ng/calc_length.h"
+#include "ui/resource/resource_object.h"
 #include "ui/view/ui_context.h"
 
 namespace OHOS::Ace::NG {
@@ -32,6 +35,11 @@ struct PaddingPropertyT {
     std::optional<T> bottom;
     std::optional<T> start;
     std::optional<T> end;
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, PaddingPropertyT&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
 
     void SetEdges(const T& padding)
     {
@@ -168,6 +176,24 @@ struct PaddingPropertyT {
         }
 
         return property;
+    }
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, PaddingPropertyT&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = {resObj, std::move(updateFunc)};
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
     }
 };
 

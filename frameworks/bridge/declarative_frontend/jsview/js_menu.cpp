@@ -211,6 +211,16 @@ void JSMenu::SetExpandingMode(const JSCallbackInfo& info)
     MenuModel::GetInstance()->SetExpandingMode(expandingMode);
 }
 
+void JSMenu::SetExpandSymbol(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
+    std::function<void(WeakPtr<NG::FrameNode>)> expandSymbol;
+    JSViewAbstract::SetSymbolOptionApply(info, expandSymbol, info[0]);
+    MenuModel::GetInstance()->SetExpandSymbol(expandSymbol);
+}
+
 void JSMenu::SetItemGroupDivider(const JSCallbackInfo& args)
 {
     auto mode = DividerMode::FLOATING_ABOVE_MENU;
@@ -318,6 +328,7 @@ void JSMenu::JSBind(BindingTarget globalObj)
     JSClass<JSMenu>::StaticMethod("width", &JSMenu::SetWidth, opt);
     JSClass<JSMenu>::StaticMethod("radius", &JSMenu::SetRadius, opt);
     JSClass<JSMenu>::StaticMethod("subMenuExpandingMode", &JSMenu::SetExpandingMode);
+    JSClass<JSMenu>::StaticMethod("subMenuExpandSymbol", &JSMenu::SetExpandSymbol);
     JSClass<JSMenu>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSMenu>::StaticMethod("menuItemDivider", &JSMenu::SetItemDivider);
     JSClass<JSMenu>::StaticMethod("menuItemGroupDivider", &JSMenu::SetItemGroupDivider);

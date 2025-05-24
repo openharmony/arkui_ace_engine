@@ -2663,4 +2663,55 @@ HWTEST_F(WebPatternTestNg, WindowMaximize_007, TestSize.Level1)
     webPattern->WindowMaximize();
 #endif
 }
+
+/**
+ * @tc.name: ChangeVisibilityOfQuickMenuV2_001
+ * @tc.desc: ChangeVisibilityOfQuickMenuV2.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, ChangeVisibilityOfQuickMenuV2_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->ChangeVisibilityOfQuickMenuV2();
+#endif
+}
+
+/**
+ * @tc.name: InitDataDetector_001
+ * @tc.desc: InitDataDetector.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, InitDataDetector_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+ 
+    bool ret = webPattern->GetDataDetectorEnable();
+    ASSERT_EQ(ret, false);
+    webPattern->GetDataDetectorAdapter();
+    webPattern->InitDataDetector();
+    ASSERT_NE(webPattern->webDataDetectorAdapter_, nullptr);
+    ret = webPattern->GetDataDetectorEnable();
+    ASSERT_EQ(ret, false);
+#endif
+}
 } // namespace OHOS::Ace::NG

@@ -58,6 +58,7 @@ public:
             theme->textStyle_.SetFontStyle(FontStyle::NORMAL);
             theme->textStyle_.SetFontWeight(FontWeight::NORMAL);
             theme->textStyle_.SetTextDecoration(TextDecoration::NONE);
+            theme->textStyle_.SetLineThicknessScale(1.0f);
         }
 
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<TextTheme>& theme) const
@@ -108,6 +109,12 @@ public:
     const TextStyle& GetTextStyle() const
     {
         return textStyle_;
+    }
+
+    TextDecoration GetTextDecoration() const
+    {
+        return textStyle_.GetTextDecoration().size() > 0 ?
+            textStyle_.GetTextDecoration()[0] : TextDecoration::NONE;
     }
 
     const Color& GetCaretColor() const

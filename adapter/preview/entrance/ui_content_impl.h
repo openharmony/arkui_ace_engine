@@ -86,7 +86,8 @@ public:
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) override;
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
-        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {}) override;
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {},
+        const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info = nullptr) override;
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override {}
     void UpdateDecorVisible(bool visible, bool hasDeco = true) override {};
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override {}
@@ -159,7 +160,7 @@ public:
 
     void SetStatusBarItemColor(uint32_t color) override;
 
-    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override {};
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool isRouter = true) override {};
 
     void EnableContainerModalGesture(bool isEnable) override {};
 
@@ -216,6 +217,7 @@ private:
     bool installationFree_ = false;
     uint32_t labelId_ = 0;
     bool useNewPipeline_ = true;
+    std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
 
     sptr<OHOS::Rosen::Window> rsWindow_;
     // ITouchOutsideListener is used for touching out of hot areas of window.

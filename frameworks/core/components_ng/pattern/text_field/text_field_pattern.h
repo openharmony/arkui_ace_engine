@@ -30,6 +30,7 @@
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/utf_helper.h"
 #include "base/view_data/view_data_wrap.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/clipboard/clipboard.h"
@@ -685,6 +686,12 @@ public:
     void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true) override;
     void HandleExtendAction(int32_t action) override;
     void HandleSelect(CaretMoveIntent direction) override;
+
+    void HandleSelectExtend(CaretMoveIntent direction) override
+    {
+        HandleSelect(direction);
+    }
+
     OffsetF GetDragUpperLeftCoordinates() override;
 
     std::vector<RectF> GetTextBoxes() override
@@ -986,10 +993,12 @@ public:
     void HandleSelectionLeftWord();
     void HandleSelectionLineBegin();
     void HandleSelectionHome();
+    void HandleSelectionParagraghBegin();
     void HandleSelectionRight();
     void HandleSelectionRightWord();
     void HandleSelectionLineEnd();
     void HandleSelectionEnd();
+    void HandleSelectionParagraghEnd();
     bool HandleOnEscape() override;
     bool HandleOnTab(bool backward) override;
     void HandleOnEnter() override
@@ -997,6 +1006,12 @@ public:
         PerformAction(GetTextInputActionValue(GetDefaultTextInputAction()), false);
     }
     void HandleOnUndoAction() override;
+
+    void HandleOnExtendUndoAction() override
+    {
+        HandleOnUndoAction();
+    }
+    
     void HandleOnRedoAction() override;
     bool CanUndo();
     bool HasOperationRecords();
@@ -1699,7 +1714,7 @@ private:
     void InitCancelButtonMouseEvent();
     void InitPasswordButtonMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
-    void OnHover(bool isHover);
+    void OnHover(bool isHover, const HoverInfo& info);
     void UpdateHoverStyle(bool isHover);
     void UpdatePressStyle(bool isPressed);
     void PlayAnimationHoverAndPress(const Color& color);
@@ -1868,8 +1883,6 @@ private:
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     void HandleCountStyle();
     void HandleDeleteOnCounterScene();
-    bool ParseFillContentJsonValue(const std::unique_ptr<JsonValue>& jsonObject,
-        std::unordered_map<std::string, std::variant<std::string, bool, int32_t>>& map);
     void HandleContentSizeChange(const RectF& textRect);
     void UpdatePreviewIndex(int32_t start, int32_t end)
     {
@@ -1920,6 +1933,9 @@ private:
     void OnReportPasteEvent(const RefPtr<FrameNode>& frameNode);
     void OnReportSubmitEvent(const RefPtr<FrameNode>& frameNode);
     void BeforeAutoFillAnimation(const std::u16string& content, const AceAutoFillType& type);
+    void RemoveFillContentMap();
+    bool NeedsSendFillContent();
+    void UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);
 
     RectF frameRect_;
     RectF textRect_;
@@ -2085,7 +2101,6 @@ private:
     std::string autoFillUserName_;
     std::string autoFillNewPassword_;
     uint32_t autoFillSessionId_ = 0;
-    std::unordered_map<std::string, std::variant<std::string, bool, int32_t>> fillContentMap_;
     bool autoFillOtherAccount_ = false;
 
     bool textInputBlurOnSubmit_ = true;

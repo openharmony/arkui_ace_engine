@@ -454,7 +454,7 @@ protected:
         dragStartPoint_ = dragStartPoint;
     }
 
-    RectF CalcBoundsRect() const;
+    virtual RectF CalcBoundsRect() const;
     int32_t GetLoopIndex(int32_t originalIndex) const;
     void ResetOverlongModifier();
 };

@@ -52,6 +52,26 @@ struct UserMouseOptions {
     OnHoverFunc onHover;
 };
 
+struct TextDecorationOptions {
+    std::optional<bool> enableMultiType;
+
+    bool IsEqual(const TextDecorationOptions& other) const
+    {
+        return this->enableMultiType.has_value() == other.enableMultiType.has_value() &&
+            this->enableMultiType.value_or(false) == other.enableMultiType.value_or(false);
+    }
+
+    bool operator==(const TextDecorationOptions& other) const
+    {
+        return IsEqual(other);
+    }
+
+    bool operator!=(const TextDecorationOptions& other) const
+    {
+        return !IsEqual(other);
+    }
+};
+
 struct ImageSpanSize {
     std::optional<CalcDimension> width;
     std::optional<CalcDimension> height;
@@ -171,20 +191,23 @@ struct ImageSpanOptions : SpanOptionBase {
 namespace OHOS::Ace::NG {
 class TextLayoutProperty;
 constexpr Dimension TEXT_DEFAULT_FONT_SIZE = 16.0_fp;
+constexpr Dimension TEXT_DEFAULT_STROKE_WIDTH = 0.0_fp;
 using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextShadow, std::vector<Shadow>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ItalicFontStyle, Ace::FontStyle);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Superscript, SuperscriptStyle);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontWeight, FontWeight);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(VariableFontWeight, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableVariableFontWeight, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFamily, std::vector<std::string>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFeature, FONT_FEATURES_LIST);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecoration, TextDecoration);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecoration, std::vector<TextDecoration>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationStyle, TextDecorationStyle);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationOptions, TextDecorationOptions);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextCase, TextCase);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AdaptMinFontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AdaptMaxFontSize, Dimension);
@@ -199,9 +222,20 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolType, SymbolType);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeWidth, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeColor, Color);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LineThicknessScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontForegroudGradiantColor, FontForegroudGradiantColor);
 
     void UpdateColorByResourceId();
+
+    TextDecoration GetTextDecorationFirst() const
+    {
+        auto decorations = GetTextDecoration();
+        if (!decorations.has_value()) {
+            return TextDecoration::NONE;
+        }
+        return decorations.value().size() > 0 ?
+            decorations.value()[0] : TextDecoration::NONE;
+    }
 };
 
 struct TextLineStyle {
@@ -224,6 +258,7 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HalfLeading, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AllowScale, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ParagraphSpacing, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(OptimizeTrailingSpace, bool);
 };
 
 struct HandleInfoNG {

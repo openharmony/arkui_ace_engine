@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -557,6 +558,16 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarMonthNode(int32_t calendarNo
     ViewStackProcessor::GetInstance()->Finish();
     auto monthPattern = monthFrameNode->GetPattern<CalendarMonthPattern>();
     CHECK_NULL_RETURN(monthPattern, nullptr);
+
+    if (settingData.dayRadiusResObj) {
+        auto&& updateFunc = [monthPattern, monthFrameNode](const RefPtr<ResourceObject>& resObj) {
+            CalcDimension dayRadius;
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, dayRadius);
+            monthPattern->UpdateDayRadius(dayRadius);
+        };
+        monthPattern->AddResObj("CalendarDayRadius", settingData.dayRadiusResObj, std::move(updateFunc));
+    }
+
     monthPattern->SetCalendarDialogFlag(true);
     auto calendarEventHub = monthPattern->GetOrCreateEventHub<CalendarEventHub>();
     CHECK_NULL_RETURN(calendarEventHub, nullptr);

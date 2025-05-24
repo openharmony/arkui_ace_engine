@@ -67,6 +67,7 @@ constexpr Dimension MIN_OPTION_WIDTH = 56.0_vp;
 constexpr Dimension OPTION_MARGIN = 8.0_vp;
 constexpr int32_t COLUMN_NUM = 2;
 constexpr Dimension BORDER_DEFAULT_WIDTH = 0.0_vp;
+constexpr Dimension STACK_EXPAND_ICON_PADDING = 2.0_vp;
 #if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
 constexpr const char* MENU_STATE_COLLAPSED = "collapsed";
 constexpr const char* MENU_STATE_EXPANDED = "expanded";
@@ -195,6 +196,9 @@ void MenuItemPattern::OnAttachToFrameNode()
     RegisterOnPress();
     RegisterOnHover();
     CreateBottomDivider();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    MenuView::RegisterAccessibilityChildActionNotify(host);
 }
 
 void CustomMenuItemPattern::OnAttachToFrameNode()
@@ -665,7 +669,41 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     if (type == ShowSubMenuType::LONG_PRESS && expandingMode_ == SubMenuExpandingMode::STACK) {
         CleanParentMenuItemBgColor();
     }
+    ShowSubMenuWithAnimation(subMenu);
     SendSubMenuOpenToAccessibility(subMenu, type);
+}
+
+void MenuItemPattern::ShowSubMenuWithAnimation(const RefPtr<FrameNode>& subMenu)
+{
+    CHECK_NULL_VOID(subMenu);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    if (menuTheme->GetMenuAnimationDuration()) {
+        auto renderContext = subMenu->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateTransformCenter(DimensionOffset(Offset()));
+        renderContext->UpdateOpacity(MENU_ANIMATION_MIN_OPACITY);
+        renderContext->UpdateTransformScale(
+            VectorF(menuTheme->GetMenuAnimationScale(), menuTheme->GetMenuAnimationScale()));
+        auto animationOption = AnimationOption();
+        animationOption.SetDuration(menuTheme->GetMenuAnimationDuration());
+        animationOption.SetCurve(menuTheme->GetMenuAnimationCurve());
+        AnimationUtils::Animate(
+            animationOption,
+            [weak = WeakClaim(RawPtr(subMenu))]() {
+                auto subMenuNode = weak.Upgrade();
+                CHECK_NULL_VOID(subMenuNode);
+                auto renderContext = subMenuNode->GetRenderContext();
+                CHECK_NULL_VOID(renderContext);
+                renderContext->UpdateTransformScale(VectorF(MENU_ANIMATION_MAX_SCALE, MENU_ANIMATION_MAX_SCALE));
+                renderContext->UpdateOpacity(MENU_ANIMATION_MAX_OPACITY);
+            },
+            animationOption.GetOnFinishEvent());
+    }
 }
 
 void MenuItemPattern::SendSubMenuOpenToAccessibility(RefPtr<FrameNode>& subMenu, ShowSubMenuType type)
@@ -1916,50 +1954,80 @@ void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
 
 void MenuItemPattern::AddExpandIcon(RefPtr<FrameNode>& row)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto menuNode = GetMenu();
-    auto menuPattern = menuNode ? menuNode->GetPattern<MenuPattern>() : nullptr;
-    auto menuProperty = menuNode ? menuNode->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
-    CHECK_NULL_VOID(menuProperty);
-    auto canExpand = GetSubBuilder() != nullptr && menuPattern
-        && !menuPattern->IsEmbedded() && !menuPattern->IsStackSubmenu()
-        && (expandingMode_ == SubMenuExpandingMode::EMBEDDED || expandingMode_ == SubMenuExpandingMode::STACK);
-    if (!canExpand) {
-        if (expandIcon_) {
-            row->RemoveChild(expandIcon_);
-            expandIcon_ = nullptr;
-            row->MarkModifyDone();
-            row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        }
-        return;
-    }
+    CHECK_EQUAL_VOID(ISNeedAddExpandIcon(row), false);
     if (!expandIcon_) {
-        expandIcon_ = FrameNode::CreateFrameNode(
-            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        expandIcon_ = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
         CHECK_NULL_VOID(expandIcon_);
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto iconTheme = pipeline->GetTheme<IconTheme>();
-    CHECK_NULL_VOID(iconTheme);
-    auto iconPath = iconTheme->GetIconPath(
-        expandingMode_ == SubMenuExpandingMode::STACK
-            ? InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG
-            : InternalResource::ResourceId::IC_PUBLIC_ARROW_DOWN_SVG);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(selectTheme);
-    ImageSourceInfo imageSourceInfo(iconPath);
-    auto props = expandIcon_->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(props);
-    props->UpdateImageSourceInfo(imageSourceInfo);
-    Ace::NG::UpdateIconSrc(expandIcon_, selectTheme->GetIconSideLength(), selectTheme->GetIconSideLength(),
-        selectTheme->GetMenuIconColor(), true);
-
+    auto menuNode = GetMenu();
+    auto menuProperty = menuNode ? menuNode->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
+    CHECK_NULL_VOID(menuProperty);
+    auto symbol = menuProperty->GetExpandSymbol();
+    if (symbol) {
+        symbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(expandIcon_)));
+    } else {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto selectTheme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(selectTheme);
+        auto menuTheme = pipeline->GetTheme<MenuTheme>();
+        CHECK_NULL_VOID(menuTheme);
+        auto props = expandIcon_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(props);
+        uint32_t symbolId = 0;
+        if (expandingMode_ == SubMenuExpandingMode::STACK) {
+            symbolId = menuTheme->GetStackExpandIconId();
+            PaddingProperty padding;
+            padding.SetEdges(CalcLength(STACK_EXPAND_ICON_PADDING));
+            props->UpdatePadding(padding);
+            props->UpdateFontSize(
+                selectTheme->GetIconSideLength() - STACK_EXPAND_ICON_PADDING - STACK_EXPAND_ICON_PADDING);
+        } else {
+            symbolId = menuTheme->GetEmbeddedExpandIconId();
+            props->UpdateFontSize(selectTheme->GetIconSideLength());
+        }
+        props->UpdateSymbolColorList({ selectTheme->GetMenuIconColor() });
+        props->UpdateSymbolSourceInfo(SymbolSourceInfo(symbolId));
+    }
     auto expandIconIndex = row->GetChildren().size();
     expandIcon_->MountToParent(row, expandIconIndex);
     expandIcon_->MarkModifyDone();
     expandIcon_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+bool MenuItemPattern::ISNeedAddExpandIcon(RefPtr<FrameNode>& row)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto menuNode = GetMenu();
+    CHECK_NULL_RETURN(menuNode, false);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, false);
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(menuProperty, false);
+    auto pattern = host->GetPattern<MenuItemPattern>();
+    auto isStackSubmenuHeader = pattern ? pattern->IsStackSubmenuHeader() : false;
+    if (isStackSubmenuHeader) {
+        return true;
+    } else {
+        auto canExpand =
+            GetSubBuilder() != nullptr && menuPattern && !menuPattern->IsEmbedded() && !menuPattern->IsStackSubmenu() &&
+            (expandingMode_ == SubMenuExpandingMode::EMBEDDED || expandingMode_ == SubMenuExpandingMode::STACK);
+        if (canExpand) {
+            return true;
+        } else {
+            if (expandIcon_) {
+                row->RemoveChild(expandIcon_);
+                expandIcon_ = nullptr;
+                row->MarkModifyDone();
+                row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
+            return false;
+        }
+    }
 }
 
 void MenuItemPattern::AddClickableArea()
@@ -2040,21 +2108,20 @@ void MenuItemPattern::AddStackSubMenuHeader(RefPtr<FrameNode>& menuNode)
     CHECK_NULL_VOID(host);
     auto layoutProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto iconTheme = pipeline->GetTheme<IconTheme>();
-    CHECK_NULL_VOID(iconTheme);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(selectTheme);
-    auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG);
-    ImageSourceInfo imageSourceInfo;
-    imageSourceInfo.SetSrc(iconPath);
-    imageSourceInfo.SetFillColor(selectTheme->GetMenuIconColor());
     auto content = layoutProperty->GetContent().value_or(layoutProperty->GetLabel().value_or(""));
-
     MenuItemProperties menuItemProps;
     menuItemProps.content = content;
-    menuItemProps.endIcon = imageSourceInfo;
+    auto menu = GetMenu();
+    CHECK_NULL_VOID(menu);
+    auto menuProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
+    auto symbol = menuProperty->GetExpandSymbol();
+    if (symbol) {
+        auto menuNodeProperty = menuNode ? menuNode->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
+        if (menuNodeProperty) {
+            menuNodeProperty->SetExpandSymbol(symbol);
+        }
+    }
     MenuItemModelNG menuItemModel;
     menuItemModel.Create(menuItemProps);
     auto stack = ViewStackProcessor::GetInstance();

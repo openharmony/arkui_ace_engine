@@ -284,7 +284,8 @@ public:
     // check if the page node needs to be avoid keyboard
     bool CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode);
 
-    PaddingPropertyF SafeAreaToPadding(bool withoutProcess = false);
+    PaddingPropertyF SafeAreaToPadding(
+        bool withoutProcess = false, LayoutSafeAreaType ignoreType = LAYOUT_SAFE_AREA_TYPE_SYSTEM);
 
     void SetWindowTypeConfig(bool isAppWindow, bool isSystemWindow, bool isSceneBoardWindow)
     {

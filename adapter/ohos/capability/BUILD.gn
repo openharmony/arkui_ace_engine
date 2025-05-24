@@ -60,6 +60,7 @@ template("ace_capability_ohos_source_set") {
         external_deps += [ "udmf:libudmf" ]
         external_deps += [ "udmf:udmf_client" ]
         external_deps += [ "udmf:udmf_data_napi" ]
+        external_deps += [ "udmf:utd_client" ]
         external_deps += [ "device_status:devicestatus_client" ]
         sources += [ "udmf/udmf_impl.cpp" ]
         sources += [ "interaction/interaction_impl.cpp" ]

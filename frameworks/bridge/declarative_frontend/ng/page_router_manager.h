@@ -339,7 +339,6 @@ protected:
         const std::string& finishCallbackTaskName, const std::string& errorCallbackTaskName);
     bool GenerateRouterPageInner(const RouterPageInfo& target);
     std::pair<int32_t, RefPtr<FrameNode>> FindIntentPageInStack() const;
-    std::string GetJsonIntentInfo(std::unique_ptr<JsonValue> intentJson);
     RouterIntentInfo ParseRouterIntentInfo(const std::string& intentInfoSerialized);
     // only for @normalized ohmUrl
     std::string ParseUrlNameFromOhmUrl(const std::string& ohmUrl);

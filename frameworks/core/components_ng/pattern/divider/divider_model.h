@@ -19,6 +19,7 @@
 #include <mutex>
 
 #include "base/utils/macros.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 
@@ -32,6 +33,7 @@ public:
     virtual void Create() = 0;
     virtual void Vertical(bool value) = 0;
     virtual void DividerColor(const Color& value) = 0;
+    virtual void DividerColor(const RefPtr<ResourceObject>& resobj) {};
     virtual void StrokeWidth(const Dimension& value) = 0;
     virtual void LineCap(const LineCap& value) = 0;
     virtual void ResetDividerColor() {};

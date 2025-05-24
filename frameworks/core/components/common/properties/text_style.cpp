@@ -14,6 +14,8 @@
  */
 
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/pattern/text/text_styles.h"
+#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace {
 const std::vector<WordBreak> WORD_BREAK_TYPES = {
@@ -47,7 +49,8 @@ bool TextStyle::operator==(const TextStyle &rhs) const
            propTextIndent_.value == rhs.propTextIndent_.value && propTextVerticalAlign_ == rhs.propTextVerticalAlign_ &&
            propWordSpacing_.value == rhs.propWordSpacing_.value && propEllipsisMode_ == rhs.propEllipsisMode_ &&
            propLineBreakStrategy_ == rhs.propLineBreakStrategy_ &&
-           propTextBackgroundStyle_ == rhs.propTextBackgroundStyle_;
+           propTextBackgroundStyle_ == rhs.propTextBackgroundStyle_ &&
+           NearEqual(propLineThicknessScale_, rhs.propLineThicknessScale_);
 }
 
 bool TextStyle::operator!=(const TextStyle &rhs) const
@@ -82,6 +85,34 @@ void TextBackgroundStyle::ToJsonValue(std::unique_ptr<JsonValue> &json, const st
     json->PutExtAttr("textBackgroundStyle", styleJson, filter);
 }
 
+void TextStyle::ToJsonValue(std::unique_ptr<JsonValue>& json, const std::optional<TextStyle>& style,
+                            const NG::InspectorFilter& filter)
+{
+    CHECK_NULL_VOID(json);
+    CHECK_NULL_VOID(style);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    json->PutExtAttr("decoration", GetDeclarationString(style->GetTextDecorationColor(), style->GetTextDecoration(),
+        style->GetTextDecorationStyle(), style->GetLineThicknessScale()).c_str(), filter);
+}
+
+std::string TextStyle::GetDeclarationString(
+    const std::optional<Color>& color, const std::vector<TextDecoration>& textDecorations,
+    const std::optional<TextDecorationStyle>& textDecorationStyle, const std::optional<float>& lineThicknessScale)
+{
+    auto jsonSpanDeclaration = JsonUtil::Create(true);
+    jsonSpanDeclaration->Put(
+        "type", V2::ConvertWrapTextDecorationToStirng(textDecorations).c_str());
+    jsonSpanDeclaration->Put("color", (color.value_or(Color::BLACK).ColorToString()).c_str());
+    jsonSpanDeclaration->Put("style", V2::ConvertWrapTextDecorationStyleToString(
+        textDecorationStyle.value_or(TextDecorationStyle::SOLID)).c_str());
+    jsonSpanDeclaration->Put("thicknessScale",
+        StringUtils::DoubleToString(static_cast<double>(lineThicknessScale.value_or(1.0f))).c_str());
+    return jsonSpanDeclaration->ToString();
+}
+
 void TextStyle::UpdateColorByResourceId()
 {
     propTextColor_.UpdateColorByResourceId();
@@ -112,7 +143,7 @@ std::string TextStyle::ToString() const
     JSON_STRING_PUT_INT(jsonValue, propTextVerticalAlign_);
     JSON_STRING_PUT_INT(jsonValue, propTextAlign_);
     JSON_STRING_PUT_INT(jsonValue, propTextDecorationStyle_);
-    JSON_STRING_PUT_INT(jsonValue, propTextDecoration_);
+    JSON_STRING_PUT_INT(jsonValue, propTextDecoration_.size() > 0 ? propTextDecoration_[0] : TextDecoration::NONE);
     JSON_STRING_PUT_INT(jsonValue, propWhiteSpace_);
     JSON_STRING_PUT_INT(jsonValue, propWordBreak_);
     JSON_STRING_PUT_INT(jsonValue, propTextCase_);

@@ -16,6 +16,7 @@
 
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components/slider/slider_theme.h"
+#include "core/components_ng/pattern/slider/slider_custom_content_options.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -507,6 +508,50 @@ void ResetMinResponsiveDistance(ArkUINodeHandle node)
     SliderModelNG::ResetMinResponsiveDistance(frameNode);
 }
 
+void SetPrefix(ArkUINodeHandle node, ArkUINodeHandle prefix, ArkUISliderCustomContentOptions* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* prefixNode = reinterpret_cast<FrameNode*>(prefix);
+    CHECK_NULL_VOID(prefixNode);
+    CHECK_NULL_VOID(options);
+    SliderPrefixOptions prefixOptions;
+    prefixOptions.accessibilityText = options->accessibilityText ? options->accessibilityText : "";
+    prefixOptions.accessibilityDescription = options->accessibilityDescription ? options->accessibilityDescription : "";
+    prefixOptions.accessibilityLevel = options->accessibilityLevel ? options->accessibilityLevel : "";
+    prefixOptions.accessibilityGroup = options->accessibilityGroup;
+    SliderModelNG::SetPrefix(frameNode, AceType::Claim<UINode>(prefixNode), prefixOptions);
+}
+
+void ResetPrefix(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SliderModelNG::ResetPrefix(frameNode);
+}
+
+void SetSuffix(ArkUINodeHandle node, ArkUINodeHandle suffix, ArkUISliderCustomContentOptions* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* suffixNode = reinterpret_cast<FrameNode*>(suffix);
+    CHECK_NULL_VOID(suffixNode);
+    CHECK_NULL_VOID(options);
+    SliderSuffixOptions suffixOptions;
+    suffixOptions.accessibilityText = options->accessibilityText ? options->accessibilityText : "";
+    suffixOptions.accessibilityDescription = options->accessibilityDescription ? options->accessibilityDescription : "";
+    suffixOptions.accessibilityLevel = options->accessibilityLevel ? options->accessibilityLevel : "";
+    suffixOptions.accessibilityGroup = options->accessibilityGroup;
+    SliderModelNG::SetSuffix(frameNode, AceType::Claim<UINode>(suffixNode), suffixOptions);
+}
+
+void ResetSuffix(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SliderModelNG::ResetSuffix(frameNode);
+}
+
 void SetOnChange(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -753,6 +798,10 @@ const ArkUISliderModifier* GetSliderModifier()
         .resetMinResponsiveDistance = SliderModifier::ResetMinResponsiveDistance,
         .setOnChange = SliderModifier::SetOnChange,
         .resetOnChange = SliderModifier::ResetOnChange,
+        .setPrefix = SliderModifier::SetPrefix,
+        .resetPrefix = SliderModifier::ResetPrefix,
+        .setSuffix = SliderModifier::SetSuffix,
+        .resetSuffix = SliderModifier::ResetSuffix,
         .getBlockColor = SliderModifier::GetBlockColor,
         .getTrackBackgroundColor = SliderModifier::GetTrackBackgroundColor,
         .getSelectColor = SliderModifier::GetSelectColor,
@@ -835,6 +884,10 @@ const CJUISliderModifier* GetCJUISliderModifier()
         .resetInteractionMode = SliderModifier::ResetInteractionMode,
         .setMinResponsiveDistance = SliderModifier::SetMinResponsiveDistance,
         .resetMinResponsiveDistance = SliderModifier::ResetMinResponsiveDistance,
+        .setPrefix = SliderModifier::SetPrefix,
+        .resetPrefix = SliderModifier::ResetPrefix,
+        .setSuffix = SliderModifier::SetSuffix,
+        .resetSuffix = SliderModifier::ResetSuffix,
         .getBlockColor = SliderModifier::GetBlockColor,
         .getTrackBackgroundColor = SliderModifier::GetTrackBackgroundColor,
         .getSelectColor = SliderModifier::GetSelectColor,

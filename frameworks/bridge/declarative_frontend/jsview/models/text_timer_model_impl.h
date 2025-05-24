@@ -35,6 +35,8 @@ public:
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
+    void CreateWithResourceObj(
+        JsTextTimerResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) override {};
 
 private:
     static RefPtr<TextTimerComponent> GetComponent();

@@ -22,6 +22,9 @@ class SpanToHtml {
 public:
     static std::string ToHtml(const SpanString& spanString);
     static std::string ToHtml(std::vector<uint8_t>& values);
+    static std::string ToHtml(const std::list<RefPtr<NG::SpanItem>>& spanItems);
+    static std::string ToHtmlForNormalType(const NG::FontStyle& fontStyle,
+        const NG::TextLineStyle& textLineStyle, const std::u16string& contentStr);
 
 private:
     static std::string NormalStyleToHtml(
@@ -31,8 +34,11 @@ private:
     static std::string FontSizeToHtml(const std::optional<Dimension>& value);
     static std::string FontWeightToHtml(const std::optional<FontWeight>& value);
     static std::string ColorToHtml(const std::optional<Color>& value);
+    static std::string StrokeWidthToHtml(const std::optional<Dimension>& value);
+    static std::string StrokeColorToHtml(const std::optional<Color>& value);
+    static std::string FontSuperscriptToHtml(const std::optional<SuperscriptStyle>& value);
     static std::string FontFamilyToHtml(const std::optional<std::vector<std::string>>& value);
-    static std::string TextDecorationToHtml(TextDecoration decoration);
+    static std::string TextDecorationToHtml(const std::vector<TextDecoration>& decoration);
     static std::string TextDecorationStyleToHtml(TextDecorationStyle decorationStyle);
     static std::string ToHtml(const std::string& key, const std::optional<Dimension>& value);
     static std::string DeclarationToHtml(const NG::FontStyle& fontStyle);
@@ -66,6 +72,8 @@ private:
     }
 
     static bool CreateDirectory(const std::string& path);
+    static void HandleSingleSpanItemHtml(const RefPtr<NG::SpanItem>& item, std::string& out,
+        size_t& paragrapStart, bool& newLine);
 };
 }; // namespace OHOS::Ace
 #endif

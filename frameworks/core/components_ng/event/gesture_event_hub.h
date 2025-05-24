@@ -100,6 +100,7 @@ struct PreparedInfoForDrag {
     RefPtr<FrameNode> textRowNode { nullptr };
     RefPtr<FrameNode> textNode { nullptr };
     RefPtr<FrameNode> menuNode { nullptr };
+    RefPtr<FrameNode> scrollNode { nullptr };
     // for menu follow animation
     float menuPositionLeft = 0.0f;
     float menuPositionTop = 0.0f;
@@ -115,6 +116,7 @@ struct PreparedInfoForDrag {
     RectF originPreviewRect;
     RectF dragPreviewRect;
     BorderRadiusProperty borderRadius = BorderRadiusProperty(0.0_vp);
+    SourceType deviceType = SourceType::NONE;
 };
 
 struct PreparedAsyncCtxForAnimate {
@@ -133,6 +135,7 @@ struct DragframeNodeInfo {
 
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 using OnDragDropFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
+using OnDrapDropSpringLoadingFunc = std::function<void(const RefPtr<DragSpringLoadingContext>& info)>;
 using OnChildTouchTestFunc = std::function<TouchResult(const std::vector<TouchTestInfo>& touchInfo)>;
 using OnReponseRegionFunc = std::function<void(const std::vector<DimensionRect>&)>;
 struct DragDropInfo {
@@ -390,6 +393,7 @@ public:
     void DumpVelocityInfoFroPanEvent(int32_t fingerId);
 
     bool IsDragNewFwk() const;
+    bool TriggerTouchEvent(const TouchEvent& point);
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,

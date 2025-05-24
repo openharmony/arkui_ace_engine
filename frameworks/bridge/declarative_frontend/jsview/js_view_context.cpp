@@ -1277,15 +1277,21 @@ void JSViewContext::JSUpdateMenu(const JSCallbackInfo& info)
     }
     NG::MenuParam menuParam;
     if (paramCnt >= LENGTH_TWO && info[INDEX_ONE]->IsObject()) {
+        NG::MenuParam menuParamOpen;
+        //Get current param config
+        auto result = GetMenuParam(menuParamOpen, menuContentNode);
+        if (result != ERROR_CODE_NO_ERROR && result != ERROR_CODE_INTERNAL_ERROR) {
+            ReturnPromise(info, result);
+            return;
+        }
         if (isPartialUpdate) {
-            auto result = GetMenuParam(menuParam, menuContentNode);
-            if (result != ERROR_CODE_NO_ERROR && result != ERROR_CODE_INTERNAL_ERROR) {
-                ReturnPromise(info, result);
-                return;
-            }
+            menuParam = menuParamOpen;
         }
         auto menuObj = JSRef<JSObject>::Cast(info[INDEX_ONE]);
         JSViewAbstract::ParseContentMenuCommonParam(info, menuObj, menuParam);
+        //Updating these parameters is not supported
+        menuParam.isShowInSubWindow = menuParamOpen.isShowInSubWindow;
+        menuParam.previewMode = menuParamOpen.previewMode;
     } else {
         ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
         return;

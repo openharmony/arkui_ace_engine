@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT CalendarPickerModel {
@@ -32,6 +33,8 @@ public:
 
     virtual void Create(const NG::CalendarSettingData& settingData) = 0;
     virtual void SetEdgeAlign(const NG::CalendarEdgeAlign& alignType, const DimensionOffset& offset) = 0;
+    virtual void SetEdgeAlign(const NG::CalendarEdgeAlign& alignType, const DimensionOffset& offset,
+        const std::vector<RefPtr<ResourceObject>>& resArray);
     virtual void SetTextStyle(const NG::PickerTextStyle& textStyle) = 0;
     virtual void SetOnChange(NG::SelectedChangeEvent&& onChange) = 0;
     virtual void SetChangeEvent(NG::SelectedChangeEvent&& onChange) = 0;
@@ -43,6 +46,7 @@ public:
     virtual void ClearBorderWidth() = 0;
     virtual void ClearPadding() = 0;
     virtual void SetMarkToday(bool isMarkToday) = 0;
+    virtual void ParseNormalTextStyleResObj(const NG::PickerTextStyle& textStyleOpt) {};
 
 private:
     static std::unique_ptr<CalendarPickerModel> instance_;

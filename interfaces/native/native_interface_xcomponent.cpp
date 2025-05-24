@@ -20,6 +20,7 @@
 #include "base/error/error_code.h"
 #include "frameworks/core/components/xcomponent/native_interface_xcomponent_impl.h"
 #include "frameworks/core/components_ng/pattern/xcomponent/xcomponent_surface_holder.h"
+#include "frameworks/core/accessibility/native_interface_accessibility_provider.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -558,6 +559,165 @@ int32_t OH_ArkUI_XComponent_IsInitialized(ArkUI_NodeHandle node, bool* isInitial
     auto res = xComponentModifier->isInitialized(node->uiNodeHandle, &value);
     *isInitialized = value;
     return res;
+}
+
+int32_t OH_NativeXComponent_GetExtraMouseEventInfo(OH_NativeXComponent* component,
+    OH_NativeXComponent_ExtraMouseEventInfo** extraMouseEventInfo)
+{
+    if ((component == nullptr) || (extraMouseEventInfo == nullptr)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    return component->GetExtraMouseEventInfo(extraMouseEventInfo);
+}
+
+int32_t OH_NativeXComponent_GetMouseEventModifierKeyStates(
+    OH_NativeXComponent_ExtraMouseEventInfo* ExtraMouseEventInfo, uint64_t* keys)
+{
+    if ((ExtraMouseEventInfo == nullptr) || (keys == nullptr)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    (*keys) = ExtraMouseEventInfo->modifierKeyStates;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_NativeXComponent_GetKeyEventModifierKeyStates(OH_NativeXComponent_KeyEvent* keyEvent, uint64_t* keys)
+{
+    if ((keyEvent == nullptr) || (keys == nullptr)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    (*keys) = keyEvent->modifierKeyStates;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_NativeXComponent_GetKeyEventNumLockState(OH_NativeXComponent_KeyEvent* keyEvent, bool* isNumLockOn)
+{
+    if ((keyEvent == nullptr) || (isNumLockOn == nullptr)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    (*isNumLockOn) = keyEvent->isNumLockOn;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_NativeXComponent_GetKeyEventCapsLockState(OH_NativeXComponent_KeyEvent* keyEvent, bool* isCapsLockOn)
+{
+    if ((keyEvent == nullptr) || (isCapsLockOn == nullptr)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    (*isCapsLockOn) = keyEvent->isCapsLockOn;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_NativeXComponent_GetKeyEventScrollLockState(OH_NativeXComponent_KeyEvent* keyEvent, bool* isScrollLockOn)
+{
+    if ((keyEvent == nullptr) || (isScrollLockOn == nullptr)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    (*isScrollLockOn) = keyEvent->isScrollLockOn;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+const ArkUIXComponentModifier* GetArkUIXComponentModifier()
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, nullptr);
+    auto nodeModifiers = impl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, nullptr);
+    auto xComponentModifier = nodeModifiers->getXComponentModifier();
+    return xComponentModifier;
+}
+
+bool IsValidXComponentNode(ArkUI_NodeHandle node)
+{
+    return OHOS::Ace::NodeModel::IsValidArkUINode(node) &&
+        (node->isBindNative || node->type == ARKUI_NODE_XCOMPONENT || node->type == ARKUI_NODE_XCOMPONENT_TEXTURE);
+}
+
+int32_t OH_ArkUI_XComponent_SetExpectedFrameRateRange(
+    ArkUI_NodeHandle node, OH_NativeXComponent_ExpectedRateRange range)
+{
+    if (!IsValidXComponentNode(node)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    auto xComponentModifier = GetArkUIXComponentModifier();
+    CHECK_NULL_RETURN(xComponentModifier, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    ArkUI_Int32 min = range.min;
+    ArkUI_Int32 max = range.max;
+    ArkUI_Int32 expected = range.expected;
+    auto res = xComponentModifier->setExpectedFrameRateRange(node->uiNodeHandle, min, max, expected);
+    return res;
+}
+
+int32_t OH_ArkUI_XComponent_RegisterOnFrameCallback(ArkUI_NodeHandle node,
+    void (*callback)(ArkUI_NodeHandle node, uint64_t timestamp, uint64_t targetTimestamp))
+{
+    if (!IsValidXComponentNode(node)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    auto xComponentModifier = GetArkUIXComponentModifier();
+    CHECK_NULL_RETURN(xComponentModifier, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto res = xComponentModifier->registerOnFrameCallback(node->uiNodeHandle,
+        reinterpret_cast<void(*)(void*, uint64_t, uint64_t)>(callback), node);
+    return res;
+}
+
+int32_t OH_ArkUI_XComponent_UnregisterOnFrameCallback(ArkUI_NodeHandle node)
+{
+    if (!IsValidXComponentNode(node)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    auto xComponentModifier = GetArkUIXComponentModifier();
+    CHECK_NULL_RETURN(xComponentModifier, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto res = xComponentModifier->unregisterOnFrameCallback(node->uiNodeHandle);
+    return res;
+}
+
+int32_t OH_ArkUI_XComponent_SetNeedSoftKeyboard(ArkUI_NodeHandle node, bool needSoftKeyboard)
+{
+    if (!IsValidXComponentNode(node)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    auto xComponentModifier = GetArkUIXComponentModifier();
+    CHECK_NULL_RETURN(xComponentModifier, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto res = xComponentModifier->setNeedSoftKeyboard(node->uiNodeHandle, needSoftKeyboard);
+    return res;
+}
+
+ArkUI_AccessibilityProvider* OH_ArkUI_AccessibilityProvider_Create(ArkUI_NodeHandle node)
+{
+    if (!IsValidXComponentNode(node)) {
+        return nullptr;
+    }
+    auto xComponentModifier = GetArkUIXComponentModifier();
+    CHECK_NULL_RETURN(xComponentModifier, nullptr);
+    auto accessibilityProvider = reinterpret_cast<ArkUI_AccessibilityProvider*>(
+        xComponentModifier->createAccessibilityProvider(node->uiNodeHandle));
+    return accessibilityProvider;
+}
+
+void OH_ArkUI_AccessibilityProvider_Dispose(ArkUI_AccessibilityProvider* provider)
+{
+    if (provider == nullptr) {
+        return;
+    }
+    auto xComponentModifier = GetArkUIXComponentModifier();
+    CHECK_NULL_VOID(xComponentModifier);
+    xComponentModifier->disposeAccessibilityProvider(provider);
+}
+
+void OH_ArkUI_SurfaceCallback_SetSurfaceShowEvent(
+    OH_ArkUI_SurfaceCallback* callback,
+    void (*onSurfaceShow)(OH_ArkUI_SurfaceHolder* surfaceHolder))
+{
+    CHECK_NULL_VOID(callback);
+    callback->onSurfaceShow = onSurfaceShow;
+}
+
+void OH_ArkUI_SurfaceCallback_SetSurfaceHideEvent(
+    OH_ArkUI_SurfaceCallback* callback,
+    void (*onSurfaceHide)(OH_ArkUI_SurfaceHolder* surfaceHolder))
+{
+    CHECK_NULL_VOID(callback);
+    callback->onSurfaceHide = onSurfaceHide;
 }
 
 #ifdef __cplusplus

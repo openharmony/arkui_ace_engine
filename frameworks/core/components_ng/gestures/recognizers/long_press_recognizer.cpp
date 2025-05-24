@@ -78,7 +78,10 @@ void LongPressRecognizer::OnAccepted()
     localMatrix_ = NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false,
         isPostEventResult_, touchPoint.postEventNodeId);
     UpdateFingerListInfo();
-    SendCallbackMsg(onAction_, false, GestureCallbackType::START);
+    {
+        ACE_SCOPED_TRACE("LongPressRecognizer onAction");
+        SendCallbackMsg(onAction_, false, GestureCallbackType::START);
+    }
     if (isLimitFingerCount_ && hasRepeated_) {
         return;
     }
@@ -201,10 +204,12 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     lastTouchEvent_ = event;
     if (refereeState_ == RefereeState::SUCCEED) {
         if (isLimitFingerCount_ && static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+            ACE_SCOPED_TRACE("LongPressRecognizer onAction");
             SendCallbackMsg(onAction_, false, GestureCallbackType::START);
         }
         if (static_cast<int32_t>(touchPoints_.size()) == 0) {
             hasRepeated_ = false;
+            ACE_SCOPED_TRACE("LongPressRecognizer onActionEnd");
             SendCallbackMsg(onActionEnd_, false, GestureCallbackType::END);
             int64_t overTime = GetSysTimestamp();
             int64_t inputTime = overTime;
@@ -258,6 +263,7 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
         touchPoints_.erase(event.id);
     }
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == 0) {
+        ACE_SCOPED_TRACE("LongPressRecognizer onActionCancel");
         SendCallbackMsg(onActionCancel_, false, GestureCallbackType::CANCEL);
         lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
@@ -343,6 +349,7 @@ void LongPressRecognizer::DoRepeat()
         return;
     }
     if (refereeState_ == RefereeState::SUCCEED) {
+        ACE_SCOPED_TRACE("LongPressRecognizer onAction");
         SendCallbackMsg(onAction_, true, GestureCallbackType::START);
         StartRepeatTimer();
     }
@@ -424,6 +431,7 @@ void LongPressRecognizer::SendCallbackMsg(
         Platform::UpdatePressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         info.SetInputEventType(inputEventType_);
+        info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
@@ -476,6 +484,7 @@ bool LongPressRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recog
     if (curr->duration_ != duration_ || curr->fingers_ != fingers_ || curr->repeat_ != repeat_ ||
         curr->priorityMask_ != priorityMask_) {
         if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) > 0) {
+            ACE_SCOPED_TRACE("LongPressRecognizer onActionCancel");
             SendCallbackMsg(onActionCancel_, false, GestureCallbackType::CANCEL);
         }
         ResetStatus();

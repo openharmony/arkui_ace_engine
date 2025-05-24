@@ -51,16 +51,6 @@ void FunctionDeleter(void *env, void *nativePointer, void *data)
 
 thread_local EcmaVM* ArkJSRuntime::threadVm_ = nullptr;
 
-void ArkJSRuntime::SetUniqueId(const std::string& uniqueId)
-{
-    uniqueId_ = uniqueId;
-}
-
-const std::string& ArkJSRuntime::GetUniqueId() const
-{
-    return uniqueId_;
-}
-
 bool ArkJSRuntime::Initialize(const std::string& libraryPath, bool isDebugMode, int32_t instanceId)
 {
     RuntimeOption option;
@@ -365,16 +355,6 @@ void ArkJSRuntime::ThrowError(const std::string& msg, int32_t code)
 void ArkJSRuntime::RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback)
 {
     JSNApi::EnableUserUncaughtErrorHandler(vm_);
-    std::weak_ptr<ArkJSRuntime> weakThis = shared_from_this();
-    JSNApi::RegisterUncatchableErrorHandler(vm_,
-        [weakThis](auto& tryCatch) {
-            auto sharedThis = weakThis.lock();
-            if (sharedThis) {
-                sharedThis->HandleUncaughtExceptionWithoutNativeEngine(tryCatch, nullptr);
-            } else {
-                LOGE("ArkJSRuntime has been destructed.");
-            }
-        });
     uncaughtErrorHandler_ = callback;
 }
 
@@ -416,7 +396,7 @@ void ArkJSRuntime::HandleUncaughtExceptionWithoutNativeEngine(panda::TryCatch& t
     if (!exception.IsEmpty() && !exception->IsHole()) {
         shared_ptr<JsValue> errorPtr =
             std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(shared_from_this(), exception));
-        uncaughtErrorHandler_(errorPtr, shared_from_this(), uniqueId_);
+        uncaughtErrorHandler_(errorPtr, shared_from_this());
     }
 }
 

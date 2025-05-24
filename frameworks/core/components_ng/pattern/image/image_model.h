@@ -27,6 +27,7 @@
 #include "base/image/drawing_lattice.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/border.h"
@@ -37,6 +38,8 @@
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
+enum class ImageResourceType { SRC, ALT, FILL_COLOR };
+
 struct ACE_FORCE_EXPORT ImageInfoConfig {
     std::shared_ptr<std::string> src;
     std::string bundleName;
@@ -79,7 +82,7 @@ public:
     virtual void SetImageRenderMode(ImageRenderMode imageRenderMode) = 0;
     virtual bool IsSrcSvgImage() = 0;
     virtual void SetAutoResize(bool autoResize) = 0;
-    virtual void SetResizableSlice(const ImageResizableSlice& slice) = 0;
+    virtual void SetResizableSlice(ImageResizableSlice& slice) = 0;
     virtual void SetResizableLattice(const RefPtr<DrawingLattice>& lattice) = 0;
     virtual void ResetResizableLattice() = 0;
     virtual void SetSyncMode(bool syncMode) = 0;
@@ -103,6 +106,7 @@ public:
     virtual void SetEnhancedImageQuality(AIImageQuality imageQuality) = 0;
     virtual void SetOrientation(ImageRotateOrientation orientation) = 0;
     virtual bool GetIsAnimation() = 0;
+    virtual void CreateWithResourceObj(ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject) = 0;
 
 private:
     static std::unique_ptr<ImageModel> instance_;

@@ -92,6 +92,8 @@ public:
         Color defaultDisappearColor = Color::BLACK;
         Color defaultNormalColor = Color::BLACK;
         Color defaultSelectColor = Color::BLACK;
+        Color defaultSelectedBgColor = Color(0x0C182431);
+        Dimension defaultSelectedBorderRadius = 24.0_vp;
         auto pipeline = PipelineBase::GetCurrentContext();
         auto frameNode = GetHost();
         if (pipeline && frameNode) {
@@ -100,6 +102,8 @@ public:
                 defaultDisappearColor = pickerTheme->GetDisappearOptionStyle().GetTextColor();
                 defaultNormalColor = pickerTheme->GetOptionStyle(false, false).GetTextColor();
                 defaultSelectColor = pickerTheme->GetOptionStyle(true, false).GetTextColor();
+                defaultSelectedBgColor = pickerTheme->GetSelectedBackgroundColor();
+                defaultSelectedBorderRadius = *pickerTheme->GetSelectedBorderRadius().radiusTopLeft;
             }
         }
         if (propDivider_.has_value()) {
@@ -184,6 +188,12 @@ public:
         auto crownSensitivity = GetDigitalCrownSensitivity();
         json->PutExtAttr("digitalCrownSensitivity",
             std::to_string(crownSensitivity.value_or(DEFAULT_CROWNSENSITIVITY)).c_str(), filter);
+        auto selectedBackgroundStyle = JsonUtil::Create(true);
+        selectedBackgroundStyle->Put("color", GetSelectedBackgroundColor().value_or(
+            defaultSelectedBgColor).ColorToString().c_str());
+        selectedBackgroundStyle->Put("borderRadius", GetSelectedBorderRadius().value_or(
+        NG::BorderRadiusProperty(defaultSelectedBorderRadius)).ToString().c_str());
+        json->PutExtAttr("selectedBackgroundStyle", selectedBackgroundStyle, filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DefaultPickerItemHeight, Dimension, PROPERTY_UPDATE_MEASURE);
@@ -197,6 +207,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedIndex, std::vector<uint32_t>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Divider, ItemDivider, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisableTextStyleAnimation, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedBackgroundColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedBorderRadius, NG::BorderRadiusProperty, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(DisappearTextStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(

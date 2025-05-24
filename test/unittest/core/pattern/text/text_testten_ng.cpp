@@ -13,18 +13,21 @@
  * limitations under the License.
  */
 
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "text_base.h"
 
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/rosen/mock_canvas.h"
-#include "core/components_ng/pattern/text/span/tlv_util.h"
+ #include "core/components_ng/pattern/text/span/tlv_util.h"
 
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_select_overlay.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/text/text_select_overlay.h"
+#include "core/event/mouse_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -2563,5 +2566,50 @@ HWTEST_F(TextFieldTenPatternNg, HandleSpanLongPressEvent001, TestSize.Level1)
     bool isSpansEmpty = pattern->spans_.empty();
     EXPECT_TRUE(isInRegion);
     EXPECT_FALSE(isSpansEmpty);
+}
+
+/**
+ * @tc.name: LeftMouseRelease.
+ * @tc.desc: test clear selection by left mouse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, LeftMouseRelease, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    pattern->copyOption_ = CopyOptions::InApp;
+    pattern->pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _))
+        .WillOnce(Return(5))
+        .WillOnce(Return(10))
+        .WillOnce(Return(15));
+    ParagraphManager::ParagraphInfo pInfo = { .paragraph = paragraph };
+    pattern->pManager_->AddParagraph(std::move(pInfo));
+
+    MouseInfo mouseInfo;
+    mouseInfo.SetButton(MouseButton::LEFT_BUTTON);
+    mouseInfo.SetAction(MouseAction::PRESS);
+    pattern->HandleMouseEvent(mouseInfo);
+    EXPECT_EQ(pattern->GetTextSelector().GetStart(), 5);
+    EXPECT_EQ(pattern->GetTextSelector().GetEnd(), 5);
+
+    mouseInfo.SetAction(MouseAction::MOVE);
+    pattern->HandleMouseEvent(mouseInfo);
+    EXPECT_EQ(pattern->GetTextSelector().GetStart(), 5);
+    EXPECT_EQ(pattern->GetTextSelector().GetEnd(), 10);
+
+    mouseInfo.SetAction(MouseAction::RELEASE);
+    pattern->HandleMouseEvent(mouseInfo);
+    EXPECT_EQ(pattern->GetTextSelector().GetStart(), 5);
+    EXPECT_EQ(pattern->GetTextSelector().GetEnd(), 10);
+
+    mouseInfo.SetAction(MouseAction::PRESS);
+    pattern->HandleMouseEvent(mouseInfo);
+    mouseInfo.SetAction(MouseAction::RELEASE);
+    pattern->HandleMouseEvent(mouseInfo);
+    auto start = pattern->GetTextSelector().GetStart();
+    auto end = pattern->GetTextSelector().GetStart();
+    EXPECT_EQ(start, -1);
+    EXPECT_EQ(end, -1);
 }
 } // namespace OHOS::Ace::NG

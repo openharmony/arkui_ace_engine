@@ -1829,7 +1829,7 @@ bool JSRichEditorController::IsDrawable(const JSRef<JSVal>& jsValue)
     return (!func->IsNull() && func->IsFunction());
 }
 
-bool JSRichEditorController::IsPixelMap(const JSRef<JSVal>& jsValue)
+bool JSRichEditorBaseController::IsPixelMap(const JSRef<JSVal>& jsValue)
 {
     if (!jsValue->IsObject()) {
         return false;
@@ -2141,6 +2141,8 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
         "updateParagraphStyle", &JSRichEditorController::UpdateParagraphStyle);
     JSClass<JSRichEditorController>::CustomMethod("getTypingStyle", &JSRichEditorController::GetTypingStyle);
     JSClass<JSRichEditorController>::CustomMethod("setTypingStyle", &JSRichEditorController::SetTypingStyle);
+    JSClass<JSRichEditorController>::CustomMethod(
+        "setTypingParagraphStyle", &JSRichEditorController::SetTypingParagraphStyle);
     JSClass<JSRichEditorController>::CustomMethod("getSpans", &JSRichEditorController::GetSpansInfo);
     JSClass<JSRichEditorController>::CustomMethod("getPreviewText", &JSRichEditorController::GetPreviewTextInfo);
     JSClass<JSRichEditorController>::CustomMethod("getParagraphs", &JSRichEditorController::GetParagraphsInfo);
@@ -2190,7 +2192,7 @@ std::pair<int32_t, int32_t> ParseRange(const JSRef<JSObject>& object)
 }
 } // namespace
 
-void JSRichEditorController::ParseWordBreakParagraphStyle(const JSRef<JSObject>& styleObject,
+void JSRichEditorBaseController::ParseWordBreakParagraphStyle(const JSRef<JSObject>& styleObject,
     struct UpdateParagraphStyle& style)
 {
     auto wordBreakObj = styleObject->GetProperty("wordBreak");
@@ -2204,7 +2206,7 @@ void JSRichEditorController::ParseWordBreakParagraphStyle(const JSRef<JSObject>&
     style.wordBreak = WORD_BREAK_TYPES[index];
 }
 
-void JSRichEditorController::ParseLineBreakStrategyParagraphStyle(
+void JSRichEditorBaseController::ParseLineBreakStrategyParagraphStyle(
     const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
 {
     auto breakStrategyObj = styleObject->GetProperty("lineBreakStrategy");
@@ -2217,7 +2219,7 @@ void JSRichEditorController::ParseLineBreakStrategyParagraphStyle(
     }
 }
 
-void JSRichEditorController::ParseTextAlignParagraphStyle(const JSRef<JSObject>& styleObject,
+void JSRichEditorBaseController::ParseTextAlignParagraphStyle(const JSRef<JSObject>& styleObject,
     struct UpdateParagraphStyle& style)
 {
     auto textAlignObj = styleObject->GetProperty("textAlign");
@@ -2230,7 +2232,7 @@ void JSRichEditorController::ParseTextAlignParagraphStyle(const JSRef<JSObject>&
     }
 }
 
-void JSRichEditorController::ParseParagraphSpacing(const JSRef<JSObject>& styleObject,
+void JSRichEditorBaseController::ParseParagraphSpacing(const JSRef<JSObject>& styleObject,
     struct UpdateParagraphStyle& style)
 {
     auto paragraphSpacing = styleObject->GetProperty("paragraphSpacing");
@@ -2241,7 +2243,7 @@ void JSRichEditorController::ParseParagraphSpacing(const JSRef<JSObject>& styleO
     }
 }
 
-bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
+bool JSRichEditorBaseController::ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     if (styleObject->IsUndefined()) {
@@ -2477,6 +2479,25 @@ void JSRichEditorBaseController::SetTypingStyle(const JSCallbackInfo& info)
         return;
     }
     controller->SetTypingStyle(typingStyle_, textStyle);
+}
+
+
+void JSRichEditorBaseController::SetTypingParagraphStyle(const JSCallbackInfo& info)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+
+    do {
+        CHECK_NULL_BREAK(info[0]->IsObject());
+        JSRef<JSObject> paraStyleObj = JSRef<JSObject>::Cast(info[0]);
+        CHECK_NULL_BREAK(!paraStyleObj->IsUndefined());
+        struct UpdateParagraphStyle style;
+        CHECK_NULL_BREAK(ParseParagraphStyle(paraStyleObj, style));
+        controller->SetTypingParagraphStyle(style);
+        return;
+    } while (0);
+    controller->SetTypingParagraphStyle(std::nullopt);
 }
 
 bool JSRichEditorBaseController::FontSizeRangeIsNegative(const CalcDimension& size)
@@ -3049,6 +3070,8 @@ void JSRichEditorStyledStringController::JSBind(BindingTarget globalObj)
         "getTypingStyle", &JSRichEditorStyledStringController::GetTypingStyle);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "setTypingStyle", &JSRichEditorStyledStringController::SetTypingStyle);
+    JSClass<JSRichEditorStyledStringController>::CustomMethod(
+        "setTypingParagraphStyle", &JSRichEditorStyledStringController::SetTypingParagraphStyle);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "getSelection", &JSRichEditorStyledStringController::GetSelection);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(

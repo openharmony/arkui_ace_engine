@@ -29,12 +29,16 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_wrapper.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
@@ -86,6 +90,49 @@ void ViewAbstract::SetWidth(const CalcLength& width)
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
 }
 
+void ViewAbstract::SetWidth(const RefPtr<ResourceObject>& resObj)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string widthString = pattern->GetResCacheMapByKey("width");
+        CalcDimension value;
+        if (widthString.empty()) {
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, value);
+            pattern->AddResCache("width", value.ToString());
+        } else {
+            value = StringUtils::StringToCalcDimension(widthString);
+        }
+        CalcLength width;
+        if (value.Unit() == DimensionUnit::CALC) {
+            width = NG::CalcLength(value.CalcValue());
+        } else {
+            width = NG::CalcLength(value);
+        }
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        // get previously user defined ideal height
+        std::optional<CalcLength> height = std::nullopt;
+        auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+        if (layoutConstraint && layoutConstraint->selfIdealSize) {
+            height = layoutConstraint->selfIdealSize->Height();
+        }
+        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("width", resObj, std::move(updateFunc));
+}
+
 void ViewAbstract::SetHeight(const CalcLength& height)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -102,6 +149,49 @@ void ViewAbstract::SetHeight(const CalcLength& height)
         width = layoutConstraint->selfIdealSize->Width();
     }
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
+}
+
+void ViewAbstract::SetHeight(const RefPtr<ResourceObject>& resObj)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string heightString = pattern->GetResCacheMapByKey("height");
+        CalcDimension value;
+        if (heightString.empty()) {
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, value);
+            pattern->AddResCache("height", value.ToString());
+        } else {
+            value = StringUtils::StringToCalcDimension(heightString);
+        }
+        CalcLength height;
+        if (value.Unit() == DimensionUnit::CALC) {
+            height = NG::CalcLength(value.CalcValue());
+        } else {
+            height = NG::CalcLength(value);
+        }
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        // get previously user defined ideal width
+        std::optional<CalcLength> width = std::nullopt;
+        auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+        if (layoutConstraint && layoutConstraint->selfIdealSize) {
+            width = layoutConstraint->selfIdealSize->Width();
+        }
+        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("height", resObj, std::move(updateFunc));
 }
 
 void ViewAbstract::SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue)
@@ -139,6 +229,38 @@ void ViewAbstract::SetMinWidth(const CalcLength& width)
     layoutProperty->UpdateCalcMinSize(CalcSize(width, std::nullopt));
 }
 
+void ViewAbstract::SetMinWidth(const RefPtr<ResourceObject>& resObj)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string minWidthString = pattern->GetResCacheMapByKey("constraintSize.minWidth");
+        CalcDimension value;
+        if (minWidthString.empty()) {
+            ResourceParseUtils::ParseResDimensionVp(resObj, value);
+            pattern->AddResCache("constraintSize.minWidth", value.ToString());
+        } else {
+            value = StringUtils::StringToCalcDimension(minWidthString);
+        }
+        NG::CalcLength width;
+        width = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateCalcMinSize(CalcSize(width, std::nullopt));
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    pattern->AddResObj("constraintSize.minWidth", resObj, std::move(updateFunc));
+}
+
 void ViewAbstract::SetMinHeight(const CalcLength& height)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -149,6 +271,38 @@ void ViewAbstract::SetMinHeight(const CalcLength& height)
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, height));
+}
+
+void ViewAbstract::SetMinHeight(const RefPtr<ResourceObject>& resObj)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string minWidthString = pattern->GetResCacheMapByKey("constraintSize.minHeight");
+        CalcDimension value;
+        if (minWidthString.empty()) {
+            ResourceParseUtils::ParseResDimensionVp(resObj, value);
+            pattern->AddResCache("constraintSize.minHeight", value.ToString());
+        } else {
+            value = StringUtils::StringToCalcDimension(minWidthString);
+        }
+        NG::CalcLength height;
+        height = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, height));
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    pattern->AddResObj("constraintSize.minHeight", resObj, std::move(updateFunc));
 }
 
 void ViewAbstract::ResetMinSize(bool resetWidth)
@@ -175,6 +329,38 @@ void ViewAbstract::SetMaxWidth(const CalcLength& width)
     layoutProperty->UpdateCalcMaxSize(CalcSize(width, std::nullopt));
 }
 
+void ViewAbstract::SetMaxWidth(const RefPtr<ResourceObject>& resObj)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string minWidthString = pattern->GetResCacheMapByKey("constraintSize.maxWidth");
+        CalcDimension value;
+        if (minWidthString.empty()) {
+            ResourceParseUtils::ParseResDimensionVp(resObj, value);
+            pattern->AddResCache("constraintSize.maxWidth", value.ToString());
+        } else {
+            value = StringUtils::StringToCalcDimension(minWidthString);
+        }
+        NG::CalcLength width;
+        width = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateCalcMaxSize(CalcSize(width, std::nullopt));
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    pattern->AddResObj("constraintSize.maxWidth", resObj, std::move(updateFunc));
+}
+
 void ViewAbstract::SetMaxHeight(const CalcLength& height)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -185,6 +371,38 @@ void ViewAbstract::SetMaxHeight(const CalcLength& height)
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, height));
+}
+
+void ViewAbstract::SetMaxHeight(const RefPtr<ResourceObject>& resObj)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string minWidthString = pattern->GetResCacheMapByKey("constraintSize.maxHeight");
+        CalcDimension value;
+        if (minWidthString.empty()) {
+            ResourceParseUtils::ParseResDimensionVp(resObj, value);
+            pattern->AddResCache("constraintSize.maxHeight", value.ToString());
+        } else {
+            value = StringUtils::StringToCalcDimension(minWidthString);
+        }
+        NG::CalcLength height;
+        height = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, height));
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    pattern->AddResObj("constraintSize.maxHeight", resObj, std::move(updateFunc));
 }
 
 void ViewAbstract::ResetMaxSize(bool resetWidth)
@@ -238,8 +456,68 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, updateColor);
 }
 
+void ViewAbstract::SetBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto &&updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject> &resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string backgroundColorStr = pattern->GetResCacheMapByKey("backgroundColor");
+        Color backgroundColor;
+        if (backgroundColorStr.empty()) {
+            ResourceParseUtils::ParseResColor(resObj, backgroundColor);
+            pattern->AddResCache("backgroundColor", backgroundColor.ColorToString());
+        } else {
+            Color::ParseColorString(backgroundColorStr, backgroundColor);
+        }
+        auto pipeline = frameNode->GetContext();
+        if (pipeline != nullptr) {
+            pipeline->CheckNeedUpdateBackgroundColor(backgroundColor);
+        }
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, backgroundColor, frameNode);
+    };
+    pattern->AddResObj("backgroundColor", resObj, std::move(updateFunc));
+
+    Color backgroundColor; 
+    ResourceParseUtils::ParseResColor(resObj, backgroundColor);
+    SetBackgroundColor(backgroundColor);
+}
+
 void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color)
 {
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
+}
+
+void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto &&updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject> &resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string backgroundColorStr = pattern->GetResCacheMapByKey("backgroundColor");
+        Color backgroundColor;
+        if (backgroundColorStr.empty()) {
+            ResourceParseUtils::ParseResColor(resObj, backgroundColor);
+            pattern->AddResCache("backgroundColor", backgroundColor.ColorToString());
+        } else {
+            Color::ParseColorString(backgroundColorStr, backgroundColor);
+        }
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, backgroundColor, frameNode);
+    };
+    pattern->AddResObj("backgroundColor", resObj, std::move(updateFunc));
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
 }
 
@@ -258,8 +536,94 @@ void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImage, src);
 }
 
+void ViewAbstract::SetBackgroundImageWithResourceObj(
+    const RefPtr<ResourceObject> &resObj, std::string &bundleName, std::string &moduleName)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto &&updateFunc = [weak = AceType::WeakClaim(frameNode), bundleName, moduleName](
+                            const RefPtr<ResourceObject> &resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string srcFromCache = pattern->GetResCacheMapByKey("backgroundImageSrc");
+        std::string src;
+        if (srcFromCache.empty()) {
+            ResourceParseUtils::ParseResMedia(resObj, src);
+            pattern->AddResCache("backgroundImageSrc", src);
+        } else {
+            src = srcFromCache;
+        }
+        auto pipeline = frameNode->GetContext();
+        if (pipeline != nullptr) {
+            bool disableSetImage = pipeline->CheckNeedDisableUpdateBackgroundImage();
+            if (disableSetImage) {
+                return;
+            }
+        }
+        auto imageSrc = ImageSourceInfo{src, bundleName, moduleName};
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImage, imageSrc, frameNode);
+
+        const auto& target = frameNode->GetRenderContext();
+        if (target) {
+            target->OnBackgroundImageUpdate(imageSrc);
+        }
+    };
+    pattern->AddResObj("backgroundImageSrc", resObj, std::move(updateFunc));
+    std::string src;
+    ResourceParseUtils::ParseResMedia(resObj, src);
+    SetBackgroundImage(ImageSourceInfo{src, bundleName, moduleName});
+}
+
 void ViewAbstract::SetBackgroundImage(FrameNode* frameNode, const ImageSourceInfo& src)
 {
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImage, src, frameNode);
+}
+
+void ViewAbstract::SetBackgroundImage(
+    FrameNode* frameNode, const ImageSourceInfo& src, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto &&updateFunc = [weak = AceType::WeakClaim(frameNode),
+                            bundleName = src.GetBundleName(),
+                            moduleName = src.GetModuleName()](const RefPtr<ResourceObject> &resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string srcFromCache = pattern->GetResCacheMapByKey("backgroundImageSrc");
+        std::string src;
+        if (srcFromCache.empty()) {
+            ResourceParseUtils::ParseResMedia(resObj, src);
+            pattern->AddResCache("backgroundImageSrc", src);
+        } else {
+            src = srcFromCache;
+        }
+        auto pipeline = frameNode->GetContext();
+        if (pipeline != nullptr) {
+            bool disableSetImage = pipeline->CheckNeedDisableUpdateBackgroundImage();
+            if (disableSetImage) {
+                return;
+            }
+        }
+        auto imageSrc = ImageSourceInfo{src, bundleName, moduleName};
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImage, imageSrc, frameNode);
+
+        const auto& target = frameNode->GetRenderContext();
+        if (target) {
+            target->OnBackgroundImageUpdate(imageSrc);
+        }
+    };
+    pattern->AddResObj("backgroundImageSrc", resObj, std::move(updateFunc));
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImage, src, frameNode);
 }
 
@@ -286,29 +650,84 @@ void ViewAbstract::SetBackgroundImageSyncMode(FrameNode* frameNode, bool syncMod
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSyncMode, syncMode, frameNode);
 }
 
-void ViewAbstract::SetBackgroundImageSize(const BackgroundImageSize& bgImgSize)
+void ViewAbstract::SetBackgroundImageSize(BackgroundImageSize& bgImgSize)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+        auto&& updateFunc = [bgImgSize, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            BackgroundImageSize &bgImgSizeValue = const_cast<BackgroundImageSize &>(bgImgSize);
+            bgImgSizeValue.ReloadResources();
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSize, bgImgSizeValue, frameNode);
+        };
+        pattern->AddResObj("backgroundImageSize", resObj, std::move(updateFunc));
+    }
+
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImageSize, bgImgSize);
 }
 
-void ViewAbstract::SetBackgroundImageSize(FrameNode* frameNode, const BackgroundImageSize& bgImgSize)
+void ViewAbstract::SetBackgroundImageSize(FrameNode* frameNode, BackgroundImageSize& bgImgSize)
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+        auto&& updateFunc = [bgImgSize, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            BackgroundImageSize &bgImgSizeValue = const_cast<BackgroundImageSize &>(bgImgSize);
+            bgImgSizeValue.ReloadResources();
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSize, bgImgSizeValue, frameNode);
+        };
+        pattern->AddResObj("backgroundImageSize", resObj, std::move(updateFunc));
+    }
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSize, bgImgSize, frameNode);
 }
 
-void ViewAbstract::SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition)
+void SetBackgroundImagePositionUpdateFunc(FrameNode* frameNode, BackgroundImagePosition& bgImgPosition)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    auto&& updateFunc = [bgImgPosition, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        BackgroundImagePosition &bgImgPositionValue = const_cast<BackgroundImagePosition &>(bgImgPosition);
+        bgImgPositionValue.ReloadResources();
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImagePosition, bgImgPositionValue, frameNode);
+    };
+    pattern->AddResObj("backgroundImagePosition", resObj, std::move(updateFunc));
+}
+
+void ViewAbstract::SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosition)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        SetBackgroundImagePositionUpdateFunc(frameNode, bgImgPosition);
+    }
+
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImagePosition, bgImgPosition);
 }
 
-void ViewAbstract::SetBackgroundImagePosition(FrameNode* frameNode, const BackgroundImagePosition& bgImgPosition)
+void ViewAbstract::SetBackgroundImagePosition(FrameNode* frameNode, BackgroundImagePosition& bgImgPosition)
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        SetBackgroundImagePositionUpdateFunc(frameNode, bgImgPosition);
+    }
+    
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImagePosition, bgImgPosition, frameNode);
 }
 
@@ -319,6 +738,37 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, co
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [bgBlurStyle, sysOptions, weak = AceType::WeakClaim(frameNode)](
+                                const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            if (!frameNode) {
+                return;
+            }
+            BlurStyleOption& bgBlurStyleValue = const_cast<BlurStyleOption&>(bgBlurStyle);
+            bgBlurStyleValue.ReloadResources();
+            auto pipeline = frameNode->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            if (bgBlurStyle.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+                pipeline->AddWindowFocusChangedCallback(frameNode->GetId());
+            } else {
+                pipeline->RemoveWindowFocusChangedCallback(frameNode->GetId());
+            }
+            auto target = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(target);
+            if (target->GetBackgroundEffect().has_value()) {
+                target->UpdateBackgroundEffect(std::nullopt);
+            }
+            target->UpdateBackBlurStyle(bgBlurStyleValue, sysOptions);
+            if (target->GetBackBlurRadius().has_value()) {
+                target->UpdateBackBlurRadius(Dimension());
+            }
+        };
+        pattern->AddResObj("backgroundBlurStyle.backgroundBlurStyleOptions", resObj, std::move(updateFunc));
+    }
     SetBackgroundBlurStyle(frameNode, bgBlurStyle, sysOptions);
 }
 
@@ -347,6 +797,24 @@ void ViewAbstract::SetBackgroundEffect(const EffectOption& effectOption, const S
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [effectOption, sysOptions, weak = AceType::WeakClaim(frameNode)](
+                                const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            if (!frameNode) {
+                return;
+            }
+            EffectOption& effectOptionValue = const_cast<EffectOption&>(effectOption);
+            effectOptionValue.ReloadResources();
+            SetBackgroundEffect(ViewStackProcessor::GetInstance()->GetMainFrameNode(), effectOptionValue, sysOptions);
+        };
+        pattern->AddResObj("backgroundEffect", resObj, std::move(updateFunc));
     }
     SetBackgroundEffect(ViewStackProcessor::GetInstance()->GetMainFrameNode(), effectOption, sysOptions);
 }
@@ -379,6 +847,23 @@ void ViewAbstract::SetPixelStretchEffect(PixStretchEffectOption& option)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [option, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            if (!frameNode) {
+                return;
+            }
+            PixStretchEffectOption& value = const_cast<PixStretchEffectOption&>(option);
+            value.ReloadResources();
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PixelStretchEffect, value, frameNode);
+        };
+        pattern->AddResObj("pixelStretchEffect", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_RENDER_CONTEXT(PixelStretchEffect, option);
 }
@@ -519,7 +1004,63 @@ void ViewAbstract::SetPadding(const PaddingProperty& value)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            PaddingProperty &padding = const_cast<PaddingProperty &>(value);
+            padding.ReloadResources();
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, padding, frameNode);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
+        };
+        pattern->AddResObj("padding", resObj, std::move(updateFunc));
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, value);
+}
+
+void ViewAbstract::SetPadding(const RefPtr<ResourceObject>& resObj)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string padding = pattern->GetResCacheMapByKey("padding");
+        CalcDimension result;
+        if (padding.empty()) {
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            pattern->AddResCache("padding", result.ToString());
+        } else {
+            result = StringUtils::StringToCalcDimension(padding);
+        }
+        CalcLength paddingLength;
+        if (result.Unit() == DimensionUnit::CALC) {
+            // padding must great or equal zero.
+            paddingLength = NG::CalcLength(result.IsNonNegative() ? result.CalcValue() : CalcDimension().CalcValue());
+        } else {
+            // padding must great or equal zero.
+            paddingLength = NG::CalcLength(result.IsNonNegative() ? result : CalcDimension());
+        }
+        PaddingProperty paddingProperty;
+        paddingProperty.SetEdges(paddingLength);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, paddingProperty, frameNode);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("padding", resObj, std::move(updateFunc));
 }
 
 void ViewAbstract::SetSafeAreaPadding(const CalcLength& value)
@@ -536,6 +1077,23 @@ void ViewAbstract::SetSafeAreaPadding(const PaddingProperty& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            PaddingProperty &padding = const_cast<PaddingProperty &>(value);
+            padding.ReloadResources();
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, padding, frameNode);
+            frameNode->MarkModifyDone();
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
+        };
+        pattern->AddResObj("safeAreaPadding", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, value);
 }
@@ -583,7 +1141,61 @@ void ViewAbstract::SetMargin(const MarginProperty& value)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            MarginProperty &margin = const_cast<MarginProperty &>(value);
+            margin.ReloadResources();
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, margin, frameNode);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
+        };
+        pattern->AddResObj("margin", resObj, std::move(updateFunc));
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Margin, value);
+}
+
+void ViewAbstract::SetMargin(const RefPtr<ResourceObject>& resObj)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string margin = pattern->GetResCacheMapByKey("margin");
+        CalcDimension result;
+        if (margin.empty()) {
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            pattern->AddResCache("margin", result.ToString());
+        } else {
+            result = StringUtils::StringToCalcDimension(margin);
+        }
+        CalcLength marginLength;
+        if (result.Unit() == DimensionUnit::CALC) {
+            marginLength = NG::CalcLength(result.CalcValue());
+        } else {
+            marginLength = NG::CalcLength(result);
+        }
+        MarginProperty marginProperty;
+        marginProperty.SetEdges(marginLength);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, marginProperty, frameNode);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("margin", resObj, std::move(updateFunc));
 }
 
 void ViewAbstract::SetBorderRadius(const Dimension& value)
@@ -602,7 +1214,53 @@ void ViewAbstract::SetBorderRadius(const BorderRadiusProperty& value)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            BorderRadiusProperty &borderRadius = const_cast<BorderRadiusProperty &>(value);
+            borderRadius.ReloadResources();
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, borderRadius, frameNode);
+        };
+        pattern->AddResObj("borderRadius.edges", resObj, std::move(updateFunc));
+    }
     ACE_UPDATE_RENDER_CONTEXT(BorderRadius, value);
+}
+
+void ViewAbstract::SetBorderRadius(const RefPtr<ResourceObject>& resObj)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string borderRadiusString = pattern->GetResCacheMapByKey("borderRadius");
+        CalcDimension borderRadius;
+        if (borderRadiusString.empty()) {
+            ResourceParseUtils::ParseResDimensionVp(resObj, borderRadius);
+            pattern->AddResCache("borderRadius", borderRadius.ToString());
+        } else {
+            borderRadius = StringUtils::StringToCalcDimension(borderRadiusString);
+        }
+        BorderRadiusProperty borderRadiusProperty;
+        borderRadiusProperty.SetRadius(borderRadius);
+        borderRadiusProperty.multiValued = false;
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, borderRadiusProperty, frameNode);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("borderRadius", resObj, std::move(updateFunc));
 }
 
 void ViewAbstract::SetBorderColor(const Color& value)
@@ -620,7 +1278,53 @@ void ViewAbstract::SetBorderColor(const BorderColorProperty& value)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            BorderColorProperty &borderColor = const_cast<BorderColorProperty &>(value);
+            borderColor.ReloadResources();
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColor, frameNode);
+            frameNode->MarkModifyDone();
+        };
+        pattern->AddResObj("borderColor.edges", resObj, std::move(updateFunc));
+    }
     ACE_UPDATE_RENDER_CONTEXT(BorderColor, value);
+}
+
+void ViewAbstract::SetBorderColor(const RefPtr<ResourceObject>& resObj)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string borderColorString = pattern->GetResCacheMapByKey("borderColor");
+        Color borderColor;
+        if (borderColorString.empty()) {
+            ResourceParseUtils::ParseResColor(resObj, borderColor);
+            pattern->AddResCache("borderColor", borderColor.ColorToString());
+        } else {
+            borderColor = Color::ColorFromString(borderColorString);
+        }
+        BorderColorProperty borderColorProperty;
+        borderColorProperty.SetColor(borderColor);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColorProperty, frameNode);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("borderColor", resObj, std::move(updateFunc));
 }
 
 void ViewAbstract::SetBorderWidth(const Dimension& value)
@@ -643,8 +1347,60 @@ void ViewAbstract::SetBorderWidth(const BorderWidthProperty& value)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            BorderWidthProperty &borderWidth = const_cast<BorderWidthProperty &>(value);
+            borderWidth.ReloadResources();
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
+        };
+        pattern->AddResObj("borderWidth.edges", resObj, std::move(updateFunc));
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, value);
     ACE_UPDATE_RENDER_CONTEXT(BorderWidth, value);
+}
+
+void ViewAbstract::SetBorderWidth(const RefPtr<ResourceObject>& resObj)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string borderWidthString = pattern->GetResCacheMapByKey("borderWidth");
+        CalcDimension borderWidth;
+        if (borderWidthString.empty()) {
+            ResourceParseUtils::ParseResDimensionVp(resObj, borderWidth);
+            pattern->AddResCache("borderWidth", borderWidth.ToString());
+        } else {
+            borderWidth = StringUtils::StringToCalcDimension(borderWidthString);
+        }
+        BorderWidthProperty borderWidthProperty;
+        if (Negative(borderWidth.Value())) {
+            borderWidthProperty.SetBorderWidth(Dimension(0));
+        } else {
+            borderWidthProperty.SetBorderWidth(borderWidth);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidthProperty, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidthProperty, frameNode);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("borderWidth", resObj, std::move(updateFunc));
 }
 
 void ViewAbstract::SetBorderStyle(const BorderStyle& value)
@@ -701,6 +1457,23 @@ void ViewAbstract::SetDashGap(const BorderWidthProperty& value)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            BorderWidthProperty &dashGap = const_cast<BorderWidthProperty &>(value);
+            dashGap.ReloadResources();
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, dashGap, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(DashGap, dashGap, frameNode);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
+        };
+        pattern->AddResObj("border.dashGap", resObj, std::move(updateFunc));
+    }
     ACE_UPDATE_RENDER_CONTEXT(DashGap, value);
 }
 
@@ -732,6 +1505,21 @@ void ViewAbstract::SetDashWidth(const BorderWidthProperty& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            BorderWidthProperty &dashWidth = const_cast<BorderWidthProperty &>(value);
+            dashWidth.ReloadResources();
+            ACE_UPDATE_NODE_RENDER_CONTEXT(DashWidth, dashWidth, frameNode);
+        };
+        pattern->AddResObj("border.dashWidth", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_RENDER_CONTEXT(DashWidth, value);
 }
@@ -765,6 +1553,25 @@ void ViewAbstract::SetOuterBorderRadius(const BorderRadiusProperty& value)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            if (!frameNode) {
+                return;
+            }
+            BorderRadiusProperty& outerBorderRadius = const_cast<BorderRadiusProperty &>(value);
+            outerBorderRadius.ReloadResources();
+            ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderRadius, outerBorderRadius, frameNode);
+            frameNode->MarkModifyDone();
+            frameNode->MarkDirtyNode();
+        };
+        pattern->AddResObj("outerBorderRadius", resObj, std::move(updateFunc));
+    }
     ACE_UPDATE_RENDER_CONTEXT(OuterBorderRadius, value);
 }
 
@@ -794,6 +1601,23 @@ void ViewAbstract::SetOuterBorderColor(const BorderColorProperty& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            if (!frameNode) {
+                return;
+            }
+            BorderColorProperty& outerBorderColor = const_cast<BorderColorProperty &>(value);
+            outerBorderColor.ReloadResources();
+            ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderColor, outerBorderColor, frameNode);
+        };
+        pattern->AddResObj("outerBorderColor", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_RENDER_CONTEXT(OuterBorderColor, value);
 }
@@ -832,6 +1656,25 @@ void ViewAbstract::SetOuterBorderWidth(const BorderWidthProperty& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            if (!frameNode) {
+                return;
+            }
+            BorderWidthProperty& outerBorderWidth = const_cast<BorderWidthProperty &>(value);
+            outerBorderWidth.ReloadResources();
+            ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderWidth, outerBorderWidth, frameNode);
+            frameNode->MarkModifyDone();
+            frameNode->MarkDirtyNode();
+        };
+        pattern->AddResObj("outerBorderWidth", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_RENDER_CONTEXT(OuterBorderWidth, value);
 }
@@ -1053,6 +1896,17 @@ void ViewAbstract::DisableOnDragEnter(FrameNode* frameNode)
     auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearCustomerOnDragEnter();
+}
+
+void ViewAbstract::DisableOnDragSpringLoading(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearCustomerOnDragSpringLoading();
+    auto relatedConfigurations = frameNode->GetOrCreateDragDropRelatedConfigurations();
+    CHECK_NULL_VOID(relatedConfigurations);
+    relatedConfigurations->SetDragSpringLoadingConfiguration(nullptr);
 }
 
 void ViewAbstract::DisableOnDragMove(FrameNode* frameNode)
@@ -1627,6 +2481,44 @@ void ViewAbstract::SetOnDragMove(FrameNode* frameNode,
     AddDragFrameNodeToManager(frameNode);
 }
 
+void ViewAbstract::SetOnDragSpringLoading(
+    std::function<void(const RefPtr<DragSpringLoadingContext>&)>&& onDragSpringLoading)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCustomerOnDragSpringLoading(std::move(onDragSpringLoading));
+    AddDragFrameNodeToManager();
+}
+
+void ViewAbstract::SetOnDragSpringLoading(
+    FrameNode* frameNode, std::function<void(const RefPtr<DragSpringLoadingContext>&)>&& onDragSpringLoading)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCustomerOnDragSpringLoading(std::move(onDragSpringLoading));
+    AddDragFrameNodeToManager();
+}
+
+void ViewAbstract::SetOnDragSpringLoadingConfiguration(
+    const RefPtr<DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto relatedConfigurations = frameNode->GetOrCreateDragDropRelatedConfigurations();
+    CHECK_NULL_VOID(relatedConfigurations);
+    relatedConfigurations->SetDragSpringLoadingConfiguration(std::move(dragSpringLoadingConfiguration));
+}
+
+void ViewAbstract::SetOnDragSpringLoadingConfiguration(
+    FrameNode* frameNode, const RefPtr<DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto relatedConfigurations = frameNode->GetOrCreateDragDropRelatedConfigurations();
+    CHECK_NULL_VOID(relatedConfigurations);
+    relatedConfigurations->SetDragSpringLoadingConfiguration(std::move(dragSpringLoadingConfiguration));
+}
+
 void ViewAbstract::SetOnDragLeave(FrameNode* frameNode,
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragLeave)
 {
@@ -1838,6 +2730,110 @@ void ViewAbstract::SetPosition(const OffsetT<Dimension>& value)
     ACE_UPDATE_RENDER_CONTEXT(Position, value);
 }
 
+void ViewAbstract::SetPosition(const Dimension& x, const Dimension& y,
+    const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    OffsetT<Dimension> value = { x, y };
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetPositionX(value, xresObj);
+    SetPositionY(value, yresObj);
+    CheckIfParentNeedMarkDirty(frameNode);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, PositionEdges);
+    ACE_UPDATE_RENDER_CONTEXT(Position, value);
+}
+
+void ViewAbstract::SetPositionX(OffsetT<Dimension>& value, const RefPtr<ResourceObject>& xresObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!xresObj) {
+        return;
+    }
+    auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string xString = pattern->GetResCacheMapByKey("position.x");
+        OffsetT<Dimension> &offset = const_cast<OffsetT<Dimension> &>(value);
+        CalcDimension x;
+        if (xString.empty()) {
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, x);
+            pattern->AddResCache("position.x", x.ToString());
+        } else {
+            x = StringUtils::StringToCalcDimension(xString);
+        }
+        const auto& renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto position = renderContext->GetPositionValue({});
+        offset.SetY(position.GetY());
+        offset.SetX(x);
+        auto parentNode = frameNode->GetAncestorNodeOfFrame(false);
+        CHECK_NULL_VOID(parentNode);
+        if (parentNode->GetTag() == V2::COLUMN_ETS_TAG || parentNode->GetTag() == V2::ROW_ETS_TAG ||
+            parentNode->GetTag() == V2::FLEX_ETS_TAG) {
+            auto renderContext = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            if (!renderContext->HasPositionEdges() && !renderContext->HasPosition()) {
+                parentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            }
+        }
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, PositionEdges, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(Position, offset, frameNode);
+    };
+    pattern->AddResObj("position.x", xresObj, std::move(updateFunc));
+}
+
+void ViewAbstract::SetPositionY(OffsetT<Dimension>& value, const RefPtr<ResourceObject>& yresObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!yresObj) {
+        return;
+    }
+    auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string yString = pattern->GetResCacheMapByKey("position.y");
+        OffsetT<Dimension> &offset = const_cast<OffsetT<Dimension> &>(value);
+        CalcDimension y;
+        if (yString.empty()) {
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, y);
+            pattern->AddResCache("position.y", y.ToString());
+        } else {
+            y = StringUtils::StringToCalcDimension(yString);
+        }
+        const auto& renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto position = renderContext->GetPositionValue({});
+        offset.SetX(position.GetX());
+        offset.SetY(y);
+        auto parentNode = frameNode->GetAncestorNodeOfFrame(false);
+        CHECK_NULL_VOID(parentNode);
+        if (parentNode->GetTag() == V2::COLUMN_ETS_TAG || parentNode->GetTag() == V2::ROW_ETS_TAG ||
+            parentNode->GetTag() == V2::FLEX_ETS_TAG) {
+            auto renderContext = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            if (!renderContext->HasPositionEdges() && !renderContext->HasPosition()) {
+                parentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            }
+        }
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, PositionEdges, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(Position, offset, frameNode);
+    };
+    pattern->AddResObj("position.y", yresObj, std::move(updateFunc));
+}
+
 void ViewAbstract::SetPositionEdges(const EdgesParam& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1845,6 +2841,30 @@ void ViewAbstract::SetPositionEdges(const EdgesParam& value)
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            EdgesParam &edges = const_cast<EdgesParam &>(value);
+            edges.ReloadResources();
+            auto parentNode = frameNode->GetAncestorNodeOfFrame(false);
+            CHECK_NULL_VOID(parentNode);
+            if (parentNode->GetTag() == V2::COLUMN_ETS_TAG || parentNode->GetTag() == V2::ROW_ETS_TAG ||
+                parentNode->GetTag() == V2::FLEX_ETS_TAG) {
+                auto renderContext = frameNode->GetRenderContext();
+                CHECK_NULL_VOID(renderContext);
+                if (!renderContext->HasPositionEdges() && !renderContext->HasPosition()) {
+                    parentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+                }
+            }
+            ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Position, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PositionEdges, edges, frameNode);
+        };
+        pattern->AddResObj("position.edges", resObj, std::move(updateFunc));
+    }
     CheckIfParentNeedMarkDirty(frameNode);
     ACE_RESET_RENDER_CONTEXT(RenderContext, Position);
     ACE_UPDATE_RENDER_CONTEXT(PositionEdges, value);
@@ -1876,10 +2896,115 @@ void ViewAbstract::SetOffset(const OffsetT<Dimension>& value)
     ACE_UPDATE_RENDER_CONTEXT(Offset, value);
 }
 
+void ViewAbstract::SetOffset(const Dimension& x, const Dimension& y,
+    const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    OffsetT<Dimension> value = { x, y };
+    SetOffsetX(value, xresObj);
+    SetOffsetY(value, yresObj);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, OffsetEdges);
+    ACE_UPDATE_RENDER_CONTEXT(Offset, value);
+}
+
+void ViewAbstract::SetOffsetX(OffsetT<Dimension>& value, const RefPtr<ResourceObject>& xresObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    if (xresObj) {
+        auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto pattern = frameNode->GetPattern<Pattern>();
+            CHECK_NULL_VOID(pattern);
+            std::string xString = pattern->GetResCacheMapByKey("offset.x");
+            OffsetT<Dimension> &offset = const_cast<OffsetT<Dimension> &>(value);
+            CalcDimension x;
+            if (xString.empty()) {
+                ResourceParseUtils::ParseResDimensionVpNG(resObj, x);
+                pattern->AddResCache("offset.x", x.ToString());
+            } else {
+                x = StringUtils::StringToCalcDimension(xString);
+            }
+            const auto& renderContext = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            auto offsetValue = renderContext->GetOffsetValue({});
+            offset.SetY(offsetValue.GetY());
+            offset.SetX(x);
+            ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, OffsetEdges, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(Offset, offset, frameNode);
+        };
+        pattern->AddResObj("offset.x", xresObj, std::move(updateFunc));
+    }
+}
+
+void ViewAbstract::SetOffsetY(OffsetT<Dimension>& value, const RefPtr<ResourceObject>& yresObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    if (yresObj) {
+        auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto pattern = frameNode->GetPattern<Pattern>();
+            CHECK_NULL_VOID(pattern);
+            std::string yString = pattern->GetResCacheMapByKey("offset.y");
+            OffsetT<Dimension> &offset = const_cast<OffsetT<Dimension> &>(value);
+            CalcDimension y;
+            if (yString.empty()) {
+                ResourceParseUtils::ParseResDimensionVpNG(resObj, y);
+                pattern->AddResCache("offset.y", y.ToString());
+            } else {
+                y = StringUtils::StringToCalcDimension(yString);
+            }
+            const auto& renderContext = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            auto offsetValue = renderContext->GetOffsetValue({});
+            offset.SetX(offsetValue.GetX());
+            offset.SetY(y);
+            ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, OffsetEdges, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(Offset, offset, frameNode);
+        };
+        pattern->AddResObj("offset.y", yresObj, std::move(updateFunc));
+    }
+}
+
 void ViewAbstract::SetOffsetEdges(const EdgesParam& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            EdgesParam &edges = const_cast<EdgesParam &>(value);
+            edges.ReloadResources();
+            auto parentNode = frameNode->GetAncestorNodeOfFrame(false);
+            CHECK_NULL_VOID(parentNode);
+            if (parentNode->GetTag() == V2::COLUMN_ETS_TAG || parentNode->GetTag() == V2::ROW_ETS_TAG ||
+                parentNode->GetTag() == V2::FLEX_ETS_TAG) {
+                auto renderContext = frameNode->GetRenderContext();
+                CHECK_NULL_VOID(renderContext);
+                if (!renderContext->HasPositionEdges() && !renderContext->HasPosition()) {
+                    parentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+                }
+            }
+            ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Offset, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(OffsetEdges, edges, frameNode);
+        };
+        pattern->AddResObj("position.edges", resObj, std::move(updateFunc));
     }
     ACE_RESET_RENDER_CONTEXT(RenderContext, Offset);
     ACE_UPDATE_RENDER_CONTEXT(OffsetEdges, value);
@@ -1891,6 +3016,82 @@ void ViewAbstract::MarkAnchor(const OffsetT<Dimension>& value)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(Anchor, value);
+}
+
+void ViewAbstract::MarkAnchor(const Dimension& x, const Dimension& y,
+    const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    OffsetT<Dimension> value = { x, y };
+    MarkAnchorX(value, xresObj);
+    MarkAnchorY(value, yresObj);
+    ACE_UPDATE_RENDER_CONTEXT(Anchor, value);
+}
+
+void ViewAbstract::MarkAnchorX(OffsetT<Dimension>& value, const RefPtr<ResourceObject>& xresObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    if (xresObj) {
+        auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto pattern = frameNode->GetPattern<Pattern>();
+            CHECK_NULL_VOID(pattern);
+            std::string xString = pattern->GetResCacheMapByKey("markAnchor.x");
+            OffsetT<Dimension> &offset = const_cast<OffsetT<Dimension> &>(value);
+            CalcDimension x;
+            if (xString.empty()) {
+                ResourceParseUtils::ParseResDimensionVpNG(resObj, x);
+                pattern->AddResCache("markAnchor.x", x.ToString());
+            } else {
+                x = StringUtils::StringToCalcDimension(xString);
+            }
+            const auto& renderContext = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            auto anchor = renderContext->GetAnchorValue({});
+            offset.SetY(anchor.GetY());
+            offset.SetX(x);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(Anchor, offset, frameNode);
+        };
+        pattern->AddResObj("markAnchor.x", xresObj, std::move(updateFunc));
+    }
+}
+
+void ViewAbstract::MarkAnchorY(OffsetT<Dimension>& value, const RefPtr<ResourceObject>& yresObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    if (yresObj) {
+        auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto pattern = frameNode->GetPattern<Pattern>();
+            CHECK_NULL_VOID(pattern);
+            std::string yString = pattern->GetResCacheMapByKey("markAnchor.y");
+            OffsetT<Dimension> &offset = const_cast<OffsetT<Dimension> &>(value);
+            CalcDimension y;
+            if (yString.empty()) {
+                ResourceParseUtils::ParseResDimensionVpNG(resObj, y);
+                pattern->AddResCache("markAnchor.y", y.ToString());
+            } else {
+                y = StringUtils::StringToCalcDimension(yString);
+            }
+            const auto& renderContext = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            auto anchor = renderContext->GetAnchorValue({});
+            offset.SetX(anchor.GetX());
+            offset.SetY(y);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(Anchor, offset, frameNode);
+        };
+        pattern->AddResObj("markAnchor.y", yresObj, std::move(updateFunc));
+    }
 }
 
 void ViewAbstract::ResetPosition()
@@ -1984,6 +3185,26 @@ void ViewAbstract::SetTransformMatrix(const Matrix4& matrix)
     ACE_UPDATE_RENDER_CONTEXT(TransformMatrix, matrix);
 }
 
+void ViewAbstract::UpdatePopupParamRescource(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& frameNode)
+{
+#ifndef ACE_UNITTEST
+    if (SystemProperties::ConfigChangePerform()) {
+        CHECK_NULL_VOID(frameNode);
+        PopupType type = POPUPTYPE_TEXTCOLOR;
+        auto textColorResourceObject = param->GetTextColorResourceObject();
+        ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, textColorResourceObject, type);
+        auto popupColorResourceObject = param->GetPopupColorResourceObject();
+        type = POPUPTYPE_POPUPCOLOR;
+        ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, popupColorResourceObject, type);
+        type = POPUPTYPE_MASKCOLOR;
+        auto maskColorResourceObject = param->GetMaskColorResourceObject();
+        ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, maskColorResourceObject, type);
+        auto maskResourceObject = param->GetMasResourceObject();
+        ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, maskResourceObject);
+    }
+#endif
+}
+
 void ViewAbstract::BindPopup(
     const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode)
 {
@@ -2058,6 +3279,8 @@ void ViewAbstract::BindPopup(
         if (popupNode) {
             popupId = popupNode->GetId();
         }
+
+        UpdatePopupParamRescource(param, popupNode);
         if (!showInSubWindow) {
             // erase popup when target node destroy
             auto destructor = [id = targetNode->GetId(), weak = AceType::WeakClaim(context)]() {
@@ -2845,6 +4068,23 @@ void ViewAbstract::SetBackShadow(const Shadow& shadow)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [shadow, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            if (!frameNode) {
+                return;
+            }
+            Shadow& shadowValue = const_cast<Shadow&>(shadow);
+            shadowValue.ReloadResources();
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, shadowValue, frameNode);
+        };
+        pattern->AddResObj("shadow", resObj, std::move(updateFunc));
+    }
     ACE_UPDATE_RENDER_CONTEXT(BackShadow, shadow);
 }
 
@@ -2874,6 +4114,22 @@ void ViewAbstract::SetLinearGradient(const NG::Gradient& gradient)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [gradient, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            Gradient& gradientValue = const_cast<Gradient &>(gradient);
+            gradientValue.ReloadResources();
+            ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::LINEAR, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradient, gradientValue, frameNode);
+        };
+        pattern->AddResObj("LinearGradient.gradient", resObj, std::move(updateFunc));
+    }
     ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::LINEAR);
     ACE_UPDATE_RENDER_CONTEXT(LinearGradient, gradient);
 }
@@ -2882,6 +4138,30 @@ void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [gradient, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            Gradient& gradientValue = const_cast<Gradient &>(gradient);
+            auto sweepGradientPtr = gradientValue.GetSweepGradient();
+            if (sweepGradientPtr) {
+                gradientValue.SetSweepGradient(*sweepGradientPtr);
+            }
+            gradientValue.ReloadResources();
+            ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(SweepGradient, gradientValue, frameNode);
+            const auto& target = frameNode->GetRenderContext();
+            if (target) {
+                target->OnSweepGradientUpdate(gradientValue);
+            }
+        };
+        pattern->AddResObj("SweepGradient.gradient", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP);
     ACE_UPDATE_RENDER_CONTEXT(SweepGradient, gradient);
@@ -2892,8 +4172,157 @@ void ViewAbstract::SetRadialGradient(const NG::Gradient& gradient)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [gradient, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            Gradient& gradientValue = const_cast<Gradient &>(gradient);
+            auto radialGradientPtr = gradientValue.GetRadialGradient();
+            if (radialGradientPtr) {
+                gradientValue.SetRadialGradient(*radialGradientPtr);
+            }
+            gradientValue.ReloadResources();
+            ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::RADIAL, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(RadialGradient, gradientValue, frameNode);
+            frameNode->MarkModifyDone();
+            frameNode->MarkDirtyNode();
+        };
+        pattern->AddResObj("RadialGradient.gradient", resObj, std::move(updateFunc));
+    }
     ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::RADIAL);
     ACE_UPDATE_RENDER_CONTEXT(RadialGradient, gradient);
+}
+
+void ViewAbstract::CreateWithForegroundColorResourceObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string foregroundColor = pattern->GetResCacheMapByKey("foregroundColor");
+        Color result;
+        ResourceParseUtils::ParseResColor(resObj, result);
+        if (foregroundColor.empty()) {
+            pattern->AddResCache("foregroundColor", result.ColorToString());
+        }
+        SetForegroundColor(AceType::RawPtr(frameNode), result);
+        auto target = frameNode->GetRenderContext();
+        if (target) {
+            target->OnForegroundColorUpdate(result);
+        }
+        frameNode->MarkModifyDone();
+        frameNode->MarkDirtyNode();
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("foregroundColor", resObj, std::move(updateFunc));
+}
+
+void ViewAbstract::CreateWithOuterBorderColorResourceObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string outerBorderColor = pattern->GetResCacheMapByKey("outerBorderColorRes");
+        Color result;
+        ResourceParseUtils::ParseResColor(resObj, result);
+        if (outerBorderColor.empty()) {
+            pattern->AddResCache("outerBorderColorRes", result.ColorToString());
+        }
+        SetOuterBorderColor(AceType::RawPtr(frameNode), result);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("outerBorderColorRes", resObj, std::move(updateFunc));
+}
+
+void ViewAbstract::CreateWithOuterBorderRadiusResourceObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string outerBorderRadius = pattern->GetResCacheMapByKey("outerBorderRadiusRes");
+        CalcDimension result;
+        ResourceParseUtils::ParseResDimensionVp(resObj, result);
+        if (outerBorderRadius.empty()) {
+            pattern->AddResCache("outerBorderRadiusRes", result.ToString());
+        }
+        SetOuterBorderRadius(AceType::RawPtr(frameNode), result);
+        frameNode->MarkModifyDone();
+        frameNode->MarkDirtyNode();
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("outerBorderRadiusRes", resObj, std::move(updateFunc));
+}
+
+void ViewAbstract::CreateWithLightColorResourceObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string lightColor = pattern->GetResCacheMapByKey("LightColorRes");
+        Color result;
+        ResourceParseUtils::ParseResColor(resObj, result);
+        if (lightColor.empty()) {
+            pattern->AddResCache("LightColorRes", result.ColorToString());
+        }
+        ACE_UPDATE_NODE_RENDER_CONTEXT(LightColor, result, frameNode);
+        frameNode->MarkModifyDone();
+        frameNode->MarkDirtyNode();
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("LightColorRes", resObj, std::move(updateFunc));
+}
+
+void ViewAbstract::CreateWithOuterBorderWidthResourceObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string outerBorderWidth = pattern->GetResCacheMapByKey("outerBorderWidthRes");
+        CalcDimension result;
+        ResourceParseUtils::ParseResDimensionVp(resObj, result);
+        if (outerBorderWidth.empty()) {
+            pattern->AddResCache("outerBorderWidthRes", result.ToString());
+        }
+        SetOuterBorderWidth(AceType::RawPtr(frameNode), result);
+        frameNode->MarkModifyDone();
+        frameNode->MarkDirtyNode();
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("outerBorderWidthRes", resObj, std::move(updateFunc));
 }
 
 void ViewAbstract::SetInspectorId(const std::string& inspectorId)
@@ -2990,6 +4419,30 @@ void ViewAbstract::SetClipShape(const RefPtr<BasicShape>& basicShape)
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [basicShape, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            if (!frameNode) {
+                return;
+            }
+            RefPtr<BasicShape>& basicShapeValue = const_cast<RefPtr<BasicShape>&>(basicShape);
+            basicShapeValue->ReloadResources();
+            CHECK_NULL_VOID(frameNode);
+            auto target = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(target);
+            if (target->GetClipEdge().has_value()) {
+                target->UpdateClipEdge(false);
+            }
+            target->UpdateClipShape(basicShapeValue);
+            target->OnClipShapeUpdate(basicShapeValue);
+            frameNode->MarkModifyDone();
+            frameNode->MarkDirtyNode();
+        };
+        pattern->AddResObj("clipShape", resObj, std::move(updateFunc));
+    }
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->GetClipEdge().has_value()) {
@@ -3048,6 +4501,28 @@ void ViewAbstract::SetMask(const RefPtr<BasicShape>& basicShape)
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [basicShape, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            if (!frameNode) {
+                return;
+            }
+            RefPtr<BasicShape>& basicShapeValue = const_cast<RefPtr<BasicShape>&>(basicShape);
+            basicShapeValue->ReloadResources();
+            auto target = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(target);
+            if (target->HasProgressMask()) {
+                target->ResetProgressMask();
+                target->OnProgressMaskUpdate(nullptr);
+            }
+            target->UpdateClipMask(basicShapeValue);
+            target->OnClipMaskUpdate(basicShapeValue);
+        };
+        pattern->AddResObj("maskShape", resObj, std::move(updateFunc));
+    }
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->HasProgressMask()) {
@@ -3192,6 +4667,36 @@ void ViewAbstract::SetColorBlend(FrameNode* frameNode, const Color& colorBlend)
     ACE_UPDATE_NODE_RENDER_CONTEXT(FrontColorBlend, colorBlend, frameNode);
 }
 
+void ViewAbstract::CreateWithColorBlendResourceObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        if (!frameNode) {
+            return;
+        }
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        std::string viewAbstractColorBlend = pattern->GetResCacheMapByKey("viewAbstract.colorBlend");
+        Color result;
+        ResourceParseUtils::ParseResColor(resObj, result);
+        if (viewAbstractColorBlend.empty()) {
+            pattern->AddResCache("viewAbstract.colorBlend", result.ColorToString());
+        } else {
+            result = Color::ColorFromString(viewAbstractColorBlend);
+        }
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontColorBlend, result, frameNode);
+        frameNode->MarkModifyDone();
+        frameNode->MarkDirtyNode();
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("viewAbstract.colorBlend", resObj, std::move(updateFunc));
+}
+
 void ViewAbstract::SetBorderImage(const RefPtr<BorderImage>& borderImage)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -3275,12 +4780,34 @@ void ViewAbstract::SetVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect
     }
 }
 
+void ViewAbstract::SetVisualEffect(FrameNode* frameNode, const OHOS::Rosen::VisualEffect* visualEffect)
+{
+    CHECK_NULL_VOID(frameNode);
+    std::lock_guard<std::mutex> lock(visualEffectMutex_);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    if (!oemVisualEffectFunc) {
+        target->UpdateVisualEffect(visualEffect);
+    } else {
+        Rosen::VisualEffect* graphicVisualEffect = oemVisualEffectFunc(visualEffect);
+        target->UpdateVisualEffect(graphicVisualEffect);
+    }
+}
+
 void ViewAbstract::SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BackgroundFilter, backgroundFilter);
+}
+
+void ViewAbstract::SetBackgroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* backgroundFilter)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    target->UpdateBackgroundFilter(backgroundFilter);
 }
 
 void ViewAbstract::SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter)
@@ -3291,12 +4818,28 @@ void ViewAbstract::SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilt
     ACE_UPDATE_RENDER_CONTEXT(ForegroundFilter, foregroundFilter);
 }
 
+void ViewAbstract::SetForegroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* foregroundFilter)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    target->UpdateForegroundFilter(foregroundFilter);
+}
+
 void ViewAbstract::SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(CompositingFilter, compositingFilter);
+}
+
+void ViewAbstract::SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* compositingFilter)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    target->UpdateCompositingFilter(compositingFilter);
 }
 
 void ViewAbstract::SetOverlay(const OverlayOptions& overlay)
@@ -3420,6 +4963,42 @@ void ViewAbstract::SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMa
     }
 }
 
+void ViewAbstract::CreateWithMaskResourceObj(const RefPtr<NG::ProgressMaskProperty>& progress)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [progress, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        if (!frameNode) {
+            return;
+        }
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        std::string colorString = pattern->GetResCacheMapByKey("progressMask.color");
+        Color maskColor;
+        if (colorString.empty()) {
+            ResourceParseUtils::ParseResColor(progress->GetResObj(), maskColor);
+            pattern->AddResCache("progressMask.color", maskColor.ColorToString());
+        } else {
+            maskColor = Color::ColorFromString(colorString);
+        }
+        progress->SetColor(maskColor);
+        auto target = frameNode->GetRenderContext();
+        if (target) {
+            if (target->HasClipMask()) {
+                target->ResetClipMask();
+                target->OnClipMaskUpdate(nullptr);
+            }
+            target->UpdateProgressMask(progress);
+        }
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("progressMask.color", resObj, std::move(updateFunc));
+}
+
 void ViewAbstract::SetUseEffect(bool useEffect, EffectType effectType)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -3435,6 +5014,14 @@ void ViewAbstract::SetFreeze(bool freeze)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(Freeze, freeze);
+}
+
+void ViewAbstract::SetFreeze(FrameNode* frameNode, bool freeze)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    target->UpdateFreeze(freeze);
 }
 
 void ViewAbstract::SetUseShadowBatching(bool useShadowBatching)
@@ -3565,6 +5152,14 @@ void ViewAbstract::UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts)
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaExpandOpts, opts);
+}
+
+void ViewAbstract::UpdateIgnoreLayoutSafeAreaOpts(const IgnoreLayoutSafeAreaOpts& opts)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IgnoreLayoutSafeAreaOpts, opts);
 }
 
 void ViewAbstract::SetRenderGroup(bool isRenderGroup)
@@ -3724,6 +5319,40 @@ void ViewAbstract::SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode)
 void ViewAbstract::SetOpacity(FrameNode* frameNode, double opacity)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(Opacity, opacity, frameNode);
+}
+
+void ViewAbstract::CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        if (!frameNode) {
+            return;
+        }
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        std::string viewAbstractOpacity = pattern->GetResCacheMapByKey("viewAbstract.opacity");
+        double result;
+        ResourceParseUtils::ParseResDouble(resObj, result);
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+                result = std::clamp(result, 0.0, 1.0);
+            } else {
+                if (result > 1.0 || LessNotEqual(result, 0.0)) {
+                    result = 1.0;
+                }
+            }
+        if (viewAbstractOpacity.empty()) {
+            pattern->AddResCache("viewAbstract.opacity", std::to_string(result));
+        } else {
+        }
+        ACE_UPDATE_NODE_RENDER_CONTEXT(Opacity, result, frameNode);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("viewAbstract.opacity", resObj, std::move(updateFunc));
 }
 
 void ViewAbstract::SetZIndex(FrameNode* frameNode, int32_t value)
@@ -3911,6 +5540,37 @@ void ViewAbstract::SetLightPosition(
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(LightPosition, TranslateOptions(positionX, positionY, positionZ));
+}
+
+void ViewAbstract::SetLightPosition(FrameNode* frameNode, const NG::TranslateOptions& options)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LightPosition, options, frameNode);
+}
+
+void ViewAbstract::SetLightPosition(const NG::TranslateOptions& options)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [options, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            NG::TranslateOptions& optionsValue = const_cast<NG::TranslateOptions &>(options);
+            optionsValue.ReloadResources();
+            ACE_UPDATE_NODE_RENDER_CONTEXT(LightPosition, optionsValue, frameNode);
+            frameNode->MarkModifyDone();
+            frameNode->MarkDirtyNode();
+        };
+        pattern->AddResObj("pointLight.LightSource", resObj, std::move(updateFunc));
+    }
+    ACE_UPDATE_RENDER_CONTEXT(LightPosition, options);
 }
 
 void ViewAbstract::SetLightIntensity(const float value)
@@ -4129,6 +5789,12 @@ void ViewAbstract::UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeArea
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaExpandOpts, opts, frameNode);
+}
+
+void ViewAbstract::UpdateIgnoreLayoutSafeAreaOpts(FrameNode* frameNode, const IgnoreLayoutSafeAreaOpts& opts)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IgnoreLayoutSafeAreaOpts, opts, frameNode);
 }
 
 void ViewAbstract::SetAspectRatio(FrameNode* frameNode, float ratio)
@@ -4803,6 +6469,14 @@ void ViewAbstract::FocusActivate(int32_t instanceId, bool isActive, bool isAutoI
         return;
     }
     context->SetIsFocusActive(isActive, NG::FocusActiveReason::USE_API, isAutoInactive);
+}
+
+bool ViewAbstract::GetFocusActive()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    bool ret = pipeline->GetIsFocusActive();
+    return ret;
 }
 
 void ViewAbstract::SetAutoFocusTransfer(int32_t instanceId, bool isAutoFocusTransfer)
@@ -5695,16 +7369,47 @@ void ViewAbstract::SetDisallowDropForcedly(bool isDisallowDropForcedly)
     frameNode->SetDisallowDropForcedly(isDisallowDropForcedly);
 }
 
-void ViewAbstract::SetBackgroundImageResizableSlice(const ImageResizableSlice& slice)
+void ViewAbstract::SetBackgroundImageResizableSlice(ImageResizableSlice& slice)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+        auto&& updateFunc = [slice, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            ImageResizableSlice &sliceValue = const_cast<ImageResizableSlice &>(slice);
+            sliceValue.ReloadResources();
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageResizableSlice, sliceValue, frameNode);
+        };
+        pattern->AddResObj("backgroundImageResizableSlice", resObj, std::move(updateFunc));
+    }
+
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImageResizableSlice, slice);
 }
 
-void ViewAbstract::SetBackgroundImageResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice)
+void ViewAbstract::SetBackgroundImageResizableSlice(FrameNode* frameNode, ImageResizableSlice& slice)
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+        auto&& updateFunc = [slice, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            ImageResizableSlice &sliceValue = const_cast<ImageResizableSlice &>(slice);
+            sliceValue.ReloadResources();
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageResizableSlice, sliceValue, frameNode);
+        };
+        pattern->AddResObj("backgroundImageResizableSlice", resObj, std::move(updateFunc));
+    }
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageResizableSlice, slice, frameNode);
 }
 
@@ -6110,6 +7815,14 @@ void ViewAbstract::SetDisableDataPrefetch(FrameNode* frameNode, bool disableData
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetDisableDataPrefetch(disableDataPrefetch);
+}
+
+void ViewAbstract::SetOnTouchTestFunc(FrameNode* frameNode, NG::OnChildTouchTestFunc&& onChildTouchTest)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnTouchTestFunc(std::move(onChildTouchTest));
 }
 
 void ViewAbstract::SetJSFrameNodeOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart)

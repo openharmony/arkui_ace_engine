@@ -859,6 +859,70 @@ HWTEST_F(TabsEventTestNg, OnWillShowAndOnWillHideTest005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnWillShowAndOnWillHideTest006
+ * @tc.desc: test OnWillShow and OnWillHide
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, OnWillShowAndOnWillHideTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create parent node
+     */
+    int32_t nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto parentNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    ViewStackProcessor::GetInstance()->Push(parentNode);
+
+    /**
+     * @tc.steps: steps2. Create tabs
+     */
+    TabsModelNG model = CreateTabs(BarPosition::START, -1);
+    bool isShow = false;
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        TabContentModelNG tabContentModel = CreateTabContent();
+        std::function<void()> showEvent = [&isShow]() { isShow = true; };
+        std::function<void()> hideEvent = [&isShow]() { isShow = false; };
+        tabContentModel.SetOnWillShow(std::move(showEvent));
+        tabContentModel.SetOnWillHide(std::move(hideEvent));
+        tabContentModel.Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step3. first display.
+     * @tc.expected: isShow = true
+     */
+    EXPECT_TRUE(isShow);
+
+    /**
+     * @tc.steps: step4. callback.
+     * @tc.expected: isShow = false
+     */
+    auto callback = parentNode->GetPattern<PagePattern>()->onHiddenChange_;
+    EXPECT_FALSE(callback.empty());
+    for (auto& OnHiddenChangeInfo : callback) {
+        if (OnHiddenChangeInfo.second) {
+            auto OnHiddenChange = OnHiddenChangeInfo.second;
+            OnHiddenChange(false);
+        }
+    }
+    EXPECT_FALSE(isShow);
+
+    /**
+     * @tc.steps: step5. callback.
+     * @tc.expected: isShow = true
+     */
+    for (auto& OnHiddenChangeInfo : callback) {
+        if (OnHiddenChangeInfo.second) {
+            auto OnHiddenChange = OnHiddenChangeInfo.second;
+            OnHiddenChange(true);
+        }
+    }
+    EXPECT_TRUE(isShow);
+}
+
+/**
  * @tc.name: TabBarPatternHandleTouchEvent001
  * @tc.desc: test HandleTouchEvent
  * @tc.type: FUNC

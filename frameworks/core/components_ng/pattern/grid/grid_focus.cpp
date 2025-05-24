@@ -45,19 +45,24 @@ std::pair<FocusStep, FocusStep> GridFocus::GetFocusSteps(int32_t curMainIndex, i
     auto isFirstOrLastFocusable = IsFirstOrLastFocusableChild(curMainIndex, curCrossIndex);
     auto isFirstFocusable = isFirstOrLastFocusable.first;
     auto isLastFocusable = isFirstOrLastFocusable.second;
+    auto focusWrapMode = GetFocusWrapMode();
     if (info_.axis_ == Axis::VERTICAL) {
-        if (isFirstFocusable && step == FocusStep::SHIFT_TAB) {
+        if (isFirstFocusable && (step == FocusStep::SHIFT_TAB ||
+            (focusWrapMode == FocusWrapMode::WRAP_WITH_ARROW && step == FocusStep::LEFT))) {
             firstStep = FocusStep::UP;
             secondStep = FocusStep::RIGHT_END;
-        } else if (isLastFocusable && step == FocusStep::TAB) {
+        } else if (isLastFocusable && (step == FocusStep::TAB || (focusWrapMode == FocusWrapMode::WRAP_WITH_ARROW &&
+            step == FocusStep::RIGHT))) {
             firstStep = FocusStep::DOWN;
             secondStep = FocusStep::LEFT_END;
         }
     } else if (info_.axis_ == Axis::HORIZONTAL) {
-        if (isFirstFocusable && step == FocusStep::SHIFT_TAB) {
+        if (isFirstFocusable && (step == FocusStep::SHIFT_TAB ||
+            (focusWrapMode == FocusWrapMode::WRAP_WITH_ARROW && step == FocusStep::UP))) {
             firstStep = FocusStep::LEFT;
             secondStep = FocusStep::DOWN_END;
-        } else if (isLastFocusable && step == FocusStep::TAB) {
+        } else if (isLastFocusable && (step == FocusStep::TAB || (focusWrapMode == FocusWrapMode::WRAP_WITH_ARROW &&
+            step == FocusStep::DOWN))) {
             firstStep = FocusStep::RIGHT;
             secondStep = FocusStep::UP_END;
         }
@@ -65,6 +70,15 @@ std::pair<FocusStep, FocusStep> GridFocus::GetFocusSteps(int32_t curMainIndex, i
     TAG_LOGI(AceLogTag::ACE_GRID, "Get focus steps. First step is %{public}d. Second step is %{public}d", firstStep,
         secondStep);
     return { firstStep, secondStep };
+}
+
+FocusWrapMode GridFocus::GetFocusWrapMode()
+{
+    auto host = grid_.GetHost();
+    CHECK_NULL_RETURN(host, FocusWrapMode::DEFAULT);
+    auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_RETURN(gridLayoutProperty, FocusWrapMode::DEFAULT);
+    return gridLayoutProperty->GetFocusWrapMode().value_or(FocusWrapMode::DEFAULT);
 }
 
 WeakPtr<FocusHub> GridFocus::GetNextFocusSimplified(FocusStep step, const RefPtr<FocusHub>& current)
@@ -102,18 +116,63 @@ WeakPtr<FocusHub> GridFocus::GetNextFocusSimplified(FocusStep step, const RefPtr
     return nullptr;
 }
 
-WeakPtr<FocusHub> GridFocus::GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode)
+WeakPtr<FocusHub> GridFocus::GetNextFocusNode(
+    FocusStep step, const WeakPtr<FocusHub>& currentFocusNode, bool isMainSkip)
+{
+    if (!GetCurrentFocusInfo(step, currentFocusNode)) {
+        return nullptr;
+    }
+    auto focusSteps = GetFocusSteps(curFocusIndexInfo_.mainIndex, curFocusIndexInfo_.crossIndex, step);
+    if (focusSteps.first != FocusStep::NONE && focusSteps.second != FocusStep::NONE) {
+        return HandleFocusSteps(step, currentFocusNode, focusSteps);
+    }
+    ResetAllDirectionsStep();
+    auto indexes = GetNextIndexByStep(curFocusIndexInfo_.mainIndex, curFocusIndexInfo_.crossIndex,
+        curFocusIndexInfo_.mainSpan, curFocusIndexInfo_.crossSpan, step);
+    auto nextMainIndex = indexes.first;
+    auto nextCrossIndex = indexes.second;
+    while (nextMainIndex >= 0 && nextCrossIndex >= 0) {
+        if (info_.gridMatrix_.find(nextMainIndex) == info_.gridMatrix_.end()) {
+            TAG_LOGW(AceLogTag::ACE_GRID, "Can not find next main index: %{public}d", nextMainIndex);
+            return nullptr;
+        }
+        auto nextMaxCrossCount = info_.crossCount_;
+        auto flag = (step == FocusStep::LEFT_END) || (step == FocusStep::RIGHT_END);
+        auto weakChild = info_.hasBigItem_
+                             ? (GetFocusWrapMode() == FocusWrapMode::WRAP_WITH_ARROW && CheckIsCrossDirectionFocus(step)
+                                       ? SearchBigItemFocusableChildInCross(
+                                           curFocusIndexInfo_.mainStart,
+                                           nextCrossIndex,
+                                           step,
+                                           isMainSkip)
+                                       : SearchIrregularFocusableChild(nextMainIndex, nextCrossIndex))
+                             : SearchFocusableChildInCross(nextMainIndex, nextCrossIndex, nextMaxCrossCount,
+                                 flag ? -1 : curFocusIndexInfo_.mainIndex,
+                                 curFocusIndexInfo_.crossIndex);
+        auto child = weakChild.Upgrade();
+        if (child && child->IsFocusable()) {
+            ScrollToFocusNode(weakChild);
+            return weakChild;
+        }
+        auto indexes = GetNextIndexByStep(nextMainIndex, nextCrossIndex, 1, 1, step);
+        nextMainIndex = indexes.first;
+        nextCrossIndex = indexes.second;
+    }
+    return nullptr;
+}
+
+bool GridFocus::GetCurrentFocusInfo(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode)
 {
     auto curFocus = currentFocusNode.Upgrade();
-    CHECK_NULL_RETURN(curFocus, nullptr);
+    CHECK_NULL_RETURN(curFocus, false);
     auto curFrame = curFocus->GetFrameNode();
-    CHECK_NULL_RETURN(curFrame, nullptr);
+    CHECK_NULL_RETURN(curFrame, false);
     auto curPattern = curFrame->GetPattern();
-    CHECK_NULL_RETURN(curPattern, nullptr);
+    CHECK_NULL_RETURN(curPattern, false);
     auto curItemPattern = AceType::DynamicCast<GridItemPattern>(curPattern);
-    CHECK_NULL_RETURN(curItemPattern, nullptr);
+    CHECK_NULL_RETURN(curItemPattern, false);
     auto curItemProperty = curItemPattern->GetLayoutProperty<GridItemLayoutProperty>();
-    CHECK_NULL_RETURN(curItemProperty, nullptr);
+    CHECK_NULL_RETURN(curItemProperty, false);
     auto irregularInfo = curItemPattern->GetIrregularItemInfo();
     bool hasIrregularItemInfo = irregularInfo.has_value();
 
@@ -142,50 +201,58 @@ WeakPtr<FocusHub> GridFocus::GetNextFocusNode(FocusStep step, const WeakPtr<Focu
 
     if (curMainIndex < 0 || curCrossIndex < 0) {
         TAG_LOGW(AceLogTag::ACE_GRID, "can't find focused child.");
-        return nullptr;
+        return false;
     }
     if (info_.gridMatrix_.find(curMainIndex) == info_.gridMatrix_.end()) {
         TAG_LOGW(AceLogTag::ACE_GRID, "Can not find current main index: %{public}d", curMainIndex);
-        return nullptr;
+        return false;
     }
     TAG_LOGI(AceLogTag::ACE_GRID,
         "GetNextFocusNode: Current:(%{public}d,%{public}d)-[%{public}d,%{public}d]. Focus: %{public}d", curMainIndex,
         curCrossIndex, curMainSpan, curCrossSpan, step);
-    auto focusSteps = GetFocusSteps(curMainIndex, curCrossIndex, step);
-    if (focusSteps.first != FocusStep::NONE && focusSteps.second != FocusStep::NONE) {
+
+    return true;
+}
+
+WeakPtr<FocusHub> GridFocus::HandleFocusSteps(
+    FocusStep step, const WeakPtr<FocusHub>& currentFocusNode, std::pair<FocusStep, FocusStep> focusSteps)
+{
+    isTab_ = (step == FocusStep::TAB || step == FocusStep::SHIFT_TAB);
+    if (GetFocusWrapMode() == FocusWrapMode::WRAP_WITH_ARROW && curFocusIndexInfo_.mainSpan > 1 && !isTab_ &&
+        (info_.axis_ == Axis::VERTICAL ? (focusSteps.first == FocusStep::DOWN)
+                                       : (focusSteps.first == FocusStep::RIGHT))) {
+        auto secondStepRes = GetNextFocusNode(focusSteps.second, currentFocusNode, true);
+        if (!secondStepRes.Upgrade()) {
+            return currentFocusNode;
+        }
+        return secondStepRes;
+    } else {
         auto firstStepRes = GetNextFocusNode(focusSteps.first, currentFocusNode);
         if (!firstStepRes.Upgrade()) {
+            isTab_ = false;
             return nullptr;
         }
         auto secondStepRes = GetNextFocusNode(focusSteps.second, firstStepRes);
         if (!secondStepRes.Upgrade()) {
+            isTab_ = false;
             return firstStepRes;
         }
+        isTab_ = false;
         return secondStepRes;
     }
-    auto indexes = GetNextIndexByStep(curMainIndex, curCrossIndex, curMainSpan, curCrossSpan, step);
-    auto nextMainIndex = indexes.first;
-    auto nextCrossIndex = indexes.second;
-    while (nextMainIndex >= 0 && nextCrossIndex >= 0) {
-        if (info_.gridMatrix_.find(nextMainIndex) == info_.gridMatrix_.end()) {
-            TAG_LOGW(AceLogTag::ACE_GRID, "Can not find next main index: %{public}d", nextMainIndex);
-            return nullptr;
-        }
-        auto nextMaxCrossCount = info_.crossCount_;
-        auto flag = (step == FocusStep::LEFT_END) || (step == FocusStep::RIGHT_END);
-        auto weakChild = info_.hasBigItem_ ? SearchIrregularFocusableChild(nextMainIndex, nextCrossIndex)
-                                           : SearchFocusableChildInCross(nextMainIndex, nextCrossIndex,
-                                                 nextMaxCrossCount, flag ? -1 : curMainIndex, curCrossIndex);
-        auto child = weakChild.Upgrade();
-        if (child && child->IsFocusable()) {
-            ScrollToFocusNode(weakChild);
-            return weakChild;
-        }
-        auto indexes = GetNextIndexByStep(nextMainIndex, nextCrossIndex, 1, 1, step);
-        nextMainIndex = indexes.first;
-        nextCrossIndex = indexes.second;
-    }
-    return nullptr;
+}
+
+bool GridFocus::CheckIsCrossDirectionFocus(FocusStep step)
+{
+    bool isVertical = (info_.axis_ == Axis::VERTICAL);
+
+    bool isLeftOrRight = (step == FocusStep::LEFT) || (step == FocusStep::RIGHT) || (step == FocusStep::LEFT_END) ||
+                         (step == FocusStep::RIGHT_END);
+
+    bool isUpOrDown = (step == FocusStep::UP) || (step == FocusStep::DOWN) || (step == FocusStep::UP_END) ||
+                      (step == FocusStep::DOWN_END);
+
+    return !isTab_ && ((isVertical && isLeftOrRight) || (!isVertical && isUpOrDown));
 }
 
 int32_t GridFocus::GetIndexByFocusHub(const WeakPtr<FocusHub>& focusNode)
@@ -315,6 +382,67 @@ std::pair<int32_t, int32_t> GridFocus::GetNextIndexByStep(
     }
     TAG_LOGI(AceLogTag::ACE_GRID, "Next index return: { %{public}d,%{public}d }.", nextMainIndex, nextCrossIndex);
     return { nextMainIndex, nextCrossIndex };
+}
+
+WeakPtr<FocusHub> GridFocus::SearchBigItemFocusableChildInCross(
+    int32_t curMainStart, int32_t tarCrossIndex, FocusStep step, bool isMainSkip)
+{
+    auto host = grid_.GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    if (isMainSkip) {
+        ++curMainStart;
+    }
+    auto main = info_.gridMatrix_.find(curMainStart);
+    while (main != info_.gridMatrix_.end()) {
+        auto cross = main->second.find(tarCrossIndex);
+        while (cross != main->second.end()) {
+            auto next = host->GetChildByIndex(cross->second);
+            CHECK_NULL_BREAK(next);
+            auto nextNode = next->GetHostNode();
+            CHECK_NULL_BREAK(nextNode);
+            auto nextFocus = nextNode->GetFocusHub();
+            if (nextFocus && nextFocus->IsFocusable()) {
+                return nextFocus;
+            }
+            if (CheckStepDirection(step, false)) {
+                tarCrossIndex--;
+            } else if (CheckStepDirection(step, true)) {
+                tarCrossIndex++;
+            }
+            if (main->second.find(tarCrossIndex) == main->second.end()) {
+                tarCrossIndex = main->second.size() - tarCrossIndex;
+                break;
+            }
+            cross = main->second.find(tarCrossIndex);
+        }
+        if (CheckStepDirection(step, false)) {
+            curMainStart--;
+        } else if (CheckStepDirection(step, true)) {
+            curMainStart++;
+        }
+        if (info_.gridMatrix_.find(curMainStart) == info_.gridMatrix_.end()) {
+            break;
+        }
+        main = info_.gridMatrix_.find(curMainStart);
+    }
+    return nullptr;
+}
+
+bool GridFocus::CheckStepDirection(FocusStep step, bool isNext)
+{
+    if (info_.axis_ == Axis::VERTICAL) {
+        if (isNext) {
+            return step == FocusStep::LEFT_END || step == FocusStep::RIGHT;
+        } else {
+            return step == FocusStep::RIGHT_END || step == FocusStep::LEFT;
+        }
+    } else {
+        if (isNext) {
+            return step == FocusStep::UP_END || step == FocusStep::DOWN;
+        } else {
+            return step == FocusStep::DOWN_END || step == FocusStep::UP;
+        }
+    }
 }
 
 WeakPtr<FocusHub> GridFocus::SearchFocusableChildInCross(

@@ -317,11 +317,7 @@ HWTEST_F(RichEditorCaretTestNg, CalculateEmptyValueCaretRect001, TestSize.Level1
     style.SetFontFeatures(TEXT_FONTFEATURE);
     auto layoutProperty = richEditorPattern->GetLayoutProperty<TextLayoutProperty>();
     layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
-    richEditorPattern->presetParagraph_ = paragraph;
-    richEditorPattern->CalculateEmptyValueCaretRect();
-    richEditorPattern->typingTextStyle_ = style;
-    richEditorPattern->PreferredParagraph();
-    EXPECT_NE(richEditorPattern->presetParagraph_, nullptr);
+    richEditorPattern->CalculateEmptyValueCaretOffset();
 }
 
 /**
@@ -339,17 +335,15 @@ HWTEST_F(RichEditorCaretTestNg, CalculateEmptyValueCaretRect002, TestSize.Level1
 
     layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
     layoutProperty->UpdateTextAlign(TextAlign::LEFT);
-    richEditorPattern->CalculateEmptyValueCaretRect();
+    richEditorPattern->CalculateEmptyValueCaretOffset();
 
     layoutProperty->UpdateLayoutDirection(TextDirection::INHERIT);
     layoutProperty->UpdateTextAlign(TextAlign::CENTER);
-    richEditorPattern->CalculateEmptyValueCaretRect();
+    richEditorPattern->CalculateEmptyValueCaretOffset();
 
     layoutProperty->UpdateLayoutDirection(TextDirection::INHERIT);
     layoutProperty->UpdateTextAlign(TextAlign::LEFT);
-    richEditorPattern->CalculateEmptyValueCaretRect();
-
-    EXPECT_EQ(richEditorPattern->presetParagraph_, false);
+    richEditorPattern->CalculateEmptyValueCaretOffset();
 }
 
 /**

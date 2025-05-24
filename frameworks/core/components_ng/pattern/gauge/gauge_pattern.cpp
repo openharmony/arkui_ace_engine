@@ -347,4 +347,64 @@ void GaugePattern::OnSensitiveStyleChange(bool isSensitive)
     gaugePaintProperty->UpdateIsSensitive(isSensitive);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
+
+void GaugePattern::UpdateStrokeWidth(const CalcDimension& strokeWidth, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<GaugePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto layoutProperty = host->GetLayoutProperty<GaugeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    paintProperty->UpdateStrokeWidth(strokeWidth);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    layoutProperty->UpdateStrokeWidth(strokeWidth);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void GaugePattern::UpdateIndicatorIconPath(
+    const std::string& iconPath, const std::string& bundleName, const std::string& moduleName, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = host->GetPaintProperty<GaugePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+        paintProperty->UpdateIndicatorIconSourceInfo(ImageSourceInfo(iconPath, bundleName, moduleName));
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void GaugePattern::UpdateIndicatorSpace(const CalcDimension& space, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = host->GetPaintProperty<GaugePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+        paintProperty->UpdateIndicatorSpace(space);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void GaugePattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (host->GetRerenderable()) {
+        host->MarkModifyDone();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
 } // namespace OHOS::Ace::NG

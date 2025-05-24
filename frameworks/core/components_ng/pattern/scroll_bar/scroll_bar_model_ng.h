@@ -26,7 +26,11 @@ public:
     void Create(const RefPtr<ScrollProxy>& proxy, bool infoflag, bool proxyFlag,
         int directionValue, int stateValue, bool isCreateArc = false) override;
     void SetEnableNestedScroll(bool enableNestedSroll) override;
+    void SetScrollBarColor(const Color& color) override;
+    void ResetScrollBarColor() override;
     static void SetEnableNestedScroll(FrameNode* frameNode, bool enableNestedSroll);
+    static void SetScrollBarColor(FrameNode* frameNode, Color color);
+    static void ResetScrollBarColor(FrameNode* frameNode);
     static void SetNestedScroll(RefPtr<FrameNode>& frameNode, RefPtr<ScrollablePattern>& pattern);
     static void UnSetNestedScroll(RefPtr<FrameNode>& frameNode, RefPtr<ScrollablePattern>& pattern);
 };

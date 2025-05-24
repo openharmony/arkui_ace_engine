@@ -57,10 +57,10 @@ adapter/ohos/entrance/distributed_ui_manager.h @arkuiframework
 adapter/ohos/entrance/dynamic_component/ @arkuiabilitygroup
 adapter/ohos/entrance/file_asset_provider_impl.cpp @arkuiframework
 adapter/ohos/entrance/file_asset_provider_impl.h @arkuiframework
-adapter/ohos/entrance/form_module_preloader.cpp @arondave
-adapter/ohos/entrance/form_module_preloader.h @arondave
-adapter/ohos/entrance/form_utils_impl.cpp @arondave
-adapter/ohos/entrance/form_utils_impl.h @arondave
+adapter/ohos/entrance/form_module_preloader.cpp @form_framework
+adapter/ohos/entrance/form_module_preloader.h @form_framework
+adapter/ohos/entrance/form_utils_impl.cpp @form_framework
+adapter/ohos/entrance/form_utils_impl.h @form_framework
 adapter/ohos/entrance/hap_asset_provider_impl.cpp @arkuiframework
 adapter/ohos/entrance/hap_asset_provider_impl.h @arkuiframework
 adapter/ohos/entrance/high_contrast_observer.cpp @arkuiframework
@@ -622,7 +622,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/data_panel_modifier.ts @
 frameworks/bridge/declarative_frontend/ark_modifier/src/date_picker_modifier.ts @arkui_image
 frameworks/bridge/declarative_frontend/ark_modifier/src/divider_modifier.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_modifier/src/flex_modifier.ts @arkuilayout
-frameworks/bridge/declarative_frontend/ark_modifier/src/form_component_modifier.ts @arondave
+frameworks/bridge/declarative_frontend/ark_modifier/src/form_component_modifier.ts @form_framework
 frameworks/bridge/declarative_frontend/ark_modifier/src/gauge_modifier.ts @arkui_image
 frameworks/bridge/declarative_frontend/ark_modifier/src/grid_col_modifier.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_modifier/src/griditem_modifier.ts @arkuiscroll
@@ -673,6 +673,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/slider_modifier.ts @arku
 frameworks/bridge/declarative_frontend/ark_modifier/src/span_modifier.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_modifier/src/stack_modifier.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_modifier/src/stepper_item_modifier.ts @arkui_superman
+frameworks/bridge/declarative_frontend/ark_modifier/src/stepper_modifier.ts @arkui_superman
 frameworks/bridge/declarative_frontend/ark_modifier/src/swiper_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/symbol_glyph_modifier.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_modifier/src/symbol_span_modifier.ts @huawei_g_five
@@ -951,6 +952,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stac
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stack_bridge.h @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stepper_item_bridge.cpp @arkui_superman
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stepper_item_bridge.h @arkui_superman
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stepper_bridge.cpp @arkui_superman
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stepper_bridge.h @arkui_superman
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_swiper_bridge.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_swiper_bridge.h @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_glyph_bridge.cpp @huawei_g_five
@@ -1421,8 +1424,8 @@ frameworks/bridge/declarative_frontend/jsview/models/flex_model_impl.cpp @arkuil
 frameworks/bridge/declarative_frontend/jsview/models/flex_model_impl.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/models/for_each_model_impl.cpp @arkuistatemgmt
 frameworks/bridge/declarative_frontend/jsview/models/for_each_model_impl.h @arkuistatemgmt
-frameworks/bridge/declarative_frontend/jsview/models/form_model_impl.cpp @arondave
-frameworks/bridge/declarative_frontend/jsview/models/form_model_impl.h @arondave
+frameworks/bridge/declarative_frontend/jsview/models/form_model_impl.cpp @form_framework
+frameworks/bridge/declarative_frontend/jsview/models/form_model_impl.h @form_framework
 frameworks/bridge/declarative_frontend/jsview/models/gauge_model_impl.cpp @arkui_image
 frameworks/bridge/declarative_frontend/jsview/models/gauge_model_impl.h @arkui_image
 frameworks/bridge/declarative_frontend/jsview/models/gesture_model_impl.cpp @arkuievent
@@ -2040,7 +2043,7 @@ frameworks/core/components/focus_animation/ @arkuievent
 frameworks/core/components/focus_collaboration/ @arkuievent
 frameworks/core/components/font/ @huawei_g_five
 frameworks/core/components/foreach/ @arkuistatemgmt
-frameworks/core/components/form/ @arkuiframework
+frameworks/core/components/form/ @form_framework
 frameworks/core/components/gesture_listener/ @arkuievent
 frameworks/core/components/grid/ @arkuiscroll
 frameworks/core/components/grid_layout/ @arkuilayout
@@ -2340,6 +2343,7 @@ frameworks/core/components_ng/base/linear_vector.h @arkuiframework
 frameworks/core/components_ng/base/modifier.cpp @arkuiframework
 frameworks/core/components_ng/base/modifier.h @arkuiframework
 frameworks/core/components_ng/base/node_flag.h @arkuiframework
+frameworks/core/components_ng/base/node_render_status_monitor.cpp @arkuievent
 frameworks/core/components_ng/base/observer_handler.cpp @arkuiframework
 frameworks/core/components_ng/base/observer_handler.h @arkuiframework
 frameworks/core/components_ng/base/symbol_modifier.h @arkuiframework
@@ -2350,8 +2354,8 @@ frameworks/core/components_ng/base/view_abstract.h @arkuievent
 frameworks/core/components_ng/base/view_abstract_model.h @arkuievent
 frameworks/core/components_ng/base/view_abstract_model_ng.cpp @arkuievent
 frameworks/core/components_ng/base/view_abstract_model_ng.h @arkuievent
-frameworks/core/components_ng/base/view_advanced_register.cpp @arkuiframework
-frameworks/core/components_ng/base/view_advanced_register.h @arkuiframework
+frameworks/core/components_ng/base/view_advanced_register.cpp @arkui_superman
+frameworks/core/components_ng/base/view_advanced_register.h @arkui_superman
 frameworks/core/components_ng/base/view_full_update_model.h @arkuistatemgmt
 frameworks/core/components_ng/base/view_full_update_model_ng.cpp @arkuistatemgmt
 frameworks/core/components_ng/base/view_full_update_model_ng.h @arkuistatemgmt
@@ -2414,8 +2418,8 @@ frameworks/core/components_ng/pattern/divider/ @arkuilayout
 frameworks/core/components_ng/pattern/effect_component/
 frameworks/core/components_ng/pattern/flex/ @arkuilayout
 frameworks/core/components_ng/pattern/folder_stack/ @arkuilayout
-frameworks/core/components_ng/pattern/form/ @arondave
-frameworks/core/components_ng/pattern/form_link/ @arondave
+frameworks/core/components_ng/pattern/form/ @form_framework
+frameworks/core/components_ng/pattern/form_link/ @form_framework
 frameworks/core/components_ng/pattern/gauge/ @arkui_image
 frameworks/core/components_ng/pattern/gesture/ @arkuievent
 frameworks/core/components_ng/pattern/grid_col/ @arkuilayout
@@ -2483,6 +2487,7 @@ frameworks/core/components_ng/pattern/particle/ @arkui_superman
 frameworks/core/components_ng/pattern/pattern.h @arkui_architecture
 frameworks/core/components_ng/pattern/patternlock/ @arkui_image
 frameworks/core/components_ng/pattern/picker/ @arkui_image
+frameworks/core/components_ng/pattern/picker_utils/ @arkui_image
 frameworks/core/components_ng/pattern/plugin/ @arkuiabilitygroup
 frameworks/core/components_ng/pattern/preview_mock/ @arkuistatemgmt
 frameworks/core/components_ng/pattern/progress/ @arkui_image
@@ -2577,8 +2582,8 @@ frameworks/core/components_ng/property/measure_utils.cpp @arkuilayout
 frameworks/core/components_ng/property/measure_utils.h @arkuilayout
 frameworks/core/components_ng/property/menu_property.h @arkuipopupwindow
 frameworks/core/components_ng/property/overlay_property.h @arkuipopupwindow
-frameworks/core/components_ng/property/particle_property_animation.h @aarkui_superman
-frameworks/core/components_ng/property/particle_property.h @aarkui_superman
+frameworks/core/components_ng/property/particle_property_animation.h @arkui_superman
+frameworks/core/components_ng/property/particle_property.h @arkui_superman
 frameworks/core/components_ng/property/position_property.h @arkuilayout
 frameworks/core/components_ng/property/progress_mask_property.h @arkui_superman
 frameworks/core/components_ng/property/property.cpp @arkuievent
@@ -2602,8 +2607,8 @@ frameworks/core/components_ng/render/adapter/focus_animation_modifier.h @arkuiev
 frameworks/core/components_ng/render/adapter/focus_modifier.h @arkuievent
 frameworks/core/components_ng/render/adapter/focus_state_modifier.cpp @arkuievent
 frameworks/core/components_ng/render/adapter/focus_state_modifier.h @arkuievent
-frameworks/core/components_ng/render/adapter/form_render_window.cpp @arondave
-frameworks/core/components_ng/render/adapter/form_render_window.h @arondave
+frameworks/core/components_ng/render/adapter/form_render_window.cpp @form_framework
+frameworks/core/components_ng/render/adapter/form_render_window.h @form_framework
 frameworks/core/components_ng/render/adapter/gradient_style_modifier.cpp @arkui_superman
 frameworks/core/components_ng/render/adapter/gradient_style_modifier.h @arkui_superman
 frameworks/core/components_ng/render/adapter/graphic_modifier.cpp @arkui_superman
@@ -2758,8 +2763,8 @@ frameworks/core/interfaces/native/node/embeddedComponent_modifier.cpp @arkuiabil
 frameworks/core/interfaces/native/node/embeddedComponent_modifier.h @arkuiabilitygroup
 frameworks/core/interfaces/native/node/flex_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/flex_modifier.h @arkuilayout
-frameworks/core/interfaces/native/node/form_component_modifier.cpp @arondave
-frameworks/core/interfaces/native/node/form_component_modifier.h @arondave
+frameworks/core/interfaces/native/node/form_component_modifier.cpp @form_framework
+frameworks/core/interfaces/native/node/form_component_modifier.h @form_framework
 frameworks/core/interfaces/native/node/frame_node_modifier.cpp @arkuiframework
 frameworks/core/interfaces/native/node/frame_node_modifier.h @arkuiframework
 frameworks/core/interfaces/native/node/gauge_modifier.cpp @arkui_image
@@ -2916,6 +2921,8 @@ frameworks/core/interfaces/native/node/side_bar_container_modifier.cpp @arkui_su
 frameworks/core/interfaces/native/node/side_bar_container_modifier.h @arkui_superman
 frameworks/core/interfaces/native/node/stepper_item_modifier.cpp @arkui_superman
 frameworks/core/interfaces/native/node/stepper_item_modifier.h @arkui_superman
+frameworks/core/interfaces/native/node/stepper_modifier.cpp @arkui_superman
+frameworks/core/interfaces/native/node/stepper_modifier.h @arkui_superman
 frameworks/core/interfaces/native/node/swiper_controller_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/node/swiper_controller_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/tab_content_modifier.cpp @arkuiscroll
@@ -3038,7 +3045,7 @@ interfaces/inner_api/ace/utils.h @arkuiframework
 interfaces/inner_api/ace/viewport_config.h @arkuiframework
 interfaces/inner_api/BUILD.gn @arkui_architecture
 interfaces/inner_api/drawable_descriptor/ @arkui_image
-interfaces/inner_api/form_render/ @arondave
+interfaces/inner_api/form_render/ @form_framework
 interfaces/inner_api/ui_service_manager/ @arkuiabilitygroup
 interfaces/inner_api/ui_session/ @arkuiframework
 interfaces/inner_api/xcomponent_controller/ @arkuilayout
@@ -3094,7 +3101,7 @@ test/mock/core/animation/mock_implicit_animation.cpp @zhoutianer
 
 test/unittest/ @zhoulianhai5
 test/unittest/core/accessibility/ @arkuiabilitygroup
-test/unittest/core/animation/ @aarkui_superman
+test/unittest/core/animation/ @arkui_superman
 test/unittest/core/common/ace_engine/ @arkuiframework
 test/unittest/core/common/asset/ @arkuiframework
 test/unittest/core/common/clipboard/ @huawei_g_five
@@ -3140,9 +3147,9 @@ test/unittest/core/pattern/dialog/ @arkuipopupwindow
 test/unittest/core/pattern/divider/ @arkuilayout
 test/unittest/core/pattern/flex/ @arkuilayout
 test/unittest/core/pattern/folder_stack/ @arkuilayout
-test/unittest/core/pattern/form/ @arondave
-test/unittest/core/pattern/form/mock/ @arondave
-test/unittest/core/pattern/form_link/ @arondave
+test/unittest/core/pattern/form/ @form_framework
+test/unittest/core/pattern/form/mock/ @form_framework
+test/unittest/core/pattern/form_link/ @form_framework
 test/unittest/core/pattern/gauge/ @arkui_image
 test/unittest/core/pattern/grid/ @arkuiscroll
 test/unittest/core/pattern/grid/irregular/ @arkuiscroll
@@ -3224,3 +3231,5 @@ test/unittest/core/svg/ @arkui_image
 test/unittest/core/syntax/ @arkuistatemgmt
 test/unittest/interfaces/ @arkuiframework
 test/unittest/interfaces/ui_input_event_test.cpp @arkuievent
+test/unittest/interfaces/ace_ui_input_event/ @arkuievent
+test/unittest/interfaces/ace_gesture/ @arkuievent

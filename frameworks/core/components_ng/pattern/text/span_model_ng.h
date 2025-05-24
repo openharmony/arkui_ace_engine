@@ -52,6 +52,7 @@ public:
     void SetAccessibilityText(const std::string& text) override;
     void SetAccessibilityDescription(const std::string& description) override;
     void SetAccessibilityImportance(const std::string& importance) override;
+    void SetLineThicknessScale(float value) override;
     void SetOnHover(OnHoverFunc&& onHoverEventFunc) override;
     void ResetOnHover() override;
 
@@ -116,6 +117,8 @@ public:
     // impl in render/adapter/span_model_adapter.cpp
     static RefPtr<SpanItem> CreateSpanItem(ArkUI_SpanItem* item);
     static ParagraphStyle CreateParagraphStyle(ArkUI_StyledString* styledString);
+    static void SetLineThicknessScale(UINode *uiNode, float value);
+    static void ResetLineThicknessScale(UINode* uiNode);
 };
 } // namespace OHOS::Ace::NG
 

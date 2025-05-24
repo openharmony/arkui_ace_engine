@@ -32,6 +32,8 @@
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
+#include "core/components_ng/pattern/dialog/alert_dialog_model.h"
+#include "core/components_ng/pattern/action_sheet/action_sheet_model.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -218,6 +220,8 @@ public:
         if (onDidAppearCallback_) {
             onDidAppearCallback_();
         }
+        SetState(PromptActionCommonState::APPEARED);
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "The current state of the dialog is APPEARED.");
     }
 
     void CallDialogDidDisappearCallback()
@@ -225,6 +229,8 @@ public:
         if (onDidDisappearCallback_) {
             onDidDisappearCallback_();
         }
+        SetState(PromptActionCommonState::DISAPPEARED);
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "The current state of the dialog is DISAPPEARED.");
     }
 
     void CallDialogWillAppearCallback()
@@ -232,6 +238,8 @@ public:
         if (onWillAppearCallback_) {
             onWillAppearCallback_();
         }
+        SetState(PromptActionCommonState::APPEARING);
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "The current state of the dialog is APPEARING.");
     }
 
     void CallDialogWillDisappearCallback()
@@ -239,6 +247,8 @@ public:
         if (onWillDisappearCallback_) {
             onWillDisappearCallback_();
         }
+        SetState(PromptActionCommonState::DISAPPEARING);
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "The current state of the dialog is DISAPPEARING.");
     }
 
     bool IsUIExtensionSubWindow() const
@@ -316,8 +326,17 @@ public:
         isDialogDisposed_ = isDialogDisposed;
     }
 
+    void SetState(PromptActionCommonState value)
+    {
+        state = value;
+    }
+
+    PromptActionCommonState GetState()
+    {
+        return state;
+    }
+
     bool IsShowInFreeMultiWindow();
-    bool IsWaterfallWindowMode();
     bool IsShowInFloatingWindow();
     void AddExtraMaskNode(const DialogProperties& props);
 
@@ -355,6 +374,23 @@ public:
     {
         return uecMaskNode_.Upgrade();
     }
+    void UpdateDialogColor(const Color& color, const DialogResourceType type);
+    void UpdateContentValue(std::string& text, const DialogResourceType type);
+    void UpdateLayoutContent(const CalcDimension& value, const DialogResourceType type);
+    void UpdateBackShadow(const Shadow& shadow);
+    void UpdateEffect(const EffectOption& option);
+    void UpdateBlurStyle(const BlurStyleOption& option);
+    void UpdateMaskRect(const DimensionRect& rect);
+    void UpdateBackGroundColor(std::string& content);
+    void UpdateBorderColor(std::string& content);
+    void UpdateContent(std::string& text, ActionSheetType type);
+    void UpdateContent(const Color& color, ActionSheetType type);
+    void UpdateBorderWidth(const NG::BorderWidthProperty& width);
+    void UpdateBorderColor(const NG::BorderColorProperty& color);
+    void UpdateCornerRadius(const NG::BorderRadiusProperty& radius);
+    void UpdateButtonBackgroundColor(const Color& color, int32_t buttonIndex);
+    void UpdateButtonFontColor(const std::string colorStr, int32_t buttonIndex);
+    void UpdateButtonText(const std::string text, int32_t buttonIndex);
 
 private:
     bool AvoidKeyboard() const override
@@ -468,6 +504,7 @@ private:
     bool isSuitOldMeasure_ = false;
     bool isScrollHeightNegative_ = false;
     float fontScaleForElderly_ = 1.0f;
+    PromptActionCommonState state = PromptActionCommonState::UNINITIALIZED;
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
     RefPtr<FrameNode> titleContainer_;
     int32_t transitionNodeCount_ = 0;

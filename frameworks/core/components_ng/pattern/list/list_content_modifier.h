@@ -33,21 +33,6 @@ public:
     ~ListContentModifier() override = default;
     void onDraw(DrawingContext& context) override;
 
-    void SetClipOffset(OffsetF offset)
-    {
-        clipOffset_->Set(offset);
-    }
-
-    void SetClipSize(SizeF size)
-    {
-        clipSize_->Set(size);
-    }
-
-    void SetClip(bool clip)
-    {
-        clip_->Set(clip);
-    }
-
     void SetDividerPainter(float width, bool isVertical, Color color)
     {
         width_ = width;
@@ -71,10 +56,7 @@ public:
 
 private:
     RefPtr<AnimatableArithmeticProperty> dividerList_;
-    RefPtr<AnimatablePropertyOffsetF> clipOffset_;
-    RefPtr<AnimatablePropertySizeF> clipSize_;
     RefPtr<AnimatablePropertyColor> color_;
-    RefPtr<PropertyBool> clip_;
     RefPtr<RefDividerMap> refDivider_;
 
     float width_ = 0.0f;

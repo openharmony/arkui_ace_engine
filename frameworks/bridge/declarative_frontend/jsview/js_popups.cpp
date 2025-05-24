@@ -92,9 +92,17 @@ void SetPopupMessageOptions(const JSRef<JSObject> messageOptionsObj, const RefPt
 {
     auto colorValue = messageOptionsObj->GetProperty("textColor");
     Color textColor;
-    if (JSViewAbstract::ParseJsColor(colorValue, textColor)) {
-        if (popupParam) {
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (JSViewAbstract::ParseJsColor(colorValue, textColor, resObj)) {
+            popupParam->SetTextColorResourceObject(resObj);
             popupParam->SetTextColor(textColor);
+        }
+    } else {
+        if (JSViewAbstract::ParseJsColor(colorValue, textColor)) {
+            if (popupParam) {
+                popupParam->SetTextColor(textColor);
+            }
         }
     }
 
@@ -344,17 +352,35 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
     }
 
     JSRef<JSVal> maskValue = popupObj->GetProperty("mask");
-    if (maskValue->IsBoolean()) {
-        if (popupParam) {
-            popupParam->SetBlockEvent(maskValue->ToBoolean());
+    bool maskValueBool = false;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (JSViewAbstract::ParseJsBool(maskValue, maskValueBool, resObj)) {
+            popupParam->SetMasResourceObject(resObj);
+            popupParam->SetBlockEvent(maskValueBool);
+        }
+    } else {
+        if (maskValue->IsBoolean()) {
+            if (popupParam) {
+                popupParam->SetBlockEvent(maskValue->ToBoolean());
+            }
         }
     }
+
     if (maskValue->IsObject()) {
         auto maskObj = JSRef<JSObject>::Cast(maskValue);
         auto colorValue = maskObj->GetProperty("color");
         Color maskColor;
-        if (JSViewAbstract::ParseJsColor(colorValue, maskColor)) {
-            popupParam->SetMaskColor(maskColor);
+        if (SystemProperties::ConfigChangePerform()) {
+            RefPtr<ResourceObject> resObj;
+            if (JSViewAbstract::ParseJsColor(colorValue, maskColor, resObj)) {
+                popupParam->SetMaskColorResourceObject(resObj);
+                popupParam->SetTextColor(maskColor);
+            }
+        } else {
+            if (JSViewAbstract::ParseJsColor(colorValue, maskColor)) {
+                popupParam->SetMaskColor(maskColor);
+            }
         }
     }
 
@@ -402,8 +428,16 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
 
     Color backgroundColor;
     auto popupColorVal = popupObj->GetProperty("popupColor");
-    if (JSViewAbstract::ParseJsColor(popupColorVal, backgroundColor)) {
-        popupParam->SetBackgroundColor(backgroundColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (JSViewAbstract::ParseJsColor(popupColorVal, backgroundColor, resObj)) {
+            popupParam->SetPopupColorResourceObject(resObj);
+            popupParam->SetBackgroundColor(backgroundColor);
+        }
+    } else {
+        if (JSViewAbstract::ParseJsColor(popupColorVal, backgroundColor)) {
+            popupParam->SetBackgroundColor(backgroundColor);
+        }
     }
 
     auto autoCancelVal = popupObj->GetProperty("autoCancel");
@@ -1010,6 +1044,33 @@ void JSViewPopups::GetMenuShowInSubwindow(NG::MenuParam& menuParam)
     menuParam.isShowInSubWindow = theme->GetExpandDisplay();
 }
 
+void JSViewPopups::ParseMenuMaskType(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto maskValue = menuOptions->GetProperty("mask");
+    if (maskValue->IsBoolean()) {
+        menuParam.maskEnable = maskValue->ToBoolean();
+    } else if (maskValue->IsObject()) {
+        menuParam.maskEnable = true;
+        if (!menuParam.maskType.has_value()) {
+            menuParam.maskType.emplace();
+        }
+        auto maskObj = JSRef<JSObject>::Cast(maskValue);
+        auto colorValue = maskObj->GetProperty("color");
+        Color maskColor;
+        if (JSViewAbstract::ParseJsColor(colorValue, maskColor)) {
+            menuParam.maskType->maskColor = maskColor;
+        }
+        auto backgroundBlurStyleValue = maskObj->GetProperty("backgroundBlurStyle");
+        if (backgroundBlurStyleValue->IsNumber()) {
+            auto blurStyle = backgroundBlurStyleValue->ToNumber<int32_t>();
+            if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+                blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+                menuParam.maskType->maskBackGroundBlueStyle = static_cast<BlurStyle>(blurStyle);
+            }
+        }
+    }
+}
+
 void JSViewPopups::ParseMenuParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
@@ -1128,6 +1189,7 @@ void JSViewPopups::ParseMenuParam(
     JSViewPopups::ParseMenuOutlineWidth(outlineWidthValue, menuParam);
     auto outlineColorValue = menuOptions->GetProperty("outlineColor");
     JSViewPopups::ParseMenuOutlineColor(outlineColorValue, menuParam);
+    JSViewPopups::ParseMenuMaskType(menuOptions, menuParam);
 }
 
 void JSViewPopups::ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)
@@ -1530,6 +1592,7 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
             contentCoverParam.onWillDismiss = std::move(onWillDismissFunc);
             ParseModalTransitonEffect(info[NUM_SECOND], contentCoverParam, /* 2:args index */
                 info.GetExecutionContext());
+            ParseEnableSafeArea(info[NUM_SECOND], contentCoverParam);
         } else if (info[NUM_SECOND]->IsNumber()) {
             auto transitionNumber = info[NUM_SECOND]->ToNumber<int32_t>();
             if (transitionNumber >= TRANSITION_NUM_ZERO && transitionNumber <= TRANSITION_NUM_TWO) {
@@ -1565,6 +1628,15 @@ void JSViewAbstract::ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalS
     Color color;
     if (ParseJsColor(backgroundColor, color)) {
         modalStyle.backgroundColor = color;
+    }
+}
+
+void JSViewAbstract::ParseEnableSafeArea(const JSRef<JSObject>& paramObj, NG::ContentCoverParam& contentCoverParam)
+{
+    auto enableSafeArea = paramObj->GetProperty("enableSafeArea");
+    if (enableSafeArea->IsBoolean()) {
+        bool enable = enableSafeArea->ToBoolean();
+        contentCoverParam.enableSafeArea = enable;
     }
 }
 
@@ -2223,6 +2295,7 @@ void JSViewAbstract::ParseContentMenuCommonParam(
     if (!menuParam.placement.has_value()) {
         MenuDefaultParam(menuParam);
     }
+    JSViewPopups::GetMenuShowInSubwindow(menuParam);
     CHECK_EQUAL_VOID(menuObj->IsEmpty(), true);
     JSViewPopups::ParseMenuParam(info, menuObj, menuParam);
     JSViewPopups::ParseMenuShowInSubWindowParam(menuObj, menuParam, false);
@@ -2232,6 +2305,7 @@ void JSViewAbstract::ParseContentMenuCommonParam(
         if (previewMode == static_cast<int32_t>(MenuPreviewMode::IMAGE)) {
             menuParam.previewMode = static_cast<MenuPreviewMode>(previewMode);
             ParseContentPreviewAnimationOptionsParam(info, menuObj, menuParam);
+            menuParam.enableArrow = false;
         }
     }
 }

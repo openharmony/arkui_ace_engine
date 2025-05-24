@@ -622,6 +622,11 @@ enum class EffectEdge {
     ALL = 3,
 };
 
+enum class FocusWrapMode {
+    DEFAULT = 0,
+    WRAP_WITH_ARROW,
+};
+
 enum class BorderStyle {
     SOLID,
     DASHED,
@@ -1187,6 +1192,12 @@ enum class SwiperAnimationMode {
 enum class DividerMode {
     FLOATING_ABOVE_MENU = 0,
     EMBEDDED_IN_MENU = 1,
+};
+
+enum class LayoutType : int32_t {
+    NONE = 0,
+    MEASURE_FOR_IGNORE = 1,
+    LAYOUT_FOR_IGNORE = 2
 };
 } // namespace OHOS::Ace
 

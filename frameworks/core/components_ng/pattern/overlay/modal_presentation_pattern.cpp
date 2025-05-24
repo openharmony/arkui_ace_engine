@@ -52,4 +52,33 @@ void ModalPresentationPattern::OnWillDisappear()
     navigationManager->FireOverlayLifecycle(hostNode, static_cast<int32_t>(NavDestinationLifecycle::ON_INACTIVE),
         static_cast<int32_t>(NavDestinationActiveReason::CONTENT_COVER));
 }
+
+void ModalPresentationPattern::BeforeCreateLayoutWrapper()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto builder = AceType::DynamicCast<FrameNode>(host->GetChildByIndex(0));
+    CHECK_NULL_VOID(builder);
+    auto modalNodeLayoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(modalNodeLayoutProperty);
+    auto builderLayoutProperty = builder->GetLayoutProperty();
+    CHECK_NULL_VOID(builderLayoutProperty);
+    if (GetEnableSafeArea()) {
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto inset = context->GetSafeAreaWithoutProcess();
+        builderLayoutProperty->UpdateSafeAreaInsets(inset);
+        inset.top_ = { 0, 0 };
+        inset.bottom_ = { 0, 0 };
+        modalNodeLayoutProperty->UpdateSafeAreaInsets(inset);
+    } else {
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto inset = context->GetSafeAreaWithoutProcess();
+        inset.top_ = { 0, 0 };
+        modalNodeLayoutProperty->UpdateSafeAreaInsets(inset);
+        inset.bottom_ = { 0, 0 };
+        builderLayoutProperty->UpdateSafeAreaInsets(inset);
+    }
+}
 } // namespace OHOS::Ace::NG

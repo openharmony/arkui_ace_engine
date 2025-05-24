@@ -423,6 +423,26 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     stateMgmtProfiler.end();
   }
 
+  // clear all cached node
+  public __ClearAllRecyle__PUV2ViewBase__Internal(): void {
+    if (this instanceof ViewPU) {
+      this.hasRecycleManager() && this.getRecycleManager().purgeAllCachedRecycleNode();
+    } else if (this instanceof ViewV2) {
+      this.hasRecyclePool() && this.getRecyclePool().purgeAllCachedRecycleElmtIds();
+    } else {
+      stateMgmtConsole.error(`clearAllRecycle: this no instanceof ViewPU or ViewV2, error!`);
+      return;
+    }
+    for (const child of (this as PUV2ViewBase).childrenWeakrefMap_.values()) {
+      const childView: IView | undefined = child.deref();
+      if (!childView) {
+        continue;
+      } else {
+        childView.__ClearAllRecyle__PUV2ViewBase__Internal();
+      }
+    }
+  }
+
   /**
   * force a complete rerender / update on specific node by executing update function.
   *

@@ -52,6 +52,11 @@ const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
 const float CHILD_WIDTH = 200.0f;
 const float CHILD_HEIGHT = 200.0f;
 const SizeF CHILD_SIZE(CHILD_WIDTH, CHILD_HEIGHT);
+const int32_t MIN_RATE = 30;
+const int32_t MAX_RATE = 120;
+const int32_t EXPECTED_RATE = 120;
+const int32_t CODE_NO_ERROR = 0;
+const int32_t CODE_PARAM_INVALID = 401;
 } // namespace
 
 class XComponentV2TestNg : public testing::Test {
@@ -417,5 +422,192 @@ HWTEST_F(XComponentV2TestNg, XComponentSurfaceHolderTest001, TestSize.Level1)
      */
     code = surfaceHolder.RemoveSurfaceCallback(&surfaceCallback);
     EXPECT_EQ(code, ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: SetExpectedRateRangeTest
+ * @tc.desc: Test SetExpectedRateRange method
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, SetExpectedRateRangeTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    ASSERT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    /**
+     * @tc.steps: step2. call SetExpectedRateRangeTest
+     * @tc.expected: return code CODE_NO_ERROR
+     */
+    auto code = XComponentModelNG::SetExpectedRateRange(AceType::RawPtr(frameNode), MIN_RATE, MAX_RATE, EXPECTED_RATE);
+    ASSERT_EQ(code, CODE_NO_ERROR);
+    /**
+     * @tc.steps: step3. call SetExpectedRateRangeTest after get Native XComponent
+     * @tc.expected: return code CODE_PARAM_INVALID
+     */
+    pattern->hasGotNativeXComponent_ = true;
+    code = XComponentModelNG::SetExpectedRateRange(AceType::RawPtr(frameNode), MIN_RATE, MAX_RATE, EXPECTED_RATE);
+    ASSERT_EQ(code, CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: SetOnFrameCallbackTest
+ * @tc.desc: Test SetOnFrameCallback method
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, SetOnFrameCallbackTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    ASSERT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    /**
+     * @tc.steps: step2. call SetOnFrameCallback
+     * @tc.expected: return code CODE_NO_ERROR
+     */
+    auto code = XComponentModelNG::SetOnFrameCallback(AceType::RawPtr(frameNode), nullptr, nullptr);
+    ASSERT_EQ(code, CODE_NO_ERROR);
+    /**
+     * @tc.steps: step3. call SetOnFrameCallback after get Native XComponent
+     * @tc.expected: return code CODE_PARAM_INVALID
+     */
+    pattern->hasGotNativeXComponent_ = true;
+    code = XComponentModelNG::SetOnFrameCallback(AceType::RawPtr(frameNode), nullptr, nullptr);
+    ASSERT_EQ(code, CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: UnregisterOnFrameCallbackTest
+ * @tc.desc: Test UnregisterOnFrameCallback method
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, UnregisterOnFrameCallbackTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    ASSERT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    /**
+     * @tc.steps: step2. call UnregisterOnFrameCallback
+     * @tc.expected: return code CODE_NO_ERROR
+     */
+    auto code = XComponentModelNG::UnregisterOnFrameCallback(AceType::RawPtr(frameNode));
+    ASSERT_EQ(code, CODE_NO_ERROR);
+    /**
+     * @tc.steps: step3. call UnregisterOnFrameCallback after get Native XComponent
+     * @tc.expected: return code CODE_PARAM_INVALID
+     */
+    pattern->hasGotNativeXComponent_ = true;
+    code = XComponentModelNG::UnregisterOnFrameCallback(AceType::RawPtr(frameNode));
+    ASSERT_EQ(code, CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: SetNeedSoftKeyboardTest
+ * @tc.desc: Test SetNeedSoftKeyboard method
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, SetNeedSoftKeyboardTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    ASSERT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    /**
+     * @tc.steps: step2. call SetNeedSoftKeyboard
+     * @tc.expected: return code CODE_NO_ERROR
+     */
+    auto code = XComponentModelNG::SetNeedSoftKeyboard(AceType::RawPtr(frameNode), true);
+    ASSERT_EQ(code, CODE_NO_ERROR);
+    ASSERT_EQ(pattern->isNeedSoftKeyboard_, true);
+    /**
+     * @tc.steps: step3. call SetNeedSoftKeyboard after get Native XComponent
+     * @tc.expected: return code CODE_PARAM_INVALID
+     */
+    pattern->hasGotNativeXComponent_ = true;
+    code = XComponentModelNG::SetNeedSoftKeyboard(AceType::RawPtr(frameNode), false);
+    ASSERT_EQ(code, CODE_PARAM_INVALID);
+    ASSERT_EQ(pattern->isNeedSoftKeyboard_, true);
+}
+
+/**
+ * @tc.name: CreateAndDisposeAccessibilityProviderTest
+ * @tc.desc: Test CreateAccessibilityProvider and DisposeAccessibilityProvider method
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, CreateAndDisposeAccessibilityProviderTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    ASSERT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    /**
+     * @tc.steps: step2. call CreateAccessibilityProvider
+     * @tc.expected: return a provider pointer which is not nullptr
+     */
+    auto provider = reinterpret_cast<ArkUI_AccessibilityProvider*>(
+        XComponentModelNG::CreateAccessibilityProvider(AceType::RawPtr(frameNode)));
+    ASSERT_TRUE(provider);
+    /**
+     * @tc.steps: step3. call CreateAccessibilityProvider again
+     * @tc.expected: return a provider which equals to the former
+     */
+    auto provider_repeat = reinterpret_cast<ArkUI_AccessibilityProvider*>(
+        XComponentModelNG::CreateAccessibilityProvider(AceType::RawPtr(frameNode)));
+    ASSERT_EQ(provider, provider_repeat);
+    /**
+     * @tc.steps: step4. call CreateAccessibilityProvider after get Native XComponent
+     * @tc.expected: return nullptr
+     */
+    pattern->hasGotNativeXComponent_ = true;
+    auto provider_null = reinterpret_cast<ArkUI_AccessibilityProvider*>(
+        XComponentModelNG::CreateAccessibilityProvider(AceType::RawPtr(frameNode)));
+    ASSERT_FALSE(provider_null);
+    /**
+     * @tc.steps: step5. call DisposeAccessibilityProvider after get Native XComponent
+     * @tc.expected: return nullptr
+     */
+    XComponentModelNG::DisposeAccessibilityProvider(provider);
+    ASSERT_TRUE(pattern->arkuiAccessibilityProvider_);
+    /**
+     * @tc.steps: step6. call DisposeAccessibilityProvider for invalid provider
+     * @tc.expected: dispose failed
+     */
+    pattern->hasGotNativeXComponent_ = false;
+    auto provider_invalid = new ArkUI_AccessibilityProvider();
+    XComponentModelNG::DisposeAccessibilityProvider(provider_invalid);
+    ASSERT_TRUE(pattern->arkuiAccessibilityProvider_);
+    /**
+     * @tc.steps: step7. call DisposeAccessibilityProvider for valid provider
+     * @tc.expected: dispose success
+     */
+    XComponentModelNG::DisposeAccessibilityProvider(provider);
+    ASSERT_FALSE(pattern->arkuiAccessibilityProvider_);
+    delete provider_invalid;
 }
 } // namespace OHOS::Ace::NG

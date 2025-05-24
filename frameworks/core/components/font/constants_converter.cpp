@@ -14,6 +14,7 @@
  */
 
 #include "constants_converter.h"
+#include <cstdint>
 
 #include "rosen_text/hm_symbol_txt.h"
 #include "rosen_text/typography_create.h"
@@ -123,6 +124,27 @@ Rosen::FontStyle ConvertTxtFontStyle(FontStyle fontStyle)
     return convertValue;
 }
 
+Rosen::TextBadgeType ConvertTxtBadgeType(SuperscriptStyle superscript)
+{
+    Rosen::TextBadgeType convertValue;
+    switch (superscript) {
+        case SuperscriptStyle::NORMAL:
+            convertValue = Rosen::TextBadgeType::BADGE_NONE;
+            break;
+        case SuperscriptStyle::SUPERSCRIPT:
+            convertValue = Rosen::TextBadgeType::SUPERSCRIPT;
+            break;
+        case SuperscriptStyle::SUBSCRIPT:
+            convertValue = Rosen::TextBadgeType::SUBSCRIPT;
+            break;
+        default:
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextBadgeType setting error! Now using default TextBadgeType");
+            convertValue = Rosen::TextBadgeType::BADGE_NONE;
+            break;
+    }
+    return convertValue;
+}
+
 Rosen::TextBaseline ConvertTxtTextBaseline(TextBaseline textBaseline)
 {
     Rosen::TextBaseline convertValue;
@@ -225,25 +247,31 @@ SkColor ConvertSkColor(Color color)
     return color.GetValue();
 }
 
-Rosen::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration)
+Rosen::TextDecoration ConvertTxtTextDecoration(const std::vector<TextDecoration>& textDecorations)
 {
     Rosen::TextDecoration convertValue = Rosen::TextDecoration::NONE;
-    switch (textDecoration) {
-        case TextDecoration::NONE:
-            convertValue = Rosen::TextDecoration::NONE;
-            break;
-        case TextDecoration::UNDERLINE:
-            convertValue = Rosen::TextDecoration::UNDERLINE;
-            break;
-        case TextDecoration::OVERLINE:
-            convertValue = Rosen::TextDecoration::OVERLINE;
-            break;
-        case TextDecoration::LINE_THROUGH:
-            convertValue = Rosen::TextDecoration::LINE_THROUGH;
-            break;
-        default:
-            TAG_LOGW(AceLogTag::ACE_FONT, "TextDecoration setting error! Now using default TextDecoration");
-            break;
+    for (TextDecoration textDecoration : textDecorations) {
+        switch (textDecoration) {
+            case TextDecoration::NONE:
+                convertValue = static_cast<Rosen::TextDecoration>(
+                    static_cast<uint32_t>(convertValue) | static_cast<uint32_t>(Rosen::TextDecoration::NONE));
+                break;
+            case TextDecoration::UNDERLINE:
+                convertValue = static_cast<Rosen::TextDecoration>(
+                    static_cast<uint32_t>(convertValue) | static_cast<uint32_t>(Rosen::TextDecoration::UNDERLINE));
+                break;
+            case TextDecoration::OVERLINE:
+                convertValue = static_cast<Rosen::TextDecoration>(
+                    static_cast<uint32_t>(convertValue) | static_cast<uint32_t>(Rosen::TextDecoration::OVERLINE));
+                break;
+            case TextDecoration::LINE_THROUGH:
+                convertValue = static_cast<Rosen::TextDecoration>(
+                    static_cast<uint32_t>(convertValue) | static_cast<uint32_t>(Rosen::TextDecoration::LINE_THROUGH));
+                break;
+            default:
+                TAG_LOGW(AceLogTag::ACE_FONT, "TextDecoration setting error! Now using default TextDecoration");
+                break;
+        }
     }
     return convertValue;
 }
@@ -384,8 +412,8 @@ void ConvertSpacingAndHeigh(
             info.lineHeightScale = lineHeight / fontSize;
         } else {
             info.lineHeightScale = 1;
-            static const int32_t BEGIN_VERSION = 6;
-            auto isBeginVersion = pipelineContext && pipelineContext->GetMinPlatformVersion() >= BEGIN_VERSION;
+            static const int32_t beginVersion = 6;
+            auto isBeginVersion = pipelineContext && pipelineContext->GetMinPlatformVersion() >= beginVersion;
             if (NearZero(lineHeight) || (!isBeginVersion && NearEqual(lineHeight, fontSize))) {
                 info.lineHeightOnly = false;
             }
@@ -463,6 +491,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     txtStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
         textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     txtStyle.fontStyle = ConvertTxtFontStyle(textStyle.GetFontStyle());
+    txtStyle.badgeType = ConvertTxtBadgeType(textStyle.GetSuperscript());
 
     if (textStyle.GetWordSpacing().Unit() == DimensionUnit::PERCENT) {
         txtStyle.wordSpacing = textStyle.GetWordSpacing().Value() * txtStyle.fontSize;
@@ -487,6 +516,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     txtStyle.decoration = ConvertTxtTextDecoration(textStyle.GetTextDecoration());
     txtStyle.decorationColor = ConvertSkColor(textStyle.GetTextDecorationColor());
     txtStyle.decorationStyle = ConvertTxtTextDecorationStyle(textStyle.GetTextDecorationStyle());
+    txtStyle.decorationThicknessScale = static_cast<double>(textStyle.GetLineThicknessScale());
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     txtStyle.halfLeading = textStyle.GetHalfLeading();
 

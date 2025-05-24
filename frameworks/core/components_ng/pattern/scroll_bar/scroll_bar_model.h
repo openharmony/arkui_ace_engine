@@ -36,6 +36,8 @@ public:
     virtual void Create(const RefPtr<ScrollProxy>& proxy, bool infoflag, bool proxyFlag,
         int directionValue, int stateValue, bool isCreateArc = false) = 0;
     virtual void SetEnableNestedScroll(bool enableNestedSroll) = 0;
+    virtual void SetScrollBarColor(const Color& color) = 0;
+    virtual void ResetScrollBarColor() = 0;
 private:
     static std::unique_ptr<ScrollBarModel> instance_;
     static std::mutex mutex_;

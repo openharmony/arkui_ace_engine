@@ -123,6 +123,7 @@ template("ace_core_interfaces_native_node") {
       "node/shape_modifier.cpp",
       "node/side_bar_container_modifier.cpp",
       "node/stepper_item_modifier.cpp",
+      "node/stepper_modifier.cpp",
       "node/swiper_controller_modifier.cpp",
       "node/tab_content_modifier.cpp",
       "node/tabs_modifier.cpp",

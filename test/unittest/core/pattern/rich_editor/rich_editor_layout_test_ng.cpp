@@ -20,6 +20,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/rich_editor/style_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -271,14 +272,6 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm001, TestSize.Level1)
     }
     auto size = layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
     EXPECT_NE(size.value().Width(), 1.0f);
-
-    layoutAlgorithm->spans_.clear();
-    auto size1 = layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(size1.value().Width(), 1.0f);
-
-    richEditorPattern->presetParagraph_ = paragraph;
-    auto size2 = layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(size2.value().Width(), 1.0f);
 }
 
 /**
@@ -326,27 +319,5 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm003, TestSize.Level1)
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
     layoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), 720.0f);
-}
-
-/**
- * @tc.name: RichEditorLayoutAlgorithm004
- * @tc.desc: test RichEditorLayoutAlgorithm
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm004, TestSize.Level1)
-{
-    std::list<RefPtr<SpanItem>> spans;
-    auto paragraphManager = AceType::MakeRefPtr<RichEditorParagraphManager>();
-    auto placeholderSpanItem = AceType::MakeRefPtr<PlaceholderSpanItem>();
-    auto spanItem = AceType::MakeRefPtr<SpanItem>();
-    ASSERT_NE(spanItem, nullptr);
-
-    std::u16string str = u"\n";
-    spanItem->content = str;
-    spans.emplace_back(spanItem);
-    auto layoutAlgorithm = AceType::MakeRefPtr<RichEditorLayoutAlgorithm>(spans, AceType::RawPtr(paragraphManager),
-        std::nullopt, nullptr);
-    ASSERT_NE(layoutAlgorithm, nullptr);
-    EXPECT_NE(*(layoutAlgorithm->allSpans_.begin()), nullptr);
 }
 } // namespace OHOS::Ace::NG

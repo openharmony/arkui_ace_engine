@@ -102,6 +102,7 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
         !(textFieldLayoutProperty->GetFontFamily().has_value())) {
         textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
     }
+    textStyle.SetEnableAutoSpacing(textFieldLayoutProperty->GetEnableAutoSpacingValue(false));
     // use for modifier.
     auto contentModifier = pattern->GetContentModifier();
     CHECK_NULL_VOID(contentModifier);
@@ -726,7 +727,8 @@ ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
         .fontSize = fontSize,
-        .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines()
+        .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines(),
+        .enableAutoSpacing = textStyle.GetEnableAutoSpacing()
     };
 }
 
@@ -769,7 +771,8 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = style->GetTextOverflow(),
         .fontSize = paragraphData.fontSize,
-        .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines() };
+        .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines(),
+        .enableAutoSpacing = textStyle.GetEnableAutoSpacing() };
     if (!paragraphData.disableTextAlign) {
         paraStyle.align = style->GetTextAlign();
     }
@@ -910,7 +913,7 @@ void TextFieldLayoutAlgorithm::SetPropertyToModifier(
     modifier->SetTextColor(textStyle.GetTextColor());
     modifier->SetFontStyle(textStyle.GetFontStyle());
     modifier->SetTextOverflow(textStyle.GetTextOverflow());
-    modifier->SetTextDecoration(textStyle.GetTextDecoration(), textStyle.GetTextDecorationColor(),
+    modifier->SetTextDecoration(textStyle.GetTextDecorationFirst(), textStyle.GetTextDecorationColor(),
         textStyle.GetTextDecorationStyle());
 }
 

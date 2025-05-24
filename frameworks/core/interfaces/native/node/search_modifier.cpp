@@ -23,6 +23,8 @@
 #include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace::NG {
+namespace{
+
 constexpr Dimension DEFAULT_FONT_SIZE = 16.0_fp;
 constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
@@ -903,7 +905,7 @@ void SetSearchAutoCapitalizationMode(ArkUINodeHandle node, ArkUI_Int32 value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetAutoCapitalizationMode(frameNode, static_cast<AutoCapitalizationMode>(value));
+    SearchModelNG::SetAutoCapitalizationMode(frameNode, CastToAutoCapitalizationMode(value));
 }
 
 void ResetSearchAutoCapitalizationMode(ArkUINodeHandle node)
@@ -955,6 +957,22 @@ void ResetSearchStrokeColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::ResetStrokeColor(frameNode);
 }
+
+void SetEnableAutoSpacing(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetEnableAutoSpacing(frameNode, static_cast<bool>(enableAutoSpacing));
+}
+
+void ResetEnableAutoSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetEnableAutoSpacing(frameNode, false);
+}
+
+} // namespace
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
 {
@@ -1069,6 +1087,8 @@ const ArkUISearchModifier* GetSearchModifier()
         .resetSearchStrokeWidth = ResetSearchStrokeWidth,
         .setSearchStrokeColor = SetSearchStrokeColor,
         .resetSearchStrokeColor = ResetSearchStrokeColor,
+        .setEnableAutoSpacing = SetEnableAutoSpacing,
+        .resetEnableAutoSpacing = ResetEnableAutoSpacing,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

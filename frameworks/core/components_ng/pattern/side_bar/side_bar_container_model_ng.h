@@ -27,6 +27,7 @@ public:
     void SetShowSideBar(bool isShow) override;
     void SetShowControlButton(bool showControlButton) override;
     void ParseAndSetWidth(WidthType widthType, Dimension& width, bool isDoubleBind = false) override;
+    void ParseAndSetWidth(WidthType widthType, const RefPtr<ResourceObject>& resObj) override;
     void SetSideBarWidth(const Dimension& sideBarWidth, bool isDoubleBind = false) override;
     void SetMinSideBarWidth(const Dimension& minSideBarWidth) override;
     void SetMaxSideBarWidth(const Dimension& maxSideBarWidth) override;
@@ -43,15 +44,26 @@ public:
         const std::string& hiddenIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap) override;
     void SetControlButtonSwitchingIconInfo(
         const std::string& switchingIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap) override;
+    void SetControlButtonShowIconInfo(
+        const RefPtr<ResourceObject>& showIconResObj, bool isPixelMap, RefPtr<PixelMap> pixMap) override;
+    void SetControlButtonHiddenIconInfo(
+        const RefPtr<ResourceObject>& hiddenIconResObj, bool isPixelMap, RefPtr<PixelMap> pixMap) override;
+    void SetControlButtonSwitchingIconInfo(
+        const RefPtr<ResourceObject>& switchingIconResObj, bool isPixelMap, RefPtr<PixelMap> pixMap) override;
     void ResetControlButtonIconInfo() override;
     void SetOnChange(std::function<void(const bool)>&& onChange) override;
     void SetDividerStrokeWidth(const Dimension& strokeWidth) override;
     void SetDividerColor(const Color& color) override;
     void SetDividerStartMargin(const Dimension& startMargin) override;
     void SetDividerEndMargin(const Dimension& endMargin) override;
+    void SetDividerStrokeWidth(const RefPtr<ResourceObject>& strokeWidthResObj) override;
+    void SetDividerColor(const RefPtr<ResourceObject>& colorResObj) override;
+    void SetDividerStartMargin(const RefPtr<ResourceObject>& startMarginResObj) override;
+    void SetDividerEndMargin(const RefPtr<ResourceObject>& endMarginResObj) override;
     void SetOnChangeEvent(std::function<void(const bool)>&& onChangeEvent) override;
     void SetOnSideBarWidthChangeEvent(OnSideBarWidthChangeEvent&& event) override;
     void SetMinContentWidth(const Dimension& minContentWidth) override;
+    void SetMinContentWidth(const RefPtr<ResourceObject>& resObj) override;
     void ResetControlButton() override;
     static void SetSideBarWidth(FrameNode* frameNode, const Dimension& sideBarWidth);
     static void SetMinSideBarWidth(FrameNode* frameNode, const Dimension& minSideBarWidth);
@@ -79,8 +91,12 @@ public:
     static void ResetControlButtonLeft(FrameNode* frameNode);
     static void ResetControlButtonIconInfo(FrameNode* frameNode);
     static bool IsDoubleBindBlock(const RefPtr<SideBarContainerPattern>& sideBarContainerPattern);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(const bool)>&& onChange);
 private:
     void MarkNeedInitRealSideBarWidth() override;
+    void SetSideBarWidth(const RefPtr<ResourceObject>& sideBarWidth);
+    void SetMinSideBarWidth(const RefPtr<ResourceObject>& minSideBarWidth);
+    void SetMaxSideBarWidth(const RefPtr<ResourceObject>& maxSideBarWidth);
     static void MarkNeedInitRealSideBarWidth(FrameNode* frameNode);
     static bool sideBarWidthDoubleBind_;
 };

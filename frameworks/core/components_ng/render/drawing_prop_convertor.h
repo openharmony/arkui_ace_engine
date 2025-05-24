@@ -33,7 +33,7 @@ RSTextDirection ToRSTextDirection(const TextDirection& txtDir);
 RSTextAlign ToRSTextAlign(const TextAlign& align);
 RSWordBreakType ToRSWordBreakType(const WordBreak& wordBreak);
 RSTextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextStyle& textStyle);
-RSTextDecoration ToRSTextDecoration(TextDecoration textDecoration);
+RSTextDecoration ToRSTextDecoration(const std::vector<TextDecoration>& textDecoration);
 RSFontWeight ToRSFontWeight(FontWeight fontWeight);
 RSEllipsisMode ToRSEllipsisMode(EllipsisMode modal);
 } // namespace OHOS::Ace

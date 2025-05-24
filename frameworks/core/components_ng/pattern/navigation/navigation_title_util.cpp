@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 
 #include "base/i18n/localization.h"
+#include "base/subwindow/subwindow_manager.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utf_helper.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
@@ -62,6 +64,9 @@ bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, const RefPtr<Nav
     MenuParam menuParam;
     menuParam.isShowInSubWindow = false;
     menuParam.placement = Placement::BOTTOM_RIGHT;
+     if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
+        menuParam.isShowInSubWindow = true;
+    }
     NavigationMenuOptions menuOptions = navDestinationPattern->GetMenuOptions();
     if (menuOptions.mbOptions.bgOptions.blurStyleOption.has_value()) {
         menuParam.backgroundBlurStyleOption = menuOptions.mbOptions.bgOptions.blurStyleOption.value();
@@ -71,7 +76,7 @@ bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, const RefPtr<Nav
     }
     auto barMenuNode = MenuView::Create(
         std::move(params), menuItemNode->GetId(), menuItemNode->GetTag(), MenuType::NAVIGATION_MENU, menuParam);
-    BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode);
+    BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode, menuParam);
     auto iconNode = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
     InitTitleBarButtonEvent(menuItemNode, iconNode, true);
 
@@ -168,14 +173,17 @@ uint32_t NavigationTitleUtil::GetOrInitMaxMenuNums(
 }
 
 void NavigationTitleUtil::BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode,
-    const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& barMenuNode)
+    const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& barMenuNode, const MenuParam& menuParam)
 {
     auto eventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto context = PipelineContext::GetCurrentContext();
-    auto clickCallback = [weakContext = WeakPtr<PipelineContext>(context), id = barItemNode->GetId(),
-                             weakMenu = WeakPtr<FrameNode>(barMenuNode)]() {
+    auto clickCallback = [weakContext = WeakPtr<PipelineContext>(context), 
+                            id = barItemNode->GetId(),
+                            param = menuParam,
+                            weakMenu = WeakPtr<FrameNode>(barMenuNode),
+                            weakBarItemNode = WeakPtr<BarItemNode>(barItemNode)]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
 
@@ -184,7 +192,19 @@ void NavigationTitleUtil::BuildMoreItemNodeAction(const RefPtr<FrameNode>& butto
 
         auto menu = weakMenu.Upgrade();
         CHECK_NULL_VOID(menu);
-        overlayManager->ShowMenu(id, OffsetF(0.0f, 0.0f), menu);
+
+        auto barItemNode = weakBarItemNode.Upgrade();
+        OffsetF offset(0.0f, 0.0f);
+        if (param.isShowInSubWindow) {
+            auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+            if (wrapperPattern && wrapperPattern->GetMenuStatus() == MenuStatus::ON_HIDE_ANIMATION) {
+                //if on hide animation, avoid displaying the menu again
+                return;
+            }
+            SubwindowManager::GetInstance()->ShowMenuNG(menu, param, barItemNode, offset);
+            return;
+        }
+        overlayManager->ShowMenu(id, offset, menu);
     };
     eventHub->SetItemAction(clickCallback);
 

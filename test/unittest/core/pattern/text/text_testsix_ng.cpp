@@ -49,13 +49,14 @@ HWTEST_F(TextTestSixNg, UseSelfStyle001, TestSize.Level1)
     textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
     fontStyle->UpdateTextShadow({ textShadow });
     fontStyle->UpdateItalicFontStyle(Ace::FontStyle::ITALIC);
+    fontStyle->UpdateSuperscript(SuperscriptStyle::SUBSCRIPT);
     fontStyle->UpdateFontWeight(Ace::FontWeight::W200);
     std::vector<std::string> fontFamilies;
     fontFamilies.emplace_back("Arial");
     fontFamilies.emplace_back("Calibri");
     fontStyle->UpdateFontFamily(fontFamilies);
     fontStyle->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
-    fontStyle->UpdateTextDecoration(TextDecoration::OVERLINE);
+    fontStyle->UpdateTextDecoration({TextDecoration::OVERLINE});
     fontStyle->UpdateTextDecorationColor(Color::WHITE);
     fontStyle->UpdateTextDecorationStyle(TextDecorationStyle::SOLID);
     fontStyle->UpdateTextCase(TextCase::LOWERCASE);

@@ -227,6 +227,34 @@ JSRef<JSObject> JsGestureJudgeFunction::CreateGestureEventObject(
     obj->SetPropertyObject("fingerList", fingerArr);
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
+    CreateFingerInfosObject(info, obj);
+    return obj;
+}
+
+JSRef<JSObject> JsGestureJudgeFunction::CreateFingerInfosObject(
+    const std::shared_ptr<BaseGestureEvent>& info, JSRef<JSObject>& obj)
+{
+    JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
+    const std::list<FingerInfo>& fingerList = info->GetFingerList();
+    std::list<FingerInfo> notTouchFingerList;
+    std::vector<JSRef<JSObject>> validFingers;
+    for (const FingerInfo& fingerInfo : fingerList) {
+        JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
+        if (fingerInfo.sourceType_ == SourceType::TOUCH && fingerInfo.sourceTool_ == SourceTool::FINGER) {
+            validFingers.emplace_back(element);
+        } else {
+            notTouchFingerList.emplace_back(fingerInfo);
+        }
+    }
+    for (size_t i = 0; i < validFingers.size(); ++i) {
+        fingerArr->SetValueAt(i, validFingers[i]);
+    }
+    auto idx = validFingers.size();
+    for (const FingerInfo& fingerInfo : notTouchFingerList) {
+        JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
+        fingerArr->SetValueAt(idx++, element);
+    }
+    obj->SetPropertyObject("fingerInfos", fingerArr);
     return obj;
 }
 } // namespace OHOS::Ace::Framework

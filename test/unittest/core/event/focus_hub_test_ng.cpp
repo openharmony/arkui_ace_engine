@@ -2523,4 +2523,55 @@ HWTEST_F(FocusHubTestNg, GetKeyProcessingMode002, TestSize.Level1)
     auto result = focusHub->GetKeyProcessingMode();
     EXPECT_EQ(result, static_cast<int32_t>(KeyProcessingMode::ANCESTOR_EVENT));
 }
+
+/**
+ * @tc.name: FocusHubPaintColorTest001
+ * @tc.desc: Test the function GetPaintColorFromBox
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubPaintColorTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create focusHub.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    Color expectPaintColor;
+    Color resultPaintColor;
+
+    /**
+     * @tc.steps: step2. Test without anything.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<AppTheme>()));
+    auto appTheme = context->GetTheme<AppTheme>();
+    appTheme->focusColor_ = Color::GREEN;
+    expectPaintColor = Color::GREEN;
+    focusHub->GetPaintColorFromBox(resultPaintColor);
+    EXPECT_EQ(expectPaintColor, resultPaintColor);
+
+    /**
+     * @tc.steps: step3. Test with custom paintColor.
+     */
+    auto testFocusPaintParams = std::make_unique<FocusPaintParam>();
+    testFocusPaintParams->paintColor = Color::BLACK;
+    expectPaintColor = Color::BLACK;
+    focusHub->focusPaintParamsPtr_ = std::move(testFocusPaintParams);
+    focusHub->GetPaintColorFromBox(resultPaintColor);
+    EXPECT_EQ(expectPaintColor, resultPaintColor);
+
+    /**
+     * @tc.steps: step4. Test with custom paintColor and focusbox.
+     */
+    FocusBoxStyle style = { Color::RED };
+    expectPaintColor = Color::RED;
+    focusHub->GetFocusBox().SetStyle(style);
+    focusHub->GetPaintColorFromBox(resultPaintColor);
+    EXPECT_EQ(expectPaintColor, resultPaintColor);
+}
 } // namespace OHOS::Ace::NG 

@@ -26,6 +26,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/render/mock_render_surface.h"
+#include "test/mock/core/rosen/testing_canvas_utils.h"
 #include "test/mock/core/manager/mock_display_manager.h"
 
 #include "base/memory/ace_type.h"
@@ -1724,5 +1725,72 @@ HWTEST_F(XComponentTestTwoNg, ToJsonValueTest, TestSize.Level1)
     EXPECT_EQ(JsonValue->GetString("enableTransparentLayer"), "true");
     EXPECT_EQ(std::stof(JsonValue->GetString("screenId")), 12345);
     EXPECT_EQ(JsonValue->GetString("renderFit"), "RenderFit.RESIZE_FILL");
+}
+
+/**
+ * @tc.name: LockCanvasTest
+ * @tc.desc: Test LockCanvas Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, LockCanvasTest, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create XComponent
+     * @tc.expected: Create XComponent Successfully
+     */
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->nativeWindow_ = new int();
+
+    /**
+     * @tc.step2: Call LockCanvasTest Func
+     * @tc.expected: first call's returnValue is not nullptr and second call's returnValue is nullptr
+     */
+    auto canvas = pattern->LockCanvas();
+    EXPECT_TRUE(canvas);
+    canvas = pattern->LockCanvas();
+    EXPECT_FALSE(canvas);
+    
+    // clear variables on the stack to prevent memory leaks
+    RSCanvasUtils::UnlockCanvas(canvas, reinterpret_cast<OHNativeWindow*>(pattern->nativeWindow_));
+    delete reinterpret_cast<int*>(pattern->nativeWindow_);
+    pattern->nativeWindow_ = nullptr;
+}
+
+/**
+ * @tc.name: UnlockCanvasAndPostTest
+ * @tc.desc: Test UnlockCanvasAndPost Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, UnlockCanvasAndPostTest, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create XComponent
+     * @tc.expected: Create XComponent Successfully
+     */
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->nativeWindow_ = new int();
+
+    /**
+     * @tc.step2: Call UnlockCanvasAndPost Func
+     * @tc.expected: returnValue is false
+     */
+    auto canvas = pattern->LockCanvas();
+    EXPECT_TRUE(canvas);
+    pattern->UnlockCanvasAndPost(canvas);
+    EXPECT_FALSE(Testing::TestingCanvasUtils::GetInstance()->lockCanvas);
+    pattern->UnlockCanvasAndPost(canvas);
+    EXPECT_FALSE(Testing::TestingCanvasUtils::GetInstance()->lockCanvas);
+
+    // clear variables on the stack to prevent memory leaks
+    delete reinterpret_cast<int*>(pattern->nativeWindow_);
+    pattern->nativeWindow_ = nullptr;
 }
 } // namespace OHOS::Ace::NG

@@ -23,7 +23,6 @@
 #include "core/animation/spring_curve.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/animation_option.h"
-#include "core/components/refresh/refresh_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_property.h"
@@ -78,6 +77,10 @@ void RefreshPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToBounds(true);
     host->GetRenderContext()->UpdateClipEdge(true);
+    isHigherVersion_ = Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    refreshTheme_ = context->GetTheme<RefreshTheme>();
 }
 
 bool RefreshPattern::OnDirtyLayoutWrapperSwap(
@@ -122,7 +125,7 @@ void RefreshPattern::OnModifyDone()
     InitPanEvent(gestureHub);
     InitOnKeyEvent();
     InitChildNode();
-    if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
+    if (isHigherVersion_) {
         InitOffsetProperty();
     } else {
         triggerLoadingDistance_ = static_cast<float>(
@@ -139,7 +142,7 @@ RefPtr<LayoutAlgorithm> RefreshPattern::CreateLayoutAlgorithm()
     auto refreshLayoutAlgorithm = MakeRefPtr<RefreshLayoutAlgorithm>();
     if (isCustomBuilderExist_) {
         refreshLayoutAlgorithm->SetCustomBuilderIndex(0);
-        if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
+        if (isHigherVersion_) {
             refreshLayoutAlgorithm->SetBuilderMeasureBaseHeight(builderMeasureBaseHeight_);
         } else {
             refreshLayoutAlgorithm->SetCustomBuilderOffset(customBuilderOffset_);
@@ -183,10 +186,6 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     };
     PanDirection panDirection;
     panDirection.type = PanDirection::VERTICAL;
-    if (panEvent_) {
-        gestureHub->RemovePanEvent(panEvent_);
-    }
-
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
@@ -230,14 +229,11 @@ void RefreshPattern::InitProgressNode()
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateLoadingProgressOwner(LoadingProgressOwner::REFRESH);
-    auto context = host->GetContext();
-    if (context) {
-        auto theme = context->GetTheme<RefreshTheme>();
-        if (theme) {
-            loadingProgressSizeTheme_ = theme->GetProgressDiameter();
-            triggerLoadingDistanceTheme_ = theme->GetLoadingDistance();
-            progressPaintProperty->UpdateColor(theme->GetProgressColor());
-        }
+
+    if (refreshTheme_) {
+        loadingProgressSizeTheme_ = refreshTheme_->GetProgressDiameter();
+        triggerLoadingDistanceTheme_ = refreshTheme_->GetLoadingDistance();
+        progressPaintProperty->UpdateColor(refreshTheme_->GetProgressColor());
     }
     auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
@@ -278,12 +274,9 @@ void RefreshPattern::InitProgressColumn()
     loadingTextLayoutProperty->UpdateMaxLines(1);
     loadingTextLayoutProperty->UpdateMaxFontScale(2.0f);
     loadingTextLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<RefreshTheme>();
-    CHECK_NULL_VOID(theme);
-    loadingTextLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
-    loadingTextLayoutProperty->UpdateFontSize(theme->GetTextStyle().GetFontSize());
+    CHECK_NULL_VOID(refreshTheme_);
+    loadingTextLayoutProperty->UpdateTextColor(refreshTheme_->GetTextStyle().GetTextColor());
+    loadingTextLayoutProperty->UpdateFontSize(refreshTheme_->GetTextStyle().GetFontSize());
 
     PaddingProperty textpadding;
     textpadding.top = CalcLength(loadingProgressSizeTheme_.ConvertToPx());
@@ -303,20 +296,35 @@ void RefreshPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(progressChild_);
     auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<RefreshTheme>();
-    CHECK_NULL_VOID(theme);
+    refreshTheme_ = pipelineContext->GetTheme<RefreshTheme>();
+    CHECK_NULL_VOID(refreshTheme_);
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
-    progressPaintProperty->UpdateColor(theme->GetProgressColor());
+    progressPaintProperty->UpdateColor(refreshTheme_->GetProgressColor());
     if (hasLoadingText_) {
         CHECK_NULL_VOID(loadingTextNode_);
         auto textLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateFontSize(theme->GetTextStyle().GetFontSize());
-        textLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
+        textLayoutProperty->UpdateFontSize(refreshTheme_->GetTextStyle().GetFontSize());
+        textLayoutProperty->UpdateTextColor(refreshTheme_->GetTextStyle().GetTextColor());
     }
+}
+
+void RefreshPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    if (isCustomBuilderExist_ || !hasLoadingText_) {
+        return;
+    }
+    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(loadingTextNode_);
+    auto textLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue());
+    loadingTextNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void RefreshPattern::InitChildNode()
@@ -331,7 +339,7 @@ void RefreshPattern::InitChildNode()
     auto accessibilityLevel = accessibilityProperty->GetAccessibilityLevel();
     if (!progressChild_) {
         InitProgressNode();
-        if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
+        if (isHigherVersion_) {
             CHECK_NULL_VOID(progressChild_);
             auto progressContext = progressChild_->GetRenderContext();
             CHECK_NULL_VOID(progressContext);
@@ -386,7 +394,7 @@ void RefreshPattern::RefreshStatusChangeEffect()
 void RefreshPattern::QuickStartFresh()
 {
     UpdateRefreshStatus(RefreshStatus::REFRESH);
-    if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
+    if (isHigherVersion_) {
         QuickFirstChildAppear();
         return;
     }
@@ -401,7 +409,7 @@ void RefreshPattern::QuickStartFresh()
 void RefreshPattern::QuickEndFresh()
 {
     SwitchToFinish();
-    if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
+    if (isHigherVersion_) {
         QuickFirstChildDisappear();
         return;
     }
@@ -426,7 +434,7 @@ bool RefreshPattern::OnKeyEvent(const KeyEvent& event)
 
 void RefreshPattern::HandleDragStart(bool isDrag, float mainSpeed)
 {
-    if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
+    if (isHigherVersion_) {
         isSourceFromAnimation_ = !isDrag;
         ResetAnimation();
     } else {
@@ -438,7 +446,7 @@ void RefreshPattern::HandleDragStart(bool isDrag, float mainSpeed)
 ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
 {
     UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, mainSpeed, SceneStatus::RUNNING);
-    if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
+    if (isHigherVersion_) {
         // If dragging does not expand the refresh, there is no need to continue executing the code
         if (NearZero(scrollOffset_) && NonPositive(delta)) {
             return { delta, true };
@@ -467,7 +475,7 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
 
 void RefreshPattern::HandleDragEnd(float speed)
 {
-    if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
+    if (isHigherVersion_) {
         SpeedTriggerAnimation(speed);
     } else {
         HandleDragEndLowVersion();
@@ -495,14 +503,11 @@ float RefreshPattern::CalculatePullDownRatio()
         return 1.0f;
     }
     if (!ratio_.has_value()) {
-        auto context = GetContext();
-        CHECK_NULL_RETURN(context, 1.0f);
-        auto refreshTheme = context->GetTheme<RefreshTheme>();
-        CHECK_NULL_RETURN(refreshTheme, 1.0f);
+        CHECK_NULL_RETURN(refreshTheme_, 1.0f);
         if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-            ratio_ = refreshTheme->GetGreatApiRatio();
+            ratio_ = refreshTheme_->GetGreatApiRatio();
         } else {
-            ratio_ = refreshTheme->GetRatio();
+            ratio_ = refreshTheme_->GetRatio();
         }
     }
     auto gamma = scrollOffset_ / contentHeight;
@@ -966,7 +971,7 @@ RefreshAnimationState RefreshPattern::GetLoadingProgressStatus()
 void RefreshPattern::ResetAnimation()
 {
     float currentOffset = scrollOffset_;
-    if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
+    if (isHigherVersion_) {
         AnimationOption option;
         option.SetCurve(DEFAULT_CURVE);
         option.SetDuration(0);

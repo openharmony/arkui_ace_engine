@@ -54,7 +54,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
-#include "core/components_ng/pattern/time_picker/toss_animation_controller.h"
+#include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
@@ -3196,8 +3196,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern019, TestSize.Level1)
      * @tc.step: step3. construct columnPattern animationProperties_ and call FlushAnimationTextProperties.
      * @tc.expected: cover branch animationProperties_ size is 1 and fontSize meet expectation.
      */
-    std::vector<TimeTextProperties> animationProperties;
-    TimeTextProperties properties1;
+    std::vector<TextProperties> animationProperties;
+    TextProperties properties1;
     properties1.upFontSize = Dimension(FONT_SIZE_5);
     properties1.fontSize = Dimension(FONT_SIZE_20);
     properties1.downFontSize = Dimension(FONT_SIZE_5);
@@ -3218,7 +3218,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern019, TestSize.Level1)
      * @tc.step: step4. add construct columnPattern animationProperties_ and call FlushAnimationTextProperties.
      * @tc.expected: cover branch animationProperties_ size is more than 1 and fontSize meet expectation.
      */
-    TimeTextProperties properties2;
+    TextProperties properties2;
     properties2.upFontSize = Dimension(FONT_SIZE_10);
     properties2.fontSize = Dimension(FONT_SIZE_20);
     properties2.downFontSize = Dimension(FONT_SIZE_10);

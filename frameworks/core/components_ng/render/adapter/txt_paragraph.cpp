@@ -75,7 +75,9 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
     }
     style.isEndAddParagraphSpacing = paraStyle.isEndAddParagraphSpacing;
     style.paragraphSpacing = paraStyle.paragraphSpacing.ConvertToPx();
+    style.enableAutoSpace = paraStyle.enableAutoSpacing;
     style.defaultTextStyleUid = paraStyle.textStyleUid;
+    style.isTrailingSpaceOptimized = paraStyle.optimizeTrailingSpace;
     if (paraStyle.isOnlyBetweenLines) {
         style.textHeightBehavior =
             paraStyle.isFirstParagraphLineSpacing

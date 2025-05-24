@@ -665,6 +665,14 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     }
 }
 
+void PipelineContext::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle)
+{
+    if (MockPipelineContext::GetCurrent()->UseFlushUITasks()) 
+    {
+        taskScheduler_->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
+    }
+}
+
 void PipelineContext::AddPendingDeleteCustomNode(const RefPtr<CustomNode>& node) {}
 
 void PipelineContext::AddLayoutNode(const RefPtr<FrameNode>& layoutNode) {}
@@ -1057,6 +1065,13 @@ ColorMode PipelineContext::GetColorMode() const
     return MockContainer::mockColorMode_;
 }
 
+const RefPtr<NodeRenderStatusMonitor>& PipelineContext::GetNodeRenderStatusMonitor()
+{
+    if (!nodeRenderStatusMonitor_) {
+        nodeRenderStatusMonitor_ = AceType::MakeRefPtr<NodeRenderStatusMonitor>();
+    }
+    return nodeRenderStatusMonitor_;
+}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -1319,8 +1334,6 @@ bool NG::PipelineContext::GetContainerControlButtonVisible()
 }
 
 void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}
-
-void NG::PipelineContext::UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode) {}
 
 RefPtr<Kit::UIContext> NG::PipelineContext::GetUIContext()
 {

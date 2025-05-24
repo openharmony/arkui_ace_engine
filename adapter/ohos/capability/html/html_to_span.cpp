@@ -14,6 +14,7 @@
  */
 
 #include "html_to_span.h"
+#include <sstream>
 
 #include "core/text/html_utils.h"
 
@@ -77,6 +78,18 @@ FontStyle StringToFontStyle(const std::string& fontStyle)
     return fontStyle == "italic" ? FontStyle::ITALIC : FontStyle::NORMAL;
 }
 
+SuperscriptStyle StringToSuperscriptStyle(const std::string& superscriptStyle)
+{
+    if (superscriptStyle == "superscript") {
+        return SuperscriptStyle::SUPERSCRIPT;
+    } else if (superscriptStyle == "subscript") {
+        return SuperscriptStyle::SUBSCRIPT;
+    } else if (superscriptStyle == "normal") {
+        return SuperscriptStyle::NORMAL;
+    }
+    return SuperscriptStyle::NONE;
+}
+
 TextDecorationStyle StringToTextDecorationStyle(const std::string& textDecorationStyle)
 {
     std::string value = StringUtils::TrimStr(textDecorationStyle);
@@ -99,25 +112,33 @@ TextDecorationStyle StringToTextDecorationStyle(const std::string& textDecoratio
     return TextDecorationStyle::SOLID;
 }
 
-TextDecoration StringToTextDecoration(const std::string& textDecoration)
+std::vector<TextDecoration> StringToTextDecoration(const std::string& textDecoration)
 {
-    std::string value = StringUtils::TrimStr(textDecoration);
-    if (value == "inherit") {
-        return TextDecoration::INHERIT;
+    std::istringstream ss(textDecoration);
+    std::string tmp;
+    std::vector<std::string> decorations;
+    while (std::getline(ss, tmp, ' ')) {
+        decorations.emplace_back(tmp);
     }
-    if (value == "line-through") {
-        return TextDecoration::LINE_THROUGH;
+    std::vector<TextDecoration> result;
+    for (const auto &its : decorations) {
+        std::string value = StringUtils::TrimStr(its);
+        TextDecoration decoration;
+        if (value == "inherit") {
+            decoration = TextDecoration::INHERIT;
+        }
+        if (value == "line-through") {
+            decoration = TextDecoration::LINE_THROUGH;
+        }
+        if (value == "overline") {
+            decoration = TextDecoration::OVERLINE;
+        }
+        if (value == "underline") {
+            decoration = TextDecoration::UNDERLINE;
+        }
+        result.push_back(decoration);
     }
-    if (value == "none") {
-        return TextDecoration::NONE;
-    }
-    if (value == "overline") {
-        return TextDecoration::OVERLINE;
-    }
-    if (value == "underline") {
-        return TextDecoration::UNDERLINE;
-    }
-    return TextDecoration::NONE;
+    return result;
 }
 
 ImageFit ConvertStrToFit(const std::string& fit)
@@ -248,12 +269,19 @@ void HtmlToSpan::InitFont(
     } else if (key == "font-family") {
         font->fontFamilies = ParseFontFamily(value);
     } else if (key == "font-variant") { // not support
-    }
+    } else if (key == "stroke-width") {
+        font->strokeWidth = FromString(value);
+    } else if (key == "stroke-color") {
+        font->strokeColor = ToSpanColor(value);
+    } else if (key == "font-superscript") {
+        font->superscript = StringToSuperscriptStyle(value);
+    } 
 }
 
 bool HtmlToSpan::IsFontAttr(const std::string& key)
 {
-    if (key == "font-size" || key == "font-weight" || key == "font-style" || key == "font-family" || key == "color") {
+    if (key == "font-size" || key == "font-weight" || key == "font-style" || key == "font-family" ||
+        key == "color" || key == "stroke-width" || key == "stroke-color" || key == "font-superscript") {
         return true;
     }
     return false;
@@ -871,6 +899,10 @@ void HtmlToSpan::AddStyleSpan(const std::string& element, SpanInfo& info)
     std::map<std::string, StyleValue> styles;
     if (element == "strong") {
         InitFont("font-weight", "bold", "font", styles);
+    } else if (element == "sup") {
+        InitFont("font-superscript", "superscript", "font", styles);
+    } else if (element == "sub") {
+        InitFont("font-superscript", "subscript", "font", styles);
     }
 
     for (auto [key, value] : styles) {
@@ -1064,9 +1096,11 @@ RefPtr<SpanBase> HtmlToSpan::MakeDimensionSpan(const SpanInfo& info, StyleValue&
 RefPtr<SpanBase> HtmlToSpan::MakeDecorationSpan(const SpanInfo& info, StyleValue& value)
 {
     auto style = Get<DecorationSpanParam>(&value);
+    std::optional<TextDecorationOptions> options;
     if (style != nullptr) {
         return AceType::MakeRefPtr<DecorationSpan>(
-            style->decorationType, style->color, style->decorationSytle, info.start, info.end);
+            std::vector<TextDecoration>({style->decorationType}), style->color,
+            style->decorationSytle, 1.0f, options, info.start, info.end);
     }
 
     return nullptr;

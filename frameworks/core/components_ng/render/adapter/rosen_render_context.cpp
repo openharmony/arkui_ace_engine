@@ -42,6 +42,7 @@
 #include "core/animation/native_curve_helper.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/blur_style_theme.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/overlay/accessibility_focus_paint_node_pattern.h"
 #include "core/components_ng/pattern/particle/particle_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -267,10 +268,6 @@ RosenRenderContext::~RosenRenderContext()
 
 void RosenRenderContext::DetachModifiers()
 {
-    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
-    if (pipeline && densityChangedCallbackId_ != DEFAULT_CALLBACK_ID) {
-        pipeline->UnregisterDensityChangedCallback(densityChangedCallbackId_);
-    }
     CHECK_NULL_VOID(rsNode_ && rsNode_->GetType() == Rosen::RSUINodeType::SURFACE_NODE);
     if (transitionEffect_) {
         transitionEffect_->Detach(this);
@@ -283,6 +280,7 @@ void RosenRenderContext::DetachModifiers()
             rsNode_->RemoveModifier(modifier);
         }
     }
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
     if (pipeline) {
         pipeline->RequestFrame();
     }
@@ -781,6 +779,12 @@ void RosenRenderContext::OnForegroundColorUpdate(const Color& value)
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetEnvForegroundColor(value.GetValue());
     RequestNextFrame();
+    if (SystemProperties::ConfigChangePerform()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pattern = host->GetPattern();
+        pattern->OnForegroundColorUpdate();
+    }
 }
 
 void RosenRenderContext::OnForegroundEffectUpdate(float radius)
@@ -1058,6 +1062,44 @@ bool RosenRenderContext::UpdateBlurBackgroundColor(const std::optional<EffectOpt
     return blurEnable;
 }
 
+void RosenRenderContext::UpdateBlurStyleForColorMode(
+    const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [weak = AceType::WeakClaim(this), bgBlurStyle, sysOptions](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto render = weak.Upgrade();
+        CHECK_NULL_VOID(render);
+        CHECK_NULL_VOID(render->rsNode_);
+        const auto& groupProperty = render->GetOrCreateBackground();
+        if (groupProperty->CheckBlurStyleOption(bgBlurStyle) && groupProperty->CheckSystemAdaptationSame(sysOptions)) {
+            // Same with previous value.
+            // If colorMode is following system and has valid blurStyle, still needs updating
+            if (bgBlurStyle->colorMode != ThemeColorMode::SYSTEM) {
+                return;
+            }
+            if (bgBlurStyle->blurOption.grayscale.size() > 1) {
+                Rosen::Vector2f grayScale(bgBlurStyle->blurOption.grayscale[0], bgBlurStyle->blurOption.grayscale[1]);
+                render->rsNode_->SetGreyCoef(grayScale);
+            }
+        } else {
+            groupProperty->propBlurStyleOption = bgBlurStyle;
+            groupProperty->propSysOptions = sysOptions;
+        }
+        if (!render->UpdateBlurBackgroundColor(bgBlurStyle)) {
+            render->rsNode_->SetBackgroundFilter(nullptr);
+            return;
+        }
+        render->SetBackBlurFilter();
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("backgroundBlurStyle.blurStyle", resObj, std::move(updateFunc));
+}
+
 void RosenRenderContext::UpdateBackBlurStyle(
     const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions)
 {
@@ -1077,7 +1119,9 @@ void RosenRenderContext::UpdateBackBlurStyle(
         groupProperty->propBlurStyleOption = bgBlurStyle;
         groupProperty->propSysOptions = sysOptions;
     }
-
+    if (SystemProperties::ConfigChangePerform()) {
+        UpdateBlurStyleForColorMode(bgBlurStyle, sysOptions);
+    }
     if (!UpdateBlurBackgroundColor(bgBlurStyle)) {
         rsNode_->SetBackgroundFilter(nullptr);
         return;
@@ -2540,30 +2584,8 @@ void RosenRenderContext::SetBorderRadius(const BorderRadiusProperty& value)
     RequestNextFrame();
 }
 
-void RosenRenderContext::RegisterDensityChangedCallback()
-{
-    if (densityChangedCallbackId_ == DEFAULT_CALLBACK_ID) {
-        auto context = GetPipelineContext();
-        CHECK_NULL_VOID(context);
-        densityChangedCallbackId_ = context->RegisterDensityChangedCallback(
-            [self = WeakClaim(this)](double density) {
-            auto renderContext = self.Upgrade();
-            CHECK_NULL_VOID(renderContext);
-            auto borderRadius = renderContext->GetBorderRadius();
-            if (borderRadius.has_value()) {
-                renderContext->SetBorderRadius(borderRadius.value());
-            }
-            auto outerBorderRadius = renderContext->GetOuterBorderRadius();
-            if (outerBorderRadius.has_value()) {
-                renderContext->SetOuterBorderRadius(outerBorderRadius.value());
-            }
-        });
-    }
-}
-
 void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
 {
-    RegisterDensityChangedCallback();
     CHECK_NULL_VOID(isSynced_);
     SetBorderRadius(value);
 }
@@ -2657,7 +2679,6 @@ void RosenRenderContext::SetDashWidth(const BorderWidthProperty& value)
 
 void RosenRenderContext::OnOuterBorderRadiusUpdate(const BorderRadiusProperty& value)
 {
-    RegisterDensityChangedCallback();
     SetOuterBorderRadius(value);
 }
 
@@ -5079,10 +5100,11 @@ void RosenRenderContext::SetContentClip(const std::variant<RectF, RefPtr<ShapeRe
 {
     CHECK_NULL_VOID(rsNode_);
     RectF rectF;
+    Rosen::Vector4f clipRect;
     if (std::holds_alternative<RectF>(rect)) {
         rectF = std::get<RectF>(rect);
-        rsNode_->SetCustomClipToFrame(
-            { rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height() });
+        clipRect =
+            Rosen::Vector4f{ rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height() };
     } else {
         auto shape = std::get<RefPtr<ShapeRect>>(rect);
         CHECK_NULL_VOID(shape);
@@ -5097,11 +5119,31 @@ void RosenRenderContext::SetContentClip(const std::variant<RectF, RefPtr<ShapeRe
         const float height =
             helper::DrawingDimensionToPx(shape->GetHeight(), paintRect_.GetSize(), LengthMode::VERTICAL);
         rectF = RectF(x, y, width, height);
-        rsNode_->SetCustomClipToFrame({ x, y, x + width, y + height });
+        clipRect = Rosen::Vector4f{ x, y, x + width, y + height };
+    }
+    if (!customClipToFrameModifier_) {
+        auto prop = std::make_shared<RSAnimatableProperty<Rosen::Vector4f>>(clipRect);
+        customClipToFrameModifier_ = std::make_shared<Rosen::RSCustomClipToFrameModifier>(prop);
+        rsNode_->AddModifier(customClipToFrameModifier_);
+    } else {
+        auto property = std::static_pointer_cast<RSAnimatableProperty<Rosen::Vector4f>>(
+            customClipToFrameModifier_->GetProperty());
+        property->Set(clipRect);
     }
     if (!contentClip_ || rectF != *contentClip_) {
         contentClip_ = std::make_unique<RectF>(rectF);
         GetHost()->AddFrameNodeChangeInfoFlag(FRAME_NODE_CONTENT_CLIP_CHANGE);
+    }
+}
+
+void RosenRenderContext::ResetContentClip()
+{
+    if (customClipToFrameModifier_) {
+        rsNode_->RemoveModifier(customClipToFrameModifier_);
+        customClipToFrameModifier_.reset();
+    }
+    if (contentClip_) {
+        contentClip_.reset();
     }
 }
 
@@ -6784,20 +6826,15 @@ void RosenRenderContext::OnAttractionEffectUpdate(const AttractionEffect& effect
     RequestNextFrame();
 }
 
-void RosenRenderContext::UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& KeyOcclusionNode)
+void RosenRenderContext::UpdateOcclusionCullingStatus(bool enable)
 {
     CHECK_NULL_VOID(rsNode_);
-    auto rsRootNode = rsNode_->ReinterpretCastTo<Rosen::RSRootNode>();
-    CHECK_NULL_VOID(rsRootNode);
-    if (KeyOcclusionNode == nullptr) {
-        rsRootNode->UpdateOcclusionCullingStatus(enable, 0);
-        return;
-    }
-    auto rosenRenderContext = DynamicCast<RosenRenderContext>(KeyOcclusionNode->renderContext_);
-    CHECK_NULL_VOID(rosenRenderContext);
-    auto keyRsNode = rosenRenderContext->GetRSNode();
-    CHECK_NULL_VOID(keyRsNode);
-    rsRootNode->UpdateOcclusionCullingStatus(enable, keyRsNode->GetId());
+    const auto keyOcclusionNodeId = rsNode_->GetId();
+    LOGD("RosenRenderContext::UpdateOcclusionCullingStatus enable %{public}d, "
+        "keyOcclusionId %{public}" PRIu64, enable, keyOcclusionNodeId);
+    ACE_SCOPED_TRACE("RosenRenderContext::UpdateOcclusionCullingStatus"
+        "enable %d, keyOcclusionId %" PRIu64, enable, keyOcclusionNodeId);
+    rsNode_->UpdateOcclusionCullingStatus(enable, keyOcclusionNodeId);
 }
 
 PipelineContext* RosenRenderContext::GetPipelineContext() const

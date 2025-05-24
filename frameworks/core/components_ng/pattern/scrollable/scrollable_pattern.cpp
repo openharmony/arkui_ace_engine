@@ -1179,6 +1179,14 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
         if (barColor) {
             scrollBar_->SetForegroundColor(barColor.value());
         }
+        auto scrollableBarMargin = property->GetScrollBarMargin();
+        if (scrollableBarMargin) {
+            auto scrollBarMargin = scrollBar_->GetScrollBarMargin();
+            if (!scrollBarMargin.has_value() || scrollBarMargin != scrollableBarMargin) {
+                scrollBar_->SetScrollBarMargin(scrollableBarMargin.value());
+                scrollBar_->FlushBarWidth();
+            }
+        }
     }
 }
 
@@ -2942,16 +2950,16 @@ void ScrollablePattern::SuggestOpIncGroup(bool flag)
     if (host->GetSuggestOpIncActivatedOnce()) {
         return;
     }
-    flag = flag && isVertical();
-    if (flag) {
-        ACE_SCOPED_TRACE("SuggestOpIncGroup %s", host->GetHostTag().c_str());
-        auto parent = host->GetAncestorNodeOfFrame(false);
-        CHECK_NULL_VOID(parent);
-        parent->SetSuggestOpIncActivatedOnce();
-        // get 1st layer
-        std::string path("\\>");
-        host->FindSuggestOpIncNode(path, host->GetGeometryNode()->GetFrameSize(), 0);
+    auto parent = host->GetParent();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+    while (parent) {
+        if (frameNode && frameNode->GetSuggestOpIncMarked()) {
+            frameNode->MarkSuggestOpIncGroup(false, false);
+        }
+        parent = parent->GetParent();
+        frameNode = AceType::DynamicCast<FrameNode>(parent);
     }
+    host->SetSuggestOpIncActivatedOnce();
 }
 
 void ScrollablePattern::OnScrollStop(

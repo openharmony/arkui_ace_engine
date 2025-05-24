@@ -352,6 +352,8 @@ public:
 
     bool DumpRSNodeByStringID(const std::vector<std::string>& params);
 
+    bool DumpExistDarkRes(const std::vector<std::string>& params);
+
     bool OnDumpInfo(const std::vector<std::string>& params);
 
     void TriggerGarbageCollection() override;
@@ -573,10 +575,6 @@ public:
     {
         isFormRender_ = isFormRender;
     }
-
-    void SetAppRunningUniqueId(const std::string& uniqueId) override;
-
-    const std::string& GetAppRunningUniqueId() const override;
 
     void InitializeSubContainer(int32_t parentContainerId);
     static void SetDialogCallback(int32_t instanceId, FrontendDialogCallback callback);
@@ -826,6 +824,9 @@ public:
     bool GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent) override;
 
     Rect GetDisplayAvailableRect() const override;
+    
+    // Get the available rect of the full screen.
+    Rect GetFoldExpandAvailableRect() const override;
 
     void GetExtensionConfig(AAFwk::WantParams& want);
 
@@ -850,7 +851,7 @@ public:
         foldStatusFromListener_ = GetCurrentFoldStatus();
     }
 
-    void DispatchExtensionDataToHostWindow(uint32_t code, const AAFwk::Want& data, int32_t persistenId);
+    void DispatchExtensionDataToHostWindow(uint32_t code, const AAFwk::Want& data, int32_t persistentId);
 
     void DistributeIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
         const std::function<void()>&& loadPageCallback);
@@ -962,8 +963,6 @@ private:
     AbilityOnQueryCallback abilityOnQueryCallback_ = nullptr;
 
     std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;
-
-    std::string uniqueId_;
 
     // For custom drag event
     std::mutex pointerEventMutex_;

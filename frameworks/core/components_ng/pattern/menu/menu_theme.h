@@ -39,6 +39,7 @@ constexpr float MENU_MAX_FONT_SIZE_SCALE = 3.2f;
 constexpr int32_t MENU_TEXT_MAX_LINES = std::numeric_limits<int32_t>::max();
 constexpr int32_t SUB_MENU_SHOW_DELAY_DURATION = 300;
 constexpr int32_t SUB_MENU_HIDE_DELAY_DURATION = 500;
+constexpr uint32_t MENU_MASK_COLOR = 0x33182431;
 
 /**
  * MenuTheme defines styles of menu item. MenuTheme should be built
@@ -60,6 +61,8 @@ public:
                 return theme;
             }
             theme->symbolId_ = themeConstants->GetSymbolByName("sys.symbol.checkmark");
+            theme->embeddedExpandIconId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_down");
+            theme->stackExpandIconId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_forward");
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -75,7 +78,7 @@ public:
                 LOGE("Pattern of menu is null, please check!");
                 return;
             }
-            theme->previewMenuMaskColor_ = pattern->GetAttr<Color>("preview_menu_mask_color", Color(0x33182431));
+            theme->previewMenuMaskColor_ = pattern->GetAttr<Color>("preview_menu_mask_color", Color(MENU_MASK_COLOR));
             theme->bgBlurEffectEnable_ =
                 StringUtils::StringToInt(pattern->GetAttr<std::string>("menu_bg_blur_effect_enable", "0"));
             theme->bgEffectSaturation_ = pattern->GetAttr<double>("menu_blur_effect_saturation", 1.0);
@@ -404,6 +407,16 @@ public:
         return menuHapticFeedback_;
     }
 
+    uint32_t GetEmbeddedExpandIconId() const
+    {
+        return embeddedExpandIconId_;
+    }
+
+    uint32_t GetStackExpandIconId() const
+    {
+        return stackExpandIconId_;
+    }
+
 protected:
     MenuTheme() = default;
 
@@ -460,6 +473,8 @@ private:
     ShadowStyle menuShadowStyle_ = ShadowStyle::OuterDefaultMD;
     int menuBackGroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
     std::string menuHapticFeedback_;
+    uint32_t embeddedExpandIconId_ = 0;
+    uint32_t stackExpandIconId_ = 0;
 };
 
 } // namespace OHOS::Ace::NG

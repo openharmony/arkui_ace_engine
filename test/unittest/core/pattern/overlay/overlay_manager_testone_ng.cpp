@@ -313,11 +313,14 @@ HWTEST_F(OverlayManagerTestOneNG, SheetSpringBack001, TestSize.Level1)
     auto sheetNode = FrameNode::CreateFrameNode(
         V2::SHEET_PAGE_TAG, -1, AceType::MakeRefPtr<SheetPresentationPattern>(-1, V2::BUTTON_ETS_TAG, nullptr));
     ASSERT_NE(sheetNode, nullptr);
+    auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->UpdateSheetType();
+    pattern->UpdateSheetObject(pattern->GetSheetTypeNoProcess());
+    ASSERT_NE(pattern->GetSheetObject(), nullptr);
     overlayManager->dismissTarget_ = DismissTarget(SheetKey(-1));
     overlayManager->sheetMap_.emplace(SheetKey(-1), Ace::Referenced::WeakClaim(Ace::Referenced::RawPtr(sheetNode)));
     overlayManager->SheetSpringBack();
-    auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(pattern, nullptr);
     EXPECT_FALSE(pattern->isDismissProcess_);
 }
 
@@ -439,9 +442,13 @@ HWTEST_F(OverlayManagerTestOneNG, UpdateSheetPage001, TestSize.Level1)
     auto sheetNode = FrameNode::CreateFrameNode(
         V2::SHEET_PAGE_TAG, 1, AceType::MakeRefPtr<SheetPresentationPattern>(1, V2::BUTTON_ETS_TAG, nullptr));
     ASSERT_NE(sheetNode, nullptr);
+    auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetNodePattern, nullptr);
+    sheetNodePattern->UpdateSheetType();
+    sheetNodePattern->UpdateSheetObject(sheetNodePattern->GetSheetTypeNoProcess());
+    ASSERT_NE(sheetNodePattern->GetSheetObject(), nullptr);
     overlayManager->UpdateSheetPage(sheetNode, sheetStyle, 2, false, false, nullptr, nullptr, nullptr, nullptr, nullptr,
         nullptr, nullptr, nullptr, nullptr, nullptr);
-    auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
     overlayManager->UpdateSheetPage(sheetNode, sheetStyle, 1, false, false, nullptr, nullptr, nullptr, nullptr, nullptr,
         nullptr, nullptr, nullptr, nullptr, nullptr);
     EXPECT_EQ(sheetNodePattern->GetSheetType(), SheetType::SHEET_BOTTOM);

@@ -127,6 +127,7 @@ public:
     void ClearMenu();
     void ClearMenuNG(int32_t instanceId = -1, int32_t targetId = -1, bool inWindow = true, bool showAnimation = false);
     void ClearPopupInSubwindow(int32_t instanceId = -1, bool isForceClear = false);
+    void ClearAllMenuPopup(int32_t instanceId);
     ACE_FORCE_EXPORT RefPtr<NG::FrameNode> ShowDialogNG(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc);
     RefPtr<NG::FrameNode> ShowDialogNGWithNode(const DialogProperties& dialogProps,
@@ -262,6 +263,7 @@ private:
     RefPtr<Subwindow> currentDialogSubwindow_;
     Rect uiExtensionWindowRect_;
     bool isSuperFoldDisplayDevice_ = false;
+    bool expandDisplay_ = false;
 
     std::mutex maskSubwindowMutex_;
     std::unordered_map<int32_t, RefPtr<Subwindow>> maskSubWindowMap_;

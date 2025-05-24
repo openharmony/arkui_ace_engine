@@ -420,7 +420,7 @@ HWTEST_F(TextFieldUXTest, TextAreaTextDecoration001, TestSize.Level1)
     EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
     pattern_->PerformAction(textInputAction, false);
 
-    EXPECT_EQ(layoutProperty_->GetTextDecoration(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(layoutProperty_->GetTextDecorationFirst(), TextDecoration::LINE_THROUGH);
     EXPECT_EQ(layoutProperty_->GetTextDecorationColor(), Color::BLUE);
     EXPECT_EQ(layoutProperty_->GetTextDecorationStyle(), TextDecorationStyle::DOTTED);
 }
@@ -1771,5 +1771,34 @@ HWTEST_F(TextFieldUXTest, TextAreaMaxFontScale001, TestSize.Level1)
     pattern_->PerformAction(textInputAction, false);
 
     EXPECT_EQ(layoutProperty_->GetMaxFontScale(), 2.0);
+}
+
+/**
+ * @tc.name: TextFieldEnableAutoSpacing
+ * @tc.desc: Test the enable or disable the EnableAutoSpacing attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextFieldEnableAutoSpacing, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoSpacing(true);
+    });
+    /**
+     * @tc.expected: Get EnableAutoSpacing Value
+     */
+    EXPECT_EQ(layoutProperty_->GetEnableAutoSpacing(), true);
+    EXPECT_EQ(TextFieldModelNG::GetEnableAutoSpacing(AceType::RawPtr(frameNode_)), true);
+    /**
+     * @tc.expected: Set EnableAutoSpacing False
+     */
+    TextFieldModelNG::SetEnableAutoSpacing(AceType::RawPtr(frameNode_), false);
+    /**
+     * @tc.expected: Get EnableAutoSpacing Value
+     */
+    EXPECT_EQ(layoutProperty_->GetEnableAutoSpacing(), false);
+    EXPECT_EQ(TextFieldModelNG::GetEnableAutoSpacing(AceType::RawPtr(frameNode_)), false);
 }
 } // namespace OHOS::Ace::NG

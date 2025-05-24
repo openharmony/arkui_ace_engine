@@ -1293,33 +1293,6 @@ HWTEST_F(TextFieldPatternTest, TextPattern053, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextPattern054
- * @tc.desc: test testInput text ParseFillContentJsonValue
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTest, TextPattern054, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. create target node.
-     */
-    CreateTextField();
-    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
-    ASSERT_NE(textFieldNode, nullptr);
-    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    std::unordered_map<std::string, std::variant<std::string, bool, int32_t>> fillContentMap;
-    auto jsonObj = JsonUtil::ParseJsonString("fillContent");
-    pattern->ParseFillContentJsonValue(jsonObj, fillContentMap);
-    auto jsonObject = JsonUtil::Create(true);
-    pattern->ParseFillContentJsonValue(jsonObject, fillContentMap);
-    const char* a = "a";
-    jsonObject->Put(a, 1);
-    pattern->ParseFillContentJsonValue(jsonObject, fillContentMap);
-}
-
-/**
  * @tc.name: TextPattern055
  * @tc.desc: test testInput text GetTextPaintOffset
  * @tc.type: FUNC
@@ -2413,6 +2386,54 @@ HWTEST_F(TextFieldPatternTest, TextPattern104, TestSize.Level1)
     EXPECT_EQ(pattern->selectController_->GetCaretIndex(), 1);
     EXPECT_EQ(pattern->selectController_->GetStartIndex(), 1);
     EXPECT_EQ(pattern->selectController_->GetEndIndex(), 1);
+}
+
+/**
+ * @tc.name: TextPattern105
+ * @tc.desc: Test TextPattern HandleSelectionParagraghBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern105, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern IsShowHandle
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->selectController_->caretInfo_.index = 1;
+    pattern->contentController_->SetTextValue(u"12345\n67890");
+    pattern->HandleSelectionParagraghBegin();
+    pattern->selectController_->caretInfo_.index = 9;
+    pattern->contentController_->SetTextValue(u"12345\n67890");
+    pattern->HandleSelectionParagraghBegin();
+}
+
+/**
+ * @tc.name: TextPattern106
+ * @tc.desc: Test TextPattern HandleSelectionParagraghEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern106, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern IsShowHandle
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->selectController_->caretInfo_.index = 1;
+    pattern->contentController_->SetTextValue(u"12345\n67890");
+    pattern->HandleSelectionParagraghEnd();
+    pattern->selectController_->caretInfo_.index = 9;
+    pattern->contentController_->SetTextValue(u"12345\n67890");
+    pattern->HandleSelectionParagraghEnd();
 }
 
 /**

@@ -38,6 +38,8 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -308,6 +310,7 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSDatePicker>::StaticMethod("create", &JSDatePicker::Create, opt);
     JSClass<JSDatePicker>::StaticMethod("lunar", &JSDatePicker::SetLunar);
+    JSClass<JSDatePicker>::StaticMethod("canLoop", &JSDatePicker::SetCanLoop);
     JSClass<JSDatePicker>::StaticMethod("onChange", &JSDatePicker::OnChange);
     JSClass<JSDatePicker>::StaticMethod("onDateChange", &JSDatePicker::OnDateChange);
     JSClass<JSDatePicker>::StaticMethod("backgroundColor", &JSDatePicker::PickerBackgroundColor);
@@ -370,6 +373,15 @@ void JSDatePicker::SetLunar(bool isLunar)
     DatePickerModel::GetInstance()->SetShowLunar(isLunar);
 }
 
+void JSDatePicker::SetCanLoop(const JSCallbackInfo& info)
+{
+    bool value = true;
+    if (info.Length() >= 1 && info[0]->IsBoolean()) {
+        value = info[0]->ToBoolean();
+    }
+    DatePickerModel::GetInstance()->SetCanLoop(value);
+}
+
 void JSDatePicker::UseMilitaryTime(bool isUseMilitaryTime)
 {
     DatePickerModel::GetInstance()->SetHour24(isUseMilitaryTime);
@@ -414,6 +426,20 @@ void JSDatePicker::IsUserDefinedFontFamily(const std::string& pos)
     }
 }
 
+void JSDatePicker::ParseTextStyleFontSize(const JSRef<JSVal>& fontSize, NG::PickerTextStyle& textStyle)
+{
+    if (fontSize->IsNull() || fontSize->IsUndefined()) {
+        textStyle.fontSize = Dimension(-1);
+    } else {
+        CalcDimension size;
+        if (!ParseJsDimensionFp(fontSize, size, textStyle.fontSizeResObj) || size.Unit() == DimensionUnit::PERCENT) {
+            textStyle.fontSize = Dimension(-1);
+        } else {
+            textStyle.fontSize = size;
+        }
+    }
+}
+
 void JSDatePicker::ParseTextStyle(
     const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle, const std::string& pos)
 {
@@ -421,7 +447,7 @@ void JSDatePicker::ParseTextStyle(
     auto fontOptions = paramObj->GetProperty("font");
 
     Color textColor;
-    if (JSViewAbstract::ParseJsColor(fontColor, textColor)) {
+    if (JSViewAbstract::ParseJsColor(fontColor, textColor, textStyle.textColorResObj)) {
         textStyle.textColor = textColor;
     }
 
@@ -433,16 +459,8 @@ void JSDatePicker::ParseTextStyle(
     auto fontWeight = fontObj->GetProperty("weight");
     auto fontFamily = fontObj->GetProperty("family");
     auto fontStyle = fontObj->GetProperty("style");
-    if (fontSize->IsNull() || fontSize->IsUndefined()) {
-        textStyle.fontSize = Dimension(-1);
-    } else {
-        CalcDimension size;
-        if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
-            textStyle.fontSize = Dimension(-1);
-        } else {
-            textStyle.fontSize = size;
-        }
-    }
+
+    ParseTextStyleFontSize(fontSize, textStyle);
 
     if (!fontWeight->IsNull() && !fontWeight->IsUndefined()) {
         std::string weight;
@@ -456,7 +474,7 @@ void JSDatePicker::ParseTextStyle(
 
     if (!fontFamily->IsNull() && !fontFamily->IsUndefined()) {
         std::vector<std::string> families;
-        if (ParseJsFontFamilies(fontFamily, families)) {
+        if (ParseJsFontFamilies(fontFamily, families, textStyle.fontFamilyResObj)) {
             textStyle.fontFamily = families;
             IsUserDefinedFontFamily(pos);
         }
@@ -479,6 +497,10 @@ void JSDatePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "disappearTextStyle");
     }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        DatePickerModel::GetInstance()->ParseDisappearTextStyleResObj(textStyle);
+    }
     DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
 
@@ -489,6 +511,10 @@ void JSDatePicker::SetTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "textStyle");
+    }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        DatePickerModel::GetInstance()->ParseNormalTextStyleResObj(textStyle);
     }
     DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
@@ -509,6 +535,10 @@ void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
+    }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        DatePickerModel::GetInstance()->ParseSelectedTextStyleResObj(textStyle);
     }
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
     if (textStyle.textColor.has_value() && theme->IsCircleDial()) {
@@ -1081,6 +1111,12 @@ void JSDatePickerDialog::UpdateDatePickerSettingData(
         }
     }
     settingData.mode = datePickerMode;
+    auto isLoop = paramObject->GetProperty("canLoop");
+    if (isLoop->IsBoolean()) {
+        settingData.canLoop = isLoop->ToBoolean();
+    } else {
+        settingData.canLoop = true;
+    }
 
     auto dateTimeOptionsValue = paramObject->GetProperty("dateTimeOptions");
     if (dateTimeOptionsValue->IsObject()) {
@@ -1585,6 +1621,10 @@ void JSTimePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "disappearTextStyleTime");
     }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        TimePickerModel::GetInstance()->ParseDisappearTextStyleResObj(textStyle);
+    }
     TimePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
 
@@ -1596,6 +1636,10 @@ void JSTimePicker::SetTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "textStyleTime");
     }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        TimePickerModel::GetInstance()->ParseNormalTextStyleResObj(textStyle);
+    }
     TimePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
@@ -1606,6 +1650,10 @@ void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "selectedTextStyleTime");
+    }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        TimePickerModel::GetInstance()->ParseSelectedTextStyleResObj(textStyle);
     }
     TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
     if (textStyle.textColor.has_value() && theme->IsCircleDial()) {

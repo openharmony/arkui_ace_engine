@@ -28,6 +28,7 @@ constexpr float GRID_WIDTH = 480.0f;
 constexpr float GRID_HEIGHT = 800.0f;
 constexpr float ITEM_WIDTH = 120.0f;
 constexpr float ITEM_HEIGHT = 200.0f;
+constexpr int32_t DEFAULT_BADGE_NUM = 2;
 } // namespace
 
 void DragAnimationHelperTestNg::SetUpTestSuite()
@@ -690,26 +691,17 @@ HWTEST_F(DragAnimationHelperTestNg, CreateBadgeTextNodeTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ShowMenuHideAnimation001
- * @tc.desc: Test ShowMenuHideAnimation
+ * @tc.name: CreateTextNode001
+ * @tc.desc: Test CreateTextNode
  * @tc.type: FUNC
  */
-HWTEST_F(DragAnimationHelperTestNg, ShowMenuHideAnimation001, TestSize.Level1)
+HWTEST_F(DragAnimationHelperTestNg, CreateTextNode001, TestSize.Level1)
 {
-    auto imageNode = FrameNode::GetOrCreateFrameNode(
-        V2::IMAGE_ETS_TAG, GetElmtId(), []() { return AceType::MakeRefPtr<Pattern>(); });
-    ASSERT_NE(imageNode, nullptr);
-    DragPreviewOption previewOption;
-    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::DEFAULT;
-    imageNode->SetDragPreviewOptions(previewOption);
     PreparedInfoForDrag data;
-    DragAnimationHelper::ShowMenuHideAnimation(imageNode, data);
-    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_TRANSITION;
-    imageNode->SetDragPreviewOptions(previewOption);
-    auto menuNode = FrameNode::GetOrCreateFrameNode(
-        V2::MENU_TAG, GetElmtId(), []() { return AceType::MakeRefPtr<MenuPattern>(0, "", MenuType::MENU); });
-    data.menuNode = menuNode;
-    DragAnimationHelper::ShowMenuHideAnimation(imageNode, data);
-    EXPECT_EQ(data.menuNode, menuNode);
+    data.badgeNumber = DEFAULT_BADGE_NUM;
+    EXPECT_EQ(data.textRowNode, nullptr);
+    DragAnimationHelper::CreateTextNode(data);
+    data.deviceType = SourceType::MOUSE;
+    EXPECT_NE(data.textRowNode, nullptr);
 }
 } // namespace OHOS::Ace::NG

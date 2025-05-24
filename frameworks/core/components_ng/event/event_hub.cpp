@@ -77,12 +77,14 @@ void EventHub::SetSupportedStates(UIState state)
     stateStyleMgr_->SetSupportedStates(state);
 }
 
-void EventHub::AddSupportedUIStateWithCallback(UIState state, std::function<void(uint64_t)>& callback, bool isInner)
+void EventHub::AddSupportedUIStateWithCallback(
+    UIState state, std::function<void(uint64_t)>& callback, bool isInner, bool excludeInner)
 {
     if (!stateStyleMgr_) {
         stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
     }
-    stateStyleMgr_->AddSupportedUIStateWithCallback(state, callback, isInner);
+    stateStyleMgr_->AddSupportedUIStateWithCallback(state, callback, isInner, excludeInner);
+    AddPressedListener();
 }
 
 void EventHub::RemoveSupportedUIState(UIState state, bool isInner)
@@ -173,13 +175,18 @@ void EventHub::FireEnabledTask()
     }
 }
 
+void EventHub::AddPressedListener()
+{
+    if (stateStyleMgr_ && stateStyleMgr_->HasStateStyle(UI_STATE_PRESSED)) {
+        GetOrCreateGestureEventHub()->AddTouchEvent(stateStyleMgr_->GetPressedListener());
+    }
+}
+
 void EventHub::MarkModifyDone()
 {
     if (stateStyleMgr_) {
         // focused style is managered in focus event hub.
-        if (stateStyleMgr_->HasStateStyle(UI_STATE_PRESSED)) {
-            GetOrCreateGestureEventHub()->AddTouchEvent(stateStyleMgr_->GetPressedListener());
-        }
+        AddPressedListener();
         if (stateStyleMgr_->HasStateStyle(UI_STATE_DISABLED)) {
             if (enabled_) {
                 stateStyleMgr_->ResetCurrentUIState(UI_STATE_DISABLED);
@@ -359,6 +366,7 @@ void EventHub::ClearCustomerOnDragFunc()
 {
     onDragStart_ = nullptr;
     customerOnDragEnter_ = nullptr;
+    customerOnDragSpringLoading_ = nullptr;
     customerOnDragLeave_ = nullptr;
     customerOnDragMove_ = nullptr;
     customerOnDrop_ = nullptr;
@@ -373,6 +381,11 @@ void EventHub::ClearCustomerOnDragStart()
 void EventHub::ClearCustomerOnDragEnter()
 {
     customerOnDragEnter_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragSpringLoading()
+{
+    customerOnDragSpringLoading_ = nullptr;
 }
 
 void EventHub::ClearCustomerOnDragMove()
@@ -817,6 +830,16 @@ void EventHub::SetOnDragEnter(OnDragFunc&& onDragEnter)
     onDragEnter_ = std::move(onDragEnter);
 }
 
+void EventHub::SetCustomerOnDragSpringLoading(OnDrapDropSpringLoadingFunc&& onDragSpringLoading)
+{
+    customerOnDragSpringLoading_ = std::move(onDragSpringLoading);
+}
+
+const OnDrapDropSpringLoadingFunc& EventHub::GetCustomerOnDragSpringLoading() const
+{
+    return customerOnDragSpringLoading_;
+}
+
 void EventHub::SetOnDragLeave(OnDragFunc&& onDragLeave)
 {
     onDragLeave_ = std::move(onDragLeave);
@@ -885,6 +908,11 @@ bool EventHub::HasCustomerOnDragEnd() const
 bool EventHub::HasCustomerOnDrop() const
 {
     return customerOnDrop_ != nullptr;
+}
+
+bool EventHub::HasCustomerOnDragSpringLoading() const
+{
+    return customerOnDragSpringLoading_ != nullptr;
 }
 
 void EventHub::SetDisableDataPrefetch(bool disableDataPrefetch)

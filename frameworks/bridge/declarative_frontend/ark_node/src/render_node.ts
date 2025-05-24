@@ -133,7 +133,8 @@ interface CommandPath {
 class LengthMetrics {
   public unit: LengthUnit;
   public value: number;
-  constructor(value: number, unit?: LengthUnit) {
+  public res: Resource;
+  constructor(value: number, unit?: LengthUnit, res?: Resource) {
       if (unit in LengthUnit) {
           this.unit = unit;
           this.value = value;
@@ -141,6 +142,7 @@ class LengthMetrics {
           this.unit = LengthUnit.VP;
           this.value = unit === undefined? value : 0;
       }
+      this.res = res === undefined ? undefined : res;
   }
   static px(value: number) {
       return new LengthMetrics(value, LengthUnit.PX);
@@ -159,7 +161,7 @@ class LengthMetrics {
   }
   static resource(res: Resource) {
     let length:Array<number> = getUINativeModule().nativeUtils.resoureToLengthMetrics(res);
-    return new LengthMetrics(length[0], length[1]);
+    return new LengthMetrics(length[0], length[1], res);
   }
 }
 

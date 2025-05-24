@@ -97,14 +97,14 @@ public:
     static RefPtr<RepeatVirtualScroll2Node> GetOrCreateRepeatNode(int32_t nodeId, uint32_t arrLen, uint32_t totalCount,
         const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
         const std::function<void(IndexType, IndexType)>& onRecycleItems,
-        const std::function<void(int32_t, int32_t, int32_t, int32_t, bool)>& onActiveRange,
+        const std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)>& onActiveRange,
         const std::function<void(IndexType, IndexType)>& onMoveFromTo,
         const std::function<void()>& onPurge);
 
     RepeatVirtualScroll2Node(int32_t nodeId, uint32_t arrLen, int32_t totalCount,
         const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
         const std::function<void(IndexType, IndexType)>& onRecycleItems,
-        const std::function<void(int32_t, int32_t, int32_t, int32_t, bool)>& onActiveRange,
+        const std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)>& onActiveRange,
         const std::function<void(IndexType, IndexType)>& onMoveFromTo,
         const std::function<void()>& onPurge);
 
@@ -214,6 +214,8 @@ public:
 
     void OnConfigurationUpdate(const ConfigurationChange& configurationChange) override;
 
+    void NotifyColorModeChange(uint32_t colorMode) override;
+
     void SetJSViewActive(bool active = true, bool isLazyForEachNode = false, bool isReuse = false) override;
     void PaintDebugBoundaryTreeAll(bool flag) override;
 
@@ -300,12 +302,23 @@ private:
     bool forceRunDoSetActiveRange_ = false;
 
     std::function<void(IndexType, IndexType)> onRecycleItems_;
-    std::function<void(int32_t, int32_t, int32_t, int32_t, bool)> onActiveRange_;
+    std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange_;
     std::function<void(IndexType, IndexType)> onMoveFromTo_;
     std::function<void()> onPurge_;
 
     // true in the time from requesting idle / predict task until exec predict tsk.
     bool postUpdateTaskHasBeenScheduled_;
+
+    // record the minimum index called by getFrameChildByIndex.
+    uint32_t minFrameChildIndex_ = 0;
+
+    // record the maximum index called by getFrameChildByIndex.
+    uint32_t maxFrameChildIndex_ = 0;
+
+    // mark the first time record minFrameChildIndex and maxFrameChildIndex after doSetActiveChildRange is called.
+    bool needRecordFirstFrameChild_ = true;
+
+    void updateFrameChildIndexRecord(uint32_t index);
 
     ACE_DISALLOW_COPY_AND_MOVE(RepeatVirtualScroll2Node);
 };

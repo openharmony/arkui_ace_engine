@@ -1859,4 +1859,43 @@ HWTEST_F(OverlayManagerPopupTestNg, ToastTest001, TestSize.Level1)
     overlayManager->ShowToast(toastInfo, nullptr);
     EXPECT_FALSE(overlayManager->toastMap_.empty());
 }
+
+/**
+ * @tc.name: HideAllPopupsWithoutAnimation001
+ * @tc.desc: Test OverlayManager::HideAllPopupsWithoutAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, HideAllPopupsWithoutAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_2);
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+    
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
+    overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_FALSE(overlayManager->PopupInteractiveDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId1);
+    overlayManager->HideAllPopupsWithoutAnimation();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+}
 } // namespace OHOS::Ace::NG

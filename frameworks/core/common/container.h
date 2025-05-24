@@ -85,14 +85,6 @@ public:
 
     virtual void Destroy() = 0;
 
-    virtual void SetAppRunningUniqueId(const std::string& uniqueId) {};
-
-    virtual const std::string& GetAppRunningUniqueId() const
-    {
-        static const std::string res;
-        return res;
-    }
-
     virtual bool IsKeyboard()
     {
         return false;
@@ -760,6 +752,11 @@ public:
     virtual std::vector<Rect> GetCurrentFoldCreaseRegion();
 
     virtual Rect GetDisplayAvailableRect() const
+    {
+        return Rect();
+    }
+
+    virtual Rect GetFoldExpandAvailableRect() const
     {
         return Rect();
     }

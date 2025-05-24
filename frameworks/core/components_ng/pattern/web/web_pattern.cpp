@@ -48,7 +48,6 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine_ext.h"
-#include "core/common/ai/data_detector_mgr.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/container.h"
 #include "core/common/ime/input_method_manager.h"
@@ -542,20 +541,27 @@ std::shared_ptr<WebPreviewSelectionMenuParam> WebPattern::GetPreviewSelectionMen
 
 void WebPattern::GetPreviewImageOffsetAndSize(bool isImage, Offset& previewOffset, SizeF& previewSize)
 {
+    CHECK_NULL_VOID(contextMenuParam_);
+    int32_t x = 0;
+    int32_t y = 0;
+    int32_t width = 0;
+    int32_t height = 0;
+    contextMenuParam_->GetImageRect(x, y, width, height);
     if (isImage) {
-        CHECK_NULL_VOID(contextMenuParam_);
-        int32_t x = 0;
-        int32_t y = 0;
-        int32_t width = 0;
-        int32_t height = 0;
-        contextMenuParam_->GetImageRect(x, y, width, height);
         previewOffset.SetX((float)x);
         previewOffset.SetY((float)y);
         previewSize.SetWidth((float)width);
         previewSize.SetHeight((float)height);
     } else {
-        previewSize.SetWidth(drawSize_.Width());
-        previewSize.SetHeight(drawSize_.Height());
+        previewOffset.SetX((float)x);
+        previewOffset.SetY((float)y);
+        if (width == 0 && height == 0) {
+            previewSize.SetWidth(drawSize_.Width());
+            previewSize.SetHeight(drawSize_.Height());
+        } else {
+            previewSize.SetWidth((float)width);
+            previewSize.SetHeight((float)height);
+        }
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -655,6 +661,38 @@ void WebPattern::UpdateImagePreviewParam()
 #endif
 }
 
+void WebPattern::ShowPreviewMenu(WebElementType type) {
+    auto sourceType = contextMenuParam_->GetSourceType();
+    if (sourceType == OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_MOUSE) {
+        curResponseType_ = ResponseType::RIGHT_CLICK;
+    } else if (sourceType == OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_LONG_PRESS) {
+        curResponseType_ = ResponseType::LONG_PRESS;
+    } else {
+        return;
+    }
+    curElementType_ = type;
+    CHECK_NULL_VOID(GetPreviewSelectionMenuParams(curElementType_, curResponseType_));
+    auto host = GetHost();
+    if (!host) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "GetHost failed");
+        delegate_->OnContextMenuHide("");
+        return;
+    }
+    auto previewNode = CreatePreviewImageFrameNode(type == WebElementType::IMAGE);
+    if (!previewNode) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "CreatePreviewImageFrameNode failed");
+        previewImageNodeId_.reset();
+        delegate_->OnContextMenuHide("");
+        return;
+    }
+
+    host->AddChild(previewNode);
+    previewNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    previewNode->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkModifyDone();
+}
+
 void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, bool isRichtext, bool result)
 {
     TAG_LOGI(AceLogTag::ACE_WEB,
@@ -666,6 +704,37 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
     CHECK_NULL_VOID(contextMenuParam_);
     contextMenuResult_ = eventInfo->GetContextMenuResult();
     CHECK_NULL_VOID(contextMenuResult_);
+    bool isImage = false;
+    bool isHyperLink = false;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        int hitTestResult = delegate_->GetHitTestResult();
+        TAG_LOGI(AceLogTag::ACE_WEB, "OnContextMenuShow hitTestResult:%{public}d, isAILink:%{public}d", hitTestResult,
+            contextMenuParam_->IsAILink());
+        switch (static_cast<WebHitTestType>(hitTestResult)) {
+            case WebHitTestType::IMG:
+                isImage = true;
+                break;
+            case WebHitTestType::HTTP_IMG:
+                isImage = true;
+                isHyperLink = true;
+                break;
+            case WebHitTestType::HTTP:
+                isHyperLink = true;
+                break;
+            default:
+                break;
+        }
+
+        // since async hittest, reconfirm
+        isImage = isImage && contextMenuParam_->GetMediaType() ==
+                                 OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_IMAGE;
+        isHyperLink =
+            isHyperLink && !isImage && !contextMenuParam_->GetLinkUrl().empty() && !contextMenuParam_->IsAILink();
+    } else {
+        isImage = (contextMenuParam_->GetLinkUrl().empty() &&
+                   (contextMenuParam_->GetMediaType() ==
+                       OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_IMAGE));
+    }
     if (isRichtext) {
         if (!contextSelectOverlay_) {
             contextSelectOverlay_ = AceType::MakeRefPtr<WebContextSelectOverlay>(WeakClaim(this));
@@ -674,39 +743,10 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
         return;
     }
     CHECK_NULL_VOID(isNewDragStyle_ && result);
-    bool isImage =
-        ((contextMenuParam_->GetMediaType() == OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_IMAGE) &&
-            (contextMenuParam_->GetLinkUrl().empty()));
     if (isImage) {
-        auto sourceType = contextMenuParam_->GetSourceType();
-        if (sourceType == OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_MOUSE) {
-            curResponseType_ = ResponseType::RIGHT_CLICK;
-        } else if (sourceType == OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_LONG_PRESS) {
-            curResponseType_ = ResponseType::LONG_PRESS;
-        } else {
-            return;
-        }
-        curElementType_ = WebElementType::IMAGE;
-        CHECK_NULL_VOID(GetPreviewSelectionMenuParams(curElementType_, curResponseType_));
-        auto host = GetHost();
-        if (!host) {
-            TAG_LOGE(AceLogTag::ACE_WEB, "GetHost failed");
-            delegate_->OnContextMenuHide("");
-            return;
-        }
-        auto previewNode = CreatePreviewImageFrameNode(isImage);
-        if (!previewNode) {
-            TAG_LOGI(AceLogTag::ACE_WEB, "CreatePreviewImageFrameNode failed");
-            previewImageNodeId_.reset();
-            delegate_->OnContextMenuHide("");
-            return;
-        }
-
-        host->AddChild(previewNode);
-        previewNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        previewNode->MarkModifyDone();
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        host->MarkModifyDone();
+        ShowPreviewMenu(WebElementType::IMAGE);
+    } else if (isHyperLink) {
+        ShowPreviewMenu(WebElementType::LINK);
     }
 }
 
@@ -747,6 +787,16 @@ void WebPattern::OnAttachToMainTree()
     InitSlideUpdateListener();
     // report component is in foreground.
     delegate_->OnRenderToForeground();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frontend = pipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->AddToPageEventController(host);
 }
 
 void WebPattern::OnDetachFromMainTree()
@@ -808,11 +858,6 @@ void WebPattern::OnAttachToFrameNode()
     pipeline->RegisterListenerForTranslate(WeakClaim(RawPtr(host)));
     EventRecorder::Get().OnAttachWeb(host);
 #endif
-    auto frontend = pipeline->GetFrontend();
-    CHECK_NULL_VOID(frontend);
-    auto accessibilityManager = frontend->GetAccessibilityManager();
-    CHECK_NULL_VOID(accessibilityManager);
-    accessibilityManager->AddToPageEventController(host);
 }
 
 void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -3690,9 +3735,8 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
     CHECK_NULL_RETURN(safeAreaManager, false);
     bool keyboardSafeAreaEnabled = safeAreaManager->KeyboardSafeAreaEnabled();
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "ProcessVirtualKeyBoard width:%{public}d, height:%{public}d, keyboard:%{public}f, safeArea:%{public}d",
-        width, height, keyboard, keyboardSafeAreaEnabled);
-
+        "ProcessVirtualKeyBoard width:%{public}d, height:%{public}d, keyboard:%{public}f, safeArea:%{public}d", width,
+        height, keyboard, keyboardSafeAreaEnabled);
     if (!isFocus_ || !isVisible_) {
         UpdateOnFocusTextField(false);
         ProcessVirtualKeyBoardHide(width, height, keyboardSafeAreaEnabled);
@@ -3700,9 +3744,10 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
     }
     UpdateOnFocusTextField(!NearZero(keyboard));
     if (NearZero(keyboard)) {
-        return ProcessVirtualKeyBoardHide(width, height, keyboardSafeAreaEnabled);
+        return ProcessVirtualKeyBoardHide(width, height, keyboardSafeAreaEnabled) && UpdateKeyboardSafeArea(true);
     }
-    return ProcessVirtualKeyBoardShow(width, height, keyboard, keyboardSafeAreaEnabled);
+    return ProcessVirtualKeyBoardShow(width, height, keyboard, keyboardSafeAreaEnabled) &&
+           UpdateKeyboardSafeArea(false, keyboard);
 }
 
 void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard, bool isUpdate)
@@ -4063,6 +4108,14 @@ void WebPattern::UpdateEditMenuOptions(
     };
 }
 
+void WebPattern::UpdateDataDetectorConfig(const TextDetectConfig& config)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::UpdateDataDetectorConfig");
+    auto adapter = GetDataDetectorAdapter();
+    CHECK_NULL_VOID(adapter);
+    adapter->SetDataDetectorConfig(config);
+}
+
 void WebPattern::HideHandleAndQuickMenuIfNecessary(bool hide, bool isScroll)
 {
     if (webSelectOverlay_) {
@@ -4074,6 +4127,15 @@ void WebPattern::ChangeVisibilityOfQuickMenu()
 {
     CHECK_NULL_VOID(webSelectOverlay_);
     webSelectOverlay_->ChangeVisibilityOfQuickMenu();
+}
+
+bool WebPattern::ChangeVisibilityOfQuickMenuV2()
+{
+    if (webSelectOverlay_ && webSelectOverlay_->IsShowHandle()) {
+        webSelectOverlay_->ChangeVisibilityOfQuickMenu();
+        return true;
+    }
+    return false;
 }
 
 bool WebPattern::IsQuickMenuShow()
@@ -4090,6 +4152,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     }
     if (webSelectOverlay_->RunQuickMenu(params, callback)) {
         DestroyAnalyzerOverlay();
+        CloseDataDetectorMenu();
         return true;
     }
     return false;
@@ -4749,6 +4812,7 @@ void WebPattern::CloseCustomKeyboard()
     keyboardOverlay_->CloseKeyboard(frameNode->GetId());
     isUsingCustomKeyboardAvoid_ = false;
     TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard CloseCustomKeyboard end");
+    UpdateKeyboardSafeArea(true);
 }
 
 void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp)
@@ -5452,6 +5516,7 @@ void WebPattern::OnVisibleAreaChange(bool isVisible)
         CloseSelectOverlay();
         SelectCancel();
         DestroyAnalyzerOverlay();
+        CloseDataDetectorMenu();
         OnTooltip("");
         isDragEndMenuShow_ = false;
         if (isVisibleActiveEnable_ && (!isDialogNested || !isFocus_)) {
@@ -6645,6 +6710,7 @@ void WebPattern::RemoveDataListNode()
 
 void WebPattern::CloseKeyboard()
 {
+    UpdateKeyboardSafeArea(true);
     InputMethodManager::GetInstance()->CloseKeyboard();
 }
 
@@ -7052,6 +7118,7 @@ bool WebPattern::OnAccessibilityChildTreeDeregister()
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_RETURN(accessibilityManager, false);
     if (treeId_ == 0) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "OnAccessibilityChildTreeDeregister: treeId is 0.");
         return false;
     }
     return accessibilityManager->DeregisterWebInteractionOperationAsChildTree(treeId_);
@@ -7176,6 +7243,14 @@ void WebPattern::OnWebMediaAVSessionEnabledUpdate(bool enable)
     if (delegate_) {
         delegate_->UpdateWebMediaAVSessionEnabled(enable);
     }
+}
+
+void WebPattern::OnEnableDataDetectorUpdate(bool enable)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnEnableDataDetectorUpdate enable:%{public}d", enable);
+    auto adapter = GetDataDetectorAdapter();
+    CHECK_NULL_VOID(adapter);
+    adapter->SetDataDetectorEnable(enable);
 }
 
 void WebPattern::PushOverlayInfo(float x, float y, int32_t id)
@@ -7427,4 +7502,51 @@ void WebPattern::RecoverToTopLeft()
         renderContextForSurface_->SetRenderFit(RenderFit::TOP_LEFT);
     }
 }
+
+RefPtr<WebDataDetectorAdapter> WebPattern::GetDataDetectorAdapter()
+{
+    if (!webDataDetectorAdapter_) {
+        webDataDetectorAdapter_ = AceType::MakeRefPtr<WebDataDetectorAdapter>(WeakClaim(this));
+    }
+    return webDataDetectorAdapter_;
+}
+
+bool WebPattern::GetDataDetectorEnable()
+{
+    if (!webDataDetectorAdapter_) {
+        return false;
+    }
+    return webDataDetectorAdapter_->GetDataDetectorEnable();
+}
+
+void WebPattern::InitDataDetector()
+{
+    CHECK_NULL_VOID(webDataDetectorAdapter_);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::InitDataDetector");
+    webDataDetectorAdapter_->Init();
+}
+
+void WebPattern::CloseDataDetectorMenu()
+{
+    CHECK_NULL_VOID(webDataDetectorAdapter_);
+    webDataDetectorAdapter_->CloseAIMenu();
+}
+bool WebPattern::UpdateKeyboardSafeArea(bool hideOrClose, double height)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, false);
+    auto keyboardInset = safeAreaManager->GetKeyboardInset();
+    if (hideOrClose) {
+        auto newBottom = std::optional<uint32_t>(keyboardInset.end);
+        safeAreaManager->UpdateKeyboardSafeArea(0, newBottom);
+    } else {
+        safeAreaManager->UpdateKeyboardSafeArea(height);
+    }
+    return true;
+}
+
 } // namespace OHOS::Ace::NG

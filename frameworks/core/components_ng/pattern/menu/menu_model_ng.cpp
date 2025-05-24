@@ -36,6 +36,21 @@ void MenuModelNG::Create()
     }
 }
 
+RefPtr<FrameNode> MenuModelNG::CreateMenu()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<InnerMenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MULTI_MENU); });
+    CHECK_NULL_RETURN(menuNode, nullptr);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        auto layoutProps = menuNode->GetLayoutProperty();
+        CHECK_NULL_RETURN(layoutProps, nullptr);
+        layoutProps->UpdateCalcMinSize(CalcSize(CalcLength(MIN_MENU_WIDTH), std::nullopt));
+    }
+    return menuNode;
+}
+
 void MenuModelNG::SetFontSize(const Dimension& fontSize)
 {
     if (fontSize.IsValid()) {
@@ -117,6 +132,23 @@ void MenuModelNG::SetExpandingMode(const SubMenuExpandingMode& expandingMode)
 void MenuModelNG::SetExpandingMode(FrameNode* frameNode, const SubMenuExpandingMode& expandingMode)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ExpandingMode, expandingMode, frameNode);
+}
+
+void MenuModelNG::SetExpandSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& expandSymbol)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto menuProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
+    menuProperty->SetExpandSymbol(expandSymbol);
+}
+
+void MenuModelNG::SetExpandSymbol(FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& expandSymbol)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto menuProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
+    menuProperty->SetExpandSymbol(expandSymbol);
 }
 
 void MenuModelNG::SetItemDivider(const V2::ItemDivider& divider, const DividerMode& mode)

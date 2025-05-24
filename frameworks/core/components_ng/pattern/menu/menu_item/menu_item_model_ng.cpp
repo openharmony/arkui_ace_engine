@@ -74,13 +74,66 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
     CHECK_NULL_VOID(menuItem);
     stack->Push(menuItem);
 
-    // set border radius
-    auto renderContext = menuItem->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
+
+    SetupMenuItemProperties(menuItem, theme); 
+
+    auto buildFunc = menuItemProps.buildFunc;
+    auto pattern = menuItem->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (buildFunc.has_value()) {
+        pattern->SetSubBuilder(buildFunc.value_or(nullptr));
+    }
+
+    UpdateMenuProperty(menuItem, menuItemProps);
+}
+
+RefPtr<FrameNode> MenuItemModelNG::CreateMenuItem(OptionParam&& param, const MenuParam& menuParam)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    int32_t nodeId = stack->ClaimNodeId();
+
+    auto menuItem = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MenuItemPattern>(); });
+    CHECK_NULL_RETURN(menuItem, nullptr);
+
+    auto renderContext = menuItem->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+
+    auto pipeline = menuItem->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+
+    SetupMenuItemProperties(menuItem, theme);
+
+    auto menuProperty = menuItem->GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_RETURN(menuProperty, nullptr);
+    menuProperty->UpdateContent(param.value);
+
+    auto eventHub = menuItem->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    eventHub->SetEnabled(param.enabled);
+
+    auto focusHub = menuItem->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, nullptr);
+    focusHub->SetEnabled(param.enabled);
+
+    GestureEventFunc clickFunc = [action = param.action](GestureEvent& info) { action(); };
+    ViewAbstract::SetOnClick(AceType::RawPtr(menuItem), std::move(clickFunc));
+
+    menuItem->MarkModifyDone();
+    return menuItem;
+}
+
+void MenuItemModelNG::SetupMenuItemProperties(const RefPtr<FrameNode>& menuItem, const RefPtr<SelectTheme>& theme)
+{
+    auto renderContext = menuItem->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     BorderRadiusProperty border;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         border.SetRadius(theme->GetMenuDefaultInnerRadius());
@@ -111,14 +164,6 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
 
         rightRow->MountToParent(menuItem);
     }
-    auto buildFunc = menuItemProps.buildFunc;
-    auto pattern = menuItem->GetPattern<MenuItemPattern>();
-    CHECK_NULL_VOID(pattern);
-    if (buildFunc.has_value()) {
-        pattern->SetSubBuilder(buildFunc.value_or(nullptr));
-    }
-
-    UpdateMenuProperty(menuItem, menuItemProps);
 }
 
 void MenuItemModelNG::UpdateMenuProperty(const RefPtr<NG::FrameNode>& menuItem, const MenuItemProperties& menuItemProps)

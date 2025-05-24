@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
 #include "core/components_ng/pattern/text_picker/textpicker_properties.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -190,6 +191,52 @@ std::vector<ButtonInfo> ParseButtonStyles(const JSRef<JSObject>& paramObject)
 
     return buttonInfos;
 }
+
+bool CheckDividerValue(const Dimension &dimension)
+{
+    if (dimension.Value() >= 0.0f && dimension.Unit() != DimensionUnit::PERCENT) {
+        return true;
+    }
+    return false;
+}
+
+void ParseDivider(JSRef<JSObject>& obj, NG::ItemDivider& divider)
+{
+    Dimension defaultStrokeWidth = 0.0_vp;
+    Dimension defaultMargin = 0.0_vp;
+    Color defaultColor = Color::TRANSPARENT;
+
+    Dimension strokeWidth = defaultStrokeWidth;
+    RefPtr<ResourceObject> strokeWidthResObj;
+    if (ConvertFromJSValueNG(obj->GetProperty("strokeWidth"), strokeWidth, strokeWidthResObj) &&
+        CheckDividerValue(strokeWidth)) {
+        divider.strokeWidth = strokeWidth;
+        divider.strokeWidthResObj = strokeWidthResObj;
+    }
+    
+    Color color = defaultColor;
+    RefPtr<ResourceObject> colorResObj;
+    if (ConvertFromJSValue(obj->GetProperty("color"), color, colorResObj)) {
+        divider.color = color;
+        divider.colorResObj = colorResObj;
+    }
+
+    Dimension startMargin = defaultMargin;
+    RefPtr<ResourceObject> startMarginResObj;
+    if (ConvertFromJSValueNG(obj->GetProperty("startMargin"), startMargin, startMarginResObj) &&
+        CheckDividerValue(startMargin)) {
+        divider.startMargin = startMargin;
+        divider.startMarginResObj = startMarginResObj;
+    }
+
+    Dimension endMargin = defaultMargin;
+    RefPtr<ResourceObject> endMarginResObj;
+    if (ConvertFromJSValueNG(obj->GetProperty("endMargin"), endMargin, endMarginResObj) &&
+        CheckDividerValue(endMargin)) {
+        divider.endMargin = endMargin;
+        divider.endMarginResObj = endMarginResObj;
+    }
+}
 } // namespace
 
 void JSTextPicker::JSBind(BindingTarget globalObj)
@@ -225,6 +272,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSTextPicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextPicker>::StaticMethod("enableHapticFeedback", &JSTextPicker::SetEnableHapticFeedback);
+    JSClass<JSTextPicker>::StaticMethod("selectedBackgroundStyle", &JSTextPicker::SetSelectedBackgroundStyle);
     JSClass<JSTextPicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -244,6 +292,10 @@ void JSTextPicker::SetDefaultTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     if (info.Length() >= 1 && info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "defaultTextStyle");
+    }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        TextPickerModel::GetInstance()->ParseDefaultTextStyleResObj(textStyle);
     }
     TextPickerModel::GetInstance()->SetDefaultTextStyle(theme, textStyle);
 }
@@ -947,15 +999,18 @@ void JSTextPickerParser::ParseDefaultTextStyle(const JSRef<JSObject>& paramObj, 
 {
     auto minFontSize = paramObj->GetProperty("minFontSize");
     auto maxFontSize = paramObj->GetProperty("maxFontSize");
+
     if (!minFontSize->IsNull() && !minFontSize->IsUndefined()) {
         CalcDimension minSize;
-        if (ParseJsDimensionFp(minFontSize, minSize) && minSize.Unit() != DimensionUnit::PERCENT) {
+        if (ParseJsDimensionFp(minFontSize, minSize, textStyle.minFontSizeResObj) &&
+            minSize.Unit() != DimensionUnit::PERCENT) {
             textStyle.minFontSize = minSize;
         }
     }
     if (!maxFontSize->IsNull() && !maxFontSize->IsUndefined()) {
         CalcDimension maxSize;
-        if (ParseJsDimensionFp(maxFontSize, maxSize) && maxSize.Unit() != DimensionUnit::PERCENT) {
+        if (ParseJsDimensionFp(maxFontSize, maxSize, textStyle.maxFontSizeResObj) &&
+            maxSize.Unit() != DimensionUnit::PERCENT) {
             textStyle.maxFontSize = maxSize;
         }
     }
@@ -971,6 +1026,20 @@ void JSTextPickerParser::ParseDefaultTextStyle(const JSRef<JSObject>& paramObj, 
     }
 }
 
+void JSTextPickerParser::ParseTextStyleFontSize(const JSRef<JSVal>& fontSize, NG::PickerTextStyle& textStyle)
+{
+    if (fontSize->IsNull() || fontSize->IsUndefined()) {
+        textStyle.fontSize = Dimension(-1);
+    } else {
+        CalcDimension size;
+        if (!ParseJsDimensionFp(fontSize, size, textStyle.fontSizeResObj) || size.Unit() == DimensionUnit::PERCENT) {
+            textStyle.fontSize = Dimension(-1);
+        } else {
+            textStyle.fontSize = size;
+        }
+    }
+}
+
 void JSTextPickerParser::ParseTextStyle(
     const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle, const std::string& pos)
 {
@@ -978,7 +1047,7 @@ void JSTextPickerParser::ParseTextStyle(
     auto fontOptions = paramObj->GetProperty("font");
 
     Color textColor;
-    if (ParseJsColor(fontColor, textColor)) {
+    if (ParseJsColor(fontColor, textColor, textStyle.textColorResObj)) {
         textStyle.textColor = textColor;
     }
 
@@ -992,16 +1061,8 @@ void JSTextPickerParser::ParseTextStyle(
     auto fontWeight = fontObj->GetProperty("weight");
     auto fontFamily = fontObj->GetProperty("family");
     auto fontStyle = fontObj->GetProperty("style");
-    if (fontSize->IsNull() || fontSize->IsUndefined()) {
-        textStyle.fontSize = Dimension(-1);
-    } else {
-        CalcDimension size;
-        if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
-            textStyle.fontSize = Dimension(-1);
-        } else {
-            textStyle.fontSize = size;
-        }
-    }
+
+    ParseTextStyleFontSize(fontSize, textStyle);
 
     if (!fontWeight->IsNull() && !fontWeight->IsUndefined()) {
         std::string weight;
@@ -1015,7 +1076,7 @@ void JSTextPickerParser::ParseTextStyle(
 
     if (!fontFamily->IsNull() && !fontFamily->IsUndefined()) {
         std::vector<std::string> families;
-        if (ParseJsFontFamilies(fontFamily, families)) {
+        if (ParseJsFontFamilies(fontFamily, families, textStyle.fontFamilyResObj)) {
             textStyle.fontFamily = families;
             IsUserDefinedFontFamily(pos);
         }
@@ -1027,6 +1088,34 @@ void JSTextPickerParser::ParseTextStyle(
             return;
         }
         textStyle.fontStyle = static_cast<FontStyle>(style);
+    }
+}
+
+void JSTextPickerParser::ParsePickerBackgroundStyle(const JSRef<JSObject>& paramObj, NG::PickerBackgroundStyle& bgStyle)
+{
+    auto color = paramObj->GetProperty("color");
+    auto borderRadius = paramObj->GetProperty("borderRadius");
+    if (!color->IsUndefined() && !color->IsNull()) {
+        Color buttonBgColor;
+        if (ParseJsColor(color, buttonBgColor)) {
+            bgStyle.color = buttonBgColor;
+        }
+    }
+    if (!borderRadius->IsUndefined() && !borderRadius->IsNull()) {
+        CalcDimension calcDimension;
+        NG::BorderRadiusProperty borderRadiusProperty;
+        if (ParseLengthMetricsToDimension(borderRadius, calcDimension)) {
+            if (GreatOrEqual(calcDimension.Value(), 0.0f)) {
+                bgStyle.borderRadius = NG::BorderRadiusProperty(calcDimension);
+            }
+        } else if (ParseBindSheetBorderRadiusProps(borderRadius, borderRadiusProperty)) {
+            if (!borderRadiusProperty.radiusTopLeft->IsNegative() &&
+                !borderRadiusProperty.radiusTopRight->IsNegative() &&
+                !borderRadiusProperty.radiusBottomLeft->IsNegative() &&
+                !borderRadiusProperty.radiusBottomRight->IsNegative()) {
+                bgStyle.borderRadius = borderRadiusProperty;
+            }
+        }
     }
 }
 
@@ -1047,6 +1136,7 @@ void JSTextPicker::SetDefaultPickerItemHeight(const JSCallbackInfo& info)
 void JSTextPicker::SetGradientHeight(const JSCallbackInfo& info)
 {
     CalcDimension height;
+    RefPtr<ResourceObject> heightResObj;
     auto pickerTheme = GetTheme<PickerTheme>();
     if (info[0]->IsNull() || info[0]->IsUndefined()) {
         if (pickerTheme) {
@@ -1056,7 +1146,7 @@ void JSTextPicker::SetGradientHeight(const JSCallbackInfo& info)
         }
     }
     if (info.Length() >= 1) {
-        if (!ConvertFromJSValueNG(info[0], height)) {
+        if (!ConvertFromJSValueNG(info[0], height, heightResObj)) {
             if (pickerTheme) {
                 height = pickerTheme->GetGradientHeight();
             }
@@ -1069,6 +1159,10 @@ void JSTextPicker::SetGradientHeight(const JSCallbackInfo& info)
                 height = 0.0_vp;
             }
         }
+    }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        TextPickerModel::GetInstance()->ParseGradientHeight(heightResObj);
     }
     TextPickerModel::GetInstance()->SetGradientHeight(height);
 }
@@ -1099,6 +1193,10 @@ void JSTextPicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     if (info.Length() >= 1 && info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "disappearTextStyle");
     }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        TextPickerModel::GetInstance()->ParseDisappearTextStyleResObj(textStyle);
+    }
     TextPickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
 
@@ -1110,6 +1208,10 @@ void JSTextPicker::SetTextStyle(const JSCallbackInfo& info)
     if (info.Length() >= 1 && info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "textStyle");
     }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        TextPickerModel::GetInstance()->ParseNormalTextStyleResObj(textStyle);
+    }
     TextPickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
@@ -1120,6 +1222,10 @@ void JSTextPicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     if (info.Length() >= 1 && info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
+    }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        TextPickerModel::GetInstance()->ParseSelectedTextStyleResObj(textStyle);
     }
     TextPickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
     if (textStyle.textColor.has_value() && theme->IsCircleDial()) {
@@ -1278,20 +1384,11 @@ void JSTextPicker::SetSelectedIndex(const JSCallbackInfo& info)
     }
 }
 
-bool JSTextPicker::CheckDividerValue(const Dimension &dimension)
-{
-    if (dimension.Value() >= 0.0f && dimension.Unit() != DimensionUnit::PERCENT) {
-        return true;
-    }
-    return false;
-}
-
 void JSTextPicker::SetDivider(const JSCallbackInfo& info)
 {
     NG::ItemDivider divider;
     auto pickerTheme = GetTheme<PickerTheme>();
     Dimension defaultStrokeWidth = 0.0_vp;
-    Dimension defaultMargin = 0.0_vp;
     Color defaultColor = Color::TRANSPARENT;
     // Set default strokeWidth and color
     if (pickerTheme) {
@@ -1303,28 +1400,13 @@ void JSTextPicker::SetDivider(const JSCallbackInfo& info)
 
     if (info.Length() >= 1 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-       
-        Dimension strokeWidth = defaultStrokeWidth;
-        if (ConvertFromJSValueNG(obj->GetProperty("strokeWidth"), strokeWidth) && CheckDividerValue(strokeWidth)) {
-            divider.strokeWidth = strokeWidth;
-        }
-        
-        Color color = defaultColor;
-        if (ConvertFromJSValue(obj->GetProperty("color"), color)) {
-            divider.color = color;
-        }
-
-        Dimension startMargin = defaultMargin;
-        if (ConvertFromJSValueNG(obj->GetProperty("startMargin"), startMargin) && CheckDividerValue(startMargin)) {
-            divider.startMargin = startMargin;
-        }
-
-        Dimension endMargin = defaultMargin;
-        if (ConvertFromJSValueNG(obj->GetProperty("endMargin"), endMargin) &&  CheckDividerValue(endMargin)) {
-            divider.endMargin = endMargin;
-        }
+        ParseDivider(obj, divider);
     } else if (info.Length() >= 1 && info[0]->IsNull()) {
         divider.strokeWidth = 0.0_vp;
+    }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        TextPickerModel::GetInstance()->ParseDividerResObj();
     }
     TextPickerModel::GetInstance()->SetDivider(divider);
 }
@@ -1441,6 +1523,22 @@ void JSTextPicker::SetEnableHapticFeedback(const JSCallbackInfo& info)
         isEnableHapticFeedback = info[0]->ToBoolean();
     }
     TextPickerModel::GetInstance()->SetEnableHapticFeedback(isEnableHapticFeedback);
+}
+
+void JSTextPicker::SetSelectedBackgroundStyle(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined()) {
+        return;
+    }
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    NG::PickerBackgroundStyle backgroundStyle;
+    backgroundStyle.color = theme->GetSelectedBackgroundColor();
+    backgroundStyle.borderRadius = theme->GetSelectedBorderRadius();
+    if (info[0]->IsObject()) {
+        JSTextPickerParser::ParsePickerBackgroundStyle(info[0], backgroundStyle);
+    }
+    TextPickerModel::GetInstance()->SetSelectedBackgroundStyle(backgroundStyle);
 }
 
 void JSTextPickerDialog::JSBind(BindingTarget globalObj)
@@ -1824,6 +1922,13 @@ bool JSTextPickerDialog::ParseShowDataAttribute(
     }
     settingData.height = height;
     ParseTextProperties(paramObject, settingData.properties);
+    auto selectedBackgroundStyle = paramObject->GetProperty("selectedBackgroundStyle");
+    if (selectedBackgroundStyle->IsObject()) {
+        JSTextPickerParser::ParsePickerBackgroundStyle(selectedBackgroundStyle, settingData.pickerBgStyle);
+    } else {
+        settingData.pickerBgStyle.color = Color::TRANSPARENT;
+        settingData.pickerBgStyle.borderRadius = NG::BorderRadiusProperty(8.0_vp);
+    }
     return true;
 }
 

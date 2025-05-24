@@ -330,6 +330,8 @@ public:
 
     bool SetIsFocusActive(
         bool isFocusActive, FocusActiveReason reason = FocusActiveReason::DEFAULT, bool autoFocusInactive = true);
+    bool SyncWindowsFocus(
+        bool isFocusActive, FocusActiveReason reason = FocusActiveReason::DEFAULT, bool autoFocusInactive = true);
     bool GetIsFocusActive() const
     {
         return isFocusActive_;

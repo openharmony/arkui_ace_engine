@@ -652,6 +652,48 @@ void UIObserverListener::OnDensityChange(double density)
     napi_close_handle_scope(env_, scope);
 }
 
+void UIObserverListener::OnNodeRenderStateChange(NG::FrameNode* frameNode, NG::NodeRenderState nodeRenderState)
+{
+    if (!env_ || !callback_) {
+        TAG_LOGW(
+            AceLogTag::ACE_OBSERVER, "Handle nodeRender state change failed, runtime or callback function invalid!");
+        return;
+    }
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+
+    napi_value objValueNodeRenderState = nullptr;
+    napi_create_int32(env_, static_cast<int32_t>(nodeRenderState), &objValueNodeRenderState);
+
+    if (frameNode) {
+        napi_value objValueFrameNode = nullptr;
+        napi_create_object(env_, &objValueFrameNode);
+        auto container = Container::Current();
+        if (!container) {
+            napi_close_handle_scope(env_, scope);
+            return;
+        }
+        auto frontEnd = container->GetFrontend();
+        if (!frontEnd) {
+            napi_close_handle_scope(env_, scope);
+            return;
+        }
+        objValueFrameNode = frontEnd->GetFrameNodeValueByNodeId(frameNode->GetId());
+        napi_value argv[] = { objValueNodeRenderState, objValueFrameNode };
+        napi_call_function(env_, nullptr, callback, PARAM_SIZE_TWO, argv, nullptr);
+    } else {
+        napi_value argv[] = { objValueNodeRenderState };
+        napi_call_function(env_, nullptr, callback, PARAM_SIZE_ONE, argv, nullptr);
+    }
+
+    napi_close_handle_scope(env_, scope);
+}
+
 void UIObserverListener::OnDrawOrLayout()
 {
     if (!env_ || !callback_) {
@@ -1098,6 +1140,7 @@ void UIObserverListener::AddGestureEventInfoThree(napi_value objValueEvent, cons
     napi_set_named_property(env_, objValueEvent, "deviceId", napiDeviceId);
     napi_create_double(env_, gestureEventInfo.GetTargetDisplayId(), &napiTargetDisplayId);
     napi_set_named_property(env_, objValueEvent, "targetDisplayId", napiTargetDisplayId);
+    AddFingerInfosInfo(objValueEvent, gestureEventInfo);
     AddFingerListInfo(objValueEvent, gestureEventInfo);
     AddTapLocationInfo(objValueEvent, gestureEventInfo);
     napi_close_handle_scope(env_, scope);
@@ -1176,6 +1219,34 @@ void UIObserverListener::AddFingerListInfo(napi_value objValueClickEvent, const 
         }
     }
     napi_set_named_property(env_, objValueClickEvent, "fingerList", napiFingerList);
+    napi_close_handle_scope(env_, scope);
+}
+
+void UIObserverListener::AddFingerInfosInfo(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo)
+{
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+
+    napi_value napiFingerInfos = nullptr;
+    napi_create_array(env_, &napiFingerInfos);
+    bool isArray = false;
+    if (napi_is_array(env_, napiFingerInfos, &isArray) != napi_ok || !isArray) {
+        return;
+    }
+    
+    int32_t index = 0;
+
+    for (auto& finger : gestureEventInfo.GetFingerList()) {
+        napi_value napiFinger = nullptr;
+        napi_create_object(env_, &napiFinger);
+        AddFingerObjectInfo(napiFinger, finger);
+        napi_set_element(env_, napiFingerInfos, index++, napiFinger);
+    }
+    
+    napi_set_named_property(env_, objValueClickEvent, "fingerInfos", napiFingerInfos);
     napi_close_handle_scope(env_, scope);
 }
 

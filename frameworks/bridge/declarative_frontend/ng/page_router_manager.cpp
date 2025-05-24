@@ -2414,6 +2414,7 @@ void PageRouterManager::RunIntentPage()
     info.intentInfo = intentInfo_.value();
     info.isUseIntent = true;
     info.url = intentInfo_.value().pagePath;
+    info.params = intentInfo_.value().param;
     intentInfo_.reset();
     RouterOptScope scope(this);
     UpdateSrcPage();
@@ -2458,22 +2459,11 @@ RouterIntentInfo PageRouterManager::ParseRouterIntentInfo(const std::string& int
         TAG_LOGE(AceLogTag::ACE_ROUTER, "error, intent info is an invalid json object!");
         return intentInfo;
     }
-    intentInfo.bundleName = GetJsonIntentInfo(intentJson->GetObject(INTENT_BUNDLE_NAME_KEY));
-    intentInfo.moduleName = GetJsonIntentInfo(intentJson->GetObject(INTENT_MODULE_NAME_KEY));
-    intentInfo.pagePath = ParseUrlNameFromOhmUrl(GetJsonIntentInfo(intentJson->GetObject(INTENT_PAGE_PATH_KEY)));
-    intentInfo.param = GetJsonIntentInfo(intentJson->GetObject(INTENT_PARAM_KEY));
+    intentInfo.bundleName = intentJson->GetString(INTENT_BUNDLE_NAME_KEY, "");
+    intentInfo.moduleName = intentJson->GetString(INTENT_MODULE_NAME_KEY, "");
+    intentInfo.pagePath = ParseUrlNameFromOhmUrl(intentJson->GetString(INTENT_PAGE_PATH_KEY, ""));
+    intentInfo.param = intentJson->GetObject(INTENT_PARAM_KEY)->ToString();
     return intentInfo;
-}
-
-std::string PageRouterManager::GetJsonIntentInfo(std::unique_ptr<JsonValue> intentJson)
-{
-    if (!intentJson || !intentJson->IsObject()) {
-        return "";
-    }
-    if (!intentJson->GetChild() || !intentJson->GetChild()->IsString()) {
-        return "";
-    }
-    return intentJson->GetChild()->GetString();
 }
 
 std::pair<int32_t, RefPtr<FrameNode>> PageRouterManager::FindIntentPageInStack() const

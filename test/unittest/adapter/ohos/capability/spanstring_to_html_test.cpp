@@ -62,8 +62,10 @@ HWTEST_F(HtmlConvertTestNg, SpanStringConvert000, TestSize.Level1)
     spanString3->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 5, 8));
 
     // Add text decoration (line through) span
+    // change Test by search MakeRefPtr<DecorationSpan>
     spanString3->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
-        TextDecoration::LINE_THROUGH, Color::BLUE, TextDecorationStyle::WAVY, 0, 1));
+        std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}), Color::BLUE,
+        TextDecorationStyle::WAVY, std::optional<TextDecorationOptions>(), 0, 1));
 
     // Add paragraph style span
     auto spanParagraphStyle = GetDefaultParagraphStyle();
@@ -471,9 +473,11 @@ HWTEST_F(HtmlConvertTestNg, SpanStringConvert008, TestSize.Level1)
     auto out = convert.ToHtml(*spanString);
     std::string result =
         "<div ><p style=\"word-break: break_word;text-overflow: clip;\"><span style=\"font-size: 16.00px;"
-        "font-style: normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;\">th</span>"
-        "<span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;"
-        "font-family: HarmonyOS Sans;\">is is a normal text Hello WORLD</span></p></div>";
+        "font-style: normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;"
+        "stroke-width: 0.00px;stroke-color: #000000FF;font-superscript: normal;\">th</span><span "
+        "style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;font-family: "
+        "HarmonyOS Sans;stroke-width: 0.00px;stroke-color: #000000FF;font-superscript: normal;\">"
+        "is is a normal text Hello WORLD</span></p></div>";
     EXPECT_EQ(out, result);
 }
 
@@ -512,9 +516,10 @@ HWTEST_F(HtmlConvertTestNg, SpanStringConvert009, TestSize.Level1)
     std::string result =
         "<div ><p style=\"text-align: center;text-indent: 20.00px;word-break: break_all;text-overflow: clip;\">"
         "<span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;"
-        "font-family: HarmonyOS Sans;\">this </span><span style=\"font-size: 16.00px;font-style: normal;"
-        "font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;\">text with CENTER BREAK_ALL"
-        " textIndent property</span></p></div>";
+        "font-family: HarmonyOS Sans;stroke-width: 0.00px;stroke-color: #000000FF;font-superscript: normal;\">"
+        "this </span><span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;"
+        "font-family: HarmonyOS Sans;stroke-width: 0.00px;stroke-color: #000000FF;font-superscript: normal;\">"
+        "text with CENTER BREAK_ALL textIndent property</span></p></div>";
     EXPECT_EQ(out, result);
 }
 
@@ -551,10 +556,12 @@ HWTEST_F(HtmlConvertTestNg, SpanStringConvert010, TestSize.Level1)
     auto out = convert.ToHtml(*spanString);
     std::string result =
         "<div ><p style=\"word-break: break_word;text-overflow: clip;\"><span style=\"font-size: 16.00px;"
-        "font-style: normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;\">big"
-        " \xE4\xB8\xAD\xE6\x96\x87\xE6\xB7\xB7</span><span style=\"font-size: 16.00px;font-style: "
-        "normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans"
-        ";\">\xE6\x8E\x92\xE6\x83\x85\xE5\x86\xB5 text</span></p></div>"; // xE4 etc is corresponding Chinese
+        "font-style: normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;"
+        "stroke-width: 0.00px;stroke-color: #000000FF;font-superscript: normal;\">big "
+        "\xE4\xB8\xAD\xE6\x96\x87\xE6\xB7\xB7</span><span style=\"font-size: 16.00px;font-style: normal;"
+        "font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;stroke-width: 0.00px;"
+        "stroke-color: #000000FF;font-superscript: normal;\">\xE6\x8E\x92\xE6\x83\x85\xE5\x86\xB5 text"
+        "</span></p></div>"; // xE4 etc is corresponding Chinese
     EXPECT_EQ(out, result);
 }
 
@@ -591,10 +598,11 @@ HWTEST_F(HtmlConvertTestNg, SpanStringConvert011, TestSize.Level1)
     auto out = convert.ToHtml(*spanString);
     std::string result =
         "<div ><p style=\"text-align: start;text-indent: 10.00px;\"><span style=\"font-size: 16.00px;"
-        "font-style: normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;\">complex"
-        "</span><span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;"
-        "font-family: HarmonyOS Sans;\">t text span style= font size: 40px;text shadow: 0 0 3px red; "
-        "shadow span </span></p></div>";
+        "font-style: normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;"
+        "stroke-width: 0.00px;stroke-color: #000000FF;font-superscript: normal;\">complex</span>"
+        "<span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;"
+        "font-family: HarmonyOS Sans;stroke-width: 0.00px;stroke-color: #000000FF;font-superscript: "
+        "normal;\">t text span style= font size: 40px;text shadow: 0 0 3px red; shadow span </span></p></div>";
     EXPECT_EQ(out, result);
 }
 
@@ -688,8 +696,106 @@ HWTEST_F(HtmlConvertTestNg, SpanStringConvert014, TestSize.Level1)
     spanString->AddSpan(AceType::MakeRefPtr<FontSpan>(testEmptyFont, 5, 8));
     spanString->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 5, 8));
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
-        TextDecoration::LINE_THROUGH, Color::BLUE, TextDecorationStyle::WAVY, 0, 1));
+        std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}), Color::BLUE,
+        TextDecorationStyle::WAVY, std::optional<TextDecorationOptions>(), 0, 1));
 
+    SpanToHtml convert;
+    auto out = convert.ToHtml(*spanString);
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(out);
+    EXPECT_EQ(IsSpanItemSame(dstSpan->GetSpanItems(), spanString->GetSpanItems()), true);
+}
+
+/**
+ * @tc.name: HTMLLineThicknessScaleTest001
+ * @tc.desc: This test case checks the conversion of a SpanString containing a mixture of
+ *           spans. It ensures that all styles are applied correctly and the conversion
+ *           between HTML and SpanString is accurate.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HTMLLineThicknessScaleTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize a mutable SpanString with an image option and create a SpanString with
+     *             mixed styles (font, letter spacing, baseline offset, text decoration, etc.).
+     * @tc.expected: The SpanString should properly handle different types of spans and apply them correctly.
+     */
+    auto imageOption = GetImageOption("src/appIcon-1.png");
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"testNewDecoration\n123");
+
+    // Add text decoration (line through) span
+    // change Test by search MakeRefPtr<DecorationSpan>
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({TextDecoration::UNDERLINE}), Color::BLACK,
+        TextDecorationStyle::SOLID, 1.0f, std::optional<TextDecorationOptions>(), 0, 1));
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({TextDecoration::UNDERLINE}), Color::BLACK,
+        TextDecorationStyle::WAVY, 5.0f, std::optional<TextDecorationOptions>(), 0, 1));
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}), Color::BLACK,
+        TextDecorationStyle::DASHED, -5.0f, std::optional<TextDecorationOptions>(), 0, 1));
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}), Color::BLACK,
+        TextDecorationStyle::DOTTED, 0, std::optional<TextDecorationOptions>(), 0, 1));
+
+    // Add paragraph style span
+    auto spanParagraphStyle = GetDefaultParagraphStyle();
+    auto paragraphSpan = AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 4, 7);
+    spanString->AddSpan(paragraphSpan);
+
+    // Insert the span string into the mutable string
+    mutableStr->InsertSpanString(2, spanString);
+
+    /**
+     * @tc.steps3: Convert the mutable SpanString to HTML using the SpanToHtml converter.
+     * @tc.expected: The HTML conversion should preserve all the added spans and their properties.
+     */
+    SpanToHtml convert;
+    auto out = convert.ToHtml(*mutableStr);
+
+    /**
+     * @tc.steps4: Convert the resulting HTML back to a SpanString and validate the number of span items.
+     * @tc.expected: The number of span items should match the total number of spans added.
+     */
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(out);
+    EXPECT_NE(dstSpan, nullptr);
+    auto items = dstSpan->GetSpanItems();
+    EXPECT_NE(items.size(), 0);
+}
+
+/**
+ * @tc.name: HTMLLineThicknessScaleTest002
+ * @tc.desc: This test case checks the conversion of a SpanString with multiple styles,
+ *           It verifies that all styles are correctly applied and preserved during conversion.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HTMLLineThicknessScaleTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create a SpanString with multiple spans
+     */
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"testNewDecoration123");
+    spanString->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 6));
+    spanString->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 6, 10));
+    spanString->AddSpan(AceType::MakeRefPtr<FontSpan>(testEmptyFont, 10, 12));
+    spanString->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(10), 5, 8));
+    /**
+     * @tc.steps2: Create a SpanString with multiple spans.
+     */
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({TextDecoration::UNDERLINE}), Color::BLACK,
+        TextDecorationStyle::SOLID, 1.0f, std::optional<TextDecorationOptions>(), 0, 1));
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}), Color::BLACK,
+        TextDecorationStyle::SOLID, 5.0f, std::optional<TextDecorationOptions>(), 2, 6));
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({TextDecoration::OVERLINE}), Color::BLACK,
+        TextDecorationStyle::SOLID, -1.0f, std::optional<TextDecorationOptions>(), 7, 9));
+    /**
+     * @tc.steps3: Create a SpanString with multiple spans, including font styles, etc.
+     */
     SpanToHtml convert;
     auto out = convert.ToHtml(*spanString);
     HtmlToSpan toSpan;

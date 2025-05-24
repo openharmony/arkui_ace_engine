@@ -19,6 +19,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -370,5 +371,81 @@ void CounterModelNG::SetOnDec(FrameNode* frameNode, CounterEventFunc&& onDec)
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onDec");
     };
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
+}
+
+void CounterModelNG::CreateWithResourceObj(JsCounterResourceType jsResourceType, const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pattern = frameNode->GetPattern<CounterPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    std::string key;
+    switch (jsResourceType) {
+        case JsCounterResourceType::Height: {
+            key = "counter.height";
+            auto&& updateFunc = [pattern, key, this](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+                Dimension height;
+                if (ResourceParseUtils::ConvertFromResObjNG(resObj, height)) {
+                    auto frameNode = pattern->GetHost();
+                    CHECK_NULL_VOID(frameNode);
+                    auto pipelineContext = frameNode->GetContext();
+                    CHECK_NULL_VOID(pipelineContext);
+                    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+                        if (LessNotEqual(height.Value(), 0.0)) {
+                            return;
+                        }
+      SetHeight(AceType::RawPtr(frameNode), height);
+                    }
+                }
+            };
+            updateFunc(resObj, true);
+            pattern->AddResObj(key, resObj, std::move(updateFunc));
+            break;
+        }
+        case JsCounterResourceType::Width: {
+            key = "counter.width";
+            auto&& updateFunc = [pattern, key, this](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+                Dimension width;
+                if (ResourceParseUtils::ConvertFromResObjNG(resObj, width)) {
+                    auto frameNode = pattern->GetHost();
+                    CHECK_NULL_VOID(frameNode);
+                    auto pipelineContext = frameNode->GetContext();
+                    CHECK_NULL_VOID(pipelineContext);
+                    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+                        if (LessNotEqual(width.Value(), 0.0)) {
+                            return;
+                        }
+                        SetWidth(AceType::RawPtr(frameNode), width);
+                    }
+                }
+            };
+            updateFunc(resObj, true);
+            pattern->AddResObj(key, resObj, std::move(updateFunc));
+            break;
+        }
+        case JsCounterResourceType::BackgroundColor: {
+            key = "counter.backgroundColor";
+            auto&& updateFunc = [pattern, key, this](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+                Color color;
+                if (ResourceParseUtils::ParseResColor(resObj, color)) {
+                    auto frameNode = pattern->GetHost();
+                    CHECK_NULL_VOID(frameNode);
+                    auto pipelineContext = frameNode->GetContext();
+                    CHECK_NULL_VOID(pipelineContext);
+                    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+                        SetBackgroundColor(AceType::RawPtr(frameNode), color);
+                    }
+                }
+            };
+            updateFunc(resObj, true);
+            pattern->AddResObj(key, resObj, std::move(updateFunc));
+            break;
+        }
+        default:
+            LOGE("Unsupported JsCounterResourceType");
+            break;
+    }
 }
 } // namespace OHOS::Ace::NG

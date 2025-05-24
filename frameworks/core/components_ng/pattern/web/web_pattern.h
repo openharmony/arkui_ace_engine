@@ -26,6 +26,8 @@
 #include "base/utils/utils.h"
 #include "base/geometry/axis.h"
 #include "base/view_data/hint_to_type_wrap.h"
+#include "core/common/ai/data_detector_mgr.h"
+#include "core/common/ai/data_detector_adapter.h"
 #include "core/common/recorder/web_event_recorder.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/components/common/layout/constants.h"
@@ -54,6 +56,7 @@
 #include "core/components_ng/gestures/pinch_gesture.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "core/components_ng/pattern/web/web_data_detector_adapter.h"
 #include "ui/rs_surface_node.h"
 #include "core/components_ng/pattern/web/web_select_overlay.h"
 
@@ -493,6 +496,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnabledHapticFeedback, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OptimizeParserBudgetEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebMediaAVSessionEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableDataDetector, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableFollowSystemFontWeight, bool);
 
     bool IsFocus() const
@@ -514,6 +518,7 @@ public:
     void OnQuickMenuDismissed();
     void HideHandleAndQuickMenuIfNecessary(bool hide, bool isScroll = false);
     void ChangeVisibilityOfQuickMenu();
+    bool ChangeVisibilityOfQuickMenuV2();
     bool IsQuickMenuShow();
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
@@ -644,6 +649,7 @@ public:
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
     void UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    void UpdateDataDetectorConfig(const TextDetectConfig& config);
     void NotifyForNextTouchEvent() override;
     void CloseKeyboard();
     void CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int offsetX, int offsetY, int rectWidth,
@@ -775,12 +781,22 @@ public:
 
     void InitRotationEventCallback();
     void UninitRotationEventCallback();
+
+    // Data Detector funcs
+    RefPtr<WebDataDetectorAdapter> GetDataDetectorAdapter();
+
+    bool GetDataDetectorEnable();
+    void InitDataDetector();
+    void CloseDataDetectorMenu();
+
 private:
     friend class WebContextSelectOverlay;
     friend class WebSelectOverlay;
+    friend class WebDataDetectorAdapter;
 
     void GetPreviewImageOffsetAndSize(bool isImage, Offset& previewOffset, SizeF& previewSize);
     RefPtr<FrameNode> CreatePreviewImageFrameNode(bool isImage);
+    void ShowPreviewMenu(WebElementType type);
     void ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
         TextResponseType responseType = TextResponseType::RIGHT_CLICK, bool handleReverse = false);
     void CloseContextSelectionMenu();
@@ -870,6 +886,8 @@ private:
     void OnEnabledHapticFeedbackUpdate(bool enable);
     void OnOptimizeParserBudgetEnabledUpdate(bool value);
     void OnEnableFollowSystemFontWeightUpdate(bool value);
+    void OnEnableDataDetectorUpdate(bool enable);
+
     int GetWebId();
 
     void InitEvent();
@@ -1053,6 +1071,7 @@ private:
     void UpdateTouchpadSlidingStatus(const GestureEvent& event);
     CursorStyleInfo GetAndUpdateCursorStyleInfo(
         const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
+    bool UpdateKeyboardSafeArea(bool hideOrClose, double height = 0.0f);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -1240,6 +1259,9 @@ private:
 
     std::optional<int32_t> dataListNodeId_ = std::nullopt;
     bool isRegisterJsObject_ = false;
+
+    // properties for AI data detector
+    RefPtr<WebDataDetectorAdapter> webDataDetectorAdapter_ = nullptr;
 
     bool isRotating_ {false};
     int32_t rotationEndCallbackId_ = 0;

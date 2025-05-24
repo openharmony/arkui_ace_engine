@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/tab_bar/tab_theme.h"
@@ -119,6 +120,26 @@ struct TabBarSymbol {
     bool selectedFlag = false;
 };
 
+enum class TabContentJsType {
+    INDICATOR_COLOR,
+    FONT_SIZE,
+    FONT_FAMILY,
+    MIN_FONT_SIZE,
+    MAX_FONT_SIZE,
+    TEXT_CONTENT,
+    ICON,
+    ICON_UNSELECT_COLOR,
+    ICON_SELECT_COLOR,
+    LABEL_UNSELECT_COLOR,
+    LABEL_SELECT_COLOR,
+    PADDING,
+    BORDER_RADIUS,
+    INDICATOR_HEIGHT,
+    INDICATOR_WIDTH,
+    INDICATOR_RADIUS,
+    INDICATOR_MARGIN_TOP,
+};
+
 class ACE_FORCE_EXPORT TabContentModel {
 public:
     static TabContentModel* GetInstance();
@@ -127,6 +148,10 @@ public:
     virtual void Create() = 0;
     virtual void Create(std::function<void()>&& deepRenderFunc) = 0;
     virtual void Pop() = 0;
+    virtual void CreateWithResourceObj(TabContentJsType jsType, const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreatePaddingWithResourceObj(const RefPtr<ResourceObject>& resObjLeft,
+        const RefPtr<ResourceObject>& resObjRight, const RefPtr<ResourceObject>& resObjTop,
+        const RefPtr<ResourceObject>& resObjBottom) {};
     virtual void SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
         const std::optional<TabBarSymbol>& tabBarSymbol, std::function<void()>&& builder, bool useContentOnly) = 0;
     virtual void SetTabBarWithContent(const RefPtr<NG::UINode>& content) = 0;

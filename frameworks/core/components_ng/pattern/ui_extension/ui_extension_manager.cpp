@@ -274,12 +274,16 @@ bool UIExtensionManager::NotifyOccupiedAreaChangeInfo(const sptr<Rosen::Occupied
     }
     // keyboardHeight is 0, broadcast it.
     bool ret = false;
-    for (const auto& it : aliveUIExtensions_) {
-        auto uiExtension = it.second.Upgrade();
-        if (uiExtension) {
-            auto session = uiExtension->GetSessionWrapper();
-            if (session && session->IsSessionValid()) {
-                ret |= session->NotifyOccupiedAreaChangeInfo(info);
+    {
+        std::lock_guard<std::mutex> aliveUIExtensionMutex(aliveUIExtensionMutex_);
+
+        for (const auto& it : aliveUIExtensions_) {
+            auto uiExtension = it.second.Upgrade();
+            if (uiExtension) {
+                auto session = uiExtension->GetSessionWrapper();
+                if (session && session->IsSessionValid()) {
+                    ret |= session->NotifyOccupiedAreaChangeInfo(info);
+                }
             }
         }
     }
@@ -333,7 +337,7 @@ void UIExtensionManager::UpdateSessionViewportConfig(const ViewportConfig& confi
         }
 
         uint64_t displayId = 0;
-        auto instanceId = uiExtension->GetInstanceIdFromHost();
+        auto instanceId = uiExtension->GetInstanceId();
         auto container = Platform::AceContainer::GetContainer(instanceId);
         if (container) {
             displayId = container->GetCurrentDisplayId();
@@ -593,6 +597,28 @@ void UIExtensionManager::UpdateWMSUIExtProperty(UIContentBusinessCode code, cons
     for (const auto& it : aliveSecurityUIExtensions_) {
         auto uiExtension = it.second.Upgrade();
         if (uiExtension) {
+            uiExtension->UpdateWMSUIExtProperty(code, data, subSystemId);
+        }
+    }
+}
+
+void UIExtensionManager::UpdateWMSUIExtPropertyByPersistentId(UIContentBusinessCode code, const AAFwk::Want& data,
+    const std::unordered_set<int32_t>& persistentIds, RSSubsystemId subSystemId)
+{
+    CHECK_RUN_ON(UI);
+    for (const auto& it : aliveUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        CHECK_NULL_CONTINUE(uiExtension);
+        auto persistentId = uiExtension->GetSessionId();
+        if (persistentIds.find(persistentId) != persistentIds.end()) {
+            uiExtension->UpdateWMSUIExtProperty(code, data, subSystemId);
+        }
+    }
+    for (const auto& it : aliveSecurityUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        CHECK_NULL_CONTINUE(uiExtension);
+        auto persistentId = uiExtension->GetSessionId();
+        if (persistentIds.find(persistentId) != persistentIds.end()) {
             uiExtension->UpdateWMSUIExtProperty(code, data, subSystemId);
         }
     }

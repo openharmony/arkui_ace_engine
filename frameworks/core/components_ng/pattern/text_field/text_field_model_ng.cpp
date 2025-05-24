@@ -1016,7 +1016,7 @@ void TextFieldModelNG::SetIsOnlyBetweenLines(bool isOnlyBetweenLines)
 
 void TextFieldModelNG::SetTextDecoration(Ace::TextDecoration value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, {value});
 }
 
 void TextFieldModelNG::SetTextDecorationColor(const Color& value)
@@ -1833,7 +1833,7 @@ void TextFieldModelNG::ResetTextInputPadding(FrameNode* frameNode)
 
 void TextFieldModelNG::SetTextDecoration(FrameNode* frameNode, TextDecoration value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, {value}, frameNode);
 }
 
 void TextFieldModelNG::SetTextDecorationColor(FrameNode* frameNode, const Color& value)
@@ -1866,6 +1866,16 @@ void TextFieldModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& val
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineSpacing, value, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextFieldLayoutProperty, IsOnlyBetweenLines, isOnlyBetweenLines, frameNode);
+}
+
+float TextFieldModelNG::GetLineSpacing(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    Dimension defaultLineSpacing(0);
+    auto value = layoutProperty->GetLineSpacing().value_or(defaultLineSpacing);
+    return static_cast<float>(value.Value());
 }
 
 void TextFieldModelNG::TextFieldModelNG::SetWordBreak(FrameNode* frameNode, Ace::WordBreak value)
@@ -2441,5 +2451,33 @@ void TextFieldModelNG::SetStrokeColor(FrameNode* frameNode, const Color& value)
 void TextFieldModelNG::ResetStrokeColor(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeColor, frameNode);
+}
+
+void TextFieldModelNG::SetEnableAutoSpacing(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EnableAutoSpacing, enabled);
+}
+
+void TextFieldModelNG::SetEnableAutoSpacing(FrameNode* frameNode, bool enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EnableAutoSpacing, enabled, frameNode);
+}
+
+bool TextFieldModelNG::GetEnableAutoSpacing(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, EnableAutoSpacing, value, frameNode, value);
+    return value;
+}
+
+void TextFieldModelNG::SetOnSecurityStateChange(FrameNode* frameNode, std::function<void(bool)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSecurityStateChange(std::move(func));
 }
 } // namespace OHOS::Ace::NG

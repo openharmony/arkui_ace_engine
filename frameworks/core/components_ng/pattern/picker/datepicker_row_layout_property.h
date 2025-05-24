@@ -43,6 +43,7 @@ public:
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propSelectedDate_ = CloneSelectedDate();
         value->propLunar_ = CloneLunar();
+        value->propCanLoop_ = CloneCanLoop();
         value->propStartDate_ = CloneStartDate();
         value->propEndDate_ = CloneEndDate();
         value->propMode_ = CloneMode();
@@ -61,6 +62,7 @@ public:
         ResetEndDate();
         ResetMode();
         ResetLunar();
+        ResetCanLoop();
         ResetDisappearTextStyle();
         ResetTextStyle();
         ResetSelectedTextStyle();
@@ -75,6 +77,7 @@ public:
             return;
         }
         json->PutExtAttr("lunar", V2::ConvertBoolToString(GetLunar().value_or(false)).c_str(), filter);
+        json->PutExtAttr("canLoop", V2::ConvertBoolToString(GetCanLoopValue(true)).c_str(), filter);
         Color defaultDisappearColor = Color::BLACK;
         Color defaultNormalColor = Color::BLACK;
         Color defaultSelectColor = Color::BLACK;
@@ -180,6 +183,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StartDate, LunarDate, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EndDate, LunarDate, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Mode, DatePickerMode, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CanLoop, bool, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(DisappearTextStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(

@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "base/geometry/dimension.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
@@ -41,6 +42,17 @@ struct BadgeParameters {
     std::optional<Dimension> badgeCircleSize;
     std::optional<Dimension> badgeBorderWidth;
     std::optional<FontWeight> badgeFontWeight;
+
+    RefPtr<ResourceObject> resourceBadgeValueObject;
+    RefPtr<ResourceObject> resourceColorObject;
+    RefPtr<ResourceObject> resourceBadgeColorObject;
+    RefPtr<ResourceObject> resourceBorderColorObject;
+    RefPtr<ResourceObject> resourceFontWeightObject;
+    RefPtr<ResourceObject> resourceBadgeSizeObject;
+    RefPtr<ResourceObject> resourceFontSizeObject;
+    RefPtr<ResourceObject> resourceBadgePositionXObject;
+    RefPtr<ResourceObject> resourceBadgePositionYObject;
+    RefPtr<ResourceObject> resourceBorderWidthObject;
 };
 } // namespace OHOS::Ace
 

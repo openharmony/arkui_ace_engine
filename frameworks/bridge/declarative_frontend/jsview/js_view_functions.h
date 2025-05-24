@@ -77,6 +77,7 @@ public:
     void ExecuteSetActive(bool active, bool isReuse = false);
     void ExecuteOnDumpInfo(const std::vector<std::string>& params);
     std::string ExecuteOnDumpInfo();
+    void ExecuteClearAllRecycle();
     std::string ExecuteOnFormRecycle();
     void ExecuteOnFormRecover(const std::string &statusData);
     void ExecutePrebuildComponent();
@@ -135,6 +136,7 @@ private:
     JSWeak<JSFunc> jsSetActive_;
     JSWeak<JSFunc> jsOnDumpInfo_;
     JSWeak<JSFunc> jsOnDumpInspector_;
+    JSWeak<JSFunc> jsClearAllRecycle_;
     JSWeak<JSFunc> jsPrebuildComponent_;
     JSWeak<JSFunc> jsSetPrebuildPhase_;
     JSWeak<JSFunc> jsIsEnablePrebuildInMultiFrame_;

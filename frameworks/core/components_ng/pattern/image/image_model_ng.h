@@ -30,6 +30,7 @@ class ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
 public:
     void Create(const RefPtr<DrawableDescriptor>& drawable) override;
     void Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap) override;
+    void CreateWithResourceObj(ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject) override;
     void ResetImage() override;
     void CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) override;
     bool GetIsAnimation() override;
@@ -76,7 +77,7 @@ public:
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) override;
     void SetImageAnalyzerConfig(void* config) override;
     void SetImageAIOptions(void* options) override;
-    void SetResizableSlice(const ImageResizableSlice& slice) override;
+    void SetResizableSlice(ImageResizableSlice& slice) override;
     void SetResizableLattice(const RefPtr<DrawingLattice>& lattice) override;
     void ResetResizableLattice() override;
     static void SetDraggableForFrameNode(RefPtr<FrameNode> frameNode, bool isImageSpan = false);
@@ -130,7 +131,7 @@ public:
     static ImageSourceInfo GetAlt(FrameNode* frameNode);
     static bool GetDraggable(FrameNode* frameNode);
     static ImageRenderMode GetImageRenderMode(FrameNode* frameNode);
-    static void SetResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice);
+    static void SetResizableSlice(FrameNode* frameNode, ImageResizableSlice& slice);
     static void SetResizableLattice(FrameNode* frameNode, const RefPtr<DrawingLattice>& lattice);
     static void ResetResizableLattice(FrameNode* frameNode);
     static ImageResizableSlice GetResizableSlice(FrameNode* frameNode);
@@ -149,6 +150,8 @@ public:
     static void ResetImageAlt(FrameNode* frameNode);
     static void SetAltPixelMap(FrameNode* frameNode, void* pixelMap);
     static void SetAltResource(FrameNode* frameNode, void* resource);
+    static void CreateWithResourceObj(
+        FrameNode* frameNode, ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject);
 
 private:
     ImagePattern* GetImagePattern();

@@ -38,6 +38,7 @@
 #include "core/components_ng/property/magic_layout_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
+#include "ui/properties/safe_area_insets.h"
 
 namespace OHOS::Ace::NG {
 
@@ -213,6 +214,8 @@ public:
 
     std::pair<std::vector<std::string>, std::vector<std::string>> CalcToString(const CalcSize& calcSize);
 
+    void ExpandConstraintWithSafeArea();
+
     void UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint);
 
     void UpdateParentLayoutConstraint(const LayoutConstraintF& parentConstraint)
@@ -324,6 +327,20 @@ public:
     }
 
     void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts);
+
+    void UpdateIgnoreLayoutSafeAreaOpts(const IgnoreLayoutSafeAreaOpts& opts);
+
+    bool IsExpandConstraintNeeded();
+
+    const std::unique_ptr<IgnoreLayoutSafeAreaOpts>& GetIgnoreLayoutSafeAreaOpts() const
+    {
+        return ignoreLayoutSafeAreaOpts_;
+    }
+
+    bool IsIgnoreOptsValid() const
+    {
+        return ignoreLayoutSafeAreaOpts_ && ignoreLayoutSafeAreaOpts_->NeedIgnoreLayoutSafeArea();
+    }
 
     bool IsUsingPosition() const
     {
@@ -443,6 +460,8 @@ private:
 
     void PaddingToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void MarginToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void IgnoreLayoutSafeAreaToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void SafeAreaExpandToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void SafeAreaPaddingToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     // available in measure process.
@@ -463,6 +482,7 @@ private:
     std::optional<NG::LayoutPolicyProperty> layoutPolicy_;
 
     std::unique_ptr<SafeAreaExpandOpts> safeAreaExpandOpts_;
+    std::unique_ptr<IgnoreLayoutSafeAreaOpts> ignoreLayoutSafeAreaOpts_;
     std::unique_ptr<SafeAreaInsets> safeAreaInsets_;
 
     std::unique_ptr<BorderWidthProperty> borderWidth_;

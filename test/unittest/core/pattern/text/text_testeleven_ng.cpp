@@ -368,6 +368,20 @@ HWTEST_F(TextTestNg, TextShadowSpanAddSpanStyle001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FontSpanAddSpanStyle001
+ * @tc.desc: test AddSpanStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, FontSpanSpanAddSpanStyle001, TestSize.Level1)
+{
+    FontSpan fontSpan;
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    spanItem->fontStyle.reset();
+    fontSpan.AddSpanStyle(spanItem);
+    EXPECT_EQ(spanItem->fontStyle, nullptr);
+}
+
+/**
  * @tc.name: BaselineOffsetSpanAddBaselineOffsetStyle001
  * @tc.desc: test AddBaselineOffsetStyle
  * @tc.type: FUNC

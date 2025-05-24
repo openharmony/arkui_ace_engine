@@ -159,22 +159,28 @@ RSEllipsisMode ToRSEllipsisMode(EllipsisMode value)
     return static_cast<RSEllipsisMode>(value);
 }
 
-RSTextDecoration ToRSTextDecoration(TextDecoration textDecoration)
+RSTextDecoration ToRSTextDecoration(const std::vector<TextDecoration>& textDecorations)
 {
     RSTextDecoration rsTextDecoration = RSTextDecoration::NONE;
-    switch (textDecoration) {
-        case TextDecoration::OVERLINE:
-            rsTextDecoration = RSTextDecoration::OVERLINE;
-            break;
-        case TextDecoration::LINE_THROUGH:
-            rsTextDecoration = RSTextDecoration::LINE_THROUGH;
-            break;
-        case TextDecoration::UNDERLINE:
-            rsTextDecoration = RSTextDecoration::UNDERLINE;
-            break;
-        default:
-            rsTextDecoration = RSTextDecoration::NONE;
-            break;
+    for (TextDecoration textDecoration : textDecorations) {
+        switch (textDecoration) {
+            case TextDecoration::OVERLINE:
+                rsTextDecoration = static_cast<RSTextDecoration>(
+                    static_cast<uint32_t>(rsTextDecoration) | static_cast<uint32_t>(RSTextDecoration::OVERLINE));
+                break;
+            case TextDecoration::LINE_THROUGH:
+                rsTextDecoration = static_cast<RSTextDecoration>(
+                    static_cast<uint32_t>(rsTextDecoration) | static_cast<uint32_t>(RSTextDecoration::LINE_THROUGH));
+                break;
+            case TextDecoration::UNDERLINE:
+                rsTextDecoration = static_cast<RSTextDecoration>(
+                    static_cast<uint32_t>(rsTextDecoration) | static_cast<uint32_t>(RSTextDecoration::UNDERLINE));
+                break;
+            default:
+                rsTextDecoration = static_cast<RSTextDecoration>(
+                    static_cast<uint32_t>(rsTextDecoration) | static_cast<uint32_t>(RSTextDecoration::NONE));
+                break;
+        }
     }
     return rsTextDecoration;
 }

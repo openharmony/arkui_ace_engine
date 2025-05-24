@@ -494,7 +494,7 @@ HWTEST_F(DatePickerTestOne, CreateAndMountTimeNode001, TestSize.Level1)
     settingData.useMilitary = false;
 
     auto monthDaysNode = DatePickerDialogView::CreateDateNode(ElementRegister::GetInstance()->MakeUniqueId(),
-        settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+        settingData, true);
     ASSERT_NE(monthDaysNode, nullptr);
 
     auto pickerRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -537,7 +537,7 @@ HWTEST_F(DatePickerTestOne, CreateAndMountTimeNode002, TestSize.Level1)
     settingData.useMilitary = true;
 
     auto monthDaysNode = DatePickerDialogView::CreateDateNode(ElementRegister::GetInstance()->MakeUniqueId(),
-        settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+        settingData, true);
     ASSERT_NE(monthDaysNode, nullptr);
 
     auto pickerRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -569,12 +569,12 @@ HWTEST_F(DatePickerTestOne, SwitchContentRowButton002, TestSize.Level1)
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     ASSERT_NE(contentColumn, nullptr);
     auto datePickerNode = DatePickerDialogView::CreateDateNode(ElementRegister::GetInstance()->MakeUniqueId(),
-        settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
+        settingData, false);
     ASSERT_NE(datePickerNode, nullptr);
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     ASSERT_NE(pickerStack, nullptr);
     auto monthDaysNode = DatePickerDialogView::CreateDateNode(ElementRegister::GetInstance()->MakeUniqueId(),
-        settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+        settingData, true);
     ASSERT_NE(monthDaysNode, nullptr);
     datePickerNode->MountToParent(pickerStack);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
@@ -625,12 +625,12 @@ HWTEST_F(DatePickerTestOne, SwitchContentRowButton003, TestSize.Level1)
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     ASSERT_NE(contentColumn, nullptr);
     auto datePickerNode = DatePickerDialogView::CreateDateNode(ElementRegister::GetInstance()->MakeUniqueId(),
-        settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
+        settingData, false);
     ASSERT_NE(datePickerNode, nullptr);
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     ASSERT_NE(pickerStack, nullptr);
     auto monthDaysNode = DatePickerDialogView::CreateDateNode(ElementRegister::GetInstance()->MakeUniqueId(),
-        settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+        settingData, true);
     ASSERT_NE(monthDaysNode, nullptr);
     datePickerNode->MountToParent(pickerStack);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
@@ -682,12 +682,12 @@ HWTEST_F(DatePickerTestOne, SwitchContentRowButton004, TestSize.Level1)
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     ASSERT_NE(contentColumn, nullptr);
     auto datePickerNode = DatePickerDialogView::CreateDateNode(ElementRegister::GetInstance()->MakeUniqueId(),
-        settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
+        settingData, false);
     ASSERT_NE(datePickerNode, nullptr);
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     ASSERT_NE(pickerStack, nullptr);
     auto monthDaysNode = DatePickerDialogView::CreateDateNode(ElementRegister::GetInstance()->MakeUniqueId(),
-        settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+        settingData, true);
     ASSERT_NE(monthDaysNode, nullptr);
     datePickerNode->MountToParent(pickerStack);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
@@ -737,14 +737,12 @@ HWTEST_F(DatePickerTestOne, HideContentChildrenButton001, TestSize.Level1)
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     ASSERT_NE(contentColumn, nullptr);
     auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto datePickerNode = DatePickerDialogView::CreateDateNode(
-        dateNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
+    auto datePickerNode = DatePickerDialogView::CreateDateNode(dateNodeId, settingData, false);
     ASSERT_NE(datePickerNode, nullptr);
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     ASSERT_NE(pickerStack, nullptr);
     auto monthDaysNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto monthDaysNode = DatePickerDialogView::CreateDateNode(
-        monthDaysNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+    auto monthDaysNode = DatePickerDialogView::CreateDateNode(monthDaysNodeId, settingData, true);
     ASSERT_NE(monthDaysNode, nullptr);
     datePickerNode->MountToParent(pickerStack);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
@@ -1214,7 +1212,7 @@ HWTEST_F(DatePickerTestOne, PlayRestAnimation001, TestSize.Level1)
     CreateDatePickerColumnNode();
     ASSERT_NE(columnPattern_, nullptr);
 
-    DatePickerOptionProperty datePickerOptionProperty;
+    PickerOptionProperty datePickerOptionProperty;
     datePickerOptionProperty.prevDistance = 0.0f;
     datePickerOptionProperty.nextDistance = 1.0f;
     columnPattern_->optionProperties_.clear();

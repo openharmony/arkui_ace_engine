@@ -1774,4 +1774,40 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternTestSetDialogAccessibilityH
     auto dialogAccessibilityProperty = dialog->GetAccessibilityProperty<DialogAccessibilityProperty>();
     ASSERT_NE(dialogAccessibilityProperty, nullptr);
 }
+
+/**
+ * @tc.name: DialogPatternUpdateBackgroundColorTest001
+ * @tc.desc: Test DialogPattern::UpdateBackGroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternUpdateBackgroundColorTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipelineContext = host->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto dialogContext = host->GetRenderContext();
+    ASSERT_NE(dialogContext, nullptr);
+
+    pipelineContext->isSystemColorChange_ = true;
+
+    std::string colorStr = "#FF0000";
+    /**
+     * @tc.steps: step2. Call UpdateBackGroundColor and check the result.
+     * @tc.expected: Background color is updated correctly.
+     */
+    pattern->UpdateBackGroundColor(colorStr);
+    EXPECT_EQ(dialogContext->GetBackgroundColor().value(), Color::ColorFromString(colorStr));
+}
 } // namespace OHOS::Ace::NG

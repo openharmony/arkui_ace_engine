@@ -633,6 +633,7 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
     JSRef<JSVal> typeValue = obj->GetProperty("type");
     JSRef<JSVal> colorValue = obj->GetProperty("color");
     JSRef<JSVal> styleValue = obj->GetProperty("style");
+    JSRef<JSVal> thicknessScaleValue = obj->GetProperty("thicknessScale");
 
     TextDecoration textDecoration;
     if (typeValue->IsNumber()) {
@@ -640,7 +641,7 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
     } else {
         auto theme = GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
-        textDecoration = theme->GetTextStyle().GetTextDecoration();
+        textDecoration = theme->GetTextDecoration();
     }
     Color result;
     if (!ParseJsColor(colorValue, result)) {
@@ -652,17 +653,19 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
             result = theme->GetTextStyle().GetTextDecorationColor();
         }
     }
-    std::optional<TextDecorationStyle> textDecorationStyle;
+    std::optional<TextDecorationStyle> textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
     if (styleValue->IsNumber()) {
         textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
-    } else {
-        textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
     }
+    float lineThicknessScale = 1.0f;
+    if (thicknessScaleValue->IsNumber()) {
+        lineThicknessScale = thicknessScaleValue->ToNumber<float>();
+    }
+    lineThicknessScale = lineThicknessScale < 0 ? 1.0f : lineThicknessScale;
     TextModel::GetInstance()->SetTextDecoration(textDecoration);
     TextModel::GetInstance()->SetTextDecorationColor(result);
-    if (textDecorationStyle) {
-        TextModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
-    }
+    TextModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+    TextModel::GetInstance()->SetLineThicknessScale(lineThicknessScale);
     info.ReturnSelf();
 }
 
@@ -1035,6 +1038,24 @@ void JSText::SetEnableHapticFeedback(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetEnableHapticFeedback(state);
 }
 
+void JSText::SetOptimizeTrailingSpace(const JSCallbackInfo& info)
+{
+    bool state = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        state = info[0]->ToBoolean();
+    }
+    TextModel::GetInstance()->SetOptimizeTrailingSpace(state);
+}
+
+void JSText::SetEnableAutoSpacing(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    TextModel::GetInstance()->SetEnableAutoSpacing(enabled);
+}
+
 void JSText::JSBind(BindingTarget globalObj)
 {
     JSClass<JSText>::Declare("Text");
@@ -1104,6 +1125,8 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("responseRegion", &JSText::JsResponseRegion);
     JSClass<JSText>::StaticMethod("halfLeading", &JSText::SetHalfLeading);
     JSClass<JSText>::StaticMethod("enableHapticFeedback", &JSText::SetEnableHapticFeedback);
+    JSClass<JSText>::StaticMethod("optimizeTrailingSpace", &JSText::SetOptimizeTrailingSpace);
+    JSClass<JSText>::StaticMethod("enableAutoSpacing", &JSText::SetEnableAutoSpacing);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

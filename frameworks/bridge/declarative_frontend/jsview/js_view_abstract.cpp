@@ -77,6 +77,9 @@
 #include "interfaces/native/node/resource.h"
 
 #include "core/common/card_scope.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_wrapper.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/common/resource/resource_configuration.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -128,6 +131,8 @@ constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr uint32_t SAFE_AREA_TYPE_LIMIT = 3;
 constexpr uint32_t SAFE_AREA_EDGE_LIMIT = 4;
+constexpr uint32_t LAYOUT_SAFE_AREA_TYPE_LIMIT = 2;
+constexpr uint32_t LAYOUT_SAFE_AREA_EDGE_LIMIT = 6;
 constexpr int32_t MAX_ALIGN_VALUE = 8;
 constexpr int32_t UNKNOWN_RESOURCE_ID = -1;
 constexpr int32_t UNKNOWN_RESOURCE_TYPE = -1;
@@ -163,8 +168,12 @@ const char* LEFT_PROPERTY = "left";
 const char* RIGHT_PROPERTY = "right";
 const char* TOP_START_PROPERTY = "topStart";
 const char* TOP_END_PROPERTY = "topEnd";
+const char* TOP_LEFT_PROPERTY = "topLeft";
+const char* TOP_RIGHT_PROPERTY = "topRight";
 const char* BOTTOM_START_PROPERTY = "bottomStart";
 const char* BOTTOM_END_PROPERTY = "bottomEnd";
+const char* BOTTOM_LEFT_PROPERTY = "bottomLeft";
+const char* BOTTOM_RIGHT_PROPERTY = "bottomRight";
 const char* DEBUG_LINE_INFO_LINE = "$line";
 const char* DEBUG_LINE_INFO_PACKAGE_NAME = "$packageName";
 
@@ -409,20 +418,103 @@ void ReplaceHolder(std::string& originStr, JSRef<JSArray> params, int32_t contai
     }
 }
 
-bool ParseLocationProps(const JSRef<JSObject>& sizeObj, CalcDimension& x, CalcDimension& y)
+bool ParseLocationProps(const JSRef<JSObject>& sizeObj, CalcDimension& x, CalcDimension& y,
+    RefPtr<ResourceObject>& xresObj, RefPtr<ResourceObject>& yresObj)
 {
     JSRef<JSVal> xVal = sizeObj->GetProperty(static_cast<int32_t>(ArkUIIndex::X));
     JSRef<JSVal> yVal = sizeObj->GetProperty(static_cast<int32_t>(ArkUIIndex::Y));
     bool hasX = false;
     bool hasY = false;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        hasX = JSViewAbstract::ParseJsDimensionNG(xVal, x, DimensionUnit::VP);
-        hasY = JSViewAbstract::ParseJsDimensionNG(yVal, y, DimensionUnit::VP);
+        hasX = JSViewAbstract::ParseJsDimensionNG(xVal, x, DimensionUnit::VP, xresObj);
+        hasY = JSViewAbstract::ParseJsDimensionNG(yVal, y, DimensionUnit::VP, yresObj);
     } else {
-        hasX = JSViewAbstract::ParseJsDimension(xVal, x, DimensionUnit::VP);
-        hasY = JSViewAbstract::ParseJsDimension(yVal, y, DimensionUnit::VP);
+        hasX = JSViewAbstract::ParseJsDimension(xVal, x, DimensionUnit::VP, xresObj);
+        hasY = JSViewAbstract::ParseJsDimension(yVal, y, DimensionUnit::VP, yresObj);
     }
     return hasX || hasY;
+}
+
+void ParseLocationPropsEdgesResObj(EdgesParam& edges, const RefPtr<ResourceObject>& topResObj,
+    const RefPtr<ResourceObject>& leftResObj, const RefPtr<ResourceObject>& bottomResObj,
+    const RefPtr<ResourceObject>& rightResObj)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (topResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, EdgesParam& edges) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+            edges.SetTop(result);
+        };
+        edges.AddResource("edges.top", topResObj, std::move(updateFunc));
+    }
+    if (leftResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, EdgesParam& edges) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+            edges.SetLeft(result);
+        };
+        edges.AddResource("edges.left", leftResObj, std::move(updateFunc));
+    }
+    if (bottomResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, EdgesParam& edges) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+            edges.SetBottom(result);
+        };
+        edges.AddResource("edges.bottom", bottomResObj, std::move(updateFunc));
+    }
+    if (rightResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, EdgesParam& edges) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+            edges.SetRight(result);
+        };
+        edges.AddResource("edges.right", rightResObj, std::move(updateFunc));
+    }
+}
+
+void ParseAllBorderRadiusesResObj(NG::BorderRadiusProperty& borderRadius, const RefPtr<ResourceObject>& topLeftResObj,
+    const RefPtr<ResourceObject>& topRightResObj, const RefPtr<ResourceObject>& bottomLeftResObj,
+    const RefPtr<ResourceObject>& bottomRightResObj)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (topLeftResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            borderRadius.radiusTopLeft = result;
+        };
+        borderRadius.AddResource("borderRadius.topLeft", topLeftResObj, std::move(updateFunc));
+    }
+    if (topRightResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            borderRadius.radiusTopRight = result;
+        };
+        borderRadius.AddResource("borderRadius.topRight", topRightResObj, std::move(updateFunc));
+    }
+    if (bottomLeftResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            borderRadius.radiusBottomLeft = result;
+        };
+        borderRadius.AddResource("borderRadius.bottomLeft", bottomLeftResObj, std::move(updateFunc));
+    }
+    if (bottomRightResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            borderRadius.radiusBottomRight = result;
+        };
+        borderRadius.AddResource("borderRadius.bottomRight", bottomRightResObj, std::move(updateFunc));
+    }
 }
 
 bool ParseLocationPropsEdges(const JSRef<JSObject>& edgesObj, EdgesParam& edges)
@@ -432,32 +524,37 @@ bool ParseLocationPropsEdges(const JSRef<JSObject>& edgesObj, EdgesParam& edges)
     CalcDimension left;
     CalcDimension bottom;
     CalcDimension right;
+    RefPtr<ResourceObject> topResObj;
+    RefPtr<ResourceObject> leftResObj;
+    RefPtr<ResourceObject> bottomResObj;
+    RefPtr<ResourceObject> rightResObj;
     JSRef<JSVal> topVal = edgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP));
     JSRef<JSVal> leftVal = edgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT));
     JSRef<JSVal> bottomVal = edgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM));
     JSRef<JSVal> rightVal = edgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT));
-    if (JSViewAbstract::ParseJsDimensionNG(topVal, top, DimensionUnit::VP)) {
+    if (JSViewAbstract::ParseJsDimensionNG(topVal, top, DimensionUnit::VP, topResObj)) {
         edges.SetTop(top);
         useEdges = true;
     }
-    if (JSViewAbstract::ParseJsDimensionNG(leftVal, left, DimensionUnit::VP)) {
+    if (JSViewAbstract::ParseJsDimensionNG(leftVal, left, DimensionUnit::VP, leftResObj)) {
         edges.SetLeft(left);
         useEdges = true;
     }
-    if (JSViewAbstract::ParseJsDimensionNG(bottomVal, bottom, DimensionUnit::VP)) {
+    if (JSViewAbstract::ParseJsDimensionNG(bottomVal, bottom, DimensionUnit::VP, bottomResObj)) {
         edges.SetBottom(bottom);
         useEdges = true;
     }
-    if (JSViewAbstract::ParseJsDimensionNG(rightVal, right, DimensionUnit::VP)) {
+    if (JSViewAbstract::ParseJsDimensionNG(rightVal, right, DimensionUnit::VP, rightResObj)) {
         edges.SetRight(right);
         useEdges = true;
     }
+    ParseLocationPropsEdgesResObj(edges, topResObj, leftResObj, bottomResObj, rightResObj);
     return useEdges;
 }
 
 decltype(JSViewAbstract::ParseJsLengthMetricsVp)* ParseJsLengthMetrics = JSViewAbstract::ParseJsLengthMetricsVp;
 
-void ParseJsLengthMetricsToDimension(const JSRef<JSObject>& obj, Dimension& result)
+void ParseJsLengthMetricsToDimension(const JSRef<JSObject>& obj, Dimension& result, RefPtr<ResourceObject>& resourceObj)
 {
     auto value = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
     if (!value->IsNumber()) {
@@ -470,6 +567,13 @@ void ParseJsLengthMetricsToDimension(const JSRef<JSObject>& obj, Dimension& resu
     }
     CalcDimension dimension(value->ToNumber<double>(), unit);
     result = dimension;
+    auto jsRes = obj->GetProperty("res");
+    if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() &&
+        !jsRes->IsNull() && !jsRes->IsObject()) {
+        JSRef<JSObject> resObj = JSRef<JSObject>::Cast(jsRes);
+        JSViewAbstract::CompleteResourceObject(resObj);
+        resourceObj = JSViewAbstract::GetResourceObject(resObj);
+    }
     return;
 }
 
@@ -783,40 +887,262 @@ void CheckDimensionUnit(CalcDimension& checkDimension, bool notPercent, bool not
 void ParseEdgeColors(const JSRef<JSObject>& object, CommonColor& commonColor)
 {
     Color left;
-    if (JSViewAbstract::ParseJsColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT)), left)) {
+    RefPtr<ResourceObject> leftResObj;
+    if (JSViewAbstract::ParseJsColor(
+        object->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT)), left, leftResObj)) {
         commonColor.left = left;
     }
     Color right;
-    if (JSViewAbstract::ParseJsColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT)), right)) {
+    RefPtr<ResourceObject> rightResObj;
+    if (JSViewAbstract::ParseJsColor(
+        object->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT)), right, rightResObj)) {
         commonColor.right = right;
     }
     Color top;
-    if (JSViewAbstract::ParseJsColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP)), top)) {
+    RefPtr<ResourceObject> topResObj;
+    if (JSViewAbstract::ParseJsColor(
+        object->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP)), top, topResObj)) {
         commonColor.top = top;
     }
     Color bottom;
-    if (JSViewAbstract::ParseJsColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottom)) {
+    RefPtr<ResourceObject> bottomResObj;
+    if (JSViewAbstract::ParseJsColor(
+        object->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottom, bottomResObj)) {
         commonColor.bottom = bottom;
     }
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (leftResObj) {
+        commonColor.leftResObj = leftResObj;
+    }
+    if (rightResObj) {
+        commonColor.rightResObj = rightResObj;
+    }
+    if (topResObj) {
+        commonColor.topResObj = topResObj;
+    }
+    if (bottomResObj) {
+        commonColor.bottomResObj = bottomResObj;
+    }
+}
+
+void ParseLocalizedEdgeStartColorsForOutLineColor(const JSRef<JSObject>& object, NG::BorderColorProperty& borderColors)
+{
+    if (object->IsUndefined()) {
+        return;
+    }
+    RefPtr<ResourceObject> startResObj;
+    Color start;
+    if (JSViewAbstract::ParseJsColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::START)), start, startResObj)) {
+        borderColors.leftColor = start;
+    }
+    if (startResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& startResObj, NG::BorderColorProperty& borderColors) {
+            Color color;
+            ResourceParseUtils::ParseResColor(startResObj, color);
+            borderColors.leftColor = color;
+        };
+        borderColors.AddResource("localizedEdgeColor.start", startResObj, std::move(updateFunc));
+    }
+}
+
+void ParseLocalizedEdgeEndColorsForOutLineColor(const JSRef<JSObject>& object, NG::BorderColorProperty& borderColors)
+{
+    if (object->IsUndefined()) {
+        return;
+    }
+    RefPtr<ResourceObject> endResObj;
+    Color end;
+    if (JSViewAbstract::ParseJsColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::END)), end, endResObj)) {
+        borderColors.rightColor = end;
+    }
+    if (endResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& endResObj, NG::BorderColorProperty& borderColors) {
+            Color color;
+            ResourceParseUtils::ParseResColor(endResObj, color);
+            borderColors.rightColor = color;
+        };
+        borderColors.AddResource("localizedEdgeColor.end", endResObj, std::move(updateFunc));
+    }
+}
+
+void ParseLocalizedEdgeTopColorsForOutLineColor(const JSRef<JSObject>& object, NG::BorderColorProperty& borderColors)
+{
+    if (object->IsUndefined()) {
+        return;
+    }
+    RefPtr<ResourceObject> topResObj;
+    Color top;
+    if (JSViewAbstract::ParseJsColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP)), top, topResObj)) {
+        borderColors.topColor = top;
+    }
+    if (topResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& topResObj, NG::BorderColorProperty& borderColors) {
+            Color color;
+            ResourceParseUtils::ParseResColor(topResObj, color);
+            borderColors.topColor = color;
+        };
+        borderColors.AddResource("localizedEdgeColor.top", topResObj, std::move(updateFunc));
+    }
+}
+
+void ParseLocalizedEdgeBottomColorsForOutLineColor(const JSRef<JSObject>& object, NG::BorderColorProperty& borderColors)
+{
+    if (object->IsUndefined()) {
+        return;
+    }
+    RefPtr<ResourceObject> bottomResObj;
+    Color bottom;
+    if (JSViewAbstract::ParseJsColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottom, bottomResObj)) {
+        borderColors.bottomColor = bottom;
+    }
+    if (bottomResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& bottomResObj, NG::BorderColorProperty& borderColors) {
+            Color color;
+            ResourceParseUtils::ParseResColor(bottomResObj, color);
+            borderColors.bottomColor = color;
+        };
+        borderColors.AddResource("localizedEdgeColor.bottom", bottomResObj, std::move(updateFunc));
+    }
+}
+
+void ParseLocalizedEdgeColorsForOutLineColor(const JSRef<JSObject>& object, NG::BorderColorProperty& borderColors)
+{
+    ParseLocalizedEdgeStartColorsForOutLineColor(object, borderColors);
+    ParseLocalizedEdgeEndColorsForOutLineColor(object, borderColors);
+    ParseLocalizedEdgeTopColorsForOutLineColor(object, borderColors);
+    ParseLocalizedEdgeBottomColorsForOutLineColor(object, borderColors);
+}
+
+void ParseEdgeLeftColorsForOutLineColor(const JSRef<JSObject>& object, NG::BorderColorProperty& borderColors)
+{
+    if (object->IsUndefined()) {
+        return;
+    }
+    RefPtr<ResourceObject> leftResObj;
+    Color left;
+    if (JSViewAbstract::ParseJsColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT)), left, leftResObj)) {
+        borderColors.leftColor = left;
+    }
+    if (leftResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& leftResObj, NG::BorderColorProperty& borderColors) {
+            Color color;
+            ResourceParseUtils::ParseResColor(leftResObj, color);
+            borderColors.leftColor = color;
+        };
+        borderColors.AddResource("outLineColor.edgeColor.left", leftResObj, std::move(updateFunc));
+    }
+}
+
+void ParseEdgeRightColorsForOutLineColor(const JSRef<JSObject>& object, NG::BorderColorProperty& borderColors)
+{
+    if (object->IsUndefined()) {
+        return;
+    }
+    RefPtr<ResourceObject> rightResObj;
+    Color right;
+    if (JSViewAbstract::ParseJsColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT)), right, rightResObj)) {
+        borderColors.rightColor = right;
+    }
+    if (rightResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color color;
+            ResourceParseUtils::ParseResColor(resObj, color);
+            borderColors.rightColor = color;
+        };
+        borderColors.AddResource("outLineColor.edgeColor.right", rightResObj, std::move(updateFunc));
+    }
+}
+
+void ParseEdgeTopColorsForOutLineColor(const JSRef<JSObject>& object, NG::BorderColorProperty& borderColors)
+{
+    if (object->IsUndefined()) {
+        return;
+    }
+    RefPtr<ResourceObject> topResObj;
+    Color top;
+    if (JSViewAbstract::ParseJsColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP)), top, topResObj)) {
+        borderColors.topColor = top;
+    }
+    if (topResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& topResObj, NG::BorderColorProperty& borderColors) {
+            Color color;
+            ResourceParseUtils::ParseResColor(topResObj, color);
+            borderColors.topColor = color;
+        };
+        borderColors.AddResource("outLineColor.edgeColor.top", topResObj, std::move(updateFunc));
+    }
+}
+
+void ParseEdgeBottomColorsForOutLineColor(const JSRef<JSObject>& object, NG::BorderColorProperty& borderColors)
+{
+    if (object->IsUndefined()) {
+        return;
+    }
+    RefPtr<ResourceObject> bottomResObj;
+    Color bottom;
+    if (JSViewAbstract::ParseJsColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottom, bottomResObj)) {
+        borderColors.bottomColor = bottom;
+    }
+    if (bottomResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color color;
+            ResourceParseUtils::ParseResColor(resObj, color);
+            borderColors.bottomColor = color;
+        };
+        borderColors.AddResource("outLineColor.edgeColor.bottom", bottomResObj, std::move(updateFunc));
+    }
+}
+
+void ParseEdgeColorsForOutLineColor(const JSRef<JSObject>& object, NG::BorderColorProperty& borderColors)
+{
+    ParseEdgeLeftColorsForOutLineColor(object, borderColors);
+    ParseEdgeRightColorsForOutLineColor(object, borderColors);
+    ParseEdgeTopColorsForOutLineColor(object, borderColors);
+    ParseEdgeBottomColorsForOutLineColor(object, borderColors);
 }
 
 void ParseLocalizedEdgeColors(const JSRef<JSObject>& object, LocalizedColor& localizedColor)
 {
     Color start;
-    if (JSViewAbstract::ParseJsColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::START)), start)) {
+    RefPtr<ResourceObject> startResObj;
+    if (JSViewAbstract::ParseJsColor(
+        object->GetProperty(static_cast<int32_t>(ArkUIIndex::START)), start, startResObj)) {
         localizedColor.start = start;
     }
     Color end;
-    if (JSViewAbstract::ParseJsColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::END)), end)) {
+    RefPtr<ResourceObject> endResObj;
+    if (JSViewAbstract::ParseJsColor(
+        object->GetProperty(static_cast<int32_t>(ArkUIIndex::END)), end, endResObj)) {
         localizedColor.end = end;
     }
     Color top;
-    if (JSViewAbstract::ParseJsColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP)), top)) {
+    RefPtr<ResourceObject> topResObj;
+    if (JSViewAbstract::ParseJsColor(
+        object->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP)), top, topResObj)) {
         localizedColor.top = top;
     }
     Color bottom;
-    if (JSViewAbstract::ParseJsColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottom)) {
+    RefPtr<ResourceObject> bottomResObj;
+    if (JSViewAbstract::ParseJsColor(
+        object->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottom, bottomResObj)) {
         localizedColor.bottom = bottom;
+    }
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (startResObj) {
+        localizedColor.startResObj = startResObj;
+    }
+    if (endResObj) {
+        localizedColor.endResObj = endResObj;
+    }
+    if (topResObj) {
+        localizedColor.topResObj = topResObj;
+    }
+    if (bottomResObj) {
+        localizedColor.bottomResObj = bottomResObj;
     }
 }
 
@@ -830,6 +1156,10 @@ bool ParseCommonEdgeColors(const JSRef<JSObject>& object, CommonColor& commonCol
         commonColor.bottom = localizedColor.bottom;
         commonColor.left = localizedColor.start;
         commonColor.right = localizedColor.end;
+        commonColor.topResObj = localizedColor.topResObj;
+        commonColor.bottomResObj = localizedColor.bottomResObj;
+        commonColor.leftResObj = localizedColor.startResObj;
+        commonColor.rightResObj = localizedColor.endResObj;
         return true;
     }
     ParseEdgeColors(object, commonColor);
@@ -858,6 +1188,87 @@ void ParseEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& commonC
         CheckDimensionUnit(bottom, true, notNegative);
         commonCalcDimension.bottom = bottom;
     }
+}
+
+void ParseEdgeWidthsResObjFunc(NG::BorderWidthProperty& borderWidth, RefPtr<ResourceObject> leftResObj,
+    RefPtr<ResourceObject> rightResObj, RefPtr<ResourceObject> topResObj, RefPtr<ResourceObject> bottomResObj)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (leftResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            borderWidth.leftDimen = result;
+            borderWidth.multiValued = true;
+        };
+        borderWidth.AddResource("borderWidth.left", leftResObj, std::move(updateFunc));
+    }
+    if (rightResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            borderWidth.rightDimen = result;
+            borderWidth.multiValued = true;
+        };
+        borderWidth.AddResource("borderWidth.right", rightResObj, std::move(updateFunc));
+    }
+    if (topResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            borderWidth.topDimen = result;
+            borderWidth.multiValued = true;
+        };
+        borderWidth.AddResource("borderWidth.top", topResObj, std::move(updateFunc));
+    }
+    if (bottomResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            borderWidth.bottomDimen = result;
+            borderWidth.multiValued = true;
+        };
+        borderWidth.AddResource("borderWidth.bottom", bottomResObj, std::move(updateFunc));
+    }
+}
+
+void ParseEdgeWidthsResObj(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidth, bool notNegative)
+{
+    CalcDimension left;
+    RefPtr<ResourceObject> leftResObj;
+    if (JSViewAbstract::ParseJsDimensionVp(
+            object->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT)), left, leftResObj)) {
+        CheckDimensionUnit(left, true, notNegative);
+        borderWidth.leftDimen = left;
+        borderWidth.multiValued = true;
+    }
+    CalcDimension right;
+    RefPtr<ResourceObject> rightResObj;
+    if (JSViewAbstract::ParseJsDimensionVp(
+            object->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT)), right, rightResObj)) {
+        CheckDimensionUnit(right, true, notNegative);
+        borderWidth.rightDimen = right;
+        borderWidth.multiValued = true;
+    }
+    CalcDimension top;
+    RefPtr<ResourceObject> topResObj;
+    if (JSViewAbstract::ParseJsDimensionVp(
+            object->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP)), top, topResObj)) {
+        CheckDimensionUnit(top, true, notNegative);
+        borderWidth.topDimen = top;
+        borderWidth.multiValued = true;
+    }
+    CalcDimension bottom;
+    RefPtr<ResourceObject> bottomResObj;
+    if (JSViewAbstract::ParseJsDimensionVp(
+            object->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottom, bottomResObj)) {
+        CheckDimensionUnit(bottom, true, notNegative);
+        borderWidth.bottomDimen = bottom;
+        borderWidth.multiValued = true;
+    }
+    ParseEdgeWidthsResObjFunc(borderWidth, leftResObj, rightResObj, topResObj, bottomResObj);
 }
 
 void ParseEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension, bool notPercent,
@@ -981,11 +1392,13 @@ bool ParseCommonEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& c
         commonCalcDimension.right = localizedCalcDimension.end;
         return true;
     }
-    ParseEdgeWidths(object, commonCalcDimension, notNegative);
+    if (!SystemProperties::ConfigChangePerform()) {
+        ParseEdgeWidths(object, commonCalcDimension, notNegative);
+    }
     return false;
 }
 
-void ParseCommonEdgeWidthsForDashParams(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
+bool ParseCommonEdgeWidthsForDashParams(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
 {
     if (CheckLengthMetrics(object)) {
         LocalizedCalcDimension localizedCalcDimension;
@@ -995,9 +1408,10 @@ void ParseCommonEdgeWidthsForDashParams(const JSRef<JSObject>& object, CommonCal
         commonCalcDimension.bottom = localizedCalcDimension.bottom;
         commonCalcDimension.left = isRightToLeft ? localizedCalcDimension.end : localizedCalcDimension.start;
         commonCalcDimension.right = isRightToLeft ? localizedCalcDimension.start : localizedCalcDimension.end;
-        return;
+        return true;
     }
     ParseEdgeWidthsProps(object, commonCalcDimension, true, false, static_cast<CalcDimension>(-1));
+    return false;
 }
 
 void ParseCommonEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
@@ -1026,6 +1440,34 @@ std::function<void(bool)> ParseTransitionCallback(const JSRef<JSFunc>& jsFunc, c
         jsFuncFinish->ExecuteJS(1, &newJSVal);
     };
     return finishCallback;
+}
+
+NG::CalcLength ConvertCalcLength(CalcDimension& target)
+{
+    NG::CalcLength targetLength = (target.Unit() == DimensionUnit::CALC) ?
+        NG::CalcLength(target.IsNonNegative() ? target.CalcValue() : CalcDimension().CalcValue()) :
+        NG::CalcLength(target.IsNonNegative() ? target : CalcDimension());
+    return targetLength;
+}
+
+void SetConstraintSize(const RefPtr<ResourceObject>& minWidthResObj, const RefPtr<ResourceObject>& maxWidthResObj,
+    const RefPtr<ResourceObject>& minHeightResObj, const RefPtr<ResourceObject>& maxHeightResObj)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (minWidthResObj) {
+        ViewAbstractModel::GetInstance()->SetMinWidth(minWidthResObj);
+    }
+    if (maxWidthResObj) {
+        ViewAbstractModel::GetInstance()->SetMaxWidth(maxWidthResObj);
+    }
+    if (minHeightResObj) {
+        ViewAbstractModel::GetInstance()->SetMinHeight(minHeightResObj);
+    }
+    if (maxHeightResObj) {
+        ViewAbstractModel::GetInstance()->SetMaxHeight(maxHeightResObj);
+    }
 }
 } // namespace
 
@@ -1316,8 +1758,13 @@ void JSViewAbstract::JsScaleY(const JSCallbackInfo& info)
 void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
 {
     double opacity = 0.0;
-    if (!ParseJsDouble(info[0], opacity)) {
+    RefPtr<ResourceObject> opacityResObj;
+    if (!ParseJsDouble(info[0], opacity, opacityResObj)) {
         ViewAbstractModel::GetInstance()->SetOpacity(1.0f);
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && opacityResObj) {
+        ViewAbstractModel::GetInstance()->CreateWithOpacityResourceObj(opacityResObj);
         return;
     }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -1582,13 +2029,14 @@ void JSViewAbstract::JsWidth(const JSCallbackInfo& info)
 bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
 {
     CalcDimension value;
+    RefPtr<ResourceObject> valueResObj;
     if (jsValue->IsUndefined()) {
         ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         return true;
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (!ParseJsDimensionVpNG(jsValue, value)) {
+        if (!ParseJsDimensionVpNG(jsValue, value, valueResObj)) {
             // JsWidth return false, check if set LayoutPolicy before return.
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
             if (!jsValue->IsObject()) {
@@ -1603,12 +2051,12 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
                 return true;
             }
         }
-    } else if (!ParseJsDimensionVp(jsValue, value)) {
+    } else if (!ParseJsDimensionVp(jsValue, value, valueResObj)) {
         return false;
     }
 
-    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
-    if (LessNotEqual(value.Value(), 0.0)) {
+    if (!SystemProperties::ConfigChangePerform() ? LessNotEqual(value.Value(), 0.0) :
+        (LessNotEqual(value.Value(), 0.0) && !valueResObj)) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
             return true;
@@ -1617,7 +2065,11 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
         }
     }
 
-    ViewAbstractModel::GetInstance()->SetWidth(value);
+    if (SystemProperties::ConfigChangePerform() && valueResObj) {
+        ViewAbstractModel::GetInstance()->SetWidth(valueResObj);
+    } else {
+        ViewAbstractModel::GetInstance()->SetWidth(value);
+    }
     return true;
 }
 
@@ -1652,13 +2104,14 @@ void JSViewAbstract::JsToolbar(const JSCallbackInfo& info)
 bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
 {
     CalcDimension value;
+    RefPtr<ResourceObject> valueResObj;
     if (jsValue->IsUndefined()) {
         ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
         return true;
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (!ParseJsDimensionVpNG(jsValue, value)) {
+        if (!ParseJsDimensionVpNG(jsValue, value, valueResObj)) {
             // JsHeight return false, check if set LayoutPolicy before return.
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
             if (!jsValue->IsObject()) {
@@ -1673,12 +2126,12 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
                 return true;
             }
         }
-    } else if (!ParseJsDimensionVp(jsValue, value)) {
+    } else if (!ParseJsDimensionVp(jsValue, value, valueResObj)) {
         return false;
     }
 
-    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
-    if (LessNotEqual(value.Value(), 0.0)) {
+    if (!SystemProperties::ConfigChangePerform() ? LessNotEqual(value.Value(), 0.0) :
+        (LessNotEqual(value.Value(), 0.0) && !valueResObj)) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
             return true;
@@ -1687,7 +2140,11 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
         }
     }
 
-    ViewAbstractModel::GetInstance()->SetHeight(value);
+    if (SystemProperties::ConfigChangePerform() && valueResObj) {
+        ViewAbstractModel::GetInstance()->SetHeight(valueResObj);
+    } else {
+        ViewAbstractModel::GetInstance()->SetHeight(value);
+    }
     return true;
 }
 
@@ -1712,6 +2169,126 @@ void JSViewAbstract::JsMouseResponseRegion(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetMouseResponseRegion(result);
 }
 
+void JSViewAbstract::ParseMaskRectOffset(
+    const JSRef<JSVal>& offsetX, const JSRef<JSVal>& offsetY, DimensionOffset& options)
+{
+    CalcDimension xDimen;
+    CalcDimension yDimen;
+    if (!SystemProperties::ConfigChangePerform()) {
+        if (ParseJsDimensionNG(offsetX, xDimen, DimensionUnit::VP)) {
+            options.SetX(xDimen);
+        }
+        if (ParseJsDimensionNG(offsetY, yDimen, DimensionUnit::VP)) {
+            options.SetY(yDimen);
+        }
+        return;
+    }
+    RefPtr<ResourceObject> xResObj = nullptr;
+    RefPtr<ResourceObject> yResObj = nullptr;
+    if (ParseJsDimensionVp(offsetX, xDimen, xResObj)) {
+        options.SetX(xDimen);
+    }
+    if (xResObj) {
+        auto&& xUpdateFunc = [](const RefPtr<ResourceObject>& xResObj, DimensionOffset& options) {
+            CalcDimension x;
+            if (ResourceParseUtils::ParseResDimensionVp(xResObj, x)) {
+                options.SetX(x);
+            }
+        };
+        options.AddResource("dialog.dimensionOffset.x", xResObj, std::move(xUpdateFunc));
+    }
+    if (ParseJsDimensionVp(offsetY, yDimen, yResObj)) {
+        options.SetY(yDimen);
+    }
+    if (yResObj) {
+        auto&& yUpdateFunc = [](const RefPtr<ResourceObject>& yResObj, DimensionOffset& options) {
+            CalcDimension y;
+            if (ResourceParseUtils::ParseResDimensionVp(yResObj, y)) {
+                options.SetY(y);
+            }
+        };
+        options.AddResource("dialog.dimensionOffset.y", yResObj, std::move(yUpdateFunc));
+    }
+}
+
+void JSViewAbstract::ParseMarkRectWidthWithResourceObj(const JSRef<JSVal>& width, DimensionRect& options)
+{
+    CalcDimension rectDimen;
+    RefPtr<ResourceObject> resObj = nullptr;
+    if (ParseJsDimensionNG(width, rectDimen, DimensionUnit::VP, resObj)) {
+        if (rectDimen.Unit() == DimensionUnit::PERCENT && rectDimen.Value() < 0) {
+            return;
+        }
+        options.SetWidth(rectDimen);
+    }
+    if (resObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, DimensionRect& options) {
+            CalcDimension rectDimenVal;
+            if (ResourceParseUtils::ParseResDimensionVpNG(resObj, rectDimenVal)) {
+                if (rectDimenVal.Unit() == DimensionUnit::PERCENT && rectDimenVal.Value() < 0) {
+                    return;
+                }
+                options.SetWidth(rectDimenVal);
+            }
+        };
+        options.AddResource("dialog.maskRect.width", resObj, std::move(updateFunc));
+    }
+}
+
+void JSViewAbstract::ParseMarkRectWidth(const JSRef<JSVal>& width, DimensionRect& options)
+{
+    CalcDimension rectDimen;
+    if (!SystemProperties::ConfigChangePerform()) {
+        if (ParseJsDimensionNG(width, rectDimen, DimensionUnit::VP)) {
+            if (rectDimen.Unit() == DimensionUnit::PERCENT && rectDimen.Value() < 0) {
+                return;
+            }
+            options.SetWidth(rectDimen);
+        }
+        return;
+    }
+    ParseMarkRectWidthWithResourceObj(width, options);
+}
+
+void JSViewAbstract::ParseMaskRectHeightWithResourceObj(const JSRef<JSVal>& height, DimensionRect& options)
+{
+    RefPtr<ResourceObject> resObj = nullptr;
+    CalcDimension rectDimen;
+    if (ParseJsDimensionNG(height, rectDimen, DimensionUnit::VP, resObj)) {
+        if (rectDimen.Unit() == DimensionUnit::PERCENT && rectDimen.Value() < 0) {
+            return;
+        }
+        options.SetHeight(rectDimen);
+    }
+    if (resObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, DimensionRect& options) {
+            CalcDimension rectDimenVal;
+            if (ResourceParseUtils::ParseResDimensionVpNG(resObj, rectDimenVal)) {
+                if (rectDimenVal.Unit() == DimensionUnit::PERCENT && rectDimenVal.Value() < 0) {
+                    return;
+                }
+                options.SetHeight(rectDimenVal);
+            }
+        };
+        options.AddResource("dialog.maskRect.height", resObj, std::move(updateFunc));
+    }
+}
+
+void JSViewAbstract::ParseMarkRectHeight(const JSRef<JSVal>& height, DimensionRect& options)
+{
+    CalcDimension rectDimen;
+    if (!SystemProperties::ConfigChangePerform()) {
+        if (ParseJsDimensionNG(height, rectDimen, DimensionUnit::VP)) {
+            if (rectDimen.Unit() == DimensionUnit::PERCENT && rectDimen.Value() < 0) {
+                return;
+            }
+            options.SetHeight(rectDimen);
+        }
+        return;
+    }
+    ParseMaskRectHeightWithResourceObj(height, options);
+}
+
 bool JSViewAbstract::ParseJsDimensionRect(const JSRef<JSVal>& jsValue, DimensionRect& result)
 {
     result.SetOffset(DimensionOffset(CalcDimension(0, DimensionUnit::VP), CalcDimension(0, DimensionUnit::VP)));
@@ -1719,7 +2296,6 @@ bool JSViewAbstract::ParseJsDimensionRect(const JSRef<JSVal>& jsValue, Dimension
     if (!jsValue->IsObject()) {
         return true;
     }
-
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> x = obj->GetProperty("x");
     JSRef<JSVal> y = obj->GetProperty("y");
@@ -1737,28 +2313,14 @@ bool JSViewAbstract::ParseJsDimensionRect(const JSRef<JSVal>& jsValue, Dimension
     if (s2.find('-') != std::string::npos) {
         height = JSRef<JSVal>::Make(ToJSValue("100%"));
     }
-    if (ParseJsDimensionNG(x, xDimen, DimensionUnit::VP)) {
-        auto offset = result.GetOffset();
-        offset.SetX(xDimen);
-        result.SetOffset(offset);
-    }
-    if (ParseJsDimensionNG(y, yDimen, DimensionUnit::VP)) {
-        auto offset = result.GetOffset();
-        offset.SetY(yDimen);
-        result.SetOffset(offset);
-    }
-    if (ParseJsDimensionNG(width, widthDimen, DimensionUnit::VP)) {
-        if (widthDimen.Unit() == DimensionUnit::PERCENT && widthDimen.Value() < 0) {
-            return true;
-        }
-        result.SetWidth(widthDimen);
-    }
-    if (ParseJsDimensionNG(height, heightDimen, DimensionUnit::VP)) {
-        if (heightDimen.Unit() == DimensionUnit::PERCENT && heightDimen.Value() < 0) {
-            return true;
-        }
-        result.SetHeight(heightDimen);
-    }
+    DimensionOffset offset;
+    ParseMaskRectOffset(x, y, offset);
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    Dimension offsetX = isRtl ? offset.GetX() * (-1) : offset.GetX();
+    offset.SetX(offsetX);
+    result.SetOffset(offset);
+    ParseMarkRectWidth(width, result);
+    ParseMarkRectHeight(height, result);
     return true;
 }
 
@@ -1829,36 +2391,41 @@ void JSViewAbstract::JsConstraintSize(const JSCallbackInfo& info)
 
     JSRef<JSVal> minWidthValue = sizeObj->GetProperty("minWidth");
     CalcDimension minWidth;
+    RefPtr<ResourceObject> minWidthResObj;
     JSRef<JSVal> maxWidthValue = sizeObj->GetProperty("maxWidth");
     CalcDimension maxWidth;
+    RefPtr<ResourceObject> maxWidthResObj;
     JSRef<JSVal> minHeightValue = sizeObj->GetProperty("minHeight");
     CalcDimension minHeight;
+    RefPtr<ResourceObject> minHeightResObj;
     JSRef<JSVal> maxHeightValue = sizeObj->GetProperty("maxHeight");
     CalcDimension maxHeight;
+    RefPtr<ResourceObject> maxHeightResObj;
     bool version10OrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
-    if (ParseJsDimensionVp(minWidthValue, minWidth)) {
+    if (ParseJsDimensionVp(minWidthValue, minWidth, minWidthResObj)) {
         ViewAbstractModel::GetInstance()->SetMinWidth(minWidth);
     } else if (version10OrLarger) {
         ViewAbstractModel::GetInstance()->ResetMinSize(true);
     }
 
-    if (ParseJsDimensionVp(maxWidthValue, maxWidth)) {
+    if (ParseJsDimensionVp(maxWidthValue, maxWidth, maxWidthResObj)) {
         ViewAbstractModel::GetInstance()->SetMaxWidth(maxWidth);
     } else if (version10OrLarger) {
         ViewAbstractModel::GetInstance()->ResetMaxSize(true);
     }
 
-    if (ParseJsDimensionVp(minHeightValue, minHeight)) {
+    if (ParseJsDimensionVp(minHeightValue, minHeight, minHeightResObj)) {
         ViewAbstractModel::GetInstance()->SetMinHeight(minHeight);
     } else if (version10OrLarger) {
         ViewAbstractModel::GetInstance()->ResetMinSize(false);
     }
 
-    if (ParseJsDimensionVp(maxHeightValue, maxHeight)) {
+    if (ParseJsDimensionVp(maxHeightValue, maxHeight, maxHeightResObj)) {
         ViewAbstractModel::GetInstance()->SetMaxHeight(maxHeight);
     } else if (version10OrLarger) {
         ViewAbstractModel::GetInstance()->ResetMaxSize(false);
     }
+    SetConstraintSize(minWidthResObj, maxWidthResObj, minHeightResObj, maxHeightResObj);
 }
 
 void JSViewAbstract::JsLayoutPriority(const JSCallbackInfo& info)
@@ -1924,13 +2491,19 @@ void JSViewAbstract::JsPosition(const JSCallbackInfo& info)
 {
     CalcDimension x;
     CalcDimension y;
+    RefPtr<ResourceObject> xResObj;
+    RefPtr<ResourceObject> yResObj;
     OHOS::Ace::EdgesParam edges;
 
     auto jsArg = info[0];
     if (jsArg->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsArg);
-        if (ParseLocationProps(jsObj, x, y)) {
-            return ViewAbstractModel::GetInstance()->SetPosition(x, y);
+        if (ParseLocationProps(jsObj, x, y, xResObj, yResObj)) {
+            if (SystemProperties::ConfigChangePerform()) {
+                return ViewAbstractModel::GetInstance()->SetPosition(x, y, xResObj, yResObj);
+            } else {
+                return ViewAbstractModel::GetInstance()->SetPosition(x, y);
+            }
         } else if (ParseLocalizedEdges(jsObj, edges)) {
             ViewAbstractModel::GetInstance()->SetPositionLocalizedEdges(true);
             return ViewAbstractModel::GetInstance()->SetPositionEdges(edges);
@@ -1949,6 +2522,8 @@ void JSViewAbstract::JsMarkAnchor(const JSCallbackInfo& info)
 {
     CalcDimension x;
     CalcDimension y;
+    RefPtr<ResourceObject> xResObj;
+    RefPtr<ResourceObject> yResObj;
 
     auto jsArg = info[0];
     if (jsArg->IsObject()) {
@@ -1956,9 +2531,14 @@ void JSViewAbstract::JsMarkAnchor(const JSCallbackInfo& info)
         if (ParseMarkAnchorPosition(jsObj, x, y)) {
             ViewAbstractModel::GetInstance()->SetMarkAnchorStart(x);
             return ViewAbstractModel::GetInstance()->MarkAnchor(x, y);
-        } else if (ParseLocationProps(jsObj, x, y)) {
+        }
+        if (ParseLocationProps(jsObj, x, y, xResObj, yResObj)) {
             ViewAbstractModel::GetInstance()->ResetMarkAnchorStart();
-            return ViewAbstractModel::GetInstance()->MarkAnchor(x, y);
+            if (SystemProperties::ConfigChangePerform()) {
+                return ViewAbstractModel::GetInstance()->MarkAnchor(x, y, xResObj, yResObj);
+            } else {
+                return ViewAbstractModel::GetInstance()->MarkAnchor(x, y);
+            }
         }
     }
     ViewAbstractModel::GetInstance()->ResetMarkAnchorStart();
@@ -1969,6 +2549,8 @@ void JSViewAbstract::JsOffset(const JSCallbackInfo& info)
 {
     CalcDimension x;
     CalcDimension y;
+    RefPtr<ResourceObject> xResObj;
+    RefPtr<ResourceObject> yResObj;
     OHOS::Ace::EdgesParam edges;
     auto jsArg = info[0];
     if (jsArg->IsObject()) {
@@ -1976,8 +2558,12 @@ void JSViewAbstract::JsOffset(const JSCallbackInfo& info)
         if (ParseLocalizedEdges(jsObj, edges)) {
             ViewAbstractModel::GetInstance()->SetOffsetLocalizedEdges(true);
             return ViewAbstractModel::GetInstance()->SetOffsetEdges(edges);
-        } else if (ParseLocationProps(jsObj, x, y)) {
-            return ViewAbstractModel::GetInstance()->SetOffset(x, y);
+        } else if (ParseLocationProps(jsObj, x, y, xResObj, yResObj)) {
+            if (SystemProperties::ConfigChangePerform()) {
+                return ViewAbstractModel::GetInstance()->SetOffset(x, y, xResObj, yResObj);
+            } else {
+                return ViewAbstractModel::GetInstance()->SetOffset(x, y);
+            }
         } else if (ParseLocationPropsEdges(jsObj, edges)) {
             return ViewAbstractModel::GetInstance()->SetOffsetEdges(edges);
         }
@@ -2383,8 +2969,19 @@ void JSViewAbstract::JsAlignSelf(const JSCallbackInfo& info)
 void JSViewAbstract::JsBackgroundColor(const JSCallbackInfo& info)
 {
     Color backgroundColor;
-    if (!ParseJsColor(info[0], backgroundColor)) {
-        backgroundColor = Color::TRANSPARENT;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> backgroundColorResObj;
+        if (!ParseJsColor(info[0], backgroundColor, backgroundColorResObj)) {
+            backgroundColor = Color::TRANSPARENT;
+        }
+        if (backgroundColorResObj) {
+            ViewAbstractModel::GetInstance()->SetBackgroundColorWithResourceObj(backgroundColorResObj);
+            return;
+        }
+    } else {
+        if (!ParseJsColor(info[0], backgroundColor)) {
+            backgroundColor = Color::TRANSPARENT;
+        }
     }
 
     ViewAbstractModel::GetInstance()->SetBackgroundColor(backgroundColor);
@@ -2403,12 +3000,17 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
     bool syncMode = false;
     ParseBackgroundImageOption(info, repeatIndex, syncMode);
     ViewAbstractModel::GetInstance()->SetBackgroundImageSyncMode(syncMode);
+    RefPtr<ResourceObject> backgroundImageResObj;
     if (jsBackgroundImage->IsString()) {
         src = jsBackgroundImage->ToString();
         ViewAbstractModel::GetInstance()->SetBackgroundImage(
             ImageSourceInfo { src, bundle, module }, GetThemeConstants());
-    } else if (ParseJsMediaWithBundleName(jsBackgroundImage, src, bundle, module, resId)) {
-        ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { src, bundle, module }, nullptr);
+    } else if (ParseJsMediaWithBundleName(jsBackgroundImage, src, bundle, module, resId, backgroundImageResObj)) {
+        if (!SystemProperties::ConfigChangePerform() || !backgroundImageResObj) {
+            ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo{src, bundle, module}, nullptr);
+        } else {
+            ViewAbstractModel::GetInstance()->SetBackgroundImageWithResourceObj(backgroundImageResObj, bundle, module, nullptr);
+        }
     } else {
 #if defined(PIXEL_MAP_SUPPORTED)
         if (IsDrawable(jsBackgroundImage)) {
@@ -2468,8 +3070,29 @@ void JSViewAbstract::ParseSysOptions(const JSRef<JSObject>& jsSysOptions, SysOpt
     }
 }
 
+void JSViewAbstract::ParseInactiveColor(const JSRef<JSObject>& jsOption, BlurStyleOption& styleOption)
+{
+    RefPtr<ResourceObject> inactiveColorResObj;
+    if (ParseJsColor(jsOption->GetProperty("inactiveColor"), styleOption.inactiveColor, inactiveColorResObj)) {
+        styleOption.isValidColor = true;
+    }
+    if (SystemProperties::ConfigChangePerform() && inactiveColorResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, BlurStyleOption& styleOption) {
+            Color inactiveColorValue;
+            ResourceParseUtils::ParseResColor(resObj, inactiveColorValue);
+            styleOption.inactiveColor = inactiveColorValue;
+            styleOption.isValidColor = true;
+        };
+        styleOption.AddResource("backgroundBlurStyle.backgroundBlurStyleOptions.inactiveColor",
+            inactiveColorResObj, std::move(updateFunc));
+    }
+}
+
 void JSViewAbstract::ParseBlurStyleOption(const JSRef<JSObject>& jsOption, BlurStyleOption& styleOption)
 {
+    if (jsOption->IsUndefined()) {
+        return;
+    }
     auto colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
     ParseJsInt32(jsOption->GetProperty("colorMode"), colorMode);
     if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
@@ -2500,9 +3123,7 @@ void JSViewAbstract::ParseBlurStyleOption(const JSRef<JSObject>& jsOption, BlurS
     }
 
     // inactiveColor
-    if (ParseJsColor(jsOption->GetProperty("inactiveColor"), styleOption.inactiveColor)) {
-        styleOption.isValidColor = true;
-    }
+    ParseInactiveColor(jsOption, styleOption);
 
     // scale
     if (jsOption->GetProperty("scale")->IsNumber()) {
@@ -2602,6 +3223,52 @@ void JSViewAbstract::ParseBrightnessOption(const JSRef<JSObject>& jsOption, Brig
     brightnessOption = { rate, lightUpDegree, cubicCoeff, quadCoeff, saturation, posRGB, negRGB, fraction };
 }
 
+void JSViewAbstract::GetEffectOptionColor(const JSRef<JSObject>& jsOption, EffectOption& effectOption)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        ParseJsColor(jsOption->GetProperty("color"), effectOption.color);
+    } else {
+        RefPtr<ResourceObject> colorResObj;
+        ParseJsColor(jsOption->GetProperty("color"), effectOption.color, colorResObj);
+        if (colorResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& colorResObj, EffectOption& effectOption) {
+                Color effectOptionColor;
+                ResourceParseUtils::ParseResColor(colorResObj, effectOptionColor);
+                effectOption.color = effectOptionColor;
+            };
+            effectOption.AddResource("backgroundEffect.color", colorResObj, std::move(updateFunc));
+        }
+    }
+}
+
+void JSViewAbstract::GetEffectOptionInactiveColorUpdate(const RefPtr<ResourceObject>& inactiveColorObj,
+    EffectOption& effectOption)
+{
+    if (inactiveColorObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& inactiveColorObj, EffectOption& effectOption) {
+            Color effectOptionInactiveColor;
+            ResourceParseUtils::ParseResColor(inactiveColorObj, effectOptionInactiveColor);
+            effectOption.inactiveColor = effectOptionInactiveColor;
+        };
+        effectOption.AddResource("backgroundEffect.inactiveColor", inactiveColorObj, std::move(updateFunc));
+    }
+}
+
+void JSViewAbstract::GetEffectOptionInactiveColor(const JSRef<JSObject>& jsOption, EffectOption& effectOption)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        if (ParseJsColor(jsOption->GetProperty("inactiveColor"), effectOption.inactiveColor)) {
+            effectOption.isValidColor = true;
+        }
+    } else {
+        RefPtr<ResourceObject> inactiveColorObj;
+        if (ParseJsColor(jsOption->GetProperty("inactiveColor"), effectOption.inactiveColor, inactiveColorObj)) {
+            GetEffectOptionInactiveColorUpdate(inactiveColorObj, effectOption);
+            effectOption.isValidColor = true;
+        }
+    }
+}
+
 void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOption& effectOption)
 {
     CalcDimension radius;
@@ -2624,7 +3291,7 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
     }
     effectOption.brightness = brightness;
 
-    ParseJsColor(jsOption->GetProperty("color"), effectOption.color);
+    GetEffectOptionColor(jsOption, effectOption);
 
     auto adaptiveColorValue = static_cast<int32_t>(AdaptiveColor::DEFAULT);
     auto adaptiveColor = AdaptiveColor::DEFAULT;
@@ -2652,9 +3319,7 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
     }
 
     // inactiveColor
-    if (ParseJsColor(jsOption->GetProperty("inactiveColor"), effectOption.inactiveColor)) {
-        effectOption.isValidColor = true;
-    }
+    GetEffectOptionInactiveColor(jsOption, effectOption);
 
     BlurOption blurOption;
     if (jsOption->GetProperty("blurOptions")->IsObject()) {
@@ -2756,6 +3421,62 @@ void JSViewAbstract::JsSphericalEffect(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetSphericalEffect(std::clamp(radio, 0.0, 1.0));
 }
 
+void JSViewAbstract::GetPixelStretchEffectLeftObj(const JSRef<JSObject>& jsObject, CalcDimension& left, PixStretchEffectOption& option)
+{
+    RefPtr<ResourceObject> leftObj;
+    ParseJsDimensionVp(jsObject->GetProperty("left"), left, leftObj);
+    if (leftObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& leftObj, PixStretchEffectOption& effectOption) {
+            CalcDimension left;
+            ResourceParseUtils::ParseResDimensionVp(leftObj, left);
+            effectOption.left = left;
+        };
+        option.AddResource("pixelStretchEffect.left", leftObj, std::move(updateFunc));
+    }
+}
+
+void JSViewAbstract::GetPixelStretchEffectRightObj(const JSRef<JSObject>& jsObject, CalcDimension& right, PixStretchEffectOption& option)
+{
+    RefPtr<ResourceObject> rightObj;
+    ParseJsDimensionVp(jsObject->GetProperty("right"), right, rightObj);
+    if (rightObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& rightObj, PixStretchEffectOption& effectOption) {
+            CalcDimension right;
+            ResourceParseUtils::ParseResDimensionVp(rightObj, right);
+            effectOption.right = right;
+        };
+        option.AddResource("pixelStretchEffect.right", rightObj, std::move(updateFunc));
+    }
+}
+
+void JSViewAbstract::GetPixelStretchEffectTopObj(const JSRef<JSObject>& jsObject, CalcDimension& top, PixStretchEffectOption& option)
+{
+    RefPtr<ResourceObject> topObj;
+    ParseJsDimensionVp(jsObject->GetProperty("top"), top, topObj);
+    if (topObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& topObj, PixStretchEffectOption& effectOption) {
+            CalcDimension top;
+            ResourceParseUtils::ParseResDimensionVp(topObj, top);
+            effectOption.top = top;
+        };
+        option.AddResource("pixelStretchEffect.top", topObj, std::move(updateFunc));
+    }
+}
+
+void JSViewAbstract::GetPixelStretchEffectBottomObj(const JSRef<JSObject>& jsObject, CalcDimension& bottom, PixStretchEffectOption& option)
+{
+    RefPtr<ResourceObject> bottomObj;
+    ParseJsDimensionVp(jsObject->GetProperty("bottom"), bottom, bottomObj);
+    if (bottomObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& bottomObj, PixStretchEffectOption& effectOption) {
+            CalcDimension bottom;
+            ResourceParseUtils::ParseResDimensionVp(bottomObj, bottom);
+            effectOption.bottom = bottom;
+        };
+        option.AddResource("pixelStretchEffect.bottom", bottomObj, std::move(updateFunc));
+    }
+}
+
 void JSViewAbstract::JsPixelStretchEffect(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
@@ -2766,15 +3487,22 @@ void JSViewAbstract::JsPixelStretchEffect(const JSCallbackInfo& info)
     }
     auto jsObject = JSRef<JSObject>::Cast(info[0]);
     CalcDimension left;
-    ParseJsDimensionVp(jsObject->GetProperty("left"), left);
     CalcDimension right;
-    ParseJsDimensionVp(jsObject->GetProperty("right"), right);
     CalcDimension top;
-    ParseJsDimensionVp(jsObject->GetProperty("top"), top);
     CalcDimension bottom;
-    ParseJsDimensionVp(jsObject->GetProperty("bottom"), bottom);
-
     PixStretchEffectOption option;
+    if (!SystemProperties::ConfigChangePerform()) {
+        ParseJsDimensionVp(jsObject->GetProperty("left"), left);
+        ParseJsDimensionVp(jsObject->GetProperty("right"), right);
+        ParseJsDimensionVp(jsObject->GetProperty("top"), top);
+        ParseJsDimensionVp(jsObject->GetProperty("bottom"), bottom);
+    } else {
+        GetPixelStretchEffectLeftObj(jsObject, left, option);
+        GetPixelStretchEffectRightObj(jsObject, right, option);
+        GetPixelStretchEffectTopObj(jsObject, top, option);
+        GetPixelStretchEffectBottomObj(jsObject, bottom, option);
+    }
+
     bool illegalInput = InitPixStretchEffect(left, right, top, bottom);
     if ((left.IsNonNegative() && top.IsNonNegative() && right.IsNonNegative() && bottom.IsNonNegative()) ||
         (left.IsNonPositive() && top.IsNonPositive() && right.IsNonPositive() && bottom.IsNonPositive())) {
@@ -2821,6 +3549,39 @@ void JSViewAbstract::JsLightUpEffect(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetLightUpEffect(std::clamp(radio, 0.0, 1.0));
 }
 
+void SetBackgroundImageSizeUpdateFunc(
+    BackgroundImageSize& bgImgSize, const RefPtr<ResourceObject>& resObjWidth, const RefPtr<ResourceObject>& resObjHeight)
+{
+    CHECK_NULL_VOID(resObjWidth);
+    auto&& updateFuncWidth = [](const RefPtr<ResourceObject>& resObj, BackgroundImageSize& bgImgSize) {
+        CalcDimension width;
+        ResourceParseUtils::ParseResDimensionVp(resObj, width);
+        double valueWidth = width.ConvertToPx();
+        BackgroundImageSizeType typeWidth = BackgroundImageSizeType::LENGTH;
+        if (width.Unit() == DimensionUnit::PERCENT) {
+            typeWidth = BackgroundImageSizeType::PERCENT;
+            valueWidth = width.Value() * FULL_DIMENSION;
+        }
+        bgImgSize.SetSizeTypeX(typeWidth);
+        bgImgSize.SetSizeValueX(valueWidth);
+    };
+    bgImgSize.AddResource("backgroundImageSizeWidth", resObjWidth, std::move(updateFuncWidth));
+    CHECK_NULL_VOID(resObjHeight);
+    auto&& updateFuncHeight = [](const RefPtr<ResourceObject>& resObj, BackgroundImageSize& bgImgSize) {
+        CalcDimension height;
+        ResourceParseUtils::ParseResDimensionVp(resObj, height);
+        double valueHeight = height.ConvertToPx();
+        BackgroundImageSizeType typeHeight = BackgroundImageSizeType::LENGTH;
+        if (height.Unit() == DimensionUnit::PERCENT) {
+            typeHeight = BackgroundImageSizeType::PERCENT;
+            valueHeight = height.Value() * FULL_DIMENSION;
+        }
+        bgImgSize.SetSizeTypeY(typeHeight);
+        bgImgSize.SetSizeValueY(valueHeight);
+    };
+    bgImgSize.AddResource("backgroundImageSizeHeight", resObjHeight, std::move(updateFuncHeight));
+}
+
 void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
 {
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
@@ -2844,8 +3605,11 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
         CalcDimension width;
         CalcDimension height;
         JSRef<JSObject> object = JSRef<JSObject>::Cast(jsVal);
-        ParseJsDimensionVp(object->GetProperty("width"), width);
-        ParseJsDimensionVp(object->GetProperty("height"), height);
+        RefPtr<ResourceObject> resObjWidth;
+        RefPtr<ResourceObject> resObjHeight;
+        ParseJsDimensionVp(object->GetProperty("width"), width, resObjWidth);
+        ParseJsDimensionVp(object->GetProperty("height"), height, resObjHeight);
+        SetBackgroundImageSizeUpdateFunc(bgImgSize, resObjWidth, resObjHeight);
         double valueWidth = width.ConvertToPx();
         double valueHeight = height.ConvertToPx();
         BackgroundImageSizeType typeWidth = BackgroundImageSizeType::LENGTH;
@@ -2879,6 +3643,45 @@ void SetBgImgPositionWithAlign(BackgroundImagePosition& bgImgPosition, int32_t a
         DimensionUnit::PERCENT, DimensionUnit::PERCENT, vec[align].first, vec[align].second, bgImgPosition);
 }
 
+void SetBackgroundImagePositionUpdateFunc(
+    BackgroundImagePosition& bgImgPosition, const RefPtr<ResourceObject>& resObjX, const RefPtr<ResourceObject>& resObjY)
+{
+    CHECK_NULL_VOID(resObjX);
+    auto&& updateFuncX = [](const RefPtr<ResourceObject>& resObj, BackgroundImagePosition& position) {
+        CalcDimension x;
+        ResourceParseUtils::ParseResDimensionVp(resObj, x);
+        double valueX = x.Value();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            valueX = x.ConvertToPx();
+        }
+        DimensionUnit typeX = DimensionUnit::PX;
+        if (x.Unit() == DimensionUnit::PERCENT) {
+            valueX = x.Value();
+            typeX = DimensionUnit::PERCENT;
+        }
+        AnimationOption option = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
+        position.SetSizeX(AnimatableDimension(valueX, typeX, option));
+    };
+    bgImgPosition.AddResource("backgroundImagePositionX", resObjX, std::move(updateFuncX));
+    CHECK_NULL_VOID(resObjY);
+    auto&& updateFuncY = [](const RefPtr<ResourceObject>& resObj, BackgroundImagePosition& position) {
+        CalcDimension y;
+        ResourceParseUtils::ParseResDimensionVp(resObj, y);
+        double valueY = y.Value();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            valueY = y.ConvertToPx();
+        }
+        DimensionUnit typeY = DimensionUnit::PX;
+        if (y.Unit() == DimensionUnit::PERCENT) {
+            valueY = y.Value();
+            typeY = DimensionUnit::PERCENT;
+        }
+        AnimationOption option = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
+        position.SetSizeY(AnimatableDimension(valueY, typeY, option));
+    };
+    bgImgPosition.AddResource("backgroundImagePositionY", resObjY, std::move(updateFuncY));
+}
+
 void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
 {
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
@@ -2897,8 +3700,11 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
         CalcDimension x;
         CalcDimension y;
         JSRef<JSObject> object = JSRef<JSObject>::Cast(jsVal);
-        ParseJsDimensionVp(object->GetProperty("x"), x);
-        ParseJsDimensionVp(object->GetProperty("y"), y);
+        RefPtr<ResourceObject> resObjX;
+        RefPtr<ResourceObject> resObjY;
+        ParseJsDimensionVp(object->GetProperty("x"), x, resObjX);
+        ParseJsDimensionVp(object->GetProperty("y"), y, resObjY);
+        SetBackgroundImagePositionUpdateFunc(bgImgPosition, resObjX, resObjY);
         double valueX = x.Value();
         double valueY = y.Value();
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -2966,24 +3772,38 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType t
                     ViewAbstractModel::GetInstance()->SetMargins(GetLocalizedPadding(commonCalcDimension.top,
                         commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right));
                 } else {
-                    ViewAbstractModel::GetInstance()->SetMargins(commonCalcDimension.top, commonCalcDimension.bottom,
-                        commonCalcDimension.left, commonCalcDimension.right);
+                    if (SystemProperties::ConfigChangePerform()) {
+                        ViewAbstractModel::GetInstance()->SetMargins(GetEdgeMargins(commonCalcDimension));
+                    } else {
+                        ViewAbstractModel::GetInstance()->SetMargins(commonCalcDimension.top, commonCalcDimension.bottom,
+                            commonCalcDimension.left, commonCalcDimension.right);
+                    }
                 }
             } else if (type == EdgeType::PADDING) {
                 if (useLengthMetrics) {
                     ViewAbstractModel::GetInstance()->SetPaddings(GetLocalizedPadding(commonCalcDimension.top,
                         commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right));
                 } else {
-                    ViewAbstractModel::GetInstance()->SetPaddings(commonCalcDimension.top, commonCalcDimension.bottom,
-                        commonCalcDimension.left, commonCalcDimension.right);
+                    if (SystemProperties::ConfigChangePerform()) {
+                        ViewAbstractModel::GetInstance()->SetPaddings(
+                            GetEdgePaddingsOrSafeAreaPaddings(commonCalcDimension));
+                    } else {
+                        ViewAbstractModel::GetInstance()->SetPaddings(commonCalcDimension.top,
+                            commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right);
+                    }
                 }
             } else if (type == EdgeType::SAFE_AREA_PADDING) {
                 if (useLengthMetrics) {
                     ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(GetLocalizedPadding(commonCalcDimension.top,
                         commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right));
                 } else {
-                    ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(commonCalcDimension.top,
-                        commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right);
+                    if (SystemProperties::ConfigChangePerform()) {
+                        ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(
+                            GetEdgePaddingsOrSafeAreaPaddings(commonCalcDimension));
+                    } else {
+                        ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(commonCalcDimension.top,
+                            commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right);
+                    }
                 }
             }
             return;
@@ -2991,14 +3811,23 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType t
     }
 
     CalcDimension length;
-    if (!ParseJsDimensionVp(jsVal, length)) {
+    RefPtr<ResourceObject> lengthResObj;
+    if (!ParseJsDimensionVp(jsVal, length, lengthResObj)) {
         // use default value.
         length.Reset();
     }
     if (type == EdgeType::MARGIN) {
-        ViewAbstractModel::GetInstance()->SetMargin(length);
+        if (SystemProperties::ConfigChangePerform() && lengthResObj) {
+            ViewAbstractModel::GetInstance()->SetMargin(lengthResObj);
+        } else {
+            ViewAbstractModel::GetInstance()->SetMargin(length);
+        }
     } else if (type == EdgeType::PADDING) {
-        ViewAbstractModel::GetInstance()->SetPadding(length);
+        if (SystemProperties::ConfigChangePerform() && lengthResObj) {
+            ViewAbstractModel::GetInstance()->SetPadding(lengthResObj);
+        } else {
+            ViewAbstractModel::GetInstance()->SetPadding(length);
+        }
     }
 }
 
@@ -3038,6 +3867,138 @@ NG::PaddingProperty JSViewAbstract::GetLocalizedPadding(const std::optional<Calc
     return paddings;
 }
 
+NG::MarginProperty JSViewAbstract::GetEdgeMargins(const CommonCalcDimension& commonCalcDimension)
+{
+    NG::MarginProperty margins;
+    if (commonCalcDimension.top.has_value()) {
+        if (commonCalcDimension.top.value().Unit() == DimensionUnit::CALC) {
+            margins.top = NG::CalcLength(commonCalcDimension.top.value().CalcValue());
+        } else {
+            margins.top = NG::CalcLength(commonCalcDimension.top.value());
+        }
+    }
+    if (commonCalcDimension.bottom.has_value()) {
+        if (commonCalcDimension.bottom.value().Unit() == DimensionUnit::CALC) {
+            margins.bottom = NG::CalcLength(commonCalcDimension.bottom.value().CalcValue());
+        } else {
+            margins.bottom = NG::CalcLength(commonCalcDimension.bottom.value());
+        }
+    }
+    if (commonCalcDimension.left.has_value()) {
+        if (commonCalcDimension.left.value().Unit() == DimensionUnit::CALC) {
+            margins.left = NG::CalcLength(commonCalcDimension.left.value().CalcValue());
+        } else {
+            margins.left = NG::CalcLength(commonCalcDimension.left.value());
+        }
+    }
+    if (commonCalcDimension.right.has_value()) {
+        if (commonCalcDimension.right.value().Unit() == DimensionUnit::CALC) {
+            margins.right = NG::CalcLength(commonCalcDimension.right.value().CalcValue());
+        } else {
+            margins.right = NG::CalcLength(commonCalcDimension.right.value());
+        }
+    }
+    GetEdgeMarginsResObj(margins, commonCalcDimension);
+    return margins;
+}
+
+void JSViewAbstract::GetEdgeMarginsResObj(NG::MarginProperty& margins, const CommonCalcDimension& commonCalcDimension)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (commonCalcDimension.topResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::MarginProperty& margins) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+            NG::CalcLength resultLength;
+            resultLength = (result.Unit() == DimensionUnit::CALC) ? NG::CalcLength(result.CalcValue()) :
+                NG::CalcLength(result);
+            margins.top = resultLength;
+        };
+        margins.AddResource("margin.top", commonCalcDimension.topResObj, std::move(updateFunc));
+    }
+    if (commonCalcDimension.bottomResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::MarginProperty& margins) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+            NG::CalcLength resultLength;
+            resultLength = (result.Unit() == DimensionUnit::CALC) ? NG::CalcLength(result.CalcValue()) :
+                NG::CalcLength(result);
+            margins.bottom = resultLength;
+        };
+        margins.AddResource("margin.bottom", commonCalcDimension.bottomResObj, std::move(updateFunc));
+    }
+    if (commonCalcDimension.leftResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::MarginProperty& margins) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+            NG::CalcLength resultLength;
+            resultLength = (result.Unit() == DimensionUnit::CALC) ? NG::CalcLength(result.CalcValue()) :
+                NG::CalcLength(result);
+            margins.left = resultLength;
+        };
+        margins.AddResource("margin.left", commonCalcDimension.leftResObj, std::move(updateFunc));
+    }
+    if (commonCalcDimension.rightResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::MarginProperty& margins) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+            NG::CalcLength resultLength;
+            resultLength = (result.Unit() == DimensionUnit::CALC) ? NG::CalcLength(result.CalcValue()) :
+                NG::CalcLength(result);
+            margins.right = resultLength;
+        };
+        margins.AddResource("margin.right", commonCalcDimension.rightResObj, std::move(updateFunc));
+    }
+}
+
+NG::PaddingProperty JSViewAbstract::GetEdgePaddingsOrSafeAreaPaddings(const CommonCalcDimension& commonCalcDimension)
+{
+    NG::PaddingProperty paddings = NG::ConvertToCalcPaddingProperty(
+        commonCalcDimension.top, commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return paddings;
+    }
+    if (commonCalcDimension.topResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::PaddingProperty& paddings) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+            NG::CalcLength resultLength = ConvertCalcLength(result);
+            paddings.top = resultLength;
+        };
+        paddings.AddResource("top", commonCalcDimension.topResObj, std::move(updateFunc));
+    }
+    if (commonCalcDimension.bottomResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::PaddingProperty& paddings) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+            NG::CalcLength resultLength = ConvertCalcLength(result);
+            paddings.bottom = resultLength;
+        };
+        paddings.AddResource("bottom", commonCalcDimension.bottomResObj, std::move(updateFunc));
+    }
+    if (commonCalcDimension.leftResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::PaddingProperty& paddings) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+            NG::CalcLength resultLength = ConvertCalcLength(result);
+            paddings.left = resultLength;
+        };
+        paddings.AddResource("left", commonCalcDimension.leftResObj, std::move(updateFunc));
+    }
+    if (commonCalcDimension.rightResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::PaddingProperty& paddings) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+            NG::CalcLength resultLength = ConvertCalcLength(result);
+            paddings.right = resultLength;
+        };
+        paddings.AddResource("right", commonCalcDimension.rightResObj, std::move(updateFunc));
+    }
+    return paddings;
+}
+
 void JSViewAbstract::ParseMarginOrPaddingCorner(JSRef<JSObject> obj, std::optional<CalcDimension>& top,
     std::optional<CalcDimension>& bottom, std::optional<CalcDimension>& left, std::optional<CalcDimension>& right)
 {
@@ -3056,6 +4017,45 @@ void JSViewAbstract::ParseMarginOrPaddingCorner(JSRef<JSObject> obj, std::option
     CalcDimension bottomDimen;
     if (ParseJsDimensionVp(obj->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottomDimen)) {
         bottom = bottomDimen;
+    }
+}
+
+void JSViewAbstract::ParseMarginOrPaddingCorner(JSRef<JSObject> obj, CommonCalcDimension& commonCalcDimension)
+{
+    CalcDimension leftDimen;
+    RefPtr<ResourceObject> leftResObj;
+    if (ParseJsDimensionVp(obj->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT)), leftDimen, leftResObj)) {
+        commonCalcDimension.left = leftDimen;
+    }
+    CalcDimension rightDimen;
+    RefPtr<ResourceObject> rightResObj;
+    if (ParseJsDimensionVp(obj->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT)), rightDimen, rightResObj)) {
+        commonCalcDimension.right = rightDimen;
+    }
+    CalcDimension topDimen;
+    RefPtr<ResourceObject> topResObj;
+    if (ParseJsDimensionVp(obj->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP)), topDimen, topResObj)) {
+        commonCalcDimension.top = topDimen;
+    }
+    CalcDimension bottomDimen;
+    RefPtr<ResourceObject> bottomResObj;
+    if (ParseJsDimensionVp(obj->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottomDimen, bottomResObj)) {
+        commonCalcDimension.bottom = bottomDimen;
+    }
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (leftResObj) {
+        commonCalcDimension.leftResObj = leftResObj;
+    }
+    if (rightResObj) {
+        commonCalcDimension.rightResObj = rightResObj;
+    }
+    if (topResObj) {
+        commonCalcDimension.topResObj = topResObj;
+    }
+    if (bottomResObj) {
+        commonCalcDimension.bottomResObj = bottomResObj;
     }
 }
 
@@ -3108,8 +4108,12 @@ bool JSViewAbstract::ParseCommonMarginOrPaddingCorner(
         commonCalcDimension.right = localizedCalcDimension.end;
         return true;
     }
-    ParseMarginOrPaddingCorner(object, commonCalcDimension.top, commonCalcDimension.bottom, commonCalcDimension.left,
-        commonCalcDimension.right);
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseMarginOrPaddingCorner(object, commonCalcDimension);
+    } else {
+        ParseMarginOrPaddingCorner(object, commonCalcDimension.top, commonCalcDimension.bottom, commonCalcDimension.left,
+            commonCalcDimension.right);
+    }
         return false;
 }
 
@@ -3253,7 +4257,8 @@ void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
         JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("JsBorderWidth", jsVal, checkList)) {
-        ViewAbstractModel::GetInstance()->SetBorderWidth({});
+        CalcDimension value = {};
+        ViewAbstractModel::GetInstance()->SetBorderWidth(value);
         return;
     }
 
@@ -3263,17 +4268,23 @@ void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
 void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
 {
     CalcDimension borderWidth;
-    if (ParseJsDimensionVp(args, borderWidth)) {
+    RefPtr<ResourceObject> borderWidthResObj;
+    if (ParseJsDimensionVp(args, borderWidth, borderWidthResObj)) {
         if (borderWidth.IsNegative()) {
             borderWidth.Reset();
         }
         if (borderWidth.Unit() == DimensionUnit::PERCENT) {
             borderWidth.Reset();
         }
-        ViewAbstractModel::GetInstance()->SetBorderWidth(borderWidth);
+        if (SystemProperties::ConfigChangePerform() && borderWidthResObj) {
+            ViewAbstractModel::GetInstance()->SetBorderWidth(borderWidthResObj);
+        } else {
+            ViewAbstractModel::GetInstance()->SetBorderWidth(borderWidth);
+        }
     } else if (args->IsObject()) {
         if (IsBorderWidthObjUndefined(args)) {
-            ViewAbstractModel::GetInstance()->SetBorderWidth({});
+            CalcDimension value = {};
+            ViewAbstractModel::GetInstance()->SetBorderWidth(value);
             return;
         }
         CommonCalcDimension commonCalcDimension;
@@ -3283,8 +4294,14 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
                 commonCalcDimension.top, commonCalcDimension.bottom, true);
             return;
         }
-        ViewAbstractModel::GetInstance()->SetBorderWidth(
-            commonCalcDimension.left, commonCalcDimension.right, commonCalcDimension.top, commonCalcDimension.bottom);
+        if (SystemProperties::ConfigChangePerform()) {
+            NG::BorderWidthProperty borderWidth;
+            ParseEdgeWidthsResObj(obj, borderWidth, true);
+            ViewAbstractModel::GetInstance()->SetBorderWidth(borderWidth);
+        } else {
+            ViewAbstractModel::GetInstance()->SetBorderWidth(commonCalcDimension.left,
+                commonCalcDimension.right, commonCalcDimension.top, commonCalcDimension.bottom);
+        }
     } else {
         return;
     }
@@ -3301,9 +4318,18 @@ void JSViewAbstract::ParseDashGap(const JSRef<JSVal>& args)
     } else if (args->IsObject()) {
         CommonCalcDimension commonCalcDimension;
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
-        ParseCommonEdgeWidthsForDashParams(obj, commonCalcDimension);
-        ViewAbstractModel::GetInstance()->SetDashGap(
-            commonCalcDimension.left, commonCalcDimension.right, commonCalcDimension.top, commonCalcDimension.bottom);
+        if (ParseCommonEdgeWidthsForDashParams(obj, commonCalcDimension)) {
+            ViewAbstractModel::GetInstance()->SetDashGap(commonCalcDimension.left,
+                commonCalcDimension.right, commonCalcDimension.top, commonCalcDimension.bottom);
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            NG::BorderWidthProperty dashGap;
+            ParseEdgeWidthsResObj(obj, dashGap, true);
+            ViewAbstractModel::GetInstance()->SetDashGap(dashGap);
+        } else {
+            ViewAbstractModel::GetInstance()->SetDashGap(commonCalcDimension.left,
+                commonCalcDimension.right, commonCalcDimension.top, commonCalcDimension.bottom);
+        }
     } else {
         dashGap.Reset();
         ViewAbstractModel::GetInstance()->SetDashGap(dashGap);
@@ -3321,17 +4347,154 @@ void JSViewAbstract::ParseDashWidth(const JSRef<JSVal>& args)
     } else if (args->IsObject()) {
         CommonCalcDimension commonCalcDimension;
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
-        ParseCommonEdgeWidthsForDashParams(obj, commonCalcDimension);
-        ViewAbstractModel::GetInstance()->SetDashWidth(
-            commonCalcDimension.left, commonCalcDimension.right, commonCalcDimension.top, commonCalcDimension.bottom);
+        if (ParseCommonEdgeWidthsForDashParams(obj, commonCalcDimension)) {
+            ViewAbstractModel::GetInstance()->SetDashWidth(commonCalcDimension.left,
+                commonCalcDimension.right, commonCalcDimension.top, commonCalcDimension.bottom);
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            NG::BorderWidthProperty dashWidth;
+            ParseEdgeWidthsResObj(obj, dashWidth, true);
+            ViewAbstractModel::GetInstance()->SetDashWidth(dashWidth);
+        } else {
+            ViewAbstractModel::GetInstance()->SetDashWidth(commonCalcDimension.left,
+                commonCalcDimension.right, commonCalcDimension.top, commonCalcDimension.bottom);
+        }
     } else {
         dashWidth.Reset();
         ViewAbstractModel::GetInstance()->SetDashWidth(dashWidth);
     }
 }
 
+void JSViewAbstract::ParseEdgeOutlineWidthLeft(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidth)
+{
+    if (object->IsUndefined()) {
+        return;
+    }
+    RefPtr<ResourceObject> resObj;
+    CalcDimension calcDim;
+    bool ret = ParseJsDimensionVp(object->GetProperty("left"), calcDim, resObj);
+    if (ret && calcDim.IsNonNegative()) {
+        if (calcDim.Unit() == DimensionUnit::PERCENT) {
+            calcDim.Reset();
+        }
+        borderWidth.leftDimen = calcDim;
+    }
+    if (resObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            borderWidth.leftDimen = dimension;
+        };
+        borderWidth.AddResource("outLineWidth.EdgeOutlineWidths.left", resObj, std::move(updateFunc));
+    }
+}
+
+void JSViewAbstract::ParseEdgeOutlineWidthRight(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidth)
+{
+    if (object->IsUndefined()) {
+        return;
+    }
+    RefPtr<ResourceObject> resObj;
+    CalcDimension calcDim;
+    bool ret = ParseJsDimensionVp(object->GetProperty("right"), calcDim, resObj);
+    if (ret && calcDim.IsNonNegative()) {
+        if (calcDim.Unit() == DimensionUnit::PERCENT) {
+            calcDim.Reset();
+        }
+        borderWidth.rightDimen = calcDim;
+    }
+    if (resObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            borderWidth.rightDimen = dimension;
+        };
+        borderWidth.AddResource("outLineWidth.EdgeOutlineWidths.right", resObj, std::move(updateFunc));
+    }
+}
+
+void JSViewAbstract::ParseEdgeOutlineWidthTop(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidth)
+{
+    if (object->IsUndefined()) {
+        return;
+    }
+    RefPtr<ResourceObject> resObj;
+    CalcDimension calcDim;
+    bool ret = ParseJsDimensionVp(object->GetProperty("top"), calcDim, resObj);
+    if (ret && calcDim.IsNonNegative()) {
+        if (calcDim.Unit() == DimensionUnit::PERCENT) {
+            calcDim.Reset();
+        }
+        borderWidth.topDimen = calcDim;
+    }
+    if (resObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            borderWidth.topDimen = dimension;
+        };
+        borderWidth.AddResource("outLineWidth.EdgeOutlineWidths.top", resObj, std::move(updateFunc));
+    }
+}
+
+void JSViewAbstract::ParseEdgeOutlineWidthBottom(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidth)
+{
+    if (object->IsUndefined()) {
+        return;
+    }
+    RefPtr<ResourceObject> resObj;
+    CalcDimension calcDim;
+    bool ret = ParseJsDimensionVp(object->GetProperty("bottom"), calcDim, resObj);
+    if (ret && calcDim.IsNonNegative()) {
+        if (calcDim.Unit() == DimensionUnit::PERCENT) {
+            calcDim.Reset();
+        }
+        borderWidth.bottomDimen = calcDim;
+    }
+    if (resObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            borderWidth.bottomDimen = dimension;
+        };
+        borderWidth.AddResource("outLineWidth.EdgeOutlineWidths.bottom", resObj, std::move(updateFunc));
+    }
+}
+
+void JSViewAbstract::ParseOuterBorderWidthNew(const JSRef<JSVal>& args)
+{
+    CalcDimension borderWidth;
+    RefPtr<ResourceObject> borderResObj;
+    bool ret = ParseJsDimensionVp(args, borderWidth, borderResObj);
+    if (borderResObj) {
+        // Dimension
+        ViewAbstractModel::GetInstance()->CreateWithOuterBorderWidthResourceObj(borderResObj);
+    } else if (ret) {
+        if (borderWidth.IsNegative() || borderWidth.Unit() == DimensionUnit::PERCENT) {
+            borderWidth.Reset();
+        }
+        ViewAbstractModel::GetInstance()->SetOuterBorderWidth(borderWidth);
+    } else if (args->IsObject()) {
+        // obj
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        NG::BorderWidthProperty borderWidthProperty;
+        borderWidthProperty.multiValued = true;
+        ParseEdgeOutlineWidthLeft(object, borderWidthProperty);
+        ParseEdgeOutlineWidthRight(object, borderWidthProperty);
+        ParseEdgeOutlineWidthTop(object, borderWidthProperty);
+        ParseEdgeOutlineWidthBottom(object, borderWidthProperty);
+        ViewAbstractModel::GetInstance()->SetOuterBorderWidthNew(borderWidthProperty);
+    } else {
+        return;
+    }
+}
+
 void JSViewAbstract::ParseOuterBorderWidth(const JSRef<JSVal>& args)
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseOuterBorderWidthNew(args);
+        return;
+    }
     CalcDimension borderWidth;
     if (ParseJsDimensionVp(args, borderWidth)) {
         if (borderWidth.IsNegative() || borderWidth.Unit() == DimensionUnit::PERCENT) {
@@ -3771,21 +4934,116 @@ NG::BorderColorProperty JSViewAbstract::GetLocalizedBorderColor(const std::optio
     return borderColors;
 }
 
+NG::BorderColorProperty JSViewAbstract::GetLocalizedBorderColor(const CommonColor& commonColor)
+{
+    NG::BorderColorProperty borderColors;
+    borderColors.startColor = commonColor.left;
+    borderColors.endColor = commonColor.right;
+    borderColors.topColor = commonColor.top;
+    borderColors.bottomColor = commonColor.bottom;
+    if (!SystemProperties::ConfigChangePerform()) {
+        return borderColors;
+    }
+    if (commonColor.leftResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.startColor = result;
+        };
+        borderColors.AddResource("borderColor.start", commonColor.leftResObj, std::move(updateFunc));
+    }
+    if (commonColor.rightResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.endColor = result;
+        };
+        borderColors.AddResource("borderColor.end", commonColor.rightResObj, std::move(updateFunc));
+    }
+    if (commonColor.topResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.topColor = result;
+        };
+        borderColors.AddResource("borderColor.top", commonColor.topResObj, std::move(updateFunc));
+    }
+    if (commonColor.bottomResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.bottomColor = result;
+        };
+        borderColors.AddResource("borderColor.bottom", commonColor.bottomResObj, std::move(updateFunc));
+    }
+    borderColors.multiValued = true;
+    return borderColors;
+}
+
+NG::BorderColorProperty JSViewAbstract::GetBorderColor(const CommonColor& commonColor)
+{
+    NG::BorderColorProperty borderColors;
+    borderColors.leftColor = commonColor.left;
+    borderColors.rightColor = commonColor.right;
+    borderColors.topColor = commonColor.top;
+    borderColors.bottomColor = commonColor.bottom;
+    if (!SystemProperties::ConfigChangePerform()) {
+        return borderColors;
+    }
+    if (commonColor.leftResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.leftColor = result;
+        };
+        borderColors.AddResource("borderColor.left", commonColor.leftResObj, std::move(updateFunc));
+    }
+    if (commonColor.rightResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.rightColor = result;
+        };
+        borderColors.AddResource("borderColor.right", commonColor.leftResObj, std::move(updateFunc));
+    }
+    if (commonColor.topResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.topColor = result;
+        };
+        borderColors.AddResource("borderColor.top", commonColor.topResObj, std::move(updateFunc));
+    }
+    if (commonColor.bottomResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.bottomColor = result;
+        };
+        borderColors.AddResource("borderColor.bottom", commonColor.bottomResObj, std::move(updateFunc));
+    }
+    borderColors.multiValued = true;
+    return borderColors;
+}
+
 void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args)
 {
     Color borderColor;
-    if (ParseJsColor(args, borderColor)) {
-        ViewAbstractModel::GetInstance()->SetBorderColor(borderColor);
+    RefPtr<ResourceObject> borderColorResObj;
+    if (ParseJsColor(args, borderColor, borderColorResObj)) {
+        if (SystemProperties::ConfigChangePerform() && borderColorResObj) {
+            ViewAbstractModel::GetInstance()->SetBorderColor(borderColorResObj);
+        } else {
+            ViewAbstractModel::GetInstance()->SetBorderColor(borderColor);
+        }
     } else if (args->IsObject()) {
         CommonColor commonColor;
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         if (ParseCommonEdgeColors(object, commonColor)) {
-            ViewAbstractModel::GetInstance()->SetBorderColor(
-                GetLocalizedBorderColor(commonColor.left, commonColor.right, commonColor.top, commonColor.bottom));
+            ViewAbstractModel::GetInstance()->SetBorderColor(GetLocalizedBorderColor(commonColor));
             return;
         }
-        ViewAbstractModel::GetInstance()->SetBorderColor(
-            commonColor.left, commonColor.right, commonColor.top, commonColor.bottom);
+        ViewAbstractModel::GetInstance()->SetBorderColor(GetBorderColor(commonColor));
     } else {
         ViewAbstractModel::GetInstance()->SetBorderColor(Color::BLACK);
     }
@@ -3794,20 +5052,44 @@ void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args)
 void JSViewAbstract::ParseOuterBorderColor(const JSRef<JSVal>& args)
 {
     Color borderColor;
-    if (ParseJsColor(args, borderColor)) {
-        ViewAbstractModel::GetInstance()->SetOuterBorderColor(borderColor);
-    } else if (args->IsObject()) {
-        CommonColor commonColor;
-        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        if (ParseCommonEdgeColors(object, commonColor)) {
+    if (!SystemProperties::ConfigChangePerform()) {
+        if (ParseJsColor(args, borderColor)) {
+            ViewAbstractModel::GetInstance()->SetOuterBorderColor(borderColor);
+        } else if (args->IsObject()) {
+            CommonColor commonColor;
+            JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+            if (ParseCommonEdgeColors(object, commonColor)) {
+                ViewAbstractModel::GetInstance()->SetOuterBorderColor(
+                    GetLocalizedBorderColor(commonColor.left, commonColor.right, commonColor.top, commonColor.bottom));
+                return;
+            }
             ViewAbstractModel::GetInstance()->SetOuterBorderColor(
-                GetLocalizedBorderColor(commonColor.left, commonColor.right, commonColor.top, commonColor.bottom));
-            return;
+                commonColor.left, commonColor.right, commonColor.top, commonColor.bottom);
+        } else {
+            ViewAbstractModel::GetInstance()->SetOuterBorderColor(Color::BLACK);
         }
-        ViewAbstractModel::GetInstance()->SetOuterBorderColor(
-            commonColor.left, commonColor.right, commonColor.top, commonColor.bottom);
     } else {
-        ViewAbstractModel::GetInstance()->SetOuterBorderColor(Color::BLACK);
+        RefPtr<ResourceObject> borderResObj;
+        bool ret = ParseJsColor(args, borderColor, borderResObj);
+        if (borderResObj) {
+            ViewAbstractModel::GetInstance()->CreateWithOuterBorderColorResourceObj(borderResObj);
+        } else if (ret) {
+            ViewAbstractModel::GetInstance()->SetOuterBorderColor(borderColor);
+        } else if (args->IsObject()) {
+            JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+            NG::BorderColorProperty borderColors;
+            if (object->HasProperty(static_cast<int32_t>(ArkUIIndex::START)) ||
+                object->HasProperty(static_cast<int32_t>(ArkUIIndex::END))) {
+                ParseLocalizedEdgeColorsForOutLineColor(object, borderColors);
+                ViewAbstractModel::GetInstance()->SetOuterBorderColor(borderColor);
+            } else {
+                ParseEdgeColorsForOutLineColor(object, borderColors);
+                borderColors.multiValued = true;
+                ViewAbstractModel::GetInstance()->SetOuterBorderColor(borderColors);
+            }
+        } else {
+            ViewAbstractModel::GetInstance()->SetOuterBorderColor(Color::BLACK);
+        }
     }
 }
 
@@ -3839,8 +5121,13 @@ NG::BorderRadiusProperty JSViewAbstract::GetLocalizedBorderRadius(const std::opt
 void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args)
 {
     CalcDimension borderRadius;
-    if (ParseJsDimensionVp(args, borderRadius)) {
-        ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
+    RefPtr<ResourceObject> borderRadiusResObj;
+    if (ParseJsDimensionVp(args, borderRadius, borderRadiusResObj)) {
+        if (SystemProperties::ConfigChangePerform() && borderRadiusResObj) {
+            ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadiusResObj);
+        } else {
+            ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
+        }
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         CalcDimension topLeft;
@@ -3852,7 +5139,27 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args)
                 GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
                 return;
         }
-        ViewAbstractModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+        if (SystemProperties::ConfigChangePerform()) {
+            NG::BorderRadiusProperty borderRadius;
+            RefPtr<ResourceObject> topLeftResObj;
+            RefPtr<ResourceObject> topRightResObj;
+            RefPtr<ResourceObject> bottomLeftResObj;
+            RefPtr<ResourceObject> bottomRightResObj;
+            GetBorderRadiusResObj("topLeft", object, topLeft, topLeftResObj);
+            GetBorderRadiusResObj("topRight", object, topRight, topRightResObj);
+            GetBorderRadiusResObj("bottomLeft", object, bottomLeft, bottomLeftResObj);
+            GetBorderRadiusResObj("bottomRight", object, bottomRight, bottomRightResObj);
+            borderRadius.radiusTopLeft = topLeft;
+            borderRadius.radiusTopRight = topRight;
+            borderRadius.radiusBottomLeft = bottomLeft;
+            borderRadius.radiusBottomRight = bottomRight;
+            borderRadius.multiValued = true;
+            ParseAllBorderRadiusesResObj(
+                borderRadius, topLeftResObj, topRightResObj, bottomLeftResObj, bottomRightResObj);
+            ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
+        } else {
+            ViewAbstractModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+        }
     }
 }
 
@@ -3862,28 +5169,150 @@ void JSViewAbstract::ParseOuterBorderRadius(const JSRef<JSVal>& args)
         return;
     }
     CalcDimension borderRadius;
-    if (ParseJsDimensionVp(args, borderRadius)) {
-        if (borderRadius.Unit() == DimensionUnit::PERCENT) {
-            borderRadius.Reset();
+    if (!SystemProperties::ConfigChangePerform()) {
+        if (ParseJsDimensionVp(args, borderRadius)) {
+            if (borderRadius.Unit() == DimensionUnit::PERCENT) {
+                borderRadius.Reset();
+            }
+            ViewAbstractModel::GetInstance()->SetOuterBorderRadius(borderRadius);
+        } else if (args->IsObject()) {
+            JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+            CalcDimension topLeft;
+            CalcDimension topRight;
+            CalcDimension bottomLeft;
+            CalcDimension bottomRight;
+            if (ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
+                ViewAbstractModel::GetInstance()->SetOuterBorderRadius(
+                    GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
+            }
+            ViewAbstractModel::GetInstance()->SetOuterBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
         }
-        ViewAbstractModel::GetInstance()->SetOuterBorderRadius(borderRadius);
-    } else if (args->IsObject()) {
-        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        CalcDimension topLeft;
-        CalcDimension topRight;
-        CalcDimension bottomLeft;
-        CalcDimension bottomRight;
-        if (ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
-            ViewAbstractModel::GetInstance()->SetOuterBorderRadius(
-                GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
+    } else {
+        RefPtr<ResourceObject> resObj;
+        bool ret = ParseJsDimensionVp(args, borderRadius, resObj);
+        if (resObj) {
+            ViewAbstractModel::GetInstance()->CreateWithOuterBorderRadiusResourceObj(resObj);
+        } else if (ret) {
+            if (borderRadius.Unit() == DimensionUnit::PERCENT) {
+                borderRadius.Reset();
+            }
+            ViewAbstractModel::GetInstance()->SetOuterBorderRadius(borderRadius);
+        } else if (args->IsObject()) {
+            JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+            NG::BorderRadiusProperty borderRadius;
+            if (!ParseAllBorderRadiusesForOutLine(object, borderRadius)) {
+                borderRadius.multiValued = true;
+            }
+            ViewAbstractModel::GetInstance()->SetOuterBorderRadius(borderRadius);
         }
-        ViewAbstractModel::GetInstance()->SetOuterBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
     }
+}
+
+void JSViewAbstract::GetBorderRadiusTopLeft(const JSRef<JSVal>& jsValue, NG::BorderRadiusProperty& borderRadius)
+{
+    RefPtr<ResourceObject> topLeftResObj;
+    CalcDimension dim;
+    if (ParseJsDimensionVp(jsValue, dim, topLeftResObj)) {
+        borderRadius.radiusTopLeft = dim;
+    }
+    if (topLeftResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            borderRadius.radiusTopLeft = dimension;
+        };
+        borderRadius.AddResource("outLineRadius.radius.radiusTopLft", topLeftResObj, std::move(updateFunc));
+    }
+}
+
+void JSViewAbstract::GetBorderRadiusTopRight(const JSRef<JSVal>& jsValue, NG::BorderRadiusProperty& borderRadius)
+{
+    RefPtr<ResourceObject> topRightResObj;
+    CalcDimension dim;
+    if (ParseJsDimensionVp(jsValue, dim, topRightResObj)) {
+        borderRadius.radiusTopRight = dim;
+    }
+    if (topRightResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            borderRadius.radiusTopRight = dimension;
+        };
+        borderRadius.AddResource("outLineRadius.radius.radiusTopRight", topRightResObj, std::move(updateFunc));
+    }
+}
+
+void JSViewAbstract::GetBorderRadiusBottomLeft(const JSRef<JSVal>& jsValue, NG::BorderRadiusProperty& borderRadius)
+{
+    RefPtr<ResourceObject> bottomLeftResObj;
+    CalcDimension dim;
+    if (ParseJsDimensionVp(jsValue, dim, bottomLeftResObj)) {
+        borderRadius.radiusBottomLeft = dim;
+    }
+    if (bottomLeftResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            borderRadius.radiusBottomLeft = dimension;
+        };
+        borderRadius.AddResource("outLineRadius.radius.radiusBottomLeft", bottomLeftResObj, std::move(updateFunc));
+    }
+}
+
+void JSViewAbstract::GetBorderRadiusBottomRight(const JSRef<JSVal>& jsValue, NG::BorderRadiusProperty& borderRadius)
+{
+    RefPtr<ResourceObject> bottomRightResObj;
+    CalcDimension dim;
+    if (ParseJsDimensionVp(jsValue, dim, bottomRightResObj)) {
+        borderRadius.radiusBottomRight = dim;
+    }
+    if (bottomRightResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            borderRadius.radiusBottomRight = dimension;
+        };
+        borderRadius.AddResource("outLineRadius.radius.radiusBottomRight", bottomRightResObj, std::move(updateFunc));
+    }
+}
+
+bool JSViewAbstract::ParseAllBorderRadiusesForOutLine(JSRef<JSObject>& object, NG::BorderRadiusProperty& borderRadius)
+{
+    if (object->IsUndefined()) {
+        return false;
+    }
+    if (object->HasProperty(TOP_START_PROPERTY) || object->HasProperty(TOP_END_PROPERTY) ||
+        object->HasProperty(BOTTOM_START_PROPERTY) || object->HasProperty(BOTTOM_END_PROPERTY)) {
+        CalcDimension topStart;
+        CalcDimension topEnd;
+        CalcDimension bottomStart;
+        CalcDimension bottomEnd;
+        GetBorderRadiusByLengthMetrics(TOP_START_PROPERTY, object, topStart);
+        GetBorderRadiusByLengthMetrics(TOP_END_PROPERTY, object, topEnd);
+        GetBorderRadiusByLengthMetrics(BOTTOM_START_PROPERTY, object, bottomStart);
+        GetBorderRadiusByLengthMetrics(BOTTOM_END_PROPERTY, object, bottomEnd);
+        borderRadius.radiusTopStart = topStart;
+        borderRadius.radiusTopEnd = topEnd;
+        borderRadius.radiusBottomEnd = bottomStart;
+        borderRadius.radiusBottomStart = bottomEnd;
+        return true;
+    }
+    GetBorderRadiusTopLeft(object->GetProperty("topLeft"), borderRadius);
+    GetBorderRadiusTopRight(object->GetProperty("topRight"), borderRadius);
+    GetBorderRadiusBottomLeft(object->GetProperty("bottomLeft"), borderRadius);
+    GetBorderRadiusBottomRight(object->GetProperty("bottomRight"), borderRadius);
+    return false;
 }
 
 void JSViewAbstract::GetBorderRadius(const char* key, JSRef<JSObject>& object, CalcDimension& radius)
 {
     ParseJsDimensionVp(object->GetProperty(key), radius);
+}
+
+void JSViewAbstract::GetBorderRadiusResObj(const char* key, JSRef<JSObject>& object, CalcDimension& radius, 
+    RefPtr<ResourceObject>& resObj)
+{
+    ParseJsDimensionVp(object->GetProperty(key), radius, resObj);
 }
 
 void JSViewAbstract::GetBorderRadiusByLengthMetrics(const char* key, JSRef<JSObject>& object, CalcDimension& radius)
@@ -3897,6 +5326,9 @@ void JSViewAbstract::GetBorderRadiusByLengthMetrics(const char* key, JSRef<JSObj
 bool JSViewAbstract::ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft, CalcDimension& topRight,
     CalcDimension& bottomLeft, CalcDimension& bottomRight)
 {
+    if (object->IsUndefined()) {
+        return false;
+    }
     if (object->HasProperty(TOP_START_PROPERTY) || object->HasProperty(TOP_END_PROPERTY) ||
         object->HasProperty(BOTTOM_START_PROPERTY) || object->HasProperty(BOTTOM_END_PROPERTY)) {
         CalcDimension topStart;
@@ -3913,10 +5345,12 @@ bool JSViewAbstract::ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimensi
         bottomRight = bottomEnd;
         return true;
     }
-    GetBorderRadius("topLeft", object, topLeft);
-    GetBorderRadius("topRight", object, topRight);
-    GetBorderRadius("bottomLeft", object, bottomLeft);
-    GetBorderRadius("bottomRight", object, bottomRight);
+    if (!SystemProperties::ConfigChangePerform()) {
+        GetBorderRadius("topLeft", object, topLeft);
+        GetBorderRadius("topRight", object, topRight);
+        GetBorderRadius("bottomLeft", object, bottomLeft);
+        GetBorderRadius("bottomRight", object, bottomRight);
+    }
     return false;
 }
 
@@ -4079,15 +5513,33 @@ void JSViewAbstract::JsColorBlend(const JSCallbackInfo& info)
         SetColorBlend(colorBlend);
         return;
     }
-    if (!ParseJsColor(info[0], colorBlend)) {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            colorBlend = Color::TRANSPARENT;
-            SetColorBlend(colorBlend);
+    if (!SystemProperties::ConfigChangePerform()) {
+        if (!ParseJsColor(info[0], colorBlend)) {
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                colorBlend = Color::TRANSPARENT;
+                SetColorBlend(colorBlend);
+            }
+            return;
         }
-        return;
+        SetColorBlend(colorBlend);
+        info.SetReturnValue(info.This());
+    } else {
+        RefPtr<ResourceObject> colorBlendResObj;
+        if (ParseJsColor(info[0], colorBlend, colorBlendResObj) && !colorBlendResObj) {
+            SetColorBlend(colorBlend);
+            info.SetReturnValue(info.This());
+            return;
+        }
+        if (colorBlendResObj) {
+            ViewAbstractModel::GetInstance()->CreateWithColorBlendResourceObj(colorBlendResObj);
+            info.SetReturnValue(info.This());
+        } else {
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                colorBlend = Color::TRANSPARENT;
+                SetColorBlend(colorBlend);
+            }
+        }
     }
-    SetColorBlend(colorBlend);
-    info.SetReturnValue(info.This());
 }
 
 void JSViewAbstract::JsUseEffect(const JSCallbackInfo& info)
@@ -4446,6 +5898,13 @@ bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimensi
 bool JSViewAbstract::ParseJsLengthNG(
     const JSRef<JSVal>& jsValue, NG::CalcLength& result, DimensionUnit defaultUnit, bool isSupportPercent)
 {
+    RefPtr<ResourceObject> resourceObj;
+    return ParseJsLengthNG(jsValue, result, defaultUnit, resourceObj, isSupportPercent);
+}
+
+bool JSViewAbstract::ParseJsLengthNG(const JSRef<JSVal>& jsValue, NG::CalcLength& result, DimensionUnit defaultUnit,
+    RefPtr<ResourceObject>& resourceObj, bool isSupportPercent)
+{
     if (jsValue->IsNumber()) {
         if (std::isnan(jsValue->ToNumber<double>())) {
             return false;
@@ -4467,6 +5926,13 @@ bool JSViewAbstract::ParseJsLengthNG(
             unit = static_cast<DimensionUnit>(jsUnit->ToNumber<int32_t>());
         }
         result = NG::CalcLength(value->ToNumber<double>(), unit);
+        auto jsRes = jsObj->GetProperty("res");
+        if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() &&
+            !jsRes->IsNull() && !jsRes->IsObject()) {
+            JSRef<JSObject> resObj = JSRef<JSObject>::Cast(jsRes);
+            JSViewAbstract::CompleteResourceObject(resObj);
+            resourceObj = JSViewAbstract::GetResourceObject(resObj);
+        }
         return true;
     }
 
@@ -4475,8 +5941,15 @@ bool JSViewAbstract::ParseJsLengthNG(
 
 bool JSViewAbstract::ParseJsLengthVpNG(const JSRef<JSVal>& jsValue, NG::CalcLength& result, bool isSupportPercent)
 {
+    RefPtr<ResourceObject> resObj;
+    return ParseJsLengthNG(jsValue, result, DimensionUnit::VP, resObj, isSupportPercent);
+}
+
+bool JSViewAbstract::ParseJsLengthVpNG(const JSRef<JSVal>& jsValue, NG::CalcLength& result,
+    RefPtr<ResourceObject>& resObj, bool isSupportPercent)
+{
     // 'vp' -> the value varies with pixel density of device.
-    return ParseJsLengthNG(jsValue, result, DimensionUnit::VP, isSupportPercent);
+    return ParseJsLengthNG(jsValue, result, DimensionUnit::VP, resObj, isSupportPercent);
 }
 
 bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit)
@@ -4574,6 +6047,13 @@ bool JSViewAbstract::ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimen
 
 bool JSViewAbstract::ParseJsLengthMetricsVp(const JSRef<JSObject>& jsObj, CalcDimension& result)
 {
+    RefPtr<ResourceObject> resourceObj;
+    return ParseJsLengthMetricsVpWithResObj(jsObj, result, resourceObj);
+}
+
+bool JSViewAbstract::ParseJsLengthMetricsVpWithResObj(const JSRef<JSObject>& jsObj, CalcDimension& result,
+    RefPtr<ResourceObject>& resourceObj)
+{
     auto value = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
     if (!value->IsNumber()) {
         return false;
@@ -4585,6 +6065,13 @@ bool JSViewAbstract::ParseJsLengthMetricsVp(const JSRef<JSObject>& jsObj, CalcDi
     }
     CalcDimension dimension(value->ToNumber<double>(), unit);
     result = dimension;
+    auto jsRes = jsObj->GetProperty("res");
+    if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() &&
+        !jsRes->IsNull() && !jsRes->IsObject()) {
+        JSRef<JSObject> resObj = JSRef<JSObject>::Cast(jsRes);
+        JSViewAbstract::CompleteResourceObject(resObj);
+        resourceObj = JSViewAbstract::GetResourceObject(resObj);
+    }
     return true;
 }
 
@@ -5490,33 +6977,44 @@ bool JSViewAbstract::ParseJsInteger(const JSRef<JSVal>& jsValue, int32_t& result
 bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result)
 {
     RefPtr<ResourceObject> resObj;
-    return ParseJsIntegerArray(jsValue, result, resObj);
+    std::vector<RefPtr<ResourceObject>> resObjArray;
+    return ParseJsIntegerArray(jsValue, result, resObj, resObjArray);
+}
+
+bool JSViewAbstract::ParseJsIntegerArrayInternal(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result,
+    std::vector<RefPtr<ResourceObject>>& resObjArray)
+{
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
+    for (size_t i = 0; i < array->Length(); i++) {
+        RefPtr<ResourceObject> resObj;
+        JSRef<JSVal> value = array->GetValueAt(i);
+        if (value->IsNumber()) {
+            result.emplace_back(value->ToNumber<uint32_t>());
+        } else if (value->IsObject()) {
+            uint32_t singleResInt;
+            if (ParseJsInteger(value, singleResInt, resObj)) {
+                result.emplace_back(singleResInt);
+            } else {
+                resObjArray.clear();
+                return false;
+            }
+        } else {
+            resObjArray.clear();
+            return false;
+        }
+        resObjArray.emplace_back(resObj);
+    }
+    return true;
 }
 
 bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result,
-    RefPtr<ResourceObject>& resObj)
+    RefPtr<ResourceObject>& resObj, std::vector<RefPtr<ResourceObject>>& resObjArray)
 {
     if (!jsValue->IsArray() && !jsValue->IsObject()) {
         return false;
     }
     if (jsValue->IsArray()) {
-        JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
-        for (size_t i = 0; i < array->Length(); i++) {
-            JSRef<JSVal> value = array->GetValueAt(i);
-            if (value->IsNumber()) {
-                result.emplace_back(value->ToNumber<uint32_t>());
-            } else if (value->IsObject()) {
-                uint32_t singleResInt;
-                if (ParseJsInteger(value, singleResInt)) {
-                    result.emplace_back(singleResInt);
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        }
-        return true;
+        return ParseJsIntegerArrayInternal(jsValue, result, resObjArray);
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
@@ -5561,33 +7059,44 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
 bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<std::string>& result)
 {
     RefPtr<ResourceObject> resObj;
-    return ParseJsStrArray(jsValue, result, resObj);
+    std::vector<RefPtr<ResourceObject>> resObjArray;
+    return ParseJsStrArray(jsValue, result, resObj, resObjArray);
+}
+
+bool JSViewAbstract::ParseJsStrArrayInternal(const JSRef<JSVal>& jsValue, std::vector<std::string>& result,
+    std::vector<RefPtr<ResourceObject>>& resObjArray)
+{
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
+    for (size_t i = 0; i < array->Length(); i++) {
+        RefPtr<ResourceObject> resObj;
+        JSRef<JSVal> value = array->GetValueAt(i);
+        if (value->IsString()) {
+            result.emplace_back(value->ToString());
+        } else if (value->IsObject()) {
+            std::string singleResStr;
+            if (ParseJsString(value, singleResStr)) {
+                result.emplace_back(singleResStr);
+            } else {
+                resObjArray.clear();
+                return false;
+            }
+        } else {
+            resObjArray.clear();
+            return false;
+        }
+        resObjArray.emplace_back(resObj);
+    }
+    return true;
 }
 
 bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<std::string>& result,
-    RefPtr<ResourceObject>& resObj)
+    RefPtr<ResourceObject>& resObj, std::vector<RefPtr<ResourceObject>>& resObjArray)
 {
     if (!jsValue->IsArray() && !jsValue->IsObject()) {
         return false;
     }
     if (jsValue->IsArray()) {
-        JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
-        for (size_t i = 0; i < array->Length(); i++) {
-            JSRef<JSVal> value = array->GetValueAt(i);
-            if (value->IsString()) {
-                result.emplace_back(value->ToString());
-            } else if (value->IsObject()) {
-                std::string singleResStr;
-                if (ParseJsString(value, singleResStr)) {
-                    result.emplace_back(singleResStr);
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        }
-        return true;
+        return ParseJsStrArrayInternal(jsValue, result, resObjArray);
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
@@ -5631,13 +7140,22 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
 
 bool JSViewAbstract::ParseJsLengthMetricsArray(const JSRef<JSVal>& jsValue, std::vector<Dimension>& result)
 {
+    std::vector<RefPtr<ResourceObject>> resObjArray;
+    return ParseJsLengthMetricsArray(jsValue, result, resObjArray);
+}
+
+bool JSViewAbstract::ParseJsLengthMetricsArray(const JSRef<JSVal>& jsValue, std::vector<Dimension>& result,
+    std::vector<RefPtr<ResourceObject>>& resObjArray)
+{
     if (jsValue->IsArray()) {
         JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
         for (size_t i = 0; i < array->Length(); i++) {
+            RefPtr<ResourceObject> resObj;
             JSRef<JSVal> value = array->GetValueAt(i);
             Dimension calc;
-            ParseJsLengthMetricsToDimension(value, calc);
+            ParseJsLengthMetricsToDimension(value, calc, resObj);
             result.emplace_back(calc);
+            resObjArray.emplace_back(resObj);
         }
         return true;
     }
@@ -5982,6 +7500,38 @@ void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetOnDragEnter(std::move(onDragEnter));
 }
 
+void JSViewAbstract::JsOnDragSpringLoading(const JSCallbackInfo& info)
+{
+    if (info.Length() > 0) {
+        static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION, JSCallbackInfoType::OBJECT };
+        auto jsVal = info[0];
+        if (!CheckJSCallbackInfo("JsOnDragSpringLoading", jsVal, checkList)) {
+            return;
+        }
+        NG::OnDrapDropSpringLoadingFunc onDragSpringLoading = nullptr;
+        WeakPtr<NG::FrameNode> frameNode =
+            AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        if (jsVal->IsFunction()) {
+            RefPtr<JsDragFunction> jsOnDragSpringLoadingFunc =
+                AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(jsVal));
+            onDragSpringLoading = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragSpringLoadingFunc),
+                                      node = frameNode](const RefPtr<DragSpringLoadingContext>& info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("JsOnDragSpringLoading");
+                PipelineContext::SetCallBackNode(node);
+                func->DragSpringLoadingExecute(info);
+            };
+        }
+        ViewAbstractModel::GetInstance()->SetOnDragSpringLoading(std::move(onDragSpringLoading));
+    }
+    if (info.Length() == NUM2 && info[NUM1]->IsObject()) {
+        auto dragSpringLoadingConfiguration = AceType::MakeRefPtr<NG::DragSpringLoadingConfiguration>();
+        ParseDragSpringLoadingConfiguration(info[NUM1], dragSpringLoadingConfiguration);
+        ViewAbstractModel::GetInstance()->SetOnDragSpringLoadingConfiguration(
+            std::move(dragSpringLoadingConfiguration));
+    }
+}
+
 void JSViewAbstract::JsOnDragEnd(const JSCallbackInfo& info)
 {
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
@@ -6209,34 +7759,80 @@ void JSViewAbstract::NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradien
     if (center->IsArray() && JSRef<JSArray>::Cast(center)->Length() == 2) {
         CalcDimension value;
         JSRef<JSArray> centerArray = JSRef<JSArray>::Cast(center);
-        if (ParseJsDimensionVp(centerArray->GetValueAt(0), value)) {
-            newGradient.GetRadialGradient()->radialCenterX = CalcDimension(value);
-            if (value.Unit() == DimensionUnit::PERCENT) {
-                // [0,1] -> [0, 100]
-                newGradient.GetRadialGradient()->radialCenterX =
-                    CalcDimension(value.Value() * 100.0, DimensionUnit::PERCENT);
-            }
-        }
-        if (ParseJsDimensionVp(centerArray->GetValueAt(1), value)) {
-            newGradient.GetRadialGradient()->radialCenterY = CalcDimension(value);
-            if (value.Unit() == DimensionUnit::PERCENT) {
-                // [0,1] -> [0, 100]
-                newGradient.GetRadialGradient()->radialCenterY =
-                    CalcDimension(value.Value() * 100.0, DimensionUnit::PERCENT);
-            }
-        }
+        ParseRadialGradientCenter(newGradient, center);
     }
     // radius
     CalcDimension radius;
-    if (ParseJsDimensionVp(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS)), radius)) {
+    RefPtr<ResourceObject> resObj;
+    if (ParseJsDimensionVp(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS)), radius, resObj)) {
         newGradient.GetRadialGradient()->radialVerticalSize = CalcDimension(radius);
         newGradient.GetRadialGradient()->radialHorizontalSize = CalcDimension(radius);
     }
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            gradient.GetRadialGradient()->radialVerticalSize = CalcDimension(dimension);
+            gradient.GetRadialGradient()->radialHorizontalSize = CalcDimension(dimension);
+        };
+        newGradient.AddResource("RadialGradient.radius", resObj, std::move(updateFunc));
+    }
+
     // repeating
     auto repeating = jsObj->GetPropertyValue<bool>("repeating", false);
     newGradient.SetRepeat(repeating);
     // color stops
     NewGetJsGradientColorStops(newGradient, jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLORS)));
+}
+
+void JSViewAbstract::ParseRadialGradientCenter(NG::Gradient& newGradient, JSRef<JSArray> centerArray)
+{
+    RefPtr<ResourceObject> resObjX;
+    RefPtr<ResourceObject> resObjY;
+    CalcDimension value;
+
+    if (ParseJsDimensionVp(centerArray->GetValueAt(0), value, resObjX)) {
+        newGradient.GetRadialGradient()->radialCenterX = CalcDimension(value);
+        if (value.Unit() == DimensionUnit::PERCENT) {
+            // [0,1] -> [0, 100]
+            newGradient.GetRadialGradient()->radialCenterX =
+                CalcDimension(value.Value() * 100.0, DimensionUnit::PERCENT);
+        }
+    }
+    if (SystemProperties::ConfigChangePerform() && resObjX) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            gradient.GetRadialGradient()->radialCenterX = CalcDimension(dimension);
+            if (dimension.Unit() == DimensionUnit::PERCENT) {
+                // [0,1] -> [0, 100]
+                gradient.GetRadialGradient()->radialCenterX =
+                    CalcDimension(dimension.Value() * 100.0, DimensionUnit::PERCENT);
+            }
+        };
+        newGradient.AddResource("RadialGradient.center.centerX", resObjX, std::move(updateFunc));
+    }
+    if (ParseJsDimensionVp(centerArray->GetValueAt(1), value, resObjY)) {
+        newGradient.GetRadialGradient()->radialCenterY = CalcDimension(value);
+        if (value.Unit() == DimensionUnit::PERCENT) {
+            // [0,1] -> [0, 100]
+            newGradient.GetRadialGradient()->radialCenterY =
+                CalcDimension(value.Value() * 100.0, DimensionUnit::PERCENT);
+        }
+    }
+    if (SystemProperties::ConfigChangePerform() && resObjY) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            gradient.GetRadialGradient()->radialCenterY = CalcDimension(dimension);
+            if (dimension.Unit() == DimensionUnit::PERCENT) {
+                // [0,1] -> [0, 100]
+                gradient.GetRadialGradient()->radialCenterY =
+                    CalcDimension(dimension.Value() * 100.0, DimensionUnit::PERCENT);
+            }
+        };
+        newGradient.AddResource("RadialGradient.center.centerY", resObjY, std::move(updateFunc));
+    }
 }
 
 void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
@@ -6255,6 +7851,51 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetSweepGradient(newGradient);
 }
 
+void JSViewAbstract::ParseSweepGradientCenter(NG::Gradient& newGradient, JSRef<JSArray> centerArray)
+{
+    RefPtr<ResourceObject> resObjX;
+    RefPtr<ResourceObject> resObjY;
+    CalcDimension value;
+    if (ParseJsDimensionVp(centerArray->GetValueAt(0), value, resObjX)) {
+        newGradient.GetSweepGradient()->centerX = CalcDimension(value);
+        if (value.Unit() == DimensionUnit::PERCENT) {
+            // [0,1] -> [0, 100]
+            newGradient.GetSweepGradient()->centerX = CalcDimension(value.Value() * 100.0, DimensionUnit::PERCENT);
+        }
+    }
+    if (SystemProperties::ConfigChangePerform() && resObjX) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            gradient.GetSweepGradient()->centerX = CalcDimension(dimension);
+            if (dimension.Unit() == DimensionUnit::PERCENT) {
+                // [0,1] -> [0, 100]
+                gradient.GetSweepGradient()->centerX = CalcDimension(dimension.Value() * 100.0, DimensionUnit::PERCENT);
+            }
+        };
+        newGradient.AddResource("SweepGradient.center.centerX", resObjX, std::move(updateFunc));
+    }
+    if (ParseJsDimensionVp(centerArray->GetValueAt(1), value, resObjY)) {
+        newGradient.GetSweepGradient()->centerY = CalcDimension(value);
+        if (value.Unit() == DimensionUnit::PERCENT) {
+            // [0,1] -> [0, 100]
+            newGradient.GetSweepGradient()->centerY = CalcDimension(value.Value() * 100.0, DimensionUnit::PERCENT);
+        }
+    }
+    if (SystemProperties::ConfigChangePerform() && resObjY) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            gradient.GetSweepGradient()->centerY = CalcDimension(dimension);
+            if (dimension.Unit() == DimensionUnit::PERCENT) {
+                // [0,1] -> [0, 100]
+                gradient.GetSweepGradient()->centerY = CalcDimension(dimension.Value() * 100.0, DimensionUnit::PERCENT);
+            }
+        };
+        newGradient.AddResource("SweepGradient.center.centerY", resObjY, std::move(updateFunc));
+    }
+}
+
 void JSViewAbstract::NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
 {
     JSRef<JSVal> arg = info[0];
@@ -6268,20 +7909,7 @@ void JSViewAbstract::NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient
     if (center->IsArray() && JSRef<JSArray>::Cast(center)->Length() == 2) {
         CalcDimension value;
         JSRef<JSArray> centerArray = JSRef<JSArray>::Cast(center);
-        if (ParseJsDimensionVp(centerArray->GetValueAt(0), value)) {
-            newGradient.GetSweepGradient()->centerX = CalcDimension(value);
-            if (value.Unit() == DimensionUnit::PERCENT) {
-                // [0,1] -> [0, 100]
-                newGradient.GetSweepGradient()->centerX = CalcDimension(value.Value() * 100.0, DimensionUnit::PERCENT);
-            }
-        }
-        if (ParseJsDimensionVp(centerArray->GetValueAt(1), value)) {
-            newGradient.GetSweepGradient()->centerY = CalcDimension(value);
-            if (value.Unit() == DimensionUnit::PERCENT) {
-                // [0,1] -> [0, 100]
-                newGradient.GetSweepGradient()->centerY = CalcDimension(value.Value() * 100.0, DimensionUnit::PERCENT);
-            }
-        }
+        ParseSweepGradientCenter(newGradient, centerArray);
     }
     // start, end and rotation
     ParseSweepGradientPartly(jsObj, newGradient);
@@ -6630,6 +8258,52 @@ void JSViewAbstract::JsClipShape(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::ParseJsMaskProperty(const JSRef<JSObject>& paramObject)
+{
+    auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
+    JSRef<JSVal> jValue = paramObject->GetProperty("value");
+    auto value = jValue->IsNumber() ? jValue->ToNumber<float>() : 0.0f;
+    if (value < 0.0f) {
+        value = 0.0f;
+    }
+    progressMask->SetValue(value);
+    JSRef<JSVal> jTotal = paramObject->GetProperty("total");
+    auto total = jTotal->IsNumber() ? jTotal->ToNumber<float>() : DEFAULT_PROGRESS_TOTAL;
+    if (total < 0.0f) {
+        total = DEFAULT_PROGRESS_TOTAL;
+    }
+    progressMask->SetMaxValue(total);
+    JSRef<JSVal> jEnableBreathe = paramObject->GetProperty("breathe");
+    if (jEnableBreathe->IsBoolean()) {
+        progressMask->SetEnableBreathe(jEnableBreathe->ToBoolean());
+    }
+    JSRef<JSVal> jColor = paramObject->GetProperty("color");
+    Color colorVal;
+    if (!SystemProperties::ConfigChangePerform()) {
+        if (ParseJsColor(jColor, colorVal)) {
+            progressMask->SetColor(colorVal);
+        } else {
+            RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+            progressMask->SetColor(theme->GetMaskColor());
+        }
+        ViewAbstractModel::GetInstance()->SetProgressMask(progressMask);
+    } else {
+        RefPtr<ResourceObject> colorResObj;
+        auto ret = ParseJsColor(jColor, colorVal, colorResObj);
+        if (colorResObj) {
+            progressMask->SetResObj(colorResObj);
+            ViewAbstractModel::GetInstance()->CreateWithMaskResourceObj(progressMask);
+        } else if (ret) {
+            progressMask->SetColor(colorVal);
+            ViewAbstractModel::GetInstance()->SetProgressMask(progressMask);
+        } else {
+            RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+            progressMask->SetColor(theme->GetMaskColor());
+            ViewAbstractModel::GetInstance()->SetProgressMask(progressMask);
+        }
+    }
+}
+
 void JSViewAbstract::JsMask(const JSCallbackInfo& info)
 {
     JSRef<JSVal> arg = info[0];
@@ -6641,32 +8315,7 @@ void JSViewAbstract::JsMask(const JSCallbackInfo& info)
     JSRef<JSVal> typeParam = paramObject->GetProperty("type");
     if (!typeParam->IsNull() && !typeParam->IsUndefined() && typeParam->IsString() &&
         typeParam->ToString() == "ProgressMask") {
-        auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
-        JSRef<JSVal> jValue = paramObject->GetProperty("value");
-        auto value = jValue->IsNumber() ? jValue->ToNumber<float>() : 0.0f;
-        if (value < 0.0f) {
-            value = 0.0f;
-        }
-        progressMask->SetValue(value);
-        JSRef<JSVal> jTotal = paramObject->GetProperty("total");
-        auto total = jTotal->IsNumber() ? jTotal->ToNumber<float>() : DEFAULT_PROGRESS_TOTAL;
-        if (total < 0.0f) {
-            total = DEFAULT_PROGRESS_TOTAL;
-        }
-        progressMask->SetMaxValue(total);
-        JSRef<JSVal> jColor = paramObject->GetProperty("color");
-        Color colorVal;
-        if (ParseJsColor(jColor, colorVal)) {
-            progressMask->SetColor(colorVal);
-        } else {
-            RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
-            progressMask->SetColor(theme->GetMaskColor());
-        }
-        JSRef<JSVal> jEnableBreathe = paramObject->GetProperty("breathe");
-        if (jEnableBreathe->IsBoolean()) {
-            progressMask->SetEnableBreathe(jEnableBreathe->ToBoolean());
-        }
-        ViewAbstractModel::GetInstance()->SetProgressMask(progressMask);
+            ParseJsMaskProperty(paramObject);
     } else {
         JSShapeAbstract* maskShape = JSRef<JSObject>::Cast(arg)->Unwrap<JSShapeAbstract>();
         if (maskShape == nullptr) {
@@ -7022,6 +8671,53 @@ void JSViewAbstract::JsExpandSafeArea(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->UpdateSafeAreaExpandOpts(opts);
 }
 
+void JSViewAbstract::JsIgnoreLayoutSafeArea(const JSCallbackInfo& info)
+{
+    static std::vector<uint32_t> LayoutTypeEnum {
+        NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        NG::LAYOUT_SAFE_AREA_TYPE_KEYBOARD,
+        NG::LAYOUT_SAFE_AREA_TYPE_ALL
+    };
+    static std::vector<uint32_t> LayoutEdgeEnum {
+        NG::LAYOUT_SAFE_AREA_EDGE_TOP,
+        NG::LAYOUT_SAFE_AREA_EDGE_BOTTOM,
+        NG::LAYOUT_SAFE_AREA_EDGE_START,
+        NG::LAYOUT_SAFE_AREA_EDGE_END,
+        NG::LAYOUT_SAFE_AREA_EDGE_VERTICAL,
+        NG::LAYOUT_SAFE_AREA_EDGE_HORIZONTAL,
+        NG::LAYOUT_SAFE_AREA_EDGE_ALL
+    };
+    NG::IgnoreLayoutSafeAreaOpts opts { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    if (info.Length() >= PARAMETER_LENGTH_FIRST && info[0]->IsArray()) {
+        auto paramArray = JSRef<JSArray>::Cast(info[0]);
+        uint32_t layoutSafeAreaType = NG::LAYOUT_SAFE_AREA_TYPE_NONE;
+        for (size_t i = 0; i < paramArray->Length(); ++i) {
+            if (!paramArray->GetValueAt(i)->IsNumber() ||
+                paramArray->GetValueAt(i)->ToNumber<uint32_t>() > LAYOUT_SAFE_AREA_TYPE_LIMIT) {
+                layoutSafeAreaType = NG::SAFE_AREA_TYPE_SYSTEM;
+                break;
+            }
+            layoutSafeAreaType |= LayoutTypeEnum[paramArray->GetValueAt(i)->ToNumber<uint32_t>()];
+        }
+        opts.type = layoutSafeAreaType;
+    }
+    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsArray()) {
+        auto paramArray = JSRef<JSArray>::Cast(info[1]);
+        uint32_t layoutSafeAreaEdge = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+        for (size_t i = 0; i < paramArray->Length(); ++i) {
+            if (!paramArray->GetValueAt(i)->IsNumber() ||
+                paramArray->GetValueAt(i)->ToNumber<uint32_t>() > LAYOUT_SAFE_AREA_EDGE_LIMIT) {
+                layoutSafeAreaEdge = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
+                break;
+            }
+            layoutSafeAreaEdge |= LayoutEdgeEnum[paramArray->GetValueAt(i)->ToNumber<uint32_t>()];
+        }
+        opts.edges = layoutSafeAreaEdge;
+    }
+
+    ViewAbstractModel::GetInstance()->UpdateIgnoreLayoutSafeAreaOpts(opts);
+}
+
 void ParseJSLightSource(JSRef<JSObject>& lightSource)
 {
     if (lightSource->IsUndefined()) {
@@ -7053,6 +8749,90 @@ void ParseJSLightSource(JSRef<JSObject>& lightSource)
     }
 }
 
+void ParseJSLightSourcePositionX(const JSRef<JSObject>& lightSource, NG::TranslateOptions& option)
+{
+    JSRef<JSVal> positionX = lightSource->GetProperty("positionX");
+    CalcDimension dimPositionX;
+    RefPtr<ResourceObject> dimPositionXResObj;
+    if (JSViewAbstract::ParseJsDimensionVp(positionX, dimPositionX, dimPositionXResObj)) {
+        option.x = dimPositionX;
+    }
+    if (dimPositionXResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::TranslateOptions& option) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            option.x = dimension;
+        };
+        option.AddResource("pointLight.LightSource.PositionX", dimPositionXResObj, std::move(updateFunc));
+    }
+}
+
+void ParseJSLightSourcePositionY(const JSRef<JSObject>& lightSource, NG::TranslateOptions& option)
+{
+    JSRef<JSVal> positionY = lightSource->GetProperty("positionY");
+    CalcDimension dimPositionY;
+    RefPtr<ResourceObject> dimPositionYResObj;
+    if (JSViewAbstract::ParseJsDimensionVp(positionY, dimPositionY, dimPositionYResObj)) {
+        option.y = dimPositionY;
+    }
+    if (dimPositionYResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::TranslateOptions& option) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            option.y = dimension;
+        };
+        option.AddResource("pointLight.LightSource.PositionY", dimPositionYResObj, std::move(updateFunc));
+    }
+}
+
+void ParseJSLightSourcePositionZ(const JSRef<JSObject>& lightSource, NG::TranslateOptions& option)
+{
+    JSRef<JSVal> positionZ = lightSource->GetProperty("positionZ");
+    CalcDimension dimPositionZ;
+    RefPtr<ResourceObject> dimPositionZResObj;
+    if (JSViewAbstract::ParseJsDimensionVp(positionZ, dimPositionZ, dimPositionZResObj)) {
+        option.z = dimPositionZ;
+    }
+    if (dimPositionZResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::TranslateOptions& option) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            option.z = dimension;
+        };
+        option.AddResource("pointLight.LightSource.PositionZ", dimPositionZResObj, std::move(updateFunc));
+    }
+
+}
+
+void ParseJSLightSourceNew(JSRef<JSObject>& lightSource)
+{
+    if (lightSource->IsUndefined()) {
+        return;
+    }
+    JSRef<JSVal> intensity = lightSource->GetProperty("intensity");
+    JSRef<JSVal> color = lightSource->GetProperty("color");
+
+    NG::TranslateOptions option;
+    ParseJSLightSourcePositionX(lightSource, option);
+    ParseJSLightSourcePositionY(lightSource, option);
+    ParseJSLightSourcePositionZ(lightSource, option);
+    ViewAbstractModel::GetInstance()->SetLightPosition(option);
+
+    if (intensity->IsNumber()) {
+        float intensityValue = intensity->ToNumber<float>();
+        ViewAbstractModel::GetInstance()->SetLightIntensity(intensityValue);
+    }
+
+    Color lightColor;
+    RefPtr<ResourceObject> lightColorResObj;
+    bool ret = JSViewAbstract::ParseJsColor(color, lightColor, lightColorResObj);
+    if (lightColorResObj) {
+        ViewAbstractModel::GetInstance()->CreateWithLightColorResourceObj(lightColorResObj);
+    } else if (ret) {
+        ViewAbstractModel::GetInstance()->SetLightColor(lightColor);
+    }
+}
+
 void JSViewAbstract::JsPointLight(const JSCallbackInfo& info)
 {
 #ifdef POINT_LIGHT_ENABLE
@@ -7062,7 +8842,11 @@ void JSViewAbstract::JsPointLight(const JSCallbackInfo& info)
 
     JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSObject> lightSource = object->GetProperty("lightSource");
-    ParseJSLightSource(lightSource);
+    if (!SystemProperties::ConfigChangePerform()) {
+        ParseJSLightSource(lightSource);
+    } else {
+        ParseJSLightSourceNew(lightSource);
+    }
 
     auto resourceWrapper = CreateResourceWrapper();
     if (!resourceWrapper) {
@@ -7243,6 +9027,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onPreDrag", &JSViewAbstract::JsOnPreDrag);
     JSClass<JSViewAbstract>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
     JSClass<JSViewAbstract>::StaticMethod("onDragEnter", &JSViewAbstract::JsOnDragEnter);
+    JSClass<JSViewAbstract>::StaticMethod("onDragSpringLoading", &JSViewAbstract::JsOnDragSpringLoading);
     JSClass<JSViewAbstract>::StaticMethod("onDragMove", &JSViewAbstract::JsOnDragMove);
     JSClass<JSViewAbstract>::StaticMethod("onDragLeave", &JSViewAbstract::JsOnDragLeave);
     JSClass<JSViewAbstract>::StaticMethod("onDrop", &JSViewAbstract::JsOnDrop);
@@ -7361,6 +9146,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("freeze", &JSViewAbstract::JsSetFreeze);
 
     JSClass<JSViewAbstract>::StaticMethod("expandSafeArea", &JSViewAbstract::JsExpandSafeArea);
+    JSClass<JSViewAbstract>::StaticMethod("ignoreLayoutSafeArea", &JSViewAbstract::JsIgnoreLayoutSafeArea);
 
     JSClass<JSViewAbstract>::StaticMethod("drawModifier", &JSViewAbstract::JsDrawModifier);
     JSClass<JSViewAbstract>::StaticMethod("customProperty", &JSViewAbstract::JsCustomProperty);
@@ -7889,7 +9675,16 @@ bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue,
 void JSViewAbstract::ParseShadowOffsetXY(const JSRef<JSObject>& jsObj, Shadow& shadow)
 {
     CalcDimension offsetX;
-    if (ParseJsResource(jsObj->GetProperty("offsetX"), offsetX)) {
+    RefPtr<ResourceObject> xResObj;
+    if (ParseJsResource(jsObj->GetProperty("offsetX"), offsetX, xResObj)) {
+        if (SystemProperties::ConfigChangePerform() && xResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& xResObj, Shadow& shadow) {
+                CalcDimension xValue;
+                ResourceParseUtils::ParseResResource(xResObj, xValue);
+                shadow.SetOffsetX(xValue.Value());
+            };
+            shadow.AddResource("shadow.offsetX", xResObj, std::move(updateFunc));
+        }
         shadow.SetOffsetX(offsetX.Value());
     } else {
         if (ParseJsDimensionVp(jsObj->GetProperty("offsetX"), offsetX)) {
@@ -7897,13 +9692,42 @@ void JSViewAbstract::ParseShadowOffsetXY(const JSRef<JSObject>& jsObj, Shadow& s
         }
     }
     CalcDimension offsetY;
+    RefPtr<ResourceObject> yResObj;
     auto jsOffsetY = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::OFFSET_Y));
-    if (ParseJsResource(jsOffsetY, offsetY)) {
+    if (ParseJsResource(jsOffsetY, offsetY, yResObj)) {
+        if (yResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& yResObj, Shadow& shadow) {
+                CalcDimension yValue;
+                ResourceParseUtils::ParseResResource(yResObj, yValue);
+                shadow.SetOffsetY(yValue.Value());
+            };
+            shadow.AddResource("shadow.offsetY", yResObj, std::move(updateFunc));
+        }
         shadow.SetOffsetY(offsetY.Value());
     } else {
         if (ParseJsDimensionVp(jsOffsetY, offsetY)) {
             shadow.SetOffsetY(offsetY.Value());
         }
+    }
+}
+
+void JSViewAbstract::ParseShadowPropsUpdate(const JSRef<JSObject>& jsObj, double& radius, Shadow& shadow)
+{
+    if (jsObj->IsUndefined()) {
+        return;
+    }
+    RefPtr<ResourceObject> radiusResObj;
+    ParseJsDouble(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS)), radius, radiusResObj);
+    if (SystemProperties::ConfigChangePerform() && radiusResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& radiusResObj, Shadow& shadow) {
+            double radius = 0.0;
+            ResourceParseUtils::ParseResDouble(radiusResObj, radius);
+            if (LessNotEqual(radius, 0.0)) {
+                radius = 0.0;
+            }
+            shadow.SetBlurRadius(radius);
+        };
+        shadow.AddResource("shadow.radius", radiusResObj, std::move(updateFunc));
     }
 }
 
@@ -7919,7 +9743,7 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     double radius = 0.0;
-    ParseJsDouble(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS)), radius);
+    ParseShadowPropsUpdate(jsObj, radius, shadow);
     if (LessNotEqual(radius, 0.0)) {
         radius = 0.0;
     }
@@ -7929,11 +9753,21 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     Color color;
     ShadowColorStrategy shadowColorStrategy;
     auto jsColor = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLOR));
+    RefPtr<ResourceObject> colorResObj;
     if (ParseJsShadowColorStrategy(jsColor, shadowColorStrategy)) {
         shadow.SetShadowColorStrategy(shadowColorStrategy);
-    } else if (ParseJsColor(jsColor, color)) {
+    } else if (ParseJsColor(jsColor, color, colorResObj)) {
+        if (SystemProperties::ConfigChangePerform() && colorResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& colorResObj, Shadow& shadow) {
+                Color colorValue;
+                ResourceParseUtils::ParseResColor(colorResObj, colorValue);
+                shadow.SetColor(colorValue);
+            };
+            shadow.AddResource("shadow.colorValue", colorResObj, std::move(updateFunc));
+        }
         shadow.SetColor(color);
     }
+
     int32_t type = static_cast<int32_t>(ShadowType::COLOR);
     JSViewAbstract::ParseJsInt32(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TYPE)), type);
     if (type != static_cast<int32_t>(ShadowType::BLUR)) {
@@ -7961,8 +9795,23 @@ bool JSViewAbstract::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
     if (!shadowTheme) {
         return false;
     }
-
     shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);;
+        auto&& updateFunc = [shadowStyle](const RefPtr<ResourceObject>& resObj, Shadow& shadow) {
+            auto colorMode = Container::CurrentColorMode();
+            auto container = Container::Current();
+            CHECK_NULL_VOID(container);
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+            if (!shadowTheme) {
+                return;
+            }
+            shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+        };
+        shadow.AddResource("shadow.shadowStyle", resObj, std::move(updateFunc));
+    }
     return true;
 }
 
@@ -8211,6 +10060,50 @@ void JSViewAbstract::NewGetGradientColorStops(NG::Gradient& gradient, const std:
     }
 }
 
+void JSViewAbstract::NewParseGradientColor(NG::Gradient& gradient, JSRef<JSArray>& subArray,
+    NG::GradientColor& gradientColor, size_t& i, size_t& length)
+{
+    Color color;
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(subArray->GetValueAt(0), color, resObj)) {
+        return;
+    }
+    gradientColor.SetColor(color);
+    gradientColor.SetHasValue(false);
+    // stop value
+    double value = 0.0;
+    if (ParseJsDouble(subArray->GetValueAt(1), value)) {
+        value = std::clamp(value, 0.0, 1.0);
+        gradientColor.SetHasValue(true);
+    }
+    //  [0, 1] -> [0, 100.0];
+    gradientColor.SetDimension(CalcDimension(value * 100.0, DimensionUnit::PERCENT));
+    gradient.AddColor(gradientColor);
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        auto&& updateFunc = [value, length,subArray](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
+            if (gradient.GetColors().size() == length) {
+                gradient.ClearColors();
+            }
+            Color color;
+            ResourceParseUtils::ParseResColor(resObj, color);
+            NG::GradientColor gradientColorValue;
+            double& valued = const_cast<double&>(value);
+            gradientColorValue.SetColor(color);
+            gradientColorValue.SetHasValue(false);
+            //  [0, 1] -> [0, 100.0];
+            JSRef<JSArray>& subArray1 = const_cast<JSRef<JSArray>&>(subArray);
+            if (ParseJsDouble(subArray1->GetValueAt(1), valued)) {
+                valued = std::clamp(valued, 0.0, 1.0);
+                gradientColorValue.SetHasValue(true);
+            }
+            gradientColorValue.SetDimension(CalcDimension(valued * 100.0, DimensionUnit::PERCENT));
+            gradient.AddColor(gradientColorValue);
+        };
+        std::string key = "LinearGradient.gradient.color" + std::to_string(i);
+        gradient.AddResource(key, resObj, std::move(updateFunc));
+    }
+}
+
 void JSViewAbstract::NewGetJsGradientColorStops(NG::Gradient& gradient, const JSRef<JSVal>& colorStops)
 {
     if (!colorStops->IsArray()) {
@@ -8230,21 +10123,7 @@ void JSViewAbstract::NewGetJsGradientColorStops(NG::Gradient& gradient, const JS
             continue;
         }
         // color
-        Color color;
-        if (!ParseJsColor(subArray->GetValueAt(0), color)) {
-            continue;
-        }
-        gradientColor.SetColor(color);
-        gradientColor.SetHasValue(false);
-        // stop value
-        double value = 0.0;
-        if (ParseJsDouble(subArray->GetValueAt(1), value)) {
-            value = std::clamp(value, 0.0, 1.0);
-            gradientColor.SetHasValue(true);
-        }
-        //  [0, 1] -> [0, 100.0];
-        gradientColor.SetDimension(CalcDimension(value * 100.0, DimensionUnit::PERCENT));
-        gradient.AddColor(gradientColor);
+        NewParseGradientColor(gradient, subArray, gradientColor, i, length);
     }
 }
 
@@ -8748,6 +10627,7 @@ void JSViewAbstract::JsOnChildTouchTest(const JSCallbackInfo& info)
                                const std::vector<NG::TouchTestInfo>& touchInfo) -> NG::TouchResult {
         NG::TouchResult touchRes;
         NG::TouchResult defaultRes;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, defaultRes);
         defaultRes.strategy = NG::TouchTestStrategy::DEFAULT;
         defaultRes.id = "";
         auto ret = func->Execute(touchInfo);
@@ -8782,8 +10662,18 @@ void JSViewAbstract::JsForegroundColor(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
         return;
     }
-    ParseJsColor(info[0], foregroundColor);
-    ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
+    if (!SystemProperties::ConfigChangePerform()) {
+        ParseJsColor(info[0], foregroundColor);
+        ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
+    } else {
+        RefPtr<ResourceObject> foregroundResObj;
+        ParseJsColor(info[0], foregroundColor, foregroundResObj);
+        if (foregroundResObj) {
+            ViewAbstractModel::GetInstance()->CreateWithForegroundColorResourceObj(foregroundResObj);
+        } else {
+            ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
+        }
+    }
 }
 
 void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
@@ -9016,10 +10906,87 @@ bool JSViewAbstract::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::stri
     return false;
 }
 
+void JSViewAbstract::SetBorderColorProps(const Color& color, NG::BorderColorProperty& props, const char* propName)
+{
+    if (propName == nullptr) {
+        return;
+    }
+    if (propName == BOTTOM_PROPERTY) {
+        props.bottomColor = color;
+    } else if (propName == TOP_PROPERTY) {
+        props.topColor = color;
+    } else if (propName == LEFT_PROPERTY || propName == START_PROPERTY) {
+        props.leftColor = color;
+    } else if (propName == RIGHT_PROPERTY || propName == END_PROPERTY) {
+        props.rightColor = color;
+    }
+}
+
+void JSViewAbstract::ParseBorderColorProps(
+    const JSRef<JSObject>& object, NG::BorderColorProperty& props, const char* propName)
+{
+    if (!object->HasProperty(propName) || propName == nullptr) {
+        return;
+    }
+    RefPtr<ResourceObject> resObj = nullptr;
+    Color color;
+    if (JSViewAbstract::ParseJsColor(object->GetProperty(propName), color, resObj)) {
+        SetBorderColorProps(color, props, propName);
+    }
+    if (!resObj) {
+        return;
+    }
+    auto&& updateFunc = [propName](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& props) {
+        Color color;
+        ResourceParseUtils::ParseResColor(resObj, color);
+        SetBorderColorProps(color, props, propName);
+    };
+    props.AddResource("dialog.borderColor." + std::string(propName), resObj, std::move(updateFunc));
+}
+
+void JSViewAbstract::GetBorderColors(const JSRef<JSObject>& object, NG::BorderColorProperty& borderColors)
+{
+    ParseBorderColorProps(object, borderColors, BOTTOM_PROPERTY);
+    ParseBorderColorProps(object, borderColors, TOP_PROPERTY);
+    ParseBorderColorProps(object, borderColors, LEFT_PROPERTY);
+    ParseBorderColorProps(object, borderColors, RIGHT_PROPERTY);
+    ParseBorderColorProps(object, borderColors, START_PROPERTY);
+    ParseBorderColorProps(object, borderColors, END_PROPERTY);
+    borderColors.multiValued = true;
+}
+
+bool JSViewAbstract::GetBorderColorsFromResource(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProps)
+{
+    Color borderColor;
+    RefPtr<ResourceObject> resObj = nullptr;
+    if (ParseJsColor(args, borderColor, resObj)) {
+        colorProps.SetColor(borderColor);
+    }
+    if (resObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& colorProps) {
+            Color color;
+            bool ret = ResourceParseUtils::ParseResColor(resObj, color);
+            Color target = ret ? color : Color::BLACK;
+            colorProps.SetColor(target);
+        };
+        colorProps.AddResource("dialog.borderColor", resObj, std::move(updateFunc));
+        return true;
+    }
+    if (args->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
+        GetBorderColors(obj, colorProps);
+        return true;
+    }
+    return false;
+}
+
 bool JSViewAbstract::ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty)
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
         return false;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        return GetBorderColorsFromResource(args, colorProperty);
     }
     Color borderColor;
     if (ParseJsColor(args, borderColor)) {
@@ -9048,6 +11015,9 @@ bool JSViewAbstract::ParseBorderWidthProps(const JSRef<JSVal>& args, NG::BorderW
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
         return false;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        return GetBorderWidthFromResource(args, borderWidthProperty);
     }
     CalcDimension borderWidth;
     if (ParseJsDimensionVpNG(args, borderWidth, true)) {
@@ -9187,9 +11157,106 @@ void JSViewAbstract::ParseCommonBorderRadiusProps(
     ParseBorderRadiusProps(object, radius);
 }
 
+bool JSViewAbstract::GetBorderRadiusFromResource(const JSRef<JSVal>& args, NG::BorderRadiusProperty& props)
+{
+    CalcDimension borderRadius;
+    RefPtr<ResourceObject> resObj;
+    if (ParseJsDimensionVpNG(args, borderRadius, resObj)) {
+        props = NG::BorderRadiusProperty(borderRadius);
+        props.multiValued = false;
+    }
+    if (resObj) {
+        return false;
+    }
+    auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& props) {
+        CalcDimension radiusValue;
+        ResourceParseUtils::ParseResDimensionVpNG(resObj, radiusValue);
+        props = NG::BorderRadiusProperty(radiusValue);
+    };
+
+    props.AddResource("dialog.borderRadius", resObj, std::move(updateFunc));
+    return true;
+}
+
+void JSViewAbstract::SetBorderRadiusProps(
+    const CalcDimension& dim, NG::BorderRadiusProperty& props, const char* propName)
+{
+    if (dim.IsNegative() || propName == nullptr) {
+        return;
+    }
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (propName == BOTTOM_LEFT_PROPERTY) {
+        props.radiusBottomLeft = dim;
+    } else if (propName == BOTTOM_RIGHT_PROPERTY) {
+        props.radiusBottomRight = dim;
+    } else if (propName == TOP_LEFT_PROPERTY) {
+        props.radiusTopLeft = dim;
+    } else if (propName == TOP_RIGHT_PROPERTY) {
+        props.radiusTopRight = dim;
+    } else if (propName == TOP_START_PROPERTY || propName == TOP_END_PROPERTY) {
+        if (isRightToLeft) {
+            props.radiusTopRight = dim;
+            return;
+        }
+        props.radiusTopLeft = dim;
+
+    } else if (propName == BOTTOM_START_PROPERTY || propName == BOTTOM_END_PROPERTY) {
+        if (isRightToLeft) {
+            props.radiusTopRight = dim;
+            return;
+        }
+        props.radiusTopLeft = dim;
+    }
+}
+
+void JSViewAbstract::GetBorderRadiusProps(
+    const JSRef<JSObject>& object, NG::BorderRadiusProperty& props, bool notNegative, const char* propName)
+{
+    if (!object->HasProperty(propName) || propName == nullptr) {
+        return;
+    }
+    RefPtr<ResourceObject> resObj;
+    CalcDimension dim;
+    if (ParseJsDimensionVp(object->GetProperty(propName), dim, resObj)) {
+        SetBorderRadiusProps(dim, props, propName);
+    }
+    ParseCommonBorderRadiusProps(object, props, notNegative);
+    if (!resObj) {
+        return;
+    }
+    auto&& updateFunc = [object, notNegative, propName](
+                            const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& props) {
+        CalcDimension radiusValue;
+        if (ResourceParseUtils::ParseResDimensionVp(resObj, radiusValue)) {
+            SetBorderRadiusProps(radiusValue, props, propName);
+        }
+        ParseCommonBorderRadiusProps(object, props, notNegative);
+    };
+    props.AddResource("dialog.borderRadius." + std::string(propName), resObj, std::move(updateFunc));
+}
+
 bool JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius, bool notNegative)
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
+        return false;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        if (GetBorderRadiusFromResource(args, radius)) {
+            return true;
+        }
+        if (args->IsObject()) {
+            JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+            GetBorderRadiusProps(object, radius, notNegative, BOTTOM_START_PROPERTY);
+            GetBorderRadiusProps(object, radius, notNegative, BOTTOM_END_PROPERTY);
+            GetBorderRadiusProps(object, radius, notNegative, BOTTOM_LEFT_PROPERTY);
+            GetBorderRadiusProps(object, radius, notNegative, BOTTOM_RIGHT_PROPERTY);
+            GetBorderRadiusProps(object, radius, notNegative, TOP_START_PROPERTY);
+            GetBorderRadiusProps(object, radius, notNegative, TOP_END_PROPERTY);
+            GetBorderRadiusProps(object, radius, notNegative, TOP_RIGHT_PROPERTY);
+            GetBorderRadiusProps(object, radius, notNegative, TOP_LEFT_PROPERTY);
+            radius.multiValued = true;
+            return true;
+        }
         return false;
     }
     CalcDimension borderRadius;
@@ -9266,6 +11333,31 @@ void JSViewAbstract::SetDragNumberBadge(const JSCallbackInfo& info, NG::DragPrev
     }
 }
 
+void JSViewAbstract::ParseDialogWidthAndHeight(DialogProperties& properties, const JSRef<JSObject>& obj)
+{
+    CalcDimension width;
+    CalcDimension height;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resWidthObj = nullptr;
+        RefPtr<ResourceObject> resHeightObj = nullptr;
+        if (ParseJsDimensionVpNG(obj->GetProperty("width"), width, resWidthObj)) {
+            properties.width = width;
+        }
+        properties.resourceWidthObj = resWidthObj;
+        if (ParseJsDimensionVpNG(obj->GetProperty("height"), height, resHeightObj)) {
+            properties.height = height;
+        }
+        properties.resourceHeightObj = resHeightObj;
+        return;
+    }
+    if (ParseJsDimensionVpNG(obj->GetProperty("width"), width, true)) {
+        properties.width = width;
+    }
+    if (ParseJsDimensionVpNG(obj->GetProperty("height"), height, true)) {
+        properties.height = height;
+    }
+}
+
 void JSViewAbstract::SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties)
 {
     // Parse cornerRadius.
@@ -9302,16 +11394,7 @@ void JSViewAbstract::SetDialogProperties(const JSRef<JSObject>& obj, DialogPrope
     if ((shadowValue->IsObject() || shadowValue->IsNumber()) && ParseShadowProps(shadowValue, shadow)) {
         properties.shadow = shadow;
     }
-    auto widthValue = obj->GetProperty("width");
-    CalcDimension width;
-    if (ParseJsDimensionVpNG(widthValue, width, true)) {
-        properties.width = width;
-    }
-    auto heightValue = obj->GetProperty("height");
-    CalcDimension height;
-    if (ParseJsDimensionVpNG(heightValue, height, true)) {
-        properties.height = height;
-    }
+    ParseDialogWidthAndHeight(properties, obj);
 }
 
 std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback(
@@ -9507,6 +11590,26 @@ void JSViewAbstract::JsGestureModifier(const JSCallbackInfo& info)
     func->Call(vm, thisObj, params, 1);
 }
 
+void SetBackgroundImageResizableUpdateFunc(
+    ImageResizableSlice& sliceResult, const RefPtr<ResourceObject>& resObj, std::string direction)
+{
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [direction](const RefPtr<ResourceObject>& resObj, ImageResizableSlice& sliceResult) {
+        CalcDimension sliceDimension;
+        ResourceParseUtils::ParseResDimensionVp(resObj, sliceDimension);
+        if (direction == "Left") {
+            sliceResult.left = sliceDimension;
+        } else if (direction == "Right") {
+            sliceResult.right = sliceDimension;
+        } else if (direction == "Top") {
+            sliceResult.top = sliceDimension;
+        } else if (direction == "Bottom") {
+            sliceResult.bottom = sliceDimension;
+        }
+    };
+    sliceResult.AddResource("backgroundImageResizable" + direction, resObj, std::move(updateFunc));
+}
+
 void JSViewAbstract::JsBackgroundImageResizable(const JSCallbackInfo& info)
 {
     auto infoObj = info[0];
@@ -9529,10 +11632,13 @@ void JSViewAbstract::JsBackgroundImageResizable(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetBackgroundImageResizableSlice(sliceResult);
         return;
     }
+    std::vector<RefPtr<ResourceObject>> bgImageResizableResObjArray;
     for (uint32_t i = 0; i < SLICE_KEYS.size(); i++) {
         auto sliceSize = sliceObj->GetProperty(SLICE_KEYS.at(i).c_str());
         CalcDimension sliceDimension;
-        if (!ParseJsDimensionVp(sliceSize, sliceDimension)) {
+        RefPtr<ResourceObject> resObj;
+        bgImageResizableResObjArray.push_back(resObj);
+        if (!ParseJsDimensionVp(sliceSize, sliceDimension, resObj)) {
             continue;
         }
         if (!sliceDimension.IsValid()) {
@@ -9541,15 +11647,19 @@ void JSViewAbstract::JsBackgroundImageResizable(const JSCallbackInfo& info)
         switch (static_cast<BorderImageDirection>(i)) {
             case BorderImageDirection::LEFT:
                 sliceResult.left = sliceDimension;
+                SetBackgroundImageResizableUpdateFunc(sliceResult, resObj, "Left");
                 break;
             case BorderImageDirection::RIGHT:
                 sliceResult.right = sliceDimension;
+                SetBackgroundImageResizableUpdateFunc(sliceResult, resObj, "Right");
                 break;
             case BorderImageDirection::TOP:
                 sliceResult.top = sliceDimension;
+                SetBackgroundImageResizableUpdateFunc(sliceResult, resObj, "Top");
                 break;
             case BorderImageDirection::BOTTOM:
                 sliceResult.bottom = sliceDimension;
+                SetBackgroundImageResizableUpdateFunc(sliceResult, resObj, "Bottom");
                 break;
             default:
                 break;
@@ -10166,5 +12276,278 @@ uint8_t JSViewAbstract::GetPixelRoundMode()
     auto pipeline = PipelineBase::GetCurrentContext();
     return pipeline ? static_cast<uint8_t>(pipeline->GetPixelRoundMode())
                     : static_cast<uint8_t>(PixelRoundMode::PIXEL_ROUND_ON_LAYOUT_FINISH);
+}
+
+void JSViewAbstract::ParseDragSpringLoadingConfiguration(
+    const JSRef<JSObject>& paramObj, const RefPtr<NG::DragSpringLoadingConfiguration>& config)
+{
+    JSRef<JSObject> configuration = JSRef<JSObject>::Cast(paramObj);
+    auto setConfigurationPropertyIfValid =
+        [&configuration, &config](const char* propName,
+            std::function<void(const RefPtr<NG::DragSpringLoadingConfiguration>&, int32_t)> setter) {
+            auto propObj = configuration->GetProperty(propName);
+            if (propObj->IsNumber()) {
+                auto value = propObj->ToNumber<int32_t>();
+                if (value >= 0) {
+                    setter(config, value);
+                }
+            }
+        };
+    setConfigurationPropertyIfValid("stillTimeLimit", [](const RefPtr<NG::DragSpringLoadingConfiguration>& config,
+                                                          int32_t value) { config->stillTimeLimit = value; });
+    setConfigurationPropertyIfValid("updateInterval", [](const RefPtr<NG::DragSpringLoadingConfiguration>& config,
+                                                          int32_t value) { config->updateInterval = value; });
+    setConfigurationPropertyIfValid("updateNotifyCount", [](const RefPtr<NG::DragSpringLoadingConfiguration>& config,
+                                                             int32_t value) { config->updateNotifyCount = value; });
+    setConfigurationPropertyIfValid(
+        "updateToFinishInterval", [](const RefPtr<NG::DragSpringLoadingConfiguration>& config, int32_t value) {
+            config->updateToFinishInterval = value;
+        });
+}
+
+void JSViewAbstract::GetBorderTopWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty)
+{
+    if (!object->HasProperty(TOP_PROPERTY)) {
+        return;
+    }
+    RefPtr<ResourceObject> resObj = nullptr;
+    CalcDimension widthValue;
+    if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(TOP_PROPERTY), widthValue, resObj)) {
+        if (widthValue.IsNegative()) {
+            widthValue.Reset();
+        }
+    }
+    CommonCalcDimension commonCalcDimension;
+    ParseCommonEdgeWidthsProps(object, commonCalcDimension);
+    borderWidthProperty.topDimen =  commonCalcDimension.top;
+    if (!resObj) {
+        return;
+    }
+
+    auto&& updateFunc = [object](const RefPtr<ResourceObject>& resObj,
+                            NG::BorderWidthProperty& borderWidthProperty) {
+        CalcDimension widthValue;
+        ResourceParseUtils::ParseResDimensionVpNG(resObj, widthValue);
+        if (widthValue.IsNegative()) {
+            widthValue.Reset();
+        }
+        CommonCalcDimension commonCalcDimension;
+        ParseCommonEdgeWidthsProps(object, commonCalcDimension);
+        borderWidthProperty.topDimen = widthValue;
+    };
+    borderWidthProperty.AddResource("dialog.borderWidth.topDimen", resObj, std::move(updateFunc));
+}
+
+void JSViewAbstract::GetBorderBottomWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty)
+{
+    if (!object->HasProperty(BOTTOM_PROPERTY)) {
+        return;
+    }
+    RefPtr<ResourceObject> resObj = nullptr;
+    CalcDimension widthValue;
+    if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(BOTTOM_PROPERTY), widthValue, resObj)) {
+        if (widthValue.IsNegative()) {
+            widthValue.Reset();
+        }
+    }
+    CommonCalcDimension commonCalcDimension;
+    ParseCommonEdgeWidthsProps(object, commonCalcDimension);
+    borderWidthProperty.bottomDimen = commonCalcDimension.bottom;
+    if (!resObj) {
+        return;
+    }
+
+    auto&& updateFunc = [object](const RefPtr<ResourceObject>& resObj,
+                            NG::BorderWidthProperty& borderWidthProperty) {
+        CalcDimension widthValue;
+        ResourceParseUtils::ParseResDimensionVpNG(resObj, widthValue);
+        if (widthValue.IsNegative()) {
+            widthValue.Reset();
+        }
+        CommonCalcDimension commonCalcDimension;
+        ParseCommonEdgeWidthsProps(object, commonCalcDimension);
+        borderWidthProperty.bottomDimen = commonCalcDimension.bottom;
+    };
+    borderWidthProperty.AddResource("dialog.borderWidth.bottomDimen", resObj, std::move(updateFunc));
+}
+
+void JSViewAbstract::GetBorderLeftWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty)
+{
+    if (!object->HasProperty(LEFT_PROPERTY)) {
+        return;
+    }
+    RefPtr<ResourceObject> resObj = nullptr;
+    CalcDimension widthValue;
+    if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(LEFT_PROPERTY), widthValue, resObj)) {
+        if (widthValue.IsNegative()) {
+            widthValue.Reset();
+        }
+    }
+    CommonCalcDimension commonCalcDimension;
+    ParseCommonEdgeWidthsProps(object, commonCalcDimension);
+    borderWidthProperty.leftDimen = commonCalcDimension.left;
+    if (!resObj) {
+        return;
+    }
+
+    auto&& updateFunc = [object](const RefPtr<ResourceObject>& resObj,
+                            NG::BorderWidthProperty& borderWidthProperty) {
+        CalcDimension widthValue;
+        ResourceParseUtils::ParseResDimensionVpNG(resObj, widthValue);
+        if (widthValue.IsNegative()) {
+            widthValue.Reset();
+        }
+        CommonCalcDimension commonCalcDimension;
+        ParseCommonEdgeWidthsProps(object, commonCalcDimension);
+        borderWidthProperty.leftDimen = commonCalcDimension.left;
+    };
+    borderWidthProperty.AddResource("dialog.borderWidth.leftDimen", resObj, std::move(updateFunc));
+}
+
+void JSViewAbstract::GetBorderRightWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty)
+{
+    if (!object->HasProperty(RIGHT_PROPERTY)) {
+        return;
+    }
+    RefPtr<ResourceObject> resObj = nullptr;
+    CalcDimension widthValue;
+    if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(RIGHT_PROPERTY), widthValue, resObj)) {
+        if (widthValue.IsNegative()) {
+            widthValue.Reset();
+        }
+    }
+    CommonCalcDimension commonCalcDimension;
+    ParseCommonEdgeWidthsProps(object, commonCalcDimension);
+    borderWidthProperty.rightDimen = widthValue;
+    if (!resObj) {
+        return;
+    }
+    auto&& updateFunc = [object](const RefPtr<ResourceObject>& resObj,
+                            NG::BorderWidthProperty& borderWidthProperty) {
+        CalcDimension widthValue;
+        ResourceParseUtils::ParseResDimensionVpNG(resObj, widthValue);
+        if (widthValue.IsNegative()) {
+            widthValue.Reset();
+        }
+        CommonCalcDimension commonCalcDimension;
+        ParseCommonEdgeWidthsProps(object, commonCalcDimension);
+        borderWidthProperty.rightDimen = commonCalcDimension.right;
+    };
+    borderWidthProperty.AddResource("dialog.borderWidth.rightDimen", resObj, std::move(updateFunc));
+}
+
+void JSViewAbstract::GetBorderStartWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty)
+{
+    if (!object->HasProperty(START_PROPERTY)) {
+        return;
+    }
+    RefPtr<ResourceObject> resObj = nullptr;
+    CalcDimension widthValue;
+    if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(START_PROPERTY), widthValue, resObj)) {
+        if (widthValue.IsNegative()) {
+            widthValue.Reset();
+        }
+    }
+    CommonCalcDimension commonCalcDimension;
+    ParseCommonEdgeWidthsProps(object, commonCalcDimension);
+    borderWidthProperty.leftDimen = commonCalcDimension.left;
+    borderWidthProperty.rightDimen = commonCalcDimension.right;
+
+    if (!resObj) {
+        return;
+    }
+
+    auto&& updateFunc = [object](const RefPtr<ResourceObject>& resObj,
+                            NG::BorderWidthProperty& borderWidthProperty) {
+        CalcDimension widthValue;
+        ResourceParseUtils::ParseResDimensionVpNG(resObj, widthValue);
+        if (widthValue.IsNegative()) {
+            widthValue.Reset();
+        }
+        CommonCalcDimension commonCalcDimension;
+        ParseCommonEdgeWidthsProps(object, commonCalcDimension);
+        borderWidthProperty.leftDimen = commonCalcDimension.left;
+        borderWidthProperty.rightDimen = commonCalcDimension.right;
+    };
+    borderWidthProperty.AddResource("dialog.borderWidth.startDimen", resObj, std::move(updateFunc));
+}
+
+void JSViewAbstract::GetBorderEndWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty)
+{
+    if (!object->HasProperty(END_PROPERTY)) {
+        return;
+    }
+    RefPtr<ResourceObject> resObj = nullptr;
+    CalcDimension widthValue;
+    if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(END_PROPERTY), widthValue, resObj)) {
+        if (widthValue.IsNegative()) {
+            widthValue.Reset();
+        }
+    }
+    CommonCalcDimension commonCalcDimension;
+    ParseCommonEdgeWidthsProps(object, commonCalcDimension);
+    borderWidthProperty.leftDimen = commonCalcDimension.left;
+    borderWidthProperty.rightDimen = commonCalcDimension.right;
+
+    if (!resObj) {
+        return;
+    }
+
+    auto&& updateFunc = [object](const RefPtr<ResourceObject>& resObj,
+                            NG::BorderWidthProperty& borderWidthProperty) {
+        CalcDimension widthValue;
+        ResourceParseUtils::ParseResDimensionVpNG(resObj, widthValue);
+        if (widthValue.IsNegative()) {
+            widthValue.Reset();
+        }
+        CommonCalcDimension commonCalcDimension;
+        ParseCommonEdgeWidthsProps(object, commonCalcDimension);
+        borderWidthProperty.leftDimen = commonCalcDimension.left;
+        borderWidthProperty.rightDimen =  commonCalcDimension.right;
+    };
+    borderWidthProperty.AddResource("dialog.borderWidth.endDimen", resObj, std::move(updateFunc));
+}
+
+void JSViewAbstract::GetBorderWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty)
+{
+    GetBorderStartWidth(object, borderWidthProperty);
+    GetBorderEndWidth(object, borderWidthProperty);
+    GetBorderTopWidth(object, borderWidthProperty);
+    GetBorderBottomWidth(object, borderWidthProperty);
+    GetBorderLeftWidth(object, borderWidthProperty);
+    GetBorderRightWidth(object, borderWidthProperty);
+    borderWidthProperty.multiValued = true;
+}
+
+bool JSViewAbstract::GetBorderWidthFromResource(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty)
+{
+    CalcDimension borderWidth;
+    RefPtr<ResourceObject> resObj = nullptr;
+    if (ParseJsDimensionVp(args, borderWidth, resObj)) {
+        if (borderWidth.IsNegative()) {
+            borderWidth.Reset();
+        }
+        borderWidthProperty =
+            NG::BorderWidthProperty({ borderWidth, borderWidth, borderWidth, borderWidth, std::nullopt, std::nullopt });
+    }
+    if (resObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidthProperty) {
+            CalcDimension widthValue;
+            ResourceParseUtils::ParseResDimensionVp(resObj, widthValue);
+            if (widthValue.IsNegative()) {
+                widthValue.Reset();
+            }
+            borderWidthProperty =
+                NG::BorderWidthProperty({ widthValue, widthValue, widthValue, widthValue, std::nullopt, std::nullopt });
+        };
+        borderWidthProperty.AddResource("dialog.borderWidth", resObj, std::move(updateFunc));
+        return true;
+    }
+    if (args->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
+        GetBorderWidth(obj, borderWidthProperty);
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::Framework

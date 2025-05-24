@@ -1503,13 +1503,14 @@ HWTEST_F(DialogPatternTestNg, CustomDialogControllerModelNGTest001, TestSize.Lev
     auto dialogComponent = AceType::MakeRefPtr<AceType>();
     auto customDialog = AceType::MakeRefPtr<AceType>();
     std::list<DialogOperation> dialogOperation;
+    bool hasBind = false;
 
     /**
      * @tc.steps: step2. execute SetOpenDialog and SetCloseDialog
      * @tc.expected: prop is set as expected
      */
     controllerModel.SetOpenDialog(props, controller, dialogs, pending, isShown,
-        []() {}, []() {}, dialogComponent, customDialog, dialogOperation);
+        []() {}, []() {}, dialogComponent, customDialog, dialogOperation, hasBind);
     props.onStatusChanged(true);
     props.onStatusChanged(false);
     controllerModel.SetCloseDialog(props, controller, dialogs, pending, isShown,
@@ -1518,7 +1519,7 @@ HWTEST_F(DialogPatternTestNg, CustomDialogControllerModelNGTest001, TestSize.Lev
     props.isShowInSubWindow = true;
     props.isModal = false;
     controllerModel.SetOpenDialog(props, controller, dialogs, pending, isShown,
-        []() {}, []() {}, dialogComponent, customDialog, dialogOperation);
+        []() {}, []() {}, dialogComponent, customDialog, dialogOperation, hasBind);
     controllerModel.SetCloseDialog(props, controller, dialogs, pending, isShown,
         []() {}, dialogComponent, customDialog, dialogOperation);
     EXPECT_TRUE(props.isShowInSubWindow);
@@ -1553,6 +1554,7 @@ HWTEST_F(DialogPatternTestNg, CustomDialogControllerModelNGTest002, TestSize.Lev
     props.isSceneBoardDialog = false;
     controllerModel.SetOpenDialogWithNode(props, nullptr);
     EXPECT_TRUE(props.isShowInSubWindow);
+    EXPECT_TRUE(props.isModal);
 }
 
 /**
@@ -1950,6 +1952,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest031, TestSize.Level1)
     ASSERT_NE(subTitleNode, nullptr);
     EXPECT_EQ(titleNode->GetTag(), V2::ROW_ETS_TAG);
     EXPECT_EQ(subTitleNode->GetTag(), V2::ROW_ETS_TAG);
+
     /**
      * @tc.steps: step2. get titleTextNode && subTitleTextNode.
      * @tc.expected: The text padding is equal to dialogTheme->GetPaddingTopTitle() when have title && subTitle.

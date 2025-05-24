@@ -20,6 +20,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/style_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -113,7 +114,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController001, TestSize.Level
     EXPECT_EQ(fontStyle->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(fontStyle->GetFontFamily(), FONT_FAMILY_VALUE);
     EXPECT_EQ(fontStyle->GetTextColor(), OHOS::Ace::Color::RED);
-    EXPECT_EQ(fontStyle->GetTextDecoration(), TEXT_DECORATION_VALUE);
+    EXPECT_EQ(fontStyle->GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
     EXPECT_EQ(fontStyle->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
     EXPECT_EQ(fontStyle->GetTextDecorationStyle(), TextDecorationStyle::WAVY);
     EXPECT_EQ(fontStyle->GetLetterSpacing(), LETTER_SPACING);
@@ -453,7 +454,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController008, TestSize.Level
     EXPECT_EQ(fontStyle->GetFontSize(), FONT_SIZE_VALUE);
     EXPECT_EQ(fontStyle->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(fontStyle->GetTextColor(), TEXT_COLOR_VALUE);
-    EXPECT_EQ(fontStyle->GetTextDecoration(), TEXT_DECORATION_VALUE);
+    EXPECT_EQ(fontStyle->GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
     EXPECT_EQ(fontStyle->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
     EXPECT_EQ(fontStyle->GetLetterSpacing(), LETTER_SPACING);
     EXPECT_EQ(fontStyle->GetTextShadow(), SHADOWS);
@@ -1043,7 +1044,8 @@ HWTEST_F(RichEditorStyledStringTestNg, CreateStyledStringByTextStyle, TestSize.L
     /**
      * @tc.steps: step5. test CreateStyledStringByTextStyle
      */
-    richEditorPattern->CreateStyledStringByTextStyle(INIT_VALUE_2, updateSpanStyle, textStyle);
+    auto& styledString = richEditorPattern->styledString_;
+    richEditorPattern->styleManager_->CreateStyledStringByTypingStyle(INIT_VALUE_2, styledString, 0, 0);
     auto spanItem = richEditorPattern->spans_.back();
     auto& fontStyle = spanItem->fontStyle;
     ASSERT_NE(fontStyle, nullptr);

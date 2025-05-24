@@ -107,7 +107,9 @@ bool TextPickerColumnPattern::OnDirtyLayoutWrapperSwap(
 
 void TextPickerColumnPattern::OnModifyDone()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PickerTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(theme);
@@ -118,8 +120,6 @@ void TextPickerColumnPattern::OnModifyDone()
     InitSelectorButtonProperties(theme);
     InitMouseAndPressEvent();
     SetAccessibilityAction();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     if (optionProperties_.size() <= 0) {
         dividerSpacing_ = pipeline->NormalizeToPx(theme->GetDividerSpacing());
         gradientHeight_ = static_cast<float>(pipeline->NormalizeToPx(theme->GetGradientHeight()));
@@ -536,7 +536,9 @@ void TextPickerColumnPattern::PlayPressAnimation(const Color& pressColor)
 
 uint32_t TextPickerColumnPattern::GetShowOptionCount() const
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0);
+    auto context = host->GetContext();
     CHECK_NULL_RETURN(context, 0);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, 0);
@@ -2220,7 +2222,9 @@ void TextPickerColumnPattern::UpdateAnimationColor(const RefPtr<PickerTheme>& pi
 void TextPickerColumnPattern::InitTextHeightAndFontHeight(uint32_t childIndex, uint32_t midIndex,
                                                           TextPickerOptionProperty &prop)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PickerTheme>();
 

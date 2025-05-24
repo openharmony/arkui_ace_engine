@@ -38,7 +38,7 @@ public:
     std::shared_ptr<SwiperArcDotParameters> GetSwiperArcDotParameters() const override;
     bool IsLoop() const override;
     void SetDisableTransitionAnimation(bool isDisable) override;
-    bool GetDisableFlushFocus() override;
+    bool GetAndResetDisableFlushFocus() override;
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) override;

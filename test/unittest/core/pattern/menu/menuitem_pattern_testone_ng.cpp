@@ -1566,4 +1566,177 @@ HWTEST_F(MenuItemPatternTestOneNg, GetSubMenu004, TestSize.Level1)
     auto node = AceType::DynamicCast<UINode>(jsViewNode);
     ASSERT_EQ(menuItemPattern->GetSubMenu(node), nullptr);
 }
+
+/**
+ * @tc.name: ISNeedAddExpandIcon001
+ * @tc.desc: Verify ISNeedAddExpandIcon().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, ISNeedAddExpandIcon001, TestSize.Level1)
+{
+    std::function<void()> buildFun = []() {
+        MenuModelNG MenuModelInstance;
+        MenuModelInstance.Create();
+    };
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto menuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 3, AceType::MakeRefPtr<MenuItemPattern>());
+    auto leftRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 4, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto rightRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 5, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto expandIcon = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 6, AceType::MakeRefPtr<ImagePattern>());
+    leftRow->MountToParent(menuItemNode);
+    rightRow->MountToParent(menuItemNode);
+    menuItemNode->MountToParent(menuNode);
+    menuNode->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    menuItemPattern->isStackSubmenuHeader_ = true;
+    EXPECT_TRUE(menuItemPattern->ISNeedAddExpandIcon(rightRow));
+
+    menuItemPattern->isStackSubmenuHeader_ = false;
+    EXPECT_FALSE(menuItemPattern->ISNeedAddExpandIcon(rightRow));
+
+    menuItemPattern->SetSubBuilder(buildFun);
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::EMBEDDED;
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->isEmbedded_ = false;
+    menuPattern->isStackSubmenu_ = false;
+    EXPECT_TRUE(menuItemPattern->ISNeedAddExpandIcon(rightRow));
+}
+
+/**
+ * @tc.name: AddExpandIcon002
+ * @tc.desc: Verify AddExpandIcon()
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, AddExpandIcon002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    std::function<void()> buildFun = []() {
+        MenuModelNG MenuModelInstance;
+        MenuModelInstance.Create();
+    };
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto menuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 3, AceType::MakeRefPtr<MenuItemPattern>());
+    auto leftRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 4, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto rightRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 5, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    leftRow->MountToParent(menuItemNode);
+    rightRow->MountToParent(menuItemNode);
+    menuItemNode->MountToParent(menuNode);
+    menuNode->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->SetSubBuilder(buildFun);
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::EMBEDDED;
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->isEmbedded_ = false;
+    menuPattern->isStackSubmenu_ = false;
+    auto pipeline = menuItemNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto menuTheme = pipeline->GetTheme<MenuTheme>();
+    ASSERT_NE(menuTheme, nullptr);
+
+    menuItemPattern->AddExpandIcon(rightRow);
+    EXPECT_NE(menuItemPattern->expandIcon_, nullptr);
+    auto props = menuItemPattern->expandIcon_->GetLayoutProperty<TextLayoutProperty>();
+    auto symbolSourceInfo = props->GetSymbolSourceInfo();
+    EXPECT_TRUE(symbolSourceInfo.has_value());
+    EXPECT_EQ(symbolSourceInfo.value().GetUnicode(), menuTheme->GetEmbeddedExpandIconId());
+    EXPECT_EQ(menuItemPattern->expandIcon_->GetTag(), V2::SYMBOL_ETS_TAG);
+    EXPECT_EQ(rightRow->GetChildren().size(), 1);
+
+    menuItemPattern->expandIcon_ = nullptr;
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::STACK;
+    menuItemPattern->AddExpandIcon(rightRow);
+    EXPECT_NE(menuItemPattern->expandIcon_, nullptr);
+    props = menuItemPattern->expandIcon_->GetLayoutProperty<TextLayoutProperty>();
+    symbolSourceInfo = props->GetSymbolSourceInfo();
+    EXPECT_TRUE(symbolSourceInfo.has_value());
+    EXPECT_EQ(symbolSourceInfo.value().GetUnicode(), menuTheme->GetStackExpandIconId());
+    EXPECT_EQ(menuItemPattern->expandIcon_->GetTag(), V2::SYMBOL_ETS_TAG);
+}
+
+/**
+ * @tc.name: AddExpandIcon003
+ * @tc.desc: Verify AddExpandIcon().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, AddExpandIcon003, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    std::function<void()> buildFun = []() {
+        MenuModelNG MenuModelInstance;
+        MenuModelInstance.Create();
+    };
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto menuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 3, AceType::MakeRefPtr<MenuItemPattern>());
+    auto leftRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 4, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto rightRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 5, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    leftRow->MountToParent(menuItemNode);
+    rightRow->MountToParent(menuItemNode);
+    menuItemNode->MountToParent(menuNode);
+    menuNode->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->SetSubBuilder(buildFun);
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::EMBEDDED;
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->isEmbedded_ = false;
+    menuPattern->isStackSubmenu_ = false;
+    auto pipeline = menuItemNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto menuTheme = pipeline->GetTheme<MenuTheme>();
+    ASSERT_NE(menuTheme, nullptr);
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
+    menuProperty->SetExpandSymbol([](WeakPtr<NG::FrameNode> weakPtr) {});
+
+    menuItemPattern->AddExpandIcon(rightRow);
+    EXPECT_NE(menuItemPattern->expandIcon_, nullptr);
+    auto props = menuItemPattern->expandIcon_->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(props, nullptr);
+    auto symbolSourceInfo = props->GetSymbolSourceInfo();
+    EXPECT_FALSE(symbolSourceInfo.has_value());
+    EXPECT_EQ(menuItemPattern->expandIcon_->GetTag(), V2::SYMBOL_ETS_TAG);
+}
+
+/**
+ * @tc.name: AddStackSubMenuHeader001
+ * @tc.desc: Verify AddStackSubMenuHeader().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, AddStackSubMenuHeader001, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto menuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 3, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(menuNode);
+    menuNode->MountToParent(wrapperNode);
+    auto menuStackNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 4, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
+    menuProperty->SetExpandSymbol([](WeakPtr<NG::FrameNode> weakPtr) {});
+
+    menuItemPattern->AddStackSubMenuHeader(menuStackNode);
+    auto menuStackProperty = menuStackNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuStackProperty);
+    EXPECT_NE(menuStackProperty->GetExpandSymbol(), nullptr);
+}
 } // namespace OHOS::Ace::NG

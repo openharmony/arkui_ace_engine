@@ -58,6 +58,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_utils.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_inner_surface_controller.h"
 #include "core/event/event_info_convertor.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
@@ -200,8 +201,16 @@ void XComponentPattern::InitSurface()
         InitNativeWindow(initSize_.Width(), initSize_.Height());
     }
     surfaceId_ = renderSurface_->GetUniqueId();
-
     UpdateTransformHint();
+    RegisterSurfaceRenderContext();
+}
+
+void XComponentPattern::RegisterSurfaceRenderContext()
+{
+    if (type_ == XComponentType::SURFACE) {
+        XComponentInnerSurfaceController::RegisterSurfaceRenderContext(
+            surfaceId_, WeakPtr(handlingSurfaceRenderContext_));
+    }
 }
 
 void XComponentPattern::UpdateTransformHint()
@@ -449,6 +458,9 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     UninitializeAccessibility(frameNode);
+    if (type_ == XComponentType::SURFACE) {
+        XComponentInnerSurfaceController::UnregisterSurfaceRenderContext(surfaceId_);
+    }
     if (isTypedNode_) {
         if (surfaceCallbackMode_ == SurfaceCallbackMode::PIP) {
             HandleSurfaceDestroyed(frameNode);
@@ -795,6 +807,17 @@ void XComponentPattern::UninitializeAccessibility(FrameNode* frameNode)
     accessibilityChildTreeCallback_ = nullptr;
 }
 
+ArkUI_AccessibilityProvider* XComponentPattern::GetNativeProvider()
+{
+    if(useNodeHandleAccessibilityProvider_) {
+        return arkuiAccessibilityProvider_;
+    }
+    auto pair = GetNativeXComponent();
+    auto nativeXComponentImpl = pair.first;
+    CHECK_NULL_RETURN(nativeXComponentImpl, nullptr);
+    return nativeXComponentImpl->GetAccessbilityProvider().get();
+}
+
 bool XComponentPattern::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId)
 {
     auto host = GetHost();
@@ -808,10 +831,7 @@ bool XComponentPattern::OnAccessibilityChildTreeRegister(uint32_t windowId, int3
             AceType::MakeRefPtr<XComponentAccessibilityProvider>(WeakClaim(this));
     }
 
-    auto pair = GetNativeXComponent();
-    auto nativeXComponentImpl = pair.first;
-    CHECK_NULL_RETURN(nativeXComponentImpl, false);
-    auto nativeProvider = nativeXComponentImpl->GetAccessbilityProvider();
+    auto nativeProvider = GetNativeProvider();
     CHECK_NULL_RETURN(nativeProvider, false);
     if (!nativeProvider->IsRegister()) {
         TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Not register native accessibility");
@@ -846,10 +866,7 @@ bool XComponentPattern::OnAccessibilityChildTreeDeregister()
     CHECK_NULL_RETURN(pipeline, false);
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_RETURN(accessibilityManager, false);
-    auto pair = GetNativeXComponent();
-    auto nativeXComponentImpl = pair.first;
-    CHECK_NULL_RETURN(nativeXComponentImpl, false);
-    auto nativeProvider = nativeXComponentImpl->GetAccessbilityProvider();
+    auto nativeProvider = GetNativeProvider();
     CHECK_NULL_RETURN(nativeProvider, false);
     nativeProvider->SetInnerAccessibilityProvider(nullptr);
     accessibilitySessionAdapter_ = nullptr;
@@ -1161,7 +1178,9 @@ void XComponentPattern::HandleMouseEvent(const MouseInfo& info)
     mouseEventPoint.action = XComponentUtils::ConvertNativeXComponentMouseEventAction(info.GetAction());
     mouseEventPoint.button = XComponentUtils::ConvertNativeXComponentMouseEventButton(info.GetButton());
     mouseEventPoint.timestamp = info.GetTimeStamp().time_since_epoch().count();
-    NativeXComponentDispatchMouseEvent(mouseEventPoint);
+    OH_NativeXComponent_ExtraMouseEventInfo extraMouseEventInfo;
+    extraMouseEventInfo.modifierKeyStates = CalculateModifierKeyState(info.GetPressedKeyCodes());
+    NativeXComponentDispatchMouseEvent(mouseEventPoint, extraMouseEventInfo);
 }
 
 void XComponentPattern::HandleAxisEvent(const AxisInfo& info)
@@ -1181,12 +1200,14 @@ void XComponentPattern::HandleMouseHoverEvent(bool isHover)
     callback->DispatchHoverEvent(nativeXComponent_.get(), isHover);
 }
 
-void XComponentPattern::NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent)
+void XComponentPattern::NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent,
+    const OH_NativeXComponent_ExtraMouseEventInfo& extraMouseEventInfo)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(nativeXComponent_);
     CHECK_NULL_VOID(nativeXComponentImpl_);
     nativeXComponentImpl_->SetMouseEvent(mouseEvent);
+    nativeXComponentImpl_->SetExtraMouseEventInfo(extraMouseEventInfo);
     auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
     const auto* callback = nativeXComponentImpl_->GetMouseEventCallback();
     CHECK_NULL_VOID(callback);

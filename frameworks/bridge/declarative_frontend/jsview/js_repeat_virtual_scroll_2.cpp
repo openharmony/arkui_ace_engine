@@ -45,11 +45,6 @@ enum {
     PARAM_SIZE = 3,
 };
 
-static JSRef<JSFunc> GetJSFunc(JsiRef<JSObject> options, const char* propertyName)
-{
-    return JSRef<JSFunc>::Cast(options->GetProperty(propertyName));
-}
-
 static bool ParseAndVerifyParams(const JSCallbackInfo& info)
 {
     if (info.Length() != PARAM_SIZE || !info[PARAM_ARR_LEN]->IsNumber() || !info[PARAM_TOTAL_COUNT]->IsNumber() ||
@@ -58,11 +53,7 @@ static bool ParseAndVerifyParams(const JSCallbackInfo& info)
     }
 
     auto handlers = JSRef<JSObject>::Cast(info[PARAM_HANDLERS]);
-    return (handlers->GetProperty("onGetRid4Index")->IsFunction() &&
-            handlers->GetProperty("onRecycleItems")->IsFunction() &&
-            handlers->GetProperty("onActiveRange")->IsFunction() &&
-            handlers->GetProperty("onMoveFromTo")->IsFunction() &&
-            handlers->GetProperty("onPurge")->IsFunction());
+    return true;
 }
 
 void JSRepeatVirtualScroll2::Create(const JSCallbackInfo& info)
@@ -80,7 +71,11 @@ void JSRepeatVirtualScroll2::Create(const JSCallbackInfo& info)
 
     // arg 2 onGetRid4Index(number int32_t) : number(uint32_t)
     auto handlers = JSRef<JSObject>::Cast(info[PARAM_HANDLERS]);
-    auto onGetRid4Index = [execCtx = info.GetExecutionContext(), func = GetJSFunc(handlers, "onGetRid4Index")](
+    auto onGetRid4IndexFunc = handlers->GetProperty("onGetRid4Index");
+    if (!onGetRid4IndexFunc->IsFunction()) {
+        return;
+    }
+    auto onGetRid4Index = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(onGetRid4IndexFunc)](
                               int32_t forIndex) -> std::pair<uint32_t, uint32_t> {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, std::pair<uint32_t, uint32_t>(0, 0));
         auto params = ConvertToJSValues(forIndex);
@@ -95,38 +90,60 @@ void JSRepeatVirtualScroll2::Create(const JSCallbackInfo& info)
             jsArr->GetValueAt(0)->ToNumber<uint32_t>(), jsArr->GetValueAt(1)->ToNumber<uint32_t>());
     };
 
-    auto onRecycleItems = [execCtx = info.GetExecutionContext(), func = GetJSFunc(handlers, "onRecycleItems")](
+    auto onRecycleItemsFunc = handlers->GetProperty("onRecycleItems");
+    if (!onRecycleItemsFunc->IsFunction()) {
+        return;
+    }
+    auto onRecycleItems = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(onRecycleItemsFunc)](
                               int32_t fromIndex, int32_t toIndex) -> void {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         auto params = ConvertToJSValues(fromIndex, toIndex);
         func->Call(JSRef<JSObject>(), params.size(), params.data());
     };
 
-    auto onActiveRange = [execCtx = info.GetExecutionContext(), func = GetJSFunc(handlers, "onActiveRange")](
-        int32_t fromIndex, int32_t toIndex, int32_t vStart, int32_t vEnd, bool isLoop) -> void {
+    auto onActiveRangeFunc = handlers->GetProperty("onActiveRange");
+    if (!onActiveRangeFunc->IsFunction()) {
+        return;
+    }
+    auto onActiveRange = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(onActiveRangeFunc)](
+        int32_t fromIndex, int32_t toIndex, int32_t vStart, int32_t vEnd, bool isLoop, bool forceUpdate) -> void {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         auto params = ConvertToJSValues(
             fromIndex != INT32_MAX ? fromIndex : std::numeric_limits<double>::quiet_NaN(),
             toIndex != INT32_MAX ? toIndex : std::numeric_limits<double>::quiet_NaN(),
             vStart != INT32_MAX ? vStart : std::numeric_limits<double>::quiet_NaN(),
             vEnd != INT32_MAX ? vEnd : std::numeric_limits<double>::quiet_NaN(),
-            isLoop);
+            isLoop, forceUpdate);
         func->Call(JSRef<JSObject>(), params.size(), params.data());
     };
 
-    auto onMoveFromTo = [execCtx = info.GetExecutionContext(), func = GetJSFunc(handlers, "onMoveFromTo")](
+    auto onMoveFromToFunc = handlers->GetProperty("onMoveFromTo");
+    if (!onMoveFromToFunc->IsFunction()) {
+        return;
+    }
+    auto onMoveFromTo = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(onMoveFromToFunc)](
                               int32_t moveFrom, int32_t moveTo) -> void {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         auto params = ConvertToJSValues(moveFrom, moveTo);
         func->Call(JSRef<JSObject>(), params.size(), params.data());
     };
 
-    auto onPurge = [execCtx = info.GetExecutionContext(), func = GetJSFunc(handlers, "onPurge")]() {
+    auto onPurgeFunc = handlers->GetProperty("onPurge");
+    if (!onPurgeFunc->IsFunction()) {
+        return;
+    }
+    auto onPurge = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(onPurgeFunc)]() {
         JSRef<JSVal> jsVal = func->Call(JSRef<JSObject>(), 0, nullptr);
     };
 
     RepeatVirtualScroll2Model::GetInstance()->Create(
         arrLen, totalCount, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge);
+}
+
+void JSRepeatVirtualScroll2::IsInAnimation(const JSCallbackInfo& info)
+{
+    auto result = RepeatVirtualScroll2Model::GetInstance()->IsInAnimation();
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
 
 void JSRepeatVirtualScroll2::RemoveNode(const JSCallbackInfo& info)
@@ -287,10 +304,8 @@ void JSRepeatVirtualScroll2::OnMove(const JSCallbackInfo& info)
 }
 
 void JSRepeatVirtualScroll2::JsParseItemDragEventHandler(
-    const JsiExecutionContext& context, const JSRef<JSVal>& jsValue, int32_t repeatElmtId)
+    const JsiExecutionContext& context, const JSRef<JSObject>& itemDragEventObj, int32_t repeatElmtId)
 {
-    auto itemDragEventObj = JSRef<JSObject>::Cast(jsValue);
-
     auto onLongPress = itemDragEventObj->GetProperty("onLongPress");
     std::function<void(int32_t)> onLongPressCallback;
     if (onLongPress->IsFunction()) {
@@ -354,6 +369,7 @@ void JSRepeatVirtualScroll2::JSBind(BindingTarget globalObj)
 
     JSClass<JSRepeatVirtualScroll2>::StaticMethod("onMove", &JSRepeatVirtualScroll2::OnMove);
     JSClass<JSRepeatVirtualScroll2>::StaticMethod("setCreateByTemplate", &JSRepeatVirtualScroll2::SetCreateByTemplate);
+    JSClass<JSRepeatVirtualScroll2>::StaticMethod("isInAnimation", &JSRepeatVirtualScroll2::IsInAnimation);
     JSClass<JSRepeatVirtualScroll2>::Bind<>(globalObj);
 }
 

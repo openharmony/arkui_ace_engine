@@ -50,6 +50,7 @@
 #include "core/common/stylus/stylus_detector_default.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/text_field_manager.h"
+#include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
@@ -363,6 +364,16 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     RequestFrame();
 }
 
+void PipelineContext::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle)
+{
+    CHECK_RUN_ON(UI);
+    if (IsDestroyed()) {
+        LOGW("Cannot add ignoreSafeArea bundle as the pipeline context is destroyed.");
+        return;
+    }
+    taskScheduler_->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
+}
+
 void PipelineContext::AddLayoutNode(const RefPtr<FrameNode>& layoutNode)
 {
     taskScheduler_->AddLayoutNode(layoutNode);
@@ -665,6 +676,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     taskScheduler_->StartRecordFrameInfo(GetCurrentFrameInfo(recvTime_, nanoTimestamp));
     taskScheduler_->FlushTask();
     UIObserverHandler::GetInstance().HandleLayoutDoneCallBack();
+    if (nodeRenderStatusMonitor_) {
+        nodeRenderStatusMonitor_->WalkThroughAncestorForStateListener();
+    }
     // flush correct rect again
     taskScheduler_->FlushPersistAfterLayoutTask();
     taskScheduler_->FinishRecordFrameInfo();
@@ -937,6 +951,18 @@ void PipelineContext::HandleSpecialContainerNode()
     ClearPositionZNodes();
 }
 
+void PipelineContext::UpdateOcclusionCullingStatus()
+{
+    for (auto &&[id, enable] : keyOcclusionNodes_) {
+        auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(id));
+        if (!frameNode) {
+            continue;
+        }
+        frameNode->UpdateOcclusionCullingStatus(enable);
+    }
+    keyOcclusionNodes_.clear();
+}
+
 void PipelineContext::FlushMessages()
 {
     int32_t id = -1;
@@ -958,6 +984,7 @@ void PipelineContext::FlushMessages()
         ResSchedReport::GetInstance().ResSchedDataReport("page_end_flush", {});
     }
     HandleSpecialContainerNode();
+    UpdateOcclusionCullingStatus();
     window_->FlushTasks();
 }
 
@@ -1523,6 +1550,7 @@ const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
+    ACE_SCOPED_TRACE("PipelineContext::OnSurfaceChanged");
     CHECK_RUN_ON(UI);
     width_ = width;
     height_ = height;
@@ -3195,7 +3223,7 @@ void PipelineContext::DumpData(
     uint32_t used_id_flag = hasJson ? USED_JSON_PARAM : USED_ID_FIND_FLAG;
     auto paramSize = params.size();
     auto container = Container::GetContainer(instanceId_);
-    if (container && (container->IsUIExtensionWindow())) {
+    if (container && (container->IsUIExtensionWindow() || container->IsFormRender())) {
         paramSize =
             static_cast<uint32_t>(std::distance(params.begin(), std::find(params.begin(), params.end(), PID_FLAG)));
     }
@@ -4837,7 +4865,7 @@ void PipelineContext::AddPredictTask(PredictTask&& task)
     RequestFrame();
 }
 
-void PipelineContext::AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, FrameCallbackFunc&& idleCallbackFunc,
+void PipelineContext::AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, IdleCallbackFunc&& idleCallbackFunc,
     int64_t delayMillis)
 {
     if (delayMillis <= 0) {
@@ -4868,7 +4896,7 @@ void PipelineContext::AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, Fr
             [weak = WeakClaim(this), callbackFunc = std::move(idleCallbackFunc)]() -> void {
                 auto pipeline = weak.Upgrade();
                 CHECK_NULL_VOID(pipeline);
-                auto callback = const_cast<FrameCallbackFunc&>(callbackFunc);
+                auto callback = const_cast<IdleCallbackFunc&>(callbackFunc);
                 pipeline->idleCallbackFuncs_.emplace_back(std::move(callback));
                 pipeline->RequestFrame();
             },
@@ -4894,8 +4922,8 @@ void PipelineContext::TriggerIdleCallback(int64_t deadline)
         return;
     }
     decltype(idleCallbackFuncs_) tasks(std::move(idleCallbackFuncs_));
-    for (const auto& idleCallbackFunc : tasks) {
-        idleCallbackFunc(deadline - currentTime);
+    for (const auto& IdleCallbackFunc : tasks) {
+        IdleCallbackFunc(deadline - currentTime, GetFrameCount());
         currentTime = GetSysTimestamp();
     }
 }
@@ -5763,7 +5791,6 @@ void PipelineContext::FlushNodeChangeFlag()
 void PipelineContext::CleanNodeChangeFlag()
 {
     auto cleanNodes = std::move(changedNodes_);
-    changedNodes_.clear();
     for (const auto& it : cleanNodes) {
         auto changeNode = it.Upgrade();
         if (changeNode) {
@@ -5939,13 +5966,6 @@ bool PipelineContext::CheckThreadSafe()
     return true;
 }
 
-void PipelineContext::UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode)
-{
-    auto rootContext = rootNode_->GetRenderContext();
-    CHECK_NULL_VOID(rootContext);
-    rootContext->UpdateOcclusionCullingStatus(enable, keyOcclusionNode);
-}
-
 uint64_t PipelineContext::AdjustVsyncTimeStamp(uint64_t nanoTimestamp)
 {
     auto period = window_->GetVSyncPeriod();
@@ -6106,7 +6126,7 @@ void PipelineContext::FlushMouseEventForHover()
         eventManager_->MouseTest(event, rootNode_, touchRestrict);
     }
     eventManager_->DispatchMouseHoverEventNG(event);
-    eventManager_->DispatchMouseHoverAnimationNG(event);
+    eventManager_->DispatchMouseHoverAnimationNG(event, true);
 }
 
 void PipelineContext::HandleTouchHoverOut(const TouchEvent& point)
@@ -6172,5 +6192,13 @@ std::shared_ptr<Rosen::RSUIDirector> PipelineContext::GetRSUIDirector()
     }
 #endif
     return nullptr;
+}
+
+const RefPtr<NodeRenderStatusMonitor>& PipelineContext::GetNodeRenderStatusMonitor()
+{
+    if (!nodeRenderStatusMonitor_) {
+        nodeRenderStatusMonitor_ = AceType::MakeRefPtr<NodeRenderStatusMonitor>();
+    }
+    return nodeRenderStatusMonitor_;
 }
 } // namespace OHOS::Ace::NG

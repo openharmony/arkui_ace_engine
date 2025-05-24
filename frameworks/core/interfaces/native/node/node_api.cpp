@@ -154,7 +154,7 @@ void AddSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state, void* callback
     auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     std::function<void(uint64_t)>* func = reinterpret_cast<std::function<void(uint64_t)>*>(callback);
-    eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), *func, isExcludeInner);
+    eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), *func, false, isExcludeInner);
     func = nullptr;
 }
 
@@ -465,6 +465,7 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     NodeModifier::SetTextInputOnWillDelete,
     NodeModifier::SetTextInputOnDidDelete,
     NodeModifier::SetOnTextInputChangeWithPreviewText,
+    NodeModifier::SetOnTextInputWillChange,
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
@@ -482,6 +483,7 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetTextAreaOnWillDeleteValue,
     NodeModifier::SetTextAreaOnDidDeleteValue,
     NodeModifier::SetOnTextAreaChangeWithPreviewText,
+    NodeModifier::SetOnTextAreaWillChange,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
@@ -686,6 +688,7 @@ const ResetComponentAsyncEventHandler TEXT_INPUT_NODE_RESET_ASYNC_EVENT_HANDLERS
     nullptr,
     nullptr,
     NodeModifier::ResetOnTextInputChangeWithPreviewText,
+    NodeModifier::ResetOnTextInputWillChange,
 };
 
 const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -703,6 +706,7 @@ const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[
     nullptr,
     nullptr,
     NodeModifier::ResetOnTextAreaChangeWithPreviewText,
+    NodeModifier::ResetOnTextAreaWillChange,
 };
 
 const ResetComponentAsyncEventHandler REFRESH_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -1840,6 +1844,25 @@ ArkUI_Int32 PostFrameCallback(ArkUI_Int32 instanceId, void* userData,
     return ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_Int32 PostIdleCallback(ArkUI_Int32 instanceId, void* userData,
+    void (*callback)(uint64_t nanoTimeLeft, uint32_t frameCount, void* userData))
+{
+    auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
+    if (pipeline == nullptr) {
+        LOGW("Cannot find pipeline context by contextHandle ID");
+        return ARKUI_ERROR_CODE_UI_CONTEXT_INVALID;
+    }
+    if (!pipeline->CheckThreadSafe()) {
+        return ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD;
+    }
+    auto onidleCallbackFuncFromCAPI = [userData, callback](uint64_t nanoTimeLeft, uint32_t frameCount) -> void {
+        callback(nanoTimeLeft, frameCount, userData);
+    };
+
+    pipeline->AddFrameCallback(nullptr, std::move(onidleCallbackFuncFromCAPI), 0);
+    return ERROR_CODE_NO_ERROR;
+}
+
 const ArkUIBasicAPI* GetBasicAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -1869,6 +1892,7 @@ const ArkUIBasicAPI* GetBasicAPI()
         .convertLengthMetricsUnit = ConvertLengthMetricsUnit,
         .getContextByNode = GetContextByNode,
         .postFrameCallback = PostFrameCallback,
+        .postIdleCallback = PostIdleCallback,
     };
     CHECK_INITIALIZED_FIELDS_END(basicImpl, 0, 0, 0); // don't move this line
     return &basicImpl;
@@ -2106,6 +2130,11 @@ ArkUI_Int32 SetDialogFocusable(ArkUIDialogHandle handle, ArkUI_Bool focusable)
     return CustomDialog::SetFocusable(handle, focusable);
 }
 
+ArkUI_Int32 GetDialogState(ArkUIDialogHandle handle, ArkUI_Int32* dialogState)
+{
+    return CustomDialog::GetDialogState(handle, dialogState);
+}
+
 ArkUI_Int32 OpenCustomDialog(ArkUIDialogHandle handle, void(*callback)(ArkUI_Int32 dialogId))
 {
     return CustomDialog::OpenCustomDialog(handle, callback);
@@ -2160,6 +2189,7 @@ const ArkUIDialogAPI* GetDialogAPI()
         .close = CloseDialog,
         .registerOnWillDismiss = RegisterOnWillDialogDismiss,
         .registerOnWillDismissWithUserData = RegisterOnWillDismissWithUserData,
+        .getState = GetDialogState,
         .setKeyboardAvoidDistance = SetKeyboardAvoidDistance,
         .setLevelMode = SetDialogLevelMode,
         .setLevelUniqueId = SetDialogLevelUniqueId,

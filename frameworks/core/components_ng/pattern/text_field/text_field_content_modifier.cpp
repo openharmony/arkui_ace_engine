@@ -253,7 +253,7 @@ void TextFieldContentModifier::SetDefaultTextOverflow(const TextStyle& textStyle
 
 void TextFieldContentModifier::SetDefaultTextDecoration(const TextStyle& textStyle)
 {
-    textDecoration_ = textStyle.GetTextDecoration();
+    textDecoration_ = textStyle.GetTextDecorationFirst();
     textDecorationStyle_ = textStyle.GetTextDecorationStyle();
     textDecorationColor_ = textStyle.GetTextDecorationColor();
     textDecorationColorAlpha_ = MakeRefPtr<AnimatablePropertyFloat>(

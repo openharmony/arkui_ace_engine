@@ -755,4 +755,104 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest011, TestSize.Level1)
     overlayManager->CleanPreviewInSubWindow();
     EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
 }
+
+/**
+ * @tc.name: MenuTest012
+ * @tc.desc: Test OverlayManager::UpdateMenuAnimationOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, MenuTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menu node, preview node and root node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
+    menuNode->MountToParent(menuWrapperNode);
+    previewNode->MountToParent(menuWrapperNode);
+    menuWrapperNode->MountToParent(rootNode);
+    auto menuWrapperContext = menuWrapperNode->GetRenderContext();
+    ASSERT_NE(menuWrapperContext, nullptr);
+    menuWrapperContext->UpdateOpacity(1.0);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    /**
+     * @tc.steps: step2. call UpdateMenuAnimationOptions duration 100ms.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    selectTheme->menuAnimationDuration_ = 100;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    AnimationOption option;
+    overlayManager->UpdateMenuAnimationOptions(menuWrapperNode, option);
+    EXPECT_EQ(option.GetDuration(), 100);
+    EXPECT_EQ(option.GetCurve(), Curves::FAST_OUT_SLOW_IN);
+
+    /**
+     * @tc.steps: step2. call UpdateMenuAnimationOptions duration 150ms.
+     */
+    selectTheme->menuAnimationDuration_ = 0;
+    overlayManager->UpdateMenuAnimationOptions(menuWrapperNode, option);
+    EXPECT_EQ(option.GetDuration(), 150);
+}
+
+/**
+ * @tc.name: HideAllMenusWithoutAnimation001
+ * @tc.desc: Test OverlayManager::HideAllMenusWithoutAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, HideAllMenusWithoutAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menu node and root node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto targetId = rootNode->GetId();
+    auto menuId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, menuId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId));
+    ASSERT_NE(menuNode, nullptr);
+    auto subMenuId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto subMenuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, subMenuId, AceType::MakeRefPtr<MenuPattern>(1, "Test", MenuType::MENU));
+    ASSERT_NE(subMenuNode, nullptr);
+    subMenuNode->MountToParent(menuNode);
+    /**
+     * @tc.steps: step2. call showMenu when menuNode is nullptr and menuMap is empty.
+     * @tc.expected: function exits normally
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->ShowMenu(targetId, MENU_OFFSET, nullptr);
+    overlayManager->ShowMenuInSubWindow(targetId, MENU_OFFSET, nullptr);
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    /**
+     * @tc.steps: step3. call showMenu when menuNode is not appended.
+     * @tc.expected: menuNode mounted successfully
+     */
+    overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
+    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    /**
+     * @tc.steps: step4. call showMenu when menuNode is nullptr and menuMap is not empty.
+     * @tc.expected: function exits normally
+     */
+    overlayManager->ShowMenu(targetId, MENU_OFFSET, nullptr);
+    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    /**
+     * @tc.steps: step5. call HideAllMenus.
+     * @tc.expected: function exits normally
+     */
+    overlayManager->HideAllMenusWithoutAnimation();
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
+}
 } // namespace OHOS::Ace::NG

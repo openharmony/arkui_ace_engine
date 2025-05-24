@@ -46,6 +46,7 @@ public:
     void ResetShadowOptions() override {}
     void ResetIndicatorIconPath() override {}
     void ResetIndicatorSpace() override {}
+    void CreateWithResourceObj(GaugeResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) override {};
 };
 
 } // namespace OHOS::Ace::Framework

@@ -521,6 +521,8 @@ void MenuLayoutAlgorithm::InitWrapperRect(
         wrapperRect_ = param_.menuWindowRect;
         wrapperSize_ = SizeF(wrapperRect_.Width(), wrapperRect_.Height());
         dumpInfo_.wrapperRect = wrapperRect_;
+        width_ = wrapperRect_.Width();
+        height_ = wrapperRect_.Height();
         return;
     }
     wrapperRect_.SetRect(0, 0, param_.menuWindowRect.Width(), param_.menuWindowRect.Height());
@@ -556,21 +558,21 @@ void MenuLayoutAlgorithm::InitWrapperRect(
 }
 
 void MenuLayoutAlgorithm::UpdateWrapperRectForHoverMode(
-    const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern)
+    const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern, float creaseHeightOffset)
 {
     auto container = Container::CurrentSafelyWithCheck();
     CHECK_NULL_VOID(container);
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_VOID(displayInfo);
     auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
-    int32_t creaseTop = 0;
-    int32_t creaseBottom = 0;
-    int32_t creaseHeight = 0;
+    float creaseTop = 0;
+    float creaseBottom = 0;
+    float creaseHeight = 0;
     if (!foldCreaseRects.empty()) {
         auto foldCrease = foldCreaseRects.front();
-        creaseTop = static_cast<int32_t>(foldCrease.Top());
-        creaseBottom = static_cast<int32_t>(foldCrease.Bottom());
-        creaseHeight = static_cast<int32_t>(foldCrease.Height());
+        creaseTop = foldCrease.Top() - creaseHeightOffset;
+        creaseBottom = foldCrease.Bottom() - creaseHeightOffset;
+        creaseHeight = foldCrease.Height();
     }
     float offsetY = 0;
     if (props->GetMenuPlacement().has_value()) {
@@ -578,9 +580,9 @@ void MenuLayoutAlgorithm::UpdateWrapperRectForHoverMode(
     } else {
         offsetY = position_.GetY();
     }
-    if (offsetY < creaseTop) {
+    if (LessNotEqual(offsetY, creaseTop)) {
         wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, creaseTop - top_);
-    } else if (offsetY > creaseBottom) {
+    } else if (GreatNotEqual(offsetY, creaseBottom)) {
         wrapperRect_.SetRect(left_, creaseBottom, width_ - left_ - right_, height_ - creaseBottom - bottom_);
     } else {
         wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, height_ - top_ - bottom_);
@@ -723,13 +725,8 @@ void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, 
     if (isContainerModal) {
         wrapperOffset = OffsetF(0.0f, static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx()));
         if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-            if (wrapper->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-                wrapperOffset += OffsetF(static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()),
+            wrapperOffset += OffsetF(static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()),
                 static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()));
-            } else {
-                wrapperOffset += OffsetF(static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx()),
-                static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()));
-            }
         }
         position -= wrapperOffset;
     }
@@ -773,16 +770,8 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!targetTag_.empty()) {
         InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu(), menuPattern);
     }
-    auto pipelineContext = menuNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    isHalfFoldHover_ = pipelineContext->IsHalfFoldHoverStatus();
-    auto menuWrapper = menuPattern->GetMenuWrapper();
-    CHECK_NULL_VOID(menuWrapper);
-    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    if (isHalfFoldHover_ && menuWrapperPattern->GetHoverMode()) {
-        UpdateWrapperRectForHoverMode(menuLayoutProperty, menuPattern);
-    }
+    CalcWrapperRectForHoverMode(menuPattern);
+
     const auto& constraint = menuLayoutProperty->GetLayoutConstraint();
     if (!constraint) {
         return;
@@ -807,6 +796,25 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto parentItem = menuPattern->GetParentMenuItem();
     CalculateIdealSize(layoutWrapper, childConstraint, padding, idealSize, parentItem);
+}
+
+void MenuLayoutAlgorithm::CalcWrapperRectForHoverMode(const RefPtr<MenuPattern>& menuPattern)
+{
+    CHECK_NULL_VOID(menuPattern);
+    auto menuNode = menuPattern->GetHost();
+    CHECK_NULL_VOID(menuNode);
+    auto pipelineContext = menuNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto menuWrapper = menuPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProperty);
+    if (OverlayManager::IsNeedAvoidFoldCrease(menuNode, true, isExpandDisplay_, menuWrapperPattern->GetHoverMode())) {
+        auto creaseHeightOffset = static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx());
+        UpdateWrapperRectForHoverMode(menuLayoutProperty, menuPattern, creaseHeightOffset);
+    }
 }
 
 bool MenuLayoutAlgorithm::CheckChildConstraintCondition(const RefPtr<MenuPattern>& menuPattern)
@@ -2231,9 +2239,6 @@ void MenuLayoutAlgorithm::LimitContainerModalMenuRect(double& rectWidth, double&
 {
     auto containerOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
                             static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        containerOffsetX += static_cast<float>(CONTENT_PADDING.ConvertToPx());
-    }
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto containerOffsetY = static_cast<float>(pipeline->GetCustomTitleHeight().ConvertToPx()) +
@@ -2613,9 +2618,6 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
                             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     if (isContainerModal) {
         auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-            newOffsetX += static_cast<float>(CONTENT_PADDING.ConvertToPx());
-        }
         auto newOffsetY = static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx()) +
                           static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
         targetOffset_ -= OffsetF(newOffsetX, newOffsetY);

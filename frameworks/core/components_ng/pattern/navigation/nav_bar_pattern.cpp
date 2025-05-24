@@ -18,6 +18,8 @@
 #include <algorithm>
 
 #include "base/i18n/localization.h"
+#include "base/subwindow/subwindow_manager.h"
+#include "base/utils/system_properties.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
@@ -33,16 +35,18 @@ namespace {
 // titlebar ZINDEX
 constexpr static int32_t DEFAULT_TITLEBAR_ZINDEX = 2;
 void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<BarItemNode>& barItemNode,
-    const RefPtr<FrameNode>& barMenuNode, const RefPtr<NavBarNode>& navBarNode)
+    const RefPtr<FrameNode>& barMenuNode, const RefPtr<NavBarNode>& navBarNode, const MenuParam& menuParam)
 {
     auto eventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto context = PipelineContext::GetCurrentContext();
-    auto clickCallback = [weakContext = WeakPtr<PipelineContext>(context), id = barItemNode->GetId(),
-                             weakMenu = WeakPtr<FrameNode>(barMenuNode),
-                             weakBarItemNode = WeakPtr<BarItemNode>(barItemNode),
-                             weakNavBarNode = WeakPtr<NavBarNode>(navBarNode)]() {
+    auto clickCallback = [weakContext = WeakPtr<PipelineContext>(context),
+                            id = barItemNode->GetId(),
+                            param = menuParam,
+                            weakMenu = WeakPtr<FrameNode>(barMenuNode),
+                            weakBarItemNode = WeakPtr<BarItemNode>(barItemNode),
+                            weakNavBarNode = WeakPtr<NavBarNode>(navBarNode)]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
 
@@ -83,6 +87,16 @@ void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<B
             symbol->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         } else {
             offset = navBarPattern->GetShowMenuOffset(barItemNode, menuNode);
+        }
+
+        if (param.isShowInSubWindow) {
+            auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+            if (wrapperPattern && wrapperPattern->GetMenuStatus() == MenuStatus::ON_HIDE_ANIMATION) {
+                //if on hide animation, avoid displaying the menu again 
+                return;
+            }
+            SubwindowManager::GetInstance()->ShowMenuNG(menu, param, barItemNode, offset);
+            return;
         }
         overlayManager->ShowMenu(id, offset, menu);
     };
@@ -183,6 +197,9 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         auto menuItemNode = NavigationTitleUtil::CreateMenuItemButton(theme);
         MenuParam menuParam;
         menuParam.isShowInSubWindow = false;
+         if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
+            menuParam.isShowInSubWindow = true;
+        }
         auto targetId = barItemNode->GetId();
         auto targetTag = barItemNode->GetTag();
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -199,7 +216,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         }
         auto barMenuNode = MenuView::Create(
             std::move(params), targetId, targetTag, MenuType::NAVIGATION_MENU, menuParam);
-        BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode, navBarNode);
+        BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode, navBarNode, menuParam);
         auto iconNode = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
         NavigationTitleUtil::InitTitleBarButtonEvent(menuItemNode, iconNode, true);
 
@@ -497,7 +514,7 @@ bool NavBarPattern::CanCoordScrollUp(float offset) const
     CHECK_NULL_RETURN(titleNode, false);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_RETURN(titlePattern, false);
-    return Negative(offset) && (!titlePattern->IsCurrentMinTitle() || IsNeedHandleScroll());
+    return (Negative(offset) && !titlePattern->IsCurrentMinTitle()) || IsNeedHandleScroll();
 }
 
 float NavBarPattern::GetTitleBarHeightLessThanMaxBarHeight() const

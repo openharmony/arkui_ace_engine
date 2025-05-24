@@ -69,6 +69,9 @@ public:
     }
 
 private:
+    float UpdateChildPositionWidthIgnoreLayoutSafeArea(const RefPtr<FrameNode>& host,
+        const RefPtr<LayoutWrapper>& childLayoutWrapper, const OffsetF& originOffset, const OffsetF& paddingOffset,
+        bool needExpandMainAxis);
     void InitFlexProperties(LayoutWrapper* layoutWrapper);
     void TravelChildrenFlexProps(LayoutWrapper* layoutWrapper);
     void UpdateAllocatedSize(const RefPtr<LayoutWrapper>& layoutWrapper, float& crossAxisSize);
@@ -103,7 +106,7 @@ private:
         FlexLayoutResult layoutResult = {});
     void SetInitMainAxisSize(LayoutWrapper* layoutWrapper);
     void SetFinalRealSize(LayoutWrapper* layoutWrapper, SizeF& realSize);
-    void SetCrossPos(const RefPtr<LayoutWrapper>& layoutWrapper, float& crossPos);
+    void SetCrossPos(const RefPtr<LayoutWrapper>& layoutWrapper, float& crossPos, const float& crossAxisSize);
     void AddElementIntoMagicNodes(int32_t childDisplayPriority, MagicLayoutNode node, float childLayoutWeight);
     bool AddElementIntoLayoutPolicyChildren(LayoutWrapper* layoutWrapper, RefPtr<LayoutWrapper> child);
     std::map<int32_t, std::list<MagicLayoutNode>>::reverse_iterator FirstMeasureInWeightMode();

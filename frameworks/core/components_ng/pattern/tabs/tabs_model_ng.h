@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 
+
 namespace OHOS::Ace::NG {
 
 class SwiperPaintProperty;
@@ -76,6 +77,7 @@ public:
     void SetPageFlipMode(int32_t pageFlipMode) override;
     void SetBarModifier(std::function<void(WeakPtr<NG::FrameNode>)>&& onApply) override;
     void SetCachedMaxCount(std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode) override;
+    void CreateWithResourceObj(TabJsResType colorType, const RefPtr<ResourceObject>& resObj) override;
     static RefPtr<TabsNode> GetOrCreateTabsNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -116,6 +118,31 @@ public:
     static void SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& gestureSwipe);
     static void SetIsCustomAnimation(FrameNode* frameNode, bool isCustom);
     static void SetOnContentWillChange(FrameNode* frameNode, std::function<bool(int32_t, int32_t)>&& callback);
+
+    static void HandleBarBackgroundColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        bool isModifier = false);
+    static void HandleBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, bool isModifier = false);
+    static void HandleBarHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, bool isModifier = false);
+    static void HandleBarGridGutter(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        bool isModifier = false);
+    static void HandleBarGridMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        bool isModifier = false);
+    static void HandleDividerStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        bool isModifier = false);
+    static void HandleDividerColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        bool isModifier = false);
+    static void HandleDividerStartMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        bool isModifier = false);
+    static void HandleDividerEndMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        bool isModifier = false);
+    static void HandleScrollableBarMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        bool isModifier = false);
+    static void HandleBackgroundEffectColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        bool isModifier = false);
+    static void HandleBackgroundEffectInactiveColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        bool isModifier = false);
+    static void HandleBackgroundBlurStyleInactiveColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        bool isModifier = false);
 
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);

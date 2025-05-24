@@ -147,7 +147,7 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestInsertDiffStyleValueInSpa
     TextStyle textStyle(5);
     richEditorPattern->SetTypingStyle(typingStyle, textStyle);
 
-    richEditorPattern->InsertDiffStyleValueInSpan(spanNode, info, insertValue, false);
+    richEditorPattern->InsertDiffStyleValueInSpan(spanNode, info, insertValue);
     ASSERT_EQ(richEditorPattern->moveLength_, 0);
 }
 
@@ -175,20 +175,20 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestCreateTextSpanNode001, Te
 
     richEditorPattern->typingStyle_ = std::nullopt;
     richEditorPattern->typingTextStyle_ = std::nullopt;
-    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue, false);
+    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue);
     EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
 
     richEditorPattern->typingStyle_ = updateSpanStyle;
-    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue, false);
+    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue);
     EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
 
     richEditorPattern->typingStyle_ = std::nullopt;
     richEditorPattern->typingTextStyle_ = textStyle;
-    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue, false);
+    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue);
     EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
 
     richEditorPattern->typingStyle_ = updateSpanStyle;
-    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue, false);
+    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue);
     EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
 
     richEditorPattern->typingStyle_ = typingStyle;

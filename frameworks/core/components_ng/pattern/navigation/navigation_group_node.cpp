@@ -146,7 +146,7 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
     if (pattern->GetIsPreForceSetList()) {
         // if page is force set, some node may not on the tree, so we need get page from preNavPathList.
         auto preNodes = pattern->GetAllNavDestinationNodesPrev();
-        if (beforeLastStandardIndex < preNodes.size() && beforeLastStandardIndex >= 0) {
+        if (beforeLastStandardIndex < static_cast<int32_t>(preNodes.size()) && beforeLastStandardIndex >= 0) {
             preLastStandardNode = AceType::DynamicCast<NavDestinationGroupNode>(
                 NavigationGroupNode::GetNavDestinationNode(preNodes[beforeLastStandardIndex].second.Upgrade()));
         }
@@ -512,7 +512,7 @@ void NavigationGroupNode::CheckIsNeedForceExitWindow(bool result)
     CHECK_NULL_VOID(overlayManager);
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);
-    int32_t navigationStackSize = navigationStack->GetAllNavDestinationNodes().size();
+    int32_t navigationStackSize = static_cast<int32_t>(navigationStack->GetAllNavDestinationNodes().size());
     int32_t pageSize =
         stageManager->GetStageNode() ? static_cast<int32_t>(stageManager->GetStageNode()->GetChildren().size()) : 0;
     if (navigationStackSize != 1 || isHasParentNavigation || !overlayManager->IsModalEmpty() || pageSize != 1) {
@@ -602,6 +602,42 @@ void NavigationGroupNode::ResetTransitionAnimationNodeState(
     }
     navigationManager->SetNavNodeInTransition(nullptr, nullptr);
     navigationManager->SetIsNavigationOnAnimation(false);
+}
+
+void NavigationGroupNode::SetSplitPlaceholder(const RefPtr<NG::UINode>& splitPlaceholder)
+{
+    auto prevsplitPlaceholder = splitPlaceholder_;
+    CHECK_NULL_VOID(placeholderContentNode_);
+    CHECK_NULL_VOID(splitPlaceholder);
+    auto splitPlaceholderFrameNode = AceType::DynamicCast<FrameNode>(splitPlaceholder);
+    CHECK_NULL_VOID(splitPlaceholderFrameNode);
+    auto splitPlaceholderLayoutProperty = splitPlaceholderFrameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(splitPlaceholderLayoutProperty);
+    auto&& opts = splitPlaceholderLayoutProperty->GetSafeAreaExpandOpts();
+    if (opts) {
+        splitPlaceholderLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
+    } else {
+        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+            .edges = SAFE_AREA_EDGE_ALL };
+        splitPlaceholderLayoutProperty->UpdateSafeAreaExpandOpts(opts);
+    }
+    auto spllitPlaceHolderFrameNode = AceType::DynamicCast<FrameNode>(splitPlaceholder);
+    CHECK_NULL_VOID(spllitPlaceHolderFrameNode);
+    const auto& eventHub = spllitPlaceHolderFrameNode->GetOrCreateEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(false);
+    auto focusHub = spllitPlaceHolderFrameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(false);
+    if (!prevsplitPlaceholder) {
+        splitPlaceholder->MountToParent(placeholderContentNode_);
+    } else {
+        if (splitPlaceholder != prevsplitPlaceholder) {
+            placeholderContentNode_->ReplaceChild(prevsplitPlaceholder, splitPlaceholder);
+            placeholderContentNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        }
+    }
+    splitPlaceholder_ = splitPlaceholder;
 }
 
 void NavigationGroupNode::CreateAnimationWithPop(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
@@ -745,7 +781,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             auto context = navigation->GetContextWithCheck();
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
-            context->UpdateOcclusionCullingStatus(false, nullptr);
+            preNavDesNode->AddToOcclusionMap(false);
         };
     AnimationFinishCallback callback = [onFinishCb = std::move(onFinish), weakNavigation = WeakClaim(this)]() {
         auto navigation = weakNavigation.Upgrade();
@@ -768,9 +804,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
         SetNeedSetInvisible(false);
     }
     isOnAnimation_ = true;
-    auto context = GetContextWithCheck();
-    CHECK_NULL_VOID(context);
-    context->UpdateOcclusionCullingStatus(true, preNode);
+    preNode->AddToOcclusionMap(true);
 }
 
 void NavigationGroupNode::RemoveJsChildImmediately(const RefPtr<FrameNode>& preNode, bool preUseCustomTransition,
@@ -994,9 +1028,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             navigation->CleanPushAnimations();
             auto pattern = navigation->GetPattern<NavigationPattern>();
             pattern->CheckContentNeedMeasure(navigation);
-            auto context = navigation->GetContextWithCheck();
-            CHECK_NULL_VOID(context);
-            context->UpdateOcclusionCullingStatus(false, nullptr);
+            preNode->AddToOcclusionMap(false);
         };
 
     AnimationFinishCallback callback = [onFinishCb = std::move(onFinish), weakNavigation = WeakClaim(this)]() {
@@ -1041,9 +1073,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(curNode,
         curNavDestination->GetNavDestinationPathInfo());
 #endif
-    auto context = GetContextWithCheck();
-    CHECK_NULL_VOID(context);
-    context->UpdateOcclusionCullingStatus(true, curNode);
+    preNode->AddToOcclusionMap(true);
 }
 
 std::shared_ptr<AnimationUtils::Animation> NavigationGroupNode::MaskAnimation(const RefPtr<FrameNode>& node,

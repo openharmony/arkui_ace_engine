@@ -297,7 +297,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       this.localCopyObservedObject_ = newObservedObjectValue;
     }
 
-    if (typeof this.localCopyObservedObject_ === 'object') {
+    if (this.localCopyObservedObject_ && typeof this.localCopyObservedObject_ === 'object') {
       if (this.localCopyObservedObject_ instanceof SubscribableAbstract) {
         // deep copy will copy Set of subscribers as well. But local copy only has its own subscribers 
         // not those of its parent value.

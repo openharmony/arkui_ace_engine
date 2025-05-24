@@ -33,6 +33,7 @@ public:
 
     static void JSBind(BindingTarget globalObj);
     static void SetLunar(bool isLunar);
+    static void SetCanLoop(const JSCallbackInfo& info);
     static void OnChange(const JSCallbackInfo& info);
     static void OnDateChange(const JSCallbackInfo& info);
     static void PickerBackgroundColor(const JSCallbackInfo& info);
@@ -40,6 +41,7 @@ public:
     static void SetTextStyle(const JSCallbackInfo& info);
     static void SetSelectedTextStyle(const JSCallbackInfo& info);
     static void ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle, const std::string& pos);
+    static void ParseTextStyleFontSize(const JSRef<JSVal>& fontSize, NG::PickerTextStyle& textStyle);
     static void ParseTextProperties(const JSRef<JSObject>& paramObj, NG::PickerTextProperties& result);
     // keep compatible, need remove after
     static void UseMilitaryTime(bool isUseMilitaryTime);

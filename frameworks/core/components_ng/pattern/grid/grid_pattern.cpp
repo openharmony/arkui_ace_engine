@@ -362,10 +362,13 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEv
     if (!isInitialized_) {
         FireObserverOnReachEnd();
     }
+    if (!NearZero(mainSizeChanged_)) {
+        info_.prevHeight_ += mainSizeChanged_;
+    }
     auto finalOffset = info_.currentHeight_ - info_.prevHeight_;
     if (!NearZero(finalOffset)) {
         bool scrollDownToEnd =
-            LessOrEqual(info_.prevHeight_, endHeight_) && GreatOrEqual(info_.currentHeight_, endHeight_);
+            LessNotEqual(info_.prevHeight_, endHeight_) && GreatOrEqual(info_.currentHeight_, endHeight_);
         bool scrollUpToEnd =
             GreatNotEqual(info_.prevHeight_, endHeight_) && LessOrEqual(info_.currentHeight_, endHeight_);
         if (scrollDownToEnd || scrollUpToEnd) {
@@ -521,6 +524,8 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     bool indexChanged =
         (gridLayoutInfo.startIndex_ != info_.startIndex_) || (gridLayoutInfo.endIndex_ != info_.endIndex_);
+    bool offsetEnd = info_.offsetEnd_;
+    mainSizeChanged_ = info_.lastMainSize_ - gridLayoutInfo.lastMainSize_;
     info_ = gridLayoutInfo;
     info_.synced_ = true;
     AnimateToTarget(scrollAlign_, layoutAlgorithmWrapper);
@@ -532,7 +537,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     bool sizeDiminished =
         IsOutOfBoundary(true) && !NearZero(curDelta) && (info_.prevHeight_ - info_.currentHeight_ - curDelta > 0.1f);
 
-    if (info_.offsetEnd_) {
+    if (info_.offsetEnd_ && (!offsetEnd || !NearZero(mainSizeChanged_))) {
         endHeight_ = GetTotalHeight() - GetMainContentSize();
     }
     ProcessEvent(indexChanged, info_.currentHeight_ - info_.prevHeight_);

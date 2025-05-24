@@ -83,6 +83,12 @@ public:                                                           \
         }                                                         \
         RequestTextFlushDirty();                                  \
     }                                                             \
+    void Update##name(const std::optional<type>& value)           \
+    {                                                             \
+        if (value.has_value()) {                                  \
+            Update##name(value.value());                          \
+        }                                                         \
+    }                                                             \
     void Reset##name()                                            \
     {                                                             \
         if (spanItem_->fontStyle) {                               \
@@ -119,6 +125,12 @@ public:                                                           \
         }                                                         \
         RequestTextFlushDirty();                                  \
         spanItem_->MarkReCreateParagraph();                       \
+    }                                                             \
+    void Update##name(const std::optional<type>& value)           \
+    {                                                             \
+        if (value.has_value()) {                                  \
+            Update##name(value.value());                          \
+        }                                                         \
     }                                                             \
     void Reset##name()                                            \
     {                                                             \
@@ -182,6 +194,12 @@ public:                                                                         
             spanItem_->MarkReLayoutParagraph();                                  \
         }                                                                        \
         RequestTextFlushDirty();                                                 \
+    }                                                                            \
+    void Update##name(const std::optional<type>& value)                          \
+    {                                                                            \
+        if (value.has_value()) {                                                 \
+            Update##name(value.value());                                         \
+        }                                                                        \
     }                                                                            \
     void Reset##name()                                                           \
     {                                                                            \
@@ -313,12 +331,17 @@ public:
     virtual bool IsDragging();
     virtual ResultObject GetSpanResultObject(int32_t start, int32_t end);
     virtual RefPtr<SpanItem> GetSameStyleSpanItem(bool isEncodeTlvS = false) const;
+    void GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
-    std::u16string urlAddress;
+    std::optional<std::u16string> urlAddress;
     std::function<void()> urlOnRelease;
     void SetUrlOnReleaseEvent(std::function<void()>&& onRelease)
     {
         urlOnRelease = std::move(onRelease);
+    }
+    const std::u16string GetUrlAddress()
+    {
+        return urlAddress.value_or(u"");
     }
     bool Contains(int32_t index)
     {
@@ -553,6 +576,11 @@ public:
         return true;
     }
 
+    void SetSpanItem(const RefPtr<SpanItem>& spanItem)
+    {
+        spanItem_ = spanItem;
+    }
+
     const RefPtr<SpanItem>& GetSpanItem() const
     {
         return spanItem_;
@@ -625,7 +653,8 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontWeight, FontWeight, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, TextDecoration, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(Superscript, SuperscriptStyle, ChangeFlag::RE_CREATE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, std::vector<TextDecoration>, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFeature, FONT_FEATURES_LIST, ChangeFlag::RE_LAYOUT);
@@ -643,6 +672,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(VariableFontWeight, int32_t, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(EnableVariableFontWeight, bool, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM_RECREATE(SymbolType, SymbolType, ChangeFlag::RE_CREATE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(LineThicknessScale, float, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign, ChangeFlag::RE_LAYOUT);
@@ -650,8 +680,19 @@ public:
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineBreakStrategy, LineBreakStrategy, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineSpacing, Dimension, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(OptimizeTrailingSpace, bool, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(HalfLeading, bool, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(ParagraphSpacing, Dimension, ChangeFlag::RE_CREATE);
+
+    TextDecoration GetTextDecorationFirst() const
+    {
+        auto decorations = GetTextDecoration();
+        if (!decorations.has_value()) {
+            return TextDecoration::NONE;
+        }
+        return decorations.value().size() > 0 ?
+            decorations.value()[0] : TextDecoration::NONE;
+    }
 
     // Mount to the previous Span node or Text node.
     void MountToParagraph();

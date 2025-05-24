@@ -17,6 +17,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "ui/base/geometry/dimension.h"
 
 #define private public
 #define protected public
@@ -36,6 +37,7 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -47,7 +49,9 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-namespace {} // namespace
+namespace {
+constexpr Dimension SHEET_SIDE_DEFAULT_WIDTH = 400.0_vp;
+} // namespace
 class SheetShowInSubwindowTestNg : public testing::Test {
 public:
     static int32_t lastPlatformVersion_;
@@ -834,5 +838,208 @@ HWTEST_F(SheetShowInSubwindowTestNg, GetSheetTypeNumber5, TestSize.Level1)
     sheetPattern->windowSize_ = SizeT<int32_t>(800, 1600);
     auto sheetType4 = sheetPattern->GetSheetType();
     EXPECT_EQ(sheetType4, SheetType::SHEET_CENTER);
+}
+
+/**
+ * @tc.name: GetSheetTypeNumber6
+ * @tc.desc: Test SheetPresentationPattern::GetSheetType.
+ *           Condition: Test Side SheetType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, GetSheetTypeNumber6, TestSize.Level1)
+{
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+    /**
+     * @tc.steps: step1. create sheet page, get sheet pattern.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step2. the device is like phone.
+     * @tc.expected: The Sheet Type is default by SHEET_BOTTM, it can't be a Side type.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetDisplayWindowRectInfo({ 0, 0, 500, 1600 });
+    auto sheetType1 = sheetPattern->GetSheetType();
+    EXPECT_EQ(sheetType1, SheetType::SHEET_BOTTOM);
+    // Even if SHEET_SIDE preferType is valid, it will still be SHEET_BOTTOM.
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_SIDE;
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    auto sheetType2 = sheetPattern->GetSheetType();
+    EXPECT_EQ(sheetType2, SheetType::SHEET_BOTTOM);
+    /**
+     * @tc.steps: step3. the device is like tablet, width > 600.
+     * @tc.expected: The Side Sheet Type will take effect.
+     */
+    pipelineContext->SetDisplayWindowRectInfo({ 0, 0, 1000, 800 });
+    auto sheetType3 = sheetPattern->GetSheetType();
+    EXPECT_EQ(sheetType3, SheetType::SHEET_SIDE);
+    // If the developer sets the preferType property to a different type, it can still take effect of that type.
+    // Such as SHEEET_BOTTOM
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    auto sheetType4 = sheetPattern->GetSheetType();
+    EXPECT_EQ(sheetType4, SheetType::SHEET_BOTTOM);
+}
+
+/**
+ * @tc.name: SideSheeteLayoutAlgorithm1
+ * @tc.desc: Test SheetPresentationSideLayoutAlgorithm::GetSheetDefaultWidth.
+ *           Condition: Test Side Sheet DefaultWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, SideSheeteLayoutAlgorithm1, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page, get sheet pattern.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    /**
+     * @tc.steps: step2. side's default width will change with the window size.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->rootWidth_ = 700.0;
+    auto algorithm = AceType::MakeRefPtr<SheetPresentationSideLayoutAlgorithm>();
+    ASSERT_NE(algorithm, nullptr);
+    EXPECT_FLOAT_EQ(algorithm->GetSheetDefaultWidth(sheetPattern), pipelineContext->rootWidth_ / 2);
+    pipelineContext->rootWidth_ = 1000.0;
+    EXPECT_FLOAT_EQ(algorithm->GetSheetDefaultWidth(sheetPattern), SHEET_SIDE_DEFAULT_WIDTH.ConvertToPx());
+
+    sheetPattern->windowSize_ = SizeT<int32_t>(700, 800);
+    EXPECT_FLOAT_EQ(algorithm->GetSheetDefaultWidth(sheetPattern), 700.0f / 2);
+    sheetPattern->windowSize_ = SizeT<int32_t>(1000, 800);
+    EXPECT_FLOAT_EQ(algorithm->GetSheetDefaultWidth(sheetPattern), SHEET_SIDE_DEFAULT_WIDTH.ConvertToPx());
+}
+
+/**
+ * @tc.name: SideSheeteLayoutAlgorithm2
+ * @tc.desc: SheetPresentationSideLayoutAlgorithm Width Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, SideSheeteLayoutAlgorithm2, TestSize.Level1)
+{
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    SheetShowInSubwindowTestNg::SetSheetTheme(sheetTheme);
+    /**
+     * @tc.steps: step1: create sheetNode, init builder func
+     * @tc.expected: targetNode != nullptr
+     */
+    SheetStyle style;
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(sheetNode->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = { 1000, 1000 };
+    sheetNode->GetGeometryNode()->SetParentLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateContentConstraint();
+    /**
+     * @tc.steps: step2. side width = defaultWidth.
+     */
+    auto algorithm = AceType::MakeRefPtr<SheetPresentationSideLayoutAlgorithm>();
+    ASSERT_NE(algorithm, nullptr);
+    algorithm->Measure(AceType::RawPtr(sheetNode));
+    EXPECT_FLOAT_EQ(algorithm->sheetMaxWidth_, 1000);
+    EXPECT_FLOAT_EQ(algorithm->sheetMaxHeight_, 1000);
+    EXPECT_FLOAT_EQ(algorithm->sheetWidth_, algorithm->GetSheetDefaultWidth(sheetPattern));
+    EXPECT_EQ(sheetNode->GetGeometryNode()->GetFrameSize(), SizeF(algorithm->sheetWidth_, algorithm->sheetHeight_));
+    EXPECT_EQ(sheetNode->GetGeometryNode()->GetContentSize(), SizeF(algorithm->sheetWidth_, algorithm->sheetHeight_));
+    /**
+     * @tc.steps: step3. side width is valid.
+     */
+    style.width = Dimension(0.5, DimensionUnit::PERCENT);
+    layoutProperty->UpdateSheetStyle(style);
+    algorithm->Measure(AceType::RawPtr(sheetNode));
+    EXPECT_FLOAT_EQ(algorithm->sheetWidth_, 1000 * 0.5);
+    style.width = Dimension(300, DimensionUnit::PX);
+    layoutProperty->UpdateSheetStyle(style);
+    algorithm->Measure(AceType::RawPtr(sheetNode));
+    EXPECT_FLOAT_EQ(algorithm->sheetWidth_, Dimension(300, DimensionUnit::PX).ConvertToPx());
+    /**
+     * @tc.steps: step4. side width is invalid, such as width is greater than maxWidth.
+     */
+    style.width = Dimension(2000, DimensionUnit::PX);
+    layoutProperty->UpdateSheetStyle(style);
+    algorithm->Measure(AceType::RawPtr(sheetNode));
+    EXPECT_FLOAT_EQ(algorithm->sheetWidth_, algorithm->GetSheetDefaultWidth(sheetPattern));
+}
+
+/**
+ * @tc.name: SideSheeteLayoutAlgorithm3
+ * @tc.desc: SheetPresentationSideLayoutAlgorithm Height Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, SideSheeteLayoutAlgorithm3, TestSize.Level1)
+{
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    SheetShowInSubwindowTestNg::SetSheetTheme(sheetTheme);
+    /**
+     * @tc.steps: step1: create sheetNode, init builder func
+     * @tc.expected: targetNode != nullptr
+     */
+    SheetStyle style;
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(sheetNode->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = { 1000, 1000 };
+    sheetNode->GetGeometryNode()->SetParentLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateContentConstraint();
+    /**
+     * @tc.steps: step2. side height = defaultHeight = maxHeight.
+     */
+    auto algorithm = AceType::MakeRefPtr<SheetPresentationSideLayoutAlgorithm>();
+    ASSERT_NE(algorithm, nullptr);
+    algorithm->Measure(AceType::RawPtr(sheetNode));
+    EXPECT_FLOAT_EQ(algorithm->sheetMaxWidth_, 1000);
+    EXPECT_FLOAT_EQ(algorithm->sheetMaxHeight_, 1000);
+    EXPECT_FLOAT_EQ(algorithm->sheetHeight_, algorithm->sheetMaxHeight_);
+    EXPECT_EQ(sheetNode->GetGeometryNode()->GetFrameSize(), SizeF(algorithm->sheetWidth_, algorithm->sheetHeight_));
+    EXPECT_EQ(sheetNode->GetGeometryNode()->GetContentSize(), SizeF(algorithm->sheetWidth_, algorithm->sheetHeight_));
+    /**
+     * @tc.steps: step3. side height is valid, and height will be not in effect.
+     */
+    style.sheetHeight.height = Dimension(0.5, DimensionUnit::PERCENT);
+    layoutProperty->UpdateSheetStyle(style);
+    algorithm->Measure(AceType::RawPtr(sheetNode));
+    EXPECT_FLOAT_EQ(algorithm->sheetHeight_, algorithm->sheetMaxHeight_);
+    style.sheetHeight.height = Dimension(300, DimensionUnit::PX);
+    layoutProperty->UpdateSheetStyle(style);
+    algorithm->Measure(AceType::RawPtr(sheetNode));
+    EXPECT_FLOAT_EQ(algorithm->sheetHeight_, algorithm->sheetMaxHeight_);
+    /**
+     * @tc.steps: step4. side height is invalid, such as height is greater than maxHeight.
+     */
+    style.sheetHeight.height = Dimension(2000, DimensionUnit::PX);
+    layoutProperty->UpdateSheetStyle(style);
+    algorithm->Measure(AceType::RawPtr(sheetNode));
+    EXPECT_FLOAT_EQ(algorithm->sheetHeight_, algorithm->sheetMaxHeight_);
 }
 } // namespace OHOS::Ace::NG

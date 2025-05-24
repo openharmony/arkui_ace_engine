@@ -24,6 +24,7 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/style_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -643,7 +644,7 @@ HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper001, TestSize.Level1
     code = KeyCode::KEY_U;
     spanStyle.SetTextDecoration(TextDecoration::UNDERLINE);
     richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
-    EXPECT_EQ(spanStyle.GetTextDecoration(), TextDecoration::NONE);
+    EXPECT_EQ(spanStyle.GetTextDecorationFirst(), TextDecoration::NONE);
 }
 
 /**
@@ -697,6 +698,10 @@ HWTEST_F(RichEditorStyleTestNg, GetChangeSpanStyle002, TestSize.Level1)
     std::optional<std::u16string> urlAddress;
     richEditorPattern->GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, urlAddress, spanNode, spanIndex);
     EXPECT_FALSE(spanTextStyle.has_value());
+    CHECK_NULL_VOID(richEditorPattern->spans_.empty());
+    auto firstSpanItem = richEditorPattern->spans_.front();
+    CHECK_NULL_VOID(firstSpanItem);
+    EXPECT_FALSE(firstSpanItem->urlAddress.has_value());
 }
 
 /**
@@ -834,7 +839,7 @@ HWTEST_F(RichEditorStyleTestNg, CreateDecorationSpanByTextStyle001, TestSize.Lev
     style.SetLineHeight(LINE_HEIGHT_VALUE);
     style.SetLetterSpacing(LETTER_SPACING);
     style.SetFontFeatures(TEXT_FONTFEATURE);
-    RefPtr<DecorationSpan> span = richEditorPattern->CreateDecorationSpanByTextStyle(updateSpanStyle, style, 0);
+    RefPtr<DecorationSpan> span = richEditorPattern->styleManager_->CreateDecorationSpanByTextStyle(updateSpanStyle, style, 0);
     ASSERT_NE(span, nullptr);
 }
 
@@ -1114,9 +1119,9 @@ HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper004, TestSize.Level1
     AddSpan(INIT_VALUE_1);
     KeyCode code = KeyCode::KEY_U;
     TextStyle spanStyle;
-    spanStyle.propTextDecoration_ = TextDecoration::UNDERLINE;
+    spanStyle.propTextDecoration_ = std::vector<TextDecoration>({TextDecoration::UNDERLINE});
     richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
-    EXPECT_EQ(spanStyle.GetTextDecoration(), TextDecoration::NONE);
+    EXPECT_EQ(spanStyle.GetTextDecorationFirst(), TextDecoration::NONE);
 }
 
 /**
@@ -1199,7 +1204,7 @@ HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper007, TestSize.Level1
     TextStyle style;
     style.SetTextDecoration(TextDecoration::NONE);
     richEditorPattern->HandleSelectFontStyleWrapper(code, style);
-    EXPECT_EQ(style.GetTextDecoration(), TextDecoration::UNDERLINE);
+    EXPECT_EQ(style.GetTextDecorationFirst(), TextDecoration::UNDERLINE);
 }
 
 /**
@@ -1214,10 +1219,10 @@ HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper008, TestSize.Level1
     KeyCode code = KeyCode::KEY_HEADSETHOOK;
     TextStyle style;
     FontWeight result1 = style.GetFontWeight();
-    TextDecoration result3 = style.GetTextDecoration();
+    TextDecoration result3 = style.GetTextDecorationFirst();
     richEditorPattern->HandleSelectFontStyleWrapper(code, style);
     EXPECT_EQ(style.GetFontWeight(), result1);
-    EXPECT_EQ(style.GetTextDecoration(), result3);
+    EXPECT_EQ(style.GetTextDecorationFirst(), result3);
 }
 
 }

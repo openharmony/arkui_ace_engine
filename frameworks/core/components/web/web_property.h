@@ -26,6 +26,7 @@
 #include "core/components/web/web_event.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_v2/common/common_def.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
@@ -82,6 +83,7 @@ enum class WebKeyboardAvoidMode : int32_t {
 enum class WebElementType : int32_t {
     TEXT = 0,
     IMAGE,
+    LINK,
     MIXED,
     NONE,
 };

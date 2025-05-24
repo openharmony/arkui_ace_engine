@@ -53,6 +53,11 @@ private:
     static void JsSetFont(const JSRef<JSObject>& info);
     static void JsSetCommonOptions(const JSCallbackInfo& info);
     static void JsSetBorderRadius(const JSRef<JSObject>& paramObject);
+    static void ProcessLinearStrokeWidth(const JSRef<JSObject>& paramObject);
+    static void ProcessRingStrokeWidth(const JSRef<JSObject>& paramObject);
+    static void ProcessCapsuleBorderWidth(const JSRef<JSObject>& paramObject);
+    static void ProcessCapsuleBorderColor(const JSRef<JSObject>& paramObject);
+    static void ProcessFontSizeOption(const JSRef<JSObject>& textObject);
 };
 
 } // namespace OHOS::Ace::Framework

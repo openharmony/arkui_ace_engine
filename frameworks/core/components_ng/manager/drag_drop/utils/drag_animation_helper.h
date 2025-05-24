@@ -45,7 +45,7 @@ public:
     static void PlayNodeResetAnimation(const RefPtr<DragEventActuator>& actuator);
     static void PlayGatherAnimation(const RefPtr<FrameNode>& frameNode, const RefPtr<OverlayManager>& overlayManager);
     static void ShowBadgeAnimation(const RefPtr<FrameNode>& textNode);
-    static void ShowMenuHideAnimation(const RefPtr<FrameNode>& imageNode, const PreparedInfoForDrag& data);
+    static void ShowMenuHideAnimation(const PreparedInfoForDrag& data);
     static void CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuPattern,
         const RefPtr<OverlayManager>& manager, const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode);
     static OffsetF CalcBadgeTextOffset(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& imageNode,

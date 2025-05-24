@@ -19,6 +19,7 @@
 #include "base/log/event_report.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_interfaces.h"
+#include "base/ressched/ressched_report.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "render_service_client/core/transaction/rs_interfaces.h"
@@ -354,6 +355,9 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
         RecordBaseInfo(record);
         AceAsyncTraceBegin(0, sceneId.c_str());
     }
+    if (sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH) {
+        ResSchedReport::GetInstance().ResSchedDataReport("ability_or_page_switch_start");
+    }
 }
 
 void PerfMonitor::StartCommercial(const std::string& sceneId, PerfActionType type, const std::string& note)
@@ -405,6 +409,9 @@ void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
         ReportAnimateEnd(sceneId, record);
         RemoveRecord(sceneId);
         AceAsyncTraceEnd(0, sceneId.c_str());
+    }
+    if (sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH) {
+        ResSchedReport::GetInstance().ResSchedDataReport("ability_or_page_switch_end");
     }
 }
 

@@ -1165,6 +1165,7 @@ class c3 extends ViewPU {
                     this.onMenuWidthChange();
                     this.onShowMenuWithTimer();
                     this.cancelMenuDisappearTimer();
+                    event.stopPropagation();
                 }
                 else {
                     this.onCancelMenuTimer();
@@ -1215,6 +1216,9 @@ class c3 extends ViewPU {
             Gesture.pop();
             Button.onHover((isHover, event) => {
                 this.onHoverMinimizeButton(isHover);
+                if (isHover) {
+                    event.stopPropagation();
+                }
                 this.getUIContext()?.animateTo({ duration: 0 }, () => {
                     if (isHover) {
                         this.minimizeScale = 1.1;
@@ -1260,6 +1264,9 @@ class c3 extends ViewPU {
             Gesture.pop();
             Button.onHover((isHover, event) => {
                 this.onHoverCloseButton(isHover);
+                if (isHover) {
+                    event.stopPropagation();
+                }
                 this.getUIContext()?.animateTo({ duration: 0 }, () => {
                     if (isHover) {
                         this.closeScale = 1.1;

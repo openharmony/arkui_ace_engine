@@ -660,7 +660,7 @@ void TabsPattern::UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<Fr
     }
     if (!tabsLayoutProperty->GetIndex().has_value()) {
         UpdateSelectedState(swiperNode, tabBarPattern, tabsLayoutProperty, index);
-        tabsLayoutProperty->UpdateIndex(indexSetByUser);
+        tabsLayoutProperty->UpdateIndex(indexSetByUser < 0 ? 0 : indexSetByUser);
     } else {
         auto preIndex = tabsLayoutProperty->GetIndex().value();
         if (preIndex == index || index < 0) {
@@ -853,5 +853,15 @@ int32_t TabsPattern::OnInjectionEvent(const std::string& command)
     CHECK_NULL_RETURN(tabBarPattern, RET_FAILED);
     tabBarPattern->ChangeIndex(targetIndex);
     return RET_SUCCESS;
+}
+
+void TabsPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG

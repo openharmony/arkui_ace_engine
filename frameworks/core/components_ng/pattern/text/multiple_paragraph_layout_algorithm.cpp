@@ -99,6 +99,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     }
     UpdateFontFamilyWithSymbol(textStyle, fontFamilies, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
     UpdateSymbolStyle(textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
+    auto lineThicknessScale = textLayoutProperty->GetLineThicknessScale().value_or(1.0f);
+    textStyle.SetLineThicknessScale(lineThicknessScale);
     auto textColor = textLayoutProperty->GetTextColorValue(textTheme->GetTextStyle().GetTextColor());
     if (contentModifier) {
         if (textLayoutProperty->GetIsAnimationNeededValue(true)) {
@@ -108,9 +110,9 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
         contentModifier->SetFontReady(false);
     }
     textStyle.SetHalfLeading(textLayoutProperty->GetHalfLeadingValue(pipeline->GetHalfLeading()));
+    textStyle.SetEnableAutoSpacing(textLayoutProperty->GetEnableAutoSpacingValue(false));
     SetAdaptFontSizeStepToTextStyle(textStyle, textLayoutProperty->GetAdaptFontSizeStep());
-    // Register callback for fonts.
-    FontRegisterCallback(frameNode, textStyle);
+    FontRegisterCallback(frameNode, textStyle); // Register callback for fonts.
     textStyle.SetTextDirection(GetTextDirection(content, layoutWrapper));
     textStyle.SetLocale(Localization::GetInstance()->GetFontLocale());
     UpdateTextColorIfForeground(frameNode, textStyle, textColor);
@@ -364,9 +366,10 @@ void MultipleParagraphLayoutAlgorithm::SetDecorationPropertyToModifier(const Ref
     }
     auto textDecoration = layoutProperty->GetTextDecoration();
     if (textDecoration.has_value()) {
-        modifier->SetTextDecoration(textDecoration.value());
+        auto value = textDecoration.value().size() > 0 ? textDecoration.value()[0] : TextDecoration::NONE;
+        modifier->SetTextDecoration(value, false);
     } else {
-        modifier->SetTextDecoration(textStyle.GetTextDecoration(), true);
+        modifier->SetTextDecoration(textStyle.GetTextDecorationFirst(), true);
     }
 }
 
@@ -473,7 +476,9 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(const TextSty
         .indent = textStyle.GetTextIndent(),
         .halfLeading = textStyle.GetHalfLeading(),
         .paragraphSpacing = textStyle.GetParagraphSpacing(),
-        .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines()
+        .optimizeTrailingSpace = textStyle.GetOptimizeTrailingSpace(),
+        .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines(),
+        .enableAutoSpacing = textStyle.GetEnableAutoSpacing()
         };
 }
 

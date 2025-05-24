@@ -21,7 +21,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_paragraph_manager.h"
 
 namespace OHOS::Ace::NG {
-
+class StyleManager;
 template<typename KeyType, typename ValueType>
 class LRUMap {
 public:
@@ -112,7 +112,8 @@ class ACE_EXPORT RichEditorLayoutAlgorithm : public MultipleParagraphLayoutAlgor
 public:
     RichEditorLayoutAlgorithm() = delete;
     RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, RichEditorParagraphManager* paragraphs,
-        std::optional<TextStyle> typingTextStyle, LRUMap<std::uintptr_t, RefPtr<Paragraph>>* paraMapPtr);
+        LRUMap<std::uintptr_t, RefPtr<Paragraph>>* paraMapPtr,
+        std::unique_ptr<StyleManager>& styleManager, bool needShowPlaceholder);
     ~RichEditorLayoutAlgorithm() override = default;
 
     const OffsetF& GetParentGlobalOffset() const
@@ -187,6 +188,8 @@ private:
     RectF richTextRect_;
     std::optional<TextStyle> typingTextStyle_;
     LRUMap<std::uintptr_t, RefPtr<Paragraph>>* const paraMapPtr_;
+    std::unique_ptr<StyleManager>& styleManager_;
+    bool needShowPlaceholder_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

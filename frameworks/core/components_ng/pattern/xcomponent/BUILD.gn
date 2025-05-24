@@ -27,6 +27,7 @@ build_component_ng("xcomponent_pattern_ng") {
     "xcomponent_pattern.cpp",
     "xcomponent_pattern_v2.cpp",
     "xcomponent_utils.cpp",
+    "xcomponent_inner_surface_controller.cpp",
   ]
 
   if (is_ohos_standard_system) {

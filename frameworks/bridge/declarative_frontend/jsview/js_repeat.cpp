@@ -59,6 +59,12 @@ void JSRepeat::FinishRender(const JSCallbackInfo& info)
     }
 }
 
+void JSRepeat::IsInAnimation(const JSCallbackInfo& info)
+{
+    auto result = RepeatModel::GetInstance()->IsInAnimation();
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
 // signature is
 // fromIndex: number
 void JSRepeat::MoveChild(const JSCallbackInfo& info)
@@ -126,10 +132,8 @@ void JSRepeat::AfterAddChild()
 }
 
 void JSRepeat::JsParseItemDragEventHandler(
-    const JsiExecutionContext& context, const JSRef<JSVal>& jsValue)
+    const JsiExecutionContext& context, const JSRef<JSObject>& itemDragEventObj)
 {
-    auto itemDragEventObj = JSRef<JSObject>::Cast(jsValue);
-
     auto onLongPress = itemDragEventObj->GetProperty("onLongPress");
     std::function<void(int32_t)> onLongPressCallback;
     if (onLongPress->IsFunction()) {
@@ -180,6 +184,7 @@ void JSRepeat::JSBind(BindingTarget globalObj)
     JSClass<JSRepeat>::StaticMethod("createNewChildFinish", &JSRepeat::CreateNewChildFinish);
     JSClass<JSRepeat>::StaticMethod("afterAddChild", &JSRepeat::AfterAddChild);
     JSClass<JSRepeat>::StaticMethod("onMove", &JSRepeat::OnMove);
+    JSClass<JSRepeat>::StaticMethod("isInAnimation", &JSRepeat::IsInAnimation);
     JSClass<JSRepeat>::Bind<>(globalObj);
 }
 

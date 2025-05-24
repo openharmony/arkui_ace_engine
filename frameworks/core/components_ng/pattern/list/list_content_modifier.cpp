@@ -21,9 +21,6 @@ namespace OHOS::Ace::NG {
 ListContentModifier::ListContentModifier(const OffsetF& clipOffset, const SizeF& clipSize)
 {
     color_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT);
-    clipOffset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(clipOffset);
-    clipSize_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(clipSize);
-    clip_ = AceType::MakeRefPtr<PropertyBool>(true);
     refDivider_ = AceType::MakeRefPtr<RefDividerMap>();
     ListDividerMap dividerMap;
     RefPtr<ListDividerArithmetic> lda = AceType::MakeRefPtr<ListDividerArithmetic>(dividerMap, refDivider_);
@@ -31,22 +28,11 @@ ListContentModifier::ListContentModifier(const OffsetF& clipOffset, const SizeF&
         AceType::DynamicCast<CustomAnimatableArithmetic>(lda));
 
     AttachProperty(color_);
-    AttachProperty(clipOffset_);
-    AttachProperty(clipSize_);
-    AttachProperty(clip_);
     AttachProperty(dividerList_);
 }
 
 void ListContentModifier::onDraw(DrawingContext& context)
 {
-    if (clip_->Get()) {
-        auto offset = clipOffset_->Get();
-        auto size = clipSize_->Get();
-        auto clipRect = RSRect(offset.GetX(), offset.GetY(),
-            offset.GetX() + size.Width(), offset.GetY() + size.Height());
-        context.canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
-    }
-
     CHECK_NULL_VOID(dividerList_);
     auto dividerlist = dividerList_->Get();
     CHECK_NULL_VOID(dividerlist);

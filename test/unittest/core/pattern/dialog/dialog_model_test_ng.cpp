@@ -102,7 +102,7 @@ void DialogModelTestNg::TearDownTestCase()
 
 /**
  * @tc.name: DialogModelTestNg001
- * @tc.desc: Test DialogEventHub's GetOrCreateGestureEventHub
+ * @tc.desc: Test DialogEventHub's GetOrCreateGestureEventHub.
  * @tc.type: FUNC
  */
 HWTEST_F(DialogModelTestNg, DialogModelTestNg001, TestSize.Level1)
@@ -1556,13 +1556,14 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg039, TestSize.Level1)
     RefPtr<AceType> dialogComponent;
     RefPtr<AceType> customDialog;
     std::list<DialogOperation> dialogOperation;
+    bool hasBind = false;
    
     /**
      * @tc.steps: step2. Call SetOpenDialog.
      * @tc.expected: Check SetOpenDialog.
      */
     controllerModel.SetOpenDialog(props, controller, dialogs, pending,
-        isShown, std::move(cancelTask), std::move(buildFunc), dialogComponent, customDialog, dialogOperation);
+        isShown, std::move(cancelTask), std::move(buildFunc), dialogComponent, customDialog, dialogOperation, hasBind);
     auto container = Container::Current();
     auto pipelineContext = container->GetPipelineContext();
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
@@ -1578,6 +1579,84 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg039, TestSize.Level1)
     EXPECT_EQ(onDidAppearFlag, true);
     EXPECT_EQ(onWillDisappearFlag, true);
     EXPECT_EQ(onDidDisappearFlag, true);
+}
+
+/**
+ * @tc.name: CustomDialogControllerGetStateTest1
+ * @tc.desc: Test CustomDialogControllerModelNG's SetOpenDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, CustomDialogControllerGetStateTest1, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. mock rootNode,Dialog and FrameNode
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto dialogProps = DialogProperties {
+        .title = "Test Title",
+        .content = "Test Content",
+        .controllerId = 1001
+    };
+
+    bool hasBind = false;
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    auto dialogNode =
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 2, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    dialogPattern->SetDialogProperties(dialogProps);
+    dialogPattern->SetState(PromptActionCommonState::APPEARING);
+    
+    std::vector<WeakPtr<AceType>> dialogs;
+    dialogs.emplace_back(WeakPtr<AceType>(dialogNode));
+
+    CustomDialogControllerModelNG controller;
+    PromptActionCommonState state = controller.GetState(dialogs, hasBind);
+    EXPECT_EQ(state, PromptActionCommonState::APPEARING);
+
+    dialogPattern->SetState(PromptActionCommonState::APPEARED);
+    state = controller.GetState(dialogs, hasBind);
+    EXPECT_EQ(state, PromptActionCommonState::APPEARED);
+}
+
+/**
+ * @tc.name: CustomDialogControllerGetStateTest2
+ * @tc.desc: Test CustomDialogControllerModelNG's SetOpenDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, CustomDialogControllerGetStateTest2, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.mock rootNode,Dialog and FrameNode
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto dialogProps = DialogProperties {
+        .title = "Test Title",
+        .content = "Test Content",
+        .controllerId = 1001
+    };
+    bool hasBind = true;
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+
+    auto dialogNode =
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 2, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    dialogPattern->SetDialogProperties(dialogProps);
+    dialogPattern->SetState(PromptActionCommonState::DISAPPEARING);
+    
+    std::vector<WeakPtr<AceType>> dialogs;
+    dialogs.emplace_back(WeakPtr<AceType>(dialogNode));
+
+    CustomDialogControllerModelNG controller;
+    PromptActionCommonState state = controller.GetState(dialogs, hasBind);
+    EXPECT_EQ(state, PromptActionCommonState::DISAPPEARING);
+
+    dialogPattern->SetState(PromptActionCommonState::DISAPPEARED);
+    state = controller.GetState(dialogs, hasBind);
+    EXPECT_EQ(state, PromptActionCommonState::DISAPPEARED);
 }
 
 /**
@@ -1607,12 +1686,15 @@ HWTEST_F(DialogModelTestNg, ComputeInnerLayoutSizeParam001, TestSize.Level1)
 HWTEST_F(DialogModelTestNg, IsGetExpandDisplayValidHeight001, TestSize.Level1)
 {
     auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    ASSERT_NE(dialogLayoutAlgorithm, nullptr);
     dialogLayoutAlgorithm->expandDisplay_ = true;
     dialogLayoutAlgorithm->isShowInSubWindow_ = true;
     DialogProperties props;
     auto dialog = DialogView::CreateDialogNode(props, nullptr);
-    EXPECT_FALSE(
-        dialogLayoutAlgorithm->IsGetExpandDisplayValidHeight(dialog->GetLayoutProperty<DialogLayoutProperty>()));
+    ASSERT_NE(dialog, nullptr);
+    auto dialogProp = dialog->GetLayoutProperty<DialogLayoutProperty>();
+    ASSERT_NE(dialogProp, nullptr);
+    EXPECT_FALSE(dialogLayoutAlgorithm->IsGetExpandDisplayValidHeight(dialogProp));
 }
 
 /**

@@ -27,6 +27,7 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 enum class ArrowOfTargetOffset {
     START,
@@ -204,7 +205,7 @@ private:
     bool GetIfNeedArrow(const RefPtr<BubbleLayoutProperty>& bubbleProp, const SizeF& childSize);
     void UpdateChildPosition(OffsetF& childOffset);
     void UpdateTouchRegion();
-    void InitWrapperRect(LayoutWrapper* layoutWrapper);
+    void InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<BubbleLayoutProperty>& layoutProp);
     void UpdateScrollHeight(LayoutWrapper* layoutWrapper, bool showInSubWindow);
     std::string MoveTo(double x, double y);
     std::string LineTo(double x, double y);
@@ -237,7 +238,7 @@ private:
     void SetBubbleRadius();
     void UpdateHostWindowRect();
     void HandleKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow);
-    void FitAvaliableRect(LayoutWrapper* layoutWrapper, bool showInSubWindow);
+    void FitAvailableRect(LayoutWrapper* layoutWrapper, bool showInSubWindow);
 
     OffsetF GetChildPosition(
         const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp, bool UseArrowOffset);
@@ -325,6 +326,7 @@ private:
     float foldCreaseBottom_ = 0.0f;
     bool isHalfFoldHover_ = false;
     bool doubleBorderEnable_ = false;
+    bool expandDisplay_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUBBLE_BUBBLE_LAYOUT_ALGORITHM_H

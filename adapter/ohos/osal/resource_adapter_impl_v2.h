@@ -88,6 +88,8 @@ public:
     void SetAppHasDarkRes(bool hasDarkRes);
     RefPtr<ResourceAdapter> GetOverrideResourceAdapter(
         const ResourceConfiguration& config, const ConfigurationChange& configurationChange) override;
+    bool ExistDarkResById(const std::string& resourceId) override;
+    bool ExistDarkResByName(const std::string& resourceName, const std::string& resourceType) override;
 
 private:
     std::unordered_map<std::string, uint32_t> patternNameMap_;

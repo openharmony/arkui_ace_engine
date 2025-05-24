@@ -34,6 +34,7 @@ class UnifiedData;
 class GridColumnInfo;
 }
 namespace OHOS::Ace::NG {
+class DragDropSpringLoadingDetector;
 enum class DragDropMgrState : int32_t {
     IDLE,
     ABOUT_TO_PREVIEW,
@@ -192,6 +193,10 @@ public:
     void SetSummaryMap(const std::map<std::string, int64_t>& summaryMap)
     {
         summaryMap_ = summaryMap;
+    }
+    const std::map<std::string, int64_t>& GetSummaryMap()
+    {
+        return summaryMap_;
     }
     void ResetRecordSize(uint32_t recordSize = 0);
     uint32_t GetRecordSize() const;
@@ -375,6 +380,7 @@ public:
         RefPtr<FrameNode> menuPreviewImageNode { nullptr };
         RefPtr<FrameNode> relativeContainerNode { nullptr };
         RefPtr<FrameNode> stackNode { nullptr };
+        RefPtr<FrameNode> menuNode { nullptr };
         RectF originPreviewRect;
         RectF dragPreviewRect;
         bool isMenuShow = false;
@@ -707,6 +713,8 @@ private:
     void PrintGridDragFrameNode(const float globalX, const float globalY, const RefPtr<FrameNode>& dragFrameNode);
     void FireOnDragEventWithDragType(const RefPtr<EventHub>& eventHub, DragEventType type,
         RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams);
+    void FireOnDragSpringLoadingEventWithDragType(const RefPtr<FrameNode>& frameNode, const RefPtr<EventHub>& eventHub,
+        DragEventType type, const std::string& extraParams);
     void NotifyDragFrameNode(
         const Point& point, const DragEventType& dragEventType, const DragRet& dragRet = DragRet::DRAG_DEFAULT);
     void TransDragWindowToDragFwk(int32_t windowContainerId);
@@ -727,6 +735,8 @@ private:
         const RefPtr<OverlayManager>& overlayManager, const RefPtr<NodeAnimatablePropertyFloat>& property, Point point);
     void ReportOnItemDropEvent(
         DragType dragType, const RefPtr<FrameNode>& dragFrameNode, double dropPositionX, double dropPositionY);
+    void NotifyDragSpringLoadingMove(const RefPtr<FrameNode>& dragFrameNode, const std::string& extraInfo);
+    void NotifyDragSpringLoadingIntercept(std::string_view extraParams);
 
     std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
@@ -801,6 +811,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
     bool grayedState_ = false;
     Point dragStartPoint_ { 0, 0 };
+    RefPtr<DragDropSpringLoadingDetector> dragDropSpringLoadingDetector_;
 
     std::map<int32_t, Point> fingerPointInfo_;
     bool isStartAnimationFinished_{};

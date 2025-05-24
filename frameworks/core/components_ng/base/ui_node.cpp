@@ -559,6 +559,18 @@ void UINode::DoAddChild(
     }
     MarkNeedSyncRenderTree(true);
     ProcessIsInDestroyingForReuseableNode(child);
+    // Forced update colormode when builderNode attach to main tree.
+    if (SystemProperties::ConfigChangePerform() && child->nodeStatus_ == NodeStatus::BUILDER_NODE_ON_MAINTREE &&
+        context_) {
+        auto colorMode = static_cast<int32_t>(context_->GetColorMode());
+        if (child->CheckIsDarkMode() != colorMode) {
+            context_->SetIsSystemColorChange(true);
+            SetRerenderable(true);
+            SetMeasureAnyway(true);
+            SetShouldClearCache(true);
+            NotifyColorModeChange(colorMode);
+        }
+    }
 }
 
 void UINode::GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent)
@@ -1468,6 +1480,17 @@ void UINode::OnRecycle()
 
 void UINode::NotifyColorModeChange(uint32_t colorMode)
 {
+    if (CheckShouldClearCache()) {
+        auto customNode = DynamicCast<CustomNode>(this);
+        if (customNode) {
+            ContainerScope scope(instanceId_);
+            ACE_LAYOUT_TRACE_BEGIN("UINode %d %s is customnode %d",
+                GetId(), GetTag().c_str(), customNode ? true : false);
+            customNode->FireClearAllRecycleFunc();
+            SetShouldClearCache(false);
+            ACE_LAYOUT_TRACE_END()
+        }
+    }
     for (const auto& child : GetChildren()) {
         child->SetShouldClearCache(CheckShouldClearCache());
         child->SetRerenderable(GetRerenderable());

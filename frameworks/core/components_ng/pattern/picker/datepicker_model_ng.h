@@ -34,6 +34,7 @@ public:
     void SetSelectedDate(const PickerDate& value) override;
     void SetMode(const DatePickerMode& value) override;
     void SetShowLunar(bool lunar) override;
+    void SetCanLoop(bool isLoop) override;
     void SetOnChange(DateChangeEvent&& onChange) override;
     void SetOnDateChange(DateChangeEvent&& onChange) override;
     void SetSelectedTime(const PickerTime& selectedTime) override {};
@@ -57,6 +58,9 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     void SetChangeEvent(DateChangeEvent&& onChange) override;
     void SetDigitalCrownSensitivity(int32_t crownSensitivity) override;
+    void ParseDisappearTextStyleResObj(const PickerTextStyle& textStyleOpt) override;
+    void ParseSelectedTextStyleResObj(const PickerTextStyle& textStyleOpt) override;
+    void ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt) override;
     static void SetSelectedTextStyle(
         FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
     static void SetNormalTextStyle(
@@ -78,12 +82,17 @@ public:
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
     static bool GetEnableHapticFeedback(FrameNode* frameNode);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
+    static bool GetCanLoop(FrameNode* frameNode);
+    static void SetCanLoop(FrameNode* frameNode, bool isLoop);
     static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
     void CreateDateColumn(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& dateNode);
+    void ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
+        std::function<void(const PickerTextStyle&)> updateTextStyleFunc);
+
     std::string dateOrder = "";
     std::string dateTimeOrder = "";
 };

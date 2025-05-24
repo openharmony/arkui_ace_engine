@@ -132,11 +132,12 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
     if (ret != 0) {
         auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
+        TAG_LOGW(AceLogTag::ACE_FORM, "Add form failed, ret:%{public}d detail:%{public}s", ret, errorMsg.c_str());
         OnFormError(std::to_string(ret), errorMsg);
         return;
     }
 
-    TAG_LOGI(AceLogTag::ACE_FORM,
+    TAG_LOGW(AceLogTag::ACE_FORM,
         "Add form success, formId: %{public}s, type: %{public}d, uiSyntax: %{public}d, isDynamic: %{public}d",
         std::to_string(formJsInfo.formId).c_str(), static_cast<int>(formJsInfo.type),
         static_cast<int>(formJsInfo.uiSyntax), isDynamic_);
@@ -830,7 +831,7 @@ void FormManagerDelegate::OnFormUpdate(const std::string& param)
 void FormManagerDelegate::OnFormError(const std::string& param)
 {
     auto result = ParseMapFromString(param);
-    TAG_LOGI(AceLogTag::ACE_FORM,
+    TAG_LOGW(AceLogTag::ACE_FORM,
         "OnFormError, code:%{public}s, msg:%{public}s", result["code"].c_str(), result["msg"].c_str());
     if (onFormErrorCallback_) {
         onFormErrorCallback_(result["code"], result["msg"]);
@@ -843,7 +844,7 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
     std::string errorMsg;
     int64_t parsedRequestCode = static_cast<int64_t>(StringUtils::StringToLongInt(code.c_str()));
     OHOS::AppExecFwk::FormMgr::GetInstance().GetExternalError(parsedRequestCode, externalErrorCode, errorMsg);
-    TAG_LOGI(AceLogTag::ACE_FORM,
+    TAG_LOGW(AceLogTag::ACE_FORM,
         "OnFormError, code:%{public}s, msg:%{public}s, externalErrorCode:%{public}d, errorMsg: %{public}s",
         code.c_str(), msg.c_str(), externalErrorCode, errorMsg.c_str());
     switch (externalErrorCode) {
@@ -919,7 +920,7 @@ void FormManagerDelegate::ReAddForm()
         OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(formJsInfo_.formId, wantCache_, clientInstance, formJsInfo_);
     if (ret != 0) {
         auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
-        TAG_LOGW(AceLogTag::ACE_FORM, "Add form failed, ret:%{public}d detail:%{public}s", ret, errorMsg.c_str());
+        TAG_LOGW(AceLogTag::ACE_FORM, "Re-add form failed, ret:%{public}d detail:%{public}s", ret, errorMsg.c_str());
         OnFormError(std::to_string(ret), errorMsg);
         return;
     }
@@ -1206,7 +1207,7 @@ void FormManagerDelegate::OnCallActionEvent(const std::string& action)
 
 void FormManagerDelegate::ProcessLockForm(bool lock)
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "ProcessEnableForm, formId is %{public}" PRId64, runningCardId_);
+    TAG_LOGI(AceLogTag::ACE_FORM, "ProcessLockForm, formId is %{public}" PRId64, runningCardId_);
     HandleLockFormCallback(lock);
 }
 #endif

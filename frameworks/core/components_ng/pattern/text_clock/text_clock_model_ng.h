@@ -47,6 +47,9 @@ public:
     void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void InitFontDefault(const TextStyle& textStyle) override;
     void SetDateTimeOptions(const ZeroPrefixType& hourType) override;
+    void CreateWithTextColorResourceObj(const RefPtr<ResourceObject>& resObj) override;
+    void CreateWithFontSizeResourceObj(const RefPtr<ResourceObject>& resObj) override;
+    void CreateWithFontFamilyResourceObj(const RefPtr<ResourceObject>& resObj) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<TextClockController> InitTextController(FrameNode* frameNode);

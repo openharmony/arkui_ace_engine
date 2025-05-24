@@ -371,6 +371,10 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_AXIS;
         case NODE_TEXT_SPAN_ON_LONG_PRESS:
             return ON_TEXT_SPAN_LONG_PRESS;
+        case NODE_TEXT_AREA_ON_WILL_CHANGE:
+            return ON_TEXT_AREA_WILL_CHANGE;
+        case NODE_TEXT_INPUT_ON_WILL_CHANGE:
+            return ON_TEXT_INPUT_WILL_CHANGE;
         default:
             return -1;
     }
@@ -611,6 +615,10 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_ON_AXIS;
         case ON_TEXT_SPAN_LONG_PRESS:
             return NODE_TEXT_SPAN_ON_LONG_PRESS;
+        case ON_TEXT_AREA_WILL_CHANGE:
+            return NODE_TEXT_AREA_ON_WILL_CHANGE;
+        case ON_TEXT_INPUT_WILL_CHANGE:
+            return NODE_TEXT_INPUT_ON_WILL_CHANGE;
         default:
             return -1;
     }

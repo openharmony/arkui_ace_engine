@@ -85,7 +85,6 @@ void ListLayoutTestNg::PaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t e
     auto modifier = paintMethod->GetContentModifier(nullptr);
     auto listContentModifier = AceType::DynamicCast<ListContentModifier>(modifier);
     Testing::MockCanvas canvas;
-    EXPECT_CALL(canvas, ClipRect(_, _, _)).Times(isClip ? 1 : 0);
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 
+#include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/pipeline/base/element_register.h"
@@ -45,6 +46,7 @@
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -82,7 +84,9 @@ constexpr uint8_t SUGGEST_OPINC_CHECKED_THROUGH = 1 << 4;
 // Node has rendergroup marked.
 constexpr uint8_t APP_RENDER_GROUP_MARKED_MASK = 1 << 7;
 // OPINC max ratio for scroll scope(height);
-constexpr float HIGHT_RATIO_LIMIT = 0.8;
+constexpr float HIGHT_RATIO_LIMIT = 0.8f;
+// OPINC max ratio for scroll scope(width);
+constexpr float WIDTH_RATIO_LIMIT = 1.0f;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
 } // namespace
@@ -471,25 +475,7 @@ FrameNode::~FrameNode()
         OnDetachFromMainTree(false, GetContextWithCheck());
     }
     HandleAreaChangeDestruct();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline) {
-        pipeline->RemoveOnAreaChangeNode(GetId());
-        pipeline->RemoveVisibleAreaChangeNode(GetId());
-        pipeline->ChangeMouseStyle(GetId(), MouseFormat::DEFAULT);
-        pipeline->FreeMouseStyleHoldNode(GetId());
-        pipeline->RemoveStoredNode(GetRestoreId());
-        auto dragManager = pipeline->GetDragDropManager();
-        if (dragManager) {
-            dragManager->RemoveDragFrameNode(GetId());
-            dragManager->UnRegisterDragStatusListener(GetId());
-        }
-        auto frameRateManager = pipeline->GetFrameRateManager();
-        if (frameRateManager) {
-            frameRateManager->RemoveNodeRate(GetId());
-        }
-        pipeline->RemoveChangedFrameNode(GetId());
-        pipeline->RemoveFrameNodeChangeListener(GetId());
-    }
+    CleanupPipelineResources();
     FireOnNodeDestroyCallback();
     FireOnExtraNodeDestroyCallback();
     FireFrameNodeDestructorCallback();
@@ -720,6 +706,10 @@ void FrameNode::DumpSafeAreaInfo()
         DumpLog::GetInstance().AddDesc(
             opts->ToString().append(",hostPageId: ").append(std::to_string(GetPageId()).c_str()));
     }
+    auto&& ignoreLayoutSafeAreaOpts = layoutProperty_->GetIgnoreLayoutSafeAreaOpts();
+    if (ignoreLayoutSafeAreaOpts) {
+        DumpLog::GetInstance().AddDesc(ignoreLayoutSafeAreaOpts->ToString());
+    }
     if (layoutProperty_->GetSafeAreaInsets()) {
         DumpLog::GetInstance().AddDesc(layoutProperty_->GetSafeAreaInsets()->ToString());
     }
@@ -809,6 +799,10 @@ void FrameNode::DumpCommonInfo()
     if (layoutProperty_->GetBorderWidthProperty()) {
         DumpLog::GetInstance().AddDesc(
             std::string("Border: ").append(layoutProperty_->GetBorderWidthProperty()->ToString().c_str()));
+    }
+    if (renderContext_->HasBorderRadius()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("BorderRadius: ").append(renderContext_->GetBorderRadius()->ToString().c_str()));
     }
     if (layoutProperty_->GetMarginProperty()) {
         DumpLog::GetInstance().AddDesc(
@@ -1499,6 +1493,17 @@ void FrameNode::NotifyVisibleChange(VisibleType preVisibility, VisibleType curre
     }
     pattern_->OnVisibleChange(currentVisibility == VisibleType::VISIBLE);
     UpdateChildrenVisible(preVisibility, currentVisibility);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto colorMode = pipeline->GetColorMode() == ColorMode::DARK ? 1 : 0;
+    if (SystemProperties::ConfigChangePerform() && (colorMode != CheckIsDarkMode())) {
+        auto parentNode = AceType::DynamicCast<FrameNode>(GetParent());
+        if (parentNode && parentNode->GetRerenderable()) {
+            pipeline->SetIsSystemColorChange(false);
+            SetRerenderable(true);
+            NotifyColorModeChange(colorMode);
+        }
+    }
 }
 
 void FrameNode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility)
@@ -2167,9 +2172,9 @@ void FrameNode::SetNodeFreeze(bool isFreeze)
     }
 }
 
-void FrameNode::CreateLayoutTask(bool forceUseMainThread)
+void FrameNode::CreateLayoutTask(bool forceUseMainThread, LayoutType layoutTaskType)
 {
-    if (!isLayoutDirtyMarked_) {
+    if (!isLayoutDirtyMarked_ && (layoutTaskType == LayoutType::NONE)) {
         return;
     }
     SetRootMeasureNode(true);
@@ -2180,20 +2185,29 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread)
         Measure(std::nullopt);
         Layout();
     } else {
-        {
+        if (layoutTaskType != LayoutType::LAYOUT_FOR_IGNORE) {
             auto layoutConstraint = GetLayoutConstraint();
             ACE_SCOPED_TRACE_COMMERCIAL("CreateTaskMeasure[%s][self:%d][parent:%d][layoutConstraint:%s]"
                              "[layoutPriority:%d][pageId:%d][depth:%d]",
                 GetTag().c_str(), GetId(), GetAncestorNodeOfFrame(false) ? GetAncestorNodeOfFrame(false)->GetId() : 0,
                 layoutConstraint.ToString().c_str(), GetLayoutPriority(), GetPageId(), GetDepth());
+            SetIgnoreLayoutProcess(layoutTaskType == LayoutType::MEASURE_FOR_IGNORE);
             Measure(layoutConstraint);
+            ResetIgnoreLayoutProcess();
+        } else {
+            TAG_LOGI(ACE_LAYOUT,
+                "LayoutTask for postponed layouting on ignoreLayoutSafeArea-container [%s][self:%d], should skip "
+                "measuring.",
+                GetTag().c_str(), GetId());
         }
         {
             ACE_SCOPED_TRACE_COMMERCIAL("CreateTaskLayout[%s][self:%d][parent:%d][layoutPriority:%d]"
                              "[pageId:%d][depth:%d]",
                 GetTag().c_str(), GetId(), GetAncestorNodeOfFrame(false) ? GetAncestorNodeOfFrame(false)->GetId() : 0,
                 GetLayoutPriority(), GetPageId(), GetDepth());
+            SetIgnoreLayoutProcess(layoutTaskType == LayoutType::LAYOUT_FOR_IGNORE);
             Layout();
+            ResetIgnoreLayoutProcess();
         }
     }
     SetRootMeasureNode(false);
@@ -3480,6 +3494,15 @@ RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub()
     return focusHub_;
 }
 
+const RefPtr<DragDropRelatedConfigurations>& FrameNode::GetOrCreateDragDropRelatedConfigurations()
+{
+    if (dragDropRelatedConfigurations_) {
+        return dragDropRelatedConfigurations_;
+    }
+    dragDropRelatedConfigurations_ = MakeRefPtr<DragDropRelatedConfigurations>();
+    return dragDropRelatedConfigurations_;
+}
+
 const RefPtr<FocusHub>& FrameNode::GetOrCreateFocusHub(FocusType type, bool focusable, FocusStyleType focusStyleType,
     const std::unique_ptr<FocusPaintParam>& paintParamsPtr)
 {
@@ -4600,7 +4623,7 @@ void FrameNode::Layout()
             }
         }
     }
-    if (CheckNeedLayout(layoutProperty_->GetPropertyChangeFlag())) {
+    if (CheckNeedLayout(layoutProperty_->GetPropertyChangeFlag()) || GetIgnoreLayoutProcess()) {
         if (!layoutProperty_->GetLayoutConstraint()) {
             const auto& parentLayoutConstraint = geometryNode_->GetParentLayoutConstraint();
             if (layoutProperty_->GetLayoutRect()) {
@@ -4791,6 +4814,15 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
             isLayoutDirtyMarked_ = true;
         }
         needSyncRsNode = false;
+    } else {
+        auto borderRadius = renderContext_->GetBorderRadius();
+        if (borderRadius.has_value()) {
+            renderContext_->SetBorderRadius(borderRadius.value());
+        }
+        auto outerBorderRadius = renderContext_->GetOuterBorderRadius();
+        if (outerBorderRadius.has_value()) {
+            renderContext_->SetOuterBorderRadius(outerBorderRadius.value());
+        }
     }
     if (GetTag() != V2::PAGE_ETS_TAG) {
         renderContext_->SavePaintRect(true, layoutProperty_->GetPixelRound());
@@ -5995,44 +6027,41 @@ bool FrameNode::GetOpIncCheckedOnce()
 bool FrameNode::MarkSuggestOpIncGroup(bool suggest, bool calc)
 {
     CHECK_NULL_RETURN(renderContext_, false);
-    if (!GetSuggestOpIncMarked() && GetCanSuggestOpInc()) {
-        renderContext_->SuggestOpIncNode(suggest, calc);
-        SetSuggestOpIncMarked(true);
-    }
+    renderContext_->SuggestOpIncNode(suggest, calc);
+    SetSuggestOpIncMarked(suggest);
     return true;
 }
 
-OPINC_TYPE_E FrameNode::IsOpIncValidNode(const SizeF& boundary, int32_t childNumber)
+OPINC_TYPE_E FrameNode::IsOpIncValidNode(const SizeF& boundary, Axis axis, int32_t childNumber)
 {
-    auto ret = GetPattern()->OpIncType();
-    switch (ret) {
-        case OPINC_NODE:
-            SetCanSuggestOpInc(true);
-            break;
-        case OPINC_PARENT_POSSIBLE:
-            break;
-        case OPINC_NODE_POSSIBLE: {
-            int32_t height = static_cast<int>(GetGeometryNode()->GetFrameSize().Height());
-            int32_t width = static_cast<int>(GetGeometryNode()->GetFrameSize().Width());
-            int32_t heightBoundary = static_cast<int>(boundary.Height() * HIGHT_RATIO_LIMIT);
-            int32_t area = height * width;
-            if (area >= MIN_OPINC_AREA && height <= heightBoundary) {
-                SetCanSuggestOpInc(true);
-                ret = OPINC_NODE;
-            } else if (height > heightBoundary) {
-                ret = OPINC_PARENT_POSSIBLE;
-            } else {
-                ret = OPINC_SUGGESTED_OR_EXCLUDED;
-            }
-            break;
-        }
-        default:
-            break;
+    int32_t height = static_cast<int>(GetGeometryNode()->GetFrameSize().Height());
+    int32_t width = static_cast<int>(GetGeometryNode()->GetFrameSize().Width());
+    int32_t heightBoundary = static_cast<int>(boundary.Height() * HIGHT_RATIO_LIMIT);
+    int32_t widthBoundary = static_cast<int>(boundary.Width() * WIDTH_RATIO_LIMIT);
+    int32_t area = height * width;
+    if (area >= MIN_OPINC_AREA &&
+        ((axis == Axis::VERTICAL && height <= heightBoundary) ||
+        (axis == Axis::HORIZONTAL && width <= widthBoundary)) &&
+        HasMultipleChild()) {
+        return OPINC_NODE;
     }
-    return ret;
+    return OPINC_INVALID;
 }
 
-OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth)
+bool FrameNode::HasMultipleChild()
+{
+    if (GetChildren().empty()) {
+        return false;
+    }
+    if (GetChildren().size() > 1) {
+        return true;
+    }
+    auto child = AceType::DynamicCast<FrameNode>(GetChildByIndex(0));
+    CHECK_NULL_RETURN(child, false);
+    return child->HasMultipleChild();
+}
+
+OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth, Axis axis)
 {
     if (GetSuggestOpIncActivatedOnce()) {
         return OPINC_SUGGESTED_OR_EXCLUDED;
@@ -6042,7 +6071,7 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
     if (GetApplicationRenderGroupMarked()) {
         return OPINC_INVALID;
     }
-    auto status = IsOpIncValidNode(boundary);
+    auto status = IsOpIncValidNode(boundary, axis);
     if (SystemProperties::GetDebugEnabled()) {
         const auto& hostTag = GetHostTag();
         path = path + " --> " + hostTag;
@@ -6060,7 +6089,7 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
         GenerateOneDepthVisibleFrame(childrens);
         for (auto& child : childrens) {
             if (child) {
-                status = child->FindSuggestOpIncNode(path, boundary, depth + 1);
+                status = child->FindSuggestOpIncNode(path, boundary, depth + 1, axis);
             }
             if (status == OPINC_INVALID) {
                     return OPINC_INVALID;
@@ -6073,22 +6102,18 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
     return OPINC_SUGGESTED_OR_EXCLUDED;
 }
 
-void FrameNode::MarkAndCheckNewOpIncNode()
+void FrameNode::MarkAndCheckNewOpIncNode(Axis axis)
 {
+    if (!IsActive() || GetSuggestOpIncActivatedOnce() || GetApplicationRenderGroupMarked()) {
+        return;
+    }
     auto parent = GetAncestorNodeOfFrame(true);
     CHECK_NULL_VOID(parent);
-    if (parent->GetSuggestOpIncActivatedOnce() && !GetSuggestOpIncActivatedOnce()) {
+    if (parent->GetSuggestOpIncActivatedOnce()) {
         SetSuggestOpIncActivatedOnce();
-        if (!parent->GetOpIncCheckedOnce()) {
-            parent->SetOpIncCheckedOnce();
-            auto status = IsOpIncValidNode(parent->GetGeometryNode()->GetFrameSize());
-            if (status == OPINC_NODE) {
-                parent->SetOpIncGroupCheckedThrough(true);
-            } else {
-                parent->SetOpIncGroupCheckedThrough(false);
-            }
-        }
-        if (parent->GetOpIncGroupCheckedThrough()) {
+        auto status = IsOpIncValidNode(parent->GetGeometryNode()->GetFrameSize(), axis);
+        ACE_SCOPED_TRACE("MarkAndCheckNewOpIncNode id:%d, tag:%s, status: %d", GetId(), GetTag().c_str(), status);
+        if (status == OPINC_NODE) {
             SetCanSuggestOpInc(true);
             MarkSuggestOpIncGroup(true, true);
         }
@@ -6216,6 +6241,7 @@ void FrameNode::AddFrameNodeChangeInfoFlag(FrameNodeChangeInfoFlag changeFlag)
 
 void FrameNode::RegisterNodeChangeListener()
 {
+    ACE_LAYOUT_SCOPED_TRACE("RegisterNodeChangeListener:%s,%d", GetTag().c_str(), GetId());
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     context->AddFrameNodeChangeListener(WeakClaim(this));
@@ -6223,6 +6249,7 @@ void FrameNode::RegisterNodeChangeListener()
 
 void FrameNode::UnregisterNodeChangeListener()
 {
+    ACE_LAYOUT_SCOPED_TRACE("UnregisterNodeChangeListener:%s,%d", GetTag().c_str(), GetId());
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     context->RemoveFrameNodeChangeListener(GetId());
@@ -6230,6 +6257,7 @@ void FrameNode::UnregisterNodeChangeListener()
 
 void FrameNode::ProcessFrameNodeChangeFlag()
 {
+    ACE_LAYOUT_SCOPED_TRACE("ProcessFrameNodeChangeFlag:%s,%d", GetTag().c_str(), GetId());
     auto changeFlag = FRAME_NODE_CHANGE_INFO_NONE;
     auto parent = Claim(this);
     while (parent) {
@@ -6243,6 +6271,7 @@ void FrameNode::ProcessFrameNodeChangeFlag()
     }
     auto pattern = GetPattern();
     if (pattern) {
+        ACE_LAYOUT_SCOPED_TRACE("OnFrameNodeChanged:%s,%d", GetTag().c_str(), GetId());
         pattern->OnFrameNodeChanged(changeFlag);
     }
 }
@@ -6800,6 +6829,37 @@ void FrameNode::HandleAreaChangeDestruct()
             CleanVisibleAreaUserCallback();
             CleanVisibleAreaInnerCallback();
         }
+    }
+}
+
+void FrameNode::AddToOcclusionMap(bool enable)
+{
+    auto context = GetContextWithCheck();
+    CHECK_NULL_VOID(context);
+    context->AddToOcclusionMap(GetId(), enable);
+}
+
+void FrameNode::CleanupPipelineResources()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        pipeline->RemoveOnAreaChangeNode(GetId());
+        pipeline->RemoveVisibleAreaChangeNode(GetId());
+        pipeline->ChangeMouseStyle(GetId(), MouseFormat::DEFAULT);
+        pipeline->FreeMouseStyleHoldNode(GetId());
+        pipeline->RemoveStoredNode(GetRestoreId());
+        auto dragManager = pipeline->GetDragDropManager();
+        if (dragManager) {
+            dragManager->RemoveDragFrameNode(GetId());
+            dragManager->UnRegisterDragStatusListener(GetId());
+        }
+        auto frameRateManager = pipeline->GetFrameRateManager();
+        if (frameRateManager) {
+            frameRateManager->RemoveNodeRate(GetId());
+        }
+        pipeline->RemoveChangedFrameNode(GetId());
+        pipeline->RemoveFrameNodeChangeListener(GetId());
+        pipeline->GetNodeRenderStatusMonitor()->NotifyFrameNodeRelease(this);
     }
 }
 } // namespace OHOS::Ace::NG

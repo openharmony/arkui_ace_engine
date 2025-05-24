@@ -331,7 +331,7 @@ HWTEST_F(TextTestNg, ModifyAISpanStyle001, TestSize.Level1)
     TextDetectConfig textDetectConfig;
     pattern->ModifyAISpanStyle(aiSpanStyle);
     EXPECT_EQ(aiSpanStyle.GetTextColor(), textDetectConfig.entityColor);
-    EXPECT_EQ(aiSpanStyle.GetTextDecoration(), textDetectConfig.entityDecorationType);
+    EXPECT_EQ(aiSpanStyle.GetTextDecorationFirst(), textDetectConfig.entityDecorationType);
     EXPECT_EQ(aiSpanStyle.GetTextDecorationColor(), textDetectConfig.entityDecorationColor);
     EXPECT_EQ(aiSpanStyle.GetTextDecorationStyle(), textDetectConfig.entityDecorationStyle);
 
@@ -346,7 +346,7 @@ HWTEST_F(TextTestNg, ModifyAISpanStyle001, TestSize.Level1)
     pattern->SetTextDetectConfig(textDetectConfig);
     pattern->ModifyAISpanStyle(aiSpanStyle);
     EXPECT_EQ(aiSpanStyle.GetTextColor(), TEXT_COLOR_VALUE);
-    EXPECT_EQ(aiSpanStyle.GetTextDecoration(), TextDecoration::OVERLINE);
+    EXPECT_EQ(aiSpanStyle.GetTextDecorationFirst(), TextDecoration::OVERLINE);
     EXPECT_EQ(aiSpanStyle.GetTextDecorationColor(), Color::BLACK);
     EXPECT_EQ(aiSpanStyle.GetTextDecorationStyle(), TextDecorationStyle::DOUBLE);
 }
@@ -2364,7 +2364,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest002, TestSize.Level1)
     Shadow textShadow;
     textLayoutProperty->UpdateTextShadow({ textShadow });
     textLayoutProperty->UpdateTextDecorationColor(TEXT_COLOR_VALUE);
-    textLayoutProperty->UpdateTextDecoration(TextDecoration::OVERLINE);
+    textLayoutProperty->UpdateTextDecoration({TextDecoration::OVERLINE});
     textLayoutProperty->UpdateBaselineOffset(BASELINE_OFFSET_VALUE);
 
     /**

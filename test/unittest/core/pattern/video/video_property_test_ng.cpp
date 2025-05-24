@@ -1011,6 +1011,24 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest023, TestSize.Level1)
     videoPattern->mediaPlayer_ = nullptr;
     videoPattern->OnCurrentTimeChange(2);
     EXPECT_EQ(videoPattern->duration_, 0);
+
+    /**
+     * @tc.steps: step4. Call OnCurrentTimeChange while isPrepared_ is true.
+     * @tc.expected: isInitialState_ is false.
+     */
+    videoPattern->isInitialState_ = true;
+    videoPattern->isPrepared_ = true;
+    videoPattern->OnCurrentTimeChange(2);
+    EXPECT_EQ(videoPattern->isInitialState_, false);
+
+    /**
+     * @tc.steps: step5. Call OnCurrentTimeChange while isPrepared_ is false.
+     * @tc.expected: isInitialState_ is true.
+     */
+    videoPattern->isInitialState_ = true;
+    videoPattern->isPrepared_ = false;
+    videoPattern->OnCurrentTimeChange(2);
+    EXPECT_EQ(videoPattern->isInitialState_, true);
 }
 
 /**

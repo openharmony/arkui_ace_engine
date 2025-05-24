@@ -173,6 +173,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     clickEffect(value: ClickEffect | null): this;
     onDragStart(event: (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this;
     onDragEnter(event: (event?: DragEvent, extraParams?: string) => void): this;
+    onDragSpringLoading(callback: Callback<SpringLoadingContext> | null, configuration?: DragSpringLoadingConfiguration): this;
     onDragMove(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDragLeave(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDrop(event: (event?: DragEvent, extraParams?: string) => void): this;
@@ -626,6 +627,7 @@ declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     clickEffect(value: ClickEffect | null): this;
     onDragStart(event: (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this;
     onDragEnter(event: (event?: DragEvent, extraParams?: string) => void): this;
+    onDragSpringLoading(callback: Callback<SpringLoadingContext> | null, configuration?: DragSpringLoadingConfiguration): this;
     onDragMove(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDragLeave(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDrop(event: (event?: DragEvent, extraParams?: string) => void): this;
@@ -751,6 +753,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     }): TextAttribute;
     letterSpacing(value: number | string): TextAttribute;
     lineSpacing(value: LengthMetrics, options?: LineSpacingOptions): TextAttribute;
+    optimizeTrailingSpace(trim: boolean): TextAttribute;
     textCase(value: TextCase): TextAttribute;
     baselineOffset(value: number | string): TextAttribute;
     copyOption(value: CopyOptions): TextAttribute;
@@ -1046,6 +1049,8 @@ declare class ArkSliderComponent extends ArkComponent implements SliderAttribute
     blockSize(value: SizeOptions): this;
     blockStyle(value: SliderBlockStyle): this;
     stepSize(value: Length): this;
+    prefix(value: CustomBuilder, options?: SliderCustomContentOptions): this;
+    suffix(value: CustomBuilder, options?: SliderCustomContentOptions): this;
 }
 declare class ArkRatingComponent extends ArkComponent implements RatingAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1084,6 +1089,14 @@ declare class ArkNavDestinationComponent extends ArkComponent implements NavDest
     onBackPressed(callback: () => boolean): this;
     ignoreLayoutSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): this;
     recoverable(value: boolean | undefined): this;
+}
+declare class ArkStepperComponent extends ArkComponent implements StepperAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    onFinish(callback: () => void): this;
+    onSkip(callback: () => void): this;
+    onChange(callback: (prevIndex: number, index: number) => void): this;
+    onNext(callback: (index: number, pendingIndex: number) => void): this;
+    onPrevious(callback: (index: number, pendingIndex: number) => void): this;
 }
 declare class ArkCounterComponent extends ArkComponent implements CounterAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1149,6 +1162,7 @@ declare class ArkNavigationComponent extends ArkComponent implements NavigationA
     ignoreLayoutSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): NavigationAttribute;
     recoverable(value: boolean | undefined): NavigationAttribute;
     enableDragBar(value: boolean | undefined): NavigationAttribute;
+    splitPlaceholder(placeholder: ComponentContent): NavigationAttribute;
 }
 declare class ArkNavRouterComponent extends ArkComponent implements NavRouterAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1695,6 +1709,7 @@ declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute
     clickEffect(value: ClickEffect): this;
     onDragStart(event: (event: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this;
     onDragEnter(event: (event: DragEvent, extraParams?: string) => void): this;
+    onDragSpringLoading(callback: Callback<SpringLoadingContext> | null, configuration?: DragSpringLoadingConfiguration): this;
     onDragMove(event: (event: DragEvent, extraParams?: string) => void): this;
     onDragLeave(event: (event: DragEvent, extraParams?: string) => void): this;
     onDrop(event: (event: DragEvent, extraParams?: string) => void): this;

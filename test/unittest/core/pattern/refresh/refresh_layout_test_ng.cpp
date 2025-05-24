@@ -35,6 +35,7 @@ HWTEST_F(RefreshLayoutTestNg, AddCustomBuilderNode001, TestSize.Level1)
     RefreshModelNG model = CreateRefresh();
     CreateDone();
     EXPECT_NE(pattern_->progressChild_, nullptr);
+    EXPECT_FALSE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. Add custom
@@ -105,6 +106,7 @@ HWTEST_F(RefreshLayoutTestNg, AddCustomBuilderNode002, TestSize.Level1)
     EXPECT_EQ(pattern_->customBuilder_, nullptr);
     EXPECT_NE(pattern_->progressChild_, nullptr);
     EXPECT_NE(pattern_->loadingTextNode_, nullptr);
+    EXPECT_FALSE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step2. Add custom
@@ -138,6 +140,7 @@ HWTEST_F(RefreshLayoutTestNg, AddCustomBuilderNode003, TestSize.Level1)
     CreateDone();
     EXPECT_EQ(pattern_->progressChild_, nullptr);
     EXPECT_EQ(pattern_->customBuilder_, builder);
+    EXPECT_FALSE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step2. Remove custom when isRefreshing
@@ -166,6 +169,7 @@ HWTEST_F(RefreshLayoutTestNg, AttrRefreshing001, TestSize.Level1)
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
     CreateRefresh();
     CreateDone();
+    EXPECT_FALSE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step2. Set to refreshing
@@ -196,6 +200,7 @@ HWTEST_F(RefreshLayoutTestNg, OnKeyEvent001, TestSize.Level1)
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
     CreateRefresh();
     CreateDone();
+    EXPECT_FALSE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. KeyCode::KEY_UNKNOWN
@@ -223,6 +228,7 @@ HWTEST_F(RefreshLayoutTestNg, OnKeyEvent002, TestSize.Level1)
     RefreshModelNG model = CreateRefresh();
     model.SetOnRefreshing(std::move(onRefreshing));
     CreateDone();
+    EXPECT_FALSE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. KeyCode::KEY_F5
@@ -258,6 +264,7 @@ HWTEST_F(RefreshLayoutTestNg, GetTargetOffset001, TestSize.Level1)
     EXPECT_FLOAT_EQ(pattern_->GetTargetOffset(), TRIGGER_REFRESH_DISTANCE);
     pattern_->HandleDragEnd(0.f);
     EXPECT_FLOAT_EQ(pattern_->GetTargetOffset(), TRIGGER_REFRESH_DISTANCE);
+    EXPECT_FALSE(pattern_->isHigherVersion_);
 }
 
 /**
@@ -270,6 +277,7 @@ HWTEST_F(RefreshLayoutTestNg, VersionElevenAttrRefreshing001, TestSize.Level1)
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     CreateRefresh();
     CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step2. Set to refreshing
@@ -302,6 +310,7 @@ HWTEST_F(RefreshLayoutTestNg, AttrRefreshOffset01, TestSize.Level1)
     model.SetRefreshOffset(Dimension(10.f));
     CreateDone();
     EXPECT_EQ(pattern_->refreshOffset_, Dimension(10.f));
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. Illegal arg
@@ -333,6 +342,7 @@ HWTEST_F(RefreshLayoutTestNg, SetPullDownRatio001, TestSize.Level1)
     model.SetPullDownRatio(std::nullopt);
     CreateDone();
     EXPECT_EQ(pattern_->CalculatePullDownRatio(), 1.f);
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     model.SetPullDownRatio(AceType::RawPtr(frameNode_), 0.f);
     EXPECT_EQ(pattern_->CalculatePullDownRatio(), 0.f);
@@ -357,6 +367,7 @@ HWTEST_F(RefreshLayoutTestNg, Layout001, TestSize.Level1)
     EXPECT_EQ(frameNode_->GetTag(), "Refresh");
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(0, 0, 32, 32)));
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 1);
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     auto loadingProgress = GetChildFrameNode(frameNode_, 0);
     EXPECT_EQ(loadingProgress->GetTag(), "LoadingProgress");
@@ -376,6 +387,7 @@ HWTEST_F(RefreshLayoutTestNg, LoadingText001, TestSize.Level1)
     model.SetLoadingText("loadingText");
     CreateDone();
     EXPECT_NE(pattern_->loadingTextNode_, nullptr);
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     layoutProperty_->ResetLoadingText();
     frameNode_->MarkModifyDone();
@@ -400,6 +412,7 @@ HWTEST_F(RefreshLayoutTestNg, LoadingText002, TestSize.Level1)
     model.SetLoadingText("loadingText");
     CreateDone();
     EXPECT_EQ(pattern_->GetTriggerRefreshDisTance().ConvertToPx(), TRIGGER_REFRESH_WITH_TEXT_DISTANCE);
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step2. Test refresh action
@@ -438,6 +451,7 @@ HWTEST_F(RefreshLayoutTestNg, CustomBuilderNodeVisibility001, TestSize.Level1)
     EXPECT_EQ(pattern_->customBuilder_, builder);
     auto customBuilderLayoutProperty = pattern_->customBuilder_->GetLayoutProperty();
     EXPECT_EQ(customBuilderLayoutProperty->GetVisibility(), VisibleType::INVISIBLE);
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step2.  start Refreshing

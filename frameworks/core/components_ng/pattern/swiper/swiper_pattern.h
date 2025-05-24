@@ -680,7 +680,7 @@ public:
     virtual void SetIsCrownSpring(bool isCrownSpring) {}
 #endif
     int32_t GetMaxDisplayCount() const;
-    virtual bool GetDisableFlushFocus() { return false; }
+    virtual bool GetAndResetDisableFlushFocus() { return false; }
     virtual void SaveCircleDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode) {}
     bool GetPrevMarginIgnoreBlank()
     {
@@ -825,6 +825,8 @@ public:
 
     void NotifyDataChange(int32_t index, int32_t count) override;
 
+    void OnColorModeChange(uint32_t colorMode) override;
+    void ResetOnForceMeasure();
 protected:
     void MarkDirtyNodeSelf();
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
@@ -836,6 +838,8 @@ protected:
     void FireAnimationStartEvent(int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const;
     void SetLazyLoadFeature(bool useLazyLoad);
     void UpdateItemRenderGroup(bool itemRenderGroup);
+
+    void SuggestOpIncGroup() const;
 
     float GetCustomPropertyOffset() const;
     float GetCustomPropertyTargetOffset() const;
@@ -1203,7 +1207,6 @@ private:
                SwiperUtils::IsStretch(swiperLayoutProperty);
     }
 
-    void ResetOnForceMeasure();
     void ResetTabBar();
     void UpdateTabBarIndicatorCurve();
     const RefPtr<Curve> GetTabBarAnimationCurve(const RefPtr<Curve>& curve);

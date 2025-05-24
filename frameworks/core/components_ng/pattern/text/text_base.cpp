@@ -20,6 +20,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 const Dimension SELECTED_BLANK_LINE_WIDTH = 2.0_vp;
+constexpr size_t UTF16_SURROGATE_PAIR_LENGTH = 2;
+constexpr size_t UTF16_SINGLE_CHAR_LENGTH = 1;
 }; // namespace
 
 void TextBase::SetSelectionNode(const SelectedByMouseInfo& info)
@@ -237,6 +239,35 @@ std::u16string TextBase::ConvertStr8toStr16(const std::string& value)
         result = StringUtils::Str8ToStr16(content);
     }
     return result;
+}
+
+std::u16string TextBase::TruncateText(const std::u16string& text, const size_t& length) const
+{
+    const size_t maxLength = length;
+    size_t charCount = 0;
+    size_t byteIndex = 0;
+
+    while (byteIndex < text.size() && charCount < maxLength) {
+        charCount++;
+        byteIndex += (text[byteIndex] >= 0xD800 && text[byteIndex] <= 0xDBFF) ?
+            UTF16_SURROGATE_PAIR_LENGTH : UTF16_SINGLE_CHAR_LENGTH;
+    }
+
+    if (charCount >= maxLength) {
+        return text.substr(0, byteIndex);
+    }
+    return text;
+}
+
+size_t TextBase::CountUtf16Chars(const std::u16string& s)
+{
+    size_t charCount = 0;
+    size_t i = 0;
+    while (i < s.size()) {
+        charCount++;
+        i += (s[i] >= 0xD800 && s[i] <= 0xDBFF) ? UTF16_SURROGATE_PAIR_LENGTH : UTF16_SINGLE_CHAR_LENGTH;
+    }
+    return charCount;
 }
 
 void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)

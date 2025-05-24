@@ -119,4 +119,18 @@ RefPtr<UINode> DialogManager::GetDialogNodeByContentNode(const RefPtr<UINode>& c
     }
     return parent;
 }
+
+bool DialogManager::IfNeedAvoidDock(const RefPtr<FrameNode>& currentNode) const
+{
+    auto pipelineContext = currentNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, false);
+    auto expandDisplay = dialogTheme->GetExpandDisplay();
+    auto containerId = pipelineContext->GetInstanceId();
+    auto container = AceEngine::Get().GetContainer(containerId);
+    CHECK_NULL_RETURN(container, false);
+    auto isFreeMultiWindow = container->IsFreeMultiWindow();
+    return expandDisplay || isFreeMultiWindow;
+}
 } // namespace OHOS::Ace::NG

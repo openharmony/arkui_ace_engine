@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/jsview/models/custom_dialog_controller_model_impl.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
@@ -64,7 +65,7 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM_END };
 const std::vector<KeyboardAvoidMode> KEYBOARD_AVOID_MODE = { KeyboardAvoidMode::DEFAULT, KeyboardAvoidMode::NONE };
 const std::vector<LevelMode> DIALOG_LEVEL_MODE = { LevelMode::OVERLAY, LevelMode::EMBEDDED };
-const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAULT, ImmersiveMode::EXTEND};
+const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAULT, ImmersiveMode::EXTEND };
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 200;
 constexpr float DEFAULT_AVOID_DISTANCE = 16.0f;
 
@@ -109,6 +110,84 @@ void ParseCustomDialogFocusable(DialogProperties& properties, JSRef<JSObject> ob
 }
 
 static std::atomic<int32_t> controllerId = 0;
+
+void ParseColor(DialogProperties& properties, const JSRef<JSObject>& obj)
+{
+    Color maskColor;
+    Color backgroundColor;
+    auto maskColorValue = obj->GetProperty("maskColor");
+    auto backgroundColorValue = obj->GetProperty("backgroundColor");
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resBgColorObj = nullptr;
+        RefPtr<ResourceObject> resMaskColorObj = nullptr;
+        if (JSViewAbstract::ParseJsColor(maskColorValue, maskColor, resMaskColorObj)) {
+            properties.maskColor = maskColor;
+        }
+        properties.resourceMaskColorObj = resMaskColorObj;
+        if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor, resBgColorObj)) {
+            properties.backgroundColor = backgroundColor;
+        }
+        properties.resourceBgColorObj = resBgColorObj;
+        return;
+    }
+    if (JSViewAbstract::ParseJsColor(maskColorValue, maskColor)) {
+        properties.maskColor = maskColor;
+    }
+    if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor)) {
+        properties.backgroundColor = backgroundColor;
+    }
+}
+
+void ParseOffset(const JSRef<JSVal>& jsValue, DialogProperties& properties)
+{
+    auto offsetObj = JSRef<JSObject>::Cast(jsValue);
+    CalcDimension dx;
+    CalcDimension dy;
+    if (!SystemProperties::ConfigChangePerform()) {
+        JSViewAbstract::ParseJsDimensionVp(offsetObj->GetProperty("dx"), dx);
+        JSViewAbstract::ParseJsDimensionVp(offsetObj->GetProperty("dy"), dy);
+        dx.ResetInvalidValue();
+        dy.ResetInvalidValue();
+        properties.offset = DimensionOffset(dx, dy);
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+        Dimension offsetX = isRtl ? properties.offset.GetX() * (-1) : properties.offset.GetX();
+        properties.offset.SetX(offsetX);
+        return;
+    }
+    RefPtr<ResourceObject> xResObj = nullptr;
+    RefPtr<ResourceObject> yResObj = nullptr;
+    if (JSViewAbstract::ParseJsDimensionVp(offsetObj->GetProperty("dx"), dx, xResObj)) {
+        properties.offset.SetX(dx);
+    }
+    if (JSViewAbstract::ParseJsDimensionVp(offsetObj->GetProperty("dy"), dy, yResObj)) {
+        properties.offset.SetY(dy);
+    }
+    DimensionOffset offsetOption;
+    if (xResObj) {
+        auto&& offsetXUpdateFunc = [](const RefPtr<ResourceObject>& xResObj, DimensionOffset& options) {
+            CalcDimension offsetX;
+            if (ResourceParseUtils::ParseResDimensionVp(xResObj, offsetX)) {
+                Dimension xVal = offsetX;
+                options.SetX(xVal);
+            }
+            bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+            Dimension value = isRtl ? options.GetX() * (-1) : options.GetX();
+            options.SetX(value);
+        };
+        offsetOption.AddResource("dialog.offset.x", xResObj, std::move(offsetXUpdateFunc));
+    }
+    if (yResObj) {
+        auto&& offsetYUpdateFunc = [](const RefPtr<ResourceObject>& yResObj, DimensionOffset& options) {
+            CalcDimension offsetY;
+            if (ResourceParseUtils::ParseResDimensionVp(yResObj, offsetY)) {
+                Dimension yVal = offsetY;
+                options.SetY(yVal);
+            }
+        };
+        offsetOption.AddResource("dialog.offset.y", yResObj, std::move(offsetYUpdateFunc));
+    }
+}
+
 void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
 {
     uint32_t argc = info.Length();
@@ -218,16 +297,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         // Parse offset
         auto offsetValue = constructorArg->GetProperty("offset");
         if (offsetValue->IsObject()) {
-            auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
-            CalcDimension dx;
-            auto dxValue = offsetObj->GetProperty("dx");
-            JSViewAbstract::ParseJsDimensionVp(dxValue, dx);
-            CalcDimension dy;
-            auto dyValue = offsetObj->GetProperty("dy");
-            JSViewAbstract::ParseJsDimensionVp(dyValue, dy);
-            dx.ResetInvalidValue();
-            dy.ResetInvalidValue();
-            instance->dialogProperties_.offset = DimensionOffset(dx, dy);
+            ParseOffset(offsetValue, instance->dialogProperties_);
         }
 
         // Parses gridCount.
@@ -236,25 +306,14 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             instance->dialogProperties_.gridCount = gridCountValue->ToNumber<int32_t>();
         }
 
-        // Parse maskColor.
-        auto maskColorValue = constructorArg->GetProperty("maskColor");
-        Color maskColor;
-        if (JSViewAbstract::ParseJsColor(maskColorValue, maskColor)) {
-            instance->dialogProperties_.maskColor = maskColor;
-        }
+        //  maskColor and backgroundColor
+        ParseColor(instance->dialogProperties_, constructorArg);
 
         // Parse maskRect.
         auto maskRectValue = constructorArg->GetProperty("maskRect");
         DimensionRect maskRect;
         if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
             instance->dialogProperties_.maskRect = maskRect;
-        }
-
-        // Parse backgroundColor.
-        auto backgroundColorValue = constructorArg->GetProperty("backgroundColor");
-        Color backgroundColor;
-        if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor)) {
-            instance->dialogProperties_.backgroundColor = backgroundColor;
         }
 
         // Parse backgroundBlurStyle.
@@ -347,7 +406,6 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
     if (!jsBuilderFunction_) {
         return;
     }
-
     if (this->ownerView_ == nullptr) {
         return;
     }
@@ -397,12 +455,12 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
     dialogProperties_.isSysBlurStyle =
         Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) ? true : false;
     CustomDialogControllerModel::GetInstance()->SetOpenDialog(dialogProperties_, WeakClaim(this), dialogs_, pending_,
-        isShown_, std::move(cancelTask), std::move(buildFunc), dialogComponent_, customDialog_, dialogOperation_);
+        isShown_, std::move(cancelTask), std::move(buildFunc), dialogComponent_, customDialog_, dialogOperation_,
+        hasBind_);
 }
 
 void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
 {
-
     if (this->ownerView_ == nullptr) {
         return;
     }
@@ -428,6 +486,12 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
 
     CustomDialogControllerModel::GetInstance()->SetCloseDialog(dialogProperties_, WeakClaim(this), dialogs_, pending_,
         isShown_, std::move(cancelTask), dialogComponent_, customDialog_, dialogOperation_);
+}
+
+void JSCustomDialogController::JsGetState(const JSCallbackInfo& info)
+{
+    PromptActionCommonState state = CustomDialogControllerModel::GetInstance()->GetState(dialogs_, hasBind_);
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(state))));
 }
 
 bool JSCustomDialogController::ParseAnimation(
@@ -496,6 +560,7 @@ void JSCustomDialogController::JSBind(BindingTarget object)
     JSClass<JSCustomDialogController>::Declare("NativeCustomDialogController");
     JSClass<JSCustomDialogController>::CustomMethod("open", &JSCustomDialogController::JsOpenDialog);
     JSClass<JSCustomDialogController>::CustomMethod("close", &JSCustomDialogController::JsCloseDialog);
+    JSClass<JSCustomDialogController>::CustomMethod("getState", &JSCustomDialogController::JsGetState);
     JSClass<JSCustomDialogController>::Bind(
         object, &JSCustomDialogController::ConstructorCallback, &JSCustomDialogController::DestructorCallback);
 }

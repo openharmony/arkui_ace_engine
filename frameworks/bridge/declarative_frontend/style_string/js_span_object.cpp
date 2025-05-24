@@ -83,6 +83,7 @@ void JSFontSpan::JSBind(BindingTarget globalObj)
     JSClass<JSFontSpan>::CustomProperty("fontFamily", &JSFontSpan::GetFontFamily, &JSFontSpan::SetFontFamily);
     JSClass<JSFontSpan>::CustomProperty("strokeWidth", &JSFontSpan::GetStrokeWidth, &JSFontSpan::SetStrokeWidth);
     JSClass<JSFontSpan>::CustomProperty("strokeColor", &JSFontSpan::GetStrokeColor, &JSFontSpan::SetStrokeColor);
+    JSClass<JSFontSpan>::CustomProperty("superscript", &JSFontSpan::GetSuperscript, &JSFontSpan::SetSuperscript);
     JSClass<JSFontSpan>::Bind(globalObj, JSFontSpan::Constructor, JSFontSpan::Destructor);
 }
 
@@ -122,6 +123,7 @@ RefPtr<FontSpan> JSFontSpan::ParseJsFontSpan(const JSRef<JSObject>& obj)
     ParseJsFontStyle(obj, font);
     ParseJsStrokeWidth(obj, font);
     ParseJsStrokeColor(obj, font);
+    ParseJsSuperscript(obj, font);
     return AceType::MakeRefPtr<FontSpan>(font);
 }
 
@@ -269,6 +271,21 @@ void JSFontSpan::ParseJsStrokeColor(const JSRef<JSObject>& obj, Font& font)
     }
 }
 
+void JSFontSpan::ParseJsSuperscript(const JSRef<JSObject>& obj, Font& font)
+{
+    if (obj->HasProperty("superscript")) {
+        auto style = obj->GetProperty("superscript");
+        OHOS::Ace::SuperscriptStyle superscriptStyle = SuperscriptStyle::NORMAL;
+        if (!style->IsNull() && style->IsNumber()) {
+            auto value = style->ToNumber<int32_t>();
+            if (value >= 0 && value < static_cast<int32_t>(SuperscriptStyle::NONE)) {
+                superscriptStyle = static_cast<SuperscriptStyle>(value);
+            }
+        }
+        font.superscript = superscriptStyle;
+    }
+}
+
 void JSFontSpan::GetFontColor(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(fontSpan_);
@@ -357,6 +374,18 @@ void JSFontSpan::GetStrokeColor(const JSCallbackInfo& info)
 
 void JSFontSpan::SetStrokeColor(const JSCallbackInfo& info) {}
 
+void JSFontSpan::GetSuperscript(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(fontSpan_);
+    if (!fontSpan_->GetFont().superscript.has_value()) {
+        return;
+    }
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(static_cast<int32_t>(fontSpan_->GetFont().superscript.value()))));
+    info.SetReturnValue(ret);
+}
+
+void JSFontSpan::SetSuperscript(const JSCallbackInfo& info) {}
+
 const RefPtr<FontSpan>& JSFontSpan::GetFontSpan()
 {
     return fontSpan_;
@@ -376,6 +405,10 @@ void JSDecorationSpan::JSBind(BindingTarget globalObj)
         "color", &JSDecorationSpan::GetTextDecorationColor, &JSDecorationSpan::SetTextDecorationColor);
     JSClass<JSDecorationSpan>::CustomProperty(
         "style", &JSDecorationSpan::GetTextDecorationStyle, &JSDecorationSpan::SetTextDecorationStyle);
+    JSClass<JSDecorationSpan>::CustomProperty(
+        "thicknessScale", &JSDecorationSpan::GetLineThicknessScale, &JSDecorationSpan::SetLineThicknessScale);
+    JSClass<JSDecorationSpan>::CustomProperty(
+        "options", &JSDecorationSpan::GetTextDecorationOptions, &JSDecorationSpan::SetTextDecorationOptions);
     JSClass<JSDecorationSpan>::Bind(globalObj, JSDecorationSpan::Constructor, JSDecorationSpan::Destructor);
 }
 
@@ -388,7 +421,7 @@ void JSDecorationSpan::Constructor(const JSCallbackInfo& args)
     if (args.Length() <= 0 || !args[0]->IsObject()) {
         span = AceType::MakeRefPtr<DecorationSpan>();
     } else {
-        span = JSDecorationSpan::ParseJsDecorationSpan(JSRef<JSObject>::Cast(args[0]));
+        span = JSDecorationSpan::ParseJsDecorationSpan(args);
     }
     decorationSpan->decorationSpan_ = span;
     args.SetReturnValue(Referenced::RawPtr(decorationSpan));
@@ -401,8 +434,9 @@ void JSDecorationSpan::Destructor(JSDecorationSpan* decorationSpan)
     }
 }
 
-RefPtr<DecorationSpan> JSDecorationSpan::ParseJsDecorationSpan(const JSRef<JSObject>& obj)
+RefPtr<DecorationSpan> JSDecorationSpan::ParseJsDecorationSpan(const JSCallbackInfo& args)
 {
+    auto obj = JSRef<JSObject>::Cast(args[0]);
     std::optional<Color> colorOption;
     Color color;
     JSRef<JSVal> colorObj = JSRef<JSVal>::Cast(obj->GetProperty("color"));
@@ -419,13 +453,35 @@ RefPtr<DecorationSpan> JSDecorationSpan::ParseJsDecorationSpan(const JSRef<JSObj
     if (!typeObj->IsNull() && typeObj->IsNumber()) {
         type = static_cast<TextDecoration>(typeObj->ToNumber<int32_t>());
     }
-    return AceType::MakeRefPtr<DecorationSpan>(type, colorOption, styleOption);
+    float lineThicknessScale = 1.0f;
+    JSRef<JSVal> thicknessScaleValue = obj->GetProperty("thicknessScale");
+    if (thicknessScaleValue->IsNumber()) {
+        lineThicknessScale = thicknessScaleValue->ToNumber<float>();
+    }
+    lineThicknessScale = LessNotEqual(lineThicknessScale, 0) ? 1.0f : lineThicknessScale;
+    std::optional<TextDecorationOptions> options;
+    if (args.Length() > 1 && args[1]->IsObject()) {
+        options = JSDecorationSpan::ParseJsDecorationOptions(JSRef<JSObject>::Cast(args[1]));
+    }
+    return AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({type}), colorOption, styleOption, lineThicknessScale, options);
+}
+
+TextDecorationOptions JSDecorationSpan::ParseJsDecorationOptions(const JSRef<JSObject>& obj)
+{
+    TextDecorationOptions options;
+    JSRef<JSVal> enableMultiTypeObj = JSRef<JSVal>::Cast(obj->GetProperty("enableMultiType"));
+    if (!enableMultiTypeObj->IsNull() && enableMultiTypeObj->IsBoolean()) {
+        options.enableMultiType = enableMultiTypeObj->ToBoolean();
+    }
+    return options;
 }
 
 void JSDecorationSpan::GetTextDecorationType(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(decorationSpan_);
-    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(static_cast<int32_t>(decorationSpan_->GetTextDecorationType()))));
+    auto ret = JSRef<JSVal>::Make(
+        JSVal(ToJSValue(static_cast<int32_t>(decorationSpan_->GetTextDecorationFirst()))));
     info.SetReturnValue(ret);
 }
 
@@ -455,6 +511,38 @@ void JSDecorationSpan::GetTextDecorationStyle(const JSCallbackInfo& info)
 }
 
 void JSDecorationSpan::SetTextDecorationStyle(const JSCallbackInfo& info) {}
+
+void JSDecorationSpan::GetLineThicknessScale(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(decorationSpan_);
+    if (!decorationSpan_->GetLineThicknessScale().has_value()) {
+        return;
+    }
+    auto ret =
+        JSRef<JSVal>::Make(JSVal(ToJSValue(decorationSpan_->GetLineThicknessScale().value())));
+    info.SetReturnValue(ret);
+}
+
+void JSDecorationSpan::SetLineThicknessScale(const JSCallbackInfo& info) {}
+
+void JSDecorationSpan::GetTextDecorationOptions(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(decorationSpan_);
+    if (!decorationSpan_->GetTextDecorationOptions().has_value()) {
+        return;
+    }
+    auto options = decorationSpan_->GetTextDecorationOptions().value();
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    objectTemplate->SetInternalFieldCount(1);
+    JSRef<JSObject> retObj = objectTemplate->NewInstance();
+    if (options.enableMultiType.has_value()) {
+        bool enableMultiType = options.enableMultiType.value_or(false);
+        retObj->SetProperty<bool>("enableMultiType", enableMultiType);
+    }
+    info.SetReturnValue(retObj);
+}
+
+void JSDecorationSpan::SetTextDecorationOptions(const JSCallbackInfo& info) {}
 
 RefPtr<DecorationSpan>& JSDecorationSpan::GetDecorationSpan()
 {

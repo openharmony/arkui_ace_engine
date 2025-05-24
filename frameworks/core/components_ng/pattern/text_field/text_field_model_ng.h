@@ -141,6 +141,7 @@ public:
     void SetStrokeWidth(const Dimension& value) override;
     void SetStrokeColor(const Color& value) override;
     void ResetStrokeColor() override;
+    void SetEnableAutoSpacing(bool enabled) override;
 
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
@@ -149,6 +150,7 @@ public:
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
     static void SetHalfLeading(FrameNode* frameNode, const bool& value);
     static void SetLineSpacing(FrameNode* frameNode, const Dimension& value, bool isOnlyBetweenLines);
+    static float GetLineSpacing(FrameNode* frameNode);
     void SetTextOverflow(Ace::TextOverflow value) override;
     void SetTextIndent(const Dimension& value) override;
     static void SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow value);
@@ -326,6 +328,9 @@ public:
     static void SetStrokeWidth(FrameNode* frameNode, const Dimension& value);
     static void SetStrokeColor(FrameNode* frameNode, const Color& value);
     static void ResetStrokeColor(FrameNode* frameNode);
+    static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
+    static bool GetEnableAutoSpacing(FrameNode* frameNode);
+    static void SetOnSecurityStateChange(FrameNode* frameNode, std::function<void(bool)>&& func);
 
 private:
     void AddDragFrameNodeToManager() const;

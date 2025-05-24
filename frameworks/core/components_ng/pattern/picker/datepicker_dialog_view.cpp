@@ -324,7 +324,9 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonRowNode()
 
 void DatePickerDialogView::CreateTitleIconNode(const RefPtr<FrameNode>& titleNode)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -991,8 +993,7 @@ void DatePickerDialogView::UpdateButtonStyleAndRole(const std::vector<ButtonInfo
 }
 
 RefPtr<FrameNode> DatePickerDialogView::CreateDateNode(int32_t dateNodeId,
-    std::map<std::string, PickerDate> datePickerProperty, const PickerTextProperties& properties, bool isLunar,
-    bool showTime)
+    const DatePickerSettingData& settingData, bool showTime)
 {
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::DATE_PICKER_ETS_TAG, dateNodeId);
     auto dateNode = FrameNode::GetOrCreateFrameNode(
@@ -1020,8 +1021,11 @@ RefPtr<FrameNode> DatePickerDialogView::CreateDateNode(int32_t dateNodeId,
     PickerDate parseStartDate;
     PickerDate parseEndDate;
     PickerDate parseSelectedDate = PickerDate::Current();
-    SetShowLunar(dateNode, isLunar);
-    SetDateTextProperties(dateNode, properties);
+    SetShowLunar(dateNode, settingData.isLunar);
+    SetCanLoop(dateNode, settingData.canLoop);
+    SetDateTextProperties(dateNode, settingData.properties);
+    
+    auto datePickerProperty = settingData.datePickerProperty;
     auto iterStart = datePickerProperty.find("start");
     if (iterStart != datePickerProperty.end()) {
         parseStartDate = iterStart->second;
@@ -1377,6 +1381,13 @@ void DatePickerDialogView::SetShowLunar(const RefPtr<FrameNode>& frameNode, bool
     pickerProperty->UpdateLunar(lunar);
 }
 
+void DatePickerDialogView::SetCanLoop(const RefPtr<FrameNode>& frameNode, bool isLoop)
+{
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    pickerProperty->UpdateCanLoop(isLoop);
+}
+
 void DatePickerDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1568,8 +1579,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountDateNode(
 {
     auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     datePickerMode_ = settingData.mode;
-    auto dateNode =
-        CreateDateNode(dateNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
+    auto dateNode = CreateDateNode(dateNodeId, settingData, false);
     SetMode(dateNode, settingData.mode);
     ViewStackProcessor::GetInstance()->Push(dateNode);
     dateNode->MountToParent(pickerStack);
@@ -1627,8 +1637,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountMonthDaysNode(const DatePi
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     auto monthDaysNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto monthDaysNode = CreateDateNode(
-        monthDaysNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+    auto monthDaysNode = CreateDateNode(monthDaysNodeId, settingData, true);
     lunarChangeEvent = [monthDaysNodeWeak = AceType::WeakClaim(AceType::RawPtr(monthDaysNode)),
                            dateNodeWeak = AceType::WeakClaim(AceType::RawPtr(dateNode))](bool selected) {
         auto monthDaysNode = monthDaysNodeWeak.Upgrade();

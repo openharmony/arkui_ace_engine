@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/time_picker/toss_animation_controller.h"
+#include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -61,6 +61,7 @@ const uint32_t INDEX_SECOND_STRAT = 0;
 const uint32_t INDEX_SECOND_ADD_ZERO = 10;
 const uint32_t INDEX_SECOND_END = 59;
 const uint32_t SIZE_OF_AMPM_COLUMN_OPTION = 2;
+constexpr float PICKER_MAXFONTSCALE = 1.0f;
 } // namespace
 
 void TimePickerRowPattern::OnAttachToFrameNode()
@@ -306,6 +307,8 @@ void TimePickerRowPattern::UpdateTitleNodeContent()
         auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateContent(str.ToString(false));
+        textTitleNode->MarkModifyDone();
+        textTitleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -2176,13 +2179,16 @@ void TimePickerRowPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(pickerTheme);
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
-    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
-    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
-    auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
-    CHECK_NULL_VOID(pickerProperty);
-    pickerProperty->UpdateColor(GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
-    pickerProperty->UpdateDisappearColor(
-        GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+    if (!SystemProperties::ConfigChangePerform()) {
+        auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
+        auto normalStyle = pickerTheme->GetOptionStyle(false, false);
+        auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
+        CHECK_NULL_VOID(pickerProperty);
+        pickerProperty->UpdateColor(
+            GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+        pickerProperty->UpdateDisappearColor(
+            GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+    }
     if (isPicker_) {
         return;
     }
@@ -2257,6 +2263,121 @@ void TimePickerRowPattern::UpdateUserSetSelectColor()
             }
         }
     }
+}
+
+Dimension TimePickerRowPattern::ConvertFontScaleValue(const Dimension& fontSizeValue)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, fontSizeValue);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, fontSizeValue);
+
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
+    auto follow = pipeline->IsFollowSystem();
+    float fontScale = pipeline->GetFontScale();
+    if (NearZero(fontScale) || (fontSizeValue.Unit() == DimensionUnit::VP)) {
+        return fontSizeValue;
+    }
+    if (GreatOrEqualCustomPrecision(fontScale, PICKER_MAXFONTSCALE) && follow) {
+        fontScale = std::clamp(fontScale, 0.0f, maxAppFontScale);
+        if (!NearZero(fontScale)) {
+            return Dimension(fontSizeValue / fontScale);
+        }
+    }
+    return fontSizeValue;
+}
+
+void TimePickerRowPattern::UpdateTextStyleCommon(
+    const PickerTextStyle& textStyle,
+    const TextStyle& defaultTextStyle,
+    std::function<void(const Color&)> updateTextColorFunc,
+    std::function<void(const Dimension&)> updateFontSizeFunc,
+    std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc
+)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pickerProperty = GetLayoutProperty<TimePickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        updateTextColorFunc(textStyle.textColor.value_or(defaultTextStyle.GetTextColor()));
+
+        Dimension fontSize = defaultTextStyle.GetFontSize();
+        if (textStyle.fontSize.has_value() && textStyle.fontSize->IsValid()) {
+            fontSize = textStyle.fontSize.value();
+        }
+        updateFontSizeFunc(ConvertFontScaleValue(fontSize));
+
+        updateFontFamilyFunc(textStyle.fontFamily.value_or(defaultTextStyle.GetFontFamilies()));
+    }
+
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void TimePickerRowPattern::UpdateDisappearTextStyle(const PickerTextStyle& textStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(pickerTheme);
+    auto defaultTextStyle = pickerTheme->GetDisappearOptionStyle();
+    auto pickerProperty = GetLayoutProperty<TimePickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    UpdateTextStyleCommon(
+        textStyle,
+        defaultTextStyle,
+        [&](const Color& color) { pickerProperty->UpdateDisappearColor(color); },
+        [&](const Dimension& fontSize) { pickerProperty->UpdateDisappearFontSize(fontSize); },
+        [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateDisappearFontFamily(fontFamily); }
+    );
+}
+
+void TimePickerRowPattern::UpdateNormalTextStyle(const PickerTextStyle& textStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(pickerTheme);
+    auto defaultTextStyle = pickerTheme->GetOptionStyle(false, false);
+    auto pickerProperty = GetLayoutProperty<TimePickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    UpdateTextStyleCommon(
+        textStyle,
+        defaultTextStyle,
+        [&](const Color& color) { pickerProperty->UpdateColor(color); },
+        [&](const Dimension& fontSize) { pickerProperty->UpdateFontSize(fontSize); },
+        [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateFontFamily(fontFamily); }
+    );
+}
+
+void TimePickerRowPattern::UpdateSelectedTextStyle(const PickerTextStyle& textStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(pickerTheme);
+    auto defaultTextStyle = pickerTheme->GetOptionStyle(true, false);
+    auto pickerProperty = GetLayoutProperty<TimePickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    UpdateTextStyleCommon(
+        textStyle,
+        defaultTextStyle,
+        [&](const Color& color) { pickerProperty->UpdateSelectedColor(color); },
+        [&](const Dimension& fontSize) { pickerProperty->UpdateSelectedFontSize(fontSize); },
+        [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateSelectedFontFamily(fontFamily); }
+    );
 }
 
 } // namespace OHOS::Ace::NG

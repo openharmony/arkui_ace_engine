@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "test/unittest/core/manager/drag_drop_manager_test_ng.h"
+#include "test/mock/core/common/mock_udmf.h"
 #include "test/mock/core/render/mock_render_context.h"
 
 using namespace testing;
@@ -1435,6 +1436,8 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest049, TestSize.Level1)
      * @tc.expected: dragDropManager->summaryMap_.empty() return a true value.
      */
     dragDropManager->summaryMap_.clear();
+    auto mockUdmfClient = static_cast<MockUdmfClient*>(UdmfClient::GetInstance());
+    EXPECT_CALL(*mockUdmfClient, IsBelongsTo(_, _)).WillOnce(testing::Return(true));
     dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::COPY, -1);
     EXPECT_TRUE(dragDropManager->summaryMap_.empty());
 

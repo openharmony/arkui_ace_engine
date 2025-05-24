@@ -34,7 +34,7 @@ using CacheItem = RepeatVirtualScroll2Caches::CacheItem;
 RefPtr<RepeatVirtualScroll2Node> RepeatVirtualScroll2Node::GetOrCreateRepeatNode(int32_t nodeId, uint32_t arrLen,
     uint32_t totalCount, const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
     const std::function<void(IndexType, IndexType)>& onRecycleItems,
-    const std::function<void(int32_t, int32_t, int32_t, int32_t, bool)>& onActiveRange,
+    const std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)>& onActiveRange,
     const std::function<void(IndexType, IndexType)>& onMoveFromTo, const std::function<void()>& onPurge)
 {
     auto node = ElementRegister::GetInstance()->GetSpecificItemById<RepeatVirtualScroll2Node>(nodeId);
@@ -55,7 +55,7 @@ RefPtr<RepeatVirtualScroll2Node> RepeatVirtualScroll2Node::GetOrCreateRepeatNode
 RepeatVirtualScroll2Node::RepeatVirtualScroll2Node(int32_t nodeId, uint32_t arrLen, int32_t totalCount,
     const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
     const std::function<void(IndexType, IndexType)>& onRecycleItems,
-    const std::function<void(int32_t, int32_t, int32_t, int32_t, bool)>& onActiveRange,
+    const std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)>& onActiveRange,
     const std::function<void(IndexType, IndexType)>& onMoveFromTo,
     const std::function<void()>& onPurge)
     : ForEachBaseNode(V2::JS_REPEAT_ETS_TAG, nodeId), arrLen_(arrLen), totalCount_(totalCount), caches_(onGetRid4Index),
@@ -201,6 +201,11 @@ ActiveRangeType RepeatVirtualScroll2Node::CheckActiveRange(
         }
     }
 
+    if (!needRecordFirstFrameChild_ && (minFrameChildIndex_ != nStart || maxFrameChildIndex_ != nEnd)) {
+        forceRunDoSetActiveRange_ = true;
+    }
+    needRecordFirstFrameChild_ = true;
+
     // step 1: if range unchanged skip full run unless forced (rerender will force run once)
     if (!forceRunDoSetActiveRange_ && (prevActiveRangeStart_ == nStart && prevActiveRangeEnd_ == nEnd) &&
         (prevVisibleRangeStart_ == start && prevVisibleRangeEnd_ == end)) {
@@ -230,7 +235,7 @@ ActiveRangeType RepeatVirtualScroll2Node::CheckActiveRange(
         start, end, cacheStart, cacheEnd, nStart, nEnd);
 
     // step 2. call TS side
-    onActiveRange_(nStart, nEnd, start, end, isLoop_);
+    onActiveRange_(nStart, nEnd, start, end, isLoop_, forceRunDoSetActiveRange_);
 
     return {nStart, nEnd};
 }
@@ -260,7 +265,10 @@ bool RepeatVirtualScroll2Node::RebuildL1(int32_t start, int32_t end, int32_t nSt
                 TAG_LOGD(AceLogTag::ACE_REPEAT,
                     "out of range: index %{public}d -> child nodeId %{public}d: SetActive(false)",
                     index, frameNode->GetId());
-                frameNode->SetActive(false);
+                // SetActive to false will remove node from RS tree, if the node is deleted by animateTo, then animation will not display
+                if (!AnimationUtils::IsImplicitAnimationOpen()) {
+                    frameNode->SetActive(false);
+                }
                 cacheItem->isActive_ = false;
             }
 
@@ -304,7 +312,10 @@ bool RepeatVirtualScroll2Node::ProcessActiveL2Nodes()
         // 2. Repeat.rerender
         auto frameNode = AceType::DynamicCast<FrameNode>(cacheItem->node_->GetFrameChildByIndex(0, true));
         if (frameNode && cacheItem->isActive_) {
-            frameNode->SetActive(false);
+            // SetActive to false will remove node from RS tree, if the node is deleted by animateTo, then animation will not display
+            if (!AnimationUtils::IsImplicitAnimationOpen()) {
+                frameNode->SetActive(false);
+            }
             cacheItem->isActive_ = false;
             needSync = true;
             TAG_LOGD(AceLogTag::ACE_REPEAT,
@@ -495,6 +506,8 @@ RefPtr<UINode> RepeatVirtualScroll2Node::GetFrameChildByIndexImpl(
         return nullptr;
     }
 
+    updateFrameChildIndexRecord(index);
+
     CacheItem& cacheItem4Index = resultPair.second;
 
     TAG_LOGD(AceLogTag::ACE_REPEAT, "GetFrameChild(%{public}d) returns node %{public}s.",
@@ -525,6 +538,8 @@ RefPtr<UINode> RepeatVirtualScroll2Node::GetFrameChildByIndexImpl(
     cacheItem4Index->node_->SetParent(WeakClaim(this));
     if (IsOnMainTree()) {
         cacheItem4Index->node_->AttachToMainTree(false, GetContext());
+        // node attached to main tree should not be in disappearing children
+        RemoveDisappearingChild(cacheItem4Index->node_);
     }
 
     MarkNeedSyncRenderTree();
@@ -538,6 +553,18 @@ RefPtr<UINode> RepeatVirtualScroll2Node::GetFrameChildByIndexImpl(
     }
 
     return childNode;
+}
+
+void RepeatVirtualScroll2Node::updateFrameChildIndexRecord(uint32_t index)
+{
+    if (needRecordFirstFrameChild_) {
+        minFrameChildIndex_ = index;
+        maxFrameChildIndex_ = index;
+        needRecordFirstFrameChild_ = false;
+    } else {
+        minFrameChildIndex_ = std::min(minFrameChildIndex_, index);
+        maxFrameChildIndex_ = std::max(maxFrameChildIndex_, index);
+    }
 }
 
 int32_t RepeatVirtualScroll2Node::GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool /*isExpanded*/)
@@ -698,6 +725,16 @@ void RepeatVirtualScroll2Node::OnConfigurationUpdate(const ConfigurationChange& 
             }
         });
     }
+}
+
+void RepeatVirtualScroll2Node::NotifyColorModeChange(uint32_t colorMode)
+{
+    caches_.ForEachCacheItem([colorMode, this](RIDType rid, const CacheItem& cacheItem) {
+      if (cacheItem->node_ != nullptr) {
+          cacheItem->node_->SetMeasureAnyway(GetRerenderable());
+          cacheItem->node_->NotifyColorModeChange(colorMode);
+      }
+    });
 }
 
 void RepeatVirtualScroll2Node::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse)

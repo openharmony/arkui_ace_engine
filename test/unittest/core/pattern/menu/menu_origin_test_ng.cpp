@@ -1822,6 +1822,62 @@ HWTEST_F(MenuTestNg, MenuViewTestNg007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MenuViewTestNg008
+ * @tc.desc: Verify HandleMenuMaskAndFilter with MenuView::Create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuViewTestNg008, TestSize.Level1)
+{
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto customNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(customNode, nullptr);
+    auto targetParentNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(targetParentNode, nullptr);
+
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+
+    auto targetNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 11, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(targetNode, nullptr);
+    auto targetGestureHub = targetNode->GetOrCreateGestureEventHub();
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->SetThemeManager(themeManager);
+
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->pipelineContext_ = pipeline;
+
+    RefPtr<MenuTheme> menuTheme = AceType::MakeRefPtr<MenuTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(menuTheme));
+
+    targetParentNode->SetDepth(1);
+    targetNode->SetParent(targetParentNode);
+
+    pipeline->GetTheme<MenuTheme>()->hasFilter_ = true;
+    targetNode->GetLayoutProperty()->UpdateIsBindOverlay(true);
+
+    targetNode->draggable_ = true;
+    menuParam.maskEnable = true;
+    auto menuWrapperNode1 = MenuView::Create(textNode, 11, V2::TEXT_ETS_TAG, menuParam, true, customNode);
+    ASSERT_NE(menuWrapperNode1, nullptr);
+    ASSERT_EQ(menuWrapperNode1->GetChildren().size(), 1);
+
+    menuParam.type = MenuType::MENU;
+    menuParam.maskType = NG::MenuMaskType();
+    menuParam.maskType->maskColor = Color::RED;
+    menuParam.maskType->maskBackGroundBlueStyle = BlurStyle::BACKGROUND_THIN;
+    auto menuWrapperNode2 = MenuView::Create(textNode, 11, V2::TEXT_ETS_TAG, menuParam, true, customNode);
+    ASSERT_NE(menuWrapperNode2, nullptr);
+    ASSERT_EQ(menuWrapperNode2->GetChildren().size(), 1);
+}
+
+/**
  * @tc.name: MenuPreviewTestNg001
  * @tc.desc: Test menu view create with image preview.
  * @tc.type: FUNC
@@ -1915,5 +1971,19 @@ HWTEST_F(MenuTestNg, MenuPreviewTestNg002, TestSize.Level1)
     auto customPreview =  menuWrapperPattern->GetHoverImageCustomPreview();
     ASSERT_NE(customPreview, nullptr);
     EXPECT_EQ(customPreview->GetTag(), V2::MENU_PREVIEW_ETS_TAG);
+}
+
+/**
+ * @tc.name: CreateMenuTest001
+ * @tc.desc: Test CreateMenu creates a FrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, CreateMenuTest001, TestSize.Level1)
+{
+    auto menuNode = MenuModelNG::CreateMenu();
+    ASSERT_NE(menuNode, nullptr);
+
+    auto layoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProps, nullptr);
 }
 } // namespace OHOS::Ace::NG

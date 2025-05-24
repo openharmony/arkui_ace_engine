@@ -936,6 +936,39 @@ void NavigationPattern::RefreshNavDestination()
         });
 }
 
+void NavigationPattern::UpdateColorModeForNodes(
+    const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        auto& allStackNode = navigationStack_->GetAllNavDestinationNodes();
+        auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+        CHECK_NULL_VOID(hostNode);
+        auto lastIndex = hostNode->GetLastStandardIndex();
+        auto pipelineContext = hostNode->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto colorMode = pipelineContext->GetColorMode() == ColorMode::DARK ? true : false;
+        for (size_t index = lastIndex; index < allStackNode.size(); index++) {
+            auto node = allStackNode[index].second;
+            if (node && node->CheckIsDarkMode() == colorMode) {
+                continue;
+            }
+            pipelineContext->SetIsSystemColorChange(false);
+            node->SetRerenderable(true);
+            node->NotifyColorModeChange(colorMode);
+        }
+        if (!newTopNavPath.has_value()) {
+            auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
+            CHECK_NULL_VOID(navBarNode);
+            if (navBarNode->CheckIsDarkMode() == colorMode) {
+                return;
+            }
+            pipelineContext->SetIsSystemColorChange(false);
+            navBarNode->SetRerenderable(true);
+            navBarNode->NotifyColorModeChange(colorMode);
+        }
+    }
+}
+
 void NavigationPattern::CheckTopNavPathChange(
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath,
@@ -1000,6 +1033,7 @@ void NavigationPattern::CheckTopNavPathChange(
         isPopPage = false;
     }
     RefPtr<NavDestinationGroupNode> newTopNavDestination;
+    UpdateColorModeForNodes(newTopNavPath);
     if (newTopNavPath.has_value()) {
         newTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
             NavigationGroupNode::GetNavDestinationNode(newTopNavPath->second));
@@ -3710,7 +3744,7 @@ void NavigationPattern::FireNavigationLifecycle(const RefPtr<UINode>& uiNode, Na
 
 void NavigationPattern::GenerateLastStandardPage(NavPathList& navPathList)
 {
-    int64_t lastPageIndex = navPathList.size() - 1;
+    int64_t lastPageIndex = static_cast<int64_t>(navPathList.size()) - 1;
     // if top page is nullptr or is dialog node, we need to generate node util standard page is found.
     while (lastPageIndex >= 0 &&
         (navPathList[lastPageIndex].second == nullptr || !IsStandardPage(navPathList[lastPageIndex].second))) {

@@ -22,6 +22,7 @@
 #include "frameworks/base/geometry/ng/offset_t.h"
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/base/utils/noncopyable.h"
+#include "frameworks/core/components/refresh/refresh_theme.h"
 #include "frameworks/core/components_ng/base/frame_scene_status.h"
 #include "frameworks/core/components_ng/pattern/list/list_layout_property.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"
@@ -84,6 +85,8 @@ public:
     }
 
     void OnColorConfigurationUpdate() override;
+
+    void OnColorModeChange(uint32_t colorMode) override;
 
     Axis GetAxis() const override
     {
@@ -157,8 +160,8 @@ private:
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
-    float scrollOffset_;
-    float lastScrollOffset_;
+    float scrollOffset_ = 0.0f;
+    float lastScrollOffset_ = 0.0f;
     bool isSourceFromAnimation_ = false;
     bool isRefreshing_ = false;
     bool isKeyEventRegisted_ = false;
@@ -199,6 +202,8 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(RefreshPattern);
     Dimension loadingProgressSizeTheme_ = 32.0_vp;
     Dimension triggerLoadingDistanceTheme_ = 16.0_vp;
+    bool isHigherVersion_ = true;
+    RefPtr<RefreshTheme> refreshTheme_;
 };
 } // namespace OHOS::Ace::NG
 

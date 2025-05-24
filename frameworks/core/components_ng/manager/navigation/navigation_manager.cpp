@@ -111,14 +111,14 @@ std::shared_ptr<NavigationInfo> NavigationManager::GetNavigationInfo(const RefPt
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "find parent navigation node failed");
         return nullptr;
     }
-    
+
     auto navigation = AceType::DynamicCast<NavigationGroupNode>(current);
     CHECK_NULL_RETURN(navigation, nullptr);
     auto pattern = navigation->GetPattern<NavigationPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     auto stack = pattern->GetNavigationStack();
     CHECK_NULL_RETURN(stack, nullptr);
-    return std::make_shared<NavigationInfo>(navigation->GetInspectorId().value_or(""), stack);
+    return std::make_shared<NavigationInfo>(navigation->GetInspectorId().value_or(""), stack, navigation->GetId());
 }
 
 bool NavigationManager::AddInteractiveAnimation(const std::function<void()>& addCallback)
@@ -548,9 +548,9 @@ NavigationIntentInfo NavigationManager::ParseNavigationIntentInfo(const std::str
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "error, intent info is an invalid json object!");
         return intentInfo;
     }
-    intentInfo.param = GetJsonIntentInfo(intentJson->GetObject(INTENT_PARAM_KEY));
-    intentInfo.navigationInspectorId = GetJsonIntentInfo(intentJson->GetObject(INTENT_NAVIGATION_ID_KEY));
-    intentInfo.navDestinationName = GetJsonIntentInfo(intentJson->GetObject(INTENT_NAVDESTINATION_NAME_KEY));
+    intentInfo.param = intentJson->GetObject(INTENT_PARAM_KEY)->ToString();
+    intentInfo.navigationInspectorId = intentJson->GetString(INTENT_NAVIGATION_ID_KEY, "");
+    intentInfo.navDestinationName = intentJson->GetString(INTENT_NAVDESTINATION_NAME_KEY, "");
     return intentInfo;
 }
 
@@ -583,16 +583,5 @@ bool NavigationManager::FireNavigationIntentActively(int32_t pageId, bool needTr
         "error, specified navigation(id: %{public}s) doesn't exist in current page(id: %{public}d)",
         navigationIntentInfo_.value().navigationInspectorId.c_str(), pageId);
     return false;
-}
-
-std::string NavigationManager::GetJsonIntentInfo(std::unique_ptr<JsonValue> intentJson)
-{
-    if (!intentJson || !intentJson->IsObject()) {
-        return "";
-    }
-    if (!intentJson->GetChild() || !intentJson->GetChild()->IsString()) {
-        return "";
-    }
-    return intentJson->GetChild()->GetString();
 }
 } // namespace OHOS::Ace::NG

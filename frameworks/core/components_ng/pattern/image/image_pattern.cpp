@@ -1926,7 +1926,9 @@ void ImagePattern::OnLanguageConfigurationUpdate()
 
 void ImagePattern::OnColorConfigurationUpdate()
 {
-    OnConfigurationUpdate();
+    if (!SystemProperties::ConfigChangePerform()) {
+        OnConfigurationUpdate();
+    }
 }
 
 void ImagePattern::OnDirectionConfigurationUpdate()
@@ -2804,6 +2806,70 @@ void ImagePattern::OnInActive()
 {
     if (status_ == AnimatorStatus::RUNNING) {
         animator_->Pause();
+    }
+}
+
+void ImagePattern::UpdateImageSourceinfo(const ImageSourceInfo& sourceInfo)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (pipelineContext->IsSystmColorChange()) {
+        auto imageCache = pipelineContext->GetImageCache();
+        CHECK_NULL_VOID(imageCache);
+        auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        ImageSourceInfo imageCacheSource = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+        imageCache->ClearCacheImgObj(imageCacheSource.GetKey());
+        imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
+        LoadImage(sourceInfo, imageLayoutProperty->GetPropertyChangeFlag());
+    }
+}
+
+void ImagePattern::UpdateImageFill(const Color& color)
+{
+    auto renderProperty = GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(renderProperty);
+    renderProperty->UpdateSvgFillColor(color);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateForegroundColor(color);
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void ImagePattern::UpdateImageAlt(const ImageSourceInfo& sourceInfo)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (pipelineContext->IsSystmColorChange()) {
+        auto imageCache = pipelineContext->GetImageCache();
+        CHECK_NULL_VOID(imageCache);
+        auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
+        imageCache->ClearCacheImgObj(altImageSourceInfo.GetKey());
+        imageLayoutProperty->UpdateAlt(sourceInfo);
+        LoadAltImage(sourceInfo);
+    }
+}
+
+void ImagePattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (host->GetRerenderable()) {
+        host->MarkModifyDone();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
 } // namespace OHOS::Ace::NG

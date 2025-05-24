@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_MODEL_NG_H
 
+#include "core/common/resource/resource_object.h"
 #include "core/components_ng/pattern/navigation/navigation_model.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -33,18 +34,43 @@ public:
     void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath) override;
     bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
         const std::string& title, bool ignoreMainTitle = false) override;
+    bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const RefPtr<ResourceObject>& subResObj,
+        const RefPtr<ResourceObject>& mainResObj, bool ignoreMainTitle = false) override;
+    void UpdateMainTitle(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj) override;
+    void UpdateSubTitle(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& subResObj) override;
+
     void SetTitle(const std::string& title, bool hasSubTitle = false) override;
     void SetTitlebarOptions(NavigationTitlebarOptions&& opt) override;
     void SetCustomTitle(const RefPtr<AceType>& customNode) override;
     void SetTitleHeight(const Dimension& height, bool isValid = true) override;
+    void SetTitleHeight(const RefPtr<ResourceObject>& resObj, bool isValid = true) override;
     void SetTitleMode(NG::NavigationTitleMode mode) override;
     void SetSubtitle(const std::string& subtitle) override;
     void SetEnableModeChangeAnimation(bool isEnable) override;
+    void SetSplitPlaceholder(const RefPtr<NG::UINode>& splitPlaceholder) override;
     void SetHideTitleBar(bool hideTitleBar, bool animated = false) override;
     void SetHideNavBar(bool hideNavBar) override;
     void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const std::string& src,
         const ImageOption& imageOption, RefPtr<PixelMap>& pixMap, const std::vector<std::string>& nameList,
         bool userDefinedAccessibilityText = false, const std::string& backButtonAccessibilityText = "") override;
+    void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const RefPtr<ResourceObject>& resObj, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText = false,
+        const std::string& backButtonAccessibilityText = "") override;
+    void SetBackButtonIconTextRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
+        const RefPtr<ResourceObject>& resObj) override;
+    void SetBackButtonIconSrcAndTextRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const RefPtr<ResourceObject>& backButtonResObj, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
+        const RefPtr<ResourceObject>& backButtonTextResObj) override;
+    void UpdateBackButtonIcon(const std::vector<std::string>& nameList,
+        NG::FrameNode* frameNode, const RefPtr<ResourceObject>& backButtonIconResObj) override;
+    void UpdateBackButtonIconText(bool userDefinedAccessibilityText,
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& backButtonTextResObj) override;
     void SetHideBackButton(bool hideBackButton) override;
     void SetHideToolBar(bool hideToolBar, bool animated = false) override;
     void SetCustomToolBar(const RefPtr<AceType>& customNode) override;
@@ -52,6 +78,7 @@ public:
 
     void SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems) override;
     void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) override;
+    void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems, MoreButtonOptions&& opt) override;
     void SetToolbarOptions(NavigationToolbarOptions&& opt) override;
     void SetHideItemText(bool isHideItemText) override;
     void SetEnableToolBarAdaptation(bool enable) override;
@@ -64,9 +91,13 @@ public:
     void SetUsrNavigationMode(NG::NavigationMode mode) override;
     void SetNavBarPosition(NG::NavBarPosition mode) override;
     void SetNavBarWidth(const Dimension& value, bool isDoubleBind = false) override;
+    void SetNavBarWidth(const RefPtr<ResourceObject>& navBarWidthResObj) override;
     void SetMinNavBarWidth(const Dimension& value) override;
     void SetMaxNavBarWidth(const Dimension& value) override;
+    void SetMinNavBarWidth(const RefPtr<ResourceObject>& minNavBarWidthResObj) override;
+    void SetMaxNavBarWidth(const RefPtr<ResourceObject>& maxNavBarWidthResObj) override;
     void SetMinContentWidth(const Dimension& value) override;
+    void SetMinContentWidth(const RefPtr<ResourceObject>& minContentWidthResObj) override;
     void SetOnNavBarStateChange(std::function<void(bool)>&& onNavBarStateChange) override;
     void SetNavigationMode(NG::NavigationMode mode) override;
     void SetNavDestination(std::function<void(std::string)>&& builder) override;
@@ -78,11 +109,14 @@ public:
     void SetIsCustomAnimation(bool isCustom) override;
     void SetRecoverable(bool recoverable) override;
     void SetEnableDragBar(bool enableDragBar) override;
+    void ResetSplitPlaceholder() override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetNavigationStack(FrameNode* frameNode);
     static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated);
     static void SetEnableModeChangeAnimation(FrameNode* frameNode, bool isEnable);
+    static void SetSplitPlaceholder(FrameNode* frameNode, FrameNode* splitPlaceholder);
+    static void ResetSplitPlaceholder(FrameNode* frameNode);
     static void SetMinContentWidth(FrameNode* frameNode, const Dimension& value);
     static void SetMinNavBarWidth(FrameNode* frameNode, const Dimension& value);
     static void SetMaxNavBarWidth(FrameNode* frameNode, const Dimension& value);
@@ -116,8 +150,17 @@ public:
     static void SetOnCoordScrollStartAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollStart);
     static void SetOnCoordScrollUpdateAction(FrameNode* frameNode, std::function<void(float)>&& onCoordScrollUpdate);
     static void SetOnCoordScrollEndAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollEnd);
-    static void SetSystemBarStyle(FrameNode* frameNode, const Color& contentColor);
+    static void SetSystemBarStyle(FrameNode* frameNode, const RefPtr<SystemBarStyle>& style);
     static bool IsDoubleBindBlock(const RefPtr<NavigationPattern>& navigationPattern);
+    static void SetOnNavigationModeChange(FrameNode* frameNode, std::function<void(NG::NavigationMode)>&& onModeChange);
+    static void SetOnTitleModeChange(FrameNode* frameNode,
+        std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
+        std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo);
+    static void SetIsCustomAnimation(FrameNode* frameNode, bool isCustom);
+    static void SetToolBarItems(FrameNode* frameNode, std::vector<NG::BarItem>&& toolBarItems);
+    static RefPtr<NG::NavigationStack> GetNavigationStack(FrameNode* frameNode);
+    static void SetOnNavBarStateChange(FrameNode* frameNode, std::function<void(bool)>&& onNavBarStateChange);
+    static CalcDimension ParseTitleHeight(const RefPtr<ResourceObject>& resObj);
 
 private:
     bool CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);

@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 #include "base/utils/device_config.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
-DeviceType DeviceConfig::realDeviceType = DeviceType::PHONE;
+const DeviceType DeviceConfig::realDeviceType = SystemProperties::GetDeviceType();
 } // namespace OHOS::Ace

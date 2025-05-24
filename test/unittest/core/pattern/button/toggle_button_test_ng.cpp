@@ -827,4 +827,66 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest017, TestSize.Level1)
     togglePattern->OnClick();
     EXPECT_EQ(togglePattern->isbgColorFocus_, false);
 }
+
+/**
+ * @tc.name: ToggleButtonPatternTest018
+ * @tc.desc: test ToggleButtonPattern::HandleHoverEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest018, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = std::make_optional(IS_ON);
+    RefPtr<FrameNode> frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto togglePattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
+    ASSERT_NE(togglePattern, nullptr);
+    auto buttonFrameNode = AceType::MakeRefPtr<FrameNode>("Button", 1, AceType::MakeRefPtr<ButtonPattern>());
+    togglePattern->frameNode_ = std::move(buttonFrameNode);
+    togglePattern->HandleHoverEvent(true);
+    EXPECT_FALSE(togglePattern->isPress_);
+    auto eventHub = buttonFrameNode->GetEventHub<EventHub>();
+    eventHub->enabled_ = false;
+    togglePattern->frameNode_ = std::move(buttonFrameNode);
+    togglePattern->HandleHoverEvent(false);
+    EXPECT_FALSE(togglePattern->isScale_);
+    togglePattern->isScale_ = true;
+    togglePattern->HandleHoverEvent(false);
+    EXPECT_FALSE(togglePattern->isScale_);
+    togglePattern->isPress_ = true;
+    togglePattern->HandleHoverEvent(false);
+    EXPECT_EQ(buttonFrameNode->GetFirstChild(), nullptr);
+    togglePattern->isPress_ = false;
+    togglePattern->HandleHoverEvent(true);
+    EXPECT_EQ(buttonFrameNode->GetFirstChild(), nullptr);
+    auto inputEventHub = buttonFrameNode->GetOrCreateInputEventHub();
+    togglePattern->frameNode_ = std::move(buttonFrameNode);
+    inputEventHub->hoverEffectType_ = HoverEffectType::NONE;
+    togglePattern->HandleHoverEvent(true);
+    EXPECT_EQ(inputEventHub->GetHoverEffect(), HoverEffectType::NONE);
+    inputEventHub->hoverEffectType_ = HoverEffectType::SCALE;
+    togglePattern->HandleHoverEvent(true);
+    EXPECT_EQ(inputEventHub->GetHoverEffect(), HoverEffectType::SCALE);
+}
+
+/**
+ * @tc.name: ToggleButtonPatternTest019
+ * @tc.desc: test ToggleButtonPattern::OnAfterModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest019, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = std::make_optional(IS_ON);
+    RefPtr<FrameNode> frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto togglePattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
+    ASSERT_NE(togglePattern, nullptr);
+    auto buttonFrameNode = AceType::MakeRefPtr<FrameNode>("Button", 1, AceType::MakeRefPtr<ButtonPattern>());
+    togglePattern->frameNode_ = std::move(buttonFrameNode);
+    togglePattern->OnAfterModifyDone();
+    buttonFrameNode->UpdateInspectorId("Toggle");
+    togglePattern->frameNode_ = std::move(buttonFrameNode);
+    togglePattern->OnAfterModifyDone();
+}
 } // namespace OHOS::Ace::NG

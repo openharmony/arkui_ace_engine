@@ -57,6 +57,10 @@ public:
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     FocusPattern GetFocusPattern() const override;
+    void UpdateQRCodeCreate(const std::string& value);
+    void UpdateColor(const Color& color, bool isFristLoad = false);
+    void UpdateBackgroundColor(const Color& color, bool isFristLoad = false);
+    void UpdateContentOpacity(double opacity, bool isFristLoad = false);
 
 private:
     void OnAttachToFrameNode() override;

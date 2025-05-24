@@ -2400,4 +2400,23 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0044, TestSize.Level1)
     EXPECT_EQ(positionLocalizedEdges, needLocalized);
 }
 
+/**
+ * @tc.name: CreateWithForegroundColorResourceObj
+ * @tc.desc: Test CreateWithForegroundColorResourceObj of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0045, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);;
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {};
+    updateFunc(resObj);
+    pattern->AddResObj("foregroundColor", resObj, std::move(updateFunc));
+    std::string foregroundColor = pattern->GetResCacheMapByKey("foregroundColor");
+    EXPECT_EQ(foregroundColor, "");
+}
+
 } // namespace OHOS::Ace::NG

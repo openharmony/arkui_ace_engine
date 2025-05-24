@@ -338,6 +338,7 @@ public:
      * @param rect - offset of @c rect is relative to FrameRect.
      */
     virtual void SetContentClip(const std::variant<RectF, RefPtr<ShapeRect>>& rect) {}
+    virtual void ResetContentClip() {}
 
     // visual
     virtual void UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) {}
@@ -803,7 +804,7 @@ public:
 
     virtual void SetDrawNode() {}
 
-    virtual void UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode) {}
+    virtual void UpdateOcclusionCullingStatus(bool enable) {}
 
     virtual void SetAnimationPropertyValue(AnimationPropertyType property, const std::vector<float>& value) {}
 

@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 
+#include <functional>
 #include <utility>
 
 #include "base/geometry/dimension.h"
@@ -32,6 +33,8 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -155,16 +158,16 @@ void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
 
 void DatePickerModelNG::CreateDateColumn(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& dateNode)
 {
-    auto stackYearNode = CreateStackNode();
-    auto blendYearNode = CreateColumnNode();
-    auto buttonYearNode = CreateButtonNode();
-    buttonYearNode->MountToParent(stackYearNode);
-    columnNode->MountToParent(blendYearNode);
-    blendYearNode->MountToParent(stackYearNode);
-    auto layoutProperty = stackYearNode->GetLayoutProperty<LayoutProperty>();
+    auto stackNode = CreateStackNode();
+    auto blendNode = CreateColumnNode();
+    auto buttonNode = CreateButtonNode();
+    buttonNode->MountToParent(stackNode);
+    columnNode->MountToParent(blendNode);
+    blendNode->MountToParent(stackNode);
+    auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
     layoutProperty->UpdateAlignment(Alignment::CENTER);
     layoutProperty->UpdateLayoutWeight(1);
-    stackYearNode->MountToParent(dateNode);
+    stackNode->MountToParent(dateNode);
 }
 
 RefPtr<FrameNode> DatePickerModelNG::CreateStackNode()
@@ -297,6 +300,27 @@ RefPtr<FrameNode> DatePickerModelNG::CreateFrameNode(int32_t nodeId)
 void DatePickerModelNG::SetShowLunar(bool lunar)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, Lunar, lunar);
+}
+
+void DatePickerModelNG::SetCanLoop(bool isLoop)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, CanLoop, isLoop);
+}
+
+void DatePickerModelNG::SetCanLoop(FrameNode* frameNode, bool isLoop)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetCanLoop(isLoop);
+}
+
+bool DatePickerModelNG::GetCanLoop(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, true);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_RETURN(datePickerPattern, true);
+    return datePickerPattern->GetCanLoop();
 }
 
 void DatePickerModelNG::SetStartDate(const PickerDate& value)
@@ -969,4 +993,88 @@ void DatePickerModelNG::UpdateUserSetSelectColor()
     datePickerPattern->UpdateUserSetSelectColor();
 }
 
+void DatePickerModelNG::ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
+    std::function<void(const PickerTextStyle&)> updateTextStyleFunc)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    auto&& updateFunc = [textStyleOpt, frameNode, updateTextStyleFunc](const RefPtr<ResourceObject> resObj) {
+        PickerTextStyle textStyle;
+        Color color;
+        CalcDimension fontSize;
+        std::vector<std::string> families;
+
+        if (textStyleOpt.textColorResObj &&
+            ResourceParseUtils::ParseResColor(textStyleOpt.textColorResObj, color)) {
+            textStyle.textColor = color;
+        }
+
+        if (textStyleOpt.fontSizeResObj &&
+            ResourceParseUtils::ParseResDimensionFp(textStyleOpt.fontSizeResObj, fontSize)) {
+            textStyle.fontSize = fontSize;
+        }
+
+        if (textStyleOpt.fontFamilyResObj &&
+            ResourceParseUtils::ParseResFontFamilies(textStyleOpt.fontFamilyResObj, families)) {
+            textStyle.fontFamily = families;
+        }
+
+        updateTextStyleFunc(textStyle);
+    };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    pickerPattern->AddResObj(textStyleType, resObj, std::move(updateFunc));
+}
+
+void DatePickerModelNG::ParseDisappearTextStyleResObj(const PickerTextStyle& textStyleOpt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    ParseResTextStyle(
+        textStyleOpt,
+        "DatePickerDisappearTextStyle",
+        [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateDisappearTextStyle(textStyle); }
+    );
+}
+
+void DatePickerModelNG::ParseSelectedTextStyleResObj(const PickerTextStyle& textStyleOpt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    ParseResTextStyle(
+        textStyleOpt,
+        "DatePickerSelectedTextStyle",
+        [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateSelectedTextStyle(textStyle); }
+    );
+}
+
+void DatePickerModelNG::ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    ParseResTextStyle(
+        textStyleOpt,
+        "DatePickerNormalTextStyle",
+        [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateNormalTextStyle(textStyle); }
+    );
+}
 } // namespace OHOS::Ace::NG

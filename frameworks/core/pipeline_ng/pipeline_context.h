@@ -78,6 +78,8 @@ namespace OHOS::Ace::NG {
 using VsyncCallbackFun = std::function<void()>;
 using FrameCallbackFunc = std::function<void(uint64_t nanoTimestamp)>;
 using FrameCallbackFuncFromCAPI = std::function<void(uint64_t nanoTimestamp, uint32_t frameCount)>;
+using IdleCallbackFunc = std::function<void(uint64_t nanoTimestamp, uint32_t frameCount)>;
+class NodeRenderStatusMonitor;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -362,6 +364,8 @@ public:
     void AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode);
 
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
+
+    void AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle);
 
     void AddLayoutNode(const RefPtr<FrameNode>& layoutNode);
 
@@ -1019,7 +1023,7 @@ public:
 
     void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) override;
 
-    void AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, FrameCallbackFunc&& idleCallbackFunc,
+    void AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, IdleCallbackFunc&& idleCallbackFunc,
         int64_t delayMillis);
 
     void FlushFrameCallback(uint64_t nanoTimestamp);
@@ -1091,7 +1095,6 @@ public:
 
     void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
     bool CheckThreadSafe();
-    void UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode);
 
     bool IsHoverModeChange() const
     {
@@ -1206,6 +1209,12 @@ public:
     void NotifyDragTouchEvent(const TouchEvent& event);
     void NotifyDragMouseEvent(const MouseEvent& event);
     void NotifyDragOnHide();
+
+    void AddToOcclusionMap(int32_t frameNodeId, bool enable)
+    {
+        keyOcclusionNodes_[frameNodeId] = enable;
+    }
+    const RefPtr<NodeRenderStatusMonitor>& GetNodeRenderStatusMonitor();
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1352,6 +1361,8 @@ private:
     bool FlushModifierAnimation(uint64_t nanoTimestamp);
 
     void FlushAnimationDirtysWhenExist(const AnimationOption& option);
+
+    void UpdateOcclusionCullingStatus();
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
@@ -1508,8 +1519,8 @@ private:
     bool isDoKeyboardAvoidAnimate_ = true;
 
     std::list<FrameCallbackFuncFromCAPI> frameCallbackFuncsFromCAPI_;
+    std::list<IdleCallbackFunc> idleCallbackFuncs_;
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
-    std::list<FrameCallbackFunc> idleCallbackFuncs_;
     uint32_t transform_ = 0;
     std::list<WeakPtr<FrameNode>> changeInfoListeners_;
     std::list<WeakPtr<FrameNode>> changedNodes_;
@@ -1529,6 +1540,8 @@ private:
     friend class FormGestureManager;
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = nullptr;
     std::set<WeakPtr<NG::UINode>> needRenderForDrawChildrenNodes_;
+    std::unordered_map<int32_t, bool> keyOcclusionNodes_;
+    RefPtr<NodeRenderStatusMonitor> nodeRenderStatusMonitor_;
 };
 
 /**
