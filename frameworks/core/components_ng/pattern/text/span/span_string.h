@@ -69,7 +69,7 @@ public:
         const RefPtr<SpanBase>& span, std::vector<int32_t>& spanNoIntersection,
         int32_t start, int32_t end);
     bool ProcessMultiDecorationSpan(const RefPtr<SpanBase>& span, int32_t start, int32_t end);
-    void AddSpan(const RefPtr<SpanBase>& span, bool processMultiDecoration = true);
+    void AddSpan(const RefPtr<SpanBase>& span, bool processMultiDecoration = true, bool isFromHtml = false);
     void RemoveSpan(int32_t start, int32_t length, SpanType key);
     bool CheckRange(int32_t start, int32_t length, bool allowLengthZero = false) const;
     void BindWithSpans(const std::vector<RefPtr<SpanBase>>& spans);

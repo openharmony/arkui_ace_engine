@@ -91,6 +91,22 @@ std::string SpanToHtml::ColorToHtml(const std::optional<Color>& value)
     return ToHtmlStyleFormat("color", color);
 }
 
+std::string SpanToHtml::BackgroundColorToHtml(const std::optional<TextBackgroundStyle>& value)
+{
+    if (!value.has_value()) {
+        return "";
+    }
+
+    const auto& backgroundStyle = value.value();
+    if (!backgroundStyle.backgroundColor.has_value()) {
+        return "";
+    }
+
+    auto color = backgroundStyle.backgroundColor.value().ColorToString();
+    ToHtmlColor(color);
+    return ToHtmlStyleFormat("background-color", color);
+}
+
 std::string SpanToHtml::FontFamilyToHtml(const std::optional<std::vector<std::string>>& value)
 {
     return ToHtmlStyleFormat("font-family", GetFontFamilyInJson(value));
@@ -488,6 +504,40 @@ std::string SpanToHtml::NormalStyleToHtml(
     return "style=\"" + style + "\"";
 }
 
+std::string SpanToHtml::NormalStyleToHtml(const RefPtr<NG::SpanItem>& item)
+{
+    if (!item || !item->fontStyle || !item->textLineStyle) {
+        return "";
+    }
+
+    const auto& fontStyle = *item->fontStyle;
+    const auto& textLineStyle = *item->textLineStyle;
+
+    std::string style = FontSizeToHtml(fontStyle.GetFontSize());
+    style += FontStyleToHtml(fontStyle.GetItalicFontStyle());
+    style += FontWeightToHtml(fontStyle.GetFontWeight());
+    style += ColorToHtml(fontStyle.GetTextColor());
+    style += FontFamilyToHtml(fontStyle.GetFontFamily());
+    style += StrokeWidthToHtml(fontStyle.GetStrokeWidth());
+    style += StrokeColorToHtml(fontStyle.GetStrokeColor());
+    style += FontSuperscriptToHtml(fontStyle.GetSuperscript());
+    style += DeclarationToHtml(fontStyle);
+    style += ToHtml("vertical-align", textLineStyle.GetBaselineOffset());
+    style += ToHtml("line-height", textLineStyle.GetLineHeight());
+    style += ToHtml("letter-spacing", fontStyle.GetLetterSpacing());
+    style += ToHtml(fontStyle.GetTextShadow());
+
+    // Add backgroundStyle parsing
+    if (item->backgroundStyle) {
+        style += BackgroundColorToHtml(item->backgroundStyle);
+    }
+
+    if (style.empty()) {
+        return "";
+    }
+    return "style=\"" + style + "\"";
+}
+
 std::string SpanToHtml::ToHtml(const std::optional<OHOS::Ace::TextAlign>& object)
 {
     if (!object.has_value()) {
@@ -585,28 +635,34 @@ std::string SpanToHtml::ToHtml(const SpanString& spanString)
             out += "<p " + paragraphStyle + ">";
             newLine = false;
         }
+        std::string str = "";
         if (item->spanItemType == SpanItemType::NORMAL) {
             if (paragrapStart == 0) {
-                paragrapStart = out.length();
+                paragrapStart = str.length();
             }
-            out += "<span " + NormalStyleToHtml(*item->fontStyle, *item->textLineStyle) + ">";
+            if (item->backgroundStyle) {
+                str += "<span " + NormalStyleToHtml(item) + ">";
+            } else {
+                str += "<span " + NormalStyleToHtml(*item->fontStyle, *item->textLineStyle) + ">";
+            }
             auto content = UtfUtils::Str16DebugToStr8(item->GetSpanContent());
             auto wContent = StringUtils::ToWstring(content);
             if (wContent.back() == L'\n') {
                 if (newLine) {
-                    out.insert(paragrapStart, "<p>");
+                    str.insert(paragrapStart, "<p>");
                     paragrapStart = 0;
                 }
                 content.pop_back();
-                out += content + "</span>";
-                out += "</p>";
+                str += WrapWithAnchorIfNeeded(item, content) + "</span>";
+                str += "</p>";
                 newLine = true;
             } else {
-                out += content + "</span>";
+                str += WrapWithAnchorIfNeeded(item, content) + "</span>";
             }
         } else if (item->spanItemType == SpanItemType::IMAGE) {
-            out += ImageToHtml(item);
+            str += ImageToHtml(item);
         }
+        out += str;
     }
 
     if (!newLine) {
@@ -631,28 +687,34 @@ void SpanToHtml::HandleSingleSpanItemHtml(const RefPtr<NG::SpanItem>& item, std:
         out += "<p " + paragraphStyle + ">";
         newLine = false;
     }
+    std::string str = "";
     if (item->spanItemType == SpanItemType::NORMAL) {
         if (paragraphStart == 0) {
-            paragraphStart = out.length();
+            paragraphStart = str.length();
         }
-        out += "<span " + NormalStyleToHtml(*item->fontStyle, *item->textLineStyle) + ">";
+        if (item->backgroundStyle) {
+            str += "<span " + NormalStyleToHtml(item) + ">";
+        } else {
+            str += "<span " + NormalStyleToHtml(*item->fontStyle, *item->textLineStyle) + ">";
+        }
         auto content = UtfUtils::Str16DebugToStr8(item->GetSpanContent());
         auto wContent = StringUtils::ToWstring(content);
         if (wContent.back() == L'\n') {
             if (newLine) {
-                out.insert(paragraphStart, "<p>");
+                str.insert(paragraphStart, "<p>");
                 paragraphStart = 0;
             }
             content.pop_back();
-            out += content + "</span>";
-            out += "</p>";
+            str += WrapWithAnchorIfNeeded(item, content) + "</span>";
+            str += "</p>";
             newLine = true;
         } else {
-            out += content + "</span>";
+            str += WrapWithAnchorIfNeeded(item, content) + "</span>";
         }
     } else if (item->spanItemType == SpanItemType::IMAGE) {
-        out += ImageToHtml(item);
+        str += ImageToHtml(item);
     }
+    out += str;
 }
 
 std::string SpanToHtml::ToHtml(const std::list<RefPtr<SpanItem>>& spanItems)
@@ -723,5 +785,13 @@ std::string HtmlUtils::ToHtmlForNormalType(const NG::FontStyle& fontStyle,
 {
     const std::string html = SpanToHtml::ToHtmlForNormalType(fontStyle, textLineStyle, contentStr);
     return html;
+}
+std::string SpanToHtml::WrapWithAnchorIfNeeded(const RefPtr<NG::SpanItem>& item, const std::string& content)
+{
+    if (item->urlAddress) {
+        std::string href = UtfUtils::Str16DebugToStr8(item->urlAddress.value_or(std::u16string(u"")));
+        return "<a href=\"" + href + "\">" + content + "</a>";
+    }
+    return content;
 }
 } // namespace OHOS::Ace

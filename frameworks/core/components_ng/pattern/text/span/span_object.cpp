@@ -1203,6 +1203,7 @@ void UrlSpan::AddUrlStyle(const RefPtr<NG::SpanItem>& spanItem) const
         pipelineContext->HyperlinkStartAbility(address);
     };
     spanItem->SetUrlOnReleaseEvent(std::move(urlOnRelease));
+    spanItem->urlAddress = std::u16string(address.begin(), address.end());
 }
 
 void UrlSpan::RemoveUrlStyle(const RefPtr<NG::SpanItem>& spanItem)
