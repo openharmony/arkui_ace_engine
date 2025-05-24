@@ -323,6 +323,11 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
     } else {
         selectInfo.menuInfo.showCopyAll = true;
     }
+
+    if (isSelectAll_) {
+        selectInfo.menuInfo.showCopyAll = false;
+    }
+
     auto value = GetSelectedText();
     auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
     if (!queryWord.empty()) {
@@ -794,6 +799,9 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
 {
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
+    if (id != OptionMenuActionId::SELECT_ALL && id != OptionMenuActionId::COPY) {
+        isSelectAll_ = false;
+    }
     if (!quickMenuCallback_) {
         pattern->CloseSelectOverlay();
         return;
@@ -802,7 +810,7 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
         case OptionMenuActionId::COPY:
             quickMenuCallback_->Continue(
                 OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY, OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
-            pattern->CloseSelectOverlay();
+            ChangeVisibilityOfQuickMenu();
             break;
         case OptionMenuActionId::CUT:
             quickMenuCallback_->Continue(
@@ -817,6 +825,7 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
         case OptionMenuActionId::SELECT_ALL:
             quickMenuCallback_->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_SELECT_ALL,
                 OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
+            isSelectAll_ = true;
             break;
         case OptionMenuActionId::TRANSLATE:
             HandleOnTranslate();
@@ -1094,6 +1103,10 @@ void WebSelectOverlay::UpdateSelectMenuOptions()
 {
     auto value = GetSelectedText();
     auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
+    if (isSelectAll_) {
+        webSelectInfo_.menuInfo.showCopyAll = true;
+        isSelectAll_ = false;
+    }
     if (!queryWord.empty()) {
         webSelectInfo_.menuInfo.showSearch = true;
         webSelectInfo_.menuInfo.showTranslate = true;
