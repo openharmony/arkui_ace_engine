@@ -699,7 +699,7 @@ ohos_unittest("native_key_event_test") {
   ]
 }
 
-ohos_unittest("ui_input_event_test") {
+ohos_unittest("ui_input_event_test_coverage") {
   module_out_path = interface_test_output_path
 
   sources = [
@@ -1194,11 +1194,12 @@ group("interfaces_unittest") {
     ":node_transition_test",
     ":ui_content_test",
     ":ui_event_test",
-    ":ui_input_event_test",
+    ":ui_input_event_test_coverage",
     ":viewport_config_test",
     ":xcomponent_controller_test",
     "ace_gesture:ace_native_gesture_test",
     "ace_kit:ace_kit_test",
+    "ace_ui_input_event:ui_input_event_test",
     "napi:arkui_napi_test",
   ]
 }
