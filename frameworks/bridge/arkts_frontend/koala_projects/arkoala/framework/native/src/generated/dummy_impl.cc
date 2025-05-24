@@ -26845,6 +26845,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return (Ark_FrameNode) 300;
     }
+    Ark_NativePointer GetFrameNodePtrImpl(Ark_FrameNode node)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("getFrameNodePtr(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
     } // FrameNodeAccessor
     namespace LengthMetricsAccessor {
     void DestroyPeerImpl(Ark_LengthMetrics peer)
@@ -43569,6 +43580,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeAccessor::GetFrameNodeByUniqueIdImpl,
             FrameNodeAccessor::Reuse,
             FrameNodeAccessor::Recycle,
+            FrameNodeAccessor::GetFrameNodePtrImpl,
         };
         return &FrameNodeAccessorImpl;
     }
