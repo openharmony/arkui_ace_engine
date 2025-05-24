@@ -233,4 +233,9 @@ Dimension TabContentNode::GetDefaultFontSize() const
     CHECK_NULL_RETURN(textLayoutProperty, Dimension(0));
     return textLayoutProperty->GetFontSizeValue(Dimension(0));
 }
+
+void TabContentNode::UpdataTabBarItem()
+{
+    TabContentModelNG::AddTabBarItem(Referenced::Claim(this), DEFAULT_NODE_SLOT, true);
+}
 } // namespace OHOS::Ace::NG

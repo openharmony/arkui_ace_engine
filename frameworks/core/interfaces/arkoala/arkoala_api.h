@@ -3655,6 +3655,17 @@ struct ArkUITabsModifier {
     void (*resetTabsOnContentWillChange)(ArkUINodeHandle node);
     void (*setTabsIsCustomAnimation)(ArkUINodeHandle node, ArkUI_Bool isCustom);
     void (*resetTabsIsCustomAnimation)(ArkUINodeHandle node);
+    void (*createScrollableBarModeOptionsWithResourceObj)(ArkUINodeHandle node, void* marginRawPtr);
+    void (*createBarGridAlignWithResourceObj)(ArkUINodeHandle node,
+        void* columnGutterRawPtr, void* columnMarginRawPtr);
+    void (*createDividerWithResourceObj)(ArkUINodeHandle node,
+        void* strokeWidthRawPtr, void* colorRawPtr, void* startMarginRawPtr, void* endMarginRawPtr);
+    void (*createBarBackgroundColorWithResourceObj)(ArkUINodeHandle node, void* bgColorRawPtr);
+    void (*createBarBackgroundBlurStyleWithResourceObj)(ArkUINodeHandle node, void* inactiveColorRawPtr);
+    void (*createTabBarWidthWithResourceObj)(ArkUINodeHandle node, void* widthRawPtr);
+    void (*createTabBarHeightWithResourceObj)(ArkUINodeHandle node, void* heightRawPtr);
+    void (*createBarBackgroundEffectWithResourceObj)(ArkUINodeHandle node,
+        void* colorRawPtr, void* inactiveColorRawPtr);
 };
 
 struct ArkUIStepperItemModifier {
