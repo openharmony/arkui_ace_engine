@@ -164,12 +164,18 @@ typedef Rosen::VisualEffect* (*OEMVisualEffectFunc)(const Rosen::VisualEffect* e
 class ACE_FORCE_EXPORT ViewAbstract {
 public:
     static void SetWidth(const CalcLength &width);
+    static void SetWidth(const RefPtr<ResourceObject>& resObj);
     static void SetHeight(const CalcLength &height);
+    static void SetHeight(const RefPtr<ResourceObject>& resObj);
     static void ClearWidthOrHeight(bool isWidth);
     static void SetMinWidth(const CalcLength &minWidth);
+    static void SetMinWidth(const RefPtr<ResourceObject>& resObj);
     static void SetMinHeight(const CalcLength &minHeight);
+    static void SetMinHeight(const RefPtr<ResourceObject>& resObj);
     static void SetMaxWidth(const CalcLength &maxWidth);
+    static void SetMaxWidth(const RefPtr<ResourceObject>& resObj);
     static void SetMaxHeight(const CalcLength &maxHeight);
+    static void SetMaxHeight(const RefPtr<ResourceObject>& resObj);
     static void ResetMinSize(bool resetWidth);
     static void ResetMaxSize(bool resetWidth);
 
@@ -200,6 +206,7 @@ public:
     static void SetLightUpEffect(double radio);
     static void SetPadding(const CalcLength &value);
     static void SetPadding(const PaddingProperty &value);
+    static void SetPadding(const RefPtr<ResourceObject>& resObj);
     static void SetSafeAreaPadding(const CalcLength& value);
     static void SetSafeAreaPadding(const PaddingProperty& value);
     static void SetSafeAreaPadding(FrameNode* frameNode, const CalcLength& value);
@@ -208,12 +215,16 @@ public:
     static void ResetSafeAreaPadding(FrameNode* frameNode);
     static void SetMargin(const CalcLength &value);
     static void SetMargin(const PaddingProperty &value);
+    static void SetMargin(const RefPtr<ResourceObject>& resObj);
     static void SetBorderRadius(const BorderRadiusProperty &value);
     static void SetBorderRadius(const Dimension &value);
+    static void SetBorderRadius(const RefPtr<ResourceObject>& resObj);
     static void SetBorderColor(const Color &value);
     static void SetBorderColor(const BorderColorProperty &value);
+    static void SetBorderColor(const RefPtr<ResourceObject>& resobj);
     static void SetBorderWidth(const Dimension &value);
     static void SetBorderWidth(const BorderWidthProperty &value);
+    static void SetBorderWidth(const RefPtr<ResourceObject>& resObj);
     static void SetBorderStyle(const BorderStyle &value);
     static void SetBorderStyle(const BorderStyleProperty &value);
     static void SetDashGap(const Dimension &value);
@@ -308,10 +319,22 @@ public:
 
     // position
     static void SetPosition(const OffsetT<Dimension>& value);
+    static void SetPositionX(OffsetT<Dimension>& value, const RefPtr<ResourceObject>& xresObj);
+    static void SetPositionY(OffsetT<Dimension>& value, const RefPtr<ResourceObject>& yresObj);
+    static void SetPosition(const Dimension& x, const Dimension& y,
+        const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj);
     static void SetOffset(const OffsetT<Dimension>& value);
+    static void SetOffset(const Dimension& x, const Dimension& y,
+        const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj);
+    static void SetOffsetX(OffsetT<Dimension>& value, const RefPtr<ResourceObject>& xresObj);
+    static void SetOffsetY(OffsetT<Dimension>& value, const RefPtr<ResourceObject>& yresObj);
     static void SetPositionEdges(const EdgesParam& value);
     static void SetOffsetEdges(const EdgesParam& value);
     static void MarkAnchor(const OffsetT<Dimension>& value);
+    static void MarkAnchorX(OffsetT<Dimension>& value, const RefPtr<ResourceObject>& xresObj);
+    static void MarkAnchorY(OffsetT<Dimension>& value, const RefPtr<ResourceObject>& yresObj);
+    static void MarkAnchor(const Dimension& x, const Dimension& y,
+        const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj);
     static void ResetPosition();
 
     // render position

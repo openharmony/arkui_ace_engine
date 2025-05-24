@@ -80,6 +80,11 @@ public:
         }
     }
 
+    void SetWidth(const RefPtr<ResourceObject>& resObj) override
+    {
+        ViewAbstract::SetWidth(resObj);
+    }
+
     void SetHeight(const CalcDimension& height) override
     {
         if (height.Unit() == DimensionUnit::CALC) {
@@ -97,6 +102,11 @@ public:
         if (layoutProperty) {
             layoutProperty->UpdateLayoutPolicyProperty(layoutPolicy, isSetWidth);
         }
+    }
+
+    void SetHeight(const RefPtr<ResourceObject>& resObj) override
+    {
+        ViewAbstract::SetHeight(resObj);
     }
 
     void ClearWidthOrHeight(bool isWidth) override
@@ -121,6 +131,11 @@ public:
         }
     }
 
+    void SetMinWidth(const RefPtr<ResourceObject>& resObj) override
+    {
+        ViewAbstract::SetMinWidth(resObj);
+    }
+
     void SetMinHeight(const CalcDimension& minHeight) override
     {
         if (minHeight.Unit() == DimensionUnit::CALC) {
@@ -128,6 +143,11 @@ public:
         } else {
             ViewAbstract::SetMinHeight(NG::CalcLength(minHeight));
         }
+    }
+
+    void SetMinHeight(const RefPtr<ResourceObject>& resObj) override
+    {
+        ViewAbstract::SetMinHeight(resObj);
     }
 
     void SetMaxWidth(const CalcDimension& maxWidth) override
@@ -139,6 +159,11 @@ public:
         }
     }
 
+    void SetMaxWidth(const RefPtr<ResourceObject>& resObj) override
+    {
+        ViewAbstract::SetMaxWidth(resObj);
+    }
+
     void SetMaxHeight(const CalcDimension& maxHeight) override
     {
         if (maxHeight.Unit() == DimensionUnit::CALC) {
@@ -146,6 +171,11 @@ public:
         } else {
             ViewAbstract::SetMaxHeight(NG::CalcLength(maxHeight));
         }
+    }
+
+    void SetMaxHeight(const RefPtr<ResourceObject>& resObj) override
+    {
+        ViewAbstract::SetMaxHeight(resObj);
     }
 
     void SetBackgroundColor(const Color& color) override
@@ -271,6 +301,11 @@ public:
         ViewAbstract::SetPadding(paddings);
     }
 
+    void SetPadding(const RefPtr<ResourceObject>& resObj) override
+    {
+        ViewAbstract::SetPadding(resObj);
+    }
+
     void ResetSafeAreaPadding() override
     {
         ViewAbstract::ResetSafeAreaPadding();
@@ -347,6 +382,11 @@ public:
         ViewAbstract::SetMargin(margins);
     }
 
+    void SetMargin(const RefPtr<ResourceObject>& resObj) override
+    {
+        ViewAbstract::SetMargin(resObj);
+    }
+
     void SetBorderRadius(const Dimension& value) override
     {
         ViewAbstract::SetBorderRadius(value);
@@ -369,6 +409,11 @@ public:
         ViewAbstract::SetBorderRadius(borderRadius);
     }
 
+    void SetBorderRadius(const RefPtr<ResourceObject>& resobj) override
+    {
+        ViewAbstract::SetBorderRadius(resobj);
+    }
+
     void SetBorderColor(const Color& value) override
     {
         ViewAbstract::SetBorderColor(value);
@@ -388,6 +433,11 @@ public:
     void SetBorderColor(const NG::BorderColorProperty& borderColors) override
     {
         ViewAbstract::SetBorderColor(borderColors);
+    }
+
+    void SetBorderColor(const RefPtr<ResourceObject>& resobj) override
+    {
+        ViewAbstract::SetBorderColor(resobj);
     }
 
     void SetBorderWidth(const Dimension& value) override
@@ -417,6 +467,16 @@ public:
             .topDimen = top, .bottomDimen = bottom, .startDimen = start, .endDimen = end, .multiValued = true
         };
         ViewAbstract::SetBorderWidth(borderWidth);
+    }
+
+    void SetBorderWidth(const RefPtr<ResourceObject>& resobj) override
+    {
+        ViewAbstract::SetBorderWidth(resobj);
+    }
+
+    void SetBorderWidth(const NG::BorderWidthProperty& value) override
+    {
+        ViewAbstract::SetBorderWidth(value);
     }
 
     void SetBorderStyle(const BorderStyle& value) override
@@ -453,6 +513,11 @@ public:
         ViewAbstract::SetDashGap(dashGap);
     }
 
+    void SetDashGap(const NG::BorderWidthProperty& value) override
+    {
+        ViewAbstract::SetDashGap(value);
+    }
+
     void SetDashWidth(const Dimension& value) override
     {
         ViewAbstract::SetDashWidth(value);
@@ -468,6 +533,11 @@ public:
         dashWidth.bottomDimen = bottom;
         dashWidth.multiValued = true;
         ViewAbstract::SetDashWidth(dashWidth);
+    }
+
+    void SetDashWidth(const NG::BorderWidthProperty& value) override
+    {
+        ViewAbstract::SetDashWidth(value);
     }
 
     void SetOuterBorderRadius(const Dimension& value) override
@@ -652,6 +722,12 @@ public:
         ViewAbstract::SetPosition({ x, y });
     }
 
+    void SetPosition(const Dimension& x, const Dimension& y,
+        const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj) override
+    {
+        ViewAbstract::SetPosition(x, y, xresObj, yresObj);
+    }
+
     void SetPositionEdges(const EdgesParam& value) override
     {
         ViewAbstract::SetPositionEdges(value);
@@ -667,6 +743,12 @@ public:
         ViewAbstract::SetOffset({ x, y });
     }
 
+    void SetOffset(const Dimension& x, const Dimension& y,
+        const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj) override
+    {
+        ViewAbstract::SetOffset(x, y, xresObj, yresObj);
+    }
+
     void SetOffsetEdges(const EdgesParam& value) override
     {
         ViewAbstract::SetOffsetEdges(value);
@@ -675,6 +757,12 @@ public:
     void MarkAnchor(const Dimension& x, const Dimension& y) override
     {
         ViewAbstract::MarkAnchor({ x, y });
+    }
+
+    void MarkAnchor(const Dimension& x, const Dimension& y,
+        const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj) override
+    {
+        ViewAbstract::MarkAnchor(x, y, xresObj, yresObj);
     }
 
     void SetScale(float x, float y, float z) override;

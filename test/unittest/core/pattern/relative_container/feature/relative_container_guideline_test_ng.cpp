@@ -203,4 +203,23 @@ HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineOffsetTest1, TestSize.Leve
     EXPECT_EQ(layoutAlgorithm.recordOffsetMap_["row1"], OffsetF(30, 40))
         << layoutAlgorithm.recordOffsetMap_["row1"].ToString();
 }
+
+/**
+ * @tc.name: CreateWithGuidelineResourceObj
+ * @tc.desc: Test CreateWithGuidelineResourceObj of Relative_Container
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerGuidelineTest, ResObjGuidelineTest1, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);;
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {};
+    updateFunc(resObj);
+    pattern->AddResObj("RelativeContainer.guideLine", resObj, std::move(updateFunc));
+    std::string guideLine = pattern->GetResCacheMapByKey("RelativeContainer.guideLine");
+    EXPECT_EQ(guideLine, "");
+}
 } // namespace OHOS::Ace::NG
