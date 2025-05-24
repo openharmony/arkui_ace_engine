@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@ import { ArkUIAniModule } from "arkui.ani"
 import { CustomNodeBuilder } from "../component/customBuilder"
 import { createUiDetachedRoot } from "../ArkUIEntry"
 import { ArkComponentRootPeer } from "../component";
+import { UnifiedData, Summary, PixelMap } from "#external"
 
 export function hookRegisterOnDragStartImpl(node: ArkCommonMethodPeer, onDragStartCallback: (((event: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo) | undefined)): void {
     DragDropOps.registerOnDragStart(node.getPeerPtr(), (node: KPointer, dragEvent: DragEvent, extraParam: string) => {
@@ -64,6 +65,13 @@ export function hookRegisterOnDragStartImpl(node: ArkCommonMethodPeer, onDragSta
             }
             let customNode = createBuilderNodeTree();
             ArkUIAniModule._DragEvent_Set_CustomNode(toPeerPtr(dragEvent), customNode)
+
+            const value_pixelMap = itemInfo.pixelMap as PixelMap
+            let value_pixelMap_type: int32 = RuntimeType.UNDEFINED
+            value_pixelMap_type = runtimeType(value_pixelMap)
+            if ((RuntimeType.UNDEFINED) != (value_pixelMap_type)) {
+                ArkUIAniModule._DragEvent_Set_PixelMap(toPeerPtr(dragEvent), value_pixelMap)
+            }
         }
     })
 }

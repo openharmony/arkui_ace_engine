@@ -20,12 +20,7 @@
 #include "utils/convert_utils.h"
 #include "core/gestures/drag_event.h"
 #include "load.h"
-
-#if defined(PIXEL_MAP_SUPPORTED)
-#include "pixel_map.h"
-#include "pixel_map_ani.h"
-#include "base/image/pixel_map.h"
-#endif
+#include "pixel_map_taihe_ani.h"
 
 namespace OHOS::Ace::Ani {
 void DragEventSetData([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
@@ -53,7 +48,17 @@ ani_object DragEventGetSummary([[maybe_unused]] ani_env* env, [[maybe_unused]] a
 void DragEventSetPixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object pixelMap)
 {
-    // not implemented
+    auto dragEvent = reinterpret_cast<ani_ref>(pointer);
+    auto pixelMapValue = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMap);
+    if (!dragEvent || !pixelMapValue) {
+        return;
+    }
+    auto pixelMapPtr = reinterpret_cast<void*>(&pixelMapValue);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragAniModifier() || !env) {
+        return;
+    }
+    modifier->getDragAniModifier()->setDragDropInfoPixelMap(dragEvent, reinterpret_cast<ani_ref>(pixelMapPtr));
 }
 
 void DragEventSetExtraInfo([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,

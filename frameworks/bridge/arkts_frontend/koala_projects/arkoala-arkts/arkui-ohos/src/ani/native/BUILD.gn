@@ -46,6 +46,8 @@ ohos_shared_library("arkoala_native_ani") {
   external_deps = [
     "hilog:libhilog",
     "runtime_core:ani",
+    "image_framework:image",
+    "image_framework:image_taihe",
   ]
 
   configs = [ "$ace_root:ace_config" ]

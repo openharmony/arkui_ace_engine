@@ -20,15 +20,26 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/gestures/drag_event.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
 #if defined(PIXEL_MAP_SUPPORTED)
 #include "pixel_map.h"
 #include "base/image/pixel_map.h"
 #endif
 namespace OHOS::Ace::NG {
 
-void SetDragDropInfoPixelMap(ani_ref event, void* pixelMap)
+void SetDragDropInfoPixelMap(ani_ref event, ani_ref pixelMapPtr)
 {
-    // not implemented
+    auto peer = reinterpret_cast<Ark_DragEvent>(event);
+    CHECK_NULL_VOID(peer);
+    auto dragEvent = peer->dragInfo;
+    CHECK_NULL_VOID(dragEvent);
+    auto pixelMapValue = reinterpret_cast<void*>(pixelMapPtr);
+    CHECK_NULL_VOID(pixelMapValue);
+#if defined(PIXEL_MAP_SUPPORTED)
+    auto pixelMap = PixelMap::CreatePixelMap(pixelMapValue);
+    CHECK_NULL_VOID(pixelMap);
+    dragEvent->SetDragDropInfoPixelMap(pixelMap);
+#endif
 }
 
 void SetDragDropInfoExtraInfo(ani_ref event, std::string& extraInfo)

@@ -17,11 +17,8 @@
 #include "content_slot_ani_modifier.h"
 #include "image_ani_modifier.h"
 #include "web_ani_modifier.h"
-<<<<<<< HEAD
 #include "custom_node_ani_modifier.h"
-=======
 #include "drag_ani_modifier.h"
->>>>>>> 1ee0a71787 (fix onDragStart)
 
 extern "C" {
 const ArkUIAniModifiers* GetArkUIAniModifiers()

@@ -51,7 +51,7 @@ struct ArkUIAniWebModifier {
         std::function<void(const std::string&)>&& onHapPath);
 };
 struct ArkUIAniDragModifier {
-    void (*setDragDropInfoPixelMap)(ani_ref event, void* pixelMap);
+    void (*setDragDropInfoPixelMap)(ani_ref event, ani_ref pixelMap);
     void (*setDragDropInfoCustomNode)(ani_ref event, ArkUINodeHandle node);
     void (*setDragDropInfoExtraInfo)(ani_ref event, std::string& extraInfo);
 };
