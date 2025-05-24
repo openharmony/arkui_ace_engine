@@ -204,6 +204,22 @@ void SetTrackBackgroundColor(ArkUINodeHandle node, uint32_t color)
     SliderModelNG::SetTrackBackgroundColor(frameNode, SliderModelNG::CreateSolidGradient(Color(color)), true);
 }
 
+void SetLinearTrackBackgroundColor(ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Int32 length)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Ace::NG::Gradient tempGradient;
+    for (int32_t j = 0; j < length; j++) {
+        OHOS::Ace::NG::GradientColor gradientColor;
+        gradientColor.SetLinearColor(LinearColor(Color(gradient->color[j])));
+        gradientColor.SetDimension(
+            Dimension(gradient->offset[j].number, static_cast<DimensionUnit>(gradient->offset[j].unit)));
+        tempGradient.AddColor(gradientColor);
+    }
+
+    SliderModelNG::SetTrackBackgroundColor(frameNode, tempGradient, false);
+}
+
 void ResetTrackBackgroundColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -216,6 +232,22 @@ void SetSelectColor(ArkUINodeHandle node, uint32_t color)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SliderModelNG::SetSelectColor(frameNode, SliderModelNG::CreateSolidGradient(Color(color)), true);
+}
+
+void SetSelectColor(ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Int32 length)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Ace::NG::Gradient tempGradient;
+    for (int32_t j = 0; j < length; j++) {
+        OHOS::Ace::NG::GradientColor gradientColor;
+        gradientColor.SetLinearColor(LinearColor(Color(gradient->color[j])));
+        gradientColor.SetDimension(
+            Dimension(gradient->offset[j].number, static_cast<DimensionUnit>(gradient->offset[j].unit)));
+        tempGradient.AddColor(gradientColor);
+    }
+
+    SliderModelNG::SetSelectColor(frameNode, tempGradient, false);
 }
 
 void ResetSelectColor(ArkUINodeHandle node)
@@ -715,8 +747,10 @@ const ArkUISliderModifier* GetSliderModifier()
         .setBlockColor = SliderModifier::SetBlockColor,
         .resetBlockColor = SliderModifier::ResetBlockColor,
         .setTrackBackgroundColor = SliderModifier::SetTrackBackgroundColor,
+        .setLinearTrackBackgroundColor = SliderModifier::SetLinearTrackBackgroundColor,
         .resetTrackBackgroundColor = SliderModifier::ResetTrackBackgroundColor,
         .setSelectColor = SliderModifier::SetSelectColor,
+        .setLinearSelectColor = SliderModifier::SetLinearSelectColor,
         .resetSelectColor = SliderModifier::ResetSelectColor,
         .setShowSteps = SliderModifier::SetShowSteps,
         .resetShowSteps = SliderModifier::ResetShowSteps,
