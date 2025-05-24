@@ -97,14 +97,7 @@ public:
         return (currentState_ & state) == state;
     }
 
-    void SetCurrentUIState(UIState state, bool flag)
-    {
-        if (flag) {
-            currentState_ |= state;
-        } else {
-            currentState_ &= ~state;
-        }
-    }
+    void SetCurrentUIState(UIState state, bool flag);
 
     void SetScrollingFeatureForbidden(bool scrollingFeatureForbidden)
     {
@@ -161,8 +154,9 @@ public:
     }
 
 private:
-    void HandleStateChangeInternal(UIState handlingState, UIState currentState, bool isReset);
-    void FireStateFunc(UIState handlingState, UIState currentState, bool isReset);
+    void HandleStateChangeInternal(
+        UIState handlingState, UIState currentState, bool isReset, bool skipFrontendForcibly = false);
+    void FireStateFunc(UIState handlingState, UIState currentState, bool isReset, bool skipFrontendForcibly = false);
 
     void PostListItemPressStyleTask(UIState state);
     void PostPressStyleTask(uint32_t delayTime);

@@ -129,6 +129,24 @@ void StateStyleManager::HandleTouchUp()
     }
 }
 
+void StateStyleManager::SetCurrentUIState(UIState state, bool flag)
+{
+    if (flag) {
+        currentState_ |= state;
+    } else {
+        currentState_ &= ~state;
+    }
+
+    if (!HasStateStyle(state)) {
+        return;
+    }
+
+    // When the UIState changes, trigger the user subscription callback registered by FrameNode and CAPI.
+    // If the frontend has already added supported UIState, forcibly skip frontend subscriber handling.
+    bool skipFrontendForcibly = frontendSubscribers_ != UI_STATE_UNKNOWN ? true : false;
+    FireStateFunc(state, currentState_, !flag, skipFrontendForcibly);
+}
+
 static bool IsCanUpdate(UIState subscribers, UIState handlingState, UIState currentState)
 {
     if (subscribers == UI_STATE_UNKNOWN) {
@@ -182,7 +200,8 @@ void StateStyleManager::RemoveSupportedUIState(UIState state, bool isInner)
     }
 }
 
-void StateStyleManager::HandleStateChangeInternal(UIState handlingState, UIState currentState, bool isReset)
+void StateStyleManager::HandleStateChangeInternal(
+    UIState handlingState, UIState currentState, bool isReset, bool skipFrontendForcibly)
 {
     std::function<void(UIState)> onStateStyleChange;
     if (IsCanUpdate(innerStateStyleSubscribers_.first, handlingState, currentState) &&
@@ -195,7 +214,7 @@ void StateStyleManager::HandleStateChangeInternal(UIState handlingState, UIState
                 "Internal state style subscriber callbacks, currentState=%{public}" PRIu64 "", currentState);
         }
     }
-    if (IsCanUpdate(frontendSubscribers_, handlingState, currentState)) {
+    if (IsCanUpdate(frontendSubscribers_, handlingState, currentState) && !skipFrontendForcibly) {
         auto node = GetFrameNode();
         CHECK_NULL_VOID(node);
         auto nodeId = node->GetId();
@@ -227,9 +246,10 @@ void StateStyleManager::HandleStateChangeInternal(UIState handlingState, UIState
     }
 }
 
-void StateStyleManager::FireStateFunc(UIState handlingState, UIState currentState, bool isReset)
+void StateStyleManager::FireStateFunc(
+    UIState handlingState, UIState currentState, bool isReset, bool skipFrontendForcibly)
 {
-    HandleStateChangeInternal(handlingState, currentState, isReset);
+    HandleStateChangeInternal(handlingState, currentState, isReset, skipFrontendForcibly);
 }
 
 void StateStyleManager::GetCustomNode(RefPtr<CustomNodeBase>& customNode, RefPtr<UINode> node)

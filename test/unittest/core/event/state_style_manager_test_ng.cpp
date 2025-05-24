@@ -744,4 +744,45 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest024, TestSize.Level1)
     EXPECT_EQ(EXCLUDE_INNER_FLAG_NONE, stateStyleMgr->userSubscribersExcludeConfigs_);
     EXPECT_FALSE(stateStyleMgr->IsExcludeInner(UI_STATE_FOCUSED));
 }
+
+/**
+ * @tc.name: StateStyleTest025
+ * @tc.desc: test AddSupportedUIStateWithCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(StateStyleManagerTestNg, StateStyleTest025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create state style manger.
+     * @tc.expected: stateStyleMgr is not null.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
+    ASSERT_NE(stateStyleMgr, nullptr);
+    UIState callbackUIState = UI_STATE_NORMAL;
+    std::function<void(UIState)> callback = [ & ](UIState state) {
+        callbackUIState = state;
+    };
+    EXPECT_EQ(callbackUIState, UI_STATE_NORMAL);
+
+    /**
+     * @tc.steps: step2. Call AddSupportedUIStateWithCallback.
+     * @tc.expected: callbackUIState value is correct.
+     */
+    UIState uiState = UI_STATE_SELECTED;
+    stateStyleMgr->AddSupportedUIStateWithCallback(uiState, callback, false);
+    EXPECT_EQ(stateStyleMgr->supportedStates_, UI_STATE_SELECTED);
+    stateStyleMgr->SetCurrentUIState(UI_STATE_SELECTED, true);
+    EXPECT_EQ(callbackUIState, UI_STATE_SELECTED);
+    stateStyleMgr->SetCurrentUIState(UI_STATE_SELECTED, false);
+    EXPECT_EQ(callbackUIState, UI_STATE_NORMAL);
+
+    /**
+     * @tc.steps: step3. Call RemoveSupportedUIState.
+     * @tc.expected: callbackUIState value is correct.
+     */
+    stateStyleMgr->RemoveSupportedUIState(UI_STATE_SELECTED, false);
+    EXPECT_EQ(UI_STATE_NORMAL, stateStyleMgr->supportedStates_);
+}
 } // namespace OHOS::Ace::NG
