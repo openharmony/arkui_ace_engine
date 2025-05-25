@@ -91,6 +91,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
 
     void SetWebSrc(const std::string &webSrc);
+    void SetWebSrcStatic(const std::string &webSrc);
     void SetWebData(const std::string& webData);
     const std::optional<std::string>& GetWebData() const
     {
