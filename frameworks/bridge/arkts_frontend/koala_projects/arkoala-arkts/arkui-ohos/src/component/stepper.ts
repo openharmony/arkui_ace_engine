@@ -41,7 +41,7 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setStepperOptionsAttribute(value?: Literal_Number_index): void {
+    setStepperOptionsAttribute(value?: StepperOptionalIndex): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -127,10 +127,10 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
 }
-export interface Literal_Number_index {
+export interface StepperOptionalIndex {
     index?: number;
 }
-export type StepperInterface = (value?: Literal_Number_index) => StepperAttribute;
+export type StepperInterface = (value?: StepperOptionalIndex) => StepperAttribute;
 export interface StepperAttribute extends CommonMethod {
     onFinish(value: (() => void) | undefined): this
     onSkip(value: (() => void) | undefined): this
@@ -185,9 +185,9 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements UIS
         return (this.peer as ArkStepperPeer)
     }
     /** @memo */
-    public setStepperOptions(value?: Literal_Number_index): this {
+    public setStepperOptions(value?: StepperOptionalIndex): this {
         if (this.checkPriority("setStepperOptions")) {
-            const value_casted = value as (Literal_Number_index | undefined)
+            const value_casted = value as (StepperOptionalIndex | undefined)
             this.getPeer()?.setStepperOptionsAttribute(value_casted)
             return this
         }
@@ -257,7 +257,7 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements UIS
 export function Stepper(
     /** @memo */
     style: ((attributes: UIStepperAttribute) => void) | undefined,
-    value?: Literal_Number_index,
+    value?: StepperOptionalIndex,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
