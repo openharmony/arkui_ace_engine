@@ -95,4 +95,55 @@ JSRef<JSObject> JsShouldBuiltInRecognizerParallelWithFunction::CreateRecognizerO
     return recognizerObj;
 }
 
+TouchRecognizerMap JsShouldBuiltInRecognizerParallelWithFunction::CreateTouchRecognizerMap(
+    const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NG::NGGestureRecognizer>& current)
+{
+    TouchRecognizerMap touchRecognizerMap;
+    auto frameNode = current->GetAttachedNode().Upgrade();
+    CHECK_NULL_RETURN(frameNode, touchRecognizerMap);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, touchRecognizerMap);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_RETURN(eventManager, touchRecognizerMap);
+    auto& touchTestResult = eventManager->touchTestResults_;
+    const auto& fingerList = info->GetFingerList();
+    for (const auto& finger : fingerList) {
+        auto& touchTargetList = touchTestResult[finger.fingerId_];
+        CollectTouchEventTarget(touchRecognizerMap, touchTargetList, AceType::RawPtr(frameNode), finger.fingerId_);
+    }
+    return touchRecognizerMap;
+}
+ 
+void JsShouldBuiltInRecognizerParallelWithFunction::CollectTouchEventTarget(
+    TouchRecognizerMap& dict, std::list<RefPtr<TouchEventTarget>>& targets, NG::FrameNode* borderNode, int32_t fingerId)
+{
+    for (auto iter = targets.begin(); iter != targets.end(); ++iter) {
+        auto& target = *iter;
+        if (AceType::DynamicCast<NG::NGGestureRecognizer>(target)) {
+            continue;
+        }
+        auto targetPtr = AceType::RawPtr(target);
+        if (dict.find(targetPtr) != dict.end() && IsFingerCollectedByTarget(dict[targetPtr], fingerId)) {
+            continue;
+        }
+        auto targetNode = target->GetAttachedNode().Upgrade();
+        if (targetNode && targetNode == borderNode) {
+            dict[targetPtr].emplace_back(fingerId, iter);
+            return;
+        }
+        while (targetNode) {
+            if (targetNode == borderNode) {
+                dict[targetPtr].emplace_back(fingerId, iter);
+                break;
+            }
+            targetNode = targetNode->GetParentFrameNode();
+        }
+    }
+}
+ 
+bool JsShouldBuiltInRecognizerParallelWithFunction::IsFingerCollectedByTarget(
+    const TouchRecognizerTarget& target, int32_t fingerId)
+{
+    return std::any_of(target.begin(), target.end(), [fingerId](const auto& item) { return item.first == fingerId; });
+}
 } // namespace OHOS::Ace::Framework

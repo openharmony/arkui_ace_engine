@@ -22,6 +22,8 @@
 #include "core/components_ng/gestures/base_gesture_event.h"
 
 namespace OHOS::Ace::Framework {
+constexpr int32_t PARAM_COUNT_THREE = 3;
+constexpr int32_t PARAM_COUNT_FOUR = 4;
 
 GestureJudgeResult JsGestureJudgeFunction::Execute(
     const RefPtr<NG::GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info)
@@ -55,8 +57,7 @@ GestureJudgeResult JsGestureJudgeFunction::Execute(const std::shared_ptr<BaseGes
     auto gestureInfo = current->GetGestureInfo();
     CHECK_NULL_RETURN(gestureInfo, GestureJudgeResult::CONTINUE);
     auto obj = CreateGestureEventObject(info, gestureInfo->GetRecognizerType());
-    int32_t paramCount = 3;
-    JSRef<JSVal> params[paramCount];
+    JSRef<JSVal> params[PARAM_COUNT_FOUR];
     params[0] = obj;
     auto currentObj = JsShouldBuiltInRecognizerParallelWithFunction::CreateRecognizerObject(current);
     params[1] = currentObj;
@@ -66,8 +67,21 @@ GestureJudgeResult JsGestureJudgeFunction::Execute(const std::shared_ptr<BaseGes
         auto othersObj = JsShouldBuiltInRecognizerParallelWithFunction::CreateRecognizerObject(item);
         othersArr->SetValueAt(othersIdx++, othersObj);
     }
+
+    auto touchRecognizerMap = JsShouldBuiltInRecognizerParallelWithFunction::CreateTouchRecognizerMap(info, current);
+    JSRef<JSArray> touchRecognizers = JSRef<JSArray>::New();
+    uint32_t touchRecognizersIdx = 0;
+    for (auto& [item, recognizerTarget] : touchRecognizerMap) {
+        JSRef<JSObject> recognizerObj = JSClass<JSTouchRecognizer>::NewInstance();
+        auto jsRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSTouchRecognizer>());
+        if (jsRecognizer) {
+            jsRecognizer->SetTouchData(item, recognizerTarget);
+        }
+        touchRecognizers->SetValueAt(touchRecognizersIdx++, recognizerObj);
+    }
     params[2] = othersArr;
-    auto jsValue = JsFunction::ExecuteJS(paramCount, params);
+    params[PARAM_COUNT_THREE] = touchRecognizers;
+    auto jsValue = JsFunction::ExecuteJS(PARAM_COUNT_FOUR, params);
     auto returnValue = GestureJudgeResult::CONTINUE;
     if (jsValue->IsNumber()) {
         returnValue = static_cast<GestureJudgeResult>(jsValue->ToNumber<int32_t>());

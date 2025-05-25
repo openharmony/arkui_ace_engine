@@ -7092,6 +7092,36 @@ Local<panda::ObjectRef> CommonBridge::CreateTapGestureInfo(EcmaVM* vm, GestureEv
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
 
+Local<panda::ArrayRef> CommonBridge::CreateTouchRecognizersObject(
+    EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NG::NGGestureRecognizer>& target)
+{
+    auto touchRecognizers = panda::ArrayRef::New(vm);
+    auto frameNode = target->GetAttachedNode().Upgrade();
+    CHECK_NULL_RETURN(frameNode, touchRecognizers);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, touchRecognizers);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_RETURN(eventManager, touchRecognizers);
+    auto& touchTestResult = eventManager->touchTestResults_;
+    TouchRecognizerMap touchRecognizerMap;
+    const auto& fingerList = info->GetFingerList();
+    for (const auto& finger : fingerList) {
+        auto& touchTargetList = touchTestResult[finger.fingerId_];
+        JsShouldBuiltInRecognizerParallelWithFunction::CollectTouchEventTarget(
+            touchRecognizerMap, touchTargetList, AceType::RawPtr(frameNode), finger.fingerId_);
+    }
+    uint32_t touchRecognizersIdx = 0;
+    for (auto& [item, recognizerTarget] : touchRecognizerMap) {
+        JSRef<JSObject> recognizerObj = JSClass<JSTouchRecognizer>::NewInstance();
+        auto jsRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSTouchRecognizer>());
+        if (jsRecognizer) {
+            jsRecognizer->SetTouchData(item, recognizerTarget);
+        }
+        touchRecognizers->SetValueAt(vm, touchRecognizers, touchRecognizersIdx++, recognizerObj->GetLocalHandle());
+    }
+    return touchRecognizers;
+}
+
 Local<panda::ObjectRef> CommonBridge::CreateFingerInfo(EcmaVM* vm, const FingerInfo& fingerInfo)
 {
     const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
@@ -8727,9 +8757,10 @@ ArkUINativeModuleValue CommonBridge::SetOnGestureRecognizerJudgeBegin(ArkUIRunti
             auto othersObj = CreateRecognizerObject(vm, item);
             othersArr->SetValueAt(vm, othersArr, othersIdx++, othersObj);
         }
-        panda::Local<panda::JSValueRef> params[3] = { gestureEventObj, currentObj, othersArr };
+        auto touchRecognizers = CreateTouchRecognizersObject(vm, info, current);
+        panda::Local<panda::JSValueRef> params[4] = { gestureEventObj, currentObj, othersArr, touchRecognizers };
         auto returnValue = GestureJudgeResult::CONTINUE;
-        auto value = function->Call(vm, function.ToLocal(), params, 3);
+        auto value = function->Call(vm, function.ToLocal(), params, 4);
         if (value->IsNumber()) {
             returnValue = static_cast<GestureJudgeResult>(value->ToNumber(vm)->Value());
         }

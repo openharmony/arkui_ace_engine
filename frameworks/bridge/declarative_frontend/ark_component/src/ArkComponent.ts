@@ -2180,7 +2180,8 @@ class OnGestureJudgeBeginModifier extends ModifierWithKey<GestureJudgeBeginCallb
   }
 }
 
-declare type GestureRecognizerJudgeBeginCallback = (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>) => GestureJudgeResult;
+declare type GestureRecognizerJudgeBeginCallback = (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>,
+  touchRecognizers?: Array<TouchRecognizer>) => GestureJudgeResult;
 class OnGestureRecognizerJudgeBeginModifier extends ModifierWithKey<GestureRecognizerJudgeBeginCallback> {
   constructor(value: GestureRecognizerJudgeBeginCallback) {
     super(value);
@@ -4009,7 +4010,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     modifierWithKey(this._modifiersWithKeys, OnGestureJudgeBeginModifier.identity, OnGestureJudgeBeginModifier, callback);
     return this;
   }
-  onGestureRecognizerJudgeBegin(callback: (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>) => GestureJudgeResult): this {
+  onGestureRecognizerJudgeBegin(callback: (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>,
+    touchRecognizers?: Array<TouchRecognizer>) => GestureJudgeResult): this {
     this._onGestureRecognizerJudgeBegin = callback;
     modifierWithKey(this._modifiersWithKeys, OnGestureRecognizerJudgeBeginModifier.identity, OnGestureRecognizerJudgeBeginModifier, callback);
     return this;

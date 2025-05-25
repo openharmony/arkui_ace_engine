@@ -605,6 +605,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSSwipeRecognizer::JSBind(globalObj);
     JSPinchRecognizer::JSBind(globalObj);
     JSRotationRecognizer::JSBind(globalObj);
+    JSTouchRecognizer::JSBind(globalObj);
 }
 
 void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)

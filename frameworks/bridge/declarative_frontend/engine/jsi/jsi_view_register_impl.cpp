@@ -817,7 +817,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LongPressRecognizer", JSLongPressRecognizer::JSBind },
     { "SwipeRecognizer", JSSwipeRecognizer::JSBind },
     { "PinchRecognizer", JSPinchRecognizer::JSBind },
-    { "RotationRecognizer", JSRotationRecognizer::JSBind }
+    { "RotationRecognizer", JSRotationRecognizer::JSBind },
+    { "TouchRecognizer", JSTouchRecognizer::JSBind }
 };
 
 void RegisterBindFuncs(BindingTarget globalObj)

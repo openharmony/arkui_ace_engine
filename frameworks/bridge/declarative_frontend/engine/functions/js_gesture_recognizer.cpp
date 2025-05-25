@@ -22,6 +22,33 @@
 
 namespace OHOS::Ace::Framework {
 
+JSRef<JSObject> CreateEventTargetInfo(RefPtr<NG::FrameNode> attachNode)
+{
+    if (!attachNode) {
+        return JSClass<JSEventTargetInfo>::NewInstance();
+    }
+    RefPtr<NG::Pattern> pattern;
+    auto scrollablePattern = attachNode->GetPattern<NG::ScrollablePattern>();
+    if (scrollablePattern) {
+        pattern = scrollablePattern;
+    }
+    auto swiperPattern = attachNode->GetPattern<NG::SwiperPattern>();
+    if (swiperPattern) {
+        pattern = swiperPattern;
+    }
+    if (pattern) {
+        JSRef<JSObject> scrollableTargetObj = JSClass<JSScrollableTargetInfo>::NewInstance();
+        auto scrollableTarget = Referenced::Claim(scrollableTargetObj->Unwrap<JSScrollableTargetInfo>());
+        scrollableTarget->SetPattern(pattern);
+        scrollableTarget->SetInspectorId(attachNode->GetInspectorIdValue(""));
+        return scrollableTargetObj;
+    }
+    auto eventTargetObj = JSClass<JSEventTargetInfo>::NewInstance();
+    auto eventTarget = Referenced::Claim(eventTargetObj->Unwrap<JSEventTargetInfo>());
+    eventTarget->SetInspectorId(attachNode->GetInspectorIdValue(""));
+    return eventTargetObj;
+}
+
 void JSScrollableTargetInfo::IsBegin(const JSCallbackInfo& args)
 {
     auto pattern = pattern_.Upgrade();
@@ -136,26 +163,7 @@ void JSGestureRecognizer::GetEventTargetInfo(const JSCallbackInfo& args)
         args.SetReturnValue(JSClass<JSEventTargetInfo>::NewInstance());
         return;
     }
-    RefPtr<NG::Pattern> pattern;
-    auto scrollablePattern = attachNode->GetPattern<NG::ScrollablePattern>();
-    if (scrollablePattern) {
-        pattern = scrollablePattern;
-    }
-    auto swiperPattern = attachNode->GetPattern<NG::SwiperPattern>();
-    if (swiperPattern) {
-        pattern = swiperPattern;
-    }
-    if (pattern) {
-        JSRef<JSObject> scrollableTargetObj = JSClass<JSScrollableTargetInfo>::NewInstance();
-        auto scrollableTarget = Referenced::Claim(scrollableTargetObj->Unwrap<JSScrollableTargetInfo>());
-        scrollableTarget->SetPattern(pattern);
-        scrollableTarget->SetInspectorId(attachNode->GetInspectorIdValue(""));
-        args.SetReturnValue(scrollableTargetObj);
-        return;
-    }
-    JSRef<JSObject> eventTargetObj = JSClass<JSEventTargetInfo>::NewInstance();
-    auto eventTarget = Referenced::Claim(eventTargetObj->Unwrap<JSEventTargetInfo>());
-    eventTarget->SetInspectorId(attachNode->GetInspectorIdValue(""));
+    auto eventTargetObj = CreateEventTargetInfo(attachNode);
     args.SetReturnValue(eventTargetObj);
 }
 
@@ -286,6 +294,39 @@ void JSSwipeRecognizer::GetSpeed(const JSCallbackInfo& args)
         double speed = context->ConvertPxToVp(Dimension(speed_, DimensionUnit::PX));
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(RoundToMaxPrecision(speed))));
     }
+}
+
+void JSTouchRecognizer::CancelTouch(const JSCallbackInfo& args)
+{
+    if (touchRecognizerTarget_.empty()) {
+        TAG_LOGW(AceLogTag::ACE_GESTURE, "touchRecognizerTarget_ is empty.");
+        return;
+    }
+    CHECK_NULL_VOID(target_);
+    auto node = target_->GetAttachedNode().Upgrade();
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+ 
+    eventManager->DispatchTouchCancelToRecognizer(target_, touchRecognizerTarget_);
+    touchRecognizerTarget_.clear();
+}
+ 
+void JSTouchRecognizer::GetEventTargetInfo(const JSCallbackInfo& args)
+{
+    if (!target_) {
+        args.SetReturnValue(JSClass<JSEventTargetInfo>::NewInstance());
+        return;
+    }
+    auto attachNode = target_->GetAttachedNode().Upgrade();
+    if (!attachNode) {
+        args.SetReturnValue(JSClass<JSEventTargetInfo>::NewInstance());
+        return;
+    }
+    auto eventTargetObj = CreateEventTargetInfo(attachNode);
+    args.SetReturnValue(eventTargetObj);
 }
 
 void JSEventTargetInfo::JSBind(BindingTarget globalObj)
@@ -435,5 +476,13 @@ void JSSwipeRecognizer::JSBind(BindingTarget globalObj)
     JSClass<JSSwipeRecognizer>::CustomMethod("isValid", &JSGestureRecognizer::IsValid);
     JSClass<JSSwipeRecognizer>::Inherit<JSGestureRecognizer>();
     JSClass<JSSwipeRecognizer>::Bind(globalObj, &JSSwipeRecognizer::Constructor, &JSSwipeRecognizer::Destructor);
+}
+
+void JSTouchRecognizer::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSTouchRecognizer>::Declare("TouchRecognizer");
+    JSClass<JSTouchRecognizer>::CustomMethod("getEventTargetInfo", &JSTouchRecognizer::GetEventTargetInfo);
+    JSClass<JSTouchRecognizer>::CustomMethod("cancelTouch", &JSTouchRecognizer::CancelTouch);
+    JSClass<JSTouchRecognizer>::Bind(globalObj, &JSTouchRecognizer::Constructor, &JSTouchRecognizer::Destructor);
 }
 } // namespace OHOS::Ace::Framework
