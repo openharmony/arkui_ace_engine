@@ -519,6 +519,9 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
         auto currentIndex = GetCurrentIndex();
         if ((currentIndex == 0 && dir == PickerScrollDirection::DOWN && GreatOrEqual(yOffset_, 0.0)) ||
             (currentIndex == totalCount - 1 && dir == PickerScrollDirection::UP && LessOrEqual(yOffset_, 0.0))) {
+            auto toss = GetToss();
+            CHECK_NULL_VOID(toss);
+            toss->StopTossAnimation();
             return;
         }
     }

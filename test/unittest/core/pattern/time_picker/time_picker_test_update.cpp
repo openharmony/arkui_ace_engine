@@ -76,6 +76,7 @@ const Dimension FONT_VALUE_NOMARL = Dimension(10);
 const double CURRENT_YOFFSET1 = -200.f;
 const double CURRENT_YOFFSET2 = 200.f;
 const double DEFAULT_YOFFSET1 = 1.f;
+const double DEFAULT_YOFFSET2 = 2.f;
 const double NEXT_DISTANCE = 7.f;
 const double PREVIOUS_DISTANCE = 5.f;
 const uint32_t PM_INDEX = 1;
@@ -2412,6 +2413,53 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerColumnPattern002, TestSize.Level
     EXPECT_EQ(amPmColumnPattern->yOffset_, 0.f);
     EXPECT_EQ(amPmColumnPattern->offsetCurSet_, 0.f);
     EXPECT_EQ(amPmColumnPattern->GetCurrentIndex(), 1);
+}
+
+/**
+ * @tc.name: TimePickerColumnPattern003
+ * @tc.desc: Test UpdateColumnChildPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, TimePickerColumnPattern003, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+
+    /**
+     * @tc.step: step1. create TimePicker's column pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto amPmColumn = allChildNode["amPm"].Upgrade();
+    ASSERT_NE(amPmColumn, nullptr);
+    auto amPmColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(amPmColumnPattern, nullptr);
+    amPmColumnPattern->SetCurrentIndex(0);
+    EXPECT_TRUE(amPmColumnPattern->NotLoopOptions());
+
+    auto host = amPmColumnPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto options = amPmColumnPattern->GetOptions();
+    auto totalOptionCount = options[host];
+    EXPECT_EQ(totalOptionCount, HALF_VALUE);
+
+    /**
+     * @tc.step: step2. call UpdateColumnChildPosition, selected index is 0, not allow to slide down.
+     * @tc.expected: yLast_ is CURRNET_YOFFSET2, offsetCurSet_ is DEFAULT_YOFFSET1, GetCurrentIndex is 0.
+     */
+    amPmColumnPattern->yOffset_ = 0.f;
+    amPmColumnPattern->offsetCurSet_ = DEFAULT_YOFFSET2;
+    amPmColumnPattern->yLast_ = DEFAULT_YOFFSET2;
+    amPmColumnPattern->UpdateColumnChildPosition(CURRENT_YOFFSET2);
+
+    EXPECT_EQ(amPmColumnPattern->yLast_, CURRENT_YOFFSET2);
+    EXPECT_EQ(amPmColumnPattern->offsetCurSet_, DEFAULT_YOFFSET1);
+    EXPECT_EQ(amPmColumnPattern->GetCurrentIndex(), 0);
 }
 
 /**
