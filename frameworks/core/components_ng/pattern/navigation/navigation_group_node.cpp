@@ -781,6 +781,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             auto context = navigation->GetContextWithCheck();
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
+            CHECK_NULL_VOID(preNavDesNode);
             preNavDesNode->AddToOcclusionMap(false);
         };
     AnimationFinishCallback callback = [onFinishCb = std::move(onFinish), weakNavigation = WeakClaim(this)]() {
@@ -804,6 +805,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
         SetNeedSetInvisible(false);
     }
     isOnAnimation_ = true;
+    CHECK_NULL_VOID(preNode);
     preNode->AddToOcclusionMap(true);
 }
 
@@ -1028,6 +1030,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             navigation->CleanPushAnimations();
             auto pattern = navigation->GetPattern<NavigationPattern>();
             pattern->CheckContentNeedMeasure(navigation);
+            CHECK_NULL_VOID(preNode);
             preNode->AddToOcclusionMap(false);
         };
 
@@ -1073,6 +1076,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(curNode,
         curNavDestination->GetNavDestinationPathInfo());
 #endif
+    CHECK_NULL_VOID(preNode);
     preNode->AddToOcclusionMap(true);
 }
 
