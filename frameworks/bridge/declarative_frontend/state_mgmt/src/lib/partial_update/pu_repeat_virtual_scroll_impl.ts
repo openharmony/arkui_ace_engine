@@ -139,7 +139,7 @@ class __RepeatVirtualScrollImpl<T> {
             ObserveV2.getObserve().addRef4Id(this.repeatElmtId_, this.arr_, forIndex.toString());
             const repeatItem = this.repeatItem4Key_.get(fromKey);
             if (!repeatItem) {
-                stateMgmtConsole.error(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onUpdateNode: fromKey "${fromKey}", \
+                stateMgmtConsole.error(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onUpdateNode: \
                     forIndex=${forIndex}, can not find RepeatItem for key. Unrecoverable error.`);
                 return;
             }
@@ -349,7 +349,7 @@ class __RepeatVirtualScrollImpl<T> {
             if (usedIndex !== undefined) {
                 // duplicate key
                 stateMgmtConsole.applicationError(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) getOrMakeKey4Index: \
-                    Detected duplicate key ${key} for indices ${forIndex} and ${usedIndex}. \
+                    Detected duplicate key for indices ${forIndex} and ${usedIndex}. \
                     Generated random key will decrease Repeat performance. Correct the key gen function in your application!`);
                 key = `___${forIndex}_+_${key}_+_${Math.random()}`;
             }
