@@ -224,7 +224,8 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineThicknessScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontForegroudGradiantColor, FontForegroudGradiantColor);
-
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(GradientShaderStyle, Gradient);
+    
     void UpdateColorByResourceId();
 
     TextDecoration GetTextDecorationFirst() const

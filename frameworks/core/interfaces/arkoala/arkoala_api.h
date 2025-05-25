@@ -2761,6 +2761,15 @@ struct ArkUITextModifier {
     ArkUI_Int32 (*getLineCount)(ArkUINodeHandle node);
     void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
     void (*resetEnableAutoSpacing)(ArkUINodeHandle node);
+    void (*setLinearGradient)(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
+        const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength);
+    ArkUI_Int32 (*getLinearGradient)(
+        ArkUINodeHandle node, ArkUI_Float32 (*values)[3], ArkUI_Uint32 (*colors)[10], ArkUI_Float32 (*stop)[10]);
+    void (*setRadialGradient)(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
+        const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength);
+    ArkUI_Int32 (*getRadialGradient)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Uint32 (*colors)[10],
+        ArkUI_Float32 (*stops)[10], ArkUI_Int32 unit);
+    void (*resetTextGradient)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {

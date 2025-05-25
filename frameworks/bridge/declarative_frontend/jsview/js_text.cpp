@@ -1056,6 +1056,31 @@ void JSText::SetEnableAutoSpacing(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetEnableAutoSpacing(enabled);
 }
 
+void JSText::SetShaderStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
+    NG::Gradient gradient;
+    ParseShaderStyle(info, gradient);
+}
+
+void JSText::ParseShaderStyle(const JSCallbackInfo& info, NG::Gradient& gradient)
+{
+    CalcDimension value;
+    auto shaderStyleObj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> center = shaderStyleObj->GetProperty(static_cast<int32_t>(ArkUIIndex::CENTER));
+    JSRef<JSVal> radius = shaderStyleObj->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS));
+    JSRef<JSVal> colors = shaderStyleObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLORS));
+    if (center->IsArray() && radius->IsNumber()) {
+        NewJsRadialGradient(info, gradient);
+        TextModel::GetInstance()->SetGradientShaderStyle(gradient);
+    } else if (colors->IsArray()) {
+        NewJsLinearGradient(info, gradient);
+        TextModel::GetInstance()->SetGradientShaderStyle(gradient);
+    }
+}
+
 void JSText::JSBind(BindingTarget globalObj)
 {
     JSClass<JSText>::Declare("Text");
@@ -1127,6 +1152,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("enableHapticFeedback", &JSText::SetEnableHapticFeedback);
     JSClass<JSText>::StaticMethod("optimizeTrailingSpace", &JSText::SetOptimizeTrailingSpace);
     JSClass<JSText>::StaticMethod("enableAutoSpacing", &JSText::SetEnableAutoSpacing);
+    JSClass<JSText>::StaticMethod("shaderStyle", &JSText::SetShaderStyle);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

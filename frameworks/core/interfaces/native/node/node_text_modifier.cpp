@@ -69,6 +69,15 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
+constexpr int NUM_5 = 5;
+constexpr int NUM_6 = 6;
+constexpr int NUM_7 = 7;
+constexpr int NUM_8 = 8;
+constexpr int NUM_9 = 9;
+constexpr int NUM_10 = 10;
+constexpr float DEFAULT_ANGLE = 180.0f;
+constexpr double PERCENT_100 = 100.0;
+constexpr float MAX_ANGLE = 360.0f;
 
 std::map<TextHeightAdaptivePolicy, int> TEXT_HEIGHT_ADAPTIVE_POLICY_MAP = {
     { TextHeightAdaptivePolicy::MAX_LINES_FIRST, 0 },
@@ -1310,6 +1319,298 @@ void ResetEnableAutoSpacing(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetEnableAutoSpacing(frameNode, false);
 }
+
+ArkUI_Float32 CheckAngle(const ArkUI_Float32 angle)
+{
+    if (LessNotEqual(angle, 0.0f)) {
+        return 0.0f;
+    }
+    if (GreatNotEqual(angle, MAX_ANGLE)) {
+        return MAX_ANGLE;
+    }
+    return angle;
+}
+
+void SetLinearGradientDirectionTo(std::shared_ptr<LinearGradient>& linearGradient, const GradientDirection direction)
+{
+    switch (direction) {
+        case GradientDirection::LEFT:
+            linearGradient->linearX = NG::GradientDirection::LEFT;
+            break;
+        case GradientDirection::RIGHT:
+            linearGradient->linearX = NG::GradientDirection::RIGHT;
+            break;
+        case GradientDirection::TOP:
+            linearGradient->linearY = NG::GradientDirection::TOP;
+            break;
+        case GradientDirection::BOTTOM:
+            linearGradient->linearY = NG::GradientDirection::BOTTOM;
+            break;
+        case GradientDirection::LEFT_TOP:
+            linearGradient->linearX = NG::GradientDirection::LEFT;
+            linearGradient->linearY = NG::GradientDirection::TOP;
+            break;
+        case GradientDirection::LEFT_BOTTOM:
+            linearGradient->linearX = NG::GradientDirection::LEFT;
+            linearGradient->linearY = NG::GradientDirection::BOTTOM;
+            break;
+        case GradientDirection::RIGHT_TOP:
+            linearGradient->linearX = NG::GradientDirection::RIGHT;
+            linearGradient->linearY = NG::GradientDirection::TOP;
+            break;
+        case GradientDirection::RIGHT_BOTTOM:
+            linearGradient->linearX = NG::GradientDirection::RIGHT;
+            linearGradient->linearY = NG::GradientDirection::BOTTOM;
+            break;
+        case GradientDirection::NONE:
+        case GradientDirection::START_TO_END:
+        case GradientDirection::END_TO_START:
+        default:
+            break;
+    }
+}
+
+GradientDirection ConvertToLinearGradientDirection(std::shared_ptr<LinearGradient> linearGradient)
+{
+    auto linearX = linearGradient->linearX;
+    auto linearY = linearGradient->linearY;
+    if (!linearX.has_value() && !linearY.has_value()) {
+        return GradientDirection::BOTTOM;
+    }
+    if (linearX.has_value() && !linearY.has_value()) {
+        return linearX.value();
+    }
+    if (!linearX.has_value() && linearY.has_value()) {
+        return linearY.value();
+    }
+
+    if (linearX.value() == NG::GradientDirection::LEFT && linearY.value() == NG::GradientDirection::TOP) {
+        return GradientDirection::LEFT_TOP;
+    }
+    if (linearX.value() == NG::GradientDirection::LEFT && linearY.value() == NG::GradientDirection::BOTTOM) {
+        return GradientDirection::LEFT_BOTTOM;
+    }
+    if (linearX.value() == NG::GradientDirection::RIGHT && linearY.value() == NG::GradientDirection::TOP) {
+        return GradientDirection::RIGHT_TOP;
+    }
+    if (linearX.value() == NG::GradientDirection::RIGHT && linearY.value() == NG::GradientDirection::BOTTOM) {
+        return GradientDirection::RIGHT_BOTTOM;
+    }
+    return GradientDirection::BOTTOM;
+}
+
+/**
+ * @param values value value
+ * values[0], values[1] : angle: hasValue, angle value
+ * values[2] : direction
+ * values[3] : repeating
+ * @param valuesLength values length
+ */
+void SetLinearGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength)
+{
+    if ((values == nullptr) || (valuesLength != NUM_4)) {
+        return;
+    }
+    auto angleHasValue = values[NUM_0].i32;
+    auto angleValue = values[NUM_1].f32;
+    auto directionValue = values[NUM_2].i32;
+    auto repeating = values[NUM_3].i32;
+    auto linearGradient = gradient.GetLinearGradient();
+    if (linearGradient == nullptr) {
+        return;
+    }
+    if (static_cast<bool>(angleHasValue)) {
+        linearGradient->angle = CalcDimension(angleValue, DimensionUnit::PX);
+    }
+    SetLinearGradientDirectionTo(linearGradient, static_cast<GradientDirection>(directionValue));
+    gradient.SetRepeat(static_cast<bool>(repeating));
+}
+
+/**
+ * @param values value value
+ * values[0], values[1], values[2] : centerX Dimension: hasValue, value, unit
+ * values[3], values[4], values[5] : centerY Dimension: hasValue, value, unit
+ * values[6], values[7], values[8] : radius: Dimension: hasValue, value, unit
+ * values[9] : repeating
+ * @param valuesLength values length
+ */
+void SetRadialGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength)
+{
+    if ((values == nullptr) || (valuesLength != NUM_10)) {
+        return;
+    }
+
+    auto centerXHasValue = values[NUM_0].i32;
+    auto centerXValue = values[NUM_1].f32;
+    auto centerXUnit = values[NUM_2].i32;
+    auto centerYHasValue = values[NUM_3].i32;
+    auto centerYValue = values[NUM_4].f32;
+    auto centerYUnit = values[NUM_5].i32;
+    auto radiusHasValue = values[NUM_6].i32;
+    auto radiusValue = values[NUM_7].f32;
+    auto radiusUnit = values[NUM_8].i32;
+    auto repeating = values[NUM_9].i32;
+
+    if (static_cast<bool>(centerXHasValue)) {
+        auto unit = static_cast<DimensionUnit>(centerXUnit);
+        auto value = (unit == DimensionUnit::PERCENT) ? (centerXValue * PERCENT_100) : centerXValue;
+        gradient.GetRadialGradient()->radialCenterX = CalcDimension(value, unit);
+    }
+    if (static_cast<bool>(centerYHasValue)) {
+        auto unit = static_cast<DimensionUnit>(centerYUnit);
+        auto value = (unit == DimensionUnit::PERCENT) ? (centerYValue * PERCENT_100) : centerYValue;
+        gradient.GetRadialGradient()->radialCenterY = CalcDimension(value, unit);
+    }
+    if (static_cast<bool>(radiusHasValue)) {
+        auto unit = static_cast<DimensionUnit>(radiusUnit);
+        auto value = CheckAngle(radiusValue);
+        gradient.GetRadialGradient()->radialVerticalSize = CalcDimension(value, unit);
+        gradient.GetRadialGradient()->radialHorizontalSize = CalcDimension(value, unit);
+    }
+    gradient.SetRepeat(static_cast<bool>(repeating));
+}
+
+/**
+ * @param colors color value
+ * colors[0], colors[1], colors[2] : color[0](color, hasDimension, dimension)
+ * colors[3], colors[4], colors[5] : color[1](color, hasDimension, dimension)
+ * ...
+ * @param colorsLength colors length
+ */
+void SetGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
+{
+    if ((colors == nullptr) || (colorsLength % NUM_3) != 0) {
+        return;
+    }
+    for (int32_t index = 0; index < colorsLength; index += NUM_3) {
+        auto colorValue = colors[index].u32;
+        auto colorHasDimension = colors[index + NUM_1].i32;
+        auto colorDimension = colors[index + NUM_2].f32;
+        auto color = static_cast<uint32_t>(colorValue);
+        auto hasDimension = static_cast<bool>(colorHasDimension);
+        auto dimension = colorDimension;
+        NG::GradientColor gradientColor;
+        gradientColor.SetColor(Color(color));
+        gradientColor.SetHasValue(hasDimension);
+        if (hasDimension) {
+            gradientColor.SetDimension(CalcDimension(dimension * PERCENT_100, DimensionUnit::PERCENT));
+        }
+        gradient.AddColor(gradientColor);
+    }
+}
+
+/**
+ * @param values value value
+ * values[0], values[1] : angle: hasValue, angle value
+ * values[2] : direction
+ * values[3] : repeating
+ * @param valuesLength values length
+ * @param colors color value
+ * colors[0], colors[1], colors[2] : color[0](color, hasDimension, dimension)
+ * colors[3], colors[4], colors[5] : color[1](color, hasDimension, dimension)
+ * ...
+ * @param colorsLength colors length
+ */
+void SetTextLinearGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((values == nullptr) || (valuesLength != NUM_4) || ((colorsLength % NUM_3) != 0)) {
+        return;
+    }
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    SetLinearGradientValues(gradient, values, valuesLength);
+    SetGradientColors(gradient, colors, colorsLength);
+    TextModelNG::SetGradientStyle(frameNode, gradient);
+}
+
+ArkUI_Int32 GetTextLinearGradient(
+    ArkUINodeHandle node, ArkUI_Float32 (*values)[3], ArkUI_Uint32 (*colors)[10], ArkUI_Float32 (*stop)[10])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    auto gradient = TextModelNG::GetGradientStyle(frameNode);
+    auto angle = gradient.GetLinearGradient()->angle;
+    //0 angle
+    (*values)[0] = angle.has_value() ? angle.value().Value() : DEFAULT_ANGLE;
+    //1 Direction
+    (*values)[1] = static_cast<int32_t>(ConvertToLinearGradientDirection(gradient.GetLinearGradient()));
+    //2 Repeat
+    (*values)[2] = gradient.GetRepeat();
+
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    //0 start index
+    int index = 0;
+    for (auto& gradientColor : gradientColors) {
+        (*colors)[index] = gradientColor.GetColor().GetValue();
+        (*stop)[index] = gradientColor.GetDimension().Value();
+        index++;
+    }
+    return index;
+}
+
+/**
+ * @param values value value
+ * values[0], values[1], values[2] : centerX Dimension: hasValue, value, unit
+ * values[3], values[4], values[5] : centerY Dimension: hasValue, value, unit
+ * values[6], values[7], values[8] : radius: Dimension: hasValue, value, unit
+ * values[9] : repeating
+ * @param valuesLength values length
+ * @param colors color value
+ * colors[0], colors[1], colors[2] : color[0](color, hasDimension, dimension)
+ * colors[3], colors[4], colors[5] : color[1](color, hasDimension, dimension)
+ * ...
+ * @param colorsLength colors length
+ */
+void SetTextRadialGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((values == nullptr) || (valuesLength != NUM_10) || ((colorsLength % NUM_3) != 0)) {
+        return;
+    }
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
+    SetRadialGradientValues(gradient, values, valuesLength);
+    SetGradientColors(gradient, colors, colorsLength);
+    TextModelNG::SetGradientStyle(frameNode, gradient);
+}
+
+void ResetTextGradient(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetTextGradient(frameNode);
+}
+
+ArkUI_Int32 GetTextRadialGradient(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Uint32 (*colors)[10],
+    ArkUI_Float32 (*stops)[10], ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    auto gradient = TextModelNG::GetGradientStyle(frameNode);
+    auto radialGradient = gradient.GetRadialGradient();
+
+    CHECK_NULL_RETURN(radialGradient, ERROR_INT_CODE);
+    (*values)[NUM_0] = radialGradient->radialCenterX->GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_1] = radialGradient->radialCenterY->GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_2] =
+        gradient.GetRadialGradient()->radialHorizontalSize->GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_3] = gradient.GetRepeat();
+
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    //0 start index
+    int index = 0;
+    for (auto& gradientColor : gradientColors) {
+        (*colors)[index] = gradientColor.GetColor().GetValue();
+        (*stops)[index] = gradientColor.GetDimension().Value();
+        index++;
+    }
+    return index;
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1453,6 +1754,11 @@ const ArkUITextModifier* GetTextModifier()
         .getLineCount = GetLineCount,
         .setEnableAutoSpacing = SetEnableAutoSpacing,
         .resetEnableAutoSpacing = ResetEnableAutoSpacing,
+        .setLinearGradient = SetTextLinearGradient,
+        .getLinearGradient = GetTextLinearGradient,
+        .setRadialGradient = SetTextRadialGradient,
+        .getRadialGradient = GetTextRadialGradient,
+        .resetTextGradient = ResetTextGradient,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

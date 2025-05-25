@@ -96,6 +96,8 @@ private:
     OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) override;
     bool UpdateSingleParagraph(LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle, const TextStyle& textStyle,
         const std::u16string& content, double maxWidth);
+    void UpdateRelayoutShaderStyle(
+        const RefPtr<TextPattern>& pattern, const RefPtr<TextLayoutProperty>& textLayoutProperty);
     bool UpdateSymbolTextStyle(const TextStyle& textStyle, const ParagraphStyle& paraStyle,
         LayoutWrapper* layoutWrapper, RefPtr<FrameNode>& frameNode);
     void CreateParagraphDrag(
@@ -120,6 +122,7 @@ private:
     void UpdateSensitiveContent(std::u16string& content);
     void CheckNeedReCreateParagraph(LayoutWrapper* layoutWrapper, const TextStyle& textStyle);
     void ResetNeedReCreateParagraph(LayoutWrapper* layoutWrapper);
+    void RelayoutShaderStyle(const RefPtr<TextLayoutProperty>& layoutProperty);
     bool AlwaysReCreateParagraph(LayoutWrapper* layoutWrapper);
     std::pair<bool, double> GetSuitableSize(TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);

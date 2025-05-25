@@ -53,6 +53,7 @@ public:
     void SetLineSpacing(const Dimension& value) override;
     void SetOptimizeTrailingSpace(bool trim) override;
     void SetIsOnlyBetweenLines(bool isOnlyBetweenLines) override;
+    void SetGradientShaderStyle(NG::Gradient& gradient) override;
     void SetTextDecoration(TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(TextDecorationStyle value) override;

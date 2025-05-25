@@ -216,6 +216,8 @@ void TextModelImpl::SetOptimizeTrailingSpace(bool trim) {}
 
 void TextModelImpl::SetIsOnlyBetweenLines(bool isOnlyBetweenLines) {}
 
+void TextModelImpl::SetGradientShaderStyle(NG::Gradient& gradient) {}
+
 void TextModelImpl::SetAdaptMinFontSize(const Dimension& value)
 {
     auto component = GetComponent();

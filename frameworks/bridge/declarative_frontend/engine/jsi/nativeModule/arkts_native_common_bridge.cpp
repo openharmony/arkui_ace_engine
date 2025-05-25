@@ -136,80 +136,6 @@ bool ParseJsDouble(const EcmaVM *vm, const Local<JSValueRef> &value, double &res
     return false;
 }
 
-bool ParseJsInt32(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &result)
-{
-    if (value->IsNumber()) {
-        result = value->Int32Value(vm);
-        return true;
-    }
-    if (value->IsString(vm)) {
-        result = StringUtils::StringToInt(value->ToString(vm)->ToString(vm));
-        return true;
-    }
-
-    return false;
-}
-
-void ParseJsAngle(const EcmaVM *vm, const Local<JSValueRef> &value, std::optional<float> &angle)
-{
-    if (value->IsNumber()) {
-        angle = static_cast<float>(value->ToNumber(vm)->Value());
-        return;
-    }
-    if (value->IsString(vm)) {
-        angle = static_cast<float>(StringUtils::StringToDegree(value->ToString(vm)->ToString(vm)));
-        return;
-    }
-    return;
-}
-
-void ParseGradientAngle(const EcmaVM *vm, const Local<JSValueRef> &value, std::vector<ArkUIInt32orFloat32> &values)
-{
-    std::optional<float> degree;
-    ParseJsAngle(vm, value, degree);
-    auto angleHasValue = degree.has_value();
-    auto angleValue = angleHasValue ? degree.value() : 0.0f;
-    degree.reset();
-    values.push_back({.i32 = static_cast<ArkUI_Int32>(angleHasValue)});
-    values.push_back({.f32 = static_cast<ArkUI_Float32>(angleValue)});
-}
-
-void ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef> &value, std::vector<ArkUIInt32orFloat32> &colors)
-{
-    if (!value->IsArray(vm)) {
-        return;
-    }
-    auto array = panda::Local<panda::ArrayRef>(value);
-    auto length = array->Length(vm);
-    for (uint32_t index = 0; index < length; index++) {
-        auto item = panda::ArrayRef::GetValueAt(vm, array, index);
-        if (!item->IsArray(vm)) {
-            continue;
-        }
-        auto itemArray = panda::Local<panda::ArrayRef>(item);
-        auto itemLength = itemArray->Length(vm);
-        if (itemLength < NUM_1) {
-            continue;
-        }
-        Color color;
-        auto colorParams = panda::ArrayRef::GetValueAt(vm, itemArray, NUM_0);
-        if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color)) {
-            continue;
-        }
-        bool hasDimension = false;
-        double dimension = 0.0;
-        if (itemLength > NUM_1) {
-            auto stopDimension = panda::ArrayRef::GetValueAt(vm, itemArray, NUM_1);
-            if (ArkTSUtils::ParseJsDouble(vm, stopDimension, dimension)) {
-                hasDimension = true;
-            }
-        }
-        colors.push_back({.u32 = static_cast<ArkUI_Uint32>(color.GetValue())});
-        colors.push_back({.i32 = static_cast<ArkUI_Int32>(hasDimension)});
-        colors.push_back({.f32 = static_cast<ArkUI_Float32>(dimension)});
-    }
-}
-
 bool ParseJsShadowColorStrategy(const EcmaVM *vm, const Local<JSValueRef> &value, ShadowColorStrategy& strategy)
 {
     if (value->IsString(vm)) {
@@ -464,13 +390,13 @@ void ParseBorderImageLinearGradient(ArkUINodeHandle node,
     }
     auto vm = runtimeCallInfo->GetVM();
     std::vector<ArkUIInt32orFloat32> options;
-    ParseGradientAngle(vm, angleArg, options);
+    ArkTSUtils::ParseGradientAngle(vm, angleArg, options);
     int32_t direction = static_cast<int32_t>(GradientDirection::NONE);
-    ParseJsInt32(vm, directionArg, direction);
+    ArkTSUtils::ParseJsInt32(vm, directionArg, direction);
     options.push_back({.i32 = static_cast<ArkUI_Int32>(direction)});
 
     std::vector<ArkUIInt32orFloat32> colors;
-    ParseGradientColorStops(vm, colorsArg, colors);
+    ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors);
     auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(runtimeCallInfo->GetVM()) : false;
     options.push_back({.i32 = static_cast<ArkUI_Int32>(repeating)});
     GetArkUINodeModifiers()->getCommonModifier()->setBorderImageGradient(node,
@@ -926,30 +852,6 @@ bool ParseJsDoublePair(const EcmaVM *vm, const Local<JSValueRef> &value, ArkUI_F
     first = static_cast<ArkUI_Float32>(firstArg->ToNumber(vm)->Value());
     second = static_cast<ArkUI_Float32>(secondArg->ToNumber(vm)->Value());
     return true;
-}
-
-void ParseGradientCenter(const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& values)
-{
-    bool hasValueX = false;
-    bool hasValueY = false;
-    CalcDimension valueX;
-    CalcDimension valueY;
-    if (value->IsArray(vm)) {
-        auto array = panda::Local<panda::ArrayRef>(value);
-        auto length = array->Length(vm);
-        if (length == NUM_2) {
-            hasValueX =
-                ArkTSUtils::ParseJsDimensionVp(vm, panda::ArrayRef::GetValueAt(vm, array, NUM_0), valueX, false);
-            hasValueY =
-                ArkTSUtils::ParseJsDimensionVp(vm, panda::ArrayRef::GetValueAt(vm, array, NUM_1), valueY, false);
-        }
-    }
-    values.push_back({.i32 = static_cast<ArkUI_Int32>(hasValueX)});
-    values.push_back({.f32 = static_cast<ArkUI_Float32>(valueX.Value())});
-    values.push_back({.i32 = static_cast<ArkUI_Int32>(valueX.Unit())});
-    values.push_back({.i32 = static_cast<ArkUI_Int32>(hasValueY)});
-    values.push_back({.f32 = static_cast<ArkUI_Float32>(valueY.Value())});
-    values.push_back({.i32 = static_cast<ArkUI_Int32>(valueY.Unit())});
 }
 
 void PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim, std::vector<ArkUI_Float32> &options)
@@ -2716,13 +2618,13 @@ ArkUINativeModuleValue CommonBridge::SetLinearGradient(ArkUIRuntimeCallInfo *run
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     std::vector<ArkUIInt32orFloat32> values;
-    ParseGradientAngle(vm, angleArg, values);
+    ArkTSUtils::ParseGradientAngle(vm, angleArg, values);
     int32_t direction = static_cast<int32_t>(GradientDirection::NONE);
-    ParseJsInt32(vm, directionArg, direction);
+    ArkTSUtils::ParseJsInt32(vm, directionArg, direction);
     values.push_back({.i32 = static_cast<ArkUI_Int32>(direction)});
 
     std::vector<ArkUIInt32orFloat32> colors;
-    ParseGradientColorStops(vm, colorsArg, colors);
+    ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors);
     auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
     values.push_back({.i32 = static_cast<ArkUI_Int32>(repeating)});
     GetArkUINodeModifiers()->getCommonModifier()->setLinearGradient(nativeNode, values.data(), values.size(),
@@ -2753,12 +2655,12 @@ ArkUINativeModuleValue CommonBridge::SetSweepGradient(ArkUIRuntimeCallInfo *runt
     auto repeatingArg = runtimeCallInfo->GetCallArgRef(NUM_6);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::vector<ArkUIInt32orFloat32> values;
-    ParseGradientCenter(vm, centerArg, values);
-    ParseGradientAngle(vm, startArg, values);
-    ParseGradientAngle(vm, endArg, values);
-    ParseGradientAngle(vm, rotationArg, values);
+    ArkTSUtils::ParseGradientCenter(vm, centerArg, values);
+    ArkTSUtils::ParseGradientAngle(vm, startArg, values);
+    ArkTSUtils::ParseGradientAngle(vm, endArg, values);
+    ArkTSUtils::ParseGradientAngle(vm, rotationArg, values);
     std::vector<ArkUIInt32orFloat32> colors;
-    ParseGradientColorStops(vm, colorsArg, colors);
+    ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors);
     auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
     values.push_back({.i32 = static_cast<ArkUI_Int32>(repeating)});
     GetArkUINodeModifiers()->getCommonModifier()->setSweepGradient(nativeNode, values.data(), values.size(),
@@ -2787,14 +2689,14 @@ ArkUINativeModuleValue CommonBridge::SetRadialGradient(ArkUIRuntimeCallInfo *run
     auto repeatingArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::vector<ArkUIInt32orFloat32> values;
-    ParseGradientCenter(vm, centerArg, values);
+    ArkTSUtils::ParseGradientCenter(vm, centerArg, values);
     CalcDimension radius;
     auto hasRadius = ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius, false);
     values.push_back({.i32 = static_cast<ArkUI_Int32>(hasRadius)});
     values.push_back({.f32 = static_cast<ArkUI_Float32>(radius.Value())});
     values.push_back({.i32 = static_cast<ArkUI_Int32>(radius.Unit())});
     std::vector<ArkUIInt32orFloat32> colors;
-    ParseGradientColorStops(vm, colorsArg, colors);
+    ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors);
     auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
     values.push_back({.i32 = static_cast<ArkUI_Int32>(repeating)});
     GetArkUINodeModifiers()->getCommonModifier()->setRadialGradient(nativeNode, values.data(), values.size(),
@@ -2939,8 +2841,8 @@ ArkUINativeModuleValue CommonBridge::SetForegroundBlurStyle(ArkUIRuntimeCallInfo
     double scale = 1.0;
     BlurOption blurOption;
     if (isHasOptions) {
-        ParseJsInt32(vm, colorModeArg, colorMode);
-        ParseJsInt32(vm, adaptiveColorArg, adaptiveColor);
+        ArkTSUtils::ParseJsInt32(vm, colorModeArg, colorMode);
+        ArkTSUtils::ParseJsInt32(vm, adaptiveColorArg, adaptiveColor);
         if (scaleArg->IsNumber()) {
             scale = scaleArg->ToNumber(vm)->Value();
         }
@@ -3026,12 +2928,12 @@ void SetBackgroundBlurStyleParam(
     if (ArkTSUtils::ParseJsColor(vm, inactiveColorArg, inactiveColor)) {
         isValidColor = true;
     }
-    ParseJsInt32(vm, policyArg, policy);
+    ArkTSUtils::ParseJsInt32(vm, policyArg, policy);
     if (policy < static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) ||
         policy > static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
         policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
     }
-    ParseJsInt32(vm, typeArg, blurType);
+    ArkTSUtils::ParseJsInt32(vm, typeArg, blurType);
     if (blurType < static_cast<int32_t>(BlurType::WITHIN_WINDOW) ||
         blurType > static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
         blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
@@ -3062,9 +2964,9 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundBlurStyle(ArkUIRuntimeCallInfo
     BlurOption blurOption;
     if (isHasOptions) {
         colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
-        ParseJsInt32(vm, colorModeArg, colorMode);
+        ArkTSUtils::ParseJsInt32(vm, colorModeArg, colorMode);
         adaptiveColor = static_cast<int32_t>(AdaptiveColor::DEFAULT);
-        ParseJsInt32(vm, adaptiveColorArg, adaptiveColor);
+        ArkTSUtils::ParseJsInt32(vm, adaptiveColorArg, adaptiveColor);
         scale = 1.0;
         if (scaleArg->IsNumber()) {
             scale = scaleArg->ToNumber(vm)->Value();
@@ -5641,12 +5543,12 @@ void SetBackgroundEffectParam(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& po
     Local<JSValueRef> inactiveColorArg = runtimeCallInfo->GetCallArgRef(8); // 8:index of parameter inactiveColor
     Local<JSValueRef> typeArg = runtimeCallInfo->GetCallArgRef(9);          // 9:index of parameter type
 
-    ParseJsInt32(vm, policyArg, policy);
+    ArkTSUtils::ParseJsInt32(vm, policyArg, policy);
     if (policy < static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) ||
         policy > static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
         policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
     }
-    ParseJsInt32(vm, typeArg, blurType);
+    ArkTSUtils::ParseJsInt32(vm, typeArg, blurType);
     if (blurType < static_cast<int32_t>(BlurType::WITHIN_WINDOW) ||
         blurType > static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
         blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);

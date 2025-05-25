@@ -889,6 +889,39 @@ class TextEnableAutoSpacingModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextShaderStyleModifier extends ModifierWithKey<{
+  center: Array<any>;
+  radius: number | string;
+  angle?: number | string;
+  direction?: GradientDirection;
+  colors: Array<any>;
+  repeating?: boolean;
+}> {
+  constructor(value: {
+    center: Array<any>;
+    radius: number | string;
+    angle?: number | string;
+    direction?: GradientDirection;
+    colors: Array<any>;
+    repeating?: boolean;
+  }) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textShaderStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetShaderStyle(node, this.value);
+    }
+    else {
+      getUINativeModule().text.setShaderStyle(node, this.value.center, this.value.radius, this.value.angle,
+        this.value.direction, this.value.repeating, this.value.colors);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1110,6 +1143,17 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   enableAutoSpacing(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextEnableAutoSpacingModifier.identity, TextEnableAutoSpacingModifier, value);
+    return this;
+  }
+  shaderStyle(value: {
+    center: Array<any>;
+    radius: number | string;
+    angle?: number | string;
+    direction?: GradientDirection;
+    colors: Array<any>;
+    repeating?: boolean;
+  }): this {
+    modifierWithKey(this._modifiersWithKeys, TextShaderStyleModifier.identity, TextShaderStyleModifier, value);
     return this;
   }
 }
