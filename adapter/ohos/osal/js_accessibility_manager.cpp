@@ -797,18 +797,17 @@ void FindText(const RefPtr<NG::UINode>& node, const std::string& text, std::list
 }
 
 bool FindFrameNodeByAccessibilityId(int64_t id, const std::list<RefPtr<NG::UINode>>& children,
-    std::queue<NG::UINode*>& nodes, RefPtr<NG::FrameNode>& result)
+    std::queue<RefPtr<NG::UINode>>& nodes, RefPtr<NG::FrameNode>& result)
 {
-    NG::FrameNode* frameNode = nullptr;
     for (const auto& child : children) {
-        frameNode = AceType::DynamicCast<NG::FrameNode>(Referenced::RawPtr(child));
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(child);
         if (frameNode != nullptr && !frameNode->CheckAccessibilityLevelNo()) {
             if (frameNode->GetAccessibilityId() == id) {
                 result = AceType::DynamicCast<NG::FrameNode>(child);
                 return true;
             }
         }
-        nodes.push(Referenced::RawPtr(child));
+        nodes.push(child);
     }
     return false;
 }
@@ -819,8 +818,8 @@ RefPtr<NG::FrameNode> GetFramenodeByAccessibilityId(const RefPtr<NG::FrameNode>&
     if (root->GetAccessibilityId() == id) {
         return root;
     }
-    std::queue<NG::UINode*> nodes;
-    nodes.push(Referenced::RawPtr(root));
+    std::queue<RefPtr<NG::UINode>> nodes;
+    nodes.push(root);
     RefPtr<NG::FrameNode> frameNodeResult = nullptr;
 
     while (!nodes.empty()) {
