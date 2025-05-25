@@ -23773,6 +23773,7 @@ typedef struct GENERATED_ArkUIFrameNodeAccessor {
     void (*reuse)(Ark_FrameNode peer);
     void (*recycle)(Ark_FrameNode peer);
     Ark_RenderNode (*getRenderNode)(Ark_FrameNode peer);
+    Ark_NativePointer (*getFrameNodePtr)(Ark_FrameNode node);
 } GENERATED_ArkUIFrameNodeAccessor;
 
 typedef struct GENERATED_ArkUILengthMetricsAccessor {

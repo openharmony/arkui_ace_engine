@@ -25,6 +25,14 @@ import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./component"
 import { ArkUIAniModule } from "arkui.ani"
 import { RenderNode, RenderNodeInternal } from "./RenderNode"
+import { CommonAttribute, ArkCommonMethodPeer, CommonMethod } from './component/common'
+import { ArkBaseNode } from './handwritten/modifiers/ArkBaseNode'
+
+export class ArkFrameNodePeer extends ArkCommonMethodPeer {
+    constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+}
 
 export enum ExpandMode {
     NOT_EXPAND = 0,
@@ -51,11 +59,12 @@ export class FrameNode implements MaterializedBase {
     renderNode_: RenderNode | undefined = undefined
     instanceId_?: number;
     _nodeId: number = -1;
+    protected _commonAttribute: CommonAttribute | undefined = undefined;
     getType(): string {
         return 'CustomFrameNode';
     }
 
-    checkValid(node:FrameNode) {
+    checkValid(node:FrameNode): boolean {
         return true;
     }
     public getPeer(): Finalizable | undefined {
@@ -418,6 +427,24 @@ export class FrameNode implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._FrameNode_getRenderNode(this.peer!.ptr)
         return RenderNodeInternal.fromPtr(retval)
     }
+    public static getFrameNodePtr(node: FrameNode): KPointer {
+        const node_casted = node as (FrameNode)
+        return FrameNode.getFrameNodePtr_serialize(node_casted)
+    }
+    private static getFrameNodePtr_serialize(node: FrameNode): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node))
+        return retval
+    }
+    get commonAttribute(): CommonMethod {
+        if (this._commonAttribute === undefined) {
+            let baseNode = new ArkBaseNode();
+            const retval  = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(this))
+            let peer = new ArkFrameNodePeer(retval, this._nodeId as int32, "FrameNode", 0);
+            baseNode.setPeer(peer);
+            this._commonAttribute = baseNode as CommonAttribute;
+        }
+        return this._commonAttribute!;
+    }
 }
 class ImmutableFrameNode extends FrameNode {
     constructor(uiContext: UIContext, type: string, ptr?: KPointer) {
@@ -426,7 +453,7 @@ class ImmutableFrameNode extends FrameNode {
     isModifiable(): boolean {
       return false;
     }
-    invalidate() {
+    invalidate(): void {
       return;
     }
     appendChild(node: FrameNode): void {

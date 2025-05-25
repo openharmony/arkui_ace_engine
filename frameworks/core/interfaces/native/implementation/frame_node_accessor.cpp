@@ -248,6 +248,7 @@ Ark_FrameNode GetFrameNodeByKeyImpl(const Ark_String* name)
 {
     auto valueName = Converter::Convert<std::string>(*name);
     auto node = NG::Inspector::GetFrameNodeByKey(valueName, true);
+    CHECK_NULL_RETURN(node, nullptr);
     return FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(node));
 }
 Ark_Number GetIdByFrameNodeImpl(Ark_FrameNode peer, Ark_FrameNode node)
@@ -388,6 +389,11 @@ Ark_RenderNode GetRenderNodeImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(peer && peer->node, nullptr);
     return peer->GetRenderNodePeer();
 }
+Ark_NativePointer GetFrameNodePtrImpl(Ark_FrameNode node)
+{
+    auto nodeRf = FrameNodePeer::GetFrameNodeByPeer(node);
+    return AceType::RawPtr(nodeRf);
+}
 } // FrameNodeAccessor
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
 {
@@ -395,7 +401,6 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
         FrameNodeAccessor::DestroyPeerImpl,
         FrameNodeAccessor::CtorImpl,
         FrameNodeAccessor::GetFinalizerImpl,
-        // FrameNodeAccessor::CtorFrameNodeImpl,
         FrameNodeAccessor::IsModifiableImpl,
         FrameNodeAccessor::AppendChildImpl,
         FrameNodeAccessor::InsertChildAfterImpl,
@@ -421,6 +426,7 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
         FrameNodeAccessor::ReuseImpl,
         FrameNodeAccessor::RecycleImpl,
         FrameNodeAccessor::GetRenderNodeImpl,
+        FrameNodeAccessor::GetFrameNodePtrImpl,
     };
     return &FrameNodeAccessorImpl;
 }

@@ -193,7 +193,7 @@ export class UIContext {
         const id_casted = id as (string);
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeByKey(id_casted);
-        if (retval == nullptr) {
+        if (retval === nullptr) {
             ArkUIAniModule._Common_Restore_InstanceId();
             return null;
         }
@@ -207,7 +207,7 @@ export class UIContext {
     getAttachedFrameNodeById(id: string): FrameNode | null {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         const retval = ArkUIGeneratedNativeModule._FrameNode_getAttachedFrameNodeById(id);
-        if (retval == nullptr) {
+        if (retval === nullptr) {
             ArkUIAniModule._Common_Restore_InstanceId();
             return null;
         }
@@ -221,7 +221,7 @@ export class UIContext {
     getFrameNodeByNodeId(id: number): FrameNode | null {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeById(id);
-        if (retval == nullptr) {
+        if (retval === nullptr) {
             ArkUIAniModule._Common_Restore_InstanceId();
             return null;
         }
@@ -235,7 +235,7 @@ export class UIContext {
     getFrameNodeByUniqueId(id: number): FrameNode | null {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeByUniqueId(id);
-        if (retval == nullptr) {
+        if (retval === nullptr) {
             ArkUIAniModule._Common_Restore_InstanceId();
             return null;
         }

@@ -13488,6 +13488,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_NativePointer GetFrameNodePtrImpl(Ark_FrameNode node)
+    {
+        return {};
+    }
     } // FrameNodeAccessor
     namespace LengthMetricsAccessor {
     void DestroyPeerImpl(Ark_LengthMetrics peer)
@@ -21345,6 +21349,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeAccessor::GetFrameNodeByUniqueIdImpl,
             FrameNodeAccessor::ReuseImpl,
             FrameNodeAccessor::RecycleImpl,
+            FrameNodeAccessor::GetFrameNodePtrImpl,
         };
         return &FrameNodeAccessorImpl;
     }
