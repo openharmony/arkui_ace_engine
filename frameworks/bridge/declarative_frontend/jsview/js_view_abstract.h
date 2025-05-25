@@ -856,6 +856,7 @@ private:
     static void ParseMaskRectHeightWithResourceObj(const JSRef<JSVal>& width, DimensionRect& options);
     static void CompleteResourceObjectInner(
         JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resIdValue);
+    static NG::LayoutSafeAreaEdge ParseJsLayoutSafeAreaEdgeArray(const JSRef<JSArray>& jsSafeAreaEdges);
     static bool ParseAllBorderRadiusesForOutLine(JSRef<JSObject>& object, NG::BorderRadiusProperty& borderRadius);
     static void GetBorderRadiusTopLeft(const JSRef<JSVal>& jsValue, NG::BorderRadiusProperty& borderRadius);
     static void GetBorderRadiusTopRight(const JSRef<JSVal>& jsValue, NG::BorderRadiusProperty& borderRadius);
@@ -865,6 +866,8 @@ private:
     static void ParseRadialGradientCenter(NG::Gradient& newGradient, const JSRef<JSArray> centerArray);
     static void NewParseGradientColor(NG::Gradient& gradient, JSRef<JSArray>& subArray,
         NG::GradientColor& gradientColor, size_t& i, size_t& length);
+    static bool ParseBackgroundBuilder(
+        const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, std::function<void()>& builderFunc);
     static void SetBorderColorProps(const Color& color, NG::BorderColorProperty& props, const char* corner);
     static void ParseBorderColorProps(
         const JSRef<JSObject>& object, NG::BorderColorProperty& props, const char* propName);

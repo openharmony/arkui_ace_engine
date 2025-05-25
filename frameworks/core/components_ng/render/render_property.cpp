@@ -255,6 +255,8 @@ void CustomBackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, con
     }
     json->PutExtAttr("backgroundPixelMap", backgroundPixelMap.c_str(), filter);
     json->PutExtAttr("backgroundAlign", propBackgroundAlign.value().ToString().c_str(), filter);
+    json->PutExtAttr(
+        "customBackgroundColor", propCustomBackgroundColor.value_or(Color::TRANSPARENT).ToString().c_str(), filter);
 }
 
 void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

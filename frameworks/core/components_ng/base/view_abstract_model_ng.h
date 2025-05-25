@@ -1521,6 +1521,21 @@ public:
     void SetToolbarBuilder(std::function<void()>&& buildFunc) override;
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
+    void SetBackground(std::function<void()>&& buildFunc) override;
+    void SetBackgroundAlign(const Alignment& align) override
+    {
+        NG::ViewAbstract::SetBackgroundAlign(align);
+    }
+    void SetCustomBackgroundColor(const Color& color) override;
+    void SetBackgroundIgnoresLayoutSafeAreaEdges(const uint32_t edges) override;
+    void SetIsTransitionBackground(bool val) override
+    {
+        NG::ViewAbstract::SetIsTransitionBackground(val);
+    }
+    void SetIsBuilderBackground(bool val) override
+    {
+        NG::ViewAbstract::SetIsBuilderBackground(val);
+    }
 
     int32_t OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId) override
     {

@@ -286,6 +286,13 @@ public:
     void DisableOnFocusAxisEvent() override {};
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
+    void SetBackground(std::function<void()>&& buildFunc) override {};
+    void SetBackgroundAlign(const Alignment& align) override {};
+    void SetCustomBackgroundColor(const Color& color) override {};
+    void SetBackgroundIgnoresLayoutSafeAreaEdges(const uint32_t edges) override {};
+    void SetIsTransitionBackground(bool val) override {};
+    void SetIsBuilderBackground(bool val) override {};
+
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
     void BindTips(const RefPtr<PopupParam>& param, const RefPtr<OHOS::Ace::SpanString>& sapnString) override;
     int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override

@@ -419,6 +419,12 @@ public:
 
     // background
     virtual void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) = 0;
+    virtual void SetBackground(std::function<void()>&& buildFunc) = 0;
+    virtual void SetBackgroundAlign(const Alignment& align) = 0;
+    virtual void SetCustomBackgroundColor(const Color& color) = 0;
+    virtual void SetBackgroundIgnoresLayoutSafeAreaEdges(const uint32_t edges) = 0;
+    virtual void SetIsTransitionBackground(bool val) = 0;
+    virtual void SetIsBuilderBackground(bool val) = 0;
 
     // popup and menu
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;

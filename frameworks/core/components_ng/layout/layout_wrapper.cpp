@@ -111,6 +111,18 @@ void LayoutWrapper::OffsetNodeToSafeArea()
     geometryNode->SetMarginFrameOffset(offset);
 }
 
+RectF LayoutWrapper::GetBackGroundAccumulatedSafeAreaExpand()
+{
+    auto ignoreLayoutSafeAreaEdges = GetLayoutProperty()->GetBackgroundIgnoresLayoutSafeAreaEdges();
+    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = ignoreLayoutSafeAreaEdges };
+    auto expandEdges = GetAccumulatedSafeAreaExpand(false, opts);
+    auto geometryNode = GetGeometryNode();
+    RectF res = geometryNode->GetFrameRect();
+    res.SetOffset(OffsetF() - OffsetF(expandEdges.left.value_or(0.0f), expandEdges.top.value_or(0.0f)));
+    res.SetSize(res.GetSize() + SizeF(expandEdges.Width(), expandEdges.Height()));
+    return res;
+}
+
 bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
 {
     auto host = GetHostNode();

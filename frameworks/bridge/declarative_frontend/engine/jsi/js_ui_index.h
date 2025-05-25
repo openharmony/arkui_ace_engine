@@ -47,6 +47,7 @@ namespace OHOS::Ace::Framework {
     FUNCTION("id", ID)       \
     FUNCTION("itemHeightValue", ITEM_HEIGHT_VALUE)       \
     FUNCTION("itemWidthValue", ITEM_WIDTH_VALUE)       \
+    FUNCTION("ignoresLayoutSafeAreaEdges", IGNORES_LAYOUT_SAFE_AREA_EDGES)  \
     FUNCTION("left", LEFT)       \
     FUNCTION("leftValue", LEFT_VALUE)       \
     FUNCTION("length", LENGTH)       \

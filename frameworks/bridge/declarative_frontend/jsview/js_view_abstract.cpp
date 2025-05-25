@@ -87,6 +87,8 @@
 #include "core/components_ng/pattern/toolbaritem/toolbaritem_model.h"
 #include "core/event/key_event.h"
 
+#include "interfaces/inner_api/ace_kit/include/ui/properties/safe_area_insets.h"
+
 namespace OHOS::Ace::NG {
 constexpr uint32_t DEFAULT_GRID_SPAN = 1;
 constexpr int32_t DEFAULT_GRID_OFFSET = 0;
@@ -178,6 +180,7 @@ const char* DEBUG_LINE_INFO_LINE = "$line";
 const char* DEBUG_LINE_INFO_PACKAGE_NAME = "$packageName";
 
 enum class OperationType { COPY, PASTE, CUT, SELECT_ALL, UNKNOWN };
+enum class BackgroundType { CUSTOM_BUILDER, COLOR };
 
 void ParseJsScale(const JSRef<JSVal>& jsValue, float& scaleX, float& scaleY, float& scaleZ,
     CalcDimension& centerX, CalcDimension& centerY)
@@ -11927,32 +11930,111 @@ void JSViewAbstract::JsFocusScopePriority(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
 {
-    // Check the parameters
-    if (info.Length() <= 0 || !info[0]->IsObject()) {
+    if (info.Length() <= 0) {
         return;
     }
-    JSRef<JSObject> backgroundObj = JSRef<JSObject>::Cast(info[0]);
-    auto builder = backgroundObj->GetProperty(static_cast<int32_t>(ArkUIIndex::BUILDER));
-    if (!builder->IsFunction()) {
-        return;
+
+    // parse custom background
+    Color color = Color::TRANSPARENT;
+    std::function<void()> builderFunc;
+    BackgroundType backgroundType = BackgroundType::COLOR;
+    if (!ParseJsColor(info[0], color)) {
+        if (ParseBackgroundBuilder(info, info[0], builderFunc)) {
+            backgroundType = BackgroundType::CUSTOM_BUILDER;
+        } else {
+            return;
+        }
     }
-    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-    CHECK_NULL_VOID(builderFunc);
+
+    // parse background options
+    Alignment alignment = Alignment::CENTER;
+    NG::LayoutSafeAreaEdge ignoreLayoutSafeAreaEdges = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(info[1]);
+        if (object->HasProperty(static_cast<int32_t>(ArkUIIndex::ALIGN))) {
+            auto align = object->GetProperty(static_cast<int32_t>(ArkUIIndex::ALIGN));
+            auto value = align->ToNumber<int32_t>();
+            alignment = ParseAlignment(value);
+        }
+        if (object->HasProperty(static_cast<int32_t>(ArkUIIndex::IGNORES_LAYOUT_SAFE_AREA_EDGES))) {
+            auto safeAreaEdgesArray =
+                object->GetProperty(static_cast<int32_t>(ArkUIIndex::IGNORES_LAYOUT_SAFE_AREA_EDGES));
+            ignoreLayoutSafeAreaEdges = ParseJsLayoutSafeAreaEdgeArray(safeAreaEdgesArray);
+        }
+    }
+
+    if (BackgroundType::COLOR == backgroundType) {
+        ignoreLayoutSafeAreaEdges = (NG::LAYOUT_SAFE_AREA_EDGE_NONE == ignoreLayoutSafeAreaEdges)
+                                        ? NG::LAYOUT_SAFE_AREA_EDGE_ALL
+                                        : ignoreLayoutSafeAreaEdges;
+    }
+
+    // parameters parsed, set the properties parsed above
+    if (BackgroundType::CUSTOM_BUILDER == backgroundType &&
+        NG::LAYOUT_SAFE_AREA_EDGE_NONE == ignoreLayoutSafeAreaEdges) {
+        ViewAbstractModel::GetInstance()->SetIsTransitionBackground(false);
+    } else {
+        ViewAbstractModel::GetInstance()->SetIsTransitionBackground(true);
+    }
+
+    ViewAbstractModel::GetInstance()->SetIsBuilderBackground(BackgroundType::CUSTOM_BUILDER == backgroundType);
+    ViewAbstractModel::GetInstance()->SetBackground(std::move(builderFunc));
+    ViewAbstractModel::GetInstance()->SetBackgroundIgnoresLayoutSafeAreaEdges(ignoreLayoutSafeAreaEdges);
+    ViewAbstractModel::GetInstance()->SetBackgroundAlign(alignment);
+    ViewAbstractModel::GetInstance()->SetCustomBackgroundColor(color);
+}
+
+bool JSViewAbstract::ParseBackgroundBuilder(
+    const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, std::function<void()>& builderFunc)
+{
+    if (!jsFunc->IsObject()) {
+        return false;
+    }
+
+    JSRef<JSObject> backgroundObj = JSRef<JSObject>::Cast(jsFunc);
+    auto contentObj = backgroundObj->GetProperty(static_cast<int32_t>(ArkUIIndex::BUILDER));
+    if (!contentObj->IsFunction()) {
+        return false;
+    }
+    auto jsBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(contentObj));
+    CHECK_NULL_RETURN(jsBuilderFunc, false);
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = frameNode]() {
+    builderFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsBuilderFunc), node = frameNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("BindBackground");
         PipelineContext::SetCallBackNode(node);
         func->Execute();
     };
-    Alignment alignment = Alignment::CENTER;
-    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsObject()) {
-        JSRef<JSObject> object = JSRef<JSObject>::Cast(info[1]);
-        auto align = object->GetProperty(static_cast<int32_t>(ArkUIIndex::ALIGN));
-        auto value = align->ToNumber<int32_t>();
-        alignment = ParseAlignment(value);
+
+    return true;
+}
+
+NG::LayoutSafeAreaEdge JSViewAbstract::ParseJsLayoutSafeAreaEdgeArray(const JSRef<JSArray>& jsSafeAreaEdges)
+{
+    NG::LayoutSafeAreaEdge edges = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+    if (!jsSafeAreaEdges->IsArray()) {
+        return edges;
     }
-    ViewAbstractModel::GetInstance()->BindBackground(std::move(buildFunc), alignment);
+
+    static std::vector<uint32_t> LayoutEdgeEnum {
+        NG::LAYOUT_SAFE_AREA_EDGE_TOP,
+        NG::LAYOUT_SAFE_AREA_EDGE_BOTTOM,
+        NG::LAYOUT_SAFE_AREA_EDGE_START,
+        NG::LAYOUT_SAFE_AREA_EDGE_END,
+        NG::LAYOUT_SAFE_AREA_EDGE_VERTICAL,
+        NG::LAYOUT_SAFE_AREA_EDGE_HORIZONTAL,
+        NG::LAYOUT_SAFE_AREA_EDGE_ALL
+    };
+
+    for (size_t i = 0; i < jsSafeAreaEdges->Length(); ++i) {
+        if (!jsSafeAreaEdges->GetValueAt(i)->IsNumber() ||
+            jsSafeAreaEdges->GetValueAt(i)->ToNumber<uint32_t>() > LAYOUT_SAFE_AREA_EDGE_LIMIT) {
+            return false;
+        }
+        edges |= LayoutEdgeEnum[jsSafeAreaEdges->GetValueAt(i)->ToNumber<uint32_t>()];
+    }
+
+    return edges;
 }
 
 void JSViewAbstract::SetSymbolOptionApply(const JSCallbackInfo& info,
