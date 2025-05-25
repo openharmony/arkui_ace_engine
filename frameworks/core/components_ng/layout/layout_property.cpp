@@ -1266,12 +1266,25 @@ void LayoutProperty::UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPoli
     if (!layoutPolicy_) {
         layoutPolicy_ = NG::LayoutPolicyProperty();
     }
+    if (UpdateLayoutPolicyWithCheck(layoutPolicy, isWidth)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+bool LayoutProperty::UpdateLayoutPolicyWithCheck(const LayoutCalPolicy layoutPolicy, bool isWidth)
+{
     if (isWidth) {
+        if (layoutPolicy_->widthLayoutPolicy_ && layoutPolicy_->widthLayoutPolicy_.value() == layoutPolicy) {
+            return false;
+        }
         layoutPolicy_->widthLayoutPolicy_ = layoutPolicy;
     } else {
+        if (layoutPolicy_->heightLayoutPolicy_ && layoutPolicy_->heightLayoutPolicy_.value() == layoutPolicy) {
+            return false;
+        }
         layoutPolicy_->heightLayoutPolicy_ = layoutPolicy;
     }
-    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    return true;
 }
 
 std::optional<NG::LayoutPolicyProperty> LayoutProperty::GetLayoutPolicyProperty()

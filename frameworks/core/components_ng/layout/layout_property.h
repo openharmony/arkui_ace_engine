@@ -204,6 +204,8 @@ public:
 
     void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isWidth);
 
+    bool UpdateLayoutPolicyWithCheck(const LayoutCalPolicy layoutPolicy, bool isWidth);
+
     std::optional<NG::LayoutPolicyProperty> GetLayoutPolicyProperty();
 
     void ClearUserDefinedIdealSize(bool clearWidth, bool clearHeight);

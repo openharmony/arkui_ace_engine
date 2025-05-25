@@ -866,7 +866,11 @@ bool FlexLayoutAlgorithm::IsKeepMinSize(const RefPtr<LayoutWrapper>& childLayout
 {
     auto child = childLayoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(child, false);
-    auto minSize = MainAxisMinValue(AceType::RawPtr(childLayoutWrapper));
+    auto layoutPolicy = childLayoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
+    bool isFix = IsHorizontal(direction_) ? layoutPolicy.has_value() && layoutPolicy.value().IsWidthFix()
+                                          : layoutPolicy.has_value() && layoutPolicy.value().IsHeightFix();
+    auto minSize = isFix ? GetMainAxisSizeHelper(childLayoutWrapper->GetGeometryNode()->GetFrameSize(), direction_)
+                         : MainAxisMinValue(AceType::RawPtr(childLayoutWrapper));
     if (GreatOrEqual(minSize, flexSize)) {
         flexSize = minSize;
         return true;
@@ -917,15 +921,23 @@ bool FlexLayoutAlgorithm::CheckSetConstraint(const std::unique_ptr<MeasureProper
     return propertyPtr && (propertyPtr->minSize || propertyPtr->maxSize);
 }
 
-void FlexLayoutAlgorithm::CheckMainAxisSizeAuto(const std::unique_ptr<MeasureProperty>& calcLayoutConstraint)
+void FlexLayoutAlgorithm::CheckMainAxisSizeAuto(
+    LayoutWrapper* layoutWrapper, const std::unique_ptr<MeasureProperty>& calcLayoutConstraint)
 {
     if (isInfiniteLayout_) {
         mainAxisSize_ = allocatedSize_;
     }
-    CHECK_NULL_VOID(calcLayoutConstraint);
-    CHECK_NULL_VOID(calcLayoutConstraint->selfIdealSize);
-    if (IsHorizontal(direction_) ? calcLayoutConstraint->selfIdealSize->IsWidthDimensionUnitAuto()
-                                 : calcLayoutConstraint->selfIdealSize->IsHeightDimensionUnitAuto()) {
+    bool isWidthAuto = calcLayoutConstraint && calcLayoutConstraint->selfIdealSize &&
+                       calcLayoutConstraint->selfIdealSize->IsWidthDimensionUnitAuto();
+    bool isHeightAuto = calcLayoutConstraint && calcLayoutConstraint->selfIdealSize &&
+                        calcLayoutConstraint->selfIdealSize->IsHeightDimensionUnitAuto();
+    auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
+    bool isWidthWrap = layoutPolicy.has_value() && layoutPolicy.value().IsWidthWrap();
+    bool isHeightWrap = layoutPolicy.has_value() && layoutPolicy.value().IsHeightWrap();
+    bool isWidthFix = layoutPolicy.has_value() && layoutPolicy.value().IsWidthFix();
+    bool isHeightFix = layoutPolicy.has_value() && layoutPolicy.value().IsHeightFix();
+    if (IsHorizontal(direction_) ? isWidthAuto || isWidthWrap || isWidthFix
+                                 : isHeightAuto || isHeightWrap || isHeightFix) {
         mainAxisSize_ = allocatedSize_;
     }
 }
@@ -961,21 +973,34 @@ void FlexLayoutAlgorithm::SetInitMainAxisSize(LayoutWrapper* layoutWrapper)
     }
 }
 
-void FlexLayoutAlgorithm::SetFinalRealSize(LayoutWrapper* layoutWrapper, SizeF& realSize)
+void FlexLayoutAlgorithm::SetFinalRealSize(
+    LayoutWrapper* layoutWrapper, SizeF& realSize, std::optional<NG::LayoutPolicyProperty> layoutPolicy)
 {
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    auto widthLayoutPolicy = LayoutCalPolicy::NO_MATCH;
+    auto heightLayoutPolicy = LayoutCalPolicy::NO_MATCH;
+    if (layoutPolicy.has_value()) {
+        widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+    }
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto horizontalPadding = padding.left.value_or(0.0f) + padding.right.value_or(0.0f);
     auto verticalPadding = padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f);
     auto finalMainAxisSize = mainAxisSize_;
     auto finalCrossAxisSize = crossAxisSize_;
+    auto fixIdealSize = OptionalSizeF();
     if (IsHorizontal(direction_)) {
         finalCrossAxisSize += verticalPadding;
         finalMainAxisSize += horizontalPadding;
+        fixIdealSize.SetSize(SizeF(finalMainAxisSize, finalCrossAxisSize));
     } else {
         finalCrossAxisSize += horizontalPadding;
         finalMainAxisSize += verticalPadding;
+        fixIdealSize.SetSize(SizeF(finalCrossAxisSize, finalMainAxisSize));
     }
+    fixIdealSize = UpdateOptionSizeByCalcLayoutConstraint(fixIdealSize,
+        layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
+        layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
     auto mainAxisSizeMin = GetMainAxisSizeHelper(layoutConstraint->minSize, direction_);
     auto mainAxisSizeMax = GetMainAxisSizeHelper(layoutConstraint->maxSize, direction_);
     auto crossAxisSizeMin = GetCrossAxisSizeHelper(layoutConstraint->minSize, direction_);
@@ -984,7 +1009,21 @@ void FlexLayoutAlgorithm::SetFinalRealSize(LayoutWrapper* layoutWrapper, SizeF& 
         finalMainAxisSize, std::min(mainAxisSizeMin, mainAxisSizeMax), std::max(mainAxisSizeMin, mainAxisSizeMax));
     finalCrossAxisSize = std::clamp(
         finalCrossAxisSize, std::min(crossAxisSizeMin, crossAxisSizeMax), std::max(crossAxisSizeMin, crossAxisSizeMax));
-
+    if (IsHorizontal(direction_)) {
+        if (widthLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+            finalMainAxisSize = fixIdealSize.Width().value_or(0.0f);
+        }
+        if (heightLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+            finalCrossAxisSize = fixIdealSize.Height().value_or(0.0f);
+        }
+    } else {
+        if (widthLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+            finalCrossAxisSize = fixIdealSize.Width().value_or(0.0f);
+        }
+        if (heightLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+            finalMainAxisSize = fixIdealSize.Height().value_or(0.0f);
+        }
+    }
     realSize.UpdateIllegalSizeWithCheck(
         GetCalcSizeHelper(finalMainAxisSize, finalCrossAxisSize, direction_).ConvertToSizeT());
 }
@@ -1049,9 +1088,9 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     AdjustTotalAllocatedSize(layoutWrapper);
 
-    CheckMainAxisSizeAuto(calcConstraint);
+    CheckMainAxisSizeAuto(layoutWrapper, calcConstraint);
 
-    SetFinalRealSize(layoutWrapper, realSize);
+    SetFinalRealSize(layoutWrapper, realSize, layoutPolicy);
 
     layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
 
