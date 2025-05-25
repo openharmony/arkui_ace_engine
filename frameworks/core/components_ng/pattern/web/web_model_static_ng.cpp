@@ -69,7 +69,7 @@ void WebModelNG::SetWebSrc(FrameNode* frameNode, const std::optional<std::string
     CHECK_NULL_VOID(frameNode);
     auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPattern);
-    webPattern->SetWebSrc(webSrc.value_or(""));
+    webPattern->SetWebSrcStatic(webSrc.value_or(""));
 }
 
 void WebModelNG::SetRenderMode(FrameNode* frameNode, const std::optional<RenderMode>& renderMode)
