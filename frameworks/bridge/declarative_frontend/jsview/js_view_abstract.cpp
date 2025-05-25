@@ -12016,7 +12016,7 @@ NG::LayoutSafeAreaEdge JSViewAbstract::ParseJsLayoutSafeAreaEdgeArray(const JSRe
         return edges;
     }
 
-    static std::vector<uint32_t> LayoutEdgeEnum {
+    static std::vector<uint32_t> layoutEdgeEnum {
         NG::LAYOUT_SAFE_AREA_EDGE_TOP,
         NG::LAYOUT_SAFE_AREA_EDGE_BOTTOM,
         NG::LAYOUT_SAFE_AREA_EDGE_START,
@@ -12031,7 +12031,7 @@ NG::LayoutSafeAreaEdge JSViewAbstract::ParseJsLayoutSafeAreaEdgeArray(const JSRe
             jsSafeAreaEdges->GetValueAt(i)->ToNumber<uint32_t>() > LAYOUT_SAFE_AREA_EDGE_LIMIT) {
             return false;
         }
-        edges |= LayoutEdgeEnum[jsSafeAreaEdges->GetValueAt(i)->ToNumber<uint32_t>()];
+        edges |= layoutEdgeEnum[jsSafeAreaEdges->GetValueAt(i)->ToNumber<uint32_t>()];
     }
 
     return edges;

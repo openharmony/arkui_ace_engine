@@ -70,14 +70,19 @@ public:
         backgroundColor_ = color;
     }
 
-    void SetDrawRegionUpdateFunc(std::function<void(const std::shared_ptr<Rosen::RectF>& rect)>& func)
+    void SetDrawRegionUpdateFunc(std::function<void(const std::shared_ptr<Rosen::RectF>& rect)>&& func)
     {
-        updateDrawRegionFunc_ = func;
+        updateDrawRegionFunc_ = std::move(func);
     }
 
     void SetIsBuilderBackground(bool isBuilderBackground)
     {
         isBuilderBackground_ = isBuilderBackground;
+    }
+
+    void SetInitialBackgroundRegion(const RectF& region)
+    {
+        initialBackgroundRegion_ = region;
     }
 
     void Active() override {};
@@ -95,15 +100,18 @@ private:
         auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(*context.canvas);
         RSSamplingOptions samplingOptions;
         RSBrush brush;
-        SizeF desSize(backgroundRegionWidth, backgroundRegionHeight);
+        SizeF desSize(initialBackgroundRegion_.Width(), initialBackgroundRegion_.Height());
         SizeF srcSize(mediaPixelMap->GetWidth(), mediaPixelMap->GetHeight());
         NG::OffsetF offset1 = Alignment::GetAlignPosition(srcSize, desSize, align_);
         NG::OffsetF offset2 = Alignment::GetAlignPosition(desSize, srcSize, align_);
         RSRect srcRSRect =
             RSRect(offset1.GetX(), offset1.GetY(), srcSize.Width() + offset1.GetX(), srcSize.Height() + offset1.GetY());
-        RSRect desRSRect = RSRect(backgroundRegion.GetLeft() + offset2.GetX(),
-            backgroundRegion.GetTop() + offset2.GetY(), srcSize.Width() + backgroundRegion.GetLeft() + offset2.GetX(),
-            srcSize.Height() + backgroundRegion.GetTop() + offset2.GetY());
+        float widthScale = backgroundRegionWidth / initialBackgroundRegion_.Width();
+        float heightScale = backgroundRegionHeight / initialBackgroundRegion_.Height();
+        RSRect desRSRect = RSRect(backgroundRegion.GetLeft() + offset2.GetX() * widthScale,
+                                  backgroundRegion.GetTop() + offset2.GetY() * heightScale,
+                                  (srcSize.Width() + backgroundRegion.GetLeft()) * widthScale + offset2.GetX(),
+                                  (srcSize.Height() + backgroundRegion.GetTop()) * heightScale + offset2.GetY());
         if (srcSize.Width() > desSize.Width()) {
             srcRSRect.SetRight(offset1.GetX() + desSize.Width());
             desRSRect.SetRight(backgroundRegion.GetLeft() + backgroundRegionWidth);
@@ -114,7 +122,6 @@ private:
         }
         std::shared_ptr<Rosen::RectF> drawRegion = std::make_shared<Rosen::RectF>(
             desRSRect.GetLeft(), desRSRect.GetTop(), desRSRect.GetWidth(), desRSRect.GetHeight());
-        CHECK_NULL_VOID(drawRegion);
         CHECK_NULL_VOID(updateDrawRegionFunc_);
         updateDrawRegionFunc_(drawRegion);
         recordingCanvas.AttachBrush(brush);
@@ -127,7 +134,6 @@ private:
         RSRect backgroundRegion = GetBackgroundRegion();
         std::shared_ptr<Rosen::RectF> drawRect = std::make_shared<Rosen::RectF>(backgroundRegion.GetLeft(),
             backgroundRegion.GetTop(), backgroundRegion.GetWidth(), backgroundRegion.GetHeight());
-        CHECK_NULL_VOID(drawRect);
         CHECK_NULL_VOID(updateDrawRegionFunc_);
         updateDrawRegionFunc_(drawRect);
         CHECK_NULL_VOID(context.canvas);
@@ -154,6 +160,7 @@ private:
     std::shared_ptr<Rosen::RSProperty<bool>> flag_;
     WeakPtr<FrameNode> host_;
     bool isBuilderBackground_ = false;
+    RectF initialBackgroundRegion_ = { 0.0f, 0.0f, 1.0f, 1.0f };
     std::function<void(const std::shared_ptr<Rosen::RectF>& rect)> updateDrawRegionFunc_;
 };
 } // namespace OHOS::Ace::NG

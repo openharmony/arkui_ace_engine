@@ -3061,7 +3061,6 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBorderImageLoadSuccessCallback()
 
 void RosenRenderContext::OnBackgroundAlignUpdate(const Alignment& align)
 {
-    CHECK_NULL_VOID(rsNode_);
     auto node = GetHost();
     CHECK_NULL_VOID(node);
     auto transitionModifier = GetOrCreateTransitionModifier();
@@ -3070,65 +3069,53 @@ void RosenRenderContext::OnBackgroundAlignUpdate(const Alignment& align)
     auto backgroundModifier = GetOrCreateBackgroundModifier();
     backgroundModifier->SetHostNode(node);
     backgroundModifier->SetAlign(align);
-    if (GetIsTransitionBackgroundValue(false)) {
-        rsNode_->RemoveModifier(backgroundModifier_);
-        rsNode_->AddModifier(transitionModifier);
-        transitionModifier->Modify();
-    } else {
-        rsNode_->RemoveModifier(transitionModifier_);
-        rsNode_->AddModifier(backgroundModifier);
-        backgroundModifier->Modify();
-    }
+    ModifyCustomBackground();
     RequestNextFrame();
 }
 
 void RosenRenderContext::OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& pixelMap)
 {
-    CHECK_NULL_VOID(rsNode_);
     auto node = GetHost();
     CHECK_NULL_VOID(node);
     auto transitionModifier = GetOrCreateTransitionModifier();
-    transitionModifier->SetPixelMap(pixelMap);
+    auto backgroundRegion = node->GetBackGroundAccumulatedSafeAreaExpand();
     transitionModifier->SetHostNode(node);
+    transitionModifier->SetPixelMap(pixelMap);
+    transitionModifier->SetInitialBackgroundRegion(backgroundRegion);
     auto backgroundModifier = GetOrCreateBackgroundModifier();
     auto nodeWidth = node->GetGeometryNode()->GetFrameSize().Width();
     auto nodeHeight = node->GetGeometryNode()->GetFrameSize().Height();
-    backgroundModifier_->SetInitialNodeSize(nodeWidth, nodeHeight);
-    backgroundModifier->SetPixelMap(pixelMap);
     backgroundModifier->SetHostNode(node);
-    if (GetIsTransitionBackgroundValue(false)) {
-        rsNode_->RemoveModifier(backgroundModifier_);
-        rsNode_->AddModifier(transitionModifier);
-        transitionModifier->Modify();
-    } else {
-        rsNode_->RemoveModifier(transitionModifier_);
-        rsNode_->AddModifier(backgroundModifier);
-        backgroundModifier->Modify();
-    }
+    backgroundModifier->SetPixelMap(pixelMap);
+    backgroundModifier->SetInitialNodeSize(nodeWidth, nodeHeight);
+    ModifyCustomBackground();
     RequestNextFrame();
 }
 
 void RosenRenderContext::OnCustomBackgroundColorUpdate(const Color& color)
 {
-    CHECK_NULL_VOID(rsNode_);
+    auto node = GetHost();
+    CHECK_NULL_VOID(node);
+    auto transitionModifier = GetOrCreateTransitionModifier();
+    transitionModifier->SetHostNode(node);
+    transitionModifier->SetBackgroundColor(color);
     if (!GetIsTransitionBackgroundValue(false)) {
         return;
     }
-    rsNode_->RemoveModifier(backgroundModifier_);
-    auto transitionModifier = GetOrCreateTransitionModifier();
-    rsNode_->AddModifier(transitionModifier);
-    auto node = GetHost();
-    CHECK_NULL_VOID(node);
-    transitionModifier->SetHostNode(node);
-    transitionModifier->SetBackgroundColor(color);
-    transitionModifier->Modify();
+    ModifyCustomBackground();
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnIsBuilderBackgroundUpdate(bool isBuilderBackground)
+void RosenRenderContext::OnBuilderBackgroundFlagUpdate(bool isBuilderBackground)
 {
     auto transitionModifier = GetOrCreateTransitionModifier();
     transitionModifier->SetIsBuilderBackground(isBuilderBackground);
+}
+
+void RosenRenderContext::UpdateCustomBackground()
+{
+    ModifyCustomBackground();
+    RequestNextFrame();
 }
 
 void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode)
@@ -7559,28 +7546,44 @@ std::vector<float> RosenRenderContext::GetRenderNodePropertyValue(AnimationPrope
 
 std::shared_ptr<TransitionModifier> RosenRenderContext::GetOrCreateTransitionModifier()
 {
-    if (transitionModifier_) {
-        return transitionModifier_;
+    if (!transitionModifier_) {
+        transitionModifier_ = std::make_shared<TransitionModifier>();
+        std::function<void(const std::shared_ptr<Rosen::RectF>& rect)> func =
+            [weak = WeakClaim(this)](const std::shared_ptr<Rosen::RectF>& rect) {
+                auto renderContext = weak.Upgrade();
+                CHECK_NULL_VOID(renderContext);
+                renderContext->UpdateDrawRegion(DRAW_REGION_TRANSITION_MODIFIER_INDEX, rect);
+            };
+
+        transitionModifier_->SetDrawRegionUpdateFunc(std::move(func));
     }
 
-    transitionModifier_ = std::make_shared<TransitionModifier>();
-    std::function<void(const std::shared_ptr<Rosen::RectF>& rect)> func =
-        [weak = WeakClaim(this)](const std::shared_ptr<Rosen::RectF>& rect) {
-            auto renderContext = weak.Upgrade();
-            CHECK_NULL_VOID(renderContext);
-            renderContext->UpdateDrawRegion(DRAW_REGION_TRANSITION_MODIFIER_INDEX, rect);
-        };
-
-    transitionModifier_->SetDrawRegionUpdateFunc(func);
     return transitionModifier_;
 }
 
 std::shared_ptr<BackgroundModifier> RosenRenderContext::GetOrCreateBackgroundModifier()
 {
-    if (backgroundModifier_) {
-        return backgroundModifier_;
+    if (!backgroundModifier_) {
+        backgroundModifier_ = std::make_shared<BackgroundModifier>();
     }
-    backgroundModifier_ = std::make_shared<BackgroundModifier>();
     return backgroundModifier_;
+}
+
+void RosenRenderContext::ModifyCustomBackground()
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto transitionModifier = GetOrCreateTransitionModifier();
+    CHECK_NULL_VOID(transitionModifier);
+    auto backgroundModifier = GetOrCreateBackgroundModifier();
+    CHECK_NULL_VOID(backgroundModifier);
+    if (GetIsTransitionBackgroundValue(false)) {
+        rsNode_->RemoveModifier(backgroundModifier);
+        rsNode_->AddModifier(transitionModifier);
+        transitionModifier->Modify();
+    } else {
+        rsNode_->RemoveModifier(transitionModifier);
+        rsNode_->AddModifier(backgroundModifier);
+        backgroundModifier->Modify();
+    }
 }
 } // namespace OHOS::Ace::NG
