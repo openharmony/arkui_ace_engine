@@ -148,7 +148,9 @@ public:
     static void JsRotateX(const JSCallbackInfo& info);
     static void JsRotateY(const JSCallbackInfo& info);
     static void JsTransform(const JSCallbackInfo& info);
+    static void JsTransform3D(const JSCallbackInfo& info);
     static void SetDefaultTransform();
+    static void SetDefaultTransform3D();
     static void JsTransition(const JSCallbackInfo& info);
     static void ParseDragPreviewConfig(const JSCallbackInfo& info, NG::DragDropInfo& dragPreviewInfo);
     static void ParseDragPreviewValue(const JSCallbackInfo& info, NG::DragDropInfo& dragPreviewInfo);

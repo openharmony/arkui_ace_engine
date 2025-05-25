@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 
+#include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/pipeline/base/element_register.h"
@@ -474,25 +475,7 @@ FrameNode::~FrameNode()
         OnDetachFromMainTree(false, GetContextWithCheck());
     }
     HandleAreaChangeDestruct();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline) {
-        pipeline->RemoveOnAreaChangeNode(GetId());
-        pipeline->RemoveVisibleAreaChangeNode(GetId());
-        pipeline->ChangeMouseStyle(GetId(), MouseFormat::DEFAULT);
-        pipeline->FreeMouseStyleHoldNode(GetId());
-        pipeline->RemoveStoredNode(GetRestoreId());
-        auto dragManager = pipeline->GetDragDropManager();
-        if (dragManager) {
-            dragManager->RemoveDragFrameNode(GetId());
-            dragManager->UnRegisterDragStatusListener(GetId());
-        }
-        auto frameRateManager = pipeline->GetFrameRateManager();
-        if (frameRateManager) {
-            frameRateManager->RemoveNodeRate(GetId());
-        }
-        pipeline->RemoveChangedFrameNode(GetId());
-        pipeline->RemoveFrameNodeChangeListener(GetId());
-    }
+    CleanupPipelineResources();
     FireOnNodeDestroyCallback();
     FireOnExtraNodeDestroyCallback();
     FireFrameNodeDestructorCallback();
@@ -2213,11 +2196,9 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread, LayoutType layoutTaskT
             Measure(layoutConstraint);
             ResetIgnoreLayoutProcess();
         } else {
-            TAG_LOGI(ACE_LAYOUT,
-                "LayoutTask for postponed layouting on ignoreLayoutSafeArea-container [%s][self:%d], should skip "
-                "measuring.",
-                GetTag().c_str(), GetId());
+            // LayoutTask for postponed layouting on ignoreLayoutSafeArea-container node, which should skip measuring.
         }
+
         {
             ACE_SCOPED_TRACE_COMMERCIAL("CreateTaskLayout[%s][self:%d][parent:%d][layoutPriority:%d]"
                              "[pageId:%d][depth:%d]",
@@ -6857,4 +6838,27 @@ void FrameNode::AddToOcclusionMap(bool enable)
     context->AddToOcclusionMap(GetId(), enable);
 }
 
+void FrameNode::CleanupPipelineResources()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        pipeline->RemoveOnAreaChangeNode(GetId());
+        pipeline->RemoveVisibleAreaChangeNode(GetId());
+        pipeline->ChangeMouseStyle(GetId(), MouseFormat::DEFAULT);
+        pipeline->FreeMouseStyleHoldNode(GetId());
+        pipeline->RemoveStoredNode(GetRestoreId());
+        auto dragManager = pipeline->GetDragDropManager();
+        if (dragManager) {
+            dragManager->RemoveDragFrameNode(GetId());
+            dragManager->UnRegisterDragStatusListener(GetId());
+        }
+        auto frameRateManager = pipeline->GetFrameRateManager();
+        if (frameRateManager) {
+            frameRateManager->RemoveNodeRate(GetId());
+        }
+        pipeline->RemoveChangedFrameNode(GetId());
+        pipeline->RemoveFrameNodeChangeListener(GetId());
+        pipeline->GetNodeRenderStatusMonitor()->NotifyFrameNodeRelease(this);
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -162,6 +162,7 @@ private:
     void UpdateSelectMenuOptions();
     bool isShowHandle_ = false;
     bool needResetHandleReverse_ = false;
+    bool isSelectAll_ = false;
     SelectOverlayInfo webSelectInfo_;
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle_ = nullptr;
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle_ = nullptr;
@@ -178,6 +179,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(WebSelectOverlay);
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;
+    bool canShowAIMenu_ = false;
     TextDataDetectType aiMenuType_ = TextDataDetectType::INVALID;
     std::string aiMenucontent_;
 };

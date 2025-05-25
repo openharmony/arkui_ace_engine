@@ -558,6 +558,40 @@ uint32_t ParseStrToUint(std::string safeAreaTypeStr)
     return uintType;
 }
 
+uint32_t ParseLayoutSafeAreaTypeStr(std::string safeAreaTypeStr)
+{
+    uint32_t uintType = NG::LAYOUT_SAFE_AREA_TYPE_NONE;
+    std::string delimiter = "|";
+    std::string type;
+    size_t pos = 0;
+    while ((pos = safeAreaTypeStr.find(delimiter)) != std::string::npos) {
+        type = safeAreaTypeStr.substr(0, pos);
+        uintType |= IgnoreLayoutSafeAreaOpts::TypeToMask(StringUtils::StringToUint(type));
+        safeAreaTypeStr.erase(0, pos + delimiter.length());
+    }
+    if (safeAreaTypeStr != "") {
+        uintType |= IgnoreLayoutSafeAreaOpts::TypeToMask(StringUtils::StringToUint(safeAreaTypeStr));
+    }
+    return uintType;
+}
+
+uint32_t ParseLayoutSafeAreaEdgesStr(std::string safeAreaEdgeStr)
+{
+    uint32_t uintType = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+    std::string delimiter = "|";
+    std::string type;
+    size_t pos = 0;
+    while ((pos = safeAreaEdgeStr.find(delimiter)) != std::string::npos) {
+        type = safeAreaEdgeStr.substr(0, pos);
+        uintType |= IgnoreLayoutSafeAreaOpts::EdgeToMask(StringUtils::StringToUint(type));
+        safeAreaEdgeStr.erase(0, pos + delimiter.length());
+    }
+    if (safeAreaEdgeStr != "") {
+        uintType |= IgnoreLayoutSafeAreaOpts::EdgeToMask(StringUtils::StringToUint(safeAreaEdgeStr));
+    }
+    return uintType;
+}
+
 RefPtr<NG::ChainedTransitionEffect> ParseChainedTranslateTransition(
     const Framework::JSRef<Framework::JSVal>& effectOption, const JSExecutionContext& context)
 {
@@ -1910,6 +1944,59 @@ ArkUINativeModuleValue CommonBridge::ResetTransform(ArkUIRuntimeCallInfo *runtim
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     GetArkUINodeModifiers()->getCommonModifier()->resetTransform(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetTransform3D(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    if (firstArg->IsNull()) {
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(NUM_1);
+
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::NativePointerRef::New(vm, nullptr));
+
+    if (!jsValue->IsArray(vm)) {
+        nodeModifiers->getCommonModifier()->resetTransform3D(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
+    float matrix[matrix4Len];
+    Local<panda::ArrayRef> transArray = static_cast<Local<panda::ArrayRef>>(jsValue);
+    if (transArray->Length(vm) != matrix4Len) {
+        TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT,
+            "Invalid matrix parameter: Expected %{public}d elements, but transArray has %{public}u elements",
+            matrix4Len, transArray->Length(vm));
+        nodeModifiers->getCommonModifier()->resetTransform3D(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    for (size_t i = 0; i < transArray->Length(vm); i++) {
+        Local<JSValueRef> value = transArray->GetValueAt(vm, jsValue, i);
+        matrix[i] = value->ToNumber(vm)->Value();
+    }
+    nodeModifiers->getCommonModifier()->setTransform3D(nativeNode, matrix, matrix4Len);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetTransform3D(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (firstArg->IsNull()) {
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::NativePointerRef::New(vm, nullptr));
+    nodeModifiers->getCommonModifier()->resetTransform3D(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -5197,10 +5284,22 @@ ArkUINativeModuleValue CommonBridge::SetIgnoreLayoutSafeArea(ArkUIRuntimeCallInf
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    std::string typeCppStr = "";
+    std::string edgesCppStr = "";
     LayoutSafeAreaType layoutSafeAreaType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM;
-    LayoutSafeAreaEdge layoutSafeAreaEdge = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
+    LayoutSafeAreaEdge layoutSafeAreaEdges = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
+    if (secondArg->IsString(vm)) {
+        typeCppStr = secondArg->ToString(vm)->ToString(vm);
+        layoutSafeAreaType = ParseLayoutSafeAreaTypeStr(typeCppStr);
+    }
+    if (thirdArg->IsString(vm)) {
+        edgesCppStr = thirdArg->ToString(vm)->ToString(vm);
+        layoutSafeAreaEdges = ParseLayoutSafeAreaEdgesStr(edgesCppStr);
+    }
     GetArkUINodeModifiers()->getCommonModifier()->setIgnoreLayoutSafeArea(
-        nativeNode, layoutSafeAreaType, layoutSafeAreaEdge);
+        nativeNode, layoutSafeAreaType, layoutSafeAreaEdges);
     return panda::JSValueRef::Undefined(vm);
 }
 

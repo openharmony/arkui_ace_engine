@@ -5405,4 +5405,31 @@ HWTEST_F(WebSelectOverlayTest, OnMenuItemActionTest006, TestSize.Level1)
     overlay.OnMenuItemAction(OptionMenuActionId::SEARCH, OptionMenuType::TOUCH_MENU);
     EXPECT_FALSE(overlay.endSelectionHandle_);
 }
+
+/**
+ * @tc.name: SetMenuOptionsTest001
+ * @tc.desc: Test SetMenuOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, SetMenuOptionsTest001, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    webPattern->OnModifyDone();
+    WebSelectOverlay overlay(webPattern);
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuCallbackMock>();
+    SelectOverlayInfo selectInfo;
+    overlay.isSelectAll_ = true;
+    overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(overlay.isSelectAll_, false);
+}
 } // namespace OHOS::Ace::NG

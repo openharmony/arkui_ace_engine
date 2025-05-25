@@ -1065,6 +1065,13 @@ ColorMode PipelineContext::GetColorMode() const
     return MockContainer::mockColorMode_;
 }
 
+const RefPtr<NodeRenderStatusMonitor>& PipelineContext::GetNodeRenderStatusMonitor()
+{
+    if (!nodeRenderStatusMonitor_) {
+        nodeRenderStatusMonitor_ = AceType::MakeRefPtr<NodeRenderStatusMonitor>();
+    }
+    return nodeRenderStatusMonitor_;
+}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 

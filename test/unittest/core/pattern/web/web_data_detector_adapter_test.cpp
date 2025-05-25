@@ -598,6 +598,9 @@ HWTEST_F(WebDataDetectorAdapterTest, AIMenu_001, TestSize.Level0)
     adapter->OnClickAIMenuOption(info, { "", funcLocation});
     adapter->OnClickAIMenuOption(info, { "", funcDateTime});
 
+    adapter->OnClickMenuItem("copy", info);
+    adapter->OnClickMenuItem("selectText", info);
+
     EXPECT_FALSE(ret);
 #endif
 }

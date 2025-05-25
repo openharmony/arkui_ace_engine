@@ -116,6 +116,11 @@ constexpr int32_t ACCESSIBILITY_FOCUS_WITHOUT_EVENT = -2100001;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
 constexpr Dimension DASH_GEP_WIDTH = -1.0_px;
+constexpr int32_t INDEX_0 = 0;
+constexpr int32_t INDEX_1 = 1;
+constexpr int32_t INDEX_2 = 2;
+constexpr int32_t INDEX_3 = 3;
+constexpr float FLOAT_ZERO = 0.0f;
 constexpr uint16_t NO_FORCE_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START) |
                                     static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP) |
                                     static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END) |
@@ -2039,6 +2044,51 @@ void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
             transformMatrixModifier_->translateXYValue, xyTranslateValue);
         AddOrChangeScaleModifier(
             rsNode_, transformMatrixModifier_->scaleXY, transformMatrixModifier_->scaleXYValue, xyScaleValue);
+        AddOrChangeSkewModifier(
+            rsNode_, transformMatrixModifier_->skew, transformMatrixModifier_->skewValue, skewValue);
+        AddOrChangeQuaternionModifier(
+            rsNode_, transformMatrixModifier_->quaternion, transformMatrixModifier_->quaternionValue, quaternion);
+    }
+    NotifyHostTransformUpdated();
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnTransform3DMatrixUpdate(const Matrix4& matrix)
+{
+    CHECK_NULL_VOID(rsNode_);
+    if (!transformMatrixModifier_.has_value()) {
+        transformMatrixModifier_ = TransformMatrixModifier();
+    }
+    DecomposedTransform transform;
+    if (!TransformUtil::DecomposeTransform(transform, matrix)) {
+        // fallback to basic matrix decompose
+        Rosen::Vector2f xyTranslateValue { static_cast<float>(matrix.Get(INDEX_0, INDEX_3)),
+            static_cast<float>(matrix.Get(INDEX_1, INDEX_3)) };
+        Rosen::Vector2f scaleValue { FLOAT_ZERO, FLOAT_ZERO };
+        AddOrChangeTranslateModifier(rsNode_, transformMatrixModifier_->translateXY,
+            transformMatrixModifier_->translateXYValue, xyTranslateValue);
+        AddOrChangeScaleModifier(
+            rsNode_, transformMatrixModifier_->scaleXY, transformMatrixModifier_->scaleXYValue, scaleValue);
+    } else {
+        Rosen::Vector4f perspectiveValue { transform.perspective[0], transform.perspective[1],
+            transform.perspective[INDEX_2], transform.perspective[INDEX_3] };
+        Rosen::Vector2f xyTranslateValue { transform.translate[0], transform.translate[1] };
+        Rosen::Quaternion quaternion { static_cast<float>(transform.quaternion.GetX()),
+            static_cast<float>(transform.quaternion.GetY()), static_cast<float>(transform.quaternion.GetZ()),
+            static_cast<float>(transform.quaternion.GetW()) };
+        Rosen::Vector2f xyScaleValue { transform.scale[0], transform.scale[1] };
+        Rosen::Vector3f skewValue { transform.skew[0], transform.skew[1], transform.skew[INDEX_2] };
+
+        AddOrChangePerspectiveModifier(rsNode_, transformMatrixModifier_->perspective,
+            transformMatrixModifier_->perspectiveValue, perspectiveValue);
+        AddOrChangeTranslateModifier(rsNode_, transformMatrixModifier_->translateXY,
+            transformMatrixModifier_->translateXYValue, xyTranslateValue);
+        AddOrChangeTranslateZModifier(rsNode_, transformMatrixModifier_->translateZ,
+            transformMatrixModifier_->translateZValue, transform.translate[INDEX_2]);
+        AddOrChangeScaleModifier(
+            rsNode_, transformMatrixModifier_->scaleXY, transformMatrixModifier_->scaleXYValue, xyScaleValue);
+        AddOrChangeScaleZModifier(
+            rsNode_, transformMatrixModifier_->scaleZ, transformMatrixModifier_->scaleZValue, transform.scale[INDEX_2]);
         AddOrChangeSkewModifier(
             rsNode_, transformMatrixModifier_->skew, transformMatrixModifier_->skewValue, skewValue);
         AddOrChangeQuaternionModifier(

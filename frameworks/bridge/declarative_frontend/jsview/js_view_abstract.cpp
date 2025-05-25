@@ -1915,6 +1915,41 @@ void JSViewAbstract::JsTransform(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetTransformMatrix(matrix);
 }
 
+void JSViewAbstract::JsTransform3D(const JSCallbackInfo& info)
+{
+    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
+    auto jsVal = info[0];
+    if (!CheckJSCallbackInfo("JsTransform3D", jsVal, checkList)) {
+        SetDefaultTransform3D();
+        return;
+    }
+    JSRef<JSVal> array = JSRef<JSObject>::Cast(jsVal)->GetProperty(static_cast<int32_t>(ArkUIIndex::MATRIX4X4));
+    const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
+    if (!array->IsArray()) {
+        TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "[JSI] Type check failed in %{public}s: expected array", __FUNCTION__);
+        SetDefaultTransform3D();
+        return;
+    }
+    JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(array);
+    if (jsArray->Length() != matrix4Len) {
+        TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT,
+            "Invalid matrix parameter: Expected %{public}d elements, but JS array has %{public}zu elements", matrix4Len,
+            jsArray->Length());
+        SetDefaultTransform3D();
+        return;
+    }
+    std::vector<float> matrix(matrix4Len);
+    for (int32_t i = 0; i < matrix4Len; i++) {
+        double value = 0.0;
+        if (!ParseJsDouble(jsArray->GetValueAt(i), value)) {
+            TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT,"[JSView] Failed to parse double");
+            value = 0.0;
+        }
+        matrix[i] = static_cast<float>(value);
+    }
+    ViewAbstractModel::GetInstance()->SetTransform3DMatrix(matrix);
+}
+
 void JSViewAbstract::SetDefaultTransform()
 {
     const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
@@ -1925,6 +1960,18 @@ void JSViewAbstract::SetDefaultTransform()
         matrix[i] = static_cast<float>(value);
     }
     ViewAbstractModel::GetInstance()->SetTransformMatrix(matrix);
+}
+
+void JSViewAbstract::SetDefaultTransform3D()
+{
+    const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
+    std::vector<float> matrix(matrix4Len);
+    const int32_t initPosition = 5;
+    for (int32_t i = 0; i < matrix4Len; i = i + initPosition) {
+        double value = 1.0;
+        matrix[i] = static_cast<float>(value);
+    }
+    ViewAbstractModel::GetInstance()->SetTransform3DMatrix(matrix);
 }
 
 NG::TransitionOptions JSViewAbstract::ParseJsTransition(const JSRef<JSObject>& jsObj)
@@ -8676,21 +8723,7 @@ void JSViewAbstract::JsExpandSafeArea(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsIgnoreLayoutSafeArea(const JSCallbackInfo& info)
 {
-    static std::vector<uint32_t> LayoutTypeEnum {
-        NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
-        NG::LAYOUT_SAFE_AREA_TYPE_KEYBOARD,
-        NG::LAYOUT_SAFE_AREA_TYPE_ALL
-    };
-    static std::vector<uint32_t> LayoutEdgeEnum {
-        NG::LAYOUT_SAFE_AREA_EDGE_TOP,
-        NG::LAYOUT_SAFE_AREA_EDGE_BOTTOM,
-        NG::LAYOUT_SAFE_AREA_EDGE_START,
-        NG::LAYOUT_SAFE_AREA_EDGE_END,
-        NG::LAYOUT_SAFE_AREA_EDGE_VERTICAL,
-        NG::LAYOUT_SAFE_AREA_EDGE_HORIZONTAL,
-        NG::LAYOUT_SAFE_AREA_EDGE_ALL
-    };
-    NG::IgnoreLayoutSafeAreaOpts opts { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    NG::IgnoreLayoutSafeAreaOpts opts { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .rawEdges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
     if (info.Length() >= PARAMETER_LENGTH_FIRST && info[0]->IsArray()) {
         auto paramArray = JSRef<JSArray>::Cast(info[0]);
         uint32_t layoutSafeAreaType = NG::LAYOUT_SAFE_AREA_TYPE_NONE;
@@ -8700,7 +8733,7 @@ void JSViewAbstract::JsIgnoreLayoutSafeArea(const JSCallbackInfo& info)
                 layoutSafeAreaType = NG::SAFE_AREA_TYPE_SYSTEM;
                 break;
             }
-            layoutSafeAreaType |= LayoutTypeEnum[paramArray->GetValueAt(i)->ToNumber<uint32_t>()];
+            layoutSafeAreaType |= NG::IgnoreLayoutSafeAreaOpts::TypeToMask(paramArray->GetValueAt(i)->ToNumber<uint32_t>());
         }
         opts.type = layoutSafeAreaType;
     }
@@ -8713,9 +8746,10 @@ void JSViewAbstract::JsIgnoreLayoutSafeArea(const JSCallbackInfo& info)
                 layoutSafeAreaEdge = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
                 break;
             }
-            layoutSafeAreaEdge |= LayoutEdgeEnum[paramArray->GetValueAt(i)->ToNumber<uint32_t>()];
+            layoutSafeAreaEdge |= 
+                NG::IgnoreLayoutSafeAreaOpts::EdgeToMask(paramArray->GetValueAt(i)->ToNumber<uint32_t>());
         }
-        opts.edges = layoutSafeAreaEdge;
+        opts.rawEdges = layoutSafeAreaEdge;
     }
 
     ViewAbstractModel::GetInstance()->UpdateIgnoreLayoutSafeAreaOpts(opts);
@@ -8984,6 +9018,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("translateX", &JSViewAbstract::JsTranslateX);
     JSClass<JSViewAbstract>::StaticMethod("translateY", &JSViewAbstract::JsTranslateY);
     JSClass<JSViewAbstract>::StaticMethod("transform", &JSViewAbstract::JsTransform);
+    JSClass<JSViewAbstract>::StaticMethod("transform3D", &JSViewAbstract::JsTransform3D);
     JSClass<JSViewAbstract>::StaticMethod("transition", &JSViewAbstract::JsTransition);
 
     JSClass<JSViewAbstract>::StaticMethod("align", &JSViewAbstract::JsAlign);

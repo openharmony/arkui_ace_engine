@@ -1994,4 +1994,29 @@ HWTEST_F(GridIrregularLayoutTest, Stretch002, TestSize.Level1)
     auto childRect4 = pattern_->GetItemRect(4);
     EXPECT_EQ(childRect4.Height(), 0);
 }
+
+/**
+ * @tc.name: Test Skip large offset
+ * @tc.desc: Test OnScrollIndex with big cachedCount by skip large offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, SkipLargeOffset001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(16, false);
+    model.SetLayoutOptions({});
+    CreateFixedItems(100);
+    CreateDone();
+
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 90);
+    EXPECT_EQ(pattern_->info_.endIndex_, 99);
+
+    pattern_->ScrollTo(ITEM_MAIN_SIZE * 5);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 15);
+    EXPECT_EQ(pattern_->info_.endIndex_, 26);
+}
 } // namespace OHOS::Ace::NG

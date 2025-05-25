@@ -362,6 +362,8 @@ private:
     bool useCutout_ = false;
 
     KeyBoardAvoidMode keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
+    bool IsModeResize();
+    bool IsModeOffset();
 
     SafeAreaInsets systemSafeArea_;
     SafeAreaInsets cutoutSafeArea_;

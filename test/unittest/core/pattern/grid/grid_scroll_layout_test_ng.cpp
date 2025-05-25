@@ -2378,4 +2378,28 @@ HWTEST_F(GridScrollLayoutTestNg, GetTotalOffsetTest001, TestSize.Level1)
     FlushUITasks();
     EXPECT_EQ(offset, pattern_->GetTotalOffset());
 }
+
+/**
+ * @tc.name: Test Skip large offset
+ * @tc.desc: Test OnScrollIndex with big cachedCount by skip large offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, SkipLargeOffset001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(16, false);
+    CreateFixedItems(100);
+    CreateDone();
+
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 90);
+    EXPECT_EQ(pattern_->info_.endIndex_, 99);
+
+    pattern_->ScrollTo(ITEM_MAIN_SIZE * 5);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 15);
+    EXPECT_EQ(pattern_->info_.endIndex_, 26);
+}
 } // namespace OHOS::Ace::NG

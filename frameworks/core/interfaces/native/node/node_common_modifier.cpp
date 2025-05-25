@@ -856,6 +856,27 @@ void ResetTransform(ArkUINodeHandle node)
                 matrix[NUM_3], matrix[NUM_7], matrix[NUM_11], matrix[NUM_15]));
 }
 
+void SetTransform3D(ArkUINodeHandle node, const ArkUI_Float32* matrix, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
+    if (length != matrix4Len) {
+        return;
+    }
+    NG::ViewAbstract::SetTransform3DMatrix(
+        frameNode, Matrix4(matrix[NUM_0], matrix[NUM_4], matrix[NUM_8], matrix[NUM_12], matrix[NUM_1], matrix[NUM_5],
+            matrix[NUM_9], matrix[NUM_13], matrix[NUM_2], matrix[NUM_6], matrix[NUM_10], matrix[NUM_14],
+                matrix[NUM_3], matrix[NUM_7], matrix[NUM_11], matrix[NUM_15]));
+}
+
+void ResetTransform3D(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::ViewAbstract::SetTransform3DMatrix(frameNode, Matrix4::CreateIdentity());
+}
+
 void SetBorderColor(
     ArkUINodeHandle node, uint32_t topColorInt, uint32_t rightColorInt, uint32_t bottomColorInt, uint32_t leftColorInt)
 {
@@ -3518,14 +3539,14 @@ void ResetExpandSafeArea(ArkUINodeHandle node)
     ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
 }
 
-void SetIgnoreLayoutSafeArea(ArkUINodeHandle node, ArkUI_Uint32 layoutSafeAreaType, ArkUI_Uint32 layoutSafeAreaEdge)
+void SetIgnoreLayoutSafeArea(ArkUINodeHandle node, ArkUI_Uint32 layoutSafeAreaType, ArkUI_Uint32 layoutSafeAreaEdges)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::IgnoreLayoutSafeAreaOpts opts { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
-        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+        .rawEdges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
     opts.type = layoutSafeAreaType;
-    opts.edges = layoutSafeAreaEdge;
+    opts.rawEdges = layoutSafeAreaEdges;
     ViewAbstract::UpdateIgnoreLayoutSafeAreaOpts(frameNode, opts);
 }
 
@@ -3533,9 +3554,8 @@ void ResetIgnoreLayoutSafeArea(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NG::IgnoreLayoutSafeAreaOpts opts;
-    opts.type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM;
-    opts.edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
+    NG::IgnoreLayoutSafeAreaOpts opts { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .rawEdges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
     ViewAbstract::UpdateIgnoreLayoutSafeAreaOpts(frameNode, opts);
 }
 
@@ -7312,6 +7332,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetBorderWidth = ResetBorderWidth,
         .setTransform = SetTransform,
         .resetTransform = ResetTransform,
+        .setTransform3D = SetTransform3D,
+        .resetTransform3D = ResetTransform3D,
         .setBorderColor = SetBorderColor,
         .resetBorderColor = ResetBorderColor,
         .setPosition = SetPosition,

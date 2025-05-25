@@ -356,6 +356,7 @@ public:
     static void SetRotate(const NG::Vector5F &value);
 
     static void SetTransformMatrix(const Matrix4 &matrix);
+    static void SetTransform3DMatrix(const Matrix4 &matrix);
 
     // event
     static void SetOnClick(GestureEventFunc &&clickEventFunc,
@@ -645,6 +646,7 @@ public:
     static void SetPositionEdges(FrameNode* frameNode, const EdgesParam& value);
     static void ResetPosition(FrameNode* frameNode);
     static void SetTransformMatrix(FrameNode* frameNode, const Matrix4& matrix);
+    static void SetTransform3DMatrix(FrameNode* frameNode, const Matrix4& matrix);
     static void SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode);
     static void SetOpacity(FrameNode* frameNode, double opacity);
     static void SetZIndex(FrameNode* frameNode, int32_t value);

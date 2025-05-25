@@ -2289,10 +2289,10 @@ void RichEditorPattern::UpdateDecoration(
 {
     if (updateSpanStyle.updateTextDecoration.has_value()) {
         spanNode->UpdateTextDecoration(textStyle.GetTextDecoration());
-        spanNode->GetSpanItem()->useThemeDecorationColor = false;
     }
     if (updateSpanStyle.updateTextDecorationColor.has_value()) {
         spanNode->UpdateTextDecorationColorWithoutCheck(textStyle.GetTextDecorationColor());
+        spanNode->GetSpanItem()->useThemeDecorationColor = false;
     }
     if (updateSpanStyle.updateTextDecorationStyle.has_value()) {
         spanNode->UpdateTextDecorationStyle(textStyle.GetTextDecorationStyle());
@@ -12712,4 +12712,10 @@ const TextEditingValue& RichEditorPattern::GetInputEditingValue() const
     return value;
 }
 #endif
+
+bool RichEditorPattern::IsSelectAll()
+{
+    return textSelector_.GetTextStart() == 0 && textSelector_.GetTextEnd() == GetTextContentLength();
+}
+
 } // namespace OHOS::Ace::NG

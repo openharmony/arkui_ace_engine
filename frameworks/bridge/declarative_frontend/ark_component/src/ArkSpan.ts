@@ -675,6 +675,10 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     throw new Error('Method not implemented.');
   }
 
+  transform3D(value: object): this {
+    throw new Error('Method not implemented.');
+  }
+
   onAppear(event: () => void): this {
     throw new Error('Method not implemented.');
   }

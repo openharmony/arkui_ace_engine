@@ -61,6 +61,8 @@ private:
     napi_value ProcessAfterPanStartUnRegister(napi_env env, napi_callback_info info);
     napi_value ProcessAfterPanEndRegister(napi_env env, napi_callback_info info);
     napi_value ProcessAfterPanEndUnRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessNodeRenderStateRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessNodeRenderStateUnRegister(napi_env env, napi_callback_info info);
     napi_value AddToScrollEventType(napi_env env);
     napi_value AddToRouterPageState(napi_env env);
     napi_value CreateNavDestinationState(napi_env env);

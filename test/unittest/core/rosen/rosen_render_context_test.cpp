@@ -1412,4 +1412,48 @@ HWTEST_F(RosenRenderContextTest, OnCustomBackgroundColorUpdate001, TestSize.Leve
     const Color value = Color::RED;
     rosenRenderContext->OnCustomBackgroundColorUpdate(value);
 }
+
+/**
+ * @tc.name: OnTransform3DMatrixUpdate001
+ * @tc.desc: Test OnTransform3DMatrixUpdate Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, OnTransform3DMatrixUpdate001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    float INDEX_0 = 0.0f;
+    float INDEX_1 = 1.0f;
+    float INDEX_100 = 100.0f;
+    Matrix4 matrix4(INDEX_1, INDEX_0, INDEX_0, INDEX_0, INDEX_0, INDEX_1, INDEX_0, INDEX_0, INDEX_0, INDEX_0, INDEX_1,
+        INDEX_0, INDEX_100, INDEX_0, INDEX_0, INDEX_1);
+    rosenRenderContext->OnTransform3DMatrixUpdate(matrix4);
+    auto perspectiveValue = rosenRenderContext->transformMatrixModifier_->perspectiveValue.get()->Get();
+    auto xyTranslateValue = rosenRenderContext->transformMatrixModifier_->translateXYValue.get()->Get();
+    auto translateZValue = rosenRenderContext->transformMatrixModifier_->translateZValue.get()->Get();
+    auto scaleXYValue = rosenRenderContext->transformMatrixModifier_->scaleXYValue.get()->Get();
+    auto scaleZValue = rosenRenderContext->transformMatrixModifier_->scaleZValue.get()->Get();
+    auto skewValue = rosenRenderContext->transformMatrixModifier_->skewValue.get()->Get();
+    auto quaternionValue = rosenRenderContext->transformMatrixModifier_->quaternionValue.get()->Get();
+    EXPECT_NE(perspectiveValue[0], 0);
+    EXPECT_EQ(perspectiveValue[1], 0);
+    EXPECT_EQ(perspectiveValue[2], 0);
+    EXPECT_NE(perspectiveValue[3], 0);
+    EXPECT_EQ(xyTranslateValue[0], 0);
+    EXPECT_EQ(perspectiveValue[1], 0);
+    EXPECT_EQ(translateZValue, 0);
+    EXPECT_NE(scaleXYValue[0], 0);
+    EXPECT_NE(scaleXYValue[1], 0);
+    EXPECT_NE(scaleZValue, 0);
+    EXPECT_EQ(skewValue[0], 0);
+    EXPECT_EQ(skewValue[1], 0);
+    EXPECT_EQ(skewValue[2], 0);
+    EXPECT_EQ(quaternionValue[0], 0);
+    EXPECT_EQ(quaternionValue[1], 0);
+    EXPECT_EQ(quaternionValue[2], 0);
+    EXPECT_NE(quaternionValue[3], 0);
+}
 } // namespace OHOS::Ace::NG

@@ -181,7 +181,11 @@ void UITaskScheduler::FlushPostponedLayoutTask(bool forceUseMainThread)
             }
             node->CreateLayoutTask(forceUseMainThread, LayoutType::MEASURE_FOR_IGNORE);
         }
-        bundle->second->CreateLayoutTask(forceUseMainThread, LayoutType::LAYOUT_FOR_IGNORE);
+        auto&& container = bundle->second;
+        if (!container || container->IsInDestroying()) {
+            continue;
+        }
+        container->CreateLayoutTask(forceUseMainThread, LayoutType::LAYOUT_FOR_IGNORE);
     }
 }
 

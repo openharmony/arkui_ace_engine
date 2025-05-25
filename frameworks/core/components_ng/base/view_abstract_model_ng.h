@@ -47,6 +47,23 @@ namespace OHOS::Ace {
 class SpanString;
 }
 namespace OHOS::Ace::NG {
+constexpr int32_t MAT4_ZERO = 0;
+constexpr int32_t MAT4_ONE = 1;
+constexpr int32_t MAT4_TWO = 2;
+constexpr int32_t MAT4_THREE = 3;
+constexpr int32_t MAT4_FOUR = 4;
+constexpr int32_t MAT4_FIVE = 5;
+constexpr int32_t MAT4_SIX = 6;
+constexpr int32_t MAT4_SEVEN = 7;
+constexpr int32_t MAT4_EIGHT = 8;
+constexpr int32_t MAT4_NINE = 9;
+constexpr int32_t MAT4_TEN = 10;
+constexpr int32_t MAT4_ELEVEN = 11;
+constexpr int32_t MAT4_TWELVE = 12;
+constexpr int32_t MAT4_THIRTEEN = 13;
+constexpr int32_t MAT4_FOURTEEN = 14;
+constexpr int32_t MAT4_FIFTEEN = 15;
+
 class ACE_FORCE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
 public:
     ~ViewAbstractModelNG() override = default;
@@ -784,6 +801,14 @@ public:
         NG::ViewAbstract::SetTransformMatrix(
             Matrix4(matrix[0], matrix[4], matrix[8], matrix[12], matrix[1], matrix[5], matrix[9], matrix[13], matrix[2],
                 matrix[6], matrix[10], matrix[14], matrix[3], matrix[7], matrix[11], matrix[15]));
+    }
+
+    void SetTransform3DMatrix(const std::vector<float>& matrix) override
+    {
+        NG::ViewAbstract::SetTransform3DMatrix(Matrix4(matrix[MAT4_ZERO], matrix[MAT4_FOUR], matrix[MAT4_EIGHT],
+            matrix[MAT4_TWELVE], matrix[MAT4_ONE], matrix[MAT4_FIVE], matrix[MAT4_NINE], matrix[MAT4_THIRTEEN],
+            matrix[MAT4_TWO], matrix[MAT4_SIX], matrix[MAT4_TEN], matrix[MAT4_FOURTEEN], matrix[MAT4_THREE],
+            matrix[MAT4_SEVEN], matrix[MAT4_ELEVEN], matrix[MAT4_FIFTEEN]));
     }
 
     void SetOpacity(double opacity, bool passThrough = false) override

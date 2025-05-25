@@ -124,6 +124,11 @@ struct ActiveChildSets {
     std::set<int32_t> cachedItems;
 };
 
+enum class IgnoreStrategy {
+    NORMAL = 0,
+    FROM_MARGIN,
+    STRIDE_OVER
+};
 class ACE_FORCE_EXPORT LayoutWrapper : public virtual AceType {
     DECLARE_ACE_TYPE(LayoutWrapper, AceType)
 public:
@@ -240,7 +245,7 @@ public:
     ExpandEdges GetAccumulatedSafeAreaExpand(bool includingSelf = false,
         IgnoreLayoutSafeAreaOpts options = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
             .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL },
-        bool fromMarginRect = false);
+        IgnoreStrategy strategy = IgnoreStrategy::NORMAL);
     void ResetSafeAreaPadding();
 
     bool SkipSyncGeometryNode() const
