@@ -2086,17 +2086,16 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
         if (!ParseJsDimensionVpNG(jsValue, value, valueResObj)) {
             // JsWidth return false, check if set LayoutPolicy before return.
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
-            if (!jsValue->IsObject()) {
-                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
-                return false;
+            if (jsValue->IsObject()) {
+                JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
+                JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
+                if (layoutPolicy->IsString()) {
+                    auto policy = ParseLayoutPolicy(layoutPolicy->ToString());
+                    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, true);
+                    return true;
+                }
             }
-            JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
-            JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
-            if (layoutPolicy->IsString()) {
-                auto policy = ParseLayoutPolicy(layoutPolicy->ToString());
-                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, true);
-                return true;
-            }
+            return false;
         }
     } else if (!ParseJsDimensionVp(jsValue, value, valueResObj)) {
         return false;
@@ -2161,17 +2160,16 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
         if (!ParseJsDimensionVpNG(jsValue, value, valueResObj)) {
             // JsHeight return false, check if set LayoutPolicy before return.
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
-            if (!jsValue->IsObject()) {
-                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
-                return false;
+            if (jsValue->IsObject()) {
+                JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
+                JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
+                if (layoutPolicy->IsString()) {
+                    auto policy = ParseLayoutPolicy(layoutPolicy->ToString());
+                    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, false);
+                    return true;
+                }
             }
-            JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
-            JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
-            if (layoutPolicy->IsString()) {
-                auto policy = ParseLayoutPolicy(layoutPolicy->ToString());
-                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, false);
-                return true;
-            }
+            return false;
         }
     } else if (!ParseJsDimensionVp(jsValue, value, valueResObj)) {
         return false;

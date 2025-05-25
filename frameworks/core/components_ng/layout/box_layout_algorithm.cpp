@@ -84,6 +84,17 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
     OptionalSizeF frameSize;
     auto version10OrLarger =
         PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9;
+    bool isEnableMatchParent = layoutWrapper->GetHostNode() && layoutWrapper->GetHostNode()->GetPattern() &&
+                               layoutWrapper->GetHostNode()->GetPattern()->IsEnableMatchParent();
+    bool isEnableFix = layoutWrapper->GetHostNode() && layoutWrapper->GetHostNode()->GetPattern() &&
+                       layoutWrapper->GetHostNode()->GetPattern()->IsEnableFix();
+    auto widthLayoutPolicy = LayoutCalPolicy::NO_MATCH;
+    auto heightLayoutPolicy = LayoutCalPolicy::NO_MATCH;
+    auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+    }
     do {
         // Use idea size first if it is valid.
         frameSize.UpdateSizeWithCheck(layoutConstraint->selfIdealSize);
@@ -100,6 +111,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
         }
 
         const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+        auto fixIdealSize = OptionalSizeF();
         if (content) {
             // use content size.
             auto contentSize = content->GetRect().GetSize();
@@ -129,6 +141,10 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
             }
             AddPaddingToSize(padding, childFrame);
             frameSize.UpdateIllegalSizeWithCheck(childFrame);
+            fixIdealSize =
+                UpdateOptionSizeByCalcLayoutConstraint(OptionalSizeF(childFrame.Width(), childFrame.Height()),
+                    layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
+                    layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
         }
         if (layoutConstraint->selfIdealSize.Width()) {
             frameSize.ConstrainFloat(minSize, maxSize, false, version10OrLarger);
@@ -137,20 +153,19 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
         } else {
             frameSize.Constrain(minSize, maxSize, version10OrLarger);
         }
+        if (isEnableFix) {
+            if (widthLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+                frameSize.SetWidth(fixIdealSize.Width());
+            }
+            if (heightLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+                frameSize.SetHeight(fixIdealSize.Height());
+            }
+        }
         frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
     } while (false);
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = host->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    bool isEnableMatchParent = pattern->IsEnableMatchParent();
-    auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
     if (isEnableMatchParent && layoutPolicy.has_value()) {
-        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_;
-        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_;
-        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(layoutConstraint.value(),
-            widthLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH),
-            heightLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH), Axis::HORIZONTAL)
+        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(
+            layoutConstraint.value(), widthLayoutPolicy, heightLayoutPolicy, Axis::HORIZONTAL)
                                     .ConvertToSizeT();
         frameSize.UpdateSizeWithCheck(layoutPolicySize);
     }
