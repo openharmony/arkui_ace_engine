@@ -211,6 +211,14 @@ public:
     {
         return isHover_;
     }
+    void SetHoverSlider(bool hover)
+    {
+        isHoverSlider_ = hover;
+    }
+    bool IsHoverSlider() const
+    {
+        return isHoverSlider_;
+    }
     OpacityAnimationType GetOpacityAnimationType() const
     {
         return opacityAnimationType_;
@@ -675,6 +683,7 @@ private:
     bool isPressed_ = false;
     bool isDriving_ = false; // false: scroll driving; true: bar driving
     bool isHover_ = false;
+    bool isHoverSlider_ = false;
     bool positionModeUpdate_ = false;
     bool normalWidthUpdate_ = false;
     bool isUserNormalWidth_ = false;
