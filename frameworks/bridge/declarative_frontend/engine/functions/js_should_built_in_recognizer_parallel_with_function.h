@@ -37,6 +37,13 @@ public:
     RefPtr<NG::NGGestureRecognizer> Execute(
         const RefPtr<NG::NGGestureRecognizer>& current, const std::vector<RefPtr<NG::NGGestureRecognizer>>& others);
     static JSRef<JSObject> CreateRecognizerObject(const RefPtr<NG::NGGestureRecognizer>& target);
+    static TouchRecognizerMap CreateTouchRecognizerMap(
+        const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NG::NGGestureRecognizer>& current);
+    static void CollectTouchEventTarget(TouchRecognizerMap& dict, std::list<RefPtr<TouchEventTarget>>& targets,
+        NG::FrameNode* borderNode, int32_t fingerId);
+ 
+private:
+    static bool IsFingerCollectedByTarget(const TouchRecognizerTarget& target, int32_t fingerId);
 };
 } // namespace OHOS::Ace::Framework
 

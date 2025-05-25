@@ -1966,4 +1966,27 @@ HWTEST_F(EventManagerTestNg, DispatchTouchCancelToRecognizer, TestSize.Level1)
     eventManager->DispatchTouchCancelToRecognizer(AceType::RawPtr(targetRefs[1]), items[1]);
     EXPECT_EQ(touchTestResult.size(), 0);
 }
+
+/**
+ * @tc.name: DispatchTouchCancelToRecognizer_ItemsEmpty
+ * @tc.desc: Test DispatchTouchCancelToRecognizer when items is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, DispatchTouchCancelToRecognizer_ItemsEmpty, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    auto& touchTestResult = eventManager->touchTestResults_;
+    RefPtr<TouchEventActuator> target = AceType::MakeRefPtr<TouchEventActuator>();
+    using TouchRecognizerTarget = std::vector<std::pair<int32_t, TouchTestResult::iterator>>;
+ 
+    TouchTestResult resultList;
+    resultList.push_back(target);
+    touchTestResult[1] = resultList;
+    TouchRecognizerTarget items;
+ 
+    eventManager->DispatchTouchCancelToRecognizer(AceType::RawPtr(target), items);
+    EXPECT_EQ(touchTestResult.size(), 1);
+    EXPECT_EQ(touchTestResult.count(1), 1);
+    EXPECT_EQ(touchTestResult[1].size(), 1);
+}
 } // namespace OHOS::Ace::NG

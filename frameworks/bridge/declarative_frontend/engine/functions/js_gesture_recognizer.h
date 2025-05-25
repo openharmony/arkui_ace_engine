@@ -40,6 +40,9 @@ enum class GestureRecognizerState {
     FAIL = 5,
 };
 
+using TouchRecognizerTarget = std::vector<std::pair<int32_t, TouchTestResult::iterator>>;
+using TouchRecognizerMap = std::map<TouchEventTarget*, TouchRecognizerTarget>;
+
 class JSEventTargetInfo : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj);
@@ -398,6 +401,37 @@ private:
 
     SwipeDirection direction_;
     double speed_ = 100.0;
+};
+
+class JSTouchRecognizer : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj);
+    
+    void GetEventTargetInfo(const JSCallbackInfo& args);
+    void CancelTouch(const JSCallbackInfo& args);
+    void SetTouchData(TouchEventTarget* target, TouchRecognizerTarget& touchRecognizerTarget)
+    {
+        target_ = target;
+        touchRecognizerTarget_ = touchRecognizerTarget;
+    }
+    
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsTouchRecognizer = Referenced::MakeRefPtr<JSTouchRecognizer>();
+        jsTouchRecognizer->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsTouchRecognizer));
+    }
+    
+    static void Destructor(JSTouchRecognizer* jsTouchRecognizer)
+    {
+        if (jsTouchRecognizer != nullptr) {
+            jsTouchRecognizer->DecRefCount();
+        }
+    }
+    
+    TouchEventTarget* target_;
+    TouchRecognizerTarget touchRecognizerTarget_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_GESTURE_RECOGNIZER_H

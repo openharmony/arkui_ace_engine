@@ -664,10 +664,10 @@ void clearGestures(ArkUINodeHandle node)
 }
 
 // <fingerid, iterator of touchTestResults in eventManager>
-using TouchRecoginerTarget = std::vector<std::pair<int32_t, TouchTestResult::iterator>>;
-using TouchRecognizerMap = std::map<TouchEventTarget*, TouchRecoginerTarget>;
-
-bool IsFingerCollectedByTarget(TouchRecoginerTarget& target, int32_t fingerId)
+using TouchRecognizerTarget = std::vector<std::pair<int32_t, TouchTestResult::iterator>>;
+using TouchRecognizerMap = std::map<TouchEventTarget*, TouchRecognizerTarget>;
+ 
+bool IsFingerCollectedByTarget(TouchRecognizerTarget& target, int32_t fingerId)
 {
     for (const auto& item : target) {
         if (item.first == fingerId) {
@@ -753,7 +753,7 @@ ArkUI_Bool touchRecognizerCancelTouch(void* recognizer)
 {
     auto iter = static_cast<TouchRecognizerMap::value_type*>(recognizer);
     TouchEventTarget* touchEventTarget = iter->first;
-    TouchRecoginerTarget& touchRecognizerTarget = iter->second;
+    TouchRecognizerTarget& touchRecognizerTarget = iter->second;
     auto node = touchEventTarget->GetAttachedNode().Upgrade();
     CHECK_NULL_RETURN(node, false);
     auto pipeline = node->GetContext();
