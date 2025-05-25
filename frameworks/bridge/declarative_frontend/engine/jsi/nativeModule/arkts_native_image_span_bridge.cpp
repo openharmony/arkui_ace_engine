@@ -444,4 +444,61 @@ ArkUINativeModuleValue ImageSpanBridge::ResetBorderRadius(ArkUIRuntimeCallInfo *
     GetArkUINodeModifiers()->getImageSpanModifier()->resetImageSpanBorderRadius(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+bool CheckIsCard()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(context, false);
+    return context->IsFormRender() && !container->IsDynamicRender();
+}
+
+ArkUINativeModuleValue ImageSpanBridge::SetImageSpanSrc(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    int32_t resId = 0;
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        Framework::JSRef<Framework::JSObject> jsObj = Framework::JSRef<Framework::JSObject>::Cast(info[1]);
+        Framework::JSRef<Framework::JSVal> tmp = jsObj->GetProperty("id");
+        if (!tmp->IsNull() && tmp->IsNumber()) {
+            resId = tmp->ToNumber<int32_t>();
+        }
+    }
+    bool isCard = CheckIsCard();
+    std::string src;
+    bool srcValid = ArkTSUtils::ParseJsMedia(vm, secondArg, src);
+    if (isCard && secondArg->IsString(vm)) {
+        SrcType srcType = ImageSourceInfo::ResolveURIType(src);
+        bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
+        if (notSupport) {
+            src.clear();
+        }
+    }
+    std::string bundleName;
+    std::string moduleName;
+    ArkTSUtils::GetJsMediaBundleInfo(vm, secondArg, bundleName, moduleName);
+    RefPtr<PixelMap> pixmap = nullptr;
+    if (!srcValid) {
+#if defined(PIXEL_MAP_SUPPORTED)
+        pixmap = Framework::CreatePixelMapFromNapiValue(info[1]);
+#endif
+    }
+    if (pixmap) {
+        ImageSpanView::SetPixelMap(reinterpret_cast<FrameNode*>(nativeNode), pixmap);
+    } else {
+        nodeModifiers->getImageSpanModifier()->setImageSpanSrc(
+            nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str(), (resId == -1));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

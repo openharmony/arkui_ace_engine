@@ -2101,6 +2101,8 @@ struct CJUIImageSpanModifier {
     void (*resetImageSpanOnComplete)(ArkUINodeHandle node);
     void (*setImageSpanOnError)(ArkUINodeHandle node, void* callback);
     void (*resetImageSpanOnError)(ArkUINodeHandle node);
+    void (*setImageSpanSrc)(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName,
+        ArkUI_Bool isUriPureNumber);
 };
 
 struct CJUIMenuModifier {

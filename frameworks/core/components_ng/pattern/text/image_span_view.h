@@ -46,6 +46,9 @@ public:
     static void SetOnError(FrameNode* frameNode, std::function<void(const LoadImageFailEvent& info)>&& callback);
     static void SetBorderRadius(FrameNode* frameNode, NG::BorderRadiusProperty borderRadius);
     static void ResetBorderRadius(FrameNode* frameNode);
+    static void SetPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pixMap);
+    static void SetSrc(FrameNode* frameNode, const std::string& src, const std::string& bundleName,
+        const std::string& moduleName, bool isUriPureNumber);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_SPAN_VIEW_H
