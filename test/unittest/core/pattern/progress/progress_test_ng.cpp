@@ -1668,6 +1668,26 @@ HWTEST_F(ProgressTestNg, ProgressPatternUpdateColorTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ProgressPatternUpdateColorTest002
+ * @tc.desc: Test UpdateColor function with first load scenario.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPatternUpdateColorTest002, TestSize.Level1)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    Color testColor(Color::BLACK);
+    pattern->UpdateColor(testColor, true);
+
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetColorValue(), testColor);
+}
+
+/**
  * @tc.name: ProgressPatternUpdateColorTest003
  * @tc.desc: Test UpdateColor function without first load or system color change.
  * @tc.type: FUNC
@@ -1679,18 +1699,12 @@ HWTEST_F(ProgressTestNg, ProgressPatternUpdateColorTest003, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     ASSERT_NE(pattern, nullptr);
-    
-    // Set initial color
     Color initialColor(Color::GREEN);
     pattern->UpdateColor(initialColor, true);
-    
-    // Try to update without first load or system color change
     Color newColor(Color::BLUE);
     pattern->UpdateColor(newColor, false);
-    
     auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
-    // Should keep the initial color
     EXPECT_EQ(paintProperty->GetColorValue(), initialColor);
 }
 

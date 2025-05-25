@@ -72,6 +72,9 @@ public:
     void SetFontColorResource(const RefPtr<ResourceObject>& resObj);
     void SetBackgroundColorResource(const RefPtr<ResourceObject>& resObj);
     void SetFontWeightResource(const RefPtr<ResourceObject>& resObj);
+    void SetRSStrokeWidth(const RefPtr<ResourceObject>& resObj);
+    void SetRSScaleWidth(const RefPtr<ResourceObject>& resObj);
+    void SetTextResource(const RefPtr<ResourceObject>& resObj);
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, double value, double max, NG::ProgressType type);
     static void SetValue(FrameNode* frameNode, double value);
