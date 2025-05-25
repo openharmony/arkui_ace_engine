@@ -728,4 +728,33 @@ HWTEST_F(PanRecognizerDistanceTestNg, PanRecognizerPanDistanceMapTest003, TestSi
         caseNum++;
     }
 }
+/**
+ * @tc.name: PanRecognizerPanDistanceMapTest004
+ * @tc.desc: Test GestureEventHub SetPanEvent Distance
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerDistanceTestNg, PanRecognizerPanDistanceMapTest004, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create GestureEventHub.
+    */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    /**
+     * @tc.steps: step2. SetPanEvent EVENT_PAN_GESTURE_LEFT|EVENT_PAN_GESTURE_UP
+     */
+    PanDirection panDirection;
+    panDirection.type = PanDirection::RIGHT | PanDirection::UP;
+    auto panEvent = AceType::MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, 1 } };
+    gestureEventHub->AddPanEvent(panEvent, panDirection, 1, distanceMap);
+    /**
+     * @tc.steps: step3. Calculate pan recognizer distance.
+     */
+    auto panEventActuator = gestureEventHub->panEventActuator_;
+    ASSERT_NE(panEventActuator, nullptr);
+    auto panRecognizer = panEventActuator->panRecognizer_;
+    ASSERT_NE(panRecognizer, nullptr);
+    EXPECT_EQ(panRecognizer->GetDistance(), 1);
+}
 } // namespace OHOS::Ace::NG
