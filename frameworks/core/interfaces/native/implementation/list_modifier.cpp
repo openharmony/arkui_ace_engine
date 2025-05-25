@@ -16,6 +16,7 @@
 #include "base/geometry/axis.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
+#include "core/components_ng/pattern/list/list_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -183,7 +184,7 @@ void AlignListItemImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetListItemAlign(frameNode, Converter::OptConvert<V2::ListItemAlign>(*value));
+    ListModelStatic::SetListItemAlign(frameNode, Converter::OptConvert<V2::ListItemAlign>(*value));
 }
 void ListDirectionImpl(Ark_NativePointer node,
                        const Opt_Axis* value)
@@ -191,7 +192,7 @@ void ListDirectionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<Axis> direction = Converter::OptConvert<Axis>(*value);
-    ListModelNG::SetListDirection(frameNode, EnumToInt(direction));
+    ListModelStatic::SetListDirection(frameNode, EnumToInt(direction));
 }
 void ScrollBarImpl(Ark_NativePointer node,
                    const Opt_BarState* value)
@@ -199,7 +200,7 @@ void ScrollBarImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<DisplayMode> mode = Converter::OptConvert<DisplayMode>(*value);
-    ListModelNG::SetListScrollBar(frameNode, EnumToInt(mode));
+    ListModelStatic::SetListScrollBar(frameNode, EnumToInt(mode));
 }
 void ContentStartOffsetImpl(Ark_NativePointer node,
                             const Opt_Number* value)
@@ -232,7 +233,7 @@ void DividerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
-    ListModelNG::SetDivider(frameNode, divider);
+    ListModelStatic::SetDivider(frameNode, divider);
 }
 void EditModeImpl(Ark_NativePointer node,
                   const Opt_Boolean* value)
@@ -310,14 +311,14 @@ void StickyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<V2::StickyStyle> style = Converter::OptConvert<V2::StickyStyle>(*value);
-    ListModelNG::SetSticky(frameNode, EnumToInt(style));
+    ListModelStatic::SetSticky(frameNode, EnumToInt(style));
 }
 void ScrollSnapAlignImpl(Ark_NativePointer node,
                          const Opt_ScrollSnapAlign* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetScrollSnapAlign(frameNode, Converter::OptConvert<ScrollSnapAlign>(*value));
+    ListModelStatic::SetScrollSnapAlign(frameNode, Converter::OptConvert<ScrollSnapAlign>(*value));
 }
 void NestedScrollImpl(Ark_NativePointer node,
                       const Opt_NestedScrollOptions* value)
@@ -348,7 +349,7 @@ void FrictionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetListFriction(frameNode, Converter::OptConvert<float>(*value));
+    ListModelStatic::SetListFriction(frameNode, Converter::OptConvert<float>(*value));
 }
 void ChildrenMainSizeImpl(Ark_NativePointer node,
                           const Opt_ChildrenMainSize* value)
