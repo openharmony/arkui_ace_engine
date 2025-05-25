@@ -338,8 +338,13 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
         selectInfo.menuInfo.showTranslate = false;
     }
     // should be the last
-    if (auto adapter = pattern->webDataDetectorAdapter_) {
-        adapter->DetectSelectedText(value);
+    canShowAIMenu_ = (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) &&
+                     (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::IN_APP);
+    canShowAIMenu_ = canShowAIMenu_ && !(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT);
+    if (canShowAIMenu_) {
+        if (auto adapter = pattern->webDataDetectorAdapter_) {
+            adapter->DetectSelectedText(value);
+        }
     }
 }
 
@@ -917,8 +922,10 @@ void WebSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     CHECK_NULL_VOID(pattern);
     auto delegate = pattern->delegate_;
     CHECK_NULL_VOID(delegate);
-    if (auto adapter = pattern->webDataDetectorAdapter_) {
-        adapter->DetectSelectedText(GetSelectedText());
+    if (canShowAIMenu_) {
+        if (auto adapter = pattern->webDataDetectorAdapter_) {
+            adapter->DetectSelectedText(GetSelectedText());
+        }
     }
     TouchInfo touchPoint;
     touchPoint.id = 0;

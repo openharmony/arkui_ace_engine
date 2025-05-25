@@ -179,6 +179,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(WebSelectOverlay);
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;
+    bool canShowAIMenu_ = false;
     TextDataDetectType aiMenuType_ = TextDataDetectType::INVALID;
     std::string aiMenucontent_;
 };
