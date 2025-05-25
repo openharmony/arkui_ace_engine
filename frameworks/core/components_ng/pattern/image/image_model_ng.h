@@ -128,6 +128,7 @@ public:
     static ImageRepeat GetObjectRepeat(FrameNode* frameNode);
     static std::vector<float> GetColorFilter(FrameNode* frameNode);
     static bool GetAutoResize(FrameNode* frameNode);
+    static bool GetSyncLoad(FrameNode* frameNode);
     static ImageSourceInfo GetAlt(FrameNode* frameNode);
     static bool GetDraggable(FrameNode* frameNode);
     static ImageRenderMode GetImageRenderMode(FrameNode* frameNode);

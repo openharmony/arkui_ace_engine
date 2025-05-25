@@ -1750,6 +1750,36 @@ HWTEST_F(ImageTestNg, TestSyncLoad001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestSyncLoad002
+ * @tc.desc: Test image syncLoad.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestSyncLoad002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+
+    /**
+     * @tc.steps: step2. default value
+     */
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->syncLoad_, false);
+
+    /**
+     * @tc.steps: step3. set syncLoad
+     */
+    pattern->SetSyncLoad(true);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->syncLoad_, true);
+    pattern->SetSyncLoad(false);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->syncLoad_, false);
+}
+
+/**
  * @tc.name: TestDraggable001
  * @tc.desc: Test image draggable.
  * @tc.type: FUNC

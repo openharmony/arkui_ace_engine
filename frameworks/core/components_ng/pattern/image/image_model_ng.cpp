@@ -976,6 +976,14 @@ bool ImageModelNG::GetAutoResize(FrameNode* frameNode)
     return layoutProperty->GetImageSizeStyle()->GetAutoResize().value_or(defaultAutoResize);
 }
 
+bool ImageModelNG::GetSyncLoad(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_RETURN(imagePattern, false);
+    return imagePattern->GetSyncLoad();
+}
+
 ImageSourceInfo ImageModelNG::GetAlt(FrameNode* frameNode)
 {
     ImageSourceInfo defaultImageSourceInfo;
