@@ -11936,15 +11936,19 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
         return;
     }
 
+    // parse custom background
     Color color = Color::TRANSPARENT;
     std::function<void()> builderFunc;
     BackgroundType backgroundType = BackgroundType::COLOR;
     if (!ParseJsColor(info[0], color)) {
         if (ParseBackgroundBuilder(info, info[0], builderFunc)) {
             backgroundType = BackgroundType::CUSTOM_BUILDER;
+        } else {
+            return;
         }
     }
 
+    // parse background options
     Alignment alignment = Alignment::CENTER;
     NG::LayoutSafeAreaEdge ignoreLayoutSafeAreaEdges = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
     if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsObject()) {
@@ -11967,6 +11971,7 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
                                         : ignoreLayoutSafeAreaEdges;
     }
 
+    // parameters parsed, set the properties parsed above
     if (BackgroundType::CUSTOM_BUILDER == backgroundType &&
         NG::LAYOUT_SAFE_AREA_EDGE_NONE == ignoreLayoutSafeAreaEdges) {
         ViewAbstractModel::GetInstance()->SetIsTransitionBackground(false);
