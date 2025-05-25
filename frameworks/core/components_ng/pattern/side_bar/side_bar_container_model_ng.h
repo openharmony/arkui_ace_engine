@@ -88,6 +88,20 @@ public:
     static void SetDividerColor(FrameNode* frameNode, const Color& color);
     static void SetDividerStartMargin(FrameNode* frameNode, const Dimension& startMargin);
     static void SetDividerEndMargin(FrameNode* frameNode, const Dimension& endMargin);
+    static void SetSideBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetMinSideBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetMaxSideBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetMinContentWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetControlButtonShowIconInfo(
+        FrameNode* frameNode, const RefPtr<ResourceObject>& showIconResObj, bool isPixelMap, RefPtr<PixelMap> pixMap);
+    static void SetControlButtonHiddenIconInfo(
+        FrameNode* frameNode, const RefPtr<ResourceObject>& hiddenIconResObj, bool isPixelMap, RefPtr<PixelMap> pixMap);
+    static void SetControlButtonSwitchingIconInfo(FrameNode* frameNode,
+        const RefPtr<ResourceObject>& switchingIconResObj, bool isPixelMap, RefPtr<PixelMap> pixMap);
+    static void SetDividerStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& strokeWidthResObj);
+    static void SetDividerEndMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& startMarginResObj);
+    static void SetDividerStartMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& startMarginResObj);
+    static void SetDividerColor(FrameNode* frameNode, const RefPtr<ResourceObject>& colorResObj);
     static void ResetControlButtonLeft(FrameNode* frameNode);
     static void ResetControlButtonIconInfo(FrameNode* frameNode);
     static bool IsDoubleBindBlock(const RefPtr<SideBarContainerPattern>& sideBarContainerPattern);

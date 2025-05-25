@@ -2420,27 +2420,31 @@ struct CJUIImageAnimatorModifier {
 };
 
 struct CJUISideBarContainerModifier {
-    void (*setSideBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setSideBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* sideBarWidthPtr);
     void (*resetSideBarWidth)(ArkUINodeHandle node);
-    void (*setMinSideBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setMinSideBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* minSideBarWidthPtr);
     void (*resetMinSideBarWidth)(ArkUINodeHandle node);
     void (*setControlButton)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valueLength,
-        const struct ArkUIIconsStruct* sideBarWidth);
+        const struct ArkUIIconsStruct* sideBarWidth, void* iconsShownPtr, void* iconsHiddenPtr,
+        void* iconsSwitchingPtr);
     void (*resetControlButton)(ArkUINodeHandle node);
     void (*setShowControlButton)(ArkUINodeHandle node, ArkUI_Bool isShow);
     void (*resetShowControlButton)(ArkUINodeHandle node);
     void (*setAutoHide)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetAutoHide)(ArkUINodeHandle node);
-    void (*setSideBarContainerMaxSideBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setSideBarContainerMaxSideBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit,
+        void* maxSideBarWidthPtr);
     void (*resetSideBarContainerMaxSideBarWidth)(ArkUINodeHandle node);
-    void (*setSideBarContainerMinContentWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setSideBarContainerMinContentWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit,
+        void* minContentWidthPtr);
     void (*resetSideBarContainerMinContentWidth)(ArkUINodeHandle node);
     void (*setSideBarPosition)(ArkUINodeHandle node, ArkUI_Int32 sideBarPosition);
     void (*resetSideBarPosition)(ArkUINodeHandle node);
     void (*setShowSideBar)(ArkUINodeHandle node, ArkUI_Bool isShow);
     void (*resetShowSideBar)(ArkUINodeHandle node);
     void (*setSideBarContainerDivider)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units,
-        ArkUI_Int32 length, ArkUI_Uint32 color);
+        ArkUI_Int32 length, ArkUI_Uint32 color, void* strokeWidthPtr, void* startMarginPtr, void* endMarginPtr,
+        void* colorPtr);
     void (*resetSideBarContainerDivider)(ArkUINodeHandle node);
 };
 
