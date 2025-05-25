@@ -2253,13 +2253,16 @@ struct CJUINavigationModifier {
     void (*resetNavHideTitleBar)(ArkUINodeHandle node);
     void (*setNavBarPosition)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetNavBarPosition)(ArkUINodeHandle node);
-    void (*setMinContentWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setMinContentWidth)(
+        ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* minContentWidthRawPtr);
     void (*resetMinContentWidth)(ArkUINodeHandle node);
-    void (*setMaxNavBarWidth)(ArkUINodeHandle node, ArkUI_Float32 maxValue, ArkUI_Int32 maxUnit);
+    void (*setMaxNavBarWidth)(
+        ArkUINodeHandle node, ArkUI_Float32 maxValue, ArkUI_Int32 maxUnit, void* maxNavBarWidthRawPtr);
     void (*resetMaxNavBarWidth)(ArkUINodeHandle node);
-    void (*setMinNavBarWidth)(ArkUINodeHandle node, ArkUI_Float32 minValue, ArkUI_Int32 minUnit);
+    void (*setMinNavBarWidth)(
+        ArkUINodeHandle node, ArkUI_Float32 minValue, ArkUI_Int32 minUnit, void* minNavBarWidthRawPtr);
     void (*resetMinNavBarWidth)(ArkUINodeHandle node);
-    void (*setNavBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setNavBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* widthRawPtr);
     void (*resetNavBarWidth)(ArkUINodeHandle node);
     void (*setNavIgnoreLayoutSafeArea)(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr);
     void (*resetNavIgnoreLayoutSafeArea)(ArkUINodeHandle node);

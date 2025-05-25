@@ -19,6 +19,11 @@
 #include <cstdint>
 #include <stddef.h>
 #include <vector>
+#include <functional>
+#include <unordered_map>
+#include <string>
+#include <utility>
+#include "core/common/resource/resource_object.h"
 
 /*
  * ATTENTION. Keep this file self contained.
@@ -1881,12 +1886,59 @@ struct ArkUINavigationTitlebarOptions {
     ArkUIOptionalDimensionType paddingStart;
     ArkUIOptionalDimensionType paddingEnd;
     ArkUIOptionalBool enableHoverMode;
+
+    struct resourceUpdater {
+        OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> resObj;
+        std::function<void(const  OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&,
+            ArkUINavigationTitlebarOptions&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
+
+    void AddResource(const std::string& key, const  OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>& resObj,
+        std::function<void(const  OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&,
+            ArkUINavigationTitlebarOptions&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = { resObj, std::move(updateFunc) };
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
+    }
 };
 
 struct ArkUIBarItem {
     ArkUIOptionalCommonCharPtr text;
     ArkUIOptionalCommonCharPtr icon;
     ArkUIOptionalBool isEnable;
+    ArkUI_Bool isStringText;
+    ArkUI_Bool isStringIcon;
+
+    struct resourceUpdater {
+        OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> resObj;
+        std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, ArkUIBarItem&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
+    void AddResource(const std::string& key, const OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>& resObj,
+        std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, ArkUIBarItem&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = { resObj, std::move(updateFunc) };
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
+    }
 };
 
 struct ArkUINavigationTitleInfo {
@@ -3963,7 +4015,8 @@ struct ArkUINavDestinationModifier {
     void (*resetNavDestinationMode)(ArkUINodeHandle node);
     void (*setIgnoreLayoutSafeArea)(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr);
     void (*resetIgnoreLayoutSafeArea)(ArkUINodeHandle node);
-    void (*setTitle)(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUINavigationTitlebarOptions options);
+    void (*setTitle)(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUINavigationTitlebarOptions options,
+        void* titleRawPtr, void* subtitleRawPtr);
     void (*resetTitle)(ArkUINodeHandle node);
     void (*setMenus)(ArkUINodeHandle node, ArkUIBarItem* items, ArkUI_Uint32 length);
     void (*resetMenus)(ArkUINodeHandle node);
@@ -4842,18 +4895,21 @@ struct ArkUINavigationModifier {
     void (*resetNavHideTitleBar)(ArkUINodeHandle node);
     void (*setNavBarPosition)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetNavBarPosition)(ArkUINodeHandle node);
-    void (*setMinContentWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setMinContentWidth)(
+        ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* minContentWidthRawPtr);
     void (*resetMinContentWidth)(ArkUINodeHandle node);
-    void (*setMaxNavBarWidth)(ArkUINodeHandle node, ArkUI_Float32 maxValue, ArkUI_Int32 maxUnit);
+    void (*setMaxNavBarWidth)(
+        ArkUINodeHandle node, ArkUI_Float32 maxValue, ArkUI_Int32 maxUnit, void* maxNavBarWidthRawPtr);
     void (*resetMaxNavBarWidth)(ArkUINodeHandle node);
-    void (*setMinNavBarWidth)(ArkUINodeHandle node, ArkUI_Float32 minValue, ArkUI_Int32 minUnit);
+    void (*setMinNavBarWidth)(
+        ArkUINodeHandle node, ArkUI_Float32 minValue, ArkUI_Int32 minUnit, void* minNavBarWidthRawPtr);
     void (*resetMinNavBarWidth)(ArkUINodeHandle node);
-    void (*setNavBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setNavBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* widthRawPtr);
     void (*resetNavBarWidth)(ArkUINodeHandle node);
     void (*setNavIgnoreLayoutSafeArea)(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr);
     void (*resetNavIgnoreLayoutSafeArea)(ArkUINodeHandle node);
     void (*setNavTitle)(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo,
-        ArkUINavigationTitlebarOptions options);
+        ArkUINavigationTitlebarOptions options, void* titleRawPtr, void* subtitleRawPtr);
     void (*resetNavTitle)(ArkUINodeHandle node);
     void (*setNavMenus)(ArkUINodeHandle node, ArkUIBarItem* items, ArkUI_Uint32 length);
     void (*resetNavMenus)(ArkUINodeHandle node);

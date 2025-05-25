@@ -31,6 +31,13 @@ public:
         ArkUINavigationTitlebarOptions& options);
     static void ParseAndSendFunctionParam(ArkUIRuntimeCallInfo* runtimeCallInfo, const Local<JSValueRef>& jsValue,
         ParamSendFunction& actionSendFunc, ParamSendFunction& symbolSendFunc);
+    static void ParseBarItemsValue(EcmaVM* vm, const Local<panda::ObjectRef>& itemObject, ArkUIBarItem& toolBarItem);
+    static void ParseBarItemsIcon(EcmaVM* vm, const Local<panda::ObjectRef>& itemObject, ArkUIBarItem& toolBarItem);
+    static void UpdateNavigationBackgroundColor(const EcmaVM* vm, const Local<panda::ObjectRef>& obj,
+        ArkUINavigationTitlebarOptions& options);
+    static void AddBackgroundColorResource(
+        const RefPtr<ResourceObject>& backgroundColorResObj, ArkUINavigationTitlebarOptions& options);
+
 private:
     static void DeepCopyStringValue(char* des, uint32_t desLength, const std::string& src);
 };
