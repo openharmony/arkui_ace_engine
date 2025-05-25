@@ -468,6 +468,8 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
                 ModifyCurrentOffsetWhenReachEnd(mainSize, layoutWrapper);
             }
         }
+    } else {
+        info_.UpdateEndIndex(info_.currentOffset_, mainSize, mainGap_);
     }
     layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
     if (info_.targetIndex_.has_value()) {
