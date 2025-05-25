@@ -971,6 +971,32 @@ void ViewAbstractModelStatic::SetBias(FrameNode* frameNode, const std::optional<
     ViewAbstract::SetBias(frameNode, biasPair);
 }
 
+void ViewAbstractModelStatic::SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
+    const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto frameNodeRef = AceType::Claim<FrameNode>(frameNode);
+    if (value.empty()) {
+        eventHub->ClearSingleKeyboardShortcut();
+        return;
+    }
+    auto key = eventManager->GetKeyboardShortcutKeys(keys);
+    if ((key == 0 && value.length() == 1) || (key == 0 && !keys.empty() && value.length() > 1)) {
+        return;
+    }
+    if (eventManager->IsSameKeyboardShortcutNode(value, key)) {
+        return;
+    }
+    eventHub->SetKeyboardShortcut(value, key, onKeyboardShortcutAction);
+    eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeRef));
+}
+
 void ViewAbstractModelStatic::SetPixelRound(FrameNode* frameNode, uint16_t value)
 {
     CHECK_NULL_VOID(frameNode);
