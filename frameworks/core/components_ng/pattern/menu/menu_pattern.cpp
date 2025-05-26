@@ -302,7 +302,7 @@ void MenuPattern::OnModifyDone()
     CHECK_NULL_VOID(pipelineContext);
     auto selecTheme = pipelineContext->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selecTheme);
-    if (selecTheme->GetMenuNeedFocus()) {
+    if (selecTheme->GetMenuItemNeedFocus()) {
         UpdateMenuBorderAndBackgroundBlur();
     }
     SetAccessibilityAction();
@@ -516,7 +516,7 @@ void InnerMenuPattern::OnModifyDone()
     CHECK_NULL_VOID(pipelineContext);
     auto selecTheme = pipelineContext->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selecTheme);
-    if (selecTheme->GetMenuNeedFocus()) {
+    if (selecTheme->GetMenuItemNeedFocus()) {
         InitDefaultBorder(host);
     }
 }
@@ -1175,8 +1175,7 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
     expandDisplay_ = expandDisplay;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()
-        || theme->GetMenuBlendBgColor()) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()) {
         auto bgColor = theme->GetBackgroundColor();
         renderContext->UpdateBackgroundColor(bgColor);
     }
