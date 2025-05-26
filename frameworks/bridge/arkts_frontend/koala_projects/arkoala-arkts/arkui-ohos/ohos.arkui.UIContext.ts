@@ -41,6 +41,7 @@ import { KeyProcessingMode } from "./src/component/focus"
 import {observer} from "@ohos/observer"
 import inspector from "@ohos/arkui/inspector"
 import router from './ohos.router'
+import { ContextMenu } from './src/component/contextMenu';
 
 export class UIInspector {
     instanceId_: int32 = -1;
@@ -181,6 +182,19 @@ export class FocusController {
     }
 }
 
+class ContextMenuController {
+    instanceId_: int32
+    constructor(instanceId: int32) {
+        this.instanceId_ = instanceId;
+    }
+
+    public close(): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        ContextMenu.close();
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+}
+
 export class UIContext {
     instanceId_: int32 = 100000;
     observer_ :UIObserver |null = null;
@@ -189,12 +203,14 @@ export class UIContext {
     componentUtils_: ComponentUtils;
     atomicServiceBar_: AtomicServiceBarInternal;
     uiInspector_: UIInspector | null = null;
+    contextMenuController_: ContextMenuController;
 
     constructor(instanceId: int32) {
         this.instanceId_ = instanceId;
         this.focusController_ = new FocusController(instanceId);
         this.componentUtils_ = new ComponentUtils(instanceId);
         this.atomicServiceBar_ = new AtomicServiceBarInternal(instanceId);
+        this.contextMenuController_ = new ContextMenuController(instanceId);
     }
     public getFont() : Font {
         let font : Font = new Font(this.instanceId_);
@@ -278,6 +294,10 @@ export class UIContext {
 
     public getFocusController(): FocusController {
         return this.focusController_;
+    }
+
+    public getContextMenuController(): ContextMenuController {
+        return this.contextMenuController_;
     }
 
     public getComponentUtils(): ComponentUtils {
