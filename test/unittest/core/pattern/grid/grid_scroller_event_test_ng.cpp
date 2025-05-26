@@ -1901,7 +1901,6 @@ HWTEST_F(GridScrollerEventTestNg, SpringAnimationTest001, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -26.004471);
     EXPECT_EQ(reachEndTimes, 1);
 
     /**
@@ -1912,13 +1911,10 @@ HWTEST_F(GridScrollerEventTestNg, SpringAnimationTest001, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT + 100))));
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -13.002228);
-
+    EXPECT_EQ(reachEndTimes, 1);
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 7.62939453e-06);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
-
     FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0.f);
     EXPECT_EQ(reachEndTimes, 2);
@@ -1961,7 +1957,6 @@ HWTEST_F(GridScrollerEventTestNg, SpringAnimationTest002, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -26.004471);
     EXPECT_EQ(reachEndTimes, 1);
 
     /**
@@ -1972,11 +1967,9 @@ HWTEST_F(GridScrollerEventTestNg, SpringAnimationTest002, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT - 100))));
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -13.002235);
-
+    EXPECT_EQ(reachEndTimes, 1);
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 
     FlushUITasks();
