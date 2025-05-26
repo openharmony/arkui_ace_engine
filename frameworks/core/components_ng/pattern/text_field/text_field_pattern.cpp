@@ -3586,9 +3586,11 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     return true;
 }
 
-void GetTextDiffObscured(
-    const std::string& beforeText, const std::string& latestContent, std::string& addedText, std::string& removedText)
+std::pair<std::string, std::string> TextFieldPattern::GetTextDiffObscured(const std::string& latestContent)
 {
+    const std::string& beforeText = textCache_;
+    std::string addedText;
+    std::string removedText;
     int32_t changeLen = latestContent.length() - beforeText.length();
     char16_t obscuring =
         Localization::GetInstance()->GetLanguage() == "ar" ? OBSCURING_CHARACTER_FOR_AR : OBSCURING_CHARACTER;
@@ -3597,6 +3599,7 @@ void GetTextDiffObscured(
     } else if (changeLen < 0) {
         removedText = UtfUtils::Str16DebugToStr8(std::u16string(-changeLen, obscuring));
     }
+    return {std::move(addedText), std::move(removedText)};
 }
 
 void TextFieldPattern::AddTextFireOnChange()
@@ -3633,22 +3636,15 @@ void TextFieldPattern::AddTextFireOnChange()
         pattern->RecordTextInputEvent();
         auto newText_str = UtfUtils::Str16DebugToStr8(newText);
         if(pattern->suppressAccessibilityEvent_){
-            std::string addedText, removedText;
-            if (pattern->IsInPasswordMode()) {
-                GetTextDiffObscured(pattern->textCache_, newText_str, addedText, removedText);
-            } else {
-                DetectTextDiff(pattern->textCache_, newText_str, addedText, removedText);
-            }
+            auto [addedText, removedText] = pattern->IsInPasswordMode() 
+                ? pattern->GetTextDiffObscured(newText_str)
+                : pattern->DetectTextDiff(newText_str);
+            TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "addedLen=%{public}d, removedLen=%{public}d",
+                 static_cast<int>(addedText.length()), static_cast<int>(removedText.length()));
             if (!addedText.empty() && removedText.empty()) {
-                TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-                    "textCache, in=%{public}s, newText=%{public}s, addedText=%{public}s", pattern->textCache_.c_str(),
-                    newText_str.c_str(), addedText.c_str());
                 pattern->OnAccessibilityEventTextChange(TextChangeType::ADD, addedText);
             }
             if (!removedText.empty() && addedText.empty()) {
-                TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-                    "textCache, in=%{public}s, newText=%{public}s, removedText=%{public}s", pattern->textCache_.c_str(),
-                    newText_str.c_str(), removedText.c_str());
                 pattern->OnAccessibilityEventTextChange(TextChangeType::REMOVE, removedText);
             }
         }

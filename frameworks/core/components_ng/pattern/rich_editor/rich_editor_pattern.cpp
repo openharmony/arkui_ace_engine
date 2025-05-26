@@ -1172,6 +1172,7 @@ void RichEditorPattern::AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset
     std::advance(it, offset);
     spans_.insert(it, item);
     UpdateSpanPosition();
+    ReportAfterContentChangeEvent();
 }
 
 void RichEditorPattern::SetContentPattern(const RefPtr<RichEditorContentPattern>& contentPattern)
@@ -1607,16 +1608,16 @@ void RichEditorPattern::ReportAfterContentChangeEvent()
 
     std::string currentContent;
     if (isSpanStringMode_) {
-        CHECK_NULL_VOID(styledString_);
-        currentContent = styledString_->GetString();
+        IF_TRUE(styledString_, currentContent = styledString_->GetString());
     } else {
         std::u16string u16Str;
         GetContentBySpans(u16Str);
         currentContent = UtfUtils::Str16DebugToStr8(u16Str);
     }
     if(suppressAccessibilityEvent_){
-        std::string addedText, removedText;
-        DetectTextDiff(textCache_, currentContent, addedText, removedText);
+        auto [addedText, removedText] = DetectTextDiff(currentContent);
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT,  "addedLen=%{public}d, removedLen=%{public}d",
+                 static_cast<int>(addedText.length()), static_cast<int>(removedText.length()));
         if (!addedText.empty() && removedText.empty()) {
             OnAccessibilityEventTextChange(TextChangeType::ADD, addedText);
         } else if (!removedText.empty() && addedText.empty()) {
@@ -11348,6 +11349,7 @@ void RichEditorPattern::AfterSpansChange(const UndoRedoRecord& record, bool isUn
     auto rangeAfter = isUndo ? record.rangeBefore : record.rangeAfter;
     changeValue.SetRangeAfter(rangeAfter);
     eventHub->FireOnDidChange(changeValue);
+    ReportAfterContentChangeEvent();
 }
 
 void RichEditorPattern::FixMoveDownChange(RichEditorChangeValue& changeValue, int32_t delLength)

@@ -309,11 +309,11 @@ void TextGestureSelector::DoTextSelectionTouchMove(const TouchEventInfo& info)
     OnTextGestureSelectionUpdate(start, end, info);
 }
 
-void TextBase::DetectTextDiff(const std::string& beforeText, const std::string& latestContent,
-    std::string& addedText, std::string& removedText)
+std::pair<std::string, std::string> TextBase::DetectTextDiff(const std::string& latestContent)
 {
-    addedText.clear();
-    removedText.clear();
+    const std::string& beforeText = textCache_;
+    std::string addedText;
+    std::string removedText;
     size_t prefixLen = 0;
     size_t minLength = std::min(beforeText.length(), latestContent.length());
     while (prefixLen < minLength && beforeText[prefixLen] == latestContent[prefixLen]) {
@@ -343,5 +343,6 @@ void TextBase::DetectTextDiff(const std::string& beforeText, const std::string& 
     if (addEnd > addStart) {
         addedText = latestContent.substr(addStart, addEnd - addStart);
     }
+    return {std::move(addedText), std::move(removedText)};
 }
 }

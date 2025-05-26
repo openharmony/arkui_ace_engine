@@ -1937,6 +1937,7 @@ private:
     bool NeedsSendFillContent();
     void UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
+    std::pair<std::string, std::string> GetTextDiffObscured(const std::string& latestContent);
 
     RectF frameRect_;
     RectF textRect_;

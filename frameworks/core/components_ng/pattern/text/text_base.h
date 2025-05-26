@@ -270,8 +270,7 @@ public:
     }
     std::u16string TruncateText(const std::u16string& text, const size_t& length) const;
     size_t CountUtf16Chars(const std::u16string& s);
-    static void DetectTextDiff(const std::string& beforeText, const std::string& latestContent, std::string& addedText,
-        std::string& removedText);
+    std::pair<std::string, std::string> DetectTextDiff(const std::string& latestContent);
 
 protected:
     TextSelector textSelector_;

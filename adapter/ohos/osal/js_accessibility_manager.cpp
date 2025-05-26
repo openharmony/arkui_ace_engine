@@ -2814,10 +2814,10 @@ void GenerateAccessibilityEventInfo(const AccessibilityEvent& accessibilityEvent
     eventInfo.SetEndIndex(accessibilityEvent.endIndex);
     if (accessibilityEvent.extraEventInfo.size() > 0) {
         ExtraEventInfo extraEventInfo;
-        for (auto& info : accessibilityEvent.extraEventInfo) {
+        for (const auto& info : accessibilityEvent.extraEventInfo) {
             auto ret = extraEventInfo.SetExtraEventInfo(info.first, info.second);
-            TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "The result of SetExtraEventInfo:%{public}d, keyStr:%{public}s",
-                ret, info.first.c_str());
+            TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "The result of SetExtraEventInfo:%{public}d, keyStrLen:%{public}d",
+                ret, static_cast<int>(info.first.length()));
         }
         eventInfo.SetExtraEvent(extraEventInfo);
     }
