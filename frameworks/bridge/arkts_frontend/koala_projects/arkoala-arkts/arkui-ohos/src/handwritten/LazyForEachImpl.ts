@@ -36,7 +36,7 @@ export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
     const changeIndex = listener.flush(offset) // first item index that's affected by DataChange
 
     // Entering this method implies that the parameters have changed.
-    let pool = rememberDisposable(() => new LazyItemPool(parent), (pool) => {
+    let pool = rememberDisposable(() => new LazyItemPool(parent), (pool?: LazyItemPool) => {
         pool?.dispose()
     })
 
