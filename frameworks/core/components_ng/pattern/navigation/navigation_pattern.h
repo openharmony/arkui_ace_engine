@@ -557,6 +557,7 @@ public:
     void TryForceSplitIfNeeded(const SizeF& frameSize);
     void SwapNavDestinationAndPlaceHolder(bool needFireLifecycle);
     bool IsPrimaryNode(const RefPtr<NavDestinationGroupNode>& destNode) const;
+    void SetToolbarManagerNavigationMode(NavigationMode mode);
 
 private:
     bool IsDestinationNeedHideInPush(

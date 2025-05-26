@@ -2211,6 +2211,9 @@ void JSViewAbstract::JsToolbar(const JSCallbackInfo& info)
     } else if (info[0]->IsObject()) {
         JSRef<JSObject> toolbarObj = JSRef<JSObject>::Cast(info[0]);
         auto builder = toolbarObj->GetProperty("builder");
+        if (!builder->IsFunction()) {
+            return;
+        }
         auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
         CHECK_NULL_VOID(builderFunc);
         auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {

@@ -1357,6 +1357,18 @@ void NavigationModelNG::SetOnNavBarWidthChangeEvent(OnNavBarWidthChangeEvent eve
 void NavigationModelNG::SetUsrNavigationMode(NavigationMode mode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, UsrNavigationMode, mode);
+    SetToolbarNavigationMode(mode);
+}
+
+void NavigationModelNG::SetToolbarNavigationMode(NavigationMode mode)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetToolbarManagerNavigationMode(mode);
 }
 
 void NavigationModelNG::SetNavBarPosition(NG::NavBarPosition mode)
@@ -1578,6 +1590,7 @@ void NavigationModelNG::SetOnNavigationModeChange(std::function<void(NavigationM
 void NavigationModelNG::SetNavigationMode(NavigationMode mode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavigationMode, mode);
+    SetToolbarNavigationMode(mode);
 }
 
 void NavigationModelNG::SetNavigationStack(const RefPtr<NG::NavigationStack>& navigationStack)
