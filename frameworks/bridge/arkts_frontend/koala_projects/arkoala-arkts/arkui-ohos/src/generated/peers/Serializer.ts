@@ -16815,7 +16815,7 @@ export class Serializer extends SerializerBase {
         const value_template  = value.template
         valueSerializer.writePluginComponentTemplate(value_template)
         const value_data  = value.data
-        valueSerializer.writeString(value_data)
+        valueSerializer.writeString(value_data == undefined || value_data == null ? '' : JSON.stringify(value_data));
     }
     writePatternLockController(value: PatternLockController): void {
         let valueSerializer : Serializer = this

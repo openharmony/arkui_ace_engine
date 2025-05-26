@@ -25,7 +25,6 @@ const char* GetDeclarativeSharedLibrary()
     return DECLARATIVE_ARK_ENGINE_SHARED_LIB;
 }
 
-// codeLanguage is equivalent to bundleInfo.applicationInfo.arkTSMode
 void PluginSubContainer::Initialize(const std::string& codeLanguage) {}
 
 void PluginSubContainer::Destroy() {}
