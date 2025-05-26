@@ -67,27 +67,32 @@ HWTEST_F(LoadingProgressModifierTest, setColorTest, TestSize.Level1)
     EXPECT_EQ(checkVal1, THEME_LOADING_COLOR.ToString());
 
     Ark_ResourceColor color = ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
-    modifier_->setColor(node_, &color);
+    auto optColor = Converter::ArkValue<Opt_ResourceColor>(color);
+    modifier_->setColor(node_, &optColor);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
 
     Ark_ResourceColor numberInt = ArkUnion<Ark_ResourceColor, Ark_Number>(0x123401);
-    modifier_->setColor(node_, &numberInt);
+    auto optNumberInt = Converter::ArkValue<Opt_ResourceColor>(numberInt);
+    modifier_->setColor(node_, &optNumberInt);
     auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal3, "#FF123401");
 
     Ark_ResourceColor numberFlt = ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f);
-    modifier_->setColor(node_, &numberFlt);
+    auto optNumberFlt = Converter::ArkValue<Opt_ResourceColor>(numberFlt);
+    modifier_->setColor(node_, &optNumberFlt);
     auto checkVal4 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal4, "#00000000");
 
     Ark_ResourceColor strColor = ArkUnion<Ark_ResourceColor, Ark_String>("#11223344");
-    modifier_->setColor(node_, &strColor);
+    auto optStrColor = Converter::ArkValue<Opt_ResourceColor>(strColor);
+    modifier_->setColor(node_, &optStrColor);
     auto checkVal5 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal5, "#11223344");
 
     Ark_ResourceColor strNumber = ArkUnion<Ark_ResourceColor, Ark_String>("65535");
-    modifier_->setColor(node_, &strNumber);
+    auto optStrNumber = Converter::ArkValue<Opt_ResourceColor>(strNumber);
+    modifier_->setColor(node_, &optStrNumber);
     auto checkVal6 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 }
@@ -101,7 +106,8 @@ HWTEST_F(LoadingProgressModifierTest, setColorTestResource, TestSize.Level1)
 {
     auto checkValue = [this](const std::string& input, const Ark_ResourceColor& value,
         const std::string& expectedStr) {
-        modifier_->setColor(node_, &value);
+        auto optValue = Converter::ArkValue<Opt_ResourceColor>(value);
+        modifier_->setColor(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
@@ -125,11 +131,13 @@ HWTEST_F(LoadingProgressModifierTest, setEnableLoadingTest, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, "true");
 
-    modifier_->setEnableLoading(node_, false);
+    auto optValue = Converter::ArkValue<Opt_Boolean>(false);
+    modifier_->setEnableLoading(node_, &optValue);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, "false");
 
-    modifier_->setEnableLoading(node_, true);
+    optValue = Converter::ArkValue<Opt_Boolean>(true);
+    modifier_->setEnableLoading(node_, &optValue);
     auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal3, "true");
 }

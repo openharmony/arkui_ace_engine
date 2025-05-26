@@ -375,8 +375,8 @@ HWTEST_F(LocationButtonModifierTest, setOnClickTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto checkCallback = [](Ark_VMContext, const Ark_Int32 resourceId, const Ark_ClickEvent peer,
-            const Ark_LocationButtonOnClickResult result, Opt_CustomObject error) {
+    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ClickEvent peer,
+            const Ark_LocationButtonOnClickResult result, Opt_BusinessError error) {
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {
@@ -389,8 +389,8 @@ HWTEST_F(LocationButtonModifierTest, setOnClickTest, TestSize.Level1)
     };
     const int32_t contextId = 123;
     auto func = Converter::ArkValue<LocationButtonCallback>(checkCallback, contextId);
-
-    modifier_->setOnClick(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_LocationButtonCallback>(func);
+    modifier_->setOnClick(node_, &optFunc);
 
     auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureEventHub, nullptr);
