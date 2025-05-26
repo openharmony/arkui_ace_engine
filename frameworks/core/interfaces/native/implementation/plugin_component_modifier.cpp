@@ -17,7 +17,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/components_ng/pattern/plugin/plugin_model_ng.h"
+#include "core/components_ng/pattern/plugin/plugin_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #endif
 #include "arkoala_api_generated.h"
@@ -56,7 +56,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #ifdef PLUGIN_COMPONENT_SUPPORTED
-    auto frameNode = PluginModelNG::CreateFrameNode(id);
+    auto frameNode = PluginModelStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -75,8 +75,8 @@ void SetPluginComponentOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(options);
 
     auto optInfoData = Converter::OptConvert<PluginComponentOptions>(*options);
-    PluginModelNG::SetRequestPluginInfo(frameNode, optInfoData ? optInfoData->requestPluginInfo : std::nullopt);
-    PluginModelNG::SetData(frameNode, optInfoData ? std::make_optional(optInfoData->data) : std::nullopt);
+    PluginModelStatic::SetRequestPluginInfo(frameNode, optInfoData ? optInfoData->requestPluginInfo : std::nullopt);
+    PluginModelStatic::SetData(frameNode, optInfoData ? std::make_optional(optInfoData->data) : std::nullopt);
 #endif
 }
 } // PluginComponentInterfaceModifier
@@ -95,7 +95,7 @@ void OnCompleteImpl(Ark_NativePointer node,
     auto onComplete = [arkCallback = CallbackHelper(*optValue)](const std::string& param) -> void {
         arkCallback.Invoke();
     };
-    PluginModelNG::SetOnComplete(frameNode, std::move(onComplete));
+    PluginModelStatic::SetOnComplete(frameNode, std::move(onComplete));
 #endif
 }
 void OnErrorImpl(Ark_NativePointer node,
@@ -117,7 +117,7 @@ void OnErrorImpl(Ark_NativePointer node,
         errorData.msg = Converter::ArkValue<Ark_String>(msg);
         arkCallback.Invoke(errorData);
     };
-    PluginModelNG::SetOnError(frameNode, std::move(onError));
+    PluginModelStatic::SetOnError(frameNode, std::move(onError));
 #endif
 }
 } // PluginComponentAttributeModifier
