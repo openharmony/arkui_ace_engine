@@ -52,7 +52,6 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/overlay/overlay_mask_manager.h"
 #include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -250,49 +249,24 @@ void DialogPattern::HandleClick(const GestureEvent& info)
         auto&& clickPosition = info.GetGlobalLocation();
         if (!contentRect.IsInRegion(
             PointF(clickPosition.GetX() - globalOffset.GetX(), clickPosition.GetY() - globalOffset.GetY()))) {
-            if (dialogProperties_.isUECHostMask) {
-                NG::OverlayMaskManager::GetInstance().SendDialogMaskEventToUEA(host, UECHostMaskAction::CLICK);
+            auto overlayManager = GetOverlayManager(nullptr);
+            CHECK_NULL_VOID(overlayManager);
+            if (this->CallDismissInNDK(static_cast<int32_t>(DialogDismissReason::DIALOG_TOUCH_OUTSIDE))) {
+                return;
+            } else if (this->ShouldDismiss()) {
+                overlayManager->SetDismissDialogId(host->GetId());
+                DialogManager::GetInstance().SetDismissDialogInfo(host->GetId(), host->GetTag());
+                auto currentId = Container::CurrentId();
+                this->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_TOUCH_OUTSIDE), currentId);
+                TAG_LOGI(AceLogTag::ACE_DIALOG, "Dialog Should Dismiss, currentId: %{public}d", currentId);
                 return;
             }
 
-            CloseDialogByEvent(DialogDismissReason::DIALOG_TOUCH_OUTSIDE);
+            PopDialog(-1);
+            if (overlayManager->isMaskNode(GetHost()->GetId())) {
+                overlayManager->PopModalDialog(GetHost()->GetId());
+            }
         }
-    }
-}
-
-void DialogPattern::CloseDialogByEvent(DialogDismissReason reason)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto overlayManager = GetOverlayManager(nullptr);
-    CHECK_NULL_VOID(overlayManager);
-
-    if (CallDismissInNDK(static_cast<int32_t>(reason))) {
-        return;
-    }
-
-    if (ShouldDismiss()) {
-        overlayManager->SetDismissDialogId(host->GetId());
-        DialogManager::GetInstance().SetDismissDialogInfo(host->GetId(), host->GetTag());
-        auto currentId = Container::CurrentId();
-        CallOnWillDismiss(static_cast<int32_t>(reason), currentId);
-        TAG_LOGI(AceLogTag::ACE_DIALOG, "Dialog Should Dismiss, currentId: %{public}d", currentId);
-        return;
-    }
-
-    CloseDialog();
-}
-
-void DialogPattern::CloseDialog()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto overlayManager = GetOverlayManager(nullptr);
-    CHECK_NULL_VOID(overlayManager);
-
-    PopDialog(-1);
-    if (overlayManager->isMaskNode(host->GetId()) && !dialogProperties_.isUECHostMask) {
-        overlayManager->PopModalDialog(host->GetId());
     }
 }
 
@@ -590,7 +564,8 @@ void DialogPattern::AddExtraMaskNode(const DialogProperties& props)
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
     auto needAddMaskNode = props.maskTransitionEffect != nullptr || props.dialogTransitionEffect != nullptr;
-    if (needAddMaskNode && props.isModal && !props.isShowInSubWindow) {
+    if ((IsUIExtensionSubWindow() && props.isModal) ||
+        (needAddMaskNode && props.isModal && !props.isShowInSubWindow)) {
         auto extraMaskNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
         CHECK_NULL_VOID(extraMaskNode);
@@ -1953,7 +1928,15 @@ void DialogPattern::UpdateHostWindowRect()
         return;
     }
 
-    if (!SystemProperties::IsSuperFoldDisplayDevice()) {
+    auto needUpdate = true;
+    if (SystemProperties::IsSuperFoldDisplayDevice()) {
+        auto container = AceEngine::Get().GetContainer(currentId);
+        auto isHalfFold = container && container->GetCurrentFoldStatus() == FoldStatus::HALF_FOLD;
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowById(currentId);
+        needUpdate = isHalfFold && subwindow && subwindow->IsSameDisplayWithParentWindow() && dialogProperties_.isModal;
+    }
+ 
+    if (needUpdate) {
         InitHostWindowRect();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -2276,7 +2259,6 @@ void DialogPattern::OnAttachToMainTree()
     AddFollowParentWindowLayoutNode();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    MountUECMask();
     auto parentNode = AceType::DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_VOID(parentNode);
     if (parentNode->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
@@ -2300,16 +2282,6 @@ void DialogPattern::OnDetachFromMainTree()
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     overlay->RemoveDialogFromMapForcefully(host);
-}
-
-void DialogPattern::MountUECMask()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    if (isUIExtensionSubWindow_ && dialogProperties_.isModal) {
-        SubwindowManager::GetInstance()->ShowDialogMaskNG(host);
-    }
 }
 
 RefPtr<OverlayManager> DialogPattern::GetOverlayManager(const RefPtr<FrameNode>& host)
