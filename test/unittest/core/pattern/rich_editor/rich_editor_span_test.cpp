@@ -1121,4 +1121,23 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolSymbol001, TestSize.Level1)
     EXPECT_EQ(contentNode->GetChildren().size(), 5);
 }
 
+/**
+ * @tc.name: IsSelectAll001
+ * @tc.desc: test IsSelectAll001
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSpanTest, IsSelectAll001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    InitSpans(SpanType::TEXT, SpanType::IMAGE,
+        SpanType::TEXT, SpanType::SYMBOL,
+        SpanType::TEXT, SpanType::BUILDER,
+        SpanType::TEXT);
+    auto contentLength = richEditorPattern->GetTextContentLength();
+    richEditorPattern->UpdateSelector(0, contentLength);
+    EXPECT_EQ(richEditorPattern->IsSelectAll(), true);
+}
+
 } // namespace OHOS::Ace::NG
