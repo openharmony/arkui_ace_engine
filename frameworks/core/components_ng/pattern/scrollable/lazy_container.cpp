@@ -98,4 +98,12 @@ void LazyContainer::Synchronize(
     newAdapter_->SetCallbacks(std::move(creator), std::move(updater));
     newAdapter_->SetTotalCount(totalCount);
 }
+int32_t LazyContainer::GetTotalChildCount() const
+{
+    return newAdapter_ ? newAdapter_->GetTotalCount() : -1;
+}
+Pattern::LazyComposeAdapter* LazyContainer::GetArkoalaLazyAdapter()
+{
+    return newAdapter_.get();
+}
 } // namespace OHOS::Ace::NG

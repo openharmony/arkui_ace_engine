@@ -39,4 +39,21 @@ void LazyComposeAdapter::SetActiveRange(int32_t start, int32_t end)
         updateRange_(start, end);
     }
 }
+void LazyComposeAdapter::SetCallbacks(CreateItemCb create, UpdateRangeCb update)
+{
+    createItem_ = std::move(create);
+    updateRange_ = std::move(update);
+}
+int32_t LazyComposeAdapter::GetTotalCount() const
+{
+    return totalCount_;
+}
+void LazyComposeAdapter::SetTotalCount(int32_t value)
+{
+    totalCount_ = value;
+}
+uint32_t LazyComposeAdapter::GetIndexOfChild(const RefPtr<FrameNode>& child)
+{
+    return items_.GetKey(child).value_or(0);
+}
 } // namespace OHOS::Ace::NG

@@ -33,28 +33,15 @@ public:
     using CreateItemCb = std::function<RefPtr<FrameNode>(int32_t)>;
     using UpdateRangeCb = std::function<void(int32_t, int32_t)>;
 
-    void SetTotalCount(int32_t value)
-    {
-        totalCount_ = value;
-    }
-    int32_t GetTotalCount() const
-    {
-        return totalCount_;
-    }
+    void SetTotalCount(int32_t value);
+    int32_t GetTotalCount() const;
 
-    void SetCallbacks(CreateItemCb create, UpdateRangeCb update)
-    {
-        createItem_ = std::move(create);
-        updateRange_ = std::move(update);
-    }
+    void SetCallbacks(CreateItemCb create, UpdateRangeCb update);
 
     RefPtr<FrameNode> GetOrCreateChild(uint32_t index);
     RefPtr<FrameNode> GetChild(uint32_t index);
 
-    uint32_t GetIndexOfChild(const RefPtr<FrameNode>& child)
-    {
-        return items_.GetKey(child).value_or(0);
-    }
+    uint32_t GetIndexOfChild(const RefPtr<FrameNode>& child);
 
     void SetActiveRange(int32_t start, int32_t end);
 

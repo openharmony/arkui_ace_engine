@@ -27,10 +27,7 @@ class LazyContainer : virtual public Pattern {
     DECLARE_ACE_TYPE(LazyContainer, Pattern);
 
 public:
-    int32_t GetTotalChildCount() const final
-    {
-        return newAdapter_ ? newAdapter_->GetTotalCount() : -1;
-    }
+    int32_t GetTotalChildCount() const final;
 
     RefPtr<FrameNode> GetOrCreateChildByIndex(uint32_t index) final;
 
@@ -38,10 +35,7 @@ public:
 
     ScrollWindowAdapter* GetOrCreateScrollWindowAdapter() final;
 
-    LazyComposeAdapter* GetArkoalaLazyAdapter() final
-    {
-        return newAdapter_.get();
-    }
+    LazyComposeAdapter* GetArkoalaLazyAdapter() final;
 
     /**
      * @brief Converts a large delta to a jump index

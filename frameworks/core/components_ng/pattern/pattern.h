@@ -30,7 +30,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/pattern/scrollable/lazy_compose_adapter.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_property.h"
@@ -670,6 +669,7 @@ public:
     {
         return nullptr;
     }
+    class LazyComposeAdapter;
     virtual LazyComposeAdapter* GetArkoalaLazyAdapter()
     {
         return nullptr;
