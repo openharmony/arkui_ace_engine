@@ -2419,4 +2419,41 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0045, TestSize.Level1)
     EXPECT_EQ(foregroundColor, "");
 }
 
+/**
+ * @tc.name: ViewAbstractSetClickFocusTest001
+ * @tc.desc: Test that container node becomes focusable when click event is set and no focusable children exist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractSetClickFocusTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create a FrameNode and set a native onClick event via SetOnClick.
+     * @tc.expected: The FrameNode should be focusable after setting onClick.
+     */
+    auto frameNode1 = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(frameNode1, nullptr);
+
+    GestureEventFunc onClick = [](GestureEvent&) {};
+    ViewAbstract::SetOnClick(AceType::RawPtr(frameNode1), std::move(onClick), 10.0);
+
+    auto focusHub1 = frameNode1->GetFocusHub();
+    ASSERT_NE(focusHub1, nullptr);
+    EXPECT_TRUE(focusHub1->IsFocusable());
+
+    /**
+     * @tc.steps2: Create another FrameNode and set a JS-based onClick event via SetJSFrameNodeOnClick.
+     * @tc.expected: The FrameNode should also become focusable after setting JS onClick.
+     */
+    auto frameNode2 = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(frameNode2, nullptr);
+
+    GestureEventFunc jsOnClick = [](GestureEvent&) {};
+    ViewAbstract::SetJSFrameNodeOnClick(AceType::RawPtr(frameNode2), std::move(jsOnClick));
+
+    auto focusHub2 = frameNode2->GetFocusHub();
+    ASSERT_NE(focusHub2, nullptr);
+    EXPECT_TRUE(focusHub2->IsFocusable());
+}
 } // namespace OHOS::Ace::NG
