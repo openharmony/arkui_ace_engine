@@ -54,6 +54,7 @@ public:
     void SetRealSideBarWidth(Dimension realSideBarWidth)
     {
         realSideBarWidthDimension_ = realSideBarWidth;
+        realSideBarWidth_ = realSideBarWidth.ConvertToPx();
     }
 
     Dimension GetRealSideBarWidth() const
