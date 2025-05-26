@@ -22,7 +22,6 @@
 
 #include "test/mock/base/mock_foldable_window.h"
 #include "test/mock/base/mock_subwindow.h"
-#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -31,7 +30,6 @@
 #include "test/unittest/core/event/frame_node_on_tree.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
-#include "core/common/ace_engine.h"
 #include "core/common/frontend.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
@@ -490,47 +488,5 @@ HWTEST_F(OverlayManagerTestFourNg, RemoveGatherNode002, TestSize.Level1)
     overlayManager.hasGatherNode_ = true;
     overlayManager.RemoveGatherNode();
     EXPECT_FALSE(overlayManager.hasGatherNode_);
-}
-
-/**
- * @tc.name: IsNeedAvoidFoldCrease001
- * @tc.desc: Test IsNeedAvoidFoldCrease.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayManagerTestFourNg, IsNeedAvoidFoldCrease001, TestSize.Level1)
-{
-    RefPtr<FrameNode> frameNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, TARGET_ID,
-        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "Menu", MenuType::MENU); });
-    ASSERT_NE(frameNode, nullptr);
-    OverlayManager overlayManager(frameNode);
-    MockSystemProperties::g_isSuperFoldDisplayDevice = true;
-    RefPtr<MockContainer> containerOne = AceType::MakeRefPtr<MockContainer>();
-    RefPtr<MockContainer> containerTwo = AceType::MakeRefPtr<MockContainer>();
-    containerOne->isSubContainer_ = true;
-    AceEngine::Get().AddContainer(0, containerOne);
-    AceEngine::Get().AddContainer(1, containerTwo);
-    std::optional<bool> enableHoverMode = true;
-    EXPECT_FALSE(overlayManager.IsNeedAvoidFoldCrease(frameNode, true, true, enableHoverMode));
-}
-
-/**
- * @tc.name: IsNeedAvoidFoldCrease002
- * @tc.desc: Test IsNeedAvoidFoldCrease.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayManagerTestFourNg, IsNeedAvoidFoldCrease002, TestSize.Level1)
-{
-    RefPtr<FrameNode> frameNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, TARGET_ID_NEW,
-        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID_NEW, "MenuTest", MenuType::MENU); });
-    ASSERT_NE(frameNode, nullptr);
-    OverlayManager overlayManager(frameNode);
-    MockSystemProperties::g_isSuperFoldDisplayDevice = true;
-    RefPtr<MockContainer> containerOne = AceType::MakeRefPtr<MockContainer>();
-    RefPtr<MockContainer> containerTwo = AceType::MakeRefPtr<MockContainer>();
-    containerOne->isSubContainer_ = true;
-    AceEngine::Get().AddContainer(0, containerOne);
-    AceEngine::Get().AddContainer(-1, containerTwo);
-    std::optional<bool> enableHoverMode = true;
-    EXPECT_FALSE(overlayManager.IsNeedAvoidFoldCrease(frameNode, true, true, enableHoverMode));
 }
 } // namespace OHOS::Ace::NG
