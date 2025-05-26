@@ -52,6 +52,8 @@ constexpr float POINT_RADIUS_INITIAL = 0.0f;
 constexpr float POINT_RADIUS_ILLEGAL = -20.0f;
 constexpr float POINT_RADIUS_LARGE = 30.0f;
 constexpr float TRACK_BORDER_RADIUS = 10.0f;
+constexpr float USER_DEFINE_WIDTH = 180.0f;
+constexpr float USER_DEFINE_HEIGHT = 100.0f;
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
 } // namespace
 
@@ -363,10 +365,10 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest005, TestSize.Level1)
     // different branch: update (frameWidth / frameHeight) = ratio = 1.8
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.maxSize = CONTAINER_SIZE;
-    layoutConstraintSize.selfIdealSize.SetSize(SizeF(180, 100)); //180 is width of toggle, 100 is height of toggle
+    layoutConstraintSize.selfIdealSize.SetSize(SizeF(USER_DEFINE_WIDTH, USER_DEFINE_HEIGHT));
     auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
-    EXPECT_EQ(switchSize->Width(), 180);  //180 is width of toggle
-    EXPECT_EQ(switchSize->Height(), 100); //100 is height of toggle
+    EXPECT_EQ(switchSize->Width(), USER_DEFINE_WIDTH);
+    EXPECT_EQ(switchSize->Height(), USER_DEFINE_HEIGHT);
 
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
