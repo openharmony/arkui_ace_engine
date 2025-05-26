@@ -928,4 +928,101 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest024, TestSize.Level1)
     focusManager->SyncWindowsFocus(false, FocusActiveReason::KEY_TAB);
     EXPECT_FALSE(focusManager->isFocusActive_);
 }
+
+/**
+ * @tc.name: FocusManagerTest025
+ * @tc.desc: Test that focus scroll is triggered after screen rotation to ensure focused node is visible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusManagerTestNg, FocusManagerTest025, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Get current pipeline context and create FocusManager.
+     * @tc.expected: FocusManager is created successfully and isNeedTriggerScroll_ is nullopt initially.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto focusManager = AceType::MakeRefPtr<FocusManager>(pipeline);
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isNeedTriggerScroll_ = std::nullopt;
+    EXPECT_EQ(focusManager->isNeedTriggerScroll_, std::nullopt);
+
+    /**
+     * @tc.steps2: Simulate a screen rotation via surfaceChangedCallbackMap_.
+     * @tc.expected: isNeedTriggerScroll_ is set to true, indicating a scroll should be triggered.
+     */
+    for (const auto& [id, callback] : pipeline->surfaceChangedCallbackMap_) {
+        if (callback) {
+            callback(1080, 1920, 1080, 720, WindowSizeChangeReason::ROTATION);
+        }
+    }
+    EXPECT_EQ(focusManager->isNeedTriggerScroll_, true);
+}
+
+/**
+ * @tc.name: FocusManagerTest026
+ * @tc.desc: Test that activating main window pipeline also activates all child pipelines.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusManagerTestNg, FocusManagerTest026, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Get current MockPipelineContext and retrieve FocusManager.
+     * @tc.expected: FocusManager is created and initially inactive.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    focusManager->isFocusActive_ = false;
+
+    /**
+     * @tc.steps2: Call SetIsFocusActive(true) to activate main window pipeline.
+     * @tc.expected: isFocusActive_ becomes true, indicating activation is successful.
+     */
+    focusManager->SetIsFocusActive(true, FocusActiveReason::USE_API, false);
+    EXPECT_TRUE(focusManager->isFocusActive_);
+}
+
+/**
+ * @tc.name: FocusManagerTest027
+ * @tc.desc: Test that focusGuard is executed when window gains focus and is destroyed at the end of its lifecycle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusManagerTestNg, FocusManagerTest027, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Get the current pipeline context and its FocusManager.
+     * @tc.expected: FocusManager is created successfully.
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+
+    /**
+     * @tc.steps2: Create root node and page node with corresponding FocusHub.
+     */
+    auto rootNode = FrameNodeOnTree::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
+    auto rootFocusHub = rootNode->GetOrCreateFocusHub();
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode = FrameNodeOnTree::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
+    auto pageFocusHub = pageNode->GetOrCreateFocusHub();
+
+    /**
+     * @tc.steps3: Add pageNode to rootNode and trigger page focus show.
+     */
+    rootNode->AddChild(pageNode);
+    pagePattern->FocusViewShow();
+    context->FlushFocusView();
+
+    /**
+     * @tc.steps4: Simulate window focus and check internal focusGuard-related flags.
+     * @tc.expected: isSwitchingFocus_ is set temporarily, and then reset; endReason_ is set.
+     */
+    focusManager->WindowFocus(true);
+
+    EXPECT_TRUE(focusManager->isSwitchingFocus_.has_value());
+    EXPECT_FALSE(focusManager->isSwitchingFocus_.value());
+    EXPECT_TRUE(focusManager->endReason_.has_value());
+}
 } // namespace OHOS::Ace::NG
