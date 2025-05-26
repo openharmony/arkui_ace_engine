@@ -875,6 +875,26 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest035, TestSize.Level1)
     EXPECT_EQ(rectAfterUpdate.GetTop(), 2.0f);
     EXPECT_EQ(rectAfterUpdate.GetRight(), 18.0f);
     EXPECT_EQ(rectAfterUpdate.GetBottom(), 18.0f);
+
+    Dimension focusPaddingVp = Dimension(0.0, DimensionUnit::VP);
+    auto borderPaddingPx = static_cast<float>(focusPaddingVp.ConvertToPx());
+    auto diffRadiusValueX = borderPaddingPx + paintWidthPx / 2;
+    auto diffRadiusValueY = borderPaddingPx + paintWidthPx / 2;
+
+    auto roundRectAfterUpdate = rosenRenderContext->accessibilityFocusStateModifier_->roundRect_;
+    auto focusPaintCornerTopLeftAfter = roundRectAfterUpdate.GetCornerRadius(RSRoundRect::RoundRect::CornerPos::TOP_LEFT_POS);
+    auto focusPaintCornerTopRightAfter = roundRectAfterUpdate.GetCornerRadius(RSRoundRect::RoundRect::CornerPos::TOP_RIGHT_POS);
+    auto focusPaintCornerBottomLeftAfter = roundRectAfterUpdate.GetCornerRadius(RSRoundRect::RoundRect::CornerPos::BOTTOM_LEFT_POS);
+    auto focusPaintCornerBottomRightAfter = roundRectAfterUpdate.GetCornerRadius(RSRoundRect::RoundRect::CornerPos::BOTTOM_RIGHT_POS);
+
+    EXPECT_EQ(focusPaintCornerTopLeftAfter.GetX(), diffRadiusValueX);
+    EXPECT_EQ(focusPaintCornerTopLeftAfter.GetY(), diffRadiusValueY);
+    EXPECT_EQ(focusPaintCornerTopRightAfter.GetX(), diffRadiusValueX);
+    EXPECT_EQ(focusPaintCornerTopRightAfter.GetY(), diffRadiusValueY);
+    EXPECT_EQ(focusPaintCornerBottomLeftAfter.GetX(), diffRadiusValueX);
+    EXPECT_EQ(focusPaintCornerBottomLeftAfter.GetY(), diffRadiusValueY);
+    EXPECT_EQ(focusPaintCornerBottomRightAfter.GetX(), diffRadiusValueX);
+    EXPECT_EQ(focusPaintCornerBottomRightAfter.GetY(), diffRadiusValueY);
 }
 
 /**
