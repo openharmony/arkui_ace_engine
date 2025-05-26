@@ -265,7 +265,8 @@ bool RepeatVirtualScroll2Node::RebuildL1(int32_t start, int32_t end, int32_t nSt
                 TAG_LOGD(AceLogTag::ACE_REPEAT,
                     "out of range: index %{public}d -> child nodeId %{public}d: SetActive(false)",
                     index, frameNode->GetId());
-                // SetActive to false will remove node from RS tree, if the node is deleted by animateTo, then animation will not display
+                // SetActive to false will remove node from RS tree.
+                // If the node is deleted by animateTo, then animation will not display.
                 if (!AnimationUtils::IsImplicitAnimationOpen()) {
                     frameNode->SetActive(false);
                 }
@@ -312,7 +313,8 @@ bool RepeatVirtualScroll2Node::ProcessActiveL2Nodes()
         // 2. Repeat.rerender
         auto frameNode = AceType::DynamicCast<FrameNode>(cacheItem->node_->GetFrameChildByIndex(0, true));
         if (frameNode && cacheItem->isActive_) {
-            // SetActive to false will remove node from RS tree, if the node is deleted by animateTo, then animation will not display
+            // SetActive to false will remove node from RS tree.
+            // If the node is deleted by animateTo, then animation will not display.
             if (!AnimationUtils::IsImplicitAnimationOpen()) {
                 frameNode->SetActive(false);
             }
