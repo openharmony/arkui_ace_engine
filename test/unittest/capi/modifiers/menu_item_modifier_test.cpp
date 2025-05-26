@@ -203,7 +203,8 @@ HWTEST_F(MenuItemModifierTest, setSelectedTest, TestSize.Level1)
 {
     bool selected = GetAttrValue<bool>(node_, "selected");
     EXPECT_FALSE(selected);
-    modifier_->setSelected(node_, Converter::ArkValue<Ark_Boolean>(true));
+    auto optValue = Converter::ArkValue<Opt_Boolean>(true);
+    modifier_->setSelected(node_, &optValue);
     selected = GetAttrValue<bool>(node_, "selected");
     EXPECT_TRUE(selected);
 }
@@ -218,8 +219,8 @@ HWTEST_F(MenuItemModifierTest, setSelectIconBoolTest, TestSize.Level1)
     auto selectIcon = GetAttrValue<std::string>(node_, "selectIcon");
     EXPECT_EQ(selectIcon, "false");
 
-    auto icon = Converter::ArkUnion<Ark_Union_Boolean_ResourceStr_SymbolGlyphModifier, Ark_Boolean>(true);
-    modifier_->setSelectIcon(node_, &icon);
+    auto optIcon = Converter::ArkUnion<Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier, Ark_Boolean>(true);
+    modifier_->setSelectIcon(node_, &optIcon);
     selectIcon = GetAttrValue<std::string>(node_, "selectIcon");
     EXPECT_EQ(selectIcon, "true");
 }
@@ -237,8 +238,8 @@ HWTEST_F(MenuItemModifierTest, setSelectIconStringTest, TestSize.Level1)
     auto str = Converter::ArkValue<Ark_String>("path_to_select_icon");
     Ark_ResourceStr resStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(str);
 
-    auto icon = Converter::ArkUnion<Ark_Union_Boolean_ResourceStr_SymbolGlyphModifier, Ark_ResourceStr>(resStr);
-    modifier_->setSelectIcon(node_, &icon);
+    auto optIcon = Converter::ArkUnion<Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier, Ark_ResourceStr>(resStr);
+    modifier_->setSelectIcon(node_, &optIcon);
     selectIcon = GetAttrValue<std::string>(node_, "selectIcon");
     EXPECT_EQ(selectIcon, "path_to_select_icon");
 }
@@ -254,8 +255,8 @@ HWTEST_F(MenuItemModifierTest, setSelectIconResourceTest, TestSize.Level1)
     EXPECT_EQ(selectIcon, "false");
     Ark_Resource iconRes = CreateResource(ICON_OK_STR.c_str(), Converter::ResourceType::STRING);
     Ark_ResourceStr resStr = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(iconRes);
-    auto icon = Converter::ArkUnion<Ark_Union_Boolean_ResourceStr_SymbolGlyphModifier, Ark_ResourceStr>(resStr);
-    modifier_->setSelectIcon(node_, &icon);
+    auto optIcon = Converter::ArkUnion<Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier, Ark_ResourceStr>(resStr);
+    modifier_->setSelectIcon(node_, &optIcon);
     selectIcon = GetAttrValue<std::string>(node_, "selectIcon");
     EXPECT_EQ(selectIcon, "path_to_select_icon");
 }
@@ -272,7 +273,8 @@ HWTEST_F(MenuItemModifierTest, setContentFontColorTest, TestSize.Level1)
     EXPECT_EQ(checkVal, COLOR_THEME_FONT);
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
-        modifier_->setContentFontColor(node_, &value);
+        auto optValue = Converter::ArkValue<Opt_ResourceColor>(value);
+        modifier_->setContentFontColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, "contentFontColor");
         EXPECT_EQ(checkVal, expectVal);
     }
@@ -290,7 +292,8 @@ HWTEST_F(MenuItemModifierTest, setContentFontColorTestRes, TestSize.Level1)
     EXPECT_EQ(checkVal, COLOR_THEME_FONT);
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
-        modifier_->setContentFontColor(node_, &value);
+        auto optValue = Converter::ArkValue<Opt_ResourceColor>(value);
+        modifier_->setContentFontColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, "contentFontColor");
         EXPECT_EQ(checkVal, expectVal);
     }
@@ -308,7 +311,8 @@ HWTEST_F(MenuItemModifierTest, setContentFontColorInvalidTest, TestSize.Level1)
     EXPECT_EQ(checkVal, COLOR_THEME_FONT);
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN_INVALID) {
-        modifier_->setContentFontColor(node_, &value);
+        auto optValue = Converter::ArkValue<Opt_ResourceColor>(value);
+        modifier_->setContentFontColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, "contentFontColor");
         EXPECT_EQ(checkVal, expectVal);
     }
@@ -326,7 +330,8 @@ HWTEST_F(MenuItemModifierTest, setLabelFontColorTest, TestSize.Level1)
     EXPECT_EQ(checkVal, COLOR_THEME_FONT_ALPHA_06);
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN1) {
-        modifier_->setLabelFontColor(node_, &value);
+        auto optValue = Converter::ArkValue<Opt_ResourceColor>(value);
+        modifier_->setLabelFontColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
         EXPECT_EQ(checkVal, expectVal);
     }
@@ -344,7 +349,8 @@ HWTEST_F(MenuItemModifierTest, setLabelFontColorTestRes, TestSize.Level1)
     EXPECT_EQ(checkVal, COLOR_THEME_FONT_ALPHA_06);
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
-        modifier_->setLabelFontColor(node_, &value);
+        auto optValue = Converter::ArkValue<Opt_ResourceColor>(value);
+        modifier_->setLabelFontColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
         EXPECT_EQ(checkVal, expectVal);
     }
@@ -362,7 +368,8 @@ HWTEST_F(MenuItemModifierTest, setLabelFontColorInvalidTest, TestSize.Level1)
     EXPECT_EQ(checkVal, COLOR_THEME_FONT_ALPHA_06);
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN1_INVALID) {
-        modifier_->setLabelFontColor(node_, &value);
+        auto optValue = Converter::ArkValue<Opt_ResourceColor>(value);
+        modifier_->setLabelFontColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
         EXPECT_EQ(checkVal, expectVal);
     }
@@ -388,7 +395,8 @@ HWTEST_F(MenuItemModifierTest, setContentFontTest1, TestSize.Level1)
 
     for (auto style : FONT_STYLE_TEST_PLAN) {
         font.style = style.first;
-        modifier_->setContentFont(node_, &font);
+        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setContentFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "contentFont");
         auto checkSize = GetAttrValue<std::string>(fontObject, "size");
@@ -422,7 +430,8 @@ HWTEST_F(MenuItemModifierTest, setContentFontTest2, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
         font.weight = weight.first;
-        modifier_->setContentFont(node_, &font);
+        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setContentFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "contentFont");
         auto checkSize = GetAttrValue<std::string>(fontObject, "size");
@@ -456,7 +465,8 @@ HWTEST_F(MenuItemModifierTest, setContentFontTest3, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
         font.weight = weight.first;
-        modifier_->setContentFont(node_, &font);
+        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setContentFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "contentFont");
         auto checkSize = GetAttrValue<std::string>(fontObject, "size");
@@ -490,7 +500,8 @@ HWTEST_F(MenuItemModifierTest, setContentFontTest4, TestSize.Level1)
 
     for (auto family : UNION_RESOURCE_STRING_PLAN) {
         font.family = family.first;
-        modifier_->setContentFont(node_, &font);
+        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setContentFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "contentFont");
         auto checkSize = GetAttrValue<std::string>(fontObject, "size");
@@ -524,7 +535,8 @@ HWTEST_F(MenuItemModifierTest, setContentFontTest5, TestSize.Level1)
 
     for (auto size : OPT_LENGTH_TEST_PLAN) {
         font.size = size.first;
-        modifier_->setContentFont(node_, &font);
+        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setContentFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "contentFont");
         auto checkSize = GetAttrValue<std::string>(fontObject, "size");
@@ -558,7 +570,8 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest1, TestSize.Level1)
 
     for (auto style : FONT_STYLE_TEST_PLAN) {
         font.style = style.first;
-        modifier_->setLabelFont(node_, &font);
+        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setLabelFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "labelFont");
         auto checkSize = GetAttrValue<std::string>(fontObject, "size");
@@ -592,7 +605,8 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest2, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
         font.weight = weight.first;
-        modifier_->setLabelFont(node_, &font);
+        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setLabelFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "labelFont");
         auto checkSize = GetAttrValue<std::string>(fontObject, "size");
@@ -626,7 +640,8 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest3, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
         font.weight = weight.first;
-        modifier_->setLabelFont(node_, &font);
+        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setLabelFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "labelFont");
         auto checkSize = GetAttrValue<std::string>(fontObject, "size");
@@ -660,7 +675,8 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest4, TestSize.Level1)
 
     for (auto family : UNION_RESOURCE_STRING_PLAN) {
         font.family = family.first;
-        modifier_->setLabelFont(node_, &font);
+        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setLabelFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "labelFont");
         auto checkSize = GetAttrValue<std::string>(fontObject, "size");
@@ -694,7 +710,8 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest5, TestSize.Level1)
 
     for (auto size : OPT_LENGTH_TEST_PLAN) {
         font.size = size.first;
-        modifier_->setLabelFont(node_, &font);
+        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        modifier_->setLabelFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "labelFont");
         auto checkSize = GetAttrValue<std::string>(fontObject, "size");
@@ -736,7 +753,8 @@ HWTEST_F(MenuItemModifierTest, setOnChangeTest, TestSize.Level1)
 
     auto onChange = eventHub->GetOnChange();
     EXPECT_EQ(onChange, nullptr);
-    modifier_->setOnChange(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_Callback_Boolean_Void>(func);
+    modifier_->setOnChange(node_, &optFunc);
     onChange = eventHub->GetOnChange();
     EXPECT_NE(onChange, nullptr);
     // check true value
@@ -765,20 +783,19 @@ HWTEST_F(MenuItemModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
 
     struct CheckEvent {
         int32_t nodeId;
-        bool value;
+        std::optional<bool> value;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
 
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Boolean parameter) {
+    auto checkCallback = [](const Ark_Int32 resourceId, const Opt_Boolean parameter) {
         checkEvent = {
             .nodeId = resourceId,
-            .value = Converter::Convert<bool>(parameter)
+            .value = Converter::OptConvert<bool>(parameter)
         };
     };
 
-    Callback_Boolean_Void arkCallback = Converter::ArkValue<Callback_Boolean_Void>(checkCallback, contextId);
-
+    auto arkCallback = Converter::ArkValue<Callback_Opt_Boolean_Void>(checkCallback, contextId);
     modifier_->set_onChangeEvent_selected(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);
