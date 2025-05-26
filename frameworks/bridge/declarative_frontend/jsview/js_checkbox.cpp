@@ -35,6 +35,7 @@
 namespace OHOS::Ace {
 namespace {
 constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
+const Dimension CHECK_BOX_MARK_WIDTH_DEFAULT_VALUE = 2.0_vp;
 }
 
 CheckBoxModel* CheckBoxModel::GetInstance()
@@ -280,10 +281,11 @@ void JSCheckbox::SetCheckboxStyle(int32_t checkBoxStyle)
 void JSCheckbox::Mark(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<CheckboxTheme>();
+    auto defaultStroke = theme ? theme->GetCheckStroke() : CHECK_BOX_MARK_WIDTH_DEFAULT_VALUE;
     if (!info[0]->IsObject()) {
         CheckBoxModel::GetInstance()->ResetCheckMarkColor();
         CheckBoxModel::GetInstance()->SetCheckMarkSize(Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE));
-        CheckBoxModel::GetInstance()->SetCheckMarkWidth(theme->GetCheckStroke());
+        CheckBoxModel::GetInstance()->SetCheckMarkWidth(defaultStroke);
         return;
     }
 
@@ -309,7 +311,7 @@ void JSCheckbox::Mark(const JSCallbackInfo& info)
         (strokeWidth.ConvertToVp() >= 0)) {
         CheckBoxModel::GetInstance()->SetCheckMarkWidth(strokeWidth);
     } else {
-        CheckBoxModel::GetInstance()->SetCheckMarkWidth(theme->GetCheckStroke());
+        CheckBoxModel::GetInstance()->SetCheckMarkWidth(defaultStroke);
     }
 }
 
