@@ -256,6 +256,7 @@ void WaterFlowPattern::TriggerPostLayoutEvents()
     float delta = layoutInfo_->GetDelta(prevOffset_);
     PrintOffsetLog(AceLogTag::ACE_WATERFLOW, host->GetId(), delta);
     FireObserverOnDidScroll(delta);
+    FireObserverOnScrollerAreaChange(delta);
     auto onScroll = eventHub->GetOnScroll();
     if (onScroll) {
         FireOnScroll(delta, onScroll);

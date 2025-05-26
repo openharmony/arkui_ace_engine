@@ -598,6 +598,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
         FireOnScroll(finalOffset, onScroll);
     }
     FireObserverOnDidScroll(finalOffset);
+    FireObserverOnScrollerAreaChange(finalOffset);
     auto onDidScroll = gridEventHub->GetOnDidScroll();
     if (onDidScroll) {
         FireOnScroll(finalOffset, onDidScroll);
