@@ -1262,6 +1262,7 @@ private:
 
     // properties for AI data detector
     RefPtr<WebDataDetectorAdapter> webDataDetectorAdapter_ = nullptr;
+    int lastDragOperation_;
 
     bool isRotating_ {false};
     int32_t rotationEndCallbackId_ = 0;

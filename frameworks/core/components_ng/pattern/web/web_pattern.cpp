@@ -1919,13 +1919,19 @@ bool WebPattern::IsImageDrag()
 DragRet WebPattern::GetDragAcceptableStatus()
 {
     OHOS::NWeb::NWebDragData::DragOperation status = delegate_->GetDragAcceptableStatus();
-    if (status == OHOS::NWeb::NWebDragData::DragOperation::DRAG_OPERATION_MOVE ||
-        status == OHOS::NWeb::NWebDragData::DragOperation::DRAG_OPERATION_LINK) {
-        return DragRet::DRAG_DEFAULT;
-    } else if (status == OHOS::NWeb::NWebDragData::DragOperation::DRAG_OPERATION_COPY) {
+    int newDragOperation = static_cast<int>(status);
+    // Fixed the issue that the corner icon blinks when you enter the move text box.
+    if (lastDragOperation_ != newDragOperation) {
+        lastDragOperation_ = newDragOperation;
         return DragRet::DRAG_DEFAULT;
     }
-    return DragRet::DRAG_DEFAULT;
+    if (status == OHOS::NWeb::NWebDragData::DragOperation::DRAG_OPERATION_COPY ||
+        status == OHOS::NWeb::NWebDragData::DragOperation::DRAG_OPERATION_LINK) {
+        return DragRet::ENABLE_DROP;
+    } else if (status == OHOS::NWeb::NWebDragData::DragOperation::DRAG_OPERATION_MOVE) {
+        return DragRet::DRAG_DEFAULT;
+    }
+    return DragRet::DISABLE_DROP;
 }
 
 bool WebPattern::NotifyStartDragTask(bool isDelayed)
