@@ -1219,10 +1219,6 @@ void SwiperLayoutAlgorithm::LayoutItem(LayoutWrapper* layoutWrapper, OffsetF off
     CHECK_NULL_VOID(wrapper->GetGeometryNode());
     wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
     wrapper->Layout();
-    auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
-    if (frameNode) {
-        frameNode->MarkAndCheckNewOpIncNode(axis_);
-    }
 }
 
 void SwiperLayoutAlgorithm::CaptureLayout(LayoutWrapper* layoutWrapper)

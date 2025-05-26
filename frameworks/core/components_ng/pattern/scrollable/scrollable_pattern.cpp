@@ -2942,7 +2942,7 @@ void ScrollablePattern::FireObserverOnDidScroll(float finalOffset)
 
 void ScrollablePattern::SuggestOpIncGroup(bool flag)
 {
-    if (!SystemProperties::IsOpIncEnable()) {
+    if (!SystemProperties::IsOpIncEnable() || !isVertical()) {
         return;
     }
     auto host = GetHost();
