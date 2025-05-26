@@ -822,7 +822,7 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     OffsetF dialogOffset = OffsetF(dialogOffsetX.value_or(0.0), dialogOffsetY.value_or(0.0));
     auto isHostWindowAlign = isUIExtensionSubWindow_ && expandDisplay_ && hostWindowRect_.GetSize().IsPositive();
     auto maxSize = isHostWindowAlign ? hostWindowRect_.GetSize() : layoutConstraint->maxSize;
-    wrapperSize_ = maxSize;
+    wrapperSize_ = layoutConstraint->maxSize;
     if (!SetAlignmentSwitch(maxSize, childSize, topLeftPoint)) {
         topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / HALF;
     }
