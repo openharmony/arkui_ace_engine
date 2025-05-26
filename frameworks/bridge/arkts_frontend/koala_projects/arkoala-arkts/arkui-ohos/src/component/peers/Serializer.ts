@@ -11437,14 +11437,14 @@ export class Serializer extends SerializerBase {
                 }
             }
         }
-        const value_modifier  = value.modifier
-        let value_modifier_type : int32 = RuntimeType.UNDEFINED
-        value_modifier_type = runtimeType(value_modifier)
-        valueSerializer.writeInt8(value_modifier_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_modifier_type)) {
-            const value_modifier_value  = value_modifier!
-            valueSerializer.writeImageModifier(value_modifier_value)
-        }
+        // const value_modifier  = value.modifier
+        // let value_modifier_type : int32 = RuntimeType.UNDEFINED
+        // value_modifier_type = runtimeType(value_modifier)
+        // valueSerializer.writeInt8(value_modifier_type as int32)
+        // if ((RuntimeType.UNDEFINED) != (value_modifier_type)) {
+        //     const value_modifier_value  = value_modifier!
+        //     valueSerializer.writeImageModifier(value_modifier_value)
+        // }
         const value_numberBadge  = value.numberBadge
         let value_numberBadge_type : int32 = RuntimeType.UNDEFINED
         value_numberBadge_type = runtimeType(value_numberBadge)
