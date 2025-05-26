@@ -676,4 +676,24 @@ void NGGestureRecognizer::CheckPendingRecognizerIsInAttachedNode(const TouchEven
         }
     }
 }
+
+std::string NGGestureRecognizer::GetCallbackName(const std::unique_ptr<GestureEventFunc>& callback)
+{
+    if (callback == onAction_) {
+        return "onAction";
+    }
+    if (callback == onActionStart_) {
+        return "onActionStart";
+    }
+    if (callback == onActionUpdate_) {
+        return "onActionUpdate";
+    }
+    if (callback == onActionEnd_) {
+        return "onActionEnd";
+    }
+    if (callback == onActionCancel_) {
+        return "onActionCancel";
+    }
+    return "";
+}
 } // namespace OHOS::Ace::NG

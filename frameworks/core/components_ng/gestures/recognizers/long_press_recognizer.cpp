@@ -78,10 +78,7 @@ void LongPressRecognizer::OnAccepted()
     localMatrix_ = NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false,
         isPostEventResult_, touchPoint.postEventNodeId);
     UpdateFingerListInfo();
-    {
-        ACE_SCOPED_TRACE("LongPressRecognizer onAction");
-        SendCallbackMsg(onAction_, false, GestureCallbackType::START);
-    }
+    SendCallbackMsg(onAction_, false, GestureCallbackType::START);
     if (isLimitFingerCount_ && hasRepeated_) {
         return;
     }
@@ -204,12 +201,10 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     lastTouchEvent_ = event;
     if (refereeState_ == RefereeState::SUCCEED) {
         if (isLimitFingerCount_ && static_cast<int32_t>(touchPoints_.size()) == fingers_) {
-            ACE_SCOPED_TRACE("LongPressRecognizer onAction");
             SendCallbackMsg(onAction_, false, GestureCallbackType::START);
         }
         if (static_cast<int32_t>(touchPoints_.size()) == 0) {
             hasRepeated_ = false;
-            ACE_SCOPED_TRACE("LongPressRecognizer onActionEnd");
             SendCallbackMsg(onActionEnd_, false, GestureCallbackType::END);
             int64_t overTime = GetSysTimestamp();
             int64_t inputTime = overTime;
@@ -263,7 +258,6 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
         touchPoints_.erase(event.id);
     }
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == 0) {
-        ACE_SCOPED_TRACE("LongPressRecognizer onActionCancel");
         SendCallbackMsg(onActionCancel_, false, GestureCallbackType::CANCEL);
         lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
@@ -349,7 +343,6 @@ void LongPressRecognizer::DoRepeat()
         return;
     }
     if (refereeState_ == RefereeState::SUCCEED) {
-        ACE_SCOPED_TRACE("LongPressRecognizer onAction");
         SendCallbackMsg(onAction_, true, GestureCallbackType::START);
         StartRepeatTimer();
     }
@@ -391,6 +384,8 @@ double LongPressRecognizer::ConvertPxToVp(double offset) const
 void LongPressRecognizer::SendCallbackMsg(
     const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, GestureCallbackType type)
 {
+    std::string callbackName = GetCallbackName(callback);
+    ACE_SCOPED_TRACE("LongPressRecognizer %s", callbackName.c_str());
     auto extraHandlingResult = GestureExtraHandler::IsGestureShouldBeAbandoned(AceType::Claim(this));
     if ((gestureInfo_ && gestureInfo_->GetDisposeTag()) || extraHandlingResult ||
         (!isOnActionTriggered_ && type != GestureCallbackType::START)) {
