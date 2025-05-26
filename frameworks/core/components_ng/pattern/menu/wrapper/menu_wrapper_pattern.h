@@ -236,6 +236,16 @@ public:
         return isShowHoverImage_;
     }
 
+    void SetHoverScaleInterruption(bool interruption)
+    {
+        hoverScaleInterruption_ = interruption;
+    }
+
+    bool GetHoverScaleInterruption() const
+    {
+        return hoverScaleInterruption_;
+    }
+
     void SetIsStopHoverImageAnimation(bool isStop)
     {
         isStopHoverImageAnimation_ = isStop;
@@ -619,9 +629,10 @@ public:
     void SetMenuMaskColor(Color maskColor);
     void SetMenuMaskblurStyle(BlurStyle maskBlurStyle);
     void UpdateFilterMaskType();
+    void CheckAndShowAnimation();
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
-    void CheckAndShowAnimation();
 
 private:
     bool AvoidKeyboard() const override
@@ -682,6 +693,7 @@ private:
     bool isFirstShow_ = true;
     bool isShowInSubWindow_ = true;
     bool isShowHoverImage_ = false;
+    bool hoverScaleInterruption_ = false;
     bool isStopHoverImageAnimation_ = false;
     bool isShowHoverImagePreviewStartDrag_ = false;
     bool onMenuDisappear_ = false;

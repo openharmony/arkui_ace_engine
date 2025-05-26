@@ -30,6 +30,7 @@ constexpr uint32_t MENU_MIN_GRID_COUNTS = 2;
 constexpr uint32_t MENU_MAX_GRID_COUNTS = 6;
 constexpr int32_t HOVER_IMAGE_OPACITY_CHANGE_DURATION = 150;
 constexpr int32_t HOVER_IMAGE_DELAY_DURATION = 200;
+constexpr int32_t HOVER_IMAGE_DELAY_DURATION_INTERRUPT = 350;
 constexpr int32_t HOVER_IMAGE_CUSTOM_PREVIEW_SCALE_DURATION = 650;
 constexpr int32_t HOVER_IMAGE_PREVIEW_DISAPPEAR_DURATION = 450;
 constexpr double OUTBORDER_RADIUS = 19.75; // Default value of outBorderRadius
@@ -97,6 +98,7 @@ public:
             theme->previewAnimationDuration_ = 300;
             theme->hoverImageSwitchToPreviewOpacityDuration_ = HOVER_IMAGE_OPACITY_CHANGE_DURATION;
             theme->hoverImageDelayDuration_ = HOVER_IMAGE_DELAY_DURATION;
+            theme->hoverImageDelayDurationForInterrupt_ = HOVER_IMAGE_DELAY_DURATION_INTERRUPT;
             theme->hoverImageCustomPreviewScaleDuration_ = HOVER_IMAGE_CUSTOM_PREVIEW_SCALE_DURATION;
             theme->hoverImagePreviewDisappearDuration_ = HOVER_IMAGE_PREVIEW_DISAPPEAR_DURATION;
             theme->previewBeforeAnimationScale_ = 0.95f;
@@ -167,9 +169,9 @@ public:
         return hoverImageSwitchToPreviewOpacityDuration_;
     }
 
-    int32_t GetHoverImageDelayDuration() const
+    int32_t GetHoverImageDelayDuration(bool canInterrupt = false) const
     {
-        return hoverImageDelayDuration_;
+        return canInterrupt ? hoverImageDelayDurationForInterrupt_ : hoverImageDelayDuration_;
     }
 
     int32_t GetHoverImageCustomPreviewScaleDuration() const
@@ -425,6 +427,7 @@ private:
     int32_t previewAnimationDuration_ = 0;
     int32_t hoverImageSwitchToPreviewOpacityDuration_ = 0;
     int32_t hoverImageDelayDuration_ = 0;
+    int32_t hoverImageDelayDurationForInterrupt_ = 0;
     int32_t hoverImageCustomPreviewScaleDuration_ = 0;
     int32_t hoverImagePreviewDisappearDuration_ = 0;
     int32_t subMenuShowDelayDuration_ = SUB_MENU_SHOW_DELAY_DURATION;

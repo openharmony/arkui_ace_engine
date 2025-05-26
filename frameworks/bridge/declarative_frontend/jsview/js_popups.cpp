@@ -1254,6 +1254,10 @@ void ParseContentPreviewAnimationOptionsParam(const JSCallbackInfo& info, const 
             ParseAnimationScaleArray(hoverScaleArray, menuParam.hoverImageAnimationOptions);
             menuParam.isShowHoverImage = true;
         }
+        auto hoverInterruptValue = animationOptionsObj->GetProperty("hoverScaleInterruption");
+        if (hoverInterruptValue->IsBoolean()) {
+            menuParam.hoverScaleInterruption = hoverInterruptValue->ToBoolean();
+        }
     }
 }
 

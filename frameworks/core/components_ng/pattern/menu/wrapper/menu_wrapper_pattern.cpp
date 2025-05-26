@@ -719,7 +719,9 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     }
     MarkAllMenuNoDraggable();
     MarkWholeSubTreeNoDraggable(GetPreview());
-    CheckAndShowAnimation();
+    if (!GetHoverScaleInterruption()) {
+        CheckAndShowAnimation();
+    }
     return false;
 }
 
