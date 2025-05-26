@@ -14,6 +14,7 @@
  */
 
 #include "base/log/event_report.h"
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 
 #include "core/components/common/layout/grid_system_manager.h"
@@ -51,7 +52,9 @@ uint32_t GetMaxGridCounts(int32_t currentColumns)
 
 void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    totalItemCount_ = layoutWrapper->GetTotalChildCount() - itemStartIndex_;
+    auto totalChildCount = layoutWrapper->GetTotalChildCount();
+    totalItemCount_ = totalChildCount - itemStartIndex_ - footerCount_;
+    footerIndex_ = (footerCount_ > 0) ? (totalChildCount - footerCount_) : -1;
     CHECK_NULL_VOID(listLayoutProperty_);
     auto layoutProperty = AceType::DynamicCast<ListItemGroupLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
@@ -457,7 +460,7 @@ void ListItemGroupLayoutAlgorithm::CheckNeedAllLayout(const RefPtr<LayoutWrapper
         needAllLayout_ = true;
         return;
     }
-    int32_t totalItemCount = layoutWrapper->GetTotalChildCount() - itemStartIndex_;
+    int32_t totalItemCount = layoutWrapper->GetTotalChildCount() - itemStartIndex_ - footerCount_;
     if (!(forwardLayout && itemPosition_.rbegin()->first == totalItemCount - 1) &&
         !(!forwardLayout && itemPosition_.begin()->first == 0)) {
         needAllLayout_ = true;
@@ -674,7 +677,7 @@ int32_t ListItemGroupLayoutAlgorithm::MeasureALineForward(LayoutWrapper* layoutW
     if (currentIndex + 1 >= totalItemCount_) {
         return cnt;
     }
-    for (int32_t i = 0; i < lanes && currentIndex + 1 <= totalItemCount_; i++) {
+    for (int32_t i = 0; i < lanes && currentIndex + 1 <= totalItemCount_ - 1; i++) {
         auto wrapper = GetListItem(layoutWrapper, currentIndex + 1);
         if (!wrapper) {
             ReportGetChildError("MeasureALineForward", currentIndex + 1);

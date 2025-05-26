@@ -1753,7 +1753,7 @@ HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition007, TestSize.Level1)
      */
     auto groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
     auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
-    groupPattern->NotifyDataChange(2, 1);
+    groupPattern->NotifyDataChange(1, 1);
     FlushUITasks();
     EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 0);
     EXPECT_EQ(pattern_->currentOffset_, 0);
@@ -1764,7 +1764,7 @@ HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition007, TestSize.Level1)
      */
     UpdateCurrentOffset(-160);
     EXPECT_EQ(pattern_->currentOffset_, 160);
-    groupPattern->NotifyDataChange(2, 1);
+    groupPattern->NotifyDataChange(1, 1);
     FlushUITasks();
     EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 2);
     EXPECT_EQ(pattern_->currentOffset_, 260);
@@ -1773,7 +1773,7 @@ HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition007, TestSize.Level1)
      * @tc.steps: step3. Scroll to listItem1, delete 1 Item in 0.
      * @tc.expected: Current index is 1, currentOffset = 260
      */
-    groupPattern->NotifyDataChange(2, -1);
+    groupPattern->NotifyDataChange(1, -1);
     FlushUITasks();
     EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 1);
     EXPECT_EQ(pattern_->currentOffset_, 160);
@@ -1817,8 +1817,8 @@ HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition008, TestSize.Level1)
      */
     auto groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
     auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
-    groupPattern->NotifyDataChange(2, -1);
-    groupNode->RemoveChildAtIndex(2);
+    groupPattern->NotifyDataChange(1, -1);
+    groupNode->RemoveChildAtIndex(1);
     FlushUITasks();
     EXPECT_EQ(pattern_->currentOffset_, 75);
 }

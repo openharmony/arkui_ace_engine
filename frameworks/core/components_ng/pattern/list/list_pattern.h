@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PATTERN_H
 
 #include <tuple>
+#include "base/log/log_wrapper.h"
 #include "core/animation/chain_animation.h"
 #include "core/components_ng/pattern/list/list_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
@@ -156,23 +157,10 @@ public:
         return { FocusType::SCOPE, true };
     }
 
-    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
-    {
-        auto property = GetLayoutProperty<ListLayoutProperty>();
-        if (!property) {
-            return {};
-        }
-        return ScopeFocusAlgorithm(property->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL, true,
-            ScopeType::OTHERS,
-            [wp = WeakClaim(this)](
-                FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) -> bool {
-                auto list = wp.Upgrade();
-                if (list) {
-                    nextFocusNode = list->GetNextFocusNode(step, currFocusNode);
-                }
-                return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
-            });
-    }
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override;
+
+    bool LayoutItemInGroupForFocus(int32_t indexInList, int32_t nextIndexInGroup, int32_t curIndexInGroup,
+        ListItemGroupPara listItemGroupPara, int32_t maxListItemIndex);
 
     ScrollOffsetAbility GetScrollOffsetAbility() override;
 
@@ -420,7 +408,7 @@ protected:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     virtual bool ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_t nextIndexInGroup);
-
+    virtual void AdjustScrollPosition(int32_t nextIndex, int32_t curIndex);
     void MarkDirtyNodeSelf();
 
     bool OnScrollCallback(float offset, int32_t source) override;
@@ -529,6 +517,26 @@ private:
     void HandleCardModeSelectedEvent(
         const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, const OffsetF& groupOffset);
 
+    // focus
+    bool LayoutListForFocus(int32_t nextIndex, int32_t curIndex);
+    bool IsLayout(int32_t index, std::optional<int32_t> indexInGroup, ScrollAlign align);
+    int32_t GetNextMoveStepForMultiLanes(int32_t curIndex, FocusStep focuseStep, bool isVertical, int32_t& nextIndex);
+    WeakPtr<FocusHub> GetNextFocusNodeInList(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
+    bool IsListItemGroupByIndex(int32_t index);
+    WeakPtr<FocusHub> FindChildFocusNodeByIndex(int32_t tarMainIndex, const FocusStep& step);
+    void DetermineSingleLaneStep(
+        FocusStep step, bool isVertical, int32_t curIndex, int32_t& moveStep, int32_t& nextIndex);
+    void DetermineMultiLaneStep(
+        FocusStep step, bool isVertical, int32_t curIndex, int32_t& moveStep, int32_t& nextIndex);
+    int32_t GetCurrentFocusIndex(const RefPtr<Pattern>& curPattern);
+    void AdjustFocusStepForRtl(FocusStep& step, bool isVertical);
+    int32_t GetCrossAxisNextIndex(int32_t curIndex, bool isVertical, int32_t moveStep, FocusStep step);
+    const ListItemInfo* GetPosition(int32_t index) const;
+    bool NextPositionBlocksMove(const ListItemInfo* curPos, const ListItemInfo* nextPos, bool isVertical) const;
+    int32_t AdjustNextIndexForEdgeRow(int32_t nextIndex, int32_t moveStep, int32_t curIndex);
+    bool IsListItem(const WeakPtr<FocusHub>& focusNode);
+    void HandleIndexToBounds(int32_t& nextIndex, bool& loopFlag);
+
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
     ListItemGroupPara GetListItemGroupParameter(const RefPtr<FrameNode>& node);
     bool IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node);
@@ -556,6 +564,7 @@ private:
 
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndexInGroup_;
+    std::optional<bool> isLayoutListForFocus_; // Flag for only do Layout.
     std::optional<ListScrollTarget> scrollTarget_;
     bool paintStateFlag_ = false;
     bool isFramePaintStateValid_ = false;
