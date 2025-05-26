@@ -2271,9 +2271,14 @@ void GridScrollLayoutAlgorithm::UpdateMainLineOnReload(int32_t startIdx)
 
 std::pair<bool, bool> GridScrollLayoutAlgorithm::GetResetMode(LayoutWrapper* layoutWrapper, int32_t updateIdx)
 {
-    if (info_.IsOutOfEnd(mainGap_, false) // avoid reset during overScroll
+    std::pair<bool, bool> res = { false, false };
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, res);
+    auto pattern = host->GetPattern<GridPattern>();
+    CHECK_NULL_RETURN(pattern, res);
+    if ((pattern->IsScrollableSpringMotionRunning() && info_.IsOutOfEnd(mainGap_, false)) // avoid reset during overScroll
         || updateIdx == -1) {
-        return { 0, 0 };
+        return res;
     }
     bool outOfMatrix = false;
     if (updateIdx != -1 && updateIdx < info_.startIndex_) {
