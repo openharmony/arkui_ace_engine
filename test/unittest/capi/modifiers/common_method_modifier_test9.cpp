@@ -166,13 +166,13 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilityGroupTestDefaultValues, Test
 HWTEST_F(CommonMethodModifierTest9, setAccessibilityGroupTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityGroup0, nullptr);
-    using OneTestStep = std::tuple<Ark_Boolean, std::string>;
+    using OneTestStep = std::tuple<Opt_Boolean, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_Boolean>(true), "true"},
-        {Converter::ArkValue<Ark_Boolean>(false), "false"},
+        {Converter::ArkValue<Opt_Boolean>(true), "true"},
+        {Converter::ArkValue<Opt_Boolean>(false), "false"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setAccessibilityGroup0(node_, inputValue);
+        modifier_->setAccessibilityGroup0(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_GROUP_NAME_TEST);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -199,10 +199,10 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilityTextTestDefaultValues, TestS
 HWTEST_F(CommonMethodModifierTest9, setAccessibilityText0TestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityText0, nullptr);
-    using OneTestStep = std::tuple<Ark_String, std::string>;
+    using OneTestStep = std::tuple<Opt_String, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_String>("test string 1"), "test string 1"},
-        {Converter::ArkValue<Ark_String>("test string 2"), "test string 2"},
+        {Converter::ArkValue<Opt_String>("test string 1"), "test string 1"},
+        {Converter::ArkValue<Opt_String>("test string 2"), "test string 2"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setAccessibilityText0(node_, &inputValue);
@@ -226,8 +226,10 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityText1TestValidValue
         {Converter::ArkValue<Ark_Resource>(inputVal1, nullptr), inputVal1},
         {Converter::ArkValue<Ark_Resource>(inputVal2, nullptr), inputVal2},
     };
+    Opt_Resource optInputValue;
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setAccessibilityText1(node_, &inputValue);
+        optInputValue = Converter::ArkValue<Opt_Resource>(inputValue);
+        modifier_->setAccessibilityText1(node_, &optInputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_TEXT_NAME_TEST);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -256,10 +258,10 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilityTextHintTestDefaultValues, T
 HWTEST_F(CommonMethodModifierTest9, setAccessibilityTextHintTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityTextHint, nullptr);
-    using OneTestStep = std::tuple<Ark_String, std::string>;
+    using OneTestStep = std::tuple<Opt_String, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_String>("test string 1"), "test string 1"},
-        {Converter::ArkValue<Ark_String>("test string 2"), "test string 2"},
+        {Converter::ArkValue<Opt_String>("test string 1"), "test string 1"},
+        {Converter::ArkValue<Opt_String>("test string 2"), "test string 2"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setAccessibilityTextHint(node_, &inputValue);
@@ -289,10 +291,10 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilityDescriptionTestDefaultValues
 HWTEST_F(CommonMethodModifierTest9, setAccessibilityDescription0TestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityDescription0, nullptr);
-    using OneTestStep = std::tuple<Ark_String, std::string>;
+    using OneTestStep = std::tuple<Opt_String, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_String>("test string 1"), "test string 1"},
-        {Converter::ArkValue<Ark_String>("test string 2"), "test string 2"},
+        {Converter::ArkValue<Opt_String>("test string 1"), "test string 1"},
+        {Converter::ArkValue<Opt_String>("test string 2"), "test string 2"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setAccessibilityDescription0(node_, &inputValue);
@@ -311,7 +313,7 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilityDescription1TestValidValues,
 {
     ASSERT_NE(modifier_->setAccessibilityDescription1, nullptr);
     auto resName = NamedResourceId(ATTRIBUTE_DESCRIPTION_RESOURCE_ID_TEST, Converter::ResourceType::STRING);
-    auto src = CreateResource(resName);
+    auto src = Converter::ArkValue<Opt_Resource>(CreateResource(resName));
 
     modifier_->setAccessibilityDescription1(node_, &src);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_DESCRIPTION_NAME_TEST);
@@ -338,10 +340,10 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilityLevelTestDefaultValues, Test
 HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityLevelTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityLevel, nullptr);
-    using OneTestStep = std::tuple<Ark_String, std::string>;
+    using OneTestStep = std::tuple<Opt_String, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_String>("test string 1"), "test string 1"},
-        {Converter::ArkValue<Ark_String>("test string 2"), "test string 2"},
+        {Converter::ArkValue<Opt_String>("test string 1"), "test string 1"},
+        {Converter::ArkValue<Opt_String>("test string 2"), "test string 2"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setAccessibilityLevel(node_, &inputValue);
@@ -371,13 +373,13 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilityCheckedTestDefaultValues, Te
 HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityCheckedTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityChecked, nullptr);
-    using OneTestStep = std::tuple<Ark_Boolean, std::string>;
+    using OneTestStep = std::tuple<Opt_Boolean, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_Boolean>(true), "true"},
-        {Converter::ArkValue<Ark_Boolean>(false), "false"},
+        {Converter::ArkValue<Opt_Boolean>(true), "true"},
+        {Converter::ArkValue<Opt_Boolean>(false), "false"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setAccessibilityChecked(node_, inputValue);
+        modifier_->setAccessibilityChecked(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_CHECKED_NAME_TEST);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -404,13 +406,13 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilitySelectedTestDefaultValues, T
 HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilitySelectedTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilitySelected, nullptr);
-    using OneTestStep = std::tuple<Ark_Boolean, std::string>;
+    using OneTestStep = std::tuple<Opt_Boolean, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_Boolean>(true), "true"},
-        {Converter::ArkValue<Ark_Boolean>(false), "false"},
+        {Converter::ArkValue<Opt_Boolean>(true), "true"},
+        {Converter::ArkValue<Opt_Boolean>(false), "false"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setAccessibilitySelected(node_, inputValue);
+        modifier_->setAccessibilitySelected(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_SELECTED_NAME_TEST);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -450,8 +452,8 @@ HWTEST_F(CommonMethodModifierTest9, SetOnHoverTest, TestSize.Level1)
         };
     };
 
-    auto callbackValue =
-        Converter::ArkValue<Callback_Boolean_HoverEvent_Void>(onHoverFunc, expectedResId);
+    auto callbackValue = Converter::ArkValue<Opt_Callback_Boolean_HoverEvent_Void>(
+        Converter::ArkValue<Callback_Boolean_HoverEvent_Void>(onHoverFunc, expectedResId));
 
     auto test = [this, &callbackValue, eventHub, frameNode](bool isHover, SourceType type) {
         checkEvent = std::nullopt;
@@ -509,7 +511,8 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1
         };
         GeneratedModifier::GetAccessibilityHoverEventAccessor()->destroyPeer(event);
     };
-    auto callBackValue = Converter::ArkValue<AccessibilityCallback>(onAccessibilityHoverFunc, frameNode->GetId());
+    auto callBackValue = Converter::ArkValue<Opt_AccessibilityCallback>(
+        Converter::ArkValue<AccessibilityCallback>(onAccessibilityHoverFunc, frameNode->GetId()));
 
     auto test = [this, &callBackValue, eventHub, frameNode](bool isHover) {
         checkEvent = std::nullopt;
@@ -558,7 +561,8 @@ HWTEST_F(CommonMethodModifierTest9, SetOnMouseTest, TestSize.Level1)
         checkEvent = { .nodeId = resourceId };
     };
 
-    auto callBackValue = Converter::ArkValue<Callback_MouseEvent_Void>(onMouseFunc, frameNode->GetId());
+    auto callBackValue = Converter::ArkValue<Opt_Callback_MouseEvent_Void>(
+        Converter::ArkValue<Callback_MouseEvent_Void>(onMouseFunc, frameNode->GetId()));
 
     auto test = [this, &callBackValue, eventHub, frameNode]() {
         checkEvent = std::nullopt;
@@ -611,8 +615,8 @@ HWTEST_F(CommonMethodModifierTest9, SetOnTouchInterceptTest, TestSize.Level1)
         CallbackHelper(continuation).InvokeSync(retVal);
     };
 
-    auto callbackValue =
-        Converter::ArkValue<Callback_TouchEvent_HitTestMode>(nullptr, onTouchInterceptFunc, expectedResId);
+    auto callbackValue = Converter::ArkValue<Opt_Callback_TouchEvent_HitTestMode>(
+        Converter::ArkValue<Callback_TouchEvent_HitTestMode>(nullptr, onTouchInterceptFunc, expectedResId));
 
     checkEvent = std::nullopt;
     modifier_->setOnTouchIntercept(node_, &callbackValue);
@@ -655,8 +659,8 @@ HWTEST_F(CommonMethodModifierTest9, SetOnTouchTest, TestSize.Level1)
         checkEvent = { .resId = resourceId };
     };
 
-    auto callbackValue =
-        Converter::ArkValue<Callback_TouchEvent_Void>(onTouchFunc, expectedResId);
+    auto callbackValue = Converter::ArkValue<Opt_Callback_TouchEvent_Void>(
+        Converter::ArkValue<Callback_TouchEvent_Void>(onTouchFunc, expectedResId));
 
     checkEvent = std::nullopt;
     modifier_->setOnTouch(node_, &callbackValue);
@@ -691,14 +695,14 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAttachTest, TestSize.Level1)
         checkEvent = { .nodeId = resourceId };
     };
 
-    Callback_Void callBackValue = {
+    auto callBackValue = Converter::ArkValue<Opt_Callback_Void>(Callback_Void {
         .resource = Ark_CallbackResource {
             .resourceId = frameNode->GetId(),
             .hold = nullptr,
             .release = nullptr
         },
         .call = onAttachFunc
-    };
+    });
 
     auto test = [this, &callBackValue, eventHub, frameNode]() {
         checkEvent = std::nullopt;
@@ -730,14 +734,14 @@ HWTEST_F(CommonMethodModifierTest9, SetOnDetachTest, TestSize.Level1)
         checkEvent = { .nodeId = resourceId };
     };
 
-    Callback_Void callBackValue = {
+    auto callBackValue = Converter::ArkValue<Opt_Callback_Void>(Callback_Void {
         .resource = Ark_CallbackResource {
             .resourceId = frameNode->GetId(),
             .hold = nullptr,
             .release = nullptr
         },
         .call = onDetachFunc
-    };
+    });
 
     auto test = [this, &callBackValue, eventHub, frameNode]() {
         checkEvent = std::nullopt;
@@ -774,7 +778,8 @@ HWTEST_F(CommonMethodModifierTest9, setOnAccessibilityFocusTest, TestSize.Level1
         };
     };
 
-    auto accessibilityFocusCallback = ArkValue<AccessibilityFocusCallback>(onAccessibilityFocus, frameNode->GetId());
+    auto accessibilityFocusCallback = ArkValue<Opt_AccessibilityFocusCallback>(
+        ArkValue<AccessibilityFocusCallback>(onAccessibilityFocus, frameNode->GetId()));
 
     for (auto& [message, value, expect] : Fixtures::testFixtureBooleanValidValues) {
         checkEvent = std::nullopt;
@@ -824,7 +829,8 @@ HWTEST_F(CommonMethodModifierTest9, setOnFocusAxisEventTest, TestSize.Level1)
         PeerUtils::DestroyPeer(parameter);
     };
 
-    auto accessibilityFocusCallback = ArkValue<Callback_FocusAxisEvent_Void>(onFocusAxisCallback, frameNode->GetId());
+    auto accessibilityFocusCallback = ArkValue<Opt_Callback_FocusAxisEvent_Void>(
+        ArkValue<Callback_FocusAxisEvent_Void>(onFocusAxisCallback, frameNode->GetId()));
     modifier_->setOnFocusAxisEvent(node_, &accessibilityFocusCallback);
     EXPECT_FALSE(checkEvent);
     auto focusHub = frameNode->GetFocusHub();
