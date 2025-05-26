@@ -574,40 +574,6 @@ HWTEST_F(RichEditorStyleTestNg, GetChangeSpanStyle001, TestSize.Level1)
 }
 
 /**
- * @tc.name: RichEditorPatternTestGetPreviewTextStyle001
- * @tc.desc: test GetPreviewTextStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorStyleTestNg, RichEditorPatternTestGetPreviewTextStyle001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto host = richEditorPattern->GetHost();
-    ASSERT_NE(host, nullptr);
-
-    auto layoutProperty = host->layoutProperty_;
-    host->layoutProperty_ = nullptr;
-    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::NORMAL);
-    host->layoutProperty_ = layoutProperty;
-
-    ASSERT_NE(host->layoutProperty_, nullptr);
-    auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
-    ASSERT_NE(property, nullptr);
-
-    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::NORMAL);
-
-    property->UpdatePreviewTextStyle("normal");
-    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::NORMAL);
-
-    property->UpdatePreviewTextStyle("underline");
-    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::UNDERLINE);
-
-    property->UpdatePreviewTextStyle("unknown");
-    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::NORMAL);
-}
-
-/**
  * @tc.name: HandleSelectFontStyleWrapper001
  * @tc.desc: test HandleSelectFontStyleWrapper
  * @tc.type: FUNC

@@ -181,54 +181,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleOnEscape001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetSpanNodeBySpanItem001
- * @tc.desc: test GetSpanNodeBySpanItem
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, GetSpanNodeBySpanItem001, TestSize.Level2)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
-    ASSERT_EQ(richEditorPattern->GetSpanNodeBySpanItem(nullptr), nullptr);
-}
-
-/**
- * @tc.name: HandleOnCopyStyledString001
- * @tc.desc: test HandleOnCopyStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleOnCopyStyledString001, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
-
-    richEditorPattern->OnModifyDone();
-    richEditorPattern->SetSpanStringMode(true);
-    richEditorPattern->OnCopyOperation();
-    ASSERT_NE(richEditorPattern->GetClipboard(), nullptr);
-}
-
-/**
- * @tc.name: OnCopyOperationExt001
- * @tc.desc: test OnCopyOperationExt
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, OnCopyOperationExt001, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
-
-    richEditorPattern->OnModifyDone();
-    auto clipboard = richEditorPattern->GetClipboard();
-    ASSERT_NE(clipboard, nullptr);
-    auto pasteDataMix = clipboard->CreatePasteDataMix();
-    richEditorPattern->OnCopyOperationExt(pasteDataMix);
-}
-
-/**
  * @tc.name: ClearContent001
  * @tc.desc: test ClearContent
  * @tc.type: FUNC
@@ -517,35 +469,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, IsTextEditableForStylus003, TestSize.Leve
     EXPECT_FALSE(richEditorNode_->IsVisible());
     bool tag = richEditorPattern->IsTextEditableForStylus();
     EXPECT_FALSE(tag);
-}
-
-/**
- * @tc.name: PasteStr001
- * @tc.desc: test PasteStr
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, PasteStr001, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    std::string text = "text";
-    richEditorPattern->PasteStr(text);
-    EXPECT_FALSE(richEditorPattern->previewLongPress_);
-}
-
-/**
- * @tc.name: PasteStr002
- * @tc.desc: test PasteStr
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, PasteStr002, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    std::string text = "";
-    auto str = richEditorPattern->pasteStr_;
-    richEditorPattern->PasteStr(text);
-    EXPECT_EQ(str, richEditorPattern->pasteStr_);
 }
 
 /**

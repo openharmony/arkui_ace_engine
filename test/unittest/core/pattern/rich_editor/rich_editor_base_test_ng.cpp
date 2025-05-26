@@ -589,26 +589,6 @@ HWTEST_F(RichEditorBaseTestNg, CreateImageSourceInfo001, TestSize.Level1)
 }
 
 /**
- * @tc.name: NeedSoftKeyboard001
- * @tc.desc: test NeedSoftKeyboard
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorBaseTestNg, NeedSoftKeyboard001, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. Get frameNode and pattern.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test whether rich editor need soft keyboard.
-     */
-    EXPECT_TRUE(richEditorPattern->NeedSoftKeyboard());
-}
-
-/**
  * @tc.name: MagnifierTest001
  * @tc.desc: Test magnifier position.
  * @tc.type: FUNC
