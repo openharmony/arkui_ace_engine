@@ -6582,6 +6582,10 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnNativeEmbedLifecycleChange));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnNativeEmbedLifecycleChange"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnNativeEmbedLifecycleChange));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnNativeEmbedGestureEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnNativeEmbedGestureEvent));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnNativeEmbedGestureEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnNativeEmbedGestureEvent));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRegisterNativeEmbedRule"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetRegisterNativeEmbedRule));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRegisterNativeEmbedRule"),
@@ -6682,6 +6686,54 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnSearchResultReceive));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSearchResultReceive"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnSearchResultReceive));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOverScrollMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOverScrollMode));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOverScrollMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOverScrollMode));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnRenderProcessResponding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnRenderProcessResponding));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnRenderProcessResponding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::RsetOnRenderProcessResponding));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnTouchIconUrlReceived"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnTouchIconUrlReceived));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnTouchIconUrlReceived"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnTouchIconUrlReceived));
+	web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnWindowNew"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnWindowNew));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWindowNew"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnWindowNew));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnGeolocationShow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnGeolocationShow));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnGeolocationShow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnGeolocationShow));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnPermissionRequest"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnPermissionRequest));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnPermissionRequest"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnPermissionRequest));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnScreenCaptureRequest"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnScreenCaptureRequest));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnScreenCaptureRequest"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnScreenCaptureRequest));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnFullScreenEnter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnFullScreenEnter));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnFullScreenEnter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnFullScreenEnter));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnWindowExit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnWindowExit));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWindowExit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnWindowExit));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnAlert"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnAlert));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnAlert"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnAlert));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnConfirm"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnConfirm));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnConfirm"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnConfirm));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnPrompt"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnPrompt));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnPrompt"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnPrompt));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif

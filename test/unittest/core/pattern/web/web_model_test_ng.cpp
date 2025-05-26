@@ -3312,6 +3312,7 @@ HWTEST_F(WebModelTestNg, SetMediaOptions001, TestSize.Level1)
     EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckAudioExclusive(true), true);
 #endif
 }
+
 /**
  * @tc.name: SetRenderProcessNotRespondingId003
  * @tc.desc: Test web_model_ng.cpp
@@ -3377,6 +3378,8 @@ HWTEST_F(WebModelTestNg, SetOnPageStartedEvent001, TestSize.Level1)
     webModelNG.SetOnProgressChange(AccessibilityManager::RawPtr(frameNode), onProgressChangeImpl);
     auto titleReceiveEventId = [](const BaseEventInfo* info) {};
     webModelNG.SetOnTitleReceive(AccessibilityManager::RawPtr(frameNode), titleReceiveEventId);
+    auto geolocationShowEventId = [](const BaseEventInfo* info) {};
+    webModelNG.SetOnGeolocationShow(geolocationShowEventId);
 #endif
 }
 
@@ -3468,6 +3471,11 @@ HWTEST_F(WebModelTestNg, SetOnRenderExited001, TestSize.Level1)
     webModelNG.SetOnSearchResultReceive(AccessibilityManager::RawPtr(frameNode), jsCallback);
     webEventHub->FireOnSearchResultReceiveEvent(mockEventInfo);
     EXPECT_TRUE(callbackCalled);
+
+    callbackCalled = false;
+    webModelNG.SetOnRenderProcessResponding(AccessibilityManager::RawPtr(frameNode), jsCallback);
+    webEventHub->FireOnRenderProcessRespondingEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
 #endif
 }
 
@@ -3499,6 +3507,12 @@ HWTEST_F(WebModelTestNg, SetOnPageVisible001, TestSize.Level1)
     webModelNG.SetOnNavigationEntryCommitted(AccessibilityManager::RawPtr(frameNode), jsCallback);
     ASSERT_NE(webEventHub, nullptr);
     webEventHub->FireOnNavigationEntryCommittedEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+
+    callbackCalled = false;
+    webModelNG.SetOnTouchIconUrlReceived(AccessibilityManager::RawPtr(frameNode), jsCallback);
+    ASSERT_NE(webEventHub, nullptr);
+    webEventHub->FireOnTouchIconUrlEvent(mockEventInfo);
     EXPECT_TRUE(callbackCalled);
 #endif
 }
@@ -3568,4 +3582,191 @@ HWTEST_F(WebModelTestNg, SetBlockNetwork001, TestSize.Level1)
     EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckBlockNetwork(true), true);
 #endif
 }
+
+/**
+ * @tc.name: SetOverScrollMode007
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOverScrollMode007, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetOverScrollMode(OverScrollMode::ALWAYS);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckOverScrollMode(OverScrollMode::ALWAYS), true);
+#endif
+}
+
+ /**
+  * @tc.name: SetNativeEmbedGestureEventId019
+  * @tc.desc: Test web_model_ng.cpp
+  * @tc.type: FUNC
+  */
+ HWTEST_F(WebModelTestNg, SetNativeEmbedGestureEventId019, TestSize.Level1)
+ {
+#ifdef OHOS_STANDARD_SYSTEM
+     auto* stack = ViewStackProcessor::GetInstance();
+     auto nodeId = stack->ClaimNodeId();
+     auto frameNode =
+         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+     ASSERT_NE(frameNode, nullptr);
+     stack->Push(frameNode);
+     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+     int callCount = 0;
+     WebModelNG webModelNG;
+     auto NativeEmbedGestureEventId = [&callCount](const BaseEventInfo* info) { callCount++; };
+     webModelNG.SetNativeEmbedGestureEventId(AccessibilityManager::RawPtr(frameNode), NativeEmbedGestureEventId);
+     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+         ->propOnNativeEmbedGestureEvent_(nullptr);
+     EXPECT_NE(callCount, 0);
+#endif
+ }
+
+ /**
+  * @tc.name: SetPermissionRequestEventId028
+  * @tc.desc: Test web_model_ng.cpp
+  * @tc.type: FUNC
+  */
+ HWTEST_F(WebModelTestNg, SetPermissionRequestEventId028, TestSize.Level1)
+ {
+#ifdef OHOS_STANDARD_SYSTEM
+     auto* stack = ViewStackProcessor::GetInstance();
+     auto nodeId = stack->ClaimNodeId();
+     auto frameNode =
+         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+     ASSERT_NE(frameNode, nullptr);
+     stack->Push(frameNode);
+     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+     bool callbackCalled = false;
+     WebModelNG webModelNG;
+     webModelNG.SetPermissionRequestEventId(AccessibilityManager::RawPtr(frameNode),
+         [&callbackCalled](const BaseEventInfo* info) { callbackCalled = true; });
+
+     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+     ASSERT_NE(webEventHub, nullptr);
+
+     auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+     webEventHub->FireOnPermissionRequestEvent(mockEventInfo);
+     EXPECT_TRUE(callbackCalled);
+#endif
+ }
+
+ /**
+  * @tc.name: SetScreenCaptureRequestEventId009
+  * @tc.desc: Test web_model_ng.cpp
+  * @tc.type: FUNC
+  */
+ HWTEST_F(WebModelTestNg, SetScreenCaptureRequestEventId009, TestSize.Level1)
+ {
+#ifdef OHOS_STANDARD_SYSTEM
+     auto* stack = ViewStackProcessor::GetInstance();
+     auto nodeId = stack->ClaimNodeId();
+     auto frameNode =
+         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+     ASSERT_NE(frameNode, nullptr);
+     stack->Push(frameNode);
+     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+     int callCount = 0;
+     WebModelNG webModelNG;
+     auto screenCaptureRequestEventId = [&callCount](const BaseEventInfo* info) { callCount++; };
+     webModelNG.SetScreenCaptureRequestEventId(AccessibilityManager::RawPtr(frameNode), screenCaptureRequestEventId);
+     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+         ->propOnScreenCaptureRequestEvent_(nullptr);
+     EXPECT_NE(callCount, 0);
+#endif
+ }
+
+ /**
+  * @tc.name: SetWindowNewEvent005
+  * @tc.desc: Test web_model_ng.cpp
+  * @tc.type: FUNC
+  */
+ HWTEST_F(WebModelTestNg, SetWindowNewEvent005, TestSize.Level1)
+ {
+#ifdef OHOS_STANDARD_SYSTEM
+     auto* stack = ViewStackProcessor::GetInstance();
+     auto nodeId = stack->ClaimNodeId();
+     auto frameNode =
+         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+     ASSERT_NE(frameNode, nullptr);
+     stack->Push(frameNode);
+     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+     WebModelNG webModelNG;
+     bool callbackCalled = false;
+     auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+     webModelNG.SetWindowNewEvent(AccessibilityManager::RawPtr(frameNode),
+         [&callbackCalled](const std::shared_ptr<BaseEventInfo> info) { callbackCalled = true; });
+     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+     ASSERT_NE(webEventHub, nullptr);
+     webEventHub->FireOnWindowNewEvent(mockEventInfo);
+     EXPECT_TRUE(callbackCalled);
+#endif
+ }
+
+ /**
+  * @tc.name: SetOnFullScreenEnter002
+  * @tc.desc: SetOnFullScreenEnter
+  * @tc.type: FUNC
+  */
+ HWTEST_F(WebModelTestNg, SetOnFullScreenEnter002, TestSize.Level1)
+ {
+#ifdef OHOS_STANDARD_SYSTEM
+     auto* stack = ViewStackProcessor::GetInstance();
+     auto nodeId = stack->ClaimNodeId();
+     auto frameNode =
+         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+     ASSERT_NE(frameNode, nullptr);
+     stack->Push(frameNode);
+     bool callbackCalled = false;
+     WebModelNG webModelNG;
+     webModelNG.SetOnFullScreenEnter(
+         AccessibilityManager::RawPtr(frameNode), [&callbackCalled](const BaseEventInfo* info) {
+             callbackCalled = true;
+             EXPECT_TRUE(info != nullptr);
+         });
+
+     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+     ASSERT_NE(webEventHub, nullptr);
+
+     auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+     webEventHub->FireOnFullScreenEnterEvent(mockEventInfo);
+     EXPECT_TRUE(callbackCalled);
+#endif
+ }
+
+ /**
+  * @tc.name: SetWindowExitEventId001
+  * @tc.desc: Test web_model_ng.cpp
+  * @tc.type: FUNC
+  */
+ HWTEST_F(WebModelTestNg, SetWindowExitEventId001, TestSize.Level1)
+ {
+#ifdef OHOS_STANDARD_SYSTEM
+     auto* stack = ViewStackProcessor::GetInstance();
+     auto nodeId = stack->ClaimNodeId();
+     auto frameNode =
+         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+     ASSERT_NE(frameNode, nullptr);
+     stack->Push(frameNode);
+
+     WebModelNG webModelNG;
+     bool callbackCalled = false;
+     auto callback = [&callbackCalled](const BaseEventInfo* info) { callbackCalled = true; };
+     webModelNG.SetWindowExitEventId(AccessibilityManager::RawPtr(frameNode), callback);
+     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+     auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+     ASSERT_NE(webEventHub, nullptr);
+     webEventHub->FireOnWindowExitEvent(mockEventInfo);
+     EXPECT_TRUE(callbackCalled);
+#endif
+ }
 } // namespace OHOS::Ace::NG

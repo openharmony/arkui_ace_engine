@@ -256,6 +256,7 @@ public:
     static void SetOnContextMenuHide(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetGeolocationAccessEnabled(FrameNode* frameNode, bool isGeolocationAccessEnabled);
     static void SetDatabaseAccessEnabled(FrameNode* frameNode, bool isDatabaseAccessEnabled);
+    static void SetOnGeolocationShow(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetOverviewModeAccessEnabled(FrameNode* frameNode, bool isOverviewModeAccessEnabled);
     static void SetForceDarkAccess(FrameNode* frameNode, bool isForceDarkAccess);
     static void SetPinchSmoothModeEnabled(FrameNode* frameNode, bool isPinchSmoothModeEnabled);
@@ -275,6 +276,8 @@ public:
     static void SetWebCursiveFont(FrameNode* frameNode, const std::string& cursiveFontFamily);
     static void SetLayoutMode(FrameNode* frameNode, WebLayoutMode mode);
     static void SetNativeEmbedLifecycleChangeId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetNativeEmbedGestureEventId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void RegisterNativeEmbedRule(FrameNode* frameNode, const std::string& tag, const std::string& type);
     static void SetNativeEmbedOptions(FrameNode* frameNode, bool isIntrinsicSizeEnabled);
@@ -308,6 +311,25 @@ public:
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& navigationEntryCommitted);
     static void SetOnSearchResultReceive(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOverScrollMode(FrameNode* frameNode, OverScrollMode mode);
+    static void SetOnTouchIconUrlReceived(
+        FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& touchIconUrlId);
+    static void SetOnRenderProcessResponding(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+	static void SetPermissionRequestEventId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetScreenCaptureRequestEventId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetWindowNewEvent(
+        FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& jsCallback);
+    static void SetOnFullScreenEnter(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetWindowExitEventId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnAlert(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType);
+    static void SetOnConfirm(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType);
+    static void SetOnPrompt(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H
