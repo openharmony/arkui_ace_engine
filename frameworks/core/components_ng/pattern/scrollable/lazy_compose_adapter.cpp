@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "lazy_compose_adapter.h"
+#include "core/components_ng/base/frame_node.h"
 namespace OHOS::Ace::NG {
 
 RefPtr<FrameNode> LazyComposeAdapter::GetOrCreateChild(uint32_t index)
@@ -23,7 +24,6 @@ RefPtr<FrameNode> LazyComposeAdapter::GetOrCreateChild(uint32_t index)
     }
     auto newItem = createItem_ ? createItem_(index) : nullptr;
     items_.Put(index, newItem);
-    // todo: attach to tree, either here / in FrameNode
     return newItem;
 }
 
