@@ -52,6 +52,9 @@
             "@ohos/arkui/focusController": [
                 "./ohos.arkui.focusController.ts"
             ],
+            "@ohos/arkui/inspector": [
+                "./ohos.arkui.inspector.ts"
+            ],
             "@ohos/arkui/UIContext": [
                 "./ohos.arkui.UIContext.ts"
             ],
@@ -84,6 +87,7 @@
         "./ohos.animator.ts",
         "./ohos.arkui.componentUtils.ts",
         "./ohos.arkui.focusController.ts",
+        "./ohos.arkui.inspector.ts",
         "./global/**/*.ts",
         "./ohos.router.ts",
         "./ohos.observer.ts",

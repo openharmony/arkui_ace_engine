@@ -39,7 +39,21 @@ import { KeyEvent } from "./src/component/common"
 import { Nullable } from "./src/component/enums"
 import { KeyProcessingMode } from "./src/component/focus"
 import {observer} from "@ohos/observer"
+import inspector from "@ohos/arkui/inspector"
 import router from './ohos.router'
+
+export class UIInspector {
+    instanceId_: int32 = -1;
+    constructor(instanceId: int32) {
+        this.instanceId_ = instanceId;
+    }
+    public createComponentObserver(id: string): inspector.ComponentObserver {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let componentObserver = inspector.createComponentObserver(id);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return componentObserver;
+    }
+}
 
 export class Font {
     instanceId_: int32 = 10001;
@@ -174,6 +188,7 @@ export class UIContext {
     focusController_: FocusController;
     componentUtils_: ComponentUtils;
     atomicServiceBar_: AtomicServiceBarInternal;
+    uiInspector_: UIInspector | null = null;
 
     constructor(instanceId: int32) {
         this.instanceId_ = instanceId;
@@ -329,6 +344,12 @@ export class UIContext {
         const onIdleFunc = frameCallback.onIdle
         this.setFrameCallback(onFrameFunc, onIdleFunc, delayTime)
         ArkUIAniModule._Common_Restore_InstanceId()
+    }
+    public getUIInspector(): UIInspector {
+        if (!this.uiInspector_) {
+            this.uiInspector_ = new UIInspector(this.instanceId_);
+        }
+        return this.uiInspector_ as UIInspector;
     }
     public getUIObserver(): UIObserver {
         if (!this.observer_) {

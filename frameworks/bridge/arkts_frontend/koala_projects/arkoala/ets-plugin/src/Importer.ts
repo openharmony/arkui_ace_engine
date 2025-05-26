@@ -120,6 +120,7 @@ function implementedPackages(kind: ArkUIImplementation): string[] {
         'ohos.arkui.modifier',
         'ohos.animator',
         'ohos.arkui.componentUtils',
+        'ohos.arkui.inspector',
         'ohos.observer'
     ]
 
