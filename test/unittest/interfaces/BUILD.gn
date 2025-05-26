@@ -1200,6 +1200,7 @@ group("interfaces_unittest") {
     "ace_gesture:ace_native_gesture_test",
     "ace_kit:ace_kit_test",
     "ace_ui_input_event:ui_input_event_test",
+    "ace_key_event:key_event_test",
     "napi:arkui_napi_test",
   ]
 }
