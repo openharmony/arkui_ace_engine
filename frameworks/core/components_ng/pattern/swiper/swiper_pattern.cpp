@@ -242,6 +242,7 @@ void SwiperPattern::StopAndResetSpringAnimation()
         itemPosition_.clear();
         isVoluntarilyClear_ = true;
         jumpIndex_ = currentIndex_;
+        MarkDirtyNodeSelf();
     }
 }
 
