@@ -169,12 +169,16 @@ int32_t UdmfClientImpl::GetSummary(std::string& key, std::map<std::string, int64
     UDMF::QueryOption queryOption;
     queryOption.key = key;
     int32_t ret = client.GetSummary(queryOption, detailedSummary);
-    int32_t convertRet = client.GetParentType(detailedSummary, summary);
-    if (convertRet != 0) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF Convert summary failed, return value is %{public}d", convertRet);
+    if (ret != 0) {
+        return ret;
+    }
+    detailedSummaryMap = detailedSummary.summary;
+    ret = client.GetParentType(detailedSummary, summary);
+    if (ret != 0) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "UDMF Convert summary failed, return value is %{public}d", ret);
+        return ret;
     }
     summaryMap = summary.summary;
-    detailedSummaryMap = detailedSummary.summary;
     return ret;
 }
 
@@ -602,12 +606,14 @@ bool UdmfClientImpl::IsBelongsTo(const std::string& summary, const std::string& 
     std::shared_ptr<UDMF::TypeDescriptor> typeDescriptor;
     auto ret = UDMF::UtdClient::GetInstance().GetTypeDescriptor(summary, typeDescriptor);
     if (ret != 0) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF get typeDescriptor failed, return value is %{public}d", ret);
+        TAG_LOGW(AceLogTag::ACE_DRAG, "UDMF get typeDescriptor failed, return value is %{public}d", ret);
+        return false;
     }
+    CHECK_NULL_RETURN(typeDescriptor, false);
     bool result = false;
     ret = typeDescriptor->BelongsTo(allowDropType, result);
     if (ret != 0) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF determine the belonging failed, return value is %{public}d", ret);
+        TAG_LOGW(AceLogTag::ACE_DRAG, "UDMF determine the belonging failed, return value is %{public}d", ret);
     }
     return result;
 }
