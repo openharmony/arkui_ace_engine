@@ -174,6 +174,8 @@ public:
     static void SetBias(FrameNode* frameNode, const std::optional<BiasPair>& biasPair);
     static void SetBias(FrameNode* frameNode, const std::optional<float>& horisontal,
         const std::optional<float>& vertical);
+    static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
+        const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
     static void SetPixelRound(FrameNode* frameNode, uint16_t value);
     static void SetMaxWidth(FrameNode* frameNode, const CalcDimension& minWidth);
     static void SetMaxHeight(FrameNode* frameNode, const CalcDimension& minHeight);

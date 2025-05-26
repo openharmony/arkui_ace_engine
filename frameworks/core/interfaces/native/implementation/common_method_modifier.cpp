@@ -5749,15 +5749,15 @@ void KeyboardShortcutImpl(Ark_NativePointer node,
                           const Opt_Array_ModifierKey* keys,
                           const Opt_Callback_Void* action)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (!value || !keys) {
-        ViewAbstract::SetKeyboardShortcut(frameNode, {}, {}, nullptr);
+        ViewAbstractModelStatic::SetKeyboardShortcut(frameNode, {}, {}, nullptr);
         return;
     }
     auto strValue = Converter::OptConvert<std::string>(*value);
-    if (!strValue.has_value() || strValue.value().size() != 1) {
-        ViewAbstract::SetKeyboardShortcut(frameNode, {}, {}, nullptr);
+    if (value->value.selector == 0 && (!strValue.has_value() || strValue.value().size() != 1)) {
+        ViewAbstractModelStatic::SetKeyboardShortcut(frameNode, {}, {}, nullptr);
         return;
     }
     auto keysOptVect = Converter::OptConvert<std::vector<std::optional<ModifierKey>>>(*keys);
@@ -5778,10 +5778,11 @@ void KeyboardShortcutImpl(Ark_NativePointer node,
             PipelineContext::SetCallBackNode(node);
             arkCallback.Invoke();
         };
-        ViewAbstract::SetKeyboardShortcut(frameNode, strValue.value(), keysVect, std::move(onKeyboardShortcutAction));
+        ViewAbstractModelStatic::SetKeyboardShortcut(
+            frameNode, strValue.value(), keysVect, std::move(onKeyboardShortcutAction));
         return;
     }
-    ViewAbstract::SetKeyboardShortcut(frameNode, strValue.value(), keysVect, nullptr);
+    ViewAbstractModelStatic::SetKeyboardShortcut(frameNode, strValue.value(), keysVect, nullptr);
 }
 } // CommonMethodModifier
 const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
