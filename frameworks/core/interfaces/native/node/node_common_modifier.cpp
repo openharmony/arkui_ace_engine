@@ -2086,7 +2086,8 @@ void SetResizableFromVec(
 }
 
 void SetBackgroundImageResizable(
-    ArkUINodeHandle node, ArkUIStringAndFloat* options, std::vector<void*>& bgImageResizableArray)
+    ArkUINodeHandle node, ArkUIStringAndFloat* options, ArkUI_Int32 optionsSize,
+    std::vector<void*>& bgImageResizableArray)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
