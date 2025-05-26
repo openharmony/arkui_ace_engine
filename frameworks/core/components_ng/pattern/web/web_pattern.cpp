@@ -5028,6 +5028,7 @@ void WebPattern::OnVisibleAreaChange(bool isVisible)
         CloseSelectOverlay();
         SelectCancel();
         DestroyAnalyzerOverlay();
+        OnTooltip("");
         isDragEndMenuShow_ = false;
         if (isVisibleActiveEnable_ && (!isDialogNested || !isFocus_)) {
             OnInActive();
