@@ -56,10 +56,8 @@ void BoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void BoxLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto host = layoutWrapper->GetHostNode();
-    if (host && !host->GetIgnoreLayoutProcess()) {
-        if (GetNeedPostponeForIgnore()) {
-            return;
-        }
+    if (host && !host->GetIgnoreLayoutProcess() && GetNeedPostponeForIgnore()) {
+        return;
     }
     PerformLayout(layoutWrapper);
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {

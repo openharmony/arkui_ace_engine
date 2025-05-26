@@ -14,11 +14,13 @@
  */
 
 #include "flex_base_test_ng.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void FlexBaseTestNG::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
 }
 
 void FlexBaseTestNG::TearDownTestSuite()
@@ -26,7 +28,11 @@ void FlexBaseTestNG::TearDownTestSuite()
     TestNG::TearDownTestSuite();
 }
 
-void FlexBaseTestNG::SetUp() {}
+void FlexBaseTestNG::SetUp() 
+{
+    ViewStackProcessor::GetInstance()->ClearStack();
+}
+
 void FlexBaseTestNG::TearDown() {}
 
 RefPtr<FrameNode> FlexBaseTestNG::CreateFlexRow(const std::function<void(FlexModelNG)>& callback)
