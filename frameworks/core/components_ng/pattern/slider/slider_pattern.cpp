@@ -641,14 +641,17 @@ void SliderPattern::UpdateStepPointsAccessibilityVirtualNodeSelected()
         CHECK_NULL_VOID(pointNodeProperty);
         auto valueTxt = UtfUtils::Str16ToStr8(pointNodeProperty->GetContent().value_or(u""));
         if (currentStepIndex == i) {
-            pointAccessibilityProperty->SetAccessibilityText(selectedTxt + valueTxt);
+            pointAccessibilityProperty->SetSelected(true);
+            pointAccessibilityProperty->SetAccessibilityText(valueTxt);
             pointAccessibilityProperty->SetAccessibilityDescription(" ");
             isClickAbled = false;
         } else if (i >= rangeFromPointIndex && i <= rangeToPointIndex) {
-            pointAccessibilityProperty->SetAccessibilityText(unSelectedTxt + valueTxt);
+            pointAccessibilityProperty->SetSelected(false);
+            pointAccessibilityProperty->SetAccessibilityText(valueTxt);
             pointAccessibilityProperty->SetAccessibilityDescription(unSelectedDesc);
         } else {
-            pointAccessibilityProperty->SetAccessibilityText(unSelectedTxt + valueTxt);
+            pointAccessibilityProperty->SetSelected(false);
+            pointAccessibilityProperty->SetAccessibilityText(valueTxt);
             pointAccessibilityProperty->SetAccessibilityDescription(disabledDesc);
             isDisabledDesc = true;
         }
