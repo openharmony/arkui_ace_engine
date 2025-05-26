@@ -156,7 +156,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 void ScrollLayoutAlgorithm::MarkAndCheckNewOpIncNode(const RefPtr<LayoutWrapper>& layoutWrapper, Axis axis)
 {
     auto childNode = AceType::DynamicCast<FrameNode>(layoutWrapper);
-    if (childNode->GetSuggestOpIncActivatedOnce()) {
+    if (childNode && childNode->GetSuggestOpIncActivatedOnce()) {
         childNode->SetSuggestOpIncActivatedOnce();
         for (auto& child : childNode->GetChildren()) {
             auto frameNode = AceType::DynamicCast<FrameNode>(child);
