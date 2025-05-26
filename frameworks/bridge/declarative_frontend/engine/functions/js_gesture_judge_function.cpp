@@ -68,14 +68,14 @@ GestureJudgeResult JsGestureJudgeFunction::Execute(const std::shared_ptr<BaseGes
         othersArr->SetValueAt(othersIdx++, othersObj);
     }
 
-    auto touchRecognizerMap = JsShouldBuiltInRecognizerParallelWithFunction::CreateTouchRecognizerMap(info, current);
+    auto touchRecognizerMap = CreateTouchRecognizerMap(info, current);
     JSRef<JSArray> touchRecognizers = JSRef<JSArray>::New();
     uint32_t touchRecognizersIdx = 0;
-    for (auto& [item, recognizerTarget] : touchRecognizerMap) {
+    for (auto& [item, fingerIds] : touchRecognizerMap) {
         JSRef<JSObject> recognizerObj = JSClass<JSTouchRecognizer>::NewInstance();
         auto jsRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSTouchRecognizer>());
         if (jsRecognizer) {
-            jsRecognizer->SetTouchData(item, recognizerTarget);
+            jsRecognizer->SetTouchData(item, fingerIds);
         }
         touchRecognizers->SetValueAt(touchRecognizersIdx++, recognizerObj);
     }
@@ -87,6 +87,51 @@ GestureJudgeResult JsGestureJudgeFunction::Execute(const std::shared_ptr<BaseGes
         returnValue = static_cast<GestureJudgeResult>(jsValue->ToNumber<int32_t>());
     }
     return returnValue;
+}
+
+TouchRecognizerMap JsGestureJudgeFunction::CreateTouchRecognizerMap(
+    const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NG::NGGestureRecognizer>& current)
+{
+    TouchRecognizerMap touchRecognizerMap;
+    auto frameNode = current->GetAttachedNode().Upgrade();
+    CHECK_NULL_RETURN(frameNode, touchRecognizerMap);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, touchRecognizerMap);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_RETURN(eventManager, touchRecognizerMap);
+    auto& touchTestResult = eventManager->touchTestResults_;
+    const auto& fingerList = info->GetFingerList();
+    for (const auto& finger : fingerList) {
+        auto& touchTargetList = touchTestResult[finger.fingerId_];
+        CollectTouchEventTarget(touchRecognizerMap, touchTargetList, AceType::RawPtr(frameNode), finger.fingerId_);
+    }
+    return touchRecognizerMap;
+}
+
+void JsGestureJudgeFunction::CollectTouchEventTarget(
+    TouchRecognizerMap& dict, std::list<RefPtr<TouchEventTarget>>& targets, NG::FrameNode* frameNode, int32_t fingerId)
+{
+    for (auto& target : targets) {
+        if (AceType::DynamicCast<NG::NGGestureRecognizer>(target)) {
+            continue;
+        }
+        auto weakTarget = WeakPtr<TouchEventTarget>(target);
+        if (dict.find(weakTarget) != dict.end() && dict[weakTarget].count(fingerId) > 0) {
+            continue;
+        }
+        auto targetNode = target->GetAttachedNode().Upgrade();
+        if (targetNode && targetNode == frameNode) {
+            dict[weakTarget].insert(fingerId);
+            return;
+        }
+        while (targetNode) {
+            if (targetNode == frameNode) {
+                dict[weakTarget].insert(fingerId);
+                break;
+            }
+            targetNode = targetNode->GetParentFrameNode();
+        }
+    }
 }
 
 JSRef<JSObject> JsGestureJudgeFunction::CreateFingerInfo(const FingerInfo& fingerInfo)

@@ -298,29 +298,46 @@ void JSSwipeRecognizer::GetSpeed(const JSCallbackInfo& args)
 
 void JSTouchRecognizer::CancelTouch(const JSCallbackInfo& args)
 {
-    if (touchRecognizerTarget_.empty()) {
-        TAG_LOGW(AceLogTag::ACE_GESTURE, "touchRecognizerTarget_ is empty.");
+    if (fingerIds_.empty()) {
+        TAG_LOGW(AceLogTag::ACE_GESTURE, "fingerIds_ is empty.");
         return;
     }
-    CHECK_NULL_VOID(target_);
-    auto node = target_->GetAttachedNode().Upgrade();
+    auto target = target_.Upgrade();
+    CHECK_NULL_VOID(target);
+    auto node = target->GetAttachedNode().Upgrade();
     CHECK_NULL_VOID(node);
     auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto eventManager = pipeline->GetEventManager();
     CHECK_NULL_VOID(eventManager);
- 
-    eventManager->DispatchTouchCancelToRecognizer(target_, touchRecognizerTarget_);
-    touchRecognizerTarget_.clear();
+    auto& touchTestResult = eventManager->touchTestResults_;
+    std::vector<std::pair<int32_t, TouchTestResult::iterator>> legacyTarget;
+    for (const auto& fingerId : fingerIds_) {
+        if (touchTestResult.find(fingerId) == touchTestResult.end()) {
+            continue;
+        }
+
+        auto& targetsList = touchTestResult[fingerId];
+        auto it = std::find_if(targetsList.begin(), targetsList.end(),
+            [&target](const RefPtr<TouchEventTarget>& t) { return t == target; });
+
+        if (it != targetsList.end()) {
+            legacyTarget.emplace_back(fingerId, it);
+        }
+    }
+
+    eventManager->DispatchTouchCancelToRecognizer(RawPtr(target), legacyTarget);
+    fingerIds_.clear();
 }
  
 void JSTouchRecognizer::GetEventTargetInfo(const JSCallbackInfo& args)
 {
-    if (!target_) {
+    auto target = target_.Upgrade();
+    if (!target) {
         args.SetReturnValue(JSClass<JSEventTargetInfo>::NewInstance());
         return;
     }
-    auto attachNode = target_->GetAttachedNode().Upgrade();
+    auto attachNode = target->GetAttachedNode().Upgrade();
     if (!attachNode) {
         args.SetReturnValue(JSClass<JSEventTargetInfo>::NewInstance());
         return;
