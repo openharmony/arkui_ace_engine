@@ -357,6 +357,34 @@ HWTEST_F(WebPatternTestNg, InitDragEvent006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetDragAcceptableStatus001
+ * @tc.desc: GetDragAcceptableStatus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, GetDragAcceptableStatus001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    webPattern->delegate_->UpdateDragCursor(NWeb::NWebDragData::DragOperation::DRAG_OPERATION_COPY);
+    webPattern->GetDragAcceptableStatus();
+    webPattern->GetDragAcceptableStatus();
+    webPattern->delegate_->UpdateDragCursor(NWeb::NWebDragData::DragOperation::DRAG_OPERATION_LINK);
+    webPattern->GetDragAcceptableStatus();
+    webPattern->delegate_->UpdateDragCursor(NWeb::NWebDragData::DragOperation::DRAG_OPERATION_MOVE);
+    webPattern->GetDragAcceptableStatus();
+    webPattern->delegate_ = nullptr;
+#endif
+}
+
+/**
  * @tc.name: ShowDateTimeDialog007
  * @tc.desc: ShowDateTimeDialog.
  * @tc.type: FUNC
