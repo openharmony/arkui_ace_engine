@@ -174,6 +174,7 @@ public:
                 pattern->GetAttr<double>("ai_intelligent_gradient_scalar2", 0.0),
                 pattern->GetAttr<double>("ai_intelligent_gradient_scalar3", 0.0),
                 pattern->GetAttr<double>("ai_intelligent_gradient_scalar4", 0.0) };
+            theme->aiMenuSymbolColor_ = pattern->GetAttr<Color>("ai_intelligent_gradient_color1", Color(0xFF3A73DE));
         }
     };
 
@@ -482,6 +483,11 @@ public:
         return aiMenuSymbolId_;
     }
 
+    const Color& GetAIMenuSymbolColor() const
+    {
+        return aiMenuSymbolColor_;
+    }
+
 protected:
     TextOverlayTheme() = default;
 
@@ -543,6 +549,7 @@ private:
     std::unordered_map<OHOS::Ace::TextDataDetectType, std::string> aiMenuTypeOptionNames_;
     std::vector<Color> aiMenuFontGradientColors_;
     std::vector<float> aiMenuFontGradientScalars_;
+    Color aiMenuSymbolColor_;
 };
 
 } // namespace OHOS::Ace

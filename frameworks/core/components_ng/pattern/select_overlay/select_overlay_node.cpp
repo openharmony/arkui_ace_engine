@@ -1782,17 +1782,23 @@ std::function<void(WeakPtr<NG::FrameNode>)> SelectOverlayNode::GetSymbolFunc(con
     CHECK_NULL_RETURN(pipeline, symbol);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(textOverlayTheme, symbol);
-
+    std::vector<Color> symbolColor;
+    if (symbolId == OH_DEFAULT_AI_MENU_PHONE) {
+        symbolColor = { textOverlayTheme->GetAIMenuSymbolColor() };
+    }
     auto symbolIdFunc = getSymbolIdMap.find(symbolId);
     if (symbolIdFunc != getSymbolIdMap.end()) {
         auto symbolId = (symbolIdFunc->second)(textOverlayTheme);
         auto symbolSize = textOverlayTheme->GetSymbolSize();
-        symbol = [symbolId, symbolSize](WeakPtr<NG::FrameNode> weak) {
+        symbol = [symbolId, symbolSize, symbolColor](WeakPtr<NG::FrameNode> weak) {
             auto node = weak.Upgrade();
             CHECK_NULL_VOID(node);
             auto symbolNode = Referenced::RawPtr(node);
             SymbolModelNG::InitialSymbol(symbolNode, symbolId);
             SymbolModelNG::SetFontSize(symbolNode, symbolSize);
+            if (!symbolColor.empty()) {
+                SymbolModelNG::SetFontColor(symbolNode, symbolColor);
+            }
         };
     }
     return symbol;
@@ -2023,24 +2029,30 @@ void SelectOverlayNode::AddCreateMenuExtensionMenuParams(const std::vector<MenuO
             systemEvent = clickCallback->second;
         }
         auto callback = CreateExtensionMenuOptionCallback(id, info->onCreateCallback, systemEvent, item);
-        auto content = GetItemContent(item.id, item.content.value_or(""));
+        auto content = GetItemContent(item.id, item.content.value_or(""), info);
         std::function<void(WeakPtr<NG::FrameNode>)> symbol = nullptr;
         auto symbolIdFunc = getSymbolIdMap.find(item.id);
+        std::vector<Color> symbolColor;
+        if (IsAIMenuOption(item.id)) {
+            symbolColor = { textOverlayTheme->GetAIMenuSymbolColor() };
+        }
         if (symbolIdFunc != getSymbolIdMap.end()) {
             auto symbolId = (symbolIdFunc->second)(textOverlayTheme);
             auto symbolSize = textOverlayTheme->GetSymbolSize();
-            symbol = [symbolId, symbolSize](WeakPtr<NG::FrameNode> weak) {
+            symbol = [symbolId, symbolSize, symbolColor](WeakPtr<NG::FrameNode> weak) {
                 auto symbolNode = weak.Upgrade();
                 SymbolModelNG::InitialSymbol(RawPtr(symbolNode), symbolId);
                 SymbolModelNG::SetFontSize(RawPtr(symbolNode), symbolSize);
+                if (!symbolColor.empty()) {
+                    SymbolModelNG::SetFontColor(RawPtr(symbolNode), symbolColor);
+                }
             };
         }
         auto param = OptionParam(content, GetSystemIconPath(item.id, item.icon.value_or(" ")), callback, symbol);
         if (item.id == OH_DEFAULT_PASTE) {
             param.isPasteOption = true;
-        } else if (IsAIMenuOption(item.id)) {
-            param.isAIMenuOption = true;
         }
+        param.isAIMenuOption = IsAIMenuOption(item.id) ? true : false;
         params.emplace_back(param);
         itemNum++;
     }
