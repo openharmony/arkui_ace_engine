@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -2414,6 +2415,8 @@ void ListPattern::UpdateScrollBarOffset()
         currentOffset += contentStartOffset_;
         estimatedHeight += contentStartOffset_ + contentEndOffset_;
     }
+    float expandHeight = ScrollableUtils::CheckHeightExpansion(layoutPriority, GetAxis());
+    estimatedHeight -= expandHeight;
 
     UpdateScrollBarRegion(currentOffset, estimatedHeight + paddingMain, size, Offset(0.0f, 0.0f));
 }

@@ -1724,8 +1724,8 @@ HWTEST_F(ListLayoutTestNg, ListLayout_SafeArea001, TestSize.Level1)
     CreateListItems(TOTAL_ITEM_NUMBER * 2);
     CreateDone();
     EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea)
-        .Times(1)
-        .WillOnce(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
+        .Times(2)
+        .WillRepeatedly(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
     layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
     FlushUITasks();
     EXPECT_EQ(pattern_->contentEndOffset_, 100);
@@ -1751,6 +1751,34 @@ HWTEST_F(ListLayoutTestNg, ListLayout_SafeArea002, TestSize.Level1)
     FlushUITasks();
     EXPECT_EQ(pattern_->contentEndOffset_, 0);
     EXPECT_TRUE(IsEqual(frameNode_->geometryNode_->GetFrameSize(), SizeF(WIDTH, HEIGHT)));
+}
+
+/**
+ * @tc.name: ListLayout_SafeArea003
+ * @tc.desc: Test list layout with expandSafeArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListLayout_SafeArea003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List.
+     */
+    ListModelNG model = CreateList();
+    model.SetInitialIndex(1);
+    model.SetScrollBar(DisplayMode::ON);
+    CreateListItems(TOTAL_ITEM_NUMBER * 2);
+    CreateDone();
+
+    EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea)
+        .Times(2)
+        .WillRepeatedly(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
+    layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
+    FlushUITasks();
+    EXPECT_EQ(pattern_->contentEndOffset_, 100);
+
+    RefPtr<ListPaintMethod> paintMethod = UpdateOverlayModifier();
+    auto scrollBar = paintMethod->scrollBar_.Upgrade();
+    EXPECT_EQ(scrollBar->GetEstimatedHeigh(), 2000);
 }
 
 /**
