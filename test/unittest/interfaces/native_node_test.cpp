@@ -4854,7 +4854,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest064, TestSize.Level1)
     ArkUI_AttributeItem layoutModeAttr = {layoutModeV, 1, nullptr, nullptr};
         
     auto frameNode = reinterpret_cast<NG::FrameNode*>(rootNode->uiNodeHandle);
-    frameNode->AttachContext(NG::MockPipelineContext::GetCurrent().GetRawPtr());
+    auto context = NG::MockPipelineContext::GetCurrent();
+    frameNode->AttachContext(AceType::RawPtr(context));
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_WATER_FLOW_LAYOUT_MODE, &layoutModeAttr),
         ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_LAYOUT_MODE)->value->i32,
