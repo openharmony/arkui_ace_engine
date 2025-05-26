@@ -102,7 +102,7 @@ int32_t LazyContainer::GetTotalChildCount() const
 {
     return newAdapter_ ? newAdapter_->GetTotalCount() : -1;
 }
-Pattern::LazyComposeAdapter* LazyContainer::GetArkoalaLazyAdapter()
+LazyComposeAdapter* LazyContainer::GetArkoalaLazyAdapter()
 {
     return newAdapter_.get();
 }

@@ -44,6 +44,7 @@ class AccessibilityEventInfo;
 namespace OHOS::Ace::NG {
 class AccessibilitySessionAdapter;
 class InspectorFilter;
+class LazyComposeAdapter;
 
 class ScrollingListener : public AceType {
     DECLARE_ACE_TYPE(ScrollingListener, AceType);
@@ -669,7 +670,6 @@ public:
     {
         return nullptr;
     }
-    class LazyComposeAdapter;
     virtual LazyComposeAdapter* GetArkoalaLazyAdapter()
     {
         return nullptr;

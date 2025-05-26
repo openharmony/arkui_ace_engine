@@ -55,6 +55,7 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_ng/pattern/scrollable/lazy_compose_adapter.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
