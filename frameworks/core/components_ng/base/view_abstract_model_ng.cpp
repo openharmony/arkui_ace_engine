@@ -51,16 +51,15 @@ void StartVirator(const MenuParam& menuParam, bool isMenu, const std::string& me
         return;
     }
     if (menuParam.hapticFeedbackMode == HapticFeedbackMode::AUTO) {
-        if (menuParam.maskEnable.has_value() && menuParam.maskEnable.value()) {
-            VibratorUtils::StartViratorDirectly(menuHapticFeedback);
+        if (menuParam.maskEnable.has_value()) {
+            if (menuParam.maskEnable.value()) {
+                VibratorUtils::StartViratorDirectly(menuHapticFeedback);
+            }
             return;
         }
-    }
-    if (isMenu) {
-        return;
-    }
-    if (menuParam.hapticFeedbackMode == HapticFeedbackMode::AUTO && menuParam.previewMode != MenuPreviewMode::NONE) {
-        VibratorUtils::StartViratorDirectly(menuHapticFeedback);
+        if (!isMenu && menuParam.previewMode != MenuPreviewMode::NONE) {
+            VibratorUtils::StartViratorDirectly(menuHapticFeedback);
+        }
     }
 }
 

@@ -1055,12 +1055,12 @@ bool MenuWrapperPattern::CheckPointInMenuZone(const RefPtr<FrameNode>& node, con
     return menuZone.IsInRegion(point);
 }
 
-bool MenuWrapperPattern::GetMenuMaskEnable()
+bool MenuWrapperPattern::GetMenuMaskEnable() const
 {
     return menuParam_.maskEnable.value_or(false);
 }
 
-Color MenuWrapperPattern::GetMenuMaskColor()
+Color MenuWrapperPattern::GetMenuMaskColor() const
 {
     if (menuParam_.maskType.has_value() && menuParam_.maskType->maskColor.has_value()) {
         return menuParam_.maskType->maskColor.value();
@@ -1076,10 +1076,10 @@ Color MenuWrapperPattern::GetMenuMaskColor()
     return menuTheme->GetPreviewMenuMaskColor();
 }
 
-BlurStyle MenuWrapperPattern::GetMenuMaskblurStyle()
+BlurStyle MenuWrapperPattern::GetMenuMaskblurStyle() const
 {
-    if (menuParam_.maskType.has_value() && menuParam_.maskType->maskBackGroundBlueStyle.has_value()) {
-        return menuParam_.maskType->maskBackGroundBlueStyle.value();
+    if (menuParam_.maskType.has_value() && menuParam_.maskType->maskBackGroundBlurStyle.has_value()) {
+        return menuParam_.maskType->maskBackGroundBlurStyle.value();
     }
     return BlurStyle::BACKGROUND_THIN;
 }
@@ -1105,7 +1105,7 @@ void MenuWrapperPattern::SetMenuMaskColor(Color maskColor)
 void MenuWrapperPattern::SetMenuMaskblurStyle(BlurStyle maskBlurStyle)
 {
     EnsureMenuMaskTypeInitialized();
-    menuParam_.maskType->maskBackGroundBlueStyle = maskBlurStyle;
+    menuParam_.maskType->maskBackGroundBlurStyle = maskBlurStyle;
 }
 
 void MenuWrapperPattern::UpdateFilterMaskType()

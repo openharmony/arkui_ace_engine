@@ -612,9 +612,9 @@ public:
         hasCustomOutlineColor_ = hasCustomOutlineColor;
     }
 
-    bool GetMenuMaskEnable();
-    Color GetMenuMaskColor();
-    BlurStyle GetMenuMaskblurStyle();
+    bool GetMenuMaskEnable() const;
+    Color GetMenuMaskColor() const;
+    BlurStyle GetMenuMaskblurStyle() const;
     void SetMenuMaskEnable(bool maskEnable);
     void SetMenuMaskColor(Color maskColor);
     void SetMenuMaskblurStyle(BlurStyle maskBlurStyle);

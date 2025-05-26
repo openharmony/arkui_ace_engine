@@ -1871,7 +1871,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNg008, TestSize.Level1)
     menuParam.type = MenuType::MENU;
     menuParam.maskType = NG::MenuMaskType();
     menuParam.maskType->maskColor = Color::RED;
-    menuParam.maskType->maskBackGroundBlueStyle = BlurStyle::BACKGROUND_THIN;
+    menuParam.maskType->maskBackGroundBlurStyle = BlurStyle::BACKGROUND_THIN;
     auto menuWrapperNode2 = MenuView::Create(textNode, 11, V2::TEXT_ETS_TAG, menuParam, true, customNode);
     ASSERT_NE(menuWrapperNode2, nullptr);
     ASSERT_EQ(menuWrapperNode2->GetChildren().size(), 1);

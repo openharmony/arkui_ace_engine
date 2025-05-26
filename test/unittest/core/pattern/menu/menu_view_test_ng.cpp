@@ -1117,9 +1117,9 @@ HWTEST_F(MenuViewTestNg, UpdateMenuMaskType001, TestSize.Level1)
     menuParam.maskEnable = true;
     menuParam.maskType = NG::MenuMaskType();
     menuParam.maskType->maskColor = Color::RED;
-    menuParam.maskType->maskBackGroundBlueStyle = BlurStyle::REGULAR;
-    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<Pattern>());
+    menuParam.maskType->maskBackGroundBlurStyle = BlurStyle::REGULAR;
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
 
     auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
