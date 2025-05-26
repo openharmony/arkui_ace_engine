@@ -48,6 +48,9 @@ class BaseNode extends ViewBuildNodeBase {
     postTouchEvent(touchEvent) {
         return this.builderBaseNode_.postTouchEvent(touchEvent);
     }
+    postInputEvent(event) {
+        return this.builderBaseNode_.postInputEvent(event);
+    }
     disposeNode() {
         return this.builderBaseNode_.disposeNode();
     }
@@ -107,6 +110,12 @@ class BuilderNode {
     postTouchEvent(touchEvent) {
         __JSScopeUtil__.syncInstanceId(this._JSBuilderNode.getInstanceId());
         let ret = this._JSBuilderNode.postTouchEvent(touchEvent);
+        __JSScopeUtil__.restoreInstanceId();
+        return ret;
+    }
+    postInputEvent(event) {
+        __JSScopeUtil__.syncInstanceId(this._JSBuilderNode.getInstanceId());
+        let ret = this._JSBuilderNode.postInputEvent(event);
         __JSScopeUtil__.restoreInstanceId();
         return ret;
     }

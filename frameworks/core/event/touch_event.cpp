@@ -265,6 +265,7 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.height = height;
     event.pressedTime = pressedTime;
     event.convertInfo = convertInfo;
+    event.passThrough = passThrough;
     return event;
 }
 

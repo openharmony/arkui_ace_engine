@@ -535,7 +535,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest017, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Call MouseTest with MouseAction::WINDOW_LEAVE
-     * @tc.expected: currHoverTestResults_ is empty
+     * @tc.expected: currHoverTestResultsMap_[event.id] is empty
      */
     MouseEvent event;
     const int nodeId = 10008;
@@ -544,30 +544,30 @@ HWTEST_F(EventManagerTestNg, EventManagerTest017, TestSize.Level1)
 
     event.action = MouseAction::WINDOW_LEAVE;
     auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, nodeId);
-    eventManager->currHoverTestResults_.push_back(hoverEventTarget);
-    EXPECT_FALSE(eventManager->currHoverTestResults_.empty());
+    eventManager->currHoverTestResultsMap_[event.id].push_back(hoverEventTarget);
+    EXPECT_FALSE(eventManager->currHoverTestResultsMap_[event.id].empty());
     eventManager->MouseTest(event, frameNode, touchRestrict);
-    EXPECT_TRUE(eventManager->currHoverTestResults_.empty());
+    EXPECT_TRUE(eventManager->currHoverTestResultsMap_[event.id].empty());
 
     /**
      * @tc.steps: step3. Call MouseTest with MouseAction::WINDOW_ENTER
-     * @tc.expected: lastHoverTestResults_ is empty
+     * @tc.expected: lastHoverTestResultsMap_[event.id] is empty
      */
     event.action = MouseAction::WINDOW_ENTER;
-    eventManager->lastHoverTestResults_.push_back(hoverEventTarget);
-    EXPECT_FALSE(eventManager->lastHoverTestResults_.empty());
+    eventManager->lastHoverTestResultsMap_[event.id].push_back(hoverEventTarget);
+    EXPECT_FALSE(eventManager->lastHoverTestResultsMap_[event.id].empty());
     eventManager->MouseTest(event, frameNode, touchRestrict);
-    EXPECT_TRUE(eventManager->lastHoverTestResults_.empty());
+    EXPECT_TRUE(eventManager->lastHoverTestResultsMap_[event.id].empty());
 
     /**
      * @tc.steps: step4. Call MouseTest with MouseAction::HOVER
-     * @tc.expected: lastHoverTestResults_ is empty and currHoverTestResults_ is empty
+     * @tc.expected: lastHoverTestResultsMap_[event.id] is empty and currHoverTestResultsMap_[event.id] is empty
      */
     event.action = MouseAction::HOVER;
-    eventManager->lastHoverTestResults_.push_back(hoverEventTarget);
+    eventManager->lastHoverTestResultsMap_[event.id].push_back(hoverEventTarget);
     eventManager->MouseTest(event, frameNode, touchRestrict);
-    EXPECT_TRUE(eventManager->lastHoverTestResults_.empty());
-    EXPECT_TRUE(eventManager->currHoverTestResults_.empty());
+    EXPECT_TRUE(eventManager->lastHoverTestResultsMap_[event.id].empty());
+    EXPECT_TRUE(eventManager->currHoverTestResultsMap_[event.id].empty());
 }
 
 /**
@@ -586,7 +586,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest018, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Call DispatchMouseEventNG
-     * @tc.expected: currHoverTestResults_ is empty
+     * @tc.expected: currHoverTestResultsMap_[event.id] is empty
      */
     MouseEvent event;
     event.action = MouseAction::PRESS;
@@ -595,14 +595,14 @@ HWTEST_F(EventManagerTestNg, EventManagerTest018, TestSize.Level1)
 
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
     eventManager->pressMouseTestResults_.push_back(mouseEventTarget);
-    eventManager->currMouseTestResults_.push_back(mouseEventTarget);
+    eventManager->currMouseTestResultsMap_[0].push_back(mouseEventTarget);
 
     auto retFlag = eventManager->DispatchMouseEventNG(event);
     EXPECT_FALSE(retFlag);
 
     /**
      * @tc.steps: step2. Call DispatchMouseEventNG
-     * @tc.expected: currHoverTestResults_ is empty
+     * @tc.expected: currHoverTestResultsMap_[event.id] is empty
      */
     event.action = MouseAction::RELEASE;
     event.button = MouseButton::LEFT_BUTTON;
@@ -612,7 +612,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest018, TestSize.Level1)
 
     /**
      * @tc.steps: step3. Call DispatchMouseEventNG
-     * @tc.expected: currHoverTestResults_ is empty
+     * @tc.expected: currHoverTestResultsMap_[event.id] is empty
      */
     event.action = MouseAction::MOVE;
     event.button = MouseButton::LEFT_BUTTON;
@@ -622,14 +622,14 @@ HWTEST_F(EventManagerTestNg, EventManagerTest018, TestSize.Level1)
 
     /**
      * @tc.steps: step4. Call DispatchMouseEventNG
-     * @tc.expected: currHoverTestResults_ not empty
+     * @tc.expected: currHoverTestResultsMap_[event.id] not empty
      */
     event.action = MouseAction::MOVE;
     event.button = MouseButton::LEFT_BUTTON;
     event.pullAction = MouseAction::PULL_UP;
 
     auto mouseTestResult = AceType::MakeRefPtr<MouseEventTarget>(CTRL, NODEID);
-    eventManager->currMouseTestResults_.push_back(mouseTestResult);
+    eventManager->currMouseTestResultsMap_[0].push_back(mouseTestResult);
 
     retFlag = eventManager->DispatchMouseEventNG(event);
     EXPECT_FALSE(retFlag);
@@ -657,10 +657,10 @@ HWTEST_F(EventManagerTestNg, EventManagerTest019, TestSize.Level1)
     auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(MOUSE, NODEID);
     auto hoverEventTarget2 = AceType::MakeRefPtr<HoverEventTarget>(MOUSE_EVENT, NODEID_2);
     auto hoverEventTarget3 = AceType::MakeRefPtr<HoverEventTarget>(MOUSE_EVENT_2, NODEID_3);
-    eventManager->lastHoverTestResults_.push_back(hoverEventTarget);
-    eventManager->currHoverTestResults_.push_back(hoverEventTarget2);
-    eventManager->currHoverTestResults_.push_back(hoverEventTarget3);
-    eventManager->currHoverTestResults_.push_back(hoverEventTarget);
+    eventManager->lastHoverTestResultsMap_[event.id].push_back(hoverEventTarget);
+    eventManager->currHoverTestResultsMap_[event.id].push_back(hoverEventTarget2);
+    eventManager->currHoverTestResultsMap_[event.id].push_back(hoverEventTarget3);
+    eventManager->currHoverTestResultsMap_[event.id].push_back(hoverEventTarget);
     eventManager->lastHoverDispatchLength_++;
 
     auto retFlag = eventManager->DispatchMouseHoverEventNG(event);
@@ -670,10 +670,10 @@ HWTEST_F(EventManagerTestNg, EventManagerTest019, TestSize.Level1)
      * @tc.steps: step2. Call DispatchMouseHoverEventNG with lastHoverTestResults == currHoverTestResults
      * @tc.expected: retFlag is true
      */
-    eventManager->lastHoverTestResults_.clear();
-    eventManager->lastHoverTestResults_.push_back(hoverEventTarget);
-    eventManager->currHoverTestResults_.clear();
-    eventManager->currHoverTestResults_.push_back(hoverEventTarget);
+    eventManager->lastHoverTestResultsMap_[event.id].clear();
+    eventManager->lastHoverTestResultsMap_[event.id].push_back(hoverEventTarget);
+    eventManager->currHoverTestResultsMap_[event.id].clear();
+    eventManager->currHoverTestResultsMap_[event.id].push_back(hoverEventTarget);
 
     retFlag = eventManager->DispatchMouseHoverEventNG(event);
     EXPECT_TRUE(retFlag);
@@ -705,7 +705,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest020, TestSize.Level1)
     EXPECT_FALSE(retFlag);
 
     /**
-     * @tc.steps: step3. Call DispatchAxisEventNG with axisTestResults_ empty
+     * @tc.steps: step3. Call DispatchAxisEventNG with axisTestResultsMap_[event.id] empty
      * @tc.expected: retFlag is false
      */
     event.horizontalAxis = 1;
@@ -713,14 +713,14 @@ HWTEST_F(EventManagerTestNg, EventManagerTest020, TestSize.Level1)
     EXPECT_TRUE(retFlag);
 
     /**
-     * @tc.steps: step4. Call DispatchAxisEventNG with axisTestResults_ not empty
+     * @tc.steps: step4. Call DispatchAxisEventNG with axisTestResultsMap_[event.id] not empty
      * @tc.expected: retFlag is false
      */
     auto axisEventTarget = AceType::MakeRefPtr<AxisEventTarget>();
     auto onAxisCallback = [](AxisInfo&) -> void {};
     axisEventTarget->SetOnAxisCallback(onAxisCallback);
 
-    eventManager->axisTestResults_.push_back(axisEventTarget);
+    eventManager->axisTestResultsMap_[event.id].push_back(axisEventTarget);
     retFlag = eventManager->DispatchAxisEventNG(event);
     EXPECT_TRUE(retFlag);
 }
