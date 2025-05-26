@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/button/button_model_ng.h"
 
 #include "base/utils/utils.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -43,6 +44,7 @@ void ButtonModelNG::SetFontStyle(const Ace::FontStyle& fontStyle)
 void ButtonModelNG::SetFontFamily(const std::vector<std::string>& fontFamily)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontFamily, fontFamily);
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColorSetByUser, true);
 }
 
 void ButtonModelNG::SetFontColor(const Color& textColor)
@@ -89,6 +91,321 @@ void ButtonModelNG::SetButtonStyle(const std::optional<ButtonStyleMode>& buttonS
         BackgroundColor(bgColor, true);
         SetFontColor(textColor);
     }
+}
+
+void ButtonModelNG::ParseButtonResColor(
+    const RefPtr<ResourceObject>& resObj, Color& result, const ButtonColorType buttonColorType)
+{
+    auto parseFlag = ResourceParseUtils::ParseResColor(resObj, result);
+    CHECK_EQUAL_VOID(parseFlag, true);
+    auto context = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    auto buttonTheme = context->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    switch (buttonColorType) {
+        case ButtonColorType::FONT_COLOR:
+            result = buttonTheme->GetTextStyle().GetTextColor();
+            break;
+        case ButtonColorType::BACKGROUND_COLOR:
+            result = buttonTheme->GetBgColor();
+            break;
+        default:
+            break;
+    }
+}
+
+void ButtonModelNG::CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
+    const ButtonColorType buttonColorType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithColorResourceObj(frameNode, resObj, buttonColorType);
+}
+
+void ButtonModelNG::UpdateResColor(FrameNode* frameNode, Color result, const ButtonColorType buttonColorType)
+{
+    CHECK_NULL_VOID(frameNode);
+    switch (buttonColorType) {
+        case ButtonColorType::FONT_COLOR:
+            SetFontColor(frameNode, result);
+            break;
+        case ButtonColorType::BACKGROUND_COLOR:
+            BackgroundColor(frameNode, result, true);
+            break;
+        default:
+            break;
+    }
+    frameNode->MarkModifyDone();
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_NORMAL);
+}
+
+void ButtonModelNG::CreateWithColorResourceObj(
+    FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, const ButtonColorType buttonColorType)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "button" + ColorTypeToString(buttonColorType);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [buttonColorType, weak = AceType::WeakClaim(frameNode)](
+        const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        Color result;
+        ParseButtonResColor(resObj, result, buttonColorType);
+        UpdateResColor(AceType::RawPtr(frameNode), result, buttonColorType);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void ButtonModelNG::CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj,
+    const ButtonStringType buttonStringType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "button" + StringTypeToStr(buttonStringType);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [buttonStringType, weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+        const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        std::string result;
+        if (ResourceParseUtils::ParseResString(resObj, result)) {
+            pattern->UpdateComponentString(result, buttonStringType);
+        }
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void ButtonModelNG::CreateWithFamiliesResourceObj(const RefPtr<ResourceObject>& resObj,
+    const ButtonStringType buttonStringType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithFamiliesResourceObj(frameNode, resObj, buttonStringType);
+}
+
+void ButtonModelNG::UpdateDefaultFamilies(
+    FrameNode* frameNode, std::vector<std::string>& value, const ButtonStringType buttonStringType)
+{
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto textTheme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    value = textTheme->GetTextStyle().GetFontFamilies();
+
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (buttonStringType) {
+            case ButtonStringType::FONT_FAMILY:
+                SetFontFamily(frameNode, value);
+                break;
+            default:
+                break;
+        }
+    }
+    if (frameNode->GetRerenderable()) {
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_NORMAL);
+    }
+}
+
+void ButtonModelNG::UpdateComponentFamilies(
+    FrameNode* frameNode, const std::vector<std::string>& value, const ButtonStringType buttonStringType)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto textTheme = pipelineContext->GetTheme<TextTheme>();
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (buttonStringType) {
+            case ButtonStringType::FONT_FAMILY:
+                SetFontFamily(frameNode, value);
+                break;
+            default:
+                break;
+        }
+    }
+    if (frameNode->GetRerenderable()) {
+        frameNode->MarkModifyDone();
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void ButtonModelNG::CreateWithFamiliesResourceObj(
+    FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, const ButtonStringType buttonStringType)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "button" + StringTypeToStr(buttonStringType);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [buttonStringType, weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        std::vector<std::string> result;
+        result.clear();
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto flag = ResourceParseUtils::ParseResFontFamilies(resObj, result);
+        if (!flag || result.empty()) {
+            UpdateDefaultFamilies(AceType::RawPtr(frameNode), result, buttonStringType);
+            return;
+        }
+        ButtonModelNG::UpdateComponentFamilies(AceType::RawPtr(frameNode), result, buttonStringType);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void ButtonModelNG::CreateWithDimensionFpResourceObj(const RefPtr<ResourceObject>& resObj,
+    const ButtonDimensionType buttonDimensionType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithDimensionFpResourceObj(frameNode, resObj, buttonDimensionType);
+}
+void ButtonModelNG::CreateWithDimensionFpResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+    const ButtonDimensionType buttonDimensionType)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "button" + DimensionTypeToString(buttonDimensionType);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [buttonDimensionType, weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+        const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CalcDimension result;
+        if (ResourceParseUtils::ParseResDimensionFpNG(resObj, result, false)) {
+            pattern->UpdateComponentDimension(result, buttonDimensionType);
+        }
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void ButtonModelNG::CreateWithDoubleResourceObj(const RefPtr<ResourceObject>& resObj,
+    const ButtonDoubleType buttonDoubleType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithDoubleResourceObj(frameNode, resObj, buttonDoubleType);
+}
+
+bool ButtonModelNG::CheckFontScale(bool resultFlag, double result, const ButtonDoubleType buttonDoubleType)
+{
+    switch (buttonDoubleType) {
+        case ButtonDoubleType::MIN_FONT_SCALE:
+            if (LessOrEqual(result, 0.0f) || GreatOrEqual(result, 1.0f)) {
+                resultFlag = true;
+            }
+            break;
+        case ButtonDoubleType::MAX_FONT_SCALE:
+            resultFlag = LessOrEqual(result, 1.0f);
+            break;
+    }
+    return resultFlag;
+}
+
+void ButtonModelNG::CreateWithDoubleResourceObj(
+    FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, const ButtonDoubleType buttonDoubleType)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "button" + DoubleTypeToString(buttonDoubleType);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [buttonDoubleType, weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+        const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        double result;
+        if (ResourceParseUtils::ParseResDouble(resObj, result)) {
+            bool resultFlag = false;
+            CHECK_EQUAL_VOID(CheckFontScale(resultFlag, result, buttonDoubleType), true);
+            pattern->UpdateComponentDouble(result, buttonDoubleType);
+        }
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+std::string ButtonModelNG::ColorTypeToString(const ButtonColorType buttonColorType)
+{
+    std::string rst;
+    switch (buttonColorType) {
+        case ButtonColorType::FONT_COLOR:
+            rst = "FontColor";
+            break;
+        case ButtonColorType::BACKGROUND_COLOR:
+            rst = "BackgroundColor";
+            break;
+        default:
+            rst = "Unknown";
+            break;
+    }
+    return rst;
+}
+
+std::string ButtonModelNG::StringTypeToStr(const ButtonStringType buttonStringType)
+{
+    std::string rst;
+    switch (buttonStringType) {
+        case ButtonStringType::LABEL:
+            rst = "Label";
+            break;
+        case ButtonStringType::FONT_FAMILY:
+            rst = "FontFamily";
+            break;
+        default:
+            rst = "Unknown";
+            break;
+    }
+    return rst;
+}
+
+std::string ButtonModelNG::DimensionTypeToString(const ButtonDimensionType buttonDimensionType)
+{
+    std::string rst;
+    switch (buttonDimensionType) {
+        case ButtonDimensionType::MIN_FONT_SIZE:
+            rst = "MinFontSize";
+            break;
+        case ButtonDimensionType::MAX_FONT_SIZE:
+            rst = "MaxFontSize";
+            break;
+        default:
+            rst = "Unknown";
+            break;
+    }
+    return rst;
+}
+
+std::string ButtonModelNG::DoubleTypeToString(const ButtonDoubleType buttonDoubleType)
+{
+    std::string rst;
+    switch (buttonDoubleType) {
+        case ButtonDoubleType::MIN_FONT_SCALE:
+            rst = "MinFontScale";
+            break;
+        case ButtonDoubleType::MAX_FONT_SCALE:
+            rst = "MaxFontScale";
+            break;
+        default:
+            rst = "Unknown";
+            break;
+    }
+    return rst;
 }
 
 void ButtonModelNG::SetRole(const std::optional<ButtonRole>& buttonRole)
@@ -297,6 +614,10 @@ void ButtonModelNG::Create(const std::string& tagName)
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(tagName, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     stack->Push(frameNode);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetFontColorSetByUser();
 }
 
 RefPtr<FrameNode> ButtonModelNG::CreateFrameNode(int32_t nodeId)
@@ -488,6 +809,7 @@ void ButtonModelNG::SetFontStyle(FrameNode* frameNode, const Ace::FontStyle& fon
 void ButtonModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& fontFamily)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontFamily, fontFamily, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColorSetByUser, true, frameNode);
 }
 
 void ButtonModelNG::SetFontColor(FrameNode* frameNode, const Color& textColor)

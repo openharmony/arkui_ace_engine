@@ -504,6 +504,56 @@ void CheckBoxPattern::UpdateUIStatus(bool check)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void CheckBoxPattern::UpdateCheckboxComponentColor(const Color& color, const CheckBoxColorType checkBoxColorType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (checkBoxColorType) {
+            case CheckBoxColorType::SELECTED_COLOR:
+                paintProperty->UpdateCheckBoxSelectedColor(color);
+                paintProperty->UpdateCheckBoxSelectedColorFlagByUser(true);
+                break;
+            case CheckBoxColorType::UN_SELECTED_COLOR:
+                paintProperty->UpdateCheckBoxUnSelectedColor(color);
+                paintProperty->UpdateCheckBoxUnSelectedColorFlagByUser(true);
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void CheckBoxPattern::UpdateComponentColor(const Color& color, const ToggleColorType toggleColorType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (toggleColorType) {
+            case ToggleColorType::SELECTED_COLOR:
+                paintProperty->UpdateCheckBoxSelectedColor(color);
+                paintProperty->UpdateCheckBoxSelectedColorFlagByUser(true);
+                break;
+            default:
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
 void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);

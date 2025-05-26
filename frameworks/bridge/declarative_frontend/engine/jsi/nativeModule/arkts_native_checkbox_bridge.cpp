@@ -106,12 +106,14 @@ ArkUINativeModuleValue CheckboxBridge::SetSelectedColor(ArkUIRuntimeCallInfo* ru
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     Color selectedColor;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, selectedColor)) {
+    RefPtr<ResourceObject> colorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, selectedColor, colorResObj)) {
         GetArkUINodeModifiers()->getCheckboxModifier()->resetSelectedColor(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-
-    GetArkUINodeModifiers()->getCheckboxModifier()->setSelectedColor(nativeNode, selectedColor.GetValue());
+    auto colorRawPtr = AceType::RawPtr(colorResObj);
+    GetArkUINodeModifiers()->getCheckboxModifier()->setSelectedColorPtr(
+        nativeNode, selectedColor.GetValue(), colorRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -124,12 +126,14 @@ ArkUINativeModuleValue CheckboxBridge::SetUnSelectedColor(ArkUIRuntimeCallInfo* 
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     Color unSelectedColor;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, unSelectedColor)) {
+    RefPtr<ResourceObject> colorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, unSelectedColor, colorResObj)) {
         GetArkUINodeModifiers()->getCheckboxModifier()->resetUnSelectedColor(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-
-    GetArkUINodeModifiers()->getCheckboxModifier()->setUnSelectedColor(nativeNode, unSelectedColor.GetValue());
+    auto colorRawPtr = AceType::RawPtr(colorResObj);
+    GetArkUINodeModifiers()->getCheckboxModifier()->setUnSelectedColorPtr(
+        nativeNode, unSelectedColor.GetValue(), colorRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 

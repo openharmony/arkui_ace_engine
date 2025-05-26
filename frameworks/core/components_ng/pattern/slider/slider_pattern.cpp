@@ -256,6 +256,35 @@ void SliderPattern::MountToNavigation(RefPtr<FrameNode>& tipNode)
     }
 }
 
+void SliderPattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto sliderTheme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(sliderTheme);
+    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (!paintProperty->GetBlockColorSetByUser().value_or(false)) {
+        paintProperty->UpdateBlockColor(sliderTheme->GetBlockColor());
+    }
+    if (!paintProperty->GetTrackBackgroundColorSetByUser().value_or(false)) {
+        Gradient defaultValue = SliderModelNG::CreateSolidGradient(sliderTheme->GetTrackBgColor());
+        paintProperty->UpdateTrackBackgroundColor(defaultValue);
+        paintProperty->UpdateTrackBackgroundIsResourceColor(true);
+    }
+    if (!paintProperty->GetSelectColorSetByUser().value_or(false)) {
+        paintProperty->UpdateSelectColor(sliderTheme->GetTrackSelectedColor());
+        paintProperty->UpdateSelectIsResourceColor(true);
+    }
+    host->MarkDirtyNode();
+}
+
 void SliderPattern::CalculateOffset()
 {
     if (sliderTipNode_) {
@@ -883,6 +912,76 @@ bool SliderPattern::UpdateParameters()
     borderBlank_ = (length - sliderLength_) * HALF;
 
     return true;
+}
+
+void SliderPattern::UpdateSliderComponentColor(const Color& color, const SliderColorType sliderColorType,
+    const Gradient& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto* pipelineContext = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (sliderColorType) {
+            case SliderColorType::BLOCK_COLOR:
+                paintProperty->UpdateBlockColor(color);
+                break;
+            case SliderColorType::TRACK_COLOR:
+                paintProperty->UpdateTrackBackgroundColor(value);
+                paintProperty->UpdateTrackBackgroundIsResourceColor(true);
+                break;
+            case SliderColorType::SELECT_COLOR:
+                paintProperty->UpdateSelectColor(color);
+                paintProperty->UpdateSelectGradientColor(value);
+                paintProperty->UpdateSelectIsResourceColor(true);
+                break;
+            case SliderColorType::BLOCK_BORDER_COLOR:
+                paintProperty->UpdateBlockBorderColor(color);
+                break;
+            case SliderColorType::STEP_COLOR:
+                paintProperty->UpdateStepColor(color);
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void SliderPattern::UpdateSliderComponentMedia()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        UpdateBlock();
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void SliderPattern::UpdateSliderComponentString(const bool isShowTips, const std::string& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        paintProperty->UpdateShowTips(isShowTips);
+        paintProperty->UpdateCustomContent(value);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 
 void SliderPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)

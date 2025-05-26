@@ -78,6 +78,7 @@ typedef char* ArkUI_CommonCharPtr;
 typedef const char* ArkUI_CharPtr;
 typedef unsigned long long ArkUI_Uint64;
 typedef void (*ActionFuncPtr)(void*);
+typedef void* ArkUI_VoidPtr;
 
 // Several opaque struct declarations.
 struct _ArkUIVMContext;
@@ -471,6 +472,17 @@ struct ArkUIFontStruct {
     ArkUI_Int32 fontStyle;
     ArkUI_CharPtr* fontFamilies;
     ArkUI_Uint32 familyLength;
+};
+
+struct ArkUIRadioColorStruct {
+    ArkUI_VoidPtr checkedBackgroundColor;
+    ArkUI_VoidPtr uncheckedBorderColor;
+    ArkUI_VoidPtr indicatorColor;
+};
+
+struct ArkUIButtonSizeStruct {
+    ArkUI_VoidPtr minFontSize;
+    ArkUI_VoidPtr maxFontSize;
 };
 
 struct ArkUIFontWithOptionsStruct {
@@ -2984,6 +2996,15 @@ struct ArkUIButtonModifier {
     void (*resetButtonMaxFontScale)(ArkUINodeHandle node);
     ArkUI_Float32 (*getButtonMinFontScale)(ArkUINodeHandle node);
     ArkUI_Float32 (*getButtonMaxFontScale)(ArkUINodeHandle node);
+    void (*setButtonFontColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 fontColor, ArkUI_VoidPtr colorRawPtr);
+    void (*setButtonFontFamilyPtr)(ArkUINodeHandle node, ArkUI_CharPtr fontFamily, ArkUI_VoidPtr familyRawPtr);
+    void (*setButtonLabelStylePtr)(ArkUINodeHandle node, ArkUI_CharPtr* stringParameters,
+        const ArkUI_Int32* valueArray, const ArkUI_Float32* dimensionArray, const ArkUI_Uint32* dataCountArray,
+        const ArkUIButtonSizeStruct& resObjVector);
+    void (*setButtonBackgroundColorWithColorSpacePtr)(
+        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, ArkUI_VoidPtr colorRawPtr);
+    void (*setButtonMinFontScalePtr)(ArkUINodeHandle node, ArkUI_Float32 minFontScale, ArkUI_VoidPtr scaleRawPtr);
+    void (*setButtonMaxFontScalePtr)(ArkUINodeHandle node, ArkUI_Float32 maxFontScale,  ArkUI_VoidPtr scaleRawPtr);
 };
 
 struct ArkUIImageModifier {
@@ -4188,6 +4209,12 @@ struct ArkUISliderModifier {
     void (*resetPrefix)(ArkUINodeHandle node);
     void (*setSuffix)(ArkUINodeHandle node, ArkUINodeHandle suffix, ArkUISliderCustomContentOptions* options);
     void (*resetSuffix)(ArkUINodeHandle node);
+    void (*setShowTipsPtr)(ArkUINodeHandle node, ArkUI_Bool isShow, ArkUI_CharPtr value, ArkUI_VoidPtr strRawPtr);
+    void (*setStepColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
+    void (*setBlockBorderColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
+    void (*setBlockColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
+    void (*setTrackBackgroundColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
+    void (*setSelectColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
 };
 
 struct ArkUIProgressModifier {
@@ -4985,6 +5012,8 @@ struct ArkUICheckboxModifier {
 
     ArkUI_CharPtr (*getCheckboxName)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getCheckboxGroup)(ArkUINodeHandle node);
+    void (*setSelectedColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
+    void (*setUnSelectedColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
 };
 
 struct ArkUICheckboxGroupModifier {
@@ -5016,6 +5045,8 @@ struct ArkUICheckboxGroupModifier {
     ArkUI_Float64 (*getCheckboxGroupMarkSize)(ArkUINodeHandle node);
     ArkUI_Float64 (*getCheckboxGroupMarkWidth)(ArkUINodeHandle node);
     ArkUI_Int32 (*getCheckboxGroupStyle)(ArkUINodeHandle node);
+    void (*setCheckboxGroupSelectedColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
+    void (*setCheckboxGroupUnSelectedColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
 };
 
 struct ArkUIImageSpanModifier {
@@ -5206,6 +5237,14 @@ struct ArkUIToggleModifier {
     void (*setToggleState)(ArkUINodeHandle node, ArkUI_Bool isOn);
     void (*setToggleOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetToggleOnChange)(ArkUINodeHandle node);
+    void (*setToggleSelectedColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 selectedColor, ArkUI_VoidPtr colorRawPtr);
+    void (*setToggleSwitchPointColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 switchPointColor,
+        ArkUI_VoidPtr colorRawPtr);
+    void (*setTogglePointRadiusPtr)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit,
+        ArkUI_VoidPtr radiuRawPtr);
+    void (*setToggleUnselectedColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 unselectedColor, ArkUI_VoidPtr colorRawPtr);
+    void (*setToggleTrackBorderRadiusPtr)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit,
+        ArkUI_VoidPtr radiuRawPtr);
 };
 
 struct ArkUINavigationModifier {
@@ -6099,6 +6138,16 @@ struct ArkUISelectModifier {
     void (*resetMenuOutline)(ArkUINodeHandle node);
     void (*setSelectSymbolValue)(ArkUINodeHandle node, ArkUI_CharPtr* values,
         void** symbolFunction, ArkUI_Uint32 length);
+    void (*setValuePtr)(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_VoidPtr valueRawPtr);
+    void (*setSelectedPtr)(ArkUINodeHandle node, ArkUI_Int32 idx, ArkUI_VoidPtr selectedRawPtr);
+    void (*setSelectFontColorPtr)(ArkUINodeHandle node, const ArkUI_Uint32 colorVal, ArkUI_VoidPtr fontColorRawPtr);
+    void (*setSelectedOptionBgColorPtr)(ArkUINodeHandle node, const ArkUI_Uint32 colorVal,
+        ArkUI_VoidPtr optionBgColorRawPtr);
+    void (*setOptionBgColorPtr)(ArkUINodeHandle node, const ArkUI_Uint32 colorVal, ArkUI_VoidPtr optionBgColorRawPtr);
+    void (*setOptionFontColorPtr)(ArkUINodeHandle node, const ArkUI_Uint32 colorVal, ArkUI_VoidPtr fontColorRawPtr);
+    void (*setSelectedOptionFontColorPtr)(ArkUINodeHandle node, const ArkUI_Uint32 colorVal,
+        ArkUI_VoidPtr fontColorRawPtr);
+    void (*setMenuBgColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr menuBgColorRawPtr);
 };
 
 /** Common for all API variants.*/
@@ -6188,6 +6237,8 @@ struct ArkUIRadioModifier {
     void (*setRadioOptions)(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_CharPtr group, ArkUI_Uint32 indicatorType);
     void (*setRadioOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetRadioOnChange)(ArkUINodeHandle node);
+    void (*setRadioStylePtr)(ArkUINodeHandle node, ArkUI_Uint32 checkedBackgroundColor,
+        ArkUI_Uint32 uncheckedBorderColor, ArkUI_Uint32 indicatorColor, const ArkUIRadioColorStruct& resObjStru);
 };
 
 struct ArkUIPatternLockControllerModifier {

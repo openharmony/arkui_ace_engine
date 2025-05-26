@@ -150,12 +150,16 @@ void JSButton::SetFontStyle(int32_t value)
 void JSButton::SetFontFamily(const JSCallbackInfo& info)
 {
     std::vector<std::string> fontFamilies;
-    if (!ParseJsFontFamilies(info[0], fontFamilies) || fontFamilies.empty()) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsFontFamilies(info[0], fontFamilies, resObj) || fontFamilies.empty()) {
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto textTheme = pipelineContext->GetTheme<TextTheme>();
         CHECK_NULL_VOID(textTheme);
         fontFamilies = textTheme->GetTextStyle().GetFontFamilies();
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        ButtonModel::GetInstance()->CreateWithFamiliesResourceObj(resObj, ButtonStringType::FONT_FAMILY);
     }
 
     ButtonModel::GetInstance()->SetFontFamily(fontFamilies);
@@ -164,11 +168,14 @@ void JSButton::SetFontFamily(const JSCallbackInfo& info)
 void JSButton::SetTextColor(const JSCallbackInfo& info)
 {
     Color textColor;
-    if (!ParseJsColor(info[0], textColor)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], textColor, resObj)) {
         auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
         textColor = buttonTheme->GetTextStyle().GetTextColor();
     }
-
+    if (SystemProperties::ConfigChangePerform()) {
+        ButtonModel::GetInstance()->CreateWithColorResourceObj(resObj, ButtonColorType::FONT_COLOR);
+    }
     ButtonModel::GetInstance()->SetFontColor(textColor);
 }
 
@@ -234,8 +241,15 @@ void JSButton::SetRole(const JSCallbackInfo& info)
 void JSButton::SetMinFontScale(const JSCallbackInfo& info)
 {
     double minFontScale;
-    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale)) {
+    RefPtr<ResourceObject> resObj;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale, resObj)) {
+        if (SystemProperties::ConfigChangePerform()) {
+            ButtonModel::GetInstance()->CreateWithDoubleResourceObj(resObj, ButtonDoubleType::MIN_FONT_SCALE);
+        }
         return;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        ButtonModel::GetInstance()->CreateWithDoubleResourceObj(resObj, ButtonDoubleType::MIN_FONT_SCALE);
     }
     if (LessOrEqual(minFontScale, 0.0f)) {
         ButtonModel::GetInstance()->SetMinFontScale(0.0f);
@@ -251,8 +265,15 @@ void JSButton::SetMinFontScale(const JSCallbackInfo& info)
 void JSButton::SetMaxFontScale(const JSCallbackInfo& info)
 {
     double maxFontScale;
-    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale)) {
+    RefPtr<ResourceObject> resObj;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale, resObj)) {
+        if (SystemProperties::ConfigChangePerform()) {
+            ButtonModel::GetInstance()->CreateWithDoubleResourceObj(resObj, ButtonDoubleType::MAX_FONT_SCALE);
+        }
         return;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        ButtonModel::GetInstance()->CreateWithDoubleResourceObj(resObj, ButtonDoubleType::MAX_FONT_SCALE);
     }
     if (LessOrEqual(maxFontScale, 1.0f)) {
         ButtonModel::GetInstance()->SetMaxFontScale(1.0f);
@@ -349,16 +370,10 @@ void JSButton::SetLableStyle(const JSCallbackInfo& info)
     }
 
     JSRef<JSVal> minFontSizeValue = obj->GetProperty("minFontSize");
-    CalcDimension minFontSize;
-    if (ParseJsDimensionFp(minFontSizeValue, minFontSize)) {
-        buttonParameters.minFontSize = minFontSize;
-    }
+    SetMinMaxFontSize(buttonParameters, minFontSizeValue, ButtonDimensionType::MIN_FONT_SIZE);
 
     JSRef<JSVal> maxFontSizeValue = obj->GetProperty("maxFontSize");
-    CalcDimension maxFontSize;
-    if (ParseJsDimensionFp(maxFontSizeValue, maxFontSize)) {
-        buttonParameters.maxFontSize = maxFontSize;
-    }
+    SetMinMaxFontSize(buttonParameters, maxFontSizeValue, ButtonDimensionType::MAX_FONT_SIZE);
 
     JSRef<JSVal> adaptHeightValue = obj->GetProperty("heightAdaptivePolicy");
     if (!adaptHeightValue->IsNull() && adaptHeightValue->IsNumber()) {
@@ -373,6 +388,23 @@ void JSButton::SetLableStyle(const JSCallbackInfo& info)
 
     CompleteParameters(buttonParameters);
     ButtonModel::GetInstance()->SetLabelStyle(buttonParameters);
+}
+
+void JSButton::SetMinMaxFontSize(ButtonParameters& buttonParameters, const JSRef<JSVal>& fontSizeValue,
+    const ButtonDimensionType type)
+{
+    CalcDimension fontSize;
+    RefPtr<ResourceObject> fontResObj;
+    if (ParseJsDimensionFpNG(fontSizeValue, fontSize, fontResObj, false)) {
+        if (type == ButtonDimensionType::MIN_FONT_SIZE) {
+            buttonParameters.minFontSize = fontSize;
+        } else if (type == ButtonDimensionType::MAX_FONT_SIZE) {
+            buttonParameters.maxFontSize = fontSize;
+        }
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        ButtonModel::GetInstance()->CreateWithDimensionFpResourceObj(fontResObj, type);
+    }
 }
 
 void JSButton::JsRemoteMessage(const JSCallbackInfo& info)
@@ -427,6 +459,12 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
     CreateWithPara para = ParseCreatePara(info, true);
     ButtonModel::GetInstance()->CreateWithLabel(para, buttonChildren);
     ButtonModel::GetInstance()->Create(para, buttonChildren);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        std::string label;
+        ParseJsString(info[0], label, resObj);
+        ButtonModel::GetInstance()->CreateWithStringResourceObj(resObj, ButtonStringType::LABEL);
+    }
     isLabelButton_ = true;
     auto buttonRole = para.buttonRole.value_or(ButtonRole::NORMAL);
     auto buttonStyleMode = para.buttonStyleMode.value_or(ButtonStyleMode::EMPHASIZE);
@@ -593,14 +631,17 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
 void JSButton::JsBackgroundColor(const JSCallbackInfo& info)
 {
     Color backgroundColor;
-    bool colorFlag = ParseJsColor(info[0], backgroundColor);
+    RefPtr<ResourceObject> resObj;
+    bool colorFlag = ParseJsColor(info[0], backgroundColor, resObj);
     if (!colorFlag) {
         auto buttonTheme = GetTheme<ButtonTheme>();
         if (buttonTheme) {
             backgroundColor = buttonTheme->GetBgColor();
         }
     }
-
+    if (SystemProperties::ConfigChangePerform()) {
+        ButtonModel::GetInstance()->CreateWithColorResourceObj(resObj, ButtonColorType::BACKGROUND_COLOR);
+    }
     ButtonModel::GetInstance()->BackgroundColor(backgroundColor, colorFlag);
     info.ReturnSelf();
 }

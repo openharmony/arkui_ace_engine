@@ -50,6 +50,11 @@ public:
     void SetOnChangeEvent(std::function<void(float)>&& onChangeEvent) override {};
     void SetPrefix(const RefPtr<NG::UINode>& content, const NG::SliderPrefixOptions& options) override;
     void SetSuffix(const RefPtr<NG::UINode>& content, const NG::SliderSuffixOptions& options) override;
+    void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
+        const SliderColorType sliderColorType) override {};
+    void CreateWithMediaResourceObj(const RefPtr<ResourceObject>& resObj, const std::string& bundleName,
+        const std::string& moduleName) override {};
+    void CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj, const bool isShowTips) override {};
 
     void ResetBlockBorderColor() override {};
     void ResetBlockBorderWidth() override {};

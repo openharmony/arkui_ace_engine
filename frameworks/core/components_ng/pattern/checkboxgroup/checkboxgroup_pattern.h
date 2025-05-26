@@ -181,6 +181,8 @@ public:
     void ReportChangeEvent(bool selectStatus);
     std::optional<bool> ParseSelectStatus(const std::string& command);
 
+    void UpdateCheckBoxGroupComponentColor(const Color& color, const CheckBoxGroupColorType checkBoxGroupColorType);
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
