@@ -727,6 +727,38 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest019, TestSize.Level1)
     focusManager->HandleKeyForExtendOrActivateFocus(event, curFocusView);
     EXPECT_EQ(focusManager->GetIsFocusActive(), false);
     EXPECT_EQ(buttonFocusHub1->IsCurrentFocus(), false);
+
+    /**
+     * @tc.steps: step6. sendKeyEvent dwon and joystick direction.
+     * expected: active and button1 focus
+     */
+    focusManager->SetIsFocusActive(false);
+    EXPECT_EQ(focusManager->GetIsFocusActive(), false);
+    FocusHub::LostFocusToViewRoot();
+    EXPECT_EQ(buttonFocusHub1->IsCurrentFocus(), false);
+    event.pressedCodes = { KeyCode::KEY_DPAD_UP };
+    event.code = KeyCode::KEY_DPAD_UP;
+    event.sourceType = SourceType::JOYSTICK;
+    event.action = KeyAction::DOWN;
+    focusManager->HandleKeyForExtendOrActivateFocus(event, curFocusView);
+    EXPECT_EQ(focusManager->GetIsFocusActive(), true);
+    EXPECT_EQ(buttonFocusHub1->IsCurrentFocus(), true);
+
+    /**
+     * @tc.steps: step7. sendKeyEvent up and joystick direction.
+     * expected: unactive and button1 blur
+     */
+    focusManager->SetIsFocusActive(false);
+    EXPECT_EQ(focusManager->GetIsFocusActive(), false);
+    FocusHub::LostFocusToViewRoot();
+    EXPECT_EQ(buttonFocusHub1->IsCurrentFocus(), false);
+    event.pressedCodes = { KeyCode::KEY_DPAD_UP };
+    event.code = KeyCode::KEY_DPAD_UP;
+    event.sourceType = SourceType::JOYSTICK;
+    event.action = KeyAction::UP;
+    focusManager->HandleKeyForExtendOrActivateFocus(event, curFocusView);
+    EXPECT_EQ(focusManager->GetIsFocusActive(), false);
+    EXPECT_EQ(buttonFocusHub1->IsCurrentFocus(), false);
 }
 
 /**

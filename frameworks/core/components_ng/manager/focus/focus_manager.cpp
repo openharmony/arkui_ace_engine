@@ -621,6 +621,9 @@ bool FocusManager::HandleKeyForExtendOrActivateFocus(const KeyEvent& event, cons
         if (event.IsKey({ KeyCode::KEY_TAB })) {
             return ExtendOrActivateFocus(curFocusView, FocusActiveReason::KEY_TAB);
         }
+        if (event.IsDirectionalKey() && event.sourceType == SourceType::JOYSTICK) {
+            return ExtendOrActivateFocus(curFocusView, FocusActiveReason::JOYSTICK_DPAD);
+        }
         auto curEntryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
         auto curEntryFocusHub = curEntryFocusView ? curFocusView->GetFocusHub() : nullptr;
         if (event.IsDirectionalKey() && curEntryFocusHub && curEntryFocusHub->GetDirectionalKeyFocus()) {
