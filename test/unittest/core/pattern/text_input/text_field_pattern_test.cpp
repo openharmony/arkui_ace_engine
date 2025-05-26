@@ -394,6 +394,17 @@ HWTEST_F(TextFieldPatternTest, TextPattern016, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->mouseStatus_ = MouseStatus::MOVE;
     pattern->HandleSingleClickEvent(info);
+
+    pattern->textRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
+    Offset offset(20.0f, 120.0f);
+    auto caretOffset = pattern->GetCaretClickLocalOffset(offset);
+    EXPECT_EQ(caretOffset.GetX(), 100.0f);
+    EXPECT_EQ(caretOffset.GetY(), 120.0f);
+    pattern->contentRect_ = RectF(0.0f, 0.0f, 50.0f, 50.0f);
+    offset = Offset(20.0f, 60.0f);
+    caretOffset = pattern->GetCaretClickLocalOffset(offset);
+    EXPECT_EQ(caretOffset.GetX(), 50.0f);
+    EXPECT_EQ(caretOffset.GetY(), 25.0f);
 }
 
 /**
