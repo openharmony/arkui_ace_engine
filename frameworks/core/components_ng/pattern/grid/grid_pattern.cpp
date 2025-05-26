@@ -567,6 +567,7 @@ void GridPattern::CheckScrollable()
     CHECK_NULL_VOID(host);
     auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(gridLayoutProperty);
+    auto lastScrollable = scrollable_;
     if (((info_.endIndex_ - info_.startIndex_ + 1) < info_.childrenCount_) ||
         (GreatNotEqual(info_.GetTotalHeightOfItemsInView(GetMainGap()), GetMainContentSize()))) {
         scrollable_ = true;
@@ -578,6 +579,10 @@ void GridPattern::CheckScrollable()
 
     if (!gridLayoutProperty->GetScrollEnabled().value_or(scrollable_)) {
         SetScrollEnabled(false);
+    }
+
+    if (lastScrollable && !scrollable_) {
+        StopAnimate();
     }
 }
 

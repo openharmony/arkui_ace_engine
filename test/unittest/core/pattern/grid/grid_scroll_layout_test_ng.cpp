@@ -1801,6 +1801,57 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SpringAnimationTest009
+ * @tc.desc: Test Grid change height during spring animation. Grid becomes unscrollable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest009, TestSize.Level1)
+{
+    MockAnimationManager::GetInstance().Reset();
+    MockAnimationManager::GetInstance().SetTicks(2);
+
+    bool isScrollStopCalled = false;
+    auto scrollStop = [&isScrollStopCalled]() { isScrollStopCalled = true; };
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    model.SetOnScrollStop(scrollStop);
+    CreateFixedItems(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Simulate a scrolling gesture.
+     * @tc.expected: Grid trigger spring animation.
+     */
+    GestureEvent info;
+    info.SetMainVelocity(-1200.f);
+    info.SetMainDelta(-200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(pattern_->OutBoundaryCallback());
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -26.00447);
+
+    /**
+     * @tc.steps: step2. increase grid height to be larger than the content during animation
+     * @tc.expected: scrollable_ is false and currentOffset_ is 0
+     */
+    MockAnimationManager::GetInstance().Tick();
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT * 2))));
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->scrollable_);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
+    EXPECT_TRUE(isScrollStopCalled);
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+}
+
+/**
  * @tc.name: TestIrregularGridWithScrollToIndex001
  * @tc.desc: Test Irregular Grid with columnStart Measure when scroll to index
  * @tc.type: FUNC
