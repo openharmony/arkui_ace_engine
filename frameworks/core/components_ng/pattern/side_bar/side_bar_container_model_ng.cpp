@@ -19,7 +19,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 static Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
+constexpr Dimension DEFAULT_SIDE_BAR_WIDTH_V10 = 240.0_vp;
 static Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
+constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH_V10 = 240.0_vp;
 constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 static Dimension DEFAULT_MIN_CONTENT_WIDTH = 0.0_vp;
 constexpr static int32_t PLATFORM_VERSION_TEN = 10;
@@ -507,7 +509,7 @@ void SideBarContainerModelNG::SetMinContentWidth(const RefPtr<ResourceObject>& r
 {
     CalcDimension minContentWidth;
     ResourceParseUtils::ParseResDimensionVpNG(resObj, minContentWidth);
-    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth, minContentWidth);
+    SetMinContentWidth(minContentWidth);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto&& updateMinContentFunc = [weakFrameNode = AceType::WeakClaim(frameNode)](
@@ -592,6 +594,103 @@ void SideBarContainerModelNG::SetMinSideBarWidth(FrameNode* frameNode, const Dim
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinSideBarWidth, minSideBarWidth, frameNode);
 }
 
+void SideBarContainerModelNG::SetSideBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CalcDimension sideBarWidth;
+    ResourceParseUtils::ParseResDimensionVpNG(resObj, sideBarWidth);
+    auto defaultSiderBarWidth = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) ? 
+        DEFAULT_SIDE_BAR_WIDTH_V10 : DEFAULT_SIDE_BAR_WIDTH;
+    SetSideBarWidth(frameNode, sideBarWidth.IsNonNegative() ? sideBarWidth : defaultSiderBarWidth);
+    CHECK_NULL_VOID(frameNode);
+    auto&& updateSideBarWidthFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->MarkNeedInitRealSideBarWidth(true);
+        CalcDimension sideBarWidth;
+        ResourceParseUtils::ParseResDimensionVpNG(resObj, sideBarWidth);
+        sideBarWidth = sideBarWidth.IsNonNegative() ? sideBarWidth : DEFAULT_SIDE_BAR_WIDTH;
+        frameNode->MarkModifyDone();
+        frameNode->MarkDirtyNode();
+    };
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj("sideBarContainer.sideBarWidth", resObj, std::move(updateSideBarWidthFunc));
+}
+
+void SideBarContainerModelNG::SetMinSideBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    
+    CalcDimension minSideBarWidth;
+    ResourceParseUtils::ParseResDimensionVpNG(resObj, minSideBarWidth);
+    auto defaultMinSideBarWidth = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) ? 
+        DEFAULT_MIN_SIDE_BAR_WIDTH_V10 : DEFAULT_MIN_SIDE_BAR_WIDTH;
+    SetMinSideBarWidth(frameNode, minSideBarWidth.IsNonNegative() ? minSideBarWidth : defaultMinSideBarWidth);
+    CHECK_NULL_VOID(frameNode);
+    auto&& updateSideBarWidthFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->MarkNeedInitRealSideBarWidth(true);
+        CalcDimension sideBarWidth;
+        ResourceParseUtils::ParseResDimensionVpNG(resObj, sideBarWidth);
+        sideBarWidth = sideBarWidth.IsNonNegative() ? sideBarWidth : DEFAULT_SIDE_BAR_WIDTH;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, SideBarWidth, sideBarWidth, frameNode);
+        frameNode->MarkModifyDone();
+        frameNode->MarkDirtyNode();
+    };
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj("sideBarContainer.minSideBarWidth", resObj, std::move(updateSideBarWidthFunc));
+}
+
+void SideBarContainerModelNG::SetMaxSideBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CalcDimension maxSideBarWidth;
+    ResourceParseUtils::ParseResDimensionVpNG(resObj, maxSideBarWidth);
+    SetMaxSideBarWidth(frameNode, maxSideBarWidth.IsNonNegative() ? maxSideBarWidth : DEFAULT_MAX_SIDE_BAR_WIDTH);
+    CHECK_NULL_VOID(frameNode);
+    auto&& updateMaxSideBarWidthFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->MarkNeedInitRealSideBarWidth(true);
+        CalcDimension maxSideBarWidth;
+        ResourceParseUtils::ParseResDimensionVpNG(resObj, maxSideBarWidth);
+        maxSideBarWidth = maxSideBarWidth.IsNonNegative() ? maxSideBarWidth : DEFAULT_MAX_SIDE_BAR_WIDTH;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MaxSideBarWidth, maxSideBarWidth, frameNode);
+        frameNode->MarkModifyDone();
+        frameNode->MarkDirtyNode();
+    };
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj("sideBarContainer.maxSideBarWidth", resObj, std::move(updateMaxSideBarWidthFunc));
+}
+
+void SideBarContainerModelNG::SetMinContentWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CalcDimension minContentWidth;
+    ResourceParseUtils::ParseResDimensionVpNG(resObj, minContentWidth);
+    SetMinContentWidth(frameNode, minContentWidth);
+    CHECK_NULL_VOID(frameNode);
+    auto&& updateMinContentFunc = [weakFrameNode = AceType::WeakClaim(frameNode)](
+                                      const RefPtr<ResourceObject>& resObj) {
+        CalcDimension minContentWidth;
+        ResourceParseUtils::ParseResDimensionVpNG(resObj, minContentWidth);
+        auto frameNode = weakFrameNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth, minContentWidth, frameNode);
+        frameNode->MarkModifyDone();
+        frameNode->MarkDirtyNode();
+    };
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj("sideBarContainer.minContentWidth", resObj, std::move(updateMinContentFunc));
+}
+
 void SideBarContainerModelNG::SetControlButtonWidth(FrameNode* frameNode, const Dimension& width)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonWidth, width, frameNode);
@@ -610,6 +709,91 @@ void SideBarContainerModelNG::SetControlButtonLeft(FrameNode* frameNode, const D
 void SideBarContainerModelNG::SetControlButtonTop(FrameNode* frameNode, const Dimension& top)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonTop, top, frameNode);
+}
+
+void SideBarContainerModelNG::SetControlButtonShowIconInfo(
+    FrameNode* frameNode, const RefPtr<ResourceObject>& showIconResObj, bool isPixelMap, RefPtr<PixelMap> pixMap)
+{
+    std::string showIconStr;
+    ResourceParseUtils::ParseResMedia(showIconResObj, showIconStr);
+    SetControlButtonShowIconInfo(frameNode, showIconStr, isPixelMap, pixMap);
+    CHECK_NULL_VOID(frameNode);
+    auto&& updateShowIconFunc = [weakFrameNode = AceType::WeakClaim(frameNode), isPixelMap,
+                                    weakPixMap = AceType::WeakClaim(AceType::RawPtr(pixMap))](
+                                    const RefPtr<ResourceObject>& resObj) {
+        std::string showIconStr;
+        ResourceParseUtils::ParseResMedia(resObj, showIconStr);
+        auto pixMap = weakPixMap.Upgrade();
+        auto frameNode = weakFrameNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto controlButtonShowIconInfo = CreateSourceInfo(showIconStr, isPixelMap, pixMap);
+        if (controlButtonShowIconInfo.IsValid()) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+                SideBarContainerLayoutProperty, ControlButtonShowIconInfo, controlButtonShowIconInfo, frameNode);
+        }
+        frameNode->MarkModifyDone();
+        frameNode->MarkDirtyNode();
+    };
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj("sideBarContainer.buttonIconOptions.shown", showIconResObj, std::move(updateShowIconFunc));
+}
+
+void SideBarContainerModelNG::SetControlButtonHiddenIconInfo(
+    FrameNode* frameNode, const RefPtr<ResourceObject>& hiddenIconResObj, bool isPixelMap, RefPtr<PixelMap> pixMap)
+{
+    std::string hiddenIconStr;
+    ResourceParseUtils::ParseResMedia(hiddenIconResObj, hiddenIconStr);
+    SetControlButtonHiddenIconInfo(frameNode, hiddenIconStr, isPixelMap, pixMap);
+    CHECK_NULL_VOID(frameNode);
+    auto&& updateHiddenIconFunc = [weakFrameNode = AceType::WeakClaim(frameNode), isPixelMap,
+                                      weakPixMap = AceType::WeakClaim(AceType::RawPtr(pixMap))](
+                                      const RefPtr<ResourceObject>& resObj) {
+        std::string hiddenIconStr;
+        ResourceParseUtils::ParseResMedia(resObj, hiddenIconStr);
+        auto pixMap = weakPixMap.Upgrade();
+        auto frameNode = weakFrameNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto controlButtonHiddenIconInfo = CreateSourceInfo(hiddenIconStr, isPixelMap, pixMap);
+        if (controlButtonHiddenIconInfo.IsValid()) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+                SideBarContainerLayoutProperty, ControlButtonHiddenIconInfo, controlButtonHiddenIconInfo, frameNode);
+        }
+        frameNode->MarkModifyDone();
+        frameNode->MarkDirtyNode();
+    };
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj("sideBarContainer.buttonIconOptions.hidden", hiddenIconResObj, std::move(updateHiddenIconFunc));
+}
+
+void SideBarContainerModelNG::SetControlButtonSwitchingIconInfo(
+    FrameNode* frameNode, const RefPtr<ResourceObject>& switchingIconResObj, bool isPixelMap, RefPtr<PixelMap> pixMap)
+{
+    std::string switchingIconStr;
+    ResourceParseUtils::ParseResMedia(switchingIconResObj, switchingIconStr);
+    SetControlButtonSwitchingIconInfo(frameNode, switchingIconStr, isPixelMap, pixMap);
+    CHECK_NULL_VOID(frameNode);
+    auto&& updateSwitchingIconFunc = [weakFrameNode = AceType::WeakClaim(frameNode), isPixelMap,
+                                         weakPixMap = AceType::WeakClaim(AceType::RawPtr(pixMap))](
+                                         const RefPtr<ResourceObject>& resObj) {
+        std::string switchingIconStr;
+        ResourceParseUtils::ParseResMedia(resObj, switchingIconStr);
+        auto pixMap = weakPixMap.Upgrade();
+        auto frameNode = weakFrameNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto controlButtonSwitchingIconInfo = CreateSourceInfo(switchingIconStr, isPixelMap, pixMap);
+        if (controlButtonSwitchingIconInfo.IsValid()) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonSwitchingIconInfo,
+                controlButtonSwitchingIconInfo, frameNode);
+        }
+        frameNode->MarkModifyDone();
+        frameNode->MarkDirtyNode();
+    };
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj(
+        "sideBarContainer.buttonIconOptions.switching", switchingIconResObj, std::move(updateSwitchingIconFunc));
 }
 
 void SideBarContainerModelNG::SetControlButtonShowIconInfo(
@@ -690,6 +874,95 @@ void SideBarContainerModelNG::SetSideBarPosition(FrameNode* frameNode, SideBarPo
 void SideBarContainerModelNG::SetShowSideBar(FrameNode* frameNode, bool isShow)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ShowSideBar, isShow, frameNode);
+}
+
+void SideBarContainerModelNG::SetDividerStrokeWidth(
+    FrameNode* frameNode, const RefPtr<ResourceObject>& strokeWidthResObj)
+{
+    CalcDimension strokeWidth;
+    ResourceParseUtils::ParseResDimensionVpNG(strokeWidthResObj, strokeWidth);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerStrokeWidth, strokeWidth, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto&& updateDividerStrokeWidthFunc = [weakFrameNode = AceType::WeakClaim(frameNode)](
+                                              const RefPtr<ResourceObject>& strokeWidthResObj) {
+        CalcDimension strokeWidth;
+        ResourceParseUtils::ParseResDimensionVpNG(strokeWidthResObj, strokeWidth);
+        auto frameNode = weakFrameNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerStrokeWidth, strokeWidth, frameNode);
+        frameNode->MarkModifyDone();
+        frameNode->MarkDirtyNode();
+    };
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj(
+        "sideBarContainer.dividerStyle.strokeWidth", strokeWidthResObj, std::move(updateDividerStrokeWidthFunc));
+}
+
+void SideBarContainerModelNG::SetDividerColor(FrameNode* frameNode, const RefPtr<ResourceObject>& colorResObj)
+{
+    Color color;
+    ResourceParseUtils::ParseResColor(colorResObj, color);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerColor, color, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto&& updateDividerColorFunc = [weakFrameNode = AceType::WeakClaim(frameNode)](
+                                        const RefPtr<ResourceObject>& colorResObj) {
+        Color color;
+        ResourceParseUtils::ParseResColor(colorResObj, color);
+        auto frameNode = weakFrameNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerColor, color, frameNode);
+        frameNode->MarkModifyDone();
+        frameNode->MarkDirtyNode();
+    };
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj("sideBarContainer.dividerStyle.color", colorResObj, std::move(updateDividerColorFunc));
+}
+
+void SideBarContainerModelNG::SetDividerStartMargin(
+    FrameNode* frameNode, const RefPtr<ResourceObject>& startMarginResObj)
+{
+    CalcDimension startMargin;
+    ResourceParseUtils::ParseResDimensionVpNG(startMarginResObj, startMargin);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerStartMargin, startMargin, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto&& updateDividerStartMarginFunc = [weakFrameNode = AceType::WeakClaim(frameNode)](
+                                              const RefPtr<ResourceObject>& startMarginResObj) {
+        CalcDimension startMargin;
+        ResourceParseUtils::ParseResDimensionVpNG(startMarginResObj, startMargin);
+        auto frameNode = weakFrameNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerStartMargin, startMargin, frameNode);
+        frameNode->MarkModifyDone();
+        frameNode->MarkDirtyNode();
+    };
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj(
+        "sideBarContainer.dividerStyle.startMargin", startMarginResObj, std::move(updateDividerStartMarginFunc));
+}
+
+void SideBarContainerModelNG::SetDividerEndMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& endMarginResObj)
+{
+    CalcDimension endMargin;
+    ResourceParseUtils::ParseResDimensionVpNG(endMarginResObj, endMargin);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerEndMargin, endMargin, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto&& updateDividerEndMarginFunc = [weakFrameNode = AceType::WeakClaim(frameNode)](
+                                            const RefPtr<ResourceObject>& endMarginResObj) {
+        CalcDimension endMargin;
+        ResourceParseUtils::ParseResDimensionVpNG(endMarginResObj, endMargin);
+        auto frameNode = weakFrameNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerEndMargin, endMargin, frameNode);
+        frameNode->MarkModifyDone();
+        frameNode->MarkDirtyNode();
+    };
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj(
+        "sideBarContainer.dividerStyle.endMargin", endMarginResObj, std::move(updateDividerEndMarginFunc));
 }
 
 void SideBarContainerModelNG::SetDividerStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth)
