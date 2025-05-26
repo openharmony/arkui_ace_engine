@@ -215,6 +215,7 @@ public:
         info_ = info;
     }
 
+    void OnDetachFromMainTree() override;
     Color GetDragBackgroundColor();
 protected:
     static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode);
@@ -235,6 +236,11 @@ protected:
         lastLineHeight_ = lineHeight;
     }
 
+    void SetOnDetachFromMainTree(std::function<void()>&& callback)
+    {
+        onDetachFromMainTree_ = std::move(callback);
+    }
+
 protected:
     RefPtr<TextDragOverlayModifier> overlayModifier_;
     TextDragData textDragData_;
@@ -249,6 +255,7 @@ private:
     std::list<RefPtr<FrameNode>> imageChildren_;
     std::vector<RectF> rectsForPlaceholders_;
     TextDragInfo info_;
+    std::function<void()> onDetachFromMainTree_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextDragPattern);
 };

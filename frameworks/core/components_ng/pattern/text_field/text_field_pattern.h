@@ -603,6 +603,7 @@ public:
     float GetBorderBottom(BorderWidthProperty border) const;
     float GetBorderRight(BorderWidthProperty border) const;
 
+    void OnDragNodeDetachFromMainTree() override;
     const RectF& GetTextRect() const override
     {
         return textRect_;

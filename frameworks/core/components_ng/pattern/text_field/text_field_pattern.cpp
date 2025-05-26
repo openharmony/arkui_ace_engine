@@ -1612,6 +1612,7 @@ void TextFieldPattern::HandleOnUndoAction()
     if (operationRecords_.empty()) {
         return;
     }
+    CHECK_NULL_VOID(!GetIsPreviewText());
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnUndoAction");
     if (operationRecords_.size() == 1) {
         FireEventHubOnChange(u"");
@@ -1654,6 +1655,7 @@ void TextFieldPattern::HandleOnRedoAction()
     if (redoOperationRecords_.empty()) {
         return;
     }
+    CHECK_NULL_VOID(!GetIsPreviewText());
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnRedoAction");
     auto textEditingValue = redoOperationRecords_.back();
     bool isWillChange = OnWillChangePreSetValue(textEditingValue.text);
@@ -1687,6 +1689,7 @@ bool TextFieldPattern::CanRedo()
 void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool showMenu)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnSelectAll");
+    CHECK_NULL_VOID(!GetIsPreviewText());
     auto textSize = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
     if (textSize == 0) {
         return; // no content
@@ -1813,6 +1816,7 @@ void TextFieldPattern::HandleOnPaste()
         }
         auto textfield = weak.Upgrade();
         CHECK_NULL_VOID(textfield);
+        CHECK_NULL_VOID(!textfield->GetIsPreviewText());
         auto host = textfield->GetHost();
         CHECK_NULL_VOID(host);
         auto eventHub = host->GetOrCreateEventHub<TextFieldEventHub>();
@@ -2245,6 +2249,16 @@ std::function<void(Offset)> TextFieldPattern::GetThumbnailCallback()
         gestureHub->SetPixelMap(nullptr);
     };
     return callback;
+}
+
+void TextFieldPattern::OnDragNodeDetachFromMainTree()
+{
+    if (dragStatus_ == DragStatus::NONE) {
+        selectController_->UpdateCaretIndex(
+            std::max(selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex()));
+        CloseSelectOverlay();
+        StartTwinkling();
+    }
 }
 
 TextDragInfo TextFieldPattern::CreateTextDragInfo() const
