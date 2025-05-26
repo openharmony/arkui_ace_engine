@@ -1024,4 +1024,87 @@ HWTEST_F(GridLayoutInfoTest, UpdateStartIndexByStartLineTest004, TestSize.Level1
     // Assert startIndex is updated
     EXPECT_EQ(info.startIndex_, 12);
 }
+
+/**
+ * @tc.name: GridLayoutInfo::GridMatrixEmpty_ReturnsFalse
+ * @tc.desc: test IsAllItemsMeasured with empty gridMatrix_
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, GridMatrixEmpty_ReturnsFalse, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    EXPECT_FALSE(info.IsAllItemsMeasured());
+}
+
+/**
+ * @tc.name: GridLayoutInfo::FirstLineNotZero_ReturnsFalse
+ * @tc.desc: test IsAllItemsMeasured with gridMatrix_ not started from 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, FirstLineNotZero_ReturnsFalse, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_[1] = {{0, 1}};
+    EXPECT_FALSE(info.IsAllItemsMeasured());
+}
+
+/**
+ * @tc.name: GridLayoutInfo::FirstLineIsEmpty_ReturnsFalse
+ * @tc.desc: test IsAllItemsMeasured with first line empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, FirstLineIsEmpty_ReturnsFalse, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_[0] = {};
+    EXPECT_FALSE(info.IsAllItemsMeasured());
+}
+
+/**
+ * @tc.name: GridLayoutInfo::FirstItemNotZero_ReturnsFalse
+ * @tc.desc: test IsAllItemsMeasured with first item not zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, FirstItemNotZero_ReturnsFalse, TestSize.Level1) {
+    GridLayoutInfo info;
+    info.gridMatrix_[0] = {{0, 1}};
+    EXPECT_FALSE(info.IsAllItemsMeasured());
+}
+
+/**
+ * @tc.name: GridLayoutInfo::LastLineEmpty_ReturnsFalse
+ * @tc.desc: test IsAllItemsMeasured with last line empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, LastLineEmpty_ReturnsFalse, TestSize.Level1) {
+    GridLayoutInfo info;
+    info.gridMatrix_[0] = {{0, 0}};
+    info.gridMatrix_[1] = {};
+    EXPECT_FALSE(info.IsAllItemsMeasured());
+}
+
+/**
+ * @tc.name: GridLayoutInfo::LineGapTooLarge_ReturnsFalse
+ * @tc.desc: test IsAllItemsMeasured with more than MAX_CUMULATIVE_LINES lines
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, LineGapTooLarge_ReturnsFalse, TestSize.Level1) {
+    GridLayoutInfo info;
+    info.gridMatrix_[0] = {{0, 0}};
+    info.gridMatrix_[101] = {{0, 101}};
+    EXPECT_FALSE(info.IsAllItemsMeasured());
+}
+
+/**
+ * @tc.name: GridLayoutInfo::AllConditionsMet_ReturnsTrue
+ * @tc.desc: test IsAllItemsMeasured with alall conditions met
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, AllConditionsMet_ReturnsTrue, TestSize.Level1) {
+    GridLayoutInfo info;
+    info.gridMatrix_[0] = {{0, 0}};
+    info.gridMatrix_[1] = {{0, 5}};
+    info.childrenCount_ = 6;
+    EXPECT_TRUE(info.IsAllItemsMeasured());
+}
 } // namespace OHOS::Ace::NG
