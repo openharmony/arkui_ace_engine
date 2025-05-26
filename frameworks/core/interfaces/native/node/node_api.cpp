@@ -59,6 +59,7 @@
 #include "core/interfaces/native/node/util_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
+#include "core/interfaces/native/runtime/runtime_init.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/text/html_utils.h"
 #include "interfaces/native/native_type.h"
@@ -2750,6 +2751,7 @@ ArkUIFullNodeAPI impl_full = {
     .getStyledStringAPI = GetStyledStringAPI,     // StyledStringAPI
     .getSnapshotAPI = GetComponentSnapshotAPI,     // SyncSnapshot
     .getMultiThreadManagerAPI = GetMultiThreadManagerAPI, // MultiThreadManagerAPI
+    .getRuntimeInit = RuntimeInit::GetRuntimeInit, // RuntimeInit
 };
 /* clang-format on */
 

@@ -24,6 +24,11 @@
 
 #include "dfx_jsnapi.h"
 
+#ifndef PREVIEW
+#include "console.h"
+#include "sys_timer.h"
+#endif
+
 #include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
 #include "base/utils/system_properties.h"
@@ -439,6 +444,8 @@ thread_local bool isWorker_ = false;
 
 thread_local bool isDynamicModulePreloaded_ = false;
 
+thread_local std::unordered_set<void*> validEnvs_;
+
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
     CHECK_RUN_ON(JS);
@@ -755,6 +762,94 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     }
     localRuntime_ = arkRuntime;
     cardRuntime_ = runtime;
+}
+
+void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtime)
+{
+#ifndef PREVIEW
+    if (!runtime) {
+        return;
+    }
+
+    std::shared_ptr<ArkJSRuntime> arkRuntime = std::make_shared<ArkJSRuntime>();
+    auto nativeArkEngine = static_cast<ArkNativeEngine*>(runtime);
+    EcmaVM* vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
+    if (vm == nullptr) {
+        return;
+    }
+    validEnvs_.insert(runtime);
+
+    if (!arkRuntime->InitializeFromExistVM(vm)) {
+        return;
+    }
+
+    LocalScope scope(vm);
+    {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = arkRuntime;
+    }
+
+    RegisterStringCacheTable(vm, MAX_STRING_CACHE_SIZE);
+    // preload js views
+    JsRegisterViews(JSNApi::GetGlobalObject(vm, nativeArkEngine->GetContext()), runtime);
+
+    // preload console
+    shared_ptr<JsValue> global = arkRuntime->GetGlobal(nativeArkEngine);
+    OHOS::JsSysModule::Console::InitConsoleModule(static_cast<napi_env>(runtime));
+    OHOS::JsSysModule::Timer::RegisterTime(static_cast<napi_env>(runtime));
+    JsiSyscapModule::GetInstance()->InitSyscapModule(arkRuntime, global);
+    PreloadAceConsole(arkRuntime, global);
+
+    // preload aceTrace
+    PreloadAceTrace(arkRuntime, global);
+
+    // preload getContext
+    JsiContextModule::GetInstance()->InitContextModule(arkRuntime, global);
+
+    // preload perfutil
+    PreloadPerfutil(arkRuntime, global);
+
+    // preload js enums
+    LOGI("preload js enums in PreloadAceModuleForCustomRuntime");
+    bool jsEnumStyleResult = PreloadJsEnums(arkRuntime);
+    if (!jsEnumStyleResult) {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+        return;
+    }
+
+    bool evalResult = PreloadStateManagement(arkRuntime);
+
+    PreloadUIContent(arkRuntime);
+
+    // preload ark component
+    bool arkComponentResult = PreloadArkComponent(arkRuntime);
+    if (!arkComponentResult) {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+        return;
+    }
+
+    // preload ark styles
+    bool arkThemeResult = PreloadArkTheme(arkRuntime);
+    if (!arkThemeResult) {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+        return;
+    }
+
+    isModulePreloaded_ = evalResult;
+    {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+    }
+    localRuntime_ = arkRuntime;
+#endif
+}
+
+void JsiDeclarativeEngineInstance::RemoveInvalidEnv(void* env)
+{
+    validEnvs_.erase(env);
 }
 
 void JsiDeclarativeEngineInstance::InitConsoleModule()

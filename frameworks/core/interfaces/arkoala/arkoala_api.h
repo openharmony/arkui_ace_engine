@@ -6949,6 +6949,11 @@ typedef struct {
     ArkUI_Int32 (*getSyncSnapshot)(ArkUINodeHandle node, ArkUISnapshotOptions* snapshotOptions, void* mediaPixel);
 } ArkUISnapshotAPI;
 
+typedef struct {
+    void (*registerViews)(void* nativeArkEngine);
+    void (*notifyArkTSEnvDestroy)(void* nativeArkEngine);
+} ArkUIRuntimeInit;
+
 /**
  * An API to control an implementation. When making changes modifying binary
  * layout, i.e. adding new events - increase ARKUI_NODE_API_VERSION above for binary
@@ -6969,6 +6974,7 @@ struct ArkUIFullNodeAPI {
     const ArkUIStyledStringAPI* (*getStyledStringAPI)();
     const ArkUISnapshotAPI* (*getSnapshotAPI)();
     const ArkUIMultiThreadManagerAPI* (*getMultiThreadManagerAPI)();
+    const ArkUIRuntimeInit* (*getRuntimeInit)();
 };
 
 struct ArkUIAnyAPI {
