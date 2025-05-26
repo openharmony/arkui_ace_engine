@@ -20,7 +20,6 @@
 #include "movingphoto_utils.h"
 
 #include "base/image/pixel_map.h"
-#include "base/image/image_source.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -33,6 +32,7 @@ constexpr float NORMAL_SCALE = 1.0f;
 constexpr float ZOOM_IN_SCALE = 1.1f;
 constexpr double NORMAL_PLAY_SPEED = 1.0;
 constexpr int32_t HALF = 2;
+constexpr int32_t ROUND_XMAGE_MODE_VALUE = 10;
 constexpr int64_t PERIOD_START = 0;
 constexpr int32_t PREPARE_RETURN = 0;
 constexpr int64_t VIDEO_PLAYTIME_START_POSITION = 0;
@@ -45,6 +45,9 @@ const std::string VIDEO_SCALE = "video_scale_type";
 const std::string IMAGE_LENGTH = "ImageLength";
 const std::string IMAGE_WIDTH = "ImageWidth";
 const std::string HW_MNOTE_XMAGE_MODE = "HwMnoteXmageMode";
+const std::string HW_MNOTE_XMAGE_LEFT = "HwMnoteXmageLeft";
+const std::string HW_MNOTE_XMAGE_TOP = "HwMnoteXmageTop";
+const std::string HW_MNOTE_XMAGE_RIGHT = "HwMnoteXmageRight";
 const std::string HW_MNOTE_XMAGE_BOTTOM = "HwMnoteXmageBottom";
 const std::string DEFAULT_EXIF_VALUE = "default_exif_value";
 constexpr int32_t ANALYZER_DELAY_TIME = 100;
@@ -730,7 +733,7 @@ void MovingPhotoPattern::OnStartedStatusCallback()
 
 bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer OnStartedStatusCallback.");
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "OnDirtyLayoutWrapperSwap.");
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
@@ -745,7 +748,11 @@ bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     } else {
         videoFrameSize = MeasureContentLayout(movingPhotoNodeSize, layoutProperty);
     }
-    SetRenderContextBounds(movingPhotoNodeSize, videoFrameSize);
+    if (xmageModeValue_ == ROUND_XMAGE_MODE_VALUE) {
+        SetRenderContextBoundsInRoundXmage(movingPhotoNodeSize, videoFrameSize);
+    } else {
+        SetRenderContextBounds(movingPhotoNodeSize, videoFrameSize);
+    }
 
     if (IsSupportImageAnalyzer() && isEnableAnalyzer_ && autoAndRepeatLevel_ == PlaybackMode::NONE) {
         if (imageAnalyzerManager_ && !GetAnalyzerState()) {
@@ -800,6 +807,41 @@ void MovingPhotoPattern::SetRenderContextBounds(const SizeF& movingPhotoNodeSize
                 (movingPhotoNodeSize.Height() - videoFrameSize.Height()) / HALF,
                 videoFrameSize.Width(), videoFrameSize.Height());
         }
+    }
+}
+
+void MovingPhotoPattern::SetRenderContextBoundsInRoundXmage(
+    const SizeF& movingPhotoNodeSize, const SizeF& videoFrameSize)
+{
+    auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pattern = DynamicCast<MovingPhotoPattern>(host->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    float ratio = 0;
+    SizeF xmageOffset = SizeF(0, 0);
+    SizeF imageSize = SizeF(0, 0);
+    SizeF xmageOffsetRatio = SizeF(0, 0);
+    if (layoutProperty->HasXmageOffset()) {
+        xmageOffset = layoutProperty->GetXmageOffset().value();
+    }
+    if (layoutProperty->HasImageSize()) {
+        imageSize = layoutProperty->GetImageSize().value();
+        ratio = CalculateRatio(movingPhotoNodeSize);
+        xmageOffsetRatio = pattern->CalculateXmageOffsetRatio(movingPhotoNodeSize);
+    }
+    if (columnRenderContext_) {
+        columnRenderContext_->SetBounds(
+            (movingPhotoNodeSize.Width() - videoFrameSize.Width()) / HALF,
+            (movingPhotoNodeSize.Height() - videoFrameSize.Height()) / HALF, imageSize.Width() * ratio,
+            imageSize.Height() * ratio);
+    }
+    if (renderContextForMediaPlayer_) {
+        renderContextForMediaPlayer_->SetBounds(
+            (movingPhotoNodeSize.Width() - videoFrameSize.Width()) / HALF,
+            (movingPhotoNodeSize.Height() - videoFrameSize.Height()) / HALF, imageSize.Width() * ratio,
+            imageSize.Height() * ratio);
     }
 }
 
@@ -963,6 +1005,33 @@ float MovingPhotoPattern::CalculateRatio(SizeF layoutSize)
     return ratio;
 }
 
+SizeF MovingPhotoPattern::CalculateXmageOffsetRatio(SizeF layoutSize)
+{
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto CalculateXmageOffsetRatio layoutSize.%{public}f, %{public}f",
+        layoutSize.Width(), layoutSize.Height());
+    SizeF ret = SizeF(0, 0);
+    auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, ret);
+    if (!layoutProperty->HasXmageRawSize()) {
+        TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto xmageRawSize is null.");
+        return ret;
+    }
+    if (!layoutProperty->HasXmageRawSize()) {
+        return ret;
+    }
+    SizeF rawSize = layoutProperty->GetXmageRawSize().value();
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto CalculateXmageOffsetRatio rawSize.%{public}f, %{public}f",
+        rawSize.Width(), rawSize.Height());
+
+    if (rawSize.Width() == 0.0 || rawSize.Height() == 0.0) {
+        TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto xmageRawSize is 0.");
+        return ret;
+    }
+    double widthRatio = layoutSize.Width() / rawSize.Width();
+    double heightRatio = layoutSize.Height() / rawSize.Height();
+    return SizeF(widthRatio, heightRatio);
+}
+
 SizeF MovingPhotoPattern::GetRawImageSize()
 {
     auto host = GetHost();
@@ -1042,6 +1111,81 @@ void MovingPhotoPattern::GetXmageHeight()
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSize, imageSize, host);
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto imageSize imageW.%{public}f, imageL %{public}f",
              imageSize.Width(), imageSize.Height());
+}
+
+void MovingPhotoPattern::SetXmagePosition()
+{
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto SetXmagePosition");
+    int32_t fd = GetImageFd();
+    CHECK_NULL_VOID(fd >= 0);
+    auto imageSrc = ImageSource::Create(fd);
+    close(fd);
+    CHECK_NULL_VOID(imageSrc);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto imageLength = imageSrc->GetProperty(IMAGE_LENGTH);
+    auto imageWidth = imageSrc->GetProperty(IMAGE_WIDTH);
+    if (imageLength.empty() || imageWidth.empty() || imageLength == DEFAULT_EXIF_VALUE ||
+        imageWidth == DEFAULT_EXIF_VALUE) {
+        TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto imageLength or imageWidth is null");
+        return;
+    }
+ 
+    float imageW = StringUtils::StringToFloat(imageWidth);
+    float imageL = StringUtils::StringToFloat(imageLength);
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto imageW.%{public}f, imageL %{public}f",
+             imageW, imageL);
+ 
+    std::string modeValue = imageSrc->GetProperty(HW_MNOTE_XMAGE_MODE);
+    SizeF imageSize = SizeF(-1, -1);
+    if (!modeValue.empty() && modeValue != DEFAULT_EXIF_VALUE) {
+        isXmageMode_ = true;
+        xmageModeValue_ = StringUtils::StringToInt(modeValue);
+        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto xmageModeValue_ = %{public}d", xmageModeValue_);
+        if (xmageModeValue_ == ROUND_XMAGE_MODE_VALUE) {
+            UpdateRoundXmageProperty(imageSrc, imageSize, imageW, imageL, host);
+        } else {
+            std::string bottomValue = imageSrc->GetProperty(HW_MNOTE_XMAGE_BOTTOM);
+            if (bottomValue.empty() || bottomValue == DEFAULT_EXIF_VALUE) {
+                TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto bottomValue is null");
+                return;
+            }
+            float bottomV = StringUtils::StringToFloat(bottomValue);
+            TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto bottomV.%{public}f", bottomV);
+            imageSize = SizeF(imageW, bottomV);
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, XmageHeight, imageL - bottomV, host);
+            TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto XmageHeight.%{public}f", imageL - bottomV);
+        }
+    } else {
+        imageSize = SizeF(imageW, imageL);
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSize, imageSize, host);
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto imageSize imageW.%{public}f, imageL %{public}f",
+            imageSize.Width(), imageSize.Height());
+}
+ 
+void MovingPhotoPattern::UpdateRoundXmageProperty(
+    RefPtr<ImageSource> imageSrc, SizeF& imageSize, float imageW, float imageL, RefPtr<FrameNode>& host)
+{
+    std::string xmageLeft = imageSrc->GetProperty(HW_MNOTE_XMAGE_LEFT);
+    std::string xmageTop = imageSrc->GetProperty(HW_MNOTE_XMAGE_TOP);
+    std::string xmageRight = imageSrc->GetProperty(HW_MNOTE_XMAGE_RIGHT);
+    std::string xmageBottom = imageSrc->GetProperty(HW_MNOTE_XMAGE_BOTTOM);
+    if (xmageBottom.empty() || xmageBottom == DEFAULT_EXIF_VALUE) {
+        TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto xmageBottom is null");
+        return;
+    }
+    float xLeft = StringUtils::StringToFloat(xmageLeft);
+    float xTop = StringUtils::StringToFloat(xmageTop);
+    float xRight = StringUtils::StringToFloat(xmageRight);
+    float xBottom = StringUtils::StringToFloat(xmageBottom);
+    imageSize = SizeF(xRight - xLeft, xBottom - xTop);
+    SizeF xmageOffset = SizeF(xLeft, xTop);
+    SizeF xmageRawSize = SizeF(imageW, imageL);
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto roundXmage(%{public}f, %{public}f, %{public}f, %{public}f)",
+        xLeft, xTop, xRight, xBottom);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, XmageOffset, xmageOffset, host);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, XmageRawSize, xmageRawSize, host);
 }
 
 SizeF MovingPhotoPattern::MeasureContentLayout(const SizeF& layoutSize,
