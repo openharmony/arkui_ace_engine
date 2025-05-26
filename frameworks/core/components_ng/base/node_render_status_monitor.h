@@ -19,6 +19,7 @@
 #include <functional>
 #include <list>
 #include <memory>
+#include <unordered_map>
 
 #include "base/memory/ace_type.h"
 
