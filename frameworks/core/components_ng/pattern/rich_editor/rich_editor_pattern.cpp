@@ -997,6 +997,19 @@ void RichEditorPattern::AddSpanHoverEvent(
     inputHub->AddOnHoverEvent(hoverEvent);
 }
 
+int32_t RichEditorPattern::AddImageSpanFromCollaboration(const ImageSpanOptions& options, bool updateCaret)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AddImageSpanFromCollaboration, updateCaret=%{public}d, ssMode=%{public}d",
+        updateCaret, !!isSpanStringMode_);
+    if (isSpanStringMode_) {
+        auto insertStyledString = MakeRefPtr<SpanString>(options);
+        auto index = options.offset.value_or(caretPosition_);
+        InsertStyledString(insertStyledString, index, updateCaret);
+        return 0;
+    }
+    return AddImageSpan(options, false, 0, updateCaret);
+}
+
 int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool isPaste, int32_t index,
     bool updateCaret)
 {
@@ -4733,8 +4746,13 @@ void RichEditorPattern::CompleteStyledString(RefPtr<SpanString>& spanString)
 
 void RichEditorPattern::InsertStyledStringByPaste(const RefPtr<SpanString>& spanString)
 {
+    InsertStyledString(spanString, caretPosition_, true);
+}
+
+void RichEditorPattern::InsertStyledString(const RefPtr<SpanString>& spanString, int32_t insertIndex, bool updateCaret)
+{
     CHECK_NULL_VOID(spanString && styledString_);
-    int32_t changeStart = caretPosition_;
+    int32_t changeStart = insertIndex;
     int32_t changeLength = 0;
     if (textSelector_.IsValid()) {
         changeStart = textSelector_.GetTextStart();
@@ -4758,7 +4776,7 @@ void RichEditorPattern::InsertStyledStringByPaste(const RefPtr<SpanString>& span
     }
     ResetSelection();
     styledString_->InsertSpanString(changeStart, subSpanString);
-    SetCaretPosition(caretPosition_ + subSpanString->GetLength());
+    IF_TRUE(updateCaret, SetCaretPosition(insertIndex + subSpanString->GetLength()));
     AfterStyledStringChange(changeStart, changeLength, subSpanString->GetU16string());
 }
 

@@ -1256,4 +1256,39 @@ HWTEST_F(RichEditorStyledStringTestNg, HandleOnPaste001, TestSize.Level1)
     richEditorPattern->ProcessSpanStringData(tlvDatas, styledString->GetString(), false);
     EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
 }
+
+/**
+ * @tc.name: HandleOnPaste001
+ * @tc.desc: test HandleOnPaste
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, AddImageSpanFromCollaboration001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto mutableTextStr = CreateTextStyledString(INIT_U16STRING_1);
+    richEditorPattern->SetStyledString(mutableTextStr);
+    int32_t insertIndex = 1;
+    int32_t initCaretPosition = 5;
+    richEditorPattern->caretPosition_ = initCaretPosition;
+    const ImageSpanOptions IMAGE_SPAN_OPTIONS_1 = {
+        .offset = insertIndex,
+        .image = "app.media.icon",
+        .bundleName = std::nullopt,
+        .moduleName = std::nullopt,
+        .imagePixelMap = std::nullopt,
+        .imageAttribute = IMAGE_SPAN_ATTRIBUTE_1
+    };
+    richEditorPattern->AddImageSpanFromCollaboration(IMAGE_SPAN_OPTIONS_1, false);
+    EXPECT_EQ(richEditorPattern->caretPosition_, initCaretPosition);
+    richEditorPattern->AddImageSpanFromCollaboration(IMAGE_SPAN_OPTIONS_1, true);
+    EXPECT_EQ(richEditorPattern->caretPosition_, insertIndex + 1);
+
+    auto contentLength = richEditorPattern->GetTextContentLength();
+    richEditorPattern->maxLength_ = contentLength;
+    richEditorPattern->AddImageSpanFromCollaboration(IMAGE_SPAN_OPTIONS_1, false);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), contentLength);
+}
+
 } // namespace OHOS::Ace::NG
