@@ -780,7 +780,7 @@ export interface DragEvent {
     getVelocityX(): number
     getVelocityY(): number
     getVelocity(): number
-    getModifierKeyState(keys: Array<string>): boolean
+    getModifierKeyState?: ((keys: Array<string>) => boolean)
     executeDropAnimation(customDropAnimation: (() => void)): void
     startDataLoading(options: DataSyncOptions): string
 }
@@ -800,6 +800,12 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     }
     set useCustomDropAnimation(useCustomDropAnimation: boolean) {
         this.setUseCustomDropAnimation(useCustomDropAnimation)
+    }
+    get getModifierKeyState(): ((keys: Array<string>) => boolean) {
+        return this.getGetModifierKeyState();
+    }
+    set getModifierKeyState(getModifierKeyState: ((keys: Array<string>) => boolean) | undefined) {
+        // setter is not implemented
     }
     static ctor_dragevent(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_ctor()
@@ -861,9 +867,11 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     public getVelocity(): number {
         return this.getVelocity_serialize()
     }
-    public getModifierKeyState(keys: Array<string>): boolean {
-        const keys_casted = keys as (Array<string>)
-        return this.getModifierKeyState_serialize(keys_casted)
+    public getGetModifierKeyState(): ((keys: Array<string>) => boolean) {
+        return (keys: Array<string>): boolean => {
+            const keys_casted = keys as (Array<string>)
+            return this.getModifierKeyState_serialize(keys_casted)
+        }
     }
     public executeDropAnimation(customDropAnimation: (() => void)): void {
         const customDropAnimation_casted = customDropAnimation as ((() => void))
