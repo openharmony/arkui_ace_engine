@@ -4831,7 +4831,9 @@ RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool ad
 {
     auto* lazyItemAdapter = pattern_->GetArkoalaLazyAdapter();
     if (lazyItemAdapter) {
-        return lazyItemAdapter->GetOrCreateChild(index);
+        auto node = lazyItemAdapter->GetOrCreateChild(index);
+        AddChild(node);
+        return node;
     }
     auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
     if (child) {
