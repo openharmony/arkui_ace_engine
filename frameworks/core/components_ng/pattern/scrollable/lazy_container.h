@@ -29,7 +29,7 @@ class LazyContainer : virtual public Pattern {
 public:
     int32_t GetTotalChildCount() const final
     {
-        return adapter_ ? adapter_->GetTotalCount() : -1;
+        return newAdapter_ ? newAdapter_->GetTotalCount() : -1;
     }
 
     RefPtr<FrameNode> GetOrCreateChildByIndex(uint32_t index) final;
@@ -37,6 +37,11 @@ public:
     ScrollWindowAdapter* GetScrollWindowAdapter() final;
 
     ScrollWindowAdapter* GetOrCreateScrollWindowAdapter() final;
+
+    LazyComposeAdapter* GetArkoalaLazyAdapter() final
+    {
+        return newAdapter_.get();
+    }
 
     /**
      * @brief Converts a large delta to a jump index
@@ -48,14 +53,8 @@ public:
         return -1;
     }
 
-    void Synchronize(LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount)
-    {
-        if (!newAdapter_) {
-            newAdapter_ = std::make_unique<LazyComposeAdapter>();
-        }
-        newAdapter_->SetCallbacks(std::move(creator), std::move(updater));
-        newAdapter_->SetTotalCount(totalCount);
-    }
+    void Synchronize(
+        LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount);
 
 protected:
     void ResetAdapter()
@@ -95,7 +94,7 @@ protected:
 private:
     virtual RefPtr<FillAlgorithm> CreateFillAlgorithm() = 0;
 
-    RefPtr<ScrollWindowAdapter> adapter_;
+    RefPtr<ScrollWindowAdapter> adapter_; // to be removed
 
     std::unique_ptr<LazyComposeAdapter> newAdapter_;
 };

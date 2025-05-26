@@ -37,32 +37,29 @@ public:
     {
         totalCount_ = value;
     }
+    int32_t GetTotalCount() const
+    {
+        return totalCount_;
+    }
+
     void SetCallbacks(CreateItemCb create, UpdateRangeCb update)
     {
         createItem_ = std::move(create);
         updateRange_ = std::move(update);
     }
 
-    RefPtr<FrameNode> GetChild(int32_t index)
+    RefPtr<FrameNode> GetOrCreateChild(uint32_t index);
+    RefPtr<FrameNode> GetChild(uint32_t index);
+
+    uint32_t GetIndexOfChild(const RefPtr<FrameNode>& child)
     {
-        auto item = items_.Get(index);
-        if (item && !item->Invalid()) {
-            return item->Upgrade();
-        }
-        auto newItem = createItem_ ? createItem_(index) : nullptr;
-        items_.Put(index, newItem);
-        // todo: attach to tree, either here / in FrameNode
-        return newItem;
+        return items_.GetKey(child).value_or(0);
     }
 
-    void SetActiveRange(int32_t start, int32_t end) {
-        if (updateRange_) {
-            updateRange_(start, end);
-        }
-    }
+    void SetActiveRange(int32_t start, int32_t end);
 
 private:
-    UniqueValuedMap<int32_t, WeakPtr<FrameNode>, WeakPtr<FrameNode>::Hash> items_;
+    UniqueValuedMap<uint32_t, WeakPtr<FrameNode>, WeakPtr<FrameNode>::Hash> items_;
     CreateItemCb createItem_;
     UpdateRangeCb updateRange_;
     int32_t totalCount_ = 0;
