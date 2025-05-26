@@ -1225,4 +1225,30 @@ HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper008, TestSize.Level1
     EXPECT_EQ(style.GetTextDecorationFirst(), result3);
 }
 
+/**
+ * @tc.name: UpdateDecorationStyle001
+ * @tc.desc: test UpdateDecorationStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, UpdateDecorationStyle001, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto spanNode = AceType::MakeRefPtr<SpanNode>(0);
+    auto spanItem = spanNode->GetSpanItem();
+    TextStyle textStyle;
+    struct UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateTextDecoration = TextDecoration::UNDERLINE;
+    richEditorPattern->UpdateDecoration(spanNode, updateSpanStyle, textStyle);
+    EXPECT_EQ(spanItem->useThemeDecorationColor, true);
+
+    updateSpanStyle.updateTextDecorationStyle = TextDecorationStyle::SOLID;
+    richEditorPattern->UpdateDecoration(spanNode, updateSpanStyle, textStyle);
+    EXPECT_EQ(spanItem->useThemeDecorationColor, true);
+
+    updateSpanStyle.updateTextDecorationColor = Color::RED;
+    richEditorPattern->UpdateDecoration(spanNode, updateSpanStyle, textStyle);
+    EXPECT_EQ(spanItem->useThemeDecorationColor, false);
+}
+
 }
