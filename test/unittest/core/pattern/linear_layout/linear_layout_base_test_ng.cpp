@@ -14,11 +14,13 @@
  */
 
 #include "linear_layout_base_test_ng.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void LinearLayoutBaseTestNG::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
 }
 
 void LinearLayoutBaseTestNG::TearDownTestSuite()
@@ -26,7 +28,10 @@ void LinearLayoutBaseTestNG::TearDownTestSuite()
     TestNG::TearDownTestSuite();
 }
 
-void LinearLayoutBaseTestNG::SetUp() {}
+void LinearLayoutBaseTestNG::SetUp() 
+{
+    ViewStackProcessor::GetInstance()->ClearStack();
+}
 void LinearLayoutBaseTestNG::TearDown() {}
 
 } // namespace OHOS::Ace::NG

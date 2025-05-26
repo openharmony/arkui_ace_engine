@@ -257,10 +257,8 @@ void LinearSplitLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     auto host = layoutWrapper->GetHostNode();
-    if (host && !host->GetIgnoreLayoutProcess()) {
-        if (GetNeedPostponeForIgnore()) { 
-            return;
-        }
+    if (host && !host->GetIgnoreLayoutProcess() && GetNeedPostponeForIgnore()) {
+        return;
     }
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     float childTotalWidth = 0.0f;
@@ -304,7 +302,9 @@ void LinearSplitLayoutAlgorithm::UpdateChildPositionWidthIgnoreLayoutSafeArea(co
     auto childNode = childLayoutWrapper->GetHostNode();
     CHECK_NULL_VOID(childNode);
     CHECK_NULL_VOID(childNode->GetLayoutProperty());
-    CHECK_NULL_VOID(childNode->GetLayoutProperty()->IsIgnoreOptsValid());
+    if (!childNode->GetLayoutProperty()->IsIgnoreOptsValid()) {
+        return;
+    }
     auto saeCorrect = originOffset;
     IgnoreLayoutSafeAreaOpts& opts = *(childNode->GetLayoutProperty()->GetIgnoreLayoutSafeAreaOpts());
     auto sae =
