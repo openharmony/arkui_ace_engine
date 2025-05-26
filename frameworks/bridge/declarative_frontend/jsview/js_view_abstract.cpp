@@ -179,7 +179,7 @@ const char* BOTTOM_RIGHT_PROPERTY = "bottomRight";
 const char* DEBUG_LINE_INFO_LINE = "$line";
 const char* DEBUG_LINE_INFO_PACKAGE_NAME = "$packageName";
 
-enum class OperationType { COPY, PASTE, CUT, SELECT_ALL, UNKNOWN };
+enum class MenuItemType { COPY, PASTE, CUT, SELECT_ALL, UNKNOWN, CAMERA_INPUT, AI_WRITER, TRANSLATE, SHARE, SEARCH };
 enum class BackgroundType { CUSTOM_BUILDER, COLOR };
 
 void ParseJsScale(const JSRef<JSVal>& jsValue, float& scaleX, float& scaleY, float& scaleZ,
@@ -1568,51 +1568,74 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
     return result;
 }
 
-OperationType StringToOperationType(const std::string& id)
+MenuItemType StringToMenuItemType(std::string_view id)
 {
-    if (id == "OH_DEFAULT_COPY") {
-        return OperationType::COPY;
-    } else if (id == "OH_DEFAULT_PASTE") {
-        return OperationType::PASTE;
-    } else if (id == "OH_DEFAULT_CUT") {
-        return OperationType::CUT;
-    } else if (id == "OH_DEFAULT_SELECT_ALL") {
-        return OperationType::SELECT_ALL;
-    } else {
-        return OperationType::UNKNOWN;
+    static const std::unordered_map<std::string_view, MenuItemType> keyMenuItemMap = {
+        { "OH_DEFAULT_COPY", MenuItemType::COPY },
+        { "OH_DEFAULT_PASTE", MenuItemType::PASTE },
+        { "OH_DEFAULT_CUT", MenuItemType::CUT },
+        { "OH_DEFAULT_SELECT_ALL", MenuItemType::SELECT_ALL },
+        { "OH_DEFAULT_CAMERA_INPUT", MenuItemType::CAMERA_INPUT },
+        { "OH_DEFAULT_AI_WRITE", MenuItemType::AI_WRITER },
+        { "OH_DEFAULT_TRANSLATE", MenuItemType::TRANSLATE },
+        { "OH_DEFAULT_SHARE", MenuItemType::SHARE },
+        { "OH_DEFAULT_SEARCH", MenuItemType::SEARCH },
+    };
+
+    auto item = keyMenuItemMap.find(id);
+    return item != keyMenuItemMap.end() ? item->second : MenuItemType::UNKNOWN;
+}
+
+void UpdateInfoById(NG::MenuOptionsParam& menuOptionsParam, std::string_view id)
+{
+    auto opType = StringToMenuItemType(id);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(theme);
+    switch (opType) {
+        case MenuItemType::COPY:
+            menuOptionsParam.labelInfo = theme->GetCopyLabelInfo();
+           menuOptionsParam.symbolId = theme->GetCopySymbolId();
+            break;
+        case MenuItemType::PASTE:
+            menuOptionsParam.labelInfo = theme->GetPasteLabelInfo();
+            menuOptionsParam.symbolId = theme->GetPasteSymbolId();
+            break;
+        case MenuItemType::CUT:
+            menuOptionsParam.labelInfo = theme->GetCutLabelInfo();
+            menuOptionsParam.symbolId = theme->GetCutSymbolId();
+            break;
+        case MenuItemType::SELECT_ALL:
+            menuOptionsParam.labelInfo = theme->GetSelectAllLabelInfo();
+            menuOptionsParam.symbolId = theme->GetCopyAllSymbolId();
+            break;
+        case MenuItemType::CAMERA_INPUT:
+            menuOptionsParam.symbolId = theme->GetCameraInputSymbolId();
+            break;
+        case MenuItemType::AI_WRITER:
+            menuOptionsParam.symbolId = theme->GetAIWriteSymbolId();
+            break;
+        case MenuItemType::TRANSLATE:
+            menuOptionsParam.symbolId = theme->GetTranslateSymbolId();
+            break;
+        case MenuItemType::SHARE:
+            menuOptionsParam.symbolId = theme->GetShareSymbolId();
+            break;
+        case MenuItemType::SEARCH:
+            menuOptionsParam.symbolId = theme->GetSearchSymbolId();
+            break;
+        default:
+            menuOptionsParam.labelInfo = "";
+            menuOptionsParam.symbolId = 0;
+            break;
     }
 }
 
 void UpdateOptionsInfo(std::vector<NG::MenuItemParam>& params)
 {
     for (auto& param : params) {
-        auto opType = StringToOperationType(param.menuOptionsParam.id);
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<TextOverlayTheme>();
-        CHECK_NULL_VOID(theme);
-        switch (opType) {
-            case OperationType::COPY:
-                param.menuOptionsParam.labelInfo = theme->GetCopyLabelInfo();
-                param.menuOptionsParam.symbolId = theme->GetCopySymbolId();
-                break;
-            case OperationType::PASTE:
-                param.menuOptionsParam.labelInfo = theme->GetPasteLabelInfo();
-                param.menuOptionsParam.symbolId = theme->GetPasteSymbolId();
-                break;
-            case OperationType::CUT:
-                param.menuOptionsParam.labelInfo = theme->GetCutLabelInfo();
-                param.menuOptionsParam.symbolId = theme->GetCutSymbolId();
-                break;
-            case OperationType::SELECT_ALL:
-                param.menuOptionsParam.labelInfo = theme->GetSelectAllLabelInfo();
-                param.menuOptionsParam.symbolId = theme->GetCopyAllSymbolId();
-                break;
-            default:
-                param.menuOptionsParam.labelInfo = "";
-                param.menuOptionsParam.symbolId = 0;
-                break;
-        }
+        UpdateInfoById(param.menuOptionsParam, param.menuOptionsParam.id);
     }
 }
 
@@ -12116,6 +12139,19 @@ void JSViewAbstract::JsCompositingFilter(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetCompositingFilter(compositingFilter);
 }
 
+void JSViewAbstract::ParseMenuItemsSymbolId(const JSRef<JSVal>& jsStartIcon, NG::MenuOptionsParam menuOptionsParam)
+{
+     if (StringToMenuItemType(menuOptionsParam.id) == MenuItemType::UNKNOWN) {
+        uint32_t symbolId = 0;
+        RefPtr<ResourceObject> resourceObject;
+        if (ParseJsSymbolId(jsStartIcon, symbolId, resourceObject)) {
+            menuOptionsParam.symbolId = symbolId;
+        }
+    } else {
+        UpdateInfoById(menuOptionsParam, menuOptionsParam.id);
+    }
+}
+
 std::vector<NG::MenuOptionsParam> JSViewAbstract::ParseMenuItems(const JSRef<JSArray>& menuItemsArray, bool showShortcut)
 {
     std::vector<NG::MenuOptionsParam> menuParams;
@@ -12130,19 +12166,6 @@ std::vector<NG::MenuOptionsParam> JSViewAbstract::ParseMenuItems(const JSRef<JSA
         std::string content;
         ParseJsString(jsContent, content);
         menuOptionsParam.content = content;
-        auto jsStartIcon = menuItemObject->GetProperty("icon");
-        std::string icon;
-        ParseJsMedia(jsStartIcon, icon);
-        menuOptionsParam.icon = icon;
-        if (showShortcut) {
-            uint32_t symbolId = 0;
-            RefPtr<ResourceObject> resourceObject;
-
-            if (ParseJsSymbolId(jsStartIcon, symbolId, resourceObject)) {
-                menuOptionsParam.symbolId = symbolId;
-            }
-        }
-
         auto jsTextMenuId = menuItemObject->GetProperty("id");
         std::string id;
         if (jsTextMenuId->IsObject()) {
@@ -12156,6 +12179,13 @@ std::vector<NG::MenuOptionsParam> JSViewAbstract::ParseMenuItems(const JSRef<JSA
         ParseJsString(jsLabelInfo, labelInfo);
         if (jsLabelInfo->IsString() || jsLabelInfo->IsObject()) {
             menuOptionsParam.labelInfo = labelInfo;
+        }
+        auto jsStartIcon = menuItemObject->GetProperty("icon");
+        std::string icon;
+        ParseJsMedia(jsStartIcon, icon);
+        menuOptionsParam.icon = icon;
+        if (!showShortcut) {
+           ParseMenuItemsSymbolId(jsStartIcon, menuOptionsParam);
         }
         menuParams.emplace_back(menuOptionsParam);
     }

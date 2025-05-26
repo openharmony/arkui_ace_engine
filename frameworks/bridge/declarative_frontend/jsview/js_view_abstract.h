@@ -839,7 +839,7 @@ private:
         int32_t resId, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);
     static bool ParseJsDimensionByNameInternal(const JSRef<JSObject>& jsObj, CalcDimension& result,
         DimensionUnit defaultUnit, RefPtr<ResourceWrapper>& resourceWrapper, int32_t resType);
-
+    static void ParseMenuItemsSymbolId(const JSRef<JSVal>& jsStartIcon, NG::MenuOptionsParam menuOptionsParam);
     static std::vector<NG::MenuOptionsParam> ParseMenuItems(const JSRef<JSArray>& menuItemsArray, bool showShortcut);
     static void ParseOnCreateMenu(
         const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, NG::OnCreateMenuCallback& onCreateMenuCallback);

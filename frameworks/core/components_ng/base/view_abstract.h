@@ -110,17 +110,14 @@ struct OptionParam {
         const std::function<void()>& actionParam)
         : value(valueParam), icon(iconParam), labelInfo(labelInfo), enabled(true), action(actionParam)
     {}
-    OptionParam(const std::string& valueParam, const std::string& iconParam, const std::string& labelInfo,
-        const std::function<void()>& actionParam, uint32_t symbolId)
-        : value(valueParam), icon(iconParam), labelInfo(labelInfo), enabled(true), action(actionParam), symbolId(symbolId)
-    {}
     OptionParam(const std::string& valueParam, const std::function<void()>& actionParam, const std::string& labelInfo,
         bool enabledParam)
         : value(valueParam), icon(""), labelInfo(labelInfo), enabled(enabledParam), action(actionParam)
     {}
     OptionParam(const std::string& valueParam, const std::function<void()>& actionParam, const std::string& labelInfo,
         bool enabledParam, uint32_t symbolId)
-        : value(valueParam), icon(""), labelInfo(labelInfo), enabled(enabledParam), action(actionParam), symbolId(symbolId)
+        : value(valueParam), icon(""), labelInfo(labelInfo), enabled(enabledParam), action(actionParam),
+          symbolId(symbolId)
     {}
 
     void SetSymbolUserDefinedIdealFontSize(const Dimension& dimension)
