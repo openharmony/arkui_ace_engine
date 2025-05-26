@@ -179,6 +179,8 @@ abstract class ViewPU extends PUV2ViewBase
     if (localStorage) {
       this.localStorage_ = localStorage;
       stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: Using LocalStorage instance provided via @Entry or view instance creation.`);
+    } else if (parent instanceof ViewBuildNodeBase) {
+      this.localStorage_ = parent.getShareLocalStorage();
     }
 
     SubscriberManager.Add(this);
