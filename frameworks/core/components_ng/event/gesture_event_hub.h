@@ -212,11 +212,12 @@ public:
     void SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
     GestureRecognizerJudgeFunc GetOnGestureRecognizerJudgeBegin() const;
     void SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& gestureJudgeFunc);
+    void SetOnGestureJudgeNativeBeginForMenu(GestureJudgeFunc&& gestureJudgeFunc);
     TouchTestDoneCallback GetOnTouchTestDoneCallbackForInner() const;
     void SetOnTouchTestDoneCallbackForInner(TouchTestDoneCallback&& touchTestDoneFunc);
     GetEventTargetImpl CreateGetEventTargetImpl() const;
     GestureJudgeFunc GetOnGestureJudgeBeginCallback() const;
-    GestureJudgeFunc GetOnGestureJudgeNativeBeginCallback() const;
+    GestureJudgeFunc GetOnGestureJudgeNativeBeginCallback();
     // When the event param is undefined, it will clear the callback.
     void ClearUserOnClick();
     void ClearUserOnTouch();
@@ -243,6 +244,7 @@ public:
         const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, PanDistanceMap distanceMap);
     void RemovePanEvent(const RefPtr<PanEvent>& panEvent);
     void SetPanEventType(GestureTypeName typeName);
+    void SetLongPressEventType(GestureTypeName typeName);
     // Set by user define, which will replace old one.
     void SetDragEvent(const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, Dimension distance);
     void SetDragDropEvent();
@@ -492,6 +494,7 @@ private:
 
     GestureJudgeFunc gestureJudgeFunc_;
     GestureJudgeFunc gestureJudgeNativeFunc_;
+    GestureJudgeFunc gestureJudgeNativeFuncForMenu_;
 
     TouchTestDoneCallback touchTestDoneCallbackForInner_;
 
