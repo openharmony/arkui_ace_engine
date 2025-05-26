@@ -25,6 +25,7 @@ build_component_ng("rich_editor_pattern_ng") {
     "rich_editor_layout_algorithm.cpp",
     "rich_editor_layout_property.cpp",
     "rich_editor_model_ng.cpp",
+    "rich_editor_model_static.cpp",
     "rich_editor_overlay_modifier.cpp",
     "rich_editor_paint_method.cpp",
     "rich_editor_pattern.cpp",
