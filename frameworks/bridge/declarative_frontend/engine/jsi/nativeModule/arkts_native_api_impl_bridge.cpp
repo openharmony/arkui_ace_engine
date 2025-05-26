@@ -6618,6 +6618,70 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetMediaOptions));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMediaOptions"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetMediaOptions));
+	web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnPageEnd"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnPageEnd));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnPageEnd"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnPageEnd));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnPageBegin"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnPageBegin));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnPageBegin"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnPageBegin));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnProgressChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnProgressChange));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnProgressChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnProgressChange));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnTitleReceive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnTitleReceive));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnTitleReceive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnTitleReceive));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnDownloadStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnDownloadStart));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDownloadStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnDownloadStart));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setJavaScriptOnDocumentStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetJavaScriptOnDocumentStart));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetJavaScriptOnDocumentStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetJavaScriptOnDocumentStart));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setJavaScriptOnDocumentEnd"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetJavaScriptOnDocumentEnd));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetJavaScriptOnDocumentEnd"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetJavaScriptOnDocumentEnd));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCopyOption"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetCopyOptionMode));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCopyOption"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetCopyOptionMode));
+	web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnRenderProcessNotResponding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnRenderProcessNotResponding));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnRenderProcessNotResponding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnRenderProcessNotResponding));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnPageVisible"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnPageVisible));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnPageVisible"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnPageVisible));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnRenderExited"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnRenderExited));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnRenderExited"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnRenderExited));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBlockNetwork"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetBlockNetwork));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBlockNetwork"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetBlockNetwork));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnResourceLoad"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnResourceLoad));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnResourceLoad"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnResourceLoad));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnRefreshAccessedHistory"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnRefreshAccessedHistory));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnRefreshAccessedHistory"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnRefreshAccessedHistory));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnNavigationEntryCommitted"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnNavigationEntryCommitted));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnNavigationEntryCommitted"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnNavigationEntryCommitted));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSearchResultReceive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnSearchResultReceive));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSearchResultReceive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnSearchResultReceive));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif

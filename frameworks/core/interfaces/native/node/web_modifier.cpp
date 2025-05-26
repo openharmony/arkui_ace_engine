@@ -58,6 +58,8 @@ constexpr bool DEFAULT_ONLINEIMAGE_ACCESS_ENABLED = true;
 constexpr bool MEDIA_PLAY_GESTURE_ACCESS_ENABLED = true;
 constexpr bool DEFAULT_MEDIA_OPTIONS_ENABLED = true;
 constexpr int32_t DEFAULT_RESUMEINTERVAL = 0;
+constexpr CopyOptions DEFAULT_COPY_OPTIONS_VALUE = CopyOptions::Local;
+constexpr bool DEFAULT_BLOCK_NETWORK_ENABLED = false;
 } // namespace
 
 void SetJavaScriptAccess(ArkUINodeHandle node, ArkUI_Bool value)
@@ -858,6 +860,420 @@ void ResetMediaOptions(ArkUINodeHandle node)
     WebModelNG::SetAudioResumeInterval(frameNode, DEFAULT_RESUMEINTERVAL);
     WebModelNG::SetAudioExclusive(frameNode, DEFAULT_MEDIA_OPTIONS_ENABLED);
 }
+void SetOnPageEnd(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* originalCallbackPtr = reinterpret_cast<std::function<void(LoadWebPageFinishEvent&)>*>(extraParam);
+    std::function<void(const BaseEventInfo*)> adaptedCallback;
+    if (extraParam) {
+        if (originalCallbackPtr) {
+        adaptedCallback = [originalCallback = *originalCallbackPtr](const BaseEventInfo* event) {
+            if (auto changeEvent = static_cast<const LoadWebPageFinishEvent*>(event)) {
+                auto& nativeEmbedEvent = const_cast<LoadWebPageFinishEvent&>(*changeEvent);
+                originalCallback(nativeEmbedEvent);
+            }
+        };
+        }
+        WebModelNG::SetOnPageFinish(frameNode, std::move(adaptedCallback));
+    } else {
+        WebModelNG::SetOnPageFinish(frameNode, nullptr);
+    }
+}
+
+void ResetOnPageEnd(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnPageFinish(frameNode, nullptr);
+}
+
+void SetOnPageBegin(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* originalCallbackPtr = reinterpret_cast<std::function<void(LoadWebPageStartEvent&)>*>(extraParam);
+    std::function<void(const BaseEventInfo*)> adaptedCallback;
+    if (extraParam) {
+        if (originalCallbackPtr) {
+        adaptedCallback = [originalCallback = *originalCallbackPtr](const BaseEventInfo* event) {
+            if (auto changeEvent = static_cast<const LoadWebPageStartEvent*>(event)) {
+                auto& nativeEmbedEvent = const_cast<LoadWebPageStartEvent&>(*changeEvent);
+                originalCallback(nativeEmbedEvent);
+            }
+        };
+        }
+        WebModelNG::SetOnPageStart(frameNode, std::move(adaptedCallback));
+    } else {
+        WebModelNG::SetOnPageStart(frameNode, nullptr);
+    }
+}
+
+void ResetOnPageBegin(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnPageStart(frameNode, nullptr);
+}
+
+void SetOnProgressChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* originalCallbackPtr = reinterpret_cast<std::function<void(LoadWebProgressChangeEvent&)>*>(extraParam);
+    std::function<void(const BaseEventInfo*)> adaptedCallback;
+    if (extraParam) {
+        if (originalCallbackPtr) {
+        adaptedCallback = [originalCallback = *originalCallbackPtr](const BaseEventInfo* event) {
+            if (auto changeEvent = static_cast<const LoadWebProgressChangeEvent*>(event)) {
+                auto& nativeEmbedEvent = const_cast<LoadWebProgressChangeEvent&>(*changeEvent);
+                originalCallback(nativeEmbedEvent);
+            }
+        };
+        }
+        WebModelNG::SetOnProgressChange(frameNode, std::move(adaptedCallback));
+    } else {
+        WebModelNG::SetOnProgressChange(frameNode, nullptr);
+    }
+}
+
+void ResetOnProgressChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnProgressChange(frameNode, nullptr);
+}
+
+void SetOnTitleReceive(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* originalCallbackPtr = reinterpret_cast<std::function<void(LoadWebTitleReceiveEvent&)>*>(extraParam);
+    std::function<void(const BaseEventInfo*)> adaptedCallback;
+    if (extraParam) {
+        if (originalCallbackPtr) {
+        adaptedCallback = [originalCallback = *originalCallbackPtr](const BaseEventInfo* event) {
+            if (auto changeEvent = static_cast<const LoadWebTitleReceiveEvent*>(event)) {
+                auto& nativeEmbedEvent = const_cast<LoadWebTitleReceiveEvent&>(*changeEvent);
+                originalCallback(nativeEmbedEvent);
+            }
+        };
+        }
+        WebModelNG::SetOnTitleReceive(frameNode, std::move(adaptedCallback));
+    } else {
+        WebModelNG::SetOnTitleReceive(frameNode, nullptr);
+    }
+}
+
+void ResetOnTitleReceive(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnTitleReceive(frameNode, nullptr);
+}
+
+void SetOnDownloadStart(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* originalCallbackPtr = reinterpret_cast<std::function<void(DownloadStartEvent&)>*>(extraParam);
+    std::function<void(const BaseEventInfo*)> adaptedCallback;
+    if (extraParam) {
+        if (originalCallbackPtr) {
+        adaptedCallback = [originalCallback = *originalCallbackPtr](const BaseEventInfo* event) {
+            if (auto changeEvent = static_cast<const DownloadStartEvent*>(event)) {
+                auto& nativeEmbedEvent = const_cast<DownloadStartEvent&>(*changeEvent);
+                originalCallback(nativeEmbedEvent);
+            }
+        };
+        }
+        WebModelNG::SetOnDownloadStart(frameNode, std::move(adaptedCallback));
+    } else {
+        WebModelNG::SetOnDownloadStart(frameNode, nullptr);
+    }
+}
+
+void ResetOnDownloadStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnDownloadStart(frameNode, nullptr);
+}
+
+void SetJavaScriptOnDocumentStart(ArkUINodeHandle node, ArkUI_ScriptItemArray* values, ArkUI_Int32 size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScriptItems SecriptInfos;
+    for (int32_t i = 0; i < size; ++i) {
+        std::string script;
+        ScriptItemsByOrder scriptRules;
+        std::string scriptStr(values[i].script);
+        script = scriptStr;
+        auto scriptRulesChar = values[i].scriptRules;
+        auto scriptRulesSize = values[i].scriptRulesSize;
+        ScriptItemsByOrder tmp;
+        for (int32_t j = 0; j < scriptRulesSize; ++j) {
+            std::string sc(scriptRulesChar[j]);
+            tmp.push_back(sc);
+        }
+        scriptRules = tmp;
+        SecriptInfos.insert(std::make_pair(script, scriptRules));
+    }
+    WebModelNG::JavaScriptOnDocumentStart(frameNode, SecriptInfos);
+}
+
+void ResetJavaScriptOnDocumentStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::JavaScriptOnDocumentStart(frameNode ,ScriptItems());
+}
+
+void SetJavaScriptOnDocumentEnd(ArkUINodeHandle node, ArkUI_ScriptItemArray* values, ArkUI_Int32 size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScriptItems SecriptInfos;
+    for (int32_t i = 0; i < size; ++i) {
+        std::string script;
+        ScriptItemsByOrder scriptRules;
+        std::string scriptStr(values[i].script);
+        script = scriptStr;
+        auto scriptRulesChar = values[i].scriptRules;
+        auto scriptRulesSize = values[i].scriptRulesSize;
+        ScriptItemsByOrder tmp;
+        for (int32_t j = 0; j < scriptRulesSize; ++j) {
+            std::string sc(scriptRulesChar[j]);
+            tmp.push_back(sc);
+        }
+        scriptRules = tmp;
+        SecriptInfos.insert(std::make_pair(script, scriptRules));
+    }
+    WebModelNG::JavaScriptOnDocumentEnd(frameNode, SecriptInfos);
+}
+
+void ResetJavaScriptOnDocumentEnd(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::JavaScriptOnDocumentEnd(frameNode ,ScriptItems());
+}
+
+void SetCopyOptionMode(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto copyOptions = CopyOptions::Local;
+    copyOptions = static_cast<CopyOptions>(value);
+    WebModelNG::SetCopyOptionMode(frameNode, static_cast<CopyOptions>(copyOptions));
+}
+
+void ResetCopyOptionMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetCopyOptionMode(frameNode, DEFAULT_COPY_OPTIONS_VALUE);
+}
+
+void SetRenderProcessNotResponding(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* originalCallbackPtr = reinterpret_cast<std::function<void(RenderProcessNotRespondingEvent&)>*>(extraParam);
+    std::function<void(const BaseEventInfo*)> adaptedCallback;
+    if (extraParam) {
+        if (originalCallbackPtr) {
+        adaptedCallback = [originalCallback = *originalCallbackPtr](const BaseEventInfo* event) {
+            if (auto changeEvent = static_cast<const RenderProcessNotRespondingEvent*>(event)) {
+                auto& nativeEmbedEvent = const_cast<RenderProcessNotRespondingEvent&>(*changeEvent);
+                originalCallback(nativeEmbedEvent);
+            }
+        };
+        }
+        WebModelNG::SetRenderProcessNotRespondingId(frameNode, std::move(adaptedCallback));
+    } else {
+        WebModelNG::SetRenderProcessNotRespondingId(frameNode, nullptr);
+    }
+}
+
+void ResetRenderProcessNotResponding(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetRenderProcessNotRespondingId(frameNode, nullptr);
+}
+
+void SetOnPageVisibleCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* originalCallbackPtr = reinterpret_cast<std::function<void(PageVisibleEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(originalCallbackPtr);
+        auto callback = [originalCallback = *originalCallbackPtr](const std::shared_ptr<BaseEventInfo>& event) {
+            auto* concreteEvent = static_cast<PageVisibleEvent*>(event.get());
+            CHECK_NULL_VOID(originalCallback);
+            originalCallback(*concreteEvent);
+        };
+        WebModelNG::SetOnPageVisible(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnPageVisible(frameNode, nullptr);
+    }
+}
+
+void ResetOnPageVisibleCallBack(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnPageVisible(frameNode, nullptr);
+}
+
+void SetOnRenderExitedCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* renderExitedPtr = reinterpret_cast<std::function<void(RenderExitedEvent&)>*>(extraParam);
+        std::function<void(const BaseEventInfo*)> callback;
+        CHECK_NULL_VOID(renderExitedPtr);
+        callback = [renderExitedPtrCallback = *renderExitedPtr](const BaseEventInfo* event) {
+            if (auto renderExitedEvent = static_cast<const RenderExitedEvent*>(event)) {
+                auto& nonConstEvent = const_cast<RenderExitedEvent&>(*renderExitedEvent);
+                renderExitedPtrCallback(nonConstEvent);
+            }
+        };
+        WebModelNG::SetOnRenderExited(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnRenderExited(frameNode, nullptr);
+    }
+}
+
+void ResetOnRenderExitedCallBack(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnRenderExited(frameNode, nullptr);
+}
+
+void SetBlockNetwork(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetBlockNetwork(frameNode, value);
+}
+
+void ResetBlockNetwork(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetBlockNetwork(frameNode, DEFAULT_BLOCK_NETWORK_ENABLED);
+}
+
+void SetOnResourceLoadCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* resourceLoadPtr = reinterpret_cast<std::function<void(ResourceLoadEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(resourceLoadPtr);
+        auto callback = [resourceLoadCallback = *resourceLoadPtr](const BaseEventInfo* event) {
+            if (auto scrollEvent = static_cast<const ResourceLoadEvent*>(event)) {
+                auto& nonConstEvent = const_cast<ResourceLoadEvent&>(*scrollEvent);
+                resourceLoadCallback(nonConstEvent);
+            }
+        };
+        WebModelNG::SetOnResourceLoad(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnResourceLoad(frameNode, nullptr);
+    }
+}
+
+void ResetOnResourceLoadCallBack(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnResourceLoad(frameNode, nullptr);
+}
+
+void SetOnRefreshAccessedHistoryCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* refreshAccessedHistoryPtr =
+            reinterpret_cast<std::function<void(RefreshAccessedHistoryEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(refreshAccessedHistoryPtr);
+        auto callback = [refreshAccessedHistoryCallback = *refreshAccessedHistoryPtr](const BaseEventInfo* event) {
+            if (auto scrollEvent = static_cast<const RefreshAccessedHistoryEvent*>(event)) {
+                auto& nonConstEvent = const_cast<RefreshAccessedHistoryEvent&>(*scrollEvent);
+                refreshAccessedHistoryCallback(nonConstEvent);
+            }
+        };
+        WebModelNG::SetOnRefreshAccessedHistory(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnRefreshAccessedHistory(frameNode, nullptr);
+    }
+}
+
+void ResetOnRefreshAccessedHistoryCallBack(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnRefreshAccessedHistory(frameNode, nullptr);
+}
+
+void SetOnNavigationEntryCommittedCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* originalCallbackPtr = reinterpret_cast<std::function<void(NavigationEntryCommittedEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(originalCallbackPtr);
+        auto callback = [originalCallback = *originalCallbackPtr](const std::shared_ptr<BaseEventInfo>& event) {
+            auto* concreteEvent = static_cast<NavigationEntryCommittedEvent*>(event.get());
+            CHECK_NULL_VOID(originalCallback);
+            originalCallback(*concreteEvent);
+        };
+        WebModelNG::SetOnNavigationEntryCommitted(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnNavigationEntryCommitted(frameNode, nullptr);
+    }
+}
+
+void ResetOnNavigationEntryCommittedCallBack(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnNavigationEntryCommitted(frameNode, nullptr);
+}
+
+void SetOnSearchResultReceiveCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* searchResultReceivePtr = reinterpret_cast<std::function<void(SearchResultReceiveEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(searchResultReceivePtr);
+        auto callback = [searchResultReceiveCallback = *searchResultReceivePtr](const BaseEventInfo* event) {
+            if (auto scrollEvent = static_cast<const SearchResultReceiveEvent*>(event)) {
+                auto& nonConstEvent = const_cast<SearchResultReceiveEvent&>(*scrollEvent);
+                searchResultReceiveCallback(nonConstEvent);
+            }
+        };
+        WebModelNG::SetOnSearchResultReceive(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnSearchResultReceive(frameNode, nullptr);
+    }
+}
+
+void ResetOnSearchResultReceiveCallBack(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnSearchResultReceive(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUIWebModifier* GetWebModifier()
 {
@@ -965,6 +1381,38 @@ const ArkUIWebModifier* GetWebModifier()
         .resetMediaPlayGestureAccess = ResetMediaPlayGestureAccess,
         .setMediaOptions = SetMediaOptions,
         .resetMediaOptions = ResetMediaOptions,
+		.setOnPageEnd = SetOnPageEnd,
+        .resetOnPageEnd = ResetOnPageEnd,
+        .setOnPageBegin = SetOnPageBegin,
+        .resetOnPageBegin = ResetOnPageBegin,
+        .setOnProgressChange = SetOnProgressChange,
+        .resetOnProgressChange = ResetOnProgressChange,
+        .setOnTitleReceive = SetOnTitleReceive,
+        .resetOnTitleReceive = ResetOnTitleReceive,
+        .setOnDownloadStart = SetOnDownloadStart,
+        .resetOnDownloadStart = ResetOnDownloadStart,
+        .setJavaScriptOnDocumentStart = SetJavaScriptOnDocumentStart,
+        .resetJavaScriptOnDocumentStart = ResetJavaScriptOnDocumentStart,
+        .setJavaScriptOnDocumentEnd = SetJavaScriptOnDocumentEnd,
+        .resetJavaScriptOnDocumentEnd = ResetJavaScriptOnDocumentEnd,
+        .setCopyOptionMode = SetCopyOptionMode,
+        .resetCopyOptionMode = ResetCopyOptionMode,
+        .setRenderProcessNotResponding = SetRenderProcessNotResponding,
+        .resetRenderProcessNotResponding = ResetRenderProcessNotResponding,
+        .setOnPageVisibleCallBack = SetOnPageVisibleCallBack,
+        .resetOnPageVisibleCallBack = ResetOnPageVisibleCallBack,
+        .setOnRenderExitedCallBack = SetOnRenderExitedCallBack,
+        .resetOnRenderExitedCallBack = ResetOnRenderExitedCallBack,
+        .setBlockNetwork = SetBlockNetwork,
+        .resetBlockNetwork = ResetBlockNetwork,
+        .setOnResourceLoadCallBack = SetOnResourceLoadCallBack,
+        .resetOnResourceLoadCallBack = ResetOnResourceLoadCallBack,
+        .setOnRefreshAccessedHistoryCallBack = SetOnRefreshAccessedHistoryCallBack,
+        .resetOnRefreshAccessedHistoryCallBack = ResetOnRefreshAccessedHistoryCallBack,
+        .setOnNavigationEntryCommittedCallBack = SetOnNavigationEntryCommittedCallBack,
+        .resetOnNavigationEntryCommittedCallBack = ResetOnNavigationEntryCommittedCallBack,
+        .setOnSearchResultReceiveCallBack = SetOnSearchResultReceiveCallBack,
+        .resetOnSearchResultReceiveCallBack = ResetOnSearchResultReceiveCallBack,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -1076,6 +1524,38 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetMediaPlayGestureAccess = ResetMediaPlayGestureAccess,
         .setMediaOptions = SetMediaOptions,
         .resetMediaOptions = ResetMediaOptions,
+		.setOnPageEnd = SetOnPageEnd,
+        .resetOnPageEnd = ResetOnPageEnd,
+        .setOnPageBegin = SetOnPageBegin,
+        .resetOnPageBegin = ResetOnPageBegin,
+        .setOnProgressChange = SetOnProgressChange,
+        .resetOnProgressChange = ResetOnProgressChange,
+        .setOnTitleReceive = SetOnTitleReceive,
+        .resetOnTitleReceive = ResetOnTitleReceive,
+        .setOnDownloadStart = SetOnDownloadStart,
+        .resetOnDownloadStart = ResetOnDownloadStart,
+        .setJavaScriptOnDocumentStart = SetJavaScriptOnDocumentStart,
+        .resetJavaScriptOnDocumentStart = ResetJavaScriptOnDocumentStart,
+        .setJavaScriptOnDocumentEnd = SetJavaScriptOnDocumentEnd,
+        .resetJavaScriptOnDocumentEnd = ResetJavaScriptOnDocumentEnd,
+        .setCopyOptionMode = SetCopyOptionMode,
+        .resetCopyOptionMode = ResetCopyOptionMode,
+        .setRenderProcessNotResponding = SetRenderProcessNotResponding,
+        .resetRenderProcessNotResponding = ResetRenderProcessNotResponding,
+        .setOnPageVisibleCallBack = SetOnPageVisibleCallBack,
+        .resetOnPageVisibleCallBack = ResetOnPageVisibleCallBack,
+        .setOnRenderExitedCallBack = SetOnRenderExitedCallBack,
+        .resetOnRenderExitedCallBack = ResetOnRenderExitedCallBack,
+        .setBlockNetwork = SetBlockNetwork,
+        .resetBlockNetwork = ResetBlockNetwork,
+        .setOnResourceLoadCallBack = SetOnResourceLoadCallBack,
+        .resetOnResourceLoadCallBack = ResetOnResourceLoadCallBack,
+        .setOnRefreshAccessedHistoryCallBack = SetOnRefreshAccessedHistoryCallBack,
+        .resetOnRefreshAccessedHistoryCallBack = ResetOnRefreshAccessedHistoryCallBack,
+        .setOnNavigationEntryCommittedCallBack = SetOnNavigationEntryCommittedCallBack,
+        .resetOnNavigationEntryCommittedCallBack = ResetOnNavigationEntryCommittedCallBack,
+        .setOnSearchResultReceiveCallBack = SetOnSearchResultReceiveCallBack,
+        .resetOnSearchResultReceiveCallBack = ResetOnSearchResultReceiveCallBack,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

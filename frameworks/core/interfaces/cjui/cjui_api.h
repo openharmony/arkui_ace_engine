@@ -1992,6 +1992,38 @@ struct CJUIWebModifier {
     void (*resetMediaPlayGestureAccess)(ArkUINodeHandle node);
     void (*setMediaOptions)(ArkUINodeHandle node, ArkUI_Int32 resumeInterval, ArkUI_Bool value);
     void (*resetMediaOptions)(ArkUINodeHandle node);
+	void (*setOnPageEnd)(ArkUINodeHandle node, void* callback);
+    void (*resetOnPageEnd)(ArkUINodeHandle node);
+    void (*setOnPageBegin)(ArkUINodeHandle node, void* callback);
+    void (*resetOnPageBegin)(ArkUINodeHandle node);
+    void (*setOnProgressChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnProgressChange)(ArkUINodeHandle node);
+    void (*setOnTitleReceive)(ArkUINodeHandle node, void* callback);
+    void (*resetOnTitleReceive)(ArkUINodeHandle node);
+    void (*setOnDownloadStart)(ArkUINodeHandle node, void* callback);
+    void (*resetOnDownloadStart)(ArkUINodeHandle node);
+    void (*setJavaScriptOnDocumentStart)(ArkUINodeHandle node, ArkUI_ScriptItemArray* values, ArkUI_Int32 size);
+    void (*resetJavaScriptOnDocumentStart)(ArkUINodeHandle node);
+    void (*setJavaScriptOnDocumentEnd)(ArkUINodeHandle node, ArkUI_ScriptItemArray* values, ArkUI_Int32 size);
+    void (*resetJavaScriptOnDocumentEnd)(ArkUINodeHandle node);
+	void (*setCopyOptionMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetCopyOptionMode)(ArkUINodeHandle node);
+	void (*setRenderProcessNotResponding)(ArkUINodeHandle node, void* callback);
+    void (*resetRenderProcessNotResponding)(ArkUINodeHandle node);
+    void (*setOnPageVisibleCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnPageVisibleCallBack)(ArkUINodeHandle node);
+    void (*setOnRenderExitedCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnRenderExitedCallBack)(ArkUINodeHandle node);
+    void (*setBlockNetwork)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetBlockNetwork)(ArkUINodeHandle node);
+    void (*setOnResourceLoadCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnResourceLoadCallBack)(ArkUINodeHandle node);
+    void (*setOnRefreshAccessedHistoryCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnRefreshAccessedHistoryCallBack)(ArkUINodeHandle node);
+    void (*setOnNavigationEntryCommittedCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnNavigationEntryCommittedCallBack)(ArkUINodeHandle node);
+    void (*setOnSearchResultReceiveCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnSearchResultReceiveCallBack)(ArkUINodeHandle node);
 };
 
 struct CJUIBlankModifier {
