@@ -59,12 +59,12 @@ public:
     bool IsEnable() const;
     bool IsCategoryEnable(int32_t index) const;
     const std::shared_ptr<Config>& GetConfig() const;
-    std::string GetWebCategory() const
+    const std::string& GetWebCategory() const
     {
         return webCategory_;
     }
 
-    std::string GetWebIdentifier() const
+    const std::string& GetWebIdentifier() const
     {
         return webIdentifier_;
     }
