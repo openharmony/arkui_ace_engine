@@ -105,6 +105,7 @@ void UpdateTextProperties(const RefPtr<PopupParam>& param, const RefPtr<TextLayo
     }
     CHECK_NULL_VOID(popupNode);
     auto pipelineContext = popupNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
     double maxAppFontScale = pipelineContext->GetMaxAppFontScale();
     auto fontSize = param->GetFontSize();
     if (fontSize.has_value()) {
@@ -835,6 +836,7 @@ RefPtr<FrameNode> BubbleView::CreateMessage(const std::string& message, bool IsU
     CHECK_NULL_RETURN(popupTheme, nullptr);
     if (!IsUseCustom) {
         auto pipelineContext = textNode->GetContextRefPtr();
+        CHECK_NULL_RETURN(pipelineContext, nullptr);
         double maxAppFontScale = pipelineContext->GetMaxAppFontScale();
         layoutProperty->UpdateMaxFontScale(std::min<double>(AGE_FONT_MAX_SIZE_SCALE, maxAppFontScale));
         layoutProperty->UpdateFontSize(popupTheme->GetFontSize());
