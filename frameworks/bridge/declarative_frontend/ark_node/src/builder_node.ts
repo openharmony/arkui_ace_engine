@@ -156,6 +156,9 @@ class JSBuilderNode extends BaseNode {
     const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
     this.bindedViewOfBuilderNode = options?.bindedViewOfBuilderNode;
     this.params_ = params;
+    if (options?.localStorage instanceof LocalStorage) {
+      this.setShareLocalStorage(options.localStorage);
+    }
     this.updateFuncByElmtId.clear();
     if(this.bindedViewOfBuilderNode){
       globalThis.__viewPuStack__?.push(this.bindedViewOfBuilderNode); 
