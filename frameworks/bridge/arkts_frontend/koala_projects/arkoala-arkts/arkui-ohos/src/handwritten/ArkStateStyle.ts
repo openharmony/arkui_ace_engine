@@ -44,6 +44,7 @@ export function hookStateStyleImpl(node: ArkCommonMethodPeer, stateStyle: StateS
         stateStyle?.normal?.(cm)
     }
     if (currentState.value & UI_STATE_PRESSED) {
+        stateStyle?.clicked?.(cm)
         stateStyle?.pressed?.(cm)
     }
     if (currentState.value & UI_STATE_FOCUSED) {
