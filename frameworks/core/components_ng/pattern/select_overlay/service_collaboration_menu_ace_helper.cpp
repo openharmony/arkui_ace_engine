@@ -951,10 +951,8 @@ int32_t ServiceCollaborationAceCallback::OnDataCallback(uint32_t code, uint32_t 
         ContainerScope scope(instanceId);
         ImageSpanOptions options;
         options.imagePixelMap = imagePix;
-        options.offset = richEditorPattern->GetCaretPosition() + helper->photoCount_;
         auto width = imagePix->GetWidth();
         auto height = imagePix->GetHeight();
-        helper->photoCount_++;
         ImageSpanAttribute attr = {
             .size = ImageSpanSize{ .width = CalcDimension(width), .height = CalcDimension(height) } };
         options.imageAttribute = attr;
@@ -965,7 +963,9 @@ int32_t ServiceCollaborationAceCallback::OnDataCallback(uint32_t code, uint32_t 
         if (!richEditorPattern->GetTextSelector().SelectNothing()) {
             richEditorPattern->DeleteBackward(1);
         }
-        richEditorPattern->AddImageSpan(options, false, 0, false);
+        options.offset = richEditorPattern->GetCaretPosition() + helper->photoCount_;
+        richEditorPattern->AddImageSpanFromCollaboration(options, false);
+        helper->photoCount_++;
         if (code == SEND_PHOTO_SUCCESS) {
             richEditorPattern->SetCaretPosition(richEditorPattern->GetCaretPosition() + helper->photoCount_);
             callback->RemovePopupNode();

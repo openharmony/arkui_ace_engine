@@ -711,6 +711,7 @@ public:
     void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle, std::optional<TextStyle> textStyle);    
     void SetTypingParagraphStyle(std::optional<struct UpdateParagraphStyle> typingParagraphStyle);
     std::optional<struct UpdateSpanStyle> GetTypingStyle();
+    int32_t AddImageSpanFromCollaboration(const ImageSpanOptions& options, bool updateCaret);
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool updateCaret = true);
     int32_t AddTextSpan(TextSpanOptions options, bool isPaste = false, int32_t index = -1);
@@ -1606,6 +1607,7 @@ private:
     void OnCopyOperationExt(RefPtr<PasteDataMix>& pasteData);
     void AddSpanByPasteData(const RefPtr<SpanString>& spanString);
     void CompleteStyledString(RefPtr<SpanString>& spanString);
+    void InsertStyledString(const RefPtr<SpanString>& spanString, int32_t insertIndex, bool updateCaret = true);
     void InsertStyledStringByPaste(const RefPtr<SpanString>& spanString);
     void HandleOnDragInsertStyledString(const RefPtr<SpanString>& spanString, bool isCopy = false);
     void AddSpansByPaste(const std::list<RefPtr<NG::SpanItem>>& spans);
