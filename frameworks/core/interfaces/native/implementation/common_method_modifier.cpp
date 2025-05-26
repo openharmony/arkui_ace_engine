@@ -36,6 +36,7 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/implementation/color_metrics_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/focus_axis_event_peer.h"
 #include "core/interfaces/native/implementation/gesture_group_interface_peer.h"
@@ -1228,10 +1229,18 @@ void AssignCast(std::optional<uint32_t>& dst, const Ark_FocusPriority& src)
 }
 
 template<>
+OHOS::Ace::Color Convert(const Ark_ColorMetrics& src)
+{
+    Color color(src->colorValue.value);
+    return color;
+}
+
+template<>
 FocusBoxStyle Convert(const Ark_FocusBoxStyle& src)
 {
     FocusBoxStyle style;
     style.strokeWidth = Converter::OptConvert<Dimension>(src.strokeWidth);
+    style.strokeColor = Converter::OptConvert<Color>(src.strokeColor);
     style.margin = Converter::OptConvert<Dimension>(src.margin);
     return style;
 }
