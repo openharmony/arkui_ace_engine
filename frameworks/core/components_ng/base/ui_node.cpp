@@ -1584,7 +1584,7 @@ void UINode::AddDisappearingChild(const RefPtr<UINode>& child, uint32_t index, i
 bool UINode::RemoveDisappearingChild(const RefPtr<UINode>& child)
 {
     // quick reject
-    if (!child->isDisappearing_) {
+    if (!child || !child->isDisappearing_) {
         return false;
     }
     auto it = std::find_if(disappearingChildren_.begin(), disappearingChildren_.end(),
