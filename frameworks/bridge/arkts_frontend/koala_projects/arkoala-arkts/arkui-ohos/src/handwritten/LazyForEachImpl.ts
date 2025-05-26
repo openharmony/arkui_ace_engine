@@ -32,7 +32,11 @@ export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
     let changeCounter = rememberMutableState(0)
     const parent = contextNode<PeerNode>()
     const offset = getOffset(parent, __id())
-    let listener = remember(() => new InternalListener(parent.peer.ptr, changeCounter))
+    let listener = remember(() => {
+        let res = new InternalListener(parent.peer.ptr, changeCounter)
+        dataSource.registerDataChangeListener(res)
+        return res
+    })
     const changeIndex = listener.flush(offset) // first item index that's affected by DataChange
 
     // Entering this method implies that the parameters have changed.
