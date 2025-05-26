@@ -118,6 +118,13 @@ void SetDivider(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* v
     TabsModelNG::SetDivider(frameNode, divider);
 }
 
+void SetDividerColorByUser(ArkUINodeHandle node, ArkUI_Bool isByUser)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetDividerColorByUser(frameNode, isByUser);
+}
+
 void CreateDividerWithResourceObj(ArkUINodeHandle node,
     void* strokeWidthRawPtr, void* colorRawPtr, void* startMarginRawPtr, void* endMarginRawPtr)
 {
@@ -160,6 +167,7 @@ void SetBarBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetBarBackgroundColor(frameNode, Color(color));
+    TabsModelNG::SetBarBackgroundColorByUser(frameNode, true);
 }
 
 void CreateBarBackgroundColorWithResourceObj(ArkUINodeHandle node, void* bgColorRawPtr)
@@ -372,6 +380,7 @@ void ResetDivider(ArkUINodeHandle node)
     divider.isNull = true;
 
     TabsModelNG::SetDivider(frameNode, divider);
+    TabsModelNG::SetDividerColorByUser(frameNode, false);
 
     CreateDividerWithResourceObj(node, nullptr, nullptr, nullptr, nullptr);
 }
@@ -392,6 +401,7 @@ void ResetBarBackgroundColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetBarBackgroundColor(frameNode, Color::BLACK.BlendOpacity(0.0f));
+    TabsModelNG::SetBarBackgroundColorByUser(frameNode, false);
 
     CreateBarBackgroundColorWithResourceObj(node, nullptr);
 }
@@ -806,6 +816,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .setScrollableBarModeOptions = SetScrollableBarModeOptions,
         .setBarGridAlign = SetBarGridAlign,
         .setDivider = SetDivider,
+        .setDividerColorByUser = SetDividerColorByUser,
         .setFadingEdge = SetFadingEdge,
         .setTabOnUnselected = SetTabOnUnselected,
         .setBarBackgroundColor = SetBarBackgroundColor,

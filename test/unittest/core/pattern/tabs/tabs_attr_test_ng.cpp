@@ -1853,4 +1853,28 @@ HWTEST_F(TabsAttrTestNg, GetAnimationCurve001, TestSize.Level1)
     tabBarPattern_->animationCurve_ = Curves::LINEAR;
     EXPECT_TRUE(Curves::LINEAR->IsEqual(tabBarPattern_->GetAnimationCurve(Curves::FRICTION)));
 }
+
+/**
+ * @tc.name: TabContentSetIndicatorColorByUser001
+ * @tc.desc: test SetIndicatorColorByUser of TabContentModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentSetIndicatorColorByUser001, TestSize.Level1)
+{
+    TabContentModelNG tabContentModel;
+    tabContentModel.Create();
+    auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(tabContentFrameNode, nullptr);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
+    ASSERT_NE(tabContentNode, nullptr);
+    auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(tabContentPattern, nullptr);
+    auto tabContentLayoutProperty = tabContentPattern->GetLayoutProperty<TabContentLayoutProperty>();
+    ASSERT_NE(tabContentLayoutProperty, nullptr);
+    tabContentModel.SetIndicatorColorByUser(false);
+    EXPECT_FALSE(tabContentLayoutProperty->GetIndicatorColorSetByUserValue());
+    tabContentModel.SetIndicatorColorByUser(true);
+    EXPECT_TRUE(tabContentLayoutProperty->GetIndicatorColorSetByUserValue());
+    tabContentModel.Pop();
+}
 } // namespace OHOS::Ace::NG
