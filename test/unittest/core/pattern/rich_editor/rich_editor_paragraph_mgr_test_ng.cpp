@@ -609,6 +609,31 @@ HWTEST_F(RichEditorParagraphMgrTestNg, GetLineMetrics001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetLineMetrics002
+ * @tc.desc: test GetLineMetrics
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphMgrTestNg, GetLineMetrics002, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    int32_t lineNumber = 3;
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(3));
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 2 });
+    richEditorPattern->richTextRect_.SetRect(1, 1, 1, 1);
+    auto lineMetrics1 = richEditorPattern->paragraphs_.GetLineMetrics(lineNumber);
+    auto ret1 = richEditorPattern->GetLineMetrics(lineNumber);
+    EXPECT_EQ(lineMetrics1.x, ret1.x);
+
+    lineNumber = 1;
+    richEditorPattern->richTextRect_.SetRect(1, 1, 1, 1);
+    auto lineMetrics2 = richEditorPattern->paragraphs_.GetLineMetrics(lineNumber);
+    auto ret2 = richEditorPattern->GetLineMetrics(lineNumber);
+    EXPECT_NE(lineMetrics2.x, ret2.x);
+}
+
+/**
  * @tc.name: GetGlyphIndexByCoordinate001
  * @tc.desc: Test the paragraph manager function.
  * @tc.type: FUNC

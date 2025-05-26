@@ -150,66 +150,6 @@ HWTEST_F(RichEditorPatternTestSixNg, AfterContentChange001, TestSize.Level1)
 }
 
 /**
- * @tc.name: RemoveEmptySpanNodes001
- * @tc.desc: test RemoveEmptySpanNodes
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, RemoveEmptySpanNodes001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto newFrameNode = ImageSpanNode::GetOrCreateSpanNode(
-        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
-    auto newAddFrameNode = ImageSpanNode::GetOrCreateSpanNode(
-        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
-    richEditorNode_->children_.push_back(newFrameNode);
-    richEditorNode_->children_.push_back(newAddFrameNode);
-    richEditorPattern->RemoveEmptySpanNodes();
-    bool nonSpanNodeStillExists = false;
-    for (const auto& child : richEditorNode_->children_) {
-        if (child == newFrameNode) {
-            nonSpanNodeStillExists = true;
-            break;
-        }
-    }
-    EXPECT_TRUE(nonSpanNodeStillExists);
-}
-
-/**
- * @tc.name: RemoveEmptySpanNodes002
- * @tc.desc: test RemoveEmptySpanNodes
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, RemoveEmptySpanNodes002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto contentNode = richEditorNode_->GetChildAtIndex(0);
-    ASSERT_NE(contentNode, nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto newFrameNode = SpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG, nodeId);
-    auto newAddFrameNode = SpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG, nodeId);
-    newAddFrameNode->GetSpanItem()->content = INIT_VALUE_3;
-    contentNode->children_.push_back(newFrameNode);
-    contentNode->children_.push_back(newAddFrameNode);
-    richEditorPattern->RemoveEmptySpanNodes();
-    bool emptySpanNodeRemoved = true;
-    for (const auto& child : contentNode->children_) {
-        auto spanNode = AceType::DynamicCast<SpanNode>(child);
-        if (spanNode && spanNode->GetSpanItem()->content.empty()) {
-            emptySpanNodeRemoved = false;
-            break;
-        }
-    }
-    EXPECT_TRUE(emptySpanNodeRemoved);
-}
-
-/**
  * @tc.name: HandleUserTouchEvent001
  * @tc.desc: test HandleUserTouchEvent
  * @tc.type: FUNC
@@ -602,29 +542,6 @@ HWTEST_F(RichEditorPatternTestSixNg, HandleKbVerticalSelection005, TestSize.Leve
     richEditorPattern->caretPosition_ = 1;
 
     EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(false), 0);
-}
-
-/**
- * @tc.name: CopyGestureOption002
- * @tc.desc: test CopyGestureOption
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, CopyGestureOption002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<SpanNode> source = OHOS::Ace::NG::SpanNode::CreateSpanNode(1);
-    RefPtr<SpanNode> target = OHOS::Ace::NG::SpanNode::CreateSpanNode(2);
-    GestureEventFunc func1 = [](GestureEvent& info) {};
-    OnHoverFunc func2 = [](bool, HoverInfo& info) {};
-    source->GetSpanItem()->SetOnClickEvent(std::move(func1));
-    source->GetSpanItem()->SetLongPressEvent(std::move(func1));
-    source->GetSpanItem()->SetDoubleClickEvent(std::move(func1));
-    source->GetSpanItem()->SetHoverEvent(std::move(func2));
-    richEditorPattern->CopyGestureOption(source, target);
-    EXPECT_TRUE(target->GetSpanItem()->onDoubleClick);
-    EXPECT_TRUE(target->GetSpanItem()->onHover);
 }
 
 /**

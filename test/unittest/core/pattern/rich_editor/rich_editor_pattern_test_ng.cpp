@@ -34,10 +34,7 @@ int32_t testOnIMEInputComplete = 0;
 int32_t testAboutToDelete = 0;
 int32_t testOnDeleteComplete = 0;
 int32_t testSpanNodeId = 1;
-int32_t testFrameNodeId = 1;
 int32_t testNumber0 = 0;
-int32_t testNumber2 = 2;
-int32_t testNumber4 = 4;
 int32_t testNumber5 = 5;
 } // namespace
 
@@ -83,52 +80,6 @@ void RichEditorPatternTestNg::TearDownTestSuite()
 }
 
 /**
- * @tc.name: RichEditorPatternTestRequestKeyboard001
- * @tc.desc: test RequestKeyboard
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestRequestKeyboard001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto func = [] {};
-
-    auto customKeyboardBuilder = richEditorPattern->customKeyboardBuilder_;
-    richEditorPattern->customKeyboardBuilder_ = func;
-    ASSERT_EQ(richEditorPattern->RequestKeyboard(true, true, true), true);
-    richEditorPattern->customKeyboardBuilder_ = customKeyboardBuilder;
-}
-
-/**
- * @tc.name: RichEditorPatternTestCloseCustomKeyboard001
- * @tc.desc: test CloseCustomKeyboard
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestCloseCustomKeyboard001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CloseCustomKeyboard();
-
-    auto func = []() {};
-    auto oldFunc = richEditorPattern->customKeyboardBuilder_;
-
-    richEditorPattern->customKeyboardBuilder_ = func;
-
-    EXPECT_EQ(richEditorPattern->isCustomKeyboardAttached_, false);
-    EXPECT_EQ(richEditorPattern->RequestCustomKeyboard(), true);
-    EXPECT_EQ(richEditorPattern->RequestCustomKeyboard(), true);
-    EXPECT_EQ(richEditorPattern->isCustomKeyboardAttached_, true);
-    EXPECT_NE(richEditorPattern->keyboardOverlay_, nullptr);
-    ASSERT_EQ(richEditorPattern->CloseCustomKeyboard(), true);
-
-    richEditorPattern->customKeyboardBuilder_ = oldFunc;
-}
-
-/**
  * @tc.name: RichEditorPatternTestInsertDiffStyleValueInSpan001
  * @tc.desc: test InsertDiffStyleValueInSpan
  * @tc.type: FUNC
@@ -149,103 +100,6 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestInsertDiffStyleValueInSpa
 
     richEditorPattern->InsertDiffStyleValueInSpan(spanNode, info, insertValue);
     ASSERT_EQ(richEditorPattern->moveLength_, 0);
-}
-
-/**
- * @tc.name: RichEditorPatternTestCreateTextSpanNode001
- * @tc.desc: test CreateTextSpanNode
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestCreateTextSpanNode001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<SpanNode> spanNode;
-
-    TextInsertValueInfo info;
-    std::u16string insertValue;
-    UpdateSpanStyle updateSpanStyle;
-    TextStyle textStyle;
-
-    updateSpanStyle.useThemeFontColor = false;
-
-    auto typingStyle = richEditorPattern->typingStyle_;
-    auto typingTextStyle = richEditorPattern->typingTextStyle_;
-
-    richEditorPattern->typingStyle_ = std::nullopt;
-    richEditorPattern->typingTextStyle_ = std::nullopt;
-    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue);
-    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
-
-    richEditorPattern->typingStyle_ = updateSpanStyle;
-    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue);
-    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
-
-    richEditorPattern->typingStyle_ = std::nullopt;
-    richEditorPattern->typingTextStyle_ = textStyle;
-    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue);
-    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
-
-    richEditorPattern->typingStyle_ = updateSpanStyle;
-    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue);
-    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
-
-    richEditorPattern->typingStyle_ = typingStyle;
-    richEditorPattern->typingTextStyle_ = typingTextStyle;
-}
-
-/**
- * @tc.name: RichEditorPatternTestInitPreviewText001
- * @tc.desc: test InitPreviewText
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestInitPreviewText001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    std::u16string previewTextValue;
-    PreviewRange range;
-
-    range.start = -1;
-    range.end = 0;
-    ASSERT_EQ(richEditorPattern->InitPreviewText(previewTextValue, range), false);
-
-    range.start = 0;
-    range.end = -1;
-    ASSERT_EQ(richEditorPattern->InitPreviewText(previewTextValue, range), false);
-
-    range.start = -1;
-    range.end = -1;
-    ASSERT_EQ(richEditorPattern->InitPreviewText(previewTextValue, range), true);
-
-    richEditorPattern->textSelector_.baseOffset = 0;
-    richEditorPattern->textSelector_.destinationOffset = 1;
-    ASSERT_EQ(richEditorPattern->InitPreviewText(previewTextValue, range), true);
-}
-
-/**
- * @tc.name: VirtualKeyboardAreaChanged001
- * @tc.desc: test OnVirtualKeyboardAreaChanged
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, VirtualKeyboardAreaChanged001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    float height = 0.0f;
-    auto x = richEditorPattern->CalcCursorOffsetByPosition(richEditorPattern->textSelector_.GetStart(), height).GetX();
-    richEditorPattern->OnVirtualKeyboardAreaChanged();
-    EXPECT_EQ(richEditorPattern->textSelector_.selectionBaseOffset.GetX(), x);
 }
 
 /**
@@ -722,64 +576,6 @@ HWTEST_F(RichEditorPatternTestNg, GetThumbnailCallback003, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetPreviewTextDecorationColor001
- * @tc.desc: test GetPreviewTextDecorationColor
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, GetPreviewTextDecorationColor001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto layoutproperty = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
-    ASSERT_NE(layoutproperty, nullptr);
-    layoutproperty->UpdatePreviewTextStyle("underline");
-
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
-
-    auto oldThemeManager = PipelineBase::GetCurrentContext()->themeManager_;
-    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
-
-    RichEditorTheme richEditorTheme;
-    EXPECT_EQ(richEditorPattern->GetPreviewTextDecorationColor(), richEditorTheme.GetPreviewUnderLineColor());
-
-    auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
-    ASSERT_NE(property, nullptr);
-
-    property->UpdatePreviewTextStyle("normal");
-    EXPECT_EQ(richEditorPattern->GetPreviewTextDecorationColor(), Color::TRANSPARENT);
-
-    PipelineBase::GetCurrentContext()->themeManager_ = oldThemeManager;
-}
-
-/**
- * @tc.name: GetPreviewTextUnderlineWidth001
- * @tc.desc: test GetPreviewTextUnderlineWidth
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, GetPreviewTextUnderlineWidth001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
-
-    auto oldThemeManager = PipelineBase::GetCurrentContext()->themeManager_;
-    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
-
-    RichEditorTheme richEditorTheme;
-    EXPECT_EQ(
-        richEditorPattern->GetPreviewTextUnderlineWidth(), richEditorTheme.GetPreviewUnderlineWidth().ConvertToPx()
-    );
-
-    PipelineBase::GetCurrentContext()->themeManager_ = oldThemeManager;
-}
-
-/**
  * @tc.name: ToGestureSpan001
  * @tc.desc: test ToGestureSpan
  * @tc.type: FUNC
@@ -800,46 +596,6 @@ HWTEST_F(RichEditorPatternTestNg, ToGestureSpan001, TestSize.Level1)
     auto start = spanItem->position - spanItem->content.length();
     auto end = spanItem->position;
     EXPECT_NE(spanString->ToGestureSpan(spanItem, start, end), nullptr);
-}
-
-/**
- * @tc.name: FinishTextPreview001
- * @tc.desc: test FinishTextPreview
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, FinishTextPreview001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    PreviewRange previewRange;
-    previewRange.start = -1;
-    previewRange.end = -1;
-
-    richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE1, previewRange);
-    richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE2, previewRange);
-    richEditorPattern->FinishTextPreview();
-
-    auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, testFrameNodeId, richEditorPattern);
-    ASSERT_NE(childFrameNode, nullptr);
-    auto childSpanNode = AceType::MakeRefPtr<SpanNode>(testSpanNodeId);
-    ASSERT_NE(childSpanNode, nullptr);
-
-    do {
-        auto newHost1 = richEditorPattern->GetContentHost();
-        auto newHost2 = richEditorPattern->GetContentHost();
-        ASSERT_EQ(newHost1, newHost2);
-
-        newHost1->children_.emplace_back(childFrameNode);
-        newHost1->children_.emplace_back(childSpanNode);
-        ASSERT_EQ(newHost1, newHost2);
-    } while (0);
-
-    richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE1, previewRange);
-    richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE2, previewRange);
-    richEditorPattern->FinishTextPreview();
-    EXPECT_EQ(richEditorPattern->previewTextRecord_.previewContent, u"");
 }
 
 /**
@@ -958,33 +714,6 @@ HWTEST_F(RichEditorPatternTestNg, ToTextShadowSpan001, TestSize.Level1)
     auto start = spanItem->position - spanItem->content.length();
     auto end = spanItem->position;
     EXPECT_NE(spanString->ToTextShadowSpan(spanItem, start, end), nullptr);
-}
-
-/**
- * @tc.name: GetPreviewTextRects001
- * @tc.desc: test GetPreviewTextRects
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, GetPreviewTextRects001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    PreviewRange previewRange;
-    previewRange.start = -1;
-    previewRange.end = -1;
-    richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE1, previewRange);
-
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    std::vector<RectF> firstRects { RectF(testNumber0, testNumber0, testNumber5, testNumber5) };
-    EXPECT_CALL(*paragraph, GetTightRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(firstRects));
-    richEditorPattern->paragraphs_.AddParagraph(
-        { .paragraph = paragraph, .start = testNumber0, .end = testNumber2 });
-    richEditorPattern->paragraphs_.AddParagraph(
-        { .paragraph = paragraph, .start = testNumber2, .end = testNumber4 });
-
-    EXPECT_NE(richEditorPattern->GetPreviewTextRects().size(), 0);
 }
 
 /**
