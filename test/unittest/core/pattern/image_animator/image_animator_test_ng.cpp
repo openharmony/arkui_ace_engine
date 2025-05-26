@@ -216,14 +216,10 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest001, TestSize.Level1)
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
 
     /**
-     * @tc.steps: step2. get childNode of frameNode and its imageLayoutProperty.
-     * @tc.expected: step2. check whether childNode, imageLayoutProperty exists and tag of childNode is correct.
+     * @tc.steps: step2. get childNode of frameNode.
+     * @tc.expected: step2. check whether childNode is empty.
      */
-
-    auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    EXPECT_TRUE(childNode != nullptr && childNode->GetTag() == V2::IMAGE_ETS_TAG);
-    auto imageLayoutProperty = childNode->GetLayoutProperty<ImageLayoutProperty>();
-    EXPECT_NE(imageLayoutProperty, nullptr);
+    EXPECT_TRUE(frameNode->GetChildren().empty());
 }
 
 /**
@@ -1400,6 +1396,44 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest023, TestSize.Level1)
 
     // Verify that the flag is correctly set to false
     EXPECT_FALSE(imageAnimatorPattern->isAutoMonitorInvisibleArea_);
+}
+
+/**
+ * @tc.name: ImageAnimatorTest024
+ * @tc.desc: Test ImageAnimatorCreate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ImageAnimatorModelNG.
+     */
+
+    ImageAnimatorModelNG ImageAnimatorModelNG;
+    ImageAnimatorModelNG.Create();
+
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
+    EXPECT_TRUE(frameNode->GetChildren().empty());
+
+    /**
+     * @tc.steps: step2. set image's attributes and imageAnimatorView's attributes.
+     * @tc.expected: step2. frameNode children size is not empty.
+     */
+
+    ImageProperties imageProperties;
+    imageProperties.src = IMAGE_SRC_URL;
+    imageProperties.width = IMAGE_WIDTH;
+    imageProperties.height = IMAGE_HEIGHT;
+    imageProperties.top = IMAGE_TOP;
+    imageProperties.left = IMAGE_LEFT;
+    imageProperties.duration = IMAGE_DURATION;
+    std::vector<ImageProperties> images;
+    images.push_back(imageProperties);
+    ImageAnimatorModelNG.SetImages(std::move(images));
+    EXPECT_TRUE(frameNode->GetChildren().empty());
 }
 
 /**
