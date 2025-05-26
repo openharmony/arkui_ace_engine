@@ -23,7 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_type.h"
-
+#include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_model_static.h"
@@ -57,7 +57,7 @@ void TextFieldModelStatic::SetShowCounterBorder(FrameNode* frameNode, const std:
 
 void TextFieldModelStatic::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    NG::ViewAbstract::SetBackgroundColor(frameNode, color);
+    NG::ViewAbstractModelStatic::SetBackgroundColor(frameNode, color);
     if (color) {
         TextFieldModelNG::SetBackgroundColor(frameNode, *color);
     } else {

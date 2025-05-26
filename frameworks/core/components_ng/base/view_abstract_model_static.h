@@ -178,6 +178,22 @@ public:
     static void SetMaxWidth(FrameNode* frameNode, const CalcDimension& minWidth);
     static void SetMaxHeight(FrameNode* frameNode, const CalcDimension& minHeight);
     static void SetDisplayIndex(FrameNode* frameNode, int32_t value);
+    static void SetBackgroundColor(FrameNode *frameNode, const std::optional<Color>& color);
+    static void SetPivot(FrameNode* frameNode, const std::optional<DimensionOffset>& optValue);
+    static void SetRotate(FrameNode* frameNode, const std::vector<std::optional<float>>& value);
+    static void SetBackdropBlur(FrameNode* frameNode, const std::optional<Dimension>& radius,
+        const std::optional<BlurOption> &blurOption, const SysOptions& sysOptions = SysOptions());
+    static void SetClipEdge(FrameNode* frameNode, std::optional<bool> isClip);
+    static void SetTransformMatrix(FrameNode* frameNode, const std::optional<Matrix4>& matrix);
+    static void SetLinearGradientBlur(FrameNode *frameNode,
+        const std::optional<NG::LinearGradientBlurPara>& blurPara);
+    static void SetRenderFit(FrameNode* frameNode, const std::optional<RenderFit>& renderFit);
+    static void SetForegroundColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetForegroundColorStrategy(FrameNode* frameNode,
+        const std::optional<ForegroundColorStrategy>& strategy);
+    static void SetForegroundEffect(FrameNode* frameNode, const std::optional<float>& radius);
+    static void SetBlendMode(FrameNode* frameNode, const std::optional<BlendMode>& blendMode);
+    static void SetBlendApplyType(FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType);
 
 private:
     static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);

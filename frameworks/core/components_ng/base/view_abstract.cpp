@@ -229,15 +229,6 @@ void ViewAbstract::SetBackgroundColor(FrameNode *frameNode, const Color& color)
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
 }
 
-void ViewAbstract::SetBackgroundColor(FrameNode *frameNode, const std::optional<Color>& color)
-{
-    if (color) {
-        ViewAbstract::SetBackgroundColor(frameNode, color.value());
-    } else {
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundColor, frameNode);
-    }
-}
-
 void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1956,13 +1947,9 @@ void ViewAbstract::SetPivot(const DimensionOffset& value)
     ACE_UPDATE_RENDER_CONTEXT(TransformCenter, value);
 }
 
-void ViewAbstract::SetPivot(FrameNode* frameNode, const std::optional<DimensionOffset>& optValue)
+void ViewAbstract::SetPivot(FrameNode* frameNode, const DimensionOffset& value)
 {
-    if (optValue.has_value()) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(TransformCenter, optValue.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, TransformCenter, frameNode);
-    }
+    ACE_UPDATE_NODE_RENDER_CONTEXT(TransformCenter, value, frameNode);
 }
 
 void ViewAbstract::SetTranslate(const NG::TranslateOptions& value)
@@ -1990,23 +1977,6 @@ void ViewAbstract::SetRotate(FrameNode* frameNode, const NG::Vector5F& value)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(TransformRotate, value, frameNode);
-}
-
-void  ViewAbstract::SetRotate(FrameNode* frameNode, const std::vector<std::optional<float>>& value)
-{
-    CHECK_NULL_VOID(frameNode);
-    NG::Vector5F rotateVec = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-    int32_t indX = 0;
-    int32_t indY = 1;
-    int32_t indZ = 2;
-    int32_t indA = 3;
-    int32_t indP = 4;
-    rotateVec.x = (value.size() > indX && value[indX].has_value()) ? value[indX].value() : DEFAULT_ROTATE_VEC.x;
-    rotateVec.y = (value.size() > indY && value[indY].has_value()) ? value[indY].value() : DEFAULT_ROTATE_VEC.y;
-    rotateVec.z = (value.size() > indZ && value[indZ].has_value()) ? value[indZ].value() : DEFAULT_ROTATE_VEC.z;
-    rotateVec.w = (value.size() > indA && value[indA].has_value()) ? value[indA].value() : DEFAULT_ROTATE_VEC.w;
-    rotateVec.v = (value.size() > indP && value[indP].has_value()) ? value[indP].value() : DEFAULT_ROTATE_VEC.v;
-    ACE_UPDATE_NODE_RENDER_CONTEXT(TransformRotate, rotateVec, frameNode);
 }
 
 void ViewAbstract::SetTransformMatrix(const Matrix4& matrix)
@@ -2759,8 +2729,8 @@ void ViewAbstract::SetNodeBackdropBlur(FrameNode *frameNode, const Dimension& ra
     }
 }
 
-void ViewAbstract::SetBackdropBlur(FrameNode *frameNode, const std::optional<Dimension>& radius,
-    const std::optional<BlurOption>& blurOption, const SysOptions& sysOptions)
+void ViewAbstract::SetBackdropBlur(
+    FrameNode* frameNode, const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions)
 {
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
@@ -2768,7 +2738,7 @@ void ViewAbstract::SetBackdropBlur(FrameNode *frameNode, const std::optional<Dim
         if (target->GetBackgroundEffect().has_value()) {
             target->UpdateBackgroundEffect(std::nullopt);
         }
-        target->UpdateBackBlur(radius.value_or(Dimension()), blurOption.value_or(BlurOption()), sysOptions);
+        target->UpdateBackBlur(radius, blurOption, sysOptions);
         if (target->GetBackBlurStyle().has_value()) {
             target->UpdateBackBlurStyle(std::nullopt);
         }
@@ -3051,19 +3021,6 @@ void ViewAbstract::SetClipEdge(FrameNode* frameNode, bool isClip)
             target->OnClipShapeUpdate(nullptr);
         }
         target->UpdateClipEdge(isClip);
-    }
-}
-
-void ViewAbstract::SetClipEdge(FrameNode* frameNode, std::optional<bool> isClip)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto target = frameNode->GetRenderContext();
-    if (target) {
-        if (target->GetClipShape().has_value()) {
-            target->ResetClipShape();
-            target->OnClipShapeUpdate(nullptr);
-        }
-        target->UpdateClipEdge(isClip.value_or(false));
     }
 }
 
@@ -3798,14 +3755,9 @@ void ViewAbstract::ResetPosition(FrameNode* frameNode)
     }
 }
 
-void ViewAbstract::SetTransformMatrix(FrameNode* frameNode, const std::optional<Matrix4>& matrix)
+void ViewAbstract::SetTransformMatrix(FrameNode* frameNode, const Matrix4& matrix)
 {
-    if (matrix.has_value()) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(TransformMatrix, matrix.value(), frameNode);
-    } else {
-        const auto target = frameNode->GetRenderContext();
-        ACE_RESET_NODE_RENDER_CONTEXT(target, TransformMatrix, frameNode);
-    }
+    ACE_UPDATE_NODE_RENDER_CONTEXT(TransformMatrix, matrix, frameNode);
 }
 
 void ViewAbstract::SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode)
@@ -3911,15 +3863,9 @@ void ViewAbstract::SetForegroundBlurStyle(
     }
 }
 
-void ViewAbstract::SetLinearGradientBlur(FrameNode *frameNode,
-                                         const std::optional<NG::LinearGradientBlurPara>& blurPara)
+void ViewAbstract::SetLinearGradientBlur(FrameNode *frameNode, const NG::LinearGradientBlurPara& blurPara)
 {
-    if (blurPara.has_value()) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradientBlur, blurPara.value(), frameNode);
-    } else {
-        const auto target = frameNode->GetRenderContext();
-        ACE_RESET_NODE_RENDER_CONTEXT(target, LinearGradientBlur, frameNode);
-    }
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradientBlur, blurPara, frameNode);
 }
 
 void ViewAbstract::SetMagnifier(FrameNode* frameNode, const MagnifierParams& magnifierOffset)
@@ -3991,13 +3937,9 @@ void ViewAbstract::SetRenderGroup(FrameNode* frameNode, bool isRenderGroup)
     frameNode->SetApplicationRenderGroupMarked(true);
 }
 
-void ViewAbstract::SetRenderFit(FrameNode* frameNode, const std::optional<RenderFit>& renderFit)
+void ViewAbstract::SetRenderFit(FrameNode* frameNode, RenderFit renderFit)
 {
-    if (renderFit.has_value()) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(RenderFit, renderFit.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, RenderFit, frameNode);
-    }
+    ACE_UPDATE_NODE_RENDER_CONTEXT(RenderFit, renderFit, frameNode);
 }
 
 void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType)
@@ -4027,37 +3969,23 @@ void ViewAbstract::SetUseEffect(FrameNode* frameNode, const std::optional<bool>&
     }
 }
 
-void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const std::optional<Color>& color)
+void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const Color& color)
 {
-    CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (color) {
-        if (renderContext->GetForegroundColorStrategy().has_value()) {
-            renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
-            renderContext->ResetForegroundColorStrategy();
-        }
-        renderContext->UpdateForegroundColor(color.value());
-        renderContext->UpdateForegroundColorFlag(true);
-    } else {
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
-        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, false, frameNode);
+    if (renderContext->GetForegroundColorStrategy().has_value()) {
+        renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
+        renderContext->ResetForegroundColorStrategy();
     }
+    renderContext->UpdateForegroundColor(color);
+    renderContext->UpdateForegroundColorFlag(true);
 }
 
-void ViewAbstract::SetForegroundColorStrategy(FrameNode* frameNode,
-    const std::optional<ForegroundColorStrategy>& strategy)
+void ViewAbstract::SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy)
 {
-    if (strategy) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorStrategy, strategy.value(), frameNode);
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
-        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
-    } else {
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
-        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, false, frameNode);
-    }
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorStrategy, strategy, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
 }
 
 void ViewAbstract::SetLightPosition(
@@ -4511,16 +4439,12 @@ void ViewAbstract::SetObscured(FrameNode* frameNode, const std::vector<ObscuredR
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, const std::optional<float>& radius)
+void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, float radius)
 {
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
-        if (radius) {
-            target->UpdateForegroundEffect(*radius);
-        } else {
-            target->ResetForegroundEffect();
-        }
+        target->UpdateForegroundEffect(radius);
     }
 }
 
@@ -4692,24 +4616,14 @@ void ViewAbstract::SetUseShadowBatching(FrameNode* frameNode, const std::optiona
     }
 }
 
-void ViewAbstract::SetBlendMode(FrameNode* frameNode, const std::optional<BlendMode>& blendMode)
+void ViewAbstract::SetBlendMode(FrameNode* frameNode, BlendMode blendMode)
 {
-    if (blendMode.has_value()) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendMode, blendMode.value(), frameNode);
-    } else {
-        const auto target = frameNode->GetRenderContext();
-        ACE_RESET_NODE_RENDER_CONTEXT(target, BackBlendMode, frameNode);
-    }
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendMode, blendMode, frameNode);
 }
 
-void ViewAbstract::SetBlendApplyType(FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType)
+void ViewAbstract::SetBlendApplyType(FrameNode* frameNode, BlendApplyType blendApplyType)
 {
-    if (blendApplyType) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendApplyType, blendApplyType.value(), frameNode);
-    } else {
-        const auto target = frameNode->GetRenderContext();
-        ACE_RESET_NODE_RENDER_CONTEXT(target, BackBlendApplyType, frameNode);
-    }
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendApplyType, blendApplyType, frameNode);
 }
 
 void ViewAbstract::SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents)

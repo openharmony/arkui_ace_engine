@@ -24,6 +24,7 @@
 #include "core/interfaces/native/implementation/render_node_peer_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 
 namespace OHOS::Ace::NG {
 namespace GeneratedModifier {
@@ -651,7 +652,7 @@ void SetTransformImpl(Ark_RenderNode peer, const Ark_Matrix4* transform)
     CHECK_NULL_VOID(frameNode);
     auto matrix4 = std::make_optional<Matrix4>(value0, value4, value8, value12, value1, value5, value9, value13, value2,
         value6, value10, value14, value3, value7, value11, value15);
-    NG::ViewAbstract::SetTransformMatrix(AceType::RawPtr(frameNode), matrix4);
+    NG::ViewAbstractModelStatic::SetTransformMatrix(AceType::RawPtr(frameNode), matrix4);
 }
 Ark_Number GetShadowColorImpl(Ark_RenderNode peer)
 {

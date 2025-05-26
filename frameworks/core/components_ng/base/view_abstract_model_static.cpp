@@ -1000,4 +1000,163 @@ void ViewAbstractModelStatic::SetDisplayIndex(FrameNode* frameNode, int32_t valu
     ViewAbstract::SetDisplayIndex(frameNode, value);
 }
 
+void ViewAbstractModelStatic::SetBackgroundColor(FrameNode *frameNode, const std::optional<Color>& color)
+{
+    if (color) {
+        ViewAbstract::SetBackgroundColor(frameNode, color.value());
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundColor, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetPivot(FrameNode* frameNode, const std::optional<DimensionOffset>& optValue)
+{
+    if (optValue.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(TransformCenter, optValue.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, TransformCenter, frameNode);
+    }
+}
+
+void  ViewAbstractModelStatic::SetRotate(FrameNode* frameNode, const std::vector<std::optional<float>>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    NG::Vector5F rotateVec = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+    int32_t indX = 0;
+    int32_t indY = 1;
+    int32_t indZ = 2;
+    int32_t indA = 3;
+    int32_t indP = 4;
+    rotateVec.x = (value.size() > indX && value[indX].has_value()) ? value[indX].value() : DEFAULT_ROTATE_VEC.x;
+    rotateVec.y = (value.size() > indY && value[indY].has_value()) ? value[indY].value() : DEFAULT_ROTATE_VEC.y;
+    rotateVec.z = (value.size() > indZ && value[indZ].has_value()) ? value[indZ].value() : DEFAULT_ROTATE_VEC.z;
+    rotateVec.w = (value.size() > indA && value[indA].has_value()) ? value[indA].value() : DEFAULT_ROTATE_VEC.w;
+    rotateVec.v = (value.size() > indP && value[indP].has_value()) ? value[indP].value() : DEFAULT_ROTATE_VEC.v;
+    ACE_UPDATE_NODE_RENDER_CONTEXT(TransformRotate, rotateVec, frameNode);
+}
+
+void ViewAbstractModelStatic::SetBackdropBlur(FrameNode *frameNode, const std::optional<Dimension>& radius,
+    const std::optional<BlurOption>& blurOption, const SysOptions& sysOptions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetBackgroundEffect().has_value()) {
+            target->UpdateBackgroundEffect(std::nullopt);
+        }
+        target->UpdateBackBlur(radius.value_or(Dimension()), blurOption.value_or(BlurOption()), sysOptions);
+        if (target->GetBackBlurStyle().has_value()) {
+            target->UpdateBackBlurStyle(std::nullopt);
+        }
+    }
+}
+
+void ViewAbstractModelStatic::SetClipEdge(FrameNode* frameNode, std::optional<bool> isClip)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetClipShape().has_value()) {
+            target->ResetClipShape();
+            target->OnClipShapeUpdate(nullptr);
+        }
+        target->UpdateClipEdge(isClip.value_or(false));
+    }
+}
+
+void ViewAbstractModelStatic::SetTransformMatrix(FrameNode* frameNode, const std::optional<Matrix4>& matrix)
+{
+    if (matrix.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(TransformMatrix, matrix.value(), frameNode);
+    } else {
+        const auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, TransformMatrix, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetLinearGradientBlur(FrameNode *frameNode,
+    const std::optional<NG::LinearGradientBlurPara>& blurPara)
+{
+    if (blurPara.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradientBlur, blurPara.value(), frameNode);
+    } else {
+        const auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, LinearGradientBlur, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetRenderFit(FrameNode* frameNode, const std::optional<RenderFit>& renderFit)
+{
+    if (renderFit.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(RenderFit, renderFit.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, RenderFit, frameNode);
+    }
+}
+void ViewAbstractModelStatic::SetForegroundColor(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (color) {
+        if (renderContext->GetForegroundColorStrategy().has_value()) {
+            renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
+            renderContext->ResetForegroundColorStrategy();
+        }
+        renderContext->UpdateForegroundColor(color.value());
+        renderContext->UpdateForegroundColorFlag(true);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, false, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetForegroundColorStrategy(FrameNode* frameNode,
+    const std::optional<ForegroundColorStrategy>& strategy)
+{
+    if (strategy) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorStrategy, strategy.value(), frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, false, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetForegroundEffect(FrameNode* frameNode, const std::optional<float>& radius)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (radius) {
+            target->UpdateForegroundEffect(*radius);
+        } else {
+            target->ResetForegroundEffect();
+        }
+    }
+}
+
+void ViewAbstractModelStatic::SetBlendMode(FrameNode* frameNode, const std::optional<BlendMode>& blendMode)
+{
+    if (blendMode.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendMode, blendMode.value(), frameNode);
+    } else {
+        const auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, BackBlendMode, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetBlendApplyType(
+    FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType)
+{
+    if (blendApplyType) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendApplyType, blendApplyType.value(), frameNode);
+    } else {
+        const auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, BackBlendApplyType, frameNode);
+    }
+}
 } // namespace OHOS::Ace::NG

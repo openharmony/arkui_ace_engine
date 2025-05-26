@@ -437,7 +437,6 @@ public:
     // clip and mask
     static void SetClipShape(const RefPtr<BasicShape> &basicShape);
     static void SetClipEdge(bool isClip);
-    static void SetClipEdge(FrameNode* frameNode, std::optional<bool> isClip);
     static void SetMask(const RefPtr<BasicShape> &basicShape);
     // overlay
     static void SetOverlay(const NG::OverlayOptions &overlay);
@@ -553,7 +552,6 @@ public:
     static void SetBloom(FrameNode* frameNode, float value);
 
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
-    static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetWidth(FrameNode* frameNode, const CalcLength& width);
     static void SetHeight(FrameNode* frameNode, const CalcLength& height);
     static void ClearWidthOrHeight(FrameNode* frameNode, bool isWidth);
@@ -581,16 +579,16 @@ public:
     static void SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value);
     static void SetPositionEdges(FrameNode* frameNode, const EdgesParam& value);
     static void ResetPosition(FrameNode* frameNode);
-    static void SetTransformMatrix(FrameNode* frameNode, const std::optional<Matrix4>& matrix);
+    static void SetTransformMatrix(FrameNode* frameNode, const Matrix4& matrix);
     static void SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode);
     static void SetOnTouchTestFunc(FrameNode* frameNode, NG::OnChildTouchTestFunc&& onChildTouchTest);
     static void SetOpacity(FrameNode* frameNode, double opacity);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
-    static void SetBackdropBlur(FrameNode* frameNode, const std::optional<Dimension>& radius,
-        const std::optional<BlurOption> &blurOption, const SysOptions& sysOptions = SysOptions());
+    static void SetBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption& blurOption,
+        const SysOptions& sysOptions = SysOptions());
     static void SetNodeBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption& blurOption);
-    static void SetInvert(FrameNode* frameNode, const std::optional<InvertVariant>& invert);
+    static void SetInvert(FrameNode* frameNosde, const std::optional<InvertVariant>& invert);
     static void SetSepia(FrameNode* frameNode, const std::optional<Dimension>& sepia);
     static void SetSaturate(FrameNode* frameNode, const std::optional<Dimension>& saturate);
     static void SetColorBlend(FrameNode* frameNode, const std::optional<Color>& colorBlend);
@@ -613,7 +611,7 @@ public:
     static void SetBorderImageGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetForegroundBlurStyle(
         FrameNode* frameNode, const BlurStyleOption& fgBlurStyle, const SysOptions& sysOptions = SysOptions());
-    static void SetLinearGradientBlur(FrameNode* frameNode, const std::optional<NG::LinearGradientBlurPara>& blurPara);
+    static void SetLinearGradientBlur(FrameNode* frameNode, const NG::LinearGradientBlurPara& blurPara);
     static void SetMagnifier(FrameNode* frameNode, const MagnifierParams& magnifierOffset);
     static void ReSetMagnifier(FrameNode* frameNode);
     static void SetBackgroundBlurStyle(
@@ -625,25 +623,24 @@ public:
     static void SetBackgroundImageSyncMode(FrameNode* frameNode, bool syncMode);
     static void SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value);
     static void SetScale(FrameNode* frameNode, const NG::VectorF& value);
-    static void SetPivot(FrameNode* frameNode, const std::optional<DimensionOffset>& value);
+    static void SetPivot(FrameNode* frameNode, const DimensionOffset& value);
     static void SetGeometryTransition(FrameNode* frameNode, const std::string& id,
         bool followWithoutTransition, bool doRegisterSharedTransition);
     static const std::string GetGeometryTransition(FrameNode* frameNode,
         bool* followWithoutTransition, bool* doRegisterSharedTransition);
     static void SetRotate(FrameNode* frameNode, const NG::Vector5F& value);
-    static void SetRotate(FrameNode* frameNode, const std::vector<std::optional<float>>& value);
     static void SetClipEdge(FrameNode* frameNode, bool isClip);
     static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetPixelStretchEffect(FrameNode* frameNode, const std::optional<PixStretchEffectOption>& option);
     static void SetLightUpEffect(FrameNode* frameNode, const std::optional<double> radio);
     static void SetSphericalEffect(FrameNode* frameNode, const std::optional<double> radio);
     static void SetRenderGroup(FrameNode* frameNode, bool isRenderGroup);
-    static void SetRenderFit(FrameNode* frameNode, const std::optional<RenderFit>& renderFit);
+    static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
     static void SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType);
     static void SetUseEffect(FrameNode* frameNode, const std::optional<bool>& useEffect);
-    static void SetForegroundColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetForegroundColor(FrameNode* frameNode, const Color& color);
     static void SetForegroundColorStrategy(FrameNode* frameNode,
-        const std::optional<ForegroundColorStrategy>& strategy);
+        const ForegroundColorStrategy& strategy);
     static void SetMotionPath(FrameNode* frameNode, const std::optional<MotionPathOption>& motionPath);
     static void SetFocusOnTouch(FrameNode* frameNode, bool isSet);
     static void SetGroupDefaultFocus(FrameNode* frameNode, bool isSet);
@@ -691,7 +688,7 @@ public:
     static void SetTabIndex(FrameNode* frameNode, int32_t index);
     static void SetObscured(FrameNode* frameNode, const std::vector<ObscuredReasons>& reasons);
     static void SetMotionBlur(FrameNode* frameNode, const std::optional<MotionBlurOption>& motionBlurOption);
-    static void SetForegroundEffect(FrameNode* frameNode, const std::optional<float>& radius);
+    static void SetForegroundEffect(FrameNode* frameNode, float radius);
     static void SetBackgroundEffect(
         FrameNode* frameNode, const EffectOption& effectOption, const SysOptions& sysOptions = SysOptions());
     static void SetBackgroundImageResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice);
@@ -712,8 +709,8 @@ public:
     static void SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
     static void SetUseShadowBatching(FrameNode* frameNode, const std::optional<bool>& useShadowBatching);
-    static void SetBlendMode(FrameNode* frameNode, const std::optional<BlendMode>& blendMode);
-    static void SetBlendApplyType(FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType);
+    static void SetBlendMode(FrameNode* frameNode, BlendMode blendMode);
+    static void SetBlendApplyType(FrameNode* frameNode, BlendApplyType blendApplyType);
     static void SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen::BrightnessBlender* brightnessBlender);
     static void SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents);
     static void SetDraggable(FrameNode* frameNode, bool draggable);

@@ -41,7 +41,7 @@ public:
     static void SetHeight(FrameNode* frameNode, const CalcLength& height);
     static void SetWidth(FrameNode* frameNode, const Dimension& value);
     static void SetWidth(FrameNode* frameNode, const CalcLength& width);
-    static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& value);
     static void ResetBackgroundColor(FrameNode* frameNode);
     static void SetOnInc(FrameNode* frameNode, CounterEventFunc&& onInc);
     static void SetOnDec(FrameNode* frameNode, CounterEventFunc&& onDec);

@@ -2048,11 +2048,7 @@ void BackgroundColor0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (AceType::TypeId(frameNode) == CounterNode::TypeId()) {
-        CounterModelNG::SetBackgroundColor(frameNode, Converter::OptConvert<Color>(*value));
-    } else {
-        ViewAbstract::SetBackgroundColor(frameNode, Converter::OptConvert<Color>(*value));
-    }
+    ViewAbstractModelStatic::SetBackgroundColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void BackgroundColor1Impl(Ark_NativePointer node,
                           const Opt_ResourceColor* value)
@@ -2174,7 +2170,7 @@ void ForegroundEffectImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<float>(value);
     Validator::ValidateNonNegative(convValue);
-    ViewAbstract::SetForegroundEffect(frameNode, convValue);
+    ViewAbstractModelStatic::SetForegroundEffect(frameNode, convValue);
 }
 void VisualEffectImpl(Ark_NativePointer node,
                       const Opt_VisualEffect* value)
@@ -2565,11 +2561,11 @@ void ForegroundColor0Impl(Ark_NativePointer node,
     Converter::VisitUnionPtr(value,
         [frameNode](const Ark_ResourceColor& resourceColor) {
             auto colorOpt = Converter::OptConvert<Color>(resourceColor);
-            ViewAbstract::SetForegroundColor(frameNode, colorOpt);
+            ViewAbstractModelStatic::SetForegroundColor(frameNode, colorOpt);
         },
         [frameNode](const Ark_ColoringStrategy& colorStrategy) {
             auto colorStrategyOpt = Converter::OptConvert<ForegroundColorStrategy>(colorStrategy);
-            ViewAbstract::SetForegroundColorStrategy(frameNode, colorStrategyOpt);
+            ViewAbstractModelStatic::SetForegroundColorStrategy(frameNode, colorStrategyOpt);
         },
         []() {}
     );
@@ -2582,11 +2578,11 @@ void ForegroundColor1Impl(Ark_NativePointer node,
     Converter::VisitUnionPtr(value,
         [frameNode](const Ark_ResourceColor& resourceColor) {
             auto colorOpt = Converter::OptConvert<Color>(resourceColor);
-            ViewAbstract::SetForegroundColor(frameNode, colorOpt);
+            ViewAbstractModelStatic::SetForegroundColor(frameNode, colorOpt);
         },
         [frameNode](const Ark_ColoringStrategy& colorStrategy) {
             auto colorStrategyOpt = Converter::OptConvert<ForegroundColorStrategy>(colorStrategy);
-            ViewAbstract::SetForegroundColorStrategy(frameNode, colorStrategyOpt);
+            ViewAbstractModelStatic::SetForegroundColorStrategy(frameNode, colorStrategyOpt);
         },
         []() {}
     );
@@ -3368,7 +3364,7 @@ void Scale0Impl(Ark_NativePointer node,
 
     CalcDimension centerX = scaleOptions.centerX.value_or(0.5_pct);
     CalcDimension centerY = scaleOptions.centerY.value_or(0.5_pct);
-    ViewAbstract::SetPivot(frameNode, DimensionOffset(centerX, centerY));
+    ViewAbstractModelStatic::SetPivot(frameNode, DimensionOffset(centerX, centerY));
 }
 void Scale1Impl(Ark_NativePointer node,
                 const Opt_ScaleOptions* value)
@@ -3406,8 +3402,8 @@ void Rotate0Impl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetPivot(frameNode, convValue->center);
-    ViewAbstract::SetRotate(frameNode, convValue->vec5f);
+    ViewAbstractModelStatic::SetPivot(frameNode, convValue->center);
+    ViewAbstractModelStatic::SetRotate(frameNode, convValue->vec5f);
 }
 void Rotate1Impl(Ark_NativePointer node,
                  const Opt_RotateOptions* value)
@@ -3417,8 +3413,8 @@ void Rotate1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<RotateOpt>(*value);
     if (convValue.has_value()) {
-        ViewAbstract::SetPivot(frameNode, convValue->center);
-        ViewAbstract::SetRotate(frameNode, convValue->vec5f);
+        ViewAbstractModelStatic::SetPivot(frameNode, convValue->center);
+        ViewAbstractModelStatic::SetRotate(frameNode, convValue->vec5f);
     }
 }
 void Transform0Impl(Ark_NativePointer node,
@@ -3435,7 +3431,7 @@ void Transform1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Matrix4>(value);
-    ViewAbstract::SetTransformMatrix(frameNode, convValue);
+    ViewAbstractModelStatic::SetTransformMatrix(frameNode, convValue);
 }
 void OnAppearImpl(Ark_NativePointer node,
                   const Opt_Callback_Void* value)
@@ -4184,7 +4180,7 @@ void Clip0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetClipEdge(frameNode, Converter::OptConvert<bool>(*value).value_or(false));
+    ViewAbstractModelStatic::SetClipEdge(frameNode, Converter::OptConvert<bool>(*value).value_or(false));
 }
 void Clip1Impl(Ark_NativePointer node,
                const Opt_Boolean* value)
@@ -4674,7 +4670,7 @@ void RenderFit0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<RenderFit>(*value);
-    ViewAbstract::SetRenderFit(frameNode, convValue);
+    ViewAbstractModelStatic::SetRenderFit(frameNode, convValue);
 }
 void RenderFit1Impl(Ark_NativePointer node,
                     const Opt_RenderFit* value)
@@ -4683,7 +4679,7 @@ void RenderFit1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<RenderFit>(*value);
-    ViewAbstract::SetRenderFit(frameNode, convValue);
+    ViewAbstractModelStatic::SetRenderFit(frameNode, convValue);
 }
 void GestureModifierImpl(Ark_NativePointer node,
                          const Opt_GestureModifier* value)
@@ -5157,7 +5153,7 @@ void LinearGradientBlur0Impl(Ark_NativePointer node,
     if (radius.has_value()) {
         convValue->blurRadius_ = radius.value();
     }
-    ViewAbstract::SetLinearGradientBlur(frameNode, convValue);
+    ViewAbstractModelStatic::SetLinearGradientBlur(frameNode, convValue);
 }
 void LinearGradientBlur1Impl(Ark_NativePointer node,
                              const Opt_Number* blurRadius,
@@ -5187,7 +5183,7 @@ void BackdropBlur0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto radius = Converter::OptConvert<Dimension>(*value);
     auto option = nullptr == options ? std::nullopt : Converter::OptConvert<BlurOption>(*options);
-    ViewAbstract::SetBackdropBlur(frameNode, radius, option);
+    ViewAbstractModelStatic::SetBackdropBlur(frameNode, radius, option);
 }
 void BackdropBlur1Impl(Ark_NativePointer node,
                        const Opt_Number* radius,
@@ -5300,8 +5296,8 @@ void BlendMode0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto blendMode = Converter::OptConvertPtr<BlendMode>(value);
     auto blendApplyType = Converter::OptConvertPtr<BlendApplyType>(type);
-    ViewAbstract::SetBlendMode(frameNode, blendMode);
-    ViewAbstract::SetBlendApplyType(frameNode, blendApplyType);
+    ViewAbstractModelStatic::SetBlendMode(frameNode, blendMode);
+    ViewAbstractModelStatic::SetBlendApplyType(frameNode, blendApplyType);
 }
 void BlendMode1Impl(Ark_NativePointer node,
                     const Opt_BlendMode* mode,
@@ -5326,7 +5322,7 @@ void AdvancedBlendModeImpl(Ark_NativePointer node,
         [&blendMode, &blendApplyType, frameNode](const Ark_BlendMode& value) {
             blendMode = Converter::OptConvert<BlendMode>(value).value_or(blendMode);
             blendApplyType = BlendApplyType::OFFSCREEN;
-            ViewAbstract::SetBlendMode(frameNode, blendMode);
+            ViewAbstractModelStatic::SetBlendMode(frameNode, blendMode);
         },
         [](const Ark_BrightnessBlender& value) {
             LOGE("CommonMethodModifier::AdvancedBlendModeImpl Ark_BrightnessBlender is not supported yet.");
@@ -5336,7 +5332,7 @@ void AdvancedBlendModeImpl(Ark_NativePointer node,
     std::optional<BlendApplyType> blendApplyTypeOpt = type ?
         Converter::OptConvert<BlendApplyType>(*type) : std::nullopt;
     blendApplyType = blendApplyTypeOpt.value_or(blendApplyType);
-    ViewAbstract::SetBlendApplyType(frameNode, blendApplyType);
+    ViewAbstractModelStatic::SetBlendApplyType(frameNode, blendApplyType);
 }
 void BindTipsImpl(Ark_NativePointer node,
                   const Opt_TipsMessageType* message,
