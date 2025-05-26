@@ -1230,6 +1230,7 @@ private:
     bool isRenderModeInit_ = false;
     bool isAutoFillClosing_ = true;
     std::shared_ptr<ViewDataCommon> viewDataCommon_;
+    RectF lastPageNodeRectRelativeToWeb_;
     bool isPasswordFill_ = false;
     bool isEnabledHapticFeedback_ = true;
     bool isTouchpadSliding_ = false;

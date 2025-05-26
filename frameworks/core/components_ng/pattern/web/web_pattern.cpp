@@ -4241,7 +4241,7 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
             if (nodeInfo && nodeInfo->GetAutoFillType() == focusType) {
                 TouchEventInfo info("autofill");
                 TouchLocationInfo location("autofill", 0);
-                auto rectF = nodeInfo->GetPageNodeRect();
+                const auto& rectF = lastPageNodeRectRelativeToWeb_;
                 location.SetLocalLocation(Offset(rectF.GetX() + (rectF.Width() / POPUP_CALCULATE_RATIO),
                     rectF.GetY() + (rectF.Height() / POPUP_CALCULATE_RATIO)));
                 info.AddChangedTouchLocationInfo(std::move(location));
@@ -4361,6 +4361,7 @@ void WebPattern::ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
 
     NG::RectF rectF;
     rectF.SetRect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+    lastPageNodeRectRelativeToWeb_ = rectF;
     node->SetPageNodeRect(rectF);
     node->SetId(nodeId);
     node->SetDepth(-1);
