@@ -153,12 +153,12 @@ void SwiperArrowPattern::InitEvent()
     CHECK_NULL_VOID(buttonNode);
 
     auto buttonGestureHub = buttonNode->GetOrCreateGestureEventHub();
-    auto touchCallback = [weak = WeakClaim(this), weakButton = WeakClaim(RawPtr(buttonNode))](TouchEventInfo& info) {
+    auto touchCallback = [weak = WeakClaim(this), weakButton = WeakClaim(RawPtr(buttonNode))](
+                             const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto buttonNode = weakButton.Upgrade();
         CHECK_NULL_VOID(buttonNode);
-        info.SetStopPropagation(true);
         pattern->ButtonTouchEvent(buttonNode, info.GetTouches().front().GetTouchType());
     };
     buttonTouchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
