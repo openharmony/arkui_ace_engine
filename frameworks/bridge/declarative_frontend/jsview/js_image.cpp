@@ -939,7 +939,7 @@ void JSImage::SetOrientation(const JSCallbackInfo& info)
     int32_t parseRes = 0;
     ParseJsInteger(info[0], parseRes);
     if (parseRes < static_cast<int>(ImageRotateOrientation::AUTO) ||
-        parseRes > static_cast<int>(ImageRotateOrientation::LEFT)) {
+        parseRes > static_cast<int>(ImageRotateOrientation::LEFT_MIRRORED)) {
         parseRes = static_cast<int>(ImageRotateOrientation::UP);
     }
     auto res = static_cast<ImageRotateOrientation>(parseRes);

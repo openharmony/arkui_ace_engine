@@ -363,7 +363,27 @@ HWTEST_F(ImageProviderTestNg, GetImageSize003, TestSize.Level1)
 
     ctx->imageObj_ =
         AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_63, LENGTH_128), nullptr);
-    ctx->GetImageObject()->SetOrientation(ImageRotateOrientation::RIGHT_MIRROR);
+    ctx->GetImageObject()->SetOrientation(ImageRotateOrientation::RIGHT_MIRRORED);
+    size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(LENGTH_128, LENGTH_63));
+}
+
+/**
+ * @tc.name: GetImageSize004
+ * @tc.desc: Test GetImageSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, GetImageSize004, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
+    auto size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(-1, -1));
+
+    ctx->imageObj_ =
+        AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_63, LENGTH_128), nullptr);
+    ctx->GetImageObject()->SetOrientation(ImageRotateOrientation::LEFT_MIRRORED);
     size = ctx->GetImageSize();
     EXPECT_EQ(size, SizeF(LENGTH_128, LENGTH_63));
 }

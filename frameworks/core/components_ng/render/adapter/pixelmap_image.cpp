@@ -130,11 +130,11 @@ void UpdateRSFilter(const ImagePaintConfig& config, RSFilter& filter)
 OrientationFit CalculateFlip(ImageRotateOrientation orientation)
 {
     switch (orientation) {
-        case ImageRotateOrientation::LEFT_MIRROR:
-        case ImageRotateOrientation::RIGHT_MIRROR:
-        case ImageRotateOrientation::UP_MIRROR:
+        case ImageRotateOrientation::LEFT_MIRRORED:
+        case ImageRotateOrientation::RIGHT_MIRRORED:
+        case ImageRotateOrientation::UP_MIRRORED:
             return OrientationFit::HORIZONTAL_FLIP;
-        case ImageRotateOrientation::DOWN_MIRROR:
+        case ImageRotateOrientation::DOWN_MIRRORED:
             return OrientationFit::VERTICAL_FLIP;
         default:
             return OrientationFit::NONE;
@@ -145,10 +145,10 @@ int32_t CalculateRotateDegree(ImageRotateOrientation orientation)
 {
     switch (orientation) {
         case ImageRotateOrientation::LEFT:
-        case ImageRotateOrientation::LEFT_MIRROR:
+        case ImageRotateOrientation::LEFT_MIRRORED:
             return -DEGREE_NINETY;
         case ImageRotateOrientation::RIGHT:
-        case ImageRotateOrientation::RIGHT_MIRROR:
+        case ImageRotateOrientation::RIGHT_MIRRORED:
             return DEGREE_NINETY;
         case ImageRotateOrientation::DOWN:
             return DEGREE_HUNDRED_EIGHTY;

@@ -1028,7 +1028,7 @@ void SetImageRotateOrientation(ArkUINodeHandle node, ArkUI_Int32 orientation)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto orientationValue = static_cast<ImageRotateOrientation>(orientation);
-    if (orientationValue < ImageRotateOrientation::AUTO || orientationValue > ImageRotateOrientation::LEFT) {
+    if (orientationValue < ImageRotateOrientation::AUTO || orientationValue > ImageRotateOrientation::LEFT_MIRRORED) {
         orientationValue = ImageRotateOrientation::UP;
     }
     ImageModelNG::SetOrientation(frameNode, orientationValue);
