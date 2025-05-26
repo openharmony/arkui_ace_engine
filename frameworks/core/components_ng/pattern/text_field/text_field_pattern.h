@@ -1814,6 +1814,7 @@ private:
     void SetAccessibilityAction() override;
     void SetAccessibilityActionGetAndSetCaretPosition();
     void SetAccessibilityActionOverlayAndSelection();
+    void SetAccessibilityEditAction();
     void SetAccessibilityMoveTextAction();
     void SetAccessibilityErrotText();
     void SetAccessibilityClearAction();
@@ -1956,7 +1957,6 @@ private:
     bool NeedsSendFillContent();
     void UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
-    std::pair<std::string, std::string> GetTextDiffObscured(const std::string& latestContent);
     void FireOnWillAttachIME();
 
     RectF frameRect_;
