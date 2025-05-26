@@ -1618,12 +1618,8 @@ void RichEditorPattern::ReportAfterContentChangeEvent()
         std::string addedText, removedText;
         DetectTextDiff(textCache_, currentContent, addedText, removedText);
         if (!addedText.empty() && removedText.empty()) {
-            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "textCache, in=%{public}s, newText=%{public}s, addedText=%{public}s",
-                textCache_.c_str(), currentContent.c_str(), addedText.c_str());
             OnAccessibilityEventTextChange(TextChangeType::ADD, addedText);
         } else if (!removedText.empty() && addedText.empty()) {
-            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "textCache, in=%{public}s, newText=%{public}s, removedText=%{public}s",
-                textCache_.c_str(), currentContent.c_str(), removedText.c_str());
             OnAccessibilityEventTextChange(TextChangeType::REMOVE, removedText);
         }
     }
