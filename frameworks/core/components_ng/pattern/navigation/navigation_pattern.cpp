@@ -23,6 +23,7 @@
 #include "base/ressched/ressched_report.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ime/input_method_manager.h"
+#include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
@@ -64,6 +65,21 @@ constexpr int32_t FULL_CIRCLE_ANGLE = 360;
 namespace {
 constexpr int32_t MODE_SWITCH_ANIMATION_DURATION = 500; // ms
 const RefPtr<CubicCurve> MODE_SWITCH_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
+constexpr Dimension SPLIT_THRESHOLD_WIDTH = 600.0_vp;
+
+const char* DeviceOrientationToString(DeviceOrientation ori)
+{
+    switch (ori) {
+        case DeviceOrientation::PORTRAIT:
+            return "PORTRAIT";
+        case DeviceOrientation::LANDSCAPE:
+            return "LANDSCAPE";
+        case DeviceOrientation::ORIENTATION_UNDEFINED:
+            return "ORIENTATION_UNDEFINED";
+        default:
+            return "UNKNOWN";
+    }
+}
 
 int32_t ConvertDisplayOrientationToRotationAngle(DisplayOrientation ori)
 {
@@ -204,28 +220,40 @@ void NavigationPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->AddWindowStateChangedCallback(host->GetId());
-    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto id = host->GetId();
+    context->AddWindowStateChangedCallback(id);
+    context->AddWindowSizeChangeCallback(id);
 
     auto theme = NavigationGetTheme();
     if (theme && theme->GetNavBarUnfocusEffectEnable()) {
-        pipelineContext->AddWindowFocusChangedCallback(host->GetId());
+        context->AddWindowFocusChangedCallback(id);
     }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_ALL, .edges = SAFE_AREA_EDGE_ALL };
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
+    auto manager = context->GetNavigationManager();
+    CHECK_NULL_VOID(manager);
+    if (manager->IsForceSplitSupported()) {
+        RegisterForceSplitListener(context, id);
+    }
 }
 
 void NavigationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
     auto id = frameNode->GetId();
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-    CHECK_NULL_VOID(pipeline);
-    pipeline->RemoveWindowStateChangedCallback(id);
-    pipeline->RemoveWindowSizeChangeCallback(id);
+    context->RemoveWindowStateChangedCallback(id);
+    context->RemoveWindowSizeChangeCallback(id);
+    auto manager = context->GetNavigationManager();
+    CHECK_NULL_VOID(manager);
+    if (manager->IsForceSplitSupported()) {
+        UnregisterForceSplitListener(context, id);
+    }
 }
 
 
@@ -751,6 +779,54 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
         }
     }
     RefreshNavDestination();
+}
+
+void NavigationPattern::RecognizeHomePageIfNeeded()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto manager = context->GetNavigationManager();
+    CHECK_NULL_VOID(manager);
+    if (!manager->IsForceSplitSupported()) {
+        return;
+    }
+    const auto& curList = navigationStack_->GetAllNavDestinationNodes();
+    std::vector<RefPtr<NavDestinationGroupNode>> allDestNodes;
+    for (const auto& pair : curList) {
+        auto node = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(pair.second));
+        CHECK_NULL_CONTINUE(node);
+        allDestNodes.push_back(node);
+    }
+
+    auto homeNode = homeNode_.Upgrade();
+    if (homeNode) {
+        bool homeNodeExistInCurStack = false;
+        for (const auto& node : allDestNodes) {
+            if (node == homeNode) {
+                homeNodeExistInCurStack = true;
+                break;
+            }
+        }
+        if (!homeNodeExistInCurStack) {
+            homeNode = nullptr;
+            homeNode_ = nullptr;
+        }
+    }
+    if (homeNode) {
+        return;
+    }
+
+    for (const auto& node : allDestNodes) {
+        if (ForceSplitUtils::IsNavDestinationHomePage(node)) {
+            node->SetNavDestinationType(NavDestinationType::HOME);
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Recognize dest[%{public}d] as HomePage", node->GetId());
+            homeNode_ = WeakPtr(node);
+            break;
+        }
+    }
 }
 
 void NavigationPattern::UpdateNavPathList()
@@ -4352,5 +4428,95 @@ bool NavigationPattern::HandleIntent(bool needTransition)
     navigationStack_->PushIntentNavDestination(navigationIntentInfo.value().navDestinationName,
         navigationIntentInfo.value().param, needTransition && !navigationIntentInfo.value().isColdStart);
     return true;
+}
+
+void NavigationPattern::RegisterForceSplitListener(PipelineContext* context, int32_t nodeId)
+{
+    CHECK_NULL_VOID(context);
+    auto mgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(mgr);
+    auto listener = [weakPattern = WeakClaim(this)]() {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto hostNode = pattern->GetHost();
+        CHECK_NULL_VOID(hostNode);
+        hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    mgr->AddForceSplitListener(nodeId, std::move(listener));
+}
+
+void NavigationPattern::UnregisterForceSplitListener(PipelineContext* context, int32_t nodeId)
+{
+    CHECK_NULL_VOID(context);
+    auto mgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->RemoveForceSplitListener(nodeId);
+}
+
+void NavigationPattern::TryForceSplitIfNeeded(const SizeF& frameSize)
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    auto context = hostNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto navManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navManager);
+    if (!navManager->IsForceSplitSupported()) {
+        return;
+    }
+
+    auto container = Container::GetContainer(context->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    auto windowManager = context->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    auto property = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    bool forceSplitSuccess = false;
+    bool forceSplitUseNavBar = false;
+    if (navManager->IsForceSplitEnable()) {
+        /**
+         * The force split mode must meet the following conditions to take effect:
+         *   1. Belonging to the main window of the application
+         *   2. Belonging to the main page of the application (excluding container model, popups, etc.)
+         *   3. The application is in landscape mode
+         *   4. The application is not in split screen mode
+         *   5. Navigation width greater than 600vp
+         *   6. It belongs to the outermost Navigation within the page
+         */
+        bool isMainWindow = container->IsMainWindow();
+        bool isInAppMainPage = pageNode_.Upgrade() != nullptr;
+        auto thresholdWidth = SPLIT_THRESHOLD_WIDTH.ConvertToPx();
+        auto dipScale = context->GetDipScale();
+        auto orientation = SystemProperties::GetDeviceOrientation();
+        auto windowMode = windowManager->GetWindowMode();
+        bool isInSplitScreenMode = windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+        bool isOuterMostNav = navManager->IsOuterMostNavigation(hostNode->GetId(), hostNode->GetDepth());
+        forceSplitSuccess = isMainWindow && isInAppMainPage && isOuterMostNav &&
+            orientation == DeviceOrientation::LANDSCAPE && thresholdWidth < frameSize.Width() && !isInSplitScreenMode;
+        /**
+         * When NavBar is not hidden and its width is greater than 0,
+         * it is considered that there is content in NavBar, and NavBar is used as the homepage
+         */
+        bool navBarHasContent = !property->GetHideNavBarValue(false) &&
+            (!userSetNavBarWidthFlag_ || GreatNotEqual(initNavBarWidthValue_.Value(), 0)) &&
+            (GreatNotEqual(property->GetMaxNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH).Value(), 0));
+        forceSplitUseNavBar = forceSplitSuccess && navBarHasContent;
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "calc splitMode, isMainWindow:%{public}d, isInAppMainPage:%{public}d, "
+            "isInSplitScreenMode:%{public}d, isOuterMostNav:%{public}d, orientation: %{public}s, dipScale: %{public}f, "
+            "thresholdWidth: %{public}f, curWidth: %{public}f, navBarHasContent:%{public}d, "
+            "forceSplitSuccess:%{public}d, forceSplitUseNavBar:%{public}d", isMainWindow, isInAppMainPage,
+            isInSplitScreenMode, isOuterMostNav, DeviceOrientationToString(orientation), dipScale, thresholdWidth,
+            frameSize.Width(), navBarHasContent, forceSplitSuccess, forceSplitUseNavBar);
+    }
+    if (forceSplitSuccess == forceSplitSuccess_ && forceSplitUseNavBar_ == forceSplitUseNavBar) {
+        return;
+    }
+    forceSplitSuccess_ = forceSplitSuccess;
+    forceSplitUseNavBar_ = forceSplitUseNavBar;
+    SwapNavDestinationAndPlaceHolder(true);
+}
+
+void NavigationPattern::SwapNavDestinationAndPlaceHolder(bool needFireLifecycle)
+{
 }
 } // namespace OHOS::Ace::NG

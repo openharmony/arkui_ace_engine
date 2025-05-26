@@ -49,6 +49,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/plugin_manager.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_wrapper.h"
 #include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
 #include "core/components_ng/base/inspector.h"
@@ -270,6 +271,37 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
         ResourceManager::GetInstance().RegisterMainResourceAdapter(
             bundleName, moduleName, INSTANCE_ID_UNDEFINED, resourceAdapter);
     }
+}
+
+void InitNavigationManagerCallback(const RefPtr<NG::PipelineContext>& context)
+{
+    CHECK_NULL_VOID(context);
+    auto navMgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(navMgr);
+    auto getColorCallback = [weakContext = WeakPtr(context)](const std::string& name, Color& color) -> bool {
+        auto context = weakContext.Upgrade();
+        CHECK_NULL_RETURN(context, false);
+        RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+        RefPtr<ThemeConstants> themeConstants = nullptr;
+        if (SystemProperties::GetResourceDecoupling()) {
+            auto container = Container::GetContainer(context->GetInstanceId());
+            CHECK_NULL_RETURN(container, false);
+            auto resourceObject = AceType::MakeRefPtr<ResourceObject>(
+                container->GetBundleName(), container->GetModuleName(), context->GetInstanceId());
+            resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+            CHECK_NULL_RETURN(resourceAdapter, false);
+        } else {
+            auto themeManager = context->GetThemeManager();
+            CHECK_NULL_RETURN(themeManager, false);
+            themeConstants = themeManager->GetThemeConstants();
+            CHECK_NULL_RETURN(themeConstants, false);
+        }
+        auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+        CHECK_NULL_RETURN(resourceWrapper, false);
+        color = resourceWrapper->GetColorByName(name);
+        return true;
+    };
+    navMgr->SetGetSystemColorCallback(std::move(getColorCallback));
 }
 
 std::string EncodeBundleAndModule(const std::string& bundleName, const std::string& moduleName)
@@ -2657,9 +2689,14 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             context->SetupRootElement();
         }
     };
+
     if (GetSettings().usePlatformAsUIThread) {
         initThemeManagerTask();
         setupRootElementTask();
+        auto newPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+        if (newPipeline) {
+            InitNavigationManagerCallback(newPipeline);
+        }
     } else {
         taskExecutor_->PostTask(initThemeManagerTask, TaskExecutor::TaskType::UI, "ArkUIInitThemeManager");
         taskExecutor_->PostTask(setupRootElementTask, TaskExecutor::TaskType::UI, "ArkUISetupRootElement");

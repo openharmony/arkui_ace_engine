@@ -23,6 +23,7 @@
 
 namespace OHOS::Ace::NG {
 class NavigationStack;
+class NavDestinationPattern;
 class NavPathInfo : public virtual AceType {
     DECLARE_ACE_TYPE(NavPathInfo, AceType)
 public:
@@ -159,6 +160,9 @@ public:
         return uniqueId_;
     }
 
+    void SetNavDestinationPattern(const WeakPtr<NavDestinationPattern>& pattern);
+    RefPtr<NavDestinationPattern> GetNavDestinationPattern() const;
+
 protected:
     int32_t index_ = -1;
     int32_t preIndex_ = -1;
@@ -167,6 +171,7 @@ protected:
     RefPtr<NavPathInfo> pathInfo_;
     bool isEmpty_ = false;
     WeakPtr<NavigationStack> navigationStack_;
+    WeakPtr<NavDestinationPattern> navDestinationPattern_;
     int32_t uniqueId_ = -1;
 };
 } // namespace OHOS::Ace::NG

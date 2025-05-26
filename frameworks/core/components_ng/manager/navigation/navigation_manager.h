@@ -24,6 +24,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace::NG {
 class NavigationStack;
@@ -70,6 +71,8 @@ struct NavdestinationRecoveryInfo {
     NavdestinationRecoveryInfo(const std::string& name, const std::string& param, int32_t mode)
         : name(std::move(name)), param(std::move(param)), mode(mode) {}
 };
+
+using GetSystemColorCallback = std::function<bool(const std::string&, Color&)>;
 
 class NavigationManager : public virtual AceType {
     DECLARE_ACE_TYPE(NavigationManager, AceType);
@@ -211,12 +214,45 @@ public:
     {
         navigationIntentInfo_.reset();
     }
+
+    void SetGetSystemColorCallback(GetSystemColorCallback&& callback)
+    {
+        getSystemColorCallback_ = std::move(callback);
+    }
+    bool GetSystemColor(const std::string& name, Color& color)
+    {
+        if (getSystemColorCallback_) {
+            return getSystemColorCallback_(name, color);
+        }
+        return false;
+    }
+    bool IsForceSplitSupported() const
+    {
+        return isForceSplitSupported_;
+    }
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage);
+    bool IsForceSplitEnable() const
+    {
+        return isForceSplitEnable_;
+    }
+    const std::string& GetHomePageName() const
+    {
+        return homePageName_;
+    }
+    void AddForceSplitListener(int32_t nodeId, std::function<void()>&& listener);
+    void RemoveForceSplitListener(int32_t nodeId);
+    bool IsOuterMostNavigation(int32_t nodeId, int32_t depth);
+
 private:
     struct DumpMapKey {
         int32_t nodeId;
         int32_t depth;
 
         DumpMapKey(int32_t n, int32_t d) : nodeId(n), depth(d) {}
+        bool operator== (const DumpMapKey& o) const
+        {
+            return nodeId == o.nodeId && depth == o.depth;
+        }
         bool operator< (const DumpMapKey& o) const
         {
             if (depth != o.depth) {
@@ -252,6 +288,12 @@ private:
     WeakPtr<PipelineContext> pipeline_;
     std::vector<std::function<void()>> beforeOrientationChangeTasks_;
     std::optional<NavigationIntentInfo> navigationIntentInfo_ = std::nullopt;
+
+    GetSystemColorCallback getSystemColorCallback_;
+    bool isForceSplitSupported_ = false;
+    bool isForceSplitEnable_ = false;
+    std::string homePageName_;
+    std::unordered_map<int32_t, std::function<void()>> forceSplitListeners_;
 };
 } // namespace OHOS::Ace::NG
 

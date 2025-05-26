@@ -514,6 +514,39 @@ public:
         return toolbarManager_;
     }
 
+    bool IsForceSplitSuccess() const
+    {
+        return forceSplitSuccess_;
+    }
+    void SetForceSplitUseNavBar(bool use)
+    {
+        forceSplitUseNavBar_ = use;
+    }
+    bool IsForceSplitUseNavBar() const
+    {
+        return forceSplitUseNavBar_;
+    }
+
+    RefPtr<NavDestinationGroupNode> GetHomeNode() const
+    {
+        return homeNode_.Upgrade();
+    }
+    const std::vector<WeakPtr<NavDestinationGroupNode>>& GetPrimaryNodes() const
+    {
+        return primaryNodes_;
+    }
+    void BackupPrimaryNodes()
+    {
+        prePrimaryNodes_ = primaryNodes_;
+    }
+    void SetPrimaryNodesToBeRemoved(std::vector<RefPtr<NavDestinationGroupNode>>&& primaryNodesToBeRemoved)
+    {
+        primaryNodesToBeRemoved_ = primaryNodesToBeRemoved;
+    }
+    void RecognizeHomePageIfNeeded();
+    void TryForceSplitIfNeeded(const SizeF& frameSize);
+    void SwapNavDestinationAndPlaceHolder(bool needFireLifecycle);
+
 private:
     void FireOnNewParam(const RefPtr<UINode>& uiNode);
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
@@ -641,6 +674,9 @@ private:
     void ClearPageAndNavigationConfig();
     bool CustomizeExpandSafeArea() override;
 
+    void RegisterForceSplitListener(PipelineContext* context, int32_t nodeId);
+    void UnregisterForceSplitListener(PipelineContext* context, int32_t nodeId);
+
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
     RefPtr<NavigationStack> navigationStack_;
@@ -703,6 +739,15 @@ private:
     std::vector<WeakPtr<NavDestinationNodeBase>> preVisibleNodes_;
     int32_t runningTransitionCount_ = 0;
     bool isTransitionAnimationAborted_ = false;
+
+    //-------for force split------- begin------
+    bool forceSplitSuccess_ = false;
+    bool forceSplitUseNavBar_ = false;
+    WeakPtr<NavDestinationGroupNode> homeNode_;
+    std::vector<WeakPtr<NavDestinationGroupNode>> prePrimaryNodes_;
+    std::vector<WeakPtr<NavDestinationGroupNode>> primaryNodes_;
+    std::vector<RefPtr<NavDestinationGroupNode>> primaryNodesToBeRemoved_;
+    //-------for force split------- end  ------
 };
 
 } // namespace OHOS::Ace::NG

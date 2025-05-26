@@ -287,6 +287,12 @@ enum class NavigationSystemTransitionType {
     SLIDE_BOTTOM = 1 << 5,
 };
 
+enum class NavDestinationType {
+    DETAIL = 0,
+    HOME = 1,
+    PLACE_HOLDER = 2,
+};
+
 inline NavigationSystemTransitionType operator& (NavigationSystemTransitionType lv, NavigationSystemTransitionType rv)
 {
     return static_cast<NavigationSystemTransitionType>(static_cast<uint32_t>(lv) & static_cast<uint32_t>(rv));

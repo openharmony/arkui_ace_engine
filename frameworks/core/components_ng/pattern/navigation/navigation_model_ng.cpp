@@ -243,7 +243,8 @@ void NavigationModelNG::Create()
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVIGATION_VIEW_ETS_TAG, nodeId);
     auto navigationGroupNode = NavigationRegister::GetInstance()->GetOrCreateGroupNode(
         V2::NAVIGATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    if (!CreateNavBarNodeIfNeeded(navigationGroupNode) ||  // navBar node
+    if (!CreatePrimaryContentIfNeeded(navigationGroupNode) || // primaryContent node
+        !CreateNavBarNodeIfNeeded(navigationGroupNode) ||  // navBar node
         !CreateContentNodeIfNeeded(navigationGroupNode) || // content node
         !CreateDividerNodeIfNeeded(navigationGroupNode)) { // divider node
         return;
@@ -259,6 +260,30 @@ void NavigationModelNG::Create()
     if (navigationPattern && !navigationPattern->GetUserSetNavBarWidthFlag()) {
         navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
     }
+}
+
+bool NavigationModelNG::CreatePrimaryContentIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode)
+{
+    CHECK_NULL_RETURN(navigationGroupNode, false);
+    auto context = navigationGroupNode->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto manager = context->GetNavigationManager();
+    CHECK_NULL_RETURN(manager, false);
+    if (!manager->IsForceSplitSupported()) {
+        return true;
+    }
+    if (navigationGroupNode->GetPrimaryContentNode()) {
+        return true;
+    }
+    int32_t contentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto contentNode = FrameNode::GetOrCreateFrameNode(
+        V2::PRIMARY_CONTENT_NODE_ETS_TAG, contentId, []() { return AceType::MakeRefPtr<NavigationContentPattern>(); });
+    contentNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+    contentNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+        HitTestMode::HTMTRANSPARENT_SELF);
+    navigationGroupNode->AddChild(contentNode);
+    navigationGroupNode->SetPrimaryContentNode(contentNode);
+    return true;
 }
 
 bool NavigationModelNG::CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode)

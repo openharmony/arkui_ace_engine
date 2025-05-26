@@ -306,6 +306,15 @@ public:
         return isSizeMatchNavigation_;
     }
 
+    void SetNavDestinationType(NavDestinationType type)
+    {
+        destType_ = type;
+    }
+    NavDestinationType GetNavDestinationType() const
+    {
+        return destType_;
+    }
+
 protected:
     RectF CalcFullClipRectForTransition(const SizeF& frameSize);
     RectF CalcHalfClipRectForTransition(const SizeF& frameSize);
@@ -351,6 +360,7 @@ protected:
     std::optional<bool> navigationIndicatorConfig_;
     std::optional<bool> preNavigationIndicatorConfig_;
     bool isSizeMatchNavigation_ = true;
+    NavDestinationType destType_ = NavDestinationType::DETAIL;
 };
 } // namespace OHOS::Ace::NG
 
