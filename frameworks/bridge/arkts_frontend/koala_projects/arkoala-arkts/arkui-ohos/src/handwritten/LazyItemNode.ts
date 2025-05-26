@@ -14,8 +14,9 @@
  */
 
 import { IncrementalNode, Disposable } from "@koalaui/runtime"
-import { PeerNode, LazyItemNodeType } from "../PeerNode"
+import { PeerNode, LazyItemNodeType, PeerNodeType } from "../PeerNode"
 import { KoalaCallsiteKey } from "@koalaui/common"
+import { nullptr, pointer } from "@koalaui/interop"
 
 /**
  * LazyItemNode is the root node of an item in LazyForEach.
@@ -37,5 +38,10 @@ export class LazyItemNode extends IncrementalNode {
 
     recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
         return this._container.recycle(reuseKey, child, id)
+    }
+
+    getPeerPtr(): pointer {
+        const peer = this.firstChild
+        return peer?.isKind(PeerNodeType) ? (peer as PeerNode).getPeerPtr() : nullptr
     }
 }

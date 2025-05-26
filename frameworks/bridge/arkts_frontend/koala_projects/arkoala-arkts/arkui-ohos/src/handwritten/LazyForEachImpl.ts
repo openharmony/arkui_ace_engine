@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { __id, ComputableState, contextNode, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, IncrementalNode, DataNode } from "@koalaui/runtime";
-import { nullptr, pointer } from "@koalaui/interop";
+import { __id, ComputableState, contextNode, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, DataNode } from "@koalaui/runtime";
+import { pointer } from "@koalaui/interop";
 import { LazyForEachType, PeerNode, PeerNodeType } from "../PeerNode";
 import { InternalListener } from "../DataChangeListener";
 import { setNeedCreate } from "../ArkComponentRoot";
@@ -118,8 +118,7 @@ class LazyItemPool implements Disposable {
             if (node.recomputeNeeded) {
                 console.log(`recomputeNeeded: ${index}`)
             }
-            const peer = node.value.firstChild
-            return peer?.isKind(PeerNodeType) ? (peer as PeerNode).getPeerPtr() : nullptr
+            return node.value.getPeerPtr()
         }
 
         const manager = GlobalStateManager.instance
@@ -141,7 +140,7 @@ class LazyItemPool implements Disposable {
         )
 
         this._activeItems.set(index, node)
-        return (node.value.firstChild as PeerNode).getPeerPtr()
+        return node.value.getPeerPtr()
     }
 
     /**
