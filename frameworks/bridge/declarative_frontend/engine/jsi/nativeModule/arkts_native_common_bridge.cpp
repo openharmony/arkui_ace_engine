@@ -3203,7 +3203,8 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImageResizable(ArkUIRuntimeCal
         bgImageResizableArray.push_back(bgImageResizableRawPtr);
     }
     PushDimensionsToVector(options, sliceDimensions);
-    GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImageResizable(nativeNode, options.data(), bgImageResizableArray);
+    GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImageResizable(nativeNode, options.data(),
+        static_cast<ArkUI_Int32>(options.size()), bgImageResizableArray);
     return panda::JSValueRef::Undefined(vm);
 }
 
