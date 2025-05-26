@@ -80,7 +80,7 @@ void RefreshPattern::OnAttachToFrameNode()
     isHigherVersion_ = Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    refreshTheme_ = context->GetTheme<RefreshTheme>();
+    refreshTheme_ = context->GetTheme<RefreshThemeNG>();
 }
 
 bool RefreshPattern::OnDirtyLayoutWrapperSwap(
@@ -296,7 +296,7 @@ void RefreshPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(progressChild_);
     auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    refreshTheme_ = pipelineContext->GetTheme<RefreshTheme>();
+    refreshTheme_ = pipelineContext->GetTheme<RefreshThemeNG>();
     CHECK_NULL_VOID(refreshTheme_);
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);

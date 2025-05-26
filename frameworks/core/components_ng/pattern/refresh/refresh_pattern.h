@@ -22,7 +22,6 @@
 #include "frameworks/base/geometry/ng/offset_t.h"
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/base/utils/noncopyable.h"
-#include "frameworks/core/components/refresh/refresh_theme.h"
 #include "frameworks/core/components_ng/base/frame_scene_status.h"
 #include "frameworks/core/components_ng/pattern/list/list_layout_property.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"
@@ -31,6 +30,7 @@
 #include "frameworks/core/components_ng/pattern/refresh/refresh_event_hub.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_property.h"
+#include "frameworks/core/components_ng/pattern/refresh/refresh_theme_ng.h"
 #include "frameworks/core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "frameworks/core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
 #include "frameworks/core/components_ng/pattern/text/text_layout_property.h"
@@ -203,7 +203,7 @@ private:
     Dimension loadingProgressSizeTheme_ = 32.0_vp;
     Dimension triggerLoadingDistanceTheme_ = 16.0_vp;
     bool isHigherVersion_ = true;
-    RefPtr<RefreshTheme> refreshTheme_;
+    RefPtr<RefreshThemeNG> refreshTheme_;
 };
 } // namespace OHOS::Ace::NG
 

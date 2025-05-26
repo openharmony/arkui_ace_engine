@@ -20,8 +20,8 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 
-#include "core/components/refresh/refresh_theme.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
+#include "core/components_ng/pattern/refresh/refresh_theme_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 
@@ -37,7 +37,7 @@ void RefreshTestNg::SetUpTestSuite()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_REFRESH);
-    auto refreshTheme = RefreshTheme::Builder().Build(themeConstants);
+    auto refreshTheme = RefreshThemeNG::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(refreshTheme));
     auto scrollableThemeConstants = CreateThemeConstants(THEME_PATTERN_SCROLLABLE);
     auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);

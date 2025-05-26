@@ -23,7 +23,6 @@
 #include "frameworks/base/geometry/ng/offset_t.h"
 #include "frameworks/base/i18n/localization.h"
 #include "frameworks/base/utils/time_util.h"
-#include "frameworks/core/components/refresh/refresh_theme.h"
 #include "frameworks/core/components_ng/base/frame_node.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
 #include "frameworks/core/components_ng/event/event_hub.h"
