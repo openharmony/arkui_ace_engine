@@ -401,7 +401,7 @@ void NavigationManager::AddNavigation(int32_t parentNodeId, const RefPtr<FrameNo
 void NavigationManager::RemoveNavigation(int32_t navigationNodeId)
 {
     for (auto navigationIter = navigationMap_.begin(); navigationIter != navigationMap_.end();) {
-        auto navigationInfos = navigationIter->second;
+        auto& navigationInfos = navigationIter->second;
         auto it = std::find_if(navigationInfos.begin(), navigationInfos.end(), [navigationNodeId](auto info) {
             return navigationNodeId == info.nodeId;
         });
