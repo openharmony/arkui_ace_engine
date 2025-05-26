@@ -295,6 +295,16 @@ public:
         return textMenuInfo_;
     }
 
+    void SetTouchPadIdChanged(bool touchPadIdChanged)
+    {
+        touchPadIdChanged_ = touchPadIdChanged;
+    }
+
+    bool GetTouchPadIdChanged() const
+    {
+        return touchPadIdChanged_;
+    }
+
 protected:
     std::string countryOrRegion_;
     std::string language_;
@@ -329,6 +339,7 @@ protected:
     TouchPassMode touchPassMode_ = TouchPassMode::DEFAULT;
     bool reusedNodeSkipMeasure_ = false;
     bool mouseTransformEnable_ = false;
+    bool touchPadIdChanged_ = false;
     TextMenuInfo textMenuInfo_;
 };
 
