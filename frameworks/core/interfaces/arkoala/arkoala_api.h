@@ -2990,6 +2990,9 @@ struct ArkUIListModifier {
     void (*resetCachedCount)(ArkUINodeHandle node);
     void (*setCachedIsShown)(ArkUINodeHandle node, ArkUI_Int32 cachedCount);
     void (*resetCachedIsShown)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getListFocusWrapMode)(ArkUINodeHandle node);
+    void (*setListFocusWrapMode)(ArkUINodeHandle node, ArkUI_Int32 focusWrapMode);
+    void (*resetListFocusWrapMode)(ArkUINodeHandle node);
     ArkUI_Int32 (*getCachedIsShown)(ArkUINodeHandle node);
     ArkUI_Int32 (*getEnableScrollInteraction)(ArkUINodeHandle node);
     void (*setEnableScrollInteraction)(ArkUINodeHandle node, ArkUI_Bool enableScrollInteraction);

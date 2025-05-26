@@ -1043,6 +1043,11 @@ bool ListItemGroupPattern::HandleCrossAxisLeftOrUpStep(
 bool ListItemGroupPattern::DetermineMultiLaneStep(FocusStep step, bool isVertical, const RefPtr<FrameNode>& curFrame,
     int32_t curIndexInGroup, int32_t& moveStep, int32_t& nextIndex)
 {
+    auto parentList = GetListFrameNode();
+    CHECK_NULL_RETURN(parentList, false);
+    auto listPattern = parentList->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(listPattern, false);
+    auto focusWrapMode = listPattern->GetFocusWrapMode();
     // Only for GetNextFocusNode
     CHECK_NULL_RETURN(curFrame, false);
     // ListItemGroup does not handle HOME/END, bubble it up to List for processing.
@@ -1054,11 +1059,17 @@ bool ListItemGroupPattern::DetermineMultiLaneStep(FocusStep step, bool isVertica
     } else if ((isVertical && step == FocusStep::UP) || (!isVertical && step == FocusStep::LEFT)) {
         HandleBackwardStep(curFrame, curIndexInGroup, moveStep, nextIndex);
     } else if ((isVertical && (step == FocusStep::RIGHT)) || (!isVertical && step == FocusStep::DOWN)) {
-        if (!HandleCrossAxisRightOrDownStep(isVertical, curIndexInGroup, moveStep, nextIndex)) {
+        if (focusWrapMode == FocusWrapMode::WRAP_WITH_ARROW) {
+            moveStep = 1;
+            nextIndex = curIndexInGroup + 1;
+        } else if (!HandleCrossAxisRightOrDownStep(isVertical, curIndexInGroup, moveStep, nextIndex)) {
             return false;
         }
     } else if ((isVertical && step == FocusStep::LEFT) || (!isVertical && step == FocusStep::UP)) {
-        if (!HandleCrossAxisLeftOrUpStep(isVertical, curIndexInGroup, moveStep, nextIndex)) {
+        if (focusWrapMode == FocusWrapMode::WRAP_WITH_ARROW) {
+            moveStep = -1;
+            nextIndex = curIndexInGroup - 1;
+        } else if (!HandleCrossAxisLeftOrUpStep(isVertical, curIndexInGroup, moveStep, nextIndex)) {
             return false;
         }
     } else if (step == FocusStep::TAB) {

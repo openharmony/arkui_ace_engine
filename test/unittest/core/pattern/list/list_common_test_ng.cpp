@@ -811,6 +811,82 @@ HWTEST_F(ListCommonTestNg, FocusStep010, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNodeInGroupWithHeaderAndFooter(FocusStep::UP, 4, 3, 0, 4));
 }
 
+HWTEST_F(ListCommonTestNg, FocusWrapMode001, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(2);
+    list.SetFocusWrapMode(FocusWrapMode::WRAP_WITH_ARROW);
+    CreateFocusableListItems(6);
+    CreateDone();
+    /**
+     * @tc.steps: step1. GetNextFocusNode func from last item
+     * @tc.expected: Move focus to the next line of first item
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, 3, 4));
+    /**
+     * @tc.steps: step2. GetNextFocusNode func from first item
+     * @tc.expected: Move focus to the previous line of last item
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, 4, 3));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode002, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(2);
+    list.SetFocusWrapMode(FocusWrapMode::DEFAULT);
+    CreateFocusableListItems(6);
+    CreateDone();
+    /**
+     * @tc.steps: step1. GetNextFocusNode func from last item
+     * @tc.expected: Move focus to the next line of first item
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, 3, NULL_VALUE));
+    /**
+     * @tc.steps: step2. GetNextFocusNode func from first item
+     * @tc.expected: Move focus to the previous line of last item
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, 4, NULL_VALUE));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode003, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(2);
+    CreateFocusableListItemGroups(2, 4);
+    list.SetFocusWrapMode(FocusWrapMode::WRAP_WITH_ARROW);
+    CreateDone();
+    /**
+     * @tc.steps: step1. GetNextFocusNode func from last item
+     * @tc.expected: Move focus to the next line of first item
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::RIGHT, 1, 2, 0, 4));
+    /**
+     * @tc.steps: step2. GetNextFocusNode func from first item
+     * @tc.expected: Move focus to the previous line of last item
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::LEFT, 2, 1, 0, 4));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode004, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(2);
+    CreateFocusableListItemGroups(2, 4);
+    list.SetFocusWrapMode(FocusWrapMode::DEFAULT);
+    CreateDone();
+    /**
+     * @tc.steps: step1. GetNextFocusNode func from last item
+     * @tc.expected: Move focus to the next line of first item
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::RIGHT, 1, 1, 0, 4));
+    /**
+     * @tc.steps: step2. GetNextFocusNode func from first item
+     * @tc.expected: Move focus to the previous line of last item
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::LEFT, 2, 2, 1, 4));
+}
+
 /**
  * @tc.name: KeyEvent001
  * @tc.desc: Test list_pattern OnKeyEvent function

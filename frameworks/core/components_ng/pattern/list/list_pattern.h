@@ -19,6 +19,7 @@
 #include <tuple>
 #include "base/log/log_wrapper.h"
 #include "core/animation/chain_animation.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/list/list_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_content_modifier.h"
@@ -234,6 +235,8 @@ public:
     // chain animation
     void SetChainAnimation();
     void SetChainAnimationOptions(const ChainAnimationOptions& options);
+    void SetFocusWrapMode(FocusWrapMode focusWrapMode);
+    FocusWrapMode GetFocusWrapMode() const;
     float FlushChainAnimation(float dragOffset);
     void ProcessDragStart(float startPosition);
     void ProcessDragUpdate(float dragOffset, int32_t source);
@@ -463,6 +466,7 @@ protected:
     int32_t itemStartIndex_ = 0;
     float scrollSnapVelocity_ = 0.0f;
     bool isStackFromEnd_ = true;
+    FocusWrapMode focusWrapMode_ = FocusWrapMode::DEFAULT;
 private:
     void CheckAndUpdateAnimateTo(float relativeOffset, float prevOffset);
     void OnScrollEndCallback() override;
@@ -523,7 +527,7 @@ private:
     int32_t GetNextMoveStepForMultiLanes(int32_t curIndex, FocusStep focuseStep, bool isVertical, int32_t& nextIndex);
     WeakPtr<FocusHub> GetNextFocusNodeInList(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
     bool IsListItemGroupByIndex(int32_t index);
-    WeakPtr<FocusHub> FindChildFocusNodeByIndex(int32_t tarMainIndex, const FocusStep& step);
+    WeakPtr<FocusHub> FindChildFocusNodeByIndex(int32_t tarMainIndex, const FocusStep& step, int32_t curFocusIndex);
     void DetermineSingleLaneStep(
         FocusStep step, bool isVertical, int32_t curIndex, int32_t& moveStep, int32_t& nextIndex);
     void DetermineMultiLaneStep(

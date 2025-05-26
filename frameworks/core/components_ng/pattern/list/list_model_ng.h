@@ -55,6 +55,7 @@ public:
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void SetScrollEnabled(bool scrollEnabled) override;
     void SetFriction(double friction) override;
+    void SetFocusWrapMode(FocusWrapMode focusWrapMode) override;
     void SetMaintainVisibleContentPosition(bool enabled) override;
     void SetStackFromEnd(bool enabled) override;
     void SetOnScroll(OnScrollEvent&& onScroll) override;
@@ -109,6 +110,8 @@ public:
     static void SetLaneMinLength(FrameNode* frameNode, const Dimension& laneMinLength);
     static float GetLaneMinLength(FrameNode* frameNode);
     static void SetLaneMaxLength(FrameNode* frameNode, const Dimension& laneMaxLength);
+    static FocusWrapMode GetFocusWrapMode(FrameNode* frameNode);
+    static void SetFocusWrapMode(FrameNode* frameNode, FocusWrapMode focusWrapMode);
     static float GetLaneMaxLength(FrameNode* frameNode);
     static void SetLaneGutter(FrameNode* frameNode, const Dimension& laneGutter);
     static float GetLaneGutter(FrameNode* frameNode);

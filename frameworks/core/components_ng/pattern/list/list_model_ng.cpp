@@ -278,6 +278,31 @@ void ListModelNG::SetFriction(double friction)
     pattern->SetFriction(friction);
 }
 
+FocusWrapMode ListModelNG::GetFocusWrapMode(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, FocusWrapMode::DEFAULT);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, FocusWrapMode::DEFAULT);
+    return pattern->GetFocusWrapMode();
+}
+
+void ListModelNG::SetFocusWrapMode(FocusWrapMode focusWrapMode)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFocusWrapMode(focusWrapMode);
+}
+
+void ListModelNG::SetFocusWrapMode(FrameNode* frameNode, FocusWrapMode focusWrapMode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFocusWrapMode(focusWrapMode);
+}
+
 void ListModelNG::SetMaintainVisibleContentPosition(bool enabled)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
