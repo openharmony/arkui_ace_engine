@@ -1647,6 +1647,8 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         renderContext_->CreateBackgroundPixelMap(columnNode);
         builderFunc_ = nullptr;
         backgroundNode_ = columnNode;
+    } else {
+        renderContext_->UpdateCustomBackground();
     }
 
     // update focus state
@@ -1670,11 +1672,11 @@ void FrameNode::SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNod
     CHECK_NULL_VOID(customNode);
     LayoutConstraintF layoutConstraint;
     layoutConstraint.scaleProperty = ScaleProperty::CreateScaleProperty();
-    auto paintRect = renderContext_->GetPaintRectWithoutTransform();
-    layoutConstraint.percentReference.SetWidth(paintRect.Width());
-    layoutConstraint.percentReference.SetHeight(paintRect.Height());
-    layoutConstraint.maxSize.SetWidth(paintRect.Width());
-    layoutConstraint.maxSize.SetHeight(paintRect.Height());
+    auto backgroundRect = GetBackGroundAccumulatedSafeAreaExpand();
+    layoutConstraint.percentReference.SetWidth(backgroundRect.Width());
+    layoutConstraint.percentReference.SetHeight(backgroundRect.Height());
+    layoutConstraint.maxSize.SetWidth(backgroundRect.Width());
+    layoutConstraint.maxSize.SetHeight(backgroundRect.Height());
     customNode->GetGeometryNode()->SetParentLayoutConstraint(layoutConstraint);
 }
 
@@ -4930,6 +4932,8 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
         renderContext_->CreateBackgroundPixelMap(columnNode);
         builderFunc_ = nullptr;
         backgroundNode_ = columnNode;
+    } else {
+        renderContext_->UpdateCustomBackground();
     }
 
     // update focus state

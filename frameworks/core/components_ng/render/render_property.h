@@ -110,7 +110,7 @@ struct CustomBackgroundProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundAlign, Alignment);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CustomBackgroundColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(IsTransitionBackground, bool);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(IsBuilderBackground, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BuilderBackgroundFlag, bool);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };

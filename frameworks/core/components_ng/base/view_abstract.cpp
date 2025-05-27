@@ -468,7 +468,7 @@ void ViewAbstract::SetIsTransitionBackground(bool val)
 
 void ViewAbstract::SetIsBuilderBackground(bool val)
 {
-    ACE_UPDATE_RENDER_CONTEXT(IsBuilderBackground, val);
+    ACE_UPDATE_RENDER_CONTEXT(BuilderBackgroundFlag, val);
 }
 
 void ViewAbstract::SetBackgroundColor(const Color& color)
