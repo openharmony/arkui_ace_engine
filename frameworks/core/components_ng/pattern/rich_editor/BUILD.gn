@@ -37,5 +37,10 @@ build_component_ng("rich_editor_pattern_ng") {
     "hilog:libhilog",
     "imf:inputmethod_client",
     "input:libmmi-client",
+
+    "ability_runtime:abilitykit_native",
+    "ipc:ipc_single",
+    "napi:ace_napi",
+    "window_manager:libwm"
   ]
 }
