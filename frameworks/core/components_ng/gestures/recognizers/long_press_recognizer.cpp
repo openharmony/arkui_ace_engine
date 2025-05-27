@@ -122,7 +122,6 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
 
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    LOGI("LongPress HandleTouchDownEvent");
     extraInfo_ = "";
     lastAction_ = static_cast<int32_t>(TouchType::DOWN);
     if (!firstInputTime_.has_value()) {
@@ -190,7 +189,6 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    LOGI("LongPress HandleTouchUpEvent");
     lastAction_ = static_cast<int32_t>(TouchType::UP);
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
@@ -233,7 +231,6 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     lastTouchEvent_.pressedKeyCodes_ = event.pressedKeyCodes_;
-    LOGI("LongPress HandleTouchMoveEvent");
     lastAction_ = static_cast<int32_t>(TouchType::MOVE);
     if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         return;
