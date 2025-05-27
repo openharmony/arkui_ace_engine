@@ -32,7 +32,7 @@ import { BlendMode } from "../../component/arkui-drawing"
 import { int32} from "@koalaui/common"
 import { PeerNode } from '../../PeerNode';
 
-enum ModifierType {
+export enum ModifierType {
    ORIGIN = 0,
    STATE = 1,
    FRAME_NODE = 2,

@@ -33945,6 +33945,15 @@ Ark_NativePointer impl_FrameNode_getFrameNodePtr(Ark_NativePointer node) {
         return GetAccessors()->getFrameNodeAccessor()->getFrameNodePtr(static_cast<Ark_FrameNode>(node));
 }
 KOALA_INTEROP_DIRECT_1(FrameNode_getFrameNodePtr, Ark_NativePointer, Ark_NativePointer)
+Ark_NativePointer impl_FrameNode_createTypedFrameNode(const KStringPtr& type) {
+        return GetAccessors()->getFrameNodeAccessor()->createTypedFrameNode((const Ark_String*) (&type));
+}
+KOALA_INTEROP_1(FrameNode_createTypedFrameNode, Ark_NativePointer, KStringPtr)
+Ark_String impl_FrameNode_getNodeType(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        return GetAccessors()->getFrameNodeAccessor()->getNodeType(self);
+}
+KOALA_INTEROP_1(FrameNode_getNodeType, KStringPtr, Ark_NativePointer)
 Ark_NativePointer impl_LengthMetrics_getFinalizer() {
         return GetAccessors()->getLengthMetricsAccessor()->getFinalizer();
 }
