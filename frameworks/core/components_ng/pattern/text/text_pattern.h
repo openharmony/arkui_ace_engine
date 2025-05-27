@@ -934,6 +934,7 @@ protected:
 
     void SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode);
     virtual std::pair<int32_t, int32_t> GetStartAndEnd(int32_t start, const RefPtr<SpanItem>& spanItem);
+    void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
     void HandleSpanStringTouchEvent(TouchEventInfo& info);
     bool enabled_ = true;
     Status status_ = Status::NONE;
