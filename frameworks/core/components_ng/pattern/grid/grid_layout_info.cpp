@@ -352,9 +352,7 @@ float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, int32_t
     if (options.getSizeByIndex) {
         return GetContentHeight(mainGap);
     }
-    if (IsAllItemsMeasured()) {
-        return GetTotalLineHeight(mainGap);
-    }
+
     float irregularHeight = -1.0f;
     float regularHeight = -1.0f;
     GetLineHeights(options, mainGap, regularHeight, irregularHeight);
