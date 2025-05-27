@@ -202,7 +202,7 @@ public:
     void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
     using DensityHandleFunc = void (*)(AbilityContextInfo&, double);
-    using DensityHandleFuncForAni = std::function<void()>;
+    using DensityHandleFuncForAni = std::function<void(AbilityContextInfo&, double)>;
     void SetHandleDensityChangeFunc(DensityHandleFunc func);
         void SetHandleDensityChangeFuncForAni(DensityHandleFuncForAni func);
 

@@ -79,8 +79,8 @@
             "@ohos/router": [
                 "../ohos.router.ts"
             ],
-            "@ohos/observer": [
-                "../ohos.observer.ts"
+            "@ohos/arkui/observer": [
+                "../ohos.arkui.observer.ts"
             ],
             "@ohos/graphics/common2D": [
                 "../ohos.graphics.common2D.ts"
@@ -104,7 +104,7 @@
         "build/unmemoized/ohos.arkui.focusController.ts",
         "src/ani/arkts/*.ts",
         "build/unmemoized/ohos.router.ts",
-        "build/unmemoized/ohos.observer.ts",
+        "build/unmemoized/ohos.arkui.observer.ts",
         "build/unmemoized/ohos.graphics.common2D.ts",
         "build/unmemoized/ohos.graphics.drawing.ts",
         "build/unmemoized/ohos.arkui.graphics.ts"

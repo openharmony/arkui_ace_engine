@@ -12,15 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- export default namespace observer {
+ import type { Callback } from '@ohos.base';
+ 
+ export default namespace uiObserver {
     loadLibrary("observer_ani");
-    
     export native function createUIObserver(id: number): UIObserver;
-
+    export class DensityInfo {
+        density: number;
+    }
     export default interface UIObserver
     {
         on(type: string, callback: ()=>void) : void;
-
+        on(type: 'densityUpdate', callback: Callback<DensityInfo>): void;
         off(type: string, callback?: ()=>void) : void;
     }
     
@@ -35,7 +38,7 @@
         }
         
         public native on(type: string, callback: ()=>void) : void;
-
+        public native on(type: 'densityUpdate', callback: Callback<DensityInfo>): void;
         public native off(type: string, callback?: ()=>void) : void;
     }
  }

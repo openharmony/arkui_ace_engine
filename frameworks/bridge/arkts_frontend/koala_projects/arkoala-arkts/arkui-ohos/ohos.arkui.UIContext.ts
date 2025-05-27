@@ -38,7 +38,7 @@ import { Frame } from "./src/Graphics"
 import { KeyEvent } from "./src/component/common"
 import { Nullable } from "./src/component/enums"
 import { KeyProcessingMode } from "./src/component/focus"
-import {observer} from "@ohos/observer"
+import { uiObserver } from "@ohos/arkui/observer"
 import inspector from "@ohos/arkui/inspector"
 import router from './ohos.router'
 
@@ -377,23 +377,24 @@ export abstract class FrameCallback {
     onIdle(timeLeftInNano: number): void {}
 }
 
+export type Callback<T,V = void> = (data: T) => V
 export class UIObserver {
     private instanceId_: number = 100000;
-    private observerImpl: observer.UIObserver | null = null;
+    private observerImpl: uiObserver.UIObserver | null = null;
 
     constructor(instanceId: number) {
         this.instanceId_ = instanceId;
         this.createUIObserver(this.instanceId_);
     }
 
-    private createUIObserver(id: number): observer.UIObserver | null {
-        this.observerImpl = observer.createUIObserver(id);
+    private createUIObserver(id: number): uiObserver.UIObserver | null {
+        this.observerImpl = uiObserver.createUIObserver(id);
         return this.observerImpl;
     }
 
-    public on(type: string, callback: () => void): void {
-        if (this.observerImpl) {
-            this.observerImpl!.on(type, callback);
+    public on(type: string, callback:Callback<uiObserver.DensityInfo>): void {
+        if (type == 'densityUpdate') {
+            this.observerImpl!.on('densityUpdate', callback);
         }
     }
 

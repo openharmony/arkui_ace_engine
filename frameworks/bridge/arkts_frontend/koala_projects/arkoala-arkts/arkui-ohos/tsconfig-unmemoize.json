@@ -70,8 +70,8 @@
             "@ohos.router": [
                 "./ohos.router.ts"
             ],
-            "@ohos/observer": [
-                "./ohos.observer.ts"
+            "@ohos/arkui/observer": [
+                "./ohos.arkui.observer.ts"
             ],
             "@ohos/graphics/common2D": [
                 "./ohos.graphics.common2D.ts"
@@ -96,7 +96,7 @@
         "./ohos.arkui.inspector.ts",
         "./global/**/*.ts",
         "./ohos.router.ts",
-        "./ohos.observer.ts",
+        "./ohos.arkui.observer.ts",
         "./ohos.graphics.common2D.ts",
         "./ohos.graphics.drawing.ts",
         "./ohos.arkui.graphics.ts"

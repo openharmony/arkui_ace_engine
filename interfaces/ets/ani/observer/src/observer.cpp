@@ -24,8 +24,8 @@
 
 namespace {
 // constexpr const char DENSITY_CHNAGE[] = "densityUpdate";
-const char ANI_OBSERVER_NS[] = "L@ohos/observer/observer;";
-const char ANI_OBSERVER_CLS[] = "L@ohos/observer/observer/UIObserverImpl;";
+const char ANI_OBSERVER_NS[] = "L@ohos/arkui/observer/uiObserver;";
+const char ANI_OBSERVER_CLS[] = "L@ohos/arkui/observer/uiObserver/UIObserverImpl;";
 } // namespace
 namespace OHOS::Ace {
 class UiObserver {
@@ -80,7 +80,7 @@ public:
             holder.end());
     }
 
-    void HandleDensityChange(ani_env* env)
+    void HandleDensityChange(ani_env* env, double density)
     {
         auto currentId = Container::CurrentId();
         auto iter = densityCbMap_.find(currentId);
@@ -88,7 +88,17 @@ public:
             return;
         }
         auto& holder = iter->second;
-        CallJsFunction(env, holder);
+        std::vector<ani_ref> callbackParams;
+        ani_ref fnReturnVal;
+        ani_object res;
+        CreateDensityInfo(env, density, res);
+        callbackParams.emplace_back(res);
+        for (auto& cb : holder) {
+            env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(cb),
+                                       callbackParams.size(),
+                                       callbackParams.data(),
+                                       &fnReturnVal);
+        }
     }
 
     ani_boolean AniEqual(ani_env* env, ani_ref cb, ani_ref cb1)
@@ -96,6 +106,17 @@ public:
         ani_boolean isEquals = false;
         env->Reference_StrictEquals(cb, cb1, &isEquals);
         return isEquals;
+    }
+
+    void CreateDensityInfo(ani_env* env, double density, ani_object& obj)
+    {
+        static const char* className = "L@ohos/arkui/observer/uiObserver/DensityInfo;";
+        ani_class cls;
+        env->FindClass(className, &cls);
+        ani_method ctor;
+        env->Class_FindMethod(cls, "<ctor>", ":V", &ctor);
+        env->Object_New(cls, ctor, &obj);
+        env->Object_SetPropertyByName_Double(obj, "density", ani_double(density));
     }
 
 private:
@@ -143,7 +164,6 @@ static void On([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object
     ani_ref fnObjGlobalRef = nullptr;
     env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
     observer->RegisterDensityCallback(100000, fnObjGlobalRef);
-    // 执行自己的注册/解注册
 }
 
 static void Off([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_string type, ani_fn_object fnObj)
@@ -174,12 +194,10 @@ static ani_object CreateObserver([[maybe_unused]] ani_env* env, ani_int id)
     }
 
     auto* observer = new UiObserver(id);
-    auto densityChangeCallback = [observer, env]() {
-        LOGE("lzr in callback");
-        observer->HandleDensityChange(env);
+    auto densityChangeCallback = [observer, env](NG::AbilityContextInfo& info, double density) {
+        observer->HandleDensityChange(env, density);
     };
     NG::UIObserverHandler::GetInstance().SetHandleDensityChangeFuncForAni(densityChangeCallback);
-    // 把自己的回调执行函数注册给handler
     ani_object context_object;
     if (ANI_OK != env->Object_New(cls, ctor, &context_object, reinterpret_cast<ani_long>(observer))) {
         LOGE("observer-ani Can not new object.");
