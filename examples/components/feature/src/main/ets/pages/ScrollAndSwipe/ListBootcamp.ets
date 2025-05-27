@@ -610,6 +610,10 @@ export struct ListBootcamp {
   @State dividerEndMargin: string | number = 0;
   @State enableScrollBar: boolean = false;
   @State scrollBar: BarState = BarState.Auto;
+  @State enableScrollBarMarginStart: boolean = false;
+  @State scrollBarMarginStart: number = 0;
+  @State enableScrollBarMarginEnd: boolean = false;
+  @State scrollBarMarginEnd: number = 0;
   @State enableDividerValue: boolean = false;
   @State dividerValue: boolean = false;
   @State enableFadingEdge: boolean = false;
@@ -1456,6 +1460,10 @@ export struct ListBootcamp {
           endMargin: useEnabled(this.enableDividerEndMargin, this.dividerEndMargin)
         } : null)
       .scrollBar(useEnabled(this.enableScrollBar, this.scrollBar))
+      .scrollBarMargin({
+        start: useEnabled(this.enableScrollBarMarginStart, LengthMetrics.vp(this.scrollBarMarginStart)),
+        end: useEnabled(this.enableScrollBarMarginEnd, LengthMetrics.vp(this.scrollBarMarginEnd))
+      })
       .listDirection(useEnabled(this.enableListDirection, this.listDirection))
       // .fadingEdge(this.fadingEdge,{
       //   fadingEdgeLength:{
@@ -1719,6 +1727,23 @@ export struct ListBootcamp {
             { label: 'On', value: BarState.On }
           ]
         })
+
+        SliderBlock({
+          title: 'scrollBarMargin.start',
+          isEnabled: $enableScrollBarMarginStart,
+          value: $scrollBarMarginStart,
+          min: 0,
+          max: 32
+        })
+
+        SliderBlock({
+          title: 'scrollBarMargin.end',
+          isEnabled: $enableScrollBarMarginEnd,
+          value: $scrollBarMarginEnd,
+          min: 0,
+          max: 32
+        })
+
         RadioBlock({
           title: 'edgeEffect',
           isEnabled: $enableEdgeEffect,
