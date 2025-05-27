@@ -1,0 +1,214 @@
+/*
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+// WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
+
+import { int32, int64, float32 } from "@koalaui/common"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { Serializer } from "./peers/Serializer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { CallbackKind } from "./peers/CallbackKind"
+import { CallbackTransformer } from "./../CallbackTransformer"
+import { memo, memo_stable } from "@koalaui/runtime/annotations"
+import { BuilderLambda } from "@koalaui/builderLambda"
+import { Dimension } from "./units"
+import { Axis } from "./enums"
+import { UICommonBase, AttributeModifier } from "./../handwritten"
+import { NodeAttach, remember } from "@koalaui/runtime"
+export class ArkRelativeContainerPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component?: ComponentBase, flags: int32 = 0): ArkRelativeContainerPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._RelativeContainer_construct(peerId, flags)
+        const _peer  = new ArkRelativeContainerPeer(_peerPtr, peerId, "RelativeContainer", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setRelativeContainerOptionsAttribute(): void {
+        ArkUIGeneratedNativeModule._RelativeContainerInterface_setRelativeContainerOptions(this.peer.ptr)
+    }
+    guideLineAttribute(value: Array<GuideLineStyle>): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeInt32(value.length as int32)
+        for (let i = 0; i < value.length; i++) {
+            const value_element : GuideLineStyle = value[i]
+            thisSerializer.writeGuideLineStyle(value_element)
+        }
+        ArkUIGeneratedNativeModule._RelativeContainerAttribute_guideLine(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    barrier0Attribute(value: Array<BarrierStyle>): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeInt32(value.length as int32)
+        for (let i = 0; i < value.length; i++) {
+            const value_element : BarrierStyle = value[i]
+            thisSerializer.writeBarrierStyle(value_element)
+        }
+        ArkUIGeneratedNativeModule._RelativeContainerAttribute_barrier0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    barrier1Attribute(value: Array<LocalizedBarrierStyle>): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeInt32(value.length as int32)
+        for (let i = 0; i < value.length; i++) {
+            const value_element : LocalizedBarrierStyle = value[i]
+            thisSerializer.writeLocalizedBarrierStyle(value_element)
+        }
+        ArkUIGeneratedNativeModule._RelativeContainerAttribute_barrier1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+
+export interface GuideLinePosition {
+    start?: Dimension;
+    end?: Dimension;
+}
+export interface GuideLineStyle {
+    id: string;
+    direction: Axis;
+    position: GuideLinePosition;
+}
+export enum BarrierDirection {
+    LEFT = 0,
+    RIGHT = 1,
+    TOP = 2,
+    BOTTOM = 3
+}
+export enum LocalizedBarrierDirection {
+    START = 0,
+    END = 1,
+    TOP = 2,
+    BOTTOM = 3
+}
+export interface BarrierStyle {
+    id: string;
+    direction: BarrierDirection;
+    referencedId: Array<string>;
+}
+export interface LocalizedBarrierStyle {
+    id: string;
+    localizedDirection: LocalizedBarrierDirection;
+    referencedId: Array<string>;
+}
+export interface RelativeContainerAttribute extends CommonMethod {
+    guideLine(value: Array<GuideLineStyle>): this
+    barrier(value: Array<BarrierStyle> | Array<LocalizedBarrierStyle>): this
+    attributeModifier(value: AttributeModifier<RelativeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this
+}
+export interface UIRelativeContainerAttribute extends UICommonMethod {
+    @memo
+    guideLine(value: Array<GuideLineStyle>): this
+    @memo
+    barrier(value: Array<BarrierStyle> | Array<LocalizedBarrierStyle>): this
+    @memo
+    attributeModifier(value: AttributeModifier<RelativeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this
+}
+export class ArkRelativeContainerStyle extends ArkCommonMethodStyle implements RelativeContainerAttribute {
+    guideLine_value?: Array<GuideLineStyle>
+    barrier_value?: Array<BarrierStyle>
+    public guideLine(value: Array<GuideLineStyle>): this {
+        return this
+    }
+    public barrier(value: Array<BarrierStyle> | Array<LocalizedBarrierStyle>): this {
+        return this
+    }
+    public attributeModifier(value: AttributeModifier<RelativeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Not implemented")
+    }
+}
+@memo_stable
+export class ArkRelativeContainerComponent extends ArkCommonMethodComponent implements UIRelativeContainerAttribute {
+    getPeer(): ArkRelativeContainerPeer {
+        return (this.peer as ArkRelativeContainerPeer)
+    }
+    @memo
+    public setRelativeContainerOptions(): this {
+        if (this.checkPriority("setRelativeContainerOptions")) {
+            this.getPeer()?.setRelativeContainerOptionsAttribute()
+            return this
+        }
+        return this
+    }
+    @memo
+    public guideLine(value: Array<GuideLineStyle>): this {
+        if (this.checkPriority("guideLine")) {
+            const value_casted = value as (Array<GuideLineStyle>)
+            this.getPeer()?.guideLineAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    @memo
+    public barrier(value: Array<BarrierStyle> | Array<LocalizedBarrierStyle>): this {
+        if (this.checkPriority("barrier")) {
+            const value_type = runtimeType(value)
+            if (((RuntimeType.OBJECT) == (value_type)) && (TypeChecker.isArray_BarrierStyle(value))) {
+                const value_casted = value as (Array<BarrierStyle>)
+                this.getPeer()?.barrier0Attribute(value_casted)
+                return this
+            }
+            if (((RuntimeType.OBJECT) == (value_type)) && (TypeChecker.isArray_LocalizedBarrierStyle(value))) {
+                const value_casted = value as (Array<LocalizedBarrierStyle>)
+                this.getPeer()?.barrier1Attribute(value_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    @memo
+    public attributeModifier(value: AttributeModifier<RelativeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        console.log("attributeModifier() not implemented")
+        return this
+    }
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
+}
+@memo
+@BuilderLambda("RelativeContainer")
+export function RelativeContainer(
+    
+    @memo
+    content_?: () => void,
+): RelativeContainerAttribute {
+    throw new Error("Not implemented")
+}
+
+@memo
+export function RelativeContainer(
+    @memo
+    style: ((attributes: UIRelativeContainerAttribute) => void) | undefined,
+    
+    @memo
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkRelativeContainerComponent>((): ArkRelativeContainerComponent => {
+        return new ArkRelativeContainerComponent()
+    })
+    NodeAttach<ArkRelativeContainerPeer>((): ArkRelativeContainerPeer => ArkRelativeContainerPeer.create(receiver), (_: ArkRelativeContainerPeer): void => {
+        receiver.setRelativeContainerOptions()
+        style?.(receiver)
+        content_?.()
+        receiver.applyAttributesFinish()
+    })
+}

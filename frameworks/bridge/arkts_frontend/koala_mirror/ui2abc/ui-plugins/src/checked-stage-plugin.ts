@@ -17,6 +17,7 @@ import * as arkts from "@koalaui/libarkts"
 import { StyleTransformer } from "./style-transformer"
 import { EtsFirstArgTransformer } from "./ets-first-arg-transformer"
 import { BuilderLambdaTransformer } from "./builder-lambda-transformer"
+import { InstantiateFactoryHelper } from "./instantiate-factory-helper"
 
 export interface TransformerOptions {
     trace?: boolean,
@@ -24,12 +25,15 @@ export interface TransformerOptions {
 
 export default function checkedTransformer(
     userPluginOptions?: TransformerOptions
-) {
+): arkts.ProgramTransformer {
     console.log("CHECKED: ", userPluginOptions)
-    return (program: arkts.Program) => [
-        new EtsFirstArgTransformer(),
-        new StyleTransformer(),
-        new BuilderLambdaTransformer()
-    ]
+    return (program: arkts.Program, _compilationOptions: arkts.CompilationOptions, context: arkts.PluginContext) => {
+        [
+            new InstantiateFactoryHelper(),
+            new EtsFirstArgTransformer(),
+            new StyleTransformer(),
+            new BuilderLambdaTransformer()
+        ]
         .reduce((node: arkts.AstNode, transformer) => transformer.visitor(node), program.astNode)
+    }
 }

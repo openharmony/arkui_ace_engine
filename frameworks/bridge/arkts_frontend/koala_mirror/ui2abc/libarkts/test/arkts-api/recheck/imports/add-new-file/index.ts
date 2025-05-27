@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 import * as arkts from "../../../../../src/arkts-api"
 
 export function addImportNewFile(program: arkts.Program, options: arkts.CompilationOptions) {
@@ -31,9 +31,7 @@ export function addImportNewFile(program: arkts.Program, options: arkts.Compilat
                     )
                 )
             ],
-            arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL,
-            arkts.arktsGlobal.compilerContext.program,
-            arkts.Es2pandaImportFlags.IMPORT_FLAGS_NONE
+            arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL
         )
     }
     return program

@@ -52,6 +52,9 @@ export class Es2pandaNativeModule {
     _UpdateNumberLiteral3(context: KNativePointer, original: KNativePointer, value: KFloat): KNativePointer {
         throw new Error("This methods was not overloaded by native module initialization")
     }
+    _NumberLiteralStrConst(context: KNativePointer, receiver: KNativePointer): KStringPtr {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
     _CreateLabelledStatement(context: KNativePointer, ident: KNativePointer, body: KNativePointer): KNativePointer {
         throw new Error("This methods was not overloaded by native module initialization")
     }
@@ -434,6 +437,12 @@ export class Es2pandaNativeModule {
         throw new Error("This methods was not overloaded by native module initialization")
     }
     _CallExpressionIsTrailingBlockInNewLineConst(context: KNativePointer, receiver: KNativePointer): KBoolean {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _CallExpressionSetIsTrailingCall(context: KNativePointer, receiver: KNativePointer, isTrailingCall: KBoolean): void {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _CallExpressionIsTrailingCallConst(context: KNativePointer, receiver: KNativePointer): KBoolean {
         throw new Error("This methods was not overloaded by native module initialization")
     }
     _CallExpressionIsETSConstructorCallConst(context: KNativePointer, receiver: KNativePointer): KBoolean {

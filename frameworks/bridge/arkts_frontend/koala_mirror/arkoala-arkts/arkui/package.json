@@ -1,0 +1,21 @@
+{
+  "name": "@ohos/arkui",
+  "version": "1.5.15-dev",
+  "description": "",
+  "main": "build/ts/src/index.js",
+  "types": "build/ts/src/index.d.ts",
+  "scripts": {
+    "clean": "rimraf build build-m3 build-m3-sdk build-m3-impl",
+    "clean:arkui-no-common": "npm run clean",
+    "build:arkui-no-common:inc": "npm run unmemoize && fast-arktsc --config ./arktsconfig-unmemoized.json --compiler ../../incremental/tools/panda/arkts/arktsc --link-name ./build/arkui-no-common.abc && ninja ${NINJA_OPTIONS} -f build/abc/build.ninja",
+    "build:arkui-no-common": "npm run build:arkui-no-common:inc",
+    "unmemoize": "ets-tsc -b ./tsconfig-unmemoize.json && cp -r ./src/generated/arkts ./build/unmemoized/src/generated",
+    "annotate": "npm run compile --prefix ../../ui2abc/annotate && node ../../ui2abc/annotate",
+    "annotate-m3": "npm run annotate -- annotate-m3.json",
+    "build:arkui-no-common:inc:ui2abc": "npm run annotate && fast-arktsc --config ./ui2abcconfig.json --compiler ../../incremental/tools/panda/arkts/ui2abc --link-name ./build-m3/arkui-no-common.abc --restart-stages && ninja ${NINJA_OPTIONS} -f build-m3/build.ninja -k 1200",
+    "build:arkui-no-common:inc:ui2abc:recheck": "npm run annotate && fast-arktsc --config ./ui2abcconfig-recheck.json --compiler ../../incremental/tools/panda/arkts/ui2abc --link-name ./build-m3/arkui-no-common.abc && ninja ${NINJA_OPTIONS} -f build-m3-recheck/build.ninja -k 1200",
+    "build:m3:inc:ui2abc": "node ../../ui2abc/fast-arktsc --config ./ui2abcconfig-m3.json --compiler ../../incremental/tools/panda/arkts/ui2abc --link-name ./build-m3-impl/arkui-m3.abc --restart-stages && ninja ${NINJA_OPTIONS} -f build-m3-impl/build.ninja -k 1200 && mkdir -p ../build && cp ./build-m3-impl/arkui-m3.abc ../build/arkui.abc",
+    "build:sdk-m3:inc:ui2abc": "node ../../ui2abc/fast-arktsc --config ./ui2abcconfig-sdk-m3.json --compiler ../../incremental/tools/panda/arkts/ui2abc --link-name ./build-m3-sdk/arkui-sdk.abc --restart-stages && ninja ${NINJA_OPTIONS} -f build-m3-sdk/build.ninja -k 1200",
+    "build:sdk-m3:inc:ui2abc:recheck": "node ../../ui2abc/fast-arktsc --config ./ui2abcconfig-sdk-m3-recheck.json --compiler ../../incremental/tools/panda/arkts/ui2abc --link-name ./build-m3-sdk/recheck/arkui-sdk.abc && ninja ${NINJA_OPTIONS} -f build-m3-sdk/recheck/build.ninja -k 1200"
+  }
+}

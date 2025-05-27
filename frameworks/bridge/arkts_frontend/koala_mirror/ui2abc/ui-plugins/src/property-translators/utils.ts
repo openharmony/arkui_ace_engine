@@ -37,6 +37,11 @@ export enum DecoratorNames {
     LOCAL_STORAGE_LINK = "LocalStorageLink",
 }
 
+export enum DecoratorParameters {
+    USE_SHARED_STORAGE = "useSharedStorage",
+    ALLOW_OVERRIDE = "allowOverride",
+}
+
 export function isDecoratorAnnotation(anno: arkts.AnnotationUsage, decoratorName: DecoratorNames): boolean {
     return !!anno.expr && arkts.isIdentifier(anno.expr) && anno.expr.name === decoratorName;
 }

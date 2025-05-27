@@ -133,7 +133,6 @@ export function findNativeModule(): string {
     const candidates = [
         path.resolve(__dirname, "../native/build/es2panda.node"),
         path.resolve(__dirname, "../build/native/build/es2panda.node"),
-        path.resolve(__dirname, "../out/native/es2panda.node") // use from gn
     ]
     let result = undefined
     candidates.forEach(path => {

@@ -15,6 +15,7 @@
 import nodeResolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import commonjs from '@rollup/plugin-commonjs'
+import terser from "@rollup/plugin-terser"
 
 export default [
     buildPlugin({
@@ -25,22 +26,29 @@ export default [
         src: "./src/checked-stage-plugin.ts",
         dst: "./lib/checked-stage-plugin.js",
     }),
+    buildPlugin({
+        src: "./src/entry.ts",
+        dst: "./lib/entry.js",
+        minimize: true,
+    }),
 ]
 
 /** @return {import("rollup").RollupOptions} */
-function buildPlugin({ src, dst }) {
+function buildPlugin({ src, dst, minimize = false }) {
     return {
         input: src,
         output: {
             file: dst,
             format: "commonjs",
             plugins: [
-                // terser()
+                minimize && terser({
+                    format: {
+                        max_line_len: 800
+                    }
+                }),
+                replaceLibarktsImport(),
             ],
-            banner: [
-                "#!/usr/bin/env node",
-                APACHE_LICENSE_HEADER()
-            ].join("\n"),
+            banner: APACHE_LICENSE_HEADER(),
         },
         external: ["@koalaui/libarkts"],
         plugins: [
@@ -79,4 +87,19 @@ function APACHE_LICENSE_HEADER() {
 */
 
 `
+}
+
+/** @returns {import("rollup").OutputPlugin} */
+function replaceLibarktsImport() {
+    const REQUIRE_PATTERN = `require("@koalaui/libarkts")`
+    return {
+        name: "replace-librkts-import",
+        generateBundle(options, bundle) {
+            for (const [fileName, asset] of Object.entries(bundle)) {
+                if (!asset.code) continue
+                if (fileName !== "entry.js") continue
+                asset.code = asset.code.replace(REQUIRE_PATTERN, `require(process.env.KOALA_WRAPPER_PATH ?? "@koalaui/libarkts")`)
+            }
+        }
+    }
 }

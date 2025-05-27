@@ -24,12 +24,18 @@ export interface TransformerOptions {
 export default function memoParserTransformer(
     userPluginOptions?: TransformerOptions
 ) {
-    return (program: arkts.Program, options: arkts.CompilationOptions) => {
-        if (userPluginOptions?.contextImport) {
+    return (program: arkts.Program, options: arkts.CompilationOptions, context: arkts.PluginContext) => {
+        if (userPluginOptions?.contextImport && options) {
             /* Some files should not be processed by plugin actually */
             if (options.name.startsWith('@koalaui/common') || options.name.startsWith('@koalaui/compat')) return
             if (options.name.startsWith('@koalaui/runtime.internals') || options.name.startsWith('@koalaui/runtime/annotations')) return
         }
-        factory.createContextTypesImportDeclaration(program, userPluginOptions?.stableForTests ?? false, userPluginOptions?.contextImport)
+        return arkts.updateETSModuleByStatements(
+            program.astNode,
+            [
+                factory.createContextTypesImportDeclaration(userPluginOptions?.stableForTests ?? false, userPluginOptions?.contextImport),
+                ...program.astNode.statements,
+            ]
+        )
     }
 }

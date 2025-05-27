@@ -22,7 +22,22 @@ export interface CompilationOptions {
     readonly stage: Es2pandaContextState,
 }
 
-export type ProgramTransformer = (program: Program, compilationOptions: CompilationOptions) => void
+export interface PluginContext {
+    setParameter<V>(name: string, value: V): void
+    parameter<V>(name: string) : V | undefined
+
+}
+export class PluginContextImpl implements PluginContext {
+    map = new Map<String, Object|undefined>()
+    parameter<V>(name: string): V|undefined {
+        return this.map.get(name) as (V|undefined)
+    }
+    setParameter<V>(name: string, value: V) {
+        this.map.set(name, value as Object)
+    }
+}
+
+export type ProgramTransformer = (program: Program, compilationOptions: CompilationOptions, context: PluginContext) => void
 
 export function defaultFilter(name: string) {
     if (name.startsWith("std.")) return false

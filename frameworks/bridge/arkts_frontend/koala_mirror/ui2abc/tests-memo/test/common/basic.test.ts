@@ -834,7 +834,7 @@ suite("Basic memo semantic", () => {
         )
     })
 
-    test.expectFailure("Return type of functional type in lambda", () => {
+    test.expectFailure("Description of the problem", "Return type of functional type in lambda", () => {
         Assert.fail('implement me')
     })
 
@@ -957,7 +957,7 @@ suite("Auto-deducing memo annotation", () => {
             "deduced variable call"
         )
     })
-    test.expectFailure("memo is assumed when pasing a TRAILING lambda argument to a memo parameter", () => {
+    test.expectFailure("Description of the problem", "memo is assumed when pasing a TRAILING lambda argument to a memo parameter", () => {
         Assert.fail("implement me")
     })
 })
@@ -1157,10 +1157,10 @@ suite("Tracking parameters", () => {
             `methodWithSkipParam: 50 call`,
         )
     })
-    test.expectFailure("Parameters (same as states) are compared as ===", () => {
+    test.expectFailure("Description of the problem", "Parameters (same as states) are compared as ===", () => {
         Assert.fail("implement me")
     })
-    test.expectFailure("By convention a lambda parameter with name `content` is not tracked", () => {
+    test.expectFailure("Description of the problem", "By convention a lambda parameter with name `content` is not tracked", () => {
         // This is to be addressed later when the compiler provides ability to compare
         // lambdas by code, not by closure object equality.
 
@@ -1366,7 +1366,7 @@ suite("Method receivers", () => {
         )
     })
 
-    test.expectFailure("lambda with receiver (ArkTS)", () => {
+    test.expectFailure("Description of the problem", "lambda with receiver (ArkTS)", () => {
         Assert.fail('implement me')
     })
 })

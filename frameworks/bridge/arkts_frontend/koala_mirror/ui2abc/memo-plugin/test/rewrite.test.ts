@@ -40,7 +40,7 @@ function testBody(path: string) {
 
 suite("golden tests", () => {
 
-    test.expectFailure("compile", () => {
+    test.expectFailure("Description of the problem", "compile", () => {
         child_process.execSync("rm -rf ../build/golden", { stdio: "inherit" })
         child_process.execSync("rm -rf out", { stdio: "inherit" })
         child_process.execSync("npx fast-arktsc --config ./input/arktsconfig.json --compiler ../../../incremental/tools/panda/arkts/ui2abc --link-name ../build/golden/all.abc && ninja -f ../build/golden/build.ninja -k 1000", { stdio: "inherit" })

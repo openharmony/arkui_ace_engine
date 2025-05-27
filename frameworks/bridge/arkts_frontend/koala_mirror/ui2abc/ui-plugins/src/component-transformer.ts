@@ -22,7 +22,7 @@ import {
 } from "./utils";
 import { BuilderParamTransformer, ConsumeTransformer, LinkTransformer, LocalStorageLinkTransformer, LocalStoragePropTransformer, ObjectLinkTransformer, PropertyTransformer, PropTransformer, ProvideTransformer, StateTransformer, StorageLinkTransformer, StoragePropTransformer, PlainPropertyTransformer, fieldOf, isOptionBackedByProperty, isOptionBackedByPropertyName } from "./property-transformers";
 import { annotation, backingField, isAnnotation } from "./common/arkts-utils";
-import { DecoratorNames, hasDecorator } from "./property-translators/utils";
+import { DecoratorNames, DecoratorParameters, hasDecorator } from "./property-translators/utils";
 import {
     factory
 } from "./ui-factory"
@@ -43,118 +43,12 @@ function computeOptionsName(clazz: arkts.ClassDeclaration): string {
         getCustomComponentOptionsName(clazz.definition?.ident?.name!)
 }
 
-
-class StructCallRewriter extends arkts.AbstractVisitor {
-    constructor(private structTable: StructTable) {
-        super()
-    }
-
-    currentStructRewritten: arkts.ETSStructDeclaration | undefined = undefined
-    currentStructCalled: StructDescriptor | undefined = undefined
-
-    visitor(node: arkts.AstNode, options?: object): arkts.AstNode {
-        if (arkts.isCallExpression(node) && arkts.isIdentifier(node.callee)) {
-            const struct = this.structTable.findStruct(node.callee as arkts.Identifier)
-            let result: arkts.AstNode
-            if (struct) {
-                this.currentStructCalled = struct
-                result = this.visitEachChild(node)
-                this.currentStructCalled = undefined
-            } else {
-                result = this.visitEachChild(node)
-            }
-            return result
-        }
-        if (this.currentStructCalled != undefined && arkts.isObjectExpression(node)) {
-            // Iterate over all statements to properly use fields getters
-            let casted = arkts.factory.createTSAsExpression(
-                this.createObjectLiteralRewrite(node),
-                arkts.factory.createTSTypeReference(arkts.factory.createIdentifier(
-                    getCustomComponentOptionsName(this.currentStructCalled.name))),
-                false
-            )
-            return casted
-        }
-        return this.visitEachChild(node)
-    }
-
-    private createObjectLiteralRewrite(expression: arkts.ObjectExpression): arkts.ObjectExpression {
-        return arkts.factory.createObjectExpression(
-            arkts.Es2pandaAstNodeType.AST_NODE_TYPE_OBJECT_EXPRESSION,
-            expression.properties.map(value => {
-                if (arkts.isProperty(value) && arkts.isMemberExpression(value.value)) {
-                    return arkts.factory.createProperty(
-                        arkts.Es2pandaPropertyKind.PROPERTY_KIND_INIT,
-                        value.key,
-                        this.createMemberRewrite(value.key as arkts.Identifier, value.value), false, false
-                    )
-                } else if (arkts.isProperty(value) && arkts.isIdentifier(value.value)) {
-                    return arkts.factory.createProperty(
-                        arkts.Es2pandaPropertyKind.PROPERTY_KIND_INIT,
-                        value.key,
-                        this.createDollarRewrite(value.key as arkts.Identifier, value.value), false, false
-                    )
-                } else if (arkts.isProperty(value) && arkts.isArrowFunctionExpression(value.value)) {
-                    return arkts.factory.createProperty(
-                        arkts.Es2pandaPropertyKind.PROPERTY_KIND_INIT,
-                        value.key,
-                        this.updateArrowFunctionExpression(value.key as arkts.Identifier, value.value), false, false
-                    )
-                } else {
-                    return value
-                }
-            }), false
-        )
-    }
-
-    private createMemberRewrite(targetPropertyNameId: arkts.Identifier, original: arkts.MemberExpression): arkts.MemberExpression {
-        if (!this.currentStructRewritten) return original
-        if (arkts.isThisExpression(original.object) && arkts.isIdentifier(original.property)) {
-            let thisPropertyName = original.property.name
-            let targetPropertyName = targetPropertyNameId.name
-            // Use backing field instead of property value, if using property.
-            let decorators = this.currentStructCalled?.decoratorsFor(targetPropertyName)
-            if (decorators?.find(it => isOptionBackedByPropertyName(it))) {
-                return fieldOf(arkts.factory.createThisExpression(), backingField(thisPropertyName))
-            }
-        }
-        return original
-    }
-
-    private createDollarRewrite(targetPropertyNameId: arkts.Identifier, original: arkts.Identifier): arkts.MemberExpression | arkts.Identifier {
-        if (!this.currentStructRewritten) return original
-        if (original.name.startsWith('$')) {
-            let targetPropertyName = targetPropertyNameId.name
-            let thisPropertyName = original.name.substring(1)
-            // Use backing field instead of property value, if using property.
-            let decorators = this.currentStructCalled?.decoratorsFor(targetPropertyName)
-            if (decorators?.find(it => isOptionBackedByPropertyName(it))) {
-                return fieldOf(arkts.factory.createThisExpression(), backingField(thisPropertyName))
-            }
-        }
-        return original
-    }
-
-    private updateArrowFunctionExpression(targetPropertyNameId: arkts.Identifier, original: arkts.ArrowFunctionExpression): arkts.ArrowFunctionExpression {
-        if (!this.currentStructRewritten) return original
-        let targetPropertyName = targetPropertyNameId.name
-        // Add @memo annotation if using @BuildParam decorated property
-        let decorators = this.currentStructCalled?.decoratorsFor(targetPropertyName)
-        if (decorators?.find(it => it == DecoratorNames.BUILDER_PARAM)) {
-            original.setAnnotations([annotation(InternalAnnotations.MEMO)])
-        }
-        return original
-    }
-}
-
 export class ComponentTransformer extends arkts.AbstractVisitor {
     private arkuiImport?: string
-    private callRewriter: StructCallRewriter
 
-    constructor(private imports: Importer, private structTable: StructTable, options?: ComponentTransformerOptions) {
+    constructor(private imports: Importer, options?: ComponentTransformerOptions) {
         super()
         this.arkuiImport = options?.arkui
-        this.callRewriter = new StructCallRewriter(structTable)
     }
 
     private transformStatements(statements: readonly arkts.Statement[]): arkts.Statement[] {
@@ -168,23 +62,11 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
         statements.forEach(statement => {
             if (arkts.isETSStructDeclaration(statement)) {
                 this.rewriteStruct(statement, result)
-            } else if (arkts.isETSImportDeclaration(statement)) {
-                this.rewriteImport(statement)
-                result.push(statement)
             } else {
                 result.push(statement)
             }
         })
         return result
-    }
-
-    private rewriteImport(statement: arkts.ETSImportDeclaration) {
-        statement.specifiers.forEach(it => {
-            const name = (it as arkts.ImportSpecifier).imported
-            if (name && this.structTable.findStruct(name)) {
-                this.imports.add(getCustomComponentOptionsName(name.name), statement.source?.str!)
-            }
-        })
     }
 
     private rewriteModule(node: arkts.ETSModule): arkts.ETSModule {
@@ -209,56 +91,54 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
 
     private rewriteOptionsBody(node: arkts.ETSStructDeclaration): arkts.Statement[] {
         let result: arkts.Statement[] = []
-        node.definition?.body.forEach(node => {
-            if (arkts.isClassProperty(node)) {
-                let transformer = this.propertyTransformers.find(it => it.check(node))
-                if (transformer == undefined) throw new Error(`Cannot find transformer for property ${node.id?.name}`)
-                transformer.applyOptions(node, result)
-            }
+        forEachProperty(node, property => {
+            this.getPropertyTransformer(property).applyOptions(property, result)
         })
         return result
     }
 
-    private rewriteStructToClass(node: arkts.ETSStructDeclaration): arkts.ClassDefinition {
-        return arkts.factory.createClassDefinition(
-            arkts.factory.createIdentifier(node.definition!.ident!.name),
-            undefined,
-            undefined,
-            node.definition?.implements ?? [],
-            undefined,
-            arkts.factory.createETSTypeReference(
-                arkts.factory.createETSTypeReferencePart(
-                    arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_CLASS_NAME, undefined),
-                    arkts.factory.createTSTypeParameterInstantiation(
-                        [
-                            arkts.factory.createETSTypeReference(
-                                arkts.factory.createETSTypeReferencePart(
-                                    arkts.factory.createIdentifier(node.definition!.ident!.name),
-                                    undefined, undefined
-                                )
-                            ),
-                            arkts.factory.createETSTypeReference(
-                                arkts.factory.createETSTypeReferencePart(
-                                    this.optionsName(node.definition!),
-                                    undefined, undefined
-                                )
-                            ),
-                        ]
-                    ), undefined
-                )
+    private rewriteStructToClass(node: arkts.ETSStructDeclaration): arkts.ClassDeclaration {
+        return arkts.factory.createClassDeclaration(
+            arkts.factory.createClassDefinition(
+                arkts.factory.createIdentifier(node.definition!.ident!.name),
+                undefined,
+                undefined,
+                node.definition?.implements ?? [],
+                undefined,
+                arkts.factory.createETSTypeReference(
+                    arkts.factory.createETSTypeReferencePart(
+                        arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_CLASS_NAME, undefined),
+                        arkts.factory.createTSTypeParameterInstantiation(
+                            [
+                                arkts.factory.createETSTypeReference(
+                                    arkts.factory.createETSTypeReferencePart(
+                                        arkts.factory.createIdentifier(node.definition!.ident!.name),
+                                        undefined, undefined
+                                    )
+                                ),
+                                arkts.factory.createETSTypeReference(
+                                    arkts.factory.createETSTypeReferencePart(
+                                        this.optionsName(node.definition!),
+                                        undefined, undefined
+                                    )
+                                ),
+                            ]
+                        ), undefined
+                    )
+                ),
+                this.rewriteStructMembers(node, (node.definition?.body as arkts.ClassElement[]) ?? []),
+                arkts.Es2pandaClassDefinitionModifiers.CLASS_DEFINITION_MODIFIERS_CLASS_DECL,
+                arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_FINAL
             ),
-            this.rewriteStructMembers(node, (node.definition?.body as arkts.ClassElement[]) ?? []),
-            arkts.Es2pandaClassDefinitionModifiers.CLASS_DEFINITION_MODIFIERS_CLASS_DECL,
-            arkts.classDefinitionFlags(node.definition!) | arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_FINAL | arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_EXPORT)
+            arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_EXPORT,
+        )
     }
 
     private rewriteStructMembers(clazz: arkts.ClassDeclaration, body: readonly arkts.ClassElement[]): arkts.ClassElement[] {
         let result: arkts.ClassElement[] = []
         body.forEach(node => {
             if (arkts.isClassProperty(node)) {
-                let transformer = this.propertyTransformers.find(it => it.check(node))
-                if (transformer == undefined) throw new Error(`Cannot find transformer for property ${node.id?.name}`)
-                transformer.applyStruct(clazz, node, result, this.pageLocalStorage)
+                this.getPropertyTransformer(node).applyStruct(clazz, node, result)
             } else if (arkts.isMethodDefinition(node)) {
                 let method = node as arkts.MethodDefinition
                 if (method.function?.id?.name == CustomComponentNames.COMPONENT_BUILD_ORI) {
@@ -272,56 +152,38 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
                 throw new Error(`How to rewrite ${node}?`)
             }
         })
-        result.push(this.createInitializer(clazz))
+        this.addInitializeStruct(clazz, result)
+        this.addDisposeStruct(clazz, result)
         return result
     }
 
-    private createInitializerBody(clazz: arkts.ClassDeclaration): arkts.Statement {
-        let result: arkts.Statement[] = []
-        clazz.definition?.body.forEach(node => {
-            if (arkts.isClassProperty(node)) {
-                let transformer = this.propertyTransformers.find(it => it.check(node))
-                if (transformer == undefined) throw new Error(`Cannot find transformer for property ${node.id?.name}`)
-                transformer.applyInitialization(node, result)
-            }
+    private addInitializeStruct(clazz: arkts.ClassDeclaration, classBody: arkts.AstNode[]) {
+        const statements: arkts.Statement[] = []
+        forEachProperty(clazz, property => {
+            this.getPropertyTransformer(property).applyInitializeStruct(this.pageLocalStorage, property, statements)
         })
-        return arkts.factory.createBlockStatement(result)
-    }
-
-    private createInitializer(clazz: arkts.ClassDeclaration): arkts.MethodDefinition {
-        let methodName = arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_INITIALIZE_STRUCT)
-        const newFunction = arkts.factory.createScriptFunction(
-            this.createInitializerBody(clazz),
-            undefined,
-            [
+        if (statements.length > 0) {
+            classBody.push(createVoidMethod(CustomComponentNames.COMPONENT_INITIALIZE_STRUCT, [
                 factory.createInitializersOptionsParameter(computeOptionsName(clazz)),
                 factory.createContentParameter(),
-            ],
-            arkts.factory.createETSPrimitiveType(arkts.Es2pandaPrimitiveType.PRIMITIVE_TYPE_VOID),
-            false,
-            arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_METHOD,
-            arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PROTECTED,
-            methodName,
-            []
-        )
-        return arkts.factory.createMethodDefinition(
-            arkts.Es2pandaMethodDefinitionKind.METHOD_DEFINITION_KIND_METHOD,
-            methodName,
-            arkts.factory.createFunctionExpression(methodName, newFunction),
-            arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PROTECTED,
-            false
-        )
+            ], statements))
+        }
+    }
+
+    private addDisposeStruct(clazz: arkts.ClassDeclaration, classBody: arkts.AstNode[]) {
+        const statements: arkts.Statement[] = []
+        forEachProperty(clazz, property => {
+            this.getPropertyTransformer(property).applyDisposeStruct(property, statements)
+        })
+        if (statements.length > 0) {
+            classBody.push(createVoidMethod(CustomComponentNames.COMPONENT_DISPOSE_STRUCT, [], statements))
+        }
     }
 
     private rewriteBuildBody(clazz: arkts.ClassDeclaration, oldBody: arkts.BlockStatement): arkts.BlockStatement {
         let result: arkts.Statement[] = []
-        clazz.definition!.body.forEach(node => {
-            if (arkts.isClassProperty(node)) {
-                let transformer = this.propertyTransformers.find(it => it.check(node))
-                if (transformer == undefined)
-                    throw new Error(`Cannot find transformer for property ${node.id?.name}`)
-                transformer.applyBuild(node, result)
-            }
+        forEachProperty(clazz, property => {
+            this.getPropertyTransformer(property).applyBuild(property, result)
         })
         oldBody.statements.forEach((it) => {
             result.push(it)
@@ -380,7 +242,7 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
 
         // shared
         const useSharedStorage = !!properties.find(property => {
-            return property.id?.name === "useSharedStorage" && arkts.isBooleanLiteral(property.value) && property.value.value
+            return property.id?.name === DecoratorParameters.USE_SHARED_STORAGE && arkts.isBooleanLiteral(property.value) && property.value.value
         })
         if (useSharedStorage) {
             return arkts.factory.createCallExpression(
@@ -430,11 +292,15 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
         new BuilderParamTransformer(),
     ]
 
+    getPropertyTransformer(property: arkts.ClassProperty): PropertyTransformer {
+        const transformer = this.propertyTransformers.find(it => it.check(property))
+        if (transformer) return transformer
+        throw new Error(`Cannot find transformer for property ${property.id?.name}`)
+    }
+
     private rewriteStruct(node: arkts.ETSStructDeclaration, result: arkts.Statement[]) {
-        this.callRewriter.currentStructRewritten = node
-        result.push(this.callRewriter.visitor(arkts.factory.createClassDeclaration(this.rewriteStructToClass(node))))
+        result.push(this.rewriteStructToClass(node))
         result.push(this.rewriteStructToOptions(node))
-        this.callRewriter.currentStructRewritten = undefined
     }
 
     visitor(node: arkts.AstNode): arkts.AstNode {
@@ -443,4 +309,33 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
         }
         throw new Error(`Must not be there`)
     }
+}
+
+function forEachProperty(clazz: arkts.ClassDeclaration, callback: (property: arkts.ClassProperty) => void) {
+    clazz.definition?.body.forEach(node => {
+        if (arkts.isClassProperty(node)) callback(node)
+    })
+}
+
+function createVoidMethod(methodName: string, parameters: readonly arkts.Expression[], statements: readonly arkts.Statement[]): arkts.MethodDefinition {
+    return arkts.factory.createMethodDefinition(
+        arkts.Es2pandaMethodDefinitionKind.METHOD_DEFINITION_KIND_METHOD,
+        arkts.factory.createIdentifier(methodName),
+        arkts.factory.createFunctionExpression(
+            arkts.factory.createIdentifier(methodName),
+            arkts.factory.createScriptFunction(
+                arkts.factory.createBlockStatement(statements),
+                undefined,
+                parameters,
+                arkts.factory.createETSPrimitiveType(arkts.Es2pandaPrimitiveType.PRIMITIVE_TYPE_VOID),
+                false,
+                arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_METHOD,
+                arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PROTECTED,
+                arkts.factory.createIdentifier(methodName),
+                []
+            )
+        ),
+        arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PROTECTED,
+        false
+    )
 }

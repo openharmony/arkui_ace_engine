@@ -36,7 +36,7 @@ export interface TransformerOptions {
 export default function memoTransformer(
     userPluginOptions?: TransformerOptions
 ) {
-    return (program: arkts.Program) => {
+    return (program: arkts.Program, options: arkts.CompilationOptions, context: arkts.PluginContext) => {
         const scriptFunctions = new Map<arkts.KNativePointer, MemoFunctionKind>()
         const ETSFunctionTypes = new Map<arkts.KNativePointer, MemoFunctionKind>()
         const analysisVisitor = new AnalysisVisitor(scriptFunctions, ETSFunctionTypes)
@@ -64,7 +64,13 @@ export default function memoTransformer(
         let result = functionTransformer.visitor(node)
         if (userPluginOptions?.manuallyDisableInsertingImport != true) {
             if ((functionTransformer.modified || signatureTransformer.modified)) {
-                factory.createContextTypesImportDeclaration(program, userPluginOptions?.stableForTests ?? false, userPluginOptions?.contextImport)
+                result = arkts.updateETSModuleByStatements(
+                    result,
+                    [
+                        factory.createContextTypesImportDeclaration(userPluginOptions?.stableForTests ?? false, userPluginOptions?.contextImport),
+                        ...result.statements
+                    ]
+                )
             }
         }
         if (userPluginOptions?.keepTransformed) {

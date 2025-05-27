@@ -15,12 +15,12 @@
 
 import * as fs from "node:fs"
 import * as path from "node:path"
-import { arktsGlobal as global } from "@koalaui/libarkts"
-import { CheckedBackFilter } from "@koalaui/libarkts"
+import { arktsGlobal as global, ImportStorage } from "@koalaui/libarkts"
+import { CheckedBackFilter, ChainExpressionFilter, PluginContext, PluginContextImpl } from "@koalaui/libarkts"
 import { Command } from "commander"
 import { filterSource, isNumber, throwError, withWarning } from "@koalaui/libarkts"
 import { Es2pandaContextState } from "@koalaui/libarkts"
-import { AstNode, CompilationOptions, Config, Context, createETSModuleFromContext, listPrograms, proceedToState, ProgramTransformer, rebindSubtree, recheckSubtree, setBaseOverloads } from "@koalaui/libarkts"
+import { AstNode, Config, Context, createETSModuleFromContext, listPrograms, proceedToState, ProgramTransformer, rebindSubtree, recheckSubtree, setBaseOverloads } from "@koalaui/libarkts"
 
 function parseCommandLineArgs() {
     const commander = new Command()
@@ -62,7 +62,9 @@ function insertPlugin(
     transform: ProgramTransformer,
     state: Es2pandaContextState,
     dumpAst: boolean, restart: boolean,
-    updateWith?: (node: AstNode) => void): AstNode {
+    context: PluginContext,
+    updateWith?: (node: AstNode) => void
+): AstNode {
     proceedToState(state)
     const script = createETSModuleFromContext()
     // Or this: const script = createETSModuleFromSource(source)
@@ -84,13 +86,21 @@ function insertPlugin(
                 return
             }
             const ast = program.program.astNode
-            transform?.(program.program, { isMainProgram: false, name: program.name, stage: state })
+            const importStorage = new ImportStorage(program.program, state == Es2pandaContextState.ES2PANDA_STATE_PARSED)
+
+            transform?.(program.program, { isMainProgram: false, name: program.name, stage: state }, context)
+
             setBaseOverloads(ast)
+            if (!restart) {
+                importStorage.update()
+            }
             setAllParents(ast)
         })
     }
 
-    transform?.(global.compilerContext.program, { isMainProgram: true, name: `${global.packageName}.${global.filePathFromPackageRoot}`, stage: state })
+    const importStorage = new ImportStorage(global.compilerContext.program, state == Es2pandaContextState.ES2PANDA_STATE_PARSED)
+
+    transform?.(global.compilerContext.program, { isMainProgram: true, name: `${global.packageName}.${global.filePathFromPackageRoot}`, stage: state }, context)
 
     const afterTransform = Date.now()
     global.profiler.transformTime += afterTransform - beforeTransform
@@ -104,7 +114,11 @@ function insertPlugin(
         }
     }
 
+    if (!restart) stageSpecificFilters(script, state)
     setBaseOverloads(script)
+    if (!restart) {
+        importStorage.update()
+    }
     setAllParents(script)
 
     if (!restart) {
@@ -113,6 +127,12 @@ function insertPlugin(
         console.log("DONE!")
     }
     return script
+}
+
+function stageSpecificFilters(script: AstNode, state: Es2pandaContextState) {
+    if (state == Es2pandaContextState.ES2PANDA_STATE_CHECKED) {
+        new ChainExpressionFilter().visitor(script)
+    }
 }
 
 function restartCompiler(source: string, configPath: string, filePath: string, stdlib: string, outputPath: string, verbose: boolean = true) {
@@ -186,7 +206,7 @@ function invokeWithPlugins(
     fs.mkdirSync(path.dirname(outputPath), {recursive: true})
     global.compilerContext = Context.createFromString(source)
 
-    console.log("PLUGINS: ", pluginsByState.size, pluginsByState)
+    // console.log("PLUGINS: ", pluginsByState.size, pluginsByState)
 
     pluginNames.push(`_proceed_to_binary`)
     let pluginsApplied = 0
@@ -211,18 +231,20 @@ function invokeWithPlugins(
         }
     }
 
+    const context = new PluginContextImpl()
+
     pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_PARSED)?.forEach(plugin => {
-        insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_PARSED, dumpAst, restart)
+        insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_PARSED, dumpAst, restart, context)
         restartProcedure()
     })
 
     pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_BOUND)?.forEach(plugin => {
-        insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_BOUND, dumpAst, restart, rebindSubtree)
+        insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_BOUND, dumpAst, restart, context, rebindSubtree)
         restartProcedure()
     })
 
     pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_CHECKED)?.forEach(plugin => {
-        insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_CHECKED, dumpAst, restart, recheckSubtree)
+        insertPlugin(source, plugin, Es2pandaContextState.ES2PANDA_STATE_CHECKED, dumpAst, restart, context, recheckSubtree)
         restartProcedure()
     })
     proceedToState(Es2pandaContextState.ES2PANDA_STATE_BIN_GENERATED)
@@ -289,8 +311,29 @@ function readAndSortPlugins(configDir: string, plugins: any[]) {
     return pluginsByState
 }
 
+
+function checkSDK() {
+    const panda = process.env.PANDA_SDK_PATH
+    if (!panda)
+        reportErrorAndExit(`Variable PANDA_SDK_PATH is not set, please fix`)
+    if (!fs.existsSync(path.join(panda, 'package.json')))
+        reportErrorAndExit(`Variable PANDA_SDK_PATH not points to SDK`)
+    const packageJson = JSON.parse(fs.readFileSync(path.join(panda, 'package.json')).toString())
+    const version = packageJson.version as string
+    if (!version)
+        reportErrorAndExit(`version is unknown`)
+    const packageJsonOur = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json')).toString())
+    const expectedVersion = packageJsonOur.config.panda_sdk_version
+    if (expectedVersion && expectedVersion != "next" && version != expectedVersion)
+        console.log(`WARNING: Panda SDK version "${version}" doesn't match expected "${expectedVersion}"`)
+    else
+        console.log(`Use Panda ${version}`)
+}
+
+
 export function main() {
     const before = Date.now()
+    checkSDK()
     const { filePath, configPath, outputPath, dumpAst, restartStages, stage } = parseCommandLineArgs()
     const arktsconfig = JSON.parse(fs.readFileSync(configPath).toString())
     const configDir = path.dirname(configPath)

@@ -14,7 +14,6 @@
  */
 
 import * as arkts from "@koalaui/libarkts"
-import { DecoratorNames, hasDecorator } from "./property-translators/utils"
 
 export const styledInstance = mangle("instance")
 
@@ -28,6 +27,7 @@ export enum CustomComponentNames {
     COMPONENT_DEFAULT_IMPORT = '@ohos.arkui',
     COMPONENT_CLASS_NAME = 'StructBase',
     COMPONENT_INTERFACE_PREFIX = '__Options_',
+    COMPONENT_DISPOSE_STRUCT = '__disposeStruct',
     COMPONENT_INITIALIZE_STRUCT = '__initializeStruct',
     COMPONENT_UPDATE_STRUCT = '__updateStruct',
     COMPONENT_BUILD = '_build',
@@ -115,9 +115,9 @@ export function createStageManagementType(stageManagementIdent: string, property
     );
 }
 
-export function makeImport(program: arkts.Program, what: string, asWhat: string, where: string) {
+export function makeImport(what: string, asWhat: string, where: string) {
     const source: arkts.StringLiteral = arkts.factory.createStringLiteral(where)
-    arkts.factory.createETSImportDeclaration(
+    return arkts.factory.createETSImportDeclaration(
         source,
         [
             arkts.factory.createImportSpecifier(
@@ -125,17 +125,16 @@ export function makeImport(program: arkts.Program, what: string, asWhat: string,
                 arkts.factory.createIdentifier(asWhat)
             )
         ],
-        arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL,
-        program,
-        arkts.Es2pandaImportFlags.IMPORT_FLAGS_NONE
+        arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL
     )
 }
 
 export class Importer {
     storage = new Map<string, [string, string]>()
     private defaultArkUIImports = [
-        'Color', 'Button', 'ButtonOptions', 'ClickEvent', 'FlexAlign',
-        'Image', 'ListOptions', 'Scroller', 'SwiperController',
+        'Color',
+        'ClickEvent', 'FlexAlign',
+        'Image', 'Button', 'List',
         'PageTransitionEnter', 'PageTransitionExit', 'PageTransitionOptions',
         'Column', 'ColumnOptions', 'Row', 'RowOptions',
         'FlexOptions', 'TabsOptions', 'StackOptions', 'ToggleOptions', 'TextInputOptions',
@@ -146,11 +145,11 @@ export class Importer {
         'IDataSource', 'DataChangeListener', 'ItemAlign', 'ImageFit', 'FlexDirection',
         'FontWeight', 'Counter', 'Toggle', 'ToggleType', 'BarMode', 'TextAlign', 'VerticalAlign',
         'TextOverflow', 'BarState', 'NavPathInfo', 'Stack', 'Swiper',
-        'List', 'ListItem', 'Grid', 'GridItem', 'Navigator', 'Position', 'Axis',
+        'ListItem', 'Grid', 'GridItem', 'Navigator', 'Position', 'Axis',
         'TextInput', 'Font', 'Alignment', 'Visibility', 'ImageRepeat', 'SizeOptions', 'Divider',
         'TabBarOptions', 'Navigation', 'Span', 'NavigationMode', 'BarPosition', 'EnterKeyType',
         'LazyForEach',
-        'TestComponent', 'TestComponentOptions', 'ForEach', 'Text', 'AppStorage', 'LocalStorage',
+        'TestComponent', 'TestComponentOptions', 'UITestComponentAttribute', 'ForEach', 'Text', 'AppStorage', 'LocalStorage',
         'SubscribedAbstractProperty',
     ]
     constructor() {
@@ -169,10 +168,12 @@ export class Importer {
             throw new Error(`Mismatching import ${what} from ${where}`)
         this.storage.set(what, [where, asWhat])
     }
-    emit(program: arkts.Program): void {
+    emit(statements: readonly arkts.Statement[]): arkts.Statement[] {
+        const newStatements = [...statements]
         this.storage.forEach(([where, asWhat], what) => {
-            makeImport(program, what, asWhat, where)
+            newStatements.unshift(makeImport(what, asWhat, where))
         })
+        return newStatements
     }
 }
 

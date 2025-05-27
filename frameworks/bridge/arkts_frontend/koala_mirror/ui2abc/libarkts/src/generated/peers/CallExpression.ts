@@ -85,6 +85,14 @@ export class CallExpression extends MaybeOptionalExpression {
     get isTrailingBlockInNewLine(): boolean {
         return global.generatedEs2panda._CallExpressionIsTrailingBlockInNewLineConst(global.context, this.peer)
     }
+    /** @deprecated */
+    setIsTrailingCall(isTrailingCall: boolean): this {
+        global.generatedEs2panda._CallExpressionSetIsTrailingCall(global.context, this.peer, isTrailingCall)
+        return this
+    }
+    get isTrailingCall(): boolean {
+        return global.generatedEs2panda._CallExpressionIsTrailingCallConst(global.context, this.peer)
+    }
     get isETSConstructorCall(): boolean {
         return global.generatedEs2panda._CallExpressionIsETSConstructorCallConst(global.context, this.peer)
     }

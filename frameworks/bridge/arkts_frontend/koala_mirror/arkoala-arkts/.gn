@@ -1,0 +1,4 @@
+buildconfig = "//gn/build/config/BUILDCONFIG.gn"
+
+root = "//:root"
+

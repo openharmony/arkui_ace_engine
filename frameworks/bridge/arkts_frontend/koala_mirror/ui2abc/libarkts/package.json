@@ -1,6 +1,6 @@
 {
     "name": "@koalaui/libarkts",
-    "version": "1.7.1+devel",
+    "version": "1.7.3+devel",
     "bin": "./lib/es2panda",
     "types": "./build/index.d.ts",
     "exports": {
@@ -20,10 +20,10 @@
     },
     "dependencies": {
         "@koalaui/ets-tsc": "4.9.5-r5",
-        "@koalaui/build-common": "1.7.1+devel",
-        "@koalaui/compat": "1.7.1+devel",
-        "@koalaui/common": "1.7.1+devel",
-        "@koalaui/interop": "1.7.1+devel",
+        "@koalaui/build-common": "1.7.3+devel",
+        "@koalaui/compat": "1.7.3+devel",
+        "@koalaui/common": "1.7.3+devel",
+        "@koalaui/interop": "1.7.3+devel",
         "node-addon-api": "8.0.0",
         "node-api-headers": "0.0.5",
         "commander": "10.0.1"

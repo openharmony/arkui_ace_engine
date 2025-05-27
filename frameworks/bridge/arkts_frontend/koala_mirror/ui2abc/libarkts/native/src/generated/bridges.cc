@@ -91,6 +91,15 @@ KNativePointer impl_UpdateNumberLiteral3(KNativePointer context, KNativePointer 
 }
 KOALA_INTEROP_3(UpdateNumberLiteral3, KNativePointer, KNativePointer, KNativePointer, KFloat);
 
+KNativePointer impl_NumberLiteralStrConst(KNativePointer context, KNativePointer receiver)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+    auto result = GetImpl()->NumberLiteralStrConst(_context, _receiver);
+    return StageArena::strdup(result);
+}
+KOALA_INTEROP_2(NumberLiteralStrConst, KNativePointer, KNativePointer, KNativePointer);
+
 KNativePointer impl_CreateLabelledStatement(KNativePointer context, KNativePointer ident, KNativePointer body)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
@@ -1330,6 +1339,25 @@ KBoolean impl_CallExpressionIsTrailingBlockInNewLineConst(KNativePointer context
     return result;
 }
 KOALA_INTEROP_2(CallExpressionIsTrailingBlockInNewLineConst, KBoolean, KNativePointer, KNativePointer);
+
+void impl_CallExpressionSetIsTrailingCall(KNativePointer context, KNativePointer receiver, KBoolean isTrailingCall)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+    const auto _isTrailingCall = static_cast<KBoolean>(isTrailingCall);
+    GetImpl()->CallExpressionSetIsTrailingCall(_context, _receiver, _isTrailingCall);
+    return ;
+}
+KOALA_INTEROP_V3(CallExpressionSetIsTrailingCall, KNativePointer, KNativePointer, KBoolean);
+
+KBoolean impl_CallExpressionIsTrailingCallConst(KNativePointer context, KNativePointer receiver)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+    auto result = GetImpl()->CallExpressionIsTrailingCallConst(_context, _receiver);
+    return result;
+}
+KOALA_INTEROP_2(CallExpressionIsTrailingCallConst, KBoolean, KNativePointer, KNativePointer);
 
 KBoolean impl_CallExpressionIsETSConstructorCallConst(KNativePointer context, KNativePointer receiver)
 {

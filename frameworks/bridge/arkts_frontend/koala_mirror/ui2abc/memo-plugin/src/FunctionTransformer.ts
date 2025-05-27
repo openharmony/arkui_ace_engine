@@ -298,6 +298,7 @@ export class FunctionTransformer extends arkts.AbstractVisitor {
         return this.signatureTransformer.visitor(node)
     }
 
+    visitor(beforeChildren: arkts.ETSModule, options?: FunctionTransformerOptions): arkts.ETSModule
     visitor(beforeChildren: arkts.AstNode, options?: FunctionTransformerOptions): arkts.AstNode {
         this.enter(beforeChildren)
         const node = this.visitEachChild(beforeChildren, {

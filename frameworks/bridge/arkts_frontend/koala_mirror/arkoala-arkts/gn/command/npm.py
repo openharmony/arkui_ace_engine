@@ -1,0 +1,90 @@
+#!/usr/bin/env python
+
+import subprocess
+import sys
+import os
+import shutil
+import argparse
+
+NPM_REPO = "https://repo.huaweicloud.com/repository/npm/"
+ 
+parser = argparse.ArgumentParser(description="npm command parser")
+parser.add_argument("--root-path", help="root directory of koala repo")
+parser.add_argument("--project-path", help="project directory in koala repo")
+parser.add_argument("--node-path", help="nodejs path")
+parser.add_argument("--arklink-path", help="ark-link path")
+parser.add_argument("--es2panda-path", help="es2panda path")
+parser.add_argument("--stdlib-path", help="stdlib path")
+parser.add_argument("--target-out-path", help="out directory of built target", default=None)
+parser.add_argument("--built-file-path", help="result of building", default=None)
+parser.add_argument("--npm-args", nargs='+', help="npm command args")
+
+args = parser.parse_args()
+
+project = args.project_path
+node_path = args.node_path
+arklink_path = args.arklink_path
+es2panda_path = args.es2panda_path
+ets_stdlib_path = args.stdlib_path
+
+target_out_path = args.target_out_path
+built_file_path = args.built_file_path
+npm_args = args.npm_args
+
+env = os.environ.copy()
+env_orig = env["PATH"]
+env["PATH"] = f"{node_path}:{env['PATH']}"
+
+if (es2panda_path != ""):
+    env["ES2PANDA_PATH"] = es2panda_path
+if (arklink_path != ""):
+    env["ARKLINK_PATH"] = arklink_path
+if (ets_stdlib_path != ""):
+    env["ETS_STDLIB_PATH"] = ets_stdlib_path
+
+env["PANDA_SDK_PATH"] = os.path.join(project_path, "../ui2abc/build/sdk")
+
+koala_log = os.path.join(project_path, "koala_build.log")
+
+def install(dir):
+    os.chdir(dir)
+    try:
+        ret = subprocess.run(["npm", "install", "--registry", NPM_REPO, "--verbose"], capture_output=True, env=env, text=True, check=True)
+        with open(koala_log, "a+") as f:
+            f.write("\n")
+            f.write("install log:\n" + ret.stdout)
+            f.close()
+    except subprocess.CalledProcessError as e:
+        with open(koala_log, "a+") as f:
+            f.write("\n")
+            f.write("error message: "+ e.stderr + "\n")
+            f.close()
+
+def npm_command(dir, command):
+    os.chdir(dir)
+    try:
+        ret = subprocess.run(["npm"] + command, capture_output=True, env=env, text=True, check=True)
+        with open(koala_log, "a+") as f:
+            f.write("\n")
+            f.write("install log:\n" + ret.stdout)
+            f.close()
+    except subprocess.CalledProcessError as e:
+        with open(koala_log, "a+") as f:
+            f.write("\n")
+            f.write("error message: "+ e.stderr + "\n")
+            f.close()
+
+def main():
+    install(project_path)
+    npm_command(project_path, npm_args)
+
+    if target_out_path and built_file_path:
+        if not os.path.exists(built_file_path):
+            print(f"Error: Built file not found at {built_file_path}")
+            sys.exit(1)
+
+        out_dir = os.path.join(target_out_path, os.path.basename(built_file_path))
+        shutil.copy(built_file_path, out_dir)
+
+if __name__ == '__main__':
+    main()

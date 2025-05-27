@@ -27,29 +27,35 @@ import { insertParameter } from "./imports/recursive"
 import { addImportSameFile } from "./imports/add-same-file"
 import { addUseImportSameFile } from "./imports/add-use-same-file"
 import { addImportNewFile } from "./imports/add-new-file"
+import { addOptionalChain } from "./optional/add-chain"
 
 const DIR = './test/arkts-api/recheck/'
+const PANDA_SDK_PATH = process.env.PANDA_SDK_PATH ?? '../../incremental/tools/panda/node_modules/@panda/sdk'
 
 function createConfig(file: string) {
     fs.mkdirSync(`${DIR}/build/abc/${file}`, { recursive: true })
-    arkts.arktsGlobal.filePath = `${DIR}/${file}/main.ts`
+    arkts.arktsGlobal.filePath = `${DIR}/${file}/main.ets`
     arkts.arktsGlobal.config = arkts.Config.create([
         '_',
         '--arktsconfig',
         `${DIR}/arktsconfig.json`,
-        `${DIR}/${file}/main.ts`,
+        `${DIR}/${file}/main.ets`,
         '--extension',
         'ets',
         '--stdlib',
-        '../build/sdk/ets/stdlib',
+        `${PANDA_SDK_PATH}/ets/stdlib`,
         '--output',
         `${DIR}/build/abc/${file}/main.abc`
     ]).peer
 }
 
 function createContext(file: string) {
-    const code = fs.readFileSync(`${DIR}/${file}/main.ts`, 'utf-8')
+    const code = fs.readFileSync(`${DIR}/${file}/main.ets`, 'utf-8')
     arkts.arktsGlobal.compilerContext = arkts.Context.createFromString(code)
+}
+
+function proceedToParsed() {
+    arkts.proceedToState(arkts.Es2pandaContextState.ES2PANDA_STATE_PARSED)
 }
 
 function proceedToChecked() {
@@ -62,17 +68,21 @@ function applyTransform(transform?: arkts.ProgramTransformer, onlyModifyMain?: b
         if (it.getName().startsWith("escompat")) return
         it.programs.forEach(program => {
             const ast = program.astNode
+            const importStorage = new arkts.ImportStorage(program, false)
             if (!onlyModifyMain) {
-                transform?.(program, { isMainProgram: false, name: "", stage: arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED })
+                transform?.(program, { isMainProgram: false, name: "", stage: arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED }, new arkts.PluginContextImpl())
             }
             arkts.setBaseOverloads(ast)
+            importStorage.update()
             arkts.arktsGlobal.es2panda._AstNodeUpdateAll(arkts.arktsGlobal.context, ast.peer)
         })
     })
 
     const script = arkts.createETSModuleFromContext()
-    transform?.(arkts.arktsGlobal.compilerContext.program, { isMainProgram: true, name: "", stage: arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED })
+    const importStorage = new arkts.ImportStorage(arkts.arktsGlobal.compilerContext.program, false)
+    transform?.(arkts.arktsGlobal.compilerContext.program, { isMainProgram: true, name: "", stage: arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED }, new arkts.PluginContextImpl())
     arkts.setBaseOverloads(script)
+    importStorage.update()
     arkts.arktsGlobal.es2panda._AstNodeUpdateAll(arkts.arktsGlobal.context, script.peer)
 }
 
@@ -83,7 +93,7 @@ function recheck() {
 function dumpSrc(file: string) {
     const src = arkts.createETSModuleFromContext().dumpSrc()
     fs.mkdirSync(`${DIR}/${file}/dump-src`, { recursive: true })
-    fs.writeFileSync(`${DIR}/${file}/dump-src/main.ts`, src)
+    fs.writeFileSync(`${DIR}/${file}/dump-src/main.ets`, src)
 }
 
 function dumpJson(file: string) {
@@ -94,7 +104,7 @@ function dumpJson(file: string) {
 
 function assertSrc(file: string) {
     const src = arkts.createETSModuleFromContext().dumpSrc()
-    const expected = fs.readFileSync(`${DIR}/${file}/dump-src/main.ts`, 'utf-8')
+    const expected = fs.readFileSync(`${DIR}/${file}/dump-src/main.ets`, 'utf-8')
     util.assert.equal(src, expected)
 }
 
@@ -108,24 +118,39 @@ function proceedToBin() {
     arkts.proceedToState(arkts.Es2pandaContextState.ES2PANDA_STATE_BIN_GENERATED)
 }
 
-function runTest(
-    file: string,
-    transform?: arkts.ProgramTransformer,
+interface TestOptions {
     skipSrc?: boolean,
     skipJson?: boolean,
     onlyModifyMain?: boolean,
+}
+
+const defaultTestOptions: TestOptions = {
+    skipSrc: false,
+    skipJson: true,
+    onlyModifyMain: false
+}
+
+function runTest(
+    file: string,
+    transform?: arkts.ProgramTransformer,
+    userOptions: TestOptions = defaultTestOptions
 ) {
+    const options = {
+        skipSrc: userOptions.skipSrc ?? defaultTestOptions.skipSrc,
+        skipJson: userOptions.skipJson ?? defaultTestOptions.skipJson,
+        onlyModifyMain: userOptions.onlyModifyMain ?? defaultTestOptions.onlyModifyMain
+    }
     createConfig(file)
     createContext(file)
     proceedToChecked()
-    applyTransform(transform, onlyModifyMain)
+    applyTransform(transform, options.onlyModifyMain)
     recheck()
     if (process.env.TEST_GOLDEN == "1") {
-        if (!skipSrc) dumpSrc(file)
-        if (!skipJson) dumpJson(file)
+        if (!options.skipSrc) dumpSrc(file)
+        if (!options.skipJson) dumpJson(file)
     } else {
-        if (!skipSrc) assertSrc(file)
-        if (!skipJson) assertJson(file)
+        if (!options.skipSrc) assertSrc(file)
+        if (!options.skipJson) assertJson(file)
     }
     proceedToBin()
 }
@@ -133,32 +158,32 @@ function runTest(
 suite(util.basename(__filename), () => {
     suite('static', () => {
         test("function", () => {
-            runTest('static/function', undefined, false, true)
+            runTest('static/function', undefined)
         })
 
         test("public setter", () => {
-            runTest('static/public-setter', undefined, false, true)
+            runTest('static/public-setter', undefined)
         })
 
         test("constructor with overload", () => {
-            runTest('static/constructor', undefined, false, true)
+            runTest('static/constructor', undefined)
         })
 
         // es2panda issue 24821
         test.skip("property", () => {
-            runTest('static/property', undefined, false, true)
+            runTest('static/property', undefined)
         })
 
         test("typed property", () => {
-            runTest('static/typed-property', undefined, false, true)
+            runTest('static/typed-property', undefined)
         })
 
         test("trailing block", () => {
-            runTest('static/trailing-block', undefined, false, true)
+            runTest('static/trailing-block', undefined)
         })
 
         test("import type", () => {
-            runTest('static/import-type', undefined, false, true)
+            runTest('static/import-type', undefined)
         })
     })
 
@@ -166,51 +191,60 @@ suite(util.basename(__filename), () => {
         test('rename class', () => {
             runTest('simple/rename-class', (program: arkts.Program) => {
                 return updateTopLevelClass(program.astNode, renameClass)
-            }, false, true)
+            })
         })
 
         test('add class method', () => {
             runTest('simple/add-class-method', (program: arkts.Program) => {
                 return updateTopLevelClass(program.astNode, addClassMethod)
-            }, false, true)
+            })
         })
 
         test('add variable declaration', () => {
             runTest('simple/add-variable', (program: arkts.Program) => {
                 return updateTopLevelClass(program.astNode, addVariableDeclaration)
-            }, false, true)
+            })
         })
     })
 
     test.skip('constructor', () => {
-        runTest('constructor', constructorWithOverload, false, true)
+        runTest('constructor', constructorWithOverload)
     })
 
     test('add this reference', () => {
-        runTest('this', addThisReference, false, true)
+        runTest('this', addThisReference)
+    })
+
+    suite('optional', () => {
+        test('pass optional unchanged', () => {
+            runTest('optional/unchanged', undefined)
+        })
+        test('add optional chain', () => {
+            runTest('optional/add-chain', addOptionalChain)
+        })
     })
 
     suite('imports', () => {
         test('add another import from the same file with dedicated API', () => {
-            runTest('imports/add-same-file', addImportSameFile, false, true)
+            runTest('imports/add-same-file', addImportSameFile)
         })
 
         test('add another import from the same file with dedicated API and use it', () => {
-            runTest('imports/add-use-same-file', addUseImportSameFile, false, true, true)
+            runTest('imports/add-use-same-file', addUseImportSameFile, {onlyModifyMain: true})
         })
 
         test.skip('add import from the new file with dedicated API', () => {
-            runTest('imports/add-new-file', addImportNewFile, false, true, true)
+            runTest('imports/add-new-file', addImportNewFile, {onlyModifyMain: true})
         })
 
         test('recursive', () => {
-            runTest('imports/recursive', insertParameter, false, true)
+            runTest('imports/recursive', insertParameter)
         })
     })
 
     suite('overloads', () => {
         test('getter and setter both modified simultaneously', () => {
-            runTest('overloads/getter-setter', insertParameterToType, false, true)
+            runTest('overloads/getter-setter', insertParameterToType)
         })
-    })    
+    })
 })

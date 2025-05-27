@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
-import { ClassDefinition, ClassElement, ClassProperty, Es2pandaModifierFlags, Expression, TSEnumDeclaration, TSEnumMember, asString, factory, isCallExpression, isClassDeclaration, isClassDefinition, isClassProperty, isETSNewClassInstanceExpression } from "./index";
+import { ClassDefinition, ClassElement, Expression, isClassDefinition, isClassProperty, isETSNewClassInstanceExpression, TSEnumDeclaration, TSEnumMember } from "src/generated";
 import { AbstractVisitor } from "./AbstractVisitor";
 import { AstNode } from "./peers/AstNode"
+import { Es2pandaModifierFlags } from "src/generated/Es2pandaEnums";
+import { factory } from "src/generated/factory";
 
 
 export class CheckedBackFilter extends AbstractVisitor {
     transformInitializer(node: Expression|undefined): Expression|undefined {
         if (node == undefined) return undefined
         if (!isETSNewClassInstanceExpression(node)) return node
-        // new ZZZ(ordinal, value) !-> value
         return node.arguments[1]
     }
     transformEnum(node: ClassDefinition): AstNode {

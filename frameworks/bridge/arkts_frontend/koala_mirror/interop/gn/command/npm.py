@@ -22,7 +22,6 @@ import argparse
 NPM_REPO = "https://repo.huaweicloud.com/repository/npm/"
  
 parser = argparse.ArgumentParser(description="npm command parser")
-parser.add_argument("--root-path", help="root directory of koala repo")
 parser.add_argument("--project-path", help="project directory in koala repo")
 parser.add_argument("--node-path", help="nodejs path")
 parser.add_argument("--arklink-path", help="ark-link path")
@@ -32,10 +31,8 @@ parser.add_argument("--target-out-path", help="out directory of built target", d
 parser.add_argument("--built-file-path", help="result of building", default=None)
 parser.add_argument("--npm-args", nargs='+', help="npm command args")
 
- 
 args = parser.parse_args()
 
-root_path = args.root_path
 project_path = args.project_path
 node_path = args.node_path
 arklink_path = args.arklink_path
@@ -88,7 +85,7 @@ def npm_command(dir, command):
             f.close()
 
 def main():
-    install(root_path)
+    install(project_path)
     npm_command(project_path, npm_args)
 
     if target_out_path and built_file_path:
@@ -98,7 +95,6 @@ def main():
 
         out_dir = os.path.join(target_out_path, os.path.basename(built_file_path))
         shutil.copy(built_file_path, out_dir)
-    
 
 if __name__ == '__main__':
     main()

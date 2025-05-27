@@ -37,14 +37,12 @@ export class factory {
         )
     }
 
-    static createContextTypesImportDeclaration(program: arkts.Program, debug: boolean, path?: string) {
+    static createContextTypesImportDeclaration(debug: boolean, path?: string): arkts.ETSImportDeclaration {
         const mandatory = [factory.createContextTypeImportSpecifier(), factory.createIdTypeImportSpecifier()]
-        arkts.factory.createETSImportDeclaration(
+        return arkts.factory.createETSImportDeclaration(
             arkts.factory.createStringLiteral(path ?? RuntimeNames.CONTEXT_TYPE_DEFAULT_IMPORT),
             debug ? [...mandatory, factory.createHashImportSpecifier()] : mandatory,
-            arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL,
-            program,
-            arkts.Es2pandaImportFlags.IMPORT_FLAGS_DEFAULT_IMPORT
+            arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL
         )
     }
 
