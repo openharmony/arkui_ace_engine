@@ -353,4 +353,77 @@ HWTEST_F(RichEditorUndoRedoTest, SetUndoStyle001, TestSize.Level1)
     EXPECT_TRUE(richEditorPattern->redoOperationRecords_.empty());
 }
 
+/**
+ * @tc.name: BeforeRedo001
+ * @tc.desc: test BeforeRedo
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUndoRedoTest, BeforeRedo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    RichEditorChangeValue changeValue;
+    int32_t innerPosition = 0;
+    RichEditorPattern::OperationRecord record;
+    record.addText = u"test123\n";
+    record.beforeCaretPosition = 20;
+    /**
+     * @tc.steps: step2. change parameters and call function.
+     */
+    record.deleteCaretPostion = 0;
+    richEditorPattern->BeforeRedo(changeValue, innerPosition, record);
+    EXPECT_NE(innerPosition, 0);
+    /**
+     * @tc.steps: step3. change parameters and call function.
+     */
+    record.deleteCaretPostion = -1;
+    record.deleteText = u"test\n";
+    richEditorPattern->BeforeRedo(changeValue, innerPosition, record);
+    EXPECT_NE(innerPosition, 0);
+}
+
+/**
+ * @tc.name: BeforeUndo001
+ * @tc.desc: test BeforeUndo
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUndoRedoTest, BeforeUndo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    RichEditorChangeValue changeValue;
+    int32_t innerPosition = 0;
+    RichEditorPattern::OperationRecord record;
+    record.addText = u"test123\n";
+    record.afterCaretPosition = 1;
+    /**
+     * @tc.steps: step2. change parameters and call function.
+     */
+    record.deleteCaretPostion = 0;
+    richEditorPattern->BeforeUndo(changeValue, innerPosition, record);
+    EXPECT_NE(innerPosition, 0);
+    /**
+     * @tc.steps: step3. change parameters and call function.
+     */
+    record.deleteCaretPostion = -1;
+    record.deleteText = u"test\n";
+    richEditorPattern->BeforeUndo(changeValue, innerPosition, record);
+    EXPECT_NE(innerPosition, 0);
+}
+
+
 } // namespace OHOS::Ace::NG

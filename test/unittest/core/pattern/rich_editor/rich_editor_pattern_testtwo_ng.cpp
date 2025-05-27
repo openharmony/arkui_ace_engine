@@ -394,11 +394,46 @@ HWTEST_F(RichEditorPatternTestTwoNg, IsResponseRegionExpandingNeededForStylus005
 }
 
 /**
- * @tc.name: OnDirtyLayoutWrapperSwap002
+ * @tc.name: IsResponseRegionExpandingNeededForStylus006
+ * @tc.desc: test testInput text IsResponseRegionExpandingNeededForStylus001
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, IsResponseRegionExpandingNeededForStylus006, TestSize.Level0)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.x = 10;
+    touchEvent.y = 10;
+    auto ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+    touchEvent.sourceTool = SourceTool::PEN;
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_TRUE(ret);
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.type = TouchType::MOVE;
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+    touchEvent.sourceTool = SourceTool::PEN;
+    touchEvent.type = TouchType::MOVE;
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.sourceTool = SourceTool::PEN;
+    EXPECT_TRUE(richEditorNode_->IsVisible());
+    richEditorNode_->layoutProperty_->OnVisibilityUpdate(VisibleType::INVISIBLE);
+    EXPECT_FALSE(richEditorNode_->IsVisible());
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap001
  * @tc.desc: test OnDirtyLayoutWrapperSwap
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPatternTestTwoNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
+HWTEST_F(RichEditorPatternTestTwoNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -415,26 +450,6 @@ HWTEST_F(RichEditorPatternTestTwoNg, OnDirtyLayoutWrapperSwap002, TestSize.Level
     richEditorPattern->isModifyingContent_ = true;
     auto ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: GetParagraphInfo001
- * @tc.desc: test GetParagraphInfo
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, GetParagraphInfo001, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    int32_t start = 1;
-    int32_t end = 24;
-    ClearSpan();
-    auto size = richEditorPattern->GetParagraphInfo(start, end).size();
-    AddSpan(INIT_VALUE_2);
-    AddSpan(INIT_VALUE_2 + u"\n");
-    AddSpan(INIT_VALUE_2);
-    AddSpan(INIT_VALUE_2);
-    EXPECT_NE(size, richEditorPattern->GetParagraphInfo(start, end).size());
 }
 
 } // namespace OHOS::Ace::NG

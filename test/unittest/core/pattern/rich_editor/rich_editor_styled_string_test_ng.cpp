@@ -20,6 +20,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_undo_manager.h"
 #include "core/components_ng/pattern/rich_editor/style_manager.h"
 
 using namespace testing;
@@ -1258,37 +1259,48 @@ HWTEST_F(RichEditorStyledStringTestNg, HandleOnPaste001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleOnPaste001
- * @tc.desc: test HandleOnPaste
+ * @tc.name: InsertValueInStyledString002
+ * @tc.desc: test InsertValueInStyledString
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, AddImageSpanFromCollaboration001, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, InsertValueInStyledString002, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto mutableTextStr = CreateTextStyledString(INIT_U16STRING_1);
-    richEditorPattern->SetStyledString(mutableTextStr);
-    int32_t insertIndex = 1;
-    int32_t initCaretPosition = 5;
-    richEditorPattern->caretPosition_ = initCaretPosition;
-    const ImageSpanOptions IMAGE_SPAN_OPTIONS_1 = {
-        .offset = insertIndex,
-        .image = "app.media.icon",
-        .bundleName = std::nullopt,
-        .moduleName = std::nullopt,
-        .imagePixelMap = std::nullopt,
-        .imageAttribute = IMAGE_SPAN_ATTRIBUTE_1
-    };
-    richEditorPattern->AddImageSpanFromCollaboration(IMAGE_SPAN_OPTIONS_1, false);
-    EXPECT_EQ(richEditorPattern->caretPosition_, initCaretPosition);
-    richEditorPattern->AddImageSpanFromCollaboration(IMAGE_SPAN_OPTIONS_1, true);
-    EXPECT_EQ(richEditorPattern->caretPosition_, insertIndex + 1);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_3);
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->undoManager_ =
+        std::make_unique<StyledStringUndoManager>(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+    richEditorPattern->InsertValueInStyledString(PREVIEW_TEXT_VALUE1);
+    EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
+}
 
-    auto contentLength = richEditorPattern->GetTextContentLength();
-    richEditorPattern->maxLength_ = contentLength;
-    richEditorPattern->AddImageSpanFromCollaboration(IMAGE_SPAN_OPTIONS_1, false);
-    EXPECT_EQ(richEditorPattern->GetTextContentLength(), contentLength);
+/**
+ * @tc.name: InsertValueInStyledString003
+ * @tc.desc: test RichEditorPattern InsertValueInStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, InsertValueInStyledString003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    auto host = richEditorPattern->GetHost();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    TextSpanOptions options2;
+    options2.value = INIT_VALUE_1;
+    richEditorController->AddTextSpan(options2);
+    focusHub->RequestFocusImmediately();
+    richEditorPattern->FireOnSelectionChange(-1, 0);
+    richEditorPattern->FireOnSelectionChange(0, -1);
+    richEditorPattern->FireOnSelectionChange(-1, -1);
+    ASSERT_EQ(richEditorPattern->HasFocus(), true);
 }
 
 } // namespace OHOS::Ace::NG

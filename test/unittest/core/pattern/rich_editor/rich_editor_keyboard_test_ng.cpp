@@ -97,6 +97,28 @@ HWTEST_F(RichEditorKeyboardTestNg, NeedSoftKeyboard001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: VirtualKeyboardAreaChanged001
+ * @tc.desc: test OnVirtualKeyboardAreaChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, VirtualKeyboardAreaChanged001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    float height = 0.0f;
+    auto x = richEditorPattern->CalcCursorOffsetByPosition(richEditorPattern->textSelector_.GetStart(), height).GetX();
+    richEditorPattern->OnVirtualKeyboardAreaChanged();
+    EXPECT_EQ(richEditorPattern->textSelector_.selectionBaseOffset.GetX(), x);
+}
+
+/**
  * @tc.name: VirtualKeyboardAreaChanged002
  * @tc.desc: test OnVirtualKeyboardAreaChanged
  * @tc.type: FUNC
@@ -120,33 +142,6 @@ HWTEST_F(RichEditorKeyboardTestNg, VirtualKeyboardAreaChanged002, TestSize.Level
         richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
     richEditorPattern->OnVirtualKeyboardAreaChanged();
     EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
-}
-
-/**
- * @tc.name: ResetKeyboardIfNeed004
- * @tc.desc: test ResetKeyboardIfNeed
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardTestNg, ResetKeyboardIfNeed004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-    */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto focusHub = richEditorPattern->GetFocusHub();
-    EXPECT_NE(focusHub, nullptr);
-
-    richEditorPattern->imeShown_ = true;
-    richEditorPattern->isCustomKeyboardAttached_ = true;
-    focusHub->currentFocus_ = true;
-    richEditorPattern->action_ = TextInputAction::SEARCH;
-    richEditorPattern->ResetKeyboardIfNeed();
-    EXPECT_NE(richEditorPattern->action_, TextInputAction::SEARCH);
 }
 
 /**
@@ -211,28 +206,6 @@ HWTEST_F(RichEditorKeyboardTestNg, RichEditorPatternTestCloseCustomKeyboard001, 
     ASSERT_EQ(richEditorPattern->CloseCustomKeyboard(), true);
 
     richEditorPattern->customKeyboardBuilder_ = oldFunc;
-}
-
-/**
- * @tc.name: VirtualKeyboardAreaChanged001
- * @tc.desc: test OnVirtualKeyboardAreaChanged
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardTestNg, VirtualKeyboardAreaChanged001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    float height = 0.0f;
-    auto x = richEditorPattern->CalcCursorOffsetByPosition(richEditorPattern->textSelector_.GetStart(), height).GetX();
-    richEditorPattern->OnVirtualKeyboardAreaChanged();
-    EXPECT_EQ(richEditorPattern->textSelector_.selectionBaseOffset.GetX(), x);
 }
 
 /**
@@ -369,6 +342,33 @@ HWTEST_F(RichEditorKeyboardTestNg, ResetKeyboardIfNeed003, TestSize.Level1)
 
     richEditorPattern->imeShown_ = false;
     richEditorPattern->isCustomKeyboardAttached_ = false;
+    focusHub->currentFocus_ = true;
+    richEditorPattern->action_ = TextInputAction::SEARCH;
+    richEditorPattern->ResetKeyboardIfNeed();
+    EXPECT_NE(richEditorPattern->action_, TextInputAction::SEARCH);
+}
+
+/**
+ * @tc.name: ResetKeyboardIfNeed004
+ * @tc.desc: test ResetKeyboardIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, ResetKeyboardIfNeed004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and call function.
+    */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    EXPECT_NE(focusHub, nullptr);
+
+    richEditorPattern->imeShown_ = true;
+    richEditorPattern->isCustomKeyboardAttached_ = true;
     focusHub->currentFocus_ = true;
     richEditorPattern->action_ = TextInputAction::SEARCH;
     richEditorPattern->ResetKeyboardIfNeed();

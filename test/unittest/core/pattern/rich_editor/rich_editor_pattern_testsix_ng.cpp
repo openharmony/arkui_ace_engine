@@ -101,24 +101,6 @@ HWTEST_F(RichEditorPatternTestSixNg, AnalyzeUrls001, TestSize.Level1)
 }
 
 /**
- * @tc.name: InsertValueInStyledString001
- * @tc.desc: test InsertValueInStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, InsertValueInStyledString001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_3);
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->undoManager_ =
-        std::make_unique<StyledStringUndoManager>(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
-    richEditorPattern->InsertValueInStyledString(PREVIEW_TEXT_VALUE1);
-    EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
-}
-
-/**
  * @tc.name: OnModifyDone001
  * @tc.desc: test OnModifyDone
  * @tc.type: FUNC
@@ -196,24 +178,6 @@ HWTEST_F(RichEditorPatternTestSixNg, ClearContent001, TestSize.Level1)
     auto child = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
     richEditorPattern->ClearContent(child);
     EXPECT_EQ(child->spanItem_->content, u"");
-}
-
-/**
- * @tc.name: ProcessInsertValue001
- * @tc.desc: test ProcessInsertValue
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, ProcessInsertValue001, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    std::u16string insertValue = u"abc";
-    richEditorPattern->isEditing_ = true;
-    richEditorPattern->isSpanStringMode_ = false;
-    auto size = richEditorPattern->operationRecords_.size();
-    richEditorPattern->ProcessInsertValue(insertValue, OperationType::IME, true);
-    EXPECT_TRUE(richEditorPattern->IsEditing());
-    EXPECT_NE(size, richEditorPattern->operationRecords_.size());
 }
 
 /**
@@ -311,47 +275,6 @@ HWTEST_F(RichEditorPatternTestSixNg, FromStyledString002, TestSize.Level1)
     selection = richEditorPattern->FromStyledString(spanString).GetSelection();
     EXPECT_EQ(selection.selection[0], 0);
     EXPECT_EQ(selection.selection[1], 0);
-}
-
-/**
- * @tc.name: BeforeChangeText001
- * @tc.desc: test BeforeChangeText
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, BeforeChangeText001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RichEditorChangeValue changeValue;
-    RichEditorPattern::OperationRecord operationRecord;
-    OHOS::Ace::NG::RecordType recodrType = OHOS::Ace::NG::RecordType::DEL_BACKWARD;
-    auto eventHub = richEditorNode_->GetOrCreateEventHub<RichEditorEventHub>();
-    eventHub->SetOnDidChange([](const RichEditorChangeValue& value) -> bool { return false; });
-    auto ret = richEditorPattern->BeforeChangeText(changeValue, operationRecord, recodrType, 100);
-    EXPECT_TRUE(ret);
-}
-
-/**
- * @tc.name: BeforeChangeText002
- * @tc.desc: test BeforeChangeText
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, BeforeChangeText002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RichEditorChangeValue changeValue;
-    TextSpanOptions options;
-    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
-    richEditorPattern->spans_.emplace_back(spanItem);
-    options.offset = -1;
-    auto eventHub = richEditorNode_->GetOrCreateEventHub<RichEditorEventHub>();
-    eventHub->SetOnDidChange([](const RichEditorChangeValue& value) -> bool { return false; });
-    auto ret = richEditorPattern->BeforeChangeText(changeValue, options);
-    EXPECT_FALSE(richEditorPattern->spans_.empty());
-    EXPECT_TRUE(ret);
 }
 
 /**
@@ -542,59 +465,6 @@ HWTEST_F(RichEditorPatternTestSixNg, HandleKbVerticalSelection005, TestSize.Leve
     richEditorPattern->caretPosition_ = 1;
 
     EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(false), 0);
-}
-
-/**
- * @tc.name: GetSameSpanItem001
- * @tc.desc: test GetSameSpanItem
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, GetSameSpanItem001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto contentNode = richEditorNode_->GetChildAtIndex(0);
-    ASSERT_NE(contentNode, nullptr);
-    auto spanItem = AceType::MakeRefPtr<ImageSpanItem>();
-    spanItem->spanItemType = SpanItemType::IMAGE;
-    auto childNode = AceType::MakeRefPtr<ImageSpanNode>(V2::IMAGE_ETS_TAG, 2);
-    childNode->imageSpanItem_ = spanItem;
-    contentNode->children_.emplace_back(childNode);
-    auto image = AceType::MakeRefPtr<MockCanvasImage>();
-    auto imageNode = richEditorPattern->GetImageSpanNodeBySpanItem(spanItem);
-    auto pattern = imageNode->GetPattern<ImagePattern>();
-    pattern->image_ = image;
-    auto pixelMap = image->GetPixelMap();
-    richEditorPattern->GetSameSpanItem(spanItem);
-    EXPECT_FALSE(pixelMap);
-}
-
-/**
- * @tc.name: GetSameSpanItem002
- * @tc.desc: test GetSameSpanItem
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, GetSameSpanItem002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto contentNode = richEditorNode_->GetChildAtIndex(0);
-    ASSERT_NE(contentNode, nullptr);
-    auto spanItem = AceType::MakeRefPtr<ImageSpanItem>();
-    spanItem->spanItemType = SpanItemType::IMAGE;
-    auto childNode = AceType::MakeRefPtr<ImageSpanNode>(V2::IMAGE_ETS_TAG, 2);
-    childNode->imageSpanItem_ = spanItem;
-    contentNode->children_.emplace_back(childNode);
-    auto image = AceType::MakeRefPtr<MockCanvasImage>();
-    image->needPixelMap = true;
-    auto imageNode = richEditorPattern->GetImageSpanNodeBySpanItem(spanItem);
-    auto pattern = imageNode->GetPattern<ImagePattern>();
-    pattern->image_ = image;
-    auto pixelMap = image->GetPixelMap();
-    richEditorPattern->GetSameSpanItem(spanItem);
-    EXPECT_TRUE(pixelMap);
 }
 
 } // namespace OHOS::Ace::NG

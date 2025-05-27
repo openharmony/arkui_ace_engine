@@ -386,35 +386,6 @@ HWTEST_F(RichEditorPatternTestFiveNg, SetSubSpans001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetThumbnailCallback001
- * @tc.desc: test GetThumbnailCallback
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, GetThumbnailCallback001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->textSelector_.baseOffset = 0;
-    richEditorPattern->textSelector_.destinationOffset = 10;
-    richEditorPattern->copyOption_ = CopyOptions::InApp;
-    ParagraphManager::ParagraphInfo paragraphInfo;
-    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
-    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
-        .WillRepeatedly(Invoke([](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
-            selectedRects.emplace_back(RectF(0, 0, 100, 20));
-        }));
-    paragraphInfo.paragraph = mockParagraph;
-    paragraphInfo.start = 0;
-    paragraphInfo.end = 10;
-    richEditorPattern->paragraphs_.paragraphs_.emplace_back(paragraphInfo);
-    auto thumbnailCallback = richEditorPattern->GetThumbnailCallback();
-    Offset point(10, 10);
-    thumbnailCallback(point);
-    EXPECT_TRUE(richEditorPattern->textSelector_.IsValid());
-}
-
-/**
  * @tc.name: HandlePointWithTransform001
  * @tc.desc: test HandlePointWithTransform
  * @tc.type: FUNC
