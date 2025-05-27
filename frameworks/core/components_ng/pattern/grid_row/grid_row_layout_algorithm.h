@@ -96,7 +96,9 @@ private:
     float CalcCrossAxisOffset(LayoutWrapper* gridRow, RefPtr<LayoutWrapper> &child,
         FlexAlign alignSelf, float currentRowHeight);
     FlexAlign GetChildAlignment(LayoutWrapper* gridRow, const RefPtr<LayoutProperty>& childLayoutProperty);
-    int32_t columnNum_ {V2::DEFAULT_COLUMN_NUMBER};
+    void UpdateFirstLineOffset(bool& childTallerThanMatchParent, const bool isGreatThanParent, float ignoreMatchOffset,
+        float& firstLineOffset);
+    int32_t columnNum_ { V2::DEFAULT_COLUMN_NUMBER };
     std::pair<double, double> gutterInDouble_ { 0, 0 };
     double columnUnitWidth_ = 0;
     std::list<ChildrenRow> gridColChildrenRows_ {};

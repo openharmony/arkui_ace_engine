@@ -16,6 +16,7 @@
 
 #include "core/components_ng/pattern//linear_layout/row_model_ng.h"
 #include "core/components_v2/grid_layout/grid_container_util_class.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -116,6 +117,7 @@ HWTEST_F(GridRowNewTestNG, GridRowIgnoreLayoutSafeArea001, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->SetMinPlatformVersion(12);
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto frameNode = CreateGridRow([this](GridRowModelNG model) {
         // step: set GridRowOptions
         V2::GridContainerSize col = V2::GridContainerSize(5);
@@ -185,6 +187,7 @@ HWTEST_F(GridRowNewTestNG, GridRowIgnoreLayoutSafeArea002, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->SetMinPlatformVersion(12);
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto frameNode = CreateGridRow([this](GridRowModelNG model) {
         // step: set GridRowOptions
         V2::GridContainerSize col = V2::GridContainerSize(5);

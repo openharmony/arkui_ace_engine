@@ -509,20 +509,28 @@ void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             auto ignoreMatchOffset = UpdateChildPositionWidthIgnoreLayoutSafeArea(
                 IsRightToLeft(layoutWrapper), childLayoutWrapper, offset + paddingOffset);
                 if (firstLine) {
-                    childTallerThanMatchParent |=
-                        GreatNotEqual(childLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetY() +
-                                          childLayoutWrapper->GetGeometryNode()->GetFrameSize().Height(),
-                            layoutWrapper->GetGeometryNode()->GetFrameSize().Height());
-                    if (GreatNotEqual(ignoreMatchOffset, 0.0f)) {
-                        firstLineOffset = ignoreMatchOffset;
-                    }
-                    if (childTallerThanMatchParent) {
-                        firstLineOffset = 0.0f;
-                    }
+                    auto isGreatThanParent =
+                    GreatNotEqual(childLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetY() +
+                                      childLayoutWrapper->GetGeometryNode()->GetFrameSize().Height(),
+                        layoutWrapper->GetGeometryNode()->GetFrameSize().Height());
+                    UpdateFirstLineOffset(
+                        childTallerThanMatchParent, isGreatThanParent, ignoreMatchOffset, firstLineOffset);
                 }
             childLayoutWrapper->Layout();
         }
         firstLine = false;
+    }
+}
+
+void GridRowLayoutAlgorithm::UpdateFirstLineOffset(
+    bool& childTallerThanMatchParent, const bool isGreatThanParent, float ignoreMatchOffset, float& firstLineOffset)
+{
+    childTallerThanMatchParent |= isGreatThanParent;
+    if (GreatNotEqual(ignoreMatchOffset, 0.0f)) {
+        firstLineOffset = ignoreMatchOffset;
+    }
+    if (childTallerThanMatchParent) {
+        firstLineOffset = 0.0f;
     }
 }
 
