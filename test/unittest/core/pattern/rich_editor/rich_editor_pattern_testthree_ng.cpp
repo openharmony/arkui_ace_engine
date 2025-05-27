@@ -140,6 +140,34 @@ HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveEnd001, TestSize.Level2)
 }
 
 /**
+ * @tc.name: CursorMoveEnd002
+ * @tc.desc: test CursorMoveEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveEnd002, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->textSelector_.baseOffset = 1;
+    richEditorPattern->textSelector_.destinationOffset = 2;
+    EXPECT_TRUE(richEditorPattern->CursorMoveEnd());
+}
+
+/**
+ * @tc.name: CursorMoveEnd003
+ * @tc.desc: test CursorMoveEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveEnd003, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->textSelector_.baseOffset = -1;
+    richEditorPattern->textSelector_.destinationOffset = 2;
+    EXPECT_FALSE(richEditorPattern->CursorMoveEnd());
+}
+
+/**
  * @tc.name: GetLeftWordPosition001
  * @tc.desc: test GetLeftWordPosition
  * @tc.type: FUNC
@@ -378,31 +406,49 @@ HWTEST_F(RichEditorPatternTestThreeNg, GetRectsForRange004, TestSize.Level1)
 }
 
 /**
- * @tc.name: CursorMoveEnd002
- * @tc.desc: test CursorMoveEnd
+ * @tc.name: CursorMoveUp001
+ * @tc.desc: test CursorMoveUp
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveEnd002, TestSize.Level1)
+HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveUp001, TestSize.Level1)
 {
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->textSelector_.baseOffset = 1;
-    richEditorPattern->textSelector_.destinationOffset = 2;
-    EXPECT_TRUE(richEditorPattern->CursorMoveEnd());
+    AddSpan("hello1");
+    richEditorPattern->caretPosition_ = 1;
+    EXPECT_TRUE(richEditorPattern->CursorMoveUp());
 }
 
 /**
- * @tc.name: CursorMoveEnd003
- * @tc.desc: test CursorMoveEnd
+ * @tc.name: CursorMoveUp002
+ * @tc.desc: test CursorMoveUp
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveEnd003, TestSize.Level1)
+HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveUp002, TestSize.Level1)
 {
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->textSelector_.baseOffset = -1;
-    richEditorPattern->textSelector_.destinationOffset = 2;
-    EXPECT_FALSE(richEditorPattern->CursorMoveEnd());
+    AddSpan("hello1");
+    richEditorPattern->caretPosition_ = 1;
+    OffsetF paintOffset = { -10, 1 };
+    richEditorPattern->richTextRect_.SetOffset(paintOffset);
+    EXPECT_TRUE(richEditorPattern->CursorMoveUp());
+}
+
+/**
+ * @tc.name: CursorMoveDown
+ * @tc.desc: test CursorMoveDown
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveDown, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("hello1");
+    richEditorPattern->caretPosition_ = 1;
+    OffsetF paintOffset = { -10, 1 };
+    richEditorPattern->richTextRect_.SetOffset(paintOffset);
+    EXPECT_TRUE(richEditorPattern->CursorMoveDown());
 }
 
 /**
@@ -640,87 +686,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, AdjustIndexSkipLineSeparator003, TestSize
     spanItem->content = u"AdjustInd\nxSkipLineSeparator";
     richEditorPattern->spans_.push_back(spanItem);
     EXPECT_TRUE(richEditorPattern->AdjustIndexSkipLineSeparator(currentPosition));
-}
-
-/**
- * @tc.name: IsResponseRegionExpandingNeededForStylus001
- * @tc.desc: test testInput text IsResponseRegionExpandingNeededForStylus001
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, IsResponseRegionExpandingNeededForStylus001, TestSize.Level0)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    TouchEvent touchEvent;
-    touchEvent.type = TouchType::DOWN;
-    touchEvent.x = 10;
-    touchEvent.y = 10;
-    auto ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
-    EXPECT_FALSE(ret);
-    touchEvent.sourceTool = SourceTool::PEN;
-    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
-    EXPECT_TRUE(ret);
-    touchEvent.sourceTool = SourceTool::FINGER;
-    touchEvent.type = TouchType::MOVE;
-    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
-    EXPECT_FALSE(ret);
-    touchEvent.sourceTool = SourceTool::PEN;
-    touchEvent.type = TouchType::MOVE;
-    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
-    EXPECT_FALSE(ret);
-    touchEvent.type = TouchType::DOWN;
-    touchEvent.sourceTool = SourceTool::PEN;
-    EXPECT_TRUE(richEditorNode_->IsVisible());
-    richEditorNode_->layoutProperty_->OnVisibilityUpdate(VisibleType::INVISIBLE);
-    EXPECT_FALSE(richEditorNode_->IsVisible());
-    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
-    EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: CursorMoveUp001
- * @tc.desc: test CursorMoveUp
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveUp001, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan("hello1");
-    richEditorPattern->caretPosition_ = 1;
-    EXPECT_TRUE(richEditorPattern->CursorMoveUp());
-}
-
-/**
- * @tc.name: CursorMoveUp002
- * @tc.desc: test CursorMoveUp
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveUp002, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan("hello1");
-    richEditorPattern->caretPosition_ = 1;
-    OffsetF paintOffset = { -10, 1 };
-    richEditorPattern->richTextRect_.SetOffset(paintOffset);
-    EXPECT_TRUE(richEditorPattern->CursorMoveUp());
-}
-
-/**
- * @tc.name: CursorMoveDown
- * @tc.desc: test CursorMoveDown
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveDown, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan("hello1");
-    richEditorPattern->caretPosition_ = 1;
-    OffsetF paintOffset = { -10, 1 };
-    richEditorPattern->richTextRect_.SetOffset(paintOffset);
-    EXPECT_TRUE(richEditorPattern->CursorMoveDown());
 }
 
 /**

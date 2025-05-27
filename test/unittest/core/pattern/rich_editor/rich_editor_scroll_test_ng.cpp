@@ -430,11 +430,11 @@ HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern002, TestSize.Level1)
 }
 
 /**
- * @tc.name: InitScrollablePattern004
+ * @tc.name: InitScrollablePattern003
  * @tc.desc: test InitScrollablePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern004, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern003, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -449,11 +449,11 @@ HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern004, TestSize.Level1)
 }
 
 /**
- * @tc.name: InitScrollablePattern005
+ * @tc.name: InitScrollablePattern004
  * @tc.desc: test InitScrollablePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern005, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern004, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

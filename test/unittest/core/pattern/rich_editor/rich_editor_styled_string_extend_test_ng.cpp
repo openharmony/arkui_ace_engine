@@ -757,4 +757,5 @@ HWTEST_F(RichEditorStyledStringExtendTestNg, HandleRedoAction001, TestSize.Level
     richEditorPattern->HandleOnRedoAction();
     EXPECT_EQ(richEditorPattern->styledString_->GetString(), EXPECT_STRING_LIST[18]);
 }
+
 } // namespace OHOS::Ace::NG

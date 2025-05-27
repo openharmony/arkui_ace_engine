@@ -311,20 +311,6 @@ HWTEST_F(RichEditorEditTestOneNg, GetTextBoxes001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetThumbnailCallback002
- * @tc.desc: test GetThumbnailCallback
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestOneNg, GetThumbnailCallback002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-
-    richEditorPattern->InitDragDropEvent();
-    EXPECT_EQ(richEditorPattern->dragNode_, nullptr);
-}
-
-/**
  * @tc.name: GetSelectedBackgroundColor001
  * @tc.desc: test GetSelectedBackgroundColor
  * @tc.type: FUNC

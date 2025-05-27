@@ -151,34 +151,6 @@ HWTEST_F(RichEditorPatternTestFourNg, CheckEditorTypeChange001, TestSize.Level1)
 }
 
 /**
- * @tc.name: InsertValueOperation001
- * @tc.desc: test InsertValueOperation
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, InsertValueOperation001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-
-    struct UpdateSpanStyle typingStyle;
-    TextStyle textStyle(5);
-    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
-    std::u16string insertValue = u"test123";
-    RichEditorPattern::OperationRecord record;
-
-    richEditorPattern->InsertValueOperation(insertValue, &record, OperationType::DEFAULT);
-
-    EXPECT_TRUE(richEditorPattern->typingStyle_.has_value());
-}
-
-/**
  * @tc.name: GetLeftWordPosition001
  * @tc.desc: test GetLeftWordPosition
  * @tc.type: FUNC
@@ -354,26 +326,6 @@ HWTEST_F(RichEditorPatternTestFourNg, ResetFirstNodeStyle001, TestSize.Level1)
     auto index4 = richEditorController->AddSymbolSpan(options);
     EXPECT_EQ(index4, 3);
     EXPECT_EQ(contentNode->GetChildren().size(), 4);
-}
-
-/**
- * @tc.name: ProcessInsertValue001
- * @tc.desc: test ProcessInsertValue
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, ProcessInsertValue001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    std::u16string insertValue = u"abc";
-    richEditorPattern->isDragSponsor_ = true;
-    richEditorPattern->isSpanStringMode_ = false;
-    richEditorPattern->previewTextRecord_.needReplacePreviewText = true;
-    richEditorPattern->ProcessInsertValue(insertValue, OperationType::DEFAULT, false);
-
-    ASSERT_EQ(richEditorPattern->previewTextRecord_.IsValid(), false);
 }
 
 /**

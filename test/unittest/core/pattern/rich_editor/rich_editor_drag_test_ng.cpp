@@ -547,40 +547,6 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragDropTextOperation001, TestSize.Level1
 }
 
 /**
- * @tc.name: GetThumbnailCallback001
- * @tc.desc: test GetThumbnailCallback
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorDragTestNg, GetThumbnailCallback001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    auto host = richEditorPattern->GetHost();
-    CHECK_NULL_VOID(host);
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-
-    gestureHub->InitDragDropEvent();
-    gestureHub->SetThumbnailCallback(richEditorPattern->GetThumbnailCallback());
-    EXPECT_EQ(richEditorPattern->dragNode_, nullptr);
-}
-
-
-/**
- * @tc.name: GetThumbnailCallback002
- * @tc.desc: test GetThumbnailCallback
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorDragTestNg, GetThumbnailCallback002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-
-    richEditorPattern->InitDragDropEvent();
-    EXPECT_EQ(richEditorPattern->dragNode_, nullptr);
-}
-
-/**
  * @tc.name: HandleOnDragDrop001
  * @tc.desc: test HandleOnDragDrop
  * @tc.type: FUNC

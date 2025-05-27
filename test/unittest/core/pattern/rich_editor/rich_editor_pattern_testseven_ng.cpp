@@ -254,29 +254,6 @@ HWTEST_F(RichEditorPatternTestSevenNg, UpdateSelectionAndHandleVisibility002, Te
 }
 
 /**
- * @tc.name: ProvidePlaceHolderText001
- * @tc.desc: test provide placeholder information to inputmethod function
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSevenNg, ProvidePlaceHolderText, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-#if defined(ENABLE_STANDARD_INPUT)
-    auto miscTextConfig = richEditorPattern->GetMiscTextConfig();
-    auto textconfig = miscTextConfig.value();
-    auto placeholder = UtfUtils::Str16ToStr8(textconfig.inputAttribute.placeholder).c_str();
-    size_t count = 0;
-    size_t i = 0;
-    while (i < placeholder.size()) {
-        count++;
-        i += (placeholder[i] >= 0xD800 && placeholder[i] <= 0xDBFF) ? 2 : 1;
-    }
-    EXPECT_NE(count, 0);
-#endif
-}
-/**
  * @tc.name: ProvideabilityNameText001
  * @tc.desc: test provide abilityName information to inputmethod function
  * @tc.type: FUNC

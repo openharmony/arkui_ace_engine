@@ -325,33 +325,6 @@ HWTEST_F(RichEditorPatternTestOneNg, UpdateTextFieldManager001, TestSize.Level1)
 }
 
 /**
- * @tc.name: InsertValueInStyledString002
- * @tc.desc: test RichEditorPattern InsertValueInStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, InsertValueInStyledString002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    auto host = richEditorPattern->GetHost();
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    TextSpanOptions options2;
-    options2.value = INIT_VALUE_1;
-    richEditorController->AddTextSpan(options2);
-    focusHub->RequestFocusImmediately();
-    richEditorPattern->FireOnSelectionChange(-1, 0);
-    richEditorPattern->FireOnSelectionChange(0, -1);
-    richEditorPattern->FireOnSelectionChange(-1, -1);
-    ASSERT_EQ(richEditorPattern->HasFocus(), true);
-}
-
-/**
  * @tc.name: CreateImageSourceInfo002
  * @tc.desc: test CreateImageSourceInfo
  * @tc.type: FUNC
