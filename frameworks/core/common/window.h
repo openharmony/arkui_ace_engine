@@ -35,6 +35,10 @@ namespace OHOS::Ace {
 namespace NG {
 class FrameNode;
 } // namespace NG
+
+enum class WidthBreakpoint {WIDTH_XS, WIDTH_SM, WIDTH_MD, WIDTH_LG, WIDTH_XL};
+enum class HeightBreakpoint {HEIGHT_SM, HEIGHT_MD, HEIGHT_LG};
+
 class ACE_EXPORT Window : public std::enable_shared_from_this<Window> {
 public:
     Window() = default;
@@ -236,6 +240,8 @@ public:
 
     void SetForceVsyncRequests(bool forceVsyncRequests);
 
+    WidthBreakpoint GetWidthBreakpoint(const LayoutBreakpoints& breakpoints) const;
+    HeightBreakpoint GetHeightBreakpoint(const LayoutBreakpoints& breakpoints) const;
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
