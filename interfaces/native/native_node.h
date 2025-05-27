@@ -5262,6 +5262,22 @@ typedef enum {
      * @since 15
      */
     NODE_SCROLL_BACK_TO_TOP = 1002021,
+
+    /**
+     * @brief Defines the margin of the scrollbar.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: start margin of the scrollbar, in vp. The default value is <b>0</b>. \n
+     * .value[1].f32: end margin of the scrollbar, in vp. The default value is <b>0</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: start margin of the scrollbar, in vp. \n
+     * .value[1].f32: end margin of the scrollbar, in vp. \n
+     *
+     * @since 20
+     */
+    NODE_SCROLL_BAR_MARGIN = 1002022,
     
     /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and

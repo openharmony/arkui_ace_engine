@@ -6346,7 +6346,7 @@ const ArkUI_AttributeItem* GetScrollBarMargin(ArkUI_NodeHandle node)
     ArkUIInt32orFloat32 values[NUM_2];
     GetFullImpl()->getNodeModifiers()->getScrollableModifier()->getScrollBarMargin(node->uiNodeHandle, &values);
     int index = 0;
-    g_numberValues[index++].f32 = values[NUM_0].i32;
+    g_numberValues[index++].f32 = values[NUM_0].f32;
     g_numberValues[index++].f32 = values[NUM_1].f32;
     g_attributeItem.size = index;
     return &g_attributeItem;
