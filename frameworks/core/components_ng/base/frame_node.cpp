@@ -2930,7 +2930,9 @@ void FrameNode::AddNodeToRegisterTouchTest()
     CHECK_NULL_VOID(eventMgr);
     auto gestureEventHub = GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
-    CHECK_NULL_VOID(gestureEventHub->GetOnTouchTestDoneCallbackForInner());
+    if (!gestureEventHub->GetOnTouchTestDoneCallbackForInner() && !gestureEventHub->GetOnTouchTestDoneCallback()) {
+        return;
+    }
     eventMgr->AddTouchDoneFrameNode(AceType::WeakClaim(this));
 }
 

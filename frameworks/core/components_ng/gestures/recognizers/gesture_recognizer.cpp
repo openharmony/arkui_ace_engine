@@ -57,14 +57,14 @@ bool NGGestureRecognizer::ShouldResponse()
     return true;
 }
 
-bool NGGestureRecognizer::IsPreventDefault() const
+bool NGGestureRecognizer::IsPreventBegin() const
 {
-    return preventDefault_;
+    return preventBegin_;
 }
 
-void NGGestureRecognizer::SetPreventDefault(bool preventDefault)
+void NGGestureRecognizer::SetPreventBegin(bool preventBegin)
 {
-    preventDefault_ = preventDefault;
+    preventBegin_ = preventBegin;
 }
 
 bool NGGestureRecognizer::CheckoutDownFingers(int32_t fingerId) const
@@ -111,7 +111,7 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
     if (!ShouldResponse() || bridgeMode_) {
         return true;
     }
-    if (IsPreventDefault()) {
+    if (IsPreventBegin()) {
         return true;
     }
     auto multiFingerRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(Claim(this));
@@ -190,7 +190,7 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
     if (!ShouldResponse() || bridgeMode_) {
         return true;
     }
-    if (IsPreventDefault()) {
+    if (IsPreventBegin()) {
         return true;
     }
     switch (event.action) {

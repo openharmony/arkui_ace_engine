@@ -103,7 +103,11 @@ struct ArkUI_TextPickerRangeContentArray;
 struct ArkUI_TextCascadePickerRangeContentArray;
 struct ArkUI_EmbeddedComponentOption;
 struct AbilityBase_Want;
-
+struct ArkUIGestureEvent;
+struct ArkUIGestureRecognizer;
+ 
+typedef ArkUIGestureRecognizer* ArkUIGestureRecognizerHandle;
+typedef ArkUIGestureRecognizerHandle* ArkUIGestureRecognizerHandleArray;
 typedef _ArkUINode* ArkUINodeHandle;
 typedef _ArkUIVMContext* ArkUIVMContext;
 typedef _ArkUIPipelineContext* ArkUIPipelineContext;
@@ -2041,6 +2045,9 @@ struct EventBindingInfo {
 };
 
 struct ArkUICommonModifier {
+    ArkUI_Int32 (*setOnTouchTestDoneCallback)(ArkUINodeHandle node, void* userData,
+        void (*touchTestDone)(
+            ArkUIGestureEvent* event, ArkUIGestureRecognizerHandleArray recognizers, int32_t count, void* userData));
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* bgColorRawPtr);
     void (*setBackgroundColorWithColorSpace)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, void* bgColorRawPtr);
@@ -3865,6 +3872,7 @@ struct ArkUIParallelInnerGestureEvent {
 };
 
 struct ArkUIGestureModifier {
+    ArkUI_Int32 (*setPreventBegin)(ArkUIGestureRecognizer* recognizer);
     ArkUIGesture* (*createTapGesture)(ArkUI_Int32 count, ArkUI_Int32 fingers, bool limitFingerCount, void* userData);
     ArkUIGesture* (*createTapGestureWithDistanceThreshold)(
         ArkUI_Int32 count, ArkUI_Int32 fingers, ArkUI_Float64 distanceThreshold, bool limitFingerCount,

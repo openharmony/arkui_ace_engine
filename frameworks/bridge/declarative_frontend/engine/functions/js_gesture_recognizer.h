@@ -129,6 +129,8 @@ public:
 
     void SetEnabled(const JSCallbackInfo& args);
 
+    void PreventBegin(const JSCallbackInfo& args);
+
     void IsEnabled(const JSCallbackInfo& args);
 
     void GetEventTargetInfo(const JSCallbackInfo& args);

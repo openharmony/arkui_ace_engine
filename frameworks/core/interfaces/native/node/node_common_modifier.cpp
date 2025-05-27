@@ -50,6 +50,7 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/interfaces/native/node/node_drag_modifier.h"
+#include "core/interfaces/native/node/node_gesture_modifier.h"
 #include "core/interfaces/native/node/touch_event_convertor.h"
 #include "core/interfaces/native/node/view_model.h"
 
@@ -7441,6 +7442,41 @@ void ResetFreeze(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::SetFreeze(frameNode, false);
 }
+
+ArkUI_Int32 SetOnTouchTestDoneCallback(ArkUINodeHandle node, void* userData,
+    void (*touchTestDone)(
+        ArkUIGestureEvent* event, ArkUIGestureRecognizerHandleArray recognizers, int32_t count, void* userData))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    if (!frameNode) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto callback = [node, userData, touchTestDone](const std::shared_ptr<BaseGestureEvent>& event,
+                        const std::list<RefPtr<NGGestureRecognizer>>& recognizers) {
+        ArkUIAPIEventGestureAsyncEvent gestureEvent;
+        ArkUITouchEvent rawInputEvent;
+        ArkUI_UIInputEvent inputEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID, nullptr };
+        std::array<ArkUITouchPoint, MAX_POINTS> points;
+        NodeModifier::GetBaseGestureEvent(&gestureEvent, rawInputEvent, inputEvent, event, points);
+        ArkUIGestureEvent arkUIGestureEvent { gestureEvent, node };
+        ArkUIGestureRecognizerHandleArray recognizerArray = nullptr;
+        auto count = static_cast<int32_t>(recognizers.size());
+        if (count <= 0) {
+            touchTestDone(&arkUIGestureEvent, recognizerArray, count, userData);
+            return;
+        }
+        recognizerArray = new ArkUIGestureRecognizerHandle[count];
+        int32_t index = 0;
+        for (const auto& value : recognizers) {
+            recognizerArray[index] = NodeModifier::CreateGestureRecognizer(value);
+            index++;
+        }
+        touchTestDone(&arkUIGestureEvent, recognizerArray, count, userData);
+        delete[] recognizerArray;
+    };
+    ViewAbstract::SetOnTouchTestDone(frameNode, callback);
+    return ERROR_CODE_NO_ERROR;
+}
 } // namespace
 
 namespace NodeModifier {
@@ -7452,6 +7488,7 @@ const ArkUICommonModifier* GetCommonModifier()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUICommonModifier modifier = {
+        .setOnTouchTestDoneCallback = SetOnTouchTestDoneCallback,
         .setBackgroundColor = SetBackgroundColor,
         .setBackgroundColorWithColorSpace = SetBackgroundColorWithColorSpace,
         .resetBackgroundColor = ResetBackgroundColor,

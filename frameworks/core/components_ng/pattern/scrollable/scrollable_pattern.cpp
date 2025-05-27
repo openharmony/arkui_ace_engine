@@ -602,7 +602,7 @@ void ScrollablePattern::OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>&
         GestureTypeName type = gestureInfo->GetRecognizerType();
         if (type == GestureTypeName::CLICK || type == GestureTypeName::LONG_PRESS_GESTURE ||
             type == GestureTypeName::TAP_GESTURE) {
-            recognizer->SetPreventDefault(true);
+            recognizer->SetPreventBegin(true);
         }
     }
 }
