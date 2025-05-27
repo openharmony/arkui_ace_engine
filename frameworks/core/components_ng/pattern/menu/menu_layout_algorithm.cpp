@@ -973,15 +973,18 @@ float MenuLayoutAlgorithm::CalcSubMenuMaxHeightConstraint(LayoutWrapper* layoutW
         if (parentPlacement == Placement::TOP_LEFT || parentPlacement == Placement::TOP ||
             parentPlacement == Placement::TOP_RIGHT) {
             float lastMenuItemPositionY = GetLastItemTopPositionY(parentMenu);
-            subMenuMaxHeight = wrapperRect_.Height() - param_.topSecurity - param_.bottomSecurity -
-                (previewBottomPositionY - lastMenuItemPositionY);
+            subMenuMaxHeight = wrapperRect_.Height() - param_.topSecurity - param_.bottomSecurity
+                - paddingBottom_ - paddingTop_
+                - (previewBottomPositionY - lastMenuItemPositionY);
         } else if (parentPlacement == Placement::BOTTOM_LEFT || parentPlacement == Placement::BOTTOM ||
                parentPlacement == Placement::BOTTOM_RIGHT) {
-            subMenuMaxHeight = wrapperRect_.Height() - param_.topSecurity -
-                (parentFirstMenuItemPositionY - previewTopPositionY);
+            subMenuMaxHeight = wrapperRect_.Height() - param_.topSecurity - param_.bottomSecurity
+                - paddingBottom_ - paddingTop_
+                - (parentFirstMenuItemPositionY - previewTopPositionY);
         } else {
-            subMenuMaxHeight = wrapperRect_.Height() - param_.topSecurity -
-                (parentFirstMenuItemPositionY - parentMenu->GetPaintRectOffset(false, true).GetY());
+            subMenuMaxHeight = wrapperRect_.Height() - param_.topSecurity - param_.bottomSecurity
+                - paddingBottom_ - paddingTop_
+                - (parentFirstMenuItemPositionY - parentMenu->GetPaintRectOffset(false, true).GetY());
         }
     } else {
         if (parentPlacement == Placement::TOP_LEFT || parentPlacement == Placement::TOP ||
@@ -992,9 +995,11 @@ float MenuLayoutAlgorithm::CalcSubMenuMaxHeightConstraint(LayoutWrapper* layoutW
                 subMenuMaxHeight = parentMenu->GetGeometryNode()->GetMarginFrameSize().Height();
             }
         } else {
-            subMenuMaxHeight = wrapperRect_.Bottom() + param_.windowsOffsetY - parentFirstMenuItemPositionY;
+            subMenuMaxHeight = wrapperRect_.Bottom() + param_.windowsOffsetY - parentFirstMenuItemPositionY
+                - param_.bottomSecurity - paddingBottom_;
             if (subMenuMaxHeight < parentItem->GetGeometryNode()->GetMarginFrameSize().Height()) {
                 subMenuMaxHeight = wrapperRect_.Bottom() + param_.windowsOffsetY
+                    - param_.bottomSecurity - paddingBottom_
                     - parentMenu->GetPaintRectOffset(false, true).GetY();
             }
         }

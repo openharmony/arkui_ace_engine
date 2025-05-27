@@ -29,7 +29,8 @@ public:
 
 private:
     OffsetF GetSubMenuPosition(const RefPtr<FrameNode>& parentMenuItem, SubMenuExpandingMode expandingMode);
-    float VerticalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize);
+    float VerticalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize,
+        const RefPtr<FrameNode>& parentMenuItem, bool stacked, LayoutWrapper* layoutWrapper);
     float HorizontalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize,
         LayoutWrapper* layoutWrapper = nullptr);
     OffsetF MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>& parentMenuItem, const SizeF& size,
