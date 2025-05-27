@@ -8175,7 +8175,7 @@ export interface CommonMethod {
     customProperty(name: string | undefined, value: Object | undefined): this
     expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this
     background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this
-    backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | BackgroundImageOptions): this
+    backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this
     backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this
     foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this
     focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this
@@ -8200,7 +8200,7 @@ export interface CommonMethod {
     bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ModalTransition | ContentCoverOptions): this
     bindSheet(isShow: boolean | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this
     onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this
-    onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): void
+    onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this
     keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this
 }
 export interface UICommonMethod {
@@ -8529,7 +8529,7 @@ export interface UICommonMethod {
     /** @memo */
     background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this
     /** @memo */
-    backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | BackgroundImageOptions): this
+    backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this
     /** @memo */
     backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this
     /** @memo */
@@ -8579,7 +8579,7 @@ export interface UICommonMethod {
     /** @memo */
     onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this
     /** @memo */
-    onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): void
+    onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this
     /** @memo */
     keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this
     /** @memo */
@@ -9231,7 +9231,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this {
         return this
     }
-    public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | BackgroundImageOptions): this {
+    public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {
         return this
     }
     public backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
@@ -9306,8 +9306,8 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {
         return this
     }
-    public onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): void {
-        throw new Error("Unimplmented")
+    public onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {
+        return this
     }
     public keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {
         return this
@@ -11748,23 +11748,16 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         return this
     }
     /** @memo */
-    public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | BackgroundImageOptions): this {
+    public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {
         if (this.checkPriority("backgroundImage")) {
             const src_type = runtimeType(src)
             const repeat_type = runtimeType(repeat)
-            if (((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type) || (RuntimeType.OBJECT == src_type) || (RuntimeType.UNDEFINED == src_type)) && ((RuntimeType.OBJECT == repeat_type) || (RuntimeType.OBJECT == repeat_type))) {
+            if (((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type) || (RuntimeType.OBJECT == src_type) || (RuntimeType.UNDEFINED == src_type)) && ((RuntimeType.NUMBER == repeat_type) || (RuntimeType.OBJECT == repeat_type))) {
                 const src_casted = src as (ResourceStr | PixelMap | undefined)
                 const repeat_casted = repeat as (ImageRepeat)
                 this.getPeer()?.backgroundImage0Attribute(src_casted, repeat_casted)
                 return this
             }
-            if (((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type) || (RuntimeType.OBJECT == src_type) || (RuntimeType.UNDEFINED == src_type)) && ((RuntimeType.OBJECT == repeat_type) || (RuntimeType.UNDEFINED == repeat_type))) {
-                const src_casted = src as (ResourceStr | PixelMap | undefined)
-                const options_casted = repeat as (BackgroundImageOptions)
-                this.getPeer()?.backgroundImage1Attribute(src_casted, options_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
         }
         return this
     }
@@ -12123,14 +12116,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         return this
     }
     /** @memo */
-    public onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): void {
+    public onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {
         if (this.checkPriority("onVisibleAreaApproximateChange")) {
             const options_casted = options as (VisibleAreaEventOptions | undefined)
             const event_casted = event as (VisibleAreaChangeCallback | undefined)
             this.getPeer()?.onVisibleAreaApproximateChangeAttribute(options_casted, event_casted)
-            return
+            return this
         }
-        return
+        return this
     }
     /** @memo */
     public keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {
