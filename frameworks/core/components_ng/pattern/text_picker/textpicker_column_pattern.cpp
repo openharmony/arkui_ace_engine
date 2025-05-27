@@ -341,6 +341,11 @@ int32_t TextPickerColumnPattern::GetMiddleButtonIndex()
     return GetShowOptionCount() / 2;
 }
 
+void TextPickerColumnPattern::StopHaptic()
+{
+    stopHaptic_ = true;
+}
+
 RefPtr<TouchEventImpl> TextPickerColumnPattern::CreateItemTouchEventListener()
 {
     auto toss = GetToss();
@@ -351,6 +356,11 @@ RefPtr<TouchEventImpl> TextPickerColumnPattern::CreateItemTouchEventListener()
         auto isToss = pattern->GetTossStatus();
         if (info.GetTouches().empty()) {
             return;
+        }
+        if (info.GetSourceTool() == SourceTool::MOUSE) {
+            pattern->stopHaptic_ = true;
+        } else {
+            pattern->stopHaptic_ = false;
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             if (isToss) {
@@ -1844,7 +1854,7 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     offsetCurSet_ = 0.0;
 
     if (hapticController_ && isShow_) {
-        if (isEnableHaptic_ && !isHapticPlayOnce_) {
+        if (isEnableHaptic_ && !isHapticPlayOnce_ && !stopHaptic_) {
             hapticController_->HandleDelta(dragDelta);
         }
     }
@@ -1944,7 +1954,7 @@ bool TextPickerColumnPattern::InnerHandleScroll(
         currentIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
-    if (hapticController_ && isEnableHaptic_) {
+    if (hapticController_ && isEnableHaptic_ && !stopHaptic_) {
         hapticController_->PlayOnce();
     }
     FlushCurrentOptions(isDown, isUpdatePropertiesOnly, isUpdateAnimationProperties);
