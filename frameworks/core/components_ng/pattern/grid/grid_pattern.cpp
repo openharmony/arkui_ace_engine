@@ -900,6 +900,9 @@ float GridPattern::GetTotalHeight() const
         return info_.GetIrregularHeight(mainGap);
     }
     if (props->HasLayoutOptions()) {
+        if (info_.IsAllItemsMeasured()) {
+            return info_.GetTotalLineHeight(mainGap);
+        }
         return info_.GetContentHeight(*props->GetLayoutOptions(), info_.childrenCount_, mainGap);
     }
     return info_.GetContentHeight(mainGap);
