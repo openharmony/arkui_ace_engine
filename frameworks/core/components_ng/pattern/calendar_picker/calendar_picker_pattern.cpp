@@ -1471,7 +1471,7 @@ void CalendarPickerPattern::UpdateTextStyle(const PickerTextStyle& textStyle)
     CHECK_NULL_VOID(pipelineContext);
     auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(calendarTheme);
-    auto pickerProperty = host->GetPaintProperty<CalendarPickerLayoutProperty>();
+    auto pickerProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
 
     if (pipelineContext->IsSystmColorChange()) {
