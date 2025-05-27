@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DATA_PANEL_DATA_PANEL_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DATA_PANEL_DATA_PANEL_PAINT_PROPERTY_H
 
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/data_panel/data_panel_theme.h"
@@ -35,6 +36,56 @@ struct DataPanelShadow {
     {
         return radius == rhs.radius && offsetX == rhs.offsetX && offsetY == rhs.offsetY && colors == rhs.colors &&
                isShadowVisible == rhs.isShadowVisible;
+    }
+
+    struct ResourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, DataPanelShadow&)> updateFunc;
+    };
+    std::unordered_map<std::string, ResourceUpdater> resMap_;
+
+    void AddResource(const std::string& key, const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, DataPanelShadow&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = { resObj, std::move(updateFunc) };
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
+        for (auto& grad : colors) {
+            grad.ReloadResources();
+        }
+    }
+
+    void SetIsShadowVisible(bool isVisible)
+    {
+        isShadowVisible = isVisible;
+    }
+
+    void SetRadius(double radiusValue)
+    {
+        radius = radiusValue;
+    }
+
+    void SetOffsetX(double offsetXValue)
+    {
+        offsetX = offsetXValue;
+    }
+
+    void SetOffsetY(double offsetYValue)
+    {
+        offsetY = offsetYValue;
+    }
+
+    void SetColors(const std::vector<Gradient>& colorList)
+    {
+        colors = colorList;
     }
 };
 class DataPanelPaintProperty : public PaintProperty {

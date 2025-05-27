@@ -44,6 +44,9 @@ enum class JsProgressResourceType {
     BackgroundColor,
     FontSize,
     FontWeight,
+    PSStrokeWidth,
+    PSScaleWidth,
+    Text,
 };
 class ACE_FORCE_EXPORT ProgressModel {
 public:

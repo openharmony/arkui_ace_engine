@@ -798,6 +798,12 @@ void ProgressModelNG::CreateWithResourceObj(JsProgressResourceType type, const R
         SetBackgroundColorResource(resObj);
     } else if (type == JsProgressResourceType::FontWeight) {
         SetFontWeightResource(resObj);
+    } else if (type == JsProgressResourceType::PSStrokeWidth) {
+        SetRSStrokeWidth(resObj);
+    } else if (type == JsProgressResourceType::PSScaleWidth) {
+        SetRSScaleWidth(resObj);
+    } else if (type == JsProgressResourceType::Text) {
+        SetTextResource(resObj);
     }
 }
 
@@ -1208,6 +1214,87 @@ void ProgressModelNG::SetFontWeightResource(const RefPtr<ResourceObject>& resObj
             auto theme = pipeline->GetTheme<TextTheme>();
             CHECK_NULL_VOID(theme);
             SetFontWeight(AceType::RawPtr(node), theme->GetTextStyle().GetFontWeight());
+        }
+    };
+    updateFunc(resObj, true);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void ProgressModelNG::SetRSStrokeWidth(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "progress.style.strokeWidth";
+    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto node = pattern->GetHost();
+        CHECK_NULL_VOID(node);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+        CHECK_NULL_VOID(progressTheme);
+        CalcDimension width;
+        bool parseOK = false;
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            parseOK = ResourceParseUtils::ParseResDimensionVpNG(resObj, width);
+        } else {
+            parseOK = ResourceParseUtils::ParseResDimensionVp(resObj, width);
+        }
+        if (!parseOK || LessOrEqual(width.Value(), 0.0f) || width.Unit() == DimensionUnit::PERCENT) {
+            width = progressTheme->GetTrackThickness();
+        }
+        SetStrokeWidth(AceType::RawPtr(node), width);
+    };
+    updateFunc(resObj, true);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void ProgressModelNG::SetRSScaleWidth(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "progress.style.scaleWidth";
+    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto node = pattern->GetHost();
+        CHECK_NULL_VOID(node);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+        CHECK_NULL_VOID(progressTheme);
+        CalcDimension width;
+        bool parseOK = false;
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            parseOK = ResourceParseUtils::ParseResDimensionVpNG(resObj, width);
+        } else {
+            parseOK = ResourceParseUtils::ParseResDimensionVp(resObj, width);
+        }
+        if (!parseOK || LessOrEqual(width.Value(), 0.0f) || width.Unit() == DimensionUnit::PERCENT) {
+            width = progressTheme->GetScaleWidth();
+        }
+        SetScaleWidth(AceType::RawPtr(node), width);
+    };
+    updateFunc(resObj, true);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void ProgressModelNG::SetTextResource(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "progress.text";
+    auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+        auto node = pattern->GetHost();
+        CHECK_NULL_VOID(node);
+        std::string text;
+        if (ResourceParseUtils::ParseResString(obj, text)) {
+            SetText(AceType::RawPtr(node), text);
+        } else {
+            SetText(AceType::RawPtr(node), std::nullopt);
         }
     };
     updateFunc(resObj, true);

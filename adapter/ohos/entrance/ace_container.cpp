@@ -3234,6 +3234,10 @@ void AceContainer::UpdateColorMode(uint32_t colorMode)
 {
     ACE_SCOPED_TRACE("AceContainer::UpdateColorMode %u", colorMode);
     CHECK_NULL_VOID(pipelineContext_);
+    if (SystemProperties::ConfigChangePerform()) {
+        pipelineContext_->ClearImageCache();
+        NG::ImageDecoder::ClearPixelMapCache();
+    }
     auto themeManager = pipelineContext_->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     if (!IsUseCustomBg() && !IsTransparentBg()) {

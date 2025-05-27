@@ -228,8 +228,10 @@ void JSProgress::JsSetProgressStyleOptions(const JSCallbackInfo& info)
     CHECK_NULL_VOID(theme);
 
     CalcDimension strokeWidthDimension;
+    RefPtr<ResourceObject> strokeWidthResObj;
     auto jsStrokeWidth = paramObject->GetProperty(attrsProgressStrokeWidth);
-    if (!CheckLength(jsStrokeWidth, strokeWidthDimension, V2::PROGRESS_ETS_TAG, attrsProgressStrokeWidth)) {
+    if (!CheckLength(
+            jsStrokeWidth, strokeWidthDimension, V2::PROGRESS_ETS_TAG, attrsProgressStrokeWidth, strokeWidthResObj)) {
         strokeWidthDimension = theme->GetTrackThickness();
     }
 
@@ -237,7 +239,11 @@ void JSProgress::JsSetProgressStyleOptions(const JSCallbackInfo& info)
         strokeWidthDimension = theme->GetTrackThickness();
     }
 
-    ProgressModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
+    if (SystemProperties::ConfigChangePerform() && strokeWidthResObj) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::PSStrokeWidth, strokeWidthResObj);
+    } else {
+        ProgressModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
+    }
 
     auto jsScaleCount = paramObject->GetProperty("scaleCount");
     auto scaleCount = jsScaleCount->IsNumber() ? jsScaleCount->ToNumber<int32_t>() : theme->GetScaleNumber();
@@ -248,8 +254,9 @@ void JSProgress::JsSetProgressStyleOptions(const JSCallbackInfo& info)
     }
 
     CalcDimension scaleWidthDimension;
+    RefPtr<ResourceObject> scaleWidthResObj;
     auto jsScaleWidth = paramObject->GetProperty(attrsProgressScaleWidth);
-    if (!CheckLength(jsScaleWidth, scaleWidthDimension, V2::PROGRESS_ETS_TAG, attrsProgressScaleWidth)) {
+    if (!CheckLength(jsScaleWidth, scaleWidthDimension, V2::PROGRESS_ETS_TAG, attrsProgressScaleWidth, scaleWidthResObj)) {
         scaleWidthDimension = theme->GetScaleWidth();
     }
 
@@ -257,8 +264,11 @@ void JSProgress::JsSetProgressStyleOptions(const JSCallbackInfo& info)
         scaleWidthDimension.Unit() == DimensionUnit::PERCENT) {
         scaleWidthDimension = theme->GetScaleWidth();
     }
-
-    ProgressModel::GetInstance()->SetScaleWidth(scaleWidthDimension);
+    if (SystemProperties::ConfigChangePerform() && scaleWidthResObj) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::PSScaleWidth, scaleWidthResObj);
+    } else {
+        ProgressModel::GetInstance()->SetScaleWidth(scaleWidthDimension);
+    }
 }
 
 NG::ProgressStatus JSProgress::ConvertStrToProgressStatus(const std::string& value)
@@ -393,13 +403,20 @@ void JSProgress::JsSetCapsuleStyle(const JSCallbackInfo& info)
     }
 
     auto jsContext = paramObject->GetProperty("content");
+    RefPtr<ResourceObject> textResObj;
     std::string text;
-    if (jsContext->IsUndefined() || jsContext->IsNull() || (!ParseJsString(jsContext, text))) {
+    if (jsContext->IsUndefined() || jsContext->IsNull()) {
         ProgressModel::GetInstance()->SetText(std::nullopt);
     } else {
-        ProgressModel::GetInstance()->SetText(text);
+        bool parseOk = ParseJsString(jsContext, text, textResObj);
+        if (SystemProperties::ConfigChangePerform() && jsContext->IsObject() && textResObj) {
+            ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::Text, textResObj);
+        } else if (parseOk) {
+            ProgressModel::GetInstance()->SetText(text);
+        } else {
+            ProgressModel::GetInstance()->SetText(std::nullopt);
+        }
     }
-
     JsSetFontStyle(info);
     JsSetBorderRadius(paramObject);
 }

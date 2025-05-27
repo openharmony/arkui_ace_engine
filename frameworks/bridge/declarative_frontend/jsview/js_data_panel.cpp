@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/data_panel_model_impl.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/data_panel/data_panel_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model.h"
@@ -260,13 +261,12 @@ void JSDataPanel::ShadowOption(const JSCallbackInfo& info)
         JSRef<JSVal> jsRadius = paramObject->GetProperty("radius");
         JSRef<JSVal> jsOffsetX = paramObject->GetProperty("offsetX");
         JSRef<JSVal> jsOffsetY = paramObject->GetProperty("offsetY");
-        ParseJsDouble(jsRadius, radius);
-        if (NonPositive(radius)) {
-            radius = theme->GetTrackShadowRadius().ConvertToVp();
-        }
-        ParseJsDouble(jsOffsetX, offsetX);
-        ParseJsDouble(jsOffsetY, offsetY);
-
+        RefPtr<ResourceObject> resR;
+        RefPtr<ResourceObject> resX;
+        RefPtr<ResourceObject> resY;
+        HandleShadowRadius(jsRadius, radius, resR, shadow);
+        HandleShadowOffsetX(jsOffsetX, offsetX, resX, shadow);
+        HandleShadowOffsetY(jsOffsetY, offsetY, resY, shadow);
         auto colors = paramObject->GetProperty("colors");
         if (!colors->IsArray()) {
             shadow.radius = radius;
@@ -276,18 +276,7 @@ void JSDataPanel::ShadowOption(const JSCallbackInfo& info)
             DataPanelModel::GetInstance()->SetShadowOption(shadow);
             return;
         }
-        shadowColors.clear();
-        auto colorsArray = JSRef<JSArray>::Cast(colors);
-        for (size_t i = 0; i < colorsArray->Length(); ++i) {
-            auto item = colorsArray->GetValueAt(i);
-            OHOS::Ace::NG::Gradient gradient;
-            if (!ConvertGradientColor(item, gradient)) {
-                shadowColors.clear();
-                ConvertThemeColor(shadowColors);
-                break;
-            }
-            shadowColors.emplace_back(gradient);
-        }
+        ParseShadowColors(colors, shadowColors);
     }
 
     shadow.radius = radius;
@@ -324,8 +313,26 @@ bool JSDataPanel::ConvertGradientColor(const JsiRef<JsiValue>& itemParam, OHOS::
 bool JSDataPanel::ConvertResourceColor(const JsiRef<JsiValue>& itemParam, OHOS::Ace::NG::Gradient& gradient)
 {
     Color color;
-    if (!ParseJsColor(itemParam, color)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(itemParam, color, resObj)) {
         return false;
+    }
+
+    if (resObj && SystemProperties::ConfigChangePerform()) {
+        std::string key = "gradient.Color";
+        gradient.AddResource(key, resObj, [](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
+            Color color;
+            ResourceParseUtils::ParseResColor(resObj, color);
+            gradient.ClearColors();
+            NG::GradientColor startColor;
+            startColor.SetLinearColor(LinearColor(color));
+            startColor.SetDimension(Dimension(0.0));
+            NG::GradientColor endColor;
+            endColor.SetLinearColor(LinearColor(color));
+            endColor.SetDimension(Dimension(1.0));
+            gradient.AddColor(startColor);
+            gradient.AddColor(endColor);
+        });
     }
     OHOS::Ace::NG::GradientColor gradientColorStart;
     gradientColorStart.SetLinearColor(LinearColor(color));
@@ -374,6 +381,77 @@ void JSDataPanel::BorderRadius(const JSCallbackInfo& info)
             return;
         }
         JSViewAbstract::ParseBorderRadius(info[0]);
+    }
+}
+
+void JSDataPanel::ParseShadowColors(const JSRef<JSVal>& colors, std::vector<OHOS::Ace::NG::Gradient>& shadowColors)
+{
+    shadowColors.clear();
+    auto colorsArray = JSRef<JSArray>::Cast(colors);
+    for (size_t i = 0; i < colorsArray->Length(); ++i) {
+        auto item = colorsArray->GetValueAt(i);
+        OHOS::Ace::NG::Gradient gradient;
+        if (!ConvertGradientColor(item, gradient)) {
+            shadowColors.clear();
+            ConvertThemeColor(shadowColors);
+            break;
+        }
+        shadowColors.emplace_back(gradient);
+    }
+}
+
+void JSDataPanel::HandleShadowRadius(
+    const JSRef<JSVal>& jsRadius, double& radius, RefPtr<ResourceObject>& resR, OHOS::Ace::NG::DataPanelShadow& shadow)
+{
+    RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+    ParseJsDouble(jsRadius, radius, resR);
+    if (resR && SystemProperties::ConfigChangePerform()) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resRadius, OHOS::Ace::NG::DataPanelShadow& shadow) {
+            RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+            double radius = theme->GetTrackShadowRadius().ConvertToVp();
+            ResourceParseUtils::ParseResDouble(resRadius, radius);
+            if (NonPositive(radius)) {
+                radius = theme->GetTrackShadowRadius().ConvertToVp();
+            }
+            shadow.SetRadius(radius);
+        };
+        shadow.AddResource("shadow.radius", resR, std::move(updateFunc));
+    } else {
+        if (NonPositive(radius)) {
+            radius = theme->GetTrackShadowRadius().ConvertToVp();
+        }
+    }
+}
+
+void JSDataPanel::HandleShadowOffsetX(const JSRef<JSVal>& jsOffsetX, double& offsetX, RefPtr<ResourceObject>& resX,
+    OHOS::Ace::NG::DataPanelShadow& shadow)
+{
+    RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+    ParseJsDouble(jsOffsetX, offsetX, resX);
+    if (resX && SystemProperties::ConfigChangePerform()) {
+        auto&& updateFuncX = [](const RefPtr<ResourceObject>& resObj, OHOS::Ace::NG::DataPanelShadow& shadow) {
+            RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+            double val = theme->GetTrackShadowOffsetX().ConvertToVp();
+            ResourceParseUtils::ParseResDouble(resObj, val);
+            shadow.SetOffsetX(val);
+        };
+        shadow.AddResource("shadow.offsetX", resX, std::move(updateFuncX));
+    }
+}
+
+void JSDataPanel::HandleShadowOffsetY(const JSRef<JSVal>& jsOffsetY, double& offsetY, RefPtr<ResourceObject>& resY,
+    OHOS::Ace::NG::DataPanelShadow& shadow)
+{
+    RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+    ParseJsDouble(jsOffsetY, offsetY, resY);
+    if (resY && SystemProperties::ConfigChangePerform()) {
+        auto&& updateFuncY = [](const RefPtr<ResourceObject>& resObj, OHOS::Ace::NG::DataPanelShadow& shadow) {
+            RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+            double val = theme->GetTrackShadowOffsetY().ConvertToVp();
+            ResourceParseUtils::ParseResDouble(resObj, val);
+            shadow.SetOffsetY(val);
+        };
+        shadow.AddResource("shadow.offsetY", resY, std::move(updateFuncY));
     }
 }
 } // namespace OHOS::Ace::Framework

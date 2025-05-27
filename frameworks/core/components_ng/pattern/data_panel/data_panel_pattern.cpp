@@ -159,4 +159,17 @@ void DataPanelPattern::UpdateStrokeWidth(const CalcDimension& strokeWidth, bool 
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
+
+void DataPanelPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (host->GetRerenderable()) {
+        host->MarkModifyDone();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
 } // namespace OHOS::Ace::NG
