@@ -338,23 +338,22 @@ void GetGestureEvent(ArkUIAPIEventGestureAsyncEvent& ret, GestureEvent& info)
     ret.source = static_cast<int32_t>(info.GetSourceDevice());
     ret.targetDisplayId = info.GetTargetDisplayId();
     ret.inputEventType = ConvertInputEventTypeToArkuiUIInputEventType(info.GetInputEventType());
-    if (info.GetInputEventType() == InputEventType::KEYBOARD) {
-        ret.deviceId = info.GetDeviceId();
-    }
 }
 
 int32_t GetPointerEventAction(InputEventType type, std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
-    CHECK_NULL_RETURN(pointerEvent, 0);
     if (type == InputEventType::AXIS) {
+        CHECK_NULL_RETURN(pointerEvent, static_cast<int32_t>(AxisAction::NONE));
         return static_cast<int32_t>(NG::GetAxisEventType(pointerEvent));
     }
     if (type == InputEventType::MOUSE_BUTTON) {
+        CHECK_NULL_RETURN(pointerEvent, static_cast<int32_t>(MouseAction::NONE));
         return static_cast<int32_t>(NG::GetMouseEventType(pointerEvent));
     }
     if (type == InputEventType::KEYBOARD) {
         return static_cast<int32_t>(KeyAction::DOWN);
     }
+    CHECK_NULL_RETURN(pointerEvent, static_cast<int32_t>(TouchType::UNKNOWN));
     return static_cast<int32_t>(NG::GetTouchEventType(pointerEvent));
 }
 

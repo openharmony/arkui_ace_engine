@@ -81,12 +81,6 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
 
 void SetTouchEventType(int32_t orgAction, TouchEvent& event);
 
-TouchType ConvertTouchEventType(int32_t originAction);
-
-MouseAction ConvertMouseEventAction(int32_t originAction);
-
-AxisAction ConvertAxisEventAction(int32_t originAction);
-
 // when the event didn't do touchtest, useRealtimeMatrix need to set true to get current matrix.
 void CalculatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& point, const RefPtr<NG::FrameNode>& frameNode,
     bool useRealtimeMatrix = false);

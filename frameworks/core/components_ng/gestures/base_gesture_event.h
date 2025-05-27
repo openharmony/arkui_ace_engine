@@ -82,9 +82,9 @@ public:
 
 protected:
     std::list<FingerInfo> fingerList_;
-    InputEventType rawInputEventType_;
+    InputEventType rawInputEventType_  = InputEventType::TOUCH_SCREEN;
     std::shared_ptr<MMI::PointerEvent> rawInputEvent_;
-    int64_t rawInputDeviceId_;
+    int64_t rawInputDeviceId_ = 0;
     std::optional<int32_t> lastAction_;
 };
 

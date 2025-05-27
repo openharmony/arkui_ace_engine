@@ -27,6 +27,81 @@ constexpr int32_t ANGLE_90 = 90;
 constexpr int32_t ANGLE_180 = 180;
 constexpr int32_t ANGLE_270 = 270;
 constexpr double SIZE_DIVIDE = 2.0;
+
+TouchType ConvertTouchEventType(int32_t originAction)
+{
+    std::map<int32_t, TouchType> actionMap = {
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL, TouchType::CANCEL },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN, TouchType::DOWN },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE, TouchType::MOVE },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_UP, TouchType::UP },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN, TouchType::PULL_DOWN },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE, TouchType::PULL_MOVE },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP, TouchType::PULL_UP },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW, TouchType::PULL_IN_WINDOW },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW, TouchType::PULL_OUT_WINDOW },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER, TouchType::HOVER_ENTER },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_MOVE, TouchType::HOVER_MOVE },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_EXIT, TouchType::HOVER_EXIT },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_CANCEL, TouchType::HOVER_CANCEL },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PROXIMITY_IN, TouchType::PROXIMITY_IN },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PROXIMITY_OUT, TouchType::PROXIMITY_OUT },
+    };
+    auto typeIter = actionMap.find(originAction);
+    if (typeIter == actionMap.end()) {
+        return TouchType::UNKNOWN;
+    }
+    return typeIter->second;
+}
+
+MouseAction ConvertMouseEventAction(int32_t originAction)
+{
+    switch (originAction) {
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
+            return MouseAction::PRESS;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
+            return MouseAction::RELEASE;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW:
+            return MouseAction::WINDOW_ENTER;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW:
+            return MouseAction::WINDOW_LEAVE;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE:
+            return MouseAction::MOVE;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN:
+            return MouseAction::PRESS;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
+            return MouseAction::MOVE;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW:
+            return MouseAction::WINDOW_ENTER;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW:
+            return MouseAction::WINDOW_LEAVE;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
+            return MouseAction::RELEASE;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
+            return MouseAction::CANCEL;
+        default:
+            return MouseAction::NONE;
+    }
+}
+
+AxisAction ConvertAxisEventAction(int32_t originAction)
+{
+    switch (originAction) {
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN:
+            return AxisAction::BEGIN;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_UPDATE:
+            return AxisAction::UPDATE;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_END:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_END:
+            return AxisAction::END;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
+            return AxisAction::CANCEL;
+        default:
+            return AxisAction::NONE;
+    }
+}
 } // namespace
 
 SourceTool GetSourceTool(int32_t orgToolType)
@@ -254,73 +329,17 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     return event;
 }
 
-TouchType ConvertTouchEventType(int32_t originAction)
-{
-    std::map<int32_t, TouchType> actionMap = {
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL, TouchType::CANCEL },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN, TouchType::DOWN },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE, TouchType::MOVE },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_UP, TouchType::UP },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN, TouchType::PULL_DOWN },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE, TouchType::PULL_MOVE },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP, TouchType::PULL_UP },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW, TouchType::PULL_IN_WINDOW },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW, TouchType::PULL_OUT_WINDOW },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER, TouchType::HOVER_ENTER },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_MOVE, TouchType::HOVER_MOVE },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_EXIT, TouchType::HOVER_EXIT },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_CANCEL, TouchType::HOVER_CANCEL },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_PROXIMITY_IN, TouchType::PROXIMITY_IN },
-        { OHOS::MMI::PointerEvent::POINTER_ACTION_PROXIMITY_OUT, TouchType::PROXIMITY_OUT },
-    };
-    auto typeIter = actionMap.find(originAction);
-    if (typeIter == actionMap.end()) {
-        return TouchType::UNKNOWN;
-    }
-    return typeIter->second;
-}
-
 void SetTouchEventType(int32_t orgAction, TouchEvent& event)
 {
     auto touchType = ConvertTouchEventType(orgAction);
     if (touchType == TouchType::UNKNOWN) {
-        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "unknown touch type");
+        TAG_LOGE(AceLogTag::ACE_INPUTKEYFLOW, "unknown touch type");
         return;
     }
     event.type = touchType;
     if (touchType == TouchType::PULL_DOWN || touchType == TouchType::PULL_MOVE || touchType == TouchType::PULL_UP ||
         touchType == TouchType::PULL_IN_WINDOW || touchType == TouchType::PULL_OUT_WINDOW) {
         event.pullType = touchType;
-    }
-}
-
-MouseAction ConvertMouseEventAction(int32_t originAction)
-{
-    switch (originAction) {
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
-            return MouseAction::PRESS;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
-            return MouseAction::RELEASE;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW:
-            return MouseAction::WINDOW_ENTER;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW:
-            return MouseAction::WINDOW_LEAVE;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE:
-            return MouseAction::MOVE;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN:
-            return MouseAction::PRESS;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
-            return MouseAction::MOVE;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW:
-            return MouseAction::WINDOW_ENTER;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW:
-            return MouseAction::WINDOW_LEAVE;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
-            return MouseAction::RELEASE;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
-            return MouseAction::CANCEL;
-        default:
-            return MouseAction::NONE;
     }
 }
 
@@ -422,25 +441,6 @@ void ConvertMouseEvent(
     events.pressedKeyCodes_.clear();
     for (const auto& curCode : pointerEvent->GetPressedKeys()) {
         events.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(curCode));
-    }
-}
-
-AxisAction ConvertAxisEventAction(int32_t originAction)
-{
-    switch (originAction) {
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN:
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN:
-            return AxisAction::BEGIN;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE:
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_UPDATE:
-            return AxisAction::UPDATE;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_END:
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_END:
-            return AxisAction::END;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
-            return AxisAction::CANCEL;
-        default:
-            return AxisAction::NONE;
     }
 }
 
@@ -987,21 +987,23 @@ void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr
     }
 }
 
-
 TouchType GetTouchTypeFromPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    CHECK_NULL_RETURN(pointerEvent, TouchType::UNKNOWN);
     auto pointerAction = pointerEvent->GetPointerAction();
     return ConvertTouchEventType(pointerAction);
 }
 
 AxisAction GetAxisActionFromPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    CHECK_NULL_RETURN(pointerEvent, AxisAction::NONE);
     auto pointerAction = pointerEvent->GetPointerAction();
     return ConvertAxisEventAction(pointerAction);
 }
 
 MouseAction GetMouseActionFromPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    CHECK_NULL_RETURN(pointerEvent, MouseAction::NONE);
     auto pointerAction = pointerEvent->GetPointerAction();
     return ConvertMouseEventAction(pointerAction);
 }
