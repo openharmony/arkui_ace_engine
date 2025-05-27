@@ -163,7 +163,8 @@ HWTEST_F(NavRouterModifierTest, setModeTestValidValues, TestSize.Level1)
     auto inputValueModeMode = ARK_NAV_ROUTE_MODE_PUSH_WITH_RECREATE;
 
     // Test
-    modifier_->setMode(node_, inputValueModeMode);
+    auto optInputValueModeMode = Converter::ArkValue<Opt_NavRouteMode>(inputValueModeMode);
+    modifier_->setMode(node_, &optInputValueModeMode);
 
     // Initial verification
     jsonValue = GetJsonValue(node_);
@@ -172,13 +173,15 @@ HWTEST_F(NavRouterModifierTest, setModeTestValidValues, TestSize.Level1)
 
     // Verifying attribute's other values
     inputValueModeMode = ARK_NAV_ROUTE_MODE_PUSH;
-    modifier_->setMode(node_, inputValueModeMode);
+    optInputValueModeMode = Converter::ArkValue<Opt_NavRouteMode>(inputValueModeMode);
+    modifier_->setMode(node_, &optInputValueModeMode);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MODE_MODE_NAME);
     EXPECT_EQ(resultStr, "NavRouteMode.PUSH");
 
     inputValueModeMode = ARK_NAV_ROUTE_MODE_REPLACE;
-    modifier_->setMode(node_, inputValueModeMode);
+    optInputValueModeMode = Converter::ArkValue<Opt_NavRouteMode>(inputValueModeMode);
+    modifier_->setMode(node_, &optInputValueModeMode);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MODE_MODE_NAME);
     EXPECT_EQ(resultStr, "NavRouteMode.REPLACE");
@@ -197,7 +200,8 @@ HWTEST_F(NavRouterModifierTest, setModeTestInvalidValues, TestSize.Level1)
     auto inputValueModeMode = static_cast<Ark_NavRouteMode>(3);
 
     // Test
-    modifier_->setMode(node_, inputValueModeMode);
+    auto optInputValueModeMode = Converter::ArkValue<Opt_NavRouteMode>(inputValueModeMode);
+    modifier_->setMode(node_, &optInputValueModeMode);
 
     // Initial verification
     jsonValue = GetJsonValue(node_);

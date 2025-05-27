@@ -96,7 +96,8 @@ HWTEST_F(NavDestinationModifierTest, setModeTestValidValues, TestSize.Level1)
     inputValueMode = initValueMode;
     for (auto&& value: modeModeValidValues) {
         inputValueMode = std::get<1>(value);
-        modifier_->setMode(node_, inputValueMode);
+        auto optInputValueMode = Converter::ArkValue<Opt_NavDestinationMode>(inputValueMode);
+        modifier_->setMode(node_, &optInputValueMode);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MODE_NAME);
         expectedStr = std::get<2>(value);
@@ -146,7 +147,8 @@ HWTEST_F(NavDestinationModifierTest, setHideTitleBar0TestValidValues, TestSize.L
     inputValueHideTitleBar = initValueHideTitleBar;
     for (auto&& value: hideTitleBarHideTitleBarValidValues) {
         inputValueHideTitleBar = std::get<1>(value);
-        modifier_->setHideTitleBar0(node_, inputValueHideTitleBar);
+        auto optInputValueHideTitleBar = Converter::ArkValue<Opt_Boolean>(inputValueHideTitleBar);
+        modifier_->setHideTitleBar0(node_, &optInputValueHideTitleBar);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HIDE_TITLE_BAR_NAME);
         expectedStr = std::get<2>(value);
@@ -185,7 +187,9 @@ HWTEST_F(NavDestinationModifierTest, setHideTitleBar1TestValidValues, TestSize.L
         inputValueHideTitleBar = std::get<1>(value);
         for (auto&& animated: animatedHideTitleBarValidValues) {
             inputValueAnimated = std::get<1>(animated);
-            modifier_->setHideTitleBar1(node_, inputValueHideTitleBar, inputValueAnimated);
+            auto optInputValueHideTitleBar = Converter::ArkValue<Opt_Boolean>(inputValueHideTitleBar);
+            auto optInputValueAnimated = Converter::ArkValue<Opt_Boolean>(inputValueAnimated);
+            modifier_->setHideTitleBar1(node_, &optInputValueHideTitleBar, &optInputValueAnimated);
             jsonValue = GetJsonValue(node_);
             resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HIDE_TITLE_BAR_NAME);
             expectedStr = std::get<2>(value);
@@ -272,7 +276,8 @@ HWTEST_F(NavDestinationModifierTest, setOnBackPressedTest, TestSize.Level1)
         CallbackHelper(cbReturn).InvokeSync(param);
     };
     auto arkFunc = Converter::ArkValue<Callback_Boolean>(nullptr, onBackPressed, expectedResId);
-    modifier_->setOnBackPressed(node_, &arkFunc);
+    auto optFunc = Converter::ArkValue<Opt_Callback_Boolean>(arkFunc);
+    modifier_->setOnBackPressed(node_, &optFunc);
     auto called = eventHub->FireOnBackPressedEvent();
     EXPECT_TRUE(called);
 }

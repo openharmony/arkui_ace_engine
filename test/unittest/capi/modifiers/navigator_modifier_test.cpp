@@ -158,23 +158,20 @@ HWTEST_F(NavigatorModifierTest, DISABLED_setActiveTestDefaultValues, TestSize.Le
 HWTEST_F(NavigatorModifierTest, setActiveTestValidValues, TestSize.Level1)
 {
     std::string resultStr;
-    Ark_Boolean inputValueActive;
 
     ASSERT_NE(modifier_->setActive, nullptr);
 
-    // Initial setup
-    inputValueActive = Converter::ArkValue<Ark_Boolean>(true);
-
     // Test
-    modifier_->setActive(node_, inputValueActive);
+    auto optInputValueActive = Converter::ArkValue<Opt_Boolean>(true);
+    modifier_->setActive(node_, &optInputValueActive);
 
     // Initial verification
     resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_ACTIVE_NAME);
     EXPECT_EQ(resultStr, "true");
 
     // Verifying attribute's other values
-    inputValueActive = Converter::ArkValue<Ark_Boolean>(false);
-    modifier_->setActive(node_, inputValueActive);
+    optInputValueActive = Converter::ArkValue<Opt_Boolean>(false);
+    modifier_->setActive(node_, &optInputValueActive);
     resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_ACTIVE_NAME);
     EXPECT_EQ(resultStr, "false");
 }
@@ -199,15 +196,12 @@ HWTEST_F(NavigatorModifierTest, setTypeTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    Ark_NavigationType inputValueType;
 
     ASSERT_NE(modifier_->setType, nullptr);
 
-    // Initial setup
-    inputValueType = ARK_NAVIGATION_TYPE_PUSH;
-
     // Test
-    modifier_->setType(node_, inputValueType);
+    auto optInputValueType = Converter::ArkValue<Opt_NavigationType>(ARK_NAVIGATION_TYPE_PUSH);
+    modifier_->setType(node_, &optInputValueType);
 
     // Initial verification
     jsonValue = GetJsonValue(node_);
@@ -215,14 +209,14 @@ HWTEST_F(NavigatorModifierTest, setTypeTestValidValues, TestSize.Level1)
     EXPECT_EQ(resultStr, "NavigationType.Push");
 
     // Verifying attribute's other values
-    inputValueType = ARK_NAVIGATION_TYPE_BACK;
-    modifier_->setType(node_, inputValueType);
+    optInputValueType = Converter::ArkValue<Opt_NavigationType>(ARK_NAVIGATION_TYPE_BACK);
+    modifier_->setType(node_, &optInputValueType);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
     EXPECT_EQ(resultStr, "NavigationType.Back");
 
-    inputValueType = ARK_NAVIGATION_TYPE_REPLACE;
-    modifier_->setType(node_, inputValueType);
+    optInputValueType = Converter::ArkValue<Opt_NavigationType>(ARK_NAVIGATION_TYPE_REPLACE);
+    modifier_->setType(node_, &optInputValueType);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
     EXPECT_EQ(resultStr, "NavigationType.Replace");
@@ -237,15 +231,12 @@ HWTEST_F(NavigatorModifierTest, DISABLED_setTypeTestInvalidValues, TestSize.Leve
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    Ark_NavigationType inputValueType;
 
     ASSERT_NE(modifier_->setType, nullptr);
 
-    // Initial setup
-    inputValueType = static_cast<Ark_NavigationType>(INT_MIN);
-
     // Test
-    modifier_->setType(node_, inputValueType);
+    auto optInputValueType = Converter::ArkValue<Opt_NavigationType>(static_cast<Ark_NavigationType>(-1));
+    modifier_->setType(node_, &optInputValueType);
 
     // Initial verification
     jsonValue = GetJsonValue(node_);
@@ -276,15 +267,12 @@ HWTEST_F(NavigatorModifierTest, setTargetTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    Ark_String inputValueTarget;
 
     ASSERT_NE(modifier_->setTarget, nullptr);
 
-    // Initial setup
-    inputValueTarget = Converter::ArkValue<Ark_String>("");
-
     // Test
-    modifier_->setTarget(node_, &inputValueTarget);
+    auto optInputValueType = Converter::ArkValue<Opt_String>("");
+    modifier_->setTarget(node_, &optInputValueType);
 
     // Initial verification
     jsonValue = GetJsonValue(node_);
@@ -292,8 +280,8 @@ HWTEST_F(NavigatorModifierTest, setTargetTestValidValues, TestSize.Level1)
     EXPECT_EQ(resultStr, "");
 
     // Verifying attribute's other values
-    inputValueTarget = Converter::ArkValue<Ark_String>("abc");
-    modifier_->setTarget(node_, &inputValueTarget);
+    optInputValueType = Converter::ArkValue<Opt_String>("abc");
+    modifier_->setTarget(node_, &optInputValueType);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TARGET_NAME);
     EXPECT_EQ(resultStr, "abc");
