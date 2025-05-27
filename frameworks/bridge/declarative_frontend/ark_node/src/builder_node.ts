@@ -48,6 +48,12 @@ class BuilderNode {
     __JSScopeUtil__.restoreInstanceId();
     return ret;
   }
+  public postInputEvent(event: InputEventType): boolean {
+    __JSScopeUtil__.syncInstanceId(this._JSBuilderNode.getInstanceId());
+    let ret = this._JSBuilderNode.postInputEvent(event);
+    __JSScopeUtil__.restoreInstanceId();
+    return ret;
+  }
   public dispose(): void {
     this._JSBuilderNode.dispose();
   }

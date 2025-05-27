@@ -673,13 +673,13 @@ HWTEST_F(EventManagerTestNg, EventManagerTest050, TestSize.Level1)
 
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
     std::list<RefPtr<MouseEventTarget>> mouseTestResult = {mouseEventTarget};
-    eventManager->currMouseTestResults_ = mouseTestResult;
+    eventManager->currMouseTestResultsMap_[0] = mouseTestResult;
 
     bool isMousePressAtSelectedNode = false;
-    eventManager->CheckMouseTestResults(isMousePressAtSelectedNode, NODEID);
+    eventManager->CheckMouseTestResults(isMousePressAtSelectedNode, NODEID, 0);
     EXPECT_TRUE(isMousePressAtSelectedNode);
     isMousePressAtSelectedNode = false;
-    eventManager->CheckMouseTestResults(isMousePressAtSelectedNode, NODEID + 1);
+    eventManager->CheckMouseTestResults(isMousePressAtSelectedNode, NODEID + 1, 0);
     EXPECT_FALSE(isMousePressAtSelectedNode);
 }
 
@@ -758,12 +758,12 @@ HWTEST_F(EventManagerTestNg, EventManagerTest053, TestSize.Level1)
     eventManager->LogPrintMouseTest();
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
     std::list<RefPtr<MouseEventTarget>> MouseTestResult = {mouseEventTarget};
-    eventManager->currMouseTestResults_ = MouseTestResult;
+    eventManager->currMouseTestResultsMap_[0] = MouseTestResult;
     
     auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(MOUSE, NODEID);
     std::list<RefPtr<HoverEventTarget>> HoverTestResult = {hoverEventTarget};
-    eventManager->lastHoverTestResults_ = HoverTestResult;
-    eventManager->currHoverTestResults_ = HoverTestResult;
+    eventManager->lastHoverTestResultsMap_[0] = HoverTestResult;
+    eventManager->currHoverTestResultsMap_[0] = HoverTestResult;
     eventManager->LogPrintMouseTest();
 }
 
@@ -787,7 +787,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest054, TestSize.Level1)
     std::list<RefPtr<TouchEventTarget>> testResult = {AceType::MakeRefPtr<MockTouchEventTarget>(),
         mouseEventTarget, hoverEventTarget};
     eventManager->UpdateHoverNode(event, testResult);
-    EXPECT_FALSE((eventManager->currMouseTestResults_).empty());
+    EXPECT_FALSE((eventManager->currMouseTestResultsMap_[0]).empty());
 }
 
 /**
@@ -1130,16 +1130,16 @@ HWTEST_F(EventManagerTestNg, EventManagerTest065, TestSize.Level1)
     Offset offset;
 
     auto eventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE_EVENT, nodeId);
-    eventManager->currMouseTestResults_.emplace_back(eventTarget);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(eventTarget);
 
     /**
      * @tc.steps: step3. Create FrameNode and Call HandleGlobalEventNG.
-     * @tc.expected: currMouseTestResults_.size is equal to 1.
+     * @tc.expected: currMouseTestResultsMap_[0].size is equal to 1.
      */
     auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(frameNode);
     NG::OffsetF rootOffset;
     eventManager->HandleGlobalEventNG(touchPoint, selectOverlayManager, rootOffset);
-    EXPECT_EQ(eventManager->currMouseTestResults_.size(), 1);
+    EXPECT_EQ(eventManager->currMouseTestResultsMap_[0].size(), 1);
 }
 
 /**
@@ -1333,7 +1333,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest071, TestSize.Level1)
     auto hoverEffectTarget = AceType::MakeRefPtr<HoverEffectTarget>(CTRLSHIFT, NODEID);
     std::list<RefPtr<TouchEventTarget>> testResult = { hoverEffectTarget };
     eventManager->UpdateHoverNode(event, testResult);
-    EXPECT_TRUE(eventManager->currMouseTestResults_.empty());
+    EXPECT_TRUE(eventManager->currMouseTestResultsMap_[0].empty());
 }
 
 /**

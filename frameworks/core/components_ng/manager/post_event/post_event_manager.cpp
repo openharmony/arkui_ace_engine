@@ -19,6 +19,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t PASS_THROUGH_EVENT_ID = 100000;
+}
 
 bool PostEventManager::PostEvent(const RefPtr<NG::UINode>& uiNode, TouchEvent& touchEvent)
 {
@@ -46,6 +49,54 @@ bool PostEventManager::PostEvent(const RefPtr<NG::UINode>& uiNode, TouchEvent& t
             break;
     }
     return result;
+}
+
+bool PostEventManager::PostTouchEvent(const RefPtr<NG::UINode>& uiNode, TouchEvent&& touchEvent)
+{
+    CHECK_NULL_RETURN(uiNode, false);
+    touchEvent.postEventNodeId = uiNode->GetId();
+    touchEvent.id += PASS_THROUGH_EVENT_ID;
+    auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    touchEvent.passThrough = true;
+    passThroughResult_ = false;
+    pipelineContext->OnTouchEvent(touchEvent, frameNode, false);
+    touchEvent.passThrough = false;
+    return passThroughResult_;
+}
+
+bool PostEventManager::PostMouseEvent(const RefPtr<NG::UINode>& uiNode, MouseEvent&& mouseEvent)
+{
+    CHECK_NULL_RETURN(uiNode, false);
+    mouseEvent.id += PASS_THROUGH_EVENT_ID;
+    mouseEvent.postEventNodeId = uiNode->GetId();
+    auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    mouseEvent.passThrough = true;
+    passThroughResult_ = false;
+    pipelineContext->OnMouseEvent(mouseEvent, frameNode);
+    mouseEvent.passThrough = false;
+    return passThroughResult_;
+}
+
+bool PostEventManager::PostAxisEvent(const RefPtr<NG::UINode>& uiNode, AxisEvent&& axisEvent)
+{
+    CHECK_NULL_RETURN(uiNode, false);
+    axisEvent.id += PASS_THROUGH_EVENT_ID;
+    axisEvent.postEventNodeId = uiNode->GetId();
+    auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    axisEvent.passThrough = true;
+    passThroughResult_ = false;
+    pipelineContext->OnAxisEvent(axisEvent, frameNode);
+    axisEvent.passThrough = false;
+    return passThroughResult_;
 }
 
 bool PostEventManager::PostDownEvent(const RefPtr<NG::UINode>& targetNode, const TouchEvent& touchEvent)
@@ -189,5 +240,10 @@ bool PostEventManager::CheckPointValidity(const TouchEvent& touchEvent)
     return !std::any_of(postEventAction_.begin(), postEventAction_.end(), [touchEvent](const auto& actionItem) {
         return actionItem.touchEvent.id == touchEvent.id && actionItem.touchEvent.time == touchEvent.time;
     });
+}
+
+void PostEventManager::SetPassThroughResult(bool passThroughResult)
+{
+    passThroughResult_ = passThroughResult;
 }
 } // namespace OHOS::Ace::NG

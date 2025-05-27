@@ -2965,11 +2965,14 @@ void PipelineContext::OnTouchEvent(
     }
 
     if (scalePoint.type == TouchType::MOVE) {
-        if (isEventsPassThrough_) {
+        if (isEventsPassThrough_ || point.passThrough) {
             scalePoint.isPassThroughMode = true;
             eventManager_->FlushTouchEventsEnd({ scalePoint });
             eventManager_->DispatchTouchEvent(scalePoint);
             hasIdleTasks_ = true;
+            if (postEventManager_) {
+                postEventManager_->SetPassThroughResult(eventManager_->GetPassThroughResult());
+            }
             return;
         }
         if (!eventManager_->GetInnerFlag() && formEventMgr) {
@@ -3025,6 +3028,9 @@ void PipelineContext::OnTouchEvent(
 
     hasIdleTasks_ = true;
     RequestFrame();
+    if (postEventManager_) {
+        postEventManager_->SetPassThroughResult(eventManager_->GetPassThroughResult());
+    }
 }
 
 bool PipelineContext::CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event)
@@ -3735,12 +3741,22 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
     NotifyDragMouseEvent(event);
     DispatchMouseToTouchEvent(event, node);
     if (event.action == MouseAction::MOVE) {
+        if (event.passThrough) {
+            DispatchMouseEvent(event, node);
+            if (postEventManager_) {
+                postEventManager_->SetPassThroughResult(eventManager_->GetPassThroughResult());
+            }
+            return;
+        }
         mouseEvents_[node].emplace_back(event);
         hasIdleTasks_ = true;
         RequestFrame();
         return;
     }
     DispatchMouseEvent(event, node);
+    if (postEventManager_) {
+        postEventManager_->SetPassThroughResult(eventManager_->GetPassThroughResult());
+    }
 }
 
 void PipelineContext::DispatchMouseToTouchEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
@@ -3840,7 +3856,7 @@ void PipelineContext::DispatchMouseEvent(const MouseEvent& event, const RefPtr<F
     touchRestrict.sourceType = event.sourceType;
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
-    if (event.action != MouseAction::MOVE) {
+    if (event.action != MouseAction::MOVE || event.passThrough) {
         eventManager_->MouseTest(scaleEvent, node, touchRestrict);
         eventManager_->DispatchMouseEventNG(scaleEvent);
         eventManager_->DispatchMouseHoverEventNG(scaleEvent);
@@ -4091,6 +4107,9 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
             eventManager_->AxisTest(scaleEvent, node);
             eventManager_->DispatchAxisEventNG(scaleEvent);
         }
+    }
+    if (postEventManager_) {
+        postEventManager_->SetPassThroughResult(eventManager_->GetPassThroughResult());
     }
     if (event.action == AxisAction::BEGIN && formEventMgr) {
         formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);

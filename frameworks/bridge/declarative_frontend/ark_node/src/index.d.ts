@@ -20,7 +20,15 @@ declare class UIContext {
 declare interface TouchEvent {
 }
 
+declare interface MouseEvent {
+}
+
+declare interface AxisEvent {
+}
+
 declare interface Position { x?: number; y?: number; }
+
+declare type InputEventType = TouchEvent | MouseEvent | AxisEvent;
 
 interface UpdateFuncRecord {
   updateFunc: UpdateFunc;

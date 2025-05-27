@@ -565,7 +565,8 @@ void EventManager::HandleGlobalEventNG(const TouchEvent& touchPoint,
     CHECK_NULL_VOID(selectOverlayManager);
     auto isMousePressAtSelectedNode = false;
     if (touchPoint.type == TouchType::DOWN &&
-        (touchTestResults_.find(touchPoint.id) != touchTestResults_.end() || !currMouseTestResults_.empty())) {
+        (touchTestResults_.find(touchPoint.id) != touchTestResults_.end() ||
+            currMouseTestResultsMap_.find(touchPoint.id) != currMouseTestResultsMap_.end())) {
         int32_t selectedNodeId = -1;
         if (touchPoint.sourceType == SourceType::MOUSE) {
             selectOverlayManager->GetSelectedNodeIdByMouse(selectedNodeId);
@@ -576,15 +577,15 @@ void EventManager::HandleGlobalEventNG(const TouchEvent& touchPoint,
             selectOverlayManager->SetOnTouchTestResults(touchTestIds);
         } else {
             // When right-click on another component, close the current component selection.
-            CheckMouseTestResults(isMousePressAtSelectedNode, selectedNodeId);
+            CheckMouseTestResults(isMousePressAtSelectedNode, selectedNodeId, touchPoint.id);
         }
     }
     selectOverlayManager->HandleGlobalEvent(touchPoint, rootOffset, isMousePressAtSelectedNode);
 }
 
-void EventManager::CheckMouseTestResults(bool& isMousePressAtSelectedNode, int32_t selectedNodeId)
+void EventManager::CheckMouseTestResults(bool& isMousePressAtSelectedNode, int32_t selectedNodeId, int32_t fingerId)
 {
-    for (const auto& result : currMouseTestResults_) {
+    for (const auto& result : currMouseTestResultsMap_[fingerId]) {
         TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
             "HandleGlobalEventNG selectedNodeId: %{public}d mouseTestResult id is: "
             SEC_PLD(%{public}d) ".", selectedNodeId, SEC_PARAM(result->GetNodeId()));
@@ -1046,6 +1047,7 @@ void EventManager::DispatchTouchEventToTouchTestResult(TouchEvent touchEvent,
             eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)), "",
                 std::string("Handle").append(GestureSnapshot::TransTouchType(touchEvent.type)), "", "");
         }
+        passThroughResult_ = isStopTouchEvent;
     }
 }
 
@@ -1286,37 +1288,80 @@ bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
     return true;
 }
 
+void EventManager::LogPrintLastHoverTestResultsEntry(const HoverTestResult& results)
+{
+    if (results.empty()) {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover last result is empty.");
+        return;
+    }
+    for (const auto& result : results) {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover last result: %{public}s/"
+            SEC_PLD(%{public}d) ".",
+            result->GetNodeName().c_str(), SEC_PARAM(result->GetNodeId()));
+    }
+}
+
+void EventManager::LogPrintLastHoverTestResults()
+{
+    for (const auto& iter : lastHoverTestResultsMap_) {
+        LogPrintLastHoverTestResultsEntry(iter.second);
+    }
+}
+
+void EventManager::LogPrintCurrHoverTestResultsEntry(const HoverTestResult& results)
+{
+    if (results.empty()) {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover current result is empty.");
+    } else {
+        for (const auto& result : results) {
+            TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover current result: %{public}s/"
+                SEC_PLD(%{public}d) ".",
+                result->GetNodeName().c_str(), SEC_PARAM(result->GetNodeId()));
+        }
+    }
+}
+
+void EventManager::LogPrintCurrHoverTestResults()
+{
+    for (const auto& iter : currHoverTestResultsMap_) {
+        LogPrintCurrHoverTestResultsEntry(iter.second);
+    }
+}
+
+void EventManager::LogPrintCurrMouseTestResultsEntry(const MouseTestResult& results)
+{
+    if (results.empty()) {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover current result is empty.");
+    } else {
+        for (const auto& result : results) {
+            TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover current result: %{public}s/"
+                SEC_PLD(%{public}d) ".",
+                result->GetNodeName().c_str(), SEC_PARAM(result->GetNodeId()));
+        }
+    }
+}
+
 void EventManager::LogPrintMouseTest()
 {
     if (!SystemProperties::GetDebugEnabled()) {
         return;
     }
-    if (currMouseTestResults_.empty()) {
+    if (currMouseTestResultsMap_.empty()) {
         TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onMouse result is empty.");
     } else {
-        for (const auto& result : currMouseTestResults_) {
-            TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onMouse result: %{public}s/"
-                SEC_PLD(%{public}d) ".",
-                result->GetNodeName().c_str(), SEC_PARAM(result->GetNodeId()));
+        for (const auto& iter : currMouseTestResultsMap_) {
+            LogPrintCurrMouseTestResultsEntry(iter.second);
         }
     }
-    if (lastHoverTestResults_.empty()) {
+    if (lastHoverTestResultsMap_.empty()) {
         TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover last result is empty.");
     } else {
-        for (const auto& result : lastHoverTestResults_) {
-            TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover last result: %{public}s/"
-                SEC_PLD(%{public}d) ".",
-                result->GetNodeName().c_str(), SEC_PARAM(result->GetNodeId()));
-        }
+        LogPrintLastHoverTestResults();
     }
-    if (currHoverTestResults_.empty()) {
+    if (currHoverTestResultsMap_.empty()) {
         TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover current result is empty.");
     } else {
-        for (const auto& result : currHoverTestResults_) {
-            TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover current result: %{public}s/"
-                SEC_PLD(%{public}d) ".",
-                result->GetNodeName().c_str(), SEC_PARAM(result->GetNodeId()));
-        }
+        LogPrintCurrHoverTestResults();
     }
     auto lastNode = lastHoverNode_.Upgrade();
     auto currNode = currHoverNode_.Upgrade();
@@ -1417,13 +1462,14 @@ void EventManager::UpdateAccessibilityHoverNode(const TouchEvent& event, const T
 
 void EventManager::UpdateHoverNode(const MouseEvent& event, const TouchTestResult& testResult)
 {
-    currMouseTestResults_.clear();
+    currMouseTestResultsMap_[event.id].clear();
+    currMouseTestResultsMap_.erase(event.id);
     HoverTestResult hoverTestResult;
     WeakPtr<NG::FrameNode> hoverNode = nullptr;
     for (const auto& result : testResult) {
         auto mouseResult = AceType::DynamicCast<MouseEventTarget>(result);
         if (mouseResult) {
-            currMouseTestResults_.emplace_back(mouseResult);
+            currMouseTestResultsMap_[event.id].emplace_back(mouseResult);
         }
         auto hoverResult = AceType::DynamicCast<HoverEventTarget>(result);
         if (hoverResult && hoverResult->IsHoverTarget()) {
@@ -1436,17 +1482,19 @@ void EventManager::UpdateHoverNode(const MouseEvent& event, const TouchTestResul
             }
         }
     }
+    int32_t eventIdentity = event.GetEventIdentity();
     if (event.action == MouseAction::WINDOW_LEAVE) {
         TAG_LOGI(AceLogTag::ACE_MOUSE, "Exit hover by leave-window event.");
-        lastHoverTestResults_ = std::move(currHoverTestResults_);
-        currHoverTestResults_.clear();
+        lastHoverTestResultsMap_[eventIdentity] = std::move(currHoverTestResultsMap_[eventIdentity]);
+        currHoverTestResultsMap_[eventIdentity].clear();
+        currHoverTestResultsMap_.erase(eventIdentity);
     } else if (event.action == MouseAction::WINDOW_ENTER) {
         TAG_LOGI(AceLogTag::ACE_MOUSE, "Enter hover by enter-window event.");
-        lastHoverTestResults_.clear();
-        currHoverTestResults_ = std::move(hoverTestResult);
+        lastHoverTestResultsMap_[eventIdentity].clear();
+        currHoverTestResultsMap_[eventIdentity] = std::move(hoverTestResult);
     } else {
-        lastHoverTestResults_ = std::move(currHoverTestResults_);
-        currHoverTestResults_ = std::move(hoverTestResult);
+        lastHoverTestResultsMap_[eventIdentity] = std::move(currHoverTestResultsMap_[eventIdentity]);
+        currHoverTestResultsMap_[eventIdentity] = std::move(hoverTestResult);
     }
     lastHoverNode_ = currHoverNode_;
     currHoverNode_ = hoverNode;
@@ -1476,18 +1524,20 @@ bool EventManager::DispatchMouseEventInGreatOrEqualAPI13(const MouseEvent& event
 {
     MouseTestResult handledResults;
     bool isStopPropagation = false;
+    PressMouseInfo key{ event.id, event.button };
     if (event.button != MouseButton::NONE_BUTTON) {
-        if (auto mouseTargetIter = pressMouseTestResultsMap_.find(event.button);
+        if (auto mouseTargetIter = pressMouseTestResultsMap_.find(key);
             mouseTargetIter != pressMouseTestResultsMap_.end()) {
             DispatchMouseEventToPressResults(event, mouseTargetIter->second, handledResults, isStopPropagation);
         }
         if (event.action == MouseAction::PRESS) {
-            pressMouseTestResultsMap_[event.button] = currMouseTestResults_;
+            pressMouseTestResultsMap_[key] = currMouseTestResultsMap_[event.id];
         }
     }
     auto result = DispatchMouseEventToCurResults(event, handledResults, isStopPropagation);
+    passThroughResult_ = isStopPropagation;
     if (event.action == MouseAction::RELEASE || event.action == MouseAction::CANCEL) {
-        DoSingleMouseActionRelease(event.button);
+        DoSingleMouseActionRelease(key);
     }
     return result;
 }
@@ -1499,7 +1549,7 @@ bool EventManager::DispatchMouseEventInLessAPI13(const MouseEvent& event)
     if (event.button == MouseButton::LEFT_BUTTON) {
         DispatchMouseEventToPressResults(event, pressMouseTestResults_, handledResults, isStopPropagation);
         if (event.action == MouseAction::PRESS) {
-            pressMouseTestResults_ = currMouseTestResults_;
+            pressMouseTestResults_ = currMouseTestResultsMap_[event.id];
         }
     }
     auto result = DispatchMouseEventToCurResultsInLessAPI13(event, handledResults, isStopPropagation);
@@ -1525,9 +1575,9 @@ void EventManager::DispatchMouseEventToPressResults(const MouseEvent& event, con
 }
 
 bool EventManager::DispatchMouseEventToCurResults(
-    const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation)
+    const MouseEvent& event, const MouseTestResult& handledResults, bool& isStopPropagation)
 {
-    auto currMouseTestResults = currMouseTestResults_;
+    auto currMouseTestResults = currMouseTestResultsMap_[event.id];
     for (const auto& mouseTarget : currMouseTestResults) {
         if (!mouseTarget) {
             continue;
@@ -1536,16 +1586,19 @@ bool EventManager::DispatchMouseEventToCurResults(
             auto ret = std::find(handledResults.begin(), handledResults.end(), mouseTarget) == handledResults.end();
             // if pressMouseTestResults doesn't have any isStopPropagation, use default handledResults.
             if (ret && mouseTarget->HandleMouseEvent(event)) {
+                isStopPropagation = true;
                 return true;
             }
             continue;
         }
-        auto mouseTargetIter = pressMouseTestResultsMap_.find(event.button);
+        PressMouseInfo key{ event.id, event.button };
+        auto mouseTargetIter = pressMouseTestResultsMap_.find(key);
         if ((mouseTargetIter != pressMouseTestResultsMap_.end() &&
             std::find(mouseTargetIter->second.begin(), mouseTargetIter->second.end(), mouseTarget) ==
             mouseTargetIter->second.end()) || mouseTargetIter == pressMouseTestResultsMap_.end()) {
             // if pressMouseTestResults has isStopPropagation, use pressMouseTestResults as handledResults.
             if (mouseTarget->HandleMouseEvent(event)) {
+                isStopPropagation = true;
                 return true;
             }
         }
@@ -1556,7 +1609,7 @@ bool EventManager::DispatchMouseEventToCurResults(
 bool EventManager::DispatchMouseEventToCurResultsInLessAPI13(
     const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation)
 {
-    auto currMouseTestResults = currMouseTestResults_;
+    auto currMouseTestResults = currMouseTestResultsMap_[event.id];
     for (const auto& mouseTarget : currMouseTestResults) {
         if (!mouseTarget) {
             continue;
@@ -1585,9 +1638,9 @@ void EventManager::DoMouseActionRelease()
     pressMouseTestResults_.clear();
 }
 
-void EventManager::DoSingleMouseActionRelease(MouseButton button)
+void EventManager::DoSingleMouseActionRelease(const PressMouseInfo& pressMouseInfo)
 {
-    pressMouseTestResultsMap_.erase(button);
+    pressMouseTestResultsMap_.erase(pressMouseInfo);
 }
 
 void HandleMouseHoverAnimation(const RefPtr<NG::FrameNode>& hoverNodeCur, const RefPtr<NG::FrameNode>& hoverNodePre)
@@ -1633,20 +1686,28 @@ void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event, bool i
 
 bool EventManager::DispatchMouseHoverEventNG(const MouseEvent& event)
 {
-    auto lastHoverEndNode = lastHoverTestResults_.begin();
-    auto currHoverEndNode = currHoverTestResults_.begin();
+    HoverTestResult lastHoverTestResults;
+    HoverTestResult currHoverTestResults;
+    if (auto it = lastHoverTestResultsMap_.find(event.GetEventIdentity()); it != lastHoverTestResultsMap_.end()) {
+        lastHoverTestResults = it->second;
+    }
+    if (auto it = currHoverTestResultsMap_.find(event.GetEventIdentity()); it != currHoverTestResultsMap_.end()) {
+        currHoverTestResults = it->second;
+    }
+    auto lastHoverEndNode = lastHoverTestResults.begin();
+    auto currHoverEndNode = currHoverTestResults.begin();
     RefPtr<HoverEventTarget> lastHoverEndNodeTarget;
     uint32_t iterCountLast = 0;
     uint32_t iterCountCurr = 0;
-    for (const auto& hoverResult : lastHoverTestResults_) {
+    for (const auto& hoverResult : lastHoverTestResults) {
         // get valid part of previous hover nodes while it's not in current hover nodes. Those nodes exit hover
-        // there may have some nodes in currHoverTestResults_ but intercepted
+        // there may have some nodes in currHoverTestResults but intercepted
         iterCountLast++;
-        if (lastHoverEndNode != currHoverTestResults_.end()) {
+        if (lastHoverEndNode != currHoverTestResults.end()) {
             lastHoverEndNode++;
         }
-        if (std::find(currHoverTestResults_.begin(), currHoverTestResults_.end(), hoverResult) ==
-            currHoverTestResults_.end()) {
+        if (std::find(currHoverTestResults.begin(), currHoverTestResults.end(), hoverResult) ==
+            currHoverTestResults.end()) {
             if (!hoverResult->GetLastHoverState().has_value()) {
                 TAG_LOGI(AceLogTag::ACE_MOUSE, "onHover-false trigger abnormal firstly");
             }
@@ -1658,14 +1719,14 @@ bool EventManager::DispatchMouseHoverEventNG(const MouseEvent& event)
         }
     }
     lastHoverDispatchLength_ = 0;
-    for (const auto& hoverResult : currHoverTestResults_) {
+    for (const auto& hoverResult : currHoverTestResults) {
         // get valid part of current hover nodes while it's not in previous hover nodes. Those nodes are new hover
         // the valid part stops at first interception
         iterCountCurr++;
-        if (currHoverEndNode != currHoverTestResults_.end()) {
+        if (currHoverEndNode != currHoverTestResults.end()) {
             currHoverEndNode++;
         }
-        if (std::find(lastHoverTestResults_.begin(), lastHoverEndNode, hoverResult) == lastHoverEndNode) {
+        if (std::find(lastHoverTestResults.begin(), lastHoverEndNode, hoverResult) == lastHoverEndNode) {
             if (!hoverResult->HandleHoverEvent(true, event)) {
                 lastHoverDispatchLength_ = iterCountCurr;
                 break;
@@ -1676,9 +1737,9 @@ bool EventManager::DispatchMouseHoverEventNG(const MouseEvent& event)
             break;
         }
     }
-    for (auto hoverResultIt = lastHoverTestResults_.begin(); hoverResultIt != lastHoverEndNode; ++hoverResultIt) {
+    for (auto hoverResultIt = lastHoverTestResults.begin(); hoverResultIt != lastHoverEndNode; ++hoverResultIt) {
         // there may have previous hover nodes in the invalid part of current hover nodes. Those nodes exit hover also
-        if (std::find(currHoverEndNode, currHoverTestResults_.end(), *hoverResultIt) != currHoverTestResults_.end()) {
+        if (std::find(currHoverEndNode, currHoverTestResults.end(), *hoverResultIt) != currHoverTestResults.end()) {
             if (!(*hoverResultIt)->GetLastHoverState().has_value()) {
                 TAG_LOGI(AceLogTag::ACE_MOUSE, "onHover-false trigger abnormal secondly");
             }
@@ -1765,7 +1826,7 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>&
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::AXIS;
     touchRestrict.touchEvent = ConvertAxisEventToTouchEvent(event);
-    frameNode->AxisTest(point, point, point, touchRestrict, axisTestResults_);
+    frameNode->AxisTest(point, point, point, touchRestrict, axisTestResultsMap_[event.id]);
 }
 
 bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
@@ -1774,17 +1835,23 @@ bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN)) {
         if (event.horizontalAxis == 0 && event.verticalAxis == 0 && event.pinchAxisScale == 0 &&
             !event.isRotationEvent) {
-            axisTestResults_.clear();
+            axisTestResultsMap_[event.id].clear();
+            axisTestResultsMap_.erase(event.id);
+            passThroughResult_  = false;
             return false;
         }
     }
-    for (const auto& axisTarget : axisTestResults_) {
+    for (const auto& axisTarget : axisTestResultsMap_[event.id]) {
         if (axisTarget && axisTarget->HandleAxisEvent(event)) {
-            axisTestResults_.clear();
+            axisTestResultsMap_[event.id].clear();
+            axisTestResultsMap_.erase(event.id);
+            passThroughResult_  = true;
             return true;
         }
     }
-    axisTestResults_.clear();
+    axisTestResultsMap_[event.id].clear();
+    axisTestResultsMap_.erase(event.id);
+    passThroughResult_ = false;
     return true;
 }
 

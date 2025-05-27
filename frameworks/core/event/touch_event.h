@@ -67,7 +67,6 @@ struct TouchEvent final : public PointerEvent {
     // the active changed point info
     // The ID is used to identify the point of contact between the finger and the screen. Different fingers have
     // different ids.
-    int32_t postEventNodeId = 0;
     int32_t id = 0;
     TouchType type = TouchType::UNKNOWN;
     TouchType pullType = TouchType::UNKNOWN;
