@@ -2183,7 +2183,6 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager039, TestSize.Level1)
     jsAccessibilityManager->SetPipelineContext(context);
     ASSERT_NE(context, nullptr);
     jsAccessibilityManager->Register(true);
-    jsAccessibilityManager->SetWindowId(1);
 
     /**
      * @tc.steps: step2. test GetFramenodeByAccessibilityId by DumpTreeNG
