@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#define NAPI_VERSION 8
+
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 #include <algorithm>
@@ -69,7 +71,7 @@
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
 #include "parameters.h"
-
+#include "adapter/ohos/entrance/ace_container.h"
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 #endif
 #endif
@@ -4704,7 +4706,7 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
 {
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, {});
-    auto pipeline = tmpHost->GetContextRefPtr();
+    auto pipeline = tmpHost->GetContext();
     CHECK_NULL_RETURN(pipeline, {});
     auto theme = GetTheme();
     CHECK_NULL_RETURN(theme, {});
@@ -4726,6 +4728,9 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         positionY -= keyboardOffset;
     }
 
+    ContainerScope scope(GetInstanceId());
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+
     MiscServices::CursorInfo cursorInfo { .left = selectController_->GetCaretRect().Left() + windowRect.Left() +
                                                   textPaintOffset.GetX(),
         .top = selectController_->GetCaretRect().Top() + windowRect.Top() + textPaintOffset.GetY(),
@@ -4743,7 +4748,9 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         .range = { .start = selectController_->GetStartIndex(), .end = selectController_->GetEndIndex() },
         .windowId = pipeline->GetFocusWindowId(),
         .positionY = positionY,
-        .height = height };
+        .height = height,
+        .abilityToken = container ? container->GetToken() : nullptr
+    };
 
     if (keyboard_ == TextInputType::NUMBER_DECIMAL) {
         textConfig.inputAttribute.inputPattern = (int32_t)TextInputType::NUMBER;

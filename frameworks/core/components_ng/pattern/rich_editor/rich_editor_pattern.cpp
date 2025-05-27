@@ -12,6 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#define NAPI_VERSION 8 
+
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 
 #include <algorithm>
@@ -77,7 +80,7 @@
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
 #include "refbase.h"
-
+#include "adapter/ohos/entrance/ace_container.h"
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 #endif
 #endif
@@ -5177,6 +5180,10 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
     HandlePointWithTransform(caretRightBottomPoint);
     // window rect relative to screen
     auto windowRect = pipeline->GetCurrentWindowRect();
+
+    ContainerScope scope(GetInstanceId());
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+
     MiscServices::CursorInfo cursorInfo { .left = caretLeftTopPoint.GetX() + windowRect.Left(),
         .top = caretLeftTopPoint.GetY() + windowRect.Top(),
         .width = std::abs(caretLeftTopPoint.GetX() - caretRightBottomPoint.GetX()),
@@ -5194,7 +5201,9 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
         .range = { .start = start, .end = end },
         .windowId = pipeline->GetFocusWindowId(),
         .positionY = positionY + windowRect.Top(),
-        .height = height };
+        .height = height,
+        .abilityToken = container ? container->GetToken() : nullptr
+    };
     return textConfig;
 }
 

@@ -42,5 +42,10 @@ build_component_ng("text_field_pattern_ng") {
     "imf:inputmethod_client",
     "init:libbegetutil",
     "input:libmmi-client",
+
+    "ability_runtime:abilitykit_native",
+    "ipc:ipc_single",
+    "napi:ace_napi",
+    "window_manager:libwm"
   ]
 }
