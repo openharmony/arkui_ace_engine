@@ -23,6 +23,8 @@ ani_object GetHostContext([[maybe_unused]] ani_env* env);
 void SyncInstanceId(ani_env* env, ani_object obj, ani_int id);
 void RestoreInstanceId(ani_env* env);
 void SetDrawCallback(ani_env* env, ani_object obj, ani_long ptr, ani_fn_object fnObj);
+void SetDrawModifier(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_object drawModifier);
+void Invalidate(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMMON_MODULE
