@@ -69,9 +69,7 @@ public:
 
     void RecordFrameTime(uint64_t timeStamp, const std::string& name) override;
 
-    void FlushTasks() override;
-
-    void FlushTasks(std::function<void()> callback) override;
+    void FlushTasks(std::function<void()> callback = nullptr) override;
 
     void SetTaskRunner(RefPtr<TaskExecutor> taskExecutor, int32_t id);
 
@@ -148,10 +146,6 @@ public:
 
     void NotifySnapshotUpdate() override;
 
-    bool GetIsBackgroundAllowsVsyncRequests() override;
-   
-    void SetIsBackgroundAllowsVsyncRequests(bool isBackgroundAllowsVsyncRequests) override;
-
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
     WeakPtr<TaskExecutor> taskExecutor_;
@@ -159,7 +153,6 @@ private:
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
     std::shared_ptr<OHOS::Rosen::VsyncCallback> vsyncCallback_;
     bool isFirstRequestVsync_ = true;
-    bool isBackgroundAllowsVsyncRequests_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenWindow);
 };

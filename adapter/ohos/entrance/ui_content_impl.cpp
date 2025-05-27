@@ -3077,12 +3077,6 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
     StoreConfiguration(config);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    std::string colorModeStr = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    if (!colorModeStr.empty()) {
-        auto pipeline = container->GetPipelineContext();
-        CHECK_NULL_VOID(pipeline);
-        pipeline->NotifyColorModeChange();
-    }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     bool formFontUseDefault = isFormRender_ && !fontScaleFollowSystem_;

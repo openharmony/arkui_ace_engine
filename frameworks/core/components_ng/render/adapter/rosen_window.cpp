@@ -165,10 +165,10 @@ bool RosenWindow::GetIsRequestFrame()
 
 void RosenWindow::RequestFrame()
 {
-    if (!GetIsBackgroundAllowsVsyncRequests() && !onShow_) {
+    if (!forceVsync_ && !onShow_) {
         return;
     }
-    SetIsBackgroundAllowsVsyncRequests(false);
+    SetForceVsyncRequests(false);
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(!isRequestVsync_);
     auto taskExecutor = taskExecutor_.Upgrade();
@@ -256,19 +256,16 @@ void RosenWindow::RecordFrameTime(uint64_t timeStamp, const std::string& name)
     rsUIDirector_->SetTimeStamp(timeStamp, name);
 }
 
-void RosenWindow::FlushTasks()
-{
-    CHECK_RUN_ON(UI);
-    CHECK_NULL_VOID(rsUIDirector_);
-    rsUIDirector_->SendMessages();
-    JankFrameReport::GetInstance().JsAnimationToRsRecord();
-}
-
 void RosenWindow::FlushTasks(std::function<void()> callback)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(rsUIDirector_);
-    rsUIDirector_->SendMessages(callback);
+    if (!callback) {
+        rsUIDirector_->SendMessages();
+    } else {
+        rsUIDirector_->SendMessages(callback);
+    }
+    
     JankFrameReport::GetInstance().JsAnimationToRsRecord();
 }
 
@@ -276,16 +273,6 @@ void RosenWindow::FlushLayoutSize(int32_t width, int32_t height)
 {
     CHECK_NULL_VOID(rsWindow_);
     rsWindow_->FlushLayoutSize(width, height);
-}
-
-bool RosenWindow::GetIsBackgroundAllowsVsyncRequests()
-{
-    return isBackgroundAllowsVsyncRequests_;
-}
-
-void RosenWindow::SetIsBackgroundAllowsVsyncRequests(bool isBackgroundAllowsVsyncRequests)
-{
-    isBackgroundAllowsVsyncRequests_ = isBackgroundAllowsVsyncRequests;
 }
 
 float RosenWindow::GetRefreshRate() const

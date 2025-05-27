@@ -39,7 +39,7 @@ void RosenWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root) {}
 
 void RosenWindow::RecordFrameTime(uint64_t timeStamp, const std::string& name) {}
 
-void RosenWindow::FlushTasks() {}
+void RosenWindow::FlushTasks(std::function<void()> callback) {}
 
 float RosenWindow::GetRefreshRate() const
 {

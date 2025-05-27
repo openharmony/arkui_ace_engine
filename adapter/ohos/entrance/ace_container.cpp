@@ -3172,12 +3172,6 @@ void AceContainer::ProcessThemeUpdate(const ParsedConfig& parsedConfig, Configur
 void AceContainer::BuildResConfig(
     ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig)
 {
-    if (pipelineContext_) {
-        auto window = pipelineContext_->GetWindow();
-        if (window) {
-            window->SetIsBackgroundAllowsVsyncRequests(true);
-        }
-    }
     if (!parsedConfig.colorMode.empty()) {
         ProcessColorModeUpdate(resConfig, configurationChange, parsedConfig);
     }
@@ -3251,6 +3245,26 @@ void AceContainer::UpdateColorMode(uint32_t colorMode)
     pipelineContext_->NotifyColorModeChange(colorMode);
 }
 
+void AceContainer::CheckForceVsync(const ParsedConfig& parsedConfig)
+{
+    if (pipelineContext_ && !pipelineContext_->GetOnShow() && !parsedConfig.colorMode.empty()) {
+        auto window = pipelineContext_->GetWindow();
+        if (window) {
+            window->SetForceVsyncRequests(true);
+        }
+    }
+}
+
+void  AceContainer::OnFrontUpdated(
+    const ConfigurationChange& configurationChange, const std::string& configuration)
+{
+    auto front = GetFrontend();
+    CHECK_NULL_VOID(front);
+    if (!configurationChange.directionUpdate && !configurationChange.dpiUpdate) {
+        front->OnConfigurationUpdated(configuration);
+    }
+}
+
 void AceContainer::UpdateConfiguration(
     const ParsedConfig& parsedConfig, const std::string& configuration, bool abilityLevel)
 {
@@ -3258,6 +3272,7 @@ void AceContainer::UpdateConfiguration(
         LOGW("AceContainer::OnConfigurationUpdated param is empty");
         return;
     }
+    CheckForceVsync(parsedConfig);
     ConfigurationChange configurationChange;
     CHECK_NULL_VOID(pipelineContext_);
     auto themeManager = pipelineContext_->GetThemeManager();
@@ -3289,11 +3304,7 @@ void AceContainer::UpdateConfiguration(
         UpdateColorMode(static_cast<uint32_t>(resConfig.GetColorMode()));
         return;
     }
-    auto front = GetFrontend();
-    CHECK_NULL_VOID(front);
-    if (!configurationChange.directionUpdate && !configurationChange.dpiUpdate) {
-        front->OnConfigurationUpdated(configuration);
-    }
+    OnFrontUpdated(configurationChange, configuration);
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     if (configurationChange.IsNeedUpdate()) {
         OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig);

@@ -706,10 +706,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         isFirstFlushMessages_ = false;
         LOGI("ArkUi flush first frame messages.");
     }
-    if (colorModeChange_) {
-        colorModeChange_ = false;
+    if (!onShow_) {
         FlushMessages([window = window_]() {
-            LOGI("FlushMessages callback called.");
             if (window) {
                 window->NotifySnapshotUpdate();
             }
@@ -973,7 +971,7 @@ void PipelineContext::UpdateOcclusionCullingStatus()
     keyOcclusionNodes_.clear();
 }
 
-void PipelineContext::FlushMessages()
+void PipelineContext::FlushMessages(std::function<void()> callback)
 {
     int32_t id = -1;
     if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
@@ -995,17 +993,6 @@ void PipelineContext::FlushMessages()
     }
     HandleSpecialContainerNode();
     UpdateOcclusionCullingStatus();
-    window_->FlushTasks();
-}
-
-void PipelineContext::FlushMessages(std::function<void()> callback)
-{
-    ACE_FUNCTION_TRACE();
-    if (IsFreezeFlushMessage()) {
-        SetIsFreezeFlushMessage(false);
-        LOGI("Flush message is freezed.");
-        return;
-    }
     window_->FlushTasks(callback);
 }
 
@@ -4470,6 +4457,30 @@ void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
 
 void PipelineContext::FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate)
 {
+     auto changeTask = [weak = WeakClaim(this), configurationChange,
+        weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager_)), fullUpdate]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        if (configurationChange.IsNeedUpdate() || configurationChange.iconUpdate) {
+            auto rootNode = pipeline->GetRootElement();
+            rootNode->UpdateConfigurationUpdate(configurationChange);
+            auto overlay = weakOverlayManager.Upgrade();
+            if (overlay) {
+                overlay->ReloadBuilderNodeConfig();
+            }
+        }
+        if (fullUpdate && configurationChange.IsNeedUpdate()) {
+            CHECK_NULL_VOID(pipeline->stageManager_);
+            pipeline->SetIsReloading(true);
+            pipeline->stageManager_->ReloadStage();
+            pipeline->SetIsReloading(false);
+            pipeline->FlushUITasks();
+        }
+    };
+    if (!onShow_) {
+        changeTask();
+        return;
+    }
     AnimationOption option;
     const int32_t duration = 400;
     option.SetDuration(duration);
@@ -4477,26 +4488,7 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
     RecycleManager::Notify(configurationChange);
     AnimationUtils::Animate(
         option,
-        [weak = WeakClaim(this), configurationChange,
-            weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager_)), fullUpdate]() {
-            auto pipeline = weak.Upgrade();
-            CHECK_NULL_VOID(pipeline);
-            if (configurationChange.IsNeedUpdate() || configurationChange.iconUpdate) {
-                auto rootNode = pipeline->GetRootElement();
-                rootNode->UpdateConfigurationUpdate(configurationChange);
-                auto overlay = weakOverlayManager.Upgrade();
-                if (overlay) {
-                    overlay->ReloadBuilderNodeConfig();
-                }
-            }
-            if (fullUpdate && configurationChange.IsNeedUpdate()) {
-                CHECK_NULL_VOID(pipeline->stageManager_);
-                pipeline->SetIsReloading(true);
-                pipeline->stageManager_->ReloadStage();
-                pipeline->SetIsReloading(false);
-                pipeline->FlushUITasks();
-            }
-        },
+        changeTask,
         [weak = WeakClaim(this)]() {
             auto pipeline = weak.Upgrade();
             CHECK_NULL_VOID(pipeline);
@@ -6038,11 +6030,6 @@ ScopedLayout::~ScopedLayout()
     }
     // set layout flag back
     pipeline_->SetIsLayouting(isLayouting_);
-}
-
-void PipelineContext::NotifyColorModeChange()
-{
-    colorModeChange_ = true;
 }
 
 std::string PipelineContext::GetBundleName()

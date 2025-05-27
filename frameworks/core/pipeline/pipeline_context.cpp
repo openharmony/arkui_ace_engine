@@ -152,7 +152,7 @@ void PipelineContext::FlushPipelineWithoutAnimation()
     FlushMessages();
 }
 
-void PipelineContext::FlushMessages()
+void PipelineContext::FlushMessages(std::function<void()> callback)
 {
     ACE_FUNCTION_TRACK();
     if (isFirstPage_) {
@@ -161,17 +161,11 @@ void PipelineContext::FlushMessages()
     }
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
-        rsUIDirector_->SendMessages();
-    }
-#endif
-}
-
-void PipelineContext::FlushMessages(std::function<void()> callback)
-{
-    ACE_FUNCTION_TRACK();
-#ifdef ENABLE_ROSEN_BACKEND
-    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
-        rsUIDirector_->SendMessages(callback);
+        if (!callback) {
+            rsUIDirector_->SendMessages();
+        } else {
+            rsUIDirector_->SendMessages(callback);
+        }
     }
 #endif
 }

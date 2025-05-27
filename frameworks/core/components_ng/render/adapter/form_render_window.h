@@ -101,7 +101,7 @@ public:
 
     void OnShow() override;
     void OnHide() override;
-    void FlushTasks() override;
+    void FlushTasks(std::function<void()> callback = nullptr) override;
 
     void Lock() override;
     void Unlock() override;

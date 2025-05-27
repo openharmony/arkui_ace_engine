@@ -63,6 +63,11 @@ void Window::SetVsyncCallback(AceVsyncCallback&& callback)
     });
 }
 
+void Window::SetForceVsyncRequests(bool forceVsyncRequests)
+{
+    forceVsync_ = forceVsyncRequests;
+}
+
 void Window::SetUiDvsyncSwitch(bool dvsyncSwitch)
 {
     if (!onShow_) {
