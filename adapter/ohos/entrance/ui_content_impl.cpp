@@ -3623,21 +3623,23 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         }
     }
 
-    if (viewportConfigMgr_->IsConfigsEqual(config) && viewportConfigMgr_->IsInfoEqual(info) &&
-        (rsTransaction == nullptr) && reasonDragFlag &&
-        reason != OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
-        TAG_LOGI(ACE_LAYOUT, "Duplicate Update and return");
-        taskExecutor->PostTask(
-            [context, config, avoidAreas] {
-                if (avoidAreas.empty()) {
+    if (viewportConfigMgr_->IsConfigsEqual(config) && (rsTransaction == nullptr) && reasonDragFlag) {
+        TAG_LOGI(ACE_LAYOUT, "UpdateViewportConfig return in advance");
+        taskExecutor->PostTask([this, context, config, avoidAreas, reason, instanceId = instanceId_,
+            pipelineContext, info, container, rsTransaction] {
+                if (avoidAreas.empty() && !info) {
                     return;
                 }
                 if (ParseAvoidAreasUpdate(context, avoidAreas, config)) {
                     context->AnimateOnSafeAreaUpdate();
                 }
                 AvoidAreasUpdateOnUIExtension(context, avoidAreas);
+                if (pipelineContext) {
+                    TAG_LOGI(ACE_KEYBOARD, "KeyboardAvoid in advance");
+                    KeyboardAvoid(reason, instanceId, pipelineContext, info, container, rsTransaction);
+                }
             },
-            TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidArea");
+            TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidAreaAndExecuteKeyboardAvoid");
         return;
     }
 
@@ -3688,6 +3690,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             static_cast<WindowSizeChangeReason>(reason));
         viewportConfigMgr->UpdateViewConfigTaskDone(taskId);
         if (pipelineContext) {
+            TAG_LOGI(ACE_KEYBOARD, "KeyboardAvoid in the UpdateViewportConfig task");
             KeyboardAvoid(reason, instanceId_, pipelineContext, info, container, rsTransaction);
         }
     };

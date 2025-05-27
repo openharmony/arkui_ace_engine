@@ -146,11 +146,8 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
         if (GetHostTag() == V2::PAGE_ETS_TAG && lastChild && lastChild->GetTag() == V2::DIALOG_ETS_TAG) {
             keyboardOffset = 0.0f;
         }
-        ACE_LAYOUT_SCOPED_TRACE("AvoidKeyboard isFocusOnPage: %d, isFocusOnOverlay: %d,"
+        ACE_MEASURE_SCOPED_TRACE("AvoidKeyboard isFocusOnPage: %d, isFocusOnOverlay: %d,"
             "pageCurrentOffset: %f, keyboardOffset: %f", isFocusOnPage, isFocusOnOverlay,
-            pageCurrentOffset, keyboardOffset);
-        TAG_LOGD(ACE_LAYOUT, "AvoidKeyboard isFocusOnPage: %{public}d, isFocusOnOverlay: %{public}d,"
-            "pageCurrentOffset: %{public}f, keyboardOffset: %{public}f", isFocusOnPage, isFocusOnOverlay,
             pageCurrentOffset, keyboardOffset);
         if (!(isFocusOnPage || (isFocusOnOverlay && isOverlay) || pageHasOffset) && LessNotEqual(keyboardOffset, 0.0)) {
             renderContext->SavePaintRect(true, GetLayoutProperty()->GetPixelRound());
@@ -680,8 +677,6 @@ float LayoutWrapper::GetPageCurrentOffset()
     auto safeArea = safeAreaManager->GetSafeArea();
     auto safeAreaTop = safeAreaManager->IsAtomicService() ? 0 : safeArea.top_.Length();
     auto paintRect = pageRenderContext->GetPaintRectWithoutTransform();
-    TAG_LOGD(ACE_LAYOUT, "PageCurrentOffset paintRect.GetY(): %{public}f, safeAreaTop: %{public}d",
-        paintRect.GetY(), safeAreaTop);
     return paintRect.GetY() - safeAreaTop;
 }
 
