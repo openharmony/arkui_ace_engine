@@ -204,12 +204,13 @@ void SetTrackBackgroundColor(ArkUINodeHandle node, uint32_t color)
     SliderModelNG::SetTrackBackgroundColor(frameNode, SliderModelNG::CreateSolidGradient(Color(color)), true);
 }
 
-void SetLinearTrackBackgroundColor(ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Int32 length)
+void SetLinearTrackBackgroundColor(ArkUINodeHandle node, const struct ArkUIGradientType* gradient,
+    ArkUI_Int32 colorLength)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     OHOS::Ace::NG::Gradient tempGradient;
-    for (int32_t j = 0; j < length; j++) {
+    for (int32_t j = 0; j < colorLength; j++) {
         OHOS::Ace::NG::GradientColor gradientColor;
         gradientColor.SetLinearColor(LinearColor(Color(gradient->color[j])));
         gradientColor.SetDimension(
@@ -234,12 +235,12 @@ void SetSelectColor(ArkUINodeHandle node, uint32_t color)
     SliderModelNG::SetSelectColor(frameNode, SliderModelNG::CreateSolidGradient(Color(color)), true);
 }
 
-void SetLinearSelectColor(ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Int32 length)
+void SetLinearSelectColor(ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Int32 colorLength)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     OHOS::Ace::NG::Gradient tempGradient;
-    for (int32_t j = 0; j < length; j++) {
+    for (int32_t j = 0; j < colorLength; j++) {
         OHOS::Ace::NG::GradientColor gradientColor;
         gradientColor.SetLinearColor(LinearColor(Color(gradient->color[j])));
         gradientColor.SetDimension(
@@ -747,10 +748,8 @@ const ArkUISliderModifier* GetSliderModifier()
         .setBlockColor = SliderModifier::SetBlockColor,
         .resetBlockColor = SliderModifier::ResetBlockColor,
         .setTrackBackgroundColor = SliderModifier::SetTrackBackgroundColor,
-        .setLinearTrackBackgroundColor = SliderModifier::SetLinearTrackBackgroundColor,
         .resetTrackBackgroundColor = SliderModifier::ResetTrackBackgroundColor,
         .setSelectColor = SliderModifier::SetSelectColor,
-        .setLinearSelectColor = SliderModifier::SetLinearSelectColor,
         .resetSelectColor = SliderModifier::ResetSelectColor,
         .setShowSteps = SliderModifier::SetShowSteps,
         .resetShowSteps = SliderModifier::ResetShowSteps,
@@ -806,6 +805,8 @@ const ArkUISliderModifier* GetSliderModifier()
         .getEnableHapticFeedback = SliderModifier::GetEnableHapticFeedback,
         .setEnableHapticFeedback = SliderModifier::SetEnableHapticFeedback,
         .resetEnableHapticFeedback = SliderModifier::ResetEnableHapticFeedback,
+        .setLinearTrackBackgroundColor = SliderModifier::SetLinearTrackBackgroundColor,
+        .setLinearSelectColor = SliderModifier::SetLinearSelectColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
