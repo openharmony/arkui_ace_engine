@@ -92,6 +92,7 @@ OffsetF SubMenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>
     CHECK_NULL_RETURN(pipelineContext, NG::OffsetF(0.0f, 0.0f));
     auto menuItemSize = parentMenuItem->GetGeometryNode()->GetFrameSize();
     position_ = GetSubMenuPosition(parentMenuItem, expandingMode);
+    bool stacked = expandingMode == SubMenuExpandingMode::STACK;
     if (layoutWrapper != nullptr) {
         auto menuLayoutProperty = layoutWrapper->GetLayoutProperty();
         CHECK_NULL_RETURN(menuLayoutProperty, NG::OffsetF(0.0f, 0.0f));
