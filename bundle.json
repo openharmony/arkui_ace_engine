@@ -117,7 +117,8 @@
                 "background_task_mgr",
                 "egl",
                 "request",
-                "qrcodegen"
+                "qrcodegen",
+                "sdk"
             ],
             "third_party": []
         },

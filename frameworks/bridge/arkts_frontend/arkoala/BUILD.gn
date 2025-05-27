@@ -56,12 +56,12 @@ action("run_arkoala_build") {
     rebase_path("$root_out_dir/arkui/innerkits"),
   ]
 
-  deps = [
-    "${ohos_ets_api_deps}",
-    "${ohos_ets_arkts_deps}",
+  external_deps = [
+    "sdk:ohos_ets_api",
+    "sdk:ohos_ets_arkts",
   ]
 
-  external_deps = ets2abc_build_deps
+  external_deps += ets2abc_build_deps
   external_deps += static_linker_build_deps
 }
 
