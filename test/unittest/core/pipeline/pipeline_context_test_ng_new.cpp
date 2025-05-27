@@ -1897,6 +1897,21 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg014, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestAddIgnoreLayoutSafeAreaBundle
+ * @tc.desc: Test AddIgnoreLayoutSafeAreaBundle
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, TestAddIgnoreLayoutSafeAreaBundle, TestSize.Level0)
+{
+    UITaskScheduler taskScheduler;
+    taskScheduler.AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle());
+    taskScheduler.AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle());
+    taskScheduler.AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle());
+
+    EXPECT_EQ(taskScheduler.ignoreLayoutSafeAreaBundles_.size(), 3);
+}
+
+/**
  * @tc.name: PipelineContextTestNg097
  * @tc.desc: Test the function RegisterTouchEventListener
  * @tc.type: FUNC
