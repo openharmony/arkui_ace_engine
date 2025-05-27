@@ -67,7 +67,7 @@ import { SaveButtonCallback, SaveButtonOnClickResult, SaveDescription, SaveIconS
 import { SearchSubmitCallback, CancelButtonStyle, SearchAttribute, IconOptions, CancelButtonOptions, CancelButtonSymbolOptions, SearchType, Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_EditableTextChangeValue_Boolean, SearchButtonOptions, SearchController, SearchControllerInternal, SearchOptions } from "./../search"
 import { SelectedCallback } from "./../griditemops"
 import { SliderTriggerChangeCallback, SliderAttribute, Callback_Number_SliderChangeMode_Void, SliderChangeMode, SliderBlockStyle, SliderInteraction, SlideRange, SliderBlockType, SliderStyle, SliderOptions } from "./../slider"
-import { StyledStringMarshallCallback, StyledStringUnmarshallCallback, CustomSpan, CustomSpanInternal, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, GestureStyle, GestureStyleInternal, GestureStyleInterface, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, ImageAttachment, ImageAttachmentInternal, StyleOptions, StyledStringKey, SpanStyle, UserDataSpan, DecorationStyleInterface, UrlStyle, UrlStyleInternal, BaselineOffsetStyle, BaselineOffsetStyleInternal, LetterSpacingStyle, LetterSpacingStyleInternal, LineHeightStyle, LineHeightStyleInternal, TextShadowStyle, TextShadowStyleInternal, DecorationStyle, DecorationStyleInternal, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInternal, ParagraphStyleInterface, TextStyle_styled_string, TextStyle_styled_stringInternal, TextStyleInterface, BackgroundColorStyle, BackgroundColorStyleInternal, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../styledString"
+import { StyledStringMarshallCallback, StyledStringUnmarshallCallback, CustomSpan, CustomSpanInternal, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, GestureStyle, GestureStyleInternal, GestureStyleInterface, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, ImageAttachment, ImageAttachmentInternal, StyleOptions, StyledStringKey, SpanStyle, UserDataSpan, DecorationStyleInterface, UrlStyle, UrlStyleInternal, BaselineOffsetStyle, BaselineOffsetStyleInternal, LetterSpacingStyle, LetterSpacingStyleInternal, LineHeightStyle, LineHeightStyleInternal, TextShadowStyle, TextShadowStyleInternal, DecorationStyle, DecorationStyleInternal, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInternal, ParagraphStyleInterface, TextStyle, TextStyle_styled_stringInternal, TextStyleInterface, BackgroundColorStyle, BackgroundColorStyleInternal, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../styledString"
 import { TextAreaSubmitCallback, TextAreaAttribute, Callback_EnterKeyType_Void, Callback_String_PasteEvent_Void, TextAreaType, Callback_ResourceStr_Void, TextAreaController, TextAreaControllerInternal, TextAreaOptions } from "./../textArea"
 import { VoidCallback, ResourceColor, Font, Position, Length, SizeOptions, Offset, ColorFilter, ColorFilterInternal, ResourceStr, Dimension, PX, VP, FP, LPX, Percentage, LengthConstrain, DividerStyleOptions, ConstraintSizeOptions, Area, AccessibilityOptions, Bias, BorderRadiuses, ChainWeightOptions, DirectionalEdgesT, EdgeOutlineStyles, EdgeOutlineWidths, EdgeWidths, OutlineRadiuses, Padding, EdgeColors, LocalizedBorderRadiuses, LocalizedEdgeColors, LocalizedEdges, LocalizedEdgeWidths, LocalizedPadding, LocalizedPosition, MarkStyle, BorderOptions, OutlineOptions, EdgeStyles, Edges } from "./../units"
 import { WithThemeInterface, WithThemeAttribute, WithThemeOptions } from "./../withTheme"
@@ -20114,7 +20114,7 @@ export class Deserializer extends DeserializerBase {
         let value : TextPickerResult = ({value: value_result, index: index_result} as TextPickerResult)
         return value
     }
-    readTextStyle_styled_string(): TextStyle_styled_string {
+    readTextStyle_styled_string(): TextStyle {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return TextStyle_styled_stringInternal.fromPtr(ptr)
@@ -25551,9 +25551,9 @@ export class Deserializer extends DeserializerBase {
         const length_result : number | undefined = length_buf
         const styledKey_result : StyledStringKey = TypeChecker.StyledStringKey_FromNumeric(valueDeserializer.readInt32())
         const styledValue_buf_selector : int32 = valueDeserializer.readInt8()
-        let styledValue_buf : TextStyle_styled_string | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | undefined
+        let styledValue_buf : TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | undefined
         if (styledValue_buf_selector == 0) {
-            styledValue_buf = (valueDeserializer.readTextStyle_styled_string() as TextStyle_styled_string)
+            styledValue_buf = (valueDeserializer.readTextStyle_styled_string() as TextStyle)
         }
         else if (styledValue_buf_selector == 1) {
             styledValue_buf = (valueDeserializer.readDecorationStyle() as DecorationStyle)
@@ -25594,7 +25594,7 @@ export class Deserializer extends DeserializerBase {
         else {
             throw new Error("One of the branches for styledValue_buf has to be chosen through deserialisation.")
         }
-        const styledValue_result : StyledStringValue = (styledValue_buf as TextStyle_styled_string | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle)
+        const styledValue_result : StyledStringValue = (styledValue_buf as TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle)
         let value : StyleOptions = ({start: start_result, length: length_result, styledKey: styledKey_result, styledValue: styledValue_result} as StyleOptions)
         return value
     }
@@ -27049,9 +27049,9 @@ export class Deserializer extends DeserializerBase {
         const length_result : number = (valueDeserializer.readNumber() as number)
         const styledKey_result : StyledStringKey = TypeChecker.StyledStringKey_FromNumeric(valueDeserializer.readInt32())
         const styledValue_buf_selector : int32 = valueDeserializer.readInt8()
-        let styledValue_buf : TextStyle_styled_string | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | undefined
+        let styledValue_buf : TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | undefined
         if (styledValue_buf_selector == 0) {
-            styledValue_buf = (valueDeserializer.readTextStyle_styled_string() as TextStyle_styled_string)
+            styledValue_buf = (valueDeserializer.readTextStyle_styled_string() as TextStyle)
         }
         else if (styledValue_buf_selector == 1) {
             styledValue_buf = (valueDeserializer.readDecorationStyle() as DecorationStyle)
@@ -27092,7 +27092,7 @@ export class Deserializer extends DeserializerBase {
         else {
             throw new Error("One of the branches for styledValue_buf has to be chosen through deserialisation.")
         }
-        const styledValue_result : StyledStringValue = (styledValue_buf as TextStyle_styled_string | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle)
+        const styledValue_result : StyledStringValue = (styledValue_buf as TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle)
         let value : SpanStyle = ({start: start_result, length: length_result, styledKey: styledKey_result, styledValue: styledValue_result} as SpanStyle)
         return value
     }

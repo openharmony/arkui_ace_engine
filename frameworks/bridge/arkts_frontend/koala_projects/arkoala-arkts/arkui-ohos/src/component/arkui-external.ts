@@ -912,9 +912,16 @@ export class GlobalScope_ohos_measure_utils {
     private static measureTextSize_serialize(options: MeasureOptions): SizeOptions {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeMeasureOptions(options)
-        const retval  = ArkUIGeneratedNativeModule._GlobalScope_ohos_measure_utils_measureTextSize(thisSerializer.asBuffer(), thisSerializer.length())
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._GlobalScope_ohos_measure_utils_measureTextSize(thisSerializer.asBuffer(), thisSerializer.length()) as FixedArray<byte>
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : SizeOptions = retvalDeserializer.readSizeOptions()
         return returnResult
     }

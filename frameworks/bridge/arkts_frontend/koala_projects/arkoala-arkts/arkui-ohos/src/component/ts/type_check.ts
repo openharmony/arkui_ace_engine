@@ -52,7 +52,7 @@ import { ComponentContent, UnifiedData, SystemBarStyle, PointerStyle, Scene, Con
 import { ContentModifier, WrappedBuilder, CommonConfiguration, Callback_WrappedBuilder_Args_Void } from "./../arkui-wrapper-builder"
 import { ContentType, EnterKeyType, InputType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback, TextInputAttribute, OnSubmitCallback, TextInputStyle, PasswordIcon, UnderlineColor, TextInputController, TextInputOptions } from "./../textInput"
 import { CustomDialogController, CustomDialogControllerOptions } from "./../customDialogController"
-import { CustomSpan, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, GestureStyle, GestureStyleInterface, StyledString, MutableStyledString, StyleOptions, SpanStyle, ImageAttachment, StyledStringKey, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback, DecorationStyleInterface, UrlStyle, BaselineOffsetStyle, LetterSpacingStyle, LineHeightStyle, TextShadowStyle, DecorationStyle, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInterface, TextStyle_styled_string, TextStyleInterface, BackgroundColorStyle, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../styledString"
+import { CustomSpan, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, GestureStyle, GestureStyleInterface, StyledString, MutableStyledString, StyleOptions, SpanStyle, ImageAttachment, StyledStringKey, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback, DecorationStyleInterface, UrlStyle, BaselineOffsetStyle, LetterSpacingStyle, LineHeightStyle, TextShadowStyle, DecorationStyle, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInterface, TextStyle, TextStyleInterface, BackgroundColorStyle, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../styledString"
 import { DrawContext, Rect, LengthUnit, ShapeClip, RoundRect, Circle, CommandPath, ShapeMask, Size, Vector2, Vector3, CornerRadius, Edges, Frame, Matrix4, ColorMetrics, LengthMetrics, LengthMetricsUnit } from "./../../Graphics"
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, ColorStop, LinearGradient, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
@@ -17022,7 +17022,7 @@ export class TypeChecker {
             return true
         }
         else {
-            throw new Error("Can not discriminate value typeof TextStyle_styled_string")
+            throw new Error("Can not discriminate value typeof TextStyle")
         }
     }
     static isTextStyleInterface(value: Object | string | number | undefined | boolean, duplicated_fontColor: boolean, duplicated_fontFamily: boolean, duplicated_fontSize: boolean, duplicated_fontWeight: boolean, duplicated_fontStyle: boolean): boolean {

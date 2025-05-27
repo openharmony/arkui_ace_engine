@@ -53,7 +53,7 @@ import { UIContext } from "@ohos/arkui/UIContext"
 import { ContentModifier, WrappedBuilder, CommonConfiguration, Callback_WrappedBuilder_Args_Void } from "./../arkui-wrapper-builder"
 import { ContentType, EnterKeyType, InputType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback, TextInputAttribute, OnSubmitCallback, TextInputStyle, PasswordIcon, UnderlineColor, TextInputController, TextInputOptions } from "./../textInput"
 import { CustomDialogController, CustomDialogControllerOptions } from "./../customDialogController"
-import { CustomSpan, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, GestureStyle, GestureStyleInterface, StyledString, MutableStyledString, StyleOptions, SpanStyle, ImageAttachment, StyledStringKey, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback, DecorationStyleInterface, UrlStyle, BaselineOffsetStyle, LetterSpacingStyle, LineHeightStyle, TextShadowStyle, DecorationStyle, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInterface, TextStyle_styled_string, TextStyleInterface, BackgroundColorStyle, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../styledString"
+import { CustomSpan, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, GestureStyle, GestureStyleInterface, StyledString, MutableStyledString, StyleOptions, SpanStyle, ImageAttachment, StyledStringKey, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback, DecorationStyleInterface, UrlStyle, BaselineOffsetStyle, LetterSpacingStyle, LineHeightStyle, TextShadowStyle, DecorationStyle, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInterface, TextStyle, TextStyleInterface, BackgroundColorStyle, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../styledString"
 import { DrawContext, Rect, LengthUnit, ShapeClip, ColorMetrics, RoundRect, Circle, CommandPath, ShapeMask, Size, Vector2, Vector3, CornerRadius, Edges, Frame, Matrix4, Corners, LengthMetrics, LengthMetricsUnit } from "./../../Graphics"
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, ColorStop, LinearGradient, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
@@ -3165,7 +3165,7 @@ export class TypeChecker {
         return value instanceof TextStyle_alert_dialog
     }
     static isTextStyle_styled_string(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
-        return value instanceof TextStyle_styled_string
+        return value instanceof TextStyle
     }
     static isTextStyleInterface(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
         return value instanceof TextStyleInterface
