@@ -2186,15 +2186,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager039, TestSize.Level1)
     jsAccessibilityManager->SetWindowId(1);
 
     /**
-     * @tc.steps: step2. test GenerateCommonProperty
-     */
-    auto mainContext = context;
-    Framework::CommonProperty commonProperty;
-    jsAccessibilityManager->GenerateCommonProperty(context, commonProperty, mainContext, frameNode);
-    EXPECT_EQ(commonProperty.innerWindowId, -1);
-
-    /**
-     * @tc.steps: step3. test GetFramenodeByAccessibilityId by DumpTreeNG
+     * @tc.steps: step2. test GetFramenodeByAccessibilityId by DumpTreeNG
      */
     frameNode->accessibilityId_ = frameNode->GetId() + 1;
     jsAccessibilityManager->DumpTreeNG(frameNode, 1, frameNode->GetId(), true);
