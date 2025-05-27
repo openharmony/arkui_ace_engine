@@ -1170,6 +1170,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest043, TestSize.Level1)
     ImageResizableSlice slice;
     ViewAbstract::SetBackgroundImageResizableSlice(slice);
     ViewAbstract::SetBackgroundImageResizableSlice(nullptr, slice);
+    ViewAbstract::SetBackgroundImageResizableSlice(nullptr, slice, true);
     MotionBlurOption motionBlurOption;
     motionBlurOption.radius = 5;
     motionBlurOption.anchor.x = 0.5;

@@ -195,6 +195,8 @@ public:
     static void SetBackgroundImageRepeat(const ImageRepeat &imageRepeat);
     static void SetBackgroundImageSyncMode(bool syncMode);
     static void SetBackgroundImageSize(BackgroundImageSize &bgImgSize);
+    static void SetBackgroundImageSizeUpdateFunc(
+        BackgroundImageSize& bgImgSize, const RefPtr<ResourceObject>& resObj, const std::string direction);
     static void SetBackgroundImagePosition(BackgroundImagePosition &bgImgPosition);
     static void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions = SysOptions());
     static void SetMotionBlur(const MotionBlurOption& motionBlurOption);
@@ -678,8 +680,9 @@ public:
     static void ReSetMagnifier(FrameNode* frameNode);
     static void SetBackgroundBlurStyle(
         FrameNode* frameNode, const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions = SysOptions());
-    static void SetBackgroundImagePosition(FrameNode* frameNode, BackgroundImagePosition& bgImgPosition);
-    static void SetBackgroundImageSize(FrameNode* frameNode, BackgroundImageSize& bgImgSize);
+    static void SetBackgroundImagePosition(
+        FrameNode* frameNode, BackgroundImagePosition& bgImgPosition, bool isReset = false);
+    static void SetBackgroundImageSize(FrameNode* frameNode, BackgroundImageSize& bgImgSize, bool isReset = false);
     static void SetBackgroundImage(FrameNode* frameNode, const ImageSourceInfo& src);
     static void SetBackgroundImage(
         FrameNode* frameNode, const ImageSourceInfo& src, const RefPtr<ResourceObject>& resObj);
@@ -753,7 +756,8 @@ public:
     static void SetForegroundEffect(FrameNode* frameNode, float radius);
     static void SetBackgroundEffect(
         FrameNode* frameNode, const EffectOption& effectOption, const SysOptions& sysOptions = SysOptions());
-    static void SetBackgroundImageResizableSlice(FrameNode* frameNode, ImageResizableSlice& slice);
+    static void SetBackgroundImageResizableSlice(
+        FrameNode* frameNode, ImageResizableSlice& slice, bool isReset = false);
     static void SetDynamicLightUp(FrameNode* frameNode, float rate, float lightUpDegree);
     static void SetBgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption);
     static void SetFgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption);

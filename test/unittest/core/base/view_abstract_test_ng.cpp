@@ -151,8 +151,10 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest003, TestSize.Level1)
     ViewAbstract::SetBackgroundImage(nullptr, imageSourceInfo);
     ViewAbstract::SetBackgroundImageSize(BACKGROUNDSIZE);
     ViewAbstract::SetBackgroundImageSize(nullptr, BACKGROUNDSIZE);
+    ViewAbstract::SetBackgroundImageSize(nullptr, BACKGROUNDSIZE, true);
     ViewAbstract::SetBackgroundImagePosition(BACKGROUNDPOSITION);
     ViewAbstract::SetBackgroundImagePosition(nullptr, BACKGROUNDPOSITION);
+    ViewAbstract::SetBackgroundImagePosition(nullptr, BACKGROUNDPOSITION, true);
     ViewAbstract::SetPixelRound(0);
     ChainInfo chainInfo;
     chainInfo.direction = LineDirection::HORIZONTAL;
@@ -244,8 +246,10 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest004, TestSize.Level1)
     ViewAbstract::SetBackgroundImage(nullptr, imageSourceInfo);
     ViewAbstract::SetBackgroundImageSize(BACKGROUNDSIZE);
     ViewAbstract::SetBackgroundImageSize(nullptr, BACKGROUNDSIZE);
+    ViewAbstract::SetBackgroundImageSize(nullptr, BACKGROUNDSIZE, true);
     ViewAbstract::SetBackgroundImagePosition(BACKGROUNDPOSITION);
     ViewAbstract::SetBackgroundImagePosition(nullptr, BACKGROUNDPOSITION);
+    ViewAbstract::SetBackgroundImagePosition(nullptr, BACKGROUNDPOSITION, true);
     ViewAbstract::SetPixelRound(0);
 
     ChainInfo chainInfo;
@@ -940,6 +944,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest016, TestSize.Level1)
     ImageResizableSlice slice;
     ViewAbstract::SetBackgroundImageResizableSlice(slice);
     ViewAbstract::SetBackgroundImageResizableSlice(nullptr, slice);
+    ViewAbstract::SetBackgroundImageResizableSlice(nullptr, slice, true);
 
     /**
      * @tc.expected: Return expected results.
@@ -1533,8 +1538,10 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest029, TestSize.Level1)
     ViewAbstract::SetBackgroundImage(nullptr, imageSourceInfo);
     ViewAbstract::SetBackgroundImageSize(BACKGROUNDSIZE);
     ViewAbstract::SetBackgroundImageSize(nullptr, BACKGROUNDSIZE);
+    ViewAbstract::SetBackgroundImageSize(nullptr, BACKGROUNDSIZE, true);
     ViewAbstract::SetBackgroundImagePosition(BACKGROUNDPOSITION);
     ViewAbstract::SetBackgroundImagePosition(nullptr, BACKGROUNDPOSITION);
+    ViewAbstract::SetBackgroundImagePosition(nullptr, BACKGROUNDPOSITION, true);
     ViewAbstract::SetPixelRound(0);
     ChainInfo chainInfo;
     chainInfo.direction = LineDirection::HORIZONTAL;

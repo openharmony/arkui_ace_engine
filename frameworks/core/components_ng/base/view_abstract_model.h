@@ -99,6 +99,8 @@ public:
         std::string& moduleName, RefPtr<ThemeConstants> themeConstant) = 0;
     virtual void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) = 0;
     virtual void SetBackgroundImageSize(BackgroundImageSize& bgImgSize) = 0;
+    virtual void SetBackgroundImageSizeUpdateFunc(
+        BackgroundImageSize& bgImgSize, const RefPtr<ResourceObject>& resObj, const std::string direction) = 0;
     virtual void SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosition) = 0;
     virtual void SetBackgroundBlurStyle(
         const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions = SysOptions()) = 0;

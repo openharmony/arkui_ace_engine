@@ -3596,39 +3596,6 @@ void JSViewAbstract::JsLightUpEffect(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetLightUpEffect(std::clamp(radio, 0.0, 1.0));
 }
 
-void SetBackgroundImageSizeUpdateFunc(
-    BackgroundImageSize& bgImgSize, const RefPtr<ResourceObject>& resObjWidth, const RefPtr<ResourceObject>& resObjHeight)
-{
-    CHECK_NULL_VOID(resObjWidth);
-    auto&& updateFuncWidth = [](const RefPtr<ResourceObject>& resObj, BackgroundImageSize& bgImgSize) {
-        CalcDimension width;
-        ResourceParseUtils::ParseResDimensionVp(resObj, width);
-        double valueWidth = width.ConvertToPx();
-        BackgroundImageSizeType typeWidth = BackgroundImageSizeType::LENGTH;
-        if (width.Unit() == DimensionUnit::PERCENT) {
-            typeWidth = BackgroundImageSizeType::PERCENT;
-            valueWidth = width.Value() * FULL_DIMENSION;
-        }
-        bgImgSize.SetSizeTypeX(typeWidth);
-        bgImgSize.SetSizeValueX(valueWidth);
-    };
-    bgImgSize.AddResource("backgroundImageSizeWidth", resObjWidth, std::move(updateFuncWidth));
-    CHECK_NULL_VOID(resObjHeight);
-    auto&& updateFuncHeight = [](const RefPtr<ResourceObject>& resObj, BackgroundImageSize& bgImgSize) {
-        CalcDimension height;
-        ResourceParseUtils::ParseResDimensionVp(resObj, height);
-        double valueHeight = height.ConvertToPx();
-        BackgroundImageSizeType typeHeight = BackgroundImageSizeType::LENGTH;
-        if (height.Unit() == DimensionUnit::PERCENT) {
-            typeHeight = BackgroundImageSizeType::PERCENT;
-            valueHeight = height.Value() * FULL_DIMENSION;
-        }
-        bgImgSize.SetSizeTypeY(typeHeight);
-        bgImgSize.SetSizeValueY(valueHeight);
-    };
-    bgImgSize.AddResource("backgroundImageSizeHeight", resObjHeight, std::move(updateFuncHeight));
-}
-
 void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
 {
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
@@ -3656,7 +3623,8 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
         RefPtr<ResourceObject> resObjHeight;
         ParseJsDimensionVp(object->GetProperty("width"), width, resObjWidth);
         ParseJsDimensionVp(object->GetProperty("height"), height, resObjHeight);
-        SetBackgroundImageSizeUpdateFunc(bgImgSize, resObjWidth, resObjHeight);
+        ViewAbstractModel::GetInstance()->SetBackgroundImageSizeUpdateFunc(bgImgSize, resObjWidth, "width");
+        ViewAbstractModel::GetInstance()->SetBackgroundImageSizeUpdateFunc(bgImgSize, resObjHeight, "height");
         double valueWidth = width.ConvertToPx();
         double valueHeight = height.ConvertToPx();
         BackgroundImageSizeType typeWidth = BackgroundImageSizeType::LENGTH;
@@ -3691,42 +3659,30 @@ void SetBgImgPositionWithAlign(BackgroundImagePosition& bgImgPosition, int32_t a
 }
 
 void SetBackgroundImagePositionUpdateFunc(
-    BackgroundImagePosition& bgImgPosition, const RefPtr<ResourceObject>& resObjX, const RefPtr<ResourceObject>& resObjY)
+    BackgroundImagePosition& bgImgPosition, const RefPtr<ResourceObject>& resObj, const std::string direction)
 {
-    CHECK_NULL_VOID(resObjX);
-    auto&& updateFuncX = [](const RefPtr<ResourceObject>& resObj, BackgroundImagePosition& position) {
-        CalcDimension x;
-        ResourceParseUtils::ParseResDimensionVp(resObj, x);
-        double valueX = x.Value();
+    CHECK_NULL_VOID(resObj);
+    if (direction.empty()) {
+        return;
+    }
+    auto&& updateFunc = [direction](const RefPtr<ResourceObject>& resObj, BackgroundImagePosition& position) {
+        CalcDimension dimension;
+        ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+        double value = dimension.Value();
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            valueX = x.ConvertToPx();
+            value = dimension.ConvertToPx();
         }
-        DimensionUnit typeX = DimensionUnit::PX;
-        if (x.Unit() == DimensionUnit::PERCENT) {
-            valueX = x.Value();
-            typeX = DimensionUnit::PERCENT;
+        DimensionUnit type = DimensionUnit::PX;
+        if (dimension.Unit() == DimensionUnit::PERCENT) {
+            value = dimension.Value();
+            type = DimensionUnit::PERCENT;
         }
         AnimationOption option = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
-        position.SetSizeX(AnimatableDimension(valueX, typeX, option));
+        (direction == "x") ? position.SetSizeX(AnimatableDimension(value, type, option))
+                           : position.SetSizeY(AnimatableDimension(value, type, option));
     };
-    bgImgPosition.AddResource("backgroundImagePositionX", resObjX, std::move(updateFuncX));
-    CHECK_NULL_VOID(resObjY);
-    auto&& updateFuncY = [](const RefPtr<ResourceObject>& resObj, BackgroundImagePosition& position) {
-        CalcDimension y;
-        ResourceParseUtils::ParseResDimensionVp(resObj, y);
-        double valueY = y.Value();
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            valueY = y.ConvertToPx();
-        }
-        DimensionUnit typeY = DimensionUnit::PX;
-        if (y.Unit() == DimensionUnit::PERCENT) {
-            valueY = y.Value();
-            typeY = DimensionUnit::PERCENT;
-        }
-        AnimationOption option = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
-        position.SetSizeY(AnimatableDimension(valueY, typeY, option));
-    };
-    bgImgPosition.AddResource("backgroundImagePositionY", resObjY, std::move(updateFuncY));
+    (direction == "x") ? bgImgPosition.AddResource("backgroundImagePositionX", resObj, std::move(updateFunc))
+                       : bgImgPosition.AddResource("backgroundImagePositionY", resObj, std::move(updateFunc));
 }
 
 void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
@@ -3751,7 +3707,8 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
         RefPtr<ResourceObject> resObjY;
         ParseJsDimensionVp(object->GetProperty("x"), x, resObjX);
         ParseJsDimensionVp(object->GetProperty("y"), y, resObjY);
-        SetBackgroundImagePositionUpdateFunc(bgImgPosition, resObjX, resObjY);
+        SetBackgroundImagePositionUpdateFunc(bgImgPosition, resObjX, "x");
+        SetBackgroundImagePositionUpdateFunc(bgImgPosition, resObjY, "y");
         double valueX = x.Value();
         double valueY = y.Value();
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {

@@ -231,6 +231,12 @@ public:
         ViewAbstract::SetBackgroundImageSize(bgImgSize);
     }
 
+    void SetBackgroundImageSizeUpdateFunc(
+        BackgroundImageSize& bgImgSize, const RefPtr<ResourceObject>& resObj, const std::string direction) override
+    {
+        ViewAbstract::SetBackgroundImageSizeUpdateFunc(bgImgSize, resObj, direction);
+    }
+
     void SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosition) override
     {
         ViewAbstract::SetBackgroundImagePosition(bgImgPosition);

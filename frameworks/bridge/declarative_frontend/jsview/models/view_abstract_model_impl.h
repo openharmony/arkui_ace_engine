@@ -50,9 +50,11 @@ public:
     void SetBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj) override {};
     void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) override;
     void SetBackgroundImageWithResourceObj(const RefPtr<ResourceObject> &resObj, std::string &bundleName,
-        std::string &moduleName, RefPtr<ThemeConstants> themeConstant) override{};
+        std::string &moduleName, RefPtr<ThemeConstants> themeConstant) override {};
     void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) override;
     void SetBackgroundImageSize(BackgroundImageSize& bgImgSize) override;
+    void SetBackgroundImageSizeUpdateFunc(
+        BackgroundImageSize& bgImgSize, const RefPtr<ResourceObject>& resObj, const std::string direction) override {};
     void SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosition) override;
     void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions) override;
     void SetPadding(const CalcDimension& value) override;
