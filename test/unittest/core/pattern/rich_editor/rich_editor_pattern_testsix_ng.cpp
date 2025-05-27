@@ -467,4 +467,42 @@ HWTEST_F(RichEditorPatternTestSixNg, HandleKbVerticalSelection005, TestSize.Leve
     EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(false), 0);
 }
 
+/**
+ * @tc.name: ReportAfterContentChangeEvent001
+ * @tc.desc: Test ReportAfterContentChangeEvent non-span string mode with content added
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSixNg, ReportAfterContentChangeEvent001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ClearSpan();
+    std::string firstText = "abcd";
+    AddSpan(firstText);
+    std::string space = " ";
+    std::string secondText = "content";
+    AddSpan(space + secondText);
+    richEditorPattern->isSpanStringMode_ = false;
+    richEditorPattern->textCache_ = "abcd";
+    richEditorPattern->ReportAfterContentChangeEvent();
+    EXPECT_EQ(richEditorPattern->textCache_, "abcd content");
+}
+
+/**
+ * @tc.name: ReportAfterContentChangeEvent002
+ * @tc.desc: Test ReportAfterContentChangeEvent in span mode with content removed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSixNg, ReportAfterContentChangeEvent002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->textCache_ = "nihaodajia";
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(PREVIEW_TEXT_VALUE1);
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->ReportAfterContentChangeEvent();
+    EXPECT_EQ(richEditorPattern->textCache_, "nihao");
+}
 } // namespace OHOS::Ace::NG

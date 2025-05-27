@@ -220,6 +220,7 @@ void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     ForceTriggerAvoidOnCaretChange();
     undoManager_->RecordOperation(record);
+    ReportAfterContentChangeEvent();
 }
 
 void RichEditorPattern::UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& spanItems)
@@ -531,6 +532,7 @@ void RichEditorPattern::AfterStyledStringChange(int32_t start, int32_t length, c
         eventHub->FireOnStyledStringDidChange(changeValue);
     }
     ForceTriggerAvoidOnCaretChange();
+    ReportAfterContentChangeEvent();
 }
 
 void RichEditorPattern::AfterStyledStringChange(const UndoRedoRecord& record, bool isUndo)
@@ -1173,6 +1175,7 @@ void RichEditorPattern::AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset
     std::advance(it, offset);
     spans_.insert(it, item);
     UpdateSpanPosition();
+    ReportAfterContentChangeEvent();
 }
 
 void RichEditorPattern::SetContentPattern(const RefPtr<RichEditorContentPattern>& contentPattern)
@@ -1598,6 +1601,34 @@ void RichEditorPattern::AfterContentChange(RichEditorChangeValue& changeValue)
         eventHub->FireOnDidChange(changeValue);
     }
     ForceTriggerAvoidOnCaretChange();
+    ReportAfterContentChangeEvent();
+}
+
+void RichEditorPattern::ReportAfterContentChangeEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    std::string currentContent;
+    if (isSpanStringMode_) {
+        IF_TRUE(styledString_, currentContent = styledString_->GetString());
+    } else {
+        std::u16string u16Str;
+        GetContentBySpans(u16Str);
+        currentContent = UtfUtils::Str16DebugToStr8(u16Str);
+    }
+    if(suppressAccessibilityEvent_){
+        auto [addedText, removedText] = DetectTextDiff(currentContent);
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT,  "addedLen=%{public}d, removedLen=%{public}d",
+                 static_cast<int>(addedText.length()), static_cast<int>(removedText.length()));
+        if (!addedText.empty() && removedText.empty()) {
+            OnAccessibilityEventTextChange(TextChangeType::ADD, addedText);
+        } else if (!removedText.empty() && addedText.empty()) {
+            OnAccessibilityEventTextChange(TextChangeType::REMOVE, removedText);
+        }
+    }
+    suppressAccessibilityEvent_ = true;
+    textCache_ = currentContent;
 }
 
 void RichEditorPattern::SpanNodeFission(RefPtr<SpanNode>& spanNode, bool needLeadingMargin)
@@ -8453,6 +8484,7 @@ void RichEditorPattern::HandleOnPaste()
         return;
     }
     CHECK_NULL_VOID(clipboard_);
+    suppressAccessibilityEvent_ = false;
 #ifdef PREVIEW
     auto pasteCallback = [weak = WeakClaim(this)](const std::string& text) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "pasteCallback callback in previewer");
@@ -8538,6 +8570,7 @@ void RichEditorPattern::HandleOnCut()
     }
 
     caretUpdateType_ = CaretUpdateType::NONE;
+    suppressAccessibilityEvent_ = false;
     OnCopyOperation();
     DeleteBackward(1);
 }
@@ -11325,6 +11358,7 @@ void RichEditorPattern::AfterSpansChange(const UndoRedoRecord& record, bool isUn
     auto rangeAfter = isUndo ? record.rangeBefore : record.rangeAfter;
     changeValue.SetRangeAfter(rangeAfter);
     eventHub->FireOnDidChange(changeValue);
+    ReportAfterContentChangeEvent();
 }
 
 void RichEditorPattern::FixMoveDownChange(RichEditorChangeValue& changeValue, int32_t delLength)
@@ -12742,6 +12776,19 @@ const TextEditingValue& RichEditorPattern::GetInputEditingValue() const
 bool RichEditorPattern::IsSelectAll()
 {
     return textSelector_.GetTextStart() == 0 && textSelector_.GetTextEnd() == GetTextContentLength();
+}
+
+void RichEditorPattern::OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    AccessibilityEvent event;
+    event.type = AccessibilityEventType::TEXT_CHANGE;
+    event.nodeId = host->GetAccessibilityId();
+    event.extraEventInfo.insert({changeType, changeString});
+    pipeline->SendEventToAccessibilityWithNode(event, GetHost());
 }
 
 } // namespace OHOS::Ace::NG
