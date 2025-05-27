@@ -19,6 +19,7 @@
 #include "arkoala_api_generated.h"
 #include "ui/base/utils/utils.h"
 
+#include "bridge/arkts_frontend/arkts_frontend.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 #include "core/interfaces/native/implementation/render_node_peer_impl.h"
@@ -47,21 +48,12 @@ DimensionUnit ConvertLengthMetricsUnitToDimensionUnit(Ark_Int32 unitValue, Dimen
 } // namespace
 namespace RenderNodeAccessor {
 void DestroyPeerImpl(Ark_RenderNode peer) {}
-Ark_RenderNode CtorImpl(Ark_Int32 nodeId, const DrawCallbackFunc* callback)
+Ark_RenderNode CtorImpl(Ark_Int32 nodeId, const DrawCallbackFunc* value)
 {
     auto frameNode = NG::FrameNode::GetOrCreateFrameNode(
         V2::RENDER_NODE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NG::RenderNodePattern>(); });
     frameNode->SetIsArkTsRenderNode(true);
     auto renderNodePeer = RenderNodePeer::Create(frameNode);
-
-    auto drawCallbackFunc = [callback = CallbackHelper(*callback)](const DrawingContext& context) -> void {
-
-    };
-    auto pattern = frameNode->GetPattern<NG::RenderNodePattern>();
-    if (pattern) {
-        pattern->SetDrawCallback(drawCallbackFunc);
-    }
-
     return renderNodePeer;
 }
 Ark_NativePointer GetFinalizerImpl()

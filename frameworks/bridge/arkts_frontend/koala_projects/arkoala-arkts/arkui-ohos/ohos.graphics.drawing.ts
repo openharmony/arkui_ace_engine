@@ -13,16 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMMON_MODULE
-#define KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMMON_MODULE
-
-#include "ani.h"
-
-namespace OHOS::Ace::Ani {
-ani_object GetHostContext([[maybe_unused]] ani_env* env);
-void SyncInstanceId(ani_env* env, ani_object obj, ani_int id);
-void RestoreInstanceId(ani_env* env);
-void SetDrawCallback(ani_env* env, ani_long ptr, ani_fn_object fnObj);
-} // namespace OHOS::Ace::Ani
-
-#endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMMON_MODULE
+export declare namespace drawing {
+    export class Canvas { }
+}

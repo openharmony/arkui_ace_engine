@@ -51,4 +51,13 @@ void RestoreInstanceId([[maybe_unused]] ani_env* env)
     }
     modifier->getCommonAniModifier()->restoreInstanceId();
 }
+
+void SetDrawCallback(ani_env* env, ani_long ptr, ani_fn_object fnObj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->setDrawCallback(env, ptr, fnObj);
+}
 } // namespace OHOS::Ace::Ani

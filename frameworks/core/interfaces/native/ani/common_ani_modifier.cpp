@@ -12,12 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <memory>
 #include "common_ani_modifier.h"
 
+#include <memory>
 #include <vector>
 
 #include "base/log/log.h"
+#include "bridge/arkts_frontend/ani_graphics_module.h"
 #include "core/common/container_scope.h"
 #include "frameworks/bridge/arkts_frontend/ani_context_module.h"
 
@@ -50,14 +51,17 @@ void RestoreInstanceId()
     restoreInstanceIds_.pop_back();
 }
 
-const ArkUIAniCommonModifier* GetCommonAniModifier()
+void SetDrawCallback(ani_env* env, ani_long ptr, ani_fn_object fnObj)
 {
-    static const ArkUIAniCommonModifier impl = {
-        .getHostContext = OHOS::Ace::NG::GetHostContext,
-        .syncInstanceId = OHOS::Ace::NG::SyncInstanceId,
-        .restoreInstanceId = OHOS::Ace::NG::RestoreInstanceId
-    };
-    return &impl;
+    Framework::AniGraphicsModule::SetDrawCallback(env, ptr, fnObj);
 }
 
+const ArkUIAniCommonModifier* GetCommonAniModifier()
+{
+    static const ArkUIAniCommonModifier impl = { .getHostContext = OHOS::Ace::NG::GetHostContext,
+        .syncInstanceId = OHOS::Ace::NG::SyncInstanceId,
+        .restoreInstanceId = OHOS::Ace::NG::RestoreInstanceId,
+        .setDrawCallback = OHOS::Ace::NG::SetDrawCallback };
+    return &impl;
+}
 } // namespace OHOS::Ace::NG

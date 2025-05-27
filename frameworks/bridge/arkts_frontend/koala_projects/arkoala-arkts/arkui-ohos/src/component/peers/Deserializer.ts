@@ -170,6 +170,7 @@ import { MenuItemOptions } from "./../menuItem"
 import { TextBackgroundStyle } from "./../span"
 import { DividerStyle as DividerStyle_sidebar } from "./../sidebar"
 import { NodeContainer_AboutToResizeCallback } from "./../nodeContainer"
+import { drawing } from "../../../ohos.graphics.drawing"
 
 export class Deserializer extends DeserializerBase {
     constructor(data: KSerializerBuffer | KUint8ArrayPtr, length: int32) {
@@ -307,10 +308,11 @@ export class Deserializer extends DeserializerBase {
         let ptr : KPointer = valueDeserializer.readPointer()
         return DrawableDescriptorInternal.fromPtr(ptr)
     }
-    readDrawingCanvas(): DrawingCanvas {
+    readDrawingCanvas(): drawing.Canvas {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
-        return DrawingCanvasInternal.fromPtr(ptr)
+        return new drawing.Canvas()
+        // return DrawingCanvasInternal.fromPtr(ptr)
     }
     readDrawingColorFilter(): DrawingColorFilter {
         let valueDeserializer : Deserializer = this
@@ -7188,8 +7190,8 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const size_result : Size = valueDeserializer.readSize()
         const sizeInPixel_result : Size = valueDeserializer.readSize()
-        const canvas_result : DrawingCanvas = (valueDeserializer.readDrawingCanvas() as DrawingCanvas)
-        let value : DrawContext = ({size: size_result, sizeInPixel: sizeInPixel_result, canvas: canvas_result} as DrawContext)
+        const canvas_result : drawing.Canvas = (valueDeserializer.readDrawingCanvas() as drawing.Canvas)
+        let value : DrawContext = ({size_: size_result, sizeInPixel_: sizeInPixel_result, canvas_: canvas_result} as DrawContext)
         return value
     }
     readDrawingRenderingContext(): DrawingRenderingContext {

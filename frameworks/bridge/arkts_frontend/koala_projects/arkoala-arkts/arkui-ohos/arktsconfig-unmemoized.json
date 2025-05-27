@@ -81,6 +81,12 @@
             ],
             "@ohos/graphics/common2D": [
                 "../ohos.graphics.common2D.ts"
+            ],
+            "@ohos/graphics/drawing": [
+                "../ohos.graphics.drawing.ts"
+            ],
+            "@ohos/arkui/graphics": [
+                "../ohos.arkui.graphics.ts"
             ]
         }
     },
@@ -96,7 +102,9 @@
         "src/ani/arkts/*.ts",
         "build/unmemoized/ohos.router.ts",
         "build/unmemoized/ohos.observer.ts",
-        "build/unmemoized/ohos.graphics.common2D.ts"
+        "build/unmemoized/ohos.graphics.common2D.ts",
+        "build/unmemoized/ohos.graphics.drawing.ts",
+        "build/unmemoized/ohos.arkui.graphics.ts"
     ],
     "exclude": [
         "**/index.ts",
