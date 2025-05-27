@@ -1678,6 +1678,11 @@ void DialogPattern::UpdateDeviceOrientation(const DeviceOrientation& deviceOrien
 
 void DialogPattern::UpdateTitleTextFontScale()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    double maxAppFontScale = pipelineContext->GetMaxAppFontScale();
     CHECK_NULL_VOID(titleContainer_);
     auto scale = dialogTheme_->GetMinFontScaleForElderly();
     if (isSuitableForElderly_) {
@@ -1691,9 +1696,9 @@ void DialogPattern::UpdateTitleTextFontScale()
             auto titleProp = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
             CHECK_NULL_VOID(titleProp);
             if (notAdapationAging_) {
-                titleProp->UpdateMaxFontScale(dialogTheme_->GetDialogDefaultScale());
+                titleProp->UpdateMaxFontScale(std::min<double>(dialogTheme_->GetDialogDefaultScale(), maxAppFontScale));
             } else {
-                titleProp->UpdateMaxFontScale(scale);
+                titleProp->UpdateMaxFontScale(std::min<double>(scale, maxAppFontScale));
                 titleProp->UpdateMaxLines(ADAPT_TITLE_MAX_LINES);
             }
         }
@@ -1703,9 +1708,9 @@ void DialogPattern::UpdateTitleTextFontScale()
         auto titleProp = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
         CHECK_NULL_VOID(titleProp);
         if (notAdapationAging_) {
-            titleProp->UpdateMaxFontScale(dialogTheme_->GetDialogDefaultScale());
+            titleProp->UpdateMaxFontScale(std::min<double>(dialogTheme_->GetDialogDefaultScale(), maxAppFontScale));
         } else {
-            titleProp->UpdateMaxFontScale(scale);
+            titleProp->UpdateMaxFontScale(std::min<double>(scale, maxAppFontScale));
             titleProp->UpdateMaxLines(ADAPT_TITLE_MAX_LINES);
         }
     }
@@ -1718,6 +1723,9 @@ void DialogPattern::UpdateTextFontScale()
     auto scale = dialogTheme_->GetMinFontScaleForElderly();
     auto contentProp =
         AceType::DynamicCast<TextLayoutProperty>(contentNodeMap_[DialogContentNode::MESSAGE]->GetLayoutProperty());
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    double maxAppFontScale = context->GetMaxAppFontScale();
     CHECK_NULL_VOID(contentProp);
     if (isSuitableForElderly_) {
         scale = SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE
@@ -1725,9 +1733,9 @@ void DialogPattern::UpdateTextFontScale()
                     : dialogTheme_->GetContentMaxFontScale();
     }
     if (notAdapationAging_) {
-        contentProp->UpdateMaxFontScale(dialogTheme_->GetDialogDefaultScale());
+        contentProp->UpdateMaxFontScale(std::min<double>(dialogTheme_->GetDialogDefaultScale(), maxAppFontScale));
     } else {
-        contentProp->UpdateMaxFontScale(scale);
+        contentProp->UpdateMaxFontScale(std::min<double>(scale, maxAppFontScale));
     }
     CHECK_NULL_VOID(buttonContainer_);
     MarginProperty margin;
@@ -1748,9 +1756,9 @@ void DialogPattern::UpdateTextFontScale()
             auto textProp = AceType::DynamicCast<TextLayoutProperty>(buttonTextNode->GetLayoutProperty());
             CHECK_NULL_VOID(textProp);
             if (notAdapationAging_) {
-                textProp->UpdateMaxFontScale(dialogTheme_->GetDialogDefaultScale());
+                textProp->UpdateMaxFontScale(std::min<double>(dialogTheme_->GetDialogDefaultScale(), maxAppFontScale));
             } else {
-                textProp->UpdateMaxFontScale(scale);
+                textProp->UpdateMaxFontScale(std::min<double>(scale, maxAppFontScale));
             }
             if (isSuitableForElderly_) {
                 textProp->UpdateMargin(margin);

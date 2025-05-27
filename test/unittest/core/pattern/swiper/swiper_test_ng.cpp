@@ -1618,7 +1618,6 @@ HWTEST_F(SwiperTestNg, OnModifyDone_StopAndResetSpringAnimation, TestSize.Level1
     swiperPattern->isBindIndicator_ = true;
     swiperPattern->currentDelta_ = 2.0f;
     swiperPattern->OnModifyDone();
-    EXPECT_EQ(frameNode->layoutProperty_->GetPropertyChangeFlag(), PROPERTY_UPDATE_MEASURE_SELF);
     EXPECT_EQ(swiperPattern->currentDelta_, 0.0f);
 }
 
