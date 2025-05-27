@@ -1361,6 +1361,10 @@ void MenuPattern::ShowPreviewPositionAnimation(AnimationOption& option, int32_t 
     previewRenderContext->UpdatePosition(
         OffsetT<Dimension>(Dimension(previewOriginPosition.GetX()), Dimension(previewOriginPosition.GetY())));
 
+    if (menuWrapperPattern->GetHoverScaleInterruption()) {
+        return;
+    }
+
     if (isHoverImageTarget) {
         option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
         option.SetDelay(delay);
@@ -1422,7 +1426,8 @@ void MenuPattern::ShowPreviewMenuAnimation()
 
     auto springMotionResponse = menuTheme->GetSpringMotionResponse();
     auto springMotionDampingFraction = menuTheme->GetSpringMotionDampingFraction();
-    auto delay = isShowHoverImage_ ? menuTheme->GetHoverImageDelayDuration() : 0;
+    auto isHoverScaleInterrupt = menuWrapperPattern->GetHoverScaleInterruption();
+    auto delay = isShowHoverImage_ ? menuTheme->GetHoverImageDelayDuration(isHoverScaleInterrupt) : 0;
 
     AnimationOption option = AnimationOption();
     auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);

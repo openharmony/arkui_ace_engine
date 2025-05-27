@@ -2599,7 +2599,8 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
     dumpInfo_.targetOffset = targetOffset_;
     menuPattern->SetTargetSize(targetSize_);
     menuPattern->SetTargetOffset(targetOffset_);
-    TAG_LOGI(AceLogTag::ACE_MENU, "targetNode: %{public}s, targetSize: %{public}s, targetOffset: %{public}s",
+    TAG_LOGI(AceLogTag::ACE_MENU,
+        "targetId: %{public}d targetNode: %{public}s, targetSize: %{public}s, targetOffset: %{public}s", targetNodeId_,
         targetTag_.c_str(), targetSize_.ToString().c_str(), targetOffset_.ToString().c_str());
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
