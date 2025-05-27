@@ -233,14 +233,22 @@ RefPtr<NGGestureRecognizer> GestureEventHub::PackInnerRecognizer(
 
 void GestureEventHub::ProcessParallelPriorityGesture(RefPtr<NGGestureRecognizer>& current,
     std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t& parallelIndex, const Offset& offset, int32_t touchId,
-    const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host)
+    const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host, bool needRebuildForCurrent)
 {
+    auto recognizer = recognizers.front();
     if (current) {
         recognizers.push_front(current);
     }
     if (recognizers.size() > 1) {
         if ((static_cast<int32_t>(externalParallelRecognizer_.size()) <= parallelIndex)) {
             externalParallelRecognizer_.emplace_back(AceType::MakeRefPtr<ParallelRecognizer>(std::move(recognizers)));
+        } else if (needRebuildForCurrent) {
+            externalParallelRecognizer_.insert(externalParallelRecognizer_.begin(),
+                AceType::MakeRefPtr<ParallelRecognizer>(std::move(recognizers)));
+            auto recognizerTouches = recognizer->GetTouchPoints();
+            for (const auto& iter : recognizerTouches) {
+                externalParallelRecognizer_[parallelIndex]->BeginReferee(iter.first);
+            }
         } else {
             externalParallelRecognizer_[parallelIndex]->AddChildren(recognizers);
         }
@@ -257,8 +265,10 @@ void GestureEventHub::ProcessParallelPriorityGesture(RefPtr<NGGestureRecognizer>
 
 void GestureEventHub::ProcessExternalExclusiveRecognizer(RefPtr<NGGestureRecognizer>& current,
     std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t& exclusiveIndex, const Offset& offset, int32_t touchId,
-    const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host, GesturePriority priority)
+    const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host, GesturePriority priority,
+    bool needRebuildForCurrent)
 {
+    auto recognizer = recognizers.front();
     if (current) {
         if (priority == GesturePriority::Low) {
             recognizers.push_front(current);
@@ -270,6 +280,13 @@ void GestureEventHub::ProcessExternalExclusiveRecognizer(RefPtr<NGGestureRecogni
     if (recognizers.size() > 1) {
         if ((static_cast<int32_t>(externalExclusiveRecognizer_.size()) <= exclusiveIndex)) {
             externalExclusiveRecognizer_.emplace_back(AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(recognizers)));
+        } else if (needRebuildForCurrent) {
+            externalExclusiveRecognizer_.insert(externalExclusiveRecognizer_.begin(),
+                AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(recognizers)));
+            auto recognizerTouches = recognizer->GetTouchPoints();
+            for (const auto& iter : recognizerTouches) {
+                externalExclusiveRecognizer_[exclusiveIndex]->BeginReferee(iter.first);
+            }
         } else {
             externalExclusiveRecognizer_[exclusiveIndex]->AddChildren(recognizers);
         }
@@ -282,6 +299,60 @@ void GestureEventHub::ProcessExternalExclusiveRecognizer(RefPtr<NGGestureRecogni
     } else if (recognizers.size() == 1) {
         current = *recognizers.begin();
     }
+}
+
+namespace {
+constexpr int32_t MAX_GROUP_DEPTH = 2;
+constexpr size_t MIN_RECOGNIZER_GROUP_LOOP_SIZE = 3;
+bool IsSameFrameNodeCollected(
+    const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& host, int32_t depth = 0)
+{
+    CHECK_NULL_RETURN(current, true);
+    if (depth >= MAX_GROUP_DEPTH) {
+        return true;
+    }
+    auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(current);
+    if (!recognizerGroup) {
+        auto recognizerNode = current->GetAttachedNode().Upgrade();
+        if (recognizerNode != host) {
+            return false;
+        }
+        return true;
+    }
+    auto recognizerList = recognizerGroup->GetGroupRecognizer();
+    for (auto recognizer : recognizerList) {
+        if (!recognizer) {
+            continue;
+        }
+        if (AceType::InstanceOf<RecognizerGroup>(recognizer) &&
+            !IsSameFrameNodeCollected(recognizer, host, depth + 1)) {
+            return false;
+        } else {
+            auto recognizerNode = recognizer->GetAttachedNode().Upgrade();
+            if (recognizerNode != host) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+} // namespace
+
+bool GestureEventHub::CheckLastInnerRecognizerCollected(GesturePriority priority, int32_t gestureGroupIndex)
+{
+    auto host = GetFrameNode();
+    CHECK_NULL_RETURN(host, false);
+    std::list<RefPtr<NGGestureRecognizer>> recognizerList;
+    if (priority == GesturePriority::Parallel) {
+        if (static_cast<int32_t>(externalParallelRecognizer_.size()) <= gestureGroupIndex) {
+            return false;
+        }
+        return IsSameFrameNodeCollected(externalParallelRecognizer_[gestureGroupIndex], host);
+    }
+    if (static_cast<int32_t>(externalExclusiveRecognizer_.size()) <= gestureGroupIndex) {
+        return false;
+    }
+    return IsSameFrameNodeCollected(externalExclusiveRecognizer_[gestureGroupIndex], host);
 }
 
 void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -303,6 +374,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
     int32_t parallelIndex = 0;
     int32_t exclusiveIndex = 0;
+    bool overMinRecognizerGroupLoopSize = gestureHierarchy_.size() >= MIN_RECOGNIZER_GROUP_LOOP_SIZE;
     for (auto const& recognizer : gestureHierarchy_) {
         if (!recognizer) {
             continue;
@@ -328,11 +400,24 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         }
         auto priority = recognizer->GetPriority();
         std::list<RefPtr<NGGestureRecognizer>> recognizers { 1, recognizer };
+        auto checkCurrentRecognizer = false;
+        auto parentRecognizer = recognizer->GetGestureGroup().Upgrade();
         if (priority == GesturePriority::Parallel) {
-            ProcessParallelPriorityGesture(current, recognizers, parallelIndex, offset, touchId, targetComponent, host);
+            checkCurrentRecognizer = overMinRecognizerGroupLoopSize && (recognizer == gestureHierarchy_.front()) &&
+                !IsSameFrameNodeCollected(current, host) &&
+                CheckLastInnerRecognizerCollected(priority, parallelIndex);
+            ProcessParallelPriorityGesture(current, recognizers, parallelIndex,
+                offset, touchId, targetComponent, host, checkCurrentRecognizer);
         } else {
-            ProcessExternalExclusiveRecognizer(
-                current, recognizers, exclusiveIndex, offset, touchId, targetComponent, host, priority);
+            checkCurrentRecognizer = overMinRecognizerGroupLoopSize && (recognizer == gestureHierarchy_.front()) &&
+                !IsSameFrameNodeCollected(current, host) &&
+                CheckLastInnerRecognizerCollected(priority, exclusiveIndex);
+            ProcessExternalExclusiveRecognizer(current, recognizers, exclusiveIndex,
+                offset, touchId, targetComponent, host, priority, checkCurrentRecognizer);
+        }
+        auto parentGroupRecognizer = AceType::DynamicCast<RecognizerGroup>(parentRecognizer);
+        if (checkCurrentRecognizer && parentGroupRecognizer) {
+            parentGroupRecognizer->RemoveRecognizerInGroup(recognizer);
         }
     }
 

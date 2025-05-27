@@ -779,12 +779,15 @@ private:
 
     void ProcessParallelPriorityGesture(RefPtr<NGGestureRecognizer>& current,
         std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t& parallelIndex, const Offset& offset,
-        int32_t touchId, const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host);
+        int32_t touchId, const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host,
+        bool needRebuildForCurrent = false);
 
     void ProcessExternalExclusiveRecognizer(RefPtr<NGGestureRecognizer>& current,
         std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t& exclusiveIndex, const Offset& offset,
         int32_t touchId, const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host,
-        GesturePriority priority);
+        GesturePriority priority, bool needRebuildForCurrent = false);
+
+    bool CheckLastInnerRecognizerCollected(GesturePriority priority, int32_t gestureGroupIndex = 0);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;
