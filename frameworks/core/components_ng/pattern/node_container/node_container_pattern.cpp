@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -109,8 +110,15 @@ bool NodeContainerPattern::HandleTextureExport(bool isStop, FrameNode* frameNode
         CHECK_NULL_RETURN(renderContext, false);
         renderContext->SetIsNeedRebuildRSTree(isStop);
     }
+    auto elementRegister = ElementRegister::GetInstance();
     if (isStop) {
+        if (elementRegister) {
+            elementRegister->UnregisterEmbedNode(surfaceId_, WeakPtr(exportTextureNode));
+        }
         return exportTextureRenderContext->StopTextureExport();
+    }
+    if (elementRegister) {
+        elementRegister->RegisterEmbedNode(surfaceId_, WeakPtr(exportTextureNode));
     }
     return exportTextureRenderContext->DoTextureExport(surfaceId_);
 }
