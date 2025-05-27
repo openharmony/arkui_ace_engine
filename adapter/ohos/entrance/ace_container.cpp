@@ -1698,19 +1698,19 @@ private:
         bool isBottom = placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
                         placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
                         placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT;
-        if (rectf.GetY() > size.height + edge + minEdge) {
+        if ((windowRect_.height_ - rectf.Height() - trans.GetY()) >
+                   (size.height + edge * POPUP_CALCULATE_RATIO + bottomAvoidHeight)) {
+            // popup will display at the bottom of the container
+            if (isBottom) {
+                deltaY = rect_.top + rect_.height - rectf.Height() - trans.GetY();
+            } else {
+                deltaY = rect_.top - rectf.Height() - size.height - trans.GetY() - edge * POPUP_CALCULATE_RATIO;
+            }
+        } else if (rectf.GetY() > size.height + edge + minEdge) {
             if (isBottom) {
                 deltaY = rect_.top - trans.GetY() + rect_.height + size.height + edge * POPUP_CALCULATE_RATIO;
             } else {
                 deltaY = rect_.top - trans.GetY();
-            }
-        } else if ((windowRect_.height_ - rectf.Height() - trans.GetY()) >
-                   (size.height + edge * POPUP_CALCULATE_RATIO + bottomAvoidHeight)) {
-            // popup will display at the bottom of the container
-            if (isBottom) {
-                deltaY = rect_.top + rect_.height - rectf.Height() - trans.GetY() + edge;
-            } else {
-                deltaY = rect_.top - rectf.Height() - size.height - trans.GetY() - edge;
             }
         } else {
             // popup will display in the middle of the container
@@ -1728,7 +1728,7 @@ private:
     {
         auto node = node_.Upgrade();
         CHECK_NULL_RETURN(node, 0);
-        auto rectf = node->GetRectWithRender();
+        auto rectf = node->GetTransformRectRelativeToWindow();
         double deltaX = 0;
         AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
         AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
@@ -1736,7 +1736,7 @@ private:
         if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_LEFT ||
             placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT) {
             double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
-            deltaX = rect_.left - edgeDist;
+            deltaX = rect_.left - rectf.Left() - edgeDist;
             if (deltaX > edgeDist) {
                 deltaX = edgeDist;
             }
