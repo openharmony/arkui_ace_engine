@@ -723,6 +723,10 @@ public:
     {
         return false;
     }
+    virtual bool OnAttachAtapter(const RefPtr<FrameNode>& node, const RefPtr<UINode>& child)
+    {
+        return false;
+    }
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
