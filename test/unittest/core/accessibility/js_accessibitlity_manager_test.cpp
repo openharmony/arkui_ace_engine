@@ -2170,19 +2170,11 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager040, TestSize.Level1)
     /**
      * @tc.steps: step1. construct JsAccessibilityManager
      */
-    auto rootNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
-    ASSERT_NE(rootNode, nullptr);
     auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(frameNode, nullptr);
-    rootNode->AddChild(frameNode);
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
-    auto context = NG::PipelineContext::GetCurrentContext();
-    jsAccessibilityManager->SetPipelineContext(context);
-    ASSERT_NE(context, nullptr);
-    jsAccessibilityManager->Register(true);
 
     /**
      * @tc.steps: step2. test GetFramenodeByAccessibilityId by DumpTreeNG
