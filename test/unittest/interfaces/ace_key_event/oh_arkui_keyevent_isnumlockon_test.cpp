@@ -21,31 +21,24 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace {
 
-HWTEST_F(KeyEventTest, KeyEvent_GetUnicode001, TestSize.Level0)
+HWTEST_F(KeyEventTest, KeyEvent_IsNumLockOn001, TestSize.Level0)
 {
-    auto result = OH_ArkUI_KeyEvent_GetUnicode(nullptr);
-    EXPECT_EQ(result, 0u);
+    EXPECT_EQ(OH_ArkUI_KeyEvent_IsNumLockOn(nullptr, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
-HWTEST_F(KeyEventTest, KeyEvent_GetUnicode002, TestSize.Level0)
+HWTEST_F(KeyEventTest, KeyEvent_IsNumLockOn002, TestSize.Level0)
 {
-    ArkUI_UIInputEvent event = {
-        .inputType = ARKUI_UIINPUTEVENT_TYPE_KEY,
-        .eventTypeId = C_KEY_EVENT_ID,
-        .inputEvent = nullptr,
-        .isCloned = false,
-        .apiVersion = 0,
-    };
-    auto result = OH_ArkUI_KeyEvent_GetUnicode(&event);
-    EXPECT_EQ(result, 0u);
+    bool state = false;
+    ArkUI_UIInputEvent event = { .inputEvent = nullptr };
+    EXPECT_EQ(OH_ArkUI_KeyEvent_IsNumLockOn(&event, &state), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
-HWTEST_F(KeyEventTest, KeyEvent_GetUnicode003, TestSize.Level0)
+HWTEST_F(KeyEventTest, KeyEvent_IsNumLockOn003, TestSize.Level0)
 {
-    std::vector<uint32_t> unicodeValues = { 65, 97, 8364, 0x1F600 }; // A, a, €, 😀
+    std::vector<bool> testValues = { true, false };
     int count = 0;
-    for (auto unicode : unicodeValues) {
-        ArkUIKeyEvent keyEvent { .unicode = static_cast<int32_t>(unicode) };
+    for (bool val : testValues) {
+        ArkUIKeyEvent keyEvent { .isNumLockOn = val };
         ArkUI_UIInputEvent event = {
             .inputType = ARKUI_UIINPUTEVENT_TYPE_KEY,
             .eventTypeId = C_KEY_EVENT_ID,
@@ -53,8 +46,10 @@ HWTEST_F(KeyEventTest, KeyEvent_GetUnicode003, TestSize.Level0)
             .isCloned = false,
             .apiVersion = 0,
         };
-        auto result = OH_ArkUI_KeyEvent_GetUnicode(&event);
-        EXPECT_EQ(result, unicode) << "index = " << count << " : expected unicode = " << unicode;
+        bool resultState = !val;
+        auto result = OH_ArkUI_KeyEvent_IsNumLockOn(&event, &resultState);
+        EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+        EXPECT_EQ(resultState, val) << "index = " << count;
         count++;
     }
 }

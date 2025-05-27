@@ -31,6 +31,7 @@ ohos_unittest("key_event_test") {
     "$ace_root/interfaces/native/node/native_node_napi.cpp",
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
+    "$ace_root/interfaces/native/node/node_model_safely.cpp",
     "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
@@ -40,6 +41,12 @@ ohos_unittest("key_event_test") {
     "oh_arkui_keyevent_getkeytext_test.cpp",
     "oh_arkui_keyevent_gettype_test.cpp",
     "oh_arkui_keyevent_getunicode_test.cpp",
+    "oh_arkui_keyevent_stoppropagation_test.cpp",
+    "oh_arkui_keyevent_setconsumed_test.cpp",
+    "oh_arkui_keyevent_dispatch_test.cpp",
+    "oh_arkui_keyevent_isnumlockon_test.cpp",
+    "oh_arkui_keyevent_iscapslockon_test.cpp",
+    "oh_arkui_keyevent_isscrolllockon_test.cpp",
   ]
 
   configs = [
