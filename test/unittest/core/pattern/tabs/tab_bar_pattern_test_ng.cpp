@@ -2320,4 +2320,174 @@ HWTEST_F(TabBarPatternTestNg, GetNextFocusNode001, TestSize.Level1)
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, 810.0f);
     EXPECT_EQ(tabBarPattern_->currentIndicatorOffset_, 360.0f);
 }
+/**
+ * @tc.name: AddTabBarItemCallBack
+ * @tc.desc: test currentIndicatorOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, AddTabBarItemCallBack, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    MockPaintRect(tabBarNode_);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->AddTabBarItemCallBack(tabBarItemNode);
+
+    auto columnNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    tabBarPattern_->AddTabBarItemCallBack(columnNode);
+}
+/**
+ * @tc.name: GetOverScrollInfo
+ * @tc.desc: test GetOverScrollInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, GetOverScrollInfo, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    MockPaintRect(tabBarNode_);
+
+    tabBarPattern_->visibleItemPosition_.clear();
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.empty(),true);
+    tabBarPattern_->GetOverScrollInfo(tabBarPattern_->GetContentSize());
+}
+/**
+ * @tc.name: HandleMouseEvent
+ * @tc.desc: test HandleMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, HandleMouseEvent, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    MockPaintRect(tabBarNode_);
+    int32_t nodeId = 1;
+    for (int i = 0; i <= 2; i++) {
+            auto frameNode_ = TabsModelNG::GetOrCreateTabsNode(
+                V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+            tabBarNode_->AddChild(frameNode_);
+        }
+    MouseInfo mouseInfo;
+    mouseInfo.SetAction(MouseAction::WINDOW_LEAVE);
+    tabBarPattern_->hoverIndex_.emplace(1);
+    tabBarPattern_->HandleMouseEvent(mouseInfo);
+}
+/**
+ * @tc.name: ResetOnForceMeasure001
+ * @tc.desc: test ResetOnForceMeasure
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, ResetOnForceMeasure001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    MockPaintRect(tabBarNode_);
+
+    tabBarPattern_->ResetOnForceMeasure(5);
+    tabBarPattern_->ResetOnForceMeasure(6);
+
+    tabBarPattern_->indicatorStyles_.clear();
+    IndicatorStyle indicatorStyle1;
+    tabBarPattern_->indicatorStyles_ = { indicatorStyle1 };
+    indicatorStyle1.color = Color::BLACK;
+    tabBarPattern_->selectedModes_.clear();
+    tabBarPattern_->ResetOnForceMeasure(0);
+
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarPattern_->visibleItemPosition_[0] = {5,0.0f};
+    tabBarPattern_->ResetOnForceMeasure(6);
+}
+/**
+ * @tc.name: ResetOnForceMeasure002
+ * @tc.desc: test HandleBottomTabBarChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, ResetOnForceMeasure002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    MockPaintRect(tabBarNode_);
+
+    tabBarPattern_->tabBarStyles_.clear();
+    tabBarPattern_->ResetOnForceMeasure(6);
+
+    LabelStyle labelStyle;
+    labelStyle.fontWeight = FontWeight::NORMAL;
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE };
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
+    tabBarPattern_->ResetOnForceMeasure(6);
+}
+/**
+ * @tc.name: UpdateBackBlurStyle
+ * @tc.desc: test UpdateBackBlurStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, UpdateBackBlurStyle, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    MockPaintRect(tabBarNode_);
+
+    auto container = Container::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+    auto pipeline = frameNode_->GetContext();
+    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    tabBarPattern_->UpdateBackBlurStyle(tabTheme);
+
+    tabTheme->bottomTabBackgroundBlurStyle_=11;
+    auto renderContext = tabBarNode_->GetRenderContext();
+    renderContext ->UpdateBackBlurStyle(std::nullopt);
+    renderContext ->UpdateBackBlurRadius(Dimension());
+    renderContext ->UpdateBackgroundEffect(std::nullopt);
+    tabBarPattern_->UpdateBackBlurStyle(tabTheme);
+
+    tabTheme->bottomTabBackgroundBlurStyle_=0;
+    tabBarPattern_->UpdateBackBlurStyle(tabTheme);
+
+    tabTheme->bottomTabBackgroundBlurStyle_=11;
+    model.SetBarOverlap(AceType::RawPtr(frameNode_), true);
+    tabBarPattern_->UpdateBackBlurStyle(tabTheme);
+
+    tabTheme->bottomTabBackgroundBlurStyle_=11;
+    renderContext->UpdateBackBlurStyle(std::nullopt);
+    auto radius = Dimension(10.0f);
+    renderContext->UpdateBackBlurRadius(radius);
+    tabBarPattern_->UpdateBackBlurStyle(tabTheme);
+
+    tabTheme->bottomTabBackgroundBlurStyle_=11;
+    renderContext->UpdateBackBlurStyle(std::nullopt);
+    renderContext->UpdateBackBlurRadius(Dimension());
+    EffectOption effectOption;
+    effectOption.policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
+    renderContext->UpdateBackgroundEffect(effectOption);
+    tabBarPattern_->UpdateBackBlurStyle(tabTheme);
+}
+/**
+ * @tc.name: UpdateChildrenClipEdge
+ * @tc.desc: test UpdateChildrenClipEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, UpdateChildrenClipEdge, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    MockPaintRect(tabBarNode_);
+
+    tabBarPattern_->UpdateChildrenClipEdge();
+
+    auto pipeline = frameNode_->GetContext();
+    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    tabTheme->isChangeFocusTextStyle_=true;
+    tabBarPattern_->UpdateChildrenClipEdge();
+}
 } // namespace OHOS::Ace::NG
