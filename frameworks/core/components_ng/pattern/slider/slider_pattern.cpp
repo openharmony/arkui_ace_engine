@@ -612,7 +612,7 @@ void SliderPattern::UpdateStepPointsAccessibilityVirtualNodeSelected()
     auto unSelectedDesc = theme->GetUnselectedDesc();
     auto disabledDesc = theme->GetDisabelDesc();
     uint32_t indexPrefix = 0;
-    uint32_t indexSuffix = pointAccessibilityNodeVec_.size() - STEP_POINT_OFFSET;
+    uint32_t indexSuffix = static_cast<int32_t>(pointAccessibilityNodeVec_.size()) - STEP_POINT_OFFSET;
     for (uint32_t i = 0; i < pointCount; i++) {
         auto isDisabledDesc = false;
         bool isClickAbled = true;
@@ -2298,8 +2298,8 @@ void SliderPattern::UpdateEndsIsShowStepsPosition(
     int32_t noneModePoint = 1;
     int32_t stepModePoint = 0;
     if (!side) {
-        noneModePoint = stepPoints_.size() - NONE_POINT_OFFSET;
-        stepModePoint = stepPoints_.size() - STEP_POINT_OFFSET;
+        noneModePoint = static_cast<int32_t>(stepPoints_.size()) - NONE_POINT_OFFSET;
+        stepModePoint = static_cast<int32_t>(stepPoints_.size()) - STEP_POINT_OFFSET;
     }
 
     if (stepPoints_.size() < 1) {
