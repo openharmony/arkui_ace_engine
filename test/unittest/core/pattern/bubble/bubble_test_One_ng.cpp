@@ -2320,7 +2320,7 @@ HWTEST_F(BubbleTestOneNg, UpdateBubbleText, TestSize.Level1)
     auto popupTheme = pattern->GetPopupTheme();
     auto color = popupTheme->GetFontPrimaryColor();
     EXPECT_EQ(layoutProperty->GetTextColor().value(), color);
-    EXPECT_EQ(layoutProperty->GetMaxFontScale().value(), std::min(FONT_SIZE_SCALE_TEST1, FONT_MAX_SIZE_SCALE));
+    EXPECT_EQ(layoutProperty->GetMaxFontScale().value(), FONT_SIZE_SCALE_TEST1);
 }
 
 /**
@@ -2337,7 +2337,6 @@ HWTEST_F(BubbleTestOneNg, UpdateBubbleText01, TestSize.Level1)
     ASSERT_NE(pipeline, nullptr);
     pipeline->SetFollowSystem(true);
     pipeline->SetMaxAppFontScale(FONT_SIZE_SCALE_TEST2);
-    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
     ButtonProperties buttonProperties { true, "Button" };
@@ -2373,7 +2372,7 @@ HWTEST_F(BubbleTestOneNg, UpdateBubbleText01, TestSize.Level1)
     ASSERT_NE(textNode, nullptr);
     auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    EXPECT_EQ(layoutProperty->GetMaxFontScale().value(), std::min(FONT_SIZE_SCALE_TEST2, FONT_MAX_SIZE_SCALE));
+    EXPECT_EQ(layoutProperty->GetMaxFontScale().value(), FONT_MAX_SIZE_SCALE);
 }
 
 /**
