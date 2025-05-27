@@ -143,6 +143,9 @@ bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& va
         return Color::ParseColorString(value->ToString(vm)->ToString(vm), result);
     }
     if (value->IsObject(vm)) {
+        if (ParseColorMetricsToColor(vm, value, result)) {
+            return true;
+        }
         return ParseJsColorFromResource(vm, value, result, resourceObject);
     }
     return false;
@@ -548,6 +551,33 @@ bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueR
     if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::COLOR)) {
         result = resourceWrapper->GetColor(resId->ToNumber(vm)->Value());
         result.SetResourceId(resId->Int32Value(vm));
+        return true;
+    }
+    return false;
+}
+
+bool ArkTSUtils::ParseColorMetricsToColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue, Color& result)
+{
+    if (!jsValue->IsObject(vm)) {
+        return false;
+    }
+    auto obj = jsValue->ToObject(vm);
+    auto toNumericProp = obj->Get(vm, "toNumeric");
+    auto colorSpaceProp = obj->Get(vm, "getColorSpace");
+    if (toNumericProp->IsFunction(vm) && colorSpaceProp->IsFunction(vm)) {
+        panda::Local<panda::FunctionRef> func = toNumericProp;
+        auto colorVal = func->Call(vm, obj, nullptr, 0);
+        result.SetValue(colorVal->Uint32Value(vm));
+
+        func = colorSpaceProp;
+        auto colorSpaceVal = func->Call(vm, obj, nullptr, 0);
+        if (colorSpaceVal->IsNumber() &&
+            colorSpaceVal->Uint32Value(vm) == static_cast<uint32_t>(ColorSpace::DISPLAY_P3)) {
+            result.SetColorSpace(ColorSpace::DISPLAY_P3);
+        } else {
+            result.SetColorSpace(ColorSpace::SRGB);
+        }
+
         return true;
     }
     return false;

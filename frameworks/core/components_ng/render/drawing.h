@@ -91,6 +91,7 @@ using RSBlurType = Rosen::Drawing::BlurType;
 using RSPathFillType = Rosen::Drawing::PathFillType;
 using RSSkPath = Rosen::Drawing::SkiaPath;
 using RSColorQuad = Rosen::Drawing::ColorQuad;
+using RSColor4f = Rosen::Drawing::Color4f;
 using RSShaderEffect = Rosen::Drawing::ShaderEffect;
 using RSTileMode = Rosen::Drawing::TileMode;
 using RSFont = Rosen::Drawing::Font;

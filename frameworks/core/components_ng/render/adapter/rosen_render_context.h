@@ -385,6 +385,7 @@ public:
     void OnIsTransitionBackgroundUpdate(bool isTransitionBackground) override {}
     void OnIsBuilderBackgroundUpdate(bool isBuilderBackground) override;
 
+    void ColorToRSColor(const Color& color, OHOS::Rosen::RSColor& rsColor);
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnOpacityUpdate(double opacity) override;
     void OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeMode) override;

@@ -417,6 +417,19 @@ void SetButtonBackgroundColor(ArkUINodeHandle node, uint32_t color)
     ButtonModelNG::BackgroundColor(frameNode, Color(color), true);
 }
 
+void SetButtonBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color backgroundColor { color };
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::DISPLAY_P3);
+    } else {
+        backgroundColor.SetColorSpace(ColorSpace::SRGB);
+    }
+    ButtonModelNG::BackgroundColor(frameNode, backgroundColor, true);
+}
+
 void ResetButtonBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -709,6 +722,7 @@ const ArkUIButtonModifier* GetButtonModifier()
         .setButtonLabelStyle = SetButtonLabelStyle,
         .resetButtonLabelStyle = ResetButtonLabelStyle,
         .setButtonBackgroundColor = SetButtonBackgroundColor,
+        .setButtonBackgroundColorWithColorSpace = SetButtonBackgroundColorWithColorSpace,
         .resetButtonBackgroundColor = ResetButtonBackgroundColor,
         .setButtonBorderRadius = SetButtonBorderRadius,
         .resetButtonBorderRadius = ResetButtonBorderRadius,
@@ -765,6 +779,7 @@ const CJUIButtonModifier* GetCJUIButtonModifier()
         .setButtonLabelStyle = SetButtonLabelStyle,
         .resetButtonLabelStyle = ResetButtonLabelStyle,
         .setButtonBackgroundColor = SetButtonBackgroundColor,
+        .setButtonBackgroundColorWithColorSpace = SetButtonBackgroundColorWithColorSpace,
         .resetButtonBackgroundColor = ResetButtonBackgroundColor,
         .setButtonBorderRadius = SetButtonBorderRadius,
         .resetButtonBorderRadius = ResetButtonBorderRadius,

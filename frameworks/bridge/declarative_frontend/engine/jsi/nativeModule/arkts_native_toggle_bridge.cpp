@@ -387,7 +387,8 @@ ArkUINativeModuleValue ToggleBridge::SetBackgroundColor(ArkUIRuntimeCallInfo* ru
     if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
         GetArkUINodeModifiers()->getToggleModifier()->resetToggleBackgroundColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getToggleModifier()->setToggleBackgroundColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getToggleModifier()->setToggleBackgroundColorWithColorSpace(
+            nativeNode, color.GetValue(), color.GetColorSpace());
     }
     return panda::JSValueRef::Undefined(vm);
 }

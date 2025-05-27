@@ -201,6 +201,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
         end?: number | string;
         rotation?: number | string;
         colors: Array<any>;
+        metricsColors?: Array<any>;
         repeating?: boolean;
     }): this;
     radialGradient(value: {

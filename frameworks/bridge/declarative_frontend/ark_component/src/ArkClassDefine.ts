@@ -243,6 +243,7 @@ class ArkSweepGradient {
   end: number | string | undefined;
   rotation: number | string | undefined;
   colors: Array<any>;
+  metricsColors: Array<any>;
   repeating: boolean | undefined;
 
   constructor(center: Array<any>,
@@ -250,12 +251,14 @@ class ArkSweepGradient {
     end: number | string | undefined,
     rotation: number | string | undefined,
     colors: Array<any>,
+    metricsColors: Array<any>,
     repeating: boolean | undefined) {
     this.center = center;
     this.start = start;
     this.end = end;
     this.rotation = rotation;
     this.colors = colors;
+    this.metricsColors = metricsColors;
     this.repeating = repeating;
   }
 
@@ -266,6 +269,7 @@ class ArkSweepGradient {
       this.end === another.end &&
       this.rotation === another.rotation &&
       deepCompareArrays(this.colors, another.colors) &&
+      deepCompareArrays(this.metricsColors, another.metricsColors) &&
       this.repeating === another.repeating
     );
   }

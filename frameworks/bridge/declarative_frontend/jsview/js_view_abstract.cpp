@@ -6183,7 +6183,8 @@ bool JSViewAbstract::ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color
     }
     auto colorObj = JSRef<JSObject>::Cast(jsValue);
     auto toNumericProp = colorObj->GetProperty("toNumeric");
-    if (toNumericProp->IsFunction()) {
+    auto colorSpaceProp = colorObj->GetProperty("getColorSpace");
+    if (toNumericProp->IsFunction() && colorSpaceProp->IsFunction()) {
         auto colorVal = JSRef<JSFunc>::Cast(toNumericProp)->Call(colorObj, 0, nullptr);
         result.SetValue(colorVal->ToNumber<uint32_t>());
 
@@ -6191,6 +6192,14 @@ bool JSViewAbstract::ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color
         if (resourceIdProp->IsFunction()) {
             auto resourceIdVal = JSRef<JSFunc>::Cast(resourceIdProp)->Call(colorObj, 0, nullptr);
             result.SetResourceId(resourceIdVal->ToNumber<uint32_t>());
+        }
+
+        auto colorSpaceVal = JSRef<JSFunc>::Cast(colorSpaceProp)->Call(colorObj, 0, nullptr);
+        if (colorSpaceVal->IsNumber() &&
+            colorSpaceVal->ToNumber<uint32_t>() == static_cast<uint32_t>(ColorSpace::DISPLAY_P3)) {
+            result.SetColorSpace(ColorSpace::DISPLAY_P3);
+        } else {
+            result.SetColorSpace(ColorSpace::SRGB);
         }
 
         return true;
@@ -6458,6 +6467,9 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result,
         return Color::ParseColorString(jsValue->ToString(), result);
     }
     if (jsValue->IsObject()) {
+        if (ParseColorMetricsToColor(jsValue, result)) {
+            return true;
+        }
         return ParseJsColorFromResource(jsValue, result, resObj);
     }
     return false;
@@ -7965,7 +7977,12 @@ void JSViewAbstract::NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient
     auto repeating = jsObj->GetPropertyValue<bool>("repeating", false);
     newGradient.SetRepeat(repeating);
     // color stops
-    NewGetJsGradientColorStops(newGradient, jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLORS)));
+    JSRef<JSVal> metricColors = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::METRICS_COLORS));
+    if (metricColors->IsArray()) {
+        NewGetJsGradientColorStopsCheck(newGradient, metricColors);
+    } else {
+        NewGetJsGradientColorStops(newGradient, jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLORS)));
+    }
 }
 
 void JSViewAbstract::ParseSweepGradientPartly(const JSRef<JSObject>& obj, NG::Gradient& newGradient)
@@ -10160,6 +10177,52 @@ void JSViewAbstract::NewGetJsGradientColorStops(NG::Gradient& gradient, const JS
         }
         // color
         NewParseGradientColor(gradient, subArray, gradientColor, i, length);
+    }
+}
+
+void JSViewAbstract::NewGetJsGradientColorStopsCheck(NG::Gradient& gradient, const JSRef<JSVal>& colorStops)
+{
+    if (!colorStops->IsArray()) {
+        return;
+    }
+
+    JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(colorStops);
+    size_t length = jsArray->Length();
+    bool isValid = true;
+    for (size_t i = 0; i < length; i++) {
+        NG::GradientColor gradientColor;
+        JSRef<JSVal> item = jsArray->GetValueAt(i);
+        if (!item->IsArray()) {
+            continue;
+        }
+        JSRef<JSArray> subArray = JSRef<JSArray>::Cast(item);
+        if (subArray->Length() < 2) {
+            continue;
+        }
+        // color
+        Color color;
+        if (!ParseJsColor(subArray->GetValueAt(0), color)) {
+            continue;
+        }
+        // is valid
+        if (gradient.GetColors().size()) {
+            if (color.GetColorSpace() != gradient.GetColors().back().GetColor().GetColorSpace()) {
+                isValid = false;
+                gradient.ClearColors();
+                break;
+            }
+        }
+        gradientColor.SetColor(color);
+        gradientColor.SetHasValue(false);
+        // stop value
+        double value = 0.0;
+        if (ParseJsDouble(subArray->GetValueAt(1), value)) {
+            value = std::clamp(value, 0.0, 1.0);
+            gradientColor.SetHasValue(true);
+        }
+        //  [0, 1] -> [0, 100.0];
+        gradientColor.SetDimension(CalcDimension(value * 100.0, DimensionUnit::PERCENT));
+        gradient.AddColor(gradientColor);
     }
 }
 

@@ -2420,6 +2420,51 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0045, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetBackgroundColor
+ * @tc.desc: Test SetBackgroundColor of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0046, TestSize.Level1)
+{
+    Color p3Red;
+    p3Red.SetValue(0xffff0000);
+    p3Red.SetColorSpace(ColorSpace::DISPLAY_P3);
+    ViewAbstract::SetBackgroundColor(AceType::RawPtr(FRAME_NODE_REGISTER), p3Red);
+    Color result = ViewAbstract::GetBackgroundColor(AceType::RawPtr(FRAME_NODE_REGISTER));
+    EXPECT_EQ(result.GetColorSpace(), p3Red.GetColorSpace());
+}
+
+/**
+ * @tc.name: SetSweepGradient
+ * @tc.desc: Test SetSweepGradient of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0047, TestSize.Level1)
+{
+    Color p3Red;
+    p3Red.SetValue(0xffff0000);
+    p3Red.SetColorSpace(ColorSpace::DISPLAY_P3);
+    Color p3Green;
+    p3Green.SetValue(0xff00ff00);
+    p3Green.SetColorSpace(ColorSpace::DISPLAY_P3);
+    Color p3Blue;
+    p3Blue.SetValue(0xff0000ff);
+    p3Blue.SetColorSpace(ColorSpace::DISPLAY_P3);
+    GradientColor gradientColor;
+    Gradient gradient;
+    gradientColor.SetColor(p3Red);
+    gradient.AddColor(gradientColor);
+    gradientColor.SetColor(p3Green);
+    gradient.AddColor(gradientColor);
+    gradientColor.SetColor(p3Blue);
+    gradient.AddColor(gradientColor);
+    ViewAbstract::SetSweepGradient(AceType::RawPtr(FRAME_NODE_REGISTER), gradient);
+    Gradient result = ViewAbstract::GetSweepGradient(AceType::RawPtr(FRAME_NODE_REGISTER));
+    EXPECT_EQ(result.GetColors().front().GetColor().GetColorSpace(), p3Red.GetColorSpace());
+    EXPECT_EQ(result.GetColors().back().GetColor().GetColorSpace(), p3Blue.GetColorSpace());
+}
+
+/**
  * @tc.name: ViewAbstractSetClickFocusTest001
  * @tc.desc: Test that container node becomes focusable when click event is set and no focusable children exist.
  * @tc.type: FUNC

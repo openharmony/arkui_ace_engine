@@ -289,6 +289,32 @@ void SetGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors
     }
 }
 
+void SetGradientColorsWithColorSpace(NG::Gradient& gradient,
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, ColorSpace colorSpace)
+{
+    if ((colors == nullptr) || (colorsLength % NUM_3) != 0) {
+        return;
+    }
+    for (int32_t index = 0; index < colorsLength; index += NUM_3) {
+        auto colorValue = colors[index].u32;
+        auto colorHasDimension = colors[index + NUM_1].i32;
+        auto colorDimension = colors[index + NUM_2].f32;
+        auto colorVal = static_cast<uint32_t>(colorValue);
+        auto hasDimension = static_cast<bool>(colorHasDimension);
+        auto dimension = colorDimension;
+        NG::GradientColor gradientColor;
+        Color color;
+        color.SetValue(colorVal);
+        color.SetColorSpace(colorSpace);
+        gradientColor.SetColor(color);
+        gradientColor.SetHasValue(hasDimension);
+        if (hasDimension) {
+            gradientColor.SetDimension(CalcDimension(dimension * PERCENT_100, DimensionUnit::PERCENT));
+        }
+        gradient.AddColor(gradientColor);
+    }
+}
+
 void SetLinearGradientDirectionTo(std::shared_ptr<LinearGradient>& linearGradient, const GradientDirection direction)
 {
     switch (direction) {
@@ -694,6 +720,26 @@ void SetBackgroundColor(ArkUINodeHandle node, uint32_t color, void* bgColorRawPt
         auto* bgColor = reinterpret_cast<ResourceObject*>(bgColorRawPtr);
         auto backgroundColorResObj = AceType::Claim(bgColor);
         ViewAbstract::SetBackgroundColor(frameNode, Color(color), backgroundColorResObj);
+    }
+}
+
+void SetBackgroundColorWithColorSpace(
+    ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, void* bgColorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color backgroundColor { color };
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::DISPLAY_P3);
+    } else {
+        backgroundColor.SetColorSpace(ColorSpace::SRGB);
+    }
+    if (!SystemProperties::ConfigChangePerform() || !bgColorRawPtr) {
+        ViewAbstract::SetBackgroundColor(frameNode, backgroundColor);
+    } else {
+        auto* bgColor = reinterpret_cast<ResourceObject*>(bgColorRawPtr);
+        auto backgroundColorResObj = AceType::Claim(bgColor);
+        ViewAbstract::SetBackgroundColor(frameNode, backgroundColor, backgroundColorResObj);
     }
 }
 
@@ -1433,7 +1479,7 @@ void ResetLinearGradient(ArkUINodeHandle node)
  * @param colorsLength colors length
  */
 void SetSweepGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
-    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, ArkUI_Int32 colorSpace)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1443,7 +1489,11 @@ void SetSweepGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, A
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::SWEEP);
     SetSweepGradientValues(gradient, values, valuesLength);
-    SetGradientColors(gradient, colors, colorsLength);
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        SetGradientColorsWithColorSpace(gradient, colors, colorsLength, ColorSpace::DISPLAY_P3);
+    } else {
+        SetGradientColorsWithColorSpace(gradient, colors, colorsLength, ColorSpace::SRGB);
+    }
     ViewAbstract::SetSweepGradient(frameNode, gradient);
 }
 
@@ -7322,6 +7372,7 @@ const ArkUICommonModifier* GetCommonModifier()
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUICommonModifier modifier = {
         .setBackgroundColor = SetBackgroundColor,
+        .setBackgroundColorWithColorSpace = SetBackgroundColorWithColorSpace,
         .resetBackgroundColor = ResetBackgroundColor,
         .setWidth = SetWidth,
         .resetWidth = ResetWidth,
@@ -7775,6 +7826,7 @@ const CJUICommonModifier* GetCJUICommonModifier()
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUICommonModifier modifier = {
         .setBackgroundColor = SetBackgroundColor,
+        .setBackgroundColorWithColorSpace = SetBackgroundColorWithColorSpace,
         .resetBackgroundColor = ResetBackgroundColor,
         .setWidth = SetWidth,
         .resetWidth = ResetWidth,

@@ -564,6 +564,19 @@ void SetTextAreaBackgroundColor(ArkUINodeHandle node, uint32_t color)
     TextFieldModelNG::SetBackgroundColor(frameNode, Color(color));
 }
 
+void SetTextAreaBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color backgroundColor { color };
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::DISPLAY_P3);
+    } else {
+        backgroundColor.SetColorSpace(ColorSpace::SRGB);
+    }
+    TextFieldModelNG::SetBackgroundColor(frameNode, backgroundColor);
+}
+
 void ResetTextAreaBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1962,6 +1975,7 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .getTextAreaPlaceholderFont = GetTextAreaPlaceholderFont,
         .getTextAreaEditing = GetTextAreaEditing,
         .setTextAreaBackgroundColor = SetTextAreaBackgroundColor,
+        .setTextAreaBackgroundColorWithColorSpace = SetTextAreaBackgroundColorWithColorSpace,
         .resetTextAreaBackgroundColor = ResetTextAreaBackgroundColor,
         .setTextAreaType = SetTextAreaType,
         .resetTextAreaType = ResetTextAreaType,
@@ -2146,6 +2160,7 @@ const CJUITextAreaModifier* GetCJUITextAreaModifier()
         .getTextAreaPlaceholderFont = GetTextAreaPlaceholderFont,
         .getTextAreaEditing = GetTextAreaEditing,
         .setTextAreaBackgroundColor = SetTextAreaBackgroundColor,
+        .setTextAreaBackgroundColorWithColorSpace = SetTextAreaBackgroundColorWithColorSpace,
         .resetTextAreaBackgroundColor = ResetTextAreaBackgroundColor,
         .setTextAreaType = SetTextAreaType,
         .resetTextAreaType = ResetTextAreaType,

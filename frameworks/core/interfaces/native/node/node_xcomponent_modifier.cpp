@@ -49,6 +49,24 @@ void SetXComponentBackgroundColor(ArkUINodeHandle node, uint32_t color)
     ViewAbstract::SetBackgroundColor(frameNode, Color(color));
 }
 
+void SetXComponentBackgroundColorWithColorSpace(
+    ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto type = XComponentModelNG::GetType(frameNode);
+    if (!XComponentModel::IsBackGroundColorAvailable(type)) {
+        return;
+    }
+    Color backgroundColor { color };
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::DISPLAY_P3);
+    } else {
+        backgroundColor.SetColorSpace(ColorSpace::SRGB);
+    }
+    ViewAbstract::SetBackgroundColor(frameNode, backgroundColor);
+}
+
 void ResetXComponentBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -477,6 +495,7 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         .setXComponentEnableAnalyzer = SetXComponentEnableAnalyzer,
         .resetXComponentEnableAnalyzer = ResetXComponentEnableAnalyzer,
         .setXComponentBackgroundColor = SetXComponentBackgroundColor,
+        .setXComponentBackgroundColorWithColorSpace = SetXComponentBackgroundColorWithColorSpace,
         .resetXComponentBackgroundColor = ResetXComponentBackgroundColor,
         .setXComponentOpacity = SetXComponentOpacity,
         .resetXComponentOpacity = ResetXComponentOpacity,
@@ -534,6 +553,7 @@ const CJUIXComponentModifier* GetCJUIXComponentModifier()
         .getXComponentSurfaceId = nullptr, // getXComponentSurfaceId
         .getXComponentController = nullptr, // getXComponentController
         .setXComponentBackgroundColor = SetXComponentBackgroundColor,
+        .setXComponentBackgroundColorWithColorSpace = SetXComponentBackgroundColorWithColorSpace,
         .resetXComponentBackgroundColor = ResetXComponentBackgroundColor,
         .setXComponentOpacity = SetXComponentOpacity,
         .resetXComponentOpacity = ResetXComponentOpacity,
