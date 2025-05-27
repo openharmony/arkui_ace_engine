@@ -165,6 +165,7 @@ public:
 
     // Enable or disable debugging of web content
     static bool webDebuggingAccess_;
+    static int32_t webDebuggingPort_;
     static JSwebEventCallback OnControllerAttachedCallback_;
     static void CopyOption(int32_t copyOption);
     static void OnOverrideUrlLoading(const JSCallbackInfo& args);
