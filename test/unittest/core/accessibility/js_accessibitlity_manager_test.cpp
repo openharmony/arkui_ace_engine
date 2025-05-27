@@ -2161,11 +2161,11 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager039, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsAccessibilityManager039
+ * @tc.name: JsAccessibilityManager040
  * @tc.desc: Test GetFramenodeByAccessibilityId
  * @tc.type: FUNC
  */
-HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager039, TestSize.Level1)
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager040, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. construct JsAccessibilityManager
