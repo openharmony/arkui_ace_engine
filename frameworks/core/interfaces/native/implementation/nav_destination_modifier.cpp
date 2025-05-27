@@ -383,15 +383,55 @@ void RecoverableImpl(Ark_NativePointer node,
     auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
     NavDestinationModelStatic::SetRecoverable(frameNode, convValue);
 }
+
 void SystemTransitionImpl(Ark_NativePointer node,
                           const Opt_NavigationSystemTransitionType* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // NavDestinationModelNG::SetSystemTransition(frameNode, convValue);
-    LOGE("ARKOALA NavDestination.SystemTransitionImpl -> Method is not implemented. "
-         "No handlers for Ark_NavigationSystemTransitionType in model");
+    CHECK_NULL_VOID(value);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    
+    constexpr int32_t JS_ENUM_TRANSITIONTYPE_NONE = 1;
+    constexpr int32_t JS_ENUM_TRANSITIONTYPE_TITLE = 2;
+    constexpr int32_t JS_ENUM_TRANSITIONTYPE_CONTENT = 3;
+    constexpr int32_t JS_ENUM_TRANSITIONTYPE_FADE = 4;
+    constexpr int32_t JS_ENUM_TRANSITIONTYPE_EXPLODE = 5;
+    constexpr int32_t JS_ENUM_TRANSITIONTYPE_SLIDE_RIGHT = 6;
+    constexpr int32_t JS_ENUM_TRANSITIONTYPE_SLIDE_BOTTOM = 7;
+
+    auto systemTransitionvalue = static_cast<int32_t>(value->value);
+    auto res = NG::NavigationSystemTransitionType::DEFAULT;
+    switch (systemTransitionvalue) {
+        case JS_ENUM_TRANSITIONTYPE_NONE:
+             res =NG::NavigationSystemTransitionType::NONE;
+             break;
+        case JS_ENUM_TRANSITIONTYPE_TITLE:
+             res =NG::NavigationSystemTransitionType::TITLE;
+             break;
+        case JS_ENUM_TRANSITIONTYPE_CONTENT:
+             res =NG::NavigationSystemTransitionType::CONTENT;
+             break;
+        case JS_ENUM_TRANSITIONTYPE_FADE:
+             res =NG::NavigationSystemTransitionType::FADE;
+             break;
+        case JS_ENUM_TRANSITIONTYPE_EXPLODE:
+             res =NG::NavigationSystemTransitionType::EXPLODE;
+             break;
+        case JS_ENUM_TRANSITIONTYPE_SLIDE_RIGHT:
+             res =NG::NavigationSystemTransitionType::SLIDE_RIGHT;
+             break;
+        case JS_ENUM_TRANSITIONTYPE_SLIDE_BOTTOM:
+             res =NG::NavigationSystemTransitionType::SLIDE_BOTTOM;
+             break;
+        default:
+             res =NG::NavigationSystemTransitionType::DEFAULT;
+             break;
+    }
+
+    NavDestinationModelStatic::SetSystemTransitionType(frameNode, res);
 }
 void BindToScrollableImpl(Ark_NativePointer node,
                           const Opt_Array_Scroller* value)
@@ -414,17 +454,35 @@ void OnActiveImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // NavDestinationModelNG::SetOnActive(frameNode, convValue);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // tbd: Reset value
+        return;
+    }
+    auto onActiveEvent = [arkCallback = CallbackHelper(*optValue)](int32_t activeValue) {
+        Ark_NavDestinationActiveReason arkValue = static_cast<Ark_NavDestinationActiveReason>(activeValue);
+        arkCallback.Invoke(arkValue);
+    };
+    NavDestinationModelStatic::SetOnActive(frameNode, std::move(onActiveEvent));
 }
+
 void OnInactiveImpl(Ark_NativePointer node,
                     const Opt_Callback_NavDestinationActiveReason_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // NavDestinationModelNG::SetOnInactive(frameNode, convValue);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // tbd: Reset value
+        return;
+    }
+    auto onInactiveEvent = [arkCallback = CallbackHelper(*optValue)](int32_t inactiveValue) {
+        Ark_NavDestinationActiveReason arkValue = static_cast<Ark_NavDestinationActiveReason>(inactiveValue);
+        arkCallback.Invoke(arkValue);
+    };
+    NavDestinationModelStatic::SetOnInactive(frameNode, std::move(onInactiveEvent));
 }
+
 void CustomTransitionImpl(Ark_NativePointer node,
                           const Opt_NavDestinationTransitionDelegate* value)
 {

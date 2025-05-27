@@ -38,9 +38,11 @@ using OnPopCallback = CallbackHelper<Callback_PopInfo_Void>;
 using NavDestBuildCallback = CallbackHelper<Callback_String_Opt_Object_Void>;
 
 struct Interception {
-    CallbackHelper<InterceptionModeCallback> modeChange;
-    CallbackHelper<InterceptionShowCallback> willShow;
-    CallbackHelper<InterceptionShowCallback> didShow;
+    std::function<void(NG::NavigationMode)> modeChange;
+    std::function<void(const RefPtr<NG::NavDestinationContext>&,
+        const RefPtr<NG::NavDestinationContext>&, NG::NavigationOperation, bool)> willShow;
+    std::function<void(const RefPtr<NG::NavDestinationContext>&,
+        const RefPtr<NG::NavDestinationContext>&, NG::NavigationOperation, bool)> didShow;
 };
 using InterceptionType = struct Interception *;
 

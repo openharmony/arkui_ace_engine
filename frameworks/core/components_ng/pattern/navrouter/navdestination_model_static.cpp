@@ -144,6 +144,29 @@ void NavDestinationModelStatic::SetMenuItems(FrameNode* frameNode, std::vector<N
     navDestinationGroupNode->UpdatePrevMenuIsCustom(false);
 }
 
+void NavDestinationModelStatic::SetSystemTransitionType(FrameNode* frameNode, NG::NavigationSystemTransitionType type)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    navDestinationGroupNode->SetSystemTransitionType(type);
+}
+
+void NavDestinationModelStatic::SetOnActive(FrameNode* frameNode, std::function<void(int32_t)>&& onActive)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnActive(onActive);
+}
+
+void NavDestinationModelStatic::SetOnInactive(FrameNode* frameNode, std::function<void(int32_t)>&& onInactive)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnInactive(onInactive);
+}
+
 void NavDestinationModelStatic::SetMenuOptions(FrameNode* frameNode, NavigationMenuOptions&& opt)
 {
     CHECK_NULL_VOID(frameNode);
