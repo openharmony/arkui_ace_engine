@@ -36,6 +36,11 @@ public:
                      float xHeight, LayoutConstraintF layoutConstraint);
 
 private:
+    void MeasureInRoundXmageMode(LayoutWrapper* layoutWrapper);
+    SizeF GetRoundXmageLayoutOffset(LayoutWrapper* layoutWrapper);
+    void ChildMeasureInXmage(RefPtr<LayoutWrapper> childLayoutWrapper, SizeF contentSize, SizeF imageSize,
+        SizeF xmageRatio, LayoutConstraintF layoutConstraint);
+
     ACE_DISALLOW_COPY_AND_MOVE(MovingPhotoLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
