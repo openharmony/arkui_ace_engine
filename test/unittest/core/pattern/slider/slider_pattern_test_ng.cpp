@@ -1425,10 +1425,12 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest004, TestSize.Level1
             std::string text, description;
             EXPECT_EQ(pointAccessibilityProperty->accessibilityLevel_, AccessibilityProperty::Level::YES_STR);
             if (i == 0) {
-                text = selected + StringUtils::Str16ToStr8(pointNodeProperty->GetContent().value_or(u""));
+                pointAccessibilityProperty->SetSelected(true);
+                text = StringUtils::Str16ToStr8(pointNodeProperty->GetContent().value_or(u""));
                 description = " ";
             } else {
-                text = unselected + StringUtils::Str16ToStr8(pointNodeProperty->GetContent().value_or(u""));
+                pointAccessibilityProperty->SetSelected(false);
+                text = StringUtils::Str16ToStr8(pointNodeProperty->GetContent().value_or(u""));
                 description = "";
             }
             EXPECT_EQ(pointAccessibilityProperty->GetAccessibilityText(), text);
