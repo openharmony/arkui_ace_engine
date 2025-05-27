@@ -746,7 +746,9 @@ void SubwindowOhos::ShowWindow(bool needFocus)
     event.windowChangeTypes = WINDOW_UPDATE_ADDED;
     context->SendEventToAccessibility(event);
     isShowed_ = true;
-    SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
+    if (ifNeedSetCurrentWindow_) {
+        SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
+    }
 }
 
 void SubwindowOhos::HideWindow()
@@ -1638,10 +1640,8 @@ void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo, std::fun
     if (parentContainer->IsSceneBoardWindow() || toastInfo.showMode == NG::ToastShowMode::TOP_MOST ||
         toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
         ResizeWindow();
-        // Recover current subwindow in subwindow manager to ensure popup/menu can close the right subwindow
-        auto currentWindow = SubwindowManager::GetInstance()->GetCurrentWindow();
+        ifNeedSetCurrentWindow_ = false;
         ShowWindow(false);
-        SubwindowManager::GetInstance()->SetCurrentSubwindow(currentWindow);
         CHECK_NULL_VOID(window_);
         window_->SetTouchable(false);
     }
