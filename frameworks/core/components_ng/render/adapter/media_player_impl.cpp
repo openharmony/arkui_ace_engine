@@ -186,6 +186,17 @@ void MediaPlayerImpl::RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUp
     startRenderFrameCallback_ = startRenderFrameEvent;
 }
 
+void MediaPlayerImpl::RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent,
+    StateChangedEvent&& stateChangedEvent, VideoErrorEvent&& errorEvent, CommonEvent&& resolutionChangeEvent,
+    CommonEvent&& startRenderFrameEvent)
+{
+    positionUpdateCallback_ = positionUpdatedEvent;
+    stateChangeCallback_ = stateChangedEvent;
+    // errorCallback_ = errorEvent;
+    resolutionChangeCallback_ = resolutionChangeEvent;
+    startRenderFrameCallback_ = startRenderFrameEvent;
+}
+
 void MediaPlayerImpl::RegisterMediaPlayerSeekDoneEvent(SeekDoneEvent&& seekDoneEvent)
 {
     seekDoneCallback_ = seekDoneEvent;
