@@ -584,6 +584,7 @@ public:
     void NotifyMemoryLevel(int32_t level) override;
     void FlushModifier() override;
     void FlushMessages() override;
+    void FlushMessages(std::function<void()> callback) override;
 
     void FlushUITasks(bool triggeredByImplicitAnimation = false) override;
     void FlushUITaskWithSingleDirtyNode(const RefPtr<FrameNode>& node);
@@ -1106,6 +1107,7 @@ public:
     void AnimateOnSafeAreaUpdate();
     void RegisterAttachedNode(UINode* uiNode);
     void RemoveAttachedNode(UINode* uiNode);
+    void NotifyColorModeChange() override;
 
     void NotifyColorModeChange(uint32_t colorMode) override;
 
@@ -1528,6 +1530,7 @@ private:
     CancelableCallback<void()> foldStatusDelayTask_;
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
+    bool colorModeChange_ = false;
     AxisEventChecker axisEventChecker_;
     std::unordered_set<UINode*> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;

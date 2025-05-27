@@ -3172,6 +3172,12 @@ void AceContainer::ProcessThemeUpdate(const ParsedConfig& parsedConfig, Configur
 void AceContainer::BuildResConfig(
     ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig)
 {
+    if (pipelineContext_) {
+        auto window = pipelineContext_->GetWindow();
+        if (window) {
+            window->SetIsBackgroundAllowsVsyncRequests(true);
+        }
+    }
     if (!parsedConfig.colorMode.empty()) {
         ProcessColorModeUpdate(resConfig, configurationChange, parsedConfig);
     }

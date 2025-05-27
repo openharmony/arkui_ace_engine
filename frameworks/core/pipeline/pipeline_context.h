@@ -804,6 +804,7 @@ public:
     void SetAppTitle(const std::string& title) override;
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
     void FlushMessages() override;
+    void FlushMessages(std::function<void()> callback) override;
 
     bool IsDensityChanged() const override
     {

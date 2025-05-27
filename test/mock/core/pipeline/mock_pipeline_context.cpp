@@ -432,6 +432,8 @@ void PipelineContext::NotifyMemoryLevel(int32_t level) {}
 
 void PipelineContext::FlushMessages() {}
 
+void PipelineContext::FlushMessages(std::function<void()> callback) {}
+
 void PipelineContext::FlushModifier() {}
 
 void PipelineContext::FlushDirtyNodeUpdate() {}
@@ -1367,6 +1369,9 @@ void NG::PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reaso
 }
 
 void NG::PipelineContext::NotifyColorModeChange(uint32_t colorMode) {}
+
+void NG::PipelineContext::NotifyColorModeChange() {}
+
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================
 

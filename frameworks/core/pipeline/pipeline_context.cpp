@@ -166,6 +166,16 @@ void PipelineContext::FlushMessages()
 #endif
 }
 
+void PipelineContext::FlushMessages(std::function<void()> callback)
+{
+    ACE_FUNCTION_TRACK();
+#ifdef ENABLE_ROSEN_BACKEND
+    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
+        rsUIDirector_->SendMessages(callback);
+    }
+#endif
+}
+
 void PipelineContext::FlushBuild()
 {
     CHECK_RUN_ON(UI);

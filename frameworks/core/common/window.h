@@ -72,6 +72,8 @@ public:
 
     virtual void FlushTasks() {}
 
+    virtual void FlushTasks(std::function<void()> callback) {}
+
     virtual std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector() const
     {
         return nullptr;
@@ -227,10 +229,20 @@ public:
 
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
 
+    virtual void NotifySnapshotUpdate() {}
+
     virtual bool GetIsRequestFrame()
     {
         return false;
     }
+
+    virtual bool GetIsBackgroundAllowsVsyncRequests()
+    {
+        return false;
+    }
+
+    virtual void SetIsBackgroundAllowsVsyncRequests(bool isBackgroundAllowsVsyncRequests) {}
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;

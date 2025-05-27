@@ -1049,6 +1049,8 @@ public:
 
     virtual void NotifyColorModeChange(uint32_t colorMode) {}
 
+    virtual void NotifyColorModeChange() {}
+
     using PostRTTaskCallback = std::function<void(std::function<void()>&&)>;
     void SetPostRTTaskCallBack(PostRTTaskCallback&& callback)
     {
@@ -1141,6 +1143,7 @@ public:
     }
     virtual void FlushModifier() {}
     virtual void FlushMessages() = 0;
+    virtual void FlushMessages(std::function<void()> callback) = 0;
     void SetGSVsyncCallback(std::function<void(void)>&& callback)
     {
         gsVsyncCallback_ = std::move(callback);

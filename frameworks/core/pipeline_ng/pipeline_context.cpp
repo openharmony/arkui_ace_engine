@@ -706,7 +706,17 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         isFirstFlushMessages_ = false;
         LOGI("ArkUi flush first frame messages.");
     }
-    FlushMessages();
+    if (colorModeChange_) {
+        colorModeChange_ = false;
+        FlushMessages([window = window_]() {
+            LOGI("FlushMessages callback called.");
+            if (window) {
+                window->NotifySnapshotUpdate();
+            }
+        });
+    } else {
+        FlushMessages();
+    }
     FlushWindowPatternInfo();
     InspectDrew();
     UIObserverHandler::GetInstance().HandleDrawCommandSendCallBack();
@@ -986,6 +996,17 @@ void PipelineContext::FlushMessages()
     HandleSpecialContainerNode();
     UpdateOcclusionCullingStatus();
     window_->FlushTasks();
+}
+
+void PipelineContext::FlushMessages(std::function<void()> callback)
+{
+    ACE_FUNCTION_TRACE();
+    if (IsFreezeFlushMessage()) {
+        SetIsFreezeFlushMessage(false);
+        LOGI("Flush message is freezed.");
+        return;
+    }
+    window_->FlushTasks(callback);
 }
 
 void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
@@ -6017,6 +6038,11 @@ ScopedLayout::~ScopedLayout()
     }
     // set layout flag back
     pipeline_->SetIsLayouting(isLayouting_);
+}
+
+void PipelineContext::NotifyColorModeChange()
+{
+    colorModeChange_ = true;
 }
 
 std::string PipelineContext::GetBundleName()

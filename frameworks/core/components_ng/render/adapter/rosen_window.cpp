@@ -165,7 +165,10 @@ bool RosenWindow::GetIsRequestFrame()
 
 void RosenWindow::RequestFrame()
 {
-    CHECK_NULL_VOID(onShow_);
+    if (!GetIsBackgroundAllowsVsyncRequests() && !onShow_) {
+        return;
+    }
+    SetIsBackgroundAllowsVsyncRequests(false);
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(!isRequestVsync_);
     auto taskExecutor = taskExecutor_.Upgrade();
@@ -261,10 +264,28 @@ void RosenWindow::FlushTasks()
     JankFrameReport::GetInstance().JsAnimationToRsRecord();
 }
 
+void RosenWindow::FlushTasks(std::function<void()> callback)
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(rsUIDirector_);
+    rsUIDirector_->SendMessages(callback);
+    JankFrameReport::GetInstance().JsAnimationToRsRecord();
+}
+
 void RosenWindow::FlushLayoutSize(int32_t width, int32_t height)
 {
     CHECK_NULL_VOID(rsWindow_);
     rsWindow_->FlushLayoutSize(width, height);
+}
+
+bool RosenWindow::GetIsBackgroundAllowsVsyncRequests()
+{
+    return isBackgroundAllowsVsyncRequests_;
+}
+
+void RosenWindow::SetIsBackgroundAllowsVsyncRequests(bool isBackgroundAllowsVsyncRequests)
+{
+    isBackgroundAllowsVsyncRequests_ = isBackgroundAllowsVsyncRequests;
 }
 
 float RosenWindow::GetRefreshRate() const
@@ -350,6 +371,12 @@ void RosenWindow::NotifyExtensionTimeout(int32_t errorCode)
 bool RosenWindow::GetIsRequestVsync()
 {
     return isRequestVsync_;
+}
+
+void RosenWindow::NotifySnapshotUpdate()
+{
+    CHECK_NULL_VOID(rsWindow_);
+    rsWindow_->NotifySnapshotUpdate();
 }
 
 } // namespace OHOS::Ace::NG

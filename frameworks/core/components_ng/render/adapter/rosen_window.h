@@ -71,6 +71,8 @@ public:
 
     void FlushTasks() override;
 
+    void FlushTasks(std::function<void()> callback) override;
+
     void SetTaskRunner(RefPtr<TaskExecutor> taskExecutor, int32_t id);
 
     void FlushLayoutSize(int32_t width, int32_t height) override;
@@ -143,6 +145,13 @@ public:
     void NotifyExtensionTimeout(int32_t errorCode) override;
 
     bool GetIsRequestFrame() override;
+
+    void NotifySnapshotUpdate() override;
+
+    bool GetIsBackgroundAllowsVsyncRequests() override;
+   
+    void SetIsBackgroundAllowsVsyncRequests(bool isBackgroundAllowsVsyncRequests) override;
+
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
     WeakPtr<TaskExecutor> taskExecutor_;
@@ -150,6 +159,7 @@ private:
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
     std::shared_ptr<OHOS::Rosen::VsyncCallback> vsyncCallback_;
     bool isFirstRequestVsync_ = true;
+    bool isBackgroundAllowsVsyncRequests_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenWindow);
 };
