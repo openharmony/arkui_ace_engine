@@ -24,7 +24,11 @@ void MenuItemModelStatic::AddChild(FrameNode* frameNode, const RefPtr<NG::UINode
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(customNode);
+    if (!frameNode->GetChildren().empty()) {
+        frameNode->Clean();
+    }
     frameNode->AddChild(customNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void MenuItemModelStatic::DoMountRow(const RefPtr<NG::FrameNode>& menuItem)
@@ -83,7 +87,9 @@ void MenuItemModelStatic::AddRowChild(FrameNode* frameNode, const MenuItemProper
     CHECK_NULL_VOID(menuItem);
 
     UpdateRadius(menuItem);
-    DoMountRow(menuItem);
+    if (menuItem->GetChildren().empty()) {
+        DoMountRow(menuItem);
+    }
     auto buildFunc = menuItemProps.buildFunc;
     auto pattern = menuItem->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
