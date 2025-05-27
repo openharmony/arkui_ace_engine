@@ -134,7 +134,8 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollCallback002, TestSize.Level1)
 
     EXPECT_TRUE(richEditorPattern->selectOverlay_->SelectOverlayIsOn());
     bool ret = false;
-    ret = richEditorPattern->OnScrollCallback(10, 10);
+    int32_t SCROLL_FROM_START = 10;
+    ret = richEditorPattern->OnScrollCallback(10, SCROLL_FROM_START);
     EXPECT_TRUE(ret);
 }
 

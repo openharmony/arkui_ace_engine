@@ -8710,6 +8710,7 @@ void RichEditorPattern::OnAreaChangedInner()
     IF_TRUE(parentGlobalOffset_ != prevParentGlobalOffset,
         UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height()));
     IF_TRUE(parentGlobalOffset_ != prevParentGlobalOffset, UpdateCaretInfoToController());
+    IF_TRUE(parentGlobalOffset_ != prevParentGlobalOffset, CloseAIMenu());
 }
 
 void RichEditorPattern::UpdateParentOffsetAndOverlay()
@@ -8717,12 +8718,11 @@ void RichEditorPattern::UpdateParentOffsetAndOverlay()
     auto parentGlobalOffset = GetPaintRectGlobalOffset(); // offset on screen(with transformation)
     CHECK_NULL_VOID(parentGlobalOffset != parentGlobalOffset_);
     parentGlobalOffset_ = parentGlobalOffset;
-    OnParentOffsetChange();
     selectOverlay_->UpdateSelectOverlayOnAreaChanged();
 }
 
 
-void RichEditorPattern::OnParentOffsetChange()
+void RichEditorPattern::CloseAIMenu()
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
@@ -9486,6 +9486,7 @@ bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
         if (SelectOverlayIsOn()) {
             selectOverlay_->HideMenu(true);
         }
+        CloseAIMenu();
         ScrollablePattern::RecordScrollEvent(Recorder::EventType::SCROLL_START);
         UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
             AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
