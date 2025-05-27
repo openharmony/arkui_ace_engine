@@ -822,47 +822,6 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager019, TestSize.Level1)
     jsAccessibilityManager->DeregisterAccessibilitySAObserverCallback(elementId0);
     EXPECT_EQ(0, jsAccessibilityManager->componentSACallbackMap_.size());
 }
-
-/**
- * @tc.name: JsAccessibilityManager020
- * @tc.desc: Test GetFramenodeByAccessibilityId
- * @tc.type: FUNC
- */
-HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager020, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct JsAccessibilityManager
-     */
-    auto rootNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
-    ASSERT_NE(rootNode, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<Pattern>(), false);
-    ASSERT_NE(frameNode, nullptr);
-    rootNode->AddChild(frameNode);
-    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
-    ASSERT_NE(jsAccessibilityManager, nullptr);
-    auto context = NG::PipelineContext::GetCurrentContext();
-    jsAccessibilityManager->SetPipelineContext(context);
-    ASSERT_NE(context, nullptr);
-    jsAccessibilityManager->Register(true);
-    jsAccessibilityManager->SetWindowId(1);
-
-    /**
-     * @tc.steps: step2. test GenerateCommonProperty
-     */
-    auto mainContext = context;
-    Framework::CommonProperty commonProperty;
-    jsAccessibilityManager->GenerateCommonProperty(context, commonProperty, mainContext, frameNode);
-    EXPECT_EQ(commonProperty.innerWindowId, -1);
-
-    /**
-     * @tc.steps: step3. test GetFramenodeByAccessibilityId by DumpTreeNG
-     */
-    frameNode->accessibilityId_ = frameNode->GetId() + 1;
-    jsAccessibilityManager->DumpTreeNG(frameNode, 1, frameNode->GetId(), true);
-}
-
 /**
  * @tc.name: UpdateWindowInfo001
  * @tc.desc: UpdateWindowInfo
@@ -2199,5 +2158,45 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager039, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetGestureEventHub(nullptr);
     EXPECT_CALL(mockJsManger, ActClick(_)).Times(0).WillOnce(Return(false));
+}
+
+/**
+ * @tc.name: JsAccessibilityManager039
+ * @tc.desc: Test GetFramenodeByAccessibilityId
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager039, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(rootNode, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    rootNode->AddChild(frameNode);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    jsAccessibilityManager->SetPipelineContext(context);
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->Register(true);
+    jsAccessibilityManager->SetWindowId(1);
+
+    /**
+     * @tc.steps: step2. test GenerateCommonProperty
+     */
+    auto mainContext = context;
+    Framework::CommonProperty commonProperty;
+    jsAccessibilityManager->GenerateCommonProperty(context, commonProperty, mainContext, frameNode);
+    EXPECT_EQ(commonProperty.innerWindowId, -1);
+
+    /**
+     * @tc.steps: step3. test GetFramenodeByAccessibilityId by DumpTreeNG
+     */
+    frameNode->accessibilityId_ = frameNode->GetId() + 1;
+    jsAccessibilityManager->DumpTreeNG(frameNode, 1, frameNode->GetId(), true);
 }
 } // namespace OHOS::Ace::NG
