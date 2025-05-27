@@ -258,6 +258,11 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         }
     }
 
+    auto columnFocusHub = columnNode->GetFocusHub();
+    if (columnFocusHub) {
+        columnFocusHub->SetFocusDependence(FocusDependence::SELF);
+    }
+
     // Create tab bar with content.
     if (tabBarParam.HasContent()) {
         ScopedViewStackProcessor builderViewStackProcessor;
