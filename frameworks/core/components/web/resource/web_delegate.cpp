@@ -1659,6 +1659,18 @@ int WebDelegate::ConverToWebHitTestType(int hitType)
     return static_cast<int>(webHitType);
 }
 
+int WebDelegate::GetLastHitTestResult()
+{
+    if (nweb_) {
+        std::shared_ptr<OHOS::NWeb::HitTestResult> nwebResult = nweb_->GetLastHitTestResult();
+        if (nwebResult) {
+            return ConverToWebHitTestType(nwebResult->GetType());
+        }
+        return ConverToWebHitTestType(OHOS::NWeb::HitTestResult::UNKNOWN_TYPE);
+    }
+    return static_cast<int>(WebHitTestType::UNKNOWN);
+}
+
 int WebDelegate::GetHitTestResult()
 {
     if (nweb_) {

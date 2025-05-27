@@ -1216,6 +1216,7 @@ public:
     void SetDataDetectorEnable(bool enable);
     void OnDataDetectorSelectText();
     void OnDataDetectorCopy(const std::vector<std::string>& recordMix);
+    int GetLastHitTestResult();
     int GetHitTestResult();
 
 private:
