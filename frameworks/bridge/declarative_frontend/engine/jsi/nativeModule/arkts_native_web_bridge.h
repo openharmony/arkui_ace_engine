@@ -137,7 +137,7 @@ public:
     static ArkUINativeModuleValue ResetJavaScriptOnDocumentEnd(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCopyOptionMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetCopyOptionMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
-	static ArkUINativeModuleValue SetOnRenderProcessNotResponding(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnRenderProcessNotResponding(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnRenderProcessNotResponding(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnPageVisible(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnPageVisible(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -158,8 +158,8 @@ public:
     static ArkUINativeModuleValue SetOnTouchIconUrlReceived(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnTouchIconUrlReceived(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnRenderProcessResponding(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue RsetOnRenderProcessResponding(ArkUIRuntimeCallInfo* runtimeCallInfo);
-	static ArkUINativeModuleValue SetOnWindowNew(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnRenderProcessResponding(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnWindowNew(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnWindowNew(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnGeolocationShow(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnGeolocationShow(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -177,6 +177,21 @@ public:
     static ArkUINativeModuleValue ResetOnConfirm(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnPrompt(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnPrompt(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnShowFileSelector(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnShowFileSelector(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnContextMenuShow(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnContextMenuShow(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static Local<panda::ObjectRef> CreateTouchEventInfoObj(EcmaVM* vm, TouchEventInfo& info);
+    static Local<panda::ObjectRef> CreateEventTargetObject(EcmaVM* vm, const BaseEventInfo& info);
+    static Local<panda::ObjectRef> CreateTouchEventInfo(EcmaVM* vm, TouchEventInfo& info);
+    static Local<panda::ObjectRef> CreateTouchInfo(
+        EcmaVM* vm, const TouchLocationInfo& touchInfo, TouchEventInfo& info);
+    static ArkUINativeModuleValue SetOnSafeBrowsingCheckResult(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnSafeBrowsingCheckResult(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetNestedScroll(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetNestedScroll(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnInterceptKeyEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnInterceptKeyEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 #endif

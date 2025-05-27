@@ -4655,7 +4655,7 @@ struct ArkUIWebModifier {
     void (*resetMediaPlayGestureAccess)(ArkUINodeHandle node);
     void (*setMediaOptions)(ArkUINodeHandle node, ArkUI_Int32 resumeInterval, ArkUI_Bool value);
     void (*resetMediaOptions)(ArkUINodeHandle node);
-	void (*setOnPageEnd)(ArkUINodeHandle node, void* callback);
+    void (*setOnPageEnd)(ArkUINodeHandle node, void* callback);
     void (*resetOnPageEnd)(ArkUINodeHandle node);
     void (*setOnPageBegin)(ArkUINodeHandle node, void* callback);
     void (*resetOnPageBegin)(ArkUINodeHandle node);
@@ -4669,9 +4669,9 @@ struct ArkUIWebModifier {
     void (*resetJavaScriptOnDocumentStart)(ArkUINodeHandle node);
     void (*setJavaScriptOnDocumentEnd)(ArkUINodeHandle node, ArkUI_ScriptItemArray* values, ArkUI_Int32 size);
     void (*resetJavaScriptOnDocumentEnd)(ArkUINodeHandle node);
-	void (*setCopyOptionMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*setCopyOptionMode)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetCopyOptionMode)(ArkUINodeHandle node);
-	void (*setRenderProcessNotResponding)(ArkUINodeHandle node, void* callback);
+    void (*setRenderProcessNotResponding)(ArkUINodeHandle node, void* callback);
     void (*resetRenderProcessNotResponding)(ArkUINodeHandle node);
     void (*setOnPageVisibleCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnPageVisibleCallBack)(ArkUINodeHandle node);
@@ -4693,7 +4693,7 @@ struct ArkUIWebModifier {
     void (*resetOnTouchIconUrlReceivedCallBack)(ArkUINodeHandle node);
     void (*setOnRenderProcessRespondingCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnRenderProcessRespondingCallBack)(ArkUINodeHandle node);
-	void (*setOnWindowNew)(ArkUINodeHandle node, void* callback);
+    void (*setOnWindowNew)(ArkUINodeHandle node, void* callback);
     void (*resetOnWindowNew)(ArkUINodeHandle node);
     void (*setOnGeolocationShow)(ArkUINodeHandle node, void* callback);
     void (*resetOnGeolocationShow)(ArkUINodeHandle node);
@@ -4711,6 +4711,17 @@ struct ArkUIWebModifier {
     void (*resetOnConfirmCallBack)(ArkUINodeHandle node);
     void (*setOnPromptCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnPromptCallBack)(ArkUINodeHandle node);
+    void (*setOnShowFileSelector)(ArkUINodeHandle node, void* callback);
+    void (*resetOnShowFileSelector)(ArkUINodeHandle node);
+    void (*setOnContextMenuShow)(ArkUINodeHandle node, void* callback);
+    void (*resetOnContextMenuShow)(ArkUINodeHandle node);
+    void (*setOnSafeBrowsingCheckResultCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnSafeBrowsingCheckResultCallBack)(ArkUINodeHandle node);
+    void (*setWebNestedScrollExt)(ArkUINodeHandle node, ArkUI_Int32 scrollUp, ArkUI_Int32 scrollDown,
+        ArkUI_Int32 scrollLeft, ArkUI_Int32 scrollRight);
+    void (*resetWebNestedScrollExt)(ArkUINodeHandle node);
+    void (*setOnInterceptKeyEventCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnInterceptKeyEventCallBack)(ArkUINodeHandle node);
 };
 
 struct ArkUIBlankModifier {

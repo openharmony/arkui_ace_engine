@@ -19279,6 +19279,22 @@ class ArkNestedScrollOptions {
     return ((this.scrollForward === another.scrollForward) && (this.scrollBackward === another.scrollBackward));
   }
 }
+class ArkNestedScrollOptionsExt {
+  constructor() {
+    this.scrollUp = undefined;
+    this.scrollDown = undefined;
+    this.scrollLeft = undefined;
+    this.scrollRight = undefined;
+  }
+  isEqual(another) {
+    return (
+          (this.scrollUp === another.scrollUp) &&
+          (this.scrollDown === another.scrollDown) &&
+          (this.scrollLeft === another.scrollLeft) &&
+          (this.scrollRight === another.scrollRight)
+      );
+  }
+}
 class ArkConstraintSizeOptions {
   constructor() {
     this.minWidth = undefined;
@@ -30420,7 +30436,8 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   onShowFileSelector(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnShowFileSelectorModifier.identity, WebOnShowFileSelectorModifier, callback);
+    return this;
   }
   onFileSelectorShow(callback) {
     throw new Error('Method not implemented.');
@@ -30456,7 +30473,8 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   onContextMenuShow(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnContextMenuShowModifier.identity, WebOnContextMenuShowModifier, callback);
+    return this;
   }
   mediaPlayGestureAccess(access) {
     modifierWithKey(this._modifiersWithKeys, WebMediaPlayGestureAccessModifier.identity, WebMediaPlayGestureAccessModifier, access);
@@ -30492,7 +30510,8 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   onInterceptKeyEvent(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnInterceptKeyEventModifier.identity, WebOnInterceptKeyEventModifier, callback);
+    return this;
   }
   webStandardFont(family) {
     modifierWithKey(this._modifiersWithKeys, WebStandardFontModifier.identity, WebStandardFontModifier, family);
@@ -30621,12 +30640,23 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebOnNativeEmbedLifecycleChangeModifier.identity, WebOnNativeEmbedLifecycleChangeModifier, event);
     return this;
   }
-  OnNativeEmbedGestureEvent(event) {
-    modifierWithKey(this._modifiersWithKeys, WebOnNativeEmbedGestureEventModifier.identity, WebOnNativeEmbedGestureEventModifier, callback);
+  onNativeEmbedGestureEvent(event) {
+    modifierWithKey(this._modifiersWithKeys, WebOnNativeEmbedGestureEventModifier.identity, WebOnNativeEmbedGestureEventModifier, event);
     return this;
   }
-  registerNativeEmbedRule(mode) {
-    modifierWithKey(this._modifiersWithKeys, WebRegisterNativeEmbedRuleModifier.identity, WebRegisterNativeEmbedRuleModifier, mode);
+  registerNativeEmbedRule(tag,type) {
+    let arkRegisterNativeEmbedRule = new ArkRegisterNativeEmbedRule();
+    if (!isUndefined(tag) && !isNull(tag)) {
+      arkRegisterNativeEmbedRule.tag = tag;
+    }
+    if (!isUndefined(type) && !isNull(type)) {
+      arkRegisterNativeEmbedRule.type = type;
+    }
+    if (arkRegisterNativeEmbedRule.tag === undefined && arkRegisterNativeEmbedRule.type === undefined) {
+        modifierWithKey(this._modifiersWithKeys, WebRegisterNativeEmbedRuleModifier.identity, WebRegisterNativeEmbedRuleModifier, undefined);
+    } else {
+        modifierWithKey(this._modifiersWithKeys, WebRegisterNativeEmbedRuleModifier.identity, WebRegisterNativeEmbedRuleModifier, arkRegisterNativeEmbedRule);
+    }
     return this;
   }
   nativeEmbedOptions(value){
@@ -30634,7 +30664,23 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   nestedScroll(value) {
-    throw new Error('Method not implemented.');
+    let options = new ArkNestedScrollOptionsExt();
+    if (value) {
+      if (value.scrollUp) {
+        options.scrollUp = value.scrollUp;
+      }
+      if (value.scrollDown) {
+        options.scrollDown = value.scrollDown;
+      }
+      if (value.scrollLeft) {
+        options.scrollLeft = value.scrollLeft;
+      }
+      if (value.scrollRight) {
+        options.scrollRight = value.scrollRight;
+      }
+      modifierWithKey(this._modifiersWithKeys, WebNestedScrollModifier.identity, WebNestedScrollModifier, options);
+    }
+    return this;
   }
   onOverrideUrlLoading(callback) {
     throw new Error('Method not implemented.');
@@ -30648,7 +30694,7 @@ class ArkWebComponent extends ArkComponent {
   }
   onRenderProcessResponding(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnRenderProcessRespondingModifier.identity, WebOnRenderProcessRespondingModifier, callback);
-    return this; 
+    return this;
   }
   onViewportFitChanged(callback) {
     throw new Error('Method not implemented.');
@@ -30670,6 +30716,10 @@ class ArkWebComponent extends ArkComponent {
   }
   onNavigationEntryCommitted(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnNavigationEntryCommittedModifier.identity, WebOnNavigationEntryCommittedModifier, callback);
+    return this;
+  }
+  onSafeBrowsingCheckResult(callback) {
+    modifierWithKey(this._modifiersWithKeys, WebOnSafeBrowsingCheckResultModifier.identity, WebOnSafeBrowsingCheckResultModifier, callback);
     return this;
   }
 }
@@ -31264,6 +31314,10 @@ class WebRegisterNativeEmbedRuleModifier extends ModifierWithKey {
       getUINativeModule().web.setRegisterNativeEmbedRule(node, this.value?.tag, this.value?.type);
     }
   }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.tag, this.value.tag) ||
+      !isBaseOrResourceEqual(this.stageValue.type, this.value.type);
+  }
 }
 WebRegisterNativeEmbedRuleModifier.identity = Symbol('webRegisterNativeEmbedRuleModifier');
 
@@ -31812,6 +31866,77 @@ class WebOnPromptModifier extends ModifierWithKey {
   }
 }
 WebOnPromptModifier.identity = Symbol('webOnPromptModifier');
+
+class WebOnShowFileSelectorModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().web.resetOnShowFileSelector(node);
+      } else {
+          getUINativeModule().web.setOnShowFileSelector(node, this.value);
+      }
+  }
+}
+WebOnShowFileSelectorModifier.identity = Symbol('webOnShowFileSelectorModifier');
+
+class WebOnContextMenuShowModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().web.resetOnContextMenuShow(node);
+      } else {
+        getUINativeModule().web.setOnContextMenuShow(node, this.value);
+      }
+  }
+}
+WebOnContextMenuShowModifier.identity = Symbol('webOnContextMenuShowModifier');
+
+class WebOnSafeBrowsingCheckResultModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().web.resetOnSafeBrowsingCheckResult(node);
+      } else {
+        getUINativeModule().web.setOnSafeBrowsingCheckResult(node, this.value);
+      }
+  }
+}
+WebOnSafeBrowsingCheckResultModifier.identity = Symbol('webOnSafeBrowsingCheckResultModifier');
+
+class WebNestedScrollModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().web.resetNestedScroll(node);
+      } else {
+          getUINativeModule().web.setNestedScroll(node, this.value.scrollUp, this.value.scrollDown,
+              this.value.scrollLeft, this.value.scrollRight);
+      }
+  }
+}
+
+class WebOnInterceptKeyEventModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().web.resetOnInterceptKeyEvent(node);
+      }
+      else {
+        getUINativeModule().web.setOnInterceptKeyEvent(node, this.value);
+      }
+  }
+}
+WebOnInterceptKeyEventModifier.identity = Symbol('webOnInterceptKeyEventModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {

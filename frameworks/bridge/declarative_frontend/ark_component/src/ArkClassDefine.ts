@@ -524,8 +524,8 @@ class ArkStarStyle {
 }
 
 class ArkRegisterNativeEmbedRule {
-  tag: string;
-  type: string;
+  tag: string | undefined;
+  type: string | undefined;
 
   constructor() {
     this.tag = undefined;
@@ -1097,6 +1097,27 @@ class ArkNestedScrollOptions {
   }
   isEqual(another: ArkNestedScrollOptions): boolean {
     return ((this.scrollForward === another.scrollForward) && (this.scrollBackward === another.scrollBackward));
+  }
+}
+
+class ArkNestedScrollOptionsExt {
+  scrollUp: NestedScrollMode | undefined;
+  scrollDown: NestedScrollMode | undefined;
+  scrollLeft: NestedScrollMode | undefined;
+  scrollRight: NestedScrollMode | undefined;
+  constructor() {
+      this.scrollUp = undefined;
+      this.scrollDown = undefined;
+      this.scrollLeft = undefined;
+      this.scrollRight = undefined;
+  }
+  isEqual(another: ArkNestedScrollOptionsExt): boolean {
+    return (
+      (this.scrollUp === another.scrollUp) &&
+      (this.scrollDown === another.scrollDown) &&
+      (this.scrollLeft === another.scrollLeft) &&
+      (this.scrollRight === another.scrollRight)
+      );
   }
 }
 

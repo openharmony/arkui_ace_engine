@@ -6731,7 +6731,7 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnRenderProcessResponding"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnRenderProcessResponding));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnRenderProcessResponding"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::RsetOnRenderProcessResponding));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnRenderProcessResponding));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnTouchIconUrlReceived"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnTouchIconUrlReceived));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnTouchIconUrlReceived"),
@@ -6772,6 +6772,26 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnPrompt));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnPrompt"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnPrompt));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnShowFileSelector"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnShowFileSelector));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnShowFileSelector"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnShowFileSelector));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnContextMenuShow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnContextMenuShow));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnContextMenuShow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnContextMenuShow));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSafeBrowsingCheckResult"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnSafeBrowsingCheckResult));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSafeBrowsingCheckResult"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnSafeBrowsingCheckResult));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setNestedScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetNestedScroll));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetNestedScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetNestedScroll));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnInterceptKeyEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnInterceptKeyEvent));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnInterceptKeyEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnInterceptKeyEvent));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif
