@@ -23,7 +23,6 @@
 #include "bridge/declarative_frontend/jsview/js_refresh.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/refresh_model_impl.h"
-#include "core/components/refresh/refresh_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/refresh/refresh_model.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
@@ -166,10 +165,7 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
-    RefPtr<RefreshTheme> theme = GetTheme<RefreshTheme>();
-    if (!theme) {
-        return;
-    }
+
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto refreshing = paramObject->GetProperty("refreshing");
     auto jsOffset = paramObject->GetProperty("offset");
@@ -192,9 +188,7 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     }
     CalcDimension offset;
     if (ParseJsDimensionVp(jsOffset, offset)) {
-        if (LessNotEqual(offset.Value(), 0.0) || offset.Unit() == DimensionUnit::PERCENT) {
-            RefreshModel::GetInstance()->SetRefreshDistance(theme->GetRefreshDistance());
-        } else {
+        if (GreatOrEqual(offset.Value(), 0.0) && offset.Unit() != DimensionUnit::PERCENT) {
             RefreshModel::GetInstance()->SetIndicatorOffset(offset);
         }
     }
@@ -213,9 +207,7 @@ void JSRefresh::Create(const JSCallbackInfo& info)
         } else {
             RefreshModel::GetInstance()->ResetLoadingText();
         }
-        return;
-    }
-    if (ParseJsString(promptText, loadingStr)) {
+    } else if (ParseJsString(promptText, loadingStr)) {
         RefreshModel::GetInstance()->SetLoadingText(loadingStr);
     } else {
         RefreshModel::GetInstance()->ResetLoadingText();
