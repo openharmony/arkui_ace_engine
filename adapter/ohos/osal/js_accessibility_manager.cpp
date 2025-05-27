@@ -4897,9 +4897,9 @@ void JsAccessibilityManager::DumpTree(int32_t depth, int64_t nodeID, bool isDump
         for (const auto& subContext : GetSubPipelineContexts()) {
             auto subPipeline = subContext.Upgrade();
             ngPipeline = AceType::DynamicCast<NG::PipelineContext>(subPipeline);
-            CHECK_NULL_VOID(ngPipeline);
+            CHECK_NULL_CONTINUE(ngPipeline);
             rootNode = ngPipeline->GetRootElement();
-            CHECK_NULL_VOID(rootNode);
+            CHECK_NULL_CONTINUE(rootNode);
             nodeID = rootNode->GetAccessibilityId();
             commonProperty.windowId = static_cast<int32_t>(ngPipeline->GetWindowId());
             commonProperty.windowLeft = GetWindowLeft(ngPipeline->GetWindowId());
@@ -4982,7 +4982,7 @@ RefPtr<PipelineBase> JsAccessibilityManager::GetPipelineByWindowId(const int32_t
         }
         for (auto& subContext : GetSubPipelineContexts()) {
             context = subContext.Upgrade();
-            CHECK_NULL_RETURN(context, nullptr);
+            CHECK_NULL_CONTINUE(context);
             if (context->GetWindowId() == static_cast<uint32_t>(windowId)) {
                 return context;
             }
@@ -6512,7 +6512,7 @@ int JsAccessibilityManager::RegisterInteractionOperation(int windowId)
     RefPtr<PipelineBase> context;
     for (const auto& subContext : GetSubPipelineContexts()) {
         context = subContext.Upgrade();
-        CHECK_NULL_RETURN(context, -1);
+        CHECK_NULL_CONTINUE(context);
         TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "RegisterSubPipeline windowId: %{public}u", context->GetWindowId());
         interactionOperation = std::make_shared<JsInteractionOperation>(context->GetWindowId());
         interactionOperation->SetHandler(WeakClaim(this));
@@ -6569,7 +6569,7 @@ void JsAccessibilityManager::DeregisterInteractionOperation()
     RefPtr<PipelineBase> context;
     for (const auto& subContext : GetSubPipelineContexts()) {
         context = subContext.Upgrade();
-        CHECK_NULL_VOID(context);
+        CHECK_NULL_CONTINUE(context);
         instance->DeregisterElementOperator(context->GetWindowId());
     }
     NotifyChildTreeOnDeregister();
@@ -6762,7 +6762,7 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
 
     for (const auto& subContext : GetSubPipelineContexts()) {
         auto context = subContext.Upgrade();
-        CHECK_NULL_VOID(context);
+        CHECK_NULL_CONTINUE(context);
         interactionOperation = std::make_shared<JsInteractionOperation>(context->GetWindowId());
         interactionOperation->SetHandler(WeakClaim(this));
         instance->RegisterElementOperator(context->GetWindowId(), interactionOperation);
@@ -6802,7 +6802,7 @@ void JsAccessibilityManager::DeregisterInteractionOperationAsChildTree()
     RefPtr<PipelineBase> context;
     for (const auto& subContext : GetSubPipelineContexts()) {
         context = subContext.Upgrade();
-        CHECK_NULL_VOID(context);
+        CHECK_NULL_CONTINUE(context);
         instance->DeregisterElementOperator(context->GetWindowId());
     }
 }
