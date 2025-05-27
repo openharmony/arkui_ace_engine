@@ -524,17 +524,16 @@ class ArkStarStyle {
 }
 
 class ArkRegisterNativeEmbedRule {
-  tag: string | undefined;
-  type: string | undefined;
+  tag: string;
+  type: string;
 
-  constructor () {
+  constructor() {
     this.tag = undefined;
     this.type = undefined;
   }
 
-  isEqual (another: ArkRegisterNativeEmbedRule): boolean {
-    return (this.tag === another.tag &&
-           this.type === another.type);
+  isEqual(another: ArkRegisterNativeEmbedRule): boolean {
+    return (this.tag === another.tag && this.type === another.type);
   }
 }
 

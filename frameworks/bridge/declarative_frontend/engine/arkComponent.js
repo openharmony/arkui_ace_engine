@@ -30130,7 +30130,8 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   overScrollMode(mode) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOverScrollModeModifier.identity, WebOverScrollModeModifier, mode);
+    return this;
   }
   textZoomAtio(textZoomAtio) {
     throw new Error('Method not implemented.');
@@ -30170,23 +30171,27 @@ class ArkWebComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   onGeolocationShow(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnGeolocationShowModifier.identity, WebOnGeolocationShowModifier, callback);
+    return this;
   }
   onRequestSelected(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnRequestSelectedModifier.identity, WebOnRequestSelectedModifier, callback);
     return this;
   }
   onAlert(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnAlertModifier.identity, WebOnAlertModifier, callback);
+    return this;
   }
   onBeforeUnload(callback) {
     throw new Error('Method not implemented.');
   }
   onConfirm(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnConfirmModifier.identity, WebOnConfirmModifier, callback);
+    return this;
   }
   onPrompt(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnPromptModifier.identity, WebOnPromptModifier, callback);
+    return this;
   }
   onConsole(callback) {
     throw new Error('Method not implemented.');
@@ -30230,7 +30235,8 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   onFullScreenEnter(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnFullScreenEnterModifier.identity, WebOnFullScreenEnterModifier, callback);
+    return this;
   }
   onScaleChange(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnScaleChangeModifier.identity, WebOnScaleChangeModifier, callback);
@@ -30243,10 +30249,12 @@ class ArkWebComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   onPermissionRequest(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnPermissionRequestModifier.identity, WebOnPermissionRequestModifier, callback);
+    return this;
   }
   onScreenCaptureRequest(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnScreenCaptureRequestModifier.identity, WebOnScreenCaptureRequestModifier, callback);
+    return this;
   }
   onContextMenuShow(callback) {
     throw new Error('Method not implemented.');
@@ -30273,10 +30281,12 @@ class ArkWebComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   onWindowNew(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnWindowNewModifier.identity, WebOnWindowNewModifier, callback);
+    return this;
   }
   onWindowExit(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnWindowExitModifier.identity, WebOnWindowExitModifier, callback);
+    return this;
   }
   multiWindowAccess(multiWindow) {
     modifierWithKey(this._modifiersWithKeys, WebMultiWindowAccessModifier.identity, WebMultiWindowAccessModifier, multiWindow);
@@ -30338,7 +30348,8 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   onTouchIconUrlReceived(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnTouchIconUrlReceivedModifier.identity, WebOnTouchIconUrlReceivedModifier, callback);
+    return this;
   }
   onFaviconReceived(callback) {
     throw new Error('Method not implemented.');
@@ -30411,15 +30422,12 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebOnNativeEmbedLifecycleChangeModifier.identity, WebOnNativeEmbedLifecycleChangeModifier, event);
     return this;
   }
+  OnNativeEmbedGestureEvent(event) {
+    modifierWithKey(this._modifiersWithKeys, WebOnNativeEmbedGestureEventModifier.identity, WebOnNativeEmbedGestureEventModifier, callback);
+    return this;
+  }
   registerNativeEmbedRule(mode) {
-    let rule = new ArkRegisterNativeEmbedRule();
-    if (!isUndefined(mode)) {
-      rule.tag = mode.tag;
-      rule.type = mode.type;
-      modifierWithKey(this._modifiersWithKeys, WebRegisterNativeEmbedRuleModifier.identity, WebRegisterNativeEmbedRuleModifier, rule);
-    } else {
-      modifierWithKey(this._modifiersWithKeys, WebRegisterNativeEmbedRuleModifier.identity, WebRegisterNativeEmbedRuleModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, WebRegisterNativeEmbedRuleModifier.identity, WebRegisterNativeEmbedRuleModifier, mode);
     return this;
   }
   nativeEmbedOptions(value){
@@ -30440,7 +30448,8 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   onRenderProcessResponding(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnRenderProcessRespondingModifier.identity, WebOnRenderProcessRespondingModifier, callback);
+    return this; 
   }
   onViewportFitChanged(callback) {
     throw new Error('Method not implemented.');
@@ -31031,30 +31040,30 @@ class WebOnNativeEmbedLifecycleChangeModifier extends ModifierWithKey {
 }
 WebOnNativeEmbedLifecycleChangeModifier.identity = Symbol('webOnNativeEmbedLifecycleChangeModifier');
 
-class WebRegisterNativeEmbedRuleModifier extends ModifierWithKey {
+class WebOnNativeEmbedGestureEventModifier extends ModifierWithKey {
   constructor (value) {
     super(value);
   }
   applyPeer (node, reset) {
-    let _a, _b
+    if (reset) {
+      getUINativeModule().web.resetOnNativeEmbedGestureEvent(node);
+    } else {
+      getUINativeModule().web.setOnNativeEmbedGestureEvent(node, this.value);
+    }
+  }
+}
+WebOnNativeEmbedGestureEventModifier.identity = Symbol('webOnNativeEmbedGestureEventModifier');
+
+class WebRegisterNativeEmbedRuleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().web.resetRegisterNativeEmbedRule(node);
     } else {
-      getUINativeModule().web.setRegisterNativeEmbedRule(
-        node,
-        (_a = this.value) === null || _a === void 0 ? void 0 : _a.tag,
-        (_b = this.value) === null || _b === void 0 ? void 0 : _b.type
-      );
+      getUINativeModule().web.setRegisterNativeEmbedRule(node, this.value?.tag, this.value?.type);
     }
-  }
-  checkObjectDiff () {
-    let _a, _b, _c, _d, _e, _f
-    return (
-      ((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.tag) !==
-        ((_b = this.value) === null || _b === void 0 ? void 0 : _b.tag) ||
-      ((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.type) !==
-        ((_d = this.value) === null || _d === void 0 ? void 0 : _d.type)
-    );
   }
 }
 WebRegisterNativeEmbedRuleModifier.identity = Symbol('webRegisterNativeEmbedRuleModifier');
@@ -31427,6 +31436,183 @@ class WebOnSearchResultReceiveModifier extends ModifierWithKey {
   }
 }
 WebOnSearchResultReceiveModifier.identity = Symbol('webOnSearchResultReceiveModifier');
+
+class WebOverScrollModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOverScrollMode(node);
+    }
+    else {
+      getUINativeModule().web.setOverScrollMode(node, this.value);
+    }
+}
+}
+WebOverScrollModeModifier.identity = Symbol('webOverScrollModeModifier');
+
+class WebOnRenderProcessRespondingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnRenderProcessResponding(node);
+    }
+    else {
+      getUINativeModule().web.setOnRenderProcessResponding(node, this.value);
+    }
+}
+}
+WebOnRenderProcessRespondingModifier.identity = Symbol('webOnRenderProcessRespondingModifier');
+
+class WebOnTouchIconUrlReceivedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnTouchIconUrlReceived(node);
+    }
+    else {
+      getUINativeModule().web.setOnTouchIconUrlReceived(node, this.value);
+    }
+}
+}
+WebOnTouchIconUrlReceivedModifier.identity = Symbol('webOnTouchIconUrlReceivedModifier');
+
+class WebOnGeolocationShowModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnGeolocationShow(node);
+    } else {
+      getUINativeModule().web.setOnGeolocationShow(node, this.value);
+    }
+  }
+}
+WebOnGeolocationShowModifier.identity = Symbol('webOnGeolocationShowModifier');
+
+class WebOnWindowNewModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnWindowNew(node);
+    } else {
+      getUINativeModule().web.setOnWindowNew(node, this.value);
+    }
+  }
+}
+WebOnWindowNewModifier.identity = Symbol('webOnWindowNewModifier');
+
+class WebOnPermissionRequestModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnPermissionRequest(node);
+    } else {
+      getUINativeModule().web.setOnPermissionRequest(node, this.value);
+    }
+  }
+}
+WebOnPermissionRequestModifier.identity = Symbol('webOnPermissionRequestModifier');
+
+class WebOnScreenCaptureRequestModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().web.resetOnScreenCaptureRequest(node);
+      }
+      else {
+        getUINativeModule().web.setOnScreenCaptureRequest(node, this.value);
+      }
+  }
+}
+WebOnScreenCaptureRequestModifier.identity = Symbol('webOnScreenCaptureRequestModifier');
+
+class WebOnFullScreenEnterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnFullScreenEnter(node);
+    }
+    else {
+      getUINativeModule().web.setOnFullScreenEnter(node, this.value);
+    }
+  }
+}
+WebOnFullScreenEnterModifier.identity = Symbol('webOnFullScreenEnterModifier');
+
+class WebOnWindowExitModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnWindowExit(node);
+    }
+    else {
+      getUINativeModule().web.setOnWindowExit(node, this.value);
+    }
+}
+}
+WebOnWindowExitModifier.identity = Symbol('webOnWindowExitModifier');
+
+class WebOnAlertModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().web.resetOnAlert(node);
+      }
+      else {
+        getUINativeModule().web.setOnAlert(node, this.value);
+      }
+  }
+}
+WebOnAlertModifier.identity = Symbol('webOnAlertModifier');
+
+class WebOnConfirmModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().web.resetOnConfirm(node);
+      }
+      else {
+        getUINativeModule().web.setOnConfirm(node, this.value);
+      }
+  }
+}
+WebOnConfirmModifier.identity = Symbol('webOnConfirmModifier');
+
+class WebOnPromptModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().web.resetOnPrompt(node);
+      }
+      else {
+        getUINativeModule().web.setOnPrompt(node, this.value);
+      }
+  }
+}
+WebOnPromptModifier.identity = Symbol('webOnPromptModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {

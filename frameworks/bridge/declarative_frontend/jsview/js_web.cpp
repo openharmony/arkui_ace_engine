@@ -2093,6 +2093,14 @@ JSRef<JSVal> WebDialogEventToJSValue(const WebDialogEvent& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> JSWeb::CreatCommonDialogResultHandler(const WebDialogEvent& eventInfo)
+{
+    JSRef<JSObject> resultObj = JSClass<JSWebDialog>::NewInstance();
+    auto jsWebDialog = Referenced::Claim(resultObj->Unwrap<JSWebDialog>());
+    jsWebDialog->SetResult(eventInfo.GetResult());
+    return resultObj;
+}
+
 JSRef<JSVal> LoadWebPageFinishEventToJSValue(const LoadWebPageFinishEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -2121,6 +2129,14 @@ JSRef<JSVal> FullScreenEnterEventToJSValue(const FullScreenEnterEvent& eventInfo
     obj->SetProperty("videoWidth", eventInfo.GetVideoNaturalWidth());
     obj->SetProperty("videoHeight", eventInfo.GetVideoNaturalHeight());
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreatFullScreenEnterHandler(const FullScreenEnterEvent& eventInfo)
+{
+    JSRef<JSObject> resultObj = JSClass<JSFullScreenExitHandler>::NewInstance();
+    auto jsFullScreenExitHandler = Referenced::Claim(resultObj->Unwrap<JSFullScreenExitHandler>());
+    jsFullScreenExitHandler->SetHandler(eventInfo.GetHandler());
+    return resultObj;
 }
 
 JSRef<JSVal> FullScreenExitEventToJSValue(const FullScreenExitEvent& eventInfo)
@@ -2180,6 +2196,14 @@ JSRef<JSVal> LoadWebGeolocationShowEventToJSValue(const LoadWebGeolocationShowEv
     geolocationEvent->SetEvent(eventInfo);
     obj->SetPropertyObject("geolocation", geolocationObj);
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreatGeolocationShowHandler(const LoadWebGeolocationShowEvent& eventInfo)
+{
+    JSRef<JSObject> geolocationObj = JSClass<JSWebGeolocation>::NewInstance();
+    auto geolocationEvent = Referenced::Claim(geolocationObj->Unwrap<JSWebGeolocation>());
+    geolocationEvent->SetEvent(eventInfo);
+    return geolocationObj;
 }
 
 JSRef<JSVal> DownloadStartEventToJSValue(const DownloadStartEvent& eventInfo)
@@ -3866,6 +3890,14 @@ JSRef<JSVal> PermissionRequestEventToJSValue(const WebPermissionRequestEvent& ev
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> JSWeb::CreatPermissionRequestHandler(const WebPermissionRequestEvent& eventInfo)
+{
+    JSRef<JSObject> permissionObj = JSClass<JSWebPermissionRequest>::NewInstance();
+    auto permissionEvent = Referenced::Claim(permissionObj->Unwrap<JSWebPermissionRequest>());
+    permissionEvent->SetEvent(eventInfo);
+    return permissionObj;
+}
+
 void JSWeb::OnPermissionRequest(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
@@ -3898,6 +3930,14 @@ JSRef<JSVal> ScreenCaptureRequestEventToJSValue(const WebScreenCaptureRequestEve
     requestEvent->SetEvent(eventInfo);
     obj->SetPropertyObject("handler", requestObj);
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreateScreenCaptureHandler(const WebScreenCaptureRequestEvent& eventInfo)
+{
+    JSRef<JSObject> requestObj = JSClass<JSScreenCaptureRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSScreenCaptureRequest>());
+    requestEvent->SetEvent(eventInfo);
+    return requestObj;
 }
 
 void JSWeb::OnScreenCaptureRequest(const JSCallbackInfo& args)
@@ -4142,7 +4182,15 @@ JSRef<JSVal> WindowNewEventToJSValue(const WebWindowNewEvent& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
-bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo)
+JSRef<JSVal> JSWeb::CreateJSWindowNewHandler(const WebWindowNewEvent& eventInfo)
+{
+    JSRef<JSObject> handlerObj = Framework::JSClass<JSWebWindowNewHandler>::NewInstance();
+    auto handler = Referenced::Claim(handlerObj->Unwrap<JSWebWindowNewHandler>());
+    handler->SetEvent(eventInfo);
+    return handlerObj;
+}
+
+bool JSWeb::HandleWindowNewEvent(const WebWindowNewEvent* eventInfo)
 {
     if (eventInfo == nullptr) {
         return false;
@@ -5055,6 +5103,14 @@ JSRef<JSVal> NativeEmbeadTouchToJSValue(const NativeEmbeadTouchInfo& eventInfo)
     requestEvent->SetResult(eventInfo.GetResult());
     obj->SetPropertyObject("result", requestObj);
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreatNativeEmbedGestureHandler(const NativeEmbeadTouchInfo& eventInfo)
+{
+    JSRef<JSObject> requestObj = JSClass<JSNativeEmbedGestureRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSNativeEmbedGestureRequest>());
+    requestEvent->SetResult(eventInfo.GetResult());
+    return requestObj;
 }
 
 void JSWeb::OnNativeEmbedGestureEvent(const JSCallbackInfo& args)

@@ -4600,6 +4600,8 @@ struct ArkUIWebModifier {
     void (*resetLayoutMode)(ArkUINodeHandle node);
     void (*setOnNativeEmbedLifecycleChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnNativeEmbedLifecycleChange)(ArkUINodeHandle node);
+    void (*setOnNativeEmbedGestureEvent)(ArkUINodeHandle node, void* callback);
+    void (*resetOnNativeEmbedGestureEvent)(ArkUINodeHandle node);
     void (*setRegisterNativeEmbedRule)(ArkUINodeHandle node, ArkUI_CharPtr tag, ArkUI_CharPtr type);
     void (*resetRegisterNativeEmbedRule)(ArkUINodeHandle node);
     void (*setNativeEmbedOptions)(ArkUINodeHandle node, ArkUI_Bool value);
@@ -4650,6 +4652,30 @@ struct ArkUIWebModifier {
     void (*resetOnNavigationEntryCommittedCallBack)(ArkUINodeHandle node);
     void (*setOnSearchResultReceiveCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnSearchResultReceiveCallBack)(ArkUINodeHandle node);
+    void (*setOverScrollMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetOverScrollMode)(ArkUINodeHandle node);
+    void (*setOnTouchIconUrlReceivedCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnTouchIconUrlReceivedCallBack)(ArkUINodeHandle node);
+    void (*setOnRenderProcessRespondingCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnRenderProcessRespondingCallBack)(ArkUINodeHandle node);
+	void (*setOnWindowNew)(ArkUINodeHandle node, void* callback);
+    void (*resetOnWindowNew)(ArkUINodeHandle node);
+    void (*setOnGeolocationShow)(ArkUINodeHandle node, void* callback);
+    void (*resetOnGeolocationShow)(ArkUINodeHandle node);
+    void (*setOnPermissionRequest)(ArkUINodeHandle node, void* callback);
+    void (*resetOnPermissionRequest)(ArkUINodeHandle node);
+    void (*setOnScreenCaptureRequest)(ArkUINodeHandle node, void* callback);
+    void (*resetOnScreenCaptureRequest)(ArkUINodeHandle node);
+    void (*setOnFullScreenEnter)(ArkUINodeHandle node, void* callback);
+    void (*resetOnFullScreenEnter)(ArkUINodeHandle node);
+    void (*setOnWindowExit)(ArkUINodeHandle node, void* callback);
+    void (*resetOnWindowExit)(ArkUINodeHandle node);
+    void (*setOnAlertlCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnAlertlCallBack)(ArkUINodeHandle node);
+    void (*setOnConfirmCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnConfirmCallBack)(ArkUINodeHandle node);
+    void (*setOnPromptCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnPromptCallBack)(ArkUINodeHandle node);
 };
 
 struct ArkUIBlankModifier {
