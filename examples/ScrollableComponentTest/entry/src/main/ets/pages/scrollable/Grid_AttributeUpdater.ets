@@ -2,7 +2,7 @@ import { LengthMetrics } from '@ohos.arkui.node'
 import { ColorMetrics } from '@ohos.arkui.node'
 import { AttributeUpdater, GridModifier } from '@ohos.arkui.modifier'
 
-@Builder function  pixelMapBuilder() { //拖拽过程样式
+@Builder function pixelMapBuilder() { //拖拽过程样式
   Column() {
     Text()
       .fontSize(16)
@@ -146,7 +146,7 @@ class MyGridUpdater extends AttributeUpdater<GridAttribute> {
 
 @Entry
 @Component
-export  struct  GridExample_Updater {
+export struct GridExample_Updater {
   @State numbers: string[] = []
   scroller: Scroller = new Scroller()
   scroller2: Scroller = new Scroller()
@@ -155,7 +155,7 @@ export  struct  GridExample_Updater {
 
 
   aboutToAppear() {
-    for (let i = 1;i <= 15; i++) {
+    for (let i = 1; i <= 15; i++) {
       this.numbers.push(i + '')
     }
   }
@@ -191,7 +191,7 @@ export  struct  GridExample_Updater {
               return null
             })
             .onWillScroll((scrollOffset: number, scrollState: ScrollState, scrollSource: ScrollSource)=>{
-              console.log('GridBridge::onWillScroll scrollOffset: ' + scrollOffset + ' scrollState: ' + scrollState  + ' scrollSource: ' + scrollState)
+              console.log('GridBridge::onWillScroll scrollOffset: ' + scrollOffset + ' scrollState: ' + scrollState + ' scrollSource: ' + scrollState)
               return null
             })
             .onDidScroll((scrollOffset: number, scrollState: ScrollState)=>{
