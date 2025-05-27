@@ -95,10 +95,10 @@ namespace {
         { Converter::ArkValue<Opt_Number>(12.34), 12.34 },
         { Converter::ArkValue<Opt_Number>(-56.73), -56.73 }
     };
-    std::vector<std::pair<Ark_Union_String_FunctionKey, bool>> arkShortcutKeyTestPlan = {
-        { Converter::ArkUnion<Ark_Union_String_FunctionKey, Ark_String>("A"), true },
-        { Converter::ArkUnion<Ark_Union_String_FunctionKey, Ark_String>("B"), true },
-        { Converter::ArkUnion<Ark_Union_String_FunctionKey, Ark_String>("C"), true },
+    std::vector<std::pair<Opt_Union_String_FunctionKey, bool>> arkShortcutKeyTestPlan = {
+        { Converter::ArkUnion<Opt_Union_String_FunctionKey, Ark_String>("A"), true },
+        { Converter::ArkUnion<Opt_Union_String_FunctionKey, Ark_String>("B"), true },
+        { Converter::ArkUnion<Opt_Union_String_FunctionKey, Ark_String>("C"), true },
     };
     struct CheckEvent {
         int32_t nodeId;
@@ -205,9 +205,9 @@ HWTEST_F(CommonMethodModifierTest8, setGeometryTransitionTestDefaultValues, Test
 HWTEST_F(CommonMethodModifierTest8, DISABLED_setGeometryTransitionTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setGeometryTransition0, nullptr);
-    using OneTestStep = std::tuple<Ark_String, std::string>;
+    using OneTestStep = std::tuple<Opt_String, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_String>("id1"), "id1"},
+        {Converter::ArkValue<Opt_String>("id1"), "id1"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setGeometryTransition0(node_, &inputValue);
@@ -237,11 +237,11 @@ HWTEST_F(CommonMethodModifierTest8, setRestoreIdTestDefaultValues, TestSize.Leve
 HWTEST_F(CommonMethodModifierTest8, DISABLED_setRestoreIdTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setRestoreId, nullptr);
-    using OneTestStep = std::tuple<Ark_Number, std::string>;
+    using OneTestStep = std::tuple<Opt_Number, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_Number>(1), "1"},
-        {Converter::ArkValue<Ark_Number>(2), "2"},
-        {Converter::ArkValue<Ark_Number>(3), "3"},
+        {Converter::ArkValue<Opt_Number>(1), "1"},
+        {Converter::ArkValue<Opt_Number>(2), "2"},
+        {Converter::ArkValue<Opt_Number>(3), "3"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setRestoreId(node_, &inputValue);
@@ -266,14 +266,14 @@ HWTEST_F(CommonMethodModifierTest8, setMonopolizeEventsTest, TestSize.Level1)
     auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUE_MONOPOLIZE_EVENTS_NAME);
     EXPECT_EQ(resultValue, ATTRIBUE_MONOPOLIZE_EVENTS_DEFAULT_VALUE);
 
-    Ark_Boolean arkTrueValue = Converter::ArkValue<Ark_Boolean>(ACTUAL_TRUE);
-    modifier_->setMonopolizeEvents(node_, arkTrueValue);
+    auto arkTrueValue = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
+    modifier_->setMonopolizeEvents(node_, &arkTrueValue);
     fullJson = GetJsonValue(node_);
     resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUE_MONOPOLIZE_EVENTS_NAME);
     EXPECT_EQ(resultValue, EXPECTED_TRUE);
 
-    Ark_Boolean arkFalseValue = Converter::ArkValue<Ark_Boolean>(ACTUAL_FALSE);
-    modifier_->setMonopolizeEvents(node_, arkFalseValue);
+    auto arkFalseValue = Converter::ArkValue<Opt_Boolean>(ACTUAL_FALSE);
+    modifier_->setMonopolizeEvents(node_, &arkFalseValue);
     fullJson = GetJsonValue(node_);
     resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUE_MONOPOLIZE_EVENTS_NAME);
     EXPECT_EQ(resultValue, EXPECTED_FALSE);
@@ -289,19 +289,19 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover0IsShowTest, TestSize.Lev
     ASSERT_NE(modifier_->setBindContentCover0, nullptr);
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
-    auto customBuilder = CreateCustomNodeBuilder(node);
-    auto arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_TRUE);
+    auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
     auto optModal = Converter::ArkValue<Opt_ModalTransition>(ARK_MODAL_TRANSITION_ALPHA);
 
     EXPECT_FALSE(checkBuilderEvent.has_value());
-    modifier_->setBindContentCover0(node_, arkShow, &customBuilder, &optModal);
+    modifier_->setBindContentCover0(node_, &arkShow, &customBuilder, &optModal);
     EXPECT_TRUE(checkBuilderEvent.has_value());
     EXPECT_EQ(checkBuilderEvent->resourceId, EXPECTED_CONTEXT_ID);
 
-    arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_FALSE);
+    arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_FALSE);
     checkBuilderEvent.reset();
     EXPECT_FALSE(checkBuilderEvent.has_value());
-    modifier_->setBindContentCover0(node_, arkShow, &customBuilder, &optModal);
+    modifier_->setBindContentCover0(node_, &arkShow, &customBuilder, &optModal);
     EXPECT_FALSE(checkBuilderEvent.has_value());
 }
 
@@ -315,11 +315,11 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover0ModalTransitionTest, Tes
     ASSERT_NE(modifier_->setBindContentCover0, nullptr);
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
-    auto customBuilder = CreateCustomNodeBuilder(node);
-    auto arkShowTrue = Converter::ArkValue<Ark_Boolean>(ACTUAL_TRUE);
+    auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
+    auto arkShowTrue = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
 
     for (auto& [actual, expected] : modalTransitionTestPlan) {
-        modifier_->setBindContentCover0(node_, arkShowTrue, &customBuilder, &actual);
+        modifier_->setBindContentCover0(node_, &arkShowTrue, &customBuilder, &actual);
         auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
         EXPECT_NE(modal, nullptr);
         auto pattern = modal->GetPattern<ModalPresentationPattern>();
@@ -342,19 +342,19 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1IsShowTest, TestSize.Lev
     ASSERT_NE(frameNode, nullptr);
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
-    auto customBuilder = CreateCustomNodeBuilder(node);
-    auto arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_TRUE);
+    auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
     auto optOptions = Converter::ArkValue<Opt_ContentCoverOptions>(Ark_Empty());
 
     EXPECT_FALSE(checkBuilderEvent.has_value());
-    modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
+    modifier_->setBindContentCover1(node_, &arkShow, &customBuilder, &optOptions);
     EXPECT_TRUE(checkBuilderEvent.has_value());
     EXPECT_EQ(checkBuilderEvent->resourceId, EXPECTED_CONTEXT_ID);
 
-    arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_FALSE);
+    arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_FALSE);
     checkBuilderEvent.reset();
     EXPECT_FALSE(checkBuilderEvent.has_value());
-    modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
+    modifier_->setBindContentCover1(node_, &arkShow, &customBuilder, &optOptions);
     EXPECT_FALSE(checkBuilderEvent.has_value());
 }
 
@@ -370,7 +370,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1OnAppearTest, TestSize.L
     ASSERT_NE(frameNode, nullptr);
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
-    auto customBuilder = CreateCustomNodeBuilder(node);
+    auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
     static std::optional<CheckEvent> checkEventAppear = std::nullopt;
     auto onAppearCallback = [](Ark_Int32 nodeId) {
         checkEventAppear = {
@@ -380,7 +380,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1OnAppearTest, TestSize.L
     auto arkOnAppearCalback = Converter::ArkValue<Callback_Void>(onAppearCallback, frameNode->GetId());
     auto optOnAppearCalback = Converter::ArkValue<Opt_Callback_Void>(arkOnAppearCalback);
 
-    auto arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_ContentCoverOptions {
         .onAppear = optOnAppearCalback,
     };
@@ -390,7 +390,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1OnAppearTest, TestSize.L
     EXPECT_FALSE(checkBuilderEvent.has_value());
     EXPECT_FALSE(checkEventAppear.has_value());
 
-    modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
+    modifier_->setBindContentCover1(node_, &arkShow, &customBuilder, &optOptions);
 
     auto parentNode = reinterpret_cast<FrameNode*>(checkBuilderEvent->parentNode);
     EXPECT_NE(parentNode, nullptr);
@@ -413,7 +413,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1OnDisAppearTest, TestSiz
     ASSERT_NE(frameNode, nullptr);
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
-    auto customBuilder = CreateCustomNodeBuilder(node);
+    auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
     static std::optional<CheckEvent> checkEventDisAppear = std::nullopt;
     auto onDisAppearCallback = [](Ark_Int32 nodeId) {
         checkEventDisAppear = {
@@ -423,7 +423,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1OnDisAppearTest, TestSiz
     auto arkOnDisAppearCalback = Converter::ArkValue<Callback_Void>(onDisAppearCallback, frameNode->GetId());
     auto optOnDisAppearCalback = Converter::ArkValue<Opt_Callback_Void>(arkOnDisAppearCalback);
 
-    auto arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_ContentCoverOptions {
         .onDisappear = optOnDisAppearCalback,
     };
@@ -432,7 +432,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1OnDisAppearTest, TestSiz
     EXPECT_FALSE(checkBuilderEvent.has_value());
     EXPECT_FALSE(checkEventDisAppear.has_value());
 
-    modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
+    modifier_->setBindContentCover1(node_, &arkShow, &customBuilder, &optOptions);
 
     modal = AceType::DynamicCast<FrameNode>(node->GetParent());
     EXPECT_NE(modal, nullptr);
@@ -461,7 +461,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1OnWillAppearTest, TestSi
     ASSERT_NE(frameNode, nullptr);
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
-    auto customBuilder = CreateCustomNodeBuilder(node);
+    auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
     static std::optional<CheckEvent> checkEventWillAppear = std::nullopt;
     auto onWillAppearCallback = [](Ark_Int32 nodeId) {
         checkEventWillAppear = {
@@ -471,7 +471,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1OnWillAppearTest, TestSi
     auto arkOnWillAppearCalback = Converter::ArkValue<Callback_Void>(onWillAppearCallback, frameNode->GetId());
     auto optOnWillAppearCalback = Converter::ArkValue<Opt_Callback_Void>(arkOnWillAppearCalback);
 
-    auto arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_ContentCoverOptions {
         .onWillAppear = optOnWillAppearCalback,
     };
@@ -480,7 +480,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1OnWillAppearTest, TestSi
     EXPECT_FALSE(checkBuilderEvent.has_value());
     EXPECT_FALSE(checkEventWillAppear.has_value());
 
-    modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
+    modifier_->setBindContentCover1(node_, &arkShow, &customBuilder, &optOptions);
     auto parentNode = reinterpret_cast<FrameNode*>(checkBuilderEvent->parentNode);
     EXPECT_NE(parentNode, nullptr);
     EXPECT_TRUE(checkBuilderEvent.has_value());
@@ -502,7 +502,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1OnWillDisAppearTest, Tes
     ASSERT_NE(frameNode, nullptr);
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
-    auto customBuilder = CreateCustomNodeBuilder(node);
+    auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
     static std::optional<CheckEvent> checkEventWillDisAppear = std::nullopt;
     auto onWillDisAppearCallback = [](Ark_Int32 nodeId) {
         checkEventWillDisAppear = {
@@ -511,7 +511,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1OnWillDisAppearTest, Tes
     };
     auto arkOnWillDisAppearCalback = Converter::ArkValue<Callback_Void>(onWillDisAppearCallback, frameNode->GetId());
     auto optOnWillDisAppearCalback = Converter::ArkValue<Opt_Callback_Void>(arkOnWillDisAppearCalback);
-    auto arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_ContentCoverOptions {
         .onWillDisappear = optOnWillDisAppearCalback,
     };
@@ -520,7 +520,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1OnWillDisAppearTest, Tes
 
     EXPECT_FALSE(checkBuilderEvent.has_value());
     EXPECT_FALSE(checkEventWillDisAppear.has_value());
-    modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
+    modifier_->setBindContentCover1(node_, &arkShow, &customBuilder, &optOptions);
 
     modal = AceType::DynamicCast<FrameNode>(node->GetParent());
     EXPECT_NE(modal, nullptr);
@@ -550,8 +550,8 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1DissmisCallbackTest, Tes
     auto onDismissCallback = CreateDissmisCallback(frameNode);
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
-    auto customBuilder = CreateCustomNodeBuilder(node);
-    auto arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_TRUE);
+    auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_ContentCoverOptions {
         .onWillDismiss = onDismissCallback
     };
@@ -559,7 +559,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1DissmisCallbackTest, Tes
     auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
     EXPECT_EQ(modal, nullptr);
 
-    modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
+    modifier_->setBindContentCover1(node_, &arkShow, &customBuilder, &optOptions);
 
     modal = AceType::DynamicCast<FrameNode>(node->GetParent());
     EXPECT_NE(modal, nullptr);
@@ -589,15 +589,15 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1BackgroundColorTest, Tes
     ASSERT_NE(frameNode, nullptr);
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
-    auto customBuilder = CreateCustomNodeBuilder(node);
-    auto arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_TRUE);
+    auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
 
     for (auto& [actual, expected] : colorTestPlan) {
         auto arkOptions = Ark_ContentCoverOptions {
             .backgroundColor = actual,
         };
         auto optOptions = Converter::ArkValue<Opt_ContentCoverOptions>(arkOptions);
-        modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
+        modifier_->setBindContentCover1(node_, &arkShow, &customBuilder, &optOptions);
         auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
         EXPECT_NE(modal, nullptr);
         auto context = modal->GetRenderContext();
@@ -620,15 +620,15 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1ModalTransitionTest, Tes
     ASSERT_NE(frameNode, nullptr);
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
-    auto customBuilder = CreateCustomNodeBuilder(node);
-    auto arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_TRUE);
+    auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
 
     for (auto& [actual, expected] : modalTransitionTestPlan) {
         auto arkOptions = Ark_ContentCoverOptions {
             .modalTransition = actual,
         };
         auto optOptions = Converter::ArkValue<Opt_ContentCoverOptions>(arkOptions);
-        modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
+        modifier_->setBindContentCover1(node_, &arkShow, &customBuilder, &optOptions);
         auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
         EXPECT_NE(modal, nullptr);
         auto pattern = modal->GetPattern<ModalPresentationPattern>();
@@ -649,8 +649,8 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1TransitionEffectTest, Te
     ASSERT_NE(frameNode, nullptr);
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
-    auto customBuilder = CreateCustomNodeBuilder(node);
-    auto arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_TRUE);
+    auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
+    auto arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
 
     for (auto& [actualC, expectedC] : arkUnionNumberTestPlan) {
         for (auto& [actualS, expectedS] : arkNumberTestPlan) {
@@ -673,7 +673,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1TransitionEffectTest, Te
                 pattern->SetHasTransitionEffect(ACTUAL_FALSE);
             }
             EXPECT_FALSE(pattern ? pattern->HasTransitionEffect() : ACTUAL_FALSE);
-            modifier_->setBindContentCover1(node_, arkShow, &customBuilder, &optOptions);
+            modifier_->setBindContentCover1(node_, &arkShow, &customBuilder, &optOptions);
             modal = AceType::DynamicCast<FrameNode>(node->GetParent());
             EXPECT_NE(modal, nullptr);
             pattern = modal->GetPattern<ModalPresentationPattern>();
@@ -709,7 +709,8 @@ HWTEST_F(CommonMethodModifierTest8, setKeyboardShortcutTest, TestSize.Level1)
         Ark_ModifierKey::ARK_MODIFIER_KEY_SHIFT,
     };
     Converter::ArkArrayHolder<Array_ModifierKey> keyHolder(modifiers);
-    Array_ModifierKey keys = keyHolder.ArkValue();
+    Array_ModifierKey keysHolder = keyHolder.ArkValue();
+    auto keys = Converter::ArkValue<Opt_Array_ModifierKey>(keysHolder);
     auto previous = eventHub->GetKeyboardShortcut();
 
     for (auto& [actual, expected] : arkShortcutKeyTestPlan) {
