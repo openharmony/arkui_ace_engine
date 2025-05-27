@@ -36,6 +36,10 @@ public:
     {
         return ViewStackProcessor::GetInstance()->GetMainFrameNode();
     }
+
+    static void setSrcType(ImageSourceInfo& info, SrcType value) {
+        info.srcType_ = value;
+    };
 };
 
 /**
@@ -2193,5 +2197,67 @@ HWTEST_F(ImageTestNg, TestSetBorderRadius004, TestSize.Level1)
     EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopRight.value(), topRight);
     EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomLeft.value(), bottomLeft);
     EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomRight.value(), bottomRight);
+}
+/**
+ * @tc.name: TestIsSurportCachePixelmap001
+ * @tc.desc: Test IsSurportCachePixelmap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestIsSurportCachePixelmap001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image Info.
+     */
+    ImageSourceInfo sourceInfo;
+    ImageTestNg::setSrcType(sourceInfo, SrcType::ASSET);
+    EXPECT_EQ(sourceInfo.srcType_, SrcType::ASSET);
+
+    /**
+     * @tc.steps: step2. Test IsSurportCachePixelmap
+     */
+    bool result = sourceInfo.IsSurportCachePixelmap();
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: TestIsSurportCachePixelmap002
+ * @tc.desc: Test IsSurportCachePixelmap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestIsSurportCachePixelmap002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image Info.
+     */
+    ImageSourceInfo sourceInfo;
+    ImageTestNg::setSrcType(sourceInfo, SrcType::NETWORK);
+    EXPECT_EQ(sourceInfo.srcType_, SrcType::NETWORK);
+
+    /**
+     * @tc.steps: step2. Test IsSurportCachePixelmap
+     */
+    bool result = sourceInfo.IsSurportCachePixelmap();
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: TestIsSurportCachePixelmap003
+ * @tc.desc: Test IsSurportCachePixelmap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestIsSurportCachePixelmap003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image Info.
+     */
+    ImageSourceInfo sourceInfo;
+    ImageTestNg::setSrcType(sourceInfo, SrcType::RESOURCE);
+    EXPECT_EQ(sourceInfo.srcType_, SrcType::RESOURCE);
+
+    /**
+     * @tc.steps: step2. Test IsSurportCachePixelmap
+     */
+    bool result = sourceInfo.IsSurportCachePixelmap();
+    EXPECT_EQ(result, true);
 }
 } // namespace OHOS::Ace::NG
