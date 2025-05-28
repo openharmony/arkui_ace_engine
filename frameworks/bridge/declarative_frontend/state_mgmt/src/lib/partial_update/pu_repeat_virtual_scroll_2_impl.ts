@@ -359,6 +359,11 @@ class __RepeatVirtualScroll2Impl<T> {
     // they are no longer associated with a data item
     private spareRid_: Set<number> = new Set<number>();
 
+    // rid for node deleted with animation
+    // such nodes can't be reused, otherwise animation will be interrupted
+    // and must be purged during onPurge call
+    private noReuseRid_: Set<number> = new Set<number>();
+
     // request container re-layout
     private firstIndexChanged_: number = 0;
 
@@ -780,7 +785,7 @@ class __RepeatVirtualScroll2Impl<T> {
                 if (this.allowItemUpdate_) {
                     this.spareRid_.add(this.activeDataItems_[oldIndex].rid);
                 } else {
-                    this.purgeNode(this.activeDataItems_[oldIndex].rid);
+                    this.noReuseRid_.add(this.activeDataItems_[oldIndex].rid);
                 }
                 const index = parseInt(oldIndex);
                 this.index4Key_.delete(this.key4Index_.get(index));
@@ -1648,6 +1653,12 @@ class __RepeatVirtualScroll2Impl<T> {
         Object.entries(this.templateOptions_).forEach((pair) => {
             availableCachedCount[pair[0]] = pair[1].cachedCount as number;
         });
+
+        // purge no reused nodes
+        for (const rid of this.noReuseRid_) {
+            this.purgeNode(rid);
+        }
+        this.noReuseRid_.clear();
 
         // Improvement needed:
         // this is a simplistic purge is more or less randomly purges 
