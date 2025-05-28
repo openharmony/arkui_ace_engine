@@ -1264,13 +1264,19 @@ void AceContainer::InitializeCallback()
             CHECK_NULL_VOID(markProcess);
             markProcess();
         };
+        auto asyncCrownTask = [context, event, markProcess, id]() {
+            ContainerScope scope(id);
+            context->OnNonPointerEvent(event);
+            CHECK_NULL_VOID(markProcess);
+            markProcess();
+        };
         auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
             crownTask();
             return result;
         }
         context->GetTaskExecutor()->PostTask(
-            crownTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerCrownEvent", PriorityType::VIP);
+            asyncCrownTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerCrownEvent", PriorityType::VIP);
         return result;
     };
     aceView_->RegisterCrownEventCallback(crownEventCallback);
