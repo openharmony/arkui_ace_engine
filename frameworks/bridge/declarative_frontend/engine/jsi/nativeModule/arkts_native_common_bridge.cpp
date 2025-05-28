@@ -7638,6 +7638,8 @@ Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, G
         vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"), panda::NumberRef::New(vm, info.GetTargetDisplayId()));
     obj->SetNativePointerFieldCount(vm, 1);
     obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTargetDisplayId())));
     if (info.GetGestureTypeName() == GestureTypeName::TAP_GESTURE && !info.GetFingerList().empty()) {
         auto tapGuestureInfo = CreateTapGestureInfo(vm, info);
         obj->Set(
