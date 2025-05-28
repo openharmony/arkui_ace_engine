@@ -39,7 +39,7 @@ export class PeerNode extends IncrementalNode {
     private _onRecycle?: () => void
     // Pool to store recycled child scopes, grouped by type
     private _reusePool?: Map<string, ReusablePool>
-    private _reusable: boolean = false
+    reusable: boolean = false
 
     getPeerPtr(): pointer {
         return this.peer.ptr
@@ -56,7 +56,7 @@ export class PeerNode extends IncrementalNode {
     }
 
     onReuse(): void {
-        if (!this._reusable) {
+        if (!this.reusable) {
             return
         }
         if (this._onReuse) {
@@ -125,7 +125,7 @@ export class PeerNode extends IncrementalNode {
             // TODO: rework to avoid search
             let peer = findPeerNode(child)
             if (peer) {
-                peer._reusable ? peer!.onReuse() : peer._reusable = true // becomes reusable after initial mount
+                peer.reusable ? peer!.onReuse() : peer.reusable = true // becomes reusable after initial mount
                 let peerPtr = peer.peer.ptr
                 if (this.insertMark != nullptr) {
                     if (this.insertDirection == 0) {
