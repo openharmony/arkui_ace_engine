@@ -58,7 +58,8 @@ import { CommonModifier } from "../CommonModifier"
 import { AttributeUpdater } from "../ohos.arkui.modifier"
 import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
 import { hookStateStyleImpl } from "../handwritten/ArkStateStyle"
-import { rememberMutableState } from '@koalaui/runtime';
+import { rememberMutableState } from '@koalaui/runtime'
+import { hookDrawModifierInvalidateImpl, hookDrawModifierAttributeImpl } from "../handwritten/ArkDrawModifierImpl"
 export interface ICurve {
     interpolate(fraction: number): number
 }
@@ -95,65 +96,25 @@ export class ICurveInternal implements MaterializedBase,ICurve {
 export class DrawModifierInternal {
     public static fromPtr(ptr: KPointer): DrawModifier {
         const obj : DrawModifier = new DrawModifier()
-        obj.peer = new Finalizable(ptr, DrawModifier.getFinalizer())
         return obj
     }
 }
-export class DrawModifier implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    static ctor_drawmodifier(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._DrawModifier_ctor()
-        return retval
-    }
+export class DrawModifier  {
+    weakRefOfPeerNode ?: WeakRef<PeerNode>;
     constructor() {
-        const ctorPtr : KPointer = DrawModifier.ctor_drawmodifier()
-        this.peer = new Finalizable(ctorPtr, DrawModifier.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._DrawModifier_getFinalizer()
     }
     public drawBehind(drawContext: DrawContext): void {
-        const drawContext_casted = drawContext as (DrawContext)
-        this.drawBehind_serialize(drawContext_casted)
         return
     }
     public drawContent(drawContext: DrawContext): void {
-        const drawContext_casted = drawContext as (DrawContext)
-        this.drawContent_serialize(drawContext_casted)
         return
     }
     public drawFront(drawContext: DrawContext): void {
-        const drawContext_casted = drawContext as (DrawContext)
-        this.drawFront_serialize(drawContext_casted)
         return
     }
     public invalidate(): void {
-        this.invalidate_serialize()
+        hookDrawModifierInvalidateImpl(this);
         return
-    }
-    private drawBehind_serialize(drawContext: DrawContext): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeDrawContext(drawContext)
-        ArkUIGeneratedNativeModule._DrawModifier_drawBehind(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private drawContent_serialize(drawContext: DrawContext): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeDrawContext(drawContext)
-        ArkUIGeneratedNativeModule._DrawModifier_drawContent(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private drawFront_serialize(drawContext: DrawContext): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeDrawContext(drawContext)
-        ArkUIGeneratedNativeModule._DrawModifier_drawFront(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private invalidate_serialize(): void {
-        ArkUIGeneratedNativeModule._DrawModifier_invalidate(this.peer!.ptr)
     }
 }
 export class TransitionEffectInternal {
@@ -2069,16 +2030,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         thisSerializer.release()
     }
     drawModifierAttribute(value: DrawModifier | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writeDrawModifier(value_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_drawModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+        hookDrawModifierAttributeImpl(this,value)
     }
     responseRegionAttribute(value: Array<Rectangle> | Rectangle | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()

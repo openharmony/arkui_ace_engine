@@ -27,6 +27,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getWebAniModifier = OHOS::Ace::NG::GetWebAniModifier,
         .getCommonAniModifier = OHOS::Ace::NG::GetCommonAniModifier,
         .getContentSlotAniModifier = OHOS::Ace::NG::GetContentSlotAniModifier,
+        .getArkUIAniDrawModifier = OHOS::Ace::NG::GetArkUIAniDrawModifier,
     };
     return &impl;
 }

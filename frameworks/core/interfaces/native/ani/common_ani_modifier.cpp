@@ -64,4 +64,23 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .setDrawCallback = OHOS::Ace::NG::SetDrawCallback };
     return &impl;
 }
+
+void SetDrawModifier(ani_env* env, ani_long ptr, ani_object fnObj)
+{
+    Framework::AniGraphicsModule::SetDrawModifier(env, ptr, fnObj);
+}
+
+void Invalidate(ani_env* env, ani_long ptr)
+{
+    Framework::AniGraphicsModule::Invalidate(env, ptr);
+}
+
+const ArkUIAniDrawModifier* GetArkUIAniDrawModifier()
+{
+    static const ArkUIAniDrawModifier impl = {
+        .setDrawModifier = OHOS::Ace::NG::SetDrawModifier,
+        .invalidate = OHOS::Ace::NG::Invalidate,
+    };
+    return &impl;
+}
 } // namespace OHOS::Ace::NG

@@ -29,8 +29,11 @@ namespace OHOS::Ace::Framework {
 class AniGraphicsModule final {
 public:
     static void SetDrawCallback(ani_env* env, ani_long ptr, ani_fn_object fnObj);
+    static void SetDrawModifier(ani_env* env, ani_long ptr, ani_object fnObj);
+    static void Invalidate(ani_env* env, ani_long ptr);
+
 private:
     static ani_object CreateDrawingContext(ani_env* env, const NG::DrawingContext& context);
 };
-}
+} // namespace OHOS::Ace::Framework
 #endif

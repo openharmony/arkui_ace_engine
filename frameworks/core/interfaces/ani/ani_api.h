@@ -55,6 +55,10 @@ struct ArkUIAniCommonModifier {
     void (*restoreInstanceId)();
     void (*setDrawCallback)(ani_env* env, ani_long ptr, ani_fn_object fnObj);
 };
+struct ArkUIAniDrawModifier {
+    void (*setDrawModifier)(ani_env* env, ani_long ptr, ani_object fnObj);
+    void (*invalidate)(ani_env* env, ani_long ptr);
+};
 struct ArkUIAniContentSlotModifier {
     ArkUIContentSlot (*construct)(ArkUI_Int32 id);
     void (*setContentSlotOptions)(ArkUIContentSlot node, ArkUINodeContent value);
@@ -65,6 +69,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniWebModifier* (*getWebAniModifier)();
     const ArkUIAniCommonModifier* (*getCommonAniModifier)();
     const ArkUIAniContentSlotModifier* (*getContentSlotAniModifier)();
+    const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);
