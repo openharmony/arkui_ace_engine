@@ -9,7 +9,6 @@ import argparse
 NPM_REPO = "https://repo.huaweicloud.com/repository/npm/"
  
 parser = argparse.ArgumentParser(description="npm command parser")
-parser.add_argument("--root-path", help="root directory of koala repo")
 parser.add_argument("--project-path", help="project directory in koala repo")
 parser.add_argument("--node-path", help="nodejs path")
 parser.add_argument("--arklink-path", help="ark-link path")
@@ -21,7 +20,7 @@ parser.add_argument("--npm-args", nargs='+', help="npm command args")
 
 args = parser.parse_args()
 
-project = args.project_path
+project_path = args.project_path
 node_path = args.node_path
 arklink_path = args.arklink_path
 es2panda_path = args.es2panda_path
@@ -46,10 +45,13 @@ env["PANDA_SDK_PATH"] = os.path.join(project_path, "../ui2abc/build/sdk")
 
 koala_log = os.path.join(project_path, "koala_build.log")
 
-def install(dir):
+def execute(dir, args):
     os.chdir(dir)
+    if env.get("KOALA_LOG_STDOUT") is not None:
+        subprocess.run(args, env=env, text=True, check=True, stderr=subprocess.STDOUT)
+        return
     try:
-        ret = subprocess.run(["npm", "install", "--registry", NPM_REPO, "--verbose"], capture_output=True, env=env, text=True, check=True)
+        ret = subprocess.run(args, capture_output=True, env=env, text=True, check=True)
         with open(koala_log, "a+") as f:
             f.write("\n")
             f.write("install log:\n" + ret.stdout)
@@ -60,19 +62,11 @@ def install(dir):
             f.write("error message: "+ e.stderr + "\n")
             f.close()
 
+def install(dir):
+    execute(dir, ["npm", "install", "--registry", NPM_REPO, "--verbose"])
+
 def npm_command(dir, command):
-    os.chdir(dir)
-    try:
-        ret = subprocess.run(["npm"] + command, capture_output=True, env=env, text=True, check=True)
-        with open(koala_log, "a+") as f:
-            f.write("\n")
-            f.write("install log:\n" + ret.stdout)
-            f.close()
-    except subprocess.CalledProcessError as e:
-        with open(koala_log, "a+") as f:
-            f.write("\n")
-            f.write("error message: "+ e.stderr + "\n")
-            f.close()
+    execute(dir, ["npm"] + command)
 
 def main():
     install(project_path)

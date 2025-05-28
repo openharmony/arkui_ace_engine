@@ -56,10 +56,13 @@ if (ets_stdlib_path != ""):
 
 koala_log = os.path.join(project_path, "koala_build.log")
 
-def install(dir):
+def execute(dir, args):
     os.chdir(dir)
+    if env.get("KOALA_LOG_STDOUT") is not None:
+        subprocess.run(args, env=env, text=True, check=True, stderr=subprocess.STDOUT)
+        return
     try:
-        ret = subprocess.run(["npm", "install", "--registry", NPM_REPO, "--verbose"], capture_output=True, env=env, text=True, check=True)
+        ret = subprocess.run(args, capture_output=True, env=env, text=True, check=True)
         with open(koala_log, "a+") as f:
             f.write("\n")
             f.write("install log:\n" + ret.stdout)
@@ -70,19 +73,11 @@ def install(dir):
             f.write("error message: "+ e.stderr + "\n")
             f.close()
 
+def install(dir):
+    execute(dir, ["npm", "install", "--registry", NPM_REPO, "--verbose"])
+
 def npm_command(dir, command):
-    os.chdir(dir)
-    try:
-        ret = subprocess.run(["npm"] + command, capture_output=True, env=env, text=True, check=True)
-        with open(koala_log, "a+") as f:
-            f.write("\n")
-            f.write("install log:\n" + ret.stdout)
-            f.close()
-    except subprocess.CalledProcessError as e:
-        with open(koala_log, "a+") as f:
-            f.write("\n")
-            f.write("error message: "+ e.output + "\n")
-            f.close()
+    execute(dir, ["npm"] + command)
 
 def main():
     install(project_path)

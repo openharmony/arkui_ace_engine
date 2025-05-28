@@ -77,5 +77,13 @@ def main():
     # Copy files or directories
     copy_files(config, args.src, args.dist, args.out_root)
 
+    # Create package.json to pass SDK validation
+    content = """{
+  "name": "@panda/sdk",
+  "version": "1.0.0"
+}"""
+    with open(os.path.join(args.dist, "package.json"), "w") as file:
+        file.write(content)
+
 if __name__ == '__main__':
     main()
