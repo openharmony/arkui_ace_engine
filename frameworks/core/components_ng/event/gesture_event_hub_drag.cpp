@@ -628,6 +628,17 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
      */
     DragDropInfo dragPreviewInfo;
     auto dragDropInfo = GetDragDropInfo(info, frameNode, dragPreviewInfo, event);
+    auto callAnsyncEnd = [weak = WeakClaim(this), frameNode](DragStartRequestStatus dragStatus) {
+        if (dragStatus == DragStartRequestStatus::WAITING) {
+            auto gestureEventHub = weak.Upgrade();
+            CHECK_NULL_VOID(gestureEventHub);
+            auto pipeline = frameNode->GetContextRefPtr();
+            CHECK_NULL_VOID(pipeline);
+            auto eventHub = gestureEventHub->eventHub_.Upgrade();
+            CHECK_NULL_VOID(eventHub);
+            gestureEventHub->FireCustomerOnDragEnd(pipeline, eventHub);
+        }
+    };
     auto continueFunc = [id = Container::CurrentId(), weak = WeakClaim(this), dragPreviewInfo, info, event,
         dragDropInfo, frameNode, pipeline]() {
         ContainerScope scope(id);
@@ -644,6 +655,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         DoOnDragStartHandling(info, frameNode, dragDropInfo, event, dragPreviewInfo, pipeline);
     } else {
         dragDropManager->SetDelayDragCallBack(continueFunc);
+        dragDropManager->SetCallAnsyncDragEnd(callAnsyncEnd);
         TAG_LOGI(AceLogTag::ACE_DRAG, "drag start pended");
     }
 }

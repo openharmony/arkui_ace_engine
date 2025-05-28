@@ -132,6 +132,11 @@ void DragDropManager::SetDelayDragCallBack(const std::function<void()>& cb) noex
     DragDropGlobalController::GetInstance().SetAsyncDragCallback(cb);
 }
 
+void DragDropManager::SetCallAnsyncDragEnd(const std::function<void(DragStartRequestStatus)>& cb)
+{
+    DragDropGlobalController::GetInstance().SetCallAnsyncDragEnd(cb);
+}
+
 void DragDropManager::ExecuteDeadlineTimer()
 {
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -945,6 +950,15 @@ void DragDropManager::HandleDragEvent(const DragPointerEvent& pointerEvent, Drag
         }
         default:
             break;
+    }
+}
+
+void DragDropManager::OnDragAsyncEnd()
+{
+    auto asyncEndCallback = DragDropGlobalController::GetInstance().GetCallAnsyncEnd();
+    DragStartRequestStatus dragStatus = DragDropGlobalController::GetInstance().GetDragStartRequestStatus();
+    if (asyncEndCallback && dragStatus == DragStartRequestStatus::WAITING) {
+        asyncEndCallback(dragStatus);
     }
 }
 
