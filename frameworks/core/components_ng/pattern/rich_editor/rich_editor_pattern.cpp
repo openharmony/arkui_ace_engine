@@ -664,7 +664,7 @@ void RichEditorPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
-    copyOption_ = layoutProperty->GetCopyOption().value_or(CopyOptions::Distributed);
+    copyOption_ = layoutProperty->GetCopyOption().value_or(CopyOptions::Local);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     ResetKeyboardIfNeed();
