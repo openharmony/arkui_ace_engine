@@ -466,6 +466,8 @@ JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
     CHECK_RUN_ON(JS);
     LOGI("Declarative instance destroyed");
 
+    std::vector<shared_ptr<JsValue>> argv = { runtime_->NewNumber(instanceId_) };
+    CallRemoveAvailableInstanceIdFunc(runtime_, argv);
     if (runningPage_) {
         runningPage_->OnJsEngineDestroy();
     }
@@ -1098,6 +1100,28 @@ shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallGetFrameNodeByNodeIdFunc(
     return retVal;
 }
 
+void JsiDeclarativeEngineInstance::CallAddAvailableInstanceIdFunc(
+    const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv)
+{
+    shared_ptr<JsValue> global = runtime->GetGlobal();
+    shared_ptr<JsValue> func = global->GetProperty(runtime, "__addAvailableInstanceId__");
+    if (!func->IsFunction(runtime)) {
+        return;
+    }
+    func->Call(runtime, global, argv, argv.size());
+}
+
+void JsiDeclarativeEngineInstance::CallRemoveAvailableInstanceIdFunc(
+    const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv)
+{
+    shared_ptr<JsValue> global = runtime->GetGlobal();
+    shared_ptr<JsValue> func = global->GetProperty(runtime, "__removeAvailableInstanceId__");
+    if (!func->IsFunction(runtime)) {
+        return;
+    }
+    func->Call(runtime, global, argv, argv.size());
+}
+
 void JsiDeclarativeEngineInstance::PostJsTask(
     const shared_ptr<JsRuntime>& runtime, std::function<void()>&& task, const std::string& name)
 {
@@ -1308,6 +1332,8 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         nativeEngine_ = new ArkNativeEngine(vm, static_cast<void*>(this));
     }
     EngineTask(sharedRuntime);
+    std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(instanceId_) };
+    engineInstance_->CallAddAvailableInstanceIdFunc(runtime, argv);
     return result;
 }
 

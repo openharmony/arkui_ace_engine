@@ -841,6 +841,10 @@ class UIContext {
         }
         __JSScopeUtil__.restoreInstanceId();
     }
+        
+    isAvailable() {
+        return __availableInstanceIds__.has(this.instanceId_);
+    }
 }
 
 class DynamicSyncScene {
@@ -1705,4 +1709,22 @@ function __checkRegexValid__(pattern) {
     } finally {
         return result;
     }
+}
+
+const __availableInstanceIds__ = new Set();
+
+/**
+ * add available instanceId
+ * @param instanceId instanceId to add
+ */
+function __addAvailableInstanceId__(instanceId) {
+    __availableInstanceIds__.add(instanceId);
+}
+
+/**
+ * remove available instanceId
+ * @param instanceId instanceId to remove
+ */
+function __removeAvailableInstanceId__(instanceId) {
+    __availableInstanceIds__.delete(instanceId);
 }
