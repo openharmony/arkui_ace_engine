@@ -4904,9 +4904,17 @@ void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheSta
     if (adapter) {
         int32_t startIndex = showCached ? std::max(0, start - cacheStart) : start;
         int32_t endIndex = showCached ? std::min(GetTotalChildCount() - 1, end + cacheEnd) : end;
+        std::vector<RefPtr<UINode>> toRemove;
         for (const auto& child : GetChildren()) {
             const int32_t index = static_cast<int32_t>(adapter->GetIndexOfChild(DynamicCast<FrameNode>(child)));
-            child->SetActive(index >= startIndex && index <= endIndex);
+            if (index >= startIndex && index <= endIndex) {
+                child->SetActive(true);
+            } else {
+                toRemove.push_back(child);
+            }
+        }
+        for (auto&& node : toRemove) {
+            RemoveChild(node);
         }
         adapter->SetActiveRange(startIndex - cacheStart, endIndex + cacheEnd);
         return;
