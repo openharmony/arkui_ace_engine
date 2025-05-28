@@ -3967,7 +3967,7 @@ void OnDragEndImpl(Ark_NativePointer node,
         CHECK_NULL_VOID(dragEvent);
         Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
         std::string extraParams = "";
-        callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
+        callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
     ViewAbstract::SetOnDragEnd(frameNode, std::move(onDragEnd));
 }
