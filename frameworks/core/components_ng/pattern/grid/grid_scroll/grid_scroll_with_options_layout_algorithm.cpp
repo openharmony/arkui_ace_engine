@@ -464,7 +464,7 @@ LayoutConstraintF GenerateCacheItemConstraint(
 } // namespace
 
 bool GridScrollWithOptionsLayoutAlgorithm::PredictBuildItem(FrameNode& host, int32_t itemIdx,
-     const GridPredictLayoutParam& param, std::map<int32_t, std::pair<int32_t, int32_t>> itemCrossMap)
+    const GridPredictLayoutParam& param, std::map<int32_t, std::pair<int32_t, int32_t>> itemCrossMap)
 {
     // build callback
     auto wrapper = host.GetOrCreateChildByIndex(itemIdx, false, true);
