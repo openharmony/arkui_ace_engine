@@ -2472,22 +2472,129 @@ HWTEST_F(TabBarPatternTestNg, UpdateBackBlurStyle, TestSize.Level1)
     tabBarPattern_->UpdateBackBlurStyle(tabTheme);
 }
 /**
- * @tc.name: UpdateChildrenClipEdge
- * @tc.desc: test UpdateChildrenClipEdge
+ * @tc.name: UpdatePaintIndicator
+ * @tc.desc: test UpdatePaintIndicator
  * @tc.type: FUNC
  */
-HWTEST_F(TabBarPatternTestNg, UpdateChildrenClipEdge, TestSize.Level1)
+HWTEST_F(TabBarPatternTestNg, UpdatePaintIndicator, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
     MockPaintRect(tabBarNode_);
 
-    tabBarPattern_->UpdateChildrenClipEdge();
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarPattern_->visibleItemPosition_[0] = { -1.0f, 1.0f };
+    tabBarPattern_->visibleItemPosition_[1] = { 1.0f, 2.0f };
+    tabBarPattern_->UpdatePaintIndicator(3,true);
 
-    auto pipeline = frameNode_->GetContext();
-    auto tabTheme = pipeline->GetTheme<TabTheme>();
-    tabTheme->isChangeFocusTextStyle_=true;
-    tabBarPattern_->UpdateChildrenClipEdge();
+    tabBarPattern_->isTouchingSwiper_ = true;
+    tabBarPattern_->tabBarStyles_.clear();
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::BOTTOMTABBATSTYLE };
+    tabBarPattern_->UpdatePaintIndicator(0,true);
+
+}
+HWTEST_F(TabBarPatternTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    //MockPaintRect(tabBarNode_);
+
+    DirtySwapConfig config;
+    config.skipMeasure = true;
+    config.skipLayout = true;
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(tabBarNode_, tabBarNode_->GetGeometryNode(), tabBarLayoutProperty_);
+    tabBarPattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+}
+HWTEST_F(TabBarPatternTestNg, HandleClick, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    model.SetIsVertical(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    auto scrollable = tabBarPattern_->scrollableEvent_->GetScrollable();
+    scrollable->GetSpringProperty();
+    scrollable->state_ = Scrollable::AnimationState::SPRING;
+    HandleClick(1); // click second tabBarItem
+
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarPattern_->visibleItemPosition_[0] = { -1.0f, 1.0f };
+    tabBarPattern_->visibleItemPosition_[1] = { 1.0f, 2.0f };
+    HandleClick(5);
+
+    tabBarPattern_->tabBarStyles_.clear();
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::BOTTOMTABBATSTYLE };
+    HandleClick(5);
+}
+
+HWTEST_F(TabBarPatternTestNg, HandleBottomTabBarChange001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    model.SetIsVertical(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    tabBarPattern_->tabBarStyles_.clear();
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::BOTTOMTABBATSTYLE };
+    tabBarPattern_->HandleBottomTabBarChange(-1);
+}
+HWTEST_F(TabBarPatternTestNg, HandleBottomTabBarChange002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    IconStyle iconStyle;
+    iconStyle.selectedColor = Color::WHITE;
+    iconStyle.unselectedColor = Color::BLACK;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+    auto tabContentModel = CreateTabContent();
+    tabContentModel.SetTabBar("test", IMAGE_SRC_URL, std::nullopt, nullptr, true);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+
+    auto tabContentModel2 = CreateTabContent();
+    tabContentModel2.SetTabBar("", IMAGE_SRC_URL, std::nullopt, nullptr, true);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabsDone(model);
+
+    tabBarPattern_->tabBarStyles_.clear();
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::BOTTOMTABBATSTYLE, TabBarStyle::SUBTABBATSTYLE };
+
+    tabBarPattern_->ResetOnForceMeasure(1);
+    tabBarPattern_->HandleBottomTabBarChange(0);
+
+    tabBarPattern_->tabBarStyles_.clear();
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
+
+    tabBarPattern_->ResetOnForceMeasure(1);
+    tabBarPattern_->HandleBottomTabBarChange(0);
+}
+HWTEST_F(TabBarPatternTestNg, HandleBottomTabBarChange003, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    IconStyle iconStyle;
+    iconStyle.selectedColor = Color::WHITE;
+    iconStyle.unselectedColor = Color::BLACK;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+    auto tabContentModel = CreateTabContent();
+    tabContentModel.SetTabBar("test", IMAGE_SRC_URL, std::nullopt, nullptr, true);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+
+    auto tabContentModel2 = CreateTabContent();
+    tabContentModel2.SetTabBar("", IMAGE_SRC_URL, std::nullopt, nullptr, true);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabsDone(model);
+
+    tabBarPattern_->tabBarStyles_.clear();
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
+
+    tabBarPattern_->ResetOnForceMeasure(1);
+    tabBarPattern_->HandleBottomTabBarChange(2);
 }
 } // namespace OHOS::Ace::NG
