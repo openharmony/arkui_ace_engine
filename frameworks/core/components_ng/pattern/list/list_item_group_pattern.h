@@ -437,8 +437,9 @@ private:
     TextDirection layoutDirection_ = TextDirection::LTR;
     float mainSize_ = 0.0f;
     float listContentSize_ = 0.0f;
-    ACE_DISALLOW_COPY_AND_MOVE(ListItemGroupPattern);
     bool isStackFromEnd_ = false;
+    bool prevMeasureBreak_ = false;
+    ACE_DISALLOW_COPY_AND_MOVE(ListItemGroupPattern);
 };
 } // namespace OHOS::Ace::NG
 

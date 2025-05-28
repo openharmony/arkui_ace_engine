@@ -603,6 +603,8 @@ private:
     ListItemIndex endInfo_ = {-1, -1, -1};
     bool isNeedDividerAnimation_ = true;
     int32_t repeatDifference_ = 0;
+
+    bool prevMeasureBreak_ = false;
 };
 } // namespace OHOS::Ace::NG
 

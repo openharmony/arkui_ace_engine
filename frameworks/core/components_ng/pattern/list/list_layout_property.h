@@ -58,6 +58,7 @@ public:
         value->propEditMode_ = CloneEditMode();
         value->propScrollEnabled_ = CloneScrollEnabled();
         value->propStackFromEnd_ = CloneStackFromEnd();
+        value->propSyncLoad_ = CloneSyncLoad();
         return value;
     }
 
@@ -82,6 +83,7 @@ public:
         ResetEditMode();
         ResetScrollEnabled();
         ResetStackFromEnd();
+        ResetSyncLoad();
     }
 
     void SetDefaultCachedCount(const int32_t cachedCount)
@@ -119,6 +121,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EditMode, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StackFromEnd, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SyncLoad, bool, PROPERTY_UPDATE_NORMAL);
 
     int defCachedCount_ = 1;
 protected:

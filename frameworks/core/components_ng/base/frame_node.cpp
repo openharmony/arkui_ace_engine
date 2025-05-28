@@ -5043,6 +5043,12 @@ bool FrameNode::CheckNeedForceMeasureAndLayout()
     return CheckNeedMeasure(flag) || CheckNeedLayout(flag);
 }
 
+bool FrameNode::ReachResponseDeadline() const
+{
+    CHECK_NULL_RETURN(context_, false);
+    return context_->ReachResponseDeadline();
+}
+
 OffsetF FrameNode::GetOffsetInScreen()
 {
     auto frameOffset = GetPaintRectOffset(false, true);
