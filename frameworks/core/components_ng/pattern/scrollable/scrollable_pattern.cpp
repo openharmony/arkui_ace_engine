@@ -3155,6 +3155,7 @@ float ScrollablePattern::IsInHotZone(const PointF& point)
         rightHotzone.SetWidth(hotZoneWidthPX);
         auto rightZoneEdgeX = wholeRect.GetX() + wholeRect.Width();
         rightHotzone.SetLeft(rightZoneEdgeX - hotZoneWidthPX);
+        float factor = IsReverse() ? -1.0f : 1.0f;
 
         // Determines whether the drag point is within the hot zone,
         // gives the scroll component movement direction according to which hot zone the point is in
@@ -3162,12 +3163,12 @@ float ScrollablePattern::IsInHotZone(const PointF& point)
         if (leftHotzone.IsInRegion(point)) {
             offset = hotZoneWidthPX - point.GetX() + wholeRect.GetX();
             if (!NearZero(hotZoneWidthPX)) {
-                return offset / hotZoneWidthPX;
+                return factor * offset / hotZoneWidthPX;
             }
         } else if (rightHotzone.IsInRegion(point)) {
             offset = rightZoneEdgeX - point.GetX() - hotZoneWidthPX;
             if (!NearZero(hotZoneWidthPX)) {
-                return offset / hotZoneWidthPX;
+                return factor * offset / hotZoneWidthPX;
             }
         }
     }

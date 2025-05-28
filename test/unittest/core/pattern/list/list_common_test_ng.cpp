@@ -55,7 +55,8 @@ public:
     int32_t FindFocusNodeIndexInGroup(
         RefPtr<FocusHub>& focusNode, int32_t groupIndexInList = -1, int32_t groupItemNum = GROUP_ITEM_NUMBER);
     std::vector<RefPtr<FrameNode>> GetListItemOrListItemGroupInList();
-    void CreateForEachList(int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove);
+    void CreateForEachList(int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove,
+        Axis axis = Axis::VERTICAL);
     void CreateRepeatList(int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove);
     void MapEventInForEachForItemDragEvent(int32_t* actualDragStartIndex, int32_t* actualOnDropIndex,
         int32_t* actualOnLongPressIndex, int32_t* actualonMoveThroughFrom, int32_t* actualonMoveThroughTo);
@@ -320,10 +321,11 @@ std::vector<RefPtr<FrameNode>> ListCommonTestNg::GetGroupListItems(RefPtr<FrameN
 }
 
 void ListCommonTestNg::CreateForEachList(
-    int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove)
+    int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove, Axis axis)
 {
     ListModelNG model = CreateList();
     model.SetLanes(lanes);
+    model.SetListDirection(axis);
     auto listNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
@@ -1673,6 +1675,110 @@ HWTEST_F(ListCommonTestNg, ForEachDrag007, TestSize.Level1)
     gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
     EXPECT_EQ(gestureHub->GetDragEventActuator()->userCallback_, nullptr);
 }
+
+/**
+* @tc.name: ForEachDrag008
+* @tc.desc: Drag test. 2 lanes, rtl
+* @tc.type: FUNC
+*/
+HWTEST_F(ListCommonTestNg, ForEachDrag008, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    CreateForEachList(4, 2, onMoveEvent); // 2 lanes
+    CreateDone();
+
+    /**
+    * @tc.steps: step1. Drag item(index:0)
+    */
+    auto dragManager = GetForEachItemDragManager(0);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 0);
+
+    /**
+    * @tc.steps: step2. Drag down delta > ITEM_MAIN_SIZE/2
+    * @tc.expected: Change of order
+    */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(51.0);
+    info.SetGlobalPoint(Point(0, 51.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "2", "0" }));
+
+    /**
+    * @tc.steps: step3. Drag left-up delta > half size
+    * @tc.expected: Continue change of order
+    */
+    info.SetOffsetX(-121.0);
+    info.SetOffsetY(0.0);
+    info.SetGlobalPoint(Point(-121.f, 0));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "0", "2" }));
+
+    /**
+    * @tc.steps: step4. Drag right delta > itemWidth/2
+    * @tc.expected: Continue change of order
+    */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(0.0);
+    info.SetGlobalPoint(Point(0, 0));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "1", "2" }));
+
+    /**
+    * @tc.steps: step5. Drag end
+    * @tc.expected: No trigger onMoveEvent
+    */
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, -1);
+    EXPECT_EQ(actualTo, -1);
+}
+
+/**
+* @tc.name: ForEachDrag009
+* @tc.desc: Drag with 2 lanes and rtl list, but items number is 3, test oblique drag direction
+* @tc.type: FUNC
+*/
+HWTEST_F(ListCommonTestNg, ForEachDrag009, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    auto onMoveEvent = [](int32_t, int32_t) {};
+    CreateForEachList(3, 2, onMoveEvent); // 2 lanes but 3 items
+    CreateDone();
+
+    /**
+    * @tc.steps: step1. Drag item(index:1)
+    */
+    auto dragManager = GetForEachItemDragManager(1);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 1);
+
+    /**
+    * @tc.steps: step2. Drag right-down delta > half size
+    * @tc.expected: Will change right order, than change down order
+    */
+    info.SetOffsetX(121.0);
+    info.SetOffsetY(51.0);
+    info.SetGlobalPoint(Point(121.f, 51.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "0", "2" }));
+
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "2", "1" }));
+}
+
 
 /**
  * @tc.name: LazyForEachDrag001

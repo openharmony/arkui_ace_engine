@@ -73,6 +73,7 @@ private:
     int32_t ScaleNearItem(int32_t index, const RectF& rect, const OffsetF& delta);
     int32_t CalcMainNearIndex(const int32_t index, const OffsetF& delta);
     int32_t CalcCrossNearIndex(const int32_t index, const OffsetF& delta);
+    int32_t CalcDiagonalIndex(const int32_t mainNearIndex, const OffsetF& delta);
     int32_t GetIndex() const;
     int32_t GetLanes() const;
     bool IsInHotZone(int32_t index, const RectF& frameRect) const;
@@ -90,6 +91,7 @@ private:
     int32_t totalCount_ = -1;
     int32_t lanes_ = 1;
     bool isStackFromEnd_ = false;
+    bool isRtl_ = false;
     bool scrolling_ = false;
     bool isSwapAnimationStopped_ = true;
     OffsetF realOffset_;
