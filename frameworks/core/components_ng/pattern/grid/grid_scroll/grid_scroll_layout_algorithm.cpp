@@ -2231,6 +2231,7 @@ void GridScrollLayoutAlgorithm::SyncPreload(
         int32_t line = scope.subEndLine_ + i + 1;
         if (!MeasureExistingLine(line, len, endIdx)) {
             currentMainLineIndex_ = line - 1;
+            FillCurrentLine(mainSize, crossSize, wrapper);
             FillNewLineBackward(crossSize, mainSize, wrapper, false);
         }
     }
