@@ -261,6 +261,7 @@ private:
     void ModifyTargetOffset();
     OffsetF UpdateMenuPosition(LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& menuNode,
         RefPtr<MenuPattern> menuPattern, const RefPtr<MenuLayoutProperty>& menuProp);
+    bool IsSelectMenuShowInSubWindow(LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& menuNode);
 
     std::string MoveTo(double x, double y);
     std::string LineTo(double x, double y);

@@ -247,7 +247,8 @@ void SelectPattern::ShowSelectMenuInSubWindow()
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
     auto offset = host->GetPositionToScreenWithTransform();
-    offset.AddY(selectSize_.Height() + CALIBERATE_Y.ConvertToPx());
+    auto offsetCustomTitleHeight = static_cast<float>(pipeline->GetCustomTitleHeight().ConvertToPx());
+    offset.AddY(selectSize_.Height() + offsetCustomTitleHeight + CALIBERATE_Y.ConvertToPx());
     offset.AddX(-CALIBERATE_X.ConvertToPx());
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);

@@ -756,13 +756,8 @@ bool MenuWrapperPattern::IsNeedSetHotAreas(const RefPtr<LayoutWrapper>& layoutWr
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, false);
-    auto menuNode = GetMenu();
-    CHECK_NULL_RETURN(menuNode, false);
-    auto menuPattern = AceType::DynamicCast<MenuPattern>(menuNode->GetPattern());
-    CHECK_NULL_RETURN(menuPattern, false);
-    bool menuNotNeedsHotAreas =
-        (layoutWrapper->GetAllChildrenWithBuild().empty() || !IsContextMenu()) &&
-        !((theme->GetExpandDisplay() || menuPattern->GetTargetTag() == V2::SELECT_ETS_TAG) && isShowInSubWindow_);
+    bool menuNotNeedsHotAreas = (layoutWrapper->GetAllChildrenWithBuild().empty() || !IsContextMenu()) &&
+                                !(theme->GetExpandDisplay() && isShowInSubWindow_);
     if (menuNotNeedsHotAreas && !GetIsSelectOverlaySubWindowWrapper()) {
         return false;
     }
