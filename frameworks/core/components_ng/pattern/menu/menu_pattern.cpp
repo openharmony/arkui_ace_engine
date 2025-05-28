@@ -1677,34 +1677,52 @@ MenuItemInfo MenuPattern::GetMenuItemInfo(const RefPtr<UINode>& child, const Ref
     return menuItemInfo;
 }
 
-//考虑jsview等语法节点
 RefPtr<FrameNode> MenuPattern::GetFirstMenuItem()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
+    uint32_t depth = 0;
     auto child = host->GetFirstChild();
-    while (child) {
+    while (child && depth < MAX_SEARCH_DEPTH) {
         if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
-            break;
+            return AceType::DynamicCast<FrameNode>(child);
+        }
+        if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            child = child->GetFirstChild();
+            if (child && child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+                child  = child->GetFirstChild();
+                ++depth;
+            }
+            continue;
         }
         child = child->GetFirstChild();
+        ++depth;
     }
-    return child ? AceType::DynamicCast<FrameNode>(child) : nullptr;
+    return nullptr;
 }
 
-//考虑jsview等语法节点
 RefPtr<FrameNode> MenuPattern::GetLastMenuItem()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
+    uint32_t depth = 0;
     auto child = host->GetLastChild();
-    while (child) {
+    while (child && depth < MAX_SEARCH_DEPTH) {
         if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
-            break;
+            return AceType::DynamicCast<FrameNode>(child);
+        }
+        if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            child = child->GetLastChild();
+            if (child && child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+                child  = child->GetLastChild();
+                ++depth;
+            }
+            continue;
         }
         child = child->GetLastChild();
+        ++depth;
     }
-    return child ? AceType::DynamicCast<FrameNode>(child) : nullptr;
+    return nullptr;
 }
 
 std::pair<float, float> MenuPattern::GetPreviewPositionY()
