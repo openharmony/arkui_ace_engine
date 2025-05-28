@@ -30,6 +30,7 @@ import { deserializeAndCallCallback } from "./component/peers/CallbackDeserializ
 import { Deserializer } from "./component/peers/Deserializer"
 import { StateUpdateLoop } from "./stateManagement"
 import { Routed } from "./handwritten/Router"
+import { updateLazyItems } from "./handwritten/LazyForEachImpl"
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 
@@ -99,14 +100,6 @@ export function destroyUiDetachedRoot(node: PeerNode): void {
     const root = detachedRoots.get(node.peer.ptr)!
     detachedRoots.delete(node.peer.ptr)
     root.dispose()
-}
-
-let customDetachedNodes = new Set<ComputableState<IncrementalNode>>()
-export function registerDetachedNode(node: ComputableState<IncrementalNode>) {
-    customDetachedNodes.add(node)
-}
-export function unregisterDetachedNode(node: ComputableState<IncrementalNode>) {
-    customDetachedNodes.delete(node)
 }
 
 function dumpTree(node: IncrementalNode, indent: int32 = 0) {
@@ -268,8 +261,8 @@ export class Application {
         this.computeRoot()
         for (const detachedRoot of detachedRoots.values())
             detachedRoot.value
-        for (const node of customDetachedNodes)
-            node.value
+        updateLazyItems()
+
         if (partialUpdates.length > 0) {
             // If there are pending partial updates - we apply them one by one and provide update context.
             for (let update of partialUpdates) {

@@ -22,8 +22,14 @@ import { int32, KoalaCallsiteKey } from "@koalaui/common";
 import { IDataSource } from "../component/lazyForEach";
 import { LazyForEachOps } from "../component";
 import { LazyItemNode } from "./LazyItemNode";
-import { registerDetachedNode, unregisterDetachedNode } from "../ArkUIEntry"
 
+let globalLazyItems = new Set<ComputableState<LazyItemNode>>()
+export function updateLazyItems() {
+    for (let node of globalLazyItems) {
+        node.value
+    }
+}
+ 
 /** @memo */
 export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
     /** @memo */
@@ -102,9 +108,11 @@ class LazyItemPool implements Disposable {
     }
 
     dispose(): void {
+        if (this.disposed) return
+
         for (let node of this._activeItems.values()) {
             node.dispose()
-            unregisterDetachedNode(node)
+            globalLazyItems.delete(node)
         }
         this.disposed = true
     }
@@ -146,7 +154,7 @@ class LazyItemPool implements Disposable {
         )
 
         this._activeItems.set(index, node)
-        registerDetachedNode(node)
+        globalLazyItems.add(node)
         return node.value.getPeerPtr()
     }
 
@@ -161,7 +169,7 @@ class LazyItemPool implements Disposable {
             if (index < start || index > end) {
                 node.dispose()
                 this._activeItems.delete(index) // Delete in-place
-                unregisterDetachedNode(node)
+                globalLazyItems.delete(node)
             }
         })
     }
