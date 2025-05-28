@@ -101,6 +101,14 @@ export function destroyUiDetachedRoot(node: PeerNode): void {
     root.dispose()
 }
 
+let customDetachedNodes = new Set<ComputableState<IncrementalNode>>()
+export function registerDetachedNode(node: ComputableState<IncrementalNode>) {
+    customDetachedNodes.add(node)
+}
+export function unregisterDetachedNode(node: ComputableState<IncrementalNode>) {
+    customDetachedNodes.delete(node)
+}
+
 function dumpTree(node: IncrementalNode, indent: int32 = 0) {
     const indentToString = (indent: number) => {
         let str = ""
@@ -260,6 +268,8 @@ export class Application {
         this.computeRoot()
         for (const detachedRoot of detachedRoots.values())
             detachedRoot.value
+        for (const node of customDetachedNodes)
+            node.value
         if (partialUpdates.length > 0) {
             // If there are pending partial updates - we apply them one by one and provide update context.
             for (let update of partialUpdates) {
