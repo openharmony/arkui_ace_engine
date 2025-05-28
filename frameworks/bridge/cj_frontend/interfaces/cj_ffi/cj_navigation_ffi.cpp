@@ -17,8 +17,8 @@
 
 #include "cj_lambda.h"
 #include "pixel_map_impl.h"
+#include "base/utils/utils.h"
 
-#include "base/system_bar/system_bar_style.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "base/system_bar/system_bar_style.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_collection_ffi.h"
