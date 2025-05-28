@@ -338,7 +338,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, FileFromUrlAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DatabaseAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextZoomRatio, int32_t);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebDebuggingAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebDebuggingAccessEnabledAndPort,
+        WebPatternProperty::WebDebuggingConfigType);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BackgroundColor, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, InitialScale, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, PinchSmoothModeEnabled, bool);
@@ -537,7 +538,8 @@ private:
     void OnFileFromUrlAccessEnabledUpdate(bool value);
     void OnDatabaseAccessEnabledUpdate(bool value);
     void OnTextZoomRatioUpdate(int32_t value);
-    void OnWebDebuggingAccessEnabledUpdate(bool value);
+    void OnWebDebuggingAccessEnabledAndPortUpdate(
+        const WebPatternProperty::WebDebuggingConfigType& enabled_and_port);
     void OnPinchSmoothModeEnabledUpdate(bool value);
     void OnBackgroundColorUpdate(int32_t value);
     void OnInitialScaleUpdate(float value);
