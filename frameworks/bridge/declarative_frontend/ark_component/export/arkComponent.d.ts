@@ -176,7 +176,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     onDragSpringLoading(callback: Callback<SpringLoadingContext> | null, configuration?: DragSpringLoadingConfiguration): this;
     onDragMove(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDragLeave(event: (event?: DragEvent, extraParams?: string) => void): this;
-    onDrop(event: (event?: DragEvent, extraParams?: string) => void): this;
+    onDrop(event: (event?: DragEvent, extraParams?: string) => void, dropOptions?: DropOptions): this;
     onDragEnd(event: (event: DragEvent, extraParams?: string) => void): this;
     onPreDrag(event: (preDragStatus: PreDragStatus) => void): this;
     allowDrop(value: Array<UniformDataType>): this;

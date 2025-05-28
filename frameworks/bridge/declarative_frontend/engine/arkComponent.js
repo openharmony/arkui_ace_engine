@@ -1809,7 +1809,7 @@ class DropModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().common.resetOnDrop(node);
     } else {
-      getUINativeModule().common.setOnDrop(node, this.value);
+      getUINativeModule().common.setOnDrop(node, this.value.event, this.value.disableDataPrefetch);
     }
   }
 }
@@ -4745,8 +4745,15 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, DragLeaveModifier.identity, DragLeaveModifier, event);
     return this;
   }
-  onDrop(event) {
-    modifierWithKey(this._modifiersWithKeys, DropModifier.identity, DropModifier, event);
+  onDrop(event, dropOptions) {
+    let arkOnDrop = new ArkOnDrop();
+    if (typeof event === 'function') {
+      arkOnDrop.event = event;
+    }
+    if (typeof dropOptions === 'object') {
+      arkOnDrop.disableDataPrefetch = dropOptions.disableDataPrefetch;
+    }
+    modifierWithKey(this._modifiersWithKeys, DropModifier.identity, DropModifier, arkOnDrop);
     return this;
   }
   onDragEnd(event) {
@@ -19497,6 +19504,20 @@ class ArkDragPreview {
       this.onlyForLifting === another.onlyForLifting &&
       this.pixelMap === another.pixelMap &&
       this.extraInfo === another.extraInfo
+    );
+  }
+}
+
+class ArkOnDrop {
+  constructor() {
+    this.event = undefined;
+    this.disableDataPrefetch = false;
+  }
+
+  isEqual(another) {
+    return (
+      this.event === another.event &&
+      this.disableDataPrefetch === another.disableDataPrefetch
     );
   }
 }

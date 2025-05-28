@@ -1900,9 +1900,8 @@ class DragLeaveModifier extends ModifierWithKey<DragLeaveCallback> {
   }
 }
 
-declare type DropCallback = (event?: DragEvent, extraParams?: string) => void;
-class DropModifier extends ModifierWithKey<DropCallback> {
-  constructor(value: DropCallback) {
+class DropModifier extends ModifierWithKey<ArkOnDrop> {
+  constructor(value: ArkOnDrop) {
     super(value);
   }
   static identity: Symbol = Symbol('onDrop');
@@ -1910,7 +1909,7 @@ class DropModifier extends ModifierWithKey<DropCallback> {
     if (reset) {
       getUINativeModule().common.resetOnDrop(node);
     } else {
-      getUINativeModule().common.setOnDrop(node, this.value);
+      getUINativeModule().common.setOnDrop(node, this.value.event, this.value.disableDataPrefetch);
     }
   }
 }
@@ -5127,8 +5126,15 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  onDrop(event: (event?: DragEvent, extraParams?: string) => void): this {
-    modifierWithKey(this._modifiersWithKeys, DropModifier.identity, DropModifier, event);
+  onDrop(event: (event?: DragEvent, extraParams?: string) => void, dropOptions: DropOptions): this {
+    let arkOnDrop = new ArkOnDrop();
+    if (typeof event === 'function') {
+      arkOnDrop.event = event;
+    }
+    if (typeof dropOptions === 'object') {
+      arkOnDrop.disableDataPrefetch = dropOptions.disableDataPrefetch;
+    }
+    modifierWithKey(this._modifiersWithKeys, DropModifier.identity, DropModifier, arkOnDrop);
     return this;
   }
 

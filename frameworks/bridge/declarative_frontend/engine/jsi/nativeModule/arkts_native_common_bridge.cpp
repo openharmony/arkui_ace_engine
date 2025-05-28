@@ -7973,6 +7973,12 @@ ArkUINativeModuleValue CommonBridge::SetOnDrop(ArkUIRuntimeCallInfo* runtimeCall
         func->Execute(info, extraParams);
     };
     NG::ViewAbstract::SetOnDrop(frameNode, std::move(onDrop));
+
+    bool disableDataPrefetch = false;
+    if (info[NUM_2]->IsBoolean()) {
+        disableDataPrefetch = info[NUM_2]->ToBoolean();
+    }
+    NG::ViewAbstract::SetDisableDataPrefetch(frameNode, disableDataPrefetch);
     return panda::JSValueRef::Undefined(vm);
 }
 

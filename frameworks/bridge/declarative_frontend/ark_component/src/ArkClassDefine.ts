@@ -1622,6 +1622,22 @@ class ArkDragPreview {
   }
 }
 
+class ArkOnDrop {
+  event: (event?: DragEvent, extraParams?: string) => void;
+  disableDataPrefetch: boolean | undefined;
+  constructor() {
+    this.event = undefined;
+    this.disableDataPrefetch = false;
+  }
+
+  isEqual(another: ArkOnDrop): boolean {
+    return (
+      this.event === another.event &&
+      this.disableDataPrefetch === another.disableDataPrefetch
+    );
+  }
+}
+
 class ArkDragSpringLoading {
   callback: (context: ArkSpringLoadingContext) => void;
   configuration: ArkDragSpringLoadingConfiguration | undefined;
