@@ -220,6 +220,8 @@ public:
 
     void OnCurrentTimeChange(uint32_t currentPos);
 
+    void OnError(const std::string& errorId);
+
     void OnError(int32_t code, const std::string& message);
 
     void OnResolutionChange() const;
