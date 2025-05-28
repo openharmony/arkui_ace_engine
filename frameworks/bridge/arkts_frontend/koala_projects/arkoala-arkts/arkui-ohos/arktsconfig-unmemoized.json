@@ -90,6 +90,9 @@
             ],
             "@ohos/arkui/graphics": [
                 "../ohos.arkui.graphics.ts"
+            ],
+            "@ohos/promptAction": [
+                "../ohos.promptAction.ts"
             ]
         }
     },
@@ -107,7 +110,8 @@
         "build/unmemoized/ohos.observer.ts",
         "build/unmemoized/ohos.graphics.common2D.ts",
         "build/unmemoized/ohos.graphics.drawing.ts",
-        "build/unmemoized/ohos.arkui.graphics.ts"
+        "build/unmemoized/ohos.arkui.graphics.ts",
+        "build/unmemoized/ohos.promptAction.ts"
     ],
     "exclude": [
         "**/index.ts",

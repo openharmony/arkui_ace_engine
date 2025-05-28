@@ -21577,4 +21577,23 @@ export class TypeChecker {
     static isIWatchTrigger<T>(value: T): boolean {
         return true;
     }
+    static isPopupButton(value: Object | string | number | undefined | boolean, duplicated_value: boolean, duplicated_action: boolean): boolean {
+        if ((!duplicated_value) && (value?.hasOwnProperty("value"))) {
+            return true
+        }
+        else if ((!duplicated_action) && (value?.hasOwnProperty("action"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof PopupButton")
+        }
+    }
+    static isPopupMaskType(value: Object | string | number | undefined | boolean, duplicated_color: boolean): boolean {
+        if ((!duplicated_color) && (value?.hasOwnProperty("color"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof PopupMaskType")
+        }
+    }
 }
