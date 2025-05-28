@@ -127,6 +127,9 @@ public:
             swiperPattern->CalculateGroupTurnPageRate(0.0f) : swiperPattern->CalcCurrentTurnPageRate(true);
         paintMethod->SetTouchBottomPageRate(currentTurnPageRate);
         paintMethod->SetFirstIndex(swiperPattern->GetLoopIndex(swiperPattern->GetFirstIndexInVisibleArea()));
+        auto targetIndex = swiperPattern->GetTargetIndex();
+        targetIndex ? paintMethod->SetTargetIndex(swiperPattern->GetLoopIndex(targetIndex.value()))
+                    : paintMethod->SetTargetIndex(std::nullopt);
         mouseClickIndex_ = std::nullopt;
     }
 

@@ -827,6 +827,12 @@ public:
 
     void OnColorModeChange(uint32_t colorMode) override;
     void ResetOnForceMeasure();
+
+    std::optional<int32_t> GetTargetIndex() const
+    {
+        return targetIndex_;
+    }
+
 protected:
     void MarkDirtyNodeSelf();
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
