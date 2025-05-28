@@ -723,6 +723,26 @@ public:
     {
         return false;
     }
+
+    void UnRegisterResource(const std::string& key);
+
+    template<typename T>
+    void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
+    {
+        if (resourceMgr_ == nullptr) {
+            resourceMgr_ = MakeRefPtr<PatternResourceManager>();
+        }
+        auto&& propUpdateFunc = [weakptr = AceType::WeakClaim(this)](
+                                    const std::string& key, const RefPtr<PropertyValueBase>& valueBase) {
+            auto pattern = weakptr.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdatePropertyImpl(key, valueBase);
+        };
+        resourceMgr_->RegisterResource<T>(std::move(propUpdateFunc), key, resObj, value);
+    }
+
+    virtual void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> valueBase) {};
+
     virtual bool OnAttachAtapter(const RefPtr<FrameNode>& node, const RefPtr<UINode>& child)
     {
         return false;

@@ -12413,6 +12413,15 @@ uint8_t JSViewAbstract::GetPixelRoundMode()
                     : static_cast<uint8_t>(PixelRoundMode::PIXEL_ROUND_ON_LAYOUT_FINISH);
 }
 
+void JSViewAbstract::UnRegisterResource(const std::string& key)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern(); 
+    CHECK_NULL_VOID(pattern);
+    pattern->UnRegisterResource(key);
+}
+
 void JSViewAbstract::ParseDragSpringLoadingConfiguration(
     const JSRef<JSObject>& paramObj, const RefPtr<NG::DragSpringLoadingConfiguration>& config)
 {
