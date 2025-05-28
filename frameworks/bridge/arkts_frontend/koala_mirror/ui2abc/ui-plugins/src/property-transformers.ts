@@ -369,15 +369,11 @@ export class LinkTransformer extends PropertyTransformerBase {
     constructor() {
         super(DecoratorNames.LINK, "LinkDecoratorProperty")
     }
-    collectImports(imports: Importer): void {
-        imports.add("LinkDecoratorProperty", "@ohos.arkui")
-        imports.add("TrackableProperty", "@ohos.arkui")
-    }
     applyOptions(property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
         result.push(arkts.factory.createClassProperty(
             arkts.factory.createIdentifier(property.id?.name!),
             undefined,
-            createWrapperType("TrackableProperty", property.typeAnnotation!),
+            createWrapperType("SubscribedAbstractProperty", property.typeAnnotation!),
             arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_OPTIONAL,
             false
         ))
@@ -403,10 +399,6 @@ export class StorageLinkTransformer extends PropertyTransformerBase {
     constructor() {
         super(DecoratorNames.STORAGE_LINK, "StorageLinkDecoratorProperty")
     }
-    collectImports(imports: Importer): void {
-        imports.add("StorageLinkDecoratorProperty", "@ohos.arkui")
-        imports.add("AbstractProperty", "@ohos.arkui")
-    }
     applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
         result.push(thisPropertyMethodCall(property, "init", withStorageKey([property.value!], property, this.decoratorName)))
     }
@@ -416,10 +408,6 @@ export class StorageLinkTransformer extends PropertyTransformerBase {
 export class LocalStorageLinkTransformer extends PropertyTransformerBase {
     constructor() {
         super(DecoratorNames.LOCAL_STORAGE_LINK, "LocalStorageLinkDecoratorProperty")
-    }
-    collectImports(imports: Importer): void {
-        imports.add("LocalStorageLinkDecoratorProperty", "@ohos.arkui")
-        imports.add("AbstractProperty", "@ohos.arkui")
     }
     applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
         if (!localStorage) throw new Error("@LocalStorageLink decorator requires specified local storage")
@@ -446,10 +434,6 @@ export class StoragePropTransformer extends PropertyTransformerBase {
     constructor() {
         super(DecoratorNames.STORAGE_PROP, "StoragePropDecoratorProperty")
     }
-    collectImports(imports: Importer): void {
-        imports.add("StoragePropDecoratorProperty", "@ohos.arkui")
-        imports.add("AbstractProperty", "@ohos.arkui")
-    }
     applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
         result.push(thisPropertyMethodCall(property, "init", withStorageKey([property.value!], property, this.decoratorName)))
     }
@@ -458,10 +442,6 @@ export class StoragePropTransformer extends PropertyTransformerBase {
 export class LocalStoragePropTransformer extends PropertyTransformerBase {
     constructor() {
         super(DecoratorNames.LOCAL_STORAGE_PROP, "LocalStoragePropDecoratorProperty")
-    }
-    collectImports(imports: Importer): void {
-        imports.add("LocalStoragePropDecoratorProperty", "@ohos.arkui")
-        imports.add("AbstractProperty", "@ohos.arkui")
     }
     applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
         if (!localStorage) throw new Error("@LocalStorageProp decorator requires specified local storage")
@@ -492,7 +472,7 @@ export function fieldOf(base: arkts.Expression, name: string, optional: boolean 
         false,
         optional
     )
-    if (optional) return arkts.factory.createChainExpression(result)
+    //if (optional) return arkts.factory.createChainExpression(result)
     return result
 }
 

@@ -26,6 +26,7 @@ export * from "./CheckedBackFilter"
 export * from "./SetBaseOverloads"
 export * from "./plugins"
 export * from "./ImportStorage"
+export * from "./InferVoidReturnType"
 
 export * from "./peers/AstNode"
 export * from "./peers/Config"

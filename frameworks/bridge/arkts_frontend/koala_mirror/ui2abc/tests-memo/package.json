@@ -22,7 +22,7 @@
         "test:arkts:compiler-plugin": "npm run unmemoize:arkts:tests && npm run compile:arkts:tests && npm run build:arkts:tests && npm run run:arkts:tests",
 
         "install:panda": "npm run panda:sdk:install --prefix ../../incremental/tools/panda",
-        "compile:deps": "npm run install:panda && cd ../../incremental && npm run compile && cd runtime && npm run build:incremental:components && cd ../harness && npm run compile:all && npm run build:harness && cd ../compiler-plugin && npm run compile && cd ../../ui2abc && npm run build:all && npm run build:incremental:inc:ui2abc --prefix ../incremental/runtime && cd tests-memo",
+        "compile:deps": "cd ../../incremental && npm run compile && cd runtime && npm run build:incremental:components && cd ../harness && npm run compile:all && npm run build:harness && cd ../compiler-plugin && npm run compile && cd ../../ui2abc && npm run build:all && npm run build:incremental:inc:ui2abc --prefix ../incremental/runtime && cd tests-memo",
 
         "test:ts": "mocha"
     },

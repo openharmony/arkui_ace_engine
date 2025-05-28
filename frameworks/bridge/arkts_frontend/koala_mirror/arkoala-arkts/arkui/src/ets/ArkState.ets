@@ -32,45 +32,14 @@ export interface AbstractProperty<T> {
     set(newValue: T): void
 }
 
-export interface TrackableProperty<T> extends AbstractProperty<T> {
-    subscribe(listener: () => void): void
-    unsubscribe(listener: () => void): void
-    aboutToBeDeleted(): void
-}
-
 /**
  * Defines the subscribed abstract property.
  * @since 7
  * @systemapi
  */
-export abstract class SubscribedAbstractProperty<T> implements TrackableProperty<T> {
-    /**
-     * Returns the property name,
-     * e.g. let link = AppStorage.Link("foo") then link.info() == "foo"
-     *
-     * @returns { string } the property name if set or undefined
-     * @syscap SystemCapability.ArkUI.ArkUI.Full
-     * @crossplatform
-     * @since 10
-     */
-    abstract info(): string
-
-    /**
-     * Called when data is obtained.
-     * @since 7
-     * @systemapi
-     */
-    abstract get(): T
-
-    /**
-     * Called when data is created.
-     * @since 7
-     * @systemapi
-     */
-    abstract set(newValue: T): void
-
-    abstract subscribe(listener: () => void): void
-    abstract unsubscribe(listener: () => void): void
+export interface SubscribedAbstractProperty<T> extends AbstractProperty<T> {
+    subscribe(listener: () => void): void
+    unsubscribe(listener: () => void): void
 
     /**
      * An app needs to call this function before the instance of SubscribedAbstractProperty
@@ -82,5 +51,5 @@ export abstract class SubscribedAbstractProperty<T> implements TrackableProperty
      * @crossplatform
      * @since 10
      */
-    abstract aboutToBeDeleted(): void
+    aboutToBeDeleted(): void
 }

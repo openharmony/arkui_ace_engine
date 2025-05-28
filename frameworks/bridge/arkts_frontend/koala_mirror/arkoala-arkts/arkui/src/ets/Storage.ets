@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import { Disposable, MutableState, GlobalStateManager } from "@koalaui/runtime"
+import { observableProxy } from "@koalaui/common"
+import { MutableState, GlobalStateManager } from "@koalaui/runtime"
 import { AbstractProperty, SubscribedAbstractProperty } from "./ArkState"
 
 
@@ -579,21 +580,32 @@ export class LocalStorage {
 
 ///// interface without generic types to workaround issues with ArkTS compiler /////
 
-interface EntryObject extends Disposable {
+interface EntryObject {
     /*readonly*/ mutable: boolean
+    dispose(): void
 }
 
 //////////////////////////////////////////////////
 
-class StorageEntry<T> implements EntryObject, AbstractProperty<T> {
-    readonly state: MutableState<T>
+class StorageEntry<T> implements EntryObject, SubscribedAbstractProperty<T> {
+    private map: StorageMap | undefined = undefined
+    private name: string
+    private state: MutableState<T>
+    private listeners: Set<() => void> | undefined = undefined
     /*readonly*/ mutable: boolean
-    readonly name: string
 
-    constructor(state: MutableState<T>, name: string, mutable: boolean = true) {
-        this.state = state
+    constructor(map: StorageMap, name: string, value: T, mutable: boolean = true) {
+        this.map = map
+        this.state = map.mutableState(value)
         this.mutable = mutable
         this.name = name
+    }
+
+    private revalidate() {
+        const map = this.map
+        if (map && this.state.disposed) {
+            this.state = map.mutableState(this.state.value)
+        }
     }
 
     info(): string {
@@ -601,18 +613,38 @@ class StorageEntry<T> implements EntryObject, AbstractProperty<T> {
     }
 
     get(): T {
+        this.revalidate()
         return this.state.value
     }
 
     set(value: T): void {
-        if (this.mutable) this.state.value = value
+        if (this.mutable) {
+            this.revalidate()
+            this.state.value = observableProxy(value)
+            this.listeners?.forEach(notify)
+        }
     }
 
-    get disposed(): boolean {
-        return this.state.disposed
+    subscribe(listener: () => void): void {
+        if (this.mutable) {
+            if (!this.listeners) this.listeners = new Set<() => void>()
+            this.listeners?.add(listener)
+        }
+    }
+
+    unsubscribe(listener: () => void): void {
+        this.listeners?.delete(listener)
+    }
+
+    aboutToBeDeleted(): void {
+    }
+
+    get modified(): boolean {
+        return this.state.modified
     }
 
     dispose(): void {
+        this.listeners?.clear()
         this.state.dispose()
     }
 }
@@ -656,21 +688,20 @@ class StorageMap {
 
     entryOrCreate<T>(key: string, value: T): StorageEntry<T> {
         const entry = this.entry<T>(key)
-        if (entry === undefined) return this.create(key, value)
-        if (entry.disposed) return this.create(key, entry.get())
-        return entry
+        if (entry) return entry
+        return this.create(key, value)
     }
 
     get<T>(key: string): T | undefined {
         const entry = this.entry<T>(key)
-        return entry && entry.state.disposed == false
+        return entry
             ? entry.get()
             : undefined
     }
 
     set<T>(key: string, value: T, create: boolean = true, mutable: boolean = true): boolean {
         const entry = this.entry<T>(key)
-        if (entry && entry.disposed == false) {
+        if (entry) {
             entry.set(value)
             return true
         }
@@ -682,12 +713,11 @@ class StorageMap {
     }
 
     link<T>(key: string): SubscribedAbstractProperty<T> | undefined {
-        const entry = this.entry<T>(key)
-        return entry ? new StorageLink<T>(this, entry) : undefined
+        return this.entry<T>(key)
     }
 
     setAndLink<T>(key: string, value: T): SubscribedAbstractProperty<T> {
-        return new StorageLink<T>(this, this.entryOrCreate(key, value))
+        return this.entryOrCreate(key, value)
     }
 
     prop<T>(key: string): SubscribedAbstractProperty<T> | undefined {
@@ -716,100 +746,78 @@ class StorageMap {
     }
 
     private create<T>(key: string, value: T, mutable: boolean = true): StorageEntry<T> {
-        const entry = new StorageEntry<T>(this.manager.mutableState(value, true), key, mutable)
+        const entry = new StorageEntry<T>(this, key, value, mutable)
         this.map.set(key, entry)
         return entry
     }
-}
 
-/**
- * This is a @Link implementation for backward compatibility.
- */
-class StorageLink<T> extends SubscribedAbstractProperty<T> {
-    private readonly map: StorageMap
-    private entry: StorageEntry<T>
-
-    constructor(map: StorageMap, entry: StorageEntry<T>) {
-        super()
-        this.map = map
-        this.entry = entry
-    }
-
-    info(): string {
-        return this.entry.info()
-    }
-
-    get(): T {
-        if (this.entry.disposed) {
-            this.entry = this.map.entryOrCreate(this.info(), this.entry.get())
-        }
-        return this.entry.get()
-    }
-
-    set(value: T): void {
-        if (this.entry.disposed) {
-            this.entry = this.map.entryOrCreate(this.info(), value)
-        } else {
-            this.entry.set(value)
-        }
-    }
-
-    subscribe(listener: () => void): void {
-    }
-
-    unsubscribe(listener: () => void): void {
-    }
-
-    aboutToBeDeleted(): void {
+    mutableState<T>(value: T): MutableState<T> {
+        return this.manager.mutableState(observableProxy(value), true)
     }
 }
 
 /**
  * This is a @Prop implementation for backward compatibility.
  */
-class StorageProp<T> extends SubscribedAbstractProperty<T> {
-    private readonly map: StorageMap
-    private readonly name: string
-    private readonly state: MutableState<T>
+class StorageProp<T> implements SubscribedAbstractProperty<T> {
+    private map: StorageMap
+    private name: string
+    private state: MutableState<T>
+    private listeners: Set<() => void> | undefined = undefined
 
     constructor(map: StorageMap, name: string, value: T) {
         super()
         this.map = map
         this.name = name
-        this.state = map.manager.mutableState(value, true)
+        this.state = map.mutableState(value)
     }
 
+    private revalidate() {
+        const map = this.map
+        if (map && this.state.disposed) {
+            this.state = map.mutableState(this.state.value)
+        }
+    }
     info(): string {
         return this.name
     }
 
     get(): T {
+        this.revalidate()
         let value = this.state.value
-        if (!this.state.disposed) {
-            const entry = this.map.entryOrCreate<T>(this.name, value)
-            if (entry.state.modified) {
-                value = entry.state.value
-                if (this.map.manager.frozen) {
-                    this.map.manager.scheduleCallback(() => { this.set(value) })
-                } else {
-                    this.state.value = value
-                }
+        const entry = this.map.entryOrCreate<T>(this.name, value)
+        if (entry.modified) {
+            value = entry.get()
+            if (this.map.manager.frozen) {
+                this.map.manager.scheduleCallback(() => { this.set(value) })
+            } else {
+                this.set(value)
             }
         }
         return value
     }
 
     set(value: T): void {
-        this.state.value = value
+        this.revalidate()
+        this.state.value = observableProxy(value)
+        this.listeners?.forEach(notify)
     }
 
     subscribe(listener: () => void): void {
+        if (!this.listeners) this.listeners = new Set<() => void>()
+        this.listeners?.add(listener)
     }
 
     unsubscribe(listener: () => void): void {
+        this.listeners?.delete(listener)
     }
 
     aboutToBeDeleted(): void {
+        this.listeners?.clear()
         this.state.dispose()
     }
+}
+
+function notify(listener: () => void) {
+    listener()
 }

@@ -45,7 +45,8 @@ export enum BuilderLambdaNames {
 }
 
 export enum InternalAnnotations {
-    MEMO = 'memo'
+    MEMO = 'memo',
+    MEMO_STABLE = 'memo_stable',
 }
 
 export function uiAttributeName(componentName: string): string {
@@ -149,8 +150,8 @@ export class Importer {
         'TextInput', 'Font', 'Alignment', 'Visibility', 'ImageRepeat', 'SizeOptions', 'Divider',
         'TabBarOptions', 'Navigation', 'Span', 'NavigationMode', 'BarPosition', 'EnterKeyType',
         'LazyForEach',
-        'TestComponent', 'TestComponentOptions', 'UITestComponentAttribute', 'ForEach', 'Text', 'AppStorage', 'LocalStorage',
-        'SubscribedAbstractProperty',
+        'TestComponent', 'TestComponentOptions', 'UITestComponentAttribute', 'ForEach', 'Text',
+        'AppStorage', 'LocalStorage', 'AbstractProperty', 'SubscribedAbstractProperty',
     ]
     constructor() {
         const withDefaultImports = true

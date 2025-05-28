@@ -15,10 +15,10 @@
 
 import { int32, observableProxy, propDeepCopy } from "@koalaui/common"
 import { mutableState, scheduleCallback, MutableState, GlobalStateManager, InternalScope } from "@koalaui/runtime"
-import { TrackableProperty } from "./ArkState"
+import { SubscribedAbstractProperty } from "./ArkState"
 import { AppStorage, LocalStorage } from "./Storage"
 
-export class PlainStructProperty<Value> implements TrackableProperty<Value> {
+export class PlainStructProperty<Value> implements SubscribedAbstractProperty<Value> {
     private name: string
     private value: Value | undefined = undefined
 
@@ -60,17 +60,17 @@ export class BuilderParamDecoratorProperty<Value> extends PlainStructProperty<Va
     }
 }
 
-export class LinkDecoratorProperty<Value> implements TrackableProperty<Value> {
+export class LinkDecoratorProperty<Value> implements SubscribedAbstractProperty<Value> {
     private readonly name: string
     private readonly watch: (() => void) | undefined
-    private property: TrackableProperty<Value> | undefined = undefined
+    private property: SubscribedAbstractProperty<Value> | undefined = undefined
 
     constructor(name: string, watch?: () => void) {
         this.name = name
         this.watch = watch
     }
 
-    linkTo(property: TrackableProperty<Value> | undefined): void {
+    linkTo(property: SubscribedAbstractProperty<Value> | undefined): void {
         if (this.property) throw new Error(`${this.name} is already linked with some property`)
         if (!property) throw new Error(`${this.name} must be linked with another property`)
         this.property = property
@@ -102,7 +102,7 @@ export class LinkDecoratorProperty<Value> implements TrackableProperty<Value> {
     }
 }
 
-export class StateDecoratorProperty<Value> implements TrackableProperty<Value> {
+export class StateDecoratorProperty<Value> implements SubscribedAbstractProperty<Value> {
     private name: string
     private state: MutableState<Value> | undefined = undefined
     private listeners: Set<() => void> | undefined = undefined
@@ -192,7 +192,7 @@ export class ProvideDecoratorProperty<Value> extends StateDecoratorProperty<Valu
         super(name, listener)
     }
     provide(provideKey?: string): void {
-        GlobalStateManager.instance.namedState<TrackableProperty<Value>>(provideKey ?? this.info(), () => this)
+        GlobalStateManager.instance.namedState<SubscribedAbstractProperty<Value>>(provideKey ?? this.info(), () => this)
     }
     checkOverrides(provideKey?: string): void {
         const actualProvideKey = provideKey ?? this.info()
@@ -209,7 +209,7 @@ export class ConsumeDecoratorProperty<Value> extends LinkDecoratorProperty<Value
         super(name, listener)
     }
     init(provideKey?: string): void {
-        this.linkTo(GlobalStateManager.instance.valueBy<TrackableProperty<Value>>(provideKey ?? this.info()))
+        this.linkTo(GlobalStateManager.instance.valueBy<SubscribedAbstractProperty<Value>>(provideKey ?? this.info()))
     }
 }
 

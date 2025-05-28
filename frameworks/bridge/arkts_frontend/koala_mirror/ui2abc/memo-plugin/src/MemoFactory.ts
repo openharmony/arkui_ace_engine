@@ -14,7 +14,7 @@
  */
 
 import * as arkts from "@koalaui/libarkts"
-import { DebugNames, RuntimeNames } from "./utils"
+import { DebugNames, RuntimeNames, isVoidReturn } from "./utils"
 
 export class factory {
     // Importing
@@ -221,7 +221,7 @@ export class factory {
                 false
             ),
             arg ? [arg] : [],
-            undefined
+            undefined,
         )
     }
     static createReturnThis(): arkts.BlockStatement {
@@ -243,8 +243,8 @@ export class factory {
             false,
         )
     }
-    static createSyntheticReturnStatement(isVoidReturn: boolean, stableThis: boolean): arkts.ReturnStatement | arkts.BlockStatement {
-        if (isVoidReturn) {
+    static createSyntheticReturnStatement(returnTypeAnnotation: arkts.TypeNode | undefined): arkts.ReturnStatement | arkts.BlockStatement {
+        if (isVoidReturn(returnTypeAnnotation)) {
             return arkts.factory.createBlockStatement([
                 arkts.factory.createExpressionStatement(
                     this.createCached()
@@ -252,14 +252,12 @@ export class factory {
                 arkts.factory.createReturnStatement(undefined)
             ])
         }
-        if (stableThis) {
+        if (arkts.isTSThisType(returnTypeAnnotation)) {
             return arkts.factory.createBlockStatement([
                 arkts.factory.createExpressionStatement(
                     this.createCached()
                 ),
-                arkts.factory.createReturnStatement(
-                    arkts.factory.createThisExpression()
-                )
+                arkts.factory.createReturnStatement(arkts.factory.createThisExpression())
             ])
         }
         return arkts.factory.createReturnStatement(

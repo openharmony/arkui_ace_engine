@@ -3,23 +3,23 @@ import { __memo_context_type as __memo_context_type, __memo_id_type as __memo_id
 
 import { memo as memo, memo_stable as memo_stable, memo_intrinsic as memo_intrinsic, memo_entry as memo_entry } from "@koalaui/runtime/annotations";
 
-import { __context as __context, __id as __id } from "@koalaui/runtime";
+import { __context as __context, __id as __id, __key as __key } from "@koalaui/runtime";
 
-function main() {}
+function main(): void {}
 
 
-@memo() function param_capturing(__memo_context: __memo_context_type, __memo_id: __memo_id_type, s: string) {
+@memo() function param_capturing(__memo_context: __memo_context_type, __memo_id: __memo_id_type, s: string): void {
   const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_param_capturing_@test.test.ets"))), 1);
   const __memo_parameter_s = __memo_scope.param(0, s);
   if (__memo_scope.unchanged) {
     __memo_scope.cached;
   return;
   }
-  let x = (() => {
+  let x = ((): void => {
     console.log(__memo_parameter_s.value);
   });
   x();
-  let y = ((s: string) => {
+  let y = ((s: string): void => {
     console.log(s);
   });
   y("she");
@@ -29,7 +29,7 @@ function main() {}
   }
 }
 
-@memo() function memo_arg_call(__memo_context: __memo_context_type, __memo_id: __memo_id_type, arg1: number, arg2: ((x: number)=> number), @memo() arg3: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type, x: number)=> number), arg4?: ((x: number)=> number), @memo() arg5?: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type, x: number)=> number)) {
+@memo() @functions.OptionalParametersAnnotation({minArgCount:3}) function memo_arg_call(__memo_context: __memo_context_type, __memo_id: __memo_id_type, arg1: number, arg2: ((x: number)=> number), @memo() arg3: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type, x: number)=> number), arg4?: ((x: number)=> number), @memo() arg5?: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type, x: number)=> number)): void {
   const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_memo_arg_call_@test.test.ets"))), 5);
   const __memo_parameter_arg1 = __memo_scope.param(0, arg1), __memo_parameter_arg2 = __memo_scope.param(1, arg2), __memo_parameter_arg3 = __memo_scope.param(2, arg3), __memo_parameter_arg4 = __memo_scope.param(3, arg4), __memo_parameter_arg5 = __memo_scope.param(4, arg5);
   if (__memo_scope.unchanged) {
@@ -78,7 +78,7 @@ class Test {
     }
   }
   
-  @memo() public a_method_with_implicit_return_type(__memo_context: __memo_context_type, __memo_id: __memo_id_type) {
+  @memo() public a_method_with_implicit_return_type(__memo_context: __memo_context_type, __memo_id: __memo_id_type): void {
     const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_a_method_with_implicit_return_type_@test.test.ets"))), 1);
     const __memo_parameter_this = __memo_scope.param(0, (this));
     if (__memo_scope.unchanged) {
@@ -91,7 +91,7 @@ class Test {
     }
   }
   
-  @memo() public void_method_with_arg(__memo_context: __memo_context_type, __memo_id: __memo_id_type, arg: string) {
+  @memo() public void_method_with_arg(__memo_context: __memo_context_type, __memo_id: __memo_id_type, arg: string): void {
     const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_void_method_with_arg_@test.test.ets"))), 2);
     const __memo_parameter_this = __memo_scope.param(0, (this)), __memo_parameter_arg = __memo_scope.param(1, arg);
     if (__memo_scope.unchanged) {
@@ -104,7 +104,7 @@ class Test {
     }
   }
   
-  @memo() public void_method_with_return(__memo_context: __memo_context_type, __memo_id: __memo_id_type, arg: string) {
+  @memo() public void_method_with_return(__memo_context: __memo_context_type, __memo_id: __memo_id_type, arg: string): void {
     const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_void_method_with_return_@test.test.ets"))), 2);
     const __memo_parameter_this = __memo_scope.param(0, (this)), __memo_parameter_arg = __memo_scope.param(1, arg);
     if (__memo_scope.unchanged) {
@@ -148,7 +148,7 @@ class Test {
     }
   }
   
-  @memo() public internal_call(__memo_context: __memo_context_type, __memo_id: __memo_id_type) {
+  @memo() public internal_call(__memo_context: __memo_context_type, __memo_id: __memo_id_type): void {
     const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_internal_call_@test.test.ets"))), 1);
     const __memo_parameter_this = __memo_scope.param(0, (this));
     if (__memo_scope.unchanged) {
@@ -162,7 +162,7 @@ class Test {
     }
   }
   
-  @memo() public lambda_arg(__memo_context: __memo_context_type, __memo_id: __memo_id_type, @memo() arg: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void)) {
+  @memo() public lambda_arg(__memo_context: __memo_context_type, __memo_id: __memo_id_type, @memo() arg: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void)): void {
     const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_lambda_arg_@test.test.ets"))), 2);
     const __memo_parameter_this = __memo_scope.param(0, (this)), __memo_parameter_arg = __memo_scope.param(1, arg);
     if (__memo_scope.unchanged) {
@@ -175,7 +175,7 @@ class Test {
     }
   }
   
-  @memo() public lambda_arg_with_arg(__memo_context: __memo_context_type, __memo_id: __memo_id_type, @memo() arg: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type, value: string)=> string)) {
+  @memo() public lambda_arg_with_arg(__memo_context: __memo_context_type, __memo_id: __memo_id_type, @memo() arg: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type, value: string)=> string)): void {
     const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_lambda_arg_with_arg_@test.test.ets"))), 2);
     const __memo_parameter_this = __memo_scope.param(0, (this)), __memo_parameter_arg = __memo_scope.param(1, arg);
     if (__memo_scope.unchanged) {
@@ -197,7 +197,7 @@ class Test {
     return 0;
   }
   
-  @memo() public method_with_internals(__memo_context: __memo_context_type, __memo_id: __memo_id_type) {
+  @memo() public method_with_internals(__memo_context: __memo_context_type, __memo_id: __memo_id_type): void {
     const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_method_with_internals_@test.test.ets"))), 1);
     const __memo_parameter_this = __memo_scope.param(0, (this));
     if (__memo_scope.unchanged) {
@@ -212,7 +212,7 @@ class Test {
     }
   }
   
-  @memo() public obj_arg(__memo_context: __memo_context_type, __memo_id: __memo_id_type, arg: A) {
+  @memo() public obj_arg(__memo_context: __memo_context_type, __memo_id: __memo_id_type, arg: A): void {
     const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_obj_arg_@test.test.ets"))), 2);
     const __memo_parameter_this = __memo_scope.param(0, (this)), __memo_parameter_arg = __memo_scope.param(1, arg);
     if (__memo_scope.unchanged) {
@@ -239,7 +239,7 @@ class Test {
     }
   }
   
-  @memo() public memo_content(__memo_context: __memo_context_type, __memo_id: __memo_id_type, @memo() content: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void)) {
+  @memo() public memo_content(__memo_context: __memo_context_type, __memo_id: __memo_id_type, @memo() content: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void)): void {
     const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_memo_content_@test.test.ets"))), 1);
     const __memo_parameter_this = __memo_scope.param(0, (this));
     if (__memo_scope.unchanged) {
@@ -253,8 +253,8 @@ class Test {
     }
   }
   
-  public memo_lambda() {
-    @memo() ((__memo_context: __memo_context_type, __memo_id: __memo_id_type) => {
+  public memo_lambda(): void {
+    @memo() ((__memo_context: __memo_context_type, __memo_id: __memo_id_type): void => {
       const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id__@test.test.ets"))), 0);
       if (__memo_scope.unchanged) {
         __memo_scope.cached;
@@ -267,7 +267,7 @@ class Test {
     });
   }
   
-  @memo() public memo_variables(__memo_context: __memo_context_type, __memo_id: __memo_id_type) {
+  @memo() public memo_variables(__memo_context: __memo_context_type, __memo_id: __memo_id_type): void {
     const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_memo_variables_@test.test.ets"))), 1);
     const __memo_parameter_this = __memo_scope.param(0, (this));
     if (__memo_scope.unchanged) {
@@ -317,7 +317,7 @@ class Test {
     }
   }
   
-  @memo() public args_with_default_values(__memo_context: __memo_context_type, __memo_id: __memo_id_type, gensym%%_1?: int, gensym%%_2?: (()=> int), gensym%%_3?: int, arg4?: int): void {
+  @memo() @functions.OptionalParametersAnnotation({minArgCount:0}) public args_with_default_values(__memo_context: __memo_context_type, __memo_id: __memo_id_type, gensym%%_1?: int, gensym%%_2?: (()=> int), gensym%%_3?: int, arg4?: int): void {
     let arg1: int = (((gensym%%_1) !== (undefined)) ? gensym%%_1 : (10 as int));
     let arg2: (()=> int) = (((gensym%%_2) !== (undefined)) ? gensym%%_2 : ((() => {
       return 20;
@@ -337,7 +337,7 @@ class Test {
     }
   }
   
-  @memo() public optional_args(__memo_context: __memo_context_type, __memo_id: __memo_id_type, arg1?: int, arg2?: (()=> int)) {
+  @memo() @functions.OptionalParametersAnnotation({minArgCount:0}) public optional_args(__memo_context: __memo_context_type, __memo_id: __memo_id_type, arg1?: int, arg2?: (()=> int)): void {
     const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_optional_args_@test.test.ets"))), 3);
     const __memo_parameter_this = __memo_scope.param(0, (this)), __memo_parameter_arg1 = __memo_scope.param(1, arg1), __memo_parameter_arg2 = __memo_scope.param(2, arg2);
     if (__memo_scope.unchanged) {
@@ -354,7 +354,7 @@ class Test {
     }
   }
   
-  @memo() public type_alias(__memo_context: __memo_context_type, __memo_id: __memo_id_type, arg: MemoType) {
+  @memo() public type_alias(__memo_context: __memo_context_type, __memo_id: __memo_id_type, arg: MemoType): void {
     const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_type_alias_@test.test.ets"))), 2);
     const __memo_parameter_this = __memo_scope.param(0, (this)), __memo_parameter_arg = __memo_scope.param(1, arg);
     if (__memo_scope.unchanged) {
@@ -368,6 +368,10 @@ class Test {
     }
   }
   
+  @memo_intrinsic() public static intrinsicKeyAccessor(__memo_context: __memo_context_type, __memo_id: __memo_id_type): void {
+    let key = __hash("id___key_@test.test.ets");
+  }
+  
   public constructor() {}
   
 }
@@ -379,8 +383,57 @@ declare class AbstractTest {
   
 }
 
+@memo_stable() class MemoStableClass {
+  @memo() public test1(__memo_context: __memo_context_type, __memo_id: __memo_id_type, x: string): string {
+    const __memo_scope = __memo_context.scope<string>(((__memo_id) + (__hash("id_test1_@test.test.ets"))), 1);
+    const __memo_parameter_x = __memo_scope.param(0, x);
+    if (__memo_scope.unchanged) {
+      return __memo_scope.cached;
+    }
+    return __memo_scope.recache(__memo_parameter_x.value);
+  }
+  
+  @memo() public test2(__memo_context: __memo_context_type, __memo_id: __memo_id_type, value: int): this {
+    const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_test2_@test.test.ets"))), 1);
+    const __memo_parameter_value = __memo_scope.param(0, value);
+    if (__memo_scope.unchanged) {
+      __memo_scope.cached;
+    return (this);
+    }
+    console.log(__memo_parameter_value.value);
+    {
+      __memo_scope.recache();
+      return (this);
+    }
+  }
+  
+  public constructor() {}
+  
+}
+
+class MemoUnstableClass {
+  @memo() public test2(__memo_context: __memo_context_type, __memo_id: __memo_id_type, value: int): this {
+    const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_test2_@test.test.ets"))), 2);
+    const __memo_parameter_this = __memo_scope.param(0, (this)), __memo_parameter_value = __memo_scope.param(1, value);
+    if (__memo_scope.unchanged) {
+      __memo_scope.cached;
+    return (this);
+    }
+    __memo_parameter_this.value;
+    
+    console.log(__memo_parameter_value.value);
+    {
+      __memo_scope.recache();
+      return (this);
+    }
+  }
+  
+  public constructor() {}
+  
+}
+
 class Use {
-  @memo() public test(__memo_context: __memo_context_type, __memo_id: __memo_id_type) {
+  @memo() public test(__memo_context: __memo_context_type, __memo_id: __memo_id_type): void {
     const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_test_@test.test.ets"))), 1);
     const __memo_parameter_this = __memo_scope.param(0, (this));
     if (__memo_scope.unchanged) {
@@ -438,6 +491,9 @@ class Use {
     })), __memo_context.compute(((__memo_id) + (__hash("id_compute_test_@test.test.ets"))), ((): (()=> void) => {
       return ((): void => {});
     })), ((): void => {}));
+    const MemoStableClass_instance = new MemoStableClass();
+    MemoStableClass_instance.test1(__memo_context, ((__memo_id) + (__hash("id_test1_@test.test.ets"))), "a");
+    MemoStableClass_instance.test2(__memo_context, ((__memo_id) + (__hash("id_test2_@test.test.ets"))), 5);
     {
       __memo_scope.recache();
       return;

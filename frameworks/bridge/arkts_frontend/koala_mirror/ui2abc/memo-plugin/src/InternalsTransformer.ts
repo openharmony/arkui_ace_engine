@@ -14,9 +14,12 @@
  */
 
 import * as arkts from "@koalaui/libarkts"
-import { RuntimeNames } from "./utils"
+import { RuntimeNames, PositionalIdTracker } from "./utils"
 
 export class InternalsTransformer extends arkts.AbstractVisitor {
+    constructor(private positionalIdTracker: PositionalIdTracker) {
+        super()
+    }
 
     visitor(beforeChildren: arkts.AstNode): arkts.AstNode {
         const node = this.visitEachChild(beforeChildren)
@@ -33,6 +36,9 @@ export class InternalsTransformer extends arkts.AbstractVisitor {
                         RuntimeNames.ID,
                         undefined
                     )
+                }
+                if (node.callee.name == RuntimeNames.__KEY) {
+                    return this.positionalIdTracker.id(RuntimeNames.__KEY)
                 }
             }
         }

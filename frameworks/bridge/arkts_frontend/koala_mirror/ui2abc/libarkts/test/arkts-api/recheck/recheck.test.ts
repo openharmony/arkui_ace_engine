@@ -28,6 +28,9 @@ import { addImportSameFile } from "./imports/add-same-file"
 import { addUseImportSameFile } from "./imports/add-use-same-file"
 import { addImportNewFile } from "./imports/add-new-file"
 import { addOptionalChain } from "./optional/add-chain"
+import { addUseImportClassSameFile } from "./exports/basic"
+import { addUseImportClassSameFileAndExportClass } from "./exports/add-export"
+import { addUseImportClassSameFileAndCreateClass } from "./exports/create-class"
 
 const DIR = './test/arkts-api/recheck/'
 const PANDA_SDK_PATH = process.env.PANDA_SDK_PATH ?? '../../incremental/tools/panda/node_modules/@panda/sdk'
@@ -245,6 +248,20 @@ suite(util.basename(__filename), () => {
     suite('overloads', () => {
         test('getter and setter both modified simultaneously', () => {
             runTest('overloads/getter-setter', insertParameterToType)
+        })
+    })
+
+    suite('exports', () => {
+        test('import existing exported class', () => {
+            runTest('exports/basic', addUseImportClassSameFile)
+        })
+
+        test('import existing not exported class', () => {
+            runTest('exports/add-export', addUseImportClassSameFileAndExportClass)
+        })
+
+        test('import created class', () => {
+            runTest('exports/create-class', addUseImportClassSameFileAndCreateClass)
         })
     })
 })

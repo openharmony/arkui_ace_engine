@@ -22,7 +22,6 @@ import {
     getDeclResolveGensym,
     hasMemoStableAnnotation,
     isTrackableParam,
-    isVoidType,
     moveToFront,
     shouldWrap,
 } from "./utils"
@@ -42,10 +41,6 @@ import {
 
 function needThisRewrite(hasReceiver: boolean, isStatic: boolean, stableThis: boolean) {
     return hasReceiver && !isStatic && !stableThis
-}
-
-function isVoidReturn(returnTypeAnnotation: arkts.TypeNode | undefined) {
-    return !returnTypeAnnotation || isVoidType(returnTypeAnnotation)
 }
 
 function mayAddLastReturn(node: arkts.BlockStatement): boolean {
@@ -108,12 +103,13 @@ function updateFunctionBody(
     const gensymParamsCount = fixGensymParams(parameterIdentifiers, node)
     const parameterNames = [...(shouldCreateMemoThisParam ? [RuntimeNames.THIS.valueOf()] : []), ...parameterIdentifiers.map(it => it.ident.name)]
     const scopeDeclaration = factory.createScopeDeclaration(
-        stableThis ? arkts.factory.createETSPrimitiveType(arkts.Es2pandaPrimitiveType.PRIMITIVE_TYPE_VOID) : returnTypeAnnotation,
+        arkts.isTSThisType(returnTypeAnnotation) ? arkts.factory.createETSPrimitiveType(arkts.Es2pandaPrimitiveType.PRIMITIVE_TYPE_VOID) : returnTypeAnnotation,
         hash, parameterNames.length
     )
     const memoParametersDeclaration = parameterNames.length ? factory.createMemoParameterDeclaration(parameterNames) : undefined
-    const syntheticReturnStatement = factory.createSyntheticReturnStatement(isVoidReturn(returnTypeAnnotation), stableThis)
-    const unchangedCheck = factory.createIfStatementWithSyntheticReturnStatement(syntheticReturnStatement)
+    const syntheticReturnStatement = factory.createSyntheticReturnStatement(returnTypeAnnotation)
+    const unchangedCheck = [factory.createIfStatementWithSyntheticReturnStatement(syntheticReturnStatement)]
+    const thisParamSubscription = (arkts.isTSThisType(returnTypeAnnotation) && !stableThis) ? [factory.createMemoParameterAccess("=t")] : []
     return [
         arkts.factory.updateBlockStatement(
             node,
@@ -123,7 +119,8 @@ function updateFunctionBody(
                 ...(memoParametersDeclaration ? [memoParametersDeclaration] : []),
                 ...(addLogging ? [factory.createMemoParameterModifiedLogging(parameterNames)] : []),
                 ...(addLogging ? [factory.createUnchangedLogging()] : []),
-                unchangedCheck,
+                ...unchangedCheck,
+                ...thisParamSubscription,
                 ...node.statements.slice(gensymParamsCount),
                 ...(mayAddLastReturn(node) ? [arkts.factory.createReturnStatement(undefined)] : []),
             ]

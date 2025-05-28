@@ -43,7 +43,7 @@ export default function memoTransformer(
         const diagnosticVisitor = new DiagnosticVisitor(scriptFunctions)
         const positionalIdTracker = new PositionalIdTracker(`${arkts.getPackageName()}.${arkts.getFilePathFromPackageRoot()}`, userPluginOptions?.stableForTests)
         const signatureTransformer = new SignatureTransformer(scriptFunctions, ETSFunctionTypes)
-        const internalsTransformer = new InternalsTransformer()
+        const internalsTransformer = new InternalsTransformer(positionalIdTracker)
         const parameterTransformer = new ParameterTransformer(positionalIdTracker)
         const returnTransformer = new ReturnTransformer()
 

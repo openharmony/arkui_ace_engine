@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,15 @@
  * limitations under the License.
  */
 
-import { ClassDefinition, ClassElement, Expression, isClassDefinition, isClassProperty, isETSNewClassInstanceExpression, TSEnumDeclaration, TSEnumMember } from "src/generated";
+import { AnnotationUsage, ClassDefinition, ClassElement, ClassProperty, Expression, TSEnumDeclaration, TSEnumMember, isArrowFunctionExpression, isCallExpression, isClassDeclaration, isClassDefinition, isClassProperty, isETSFunctionType, isETSNewClassInstanceExpression, isETSParameterExpression, isIdentifier, isScriptFunction, isTSTypeAliasDeclaration, isVariableDeclaration } from "src/generated";
 import { AbstractVisitor } from "./AbstractVisitor";
 import { AstNode } from "./peers/AstNode"
 import { Es2pandaModifierFlags } from "src/generated/Es2pandaEnums";
 import { factory } from "src/generated/factory";
 
+function filterAnnotations(annotations: AnnotationUsage[]): AnnotationUsage[] {
+    return annotations.filter(it => it.baseName?.name != "OptionalParametersAnnotation")
+}
 
 export class CheckedBackFilter extends AbstractVisitor {
     transformInitializer(node: Expression|undefined): Expression|undefined {
@@ -34,7 +37,7 @@ export class CheckedBackFilter extends AbstractVisitor {
                 if (!isClassProperty(member)) return undefined
                 if (isClassProperty(member) && member.id?.name.startsWith("#")) return undefined
                 return factory.createTSEnumMember(
-                    member.key,
+                    member.key, 
                     this.transformInitializer(member.value),
                     false
                 )
@@ -46,9 +49,26 @@ export class CheckedBackFilter extends AbstractVisitor {
     }
     visitor(beforeChildren: AstNode): AstNode {
         const node = this.visitEachChild(beforeChildren)
-        if (isClassDefinition(node) && node.isEnumTransformed) {
-            return this.transformEnum(node)
+        if (isClassDefinition(node)) {
+            if (node.isEnumTransformed) {
+                return this.transformEnum(node)
+            } else {
+                return node.setAnnotations(filterAnnotations([...node.annotations]))
+            }
         }
+        if (isClassProperty(node)) {
+            return node.setAnnotations(filterAnnotations([...node.annotations]))
+        }
+        if (isArrowFunctionExpression(node)) {
+            return node.setAnnotations(filterAnnotations([...node.annotations]))
+        }
+        if (isETSFunctionType(node)) {
+            return node.setAnnotations(filterAnnotations([...node.annotations]))
+        }
+        if (isScriptFunction(node)) {
+            return node.setAnnotations(filterAnnotations([...node.annotations]))
+        }
+       
         return node
     }
 }

@@ -4,6 +4,7 @@
     "config": {
         "idlizer_version": "2.1.2",
         "idlizer_current": "../../../../arkgen",
+        "idlizer_ets_current": "../../../../etsgen",
         "api_version": "124",
         "input_dir": "../../arkui-common/interface_sdk-js/api/@internal/component/ets/,../../arkui-common/interface_sdk-js/api/global",
         "base_dir": "../../arkui-common/interface_sdk-js/api,../../arkui-common/interface_sdk-js/kits,../../arkui-common/interface_sdk-js/arkts"
@@ -13,13 +14,16 @@
         "clean:ts": "rimraf ../../../arkoala/arkui/src/generated",
         "generate:ts": "npm run clean:ts && npx @idlizer/arkgen@$npm_package_config_idlizer_version --dts2peer --base-dir $npm_package_config_base_dir --input-dir $npm_package_config_input_dir --arkoala-destination ../../.. --api-version $npm_package_config_api_version --generator-target arkoala --language=ts --only-integrated",
         "clean:arkts": "rimraf ../../arkui/src/generated",
+        "clean:m3": "rimraf ../../arkui/sdk/generated && rimraf ../../arkui/src/ets/generated",
         "generate:arkts": "npm run clean:arkts && npx @idlizer/arkgen@$npm_package_config_idlizer_version --dts2peer --only-integrated --base-dir $npm_package_config_base_dir --input-dir $npm_package_config_input_dir --arkoala-destination ../../.. --api-version $npm_package_config_api_version --generator-target arkoala --language=arkts",
         "generate:all": "npm run generate:ts && npm run generate:arkts",
         "compile:current": "npm run compile --prefix $npm_package_config_idlizer_current",
         "generate:ts:current": "npm run clean:ts && node $npm_package_config_idlizer_current --dts2peer --base-dir $npm_package_config_base_dir --input-dir $npm_package_config_input_dir --arkoala-destination ../../.. --api-version $npm_package_config_api_version --generator-target arkoala --language=ts --only-integrated",
         "generate:arkts:current": "npm run clean:arkts && node $npm_package_config_idlizer_current --dts2peer --base-dir $npm_package_config_base_dir --input-dir $npm_package_config_input_dir --arkoala-destination ../../.. --api-version $npm_package_config_api_version --generator-target arkoala --language=arkts --only-integrated",
         "generate:arkts:m3:current": "node $npm_package_config_idlizer_current --dts2peer --base-dir $npm_package_config_base_dir --input-dir $npm_package_config_input_dir --arkoala-destination ../../.. --api-version $npm_package_config_api_version --generator-target arkoala --language=arkts --only-integrated --use-memo-m3 --arkts-extension .ets",
-        "generate:all:current": "npm run compile:current && npm run generate:ts:current && npm run generate:arkts:current"
+        "generate:all:current": "npm run compile:current && npm run generate:ts:current && npm run generate:arkts:current",
+        "generate:all:ets:current": "cd $npm_package_config_idlizer_ets_current && rimraf out && npm run run:sdk && cd - && cd $npm_package_config_idlizer_current && npm run compile && rimraf out && npm run check:peers:ets:generate:only:integrated && npm run check:peers:arkts:ets:generate:only:integrated && npm run check:peers:m3:ets:generate:only:integrated && cd - && npm run clean:ts && npm run clean:arkts && npm run clean:m3 && rsync -av $npm_package_config_idlizer_current/out/ets-ts-peers/generated/sig/ ../../../",
+        "generate:m3:ets:current": "cd $npm_package_config_idlizer_ets_current && rimraf out && npm run run:sdk && cd - && cd $npm_package_config_idlizer_current && npm run compile && rimraf out && npm run check:peers:m3:ets:generate:only:integrated && cd - && npm run clean:m3 && rsync -av $npm_package_config_idlizer_current/out/ets-ts-peers/generated/sig/ ../../../"
     },
     "dependencies": {
         "@koalaui/interop": "file:../../../../external/interop"

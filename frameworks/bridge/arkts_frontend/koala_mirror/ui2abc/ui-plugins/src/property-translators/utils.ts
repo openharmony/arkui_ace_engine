@@ -15,6 +15,7 @@
 
 import * as arkts from "@koalaui/libarkts"
 import { annotation } from "../common/arkts-utils";
+import { InternalAnnotations } from "../utils";
 
 export enum DecoratorNames {
     ENTRY = "Entry",
@@ -119,7 +120,7 @@ export function createSetter(
         false
     );
     if (needMemo) {
-        param.setAnnotations([annotation("memo")])
+        param.setAnnotations([annotation(InternalAnnotations.MEMO)])
     }
     const key = arkts.factory.createIdentifier(name, undefined)
     const scriptFunction = arkts.factory.createScriptFunction(

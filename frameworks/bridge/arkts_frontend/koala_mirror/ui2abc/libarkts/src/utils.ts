@@ -271,7 +271,9 @@ function fixDuplicateSettersInInterfaces(code: string): string {
 }
 
 function excludePartialInterfaces(code: string): string {
-    return code.replaceAll(/interface (.*)\$partial<>([\s\S]*?)}/g, '')
+    return code
+    .replaceAll(/export interface (.*)\$partial<>([\s\S]*?)}/g, '')
+    .replaceAll(/interface (.*)\$partial<>([\s\S]*?)}/g, '')
 }
 
 function fixNamespace(code: string) {
@@ -285,6 +287,9 @@ function fixNamespace(code: string) {
     code = code.replaceAll(`public static _$init$_() {}`, ``)
     code = code.replaceAll(`public static _$initializerBlockInit$_() {}`, ``)
     code = code.replaceAll(/public static ((?:un)?registerVsyncCallback)/g, "export function $1")
+    code = code.replaceAll(/public static (setCursor)/g, "export function $1")
+    code = code.replaceAll(/public static (restoreDefault)/g, "export function $1")
+    code = code.replaceAll(/public static (requestFocus\(value)/g, "export function $1")
 
     return code
 }
@@ -327,28 +332,6 @@ function fixEnums(code: string) {
     return code
 }
 
-function fixSwitchCase(code: string) {
-    const lines = code.split('\n')
-    // assume good formatting on start, return also good formatting (spaces on line beginnings)
-    const spacesStack = []
-    for (var i = 1; i < lines.length; i++) {
-        if (lines[i].trimStart().startsWith('case ') || lines[i].trimStart().startsWith('default:')) {
-            if (lines[i - 1].trimStart().startsWith('switch')) {
-                spacesStack.push(lines[i - 1].indexOf('s'))
-                lines[i] = lines[i] + ` {`
-            } else {
-                const indent = ` `.repeat(spacesStack[spacesStack.length - 1] + 2)
-                lines[i] = indent + `}\n` + indent + lines[i].trimStart() + ` {`
-            }
-        }
-        else if (spacesStack.length && lines[i].trimStart().startsWith('}') && lines[i].indexOf('}') <= spacesStack[spacesStack.length - 1]) {
-            lines[i] = ` `.repeat(spacesStack[spacesStack.length - 1]) + `} ` + lines[i].trimStart()
-            spacesStack.pop()
-        }
-    }
-    return lines.join('\n')
-}
-
 /*
     TODO:
      The lowerings insert %% and other special symbols into names of temporary variables.
@@ -372,8 +355,8 @@ export function filterSource(text: string): string {
         (code: string) => code.replaceAll("<cctor>", "_cctor_"),
         (code: string) => code.replaceAll("public constructor() {}", ""),
         (code: string) => code.replaceAll("@Module()", ""),
-        fixPropertyLines,
-        fixSwitchCase,
+        (code: string) => code.replaceAll("export * as  from", "export * from"),
+        fixPropertyLines
     ]
     // console.error("====")
     // console.error(dumperUnwrappers.reduceRight((code, f) => f(code), text).split('\n').map((it, index) => `${`${index + 1}`.padStart(4)} |${it}`).join('\n'))

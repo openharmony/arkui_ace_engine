@@ -15,12 +15,12 @@
 
 import * as fs from "node:fs"
 import * as path from "node:path"
-import { arktsGlobal as global, ImportStorage } from "@koalaui/libarkts"
+import { checkSDK, arktsGlobal as global, ImportStorage } from "@koalaui/libarkts"
 import { CheckedBackFilter, ChainExpressionFilter, PluginContext, PluginContextImpl } from "@koalaui/libarkts"
 import { Command } from "commander"
 import { filterSource, isNumber, throwError, withWarning } from "@koalaui/libarkts"
 import { Es2pandaContextState } from "@koalaui/libarkts"
-import { AstNode, Config, Context, createETSModuleFromContext, listPrograms, proceedToState, ProgramTransformer, rebindSubtree, recheckSubtree, setBaseOverloads } from "@koalaui/libarkts"
+import { AstNode, Config, Context, createETSModuleFromContext, inferVoidReturnType, listPrograms, proceedToState, ProgramTransformer, rebindSubtree, recheckSubtree, setBaseOverloads } from "@koalaui/libarkts"
 
 function parseCommandLineArgs() {
     const commander = new Command()
@@ -87,9 +87,11 @@ function insertPlugin(
             }
             const ast = program.program.astNode
             const importStorage = new ImportStorage(program.program, state == Es2pandaContextState.ES2PANDA_STATE_PARSED)
-
+            stageSpecificPreFilters(ast, state)
+            
             transform?.(program.program, { isMainProgram: false, name: program.name, stage: state }, context)
 
+            stageSpecificPostFilters(ast, state)
             setBaseOverloads(ast)
             if (!restart) {
                 importStorage.update()
@@ -99,6 +101,7 @@ function insertPlugin(
     }
 
     const importStorage = new ImportStorage(global.compilerContext.program, state == Es2pandaContextState.ES2PANDA_STATE_PARSED)
+    if (!restart) stageSpecificPreFilters(script, state)
 
     transform?.(global.compilerContext.program, { isMainProgram: true, name: `${global.packageName}.${global.filePathFromPackageRoot}`, stage: state }, context)
 
@@ -114,7 +117,7 @@ function insertPlugin(
         }
     }
 
-    if (!restart) stageSpecificFilters(script, state)
+    if (!restart) stageSpecificPostFilters(script, state)
     setBaseOverloads(script)
     if (!restart) {
         importStorage.update()
@@ -129,7 +132,13 @@ function insertPlugin(
     return script
 }
 
-function stageSpecificFilters(script: AstNode, state: Es2pandaContextState) {
+function stageSpecificPreFilters(script: AstNode, state: Es2pandaContextState) {
+    if (state == Es2pandaContextState.ES2PANDA_STATE_CHECKED) {
+        inferVoidReturnType(script)
+    }
+}
+
+function stageSpecificPostFilters(script: AstNode, state: Es2pandaContextState) {
     if (state == Es2pandaContextState.ES2PANDA_STATE_CHECKED) {
         new ChainExpressionFilter().visitor(script)
     }
@@ -311,26 +320,6 @@ function readAndSortPlugins(configDir: string, plugins: any[]) {
     return pluginsByState
 }
 
-
-function checkSDK() {
-    const panda = process.env.PANDA_SDK_PATH
-    if (!panda)
-        reportErrorAndExit(`Variable PANDA_SDK_PATH is not set, please fix`)
-    if (!fs.existsSync(path.join(panda, 'package.json')))
-        reportErrorAndExit(`Variable PANDA_SDK_PATH not points to SDK`)
-    const packageJson = JSON.parse(fs.readFileSync(path.join(panda, 'package.json')).toString())
-    const version = packageJson.version as string
-    if (!version)
-        reportErrorAndExit(`version is unknown`)
-    const packageJsonOur = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json')).toString())
-    const expectedVersion = packageJsonOur.config.panda_sdk_version
-    if (expectedVersion && expectedVersion != "next" && version != expectedVersion)
-        console.log(`WARNING: Panda SDK version "${version}" doesn't match expected "${expectedVersion}"`)
-    else
-        console.log(`Use Panda ${version}`)
-}
-
-
 export function main() {
     const before = Date.now()
     checkSDK()
@@ -345,11 +334,6 @@ export function main() {
     const pluginNames = plugins.map((it: any) => `${it.name}-${it.stage}`)
 
     const pluginsByState = readAndSortPlugins(configDir, plugins)
-
-    exportsFromInitialFile.push(
-        ...[...fs.readFileSync(filePath).toString().matchAll(/export {([\s\S]*?)} from .*(\n|$)/g)].map(it => it[0]),
-        ...[...fs.readFileSync(filePath).toString().matchAll(/export \* from .*(\n|$)/g)].map(it => it[0])
-    )
 
     invokeWithPlugins(configPath, packageName, baseUrl, outDir, filePath, outputPath, pluginsByState, dumpAst, restartStages, stage, pluginNames)
 
