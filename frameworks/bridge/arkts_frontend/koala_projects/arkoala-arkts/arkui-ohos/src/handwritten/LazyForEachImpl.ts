@@ -153,11 +153,12 @@ class LazyItemPool implements Disposable {
      * @param end 
      */
     prune(start: int32, end: int32) {
-        for (let entry of this._activeItems.entries()) {
-            if (entry[0] < start || entry[0] > end) {
-                entry[1].dispose()
-                this._activeItems.delete(entry[0])
+        if (start > end) return
+        this._activeItems.forEach((value, key) => {
+            if (key < start || key > end) {
+                value.dispose()
+                this._activeItems.delete(key) // Delete in-place
             }
-        }
+        })
     }
 }
