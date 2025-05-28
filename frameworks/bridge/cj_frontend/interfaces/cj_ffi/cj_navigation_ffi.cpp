@@ -518,12 +518,12 @@ void FfiOHOSAceFrameworkNavigationSetEnableDragBar(bool isEnable){
 }
 
 void FfiOHOSAceFrameworkNavigationSetEnableModeChangeAnimtion(bool isEnable){
-    NavigationModel::GetInstance()->EnableModeChangeAnimtion(isEnable);
+    NavigationModel::GetInstance()->SetEnableModeChangeAnimtion(isEnable);
 }
 
 void FfiOHOSAceFrameworkNavigationSetIgnoreLayoutSafeArea(VectorInt32Ptr types,VectorInt32Ptr edges){
-    const auto& typesArray = *reinterpret_cast(std::vector<int32_t>*)(types);
-    const auto& edgeArray = *reinterpret_cast(std::vector<int32_t>*)(edges);
+    const auto& typesArray = *reinterpret_cast<std::vector<int32_t>*>(types);
+    const auto& edgeArray = *reinterpret_cast<std::vector<int32_t>*>(edges);
     NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
     if(typesArray.size() > 0){
         uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;

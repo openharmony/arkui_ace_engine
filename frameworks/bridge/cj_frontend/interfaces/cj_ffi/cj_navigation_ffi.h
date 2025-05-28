@@ -84,7 +84,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetToolBarWithBuilderWithOptions(
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetHideToolBar(bool isHide);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetHideToolBarWithAnimated(bool isHide,bool animated);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetHideTitleBar(bool isHide);
-CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetHideTitleBarWithAnimated(bool isHide,bool animated)
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetHideTitleBarWithAnimated(bool isHide,bool animated);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetHideBackButton(bool isHide);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetNavBarWidth(double width, int32_t widthUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetNavBarPosition(int32_t position);
