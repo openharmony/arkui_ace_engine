@@ -730,22 +730,8 @@ void NavigationStack::FireNavigationInterception(bool isBefore, const RefPtr<NG:
     InterceptionType interception = PathStack::GetInterception();
     CHECK_NULL_VOID(interception);
     auto show = isBefore ? interception->willShow : interception->didShow;
-    if (show.IsValid()) {
-        Ark_Union_NavDestinationContext_NavBar tempfrom;
-        Ark_Union_NavDestinationContext_NavBar tempto;
-        auto preDestination = AceType::DynamicCast<NG::NavDestinationContext>(from);
-        if (!preDestination) {
-            tempfrom = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_String>("navbar");
-        } else {
-            tempfrom = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_NavDestinationContext>(from);
-        }
-        auto topDestination = AceType::DynamicCast<NG::NavDestinationContext>(to);
-        if (!topDestination) {
-            tempto = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_String>("navbar");
-        } else {
-            tempto = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_NavDestinationContext>(to);
-        }
-        show.Invoke(tempfrom, tempto, Converter::ArkValue<Ark_NavigationOperation>(operation), Converter::ArkValue<Ark_Boolean>(isAnimated));
+    if (show) {
+        show(from, to, operation, isAnimated);
     }
 }
 
@@ -754,8 +740,8 @@ void NavigationStack::FireNavigationModeChange(NG::NavigationMode mode)
     InterceptionType interception = PathStack::GetInterception();
     CHECK_NULL_VOID(interception);
     auto modeChange = interception->modeChange;
-    if (modeChange.IsValid()) {
-        modeChange.Invoke(Converter::ArkValue<Ark_NavigationMode>(mode));
+    if (modeChange) {
+        modeChange(mode);
     }
 }
 

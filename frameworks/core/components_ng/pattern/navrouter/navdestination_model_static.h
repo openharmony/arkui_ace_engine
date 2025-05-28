@@ -37,6 +37,9 @@ public:
     static void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);
     static void CreateImageButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);
     static RefPtr<NG::FrameNode> CreateFrameNode(int32_t nodeId, std::function<void()>&& deepRenderFunc = nullptr);
+    static void SetSystemTransitionType(FrameNode* frameNode, NG::NavigationSystemTransitionType type);
+    static void SetOnActive(FrameNode* frameNode, std::function<void(int32_t)>&& onActive);
+    static void SetOnInactive(FrameNode* frameNode, std::function<void(int32_t)>&& onInactive);
     static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated = false);
     static void SetOnShown(FrameNode* frameNode, std::function<void()>&& onShow);
     static void SetOnHidden(FrameNode* frameNode, std::function<void()>&& onHidden);

@@ -381,13 +381,55 @@ void SetInterceptionImpl(Ark_NavPathStack peer,
     CHECK_NULL_VOID(pathStack);
     NavigationContext::InterceptionType result = new NavigationContext::Interception();
     if (interception->modeChange.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        result->modeChange = CallbackHelper(interception->modeChange.value);
+        result->modeChange = [callback = CallbackHelper(interception->modeChange.value)](NG::NavigationMode mode) {
+            callback.Invoke(Converter::ArkValue<Ark_NavigationMode>(mode));
+        };
     }
     if (interception->willShow.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        result->willShow = CallbackHelper(interception->willShow.value);
+        result->willShow = [callback = CallbackHelper(interception->willShow.value)](
+                               const RefPtr<NG::NavDestinationContext>& from,
+                               const RefPtr<NG::NavDestinationContext>& to, NG::NavigationOperation operation,
+                               bool isAnimated) {
+            Ark_Union_NavDestinationContext_NavBar tempfrom;
+            Ark_Union_NavDestinationContext_NavBar tempto;
+            auto preDestination = AceType::DynamicCast<NG::NavDestinationContext>(from);
+            if (!preDestination) {
+                tempfrom = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_String>("navbar");
+            } else {
+                tempfrom = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_NavDestinationContext>(from);
+            }
+            auto topDestination = AceType::DynamicCast<NG::NavDestinationContext>(to);
+            if (!topDestination) {
+                tempto = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_String>("navbar");
+            } else {
+                tempto = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_NavDestinationContext>(to);
+            }
+            callback.Invoke(tempfrom, tempto, Converter::ArkValue<Ark_NavigationOperation>(operation),
+                Converter::ArkValue<Ark_Boolean>(isAnimated));
+        };
     }
     if (interception->didShow.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        result->didShow = CallbackHelper(interception->didShow.value);
+        result->didShow = [callback = CallbackHelper(interception->didShow.value)](
+                              const RefPtr<NG::NavDestinationContext>& from,
+                              const RefPtr<NG::NavDestinationContext>& to, NG::NavigationOperation operation,
+                              bool isAnimated) {
+            Ark_Union_NavDestinationContext_NavBar tempfrom;
+            Ark_Union_NavDestinationContext_NavBar tempto;
+            auto preDestination = AceType::DynamicCast<NG::NavDestinationContext>(from);
+            if (!preDestination) {
+                tempfrom = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_String>("navbar");
+            } else {
+                tempfrom = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_NavDestinationContext>(from);
+            }
+            auto topDestination = AceType::DynamicCast<NG::NavDestinationContext>(to);
+            if (!topDestination) {
+                tempto = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_String>("navbar");
+            } else {
+                tempto = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_NavDestinationContext>(to);
+            }
+            callback.Invoke(tempfrom, tempto, Converter::ArkValue<Ark_NavigationOperation>(operation),
+                Converter::ArkValue<Ark_Boolean>(isAnimated));
+        };
     }
     pathStack->NavigationContext::PathStack::SetInterception(result);
 }
