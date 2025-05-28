@@ -5181,9 +5181,20 @@ void BackdropBlur1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(radius);
-    //auto convValue = Converter::OptConvert<type>(radius); // for enums
-    //CommonMethodModelNG::SetBackdropBlur1(frameNode, convValue);
+    CHECK_NULL_VOID(radius);
+    Dimension blurRadius;
+    if (auto blur = Converter::OptConvert<Dimension>(*radius); blur) {
+        blurRadius = *blur;
+    }
+    BlurOption blurOption;
+    if (auto blurOpt = Converter::OptConvertPtr<BlurOption>(options); blurOpt) {
+        blurOption = *blurOpt;
+    }
+    SysOptions systemOptions;
+    if (auto sysOpts = Converter::OptConvertPtr<SysOptions>(sysOptions); sysOpts) {
+        systemOptions = *sysOpts;
+    }
+    ViewAbstract::SetBackdropBlur(frameNode, blurRadius, blurOption, systemOptions);
 }
 void SharedTransitionImpl(Ark_NativePointer node,
                           const Opt_String* id,

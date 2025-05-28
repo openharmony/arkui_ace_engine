@@ -596,6 +596,7 @@ namespace Converter {
     template<> SheetHeight Convert(const Ark_Length& src);
     template<> SheetHeight Convert(const Ark_SheetSize& src);
     template<> StringArray Convert(const Ark_CustomObject& src);
+    template<> SysOptions Convert(const Ark_SystemAdaptiveOptions& src);
     template<> TextBackgroundStyle Convert(const Ark_TextBackgroundStyle& src);
     template<> TextCascadePickerOptions Convert(const Ark_TextCascadePickerRangeContent& src);
     template<> TextDecorationOptions Convert(const Ark_TextDecorationOptions& src);
