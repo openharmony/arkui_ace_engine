@@ -3008,7 +3008,7 @@ void FocusBoxImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<NG::FocusBoxStyle>(value);
-    ViewAbstract::SetFocusBoxStyle(frameNode, convValue);
+    ViewAbstractModelStatic::SetFocusBoxStyle(frameNode, convValue);
 }
 void AnimationImpl(Ark_NativePointer node,
                    const Opt_AnimateParam* value)
@@ -5025,7 +5025,7 @@ void FocusScopeId0Impl(Ark_NativePointer node,
         return;
     }
     auto convIsGroupValue = Converter::OptConvertPtr<bool>(isGroup);
-    ViewAbstract::SetFocusScopeId(frameNode, *convIdValue, convIsGroupValue, std::nullopt);
+    ViewAbstractModelStatic::SetFocusScopeId(frameNode, *convIdValue, convIsGroupValue, std::nullopt);
 }
 void FocusScopeId1Impl(Ark_NativePointer node,
                        const Opt_String* id,
@@ -5055,7 +5055,7 @@ void FocusScopePriorityImpl(Ark_NativePointer node,
         return;
     }
     auto optPriority = Converter::OptConvertPtr<uint32_t>(priority);
-    ViewAbstract::SetFocusScopePriority(frameNode, *convIdValue, optPriority);
+    ViewAbstractModelStatic::SetFocusScopePriority(frameNode, *convIdValue, optPriority);
 }
 void GestureImplInternal(Ark_NativePointer node, const Opt_GestureType* gesture, const Opt_GestureMask* mask,
     GesturePriority priority)

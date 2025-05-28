@@ -1175,6 +1175,38 @@ void ViewAbstractModelStatic::SetBlendMode(FrameNode* frameNode, const std::opti
     }
 }
 
+void ViewAbstractModelStatic::SetFocusBoxStyle(FrameNode* frameNode, const std::optional<NG::FocusBoxStyle>& style)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (!style.has_value()) {
+        return;
+    }
+    focusHub->GetFocusBox().SetStyle(style.value());
+}
+
+void ViewAbstractModelStatic::SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId,
+    const std::optional<bool>& isGroup, const std::optional<bool>& arrowKeyStepOut)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    bool isGroupValue = isGroup.value_or(DEFAULT_FOCUS_IS_GROUP);
+    bool arrowKeyStepOutValue = arrowKeyStepOut.value_or(DEFAULT_FOCUS_ARROW_KEY_STEP_OUT);
+    focusHub->SetFocusScopeId(focusScopeId, isGroupValue, arrowKeyStepOutValue);
+}
+
+void ViewAbstractModelStatic::SetFocusScopePriority(
+    FrameNode* frameNode, const std::string& focusScopeId, const std::optional<uint32_t>& focusPriority)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto proirity = focusPriority.value_or(static_cast<uint32_t>(FocusPriority::AUTO));
+    focusHub->SetFocusScopePriority(focusScopeId, proirity);
+}
+
 void ViewAbstractModelStatic::SetBlendApplyType(
     FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType)
 {
