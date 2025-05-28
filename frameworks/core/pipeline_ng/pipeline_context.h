@@ -1445,8 +1445,8 @@ private:
     std::list<DelayedTask> delayedTasks_;
     RefPtr<PostEventManager> postEventManager_;
 
-    std::map<RefPtr<FrameNode>, std::vector<MouseEvent>> nodeToMousePoints_;
-    std::map<RefPtr<FrameNode>, std::vector<DragPointerEvent>> nodeToPointEvent_;
+    std::map<WeakPtr<FrameNode>, std::vector<MouseEvent>> nodeToMousePoints_;
+    std::map<WeakPtr<FrameNode>, std::vector<DragPointerEvent>> nodeToPointEvent_;
     std::vector<Ace::RectF> overlayNodePositions_;
     std::function<void(std::vector<Ace::RectF>)> overlayNodePositionUpdateCallback_;
 
