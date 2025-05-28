@@ -262,7 +262,6 @@ shared_ptr<JsValue> ApiVersionIsGreaterOrEqual(const shared_ptr<JsRuntime>& runt
         LOGW("first arg is not a string");
         return runtime->NewNull();
     }
-
     std::string versionStr = argv[0]->ToString(runtime);
     std::vector<std::string> parts;
     std::string currentPart;
@@ -278,27 +277,24 @@ shared_ptr<JsValue> ApiVersionIsGreaterOrEqual(const shared_ptr<JsRuntime>& runt
     while (parts.size() < 3) {  // 3 分解参数个数
         parts.push_back("");
     }
-
     auto convertToInt = [](const std::string& s) -> int32_t {
-        if (s.empty()) return 0;
-
+        if (s.empty()) {
+            return -1;
+        }
         for (char c : s) {
             if (!isdigit(static_cast<unsigned char>(c))) {
-                return 0;
+                return -1;
             }
         }
-
         const char* str = s.c_str();
         char* endPtr;
         errno = 0;
         long num = std::strtol(str, &endPtr, 10);
-
         if (*endPtr != '\0' || errno == ERANGE || num < INT32_MIN || num > INT32_MAX) {
-            return 0;
+            return -1;
         }
         return static_cast<int32_t>(num);
     };
-
     int32_t major = convertToInt(parts[0]);
     int32_t minor = convertToInt(parts[1]);
     int32_t patch = convertToInt(parts[2]);
