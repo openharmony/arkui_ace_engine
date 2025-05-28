@@ -141,6 +141,46 @@
       "buildFunction": "MenuPressStatusBuilder"
     },
     {
+      "name": "bindContextMenuPreviewBottom",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuPreviewBottom.ets",
+      "buildFunction": "bindContextMenuPreviewBottomBuilder"
+    },
+    {
+      "name": "bindContextMenuPreviewRight",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuPreviewRight.ets",
+      "buildFunction": "bindContextMenuPreviewRightBuilder"
+    },
+    {
+      "name": "bindContextMenuPreviewLeft",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuPreviewLeft.ets",
+      "buildFunction": "bindContextMenuPreviewLeftBuilder"
+    },
+    {
+      "name": "bindContextMenuPreviewTop",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuPreviewTop.ets",
+      "buildFunction": "bindContextMenuPreviewTopBuilder"
+    },
+    {
+      "name": "bindContextMenuBottom",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuBottom.ets",
+      "buildFunction": "bindContextMenuBottomBuilder"
+    },
+    {
+      "name": "bindContextMenuTop",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuTop.ets",
+      "buildFunction": "bindContextMenuTopBuilder"
+    },
+    {
+      "name": "bindContextMenuRight",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuRight.ets",
+      "buildFunction": "bindContextMenuRightBuilder"
+    },
+    {
+      "name": "bindContextMenuLeft",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuLeft.ets",
+      "buildFunction": "bindContextMenuLeftBuilder"
+    },
+    {
       "name": "OverlayIndex",
       "pageSourceFile": "src/main/ets/pages/components/overlay/Index.ets",
       "buildFunction": "OverlayIndexBuilder"

@@ -42,6 +42,14 @@ export struct MenuIndex {
     { name: 'MenuDivider', path: 'MenuDivider' },
     { name: 'MenuExpand', path: 'MenuExpand' },
     { name: 'MenuPressStatus', path: 'MenuPressStatus' },
+    { name: 'bindContextMenuPreviewBottom', path: 'bindContextMenuPreviewBottom' },
+    { name: 'bindContextMenuPreviewRight', path: 'bindContextMenuPreviewRight' },
+    { name: 'bindContextMenuPreviewLeft', path: 'bindContextMenuPreviewLeft' },
+    { name: 'bindContextMenuPreviewTop', path: 'bindContextMenuPreviewTop' },
+    { name: 'bindContextMenuBottom', path: 'bindContextMenuBottom' },
+    { name: 'bindContextMenuTop', path: 'bindContextMenuTop' },
+    { name: 'bindContextMenuRight', path: 'bindContextMenuRight' },
+    { name: 'bindContextMenuLeft', path: 'bindContextMenuLeft' }
   ]
 
   build() {
