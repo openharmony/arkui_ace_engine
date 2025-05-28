@@ -21,13 +21,13 @@
 struct ImageExample {
   build() {
     Column({ space: 10 }) {
-      Image($r("app.media.startIcon"))
+      Image($r('app.media.startIcon'))
         .width(50)
         .height(50)
         .margin({top :30})
         .privacySensitive(true)
     }
     .alignItems(HorizontalAlign.Center)
-    .width("100%")
+    .width('100%')
   }
 }
