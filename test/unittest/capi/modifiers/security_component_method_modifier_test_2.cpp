@@ -77,7 +77,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidPositio
     for (const auto &[arkLength, expected]: LENGTH_TEST_PLAN) {
         position.x = Converter::ArkValue<Opt_Length>(arkLength);
         position.y = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_Position>(position);
+        auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_Position>(position);
         modifier_->setOffset(node_, &value);
         strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
         auto xResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_X_NAME);
@@ -99,7 +99,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidPositio
     for (const auto &[arkLength, expected]: LENGTH_TEST_PLAN) {
         position.x = Converter::ArkValue<Opt_Length>(Ark_Empty());
         position.y = Converter::ArkValue<Opt_Length>(arkLength);
-        auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_Position>(position);
+        auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_Position>(position);
         modifier_->setOffset(node_, &value);
         strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
         auto xResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_X_NAME);
@@ -244,7 +244,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidLocaliz
     Ark_LocalizedEdges inputValue { lenMetUndef, lenMetUndef, lenMetUndef, lenMetUndef };
     for (const auto &[lenMetrics, expected]: LENGTH_METRICS_ANY_TEST_PLAN) {
         inputValue.start = Converter::ArkValue<Opt_LengthMetrics>(lenMetrics);
-        auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_LocalizedEdges>(inputValue);
+        auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_LocalizedEdges>(inputValue);
         modifier_->setOffset(node_, &value);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
         EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME), expected);
@@ -269,7 +269,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidLocaliz
     Ark_LocalizedEdges inputValue { lenMetUndef, lenMetUndef, lenMetUndef, lenMetUndef };
     for (const auto &[lenMetrics, expected]: LENGTH_METRICS_ANY_TEST_PLAN) {
         inputValue.end = Converter::ArkValue<Opt_LengthMetrics>(lenMetrics);
-        auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_LocalizedEdges>(inputValue);
+        auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_LocalizedEdges>(inputValue);
         modifier_->setOffset(node_, &value);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
         EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME), defaultValue);
@@ -294,7 +294,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidLocaliz
     Ark_LocalizedEdges inputValue { lenMetUndef, lenMetUndef, lenMetUndef, lenMetUndef };
     for (const auto &[lenMetrics, expected]: LENGTH_METRICS_ANY_TEST_PLAN) {
         inputValue.top = Converter::ArkValue<Opt_LengthMetrics>(lenMetrics);
-        auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_LocalizedEdges>(inputValue);
+        auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_LocalizedEdges>(inputValue);
         modifier_->setOffset(node_, &value);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
         EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME), defaultValue);
@@ -319,7 +319,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidLocaliz
     Ark_LocalizedEdges inputValue { lenMetUndef, lenMetUndef, lenMetUndef, lenMetUndef };
     for (const auto &[lenMetrics, expected]: LENGTH_METRICS_ANY_TEST_PLAN) {
         inputValue.bottom = Converter::ArkValue<Opt_LengthMetrics>(lenMetrics);
-        auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_LocalizedEdges>(inputValue);
+        auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_LocalizedEdges>(inputValue);
         modifier_->setOffset(node_, &value);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
         EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME), defaultValue);
@@ -351,7 +351,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, alignTestValidValues, TestSize.Lev
     auto checkValue = [this](const std::string& input, const Ark_Alignment& value,
         const Alignment& expected)
     {
-        modifier_->setAlign(node_, value);
+        auto convValue = Converter::ArkValue<Opt_Alignment>(value);
+        modifier_->setAlign(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -376,10 +377,12 @@ HWTEST_F(SecurityComponentMethodModifierTest, alignTestInvalidValues, TestSize.L
 {
     const auto initialValue = ARK_ALIGNMENT_TOP_START;
 
-    auto checkValue = [this](const std::string& input, const Ark_Alignment& value)
+    auto checkValue = [initialValue, this](const std::string& input, const Ark_Alignment& value)
     {
-        modifier_->setAlign(node_, initialValue);
-        modifier_->setAlign(node_, value);
+        auto convValue = Converter::ArkValue<Opt_Alignment>(initialValue);
+        modifier_->setAlign(node_, &convValue);
+        convValue = Converter::ArkValue<Opt_Alignment>(value);
+        modifier_->setAlign(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -411,7 +414,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMaxFontScaleTestValidValues, Te
         Ark_Union_Number_Resource inputValueMaxFontScale = initValueMaxFontScale;
 
         inputValueMaxFontScale = value;
-        modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
+        auto convValue = ArkValue<Opt_Union_Number_Resource>(inputValueMaxFontScale);
+        modifier_->setMaxFontScale(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -446,10 +450,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMaxFontScaleTestInvalidValues, 
 
     auto checkValue = [this, &initValueMaxFontScale](const std::string& input, const Ark_Union_Number_Resource& value) {
         Ark_Union_Number_Resource inputValueMaxFontScale = initValueMaxFontScale;
-
-        modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
+        auto convValue = ArkValue<Opt_Union_Number_Resource>(inputValueMaxFontScale);
+        modifier_->setMaxFontScale(node_, &convValue);
         inputValueMaxFontScale = value;
-        modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
+        convValue = ArkValue<Opt_Union_Number_Resource>(inputValueMaxFontScale);
+        modifier_->setMaxFontScale(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -480,7 +485,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMinFontScaleTestValidValues, Te
         Ark_Union_Number_Resource inputValueMinFontScale = initValueMinFontScale;
 
         inputValueMinFontScale = value;
-        modifier_->setMinFontScale(node_, &inputValueMinFontScale);
+        auto convValue = ArkValue<Opt_Union_Number_Resource>(inputValueMinFontScale);
+        modifier_->setMinFontScale(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -515,10 +521,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMinFontScaleTestInvalidValues, 
 
     auto checkValue = [this, &initValueMinFontScale](const std::string& input, const Ark_Union_Number_Resource& value) {
         Ark_Union_Number_Resource inputValueMinFontScale = initValueMinFontScale;
-
-        modifier_->setMinFontScale(node_, &inputValueMinFontScale);
+        auto convValue = ArkValue<Opt_Union_Number_Resource>(inputValueMinFontScale);
+        modifier_->setMinFontScale(node_, &convValue);
         inputValueMinFontScale = value;
-        modifier_->setMinFontScale(node_, &inputValueMinFontScale);
+        convValue = ArkValue<Opt_Union_Number_Resource>(inputValueMinFontScale);
+        modifier_->setMinFontScale(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -548,7 +555,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMaxLinesTestValidValues, TestSi
         Ark_Number inputValueMaxLines = initValueMaxLines;
 
         inputValueMaxLines = value;
-        modifier_->setMaxLines(node_, &inputValueMaxLines);
+        auto convValue = ArkValue<Opt_Number>(inputValueMaxLines);
+        modifier_->setMaxLines(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -579,10 +587,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMaxLinesTestInvalidValues, Test
 
     auto checkValue = [this, &initValueMaxLines](const std::string& input, const Ark_Number& value) {
         Ark_Number inputValueMaxLines = initValueMaxLines;
-
-        modifier_->setMaxLines(node_, &inputValueMaxLines);
+        auto convValue = ArkValue<Opt_Number>(inputValueMaxLines);
+        modifier_->setMaxLines(node_, &convValue);
         inputValueMaxLines = value;
-        modifier_->setMaxLines(node_, &inputValueMaxLines);
+        convValue = ArkValue<Opt_Number>(inputValueMaxLines);
+        modifier_->setMaxLines(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -614,7 +623,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMinFontSizeTestValidValues, Tes
         Ark_Union_Number_String_Resource inputValueMinFontSize = initValueMinFontSize;
 
         inputValueMinFontSize = value;
-        modifier_->setMinFontSize(node_, &inputValueMinFontSize);
+        auto convValue = ArkValue<Opt_Union_Number_String_Resource>(inputValueMinFontSize);
+        modifier_->setMinFontSize(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -653,10 +663,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMinFontSizeTestInvalidValues, T
     auto checkValue = [this, &initValueMinFontSize](
                           const std::string& input, const Ark_Union_Number_String_Resource& value) {
         Ark_Union_Number_String_Resource inputValueMinFontSize = initValueMinFontSize;
-
-        modifier_->setMinFontSize(node_, &inputValueMinFontSize);
+        auto convValue = ArkValue<Opt_Union_Number_String_Resource>(inputValueMinFontSize);
+        modifier_->setMinFontSize(node_, &convValue);
         inputValueMinFontSize = value;
-        modifier_->setMinFontSize(node_, &inputValueMinFontSize);
+        convValue = ArkValue<Opt_Union_Number_String_Resource>(inputValueMinFontSize);
+        modifier_->setMinFontSize(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -696,7 +707,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMaxFontSizeTestValidValues, Tes
         Ark_Union_Number_String_Resource inputValueMaxFontSize = initValueMaxFontSize;
 
         inputValueMaxFontSize = value;
-        modifier_->setMaxFontSize(node_, &inputValueMaxFontSize);
+        auto convValue = ArkValue<Opt_Union_Number_String_Resource>(inputValueMaxFontSize);
+        modifier_->setMaxFontSize(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -735,10 +747,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMaxFontSizeTestInvalidValues, T
     auto checkValue = [this, &initValueMaxFontSize](
                           const std::string& input, const Ark_Union_Number_String_Resource& value) {
         Ark_Union_Number_String_Resource inputValueMaxFontSize = initValueMaxFontSize;
-
-        modifier_->setMaxFontSize(node_, &inputValueMaxFontSize);
+        auto convValue = ArkValue<Opt_Union_Number_String_Resource>(inputValueMaxFontSize);
+        modifier_->setMaxFontSize(node_, &convValue);
         inputValueMaxFontSize = value;
-        modifier_->setMaxFontSize(node_, &inputValueMaxFontSize);
+        convValue = ArkValue<Opt_Union_Number_String_Resource>(inputValueMaxFontSize);
+        modifier_->setMaxFontSize(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -777,7 +790,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setHeightAdaptivePolicyTestValidVa
         Ark_TextHeightAdaptivePolicy inputValueHeightAdaptivePolicy = initValueHeightAdaptivePolicy;
 
         inputValueHeightAdaptivePolicy = value;
-        modifier_->setHeightAdaptivePolicy(node_, inputValueHeightAdaptivePolicy);
+        auto convValue = ArkValue<Opt_TextHeightAdaptivePolicy>(inputValueHeightAdaptivePolicy);
+        modifier_->setHeightAdaptivePolicy(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -809,10 +823,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, setHeightAdaptivePolicyTestInvalid
     auto checkValue = [this, &initValueHeightAdaptivePolicy](
                           const std::string& input, const Ark_TextHeightAdaptivePolicy& value) {
         Ark_TextHeightAdaptivePolicy inputValueHeightAdaptivePolicy = initValueHeightAdaptivePolicy;
-
-        modifier_->setHeightAdaptivePolicy(node_, inputValueHeightAdaptivePolicy);
+        auto convValue = ArkValue<Opt_TextHeightAdaptivePolicy>(inputValueHeightAdaptivePolicy);
+        modifier_->setHeightAdaptivePolicy(node_, &convValue);
         inputValueHeightAdaptivePolicy = value;
-        modifier_->setHeightAdaptivePolicy(node_, inputValueHeightAdaptivePolicy);
+        convValue = ArkValue<Opt_TextHeightAdaptivePolicy>(inputValueHeightAdaptivePolicy);
+        modifier_->setHeightAdaptivePolicy(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -835,7 +850,9 @@ HWTEST_F(SecurityComponentMethodModifierTest, ChainModeTest, TestSize.Level1)
 {
     Ark_Axis direction = Ark_Axis::ARK_AXIS_HORIZONTAL;
     Ark_ChainStyle style = Ark_ChainStyle::ARK_CHAIN_STYLE_SPREAD_INSIDE;
-    modifier_->setChainMode(node_, direction, style);
+    auto convDirection = ArkValue<Opt_Axis>(direction);
+    auto convStyle = ArkValue<Opt_ChainStyle>(style);
+    modifier_->setChainMode(node_, &convDirection, &convStyle);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -853,7 +870,9 @@ HWTEST_F(SecurityComponentMethodModifierTest, ChainModeTest, TestSize.Level1)
     ASSERT_TRUE(storedChainMode.style.has_value());
     EXPECT_EQ(ChainStyle::SPREAD_INSIDE, storedChainMode.style.value());
 
-    modifier_->setChainMode(node_, direction, Ark_ChainStyle::ARK_CHAIN_STYLE_SPREAD);
+    convDirection = ArkValue<Opt_Axis>(direction);
+    convStyle = ArkValue<Opt_ChainStyle>(Ark_ChainStyle::ARK_CHAIN_STYLE_SPREAD);
+    modifier_->setChainMode(node_, &convDirection, &convStyle);
 
     EXPECT_FALSE(layoutProperty->GetFlexItemProperty()->HasVerticalChainStyle());
     ASSERT_TRUE(layoutProperty->GetFlexItemProperty()->HasHorizontalChainStyle());
@@ -866,7 +885,9 @@ HWTEST_F(SecurityComponentMethodModifierTest, ChainModeTest, TestSize.Level1)
 
     direction = Ark_Axis::ARK_AXIS_VERTICAL;
     style = Ark_ChainStyle::ARK_CHAIN_STYLE_PACKED;
-    modifier_->setChainMode(node_, direction, style);
+    convDirection = ArkValue<Opt_Axis>(direction);
+    convStyle = ArkValue<Opt_ChainStyle>(style);
+    modifier_->setChainMode(node_, &convDirection, &convStyle);
 
     ASSERT_TRUE(layoutProperty->GetFlexItemProperty()->HasVerticalChainStyle());
     EXPECT_TRUE(layoutProperty->GetFlexItemProperty()->HasHorizontalChainStyle());
@@ -898,9 +919,9 @@ HWTEST_F(SecurityComponentMethodModifierTest, ChainModeImpl_SetBadDirectionValue
     ASSERT_NE(layoutProperty, nullptr);
     ASSERT_EQ(layoutProperty->GetFlexItemProperty(), nullptr);
 
-    Ark_Axis direction = static_cast<Ark_Axis>(INT_MAX);
-    Ark_ChainStyle style = Ark_ChainStyle::ARK_CHAIN_STYLE_SPREAD_INSIDE;
-    modifier_->setChainMode(node_, direction, style);
+    Opt_Axis direction = ArkValue<Opt_Axis>(static_cast<Ark_Axis>(INT_MAX));
+    Opt_ChainStyle style = ArkValue<Opt_ChainStyle>(Ark_ChainStyle::ARK_CHAIN_STYLE_SPREAD_INSIDE);
+    modifier_->setChainMode(node_, &direction, &style);
     // empty direction optional creates both ChainStyle components but sets the style part of the VerticalChainStyle
     ASSERT_TRUE(layoutProperty->GetFlexItemProperty()->HasVerticalChainStyle());
     EXPECT_FALSE(layoutProperty->GetFlexItemProperty()->GetVerticalChainStyleValue().direction.has_value());
@@ -927,9 +948,9 @@ HWTEST_F(SecurityComponentMethodModifierTest, ChainModeImpl_SetBadStyleValues, T
     ASSERT_NE(layoutProperty, nullptr);
     ASSERT_EQ(layoutProperty->GetFlexItemProperty(), nullptr);
 
-    Ark_Axis direction = Ark_Axis::ARK_AXIS_HORIZONTAL;
-    Ark_ChainStyle style = static_cast<Ark_ChainStyle>(INT_MIN);
-    modifier_->setChainMode(node_, direction, style);
+    Opt_Axis direction = ArkValue<Opt_Axis>(Ark_Axis::ARK_AXIS_HORIZONTAL);
+    Opt_ChainStyle style = ArkValue<Opt_ChainStyle>(static_cast<Ark_ChainStyle>(INT_MIN));
+    modifier_->setChainMode(node_, &direction, &style);
 
     EXPECT_FALSE(layoutProperty->GetFlexItemProperty()->HasVerticalChainStyle());
 
@@ -955,9 +976,9 @@ HWTEST_F(SecurityComponentMethodModifierTest, ChainModeImpl_SetBadBothValues, Te
     ASSERT_NE(layoutProperty, nullptr);
     ASSERT_EQ(layoutProperty->GetFlexItemProperty(), nullptr);
 
-    Ark_Axis direction = static_cast<Ark_Axis>(INT_MAX);
-    Ark_ChainStyle style = static_cast<Ark_ChainStyle>(INT_MIN);
-    modifier_->setChainMode(node_, direction, style);
+    Opt_Axis direction = ArkValue<Opt_Axis>(static_cast<Ark_Axis>(INT_MAX));
+    Opt_ChainStyle style = ArkValue<Opt_ChainStyle>(static_cast<Ark_ChainStyle>(INT_MIN));
+    modifier_->setChainMode(node_, &direction, &style);
 
     ASSERT_TRUE(layoutProperty->GetFlexItemProperty()->HasVerticalChainStyle());
     EXPECT_FALSE(layoutProperty->GetFlexItemProperty()->GetVerticalChainStyleValue().direction.has_value());
@@ -993,7 +1014,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBo
         Ark_Union_Dimension_BorderRadiuses inputValueBorderRadius = initValueBorderRadius;
 
         WriteToUnion<Ark_BorderRadiuses>(inputValueBorderRadius).topLeft = value;
-        modifier_->setBorderRadius1(node_, &inputValueBorderRadius);
+        auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
+        modifier_->setBorderRadius1(node_, &radius);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -1033,10 +1055,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBo
 
     auto checkValue = [this, &initValueBorderRadius](const std::string& input, const Opt_Length& value) {
         Ark_Union_Dimension_BorderRadiuses inputValueBorderRadius = initValueBorderRadius;
-
-        modifier_->setBorderRadius1(node_, &inputValueBorderRadius);
+        auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
+        modifier_->setBorderRadius1(node_, &radius);
         WriteToUnion<Ark_BorderRadiuses>(inputValueBorderRadius).topLeft = value;
-        modifier_->setBorderRadius1(node_, &inputValueBorderRadius);
+        radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
+        modifier_->setBorderRadius1(node_, &radius);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -1080,7 +1103,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBo
         Ark_Union_Dimension_BorderRadiuses inputValueBorderRadius = initValueBorderRadius;
 
         WriteToUnion<Ark_BorderRadiuses>(inputValueBorderRadius).topRight = value;
-        modifier_->setBorderRadius1(node_, &inputValueBorderRadius);
+        auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
+        modifier_->setBorderRadius1(node_, &radius);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -1120,10 +1144,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBo
 
     auto checkValue = [this, &initValueBorderRadius](const std::string& input, const Opt_Length& value) {
         Ark_Union_Dimension_BorderRadiuses inputValueBorderRadius = initValueBorderRadius;
-
-        modifier_->setBorderRadius1(node_, &inputValueBorderRadius);
+        auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
+        modifier_->setBorderRadius1(node_, &radius);
         WriteToUnion<Ark_BorderRadiuses>(inputValueBorderRadius).topRight = value;
-        modifier_->setBorderRadius1(node_, &inputValueBorderRadius);
+        radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
+        modifier_->setBorderRadius1(node_, &radius);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -1167,7 +1192,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBo
         Ark_Union_Dimension_BorderRadiuses inputValueBorderRadius = initValueBorderRadius;
 
         WriteToUnion<Ark_BorderRadiuses>(inputValueBorderRadius).bottomLeft = value;
-        modifier_->setBorderRadius1(node_, &inputValueBorderRadius);
+        auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
+        modifier_->setBorderRadius1(node_, &radius);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -1207,10 +1233,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBo
 
     auto checkValue = [this, &initValueBorderRadius](const std::string& input, const Opt_Length& value) {
         Ark_Union_Dimension_BorderRadiuses inputValueBorderRadius = initValueBorderRadius;
-
-        modifier_->setBorderRadius1(node_, &inputValueBorderRadius);
+        auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
+        modifier_->setBorderRadius1(node_, &radius);
         WriteToUnion<Ark_BorderRadiuses>(inputValueBorderRadius).bottomLeft = value;
-        modifier_->setBorderRadius1(node_, &inputValueBorderRadius);
+        radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
+        modifier_->setBorderRadius1(node_, &radius);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -1254,7 +1281,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBo
         Ark_Union_Dimension_BorderRadiuses inputValueBorderRadius = initValueBorderRadius;
 
         WriteToUnion<Ark_BorderRadiuses>(inputValueBorderRadius).bottomRight = value;
-        modifier_->setBorderRadius1(node_, &inputValueBorderRadius);
+        auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
+        modifier_->setBorderRadius1(node_, &radius);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -1294,10 +1322,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBo
 
     auto checkValue = [this, &initValueBorderRadius](const std::string& input, const Opt_Length& value) {
         Ark_Union_Dimension_BorderRadiuses inputValueBorderRadius = initValueBorderRadius;
-
-        modifier_->setBorderRadius1(node_, &inputValueBorderRadius);
+        auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
+        modifier_->setBorderRadius1(node_, &radius);
         WriteToUnion<Ark_BorderRadiuses>(inputValueBorderRadius).bottomRight = value;
-        modifier_->setBorderRadius1(node_, &inputValueBorderRadius);
+        radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
+        modifier_->setBorderRadius1(node_, &radius);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
