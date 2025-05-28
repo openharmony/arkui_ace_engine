@@ -493,4 +493,24 @@ HWTEST_F(AccessibilityProviderUtilsTestNg, AccessibilityUtilsTest004, TestSize.L
     EXPECT_EQ(afterInfo2.GetActionList().size(), 0);
 }
 
+/**
+ * @tc.name: accessibilityTest005
+ * @tc.desc: Test TransformAccessbilityElementInfo with nullptr description
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityProviderUtilsTestNg, AccessibilityUtilsTest005, TestSize.Level1)
+{
+    ArkUI_AccessibleAction nullptrAction;
+    nullptrAction.description = nullptr;
+    ArkUI_AccessibilityElementInfo info;
+    info.AddOperationAction(nullptrAction);
+    
+    OHOS::Accessibility::AccessibilityElementInfo afterInfo;
+    Framework::TransformAccessbilityElementInfo(info, afterInfo);
+
+    auto actionList = afterInfo.GetActionList();
+    EXPECT_EQ(actionList.size(), 1);
+    auto description = actionList[0].GetDescriptionInfo();
+    EXPECT_EQ(description.length(), 0);
+}
 } // namespace OHOS::Ace::NG
