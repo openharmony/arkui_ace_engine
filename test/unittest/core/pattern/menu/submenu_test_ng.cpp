@@ -846,7 +846,7 @@ HWTEST_F(SubMenuTestNg, VerticalLayoutSubMenuHalfScreen001, TestSize.Level1)
     subMenuLayoutAlgorithm.position_.y_ = MENU_ITEM_WRAPPER_WIDTH;
     subMenuLayoutAlgorithm.wrapperSize_ = SizeT(TARGET_SIZE_WIDTH, MENU_ITEM_WRAPPER_HEIGHT);
     float position = ONE;
-    EXPECT_EQ(subMenuLayoutAlgorithm.VerticalLayoutSubMenuHalfScreen(size, position, menuItemSize), TARGET_SIZE_WIDTH);
+    EXPECT_EQ(subMenuLayoutAlgorithm.VerticalLayoutSubMenuHalfScreen(size, position, menuItemSize, nullptr, false, nullptr), TARGET_SIZE_WIDTH);
 }
 
 /**
@@ -865,7 +865,7 @@ HWTEST_F(SubMenuTestNg, VerticalLayoutSubMenuHalfScreen002, TestSize.Level1)
     SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
     subMenuLayoutAlgorithm.wrapperSize_ = SizeT(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
     float position = ONE;
-    EXPECT_EQ(subMenuLayoutAlgorithm.VerticalLayoutSubMenuHalfScreen(size, position, menuItemSize), ZERO);
+    EXPECT_EQ(subMenuLayoutAlgorithm.VerticalLayoutSubMenuHalfScreen(size, position, menuItemSize, nullptr, false, nullptr), ZERO);
 }
 
 /**
@@ -885,7 +885,7 @@ HWTEST_F(SubMenuTestNg, VerticalLayoutSubMenu001, TestSize.Level1)
     subMenuLayoutAlgorithm.wrapperRect_ =
         Rect(MENU_ITEM_WRAPPER_X, MENU_ITEM_WRAPPER_Y, MENU_ITEM_WRAPPER_WIDTH, TARGET_SIZE_HEIGHT);
     float position = THREE_HUNDRED_FIFTY;
-    EXPECT_EQ(subMenuLayoutAlgorithm.VerticalLayoutSubMenu(size, position, menuItemSize), THREE_HUNDRED_TEN);
+    EXPECT_EQ(subMenuLayoutAlgorithm.VerticalLayoutSubMenu(size, position, menuItemSize, nullptr, false, nullptr), THREE_HUNDRED_TEN);
 }
 
 /**
@@ -905,7 +905,7 @@ HWTEST_F(SubMenuTestNg, VerticalLayoutSubMenu002, TestSize.Level1)
     subMenuLayoutAlgorithm.wrapperRect_ =
         Rect(MENU_ITEM_WRAPPER_X, MENU_ITEM_WRAPPER_Y_NEW, MENU_ITEM_WRAPPER_WIDTH, TARGET_SIZE_HEIGHT);
     float position = ONE;
-    EXPECT_EQ(subMenuLayoutAlgorithm.VerticalLayoutSubMenu(size, position, menuItemSize), TARGET_SIZE_WIDTH);
+    EXPECT_EQ(subMenuLayoutAlgorithm.VerticalLayoutSubMenu(size, position, menuItemSize, nullptr, false, nullptr), TARGET_SIZE_WIDTH);
 }
 
 /**

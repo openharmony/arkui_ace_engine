@@ -1348,7 +1348,7 @@ HWTEST_F(MenuLayout2TestNg, SubMenuLayoutAlgorithmTestNg001, TestSize.Level1)
     ASSERT_NE(menuGeometryNode, nullptr);
     menuGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
     auto result = algorithm->VerticalLayoutSubMenuHalfScreen(menuNode->GetGeometryNode()->GetFrameSize(),
-        algorithm->position_.GetY(), item->GetGeometryNode()->GetFrameSize());
+        algorithm->position_.GetY(), item->GetGeometryNode()->GetFrameSize(), item, false, nullptr);
     ASSERT_EQ(result, 0.0f);
     SizeF size_f(100, 200);
     algorithm->wrapperSize_ = size_f;
@@ -1412,7 +1412,7 @@ HWTEST_F(MenuLayout2TestNg, SubMenuLayoutAlgorithmTestNg002, TestSize.Level1)
     ASSERT_NE(menuGeometryNode, nullptr);
     menuGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
     auto result = algorithm->VerticalLayoutSubMenuHalfScreen(menuNode->GetGeometryNode()->GetFrameSize(),
-        algorithm->position_.GetY(), item->GetGeometryNode()->GetFrameSize());
+        algorithm->position_.GetY(), item->GetGeometryNode()->GetFrameSize(), item, false, nullptr);
     ASSERT_EQ(result, 0.0f);
     SizeF size_f(100, 200);
     algorithm->wrapperSize_ = size_f;
@@ -1489,7 +1489,7 @@ HWTEST_F(MenuLayout2TestNg, SubMenuLayoutAlgorithmTestNg003, TestSize.Level1)
     ASSERT_NE(menuGeometryNode, nullptr);
     menuGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
     auto result = algorithm->VerticalLayoutSubMenuHalfScreen(menuNode->GetGeometryNode()->GetFrameSize(),
-        algorithm->position_.GetY(), item->GetGeometryNode()->GetFrameSize());
+        algorithm->position_.GetY(), item->GetGeometryNode()->GetFrameSize(), item, false, nullptr);
     ASSERT_EQ(result, 0.0f);
     SizeF size_f(100, 200);
     algorithm->wrapperSize_ = size_f;

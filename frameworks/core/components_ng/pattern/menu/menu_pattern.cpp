@@ -1807,8 +1807,8 @@ void MenuPattern::ShowStackMenuDisappearAnimation(const RefPtr<FrameNode>& menuN
     });
 
     CHECK_NULL_VOID(menuNode);
-    auto [originOffset, endOffset] = GetMenuOffset(menuNode, subMenuNode, true);
     CHECK_NULL_VOID(subMenuNode);
+    auto [originOffset, endOffset] = GetMenuOffset(menuNode, subMenuNode, true);
     auto subMenuPos = subMenuNode->GetPaintRectOffset(false, true);
     auto menuPosition = OffsetF(subMenuPos.GetX(), originOffset.GetY());
 
