@@ -81,6 +81,7 @@ private:
     void ProcessMaskRect(std::optional<DimensionRect> maskRect, const RefPtr<FrameNode>& dialog, bool isMask = false);
     void SetSubWindowHotarea(
         const RefPtr<DialogLayoutProperty>& dialogProp, SizeF childSize, SizeF selfSize, int32_t frameNodeId);
+    std::optional<DimensionRect> GetMaskRect(const RefPtr<FrameNode>& dialog);
 
     void UpdateTouchRegion();
 
@@ -94,6 +95,7 @@ private:
     void UpdateSafeArea(const RefPtr<FrameNode>& frameNode);
     void UpdateChildLayoutConstraint(const RefPtr<DialogLayoutProperty>& dialogProp,
         LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper);
+    void ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog);
     void AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child);
     void UpdateIsScrollHeightNegative(LayoutWrapper* layoutWrapper, float height);
     void UpdateChildMaxSizeHeight(SizeT<float>& maxSize);

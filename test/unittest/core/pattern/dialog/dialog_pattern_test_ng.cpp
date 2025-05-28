@@ -905,6 +905,11 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgAddExtraMas
     props.isModal = false;
     pattern->AddExtraMaskNode(props);
     EXPECT_EQ(totalChildCount, frameNode->GetTotalChildCount());
+ 
+    pattern->isUIExtensionSubWindow_ = true;
+    props.isModal = true;
+    pattern->AddExtraMaskNode(props);
+    EXPECT_EQ(totalChildCount + 1, frameNode->GetTotalChildCount());
 }
 
 /**

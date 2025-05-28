@@ -217,8 +217,6 @@ public:
         detachState_ = t;
     }
 
-    void ShowDialogMaskNG(const RefPtr<NG::FrameNode>& dialog) override;
-    void CloseDialogMaskNG(const RefPtr<NG::FrameNode>& dialog) override;
     void SwitchFollowParentWindowLayout(bool freeMultiWindowEnable) override;
     bool NeedFollowParentWindowLayout() override
     {

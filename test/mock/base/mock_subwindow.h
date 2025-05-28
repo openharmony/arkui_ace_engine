@@ -127,8 +127,6 @@ public:
     MOCK_METHOD0(GetAttachState, MenuWindowState());
     MOCK_METHOD0(GetDetachState, MenuWindowState());
     MOCK_CONST_METHOD0(GetWindowRect, NG::RectF());
-    MOCK_METHOD1(ShowDialogMaskNG, void(const RefPtr<NG::FrameNode>& dialog));
-    MOCK_METHOD1(CloseDialogMaskNG, void(const RefPtr<NG::FrameNode>& dialog));
     MOCK_METHOD1(SwitchFollowParentWindowLayout, void(bool freeMultiWindowEnable));
     MOCK_METHOD0(NeedFollowParentWindowLayout, bool());
     MOCK_METHOD1(AddFollowParentWindowLayoutNode, void(int32_t nodeId));
