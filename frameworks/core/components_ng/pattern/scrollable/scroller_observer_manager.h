@@ -36,6 +36,7 @@ public:
     void HandleOnScrollStartEvent();
     void HandleOnScrollStopEvent();
     void HandleOnDidScrollEvent(Dimension dimension, ScrollSource source, bool isAtTop, bool isAtBottom);
+    void HandleOnScrollerAreaChangeEvent(Dimension dimension, ScrollSource source, bool isAtTop, bool isAtBottom);
 
 private:
     std::unordered_map<int32_t, ScrollerObserver> observers_;

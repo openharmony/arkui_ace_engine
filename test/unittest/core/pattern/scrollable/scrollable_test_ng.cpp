@@ -1538,6 +1538,35 @@ HWTEST_F(ScrollableTestNg, OnTouchTestDone001, TestSize.Level1)
     EXPECT_FALSE(panRecognizer->IsPreventDefault());
 }
 
+/**
+ * @tc.name: onScrollerAreaChangeEventTest001
+ * @tc.desc: Test onScrollerAreaChangeEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, onScrollerAreaChangeEventTest001, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
+    scrollPn->parent_ = mockPn;
+
+    bool isChange = false;
+    OnScrollerAreaChangeEvent onScrollerAreaChange = [&isChange](Dimension dimension, ScrollSource state,
+        bool isAtTop, bool isAtBottom) {
+        isChange = true;
+    };
+    ScrollerObserver obs;
+    obs.onScrollerAreaChangeEvent = onScrollerAreaChange;
+    auto obserserMgr = AceType::MakeRefPtr<Ace::ScrollerObserverManager>();
+    ASSERT_NE(obserserMgr, nullptr);
+    obserserMgr->AddObserver(obs, 0);
+    auto positionController = AceType::MakeRefPtr<NG::ScrollableController>();
+    ASSERT_NE(positionController, nullptr);
+    positionController->SetObserverManager(obserserMgr);
+    scrollPn->SetPositionController(positionController);
+    scrollPn->FireObserverOnScrollerAreaChange(0.0);
+    EXPECT_EQ(isChange, true);
+}
+
 #ifdef SUPPORT_DIGITAL_CROWN
 /**
  * @tc.name: ListenDigitalCrownEvent001
