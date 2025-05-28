@@ -81,21 +81,6 @@ union DebugFlags {
     } bits_;
 };
 
-struct LayoutBreakpoints{
-    double WidthVPXS;
-    double WidthVPSM;
-    double WidthVPMD;
-    double WidthVPLG;
-    double HeightVPRATIOSM;
-    double HeightVPRATIOMD;
-
-    LayoutBreakpoints(double xs, double sm, double md, double lg, double ratio_sm, double ratio_lg)
-        : WidthVPXS(xs), WidthVPSM(sm), WidthVPMD(md), WidthVPLG(lg), HeightVPRATIOSM(ratio_sm),
-          HeightVPRATIOMD(ratio_lg)
-    {}
-};
-
-
 class ACE_FORCE_EXPORT SystemProperties final {
 public:
     /*
@@ -739,7 +724,9 @@ public:
 
     static int32_t getFormSharedImageCacheThreshold();
 
-    static LayoutBreakpoints GetLayoutBreakpoints();
+    static std::vector<double> GetWidthLayoutBreakpoints();
+
+    static std::vector<double> GetHeightLayoutBreakpoints();
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;

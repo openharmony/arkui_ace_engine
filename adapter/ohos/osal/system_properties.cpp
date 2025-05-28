@@ -54,7 +54,12 @@ constexpr char DISTRIBUTE_ENGINE_BUNDLE_NAME[] = "atomic.service.distribute.engi
 constexpr char IS_OPINC_ENABLE[] = "persist.ddgr.opinctype";
 constexpr char LAYOUT_BREAKPOINT[] = "const.arkui.layoutbreakpoint";
 constexpr char LAYOUT_BREAKPOINT_DEFAULT[] = "320,600,1000,1440;0.8,1.2;";
-static LayoutBreakpoints layoutBreakpoints_ = { 320, 600, 1000, 1440, 0.8, 1.2 };
+constexpr size_t NUM_0 = 0;
+constexpr size_t NUM_1 = 1;
+constexpr size_t NUM_2 = 2;
+constexpr size_t NUM_4 = 4;
+const std::vector<double> WIDTH_DEFAULTS {320, 600, 1000, 1440};
+const std::vector<double> HEIGHT_DEFAULTS {0.8, 1.2};
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr int DEFAULT_THRESHOLD_JANK = 15;
@@ -465,7 +470,8 @@ int32_t ReadTouchAccelarateMode()
     return system::GetIntParameter("debug.ace.touch.accelarate", 0);
 }
 
-std::vector<std::string> split(const std::string &s, char delimiter) {
+std::vector<std::string> Split(const std::string &s, char delimiter)
+{
     std::vector<std::string> tokens;
     std::string token;
     std::istringstream tokenStream(s);
@@ -477,20 +483,33 @@ std::vector<std::string> split(const std::string &s, char delimiter) {
     return tokens;
 }
 
-bool isValidNumber(const std::string &s, double &num) {
-    char *end;
-    const char *cstr = s.c_str();
-    num = strtod(cstr, &end);
-    if (end != cstr + s.size()) {
-        return false; // Contains invalid characters
+bool IsValidNumber(const std::string &s, double &num)
+{
+    if (s.empty()) {
+        return false;
     }
-    if (num <= 0) {
-        return false; // Non-positive numbe
+
+    std::istringstream iss(s);
+    double parsedNum;
+
+    iss >> parsedNum;
+
+    // Check if parsing failed or there are remaining characters
+    if (iss.fail() || !iss.eof()) {
+        return false;
     }
+
+    // Check for non-positive value
+    if (parsedNum <= 0) {
+        return false;
+    }
+
+    num = parsedNum;
     return true;
 }
 
-bool isAscending(const std::vector<double> &nums) {
+bool IsAscending(const std::vector<double> &nums)
+{
     for (size_t i = 1; i < nums.size(); ++i) {
         if (nums[i] < nums[i-1]) {
             return false;
@@ -499,84 +518,67 @@ bool isAscending(const std::vector<double> &nums) {
     return true;
 }
 
-bool parseThresholds(const std::string& input, std::vector<double>& horizontalVec, std::vector<double>& verticalVec)
+bool ParseBreakPoints(const std::string& input, std::vector<double>& breakpointsVec, size_t expectedCount)
 {
-    std::vector<std::string> parts = split(input, ';');
-
-    if (parts.size() < 2) {
+    std::vector<std::string> tokens = Split(input, ',');
+    if (tokens.size() != expectedCount) {
         return false;
     }
 
-    std::string part1 = parts[0];
-    std::string part2 = parts[1];
-
-    // Process the first part
-    std::vector<std::string> numStrs1 = split(part1, ',');
-    if (numStrs1.size() != 4) {
-        return false;
-    }
-
-    for (const std::string &s : numStrs1) {
+    for (const std::string& s : tokens) {
         double num;
-        if (!isValidNumber(s, num)) {
+        if (!IsValidNumber(s, num)) {
             return false;
         }
-        horizontalVec.push_back(num);
+        breakpointsVec.push_back(num);
     }
 
-    if (!isAscending(horizontalVec)) {
-        return false;
-    }
-
-    // Process the second part
-    std::vector<std::string> numStrs2 = split(part2, ',');
-    if (numStrs2.size() != 2) {
-        return false;
-    }
-
-    for (const std::string &s : numStrs2) {
-        double num;
-        if (!isValidNumber(s, num)) {
-            return false;
-        }
-        verticalVec.push_back(num);
-    }
-
-    if (!isAscending(verticalVec)) {
-        return false;
-    }
-
-    for (double num : horizontalVec)
-        LOGI("horizontalVec: %{public}lf ", num);
-    for (double num : verticalVec)
-        LOGI("verticalVec: %{public}lf ", num);
-
-    return true;
+    return IsAscending(breakpointsVec);
 }
 
-LayoutBreakpoints AcquireLayoutBreakpoints()
+bool ParseWidthBreakPoints(const std::string& input, std::vector<double>& breakpointsVec)
+{
+    return ParseBreakPoints(input, breakpointsVec, NUM_4);
+}
+
+bool ParseHeightBreakPoints(const std::string& input, std::vector<double>& breakpointsVec)
+{
+    return ParseBreakPoints(input, breakpointsVec, NUM_2);
+}
+
+std::vector<double> GetLayoutBreakpoints(
+    size_t partIndex, const std::vector<double>& defaults, bool (*parser)(const std::string&, std::vector<double>&))
 {
     auto param = system::GetParameter(LAYOUT_BREAKPOINT, LAYOUT_BREAKPOINT_DEFAULT);
-    LayoutBreakpoints beakpoints(320, 600, 1000, 1440, 0.8, 1.2);
     if (param == LAYOUT_BREAKPOINT_DEFAULT) {
-        LOGI("LayoutBreakpoint is default.");
-        return beakpoints;
+        LOGI("Using default layout breakpoints");
+        return defaults;
     }
-    LOGI("LayoutBreakpoint: %{public}s", param.c_str());
-    std::vector<double> horizontal;
-    std::vector<double> vertical;
-    if (parseThresholds(param, horizontal, vertical)) {
-        beakpoints.WidthVPXS = horizontal[0];
-        beakpoints.WidthVPSM = horizontal[1];
-        beakpoints.WidthVPMD = horizontal[2];
-        beakpoints.WidthVPLG = horizontal[3];
-        beakpoints.HeightVPRATIOSM = vertical[0];
-        beakpoints.HeightVPRATIOMD = vertical[1];
-        LOGI("LayoutBreakpoint is set.");
-        return beakpoints;
+
+    auto parts = Split(param, ';');
+    if (parts.size() <= partIndex) {
+        LOGI("Invalid parameter format");
+        return defaults;
     }
-    LOGI("parseThresholds failed, LayoutBreakpoint is default.");
-    return beakpoints;
+
+    std::vector<double> result;
+    if (parser(parts[partIndex], result)) {
+        LOGI("Custom breakpoints applied");
+        return result;
+    }
+
+    LOGI("Failed to parse, using defaults");
+    return defaults;
+}
+
+std::vector<double> SystemProperties::GetWidthLayoutBreakpoints()
+{
+    return GetLayoutBreakpoints(NUM_0, WIDTH_DEFAULTS, ParseWidthBreakPoints);
+}
+
+std::vector<double> SystemProperties::GetHeightLayoutBreakpoints()
+{
+    return GetLayoutBreakpoints(NUM_1, HEIGHT_DEFAULTS, ParseHeightBreakPoints);
 }
 
 std::string InitSysBrand()
@@ -841,12 +843,6 @@ void SystemProperties::InitDeviceTypeBySystemProperty()
     } else {
         deviceType_ = DeviceType::PHONE;
     }
-}
-
-ACE_WEAK_SYM LayoutBreakpoints SystemProperties::GetLayoutBreakpoints()
-{
-    layoutBreakpoints_ = AcquireLayoutBreakpoints();
-    return layoutBreakpoints_;
 }
 
 void SystemProperties::InitDeviceInfo(

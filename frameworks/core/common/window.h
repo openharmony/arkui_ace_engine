@@ -240,8 +240,8 @@ public:
 
     void SetForceVsyncRequests(bool forceVsyncRequests);
 
-    WidthBreakpoint GetWidthBreakpoint(const LayoutBreakpoints& breakpoints) const;
-    HeightBreakpoint GetHeightBreakpoint(const LayoutBreakpoints& breakpoints) const;
+    WidthBreakpoint GetWidthBreakpoint(const std::vector<double>& layoutBreakpoints) const;
+    HeightBreakpoint GetHeightBreakpoint(const std::vector<double>& layoutBreakpoints) const;
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
