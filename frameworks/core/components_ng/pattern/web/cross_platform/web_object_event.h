@@ -240,7 +240,8 @@ public:
         return false;
     }
 
-    RefPtr<WebResponse> OnObjectEventWithResponseReturn(const std::string& eventId, const std::string& param, void *jObject)
+    RefPtr<WebResponse> OnObjectEventWithResponseReturn(
+        const std::string& eventId, const std::string& param, void* jObject)
     {
         auto event = eventObjectWithResponseReturnMap_.find(eventId);
         if (event != eventObjectWithResponseReturnMap_.end() && event->second) {
