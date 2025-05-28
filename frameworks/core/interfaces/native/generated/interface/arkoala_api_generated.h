@@ -2684,6 +2684,8 @@ typedef struct Ark_Literal_Number_code__want Ark_Literal_Number_code__want;
 typedef struct Opt_Literal_Number_code__want Opt_Literal_Number_code__want;
 typedef struct Ark_Literal_ResourceColor_color Ark_Literal_ResourceColor_color;
 typedef struct Opt_Literal_ResourceColor_color Opt_Literal_ResourceColor_color;
+typedef struct Ark_PopupMaskType Ark_PopupMaskType;
+typedef struct Opt_PopupMaskType Opt_PopupMaskType;
 typedef struct Ark_Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs Ark_Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs;
 typedef struct Opt_Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs Opt_Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs;
 typedef struct Ark_Literal_Union_String_Resource_url_Array_Header_headers Ark_Literal_Union_String_Resource_url_Array_Header_headers;
@@ -2894,6 +2896,8 @@ typedef struct Ark_Union_ArrowStyle_Boolean Ark_Union_ArrowStyle_Boolean;
 typedef struct Opt_Union_ArrowStyle_Boolean Opt_Union_ArrowStyle_Boolean;
 typedef struct Ark_Union_Boolean_Literal_ResourceColor_color Ark_Union_Boolean_Literal_ResourceColor_color;
 typedef struct Opt_Union_Boolean_Literal_ResourceColor_color Opt_Union_Boolean_Literal_ResourceColor_color;
+typedef struct Ark_Union_Boolean_PopupMaskType Ark_Union_Boolean_PopupMaskType;
+typedef struct Opt_Union_Boolean_PopupMaskType Opt_Union_Boolean_PopupMaskType;
 typedef struct Ark_Union_BorderRadiuses_Length_LocalizedBorderRadiuses Ark_Union_BorderRadiuses_Length_LocalizedBorderRadiuses;
 typedef struct Opt_Union_BorderRadiuses_Length_LocalizedBorderRadiuses Opt_Union_BorderRadiuses_Length_LocalizedBorderRadiuses;
 typedef struct Ark_Union_CanvasRenderingContext2D_DrawingRenderingContext Ark_Union_CanvasRenderingContext2D_DrawingRenderingContext;
@@ -3143,6 +3147,8 @@ typedef struct Ark_RichEditorSpan Ark_RichEditorSpan;
 typedef struct Opt_RichEditorSpan Opt_RichEditorSpan;
 typedef struct DrawCallbackFunc DrawCallbackFunc;
 typedef struct Opt_DrawCallbackFunc Opt_DrawCallbackFunc;
+typedef struct Ark_PopupButton Ark_PopupButton;
+typedef struct Opt_PopupButton Opt_PopupButton;
 typedef Ark_Object Ark_ContentModifier;
 typedef Opt_Object Opt_ContentModifier;
 typedef enum Ark_AccessibilityHoverType {
@@ -13027,6 +13033,15 @@ typedef struct Opt_Literal_String_value_Callback_Void_action {
     Ark_Tag tag;
     Ark_Literal_String_value_Callback_Void_action value;
 } Opt_Literal_String_value_Callback_Void_action;
+
+typedef struct Ark_PopupButton {
+    Ark_String value;
+    Callback_Void action;
+} Ark_PopupButton;
+typedef struct Opt_PopupButton {
+    Ark_Tag tag;
+    Ark_PopupButton value;
+} Opt_PopupButton;
 typedef struct Ark_Literal_TransitionEffect_appear_disappear {
     Ark_TransitionEffect appear;
     Ark_TransitionEffect disappear;
@@ -16409,6 +16424,13 @@ typedef struct Opt_Literal_ResourceColor_color {
     Ark_Tag tag;
     Ark_Literal_ResourceColor_color value;
 } Opt_Literal_ResourceColor_color;
+typedef struct Ark_PopupMaskType {
+    Ark_ResourceColor color;
+} Ark_PopupMaskType;
+typedef struct Opt_PopupMaskType {
+    Ark_Tag tag;
+    Ark_PopupMaskType value;
+} Opt_PopupMaskType;
 typedef struct Ark_Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs {
     Opt_Union_Number_Literal_Number_offset_span xs;
     Opt_Union_Number_Literal_Number_offset_span sm;
@@ -17299,6 +17321,17 @@ typedef struct Opt_Union_Boolean_Literal_ResourceColor_color {
     Ark_Tag tag;
     Ark_Union_Boolean_Literal_ResourceColor_color value;
 } Opt_Union_Boolean_Literal_ResourceColor_color;
+typedef struct Ark_Union_Boolean_PopupMaskType {
+    Ark_Int32 selector;
+    union {
+        Ark_Boolean value0;
+        Ark_PopupMaskType value1;
+    };
+} Ark_Union_Boolean_PopupMaskType;
+typedef struct Opt_Union_Boolean_PopupMaskType {
+    Ark_Tag tag;
+    Ark_Union_Boolean_PopupMaskType value;
+} Opt_Union_Boolean_PopupMaskType;
 typedef struct Ark_Union_BorderRadiuses_Length_LocalizedBorderRadiuses {
     Ark_Int32 selector;
     union {
@@ -18061,14 +18094,13 @@ typedef struct Opt_CustomDialogControllerOptions {
 typedef struct Ark_CustomPopupOptions {
     CustomNodeBuilder builder;
     Opt_Placement placement;
-    Opt_Union_Color_String_Resource_Number maskColor;
     Opt_Union_Color_String_Resource_Number popupColor;
     Opt_Boolean enableArrow;
     Opt_Boolean autoCancel;
-    Opt_Callback_Literal_Boolean_isVisible_Void onStateChange;
+    Opt_PopupStateChangeCallback onStateChange;
     Opt_Length arrowOffset;
     Opt_Boolean showInSubWindow;
-    Opt_Union_Boolean_Literal_ResourceColor_color mask;
+    Opt_Union_Boolean_PopupMaskType mask;
     Opt_Length targetSpace;
     Opt_Position offset;
     Opt_Length width;
@@ -18728,14 +18760,13 @@ typedef struct Opt_NavigationToolbarOptions {
 } Opt_NavigationToolbarOptions;
 typedef struct Ark_PopupOptions {
     Ark_String message;
-    Opt_Boolean placementOnTop;
     Opt_Placement placement;
-    Opt_Literal_String_value_Callback_Void_action primaryButton;
-    Opt_Literal_String_value_Callback_Void_action secondaryButton;
-    Opt_Callback_Literal_Boolean_isVisible_Void onStateChange;
+    Opt_PopupButton primaryButton;
+    Opt_PopupButton secondaryButton;
+    Opt_PopupStateChangeCallback onStateChange;
     Opt_Length arrowOffset;
     Opt_Boolean showInSubWindow;
-    Opt_Union_Boolean_Literal_ResourceColor_color mask;
+    Opt_Union_Boolean_PopupMaskType mask;
     Opt_PopupMessageOptions messageOptions;
     Opt_Length targetSpace;
     Opt_Boolean enableArrow;

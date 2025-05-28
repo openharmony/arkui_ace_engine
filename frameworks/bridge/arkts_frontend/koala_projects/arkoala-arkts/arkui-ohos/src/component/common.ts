@@ -7799,6 +7799,11 @@ export interface TipsOptions {
     arrowWidth?: Dimension;
     arrowHeight?: Dimension;
 }
+
+export interface PopupButton {
+    value: string;
+    action: (() => void);
+}
 export interface Literal_String_value_Callback_Void_action {
     value: string;
     action: (() => void);
@@ -7812,14 +7817,13 @@ export interface Literal_ResourceColor_color {
 }
 export interface PopupOptions {
     message: string;
-    placementOnTop?: boolean;
     placement?: Placement;
-    primaryButton?: Literal_String_value_Callback_Void_action;
-    secondaryButton?: Literal_String_value_Callback_Void_action;
-    onStateChange?: ((event: Literal_Boolean_isVisible) => void);
+    primaryButton?: PopupButton;
+    secondaryButton?: PopupButton;
+    onStateChange?: PopupStateChangeCallback;
     arrowOffset?: Length;
     showInSubWindow?: boolean;
-    mask?: boolean | Literal_ResourceColor_color;
+    mask?: boolean | PopupMaskType;
     messageOptions?: PopupMessageOptions;
     targetSpace?: Length;
     enableArrow?: boolean;
@@ -7842,14 +7846,13 @@ export interface PopupOptions {
 export interface CustomPopupOptions {
     builder: CustomBuilder;
     placement?: Placement;
-    maskColor?: Color | string | Resource | number;
     popupColor?: Color | string | Resource | number;
     enableArrow?: boolean;
     autoCancel?: boolean;
-    onStateChange?: ((event: Literal_Boolean_isVisible) => void);
+    onStateChange?: PopupStateChangeCallback;
     arrowOffset?: Length;
     showInSubWindow?: boolean;
-    mask?: boolean | Literal_ResourceColor_color;
+    mask?: boolean | PopupMaskType;
     targetSpace?: Length;
     offset?: Position;
     width?: Dimension;

@@ -2153,6 +2153,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Boolean_PopupMaskType& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_BorderRadiuses_Length_LocalizedBorderRadiuses& src)
 {
     switch (src.selector) {
@@ -3175,6 +3190,12 @@ void AssignLiteralTo(std::optional<T>& dst,
     AssignTo(dst, src.identity);
 }
 
+template<typename T>
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Ark_PopupButton& src)
+{
+    AssignTo(dst, src.value);
+}
 
 #define ASSIGN_OPT(name) \
 template<typename T> \
@@ -4738,6 +4759,7 @@ ASSIGN_OPT(Opt_Type_NavigationAttribute_title_value)
 ASSIGN_OPT(Opt_UnderlineColor)
 ASSIGN_OPT(Opt_Union_ArrowStyle_Boolean)
 ASSIGN_OPT(Opt_Union_Boolean_Literal_ResourceColor_color)
+ASSIGN_OPT(Opt_Union_Boolean_PopupMaskType)
 ASSIGN_OPT(Opt_Union_BorderRadiuses_Length_LocalizedBorderRadiuses)
 ASSIGN_OPT(Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext)
 ASSIGN_OPT(Opt_Union_Dimension_BorderRadiuses_LocalizedBorderRadiuses)
@@ -4842,7 +4864,6 @@ ASSIGN_OPT(Opt_DatePickerDialogOptions)
 ASSIGN_OPT(Opt_MenuOptions)
 ASSIGN_OPT(Opt_NavigationMenuOptions)
 ASSIGN_OPT(Opt_NavigationToolbarOptions)
-ASSIGN_OPT(Opt_PopupOptions)
 ASSIGN_OPT(Opt_RichEditorImageSpanOptions)
 ASSIGN_OPT(Opt_RichEditorImageSpanResult)
 ASSIGN_OPT(Opt_RichEditorTextSpanOptions)
@@ -4858,6 +4879,8 @@ ASSIGN_OPT(Opt_Union_RichEditorTextSpanResult_RichEditorImageSpanResult)
 ASSIGN_OPT(Opt_Union_SubTabBarStyle_BottomTabBarStyle)
 ASSIGN_OPT(Opt_WithThemeOptions)
 ASSIGN_OPT(Opt_RichEditorSpan)
+ASSIGN_OPT(Opt_PopupButton)
+ASSIGN_OPT(Opt_PopupOptions)
 #undef ASSIGN_OPT
 }
 

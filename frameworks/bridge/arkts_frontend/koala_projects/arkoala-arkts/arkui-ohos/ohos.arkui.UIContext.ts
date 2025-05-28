@@ -38,9 +38,12 @@ import { Frame } from "./src/Graphics"
 import { KeyEvent } from "./src/component/common"
 import { Nullable } from "./src/component/enums"
 import { KeyProcessingMode } from "./src/component/focus"
-import {observer} from "@ohos/observer"
+import { observer } from "@ohos/observer"
+import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
+    AlertDialogParamWithOptions }from "./src/component/alertDialog"
 import inspector from "@ohos/arkui/inspector"
 import router from './ohos.router'
+import promptAction from './ohos.promptAction';
 import { ContextMenu } from './src/component/contextMenu';
 
 export class UIInspector {
@@ -191,6 +194,18 @@ class ContextMenuController {
     public close(): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         ContextMenu.close();
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+}
+
+export class PromptAction {
+    instanceId_: int32 = 100000;
+    constructor(instanceId: int32) {
+        this.instanceId_ = instanceId;
+    }
+
+    showToast(options: promptAction.ShowToastOptions): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 }
@@ -376,6 +391,18 @@ export class UIContext {
             this.observer_ = new UIObserver(this.instanceId_);
         }
         return this.observer_ as UIObserver;
+    }
+
+    public getPromptAction(): PromptAction {
+        let promptAction : PromptAction = new PromptAction(this.instanceId_);
+        return promptAction;
+    }
+
+    public showAlertDialog(options: AlertDialogParamWithConfirm | AlertDialogParamWithButtons |
+        AlertDialogParamWithOptions): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        AlertDialog.show(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     // @ts-ignore
