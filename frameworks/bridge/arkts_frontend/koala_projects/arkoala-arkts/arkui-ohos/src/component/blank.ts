@@ -100,12 +100,7 @@ export class ArkBlankPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
 }
-export type BlankInterface = (min?: number | string) => BlankAttribute;
 export interface BlankAttribute extends CommonMethod {
-    color(value: ResourceColor | undefined): this
-}
-export interface UIBlankAttribute extends UICommonMethod {
-    /** @memo */
     color(value: ResourceColor | undefined): this
 }
 export class ArkBlankStyle extends ArkCommonMethodStyle implements BlankAttribute {
@@ -114,9 +109,8 @@ export class ArkBlankStyle extends ArkCommonMethodStyle implements BlankAttribut
         return this
     }
 }
-/** @memo:stable */
-export class ArkBlankComponent extends ArkCommonMethodComponent implements UIBlankAttribute {
-    protected _modifierHost: ArkBlankNode | undefined;
+export class ArkBlankComponent extends ArkCommonMethodComponent implements BlankAttribute {
+    protected _modifierHost: ArkBlankNode | undefined
     setModifierHost(value: ArkBlankNode): void {
         this._modifierHost = value;
     }
@@ -142,7 +136,6 @@ export class ArkBlankComponent extends ArkCommonMethodComponent implements UIBla
     getPeer(): ArkBlankPeer {
         return (this.peer as ArkBlankPeer)
     }
-    /** @memo */
     public setBlankOptions(min?: number | string): this {
         if (this.checkPriority("setBlankOptions")) {
             const min_casted = min as (number | string | undefined)
@@ -151,7 +144,6 @@ export class ArkBlankComponent extends ArkCommonMethodComponent implements UIBla
         }
         return this
     }
-    /** @memo */
     public color(value: ResourceColor | undefined): this {
         if (this.checkPriority("color")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -168,7 +160,7 @@ export class ArkBlankComponent extends ArkCommonMethodComponent implements UIBla
 /** @memo */
 export function Blank(
     /** @memo */
-    style: ((attributes: UIBlankAttribute) => void) | undefined,
+    style: ((attributes: BlankAttribute) => void) | undefined,
     min?: number | string,
     /** @memo */
     content_?: (() => void) | undefined,
