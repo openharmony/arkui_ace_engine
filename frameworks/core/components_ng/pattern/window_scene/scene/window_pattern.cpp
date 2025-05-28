@@ -569,7 +569,10 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
     session_->SetNeedSnapshot(false);
     isBlankForSnapshot_ = false;
 
-    if (IsSnapshotSizeChanged()) {
+    int32_t imageFit = 0;
+    auto isPersistentImageFit = Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
+        session_->GetPersistentId(), imageFit);
+    if (IsSnapshotSizeChanged() && isPersistentImageFit == false) {
         isBlankForSnapshot_ = true;
         CreateBlankWindow(snapshotWindow_);
         return;
