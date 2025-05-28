@@ -995,10 +995,11 @@ void JSSelect::SetMenuOutline(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    auto menuOptionArg = info[0];
     auto menuTheme = GetTheme<NG::MenuTheme>();
     NG::MenuParam menuParam;
     MenuDefaultParam(menuParam);
-    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+    if (!menuOptionArg->IsObject()) {
         NG::BorderWidthProperty outlineWidth;
         outlineWidth.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
         menuParam.outlineWidth = outlineWidth;
@@ -1006,7 +1007,7 @@ void JSSelect::SetMenuOutline(const JSCallbackInfo& info)
         outlineColor.SetColor(menuTheme->GetOuterBorderColor());
         menuParam.outlineColor = outlineColor;
     } else {
-        auto menuOptions = JSRef<JSObject>::Cast(info[0]);
+        auto menuOptions = JSRef<JSObject>::Cast(menuOptionArg);
         auto outlineWidthValue = menuOptions->GetProperty("width");
         JSViewPopups::ParseMenuOutlineWidth(outlineWidthValue, menuParam);
         auto outlineColorValue = menuOptions->GetProperty("color");
