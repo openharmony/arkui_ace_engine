@@ -105,6 +105,13 @@ RefPtr<FrameNode> TextDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostN
 
     CalcSize size(NG::CalcLength(dragPattern->GetFrameWidth()), NG::CalcLength(dragPattern->GetFrameHeight()));
     dragNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(size);
+
+    auto onDetachFromMainTreeCallback = [weak = WeakPtr<TextDragBase>(hostPattern)]() {
+        auto textDragBasePattern = weak.Upgrade();
+        CHECK_NULL_VOID(textDragBasePattern);
+        textDragBasePattern->OnDragNodeDetachFromMainTree();
+    };
+    dragPattern->SetOnDetachFromMainTree(std::move(onDetachFromMainTreeCallback));
     return dragNode;
 }
 
@@ -386,5 +393,11 @@ Dimension TextDragPattern::GetDragCornerRadius()
         return TEXT_DRAG_RADIUS_2IN1;
     }
     return TEXT_DRAG_RADIUS;
+}
+
+void TextDragPattern::OnDetachFromMainTree()
+{
+    CHECK_NULL_VOID(onDetachFromMainTree_);
+    onDetachFromMainTree_();
 }
 } // namespace OHOS::Ace::NG
