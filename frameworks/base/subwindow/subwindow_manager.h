@@ -55,6 +55,7 @@ struct SubwindowKey {
         json->Put("instanceId", instanceId);
         json->Put("displayId", (double)displayId);
         json->Put("windowType", subwindowType);
+        json->Put("foldStatus", static_cast<int32_t>(foldStatus));
         return json->ToString();
     }
 };
