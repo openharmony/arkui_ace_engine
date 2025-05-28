@@ -1600,6 +1600,8 @@ HWTEST_F(ViewAbstractTestNg, BackgroundResourceTest001, TestSize.Level1)
     ViewAbstract::SetBackgroundColor(nullptr, BLUE, resourceObject);
     ViewAbstract::SetBackgroundImageWithResourceObj(resourceObject, bundleName, moduleName);
     ViewAbstract::SetBackgroundImage(nullptr, imageSourceInfo, resourceObject);
+    ViewAbstract::SetCustomBackgroundColorWithResourceObj(resourceObject);
+    ViewAbstract::SetCustomBackgroundColor(BLUE);
 
     /**
      * @tc.expected: Return expected results..

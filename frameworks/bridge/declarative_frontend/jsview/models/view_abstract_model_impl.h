@@ -291,6 +291,7 @@ public:
     void SetBackground(std::function<void()>&& buildFunc) override {};
     void SetBackgroundAlign(const Alignment& align) override {};
     void SetCustomBackgroundColor(const Color& color) override {};
+    void SetCustomBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj) override {};
     void SetBackgroundIgnoresLayoutSafeAreaEdges(const uint32_t edges) override {};
     void SetIsTransitionBackground(bool val) override {};
     void SetIsBuilderBackground(bool val) override {};
