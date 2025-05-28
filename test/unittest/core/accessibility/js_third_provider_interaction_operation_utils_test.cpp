@@ -500,17 +500,20 @@ HWTEST_F(AccessibilityProviderUtilsTestNg, AccessibilityUtilsTest004, TestSize.L
  */
 HWTEST_F(AccessibilityProviderUtilsTestNg, AccessibilityUtilsTest005, TestSize.Level1)
 {
-    ArkUI_AccessibleAction nullptrAction;
-    nullptrAction.description = nullptr;
+    ArkUI_AccessibleAction nullptrAction0;
+    nullptrAction0.description = nullptr;
+    ArkUI_AccessibleAction nullptrAction1;
+    nullptrAction1.description = "";
     ArkUI_AccessibilityElementInfo info;
-    info.AddOperationAction(nullptrAction);
+    info.AddOperationAction(nullptrAction0);
+    info.AddOperationAction(nullptrAction1);
     
     OHOS::Accessibility::AccessibilityElementInfo afterInfo;
     Framework::TransformAccessbilityElementInfo(info, afterInfo);
 
     auto actionList = afterInfo.GetActionList();
-    EXPECT_EQ(actionList.size(), 1);
-    auto description = actionList[0].GetDescriptionInfo();
-    EXPECT_EQ(description.length(), 0);
+    EXPECT_EQ(actionList.size(), 2);
+    EXPECT_EQ(actionList[0].GetDescriptionInfo(), "");
+    EXPECT_EQ(actionList[1].GetDescriptionInfo(), "");
 }
 } // namespace OHOS::Ace::NG
