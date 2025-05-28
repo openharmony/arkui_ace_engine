@@ -31,7 +31,7 @@ using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
 
 namespace {
-const std::vector<Dimension> TITLE_HEIGHT = { NG::SINGLE_LINE_TITLEBAR_HEIGHT,NG::DOUBLE_LINE_TITLEBAR_HEIGHT };
+const std::vector<Dimension> TITLE_HEIGHT = { NG::SINGLE_LINE_TITLEBAR_HEIGHT, NG::DOUBLE_LINE_TITLEBAR_HEIGHT };
 
 constexpr uint32_t SAFE_AREA_TYPE_LIMIT = 3;
 constexpr uint32_t SAFE_AREA_EDGE_LIMIT = 4;
@@ -366,9 +366,9 @@ void FfiOHOSAceFrameworkNavigationSetHideToolBar(bool isHide)
     NavigationModel::GetInstance()->SetHideToolBar(isHide);
 }
 
-void FfiOHOSAceFrameworkNavigationSetHideToolBarWithAnimated(bool isHide,bool animated)
+void FfiOHOSAceFrameworkNavigationSetHideToolBarWithAnimated(bool isHide, bool animated)
 {
-    NavigationModel::GetInstance()->SetHideToolBar(isHide,animated);
+    NavigationModel::GetInstance()->SetHideToolBar(isHide, animated);
 }
 
 void FfiOHOSAceFrameworkNavigationSetHideTitleBar(bool isHide)
@@ -376,9 +376,9 @@ void FfiOHOSAceFrameworkNavigationSetHideTitleBar(bool isHide)
     NavigationModel::GetInstance()->SetHideTitleBar(isHide);
 }
 
-void FfiOHOSAceFrameworkNavigationSetHideTitleBarWithAnimated(bool isHide,bool animated)
+void FfiOHOSAceFrameworkNavigationSetHideTitleBarWithAnimated(bool isHide, bool animated)
 {
-    NavigationModel::GetInstance()->SetHideTitleBar(isHide,animated);
+    NavigationModel::GetInstance()->SetHideTitleBar(isHide, animated);
 }
 
 
@@ -526,16 +526,16 @@ void FfiOHOSAceFrameworkNavigationSetEnableModeChangeAnimtion(bool isEnable)
     NavigationModel::GetInstance()->SetEnableModeChangeAnimtion(isEnable);
 }
 
-void FfiOHOSAceFrameworkNavigationSetIgnoreLayoutSafeArea(VectorInt32Ptr types,VectorInt32Ptr edges)
+void FfiOHOSAceFrameworkNavigationSetIgnoreLayoutSafeArea(VectorInt32Ptr types, VectorInt32Ptr edges)
 {
     const auto& typesArray = *reinterpret_cast<std::vector<int32_t>*>(types);
     const auto& edgeArray = *reinterpret_cast<std::vector<int32_t>*>(edges);
     NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
-    if(typesArray.size() > 0) {
+    if (typesArray.size() > 0) {
         uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
-        for(size_t i = 0;i < typesArray.size();++i) {
+        for (size_t i = 0; i < typesArray.size(); ++i) {
             auto value = typesArray.at(i);
-            if( value >= static_cast<int32_t>(SAFE_AREA_TYPE_LIMIT)||
+            if (value >= static_cast<int32_t>(SAFE_AREA_TYPE_LIMIT)||
                 value == static_cast<int32_t>(SAFE_AREA_EDGE_SYSTEM)) {
                 safeAreaType = NG::SAFE_AREA_TYPE_SYSTEM;
                 break;
@@ -543,20 +543,20 @@ void FfiOHOSAceFrameworkNavigationSetIgnoreLayoutSafeArea(VectorInt32Ptr types,V
         }
         opts.type = safeAreaType;
     }
-    if(edgeArray.size() > 0) {
+    if (edgeArray.size() > 0) {
         uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
-        for(size_t i = 0;i < edgeArray.size();++i) {
+        for (size_t i = 0; i < edgeArray.size(); ++i) {
             auto value = edgeArray.at(i);
-            if( value >= static_cast<int32_t>(SAFE_AREA_EDGE_LIMIT)) {
+            if (value >= static_cast<int32_t>(SAFE_AREA_EDGE_LIMIT)) {
                 safeAreaEdge = NG::SAFE_AREA_EDGE_ALL;
                 break;
             }
-            if( value >= SAFE_AREA_EDGE_TOP || SAFE_AREA_EDGE_BOTTOM) {
+            if ( value >= SAFE_AREA_EDGE_TOP || SAFE_AREA_EDGE_BOTTOM) {
                 safeAreaEdge |= (1 << (uint32_t)value);
             }
         }
         opts.edges = safeAreaEdge;
-    }    
+    }
     NavigationModel::GetInstance()->SetIgnoreLayoutSafeArea(opts);
 }
 }
