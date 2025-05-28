@@ -74,6 +74,9 @@ private:
     static bool CreateDirectory(const std::string& path);
     static void HandleSingleSpanItemHtml(const RefPtr<NG::SpanItem>& item, std::string& out,
         size_t& paragrapStart, bool& newLine);
+    static std::string BackgroundColorToHtml(const std::optional<TextBackgroundStyle>& value);
+    static std::string NormalStyleToHtml(const RefPtr<NG::SpanItem>& item);
+    static std::string WrapWithAnchorIfNeeded(const RefPtr<NG::SpanItem>& item, const std::string& content);
 };
 }; // namespace OHOS::Ace
 #endif

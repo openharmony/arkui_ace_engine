@@ -72,7 +72,8 @@ public:
         Dimension dimension;
     };
     using StyleValue = std::variant<std::monostate, Font, DecorationSpanParam, BaseLineSpanParam,
-        LetterSpacingSpanParam, LineHeightSpanSparam, std::vector<Shadow>, ImageSpanOptions, SpanParagraphStyle>;
+        LetterSpacingSpanParam, LineHeightSpanSparam, std::vector<Shadow>, ImageSpanOptions, SpanParagraphStyle,
+        TextBackgroundStyle, std::string>;
     enum class StyleIndex {
         STYLE_NULL = 0,
         STYLE_FONT,
@@ -83,6 +84,8 @@ public:
         STYLE_SHADOWS,
         STYLE_IMAGE,
         STYLE_PARAGRAPH,
+        STYLE_BACKGROUND_COLOR,
+        STYLE_URL,
         STYLE_MAX
     };
 
@@ -91,6 +94,7 @@ private:
         PARAGRAPH = 0,
         IMAGE,
         TEXT,
+        ANCHOR,
         DEFAULT,
     };
 
@@ -132,6 +136,12 @@ private:
     bool IsBorderAttr(const std::string& key);
     bool IsDecorationLine(const std::string& key);
     bool IsDecorationStyle(const std::string& key);
+    bool IsBackgroundColorAttr(const std::string& key) const;
+    void InitBackgroundColor(
+        const std::string& key, const std::string& value, const std::string& index, StyleValues& values);
+    bool IsForegroundColorAttr(const std::string& key) const;
+    void InitForegroundColor(
+        const std::string& key, const std::string& value, const std::string& index, StyleValues& values);
     void SetPaddingOption(const std::string& key, const std::string& value, ImageSpanOptions& options);
     void SetMarginOption(const std::string& key, const std::string& value, ImageSpanOptions& options);
     void SetBorderOption(const std::string& key, const std::string& value, ImageSpanOptions& options);
@@ -175,6 +185,8 @@ private:
     RefPtr<SpanBase> MakeDecorationSpan(const SpanInfo& info, StyleValue& value);
     void AddImageSpans(const SpanInfo& info, RefPtr<MutableSpanString> mutableSpan);
     void AddSpans(const SpanInfo& info, RefPtr<MutableSpanString> span);
+    void ToAnchorSpan(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos);
+    std::string CleanTextSpaces(const std::string& text);
 
     std::string GetHtmlContent(xmlNodePtr node);
     RefPtr<MutableSpanString> GenerateSpans(const std::string& allContent, const std::vector<SpanInfo>& spanInfos);
