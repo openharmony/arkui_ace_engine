@@ -33,6 +33,9 @@ namespace OHOS::Ace::Framework {
     FUNCTION("centerX", CENTER_X)       \
     FUNCTION("centerY", CENTER_Y)       \
     FUNCTION("centerZ", CENTER_Z)       \
+    FUNCTION("angleX", ANGLE_X)       \
+    FUNCTION("angleY", ANGLE_Y)       \
+    FUNCTION("angleZ", ANGLE_Z)       \
     FUNCTION("color", COLOR)       \
     FUNCTION("colors", COLORS)       \
     FUNCTION("colorValue", COLOR_VALUE)       \

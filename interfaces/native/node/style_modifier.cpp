@@ -1385,12 +1385,37 @@ int32_t SetRotate(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     return ERROR_CODE_NO_ERROR;
 }
 
+int32_t SetRotateAngle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_FOUR_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto fullImpl = GetFullImpl();
+    ArkUI_Float32 values[item->size];
+    for (int i = 0; i < item->size; ++i) {
+        values[i] = item->value[i].f32;
+    }
+
+    fullImpl->getNodeModifiers()->getCommonModifier()->setRotateAngleWithoutTransformCenter(
+        node->uiNodeHandle, values, item->size);
+    return ERROR_CODE_NO_ERROR;
+}
+
 void ResetRotate(ArkUI_NodeHandle node)
 {
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
 
     fullImpl->getNodeModifiers()->getCommonModifier()->resetRotate(node->uiNodeHandle);
+}
+
+void ResetRotateAngle(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetRotateAngleWithoutTransformCenter(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetRotate(ArkUI_NodeHandle node)
@@ -1420,6 +1445,19 @@ int32_t SetBrightness(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     auto brightness = item->value[NUM_0].f32;
     fullImpl->getNodeModifiers()->getCommonModifier()->setBrightness(node->uiNodeHandle, brightness);
     return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetRotateAngle(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    ArkUIRotateAngleType rotateAngleType = { 0.0f, 0.0f, 0.0f, 0.0f };
+    fullImpl->getNodeModifiers()->getCommonModifier()->getRotateAngle(node->uiNodeHandle, &rotateAngleType);
+    g_numberValues[NUM_0].f32 = rotateAngleType.angleX;
+    g_numberValues[NUM_1].f32 = rotateAngleType.angleY;
+    g_numberValues[NUM_2].f32 = rotateAngleType.angleZ;
+    g_numberValues[NUM_3].f32 = rotateAngleType.sightDistance;
+    g_attributeItem.size = NUM_4;
+    return &g_attributeItem;
 }
 
 void ResetBrightness(ArkUI_NodeHandle node)
@@ -15373,6 +15411,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetNextFocus,
         SetAreaChangeApproximateOptions,
         SetTranslateWithPercentage,
+        SetRotateAngle,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -15488,6 +15527,7 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         nullptr,
         GetAreaChangeApproximateOptions,
         GetTranslateWithPercentage,
+        GetRotateAngle,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -15607,6 +15647,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetNextFocus,
         ResetAreaChangeApproximateOptions,
         ResetTranslateWithPercentage,
+        ResetRotateAngle,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

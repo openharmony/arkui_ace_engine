@@ -1178,6 +1178,47 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest046, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RosenRenderContextTest047
+ * @tc.desc: Test OnTransformRotateAngleUpdate Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTest047, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    auto rotateX = 40.0f;
+    auto rotateY = -40.0f;
+    auto rotateZ = 0.0f;
+    auto perspective = 120.0f;
+    auto rotate = 0.0f;
+    auto rotationXUserModifier = std::make_shared<Rosen::RSAnimatableProperty<float>>(rotate);
+    auto rotationYUserModifier = std::make_shared<Rosen::RSAnimatableProperty<float>>(rotate);
+    auto rotationZUserModifier = std::make_shared<Rosen::RSAnimatableProperty<float>>(rotate);
+    auto cameraDistanceUserModifier = std::make_shared<Rosen::RSAnimatableProperty<float>>(rotate);
+    rosenRenderContext->rotationXUserModifier_ = std::make_shared<Rosen::RSRotationXModifier>(rotationXUserModifier);
+    rosenRenderContext->rotationYUserModifier_ = std::make_shared<Rosen::RSRotationYModifier>(rotationYUserModifier);
+    rosenRenderContext->rotationZUserModifier_ = std::make_shared<Rosen::RSRotationModifier>(rotationZUserModifier);
+    rosenRenderContext->cameraDistanceUserModifier_ =
+        std::make_shared<Rosen::RSCameraDistanceModifier>(cameraDistanceUserModifier);
+    rosenRenderContext->OnTransformRotateAngleUpdate({ rotateX, rotateY, rotateZ, perspective });
+    auto rotationXValue = std::static_pointer_cast<Rosen::RSAnimatableProperty<float>>(
+        rosenRenderContext->rotationXUserModifier_->GetProperty())->Get();
+    auto rotationYValue = std::static_pointer_cast<Rosen::RSAnimatableProperty<float>>(
+        rosenRenderContext->rotationYUserModifier_->GetProperty())->Get();
+    auto rotationZValue = std::static_pointer_cast<Rosen::RSAnimatableProperty<float>>(
+        rosenRenderContext->rotationZUserModifier_->GetProperty())->Get();
+    auto cameraDistanceValue = std::static_pointer_cast<Rosen::RSAnimatableProperty<float>>(
+        rosenRenderContext->cameraDistanceUserModifier_->GetProperty()) ->Get();
+    EXPECT_EQ(rotationXValue, -rotateX);
+    EXPECT_EQ(rotationYValue, -rotateY);
+    EXPECT_EQ(rotationZValue, rotateZ);
+    EXPECT_EQ(cameraDistanceValue, perspective);
+}
+
+/**
  * @tc.name: AnimationPropertyTest001
  * @tc.desc: Test GetRenderNodePropertyValue func.
  * @tc.type: FUNC
