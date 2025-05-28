@@ -66,7 +66,7 @@ HWTEST_F(NodeRenderStatusMonitorTestNg, NodeRenderStatusMonitorTestNg001, testin
 {
     ASSERT_NE(monitor_, nullptr);
     auto frameNodeOne = FrameNode::CreateFrameNode(
-        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(frameNodeOne, nullptr);
     auto func = [](FrameNode* frameNode, NodeRenderState state, RenderMonitorReason reason) {};
     auto frameNodeOnePtr = AceType::RawPtr(frameNodeOne);
@@ -84,7 +84,7 @@ HWTEST_F(NodeRenderStatusMonitorTestNg, NodeRenderStatusMonitorTestNg001, testin
     EXPECT_EQ(monitor_->nodeRenderStatusListeners_.size(), 1);
 
     auto frameNodeTwo = FrameNode::CreateFrameNode(
-        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(frameNodeTwo, nullptr);
     auto frameNodeTwoPtr = AceType::RawPtr(frameNodeTwo);
     auto resultTwo = monitor_->RegisterNodeRenderStatusListener(frameNodeTwoPtr, nullptr, MonitorSourceType::OBSERVER);
@@ -116,7 +116,7 @@ HWTEST_F(NodeRenderStatusMonitorTestNg, NodeRenderStatusMonitorTestNg002, testin
     rootNode->layoutProperty_->UpdateVisibility(OHOS::Ace::VisibleType::VISIBLE);
     rootNode->SetActive(true);
     auto childNodeOne = FrameNode::CreateFrameNode(
-        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(childNodeOne, nullptr);
     childNodeOne->layoutProperty_->UpdateVisibility(OHOS::Ace::VisibleType::VISIBLE);
     childNodeOne->SetActive(true);
@@ -137,13 +137,12 @@ HWTEST_F(NodeRenderStatusMonitorTestNg, NodeRenderStatusMonitorTestNg002, testin
     EXPECT_EQ(listenerCount, 1);
 
     auto childNodeTwo = FrameNode::CreateFrameNode(
-        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(childNodeTwo, nullptr);
     childNodeTwo->layoutProperty_->UpdateVisibility(OHOS::Ace::VisibleType::VISIBLE);
     childNodeTwo->SetActive(true);
     childNodeTwo->AttachToMainTree(true);
-    childNodeTwo->MountToParent(rootNode);
-    childNodeTwo->AttachToMainTree(true);
+    childNodeTwo->MountToParent(childNodeOne);
     auto childNodeTwoPtr = AceType::RawPtr(childNodeTwo);
     state = monitor_->GetNodeCurrentRenderState(childNodeTwoPtr);
     EXPECT_EQ(state, NodeRenderState::ABOUT_TO_RENDER_OUT);
@@ -169,7 +168,7 @@ HWTEST_F(NodeRenderStatusMonitorTestNg, NodeRenderStatusMonitorTestNg003, testin
     rootNode->SetActive(true);
     auto func = [](FrameNode* frameNode, NodeRenderState state, RenderMonitorReason reason) {};
     auto childNodeOne = FrameNode::CreateFrameNode(
-        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(childNodeOne, nullptr);
     childNodeOne->layoutProperty_->UpdateVisibility(OHOS::Ace::VisibleType::VISIBLE);
     childNodeOne->SetActive(true);
@@ -208,11 +207,11 @@ HWTEST_F(NodeRenderStatusMonitorTestNg, NodeRenderStatusMonitorTestNg004, testin
     ASSERT_NE(monitor_, nullptr);
     auto func = [](FrameNode* frameNode, NodeRenderState state, RenderMonitorReason reason) {};
     auto childNodeOne = FrameNode::CreateFrameNode(
-        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(childNodeOne, nullptr);
     monitor_->RegisterNodeRenderStatusListener(AceType::RawPtr(childNodeOne), func, MonitorSourceType::OBSERVER);
     auto childNodeTwo = FrameNode::CreateFrameNode(
-        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(childNodeTwo, nullptr);
     monitor_->RegisterNodeRenderStatusListener(AceType::RawPtr(childNodeTwo), func, MonitorSourceType::OBSERVER);
     EXPECT_EQ(monitor_->nodeRenderStatusListeners_.size(), 2);
@@ -234,7 +233,7 @@ HWTEST_F(NodeRenderStatusMonitorTestNg, NodeRenderStatusMonitorTestNg005, testin
     auto func = [](FrameNode* frameNode, NodeRenderState state, RenderMonitorReason reason) {};
     for (int i = 0; i < 63; i++) {
         auto child = FrameNode::CreateFrameNode(
-            V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+            V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
         ASSERT_NE(child, nullptr);
         frameNodes.emplace_back(child);
         monitor_->RegisterNodeRenderStatusListener(AceType::RawPtr(child), func, MonitorSourceType::OBSERVER);
@@ -244,7 +243,7 @@ HWTEST_F(NodeRenderStatusMonitorTestNg, NodeRenderStatusMonitorTestNg005, testin
     EXPECT_EQ(isLimit, false);
 
     auto child = FrameNode::CreateFrameNode(
-        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(child, nullptr);
     auto result = monitor_->RegisterNodeRenderStatusListener(AceType::RawPtr(child), func, MonitorSourceType::OBSERVER);
     EXPECT_NE(result.id, MONITOR_INVALID_ID);
@@ -253,7 +252,7 @@ HWTEST_F(NodeRenderStatusMonitorTestNg, NodeRenderStatusMonitorTestNg005, testin
     EXPECT_EQ(isLimit, true);
 
     auto childTwo = FrameNode::CreateFrameNode(
-        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(childTwo, nullptr);
     result = monitor_->RegisterNodeRenderStatusListener(AceType::RawPtr(childTwo), func, MonitorSourceType::OBSERVER);
     EXPECT_EQ(result.id, MONITOR_INVALID_ID);
