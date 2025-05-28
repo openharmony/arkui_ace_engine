@@ -1227,7 +1227,11 @@ void SetRootAccessibilityNextFocusId(const RefPtr<NG::UINode>& currentNode, cons
     };
     auto nextNode = GetFramenodeByCondition(rootNode, condition);
     CHECK_NULL_VOID(nextNode);
-    nodeInfo.SetAccessibilityNextFocusId(nextNode->GetAccessibilityId());
+    auto elementId = nextNode->GetAccessibilityId();
+    if (nodeInfo.GetBelongTreeId() > 0) {
+        AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(nodeInfo.GetBelongTreeId(), elementId);
+    }
+    nodeInfo.SetAccessibilityNextFocusId(elementId);
 }
 
 void SetRootAccessibilityPreFocusId(const RefPtr<NG::UINode>& currentNode, const RefPtr<NG::FrameNode>& rootNode,

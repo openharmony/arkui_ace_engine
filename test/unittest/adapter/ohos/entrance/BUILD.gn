@@ -14,6 +14,123 @@
 import("//build/ohos_var.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
+ohos_source_set("ace_layout_inspector_mock") {
+  testonly = true
+  defines = [ "ENHANCED_ANIMATION" ]
+  sources = [
+    "$ace_root/test/mock/adapter/mock_dynamic_module_helper.cpp",
+    "$ace_root/test/mock/adapter/mock_file_uri_helper_ohos.cpp",
+    "$ace_root/test/mock/adapter/mock_image_packer_ohos.cpp",
+    "$ace_root/test/mock/adapter/mock_input_manager.cpp",
+    "$ace_root/test/mock/adapter/mock_modal_ui_extension.cpp",
+    "$ace_root/test/mock/adapter/mock_system_bar_style_ohos.cpp",
+    "$ace_root/test/mock/adapter/mock_ui_session_manager.cpp",
+    "$ace_root/test/mock/adapter/mock_view_data_wrap_ohos.cpp",
+    "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
+    "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
+    "$ace_root/test/mock/base/mock_ace_trace.cpp",
+    "$ace_root/test/mock/base/mock_download_manager.cpp",
+    "$ace_root/test/mock/base/mock_drag_window.cpp",
+    "$ace_root/test/mock/base/mock_engine_helper.cpp",
+    "$ace_root/test/mock/base/mock_event_report.cpp",
+    "$ace_root/test/mock/base/mock_foldable_window.cpp",
+    "$ace_root/test/mock/base/mock_frame_report.cpp",
+    "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
+    "$ace_root/test/mock/base/mock_image_perf.cpp",
+    "$ace_root/test/mock/base/mock_image_source.cpp",
+    "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
+    "$ace_root/test/mock/base/mock_localization.cpp",
+    "$ace_root/test/mock/base/mock_measure_util.cpp",
+    "$ace_root/test/mock/base/mock_mouse_style.cpp",
+    "$ace_root/test/mock/base/mock_pixel_map.cpp",
+    "$ace_root/test/mock/base/mock_ressched_report.cpp",
+    "$ace_root/test/mock/base/mock_socperf_client_impl.cpp",
+    "$ace_root/test/mock/base/mock_subwindow.cpp",
+    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/core/animation/mock_animation_manager.cpp",
+    "$ace_root/test/mock/core/animation/mock_implicit_animation.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_engine.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_engine_ext.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_translate_manager.cpp",
+    "$ace_root/test/mock/core/common/mock_ai_write_adapter.cpp",
+    "$ace_root/test/mock/core/common/mock_clipboard.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/mock/core/common/mock_data_detector_adapter.cpp",
+    "$ace_root/test/mock/core/common/mock_data_detector_mgr.cpp",
+    "$ace_root/test/mock/core/common/mock_data_url_analyzer_mgr.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
+    "$ace_root/test/mock/core/common/mock_image_analyzer_adapter.cpp",
+    "$ace_root/test/mock/core/common/mock_image_analyzer_manager.cpp",
+    "$ace_root/test/mock/core/common/mock_image_analyzer_mgr.cpp",
+    "$ace_root/test/mock/core/common/mock_interaction.cpp",
+    "$ace_root/test/mock/core/common/mock_motion_path_evaluator.cpp",
+    "$ace_root/test/mock/core/common/mock_raw_recognizer.cpp",
+    "$ace_root/test/mock/core/common/mock_reporter.cpp",
+    "$ace_root/test/mock/core/common/mock_resource_adapter_v2.cpp",
+    "$ace_root/test/mock/core/common/mock_stylus_detector_default.cpp",
+    "$ace_root/test/mock/core/common/mock_stylus_detector_mgr.cpp",
+    "$ace_root/test/mock/core/common/mock_text_share_adapter.cpp",
+    "$ace_root/test/mock/core/common/mock_text_translation_adapter.cpp",
+    "$ace_root/test/mock/core/common/mock_text_translation_mgr.cpp",
+    "$ace_root/test/mock/core/common/mock_theme_constants.cpp",
+    "$ace_root/test/mock/core/common/mock_theme_utils.cpp",
+    "$ace_root/test/mock/core/common/mock_udmf.cpp",
+    "$ace_root/test/mock/core/common/mock_xcollieInterface.cpp",
+    "$ace_root/test/mock/core/event/mock_statusbar_event_proxy.cpp",
+    "$ace_root/test/mock/core/event/mock_time_event_proxy.cpp",
+    "$ace_root/test/mock/core/event/mock_touch_event.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_cache.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_loading_context.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_source_info.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_utils.cpp",
+    "$ace_root/test/mock/core/manager/mock_display_manager.cpp",
+    "$ace_root/test/mock/core/package/mock_package_event_proxy.cpp",
+    "$ace_root/test/mock/core/pattern/mock_app_bar_utils.cpp",
+    "$ace_root/test/mock/core/pattern/mock_app_bar_view.cpp",
+    "$ace_root/test/mock/core/pattern/mock_container_modal_utils.cpp",
+    "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
+    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
+    "$ace_root/test/mock/core/render/mock_animated_image.cpp",
+    "$ace_root/test/mock/core/render/mock_animation_utils.cpp",
+    "$ace_root/test/mock/core/render/mock_canvas_image.cpp",
+    "$ace_root/test/mock/core/render/mock_component_snapshot.cpp",
+    "$ace_root/test/mock/core/render/mock_font_collection.cpp",
+    "$ace_root/test/mock/core/render/mock_media_player_creator.cpp",
+    "$ace_root/test/mock/core/render/mock_modifier_adapter.cpp",
+    "$ace_root/test/mock/core/render/mock_paragraph.cpp",
+    "$ace_root/test/mock/core/render/mock_path_painter.cpp",
+    "$ace_root/test/mock/core/render/mock_pixmap_image.cpp",
+    "$ace_root/test/mock/core/render/mock_render_context.cpp",
+    "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",
+    "$ace_root/test/mock/core/render/mock_render_surface_creator.cpp",
+    "$ace_root/test/mock/core/rosen/testing_typography_style.cpp",
+    "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
+    "$ace_root/test/mock/interfaces/mock_content_modifier.cpp",
+    "$ace_root/test/unittest/core/pattern/scrollable/scrollable_utils_test_ng.cpp",
+    "$ace_root/test/unittest/core/pattern/test_ng.cpp",
+    "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
+    "$ace_root/test/unittest/core/pipeline/mock_input_method_manager.cpp",
+  ]
+  deps = [
+    "$ace_root/frameworks/core/components/theme:build_theme_code",
+    "$ace_root/test/unittest:ace_unittest_log",
+  ]
+  external_deps = [
+    "googletest:gmock",
+    "googletest:gtest_main",
+  ]
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+  if (current_os == "ohos") {
+    external_deps += [
+      "c_utils:utils",
+      "napi:ace_napi",
+      "skia:skia_canvaskit",
+    ]
+  }
+}
+
 ohos_unittest("container_test") {
   module_out_path = adapter_test_output_path
   sources = [ "container_test.cpp" ]
@@ -47,24 +164,47 @@ ohos_unittest("layout_inspector_test") {
   module_out_path = adapter_test_output_path
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
   sources = [
+    "$ace_root/adapter/ohos/osal/layout_inspector.cpp",
     "layout_inspector_test.cpp",
-    "$ace_root/adapter/ohos/osal/layout_inspector.cpp"
+    "mock_ace_checker.cpp",
+    "mock_component_snapshot.cpp",
+    "mock_connect_server_manager.cpp",
+    "mock_inspector_pixel_map.cpp",
+    "mock_v2_inspector.cpp",
+    "mock_websocket_manager.cpp",
   ]
   defines = []
   if (use_new_skia) {
     defines += [ "USE_NEW_SKIA" ]
   }
 
+  deps = [
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_event",
+    "$ace_root/test/unittest:ace_components_gestures",
+    "$ace_root/test/unittest:ace_components_layout",
+    "$ace_root/test/unittest:ace_components_manager",
+    "$ace_root/test/unittest:ace_components_pattern",
+    "$ace_root/test/unittest:ace_components_property",
+    "$ace_root/test/unittest:ace_components_render",
+    "$ace_root/test/unittest:ace_components_syntax",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
+    "$ace_root/test/unittest:ace_unittest_log",
+    ":ace_layout_inspector_mock",
+  ]
   external_deps = [
-     "ability_runtime:abilitykit_native",
-     "ability_runtime:connect_server_manager",
-     "graphic_2d:librender_service_base",
-     "graphic_2d:librender_service_client",
-     "image_framework:image_native",
-     "napi:ace_napi",
-     "resource_management:global_resmgr",
-     "skia:skia_canvaskit",
-     "window_manager:libwm",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:connect_server_manager",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "image_framework:image_native",
+    "napi:ace_napi",
+    "resource_management:global_resmgr",
+    "skia:skia_canvaskit",
+    "window_manager:libwm",
   ]
 }
 
@@ -72,14 +212,12 @@ ohos_unittest("rs_adapter_test") {
   module_out_path = adapter_test_output_path
   sources = [
     "$ace_root/adapter/ohos/entrance/rs_adapter.cpp",
-    "rs_adapter_test.cpp"
+    "rs_adapter_test.cpp",
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 
-  defines = [
-    "ENABLE_ROSEN_BACKEND"
-  ]
+  defines = [ "ENABLE_ROSEN_BACKEND" ]
 
   deps = [
     "$ace_root/test/unittest:ace_base",
@@ -109,15 +247,14 @@ ohos_unittest("rs_adapter_test") {
     "graphic_2d:librender_service_client",
     "ipc:ipc_single",
     "napi:ace_napi",
-
   ]
 }
 
 group("entrance_unittest") {
   testonly = true
   deps = [
-     ":container_test" ,
-     ":layout_inspector_test",
-     ":rs_adapter_test"
+    ":container_test",
+    ":layout_inspector_test",
+    ":rs_adapter_test",
   ]
 }
