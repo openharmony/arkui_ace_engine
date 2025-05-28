@@ -2159,4 +2159,27 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager039, TestSize.Level1)
     eventHub->SetGestureEventHub(nullptr);
     EXPECT_CALL(mockJsManger, ActClick(_)).Times(0).WillOnce(Return(false));
 }
+
+/**
+ * @tc.name: JsAccessibilityManager040
+ * @tc.desc: Test GetFramenodeByAccessibilityId
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager040, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test GetFramenodeByAccessibilityId by DumpTreeNG
+     */
+    frameNode->accessibilityId_ = frameNode->GetId() + 1;
+    jsAccessibilityManager->DumpTreeNG(frameNode, 1, frameNode->GetId(), true);
+}
 } // namespace OHOS::Ace::NG
