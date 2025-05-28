@@ -161,8 +161,8 @@ void AniGraphicsModule::Invalidate(ani_env* env, ani_long ptr)
 void AniGraphicsModule::SetDrawModifier(ani_env* env, ani_long ptr, ani_object drawModifierObj)
 {
     if (drawModifierObj == nullptr) {
-        LOGE("DrawModifier is undefined.");
-        return;
+        // drawModifierObj should not be nullptr;
+        LOGF_ABORT("DrawModifier is undefined.");
     }
     ani_ref modifier;
     env->GlobalReference_Create(reinterpret_cast<ani_ref>(drawModifierObj), &modifier);
@@ -205,6 +205,5 @@ void AniGraphicsModule::SetDrawModifier(ani_env* env, ani_long ptr, ani_object d
             frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
         }
     }
-
 }
 } // namespace OHOS::Ace::Framework
