@@ -53,7 +53,7 @@ export class NavPathInfoInternal {
 export class NavPathInfo implements MaterializedBase {
     name: string = ""
     peer?: Finalizable | undefined = undefined
-    param: object | undefined = undefined
+    param: object | null | undefined = undefined
     onPop: ((parameter: PopInfo)=> void) | undefined = undefined
     isEntry: boolean | undefined = false;
     navDestinationId: string | undefined = ""
@@ -68,7 +68,7 @@ export class NavPathInfo implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._NavPathInfo_ctor(name, isEntry_casted ? 1 : 0)
         return retval
     }
-    constructor(name?: string, param?: object, onPop?: ((parameter: PopInfo) => void), isEntry?: boolean) {
+    constructor(name?: string, param?: object | null | undefined, onPop?: ((parameter: PopInfo) => void), isEntry?: boolean) {
         let name_casted: string = ""
         if (runtimeType(name) === RuntimeType.STRING) {
             name_casted = name!

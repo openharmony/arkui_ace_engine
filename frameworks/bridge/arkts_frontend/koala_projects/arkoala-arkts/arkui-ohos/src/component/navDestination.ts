@@ -576,7 +576,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._NavDestinationAttribute_customTransition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    onNewParamAttribute(value: ((parameter: Object) => void) | undefined): void {
+    onNewParamAttribute(value: ((parameter: Object | null | undefined) => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -833,7 +833,7 @@ export interface NavDestinationAttribute extends CommonMethod {
     onActive(value: ((parameter: NavDestinationActiveReason) => void) | undefined): this
     onInactive(value: ((parameter: NavDestinationActiveReason) => void) | undefined): this
     customTransition(value: NavDestinationTransitionDelegate | undefined): this
-    onNewParam(value: ((parameter: Object) => void) | undefined): this
+    onNewParam(value: ((parameter: Object | null | undefined) => void) | undefined): this
     preferredOrientation(value: Orientation | undefined): this
     enableNavigationIndicator(value: boolean | undefined): this
     title(value: string | CustomBuilder | NavDestinationCommonTitle | NavDestinationCustomTitle | Resource | undefined, options?: NavigationTitleOptions): this
@@ -888,7 +888,7 @@ export interface UINavDestinationAttribute extends UICommonMethod {
     /** @memo */
     customTransition(value: NavDestinationTransitionDelegate | undefined): this
     /** @memo */
-    onNewParam(value: ((parameter: Object) => void) | undefined): this
+    onNewParam(value: ((parameter: Object | null | undefined) => void) | undefined): this
     /** @memo */
     preferredOrientation(value: Orientation | undefined): this
     /** @memo */
@@ -928,7 +928,7 @@ export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavD
     onActive_value?: ((parameter: NavDestinationActiveReason) => void) | undefined
     onInactive_value?: ((parameter: NavDestinationActiveReason) => void) | undefined
     customTransition_value?: NavDestinationTransitionDelegate | undefined
-    onNewParam_value?: ((parameter: Object) => void) | undefined
+    onNewParam_value?: ((parameter: Object | null | undefined) => void) | undefined
     preferredOrientation_value?: Orientation | undefined
     enableNavigationIndicator_value?: boolean | undefined
     public hideTitleBar(hide: boolean | undefined, animated?: boolean): this {
@@ -997,7 +997,7 @@ export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavD
     public customTransition(value: NavDestinationTransitionDelegate | undefined): this {
         return this
     }
-    public onNewParam(value: ((parameter: Object) => void) | undefined): this {
+    public onNewParam(value: ((parameter: Object | null | undefined) => void) | undefined): this {
         return this
     }
     public preferredOrientation(value: Orientation | undefined): this {
@@ -1272,9 +1272,9 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         return this
     }
     /** @memo */
-    public onNewParam(value: ((parameter: Object) => void) | undefined): this {
+    public onNewParam(value: ((parameter: Object | null | undefined) => void) | undefined): this {
         if (this.checkPriority("onNewParam")) {
-            const value_casted = value as (((parameter: Object) => void) | undefined)
+            const value_casted = value as (((parameter: Object | null | undefined) => void) | undefined)
             this.getPeer()?.onNewParamAttribute(value_casted)
             return this
         }
