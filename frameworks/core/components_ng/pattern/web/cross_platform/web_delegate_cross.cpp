@@ -931,7 +931,8 @@ void WebDelegateCross::RegisterWebObjectEvent()
             }
             return false;
         });
-    WebObjectEventManager::GetInstance().RegisterObjectEventWithResponseReturn(MakeEventHash(WEB_EVENT_ONINTERCEPTREQUEST),
+    WebObjectEventManager::GetInstance().RegisterObjectEventWithResponseReturn(
+        MakeEventHash(WEB_EVENT_ONINTERCEPTREQUEST),
         [weak = WeakClaim(this)](const std::string& param, void* object) -> RefPtr<WebResponse> {
             auto delegate = weak.Upgrade();
             if (delegate) {
@@ -1452,20 +1453,22 @@ RefPtr<WebResponse> WebDelegateCross::OnInterceptRequest(void* object)
     auto request = AceType::MakeRefPtr<WebRequest>(requestHeader, method, url, hasGesture, isMainFrame, isRedirect);
 
     auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
-    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), request, &result]() {
-        auto delegate = weak.Upgrade();
-        CHECK_NULL_VOID(delegate);
-        if (Container::IsCurrentUseNewPipeline()) {
-            auto webPattern = delegate->webPattern_.Upgrade();
-            CHECK_NULL_VOID(webPattern);
-            auto webEventHub = webPattern->GetWebEventHub();
-            CHECK_NULL_VOID(webEventHub);
-            auto propOnInterceptRequestEvent = webEventHub->GetOnInterceptRequestEvent();
-            CHECK_NULL_VOID(propOnInterceptRequestEvent);
-            auto param = std::make_shared<OnInterceptRequestEvent>(request);
-            result = propOnInterceptRequestEvent(param);
-        }
-    }, "ArkUIWebInterceptRequest");
+    jsTaskExecutor.PostSyncTask(
+        [weak = WeakClaim(this), request, &result]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnInterceptRequestEvent = webEventHub->GetOnInterceptRequestEvent();
+                CHECK_NULL_VOID(propOnInterceptRequestEvent);
+                auto param = std::make_shared<OnInterceptRequestEvent>(request);
+                result = propOnInterceptRequestEvent(param);
+            }
+        },
+        "ArkUIWebInterceptRequest");
     return result;
 }
 
