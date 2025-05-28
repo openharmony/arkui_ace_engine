@@ -219,6 +219,12 @@ static void FontImplInternal(Ark_NativePointer node,
     if (convValue.has_value()) {
         convValue->enableVariableFontWeight = enableVariableFontWeight;
     }
+    Converter::FontWeightInt defaultWeight = {};
+    std::optional<Converter::FontWeightInt> weight = defaultWeight;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        weight = Converter::OptConvert<Converter::FontWeightInt>(value->value.weight).value_or(defaultWeight);
+    }
+    TextModelStatic::SetVariableFontWeight(frameNode, weight->variable);
     TextModelStatic::SetFont(frameNode, convValue);
 }
 

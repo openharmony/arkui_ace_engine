@@ -1315,7 +1315,7 @@ TextDetectConfig Convert(const Ark_TextDataDetectorConfig& src)
         auto callback = [arkCallback = CallbackHelper(*onDetectResultUpdate)](const std::string& arg) -> void {
             ConvContext ctx;
             auto arkArg = ArkValue<Ark_String>(arg, &ctx);
-            arkCallback.Invoke(arkArg);
+            arkCallback.InvokeSync(arkArg);
         };
         ret.onResult = callback;
     }

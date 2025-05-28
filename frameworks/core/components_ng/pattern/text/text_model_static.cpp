@@ -298,14 +298,7 @@ void TextModelStatic::SetLineBreakStrategy(FrameNode* frameNode, const std::opti
 
 void TextModelStatic::SetTextSelectableMode(FrameNode* frameNode, const std::optional<Ace::TextSelectableMode>& value)
 {
-    if (value.has_value()) {
-        TextModelNG::SetTextSelectableMode(frameNode, value.value());
-        return;
-    }
-    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextSelectableMode, frameNode);
-    auto textPattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_VOID(textPattern);
-    textPattern->SetTextSelectableMode(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+    TextModelNG::SetTextSelectableMode(frameNode, value.value_or(TextSelectableMode::SELECTABLE_UNFOCUSABLE));
 }
 
 void TextModelStatic::SetEllipsisMode(FrameNode* frameNode, const std::optional<Ace::EllipsisMode>& value)

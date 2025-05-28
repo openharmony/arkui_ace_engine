@@ -70,7 +70,7 @@ export class Font {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let arrayResult_ = GlobalScope_ohos_font.getSystemFontList();
         ArkUIAniModule._Common_Restore_InstanceId();
-        return new Array<string>();
+        return arrayResult_;
     }
     public getFontByName(fontName : string) : FontInfo {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
@@ -89,13 +89,13 @@ export class MeasureUtils {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let width = GlobalScope_ohos_measure_utils.measureText(options);
         ArkUIAniModule._Common_Restore_InstanceId();
-        return 0;
+        return width;
     }
     public measureTextSize(options: MeasureOptions) : SizeOptions {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let sizeOptions = GlobalScope_ohos_measure_utils.measureTextSize(options);
         ArkUIAniModule._Common_Restore_InstanceId();
-        return {};
+        return sizeOptions;
     }
 }
 
