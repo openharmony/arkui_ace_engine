@@ -18,5 +18,6 @@ ace_unittest("bubble_test_ng") {
   sources = [
     "bubble_test_One_ng.cpp",
     "bubble_test_ng.cpp",
+    "bubble_test_two_ng.cpp"
   ]
 }

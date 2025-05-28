@@ -20,6 +20,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -34,6 +35,7 @@
 #include "base/utils/utils.h"
 #include "base/log/dump_log.h"
 #include "base/window/foldable_window.h"
+#include "core/common/ace_engine.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
@@ -87,6 +89,8 @@ const std::string BOTTOMSTRING = "test";
 constexpr int32_t START_YEAR_BEFORE = 1990;
 constexpr int32_t SELECTED_YEAR = 2000;
 constexpr int32_t END_YEAR = 2090;
+const std::int32_t TARGET_ID = 1;
+const std::int32_t TARGET_ID_NEW = 2;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 } // namespace
 class OverlayNewTestNg : public testing::Test {
@@ -1654,5 +1658,47 @@ HWTEST_F(OverlayNewTestNg, GetFirstFrameNodeOfBuilder001, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     auto sheetContent = sheetPattern->GetFirstFrameNodeOfBuilder();
     EXPECT_NE(sheetContent, nullptr);
+}
+
+/**
+ * @tc.name: IsNeedAvoidFoldCrease001
+ * @tc.desc: Test IsNeedAvoidFoldCrease.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayNewTestNg, IsNeedAvoidFoldCrease001, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, TARGET_ID,
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "Menu", MenuType::MENU); });
+    ASSERT_NE(frameNode, nullptr);
+    OverlayManager overlayManager(frameNode);
+    MockSystemProperties::g_isSuperFoldDisplayDevice = true;
+    RefPtr<MockContainer> containerOne = AceType::MakeRefPtr<MockContainer>();
+    RefPtr<MockContainer> containerTwo = AceType::MakeRefPtr<MockContainer>();
+    containerOne->isSubContainer_ = true;
+    AceEngine::Get().AddContainer(0, containerOne);
+    AceEngine::Get().AddContainer(1, containerTwo);
+    std::optional<bool> enableHoverMode = true;
+    EXPECT_FALSE(overlayManager.IsNeedAvoidFoldCrease(frameNode, true, true, enableHoverMode));
+}
+
+/**
+ * @tc.name: IsNeedAvoidFoldCrease002
+ * @tc.desc: Test IsNeedAvoidFoldCrease.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayNewTestNg, IsNeedAvoidFoldCrease002, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, TARGET_ID_NEW,
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID_NEW, "MenuTest", MenuType::MENU); });
+    ASSERT_NE(frameNode, nullptr);
+    OverlayManager overlayManager(frameNode);
+    MockSystemProperties::g_isSuperFoldDisplayDevice = true;
+    RefPtr<MockContainer> containerOne = AceType::MakeRefPtr<MockContainer>();
+    RefPtr<MockContainer> containerTwo = AceType::MakeRefPtr<MockContainer>();
+    containerOne->isSubContainer_ = true;
+    AceEngine::Get().AddContainer(0, containerOne);
+    AceEngine::Get().AddContainer(-1, containerTwo);
+    std::optional<bool> enableHoverMode = true;
+    EXPECT_FALSE(overlayManager.IsNeedAvoidFoldCrease(frameNode, true, true, enableHoverMode));
 }
 } // namespace OHOS::Ace::NG
