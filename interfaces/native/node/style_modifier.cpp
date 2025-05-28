@@ -9385,6 +9385,7 @@ void ResetDatePickerEnableHapticFeedback(ArkUI_NodeHandle node)
         fullImpl->getNodeModifiers()->getDatePickerModifier()->resetEnableHapticFeedback(node->uiNodeHandle);
     }
 }
+
 const ArkUI_AttributeItem* GetDatePickerCanLoop(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
