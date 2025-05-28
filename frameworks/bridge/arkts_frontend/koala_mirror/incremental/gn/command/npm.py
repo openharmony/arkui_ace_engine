@@ -54,6 +54,8 @@ if (arklink_path != ""):
 if (ets_stdlib_path != ""):
     env["ETS_STDLIB_PATH"] = ets_stdlib_path
 
+env["PANDA_SDK_PATH"] = os.path.join(project_path, "../ui2abc/build/sdk")
+
 koala_log = os.path.join(project_path, "koala_build.log")
 
 def execute(dir, args):

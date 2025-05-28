@@ -156,6 +156,7 @@ action("arkoala.abc") {
     deps = [
       "${ohos_ets_api_deps}",
       "${ohos_ets_arkts_deps}",
+      "$koala_root/incremental:incremental"
     ]
 
     external_deps = ets2abc_build_deps

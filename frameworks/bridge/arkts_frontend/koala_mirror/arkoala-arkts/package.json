@@ -75,10 +75,12 @@
         "build:arkoala:components:inc": "npm run build:incremental:inc && npm run build:interop:inc && npm run build:arkui-common:inc && npm run build:arkui-no-common:inc",
         "build:arkoala": "npm run panda:sdk:check-install && npm run build:arkoala:components && npm run link:arkoala",
         "build:arkoala:m3": "npm run build:all -C ../ui2abc && npm run compile:native:node-host && npm run build:incremental:inc:ui2abc && npm run build:interop:inc -C ../interop && npm run build:arkui-common:inc:ui2abc -C ./arkui-common && npm run -C arkui build:m3:inc:ui2abc && npm run -C arkui build:sdk-m3:inc:ui2abc && npm run copy:arkoala:m3",
+        "build:arkoala:m3:gn": "npm run build:arkui-common:inc:ui2abc -C ./arkui-common && npm run -C arkui build:m3:inc:ui2abc && npm run -C arkui build:sdk-m3:inc:ui2abc && npm run link:arkoala:m3:gn",
         "build:arkoala:gn": "npm run build:arkoala:components && npm run link:arkoala",
         "build:arkoala:inc": "npm run build:arkoala:components:inc && npm run link:arkoala",
         "link:arkoala": "mkdir -p build && ../incremental/tools/panda/arkts/arklink --output build/arkoala.abc -- ./arkui/build/arkui-no-common.abc ./arkui-common/build/arkui-common.abc  ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc",
-	    "link:arkoala:m3": "mkdir -p build && ../incremental/tools/panda/arkts/arklink --output build/arkoala-m3.abc -- ./arkui/build/arkui-no-common.abc ./arkui-common/build/arkui-common.abc  ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc",
+        "link:arkoala:m3": "mkdir -p build && ../incremental/tools/panda/arkts/arklink --output build/arkoala-m3.abc -- ./build/arkui.abc ./arkui-common/build/arkui-common.abc  ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc",
+        "link:arkoala:m3:gn": "mkdir -p build && ../incremental/tools/panda/arkts/arklink --output build/arkoala.abc -- ./build/arkui.abc ./arkui-common/build-m3/arkui-common.abc ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc",
         "copy:arkoala:m3": "mkdir -p ./build && cp ../interop/build/interop.abc ./build/ && cp ../incremental/runtime/build/incremental.abc ./build/ && cp ./arkui/build-m3-impl/arkui-m3.abc ./build/arkui.abc",
 
         "arkoala:aot:host": "npm run link:arkoala && npm run stdlib:aot:host && fast-arktsc --only-aot build/arkoala.abc",
