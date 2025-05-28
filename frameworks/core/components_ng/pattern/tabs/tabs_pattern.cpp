@@ -660,7 +660,7 @@ void TabsPattern::UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<Fr
     SetLastWeakFocusNode(tabsNode, tabBarNode, tabsLayoutProperty, index);
     if (!tabsLayoutProperty->GetIndex().has_value()) {
         UpdateSelectedState(swiperNode, tabBarPattern, tabsLayoutProperty, index);
-        tabsLayoutProperty->UpdateIndex(indexSetByUser);
+        tabsLayoutProperty->UpdateIndex(indexSetByUser < 0 ? 0 : indexSetByUser);
     } else {
         auto preIndex = tabsLayoutProperty->GetIndex().value();
         if (preIndex == index || index < 0) {
