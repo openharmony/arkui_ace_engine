@@ -19,6 +19,7 @@
 
 #include "converter.h"
 
+#include "base/utils/string_utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/card_scope.h"
 #include "core/components/common/layout/constants.h"
@@ -401,6 +402,27 @@ std::optional<float> ResourceConverter::ToFloat()
             optFloat = static_cast<float>(themeConstants_->GetDoubleByName(params_[0]));
         } else {
             optFloat = static_cast<float>(themeConstants_->GetDouble(id_));
+        }
+    } else if (type_ == ResourceType::INTEGER) {
+        if (id_ == -1 && params_.size() > 0) {
+            optFloat = static_cast<float>(themeConstants_->GetIntByName(params_[0]));
+        } else {
+            optFloat = static_cast<float>(themeConstants_->GetInt(id_));
+        }
+    } else if (type_ == ResourceType::STRING) {
+        std::optional<std::string> result;
+        if (id_ != -1) {
+            result = themeConstants_->GetString(id_);
+            ReplaceHolder(result.value(), params_, 0);
+        } else if (!params_.empty()) {
+            result = themeConstants_->GetStringByName(params_.front());
+            ReplaceHolder(result.value(), params_, 1);
+        }
+        if (result.has_value()) {
+            double floatVal;
+            if (StringUtils::StringToDouble(result.value(), floatVal)) {
+                optFloat = floatVal;
+            }
         }
     }
     return optFloat;
