@@ -4078,7 +4078,7 @@ void TextPattern::CollectSymbolSpanNodes(const RefPtr<SpanNode>& spanNode, const
 {
     spanNode->CleanSpanItemChildren();
     spanNode->MountToParagraph();
-    textForDisplay_.append(u"    ");
+    textForDisplay_.append(u"  ");
     dataDetectorAdapter_->textForAI_.append(SYMBOL_TRANS);
     childNodes_.push_back(node);
 }
