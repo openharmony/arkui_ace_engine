@@ -19,6 +19,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <unordered_map>
 
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
