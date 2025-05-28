@@ -133,7 +133,7 @@ class LazyItemPool implements Disposable {
                 setNeedCreate(true) // ensure synchronous creation of CustomComponent
                 memoEntry2<T, number, void>(
                     context,
-                    0,
+                    index, // using index to simplify reuse process
                     itemGenerator,
                     data,
                     index

@@ -45,7 +45,7 @@ void SyncImpl(Ark_NativePointer node, Ark_Int32 totalCount, const Callback_Creat
     lazyComponent->Synchronize(
         [callback = CallbackHelper(*creator)](
             int32_t index) { return AceType::DynamicCast<FrameNode>(callback.BuildSync(index)); },
-        [cb = CallbackHelper(*updater)](int32_t start, int32_t end) { cb.Invoke(start, end); }, totalCount);
+        [cb = CallbackHelper(*updater)](int32_t start, int32_t end) { cb.InvokeSync(start, end); }, totalCount);
 }
 } // namespace LazyForEachOpsAccessor
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
