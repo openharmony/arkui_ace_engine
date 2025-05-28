@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
 #include "core/components_ng/syntax/if_else_model_ng.h"
 #include "core/components_ng/syntax/if_else_node.h"
+#include "core/components_ng/syntax/lazy_for_each_model_ng.h"
 #undef protected
 #undef private
 
@@ -1147,5 +1148,28 @@ HWTEST_F(WaterFlowTestNg, CustomNode001, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, TOP_TO_DOWN ? 0 : 9);
     EXPECT_EQ(pattern_->layoutInfo_->childrenCount_, 10);
+}
+
+/**
+ * @tc.name: OnAttachAtapter001
+ * @tc.desc: Test OnAttachAtapter when have footer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, OnAttachAtapter001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateDone();
+
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 1);
+
+    RefPtr<WaterFlowMockLazy> mockLazy =
+        AceType::MakeRefPtr<WaterFlowMockLazy>(10, [](int32_t index) { return 100.0f; });
+    RefPtr<LazyForEachActuator> mockLazyForEachActuator = mockLazy;
+    LazyForEachModelNG lazyForEach;
+    lazyForEach.Create(mockLazyForEachActuator);
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_EQ(pattern_->OnAttachAtapter(frameNode_, lazyForEachNode), true);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 11);
 }
 } // namespace OHOS::Ace::NG
