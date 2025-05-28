@@ -53,6 +53,13 @@ public:
         eventType_ = eventType;
     }
 
+    virtual void NotifyUIEvent(
+        int32_t eventType, const std::shared_ptr<std::unordered_map<std::string, std::string>>& eventParams)
+    {
+        LOGI("NotifyUIEvent eventType %{public}d", eventType);
+        eventType_ = eventType;
+    }
+
 private:
     int32_t eventType_;
 };

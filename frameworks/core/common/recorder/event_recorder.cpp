@@ -25,7 +25,27 @@
 #include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::Recorder {
+namespace {
 constexpr char IGNORE_WINDOW_NAME[] = "$HA_FLOAT_WINDOW$";
+
+void FillExtraTextIfNeed(EventType eventType, EventParamsBuilder& builder, const RefPtr<NG::FrameNode>& host)
+{
+    if (eventType != EventType::CLICK || !builder.GetValue(KEY_TEXT).empty()) {
+        return;
+    }
+    if (!EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_PARENT_TEXT)) {
+        return;
+    }
+    if (!host->GetChildren().empty()) {
+        return;
+    }
+    auto parent = host->GetParentFrameNode();
+    CHECK_NULL_VOID(parent);
+    auto property = parent->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(property);
+    builder.SetExtra(KEY_EXTRA_TEXT, property->GetGroupText(true));
+}
+} // namespace
 
 bool IsCacheAvaliable()
 {
@@ -116,24 +136,6 @@ EventParamsBuilder& EventParamsBuilder::SetTextArray(const std::vector<std::stri
     }
     params_->emplace(KEY_TEXT_ARRAY, jsonArray->ToString());
     return *this;
-}
-
-void FillExtraTextIfNeed(EventType eventType, EventParamsBuilder& builder, const RefPtr<NG::FrameNode>& host)
-{
-    if (eventType != EventType::CLICK || !builder.GetValue(KEY_TEXT).empty()) {
-        return;
-    }
-    if (!EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_PARENT_TEXT)) {
-        return;
-    }
-    if (!host->GetChildren().empty()) {
-        return;
-    }
-    auto parent = host->GetParentFrameNode();
-    CHECK_NULL_VOID(parent);
-    auto property = parent->GetAccessibilityProperty<NG::AccessibilityProperty>();
-    CHECK_NULL_VOID(property);
-    builder.SetExtra(KEY_EXTRA_TEXT, property->GetGroupText(true));
 }
 
 EventParamsBuilder& EventParamsBuilder::SetHost(const RefPtr<NG::FrameNode>& node)
@@ -236,40 +238,53 @@ EventRecorder::EventRecorder()
 
 void EventRecorder::UpdateEventSwitch(const std::vector<bool>& eventSwitch)
 {
+    std::unique_lock<std::shared_mutex> lock(switchLock_);
     eventSwitch_ = eventSwitch;
 }
 
-void EventRecorder::UpdateWebIdentifier(const std::unordered_map<std::string, std::string> identifierMap)
+void EventRecorder::UpdateGlobalEventSwitch(const std::vector<bool>& eventSwitch)
 {
+    std::unique_lock<std::shared_mutex> lock(switchLock_);
+    globalSwitch_ = eventSwitch;
+}
+
+void EventRecorder::UpdateWebIdentifier(const std::unordered_map<std::string, std::string>& identifierMap)
+{
+    std::unique_lock<std::shared_mutex> lock(switchLock_);
     webIdentifierMap_ = identifierMap;
 }
 
 bool EventRecorder::IsPageRecordEnable() const
 {
+    std::shared_lock<std::shared_mutex> lock(switchLock_);
     int32_t index = static_cast<int32_t>(EventCategory::CATEGORY_PAGE);
     return globalSwitch_[index] && eventSwitch_[index];
 }
 
 bool EventRecorder::IsPageParamRecordEnable() const
 {
+    std::shared_lock<std::shared_mutex> lock(switchLock_);
     int32_t index = static_cast<int32_t>(EventCategory::CATEGORY_PAGE_PARAM);
     return globalSwitch_[index] && eventSwitch_[index];
 }
 
 bool EventRecorder::IsExposureRecordEnable() const
 {
+    std::shared_lock<std::shared_mutex> lock(switchLock_);
     int32_t index = static_cast<int32_t>(EventCategory::CATEGORY_EXPOSURE);
     return globalSwitch_[index] && eventSwitch_[index];
 }
 
 bool EventRecorder::IsComponentRecordEnable() const
 {
+    std::shared_lock<std::shared_mutex> lock(switchLock_);
     int32_t index = static_cast<int32_t>(EventCategory::CATEGORY_COMPONENT);
     return globalSwitch_[index] && eventSwitch_[index];
 }
 
 bool EventRecorder::IsRecordEnable(EventCategory category) const
 {
+    std::shared_lock<std::shared_mutex> lock(switchLock_);
     int32_t index = static_cast<int32_t>(category);
     return globalSwitch_[index] && eventSwitch_[index];
 }
@@ -340,6 +355,7 @@ void EventRecorder::FillWebJsCode(std::optional<WebJsItem>& scriptItems) const
 
 bool EventRecorder::IsMessageValid(const std::string& webCategory, const std::string& identifier)
 {
+    std::shared_lock<std::shared_mutex> lock(switchLock_);
     auto iter = webIdentifierMap_.find(webCategory);
     if (iter == webIdentifierMap_.end()) {
         return false;
