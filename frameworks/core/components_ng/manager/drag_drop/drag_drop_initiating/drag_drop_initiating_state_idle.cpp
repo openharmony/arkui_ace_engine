@@ -218,11 +218,11 @@ void DragDropInitiatingStateIdle::HandleHitTesting(const TouchEvent& touchEvent)
     if (touchEvent.sourceType != SourceType::MOUSE) {
         if (DragDropFuncWrapper::IsTextCategoryComponent(frameNode->GetTag())) {
             StartCreateTextThumbnailPixelMap();
-        } else {
+        } else if (IsAllowedDrag()) {
             StartCreateSnapshotTask(touchEvent.id);
+            StartGatherTask();
         }
         StartPreDragDetectingStartTask();
-        StartGatherTask();
         StartPreDragStatusCallback(touchEvent);
     } else {
         auto pipeline = frameNode->GetContextRefPtr();
