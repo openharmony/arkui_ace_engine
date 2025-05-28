@@ -35,7 +35,15 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     constructParam(...param: Object[]): this {
         return this;
     }
-
+    initialize(...args: Object[]): this {
+        return this;
+    }
+    allowChildCount(): number {
+        return -1;
+    }
+    allowChildTypes(): string[] | undefined {
+        return undefined;
+    }
     getPeer(): ArkCommonMethodPeer {
         return this.peer as ArkCommonMethodPeer;
     }

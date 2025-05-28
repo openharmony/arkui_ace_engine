@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/property/property.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/view_model_bridge.h"
 
 namespace OHOS::Ace::NG {
 enum class ExpandMode : uint32_t {
@@ -316,11 +317,11 @@ Ark_Number GetLastChildIndexWithoutExpandImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(peerNode, errValue);
     size_t size = static_cast<size_t>(peerNode->GetTotalChildCountWithoutExpanded());
     CHECK_NULL_RETURN(size > 0, errValue);
-    auto child = peer->node->GetFrameNodeChildByIndex(size - 1, false, false);
+    auto child = peerNode->GetFrameNodeChildByIndex(size - 1, false, false);
     CHECK_NULL_RETURN(child, errValue);
     auto* childNode = reinterpret_cast<FrameNode*>(child);
     auto childRef = Referenced::Claim<FrameNode>(childNode);
-    auto index = peer->node->GetFrameNodeIndex(childRef, true);
+    auto index = peerNode->GetFrameNodeIndex(childRef, true);
     return Converter::ArkValue<Ark_Number>(index);
 }
 Ark_FrameNode GetAttachedFrameNodeByIdImpl(const Ark_String* id)
@@ -394,6 +395,39 @@ Ark_NativePointer GetFrameNodePtrImpl(Ark_FrameNode node)
     auto nodeRf = FrameNodePeer::GetFrameNodeByPeer(node);
     return AceType::RawPtr(nodeRf);
 }
+static GENERATED_Ark_NodeType ParseNodeType(std::string& type)
+{
+    static const std::unordered_map<std::string, GENERATED_Ark_NodeType> typeMap = { { "List", GENERATED_ARKUI_LIST } };
+    GENERATED_Ark_NodeType nodeType = GENERATED_ARKUI_CUSTOM_NODE;
+    auto iter = typeMap.find(type);
+    if (iter != typeMap.end()) {
+        nodeType = iter->second;
+    }
+    return nodeType;
+}
+Ark_FrameNode CreateTypedFrameNodeImpl(const Ark_String* type)
+{
+    auto valueType = Converter::Convert<std::string>(*type);
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    GENERATED_Ark_NodeType nodeType = ParseNodeType(valueType);
+    if (nodeType == GENERATED_ARKUI_CUSTOM_NODE) {
+        return nullptr;
+    }
+    auto node =  OHOS::Ace::NG::GeneratedBridge::CreateNode(nodeType, nodeId, 0);
+    CHECK_NULL_RETURN(node, nullptr);
+    auto newNode = AceType::Claim(reinterpret_cast<FrameNode*>(node));
+    newNode->SetIsArkTsFrameNode(true);
+    newNode->DecRefCount();
+    return FrameNodePeer::Create(newNode);
+}
+Ark_String GetNodeTypeImpl(Ark_FrameNode peer)
+{
+    const auto errValue = Converter::ArkValue<Ark_String>("");
+    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(peerNode, errValue);
+    static std::string nodeType = peerNode->GetTag();
+    return Converter::ArkValue<Ark_String>(nodeType);
+}
 } // FrameNodeAccessor
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
 {
@@ -427,6 +461,8 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
         FrameNodeAccessor::RecycleImpl,
         FrameNodeAccessor::GetRenderNodeImpl,
         FrameNodeAccessor::GetFrameNodePtrImpl,
+        FrameNodeAccessor::CreateTypedFrameNodeImpl,
+        FrameNodeAccessor::GetNodeTypeImpl,
     };
     return &FrameNodeAccessorImpl;
 }

@@ -27,6 +27,9 @@ import { ArkUIAniModule } from "arkui.ani"
 import { RenderNode, RenderNodeInternal } from "./RenderNode"
 import { CommonAttribute, ArkCommonMethodPeer, CommonMethod } from './component/common'
 import { ArkBaseNode } from './handwritten/modifiers/ArkBaseNode'
+import { ArkListNode } from './handwritten/modifiers/ArkListNode'
+import { ModifierType } from './handwritten/modifiers/ArkCommonModifier'
+import { ListOptions, ListAttribute, ArkListPeer } from './component/list'
 
 export class ArkFrameNodePeer extends ArkCommonMethodPeer {
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -98,6 +101,9 @@ export class FrameNode implements MaterializedBase {
                 this.renderNode_ = new RenderNode('CustomFrameNode')
                 const ctorPtr: KPointer = FrameNode.ctor_framenode()
                 this.peer = new Finalizable(ctorPtr, FrameNode.getFinalizer())
+            } else {
+                const retval  = ArkUIGeneratedNativeModule._FrameNode_createTypedFrameNode(type as string);
+                this.peer = new Finalizable(retval, FrameNode.getFinalizer());
             }
             this.renderNode_?.setFrameNode(new WeakRef<FrameNode>(this))
 
@@ -445,6 +451,22 @@ export class FrameNode implements MaterializedBase {
         }
         return this._commonAttribute!;
     }
+    public static createTypedFrameNode(type: string): FrameNode {
+        const type_casted = type as (string)
+        return FrameNode.createTypedFrameNode_serialize(type_casted)
+    }
+    private static createTypedFrameNode_serialize(type: string): FrameNode {
+        const retval = ArkUIGeneratedNativeModule._FrameNode_createTypedFrameNode(type)
+        const obj: FrameNode = FrameNodeInternal.fromPtr(retval)
+        return obj
+    }
+    public getNodeType(): string {
+        return this.getNodeType_serialize()
+    }
+    private getNodeType_serialize(): string {
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getNodeType(this.peer!.ptr)
+        return retval
+    }
 }
 class ImmutableFrameNode extends FrameNode {
     constructor(uiContext: UIContext, type: string, ptr?: KPointer) {
@@ -507,5 +529,77 @@ export class FrameNodeUtils {
             return frameNode;
         }
         return null;
+    }
+}
+
+abstract class TypedFrameNode<T extends ArkBaseNode> extends FrameNode {
+    attribute_: T | undefined = undefined;
+    attrCreator_: (node: FrameNode, type: ModifierType) => T
+    type_: string = "";
+
+    constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => T) {
+        super(uiContext, type, nullptr);
+        this.attrCreator_ = attrCreator;
+        this.type_ = type;
+    }
+    getType(): string {
+        return this.type_;
+    }
+    checkValid(node?: FrameNode): boolean {
+        if (this.attribute_ === undefined) {
+            this.attribute_ = this.attrCreator_(this, ModifierType.FRAME_NODE);
+        }
+        const a = this.attribute_ as ArkBaseNode;
+        const allowCount: number = a.allowChildCount();
+        const childrenCount = this.getChildrenCount();
+        if (allowCount != -1) {
+            if (childrenCount >= allowCount) {
+                return false;
+            }
+        }
+
+        if (node !== undefined) {
+            const childType = node!.getNodeType();
+            const allowTypes = a.allowChildTypes();
+            if (allowTypes === undefined) {
+                return true;
+            }
+            let isValid = false;
+            allowTypes!.forEach((nodeType: string) => {
+                if (nodeType === childType) {
+                    isValid = true;
+                }
+            });
+            return isValid;
+        }
+        return true;
+    }
+}
+export namespace typeNode {
+    class ListFrameNode extends TypedFrameNode<ArkListNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkListNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: ListOptions): ListAttribute {
+            let arkListNode = this.attribute as ArkListNode;
+            return arkListNode!.initialize(options);
+        }
+        get attribute(): ListAttribute {
+            if (this.attribute_ === undefined) {
+                this.attribute_ = this.attrCreator_(this, ModifierType.FRAME_NODE);
+            }
+            return this.attribute_!;
+        }
+    }
+
+    // @ts-ignore
+    function createNode(context: UIContext, type: string): ListFrameNode {
+        return new ListFrameNode(context, 'List', (node: FrameNode, type: ModifierType): ArkListNode => {
+            let arknode = new ArkListNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkListPeer(retval, node._nodeId as int32, "List", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
     }
 }
