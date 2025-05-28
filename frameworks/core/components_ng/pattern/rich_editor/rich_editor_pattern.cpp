@@ -630,7 +630,7 @@ void RichEditorPattern::ApplyOptions(const OptionsList& optionsList, bool restor
                 TextSpanOptions options = specificOption;
                 options.optionSource = OptionSource::UNDO_REDO;
                 pattern->AddTextSpan(options, false, pattern->GetCaretIndex());
-                optionsLength += options.value.length();
+                optionsLength += static_cast<int32_t>(options.value.length());
             } else if constexpr (std::is_same_v<T, SymbolSpanOptions>) {
                 SymbolSpanOptions options = specificOption;
                 options.optionSource = OptionSource::UNDO_REDO;
