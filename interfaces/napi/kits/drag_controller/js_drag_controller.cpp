@@ -941,7 +941,9 @@ bool CreatePreviewNodeAndScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     CHECK_NULL_RETURN(pipeline, false);
     auto dragNodePipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
     CHECK_NULL_RETURN(dragNodePipeline, false);
-    auto minScaleWidth = NG::DragDropFuncWrapper::GetScaleWidth(asyncCtx->instanceId);
+    auto scaleData =
+        NG::DragControllerFuncWrapper::GetScaleInfo(asyncCtx->instanceId, pixelMap->GetWidth(), pixelMap->GetHeight());
+    CHECK_NULL_RETURN(scaleData, false);
     auto scale = asyncCtx->windowScale;
     CHECK_NULL_RETURN(pixelMap, false);
     RefPtr<PixelMap> refPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
@@ -953,10 +955,10 @@ bool CreatePreviewNodeAndScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     data = { false, asyncCtx->badgeNumber, 1.0f, false,
         NG::OffsetF(), NG::DragControllerFuncWrapper::GetUpdateDragMovePosition(asyncCtx->instanceId), refPixelMap };
     NG::DragControllerFuncWrapper::ResetContextMenuDragPosition(asyncCtx->instanceId);
-    if (pixelMap->GetWidth() > minScaleWidth && asyncCtx->dragPreviewOption.isScaleEnabled) {
+    if (scaleData->isNeedScale && asyncCtx->dragPreviewOption.isScaleEnabled) {
         auto overlayManager = dragNodePipeline->GetOverlayManager();
         auto imageNode = overlayManager->GetPixelMapContentNode();
-        scale = minScaleWidth / pixelMap->GetWidth() * asyncCtx->windowScale;
+        scale = scaleData->scale * asyncCtx->windowScale;
         data.previewScale = scale;
         NG::DragControllerFuncWrapper::CreatePreviewNode(imageNode, data, asyncCtxData);
         CHECK_NULL_RETURN(imageNode, false);
