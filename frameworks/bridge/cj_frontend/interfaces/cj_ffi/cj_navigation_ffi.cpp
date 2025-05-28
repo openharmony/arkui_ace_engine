@@ -521,9 +521,9 @@ void FfiOHOSAceFrameworkNavigationSetEnableDragBar(bool isEnable)
     NavigationModel::GetInstance()->SetEnableDragBar(isEnable);
 }
 
-void FfiOHOSAceFrameworkNavigationSetEnableModeChangeAnimtion(bool isEnable)
+void FfiOHOSAceFrameworkNavigationSetEnableModeChangeAnimation(bool isEnable)
 {
-    NavigationModel::GetInstance()->SetEnableModeChangeAnimtion(isEnable);
+    NavigationModel::GetInstance()->SetEnableModeChangeAnimation(isEnable);
 }
 
 void FfiOHOSAceFrameworkNavigationSetIgnoreLayoutSafeArea(VectorInt32Ptr types, VectorInt32Ptr edges)

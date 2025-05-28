@@ -101,7 +101,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetOnNavBarStateChange(void (*callba
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetOnNavigationModeChange(void (*callback)(int32_t));
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetRecoverable(bool recoverable);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetEnableDragBar(bool isEnable);
-CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetEnableModeChangeAnimtion(bool isEnable);
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetEnableModeChangeAnimation(bool isEnable);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetIgnoreLayoutSafeArea(VectorInt32Ptr types, VectorInt32Ptr edges);
 }
 
