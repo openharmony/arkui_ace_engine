@@ -60,6 +60,11 @@ enum class PopupKeyboardAvoidMode {
     NONE
 };
 
+enum class TipsAnchorType {
+    TARGET = 0, // anchor to target node
+    CURSOR = 1  // anchor to cursor position
+};
+
 using StateChangeFunc = std::function<void(const std::string&)>;
 using OnWillDismiss = std::function<void(int32_t)>;
 class PopupParam : public AceType {
@@ -684,6 +689,20 @@ public:
         return resourceMaskObj_;
     }
 
+    void SetAnchorType(TipsAnchorType anchorType)
+    {
+        anchorType_ = anchorType;
+        if (anchorType == TipsAnchorType::CURSOR) {
+            enableArrow_ = false;
+            placement_ = Placement::BOTTOM_LEFT;
+        }
+    }
+
+    TipsAnchorType GetAnchorType() const
+    {
+        return anchorType_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -702,6 +721,7 @@ private:
     std::optional<bool> enableHoverMode_ = std::nullopt;
     bool followTransformOfTarget_ = false;
     bool isTips_ = false;
+    TipsAnchorType anchorType_ = TipsAnchorType::TARGET;
     int32_t appearingTime_ = 700;
     int32_t disappearingTime_ = 300;
     int32_t appearingTimeWithContinuousOperation_ = 300;

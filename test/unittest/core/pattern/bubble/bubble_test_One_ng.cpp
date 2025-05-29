@@ -2685,6 +2685,7 @@ HWTEST_F(BubbleTestOneNg, CreateBubbleNode001, TestSize.Level1)
     popupParam->SetArrowHeight(arrowHeight);
     popupParam->SetArrowWidth(arrowWidth);
     popupParam->SetShadow(shadow);
+    popupParam->SetAnchorType(TipsAnchorType::CURSOR);
 
     /**
      * @tc.steps: step2. create BubbleNode with position offset
@@ -2709,6 +2710,7 @@ HWTEST_F(BubbleTestOneNg, CreateBubbleNode001, TestSize.Level1)
     EXPECT_EQ(property->GetRadius().value(), radius);
     EXPECT_EQ(property->GetArrowHeight().value(), arrowHeight);
     EXPECT_EQ(property->GetArrowWidth().value(), arrowWidth);
+    EXPECT_EQ(property->GetShowAtAnchor().value(), TipsAnchorType::CURSOR);
 }
 
 /**

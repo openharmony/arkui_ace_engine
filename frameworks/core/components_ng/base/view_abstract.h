@@ -464,6 +464,7 @@ public:
         PopupInfo& tipsInfo, bool showInSubWindow);
     static void UpdateTipsInfo(PopupInfo& tipsInfo, int32_t popupId, const RefPtr<FrameNode>& popupNode,
         const RefPtr<PopupParam>& param, bool isAvoidKeyboard);
+    static void AddMouseEventForTips(const RefPtr<FrameNode>& targetNode, PopupInfo& tipsInfo);
     static RefPtr<OverlayManager> GetCurOverlayManager(const RefPtr<UINode>& node);
     static bool GetTargetNodeIsInSubwindow(const RefPtr<UINode>& targetNode);
     static int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
