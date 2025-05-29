@@ -57,6 +57,7 @@ constexpr char LAYOUT_BREAKPOINT_DEFAULT[] = "320,600,1000,1440;0.8,1.2;";
 constexpr size_t NUM_0 = 0;
 constexpr size_t NUM_1 = 1;
 constexpr size_t NUM_2 = 2;
+constexpr size_t NUM_3 = 3;
 constexpr size_t NUM_4 = 4;
 const std::vector<double> WIDTH_DEFAULTS {320, 600, 1000, 1440};
 const std::vector<double> HEIGHT_DEFAULTS {0.8, 1.2};
@@ -556,7 +557,7 @@ std::vector<double> GetLayoutBreakpoints(
     }
 
     auto parts = Split(param, ';');
-    if (parts.size() <= partIndex) {
+    if (parts.size() == NUM_2) {
         LOGI("Invalid parameter format");
         return defaults;
     }
@@ -571,14 +572,16 @@ std::vector<double> GetLayoutBreakpoints(
     return defaults;
 }
 
-std::vector<double> SystemProperties::GetWidthLayoutBreakpoints()
+WidthLayoutBreakPoint SystemProperties::GetWidthLayoutBreakpoints()
 {
-    return GetLayoutBreakpoints(NUM_0, WIDTH_DEFAULTS, ParseWidthBreakPoints);
+    std::vector<double> vec = GetLayoutBreakpoints(NUM_0, WIDTH_DEFAULTS, ParseWidthBreakPoints);
+    return WidthLayoutBreakPoint(vec[NUM_0], vec[NUM_1], vec[NUM_2], vec[NUM_3]);
 }
 
-std::vector<double> SystemProperties::GetHeightLayoutBreakpoints()
+HeightLayoutBreakPoint SystemProperties::GetHeightLayoutBreakpoints()
 {
-    return GetLayoutBreakpoints(NUM_1, HEIGHT_DEFAULTS, ParseHeightBreakPoints);
+    std::vector<double> vec = GetLayoutBreakpoints(NUM_1, HEIGHT_DEFAULTS, ParseHeightBreakPoints);
+    return HeightLayoutBreakPoint(vec[NUM_0], vec[NUM_1]);
 }
 
 std::string InitSysBrand()

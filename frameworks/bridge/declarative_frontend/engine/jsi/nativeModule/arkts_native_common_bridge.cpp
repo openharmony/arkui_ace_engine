@@ -9319,7 +9319,7 @@ ArkUINativeModuleValue CommonBridge::GetWindowWidthBreakpoint(ArkUIRuntimeCallIn
     auto window = container->GetWindow();
     CHECK_NULL_RETURN(window, panda::JSValueRef::Undefined(vm));
 
-    std::vector<double> layoutBreakpoints = SystemProperties::GetWidthLayoutBreakpoints();
+    WidthLayoutBreakPoint layoutBreakpoints = SystemProperties::GetWidthLayoutBreakpoints();
     WidthBreakpoint breakpoint = window->GetWidthBreakpoint(layoutBreakpoints);
 
     return panda::IntegerRef::NewFromUnsigned(vm, static_cast<uint32_t>(breakpoint));
@@ -9334,7 +9334,7 @@ ArkUINativeModuleValue CommonBridge::GetWindowHeightBreakpoint(ArkUIRuntimeCallI
     auto window = container->GetWindow();
     CHECK_NULL_RETURN(window, panda::JSValueRef::Undefined(vm));
 
-    std::vector<double> layoutBreakpoints = SystemProperties::GetHeightLayoutBreakpoints();
+    HeightLayoutBreakPoint layoutBreakpoints = SystemProperties::GetHeightLayoutBreakpoints();
     HeightBreakpoint breakpoint = window->GetHeightBreakpoint(layoutBreakpoints);
 
     return panda::IntegerRef::NewFromUnsigned(vm, static_cast<uint32_t>(breakpoint));

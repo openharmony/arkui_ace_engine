@@ -102,7 +102,7 @@ int64_t Window::GetDeadlineByFrameCount(int64_t deadline, int64_t ts, int64_t fr
     return deadline;
 }
 
-WidthBreakpoint Window::GetWidthBreakpoint(const std::vector<double>& layoutBreakpoints) const
+WidthBreakpoint Window::GetWidthBreakpoint(const WidthLayoutBreakPoint& layoutBreakpoints) const
 {
     double density = PipelineBase::GetCurrentDensity();
     double width = 0.0;
@@ -114,13 +114,13 @@ WidthBreakpoint Window::GetWidthBreakpoint(const std::vector<double>& layoutBrea
     LOGI("GetWidthBreakpoint width: %{public}lf", width);
 
     WidthBreakpoint breakpoint;
-    if (width < layoutBreakpoints[0]) {
+    if (width < layoutBreakpoints.WidthVPXS) {
         breakpoint = WidthBreakpoint::WIDTH_XS;
-    } else if (width < layoutBreakpoints[1]) {
+    } else if (width < layoutBreakpoints.WidthVPSM) {
         breakpoint = WidthBreakpoint::WIDTH_SM;
-    } else if (width < layoutBreakpoints[2]) {
+    } else if (width < layoutBreakpoints.WidthVPMD) {
         breakpoint = WidthBreakpoint::WIDTH_MD;
-    } else if (width < layoutBreakpoints[3]) {
+    } else if (width < layoutBreakpoints.WidthVPLG) {
         breakpoint = WidthBreakpoint::WIDTH_LG;
     } else {
         breakpoint = WidthBreakpoint::WIDTH_XL;
@@ -128,7 +128,7 @@ WidthBreakpoint Window::GetWidthBreakpoint(const std::vector<double>& layoutBrea
     return breakpoint;
 }
 
-HeightBreakpoint Window::GetHeightBreakpoint(const std::vector<double>& layoutBreakpoints) const
+HeightBreakpoint Window::GetHeightBreakpoint(const HeightLayoutBreakPoint& layoutBreakpoints) const
 {
     auto width = GetCurrentWindowRect().Width();
     auto height = GetCurrentWindowRect().Height();
@@ -141,9 +141,9 @@ HeightBreakpoint Window::GetHeightBreakpoint(const std::vector<double>& layoutBr
     LOGI("GetHeightBreakpoint aspectRatio: %{public}lf", aspectRatio);
 
     HeightBreakpoint breakpoint;
-    if (aspectRatio < layoutBreakpoints[0]) {
+    if (aspectRatio < layoutBreakpoints.HeightVPRATIOSM) {
         breakpoint = HeightBreakpoint::HEIGHT_SM;
-    } else if (aspectRatio < layoutBreakpoints[1]) {
+    } else if (aspectRatio < layoutBreakpoints.HeightVPRATIOMD) {
         breakpoint = HeightBreakpoint::HEIGHT_MD;
     } else {
         breakpoint = HeightBreakpoint::HEIGHT_LG;
