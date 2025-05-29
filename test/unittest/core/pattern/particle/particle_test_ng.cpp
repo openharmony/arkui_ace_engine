@@ -300,6 +300,26 @@ HWTEST_F(ParticleTestNg, ParticleTest006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ParticleResObj001
+ * @tc.desc: Test CreateParticleResObj of particle
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParticleTestNg, ParticleResObj001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PARTICLE_ETS_TAG, 1, [count = 1]() { return AceType::MakeRefPtr<ParticlePattern>(count); });
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);;
+    auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj) {};
+    updateFunc(resObj);
+    pattern->AddResObj("particle.Create", resObj, std::move(updateFunc));
+    std::string particle = pattern->GetResCacheMapByKey("particle.Create");
+    EXPECT_EQ(particle, "");
+}
+
+/**
  * @tc.name: ParticleToJsonValue001
  * @tc.desc: Test GetEmitterJson parse.
  * @tc.type: FUNC
