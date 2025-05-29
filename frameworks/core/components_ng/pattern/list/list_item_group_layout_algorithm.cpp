@@ -14,7 +14,6 @@
  */
 
 #include "base/log/event_report.h"
-#include "base/log/log_wrapper.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 
 #include "core/components/common/layout/grid_system_manager.h"

@@ -14,9 +14,6 @@
  */
 
 #include "core/components_ng/pattern/list/list_pattern.h"
-#include <cstdint>
-#include <optional>
-#include <unistd.h>
 
 #include "base/geometry/rect.h"
 #include "base/log/dump_log.h"
@@ -24,7 +21,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/list/list_theme.h"
 #include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/list/list_height_offset_calculator.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
@@ -3298,7 +3294,7 @@ SizeF ListPattern::GetChildrenExpandedSize()
 }
 
 bool ListPattern::LayoutItemInGroupForFocus(int32_t indexInList, int32_t nextIndexInGroup, int32_t curIndexInGroup,
-    ListItemGroupPara listItemGroupPara, int32_t maxListItemIndex)
+    const ListItemGroupPara& listItemGroupPara, int32_t maxListItemIndex)
 {
     // nextIndexInGroup = -1 indicates the current position is Header; nextIndexInGroup = maxListItemIndex indicates the
     // current position is Footer.
@@ -3763,8 +3759,6 @@ ScopeFocusAlgorithm ListPattern::GetScopeFocusAlgorithm()
             if (list) {
                 nextFocusNode = list->GetNextFocusNodeInList(step, currFocusNode);
             }
-            LOGI("acefocus ListPattern::GetScopeFocusAlgorithm return: %{public}d",
-                nextFocusNode.Upgrade() != currFocusNode.Upgrade());
             return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
         });
 }
