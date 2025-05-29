@@ -1438,6 +1438,102 @@ HWTEST_F(NavigationLayoutTestNg, TransitionWithReplace001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckContentNeedMeasure
+ * @tc.desc:
+ *           test navigationpattern::CheckContentNeedMeasure
+ *           if navigation height is "auto"
+ *           dirtynodes is not empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutTestNg, CheckContentNeedMeasure001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1 create navigation and setHeight
+     * @tc.expected: success create navigation
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationLayoutProperty = navigation->GetLayoutProperty<NavigationLayoutProperty>();
+    EXPECT_NE(navigationLayoutProperty, nullptr);
+    navigationLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_NORMAL);
+    CalcSize idealSize = { CalcLength("100%"), CalcLength("auto") };
+    MeasureProperty layoutConstraint = { .selfIdealSize = idealSize };
+    navigationLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    /**
+     * @tc.steps: step2 call CheckContentNeedMeasure
+     * @tc.expected: dirty flag is PROPERTY_UPDATE_MEASURE
+     */
+    auto navigationContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, 12,
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_NE(navigationContentNode, nullptr);
+    auto layoutProperty = navigationContentNode->GetLayoutProperty<LayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    layoutProperty->CleanDirty();
+    navigation->SetContentNode(navigationContentNode);
+    navigationPattern->CheckContentNeedMeasure(navigation);
+    auto layoutFlag = layoutProperty->GetPropertyChangeFlag();
+    ASSERT_EQ(layoutFlag, PROPERTY_UPDATE_MEASURE);
+}
+
+/**
+ * @tc.name: CheckContentNeedMeasure
+ * @tc.desc:
+ *           test navigationpattern::CheckContentNeedMeasure
+ *           if navigation height is "auto"
+ *           dirtynodes is not empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutTestNg, CheckContentNeedMeasure002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1 create navigation and setHeight "1111"
+     * @tc.expected: success create navigation
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationLayoutProperty = navigation->GetLayoutProperty<NavigationLayoutProperty>();
+    EXPECT_NE(navigationLayoutProperty, nullptr);
+    CalcSize idealSize = { CalcLength("100%"), CalcLength("1111") };
+    MeasureProperty layoutConstraint = { .selfIdealSize = idealSize };
+    navigationLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    /**
+     * @tc.steps: step2 call CheckContentNeedMeasure
+     * @tc.expected: dirty flag is not PROPERTY_UPDATE_MEASURE
+     */
+    auto navigationContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, 22,
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_NE(navigationContentNode, nullptr);
+    auto layoutProperty = navigationContentNode->GetLayoutProperty<LayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    layoutProperty->CleanDirty();
+    EXPECT_EQ(layoutProperty->GetPropertyChangeFlag(), PROPERTY_UPDATE_NORMAL);
+    navigation->SetContentNode(navigationContentNode);
+    navigationPattern->CheckContentNeedMeasure(navigation);
+    auto layoutFlag = layoutProperty->GetPropertyChangeFlag();
+    ASSERT_NE(layoutFlag, PROPERTY_UPDATE_MEASURE);
+}
+
+/**
  * @tc.name: DealNavigationExit001
  * @tc.desc: Test DealNavigationExit and make the logic as follows:
  *               GetOrCreateEventHub return false
