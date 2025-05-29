@@ -1520,12 +1520,13 @@ void MenuPattern::ShowStackMenuAppearAnimation()
     subMenuContext->UpdatePosition(
         OffsetT<Dimension>(Dimension(originOffset.GetX()), Dimension(originOffset.GetY())));
 
-
     auto preview = isShowHoverImage_ ? menuWrapperPattern->GetHoverImageFlexNode() : menuWrapperPattern->GetPreview();
     float translateYForStack = subMenuPattern->GetTranslateYForStack();
     AnimationOption translateOption = AnimationOption();
     translateOption.SetCurve(STACK_SUB_MENU_ANIMATION_CURVE);
-    AnimationUtils::Animate(translateOption, [subMenuContext, menuPosition = endOffset, mainMenuContext, mainMenu, translateYForStack, preview]() {
+    AnimationUtils::Animate(
+        translateOption,
+        [subMenuContext, menuPosition = endOffset, mainMenuContext, mainMenu, translateYForStack, preview]() {
         if (subMenuContext) {
             subMenuContext->UpdatePosition(
                 OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
@@ -1541,9 +1542,10 @@ void MenuPattern::ShowStackMenuAppearAnimation()
         CHECK_NULL_VOID(mainMenuPattern);
         mainMenuPattern->SetOriginMenuYForStack(mainMenuOffset.GetY());
         mainMenuContext->UpdatePosition(
-            OffsetT<Dimension>(Dimension(mainMenuOffset.GetX()), Dimension(mainMenuOffset.GetY() - translateYForStack))
-        );
-        mainMenu->GetGeometryNode()->SetMarginFrameOffset(OffsetF(mainMenuOffset.GetX(), mainMenuOffset.GetY() - translateYForStack));
+            OffsetT<Dimension>(Dimension(mainMenuOffset.GetX()),
+                Dimension(mainMenuOffset.GetY() - translateYForStack)));
+        mainMenu->GetGeometryNode()->SetMarginFrameOffset(OffsetF(mainMenuOffset.GetX(),
+            mainMenuOffset.GetY() - translateYForStack));
 
         CHECK_NULL_VOID(preview);
         auto previewFrameOffset = preview->GetGeometryNode()->GetFrameOffset();
@@ -1551,9 +1553,10 @@ void MenuPattern::ShowStackMenuAppearAnimation()
         auto previewRenderContext = preview->GetRenderContext();
         CHECK_NULL_VOID(previewRenderContext);
         previewRenderContext->UpdatePosition(
-            OffsetT<Dimension>(Dimension(previewFrameOffset.GetX()), Dimension(previewFrameOffset.GetY() - translateYForStack))
-        );
-        preview->GetGeometryNode()->SetMarginFrameOffset(OffsetF(previewFrameOffset.GetX(), previewFrameOffset.GetY() - translateYForStack));
+            OffsetT<Dimension>(Dimension(previewFrameOffset.GetX()),
+                Dimension(previewFrameOffset.GetY() - translateYForStack)));
+        preview->GetGeometryNode()->SetMarginFrameOffset(OffsetF(previewFrameOffset.GetX(),
+            previewFrameOffset.GetY() - translateYForStack));
     });
     ShowArrowRotateAnimation();
     isSubMenuShow_ = false;
@@ -1831,16 +1834,20 @@ void MenuPattern::ShowStackMenuDisappearAnimation(const RefPtr<FrameNode>& menuN
             auto menuPattern = menuNode->GetPattern<MenuPattern>();
             if (GreatNotEqual(menuPattern->GetOriginMenuYForStack(), 0.0f)) {
                 menuContext->UpdatePosition(
-                    OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPattern->GetOriginMenuYForStack())));
-                menuNode->GetGeometryNode()->SetMarginFrameOffset(OffsetF(menuPosition.GetX(), menuPattern->GetOriginMenuYForStack()));
+                    OffsetT<Dimension>(Dimension(menuPosition.GetX()),
+                        Dimension(menuPattern->GetOriginMenuYForStack())));
+                menuNode->GetGeometryNode()->SetMarginFrameOffset(OffsetF(menuPosition.GetX(),
+                    menuPattern->GetOriginMenuYForStack()));
             }
             if (GreatNotEqual(menuPattern->GetOriginPreviewYForStack(), 0.0f)) {
                 auto previewRenderContext = preview->GetRenderContext();
                 CHECK_NULL_VOID(previewRenderContext);
                 auto previewFrameOffsetX = preview->GetGeometryNode()->GetFrameOffset().GetX();
                 previewRenderContext->UpdatePosition(
-                    OffsetT<Dimension>(Dimension(previewFrameOffsetX), Dimension(menuPattern->GetOriginPreviewYForStack())));
-                preview->GetGeometryNode()->SetMarginFrameOffset(OffsetF(previewFrameOffsetX, menuPattern->GetOriginPreviewYForStack()));
+                    OffsetT<Dimension>(Dimension(previewFrameOffsetX),
+                        Dimension(menuPattern->GetOriginPreviewYForStack())));
+                preview->GetGeometryNode()->SetMarginFrameOffset(OffsetF(previewFrameOffsetX,
+                    menuPattern->GetOriginPreviewYForStack()));
             }
         }
         if (subImageNode) {
