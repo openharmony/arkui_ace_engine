@@ -186,6 +186,7 @@ LayoutConstraintF RichEditorLayoutAlgorithm::ReMeasureContent(
         return newContentConstraint;
     }
     if (pattern->GetMaxLines() == INT32_MAX || pManager_->GetHeight() <= 0.0f) {
+        UpdateConstraintByLayoutPolicy(textSize, newContentConstraint, layoutWrapper);
         return newContentConstraint;
     }
     pattern->SetMaxLinesHeight(pManager_->GetHeight());
@@ -198,6 +199,24 @@ LayoutConstraintF RichEditorLayoutAlgorithm::ReMeasureContent(
     pManager_->SetParagraphs(GetParagraphs());
     textSize = SizeF(pManager_->GetMaxWidth(), pManager_->GetHeight());
     return newContentConstraint;
+}
+
+void RichEditorLayoutAlgorithm::UpdateConstraintByLayoutPolicy(
+    const SizeF& textSize, LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicy.has_value() && layoutPolicy->IsHeightFix());
+    const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_VOID(calcLayoutConstraint);
+    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint.has_value());
+    const auto& percentReference = layoutConstraint->percentReference;
+    auto finalSize = UpdateOptionSizeByCalcLayoutConstraint(OptionalSizeF(textSize), calcLayoutConstraint,
+        percentReference);
+    IF_TRUE(finalSize.Height().has_value(), constraint.maxSize.SetHeight(finalSize.Height().value()));
 }
 
 std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
@@ -223,6 +242,7 @@ bool RichEditorLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPt
 {
     ACE_SCOPED_TRACE("RichEditorLayoutAlgorithm::BuildParagraph");
     auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
+    UpdateMaxSizeByLayoutPolicy(contentConstraint, layoutWrapper, maxSize);
     if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(u""), layoutWrapper, maxSize.Width())) {
         return false;
     }
@@ -251,12 +271,39 @@ bool RichEditorLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPt
         ++pIter;
         ++groupIter;
     }
+    ReLayoutParagraphByLayoutPolicy(layoutWrapper, maxSize.Width());
 
     if (paraMapPtr_) {
         paraMapPtr_->SetCapacity(paragraphInfo.size());
         paraMapPtr_->SetCapacity(SIZE_MAX);
     }
     return ParagraphReLayout(contentConstraint);
+}
+
+void RichEditorLayoutAlgorithm::UpdateMaxSizeByLayoutPolicy(const LayoutConstraintF& contentConstraint,
+    LayoutWrapper* layoutWrapper, SizeF& maxSize)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicy.has_value() && layoutPolicy->IsWidthFix());
+    auto parentIdealWidth = contentConstraint.parentIdealSize.Width();
+    CHECK_NULL_VOID(parentIdealWidth.has_value() && NearEqual(maxSize.Width(), parentIdealWidth.value()));
+    maxSize.SetWidth(std::numeric_limits<float>::max());
+}
+
+void RichEditorLayoutAlgorithm::ReLayoutParagraphByLayoutPolicy(LayoutWrapper* layoutWrapper, float maxWidth)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicy.has_value() && layoutPolicy->IsWidthAdaptive());
+    CHECK_NULL_VOID(paragraphManager_);
+    auto maxParagraphWidth = paragraphManager_->GetLongestLineWithIndent();
+    CHECK_NULL_VOID(GreatNotEqual(maxWidth, maxParagraphWidth));
+    paragraphManager_->LayoutParagraphs(maxParagraphWidth);
 }
 
 void RichEditorLayoutAlgorithm::ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper,
@@ -362,6 +409,7 @@ void RichEditorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     frameSize.SetWidth(idealSize.ConvertToSizeT().Width());
+    UpdateFrameSizeWithLayoutPolicy(layoutWrapper, frameSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
 
     auto children = layoutWrapper->GetAllChildrenWithBuild();
@@ -381,6 +429,41 @@ void RichEditorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
     contentLayoutWrapper->Measure(layoutConstraint);
+}
+
+void RichEditorLayoutAlgorithm::UpdateFrameSizeWithLayoutPolicy(LayoutWrapper* layoutWrapper, SizeF& frameSize)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_VOID(calcLayoutConstraint);
+    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint.has_value());
+    const auto& percentReference = layoutConstraint->percentReference;
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicy.has_value());
+    if (layoutPolicy->IsMatch()) {
+        auto matchParentSize = UpdateOptionSizeByCalcLayoutConstraint(OptionalSizeF(frameSize), calcLayoutConstraint,
+            percentReference);
+        bool matchWidth = layoutPolicy->IsWidthMatch() && matchParentSize.Width().has_value();
+        bool matchHeight = layoutPolicy->IsHeightMatch() && matchParentSize.Height().has_value();
+        IF_TRUE(matchWidth, frameSize.SetWidth(matchParentSize.Width().value()));
+        IF_TRUE(matchHeight, frameSize.SetHeight(matchParentSize.Height().value()));
+    }
+ 
+    CHECK_NULL_VOID(layoutPolicy->IsAdaptive());
+    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+    CHECK_NULL_VOID(content);
+    auto contentSize = content->GetRect().GetSize();
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
+    AddPaddingToSize(padding, contentSize);
+    auto fixIdealSize = UpdateOptionSizeByCalcLayoutConstraint(OptionalSizeF(contentSize), calcLayoutConstraint,
+        percentReference);
+    bool widthAdaptive = layoutPolicy->IsWidthAdaptive() && fixIdealSize.Width().has_value();
+    bool heightAdaptive = layoutPolicy->IsHeightAdaptive() && fixIdealSize.Height().has_value();
+    IF_TRUE(widthAdaptive, frameSize.SetWidth(fixIdealSize.Width().value()));
+    IF_TRUE(heightAdaptive, frameSize.SetHeight(fixIdealSize.Height().value()));
 }
 
 void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

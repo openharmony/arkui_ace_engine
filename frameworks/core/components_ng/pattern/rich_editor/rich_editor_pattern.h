@@ -362,6 +362,12 @@ public:
         return true;
     }
 
+    // Support LayoutPolicy.matchParent
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
     BlurReason GetBlurReason();
 
     uint32_t GetSCBSystemWindowId();

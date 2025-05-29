@@ -150,6 +150,7 @@ protected:
     ChildrenListWithGuard GetAllChildrenWithBuild(LayoutWrapper* layoutWrapper) override;
 
 private:
+    void UpdateFrameSizeWithLayoutPolicy(LayoutWrapper* layoutWrapper, SizeF& frameSize);
     OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) override;
     bool CreateParagraph(const TextStyle& textStyle, std::u16string content, LayoutWrapper* layoutWrapper,
         double maxWidth = 0.0) override;
@@ -170,6 +171,11 @@ private:
     LayoutConstraintF ReMeasureContent(
         SizeF& textSize, const LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper);
     void HandleParagraphCache();
+    void UpdateConstraintByLayoutPolicy(
+        const SizeF& textSize, LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper);
+    void UpdateMaxSizeByLayoutPolicy(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
+        SizeF& maxSize);
+    void ReLayoutParagraphByLayoutPolicy(LayoutWrapper* layoutWrapper, float maxWidth);
     void ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper, std::vector<TextStyle>& textStyles,
         std::list<RefPtr<SpanItem>>& group, bool& needReLayout, bool& needReLayoutParagraph);
     std::uintptr_t Hash(const std::list<RefPtr<SpanItem>>& spanGroup);
