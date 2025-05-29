@@ -198,16 +198,16 @@ void ParseTitlebarOptions(const CJNavigationTitleOptions& info, NG::NavigationTi
 void FfiOHOSAceFrameworkNavdestinationSetTitleWithStringOptions(const char* value, CJNavigationTitleOptions options)
 {
     FfiOHOSAceFrameworkNavdestinationSetTitleWithString(value);
-    NG::NavigationToolbarOptions optionsNG;
-    ParseToolbarOptions(options, optionsNG);
+    NG::NavigationTitlebarOptions optionsNG;
+    ParseTitlebarOptions(options, optionsNG);
     NavDestinationModel::GetInstance()->SetToolbarOptions(std::move(optionsNG));
 }
 
 void FfiOHOSAceFrameworkNavdestinationSetTitleWithBuilderOptions(void (*builder)(), CJNavigationTitleOptions options)
 {
     FfiOHOSAceFrameworkNavdestinationSetTitleWithBuilder(builder);
-    NG::NavigationToolbarOptions optionsNG;
-    ParseToolbarOptions(options, optionsNG);
+    NG::NavigationTitlebarOptions optionsNG;
+    ParseTitlebarOptions(options, optionsNG);
     NavDestinationModel::GetInstance()->SetToolbarOptions(std::move(optionsNG));
 }
 
@@ -215,8 +215,8 @@ void FfiOHOSAceFrameworkNavdestinationSetTitleWithCommonTitleOptions(
     const char* main, const char* sub, CJNavigationTitleOptions options)
 {
     FfiOHOSAceFrameworkNavdestinationSetTitleWithCommonTitle(main, sub);
-    NG::NavigationToolbarOptions optionsNG;
-    ParseToolbarOptions(options, optionsNG);
+    NG::NavigationTitlebarOptions optionsNG;
+    ParseTitlebarOptions(options, optionsNG);
     NavDestinationModel::GetInstance()->SetToolbarOptions(std::move(optionsNG));
 }
 
@@ -224,8 +224,8 @@ void FfiOHOSAceFrameworkNavdestinationSetTitleWithTitleHeightOptions(
     void (*builder)(), int32_t titleHeightMode, CJNavigationTitleOptions options)
 {
     FfiOHOSAceFrameworkNavdestinationSetTitleWithTitleHeight(builder, titleHeightMode);
-    NG::NavigationToolbarOptions optionsNG;
-    ParseToolbarOptions(options, optionsNG);
+    NG::NavigationTitlebarOptions optionsNG;
+    ParseTitlebarOptions(options, optionsNG);
     NavDestinationModel::GetInstance()->SetToolbarOptions(std::move(optionsNG));
 }
 
@@ -233,8 +233,8 @@ void FfiOHOSAceFrameworkNavdestinationSetTitleWithHeightOptions(
     void (*builder)(), double height, int32_t heightUnit, CJNavigationTitleOptions options)
 {
     FfiOHOSAceFrameworkNavdestinationSetTitleWithHeight(builder, height, heightUnit);
-    NG::NavigationToolbarOptions optionsNG;
-    ParseToolbarOptions(options, optionsNG);
+    NG::NavigationTitlebarOptions optionsNG;
+    ParseTitlebarOptions(options, optionsNG);
     NavDestinationModel::GetInstance()->SetToolbarOptions(std::move(optionsNG));
 }
 
