@@ -304,6 +304,7 @@ void ListItemPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
+    InitOnFocusEvent();
     Pattern::OnModifyDone();
     InitListItemCardStyleForList();
     if (!listItemEventHub->HasStateStyle(UI_STATE_SELECTED)) {
@@ -1360,6 +1361,36 @@ void ListItemPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("hasStartDeleteArea", hasStartDeleteArea_);
     if (enableOpacity_.has_value()) {
         json->Put("enableOpacity", enableOpacity_.value() ? "true:" : "false");
+    }
+}
+
+void ListItemPattern::InitOnFocusEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnFocusInternal([weak = WeakClaim(this)](FocusReason reason) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleFocusEvent();
+        }
+    });
+}
+
+void ListItemPattern::HandleFocusEvent()
+{
+    auto list = GetListFrameNode();
+    CHECK_NULL_VOID(list);
+    int32_t groupIndex = GetIndexInListItemGroup();
+    auto pattern = list->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFocusIndex(GetIndexInList());
+    if (groupIndex >= 0) {
+        pattern->SetGroupFocusIndex(groupIndex);
+        pattern->SetFocusIndexChangedByListItemGroup(true);
+    } else {
+        pattern->SetFocusIndexChangedByListItemGroup(false);
     }
 }
 } // namespace OHOS::Ace::NG
