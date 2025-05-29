@@ -303,6 +303,8 @@ public:
     void OnScrollStart(const float x, const float y) override;
 
     void RestoreRenderFit() override;
+
+    void OnPip(int status, int delegate_id, int child_id, int frame_routing_id, int width, int height) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

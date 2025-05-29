@@ -8150,4 +8150,55 @@ bool WebDelegate::IsNWebEx()
     }
     return nweb_->IsNWebEx();
 }
+
+void WebDelegate::OnPip(
+    int status, int delegate_id, int child_id, int frame_routing_id, int width, int height)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnPip");
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), status, delegate_id, child_id, frame_routing_id, width, height]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->OnPip(status, delegate_id, child_id, frame_routing_id, width, height);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIWebOnPip");
+}
+
+void WebDelegate::SetPipNativeWindow(int delegate_id, int child_id, int frame_routing_id, void* window)
+{
+    if (!window) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "SetPipNativeWindow null");
+        return;
+    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), delegate_id, child_id, frame_routing_id, window]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            TAG_LOGI(AceLogTag::ACE_WEB, "setPipNativeWindow setting");
+            delegate->nweb_->SetPipNativeWindow(delegate_id, child_id, frame_routing_id, window);
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetPipNativeWindow");
+}
+
+void WebDelegate::SendPipEvent(int delegate_id, int child_id, int frame_routing_id, int event)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), delegate_id, child_id, frame_routing_id, event]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            TAG_LOGI(AceLogTag::ACE_WEB, "sendPipEvent setting");
+            delegate->nweb_->SendPipEvent(delegate_id, child_id, frame_routing_id, event);
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSendPipEvent");
+}
 } // namespace OHOS::Ace

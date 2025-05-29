@@ -108,6 +108,15 @@ enum class WebInfoType : int32_t {
     TYPE_UNKNOWN
 };
 
+struct PipInfo {
+    uint32_t mainWindowId;
+    int delegateId;
+    int childId;
+    int frameRoutingId;
+    int width;
+    int height;
+};
+
 using CursorStyleInfo = std::tuple<OHOS::NWeb::CursorType, std::shared_ptr<OHOS::NWeb::NWebCursorInfo>>;
 
 class WebPattern : public NestableScrollContainer,
@@ -790,11 +799,24 @@ public:
     void InitDataDetector();
     void CloseDataDetectorMenu();
 
+
+    void OnPip(int status, int delegateId, int childId, int frameRoutingId, int width, int height);
+    void SetPipNativeWindow(int delegateId, int childId, int frameRoutingId, void* window);
+    void SendPipEvent(int delegateId, int childId, int frameRoutingId, int event);
 private:
     friend class WebContextSelectOverlay;
     friend class WebSelectOverlay;
     friend class WebDataDetectorAdapter;
 
+    bool Pip(int status, int delegateId, int childId, int frameRoutingId, int width, int height);
+    napi_env CreateEnv();
+    bool CreatePip(int status, napi_env env, bool& init, uint32_t &pipController, const PipInfo &pipInfo);
+    bool RegisterPip(uint32_t pipController);
+    bool StartPip(uint32_t pipController);
+    void EnablePip(uint32_t pipController);
+    bool StopPip(int delegateId, int childId, int frameRoutingId);
+    bool PlayPip(int delegateId, int childId, int frameRoutingId);
+    bool PausePip(int delegateId, int childId, int frameRoutingId);
     void GetPreviewImageOffsetAndSize(bool isImage, Offset& previewOffset, SizeF& previewSize);
     RefPtr<FrameNode> CreatePreviewImageFrameNode(bool isImage);
     void ShowPreviewMenu(WebElementType type);
@@ -1259,7 +1281,7 @@ private:
     double density_ = 0.0;
     int32_t densityCallbackId_ = 0;
     bool keyboardGetready_ = false;
-
+    std::vector<uint32_t> pipController_;
     std::optional<int32_t> dataListNodeId_ = std::nullopt;
     bool isRegisterJsObject_ = false;
 

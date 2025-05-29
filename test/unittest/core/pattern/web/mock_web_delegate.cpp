@@ -1250,4 +1250,12 @@ bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
 {
     return false;
 }
+
+void WebDelegate::OnPip(int status, int delegate_id,
+    int child_id, int frame_routing_id,  int width, int height) {}
+void WebDelegate::SetPipNativeWindow(int delegate_id,
+    int child_id, int frame_routing_id, void* window) {}
+void WebDelegate::SendPipEvent(int delegate_id,
+    int child_id, int frame_routing_id, int event) {}
+
 } // namespace OHOS::Ace
