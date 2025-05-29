@@ -1026,16 +1026,8 @@ class SegmentButtonItem extends ViewPU {
         return segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR;
       }
       return this.options.selectedFontColor ?? segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR;
-    } else {
-      if (
-        this.options.fontColor === segmentButtonTheme.FONT_COLOR &&
-        this.isSegmentFocusStyleCustomized &&
-        this.focusIndex === this.index
-      ) {
-        return segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR;
-      }
-      return this.options.fontColor ?? segmentButtonTheme.FONT_COLOR;
     }
+    return this.options.fontColor ?? segmentButtonTheme.FONT_COLOR;
   }
   getAccessibilityText() {
     if (
@@ -1754,6 +1746,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
       Stack.direction(this.options.direction);
       Stack.size({ width: 1, height: 1 });
       Stack.align(Alignment.Center);
+      Stack.visibility(!this.isSegmentFocusStyleCustomized && this.focusIndex === index ? Visibility.Visible : Visibility.None);
     }, Stack);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Stack.create();
@@ -1936,20 +1929,21 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                           };
                         }
                       });
-                      ViewStackProcessor.visualState('normal');
-                      Button.overlay(undefined);
-                      ViewStackProcessor.visualState('focused');
-                      Button.overlay(
-                        {
-                          builder: () => {
-                            this.focusStack.call(this, index);
-                          },
-                        },
-                        {
-                          align: Alignment.Center,
+                      Button.overlay({
+                        builder: () => {
+                          this.focusStack.call(this, index);
                         }
-                      );
-                      ViewStackProcessor.visualState();
+                      }, { align: Alignment.Center });
+                      Button.attributeModifier.bind(this)(this.isSegmentFocusStyleCustomized ? undefined :
+                        new FocusStyleButtonModifier((isFocused) => {
+                          if (!isFocused && this.focusIndex === index) {
+                            this.focusIndex = -1;
+                            return;
+                          }
+                          if (isFocused) {
+                            this.focusIndex = index;
+                          }
+                        }));
                       Button.onFocus(() => {
                         this.focusIndex = index;
                         if (this.isSegmentFocusStyleCustomized) {
@@ -1957,7 +1951,9 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                         }
                       });
                       Button.onBlur(() => {
-                        this.focusIndex = -1;
+                        if (this.focusIndex === index) {
+                          this.focusIndex = -1;
+                        }
                         this.hoverColorArray[index].hoverColor = Color.Transparent;
                       });
                       Gesture.create(GesturePriority.Low);
@@ -3150,6 +3146,20 @@ function getBackgroundBorderRadius(options, defaultRadius) {
     return options.iconTextRadius ?? options.iconTextBackgroundRadius ?? defaultRadius;
   }
   return options.iconTextBackgroundRadius ?? defaultRadius;
+}
+
+class FocusStyleButtonModifier {
+  constructor(stateStyleAction) {
+    this.stateStyleAction = stateStyleAction;
+  }
+
+  applyNormalAttribute(instance) {
+    this.stateStyleAction && this.stateStyleAction(false);
+  }
+
+  applyFocusedAttribute(instance) {
+    this.stateStyleAction && this.stateStyleAction(true);
+  }
 }
 
 export default {

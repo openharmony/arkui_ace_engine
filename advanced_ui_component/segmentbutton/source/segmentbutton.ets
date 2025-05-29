@@ -627,13 +627,8 @@ struct SegmentButtonItem {
         return segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR;
       }
       return this.options.selectedFontColor ?? segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR;
-    } else {
-      if (this.options.fontColor === segmentButtonTheme.FONT_COLOR && this.isSegmentFocusStyleCustomized &&
-        this.focusIndex === this.index) {
-        return segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR;
-      }
-      return this.options.fontColor ?? segmentButtonTheme.FONT_COLOR;
     }
+    return this.options.fontColor ?? segmentButtonTheme.FONT_COLOR;
   }
 
   private getAccessibilityText(): Resource | undefined {
@@ -930,6 +925,8 @@ struct SegmentButtonItemArrayComponent {
     .direction(this.options.direction)
     .size({ width: 1, height: 1 })
     .align(Alignment.Center)
+    // 当前仅TV场景isSegmentFocusStyleCustomized为true,TV场景需要使用按键内置的focus样式，故隐藏此高级组件自定义的focus样式
+    .visibility(!this.isSegmentFocusStyleCustomized && this.focusIndex === index ? Visibility.Visible : Visibility.None)
   }
 
   calculateBorderRadius() {
@@ -1097,16 +1094,17 @@ struct SegmentButtonItemArrayComponent {
                 }
               }
             })
-            .stateStyles({
-              normal: {
-                .overlay(undefined)
-              },
-              focused: {
-                .overlay(this.focusStack(index), {
-                  align: Alignment.Center
-                })
-              }
-            })
+            .overlay(this.focusStack(index), { align: Alignment.Center })
+            .attributeModifier(this.isSegmentFocusStyleCustomized ? undefined :
+              new FocusStyleButtonModifier((isFocused: boolean): void => {
+                if (!isFocused && this.focusIndex === index) {
+                  this.focusIndex = -1;
+                  return;
+                }
+                if (isFocused) {
+                  this.focusIndex = index;
+                }
+              }))
             .onFocus(() => {
               this.focusIndex = index;
               if (this.isSegmentFocusStyleCustomized) {
@@ -1114,7 +1112,9 @@ struct SegmentButtonItemArrayComponent {
               }
             })
             .onBlur(() => {
-              this.focusIndex = -1;
+              if (this.focusIndex === index) {
+                this.focusIndex = -1;
+              }
               this.hoverColorArray[index].hoverColor = Color.Transparent;
             })
             .gesture(TapGesture().onAction(() => {
@@ -1755,4 +1755,20 @@ function getBackgroundBorderRadius(options: SegmentButtonOptions, defaultRadius:
     return options.iconTextRadius ?? options.iconTextBackgroundRadius ?? defaultRadius;
   }
   return options.iconTextBackgroundRadius ?? defaultRadius;
+}
+
+class FocusStyleButtonModifier implements AttributeModifier<ButtonAttribute> {
+  private stateStyleAction?: (isFocused: boolean) => void;
+
+  constructor(stateStyleAction: (isFocused: boolean) => void) {
+    this.stateStyleAction = stateStyleAction;
+  }
+
+  applyNormalAttribute(instance: ButtonAttribute): void {
+    this.stateStyleAction && this.stateStyleAction(false);
+  }
+
+  applyFocusedAttribute(instance: ButtonAttribute): void {
+    this.stateStyleAction && this.stateStyleAction(true);
+  }
 }
