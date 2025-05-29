@@ -208,12 +208,12 @@ HWTEST_F(CommonMethodModifierTest19, TabStopTestValidValues, TestSize.Level1)
     auto focusHub = frameNode->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
 
-    using TestStep = std::tuple<Ark_Boolean, bool>;
+    using TestStep = std::tuple<Opt_Boolean, bool>;
     static const std::vector<TestStep> testPlan = {
-        {Converter::ArkValue<Ark_Boolean>(false), false}, {Converter::ArkValue<Ark_Boolean>(true), true}};
+        {Converter::ArkValue<Opt_Boolean>(false), false}, {Converter::ArkValue<Opt_Boolean>(true), true}};
 
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setTabStop(node_, inputValue);
+        modifier_->setTabStop(node_, &inputValue);
         EXPECT_EQ(focusHub->IsTabStop(), expectedValue);
     }
 }
@@ -246,9 +246,9 @@ HWTEST_F(CommonMethodModifierTest19, AccessibilityNextFocusIdTestValidValues, Te
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
 
-    using TestStep = std::tuple<Ark_String, std::string>;
+    using TestStep = std::tuple<Opt_String, std::string>;
     static const std::vector<TestStep> testPlan = {
-        {Converter::ArkValue<Ark_String>("id1"), "id1"}, {Converter::ArkValue<Ark_String>("id2"), "id2"}};
+        {Converter::ArkValue<Opt_String>("id1"), "id1"}, {Converter::ArkValue<Opt_String>("id2"), "id2"}};
 
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setAccessibilityNextFocusId(node_, &inputValue);
@@ -285,8 +285,8 @@ HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityDefaultFocusTestValid
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     ASSERT_NE(accessibilityManager, nullptr);
 
-    bool isFocus = true;
-    modifier_->setAccessibilityDefaultFocus(node_, isFocus);
+    auto isFocus = Converter::ArkValue<Opt_Boolean>(true);
+    modifier_->setAccessibilityDefaultFocus(node_, &isFocus);
 }
 
 /*
@@ -318,13 +318,15 @@ HWTEST_F(CommonMethodModifierTest19, AccessibilityUseSamePageTestValidValues, Te
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
 
-    using TestStep = std::tuple<Ark_AccessibilitySamePageMode, std::string>;
+    using TestStep = std::tuple<Opt_AccessibilitySamePageMode, std::string>;
     static const std::vector<TestStep> testPlan = {
-        {ARK_ACCESSIBILITY_SAME_PAGE_MODE_FULL_SILENT, "fullsilent"},
-        {ARK_ACCESSIBILITY_SAME_PAGE_MODE_SEMI_SILENT, "semisilent"}};
+        {Converter::ArkValue<Opt_AccessibilitySamePageMode>(ARK_ACCESSIBILITY_SAME_PAGE_MODE_FULL_SILENT),
+            "FULL_SILENT"},
+        {Converter::ArkValue<Opt_AccessibilitySamePageMode>(ARK_ACCESSIBILITY_SAME_PAGE_MODE_SEMI_SILENT),
+            "SEMI_SILENT"}};
 
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setAccessibilityUseSamePage(node_, inputValue);
+        modifier_->setAccessibilityUseSamePage(node_, &inputValue);
         EXPECT_TRUE(accessibilityProperty->HasAccessibilitySamePage());
         EXPECT_EQ(accessibilityProperty->GetAccessibilitySamePage(), expectedValue);
     }
@@ -343,9 +345,9 @@ HWTEST_F(CommonMethodModifierTest19, AccessibilityUseSamePageTestInvalidValues, 
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     auto expectedValue = "";
-    auto invalidValue = static_cast<Ark_AccessibilitySamePageMode>(-1);
-
-    modifier_->setAccessibilityUseSamePage(node_, invalidValue);
+    auto invalidValue = Converter::ArkValue<Opt_AccessibilitySamePageMode>(
+        static_cast<Ark_AccessibilitySamePageMode>(-1));
+    modifier_->setAccessibilityUseSamePage(node_, &invalidValue);
     EXPECT_FALSE(accessibilityProperty->HasAccessibilitySamePage());
     EXPECT_EQ(accessibilityProperty->GetAccessibilitySamePage(), expectedValue);
 }
@@ -379,9 +381,10 @@ HWTEST_F(CommonMethodModifierTest19, AccessibilityRoleTestValidValues, TestSize.
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_FALSE(accessibilityProperty->HasAccessibilityCustomRole());
-
+    Opt_AccessibilityRoleType optInputValue;
     for (auto [inputValue, expectedValue]: ACCESSIBILITY_ROLE_MAP) {
-        modifier_->setAccessibilityRole(node_, inputValue);
+        optInputValue = Converter::ArkValue<Opt_AccessibilityRoleType>(inputValue);
+        modifier_->setAccessibilityRole(node_, &optInputValue);
         EXPECT_TRUE(accessibilityProperty->HasAccessibilityCustomRole());
         EXPECT_EQ(accessibilityProperty->GetAccessibilityCustomRole(), expectedValue);
     }
@@ -400,10 +403,10 @@ HWTEST_F(CommonMethodModifierTest19, AccessibilityRoleTestInvalidValues, TestSiz
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     auto expectedValue = "";
-    auto invalidValue = static_cast<Ark_AccessibilityRoleType>(-1);
+    auto invalidValue = Converter::ArkValue<Opt_AccessibilityRoleType>(static_cast<Ark_AccessibilityRoleType>(-1));
 
     EXPECT_FALSE(accessibilityProperty->HasAccessibilityCustomRole());
-    modifier_->setAccessibilityRole(node_, invalidValue);
+    modifier_->setAccessibilityRole(node_, &invalidValue);
     EXPECT_TRUE(accessibilityProperty->HasAccessibilityCustomRole());
     EXPECT_EQ(accessibilityProperty->GetAccessibilityCustomRole(), expectedValue);
 }
@@ -444,7 +447,8 @@ HWTEST_F(CommonMethodModifierTest19, SetOnKeyEventDispatchTest, TestSize.Level1)
     };
 
     auto arkCallback = Converter::ArkValue<Callback_KeyEvent_Boolean>(nullptr, checkCallback, expectedResId);
-    modifier_->setOnKeyEventDispatch(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_KeyEvent_Boolean>(arkCallback);
+    modifier_->setOnKeyEventDispatch(node_, &optCallback);
 
     auto callOnKeyEvent = focusHub->GetOnKeyEventDispatchCallback();
     ASSERT_NE(callOnKeyEvent, nullptr);
