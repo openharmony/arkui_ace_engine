@@ -2597,4 +2597,90 @@ HWTEST_F(TabBarPatternTestNg, HandleBottomTabBarChange003, TestSize.Level1)
     tabBarPattern_->ResetOnForceMeasure(1);
     tabBarPattern_->HandleBottomTabBarChange(2);
 }
+HWTEST_F(TabBarPatternTestNg, PlayPressAnimation, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    model.SetIsVertical(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    frameNode_->GetContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+    tabBarPattern_->tabBarStyle_ = TabBarStyle::BOTTOMTABBATSTYLE;
+    tabBarPattern_->PlayPressAnimation(0, Color::BLACK, AnimationType::PRESS);
+
+    tabBarPattern_->PlayPressAnimation(0, Color::BLACK, AnimationType:: HOVER);
+
+    tabBarPattern_->tabBarStyles_.clear();
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
+    tabBarPattern_->selectedModes_ = { SelectedMode::BOARD };
+    tabBarPattern_->PlayPressAnimation(1, Color::BLACK, AnimationType:: HOVER);
+
+    tabBarPattern_->selectedModes_ = { SelectedMode::BOARD, SelectedMode::INDICATOR };
+    IndicatorStyle indicatorStyle;
+    indicatorStyle.color = Color::BLACK;
+    tabBarPattern_->indicatorStyles_ = { indicatorStyle };
+    tabBarPattern_->PlayPressAnimation(1, Color::BLACK, AnimationType:: HOVER);
+}
+HWTEST_F(TabBarPatternTestNg,UpdateSubTabBoard, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    model.SetIsVertical(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    tabBarPattern_->indicatorStyles_.clear();
+    tabBarPattern_->selectedModes_ = { SelectedMode::BOARD };
+    tabBarPattern_->UpdateSubTabBoard(1);
+
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarPattern_->visibleItemPosition_[0] = { -1.0f, 1.0f };
+    tabBarPattern_->visibleItemPosition_[1] = { 1.0f, 2.0f };
+    tabBarPattern_->tabBarStyles_.clear();
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE };
+    IndicatorStyle indicatorStyle;
+    indicatorStyle.color = Color::BLACK;
+    tabBarPattern_->indicatorStyles_ = { indicatorStyle };
+    tabBarPattern_->UpdateSubTabBoard(0);
+}
+HWTEST_F(TabBarPatternTestNg,CalculateTargetOffset, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    model.SetIsVertical(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarPattern_->visibleItemPosition_[0] = { -1.0f, 1.0f };
+    tabBarPattern_->visibleItemPosition_[1] = { 1.0f, 2.0f };
+    tabBarPattern_->CalculateTargetOffset(0);
+
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarPattern_->scrollMargin_ = 365.0f;
+    tabBarPattern_->CalculateTargetOffset(1);
+}
+HWTEST_F(TabBarPatternTestNg,GetIndicatorStyle, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    model.SetIsVertical(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    tabBarPattern_->axis_ = Axis::VERTICAL;
+    tabBarPattern_->isTouchingSwiper_ = true;
+    tabBarPattern_->indicator_ = 1;
+    tabBarPattern_->swiperStartIndex_ = 0;
+    IndicatorStyle indicatorStyle;
+    indicatorStyle.color = Color::BLACK;
+    tabBarPattern_->indicatorStyles_ = { indicatorStyle };
+    auto firstRect = tabBarLayoutProperty_->GetIndicatorRect(0);
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE };
+    tabBarPattern_->selectedModes_ = { SelectedMode::INDICATOR };
+    IndicatorStyle indicator;
+    OffsetF indicatorOffset;
+    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset, firstRect);
+}
 } // namespace OHOS::Ace::NG
