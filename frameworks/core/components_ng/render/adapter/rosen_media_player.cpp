@@ -429,18 +429,11 @@ void RosenMediaPlayer::RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionU
     mediaPlayer_->SetPlayerCallback(mediaPlayerCallback_);
 }
 
-void RosenMediaPlayer::RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent,
-    StateChangedEvent&& stateChangedEvent, VideoErrorEvent&& errorEvent, CommonEvent&& resolutionChangeEvent,
-    CommonEvent&& startRenderFrameEvent)
+void RosenMediaPlayer::RegisterMediaPlayerVideoErrorEvent(VideoErrorEvent&& errorEvent)
 {
-    CHECK_NULL_VOID(mediaPlayer_);
-    mediaPlayerCallback_ = std::make_shared<VideoMediaPlayerCallback>(ContainerScope::CurrentId());
-    mediaPlayerCallback_->SetPositionUpdatedEvent(std::move(positionUpdatedEvent));
-    mediaPlayerCallback_->SetStateChangedEvent(std::move(stateChangedEvent));
-    mediaPlayerCallback_->SetErrorEvent(std::move(errorEvent));
-    mediaPlayerCallback_->SetResolutionChangeEvent(std::move(resolutionChangeEvent));
-    mediaPlayerCallback_->SetStartRenderFrameEvent(std::move(startRenderFrameEvent));
-    mediaPlayer_->SetPlayerCallback(mediaPlayerCallback_);
+    if (mediaPlayerCallback_) {
+        mediaPlayerCallback_->SetErrorEvent(std::move(errorEvent));
+    }
 }
 
 void RosenMediaPlayer::RegisterMediaPlayerSeekDoneEvent(SeekDoneEvent&& seekDoneEvent)
