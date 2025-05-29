@@ -178,7 +178,6 @@ RefPtr<FrameNode> StartingWindowLayoutHelper::CreateStartingWindowNode(
     auto columnLayoutProps = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(columnLayoutProps, nullptr);
     columnLayoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    columnLayoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
     
     auto upperAreaNode = CreateUpperAreaNode(ImageSourceInfo(
         startingWindowInfo_.iconPath_.empty() ? startingWindowInfo_.illustrationPath_ : startingWindowInfo_.iconPath_,
@@ -258,7 +257,8 @@ void StartingWindowLayoutHelper::MeasureChildNode(const SizeF& parentSize)
         .left = CalcLength(Dimension(brandHorizontalMarginPx, DimensionUnit::PX)),
         .right = CalcLength(Dimension(brandHorizontalMarginPx, DimensionUnit::PX)),
         .top = CalcLength(Dimension(brandVerticalMarginPx, DimensionUnit::PX)),
-        .bottom = CalcLength(Dimension(brandVerticalMarginPx, DimensionUnit::PX)),
+        .bottom = CalcLength(Dimension(brandVerticalMarginPx + FIXED_BOTTOM_SAFE_AREA_HEIGHT_VP.ConvertToPx(),
+            DimensionUnit::PX)),
     };
     brandLayoutProperty->UpdateMargin(brandMargin);
     brandLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(
