@@ -23,6 +23,7 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
 #include "core/common/resource/resource_object.h"
+#include <unordered_map>
 
 namespace OHOS::Ace::NG {
 
