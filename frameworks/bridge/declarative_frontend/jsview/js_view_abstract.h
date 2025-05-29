@@ -788,7 +788,7 @@ public:
         const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius, bool notNegative = true);
     static void ParseBorderRadiusProps(const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius);
     static bool ParseEditMenuOptions(const JSCallbackInfo& info, NG::OnCreateMenuCallback& onCreateMenuCallback,
-        NG::OnMenuItemClickCallback& onMenuItemClick);
+        NG::OnMenuItemClickCallback& onMenuItemClick, NG::OnPrepareMenuCallback& onPrepareMenuCallback);
     static void SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
     static void SetDialogHoverModeProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
     static void SetDialogBlurStyleOption(const JSRef<JSObject>& obj, DialogProperties& properties);
@@ -854,6 +854,8 @@ private:
     static std::vector<NG::MenuOptionsParam> ParseMenuItems(const JSRef<JSArray>& menuItemsArray, bool showShortcut);
     static void ParseOnCreateMenu(
         const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, NG::OnCreateMenuCallback& onCreateMenuCallback);
+    static void ParseOnPrepareMenu(
+        const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, NG::OnPrepareMenuCallback& onPrepareMenuCallback);
     static JSRef<JSVal> CreateJsTextMenuItem(const NG::MenuItemParam& menuItemParam);
     static JSRef<JSVal> CreateJsTextRange(const NG::MenuItemParam& menuItemParam);
     static JSRef<JSObject> CreateJsTextMenuId(const std::string& id);

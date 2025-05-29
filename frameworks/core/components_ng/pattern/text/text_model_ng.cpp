@@ -1190,12 +1190,13 @@ void TextModelNG::SetOnTextSelectionChange(FrameNode* frameNode, std::function<v
     eventHub->SetOnSelectionChange(std::move(func));
 }
 
-void TextModelNG::SetSelectionMenuOptions(
-    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
+void TextModelNG::SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+    const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
     auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    textPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    textPattern->OnSelectionMenuOptionsUpdate(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
 }
 
 void TextModelNG::OnCreateMenuCallbackUpdate(
@@ -1214,6 +1215,15 @@ void TextModelNG::OnMenuItemClickCallbackUpdate(
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->OnMenuItemClickCallbackUpdate(std::move(onMenuItemClick));
+}
+
+void TextModelNG::OnPrepareMenuCallbackUpdate(
+    FrameNode* frameNode, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->OnPrepareMenuCallbackUpdate(std::move(onPrepareMenuCallback));
 }
 
 void TextModelNG::SetResponseRegion(bool isUserSetResponseRegion)
