@@ -255,6 +255,7 @@ ace_unittest("modal_ui_extension_proxy_impl_test_ng") {
       "ace_engine:ace_uicontent",
       "c_utils:utils",
       "ffrt:libffrt",
+      "graphic_2d:librender_service_base",
       "graphic_2d:librender_service_client",
       "hilog:libhilog",
       "init:libbegetutil",
