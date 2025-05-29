@@ -430,7 +430,7 @@ void PipelineContext::FlushBuildFinishCallbacks()
 
 void PipelineContext::NotifyMemoryLevel(int32_t level) {}
 
-void PipelineContext::FlushMessages() {}
+void PipelineContext::FlushMessages(std::function<void()> callback) {}
 
 void PipelineContext::FlushModifier() {}
 

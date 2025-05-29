@@ -1140,7 +1140,7 @@ public:
         return displayWindowRectInfo_;
     }
     virtual void FlushModifier() {}
-    virtual void FlushMessages() = 0;
+    virtual void FlushMessages(std::function<void()> callback = nullptr) = 0;
     void SetGSVsyncCallback(std::function<void(void)>&& callback)
     {
         gsVsyncCallback_ = std::move(callback);

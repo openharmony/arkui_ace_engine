@@ -31,7 +31,7 @@ public:
     MOCK_METHOD0(Init, void());
     MOCK_METHOD0(OnShow, void());
     MOCK_METHOD0(OnHide, void());
-    MOCK_METHOD0(FlushTasks, void());
+    MOCK_METHOD1(FlushTasks, void(std::function<void()> callback));
     MOCK_METHOD0(FlushModifier, void());
     MOCK_CONST_METHOD0(GetRefreshRate, float());
     MOCK_CONST_METHOD0(GetCurrentWindowRect, Rect());

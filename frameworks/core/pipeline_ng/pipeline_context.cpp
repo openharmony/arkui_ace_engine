@@ -706,7 +706,15 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         isFirstFlushMessages_ = false;
         LOGI("ArkUi flush first frame messages.");
     }
-    FlushMessages();
+    if (!onShow_) {
+        FlushMessages([window = window_]() {
+            if (window) {
+                window->NotifySnapshotUpdate();
+            }
+        });
+    } else {
+        FlushMessages();
+    }
     FlushWindowPatternInfo();
     InspectDrew();
     UIObserverHandler::GetInstance().HandleDrawCommandSendCallBack();
@@ -963,7 +971,7 @@ void PipelineContext::UpdateOcclusionCullingStatus()
     keyOcclusionNodes_.clear();
 }
 
-void PipelineContext::FlushMessages()
+void PipelineContext::FlushMessages(std::function<void()> callback)
 {
     int32_t id = -1;
     if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
@@ -985,7 +993,7 @@ void PipelineContext::FlushMessages()
     }
     HandleSpecialContainerNode();
     UpdateOcclusionCullingStatus();
-    window_->FlushTasks();
+    window_->FlushTasks(callback);
 }
 
 void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
@@ -4468,6 +4476,30 @@ void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
 
 void PipelineContext::FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate)
 {
+     auto changeTask = [weak = WeakClaim(this), configurationChange,
+        weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager_)), fullUpdate]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        if (configurationChange.IsNeedUpdate() || configurationChange.iconUpdate) {
+            auto rootNode = pipeline->GetRootElement();
+            rootNode->UpdateConfigurationUpdate(configurationChange);
+            auto overlay = weakOverlayManager.Upgrade();
+            if (overlay) {
+                overlay->ReloadBuilderNodeConfig();
+            }
+        }
+        if (fullUpdate && configurationChange.IsNeedUpdate()) {
+            CHECK_NULL_VOID(pipeline->stageManager_);
+            pipeline->SetIsReloading(true);
+            pipeline->stageManager_->ReloadStage();
+            pipeline->SetIsReloading(false);
+            pipeline->FlushUITasks();
+        }
+    };
+    if (!onShow_) {
+        changeTask();
+        return;
+    }
     AnimationOption option;
     const int32_t duration = 400;
     option.SetDuration(duration);
@@ -4475,26 +4507,7 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
     RecycleManager::Notify(configurationChange);
     AnimationUtils::Animate(
         option,
-        [weak = WeakClaim(this), configurationChange,
-            weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager_)), fullUpdate]() {
-            auto pipeline = weak.Upgrade();
-            CHECK_NULL_VOID(pipeline);
-            if (configurationChange.IsNeedUpdate() || configurationChange.iconUpdate) {
-                auto rootNode = pipeline->GetRootElement();
-                rootNode->UpdateConfigurationUpdate(configurationChange);
-                auto overlay = weakOverlayManager.Upgrade();
-                if (overlay) {
-                    overlay->ReloadBuilderNodeConfig();
-                }
-            }
-            if (fullUpdate && configurationChange.IsNeedUpdate()) {
-                CHECK_NULL_VOID(pipeline->stageManager_);
-                pipeline->SetIsReloading(true);
-                pipeline->stageManager_->ReloadStage();
-                pipeline->SetIsReloading(false);
-                pipeline->FlushUITasks();
-            }
-        },
+        changeTask,
         [weak = WeakClaim(this)]() {
             auto pipeline = weak.Upgrade();
             CHECK_NULL_VOID(pipeline);

@@ -69,7 +69,7 @@ public:
 
     void RecordFrameTime(uint64_t timeStamp, const std::string& name) override;
 
-    void FlushTasks() override;
+    void FlushTasks(std::function<void()> callback = nullptr) override;
 
     void SetTaskRunner(RefPtr<TaskExecutor> taskExecutor, int32_t id);
 
@@ -143,6 +143,9 @@ public:
     void NotifyExtensionTimeout(int32_t errorCode) override;
 
     bool GetIsRequestFrame() override;
+
+    void NotifySnapshotUpdate() override;
+
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
     WeakPtr<TaskExecutor> taskExecutor_;

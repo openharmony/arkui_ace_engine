@@ -583,7 +583,7 @@ public:
     void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);
     void NotifyMemoryLevel(int32_t level) override;
     void FlushModifier() override;
-    void FlushMessages() override;
+    void FlushMessages(std::function<void()> callback = nullptr) override;
 
     void FlushUITasks(bool triggeredByImplicitAnimation = false) override;
     void FlushUITaskWithSingleDirtyNode(const RefPtr<FrameNode>& node);
