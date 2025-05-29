@@ -805,7 +805,7 @@ export class ArkCommonAttributeSet implements CommonAttribute {
   public customProperty(name: string | undefined, value: Object | undefined): this {
       return this
   }
-  public expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
+  public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {
       return this
   }
   public background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this {

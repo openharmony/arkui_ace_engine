@@ -8157,7 +8157,7 @@ export interface CommonMethod {
     onSizeChange(value: SizeChangeCallback | undefined): this
     accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this
     customProperty(name: string | undefined, value: Object | undefined): this
-    expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this
+    expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this
     background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this
     backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this
     backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this
@@ -8509,7 +8509,7 @@ export interface UICommonMethod {
     /** @memo */
     customProperty(name: string | undefined, value: Object | undefined): this
     /** @memo */
-    expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this
+    expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this
     /** @memo */
     background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this
     /** @memo */
@@ -9209,7 +9209,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public customProperty(name: string | undefined, value: Object | undefined): this {
         return this
     }
-    public expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
+    public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {
         return this
     }
     public background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this {
@@ -11712,10 +11712,10 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         return this
     }
     /** @memo */
-    public expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
+    public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {
         if (this.checkPriority("expandSafeArea")) {
-            const types_casted = types as (Array<SafeAreaType>)
-            const edges_casted = edges as (Array<SafeAreaEdge>)
+            const types_casted = types as (Array<SafeAreaType> | undefined)
+            const edges_casted = edges as (Array<SafeAreaEdge> | undefined)
             this.getPeer()?.expandSafeAreaAttribute(types_casted, edges_casted)
             return this
         }
