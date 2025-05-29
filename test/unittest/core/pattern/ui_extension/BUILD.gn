@@ -66,6 +66,7 @@ ace_unittest("accessibility_session_adapter_ui_extension_test_ng") {
       "accessibility:accessibility_common",
       "c_utils:utils",
       "ffrt:libffrt",
+      "graphic_2d:librender_service_base",
       "graphic_2d:librender_service_client",
       "hilog:libhilog",
       "init:libbegetutil",

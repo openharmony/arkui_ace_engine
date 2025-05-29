@@ -70,6 +70,7 @@ ohos_unittest("ui_input_event_test") {
     "c_utils:utils",
     "googletest:gmock_main",
     "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image",
