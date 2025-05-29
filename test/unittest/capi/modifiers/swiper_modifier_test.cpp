@@ -1889,16 +1889,15 @@ HWTEST_F(SwiperModifierTest, setOnChangeEventIndexImpl, TestSize.Level1)
 
     struct CheckEvent {
         int32_t nodeId;
-        int32_t value;
+        std::optional<int32_t> value;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
 
     auto checkCallback = [](const Ark_Int32 resourceId, const Opt_Number parameter) {
-        auto param = Converter::OptConvert<int32_t>(parameter);
         checkEvent = {
             .nodeId = resourceId,
-            .value = param.value()
+            .value = Converter::OptConvert<int32_t>(parameter)
         };
     };
 
