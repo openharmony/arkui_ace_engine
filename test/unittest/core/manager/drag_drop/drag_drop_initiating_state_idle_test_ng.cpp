@@ -283,4 +283,42 @@ HWTEST_F(DragDropInitiatingStateIdleTestNG, DragDropInitiatingStateIdleTestNG001
     }
 }
 
+/**
+ * @tc.name: DragDropInitiatingStateIdleTestNG002
+ * @tc.desc: Test HandleHitTesting function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateIdleTestNG, DragDropInitiatingStateIdleTestNG002, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+    auto state = machine->dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::IDLE)];
+    ASSERT_NE(state, nullptr);
+    auto idleState = AceType::DynamicCast<DragDropInitiatingStateIdle>(state);
+    ASSERT_NE(idleState, nullptr);
+    TouchEvent touchEvent;
+    touchEvent.sourceType = SourceType::TOUCH;
+    idleState->HandleHitTesting(touchEvent);
+    EXPECT_EQ(static_cast<DragDropInitiatingStatus>(machine->currentState_), DragDropInitiatingStatus::READY);
+
+    auto onDragStart = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
+        return {};
+    };
+    eventHub->SetOnDragStart(std::move(onDragStart));
+    EXPECT_EQ(static_cast<DragDropInitiatingStatus>(machine->currentState_), DragDropInitiatingStatus::READY);
+}
 } // namespace OHOS::Ace::NG

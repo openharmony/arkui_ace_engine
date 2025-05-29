@@ -441,6 +441,10 @@ void DragDropInitiatingStateLifting::Init(int32_t currentState)
         }
         return;
     }
+    if (!IsAllowedDrag()) {
+        TAG_LOGD(AceLogTag::ACE_DRAG, "DragDrop long press and info received");
+        return;
+    }
     DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(frameNode);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
