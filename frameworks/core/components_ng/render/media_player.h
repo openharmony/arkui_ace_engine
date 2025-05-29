@@ -71,10 +71,7 @@ public:
         CommonEvent&& startRenderFrameEvent)
     {}
 
-    virtual void RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent,
-        StateChangedEvent&& stateChangedEvent, VideoErrorEvent&& errorEvent, CommonEvent&& resolutionChangeEvent,
-        CommonEvent&& startRenderFrameEvent)
-    {}
+    virtual void RegisterMediaPlayerVideoErrorEvent(VideoErrorEvent&& errorEvent) {}
 
     virtual void RegisterMediaPlayerSeekDoneEvent(SeekDoneEvent&& seekDoneEvent) {}
 

@@ -337,13 +337,22 @@ void RegisterMediaPlayerEventImpl(const WeakPtr<VideoPattern>& weak, const RefPt
             }, "ArkUIVideoPlayerStatusChange");
     };
 
-    auto&& errorEvent = [weak, uiTaskExecutor, instanceId](int32_t code, const std::string& message) {
+    auto&& errorEvent = [weak, uiTaskExecutor, instanceId]() {
+        uiTaskExecutor.PostTask([weak, instanceId] {
+            auto video = weak.Upgrade();
+            CHECK_NULL_VOID(video);
+            ContainerScope scope(instanceId);
+            video->OnError("");
+            }, "ArkUIVideoError");
+    };
+
+    auto&& videoErrorEvent = [weak, uiTaskExecutor, instanceId](int32_t code, const std::string& message) {
         uiTaskExecutor.PostTask([weak, instanceId, code, message] {
             auto video = weak.Upgrade();
             CHECK_NULL_VOID(video);
             ContainerScope scope(instanceId);
             video->OnError(code, message);
-            }, "ArkUIVideoError");
+            }, "ArkUIVideoErrorWithParam");
     };
 
     auto&& resolutionChangeEvent = [weak, uiTaskExecutor, instanceId]() {
@@ -366,6 +375,7 @@ void RegisterMediaPlayerEventImpl(const WeakPtr<VideoPattern>& weak, const RefPt
 
     mediaPlayer->RegisterMediaPlayerEvent(
         positionUpdatedEvent, stateChangedEvent, errorEvent, resolutionChangeEvent, startRenderFrameEvent);
+    mediaPlayer->RegisterMediaPlayerVideoErrorEvent(videoErrorEvent);
 }
 
 std::string StatusToString(PlaybackStatus status)
@@ -655,6 +665,20 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
     }
 
     ChangePlayerStatus(status);
+}
+
+void VideoPattern::OnError(const std::string& errorId)
+{
+    AddChild();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RequestFrame();
+
+    auto eventHub = GetOrCreateEventHub<VideoEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireErrorEvent();
 }
 
 void VideoPattern::OnError(int32_t code, const std::string& message)
