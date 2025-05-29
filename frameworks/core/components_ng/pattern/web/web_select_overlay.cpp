@@ -116,6 +116,7 @@ void WebSelectOverlay::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebT
             selectInfo.menuInfo.menuDisable = true;
             selectInfo.menuInfo.menuIsShow = false;
             selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
+            SetEditMenuOptions(selectInfo);
             RegisterSelectOverlayEvent(selectInfo);
             selectInfo.isHandleLineShow = false;
             isShowHandle_ = true;
@@ -144,6 +145,24 @@ void WebSelectOverlay::RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo)
         CHECK_NULL_VOID(overlay);
         overlay->OnOverlayClick(info, isFirst);
     };
+}
+
+void WebSelectOverlay::SetEditMenuOptions(SelectOverlayInfo& selectInfo)
+{
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern && !(pattern->onCreateMenuCallback_ && pattern->onMenuItemClick_)) {
+        selectInfo.menuOptionItems = pattern->menuOptionParam_;
+    }
+    if (pattern && pattern->onCreateMenuCallback_ && pattern->onMenuItemClick_) {
+        selectInfo.onCreateCallback.onCreateMenuCallback = pattern->onCreateMenuCallback_;
+        selectInfo.onCreateCallback.onMenuItemClick = pattern->onMenuItemClick_;
+        auto textRange = [](int32_t& start, int32_t& end) {
+            start = -1;
+            end = -1;
+        };
+        selectInfo.onCreateCallback.textRangeCallback = textRange;
+    }
 }
 
 bool WebSelectOverlay::IsSelectHandleReverse()
