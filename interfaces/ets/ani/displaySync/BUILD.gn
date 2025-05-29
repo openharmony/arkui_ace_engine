@@ -36,10 +36,11 @@ ohos_shared_library("display_sync_ani") {
 generate_static_abc("display_sync_ani_abc") {
   base_url = "./ets"
   files = [
-    "./ets/@ohos.graphic.displaySync.ets",
+    "./ets/@ohos.graphics.displaySync.ets",
+    "./ets/arkui.component.common.ets"
   ]
-  paths_keys = [ "@ohos.graphic.displaySync" ]
-  paths_values = [ "./ets/@ohos.graphic.displaySync.ets" ]
+  paths_keys = [ "@ohos.graphics.displaySync" ]
+  paths_values = [ "./ets/@ohos.graphics.displaySync.ets" ]
   dst_file = target_out_dir + "/display_sync_ani.abc"
   out_puts = [ target_out_dir + "/display_sync_ani.abc" ]
   is_boot_abc = "True"

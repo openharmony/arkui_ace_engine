@@ -13,52 +13,55 @@
  * limitations under the License.
  */
 
+import { ExpectedFrameRateRange } from './arkui.component.common'
 
-export interface ExpectedFrameRateRange {
-  min: number,
-  max: number,
-  expected: number,
-}
+export namespace displaySync {
+  loadLibrary("display_sync_ani")
 
-export class IntervalInfo {
-    timestamp: long;
-    targetTimestamp: long;
+  export class IntervalInfo {
+    _timestamp: number;
+    _targetTimestamp: number;
 
-    constructor(timestamp: long, targetTimestamp: long) {
-        this.timestamp = timestamp;
-        this.targetTimestamp = targetTimestamp;
+    public get timestamp(): number {
+      return this._timestamp;
     }
-}
 
-export default class DisplaySync {
-    static { loadLibrary("display_sync_ani") }
-    static native create(): DisplaySyncResult;
-}
+    public get targetTimestamp(): number {
+      return this._targetTimestamp;
+    }
 
-export interface DisplaySyncResult {
-    setExpectedFrameRateRange(rateRange: ExpectedFrameRateRange) : void;
-    on(callbackType: string, callback: (intervalInfo: IntervalInfo) => void): void;
-    off(callbackType: string, callback?: (intervalInfo: IntervalInfo) => void): void;
-    start(): void;
-    stop(): void;
-}
+    public set timestamp(value: number) {
+      this._timestamp = value;
+    }
 
-class Cleaner {
+    public set targetTimestamp(value: number) {
+      this._targetTimestamp = value;
+    }
+
+    constructor(timestamp: number, targetTimestamp: number) {
+        this._timestamp = timestamp;
+        this._targetTimestamp = targetTimestamp;
+    }
+  }
+
+  export native function create(): DisplaySync;
+
+  class Cleaner {
     private ptr: long = 0;
     constructor(ptr: long) {
         this.ptr = ptr;
     }
     native clean(): void;
-}
+  }
 
-function callback(cleaner: Cleaner): void {
-    cleaner.clean()
-}
+  export function callback(cleaner: Cleaner): void {
+      cleaner.clean()
+  }
 
-let destroyRegister = new FinalizationRegistry<Cleaner>(callback)
-let unregisterToken = new object()
+  let destroyRegister = new FinalizationRegistry<Cleaner>(callback)
+  let unregisterToken = new object()
 
-class DisplaySyncResultInner implements DisplaySyncResult {
+  class DisplaySync {
     displaySync: long = 0;
     private cleaner: Cleaner | null = null;
     constructor(result: long) {
@@ -82,4 +85,6 @@ class DisplaySyncResultInner implements DisplaySyncResult {
     public native start(): void;
     public native stop(): void;
     public native clean(): void;
+  }
 }
+
