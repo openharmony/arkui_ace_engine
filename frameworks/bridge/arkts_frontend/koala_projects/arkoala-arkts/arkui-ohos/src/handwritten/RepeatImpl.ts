@@ -52,6 +52,7 @@ class RepeatItemImpl<T> implements RepeatItem<T> {
 
 class RepeatDataSource<T> implements IDataSource<T> {
     private arr_: RepeatArray<T>;
+    private listeners = new Set<DataChangeListener>()
 
     constructor(arr: RepeatArray<T>) {
         this.arr_ = arr;
@@ -61,6 +62,27 @@ class RepeatDataSource<T> implements IDataSource<T> {
         return this.arr_.length;
     }
 
+    updateData(newArr: RepeatArray<T>) {
+        // Compare array references first
+        if (this.arr_ === newArr) {
+            return;
+        }
+        // Shallow compare: check length and each element by reference
+        if (this.arr_.length !== newArr.length) {
+            this.arr_ = newArr;
+            this.listeners.forEach(listener => listener.onDataReloaded());
+            return;
+        }
+        for (let i = 0; i < newArr.length; i++) {
+            if (this.arr_[i] !== newArr[i]) {
+                this.arr_ = newArr;
+                this.listeners.forEach(listener => listener.onDataReloaded());
+                return;
+            }
+        }
+        // No changes detected
+    }
+
     getData(index: number): T {
         if (index < 0 || index >= this.arr_.length) {
             throw new Error('index out of range. Application error!');
@@ -68,9 +90,13 @@ class RepeatDataSource<T> implements IDataSource<T> {
         return this.arr_[index];
     }
 
-    registerDataChangeListener(listener: DataChangeListener): void {}
+    registerDataChangeListener(listener: DataChangeListener): void {
+        this.listeners.add(listener)
+    }
 
-    unregisterDataChangeListener(listener: DataChangeListener): void {}
+    unregisterDataChangeListener(listener: DataChangeListener): void {
+        this.listeners.delete(listener)
+    }
 }
 
 export class RepeatDataNode<T> extends DataNode<T> {
@@ -182,7 +208,8 @@ function virtualRender<T>(arr: RepeatArray<T>,
     typedFunc?: TemplateTypedFunc<T>,
     reusable?: boolean
 ): void {
-    const dataSource = new RepeatDataSource<T>(arr); // todo: compare performance with/without remember
+    let dataSource = remember(()=> new RepeatDataSource<T>(arr))
+    dataSource.updateData(arr)
     /** @memo */
     const itemGen = (item: T, index: number): void => {
         const ri = new RepeatItemImpl<T>(item, index as number);
