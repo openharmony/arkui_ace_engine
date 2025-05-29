@@ -375,6 +375,10 @@ HWTEST_F(WebDataDetectorAdapterTest, ParseAIResultByType_001, TestSize.Level0)
     EXPECT_EQ(mat.end, 18);
     EXPECT_EQ(mat.entityType, "phoneNum");
     EXPECT_EQ(mat.clean, "12345678901");
+    jsonValue = JsonUtil::ParseJsonString(
+        R"([{"charOffset": -1, "oriText": "12345678901"}])");
+    EXPECT_TRUE(jsonValue->IsArray());
+    adapter->ParseAIResultByType(requestContext, "phoneNum", jsonValue);
 #endif
 }
 
@@ -672,6 +676,12 @@ HWTEST_F(WebDataDetectorAdapterTest, OnDetectSelectedTextDone_001, TestSize.Leve
 
     result.entity = R"({"email": [{"charOffset": 6, "oriText": "abc@huawei.com"}], "url": 666})";
     adapter->OnDetectSelectedTextDone(result);
+
+    result.entity = R"({"phoneNum": [{"charOffset": -1, "oriText": "12345678901"}]})";
+    adapter->OnDetectSelectedTextDone(result);
+    // test UpdateAISelectMenu
+    adapter->UpdateAISelectMenu("fake", "fake");
+    adapter->UpdateAISelectMenu("phoneNum", "12345678901");
     EXPECT_FALSE(adapter->hasInit_);
 #endif
 }
