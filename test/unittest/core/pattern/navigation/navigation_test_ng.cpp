@@ -27,6 +27,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_content_layout_algorithm.h"
+#include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
@@ -1751,5 +1752,90 @@ HWTEST_F(NavigationTestNg, NavigationCommonTitleTest001, TestSize.Level1)
     ASSERT_NE(navigationGroupNode, nullptr);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     ASSERT_NE(navBarNode, nullptr);
+}
+
+/**
+ * @tc.name: CreatePrimaryContentIfNeeded001
+ * @tc.desc: Branch: if (!manager->IsForceSplitSupported()) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, CreatePrimaryContentIfNeeded001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto manager = context->GetNavigationManager();
+    ASSERT_NE(manager, nullptr);
+    NavigationModelNG navigationModel;
+    auto navNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationStack, nullptr);
+    pattern->SetNavigationStack(navigationStack);
+
+    manager->isForceSplitSupported_ = false;
+    ASSERT_TRUE(navigationModel.CreatePrimaryContentIfNeeded(navNode));
+}
+
+/**
+ * @tc.name: CreatePrimaryContentIfNeeded002
+ * @tc.desc: Branch: if (!manager->IsForceSplitSupported()) { => false
+ *                   if (navigationGroupNode->GetPrimaryContentNode()) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, CreatePrimaryContentIfNeeded002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto manager = context->GetNavigationManager();
+    ASSERT_NE(manager, nullptr);
+    NavigationModelNG navigationModel;
+    auto navNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationStack, nullptr);
+    pattern->SetNavigationStack(navigationStack);
+    auto contentNode = FrameNode::GetOrCreateFrameNode(
+        V2::PRIMARY_CONTENT_NODE_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavigationContentPattern>(); });
+    ASSERT_NE(contentNode, nullptr);
+
+    manager->isForceSplitSupported_ = true;
+    navNode->primaryContentNode_ = contentNode;
+    ASSERT_TRUE(navigationModel.CreatePrimaryContentIfNeeded(navNode));
+}
+
+/**
+ * @tc.name: CreatePrimaryContentIfNeeded003
+ * @tc.desc: Branch: if (!manager->IsForceSplitSupported()) { => false
+ *                   if (navigationGroupNode->GetPrimaryContentNode()) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, CreatePrimaryContentIfNeeded003, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto manager = context->GetNavigationManager();
+    ASSERT_NE(manager, nullptr);
+    NavigationModelNG navigationModel;
+    auto navNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationStack, nullptr);
+    pattern->SetNavigationStack(navigationStack);
+
+    manager->isForceSplitSupported_ = true;
+    navNode->primaryContentNode_ = nullptr;
+    ASSERT_TRUE(navigationModel.CreatePrimaryContentIfNeeded(navNode));
 }
 } // namespace OHOS::Ace::NG
