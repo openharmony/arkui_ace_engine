@@ -817,6 +817,7 @@ void WebPattern::ShowPreviewMenu(WebElementType type) {
     auto host = GetHost();
     if (!host) {
         TAG_LOGE(AceLogTag::ACE_WEB, "GetHost failed");
+        CHECK_NULL_VOID(delegate_);
         delegate_->OnContextMenuHide("");
         return;
     }
@@ -824,6 +825,7 @@ void WebPattern::ShowPreviewMenu(WebElementType type) {
     if (!previewNode) {
         TAG_LOGI(AceLogTag::ACE_WEB, "CreatePreviewImageFrameNode failed");
         previewImageNodeId_.reset();
+        CHECK_NULL_VOID(delegate_);
         delegate_->OnContextMenuHide("");
         return;
     }
@@ -849,7 +851,7 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
     bool isImage = false;
     bool isHyperLink = false;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
-        int hitTestResult = delegate_->GetHitTestResult();
+        int hitTestResult = delegate_->GetLastHitTestResult();
         TAG_LOGI(AceLogTag::ACE_WEB, "OnContextMenuShow hitTestResult:%{public}d, isAILink:%{public}d", hitTestResult,
             contextMenuParam_->IsAILink());
         switch (static_cast<WebHitTestType>(hitTestResult)) {
@@ -885,6 +887,7 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
         return;
     }
     CHECK_NULL_VOID(isNewDragStyle_ && result);
+    TAG_LOGD(AceLogTag::ACE_WEB, "OnContextMenuShow isImage:%{public}d, isHyperLink:%{public}d", isImage, isHyperLink);
     if (isImage) {
         ShowPreviewMenu(WebElementType::IMAGE);
     } else if (isHyperLink) {

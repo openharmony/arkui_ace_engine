@@ -481,6 +481,10 @@ int WebDelegate::ConverToWebHitTestType(int hitType)
 {
     return false;
 }
+int WebDelegate::GetLastHitTestResult()
+{
+    return 0;
+}
 int WebDelegate::GetHitTestResult()
 {
     return false;

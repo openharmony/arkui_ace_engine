@@ -3374,7 +3374,8 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
         menuParam.previewMode = MenuPreviewMode::CUSTOM;
         auto previewMenuOptions = menuOptions->GetProperty("previewMenuOptions");
         if (previewMenuOptions->IsObject()) {
-            auto hapticFeedbackMode = JSRef<JSObject>::Cast(previewMenuOptions)->GetProperty("hapticFeedbackMode");
+            auto previewMenuOptionsObj = JSRef<JSObject>::Cast(previewMenuOptions);
+            auto hapticFeedbackMode = previewMenuOptionsObj->GetProperty("hapticFeedbackMode");
             if (hapticFeedbackMode->IsNumber()) {
                 menuParam.hapticFeedbackMode = HapticFeedbackMode(hapticFeedbackMode->ToNumber<int32_t>());
             }
@@ -3392,8 +3393,8 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
     }
 }
 
-NG::MenuParam GetSelectionMenuParam(
-    const JSCallbackInfo& info, ResponseType responseType, std::function<void()> previewBuilder)
+NG::MenuParam GetSelectionMenuParam(const JSCallbackInfo &info, ResponseType responseType,
+    std::function<void()> &previewBuilder, WebElementType elementType)
 {
     NG::MenuParam menuParam;
     if (info.Length() > SELECTION_MENU_OPTION_PARAM_INDEX && info[SELECTION_MENU_OPTION_PARAM_INDEX]->IsObject()) {
@@ -3411,7 +3412,7 @@ NG::MenuParam GetSelectionMenuParam(
     paddings.end = NG::CalcLength(PREVIEW_MENU_MARGIN_RIGHT);
     menuParam.layoutRegionMargin = paddings;
     menuParam.disappearScaleToTarget = true;
-    menuParam.isPreviewContainScale = true;
+    menuParam.isPreviewContainScale = (elementType == WebElementType::IMAGE);
     menuParam.isShow = true;
     return menuParam;
 }
@@ -3466,7 +3467,7 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
     };
 
     std::function<void()> previewBuilder = nullptr;
-    NG::MenuParam menuParam = GetSelectionMenuParam(info, responseType, previewBuilder);
+    NG::MenuParam menuParam = GetSelectionMenuParam(info, responseType, previewBuilder, elementType);
     WebModel::GetInstance()->SetNewDragStyle(true);
     auto previewSelectionMenuParam = std::make_shared<WebPreviewSelectionMenuParam>(
         elementType, responseType, menuBuilder, previewBuilder, menuParam);

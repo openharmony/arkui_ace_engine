@@ -1218,6 +1218,7 @@ public:
     void SetDataDetectorEnable(bool enable);
     void OnDataDetectorSelectText();
     void OnDataDetectorCopy(const std::vector<std::string>& recordMix);
+    int GetLastHitTestResult();
     int GetHitTestResult();
 
     void OnPip(int status, int delegate_id, int child_id, int frame_routing_id,  int width, int height);
