@@ -45,7 +45,7 @@ namespace GridItemModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = GridItemModelNG::CreateFrameNode(id);
+    auto frameNode = GridItemModelStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -60,7 +60,7 @@ void SetGridItemOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     std::optional<GridItemStyle> style = Converter::OptConvert<GridItemStyle>(*value);
     if (style) {
-        GridItemModelNG::SetGridItemStyle(frameNode, style.value());
+        GridItemModelStatic::SetGridItemStyle(frameNode, style.value());
     }
 }
 } // GridItemInterfaceModifier
@@ -75,7 +75,7 @@ void RowStartImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    GridItemModelNG::SetRowStart(frameNode, *convValue);
+    GridItemModelStatic::SetRowStart(frameNode, *convValue);
 }
 void RowEndImpl(Ark_NativePointer node,
                 const Opt_Number* value)
@@ -87,7 +87,7 @@ void RowEndImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    GridItemModelNG::SetRowEnd(frameNode, *convValue);
+    GridItemModelStatic::SetRowEnd(frameNode, *convValue);
 }
 void ColumnStartImpl(Ark_NativePointer node,
                      const Opt_Number* value)
@@ -99,7 +99,7 @@ void ColumnStartImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    GridItemModelNG::SetColumnStart(frameNode, *convValue);
+    GridItemModelStatic::SetColumnStart(frameNode, *convValue);
 }
 void ColumnEndImpl(Ark_NativePointer node,
                    const Opt_Number* value)
@@ -111,7 +111,7 @@ void ColumnEndImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    GridItemModelNG::SetColumnEnd(frameNode, *convValue);
+    GridItemModelStatic::SetColumnEnd(frameNode, *convValue);
 }
 void ForceRebuildImpl(Ark_NativePointer node,
                       const Opt_Boolean* value)
@@ -123,7 +123,7 @@ void ForceRebuildImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    GridItemModelNG::SetForceRebuild(frameNode, *convValue);
+    GridItemModelStatic::SetForceRebuild(frameNode, *convValue);
 }
 void SelectableImpl(Ark_NativePointer node,
                     const Opt_Boolean* value)
@@ -135,7 +135,7 @@ void SelectableImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    GridItemModelNG::SetSelectable(frameNode, *convValue);
+    GridItemModelStatic::SetSelectable(frameNode, *convValue);
 }
 void SelectedImpl(Ark_NativePointer node,
                   const Opt_Boolean* value)
@@ -144,10 +144,10 @@ void SelectedImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        GridItemModelNG::SetSelected(frameNode, false);
+        GridItemModelStatic::SetSelected(frameNode, false);
         return;
     }
-    GridItemModelNG::SetSelected(frameNode, *convValue);
+    GridItemModelStatic::SetSelected(frameNode, *convValue);
 }
 void OnSelectImpl(Ark_NativePointer node,
                   const Opt_Callback_Boolean_Void* value)

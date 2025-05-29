@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_item_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -28,13 +28,13 @@ Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    GridItemModelNG::SetSelected(frameNode, Converter::Convert<bool>(value));
+    GridItemModelStatic::SetSelected(frameNode, Converter::Convert<bool>(value));
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
     auto changeEvent = [arkCallback = CallbackHelper(*callback), weakNode](bool isSelected) {
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(isSelected));
     };
-    // GridItemModelNG::SetSelectChangeEvent(frameNode, std::move(changeEvent));
+    GridItemModelStatic::SetSelectChangeEvent(frameNode, std::move(changeEvent));
     return node;
 }
 } // namespace GridItemOpsAccessor
