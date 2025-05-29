@@ -30,6 +30,7 @@ ace_unittest("common_test") {
     "clipboard/clipboard_test.cpp",
     "environment/environment_test.cpp",
     "ime/ime_test.cpp",
+    "multi_thread_build_manager/multi_thread_build_manager_test.cpp",
     "others/thread_checker_test.cpp",
     "recorder/event_recorder_test.cpp",
     "resource/resource_manager_test.cpp",
