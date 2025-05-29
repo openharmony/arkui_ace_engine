@@ -40,10 +40,10 @@ ohos_shared_library("observer_ani") {
 
 #构建abc
 generate_static_abc("observer") {
-  paths_keys = [ "@ohos.observer" ]
+  paths_keys = [ "@ohos.arkui.observer" ]
   base_url = "./ets"
-  files = [ "./ets/@ohos.observer.ets" ]
-  paths_values = [ "./ets/@ohos.observer.ets" ]
+  files = [ "./ets/@ohos.arkui.observer.ets" ]
+  paths_values = [ "./ets/@ohos.arkui.observer.ets" ]
   dst_file = target_out_dir + "/observer.abc"
   out_puts = [ target_out_dir + "/observer.abc" ]
   is_boot_abc = "True"

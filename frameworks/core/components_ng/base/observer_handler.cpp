@@ -113,7 +113,7 @@ void UIObserverHandler::NotifyDensityChange(double density)
         densityHandleFunc_(info, density);
     }
     if (densityHandleFuncForAni_) {
-        densityHandleFuncForAni_();
+        densityHandleFuncForAni_(info, density);
     }
 }
 
