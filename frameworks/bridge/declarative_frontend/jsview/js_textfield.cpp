@@ -746,7 +746,9 @@ void JSTextField::JsHeight(const JSCallbackInfo& info)
         return;
     }
     CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
+    auto jsValue = info[0];
+    if (!ParseJsDimensionVp(jsValue, value)) {
+        SetLayoutPolicy(jsValue, false);
         return;
     }
     if (LessNotEqual(value.Value(), 0.0)) {
@@ -768,12 +770,14 @@ void JSTextField::JsWidth(const JSCallbackInfo& info)
     if (jsValue->IsString() && jsValue->ToString() == "auto") {
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         TextFieldModel::GetInstance()->SetWidthAuto(true);
+        SetLayoutPolicy(jsValue, true);
         return;
     }
 
     TextFieldModel::GetInstance()->SetWidthAuto(false);
     CalcDimension value;
     if (!ParseJsDimensionVp(jsValue, value)) {
+        SetLayoutPolicy(jsValue, true);
         return;
     }
     if (LessNotEqual(value.Value(), 0.0)) {
@@ -2165,4 +2169,17 @@ void JSTextField::SetStrokeColor(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetStrokeColor(strokeColor);
 }
 
+void JSTextField::SetLayoutPolicy(const JSRef<JSVal>& jsValue, bool isWidth)
+{
+    if (!jsValue->IsObject()) {
+        ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, isWidth);
+        return;
+    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
+    if (layoutPolicy->IsString()) {
+        auto policy = ParseLayoutPolicy(layoutPolicy->ToString());
+        ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, isWidth);
+    }
+}
 } // namespace OHOS::Ace::Framework

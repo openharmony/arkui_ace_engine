@@ -131,6 +131,7 @@ private:
     std::pair<bool, double> GetSuitableSizeBS(TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double stepSize);
     bool IsAdaptExceedLimit(const SizeF& maxSize) override;
+    bool IsParentSizeNearZero(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
 
     RefPtr<PropertyBool> showSelect_;
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);

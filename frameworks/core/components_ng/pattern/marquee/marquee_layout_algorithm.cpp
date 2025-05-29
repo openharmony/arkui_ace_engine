@@ -17,6 +17,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
+#include "core/components_ng/pattern/text/text_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -31,9 +32,13 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto child = layoutWrapper->GetAllChildrenWithBuild().front();
     LayoutConstraintF textLayoutConstraint;
     textLayoutConstraint.UpdateMaxSizeWithCheck(SizeF(Infinity<float>(), maxSize.Height()));
+    auto heightLayoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
     // use marquee constrain size as text child max constrain size
     if (layoutConstraint->selfIdealSize.Height().has_value()) {
         textLayoutConstraint.selfIdealSize.SetHeight(layoutConstraint->selfIdealSize.Height().value());
+    } else if (heightLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
+        auto maxHeight = TextBase::GetConstraintMaxLength(layoutWrapper, layoutConstraint.value(), false);
+        textLayoutConstraint.selfIdealSize.SetHeight(maxHeight);
     }
     // measure text, and add marquee padding to text child
     PaddingProperty textPadding;
@@ -56,7 +61,12 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         frameSize.UpdateIllegalSizeWithCheck(layoutConstraint->parentIdealSize);
         frameSize.UpdateIllegalSizeWithCheck(layoutConstraint->percentReference);
         auto childFrame = child->GetGeometryNode()->GetMarginFrameSize();
-        frameSize.Constrain(SizeF { 0.0f, 0.0f }, SizeF { maxSize.Width(), childFrame.Height() });
+        auto constrainWidth = maxSize.Width();
+        auto widthLayoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
+        if (widthLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
+            constrainWidth = layoutConstraint->parentIdealSize.Width().value_or(0.0f);
+        }
+        frameSize.Constrain(SizeF { 0.0f, 0.0f }, SizeF { constrainWidth, childFrame.Height() });
         break;
     } while (false);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());

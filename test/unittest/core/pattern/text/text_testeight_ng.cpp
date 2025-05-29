@@ -19,7 +19,9 @@
 
 #include "test/mock/core/common/mock_theme_manager.h"
 
+#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/text/text_base.h"
 
 #define private public
 #define protected public
@@ -1357,5 +1359,35 @@ HWTEST_F(TextTestEightNg, IsSelectedRectsChanged002, TestSize.Level1)
     textOverlayModifier.SetSelectedRects({ { 3, 3, 3, 3 } });
     auto result = textOverlayModifier.IsSelectedRectsChanged(selectedRects);
     EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: GetLayoutCalPolicy
+ * @tc.desc: test GetLayoutCalPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, GetLayoutCalPolicy, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    auto policy = TextBase::GetLayoutCalPolicy(AceType::RawPtr(layoutWrapper), true);
+    EXPECT_EQ(policy, LayoutCalPolicy::NO_MATCH);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    policy = TextBase::GetLayoutCalPolicy(AceType::RawPtr(layoutWrapper), true);
+    EXPECT_EQ(policy, LayoutCalPolicy::MATCH_PARENT);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    policy = TextBase::GetLayoutCalPolicy(AceType::RawPtr(layoutWrapper), false);
+    EXPECT_EQ(policy, LayoutCalPolicy::MATCH_PARENT);
+
+    auto constraint = layoutProperty->CreateContentConstraint();
+    constraint.parentIdealSize.SetWidth(1080.0f);
+    constraint.parentIdealSize.SetHeight(2048.0f);
+    auto len = TextBase::GetConstraintMaxLength(AceType::RawPtr(layoutWrapper), constraint, true);
+    EXPECT_EQ(len, 1080.0f);
+    len = TextBase::GetConstraintMaxLength(AceType::RawPtr(layoutWrapper), constraint, false);
+    EXPECT_EQ(len, 2048.0f);
 }
 } // namespace OHOS::Ace::NG

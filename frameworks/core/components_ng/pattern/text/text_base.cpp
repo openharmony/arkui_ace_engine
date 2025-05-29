@@ -270,6 +270,31 @@ size_t TextBase::CountUtf16Chars(const std::u16string& s)
     return charCount;
 }
 
+LayoutCalPolicy TextBase::GetLayoutCalPolicy(LayoutWrapper* layoutWrapper, bool isHorizontal)
+{
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, LayoutCalPolicy::NO_MATCH);
+    auto layoutPolicyProperty = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_RETURN(layoutPolicyProperty, LayoutCalPolicy::NO_MATCH);
+    if (isHorizontal) {
+        CHECK_NULL_RETURN(layoutPolicyProperty->widthLayoutPolicy_, LayoutCalPolicy::NO_MATCH);
+        return layoutPolicyProperty->widthLayoutPolicy_.value();
+    }
+    CHECK_NULL_RETURN(layoutPolicyProperty->heightLayoutPolicy_, LayoutCalPolicy::NO_MATCH);
+    return layoutPolicyProperty->heightLayoutPolicy_.value();
+}
+
+float TextBase::GetConstraintMaxLength(
+    LayoutWrapper* layoutWrapper, const LayoutConstraintF& constraint, bool isHorizontal)
+{
+    auto layoutCalPolicy = GetLayoutCalPolicy(layoutWrapper, isHorizontal);
+    if (layoutCalPolicy == LayoutCalPolicy::MATCH_PARENT) {
+        return isHorizontal ? constraint.parentIdealSize.Width().value_or(0.0f)
+                            : constraint.parentIdealSize.Height().value_or(0.0f);
+    }
+    return isHorizontal ? constraint.maxSize.Width() : constraint.maxSize.Height();
+}
+
 void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)
 {
     if (!isStarted_ || info.GetChangedTouches().empty()) {

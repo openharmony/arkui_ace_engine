@@ -151,6 +151,7 @@ private:
     static void SetCancelDefaultIcon();
     static void ResetCancelIcon();
     static void SetCancelSymbolIcon(const JSCallbackInfo& info);
+    static void SetLayoutPolicy(const JSRef<JSVal>& jsValue, bool isWidth);
 };
 
 } // namespace OHOS::Ace::Framework

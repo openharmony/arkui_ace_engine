@@ -271,6 +271,9 @@ public:
     std::u16string TruncateText(const std::u16string& text, const size_t& length) const;
     size_t CountUtf16Chars(const std::u16string& s);
     std::pair<std::string, std::string> DetectTextDiff(const std::string& latestContent);
+    static LayoutCalPolicy GetLayoutCalPolicy(LayoutWrapper* layoutWrapper, bool isHorizontal);
+    static float GetConstraintMaxLength(
+        LayoutWrapper* layoutWrapper, const LayoutConstraintF& constraint, bool isHorizontal);
 
 protected:
     TextSelector textSelector_;

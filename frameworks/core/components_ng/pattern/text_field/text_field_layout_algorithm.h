@@ -148,6 +148,8 @@ protected:
 
     LayoutConstraintF CalculateFrameSizeConstraint(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    void UpdateFrameSizeWithLayoutPolicy(LayoutWrapper* layoutWrapper, OptionalSizeF& frameSize);
+    void UpdateAutoWidth(const RefPtr<TextFieldLayoutProperty>& property, LayoutWrapper* layoutWrapper);
 
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> inlineParagraph_;

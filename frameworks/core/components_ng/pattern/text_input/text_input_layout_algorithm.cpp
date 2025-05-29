@@ -56,7 +56,7 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
         CreateParagraphEx(textStyle, textContent_, contentConstraint, layoutWrapper);
     }
 
-    autoWidth_ = textFieldLayoutProperty->GetWidthAutoValue(false);
+    UpdateAutoWidth(textFieldLayoutProperty, layoutWrapper);
     isFontSizeNonPositive_ = IsFontSizeNonPositive(textStyle);
 
     if (textContent_.empty()) {
@@ -137,6 +137,7 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         frameSize.SetHeight(finalSize.Height());
         frameSize.Constrain(frameSizeConstraint.minSize, frameSizeConstraint.maxSize);
     }
+    UpdateFrameSizeWithLayoutPolicy(layoutWrapper, frameSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
     MeasureAutoFillIcon(layoutWrapper);
 }
