@@ -993,7 +993,7 @@ export class ChipComponent extends ViewPU {
     this.mdListener.off('change');
     this.lgListener.off('change');
     if (this.environmentCallbackID) {
-      this.getUIContext().getHostContext()?.getApplicationContext().off('environment', this.environmentCallbackID);
+      this.getUIContext()?.getHostContext()?.getApplicationContext().off('environment', this.environmentCallbackID);
       this.environmentCallbackID = void 0;
     }
   }
