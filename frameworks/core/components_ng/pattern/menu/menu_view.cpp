@@ -2421,15 +2421,15 @@ void MenuView::UpdateMenuOutlineWithArrow(
     menuWrapperPattern->SetMenuParam(menuParam);
 }
 
-void MenuView::TouchEventGernerator(const RefPtr<FrameNode>& actionNode, TouchEvent& event)
+void MenuView::TouchEventGenerator(const RefPtr<FrameNode>& actionNode, TouchEvent& event)
 {
     CHECK_NULL_VOID(actionNode);
     event.id = actionNode->GetId();
     event.originalId = actionNode->GetId();
     auto childOffset = actionNode->GetPaintRectOffset(false, true);
     auto rectWithRender = actionNode->GetRectWithRender();
-    event.x = childOffset.GetX() + rectWithRender.Width() / HALF_DIVIDE;
-    event.y = childOffset.GetY() + rectWithRender.Height() / HALF_DIVIDE;
+    event.x = childOffset.GetX() + static_cast<double>(rectWithRender.Width()) / HALF_DIVIDE;
+    event.y = childOffset.GetY() + static_cast<double>(rectWithRender.Height()) / HALF_DIVIDE;
     event.postEventNodeId = actionNode->GetId();
     event.isInterpolated = true;
     std::chrono::microseconds microseconds(GetMicroTickCount());
@@ -2437,7 +2437,7 @@ void MenuView::TouchEventGernerator(const RefPtr<FrameNode>& actionNode, TouchEv
     event.time = time;
 }
 
-void MenuView::TouchPointGernerator(const RefPtr<FrameNode>& actionNode, TouchPoint& point)
+void MenuView::TouchPointGenerator(const RefPtr<FrameNode>& actionNode, TouchPoint& point)
 {
     CHECK_NULL_VOID(actionNode);
     auto childOffset = actionNode->GetPaintRectOffset(false, true);
@@ -2445,10 +2445,10 @@ void MenuView::TouchPointGernerator(const RefPtr<FrameNode>& actionNode, TouchPo
     auto globalOffset = actionNode->GetPaintRectGlobalOffsetWithTranslate();
     point.id = actionNode->GetId();
     point.originalId = actionNode->GetId();
-    point.x = globalOffset.first.GetX() + rectWithRender.Width() / HALF_DIVIDE;
-    point.y = globalOffset.first.GetY() + rectWithRender.Height() / HALF_DIVIDE;
-    point.screenX = childOffset.GetX() + rectWithRender.Width() / HALF_DIVIDE;
-    point.screenY = childOffset.GetY() + rectWithRender.Height() / HALF_DIVIDE;
+    point.x = globalOffset.first.GetX() + static_cast<double>(rectWithRender.Width()) / HALF_DIVIDE;
+    point.y = globalOffset.first.GetY() + static_cast<double>(rectWithRender.Height()) / HALF_DIVIDE;
+    point.screenX = childOffset.GetX() + static_cast<double>(rectWithRender.Width()) / HALF_DIVIDE;
+    point.screenY = childOffset.GetY() + static_cast<double>(rectWithRender.Height()) / HALF_DIVIDE;
     std::chrono::microseconds microseconds(GetMicroTickCount());
     TimeStamp time(microseconds);
     point.downTime = time;
@@ -2471,9 +2471,9 @@ void MenuView::RegisterAccessibilityChildActionNotify(const RefPtr<FrameNode>& m
             CHECK_NULL_RETURN(gesture, result);
             TouchEvent event;
             event.type = TouchType::DOWN;
-            MenuView::TouchEventGernerator(node, event);
+            MenuView::TouchEventGenerator(node, event);
             TouchPoint eventPoint;
-            MenuView::TouchPointGernerator(node, eventPoint);
+            MenuView::TouchPointGenerator(node, eventPoint);
             event.pointers.push_back(eventPoint);
             auto actionResult = gesture->TriggerTouchEvent(event);
             event.type = TouchType::UP;

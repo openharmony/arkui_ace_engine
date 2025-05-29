@@ -88,8 +88,8 @@ public:
     static void SetHasCustomOutline(
         const RefPtr<FrameNode>& menuWrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     static void RegisterAccessibilityChildActionNotify(const RefPtr<FrameNode>& menuNode);
-    static void TouchEventGernerator(const RefPtr<FrameNode>& actionNode, TouchEvent& event);
-    static void TouchPointGernerator(const RefPtr<FrameNode>& actionNode, TouchPoint& point);
+    static void TouchEventGenerator(const RefPtr<FrameNode>& actionNode, TouchEvent& event);
+    static void TouchPointGenerator(const RefPtr<FrameNode>& actionNode, TouchPoint& point);
     static void ShowMenuTargetScaleToOrigin(
         const RefPtr<MenuWrapperPattern>& wrapperPattern, const RefPtr<MenuPreviewPattern>& previewPattern);
     static void UpdateHoverImagePreivewPosition(const RefPtr<MenuPreviewPattern>& previewPattern);
