@@ -379,6 +379,10 @@ void HideToolBar1Impl(Ark_NativePointer node, const Opt_Boolean* hide, const Opt
 void EnableToolBarAdaptationImpl(Ark_NativePointer node,
                                  const Opt_Boolean* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    NavigationModelStatic::SetEnableToolBarAdaptation(frameNode, Converter::OptConvert<bool>(*value).value_or(true));
 }
 void OnTitleModeChangeImpl(Ark_NativePointer node,
                            const Opt_Callback_NavigationTitleMode_Void* value)
@@ -472,9 +476,6 @@ void SystemBarStyleImpl(Ark_NativePointer node, const Opt_SystemBarStyle* value)
     auto contentColor = Converter::Convert<Color>(value->value.statusBarContentColor.value);
     NavigationModelStatic::SetSystemBarStyle(frameNode, contentColor);
 }
-void RecoverableImpl(Ark_NativePointer node, const Opt_Boolean* value) {}
-void EnableDragBarImpl(Ark_NativePointer node, const Opt_Boolean* value) {}
-void EnableModeChangeAnimationImpl(Ark_NativePointer node, const Opt_Boolean* value) {}
 void TitleImpl(Ark_NativePointer node, const Opt_Type_NavigationAttribute_title_value* value,
     const Opt_NavigationTitleOptions* options)
 {
@@ -624,6 +625,27 @@ void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
         opts.edges = safeAreaEdge;
     }
     NavigationModelStatic::SetIgnoreLayoutSafeArea(frameNode, opts);
+}
+void RecoverableImpl(Ark_NativePointer node, const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    NavigationModelStatic::SetRecoverable(frameNode, Converter::OptConvert<bool>(*value).value_or(false));
+}
+void EnableDragBarImpl(Ark_NativePointer node, const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    NavigationModelStatic::SetEnableDragBar(frameNode, Converter::OptConvert<bool>(*value).value_or(false));
+}
+void EnableModeChangeAnimationImpl(Ark_NativePointer node, const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    NavigationModelStatic::SetEnableModeChangeAnimation(frameNode, Converter::OptConvert<bool>(*value).value_or(true));
 }
 } // namespace NavigationAttributeModifier
 const GENERATED_ArkUINavigationModifier* GetNavigationModifier()
