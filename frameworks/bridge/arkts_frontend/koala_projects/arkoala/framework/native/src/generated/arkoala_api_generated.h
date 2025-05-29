@@ -20399,7 +20399,7 @@ typedef struct GENERATED_ArkUIGridModifier {
     void (*setOnScrollStop)(Ark_NativePointer node,
                             const Opt_Callback_Void* value);
     void (*setOnScrollFrameBegin)(Ark_NativePointer node,
-                                  const Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain* value);
+                                  const Opt_OnScrollFrameBeginCallback* value);
     void (*setOnWillScroll)(Ark_NativePointer node,
                             const Opt_OnWillScrollCallback* value);
     void (*setOnDidScroll)(Ark_NativePointer node,

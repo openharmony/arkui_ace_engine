@@ -29,7 +29,7 @@ import { GridAttribute_onItemDragStart_event_type } from "./type-replacements"
 import { Resource } from "global/resource"
 import { Callback_Void } from "./abilityComponent"
 import { ScrollState } from "./list"
-import { Scroller } from "./scroll"
+import { OnScrollFrameBeginCallback, Scroller } from "./scroll"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -494,7 +494,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_onScrollStop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    onScrollFrameBeginAttribute(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): void {
+    onScrollFrameBeginAttribute(value: OnScrollFrameBeginCallback | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -625,7 +625,7 @@ export interface GridAttribute extends ScrollableCommonMethod {
     onReachEnd(value: (() => void) | undefined): this
     onScrollStart(value: (() => void) | undefined): this
     onScrollStop(value: (() => void) | undefined): this
-    onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this
     onWillScroll(value: OnWillScrollCallback | undefined): this
     onDidScroll(value: OnScrollCallback | undefined): this
     edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this
@@ -694,7 +694,7 @@ export interface UIGridAttribute extends UIScrollableCommonMethod {
     /** @memo */
     onScrollStop(value: (() => void) | undefined): this
     /** @memo */
-    onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this
     /** @memo */
     onWillScroll(value: OnWillScrollCallback | undefined): this
     /** @memo */
@@ -735,7 +735,7 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     onReachEnd_value?: (() => void) | undefined
     onScrollStart_value?: (() => void) | undefined
     onScrollStop_value?: (() => void) | undefined
-    onScrollFrameBegin_value?: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined
+    onScrollFrameBegin_value?: OnScrollFrameBeginCallback | undefined
     onWillScroll_value?: OnWillScrollCallback | undefined
     onDidScroll_value?: OnScrollCallback | undefined
     public columnsTemplate(value: string | undefined): this {
@@ -831,7 +831,7 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     public onScrollStop(value: (() => void) | undefined): this {
         return this
     }
-    public onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this {
+    public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         return this
     }
     public onWillScroll(value: OnWillScrollCallback | undefined): this {
@@ -1150,9 +1150,9 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         return this
     }
     /** @memo */
-    public onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this {
+    public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         if (this.checkPriority("onScrollFrameBegin")) {
-            const value_casted = value as (((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined)
+            const value_casted = value as (OnScrollFrameBeginCallback | undefined)
             this.getPeer()?.onScrollFrameBeginAttribute(value_casted)
             return this
         }

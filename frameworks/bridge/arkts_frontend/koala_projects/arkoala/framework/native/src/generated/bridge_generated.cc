@@ -11201,14 +11201,14 @@ void impl_GridAttribute_onScrollFrameBegin(Ark_NativePointer thisPtr, KSerialize
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
         const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain value_value_buf = {};
+        Opt_OnScrollFrameBeginCallback value_value_buf = {};
         value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
         {
-            value_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number offset, Ark_ScrollState state, const Callback_Literal_Number_offsetRemain_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Number_ScrollState_Literal_Number_offsetRemain)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number offset, Ark_ScrollState state, const Callback_Literal_Number_offsetRemain_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Number_ScrollState_Literal_Number_offsetRemain))))};
+            value_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number offset, Ark_ScrollState state, const Callback_OnScrollFrameBeginHandlerResult_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnScrollFrameBeginCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number offset, Ark_ScrollState state, const Callback_OnScrollFrameBeginHandlerResult_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnScrollFrameBeginCallback))))};
         }
-        Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain value_value = value_value_buf;;
-        GetNodeModifiers()->getGridModifier()->setOnScrollFrameBegin(self, (const Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain*)&value_value);
+        Opt_OnScrollFrameBeginCallback value_value = value_value_buf;;
+        GetNodeModifiers()->getGridModifier()->setOnScrollFrameBegin(self, (const Opt_OnScrollFrameBeginCallback*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(GridAttribute_onScrollFrameBegin, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_GridAttribute_onWillScroll(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {

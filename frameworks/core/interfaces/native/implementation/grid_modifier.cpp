@@ -78,6 +78,14 @@ inline void AssignCast(std::optional<GridItemRect>& dst, const Ark_Tuple_Number_
     auto columnSpan = Converter::Convert<int32_t>(src.value3);
     dst = {.rowStart = rowStart, .columnStart = columnStart, .rowSpan = rowSpan, .columnSpan = columnSpan};
 }
+
+template<>
+inline void AssignTo(std::optional<ScrollFrameResult>& dst, const Ark_OnScrollFrameBeginHandlerResult& from)
+{
+    ScrollFrameResult ret;
+    ret.offset = Converter::Convert<Dimension>(from.offsetRemain);
+    dst = ret;
+}
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -590,7 +598,7 @@ void OnScrollStopImpl(Ark_NativePointer node,
     GridModelStatic::SetOnScrollStop(frameNode, std::move(onScrollStop));
 }
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                            const Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain* value)
+                            const Opt_OnScrollFrameBeginCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -599,18 +607,17 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    auto onScrollFrameBegin = [callback = CallbackHelper(*optValue)](
-            const Dimension& offset, const ScrollState& state
-        ) -> ScrollFrameResult {
-        auto arkOffset = Converter::ArkValue<Ark_Number>(offset);
-        auto arkState = Converter::ArkValue<Ark_ScrollState>(state);
-        auto arkResult = callback.InvokeWithObtainResult<Ark_Literal_Number_offsetRemain,
-            Callback_Literal_Number_offsetRemain_Void>(arkOffset, arkState);
-        return {
-            .offset = Converter::Convert<Dimension>(arkResult.offsetRemain)
-        };
+    auto onScrollFrameEvent = [callback = CallbackHelper(*optValue)](
+        Dimension dimension, ScrollState state) -> ScrollFrameResult {
+        Ark_Number arkValue = Converter::ArkValue<Ark_Number>(dimension);
+        Ark_ScrollState arkState = Converter::ArkValue<Ark_ScrollState>(state);
+        ScrollFrameResult result { .offset = dimension};
+        return callback.InvokeWithOptConvertResult<
+            ScrollFrameResult, Ark_OnScrollFrameBeginHandlerResult,
+            Callback_OnScrollFrameBeginHandlerResult_Void>(arkValue, arkState)
+            .value_or(result);
     };
-    GridModelStatic::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameBegin));
+    GridModelStatic::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameEvent));
 }
 void OnWillScrollImpl(Ark_NativePointer node,
                       const Opt_OnWillScrollCallback* value)
