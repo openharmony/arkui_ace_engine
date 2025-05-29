@@ -1460,6 +1460,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/water_flow_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/water_flow_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/water_flow_sections.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/waterflow/water_flow_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_accessibility_child_tree_callback.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_accessibility_provider.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.cpp",

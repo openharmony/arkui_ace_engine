@@ -20536,7 +20536,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                                const Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain* value)
+                                const Opt_OnScrollFrameBeginCallback* value)
     {
         if (!needGroupedLog(1))
             return;
