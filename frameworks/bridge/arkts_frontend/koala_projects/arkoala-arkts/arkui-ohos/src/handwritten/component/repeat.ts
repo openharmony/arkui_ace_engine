@@ -52,7 +52,7 @@ export interface UIRepeatAttribute<T> {
     /** @memo */
     templateId(typedFunc: TemplateTypedFunc<T>): UIRepeatAttribute<T>;
     /** @memo */
-    render(): void;
+    render(arr: RepeatArray<T>): void;
 }
 
 /** @memo */
