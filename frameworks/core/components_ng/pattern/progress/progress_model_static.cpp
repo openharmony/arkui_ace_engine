@@ -280,11 +280,11 @@ void ProgressModelStatic::SetStrokeRadius(FrameNode* frameNode, const std::optio
 
 void ProgressModelStatic::SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag)
 {
-    if (flag) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, IsSensitive, *flag, frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, IsSensitive, PROPERTY_UPDATE_RENDER, frameNode);
-    }
-    ViewAbstract::SetPrivacySensitive(frameNode, flag);
+    // if (flag) {
+    //     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, IsSensitive, *flag, frameNode);
+    // } else {
+    //     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, IsSensitive, PROPERTY_UPDATE_RENDER, frameNode);
+    // }
+    // ViewAbstract::SetPrivacySensitive(frameNode, flag);
 }
 } // namespace OHOS::Ace::NG

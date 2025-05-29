@@ -45,10 +45,11 @@ namespace RowModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = RowModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = RowModelNG::CreateFrameNode(id);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 } // RowModifier
 namespace RowInterfaceModifier {
@@ -60,7 +61,7 @@ void SetRowOptions0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(options);
     auto opts = Converter::OptConvert<RowOptions>(*options);
     auto space = opts ? opts->space : std::nullopt;
-    RowModelNG::SetSpace(frameNode, space.value_or(0.0_px));
+    //RowModelNG::SetSpace(frameNode, space.value_or(0.0_px));
 }
 void SetRowOptions1Impl(Ark_NativePointer node,
                         const Opt_Union_RowOptions_RowOptionsV2* options)
@@ -69,12 +70,12 @@ void SetRowOptions1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto arkUnion = options ? Converter::GetOpt(*options) : std::nullopt;
     if (!arkUnion.has_value()) {
-        RowModelNG::SetSpace(frameNode, Dimension());
+        //RowModelNG::SetSpace(frameNode, Dimension());
         return;
     }
     Converter::VisitUnion(arkUnion.value(),
         [frameNode](const Ark_RowOptions& value) {
-            RowModelNG::SetSpace(frameNode, Converter::OptConvert<Dimension>(value.space));
+            //RowModelNG::SetSpace(frameNode, Converter::OptConvert<Dimension>(value.space));
         },
         [frameNode](const Ark_RowOptionsV2& value) {
             LOGE("ARKOALA RowInterfaceModifier::SetRowOptions1Impl  Ark_RowOptionsV2 is not implemented.");
@@ -92,7 +93,7 @@ void AlignItemsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto flexAlign = Converter::OptConvert<FlexAlign>(*value);
-    RowModelNG::SetAlignItems(frameNode, flexAlign);
+    //RowModelNG::SetAlignItems(frameNode, flexAlign);
 }
 void JustifyContentImpl(Ark_NativePointer node,
                         const Opt_FlexAlign* value)
@@ -100,7 +101,7 @@ void JustifyContentImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto flexAlign = Converter::OptConvert<FlexAlign>(*value);
-    RowModelNG::SetJustifyContent(frameNode, flexAlign);
+    //RowModelNG::SetJustifyContent(frameNode, flexAlign);
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Opt_PointLightStyle* value)
@@ -143,7 +144,7 @@ void ReverseImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    RowModelNG::SetIsReverse(frameNode, value ? Converter::OptConvert<bool>(*value) : std::nullopt);
+    //RowModelNG::SetIsReverse(frameNode, value ? Converter::OptConvert<bool>(*value) : std::nullopt);
 }
 } // RowAttributeModifier
 const GENERATED_ArkUIRowModifier* GetRowModifier()

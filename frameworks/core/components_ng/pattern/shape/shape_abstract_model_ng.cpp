@@ -120,30 +120,20 @@ void ShapeAbstractModelNG::SetHeight(Dimension& height)
     ViewAbstract::SetHeight(CalcLength(height));
 }
 
-void ShapeAbstractModelNG::SetWidth(FrameNode* frameNode, const std::optional<Dimension>& width)
+void ShapeAbstractModelNG::SetWidth(FrameNode* frameNode, Dimension& width)
 {
-    if (width) {
-        Dimension val = width.value();
-        if (LessNotEqual(val.Value(), 0.0)) {
-            val.SetValue(0.0);
-        }
-        ViewAbstract::SetWidth(frameNode, CalcLength(val));
-    } else {
-        ViewAbstract::ClearWidthOrHeight(frameNode, false);
+    if (LessNotEqual(width.Value(), 0.0)) {
+        width.SetValue(0.0);
     }
+    ViewAbstract::SetWidth(frameNode, CalcLength(width));
 }
 
-void ShapeAbstractModelNG::SetHeight(FrameNode* frameNode, const std::optional<Dimension>& height)
+void ShapeAbstractModelNG::SetHeight(FrameNode* frameNode, Dimension& height)
 {
-    if (height) {
-        Dimension val = height.value();
-        if (LessNotEqual(val.Value(), 0.0)) {
-            val.SetValue(0.0);
-        }
-        ViewAbstract::SetHeight(frameNode, CalcLength(val));
-    } else {
-        ViewAbstract::ClearWidthOrHeight(frameNode, true);
+    if (LessNotEqual(height.Value(), 0.0)) {
+        height.SetValue(0.0);
     }
+    ViewAbstract::SetHeight(frameNode, CalcLength(height));
 }
 
 void ShapeAbstractModelNG::ResetWidth(FrameNode* frameNode)
@@ -154,44 +144,5 @@ void ShapeAbstractModelNG::ResetWidth(FrameNode* frameNode)
 void ShapeAbstractModelNG::ResetHeight(FrameNode* frameNode)
 {
     ViewAbstract::ClearWidthOrHeight(frameNode, false);
-}
-
-void ShapeAbstractModelNG::SetStrokeDashOffset(FrameNode* frameNode, const Ace::Dimension& dashOffset)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashOffset, dashOffset, frameNode);
-}
-
-void ShapeAbstractModelNG::SetStrokeLineCap(FrameNode* frameNode, int lineCapStyle)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeLineCap, lineCapStyle, frameNode);
-}
-void ShapeAbstractModelNG::SetStrokeLineJoin(FrameNode* frameNode, int lineJoinStyle)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeLineJoin, lineJoinStyle, frameNode);
-}
-
-void ShapeAbstractModelNG::SetStrokeMiterLimit(FrameNode* frameNode, double miterLimit)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeMiterLimit, miterLimit, frameNode);
-}
-
-void ShapeAbstractModelNG::SetStrokeOpacity(FrameNode* frameNode, double opacity)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeOpacity, opacity, frameNode);
-}
-
-void ShapeAbstractModelNG::SetFillOpacity(FrameNode* frameNode, double opacity)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, FillOpacity, opacity, frameNode);
-}
-
-void ShapeAbstractModelNG::SetAntiAlias(FrameNode* frameNode, bool antiAlias)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, AntiAlias, antiAlias, frameNode);
-}
-
-void ShapeAbstractModelNG::SetStrokeDashArray(FrameNode* frameNode, const std::vector<Ace::Dimension>& segments)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashArray, segments, frameNode);
 }
 } // namespace OHOS::Ace::NG

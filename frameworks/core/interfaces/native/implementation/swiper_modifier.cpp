@@ -490,17 +490,17 @@ void CurveImpl(Ark_NativePointer node,
 void OnChangeImpl(Ark_NativePointer node,
                   const Opt_Callback_Number_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto onEvent = [arkCallback = CallbackHelper(*optValue)](int32_t index) {
-        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(index));
-    };
-    SwiperModelNG::SetOnChange(frameNode, onEvent);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto optValue = Converter::GetOptPtr(value);
+    // if (!optValue) {
+    //     // TODO: Reset value
+    //     return;
+    // }
+    // auto onEvent = [arkCallback = CallbackHelper(*optValue)](int32_t index) {
+    //     arkCallback.Invoke(Converter::ArkValue<Ark_Number>(index));
+    // };
+    // SwiperModelNG::SetOnChange(frameNode, onEvent);
 }
 void OnSelectedImpl(Ark_NativePointer node,
                     const Opt_Callback_Number_Void* value)
@@ -819,7 +819,7 @@ void PrevMarginImpl(Ark_NativePointer node,
     auto optMargin = Converter::OptConvert<Dimension>(*value);
     CHECK_NULL_VOID(optMargin);
     auto optIgnore = ignoreBlank ? Converter::OptConvert<bool>(*ignoreBlank) : std::nullopt;
-    SwiperModelNG::SetPreviousMargin(frameNode, *optMargin, optIgnore);
+    // SwiperModelNG::SetPreviousMargin(frameNode, *optMargin, optIgnore);
 }
 void NextMarginImpl(Ark_NativePointer node,
                     const Opt_Length* value,
@@ -831,7 +831,7 @@ void NextMarginImpl(Ark_NativePointer node,
     auto optMargin = Converter::OptConvert<Dimension>(*value);
     CHECK_NULL_VOID(optMargin);
     auto optIgnore = ignoreBlank ? Converter::OptConvert<bool>(*ignoreBlank) : std::nullopt;
-    SwiperModelNG::SetNextMargin(frameNode, *optMargin, optIgnore);
+    // SwiperModelNG::SetNextMargin(frameNode, *optMargin, optIgnore);
 }
 void _onChangeEvent_indexImpl(Ark_NativePointer node,
                               const Callback_Opt_Number_Void* callback)
@@ -846,7 +846,7 @@ void _onChangeEvent_indexImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(Converter::ArkValue<Opt_Number>(swiperInfo->GetIndex()));
     };
-    SwiperModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
+    // SwiperModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
 } // SwiperAttributeModifier
 const GENERATED_ArkUISwiperModifier* GetSwiperModifier()

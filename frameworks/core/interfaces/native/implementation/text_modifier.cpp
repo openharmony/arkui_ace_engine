@@ -623,9 +623,9 @@ void OnMarqueeStateChangeImpl(Ark_NativePointer node,
 void PrivacySensitiveImpl(Ark_NativePointer node,
                           const Opt_Boolean* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetPrivacySensitive(frameNode, Converter::OptConvert<bool>(*value));
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // ViewAbstract::SetPrivacySensitive(frameNode, Converter::OptConvert<bool>(*value));
 }
 void TextSelectableImpl(Ark_NativePointer node,
                         const Opt_TextSelectableMode* value)

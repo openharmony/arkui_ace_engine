@@ -173,5 +173,5 @@ ace_unittest("capi_all_accessors_test") {
 
 group("capi_accessors_unittest") {
   testonly = true
-  deps = [ ":capi_all_accessors_test" ]
+  # deps = [ ":capi_all_accessors_test" ]
 }

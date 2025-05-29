@@ -58,19 +58,19 @@ public:
 
     int32_t GetSpan(V2::GridSizeType sizeType) const
     {
-        auto span = GetSpanValue(V2::GridContainerSize(1));
+        auto span = GetSpanValue();
         return GetPropValue(span, sizeType);
     }
 
     int32_t GetOrder(V2::GridSizeType sizeType) const
     {
-        auto order = GetOrderValue(V2::GridContainerSize(0));
+        auto order = GetOrderValue();
         return GetPropValue(order, sizeType);
     }
 
     int32_t GetOffset(V2::GridSizeType sizeType) const
     {
-        auto offset = GetOffsetValue(V2::GridContainerSize(0));
+        auto offset = GetOffsetValue();
         return GetPropValue(offset, sizeType);
     }
 

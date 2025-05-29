@@ -154,28 +154,28 @@ namespace ListInterfaceModifier {
 void SetListOptionsImpl(Ark_NativePointer node,
                         const Opt_ListOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // CHECK_NULL_VOID(options);
 
-    auto optionsOpt = Converter::OptConvert<Converter::ListOptions>(*options);
-    if (!optionsOpt.has_value()) {
-        return;
-    }
+    // auto optionsOpt = Converter::OptConvert<Converter::ListOptions>(*options);
+    // if (!optionsOpt.has_value()) {
+    //     return;
+    // }
 
-    auto initialIndex = optionsOpt.value().initialIndex;
-    ListModelNG::SetInitialIndex(frameNode, initialIndex);
-    auto space = optionsOpt.value().space;
-    ListModelNG::SetListSpace(frameNode, space);
+    // auto initialIndex = optionsOpt.value().initialIndex;
+    // ListModelNG::SetInitialIndex(frameNode, initialIndex);
+    // auto space = optionsOpt.value().space;
+    // ListModelNG::SetListSpace(frameNode, space);
 
-    RefPtr<ScrollControllerBase> positionController = ListModelNG::GetOrCreateController(frameNode);
-    RefPtr<ScrollProxy> scrollBarProxy = ListModelNG::GetOrCreateScrollBarProxy(frameNode);
-    auto abstPeerPtrOpt = optionsOpt.value().scroller;
-    CHECK_NULL_VOID(abstPeerPtrOpt);
-    auto peerImplPtr = *abstPeerPtrOpt;
-    CHECK_NULL_VOID(peerImplPtr);
-    peerImplPtr->SetController(positionController);
-    peerImplPtr->SetScrollBarProxy(scrollBarProxy);
+    // RefPtr<ScrollControllerBase> positionController = ListModelNG::GetOrCreateController(frameNode);
+    // RefPtr<ScrollProxy> scrollBarProxy = ListModelNG::GetOrCreateScrollBarProxy(frameNode);
+    // auto abstPeerPtrOpt = optionsOpt.value().scroller;
+    // CHECK_NULL_VOID(abstPeerPtrOpt);
+    // auto peerImplPtr = *abstPeerPtrOpt;
+    // CHECK_NULL_VOID(peerImplPtr);
+    // peerImplPtr->SetController(positionController);
+    // peerImplPtr->SetScrollBarProxy(scrollBarProxy);
 }
 } // ListInterfaceModifier
 namespace ListAttributeModifier {
@@ -323,14 +323,14 @@ void ScrollSnapAlignImpl(Ark_NativePointer node,
 void NestedScrollImpl(Ark_NativePointer node,
                       const Opt_NestedScrollOptions* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto options = Converter::OptConvert<Converter::NestedScrollModeOptions>(*value);
-    if (!options) {
-        // TODO: Reset value
-        return;
-    }
-    ListModelNG::SetListNestedScroll(frameNode, options->forward, options->backward);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto options = Converter::OptConvert<Converter::NestedScrollModeOptions>(*value);
+    // if (!options) {
+    //     // TODO: Reset value
+    //     return;
+    // }
+    // ListModelNG::SetListNestedScroll(frameNode, options->forward, options->backward);
 }
 void EnableScrollInteractionImpl(Ark_NativePointer node,
                                  const Opt_Boolean* value)
@@ -354,17 +354,17 @@ void FrictionImpl(Ark_NativePointer node,
 void ChildrenMainSizeImpl(Ark_NativePointer node,
                           const Opt_ChildrenMainSize* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto peer = *optValue;
-    CHECK_NULL_VOID(peer);
-    RefPtr<ListChildrenMainSize> handler = ListModelNG::GetOrCreateListChildrenMainSize(frameNode);
-    peer->SetHandler(handler);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto optValue = Converter::GetOptPtr(value);
+    // if (!optValue) {
+    //     // TODO: Reset value
+    //     return;
+    // }
+    // auto peer = *optValue;
+    // CHECK_NULL_VOID(peer);
+    // RefPtr<ListChildrenMainSize> handler = ListModelNG::GetOrCreateListChildrenMainSize(frameNode);
+    // peer->SetHandler(handler);
 }
 void MaintainVisibleContentPositionImpl(Ark_NativePointer node,
                                         const Opt_Boolean* value)
@@ -504,19 +504,19 @@ void OnScrollStopImpl(Ark_NativePointer node,
 void OnItemDeleteImpl(Ark_NativePointer node,
                       const Opt_Callback_Number_Boolean* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto onItemDelete = [callback = CallbackHelper(*optValue)](int32_t index) -> bool {
-        auto arkIndex = Converter::ArkValue<Ark_Number>(index);
-        auto arkResult = callback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(arkIndex);
-        return Converter::Convert<bool>(arkResult);
-    };
-    ListModelNG::SetOnItemDelete(frameNode, std::move(onItemDelete));
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto optValue = Converter::GetOptPtr(value);
+    // if (!optValue) {
+    //     // TODO: Reset value
+    //     return;
+    // }
+    // auto onItemDelete = [callback = CallbackHelper(*optValue)](int32_t index) -> bool {
+    //     auto arkIndex = Converter::ArkValue<Ark_Number>(index);
+    //     auto arkResult = callback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(arkIndex);
+    //     return Converter::Convert<bool>(arkResult);
+    // };
+    // ListModelNG::SetOnItemDelete(frameNode, std::move(onItemDelete));
 }
 void OnItemMoveImpl(Ark_NativePointer node,
                     const Opt_Callback_Number_Number_Boolean* value)
@@ -701,44 +701,44 @@ void LanesImpl(Ark_NativePointer node,
                const Opt_Union_Number_LengthConstrain* value,
                const Opt_Length* gutter)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
 
-    if (value != nullptr) {
-        auto lanes = Converter::OptConvert<ListLanesType>(*value);
-        if (lanes) {
-            if (lanes.value().index() == 0) {
-                int lane = std::get<0>(lanes.value());
-                ListModelNG::SetLanes(frameNode, lane);
-                ListModelNG::SetLaneConstrain(frameNode, Dimension(), Dimension());
-            } else {
-                auto dimensions = std::get<1>(lanes.value());
-                ListModelNG::SetLanes(frameNode, 1);
-                ListModelNG::SetLaneConstrain(frameNode, std::get<0>(dimensions), std::get<1>(dimensions));
-            }
-        }
-    }
+    // if (value != nullptr) {
+    //     auto lanes = Converter::OptConvert<ListLanesType>(*value);
+    //     if (lanes) {
+    //         if (lanes.value().index() == 0) {
+    //             int lane = std::get<0>(lanes.value());
+    //             ListModelNG::SetLanes(frameNode, lane);
+    //             ListModelNG::SetLaneConstrain(frameNode, Dimension(), Dimension());
+    //         } else {
+    //             auto dimensions = std::get<1>(lanes.value());
+    //             ListModelNG::SetLanes(frameNode, 1);
+    //             ListModelNG::SetLaneConstrain(frameNode, std::get<0>(dimensions), std::get<1>(dimensions));
+    //         }
+    //     }
+    // }
 
-    if (gutter != nullptr) {
-        std::optional<Dimension> gutterOpt;
-        Converter::AssignOptionalTo(gutterOpt, *gutter);
-        if (gutterOpt.has_value()) {
-            ListModelNG::SetLaneGutter(frameNode, gutterOpt);
-        }
-    }
+    // if (gutter != nullptr) {
+    //     std::optional<Dimension> gutterOpt;
+    //     Converter::AssignOptionalTo(gutterOpt, *gutter);
+    //     if (gutterOpt.has_value()) {
+    //         ListModelNG::SetLaneGutter(frameNode, gutterOpt);
+    //     }
+    // }
 }
 void EdgeEffectImpl(Ark_NativePointer node,
                     const Opt_EdgeEffect* value,
                     const Opt_EdgeEffectOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::optional<bool> alwaysEnabled;
-    if (options != nullptr) {
-        alwaysEnabled = Converter::OptConvert<bool>(*options);
-    }
-    std::optional<EdgeEffect> effect = Converter::OptConvert<EdgeEffect>(*value);
-    ListModelNG::SetEdgeEffect(frameNode, EnumToInt(effect), alwaysEnabled);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // std::optional<bool> alwaysEnabled;
+    // if (options != nullptr) {
+    //     alwaysEnabled = Converter::OptConvert<bool>(*options);
+    // }
+    // std::optional<EdgeEffect> effect = Converter::OptConvert<EdgeEffect>(*value);
+    // ListModelNG::SetEdgeEffect(frameNode, EnumToInt(effect), alwaysEnabled);
 }
 } // ListAttributeModifier
 const GENERATED_ArkUIListModifier* GetListModifier()

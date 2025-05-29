@@ -136,33 +136,34 @@ namespace TabsModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = TabsModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = TabsModelNG::CreateFrameNode(id);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 } // TabsModifier
 namespace TabsInterfaceModifier {
 void SetTabsOptionsImpl(Ark_NativePointer node,
                         const Opt_TabsOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto tabsOptionsOpt = Converter::OptConvert<TabsOptions>(*options);
-    CHECK_NULL_VOID(tabsOptionsOpt);
-    TabsModelNG::SetTabBarPosition(frameNode, tabsOptionsOpt->barPosOpt);
-    TabsModelNG::InitIndex(frameNode, tabsOptionsOpt->indexOpt);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // CHECK_NULL_VOID(options);
+    // auto tabsOptionsOpt = Converter::OptConvert<TabsOptions>(*options);
+    // CHECK_NULL_VOID(tabsOptionsOpt);
+    // // TabsModelNG::SetTabBarPosition(frameNode, tabsOptionsOpt->barPosOpt);
+    // // TabsModelNG::InitIndex(frameNode, tabsOptionsOpt->indexOpt);
 
-    if (tabsOptionsOpt->controllerOpt) {
-        // obtain the external TabController peer
-        if (auto peerImplPtr = *(tabsOptionsOpt->controllerOpt); peerImplPtr) {
-            // obtain the internal SwiperController
-            auto internalSwiperController = TabsModelNG::GetSwiperController(frameNode);
-            // pass the internal controller to external management
-            peerImplPtr->SetTargetController(internalSwiperController);
-        }
-    }
+    // if (tabsOptionsOpt->controllerOpt) {
+    //     // obtain the external TabController peer
+    //     if (auto peerImplPtr = *(tabsOptionsOpt->controllerOpt); peerImplPtr) {
+    //         // obtain the internal SwiperController
+    //         auto internalSwiperController = TabsModelNG::GetSwiperController(frameNode);
+    //         // pass the internal controller to external management
+    //         peerImplPtr->SetTargetController(internalSwiperController);
+    //     }
+    // }
 }
 } // TabsInterfaceModifier
 namespace TabsAttributeModifier {
@@ -173,17 +174,17 @@ void VerticalImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        TabsModelNG::SetIsVertical(frameNode, false);
+        // TabsModelNG::SetIsVertical(frameNode, false);
         return;
     }
-    TabsModelNG::SetIsVertical(frameNode, *convValue);
+    // TabsModelNG::SetIsVertical(frameNode, *convValue);
 }
 void BarPositionImpl(Ark_NativePointer node,
                      const Opt_BarPosition* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TabsModelNG::SetTabBarPosition(frameNode, Converter::OptConvert<BarPosition>(*value));
+    // TabsModelNG::SetTabBarPosition(frameNode, Converter::OptConvert<BarPosition>(*value));
 }
 void ScrollableImpl(Ark_NativePointer node,
                     const Opt_Boolean* value)
@@ -192,10 +193,10 @@ void ScrollableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        TabsModelNG::SetScrollable(frameNode, true);
+        // TabsModelNG::SetScrollable(frameNode, true);
         return;
     }
-    TabsModelNG::SetScrollable(frameNode, *convValue);
+    // TabsModelNG::SetScrollable(frameNode, *convValue);
 }
 void BarMode1Impl(Ark_NativePointer node, const Opt_BarMode *value, const Opt_ScrollableBarModeOptions* options);
 void BarMode0Impl(Ark_NativePointer node,
@@ -225,9 +226,9 @@ void BarMode1Impl(Ark_NativePointer node,
                 barModeOptions.nonScrollableLayoutStyle = styleOpt;
             }
         }
-        TabsModelNG::SetScrollableBarModeOptions(frameNode, barModeOptions);
+        // TabsModelNG::SetScrollableBarModeOptions(frameNode, barModeOptions);
     }
-    TabsModelNG::SetTabBarMode(frameNode, mode);
+    // TabsModelNG::SetTabBarMode(frameNode, mode);
 }
 void BarWidthImpl(Ark_NativePointer node,
                   const Opt_Length* value)
@@ -236,7 +237,7 @@ void BarWidthImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto valueOpt = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(valueOpt);
-    TabsModelNG::SetTabBarWidth(frameNode, valueOpt);
+    // TabsModelNG::SetTabBarWidth(frameNode, valueOpt);
 }
 void BarHeightImpl(Ark_NativePointer node,
                    const Opt_Length* value)
@@ -245,7 +246,7 @@ void BarHeightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto valueOpt = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(valueOpt);
-    TabsModelNG::SetTabBarHeight(frameNode, valueOpt);
+    // TabsModelNG::SetTabBarHeight(frameNode, valueOpt);
 }
 void AnimationDurationImpl(Ark_NativePointer node,
                            const Opt_Number* value)
@@ -254,10 +255,10 @@ void AnimationDurationImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<float>(*value);
     if (!convValue) {
-        TabsModelNG::SetAnimationDuration(frameNode, -1);
+        // TabsModelNG::SetAnimationDuration(frameNode, -1);
         return;
     }
-    TabsModelNG::SetAnimationDuration(frameNode, *convValue);
+    // TabsModelNG::SetAnimationDuration(frameNode, *convValue);
 }
 void AnimationModeImpl(Ark_NativePointer node,
                        const Opt_AnimationMode* value)
@@ -265,7 +266,7 @@ void AnimationModeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    TabsModelNG::SetAnimateMode(frameNode, Converter::OptConvert<TabAnimateMode>(*value));
+    // TabsModelNG::SetAnimateMode(frameNode, Converter::OptConvert<TabAnimateMode>(*value));
 }
 void EdgeEffectImpl(Ark_NativePointer node,
                     const Opt_EdgeEffect* value)
@@ -274,7 +275,7 @@ void EdgeEffectImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto edgeEffectOpt = Converter::OptConvert<EdgeEffect>(*value);
-    TabsModelNG::SetEdgeEffect(frameNode, OHOS::Ace::NG::EnumToInt(edgeEffectOpt));
+    // TabsModelNG::SetEdgeEffect(frameNode, OHOS::Ace::NG::EnumToInt(edgeEffectOpt));
 }
 void OnChangeImpl(Ark_NativePointer node,
                   const Opt_Callback_Number_Void* value)
@@ -283,7 +284,7 @@ void OnChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        TabsModelNG::SetOnChange(frameNode, nullptr);
+        // TabsModelNG::SetOnChange(frameNode, nullptr);
         return;
     }
     auto onChange = [arkCallback = CallbackHelper(*optValue)](const BaseEventInfo* info) {
@@ -295,7 +296,7 @@ void OnChangeImpl(Ark_NativePointer node,
         auto index = Converter::ArkValue<Ark_Number>(indexInt);
         arkCallback.Invoke(index);
     };
-    TabsModelNG::SetOnChange(frameNode, std::move(onChange));
+    // TabsModelNG::SetOnChange(frameNode, std::move(onChange));
 }
 void OnSelectedImpl(Ark_NativePointer node,
                     const Opt_Callback_Number_Void* value)
@@ -304,7 +305,7 @@ void OnSelectedImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        TabsModelNG::SetOnSelected(frameNode, nullptr);
+        // TabsModelNG::SetOnSelected(frameNode, nullptr);
         return;
     }
     auto onSelected = [arkCallback = CallbackHelper(*optValue), node = AceType::WeakClaim(frameNode)](
@@ -318,7 +319,7 @@ void OnSelectedImpl(Ark_NativePointer node,
         auto index = Converter::ArkValue<Ark_Number>(tabsInfo->GetIndex());
         arkCallback.Invoke(index);
     };
-    TabsModelNG::SetOnSelected(frameNode, std::move(onSelected));
+    // TabsModelNG::SetOnSelected(frameNode, std::move(onSelected));
 }
 void OnTabBarClickImpl(Ark_NativePointer node,
                        const Opt_Callback_Number_Void* value)
@@ -327,7 +328,7 @@ void OnTabBarClickImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        TabsModelNG::SetOnTabBarClick(frameNode, nullptr);
+        // TabsModelNG::SetOnTabBarClick(frameNode, nullptr);
         return;
     }
     auto onTabBarClick = [arkCallback = CallbackHelper(*optValue)](const BaseEventInfo* info) {
@@ -339,7 +340,7 @@ void OnTabBarClickImpl(Ark_NativePointer node,
         auto index = Converter::ArkValue<Ark_Number>(indexInt);
         arkCallback.Invoke(index);
     };
-    TabsModelNG::SetOnTabBarClick(frameNode, std::move(onTabBarClick));
+    // TabsModelNG::SetOnTabBarClick(frameNode, std::move(onTabBarClick));
 }
 void OnUnselectedImpl(Ark_NativePointer node,
                       const Opt_Callback_Number_Void* value)
@@ -348,7 +349,7 @@ void OnUnselectedImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        TabsModelNG::SetOnUnselected(frameNode, nullptr);
+        // TabsModelNG::SetOnUnselected(frameNode, nullptr);
         return;
     }
     auto onUnselected = [arkCallback = CallbackHelper(*optValue), node = AceType::WeakClaim(frameNode)](
@@ -362,7 +363,7 @@ void OnUnselectedImpl(Ark_NativePointer node,
         auto index = Converter::ArkValue<Ark_Number>(tabsInfo->GetIndex());
         arkCallback.Invoke(index);
     };
-    TabsModelNG::SetOnUnselected(frameNode, std::move(onUnselected));
+    // TabsModelNG::SetOnUnselected(frameNode, std::move(onUnselected));
 }
 void OnAnimationStartImpl(Ark_NativePointer node,
                           const Opt_OnTabsAnimationStartCallback* value)
@@ -371,7 +372,7 @@ void OnAnimationStartImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        TabsModelNG::SetOnAnimationStart(frameNode, nullptr);
+        // TabsModelNG::SetOnAnimationStart(frameNode, nullptr);
         return;
     }
     auto onAnimationStart = [arkCallback = CallbackHelper(*optValue)](
@@ -384,7 +385,7 @@ void OnAnimationStartImpl(Ark_NativePointer node,
         tabsAnimationEvent.velocity = Converter::ArkValue<Ark_Number>(info.velocity.value_or(0.00f));
         arkCallback.Invoke(arkIndex, arkTargetIndex, tabsAnimationEvent);
     };
-    TabsModelNG::SetOnAnimationStart(frameNode, std::move(onAnimationStart));
+    // TabsModelNG::SetOnAnimationStart(frameNode, std::move(onAnimationStart));
 }
 void OnAnimationEndImpl(Ark_NativePointer node,
                         const Opt_OnTabsAnimationEndCallback* value)
@@ -393,7 +394,7 @@ void OnAnimationEndImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        TabsModelNG::SetOnAnimationEnd(frameNode, nullptr);
+        // TabsModelNG::SetOnAnimationEnd(frameNode, nullptr);
         return;
     }
     auto onAnimationEnd = [arkCallback = CallbackHelper(*optValue)](int32_t index, const AnimationCallbackInfo& info) {
@@ -404,7 +405,7 @@ void OnAnimationEndImpl(Ark_NativePointer node,
         tabsAnimationEvent.velocity = Converter::ArkValue<Ark_Number>(info.velocity.value_or(0.00f));
         arkCallback.Invoke(arkIndex, tabsAnimationEvent);
     };
-    TabsModelNG::SetOnAnimationEnd(frameNode, std::move(onAnimationEnd));
+    // TabsModelNG::SetOnAnimationEnd(frameNode, std::move(onAnimationEnd));
 }
 void OnGestureSwipeImpl(Ark_NativePointer node,
                         const Opt_OnTabsGestureSwipeCallback* value)
@@ -413,7 +414,7 @@ void OnGestureSwipeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        TabsModelNG::SetOnGestureSwipe(frameNode, nullptr);
+        // TabsModelNG::SetOnGestureSwipe(frameNode, nullptr);
         return;
     }
     auto onGestureSwipe = [arkCallback = CallbackHelper(*optValue)](int32_t index, const AnimationCallbackInfo& info) {
@@ -424,7 +425,7 @@ void OnGestureSwipeImpl(Ark_NativePointer node,
         tabsAnimationEvent.velocity = Converter::ArkValue<Ark_Number>(info.velocity.value_or(0.00f));
         arkCallback.Invoke(arkIndex, tabsAnimationEvent);
     };
-    TabsModelNG::SetOnGestureSwipe(frameNode, std::move(onGestureSwipe));
+    // TabsModelNG::SetOnGestureSwipe(frameNode, std::move(onGestureSwipe));
 }
 void FadingEdgeImpl(Ark_NativePointer node,
                     const Opt_Boolean* value)
@@ -433,10 +434,10 @@ void FadingEdgeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        TabsModelNG::SetFadingEdge(frameNode, true);
+        // TabsModelNG::SetFadingEdge(frameNode, true);
         return;
     }
-    TabsModelNG::SetFadingEdge(frameNode, *convValue);
+    // TabsModelNG::SetFadingEdge(frameNode, *convValue);
 }
 void DividerImpl(Ark_NativePointer node,
                  const Opt_DividerStyle* value)
@@ -445,8 +446,8 @@ void DividerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto divider = Converter::OptConvert<TabsItemDivider>(*value);
-    TabsModelNG::SetDivider(frameNode, divider);
-    TabsModelNG::InitDivider(frameNode);
+    // TabsModelNG::SetDivider(frameNode, divider);
+    // TabsModelNG::InitDivider(frameNode);
 }
 void BarOverlapImpl(Ark_NativePointer node,
                     const Opt_Boolean* value)
@@ -455,17 +456,17 @@ void BarOverlapImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        TabsModelNG::SetBarOverlap(frameNode, false);
+        // TabsModelNG::SetBarOverlap(frameNode, false);
         return;
     }
-    TabsModelNG::SetBarOverlap(frameNode, *convValue);
+    // TabsModelNG::SetBarOverlap(frameNode, *convValue);
 }
 void BarBackgroundColorImpl(Ark_NativePointer node,
                             const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TabsModelNG::SetBarBackgroundColor(frameNode,  Converter::OptConvert<Color>(*value));
+    // TabsModelNG::SetBarBackgroundColor(frameNode,  Converter::OptConvert<Color>(*value));
 }
 void BarGridAlignImpl(Ark_NativePointer node,
                       const Opt_BarGridColumnOptions* value)
@@ -477,7 +478,7 @@ void BarGridAlignImpl(Ark_NativePointer node,
     if (convValue) {
         columnOption = convValue.value();
     }
-    TabsModelNG::SetBarGridAlign(frameNode, columnOption);
+    // TabsModelNG::SetBarGridAlign(frameNode, columnOption);
 }
 void CustomContentTransitionImpl(Ark_NativePointer node,
                                  const Opt_TabsCustomContentTransitionCallback* value)
@@ -486,8 +487,8 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        TabsModelNG::SetIsCustomAnimation(frameNode, false);
-        TabsModelNG::SetOnCustomAnimation(frameNode, nullptr);
+        // TabsModelNG::SetIsCustomAnimation(frameNode, false);
+        // TabsModelNG::SetOnCustomAnimation(frameNode, nullptr);
         return;
     }
     auto accessor = GetTabContentTransitionProxyAccessor();
@@ -514,8 +515,8 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
             Callback_Opt_TabContentAnimatedTransition_Void>(arkFrom, arkTo)
             .value_or(result);
         };
-    TabsModelNG::SetIsCustomAnimation(frameNode, true); //Set 'true' to any cases. It is wrong behavior.
-    TabsModelNG::SetOnCustomAnimation(frameNode, std::move(onCustomAnimation));
+    // TabsModelNG::SetIsCustomAnimation(frameNode, true); //Set 'true' to any cases. It is wrong behavior.
+    // TabsModelNG::SetOnCustomAnimation(frameNode, std::move(onCustomAnimation));
 }
 void BarBackgroundBlurStyle0Impl(Ark_NativePointer node,
                                  const Opt_BlurStyle* value)
@@ -527,7 +528,7 @@ void BarBackgroundBlurStyle0Impl(Ark_NativePointer node,
     if (blurStyle) {
         option.blurStyle = blurStyle.value();
     }
-    TabsModelNG::SetBarBackgroundBlurStyle(frameNode, option);
+    // TabsModelNG::SetBarBackgroundBlurStyle(frameNode, option);
 }
 void BarBackgroundBlurStyle1Impl(Ark_NativePointer node,
                                  const Opt_BlurStyle* style,
@@ -544,7 +545,7 @@ void BarBackgroundBlurStyle1Impl(Ark_NativePointer node,
     if (blurStyle) {
         option.blurStyle = blurStyle.value();
     }
-    TabsModelNG::SetBarBackgroundBlurStyle(frameNode, option);
+    // TabsModelNG::SetBarBackgroundBlurStyle(frameNode, option);
 }
 void BarBackgroundEffectImpl(Ark_NativePointer node,
                              const Opt_BackgroundEffectOptions* value)
@@ -556,7 +557,7 @@ void BarBackgroundEffectImpl(Ark_NativePointer node,
     if (convValue) {
         option = convValue.value();
     }
-    TabsModelNG::SetBarBackgroundEffect(frameNode, option);
+    // TabsModelNG::SetBarBackgroundEffect(frameNode, option);
 }
 void PageFlipModeImpl(Ark_NativePointer node,
                       const Opt_PageFlipMode* value)
@@ -565,7 +566,7 @@ void PageFlipModeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<int32_t>(*value) : std::nullopt;
     int32_t defaultValue = static_cast<int32_t>(PageFlipMode::CONTINUOUS);
-    TabsModelNG::SetPageFlipMode(frameNode, convValue.value_or(defaultValue));
+    // TabsModelNG::SetPageFlipMode(frameNode, convValue.value_or(defaultValue));
 }
 void OnContentWillChangeImpl(Ark_NativePointer node,
                              const Opt_OnTabsContentWillChangeCallback* value)
@@ -574,7 +575,7 @@ void OnContentWillChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        TabsModelNG::SetOnContentWillChange(frameNode, nullptr);
+        // TabsModelNG::SetOnContentWillChange(frameNode, nullptr);
         return;
     }
     auto callback = [callback = CallbackHelper(*optValue)](
@@ -585,7 +586,7 @@ void OnContentWillChangeImpl(Ark_NativePointer node,
             bool, Ark_Boolean, Callback_Boolean_Void>(arkCurrentIndex, arkComingIndex)
             .value_or(false);
     };
-    TabsModelNG::SetOnContentWillChange(frameNode, std::move(callback));
+    // TabsModelNG::SetOnContentWillChange(frameNode, std::move(callback));
 }
 void BarModeScrollableImpl(Ark_NativePointer node,
                            const Opt_ScrollableBarModeOptions* options)
@@ -603,7 +604,7 @@ void CachedMaxCountImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto countValue = count ? Converter::OptConvert<int32_t>(*count) : std::nullopt;
     auto modeValue = Converter::OptConvert<TabsCacheMode>(*mode);
-    TabsModelNG::SetCachedMaxCount(frameNode, countValue, modeValue);
+    // TabsModelNG::SetCachedMaxCount(frameNode, countValue, modeValue);
 }
 void _onChangeEvent_indexImpl(Ark_NativePointer node,
                               const Callback_Number_Void* callback)
@@ -618,7 +619,7 @@ void _onChangeEvent_indexImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(Converter::ArkValue<Ark_Number>(tabsInfo->GetIndex()));
     };
-    TabsModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
+    // TabsModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
 } // TabsAttributeModifier
 const GENERATED_ArkUITabsModifier* GetTabsModifier()

@@ -179,7 +179,7 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
         ChangeControlButtons(isFocus_);
         return;
     }
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
     auto stackNode = GetStackNode();
@@ -287,7 +287,7 @@ void ContainerModalPatternEnhance::ChangeControlButtons(bool isFocus)
 
 void ContainerModalPatternEnhance::ChangeFloatingTitle(bool isFocus)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
@@ -301,7 +301,7 @@ void ContainerModalPatternEnhance::ChangeFloatingTitle(bool isFocus)
     CHECK_NULL_VOID(floatingTitleRow);
     auto floatingContext = floatingTitleRow->GetRenderContext();
     CHECK_NULL_VOID(floatingContext);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
     floatingContext->UpdateBackgroundColor(GetContainerColor(isFocus));
@@ -353,7 +353,7 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
             floatingContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(height - rect.GetY()), 0.0f });
         });
         buttonsContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
-        controlButtonVisibleBeforeAnim_ = controlButtonsLayoutProperty->GetVisibilityValue(VisibleType::GONE);
+        controlButtonVisibleBeforeAnim_ = controlButtonsLayoutProperty->GetVisibilityValue();
         controlButtonsLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         AnimationUtils::Animate(option, [buttonsContext, titlePopupDistance, height]() {
             auto rect = buttonsContext->GetPaintRectWithoutTransform();
@@ -536,7 +536,7 @@ RefPtr<FrameNode> ContainerModalPatternEnhance::ShowMaxMenu(const RefPtr<FrameNo
         TAG_LOGI(AceLogTag::ACE_APPBAR, "the app window is not support spilt menu");
         return nullptr;
     }
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
@@ -705,7 +705,7 @@ bool ContainerModalPatternEnhance::GetFloatingTitleVisible()
     CHECK_NULL_RETURN(floatingTitleRow, false);
     auto floatingTitleRowProp = floatingTitleRow->GetLayoutProperty();
     CHECK_NULL_RETURN(floatingTitleRowProp, false);
-    return (floatingTitleRowProp->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE);
+    return (floatingTitleRowProp->GetVisibilityValue() == VisibleType::VISIBLE);
 }
 
 bool ContainerModalPatternEnhance::GetCustomTitleVisible()
@@ -714,7 +714,7 @@ bool ContainerModalPatternEnhance::GetCustomTitleVisible()
     CHECK_NULL_RETURN(customTitleRow, false);
     auto customTitleRowProp = customTitleRow->GetLayoutProperty();
     CHECK_NULL_RETURN(customTitleRowProp, false);
-    return (customTitleRowProp->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE);
+    return (customTitleRowProp->GetVisibilityValue() == VisibleType::VISIBLE);
 }
 
 bool ContainerModalPatternEnhance::GetControlButtonVisible()
@@ -723,7 +723,7 @@ bool ContainerModalPatternEnhance::GetControlButtonVisible()
     CHECK_NULL_RETURN(controlButtonRow, false);
     auto controlButtonRowProp = controlButtonRow->GetLayoutProperty();
     CHECK_NULL_RETURN(controlButtonRowProp, false);
-    return (controlButtonRowProp->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE);
+    return (controlButtonRowProp->GetVisibilityValue() == VisibleType::VISIBLE);
 }
 
 void ContainerModalPatternEnhance::Init()

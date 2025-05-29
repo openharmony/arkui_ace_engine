@@ -48,7 +48,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_static.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
-#include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_model_static.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
 #include "core/components_ng/pattern/effect_component/effect_component_model_ng.h"
 #include "core/components_ng/pattern/shape/ellipse_model_ng.h"
@@ -335,13 +335,7 @@ void* createComponentRootNode(ArkUI_Int32 nodeId)
 
 void* createXComponentNode(ArkUI_Int32 nodeId)
 {
-#ifdef XCOMPONENT_SUPPORTED
-    auto frameNode = XComponentModelNG::CreateFrameNode(nodeId, std::nullopt, XComponentType::SURFACE, std::nullopt);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-#else
     return nullptr;
-#endif //XCOMPONENT_SUPPORTED
 }
 
 void* createListItemGroupNode(ArkUI_Int32 nodeId)
@@ -676,10 +670,11 @@ void* createContainerSpanNode(ArkUI_Int32 nodeId)
 
 void* createCounterNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = CounterModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = CounterModelNG::CreateFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createDataPanelNode(ArkUI_Int32 nodeId)
@@ -700,10 +695,11 @@ void* createEffectComponentNode(ArkUI_Int32 nodeId)
 
 void* createEllipseNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = EllipseModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = EllipseModelNG::CreateFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createEmbeddedComponentNode(ArkUI_Int32 nodeId)
@@ -720,10 +716,11 @@ void* createEmbeddedComponentNode(ArkUI_Int32 nodeId)
 
 void* createFolderStackNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = FolderStackModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = FolderStackModelNG::CreateFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createFormComponentNode(ArkUI_Int32 nodeId)
@@ -770,10 +767,11 @@ void* createHyperlinkNode(ArkUI_Int32 nodeId)
 
 void* createLineNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = LineModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = LineModelNG::CreateFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createLocationButtonNode(ArkUI_Int32 nodeId)
@@ -791,26 +789,29 @@ void* createMediaCachedImageNode(ArkUI_Int32 nodeId)
 
 void* createMenuNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = MenuModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = MenuModelNG::CreateFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createMenuItemNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = MenuItemModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = MenuItemModelNG::CreateFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createMenuItemGroupNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = MenuItemGroupView::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = MenuItemGroupView::CreateFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createNavDestinationNode(ArkUI_Int32 nodeId)
@@ -852,10 +853,11 @@ void* createPasteButtonNode(ArkUI_Int32 nodeId)
 
 void* createPathNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = PathModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = PathModelNG::CreateFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createPatternLockNode(ArkUI_Int32 nodeId)
@@ -880,26 +882,29 @@ void* createPluginComponentNode(ArkUI_Int32 nodeId)
 
 void* createPolygonNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = PolygonModelNG::CreateFrameNode(nodeId, true);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = PolygonModelNG::CreateFrameNode(nodeId, true);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createPolylineNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = PolygonModelNG::CreateFrameNode(nodeId, false);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = PolygonModelNG::CreateFrameNode(nodeId, false);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createRectNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = RectModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = RectModelNG::CreateFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createRichEditorNode(ArkUI_Int32 nodeId)
@@ -955,7 +960,7 @@ void* createScreenNode(ArkUI_Int32 nodeId)
 
 void* createScrollBarNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = ScrollBarModelNG::CreateFrameNode(nodeId);
+    auto frameNode = ScrollBarModelStatic::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -968,10 +973,11 @@ void* createSecurityComponentMethodNode(ArkUI_Int32 nodeId)
 
 void* createShapeNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = ShapeModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = ShapeModelNG::CreateFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createBaseSpanNode(ArkUI_Int32 nodeId)
@@ -1016,10 +1022,11 @@ void* createSymbolSpanNode(ArkUI_Int32 nodeId)
 
 void* createVideoNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = VideoModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = VideoModelNG::CreateFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createWebNode(ArkUI_Int32 nodeId)

@@ -154,14 +154,14 @@ auto g_onWillDismissPopup = [](
         },
         [&popupParam](const Callback_DismissPopupAction_Void& value) {
             auto callback = [arkCallback = CallbackHelper(value)](int32_t reason) {
-                Ark_DismissPopupAction parameter;
-                auto reasonOpt = Converter::ArkValue<Opt_DismissReason>(
-                    static_cast<BindSheetDismissReason>(reason));
-                parameter.reason = Converter::OptConvert<Ark_DismissReason>(reasonOpt)
-                    .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
-                const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstract::DismissPopup));
-                parameter.dismiss = keeper.ArkValue();
-                arkCallback.Invoke(parameter);
+                // Ark_DismissPopupAction parameter;
+                // auto reasonOpt = Converter::ArkValue<Opt_DismissReason>(
+                //     static_cast<BindSheetDismissReason>(reason));
+                // parameter.reason = Converter::OptConvert<Ark_DismissReason>(reasonOpt)
+                //     .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
+                // const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstract::DismissPopup));
+                // parameter.dismiss = keeper.ArkValue();
+                // arkCallback.Invoke(parameter);
             };
             popupParam->SetOnWillDismiss(std::move(callback));
             popupParam->SetInteractiveDismiss(true);
@@ -294,15 +294,15 @@ auto g_contentCoverCallbacks = [](WeakPtr<FrameNode> weakNode, const Ark_Content
     auto onWillDismissValue = OptConvert<Callback_DismissContentCoverAction_Void>(options.onWillDismiss);
     if (onWillDismissValue) {
         onWillDismissFunc = [arkCallback = CallbackHelper(onWillDismissValue.value()), weakNode](int32_t reason) {
-            PipelineContext::SetCallBackNode(weakNode);
-            Ark_DismissContentCoverAction parameter;
-            auto reasonOpt = Converter::ArkValue<Opt_DismissReason>(
-                static_cast<BindSheetDismissReason>(reason));
-            parameter.reason = Converter::OptConvert<Ark_DismissReason>(reasonOpt)
-                .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
-            const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelNG::DismissContentCoverStatic));
-            parameter.dismiss = keeper.ArkValue();
-            arkCallback.Invoke(parameter);
+            // PipelineContext::SetCallBackNode(weakNode);
+            // Ark_DismissContentCoverAction parameter;
+            // auto reasonOpt = Converter::ArkValue<Opt_DismissReason>(
+            //     static_cast<BindSheetDismissReason>(reason));
+            // parameter.reason = Converter::OptConvert<Ark_DismissReason>(reasonOpt)
+            //     .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
+            // const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelNG::DismissContentCoverStatic));
+            // parameter.dismiss = keeper.ArkValue();
+            // arkCallback.Invoke(parameter);
         };
     }
 };
@@ -425,10 +425,10 @@ auto g_bindSheetCallbacks1 = [](SheetCallbacks& callbacks, const Ark_SheetOption
     auto shouldDismiss = Converter::OptConvert<Callback_SheetDismiss_Void>(sheetOptions.shouldDismiss);
     if (shouldDismiss) {
         callbacks.shouldDismiss = [arkCallback = CallbackHelper(shouldDismiss.value())]() {
-            Ark_SheetDismiss parameter;
-            const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelNG::DismissSheetStatic));
-            parameter.dismiss = keeper.ArkValue();
-            arkCallback.Invoke(parameter);
+            // Ark_SheetDismiss parameter;
+            // const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelNG::DismissSheetStatic));
+            // parameter.dismiss = keeper.ArkValue();
+            // arkCallback.Invoke(parameter);
         };
     }
     auto onTypeDidChange = Converter::OptConvert<Callback_SheetType_Void>(sheetOptions.onTypeDidChange);
@@ -443,22 +443,22 @@ auto g_bindSheetCallbacks2 = [](SheetCallbacks& callbacks, const Ark_SheetOption
     auto onWillDismiss = Converter::OptConvert<Callback_DismissSheetAction_Void>(sheetOptions.onWillDismiss);
     if (onWillDismiss) {
         callbacks.onWillDismiss = [arkCallback = CallbackHelper(onWillDismiss.value())](const int32_t reason) {
-            Ark_DismissSheetAction parameter;
-            auto reasonOpt = ArkValue<Opt_DismissReason>(static_cast<BindSheetDismissReason>(reason));
-            parameter.reason = OptConvert<Ark_DismissReason>(reasonOpt).value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
-            const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelNG::DismissSheetStatic));
-            parameter.dismiss = keeper.ArkValue();
-            arkCallback.Invoke(parameter);
+            // Ark_DismissSheetAction parameter;
+            // auto reasonOpt = ArkValue<Opt_DismissReason>(static_cast<BindSheetDismissReason>(reason));
+            // parameter.reason = OptConvert<Ark_DismissReason>(reasonOpt).value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
+            // const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelNG::DismissSheetStatic));
+            // parameter.dismiss = keeper.ArkValue();
+            // arkCallback.Invoke(parameter);
         };
     }
     auto onWillSpringBackWhenDismiss = Converter::OptConvert<Callback_SpringBackAction_Void>(
         sheetOptions.onWillSpringBackWhenDismiss);
     if (onWillSpringBackWhenDismiss) {
         callbacks.sheetSpringBack = [arkCallback = CallbackHelper(onWillSpringBackWhenDismiss.value())]() {
-            Ark_SpringBackAction parameter;
-            const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelNG::SheetSpringBackStatic));
-            parameter.springBack = keeper.ArkValue();
-            arkCallback.Invoke(parameter);
+            // Ark_SpringBackAction parameter;
+            // const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelNG::SheetSpringBackStatic));
+            // parameter.springBack = keeper.ArkValue();
+            // arkCallback.Invoke(parameter);
         };
     }
     auto onHeightDidChange = Converter::OptConvert<Callback_Number_Void>(sheetOptions.onHeightDidChange);
@@ -1804,7 +1804,7 @@ void Width0Impl(Ark_NativePointer node,
         CounterModelNG::SetWidth(frameNode, *result);
     } else {
         if (!result) {
-            ViewAbstract::ClearWidthOrHeight(frameNode, true);
+            // ViewAbstract::ClearWidthOrHeight(frameNode, true);
             return;
         }
         ViewAbstractModelStatic::SetWidth(frameNode, *result);
@@ -1833,7 +1833,7 @@ void Height0Impl(Ark_NativePointer node,
         CounterModelNG::SetHeight(frameNode, *result);
     } else {
         if (!result) {
-            ViewAbstract::ClearWidthOrHeight(frameNode, false);
+            // ViewAbstract::ClearWidthOrHeight(frameNode, false);
             return;
         }
         ViewAbstractModelStatic::SetHeight(frameNode, *result);
@@ -1865,7 +1865,7 @@ void DrawModifierImpl(Ark_NativePointer node,
         peer->drawModifier = AceType::MakeRefPtr<DrawModifier>();
     }
     peer->frameNode = AceType::WeakClaim(frameNode);
-    ViewAbstract::SetDrawModifier(frameNode, peer->drawModifier);
+    // ViewAbstract::SetDrawModifier(frameNode, peer->drawModifier);
 }
 void ResponseRegionImpl(Ark_NativePointer node,
                         const Opt_Union_Array_Rectangle_Rectangle* value)
@@ -1873,9 +1873,9 @@ void ResponseRegionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     if (auto convArray = Converter::OptConvertPtr<std::vector<DimensionRect>>(value); convArray) {
-        ViewAbstract::SetResponseRegion(frameNode, *convArray);
+        // ViewAbstract::SetResponseRegion(frameNode, *convArray);
     } else {
-        ViewAbstract::SetResponseRegion(frameNode, { DimensionRect() });
+        // ViewAbstract::SetResponseRegion(frameNode, { DimensionRect() });
     }
 }
 void MouseResponseRegionImpl(Ark_NativePointer node,
@@ -1884,9 +1884,9 @@ void MouseResponseRegionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     if (auto convArray = Converter::OptConvertPtr<std::vector<DimensionRect>>(value); convArray) {
-        ViewAbstract::SetMouseResponseRegion(frameNode, *convArray);
+        // ViewAbstract::SetMouseResponseRegion(frameNode, *convArray);
     } else {
-        ViewAbstract::SetMouseResponseRegion(frameNode, { DimensionRect() });
+        // ViewAbstract::SetMouseResponseRegion(frameNode, { DimensionRect() });
     }
 }
 void SizeImpl(Ark_NativePointer node,
@@ -1939,7 +1939,7 @@ void TouchableImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetTouchable(frameNode, *convValue);
+    // ViewAbstract::SetTouchable(frameNode, *convValue);
 }
 void HitTestBehaviorImpl(Ark_NativePointer node,
                          const Opt_HitTestMode* value)
@@ -1951,7 +1951,7 @@ void HitTestBehaviorImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetHitTestMode(frameNode, *convValue);
+    // ViewAbstract::SetHitTestMode(frameNode, *convValue);
 }
 void OnChildTouchTestImpl(Ark_NativePointer node,
                           const Opt_Callback_Array_TouchTestInfo_TouchResult* value)
@@ -1988,7 +1988,7 @@ void OnChildTouchTestImpl(Ark_NativePointer node,
         static const NG::TouchResult defaultRes{ NG::TouchTestStrategy::DEFAULT, "" };
         return resultOpt.value_or(defaultRes);
     };
-    ViewAbstract::SetOnTouchTestFunc(frameNode, std::move(onTouchTestFunc));
+    // ViewAbstract::SetOnTouchTestFunc(frameNode, std::move(onTouchTestFunc));
 }
 void LayoutWeightImpl(Ark_NativePointer node,
                       const Opt_Union_Number_String* value)
@@ -2023,16 +2023,16 @@ void SafeAreaPaddingImpl(Ark_NativePointer node,
     Converter::VisitUnionPtr(value,
         [frameNode](const Ark_Padding& value) {
             auto convValue = Converter::Convert<PaddingProperty>(value);
-            ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
+            // ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
         },
         [frameNode](const Ark_LocalizedPadding& value) {
              LOGE("ARKOALA: CommonMethod::SafeAreaPaddingImpl: Ark_LocalizedPadding is not supported.\n");
             auto convValue = Converter::Convert<PaddingProperty>(value);
-             ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
+             // ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
         },
         [frameNode](const Ark_LengthMetrics& value) {
             auto convValue = Converter::Convert<CalcLength>(value);
-             ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
+             // ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
         },
         []() {}
     );
@@ -2076,7 +2076,7 @@ void BackgroundImageSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetBackgroundImageSize(frameNode, Converter::OptConvertPtr<BackgroundImageSize>(value));
+    // ViewAbstract::SetBackgroundImageSize(frameNode, Converter::OptConvertPtr<BackgroundImageSize>(value));
 }
 void BackgroundImagePositionImpl(Ark_NativePointer node,
                                  const Opt_Union_Position_Alignment* value)
@@ -2125,7 +2125,7 @@ void BackgroundImagePositionImpl(Ark_NativePointer node,
     }
     bgImgPosition.SetSizeX(AnimatableDimension(valueX, typeX, option));
     bgImgPosition.SetSizeY(AnimatableDimension(valueY, typeY, option));
-    ViewAbstract::SetBackgroundImagePosition(frameNode, bgImgPosition);
+    // ViewAbstract::SetBackgroundImagePosition(frameNode, bgImgPosition);
 }
 void BackgroundEffect0Impl(Ark_NativePointer node,
                            const Opt_BackgroundEffectOptions* value)
@@ -2137,7 +2137,7 @@ void BackgroundEffect0Impl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetBackgroundEffect(frameNode, *convValue);
+    // ViewAbstract::SetBackgroundEffect(frameNode, *convValue);
 }
 void BackgroundEffect1Impl(Ark_NativePointer node,
                            const Opt_BackgroundEffectOptions* options,
@@ -2162,7 +2162,7 @@ void BackgroundImageResizableImpl(Ark_NativePointer node,
     ImageResizableSlice convValue {};
     convValue = Converter::OptConvert<ImageResizableSlice>(optValue->slice).value_or(convValue);
     // lattice .. This parameter does not take effect for the backgroundImageResizable API.
-    ViewAbstract::SetBackgroundImageResizableSlice(frameNode, convValue);
+    // ViewAbstract::SetBackgroundImageResizableSlice(frameNode, convValue);
 }
 void ForegroundEffectImpl(Ark_NativePointer node,
                           const Opt_ForegroundEffectOptions* value)
@@ -2213,7 +2213,7 @@ void Opacity0Impl(Ark_NativePointer node,
     auto result = Converter::OptConvertPtr<float>(value);
     if (result) {
         // TODO: Reset value
-        ViewAbstract::SetOpacity(frameNode, result.value());
+        // ViewAbstract::SetOpacity(frameNode, result.value());
     }
 }
 void Opacity1Impl(Ark_NativePointer node,
@@ -2321,7 +2321,7 @@ void BorderImageImpl(Ark_NativePointer node,
     Converter::VisitUnion(optValue->source,
         [frameNode](const Ark_LinearGradient_common& src) {
             Gradient gradient = Converter::Convert<Gradient>(src);
-            ViewAbstract::SetBorderImageGradient(frameNode, gradient);
+            // ViewAbstract::SetBorderImageGradient(frameNode, gradient);
         },
         [&borderImage](const auto& src) {
             auto info = Converter::OptConvert<ImageSourceInfo>(src);
@@ -2458,7 +2458,7 @@ void BorderImageImpl(Ark_NativePointer node,
                 return;
         }
     });
-    ViewAbstract::SetBorderImage(frameNode, borderImage);
+    // ViewAbstract::SetBorderImage(frameNode, borderImage);
 }
 void Outline0Impl(Ark_NativePointer node,
                   const Opt_OutlineOptions* value)
@@ -2471,16 +2471,16 @@ void Outline0Impl(Ark_NativePointer node,
         return;
     }
     auto borderWidthOpt = Converter::OptConvert<BorderWidthProperty>(optValue->width);
-    ViewAbstract::SetOuterBorderWidth(frameNode, borderWidthOpt.value_or(BorderWidthProperty()));
+    // ViewAbstract::SetOuterBorderWidth(frameNode, borderWidthOpt.value_or(BorderWidthProperty()));
 
     auto borderRadiusOpt = Converter::OptConvert<BorderRadiusProperty>(optValue->radius);
-    ViewAbstract::SetOuterBorderRadius(frameNode, borderRadiusOpt.value_or(BorderRadiusProperty()));
+    // ViewAbstract::SetOuterBorderRadius(frameNode, borderRadiusOpt.value_or(BorderRadiusProperty()));
 
     auto borderColorsOpt = Converter::OptConvert<BorderColorProperty>(optValue->color);
-    ViewAbstract::SetOuterBorderColor(frameNode, borderColorsOpt.value_or(BorderColorProperty()));
+    // ViewAbstract::SetOuterBorderColor(frameNode, borderColorsOpt.value_or(BorderColorProperty()));
 
     auto borderStylesOpt = Converter::OptConvert<BorderStyleProperty>(optValue->style);
-    ViewAbstract::SetOuterBorderStyle(frameNode, borderStylesOpt.value_or(BorderStyleProperty()));
+    // ViewAbstract::SetOuterBorderStyle(frameNode, borderStylesOpt.value_or(BorderStyleProperty()));
 }
 void Outline1Impl(Ark_NativePointer node,
                   const Opt_OutlineOptions* value)
@@ -2496,7 +2496,7 @@ void OutlineStyle0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto borderStylesOpt = Converter::OptConvertPtr<BorderStyleProperty>(value);
-    ViewAbstract::SetOuterBorderStyle(frameNode, borderStylesOpt.value_or(BorderStyleProperty()));
+    // ViewAbstract::SetOuterBorderStyle(frameNode, borderStylesOpt.value_or(BorderStyleProperty()));
 }
 void OutlineStyle1Impl(Ark_NativePointer node,
                        const Opt_Union_OutlineStyle_EdgeOutlineStyles* value)
@@ -2512,7 +2512,7 @@ void OutlineWidth0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto borderWidthOpt = Converter::OptConvertPtr<BorderWidthProperty>(value);
-    ViewAbstract::SetOuterBorderWidth(frameNode, borderWidthOpt.value_or(BorderWidthProperty()));
+    // ViewAbstract::SetOuterBorderWidth(frameNode, borderWidthOpt.value_or(BorderWidthProperty()));
 }
 void OutlineWidth1Impl(Ark_NativePointer node,
                        const Opt_Union_Dimension_EdgeOutlineWidths* value)
@@ -2528,7 +2528,7 @@ void OutlineColor0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto borderColorsOpt = Converter::OptConvertPtr<BorderColorProperty>(value);
-    ViewAbstract::SetOuterBorderColor(frameNode, borderColorsOpt.value_or(BorderColorProperty()));
+    // ViewAbstract::SetOuterBorderColor(frameNode, borderColorsOpt.value_or(BorderColorProperty()));
 }
 void OutlineColor1Impl(Ark_NativePointer node,
                        const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value)
@@ -2544,7 +2544,7 @@ void OutlineRadius0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto borderRadiusOpt = Converter::OptConvertPtr<BorderRadiusProperty>(value);
-    ViewAbstract::SetOuterBorderRadius(frameNode, borderRadiusOpt.value_or(BorderRadiusProperty()));
+    // ViewAbstract::SetOuterBorderRadius(frameNode, borderRadiusOpt.value_or(BorderRadiusProperty()));
 }
 void OutlineRadius1Impl(Ark_NativePointer node,
                         const Opt_Union_Dimension_OutlineRadiuses* value)
@@ -2602,7 +2602,7 @@ void OnClick0Impl(Ark_NativePointer node,
         const auto event = Converter::ArkClickEventSync(info);
         callback.InvokeSync(event.ArkValue());
     };
-    NG::ViewAbstract::SetOnClick(frameNode, std::move(onClick));
+    // ViewAbstract::SetOnClick(frameNode, std::move(onClick));
 }
 void OnClick1Impl(Ark_NativePointer node,
                   const Opt_Callback_ClickEvent_Void* event,
@@ -2628,7 +2628,7 @@ void OnClick1Impl(Ark_NativePointer node,
             // TODO: Reset value
             return;
         }
-        ViewAbstract::SetOnClick(frameNode, std::move(onEvent), *convValue);
+        // ViewAbstract::SetOnClick(frameNode, std::move(onEvent), *convValue);
     }
 }
 void OnHoverImpl(Ark_NativePointer node,
@@ -2648,7 +2648,7 @@ void OnHoverImpl(Ark_NativePointer node,
         const auto event = Converter::ArkHoverEventSync(hoverInfo);
         arkCallback.InvokeSync(arkIsHover, event.ArkValue());
     };
-    ViewAbstract::SetOnHover(frameNode, std::move(onHover));
+    // ViewAbstract::SetOnHover(frameNode, std::move(onHover));
 }
 void OnHoverMoveImpl(Ark_NativePointer node,
                      const Opt_Callback_HoverEvent_Void* value)
@@ -2661,22 +2661,22 @@ void OnHoverMoveImpl(Ark_NativePointer node,
 void OnAccessibilityHoverImpl(Ark_NativePointer node,
                               const Opt_AccessibilityCallback* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        ViewAbstract::DisableOnAccessibilityHover(frameNode);
-        return;
-    }
-    auto weakNode = AceType::WeakClaim(frameNode);
-    auto onAccessibilityHover = [arkCallback = CallbackHelper(*optValue), node = weakNode](
-        bool isHover, AccessibilityHoverInfo& hoverInfo) {
-        PipelineContext::SetCallBackNode(node);
-        Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
-        auto event = Converter::ArkAccessibilityHoverEventSync(hoverInfo);
-        arkCallback.InvokeSync(arkIsHover, event.ArkValue());
-    };
-    ViewAbstract::SetOnAccessibilityHover(frameNode, std::move(onAccessibilityHover));
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto optValue = Converter::GetOptPtr(value);
+    // if (!optValue) {
+    //     ViewAbstract::DisableOnAccessibilityHover(frameNode);
+    //     return;
+    // }
+    // auto weakNode = AceType::WeakClaim(frameNode);
+    // auto onAccessibilityHover = [arkCallback = CallbackHelper(*optValue), node = weakNode](
+    //     bool isHover, AccessibilityHoverInfo& hoverInfo) {
+    //     PipelineContext::SetCallBackNode(node);
+    //     Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
+    //     auto event = Converter::ArkAccessibilityHoverEventSync(hoverInfo);
+    //     arkCallback.InvokeSync(arkIsHover, event.ArkValue());
+    // };
+    // ViewAbstract::SetOnAccessibilityHover(frameNode, std::move(onAccessibilityHover));
 }
 void HoverEffectImpl(Ark_NativePointer node,
                      const Opt_HoverEffect* value)
@@ -2686,7 +2686,7 @@ void HoverEffectImpl(Ark_NativePointer node,
     auto hoverEffect = Converter::OptConvertPtr<OHOS::Ace::HoverEffectType>(value);
     // TODO: Reset value
     if (hoverEffect) {
-        ViewAbstract::SetHoverEffect(frameNode, hoverEffect.value());
+        // ViewAbstract::SetHoverEffect(frameNode, hoverEffect.value());
     }
 }
 void OnMouseImpl(Ark_NativePointer node,
@@ -2705,7 +2705,7 @@ void OnMouseImpl(Ark_NativePointer node,
         const auto event = Converter::ArkMouseEventSync(mouseInfo);
         arkCallback.InvokeSync(event.ArkValue());
     };
-    ViewAbstract::SetOnMouse(frameNode, std::move(onMouse));
+    // ViewAbstract::SetOnMouse(frameNode, std::move(onMouse));
 }
 void OnTouchImpl(Ark_NativePointer node,
                  const Opt_Callback_TouchEvent_Void* value)
@@ -2721,7 +2721,7 @@ void OnTouchImpl(Ark_NativePointer node,
         const auto event = Converter::ArkTouchEventSync(info);
         callback.InvokeSync(event.ArkValue());
     };
-    ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
+    // ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
 }
 void OnKeyEvent0Impl(Ark_NativePointer node,
                      const Opt_Callback_KeyEvent_Void* value)
@@ -2730,7 +2730,7 @@ void OnKeyEvent0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        ViewAbstract::DisableOnKeyEvent(frameNode);
+        // ViewAbstract::DisableOnKeyEvent(frameNode);
         return;
     } else {
         auto weakNode = AceType::WeakClaim(frameNode);
@@ -2740,7 +2740,7 @@ void OnKeyEvent0Impl(Ark_NativePointer node,
             arkCallback.InvokeSync(event.ArkValue());
             return false;
         };
-        ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
+        // ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
     }
 }
 void OnKeyEvent1Impl(Ark_NativePointer node,
@@ -2750,7 +2750,7 @@ void OnKeyEvent1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        ViewAbstract::DisableOnKeyEvent(frameNode);
+        // ViewAbstract::DisableOnKeyEvent(frameNode);
         return;
     } else {
         auto weakNode = AceType::WeakClaim(frameNode);
@@ -2760,7 +2760,7 @@ void OnKeyEvent1Impl(Ark_NativePointer node,
             auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event.ArkValue());
             return Converter::Convert<bool>(arkResult);
         };
-        ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
+        // ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
     }
 }
 void OnDigitalCrownImpl(Ark_NativePointer node,
@@ -2786,9 +2786,9 @@ void OnDigitalCrownImpl(Ark_NativePointer node,
             };
             callback.Invoke(crownEvent);
         };
-        ViewAbstract::SetOnCrownEvent(frameNode, std::move(onDigitalCrown));
+        // ViewAbstract::SetOnCrownEvent(frameNode, std::move(onDigitalCrown));
     } else {
-        ViewAbstract::DisableOnCrownEvent(frameNode);
+        // ViewAbstract::DisableOnCrownEvent(frameNode);
     }
 #endif
 }
@@ -2799,7 +2799,7 @@ void OnKeyPreImeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        ViewAbstractModelNG::DisableOnKeyPreIme(frameNode);
+        // ViewAbstractModelNG::DisableOnKeyPreIme(frameNode);
         return;
     } else {
         auto weakNode = AceType::WeakClaim(frameNode);
@@ -2810,7 +2810,7 @@ void OnKeyPreImeImpl(Ark_NativePointer node,
             auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event.ArkValue());
             return Converter::Convert<bool>(arkResult);
         };
-        ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onKeyPreImeEvent));
+        // ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onKeyPreImeEvent));
     }
 }
 void OnKeyEventDispatchImpl(Ark_NativePointer node,
@@ -2820,7 +2820,7 @@ void OnKeyEventDispatchImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        ViewAbstract::DisableOnKeyEventDispatch(frameNode);
+        // ViewAbstract::DisableOnKeyEventDispatch(frameNode);
         return;
     }
     auto weakNode = AceType::WeakClaim(frameNode);
@@ -2830,7 +2830,7 @@ void OnKeyEventDispatchImpl(Ark_NativePointer node,
         auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event.ArkValue());
         return Converter::Convert<bool>(arkResult);
     };
-    ViewAbstract::SetOnKeyEventDispatch(frameNode, std::move(onKeyEvent));
+    // ViewAbstract::SetOnKeyEventDispatch(frameNode, std::move(onKeyEvent));
 }
 void OnFocusAxisEventImpl(Ark_NativePointer node,
                           const Opt_Callback_FocusAxisEvent_Void* value)
@@ -2848,7 +2848,7 @@ void OnFocusAxisEventImpl(Ark_NativePointer node,
         const auto arkInfo = Converter::ArkFocusAxisEventSync(info);
         callback.InvokeSync(arkInfo.ArkValue());
     };
-    ViewAbstract::SetOnFocusAxisEvent(frameNode, std::move(onFocusAxis));
+    // ViewAbstract::SetOnFocusAxisEvent(frameNode, std::move(onFocusAxis));
 }
 void OnAxisEventImpl(Ark_NativePointer node,
                      const Opt_Callback_AxisEvent_Void* value)
@@ -2868,7 +2868,7 @@ void FocusableImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetFocusable(frameNode, *convValue);
+    // ViewAbstract::SetFocusable(frameNode, *convValue);
 }
 void NextFocusImpl(Ark_NativePointer node,
                    const Opt_FocusMovement* value)
@@ -2878,37 +2878,37 @@ void NextFocusImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto arkFocusMovement = Converter::OptConvertPtr<Ark_FocusMovement>(value);
     if (!arkFocusMovement) {
-        ViewAbstract::ResetNextFocus(frameNode);
+        // ViewAbstract::ResetNextFocus(frameNode);
         return;
     }
     auto forward = Converter::OptConvert<std::string>(arkFocusMovement->forward);
     if (forward.has_value()) {
-        ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::TAB, forward.value());
+        // ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::TAB, forward.value());
     }
 
     auto backward = Converter::OptConvert<std::string>(arkFocusMovement->backward);
     if (backward.has_value()) {
-        ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::SHIFT_TAB, backward.value());
+        // ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::SHIFT_TAB, backward.value());
     }
 
     auto up = Converter::OptConvert<std::string>(arkFocusMovement->up);
     if (up.has_value()) {
-        ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::UP, up.value());
+        // ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::UP, up.value());
     }
 
     auto down = Converter::OptConvert<std::string>(arkFocusMovement->down);
     if (down.has_value()) {
-        ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::DOWN, down.value());
+        // ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::DOWN, down.value());
     }
 
     auto left = Converter::OptConvert<std::string>(arkFocusMovement->left);
     if (left.has_value()) {
-        ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::LEFT, left.value());
+        // ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::LEFT, left.value());
     }
 
     auto right = Converter::OptConvert<std::string>(arkFocusMovement->right);
     if (right.has_value()) {
-        ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::RIGHT, right.value());
+        // ViewAbstract::SetNextFocus(frameNode, NG::FocusIntension::RIGHT, right.value());
     }
 }
 void TabStopImpl(Ark_NativePointer node,
@@ -2921,7 +2921,7 @@ void TabStopImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetTabStop(frameNode, *convValue);
+    // ViewAbstract::SetTabStop(frameNode, *convValue);
 }
 void OnFocusImpl(Ark_NativePointer node,
                  const Opt_Callback_Void* value)
@@ -2930,13 +2930,13 @@ void OnFocusImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        ViewAbstract::DisableOnFocus(frameNode);
+        // ViewAbstract::DisableOnFocus(frameNode);
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
         arkCallback.Invoke();
     };
-    ViewAbstract::SetOnFocus(frameNode, std::move(onEvent));
+    // ViewAbstract::SetOnFocus(frameNode, std::move(onEvent));
 }
 void OnBlurImpl(Ark_NativePointer node,
                 const Opt_Callback_Void* value)
@@ -2945,13 +2945,13 @@ void OnBlurImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        ViewAbstract::DisableOnBlur(frameNode);
+        // ViewAbstract::DisableOnBlur(frameNode);
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
         arkCallback.Invoke();
     };
-    ViewAbstract::SetOnBlur(frameNode, std::move(onEvent));
+    // ViewAbstract::SetOnBlur(frameNode, std::move(onEvent));
 }
 void TabIndexImpl(Ark_NativePointer node,
                   const Opt_Number* value)
@@ -2963,7 +2963,7 @@ void TabIndexImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetTabIndex(frameNode, *convValue);
+    // ViewAbstract::SetTabIndex(frameNode, *convValue);
 }
 void DefaultFocusImpl(Ark_NativePointer node,
                       const Opt_Boolean* value)
@@ -2975,7 +2975,7 @@ void DefaultFocusImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetDefaultFocus(frameNode, *convValue);
+    // ViewAbstract::SetDefaultFocus(frameNode, *convValue);
 }
 void GroupDefaultFocusImpl(Ark_NativePointer node,
                            const Opt_Boolean* value)
@@ -2987,7 +2987,7 @@ void GroupDefaultFocusImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetGroupDefaultFocus(frameNode, *convValue);
+    // ViewAbstract::SetGroupDefaultFocus(frameNode, *convValue);
 }
 void FocusOnTouchImpl(Ark_NativePointer node,
                       const Opt_Boolean* value)
@@ -2999,7 +2999,7 @@ void FocusOnTouchImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetFocusOnTouch(frameNode, *convValue);
+    // ViewAbstract::SetFocusOnTouch(frameNode, *convValue);
 }
 void FocusBoxImpl(Ark_NativePointer node,
                   const Opt_FocusBoxStyle* value)
@@ -3062,11 +3062,11 @@ void Transition0Impl(Ark_NativePointer node,
     Converter::VisitUnionPtr(value,
         [frameNode](const Ark_TransitionOptions& value) {
             auto convValue = Converter::Convert<TransitionOptions>(value);
-            ViewAbstract::SetTransition(frameNode, convValue);
+            // ViewAbstract::SetTransition(frameNode, convValue);
         },
         [frameNode](const Ark_TransitionEffect& value) {
             auto convValue = Converter::Convert<RefPtr<NG::ChainedTransitionEffect>>(value);
-             ViewAbstract::SetChainedTransition(frameNode, convValue);
+             // ViewAbstract::SetChainedTransition(frameNode, convValue);
         },
         []() {}
     );
@@ -3092,9 +3092,9 @@ void Transition1Impl(Ark_NativePointer node,
     }
     auto effectPeer = *optValue;
     if (effectPeer && effectPeer->handler) {
-        ViewAbstract::SetChainedTransition(frameNode, effectPeer->handler, std::move(finishCallback));
+        // ViewAbstract::SetChainedTransition(frameNode, effectPeer->handler, std::move(finishCallback));
     } else {
-        ViewAbstract::CleanTransition(frameNode);
+        // ViewAbstract::CleanTransition(frameNode);
     }
 }
 void MotionBlur0Impl(Ark_NativePointer node,
@@ -3103,7 +3103,7 @@ void MotionBlur0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<MotionBlurOption>(value);
-    ViewAbstract::SetMotionBlur(frameNode, convValue);
+    // ViewAbstract::SetMotionBlur(frameNode, convValue);
 }
 void MotionBlur1Impl(Ark_NativePointer node,
                      const Opt_MotionBlurOptions* value)
@@ -3112,16 +3112,16 @@ void MotionBlur1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvertPtr<MotionBlurOption>(value);
-    ViewAbstract::SetMotionBlur(frameNode, convValue);
+    // ViewAbstract::SetMotionBlur(frameNode, convValue);
 }
 void Brightness0Impl(Ark_NativePointer node,
                      const Opt_Number* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(convValue);
-    ViewAbstract::SetBrightness(frameNode, convValue);
+    // auto frameNode = reinterpret_cast<FrameNode*>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    // Validator::ValidateNonNegative(convValue);
+    // ViewAbstract::SetBrightness(frameNode, convValue);
 }
 void Brightness1Impl(Ark_NativePointer node,
                      const Opt_Number* value)
@@ -3134,11 +3134,11 @@ void Brightness1Impl(Ark_NativePointer node,
 void Contrast0Impl(Ark_NativePointer node,
                    const Opt_Number* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(convValue);
-    ViewAbstract::SetContrast(frameNode, convValue);
+    // auto frameNode = reinterpret_cast<FrameNode*>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    // Validator::ValidateNonNegative(convValue);
+    // ViewAbstract::SetContrast(frameNode, convValue);
 }
 void Contrast1Impl(Ark_NativePointer node,
                    const Opt_Number* value)
@@ -3155,7 +3155,7 @@ void Grayscale0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(convValue);
-    ViewAbstract::SetGrayScale(frameNode, convValue);
+    // ViewAbstract::SetGrayScale(frameNode, convValue);
 }
 void Grayscale1Impl(Ark_NativePointer node,
                     const Opt_Number* value)
@@ -3171,7 +3171,7 @@ void ColorBlend0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Color>(value);
-    ViewAbstract::SetColorBlend(frameNode, convValue);
+    // ViewAbstract::SetColorBlend(frameNode, convValue);
 }
 void ColorBlend1Impl(Ark_NativePointer node,
                      const Opt_Union_Color_String_Resource* value)
@@ -3188,7 +3188,7 @@ void Saturate0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(convValue);
-    ViewAbstract::SetSaturate(frameNode, convValue);
+    // ViewAbstract::SetSaturate(frameNode, convValue);
 }
 void Saturate1Impl(Ark_NativePointer node,
                    const Opt_Number* value)
@@ -3205,7 +3205,7 @@ void Sepia0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(convValue);
-    ViewAbstract::SetSepia(frameNode, convValue);
+    // ViewAbstract::SetSepia(frameNode, convValue);
 }
 void Sepia1Impl(Ark_NativePointer node,
                 const Opt_Number* value)
@@ -3224,7 +3224,7 @@ void Invert0Impl(Ark_NativePointer node,
     const float maxValue = 100.0;
     auto convValue = Converter::OptConvertPtr<InvertVariant>(value);
     Validator::ValidateByRange(convValue, minValue, maxValue);
-    ViewAbstract::SetInvert(frameNode, convValue);
+    // ViewAbstract::SetInvert(frameNode, convValue);
 }
 void Invert1Impl(Ark_NativePointer node,
                  const Opt_Union_Number_InvertOptions* value)
@@ -3240,7 +3240,7 @@ void HueRotate0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<float>(value);
-    ViewAbstract::SetHueRotate(frameNode, convValue);
+    // ViewAbstract::SetHueRotate(frameNode, convValue);
 }
 void HueRotate1Impl(Ark_NativePointer node,
                     const Opt_Union_Number_String* value)
@@ -3256,7 +3256,7 @@ void UseShadowBatching0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
-    ViewAbstract::SetUseShadowBatching(frameNode, convValue);
+    // ViewAbstract::SetUseShadowBatching(frameNode, convValue);
 }
 void UseShadowBatching1Impl(Ark_NativePointer node,
                             const Opt_Boolean* value)
@@ -3272,7 +3272,7 @@ void UseEffect0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
-    ViewAbstract::SetUseEffect(frameNode, convValue);
+    // ViewAbstract::SetUseEffect(frameNode, convValue);
 }
 void UseEffect1Impl(Ark_NativePointer node,
                     const Opt_Boolean* useEffect,
@@ -3304,7 +3304,7 @@ void RenderGroup0Impl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetRenderGroup(frameNode, *convValue);
+    // ViewAbstract::SetRenderGroup(frameNode, *convValue);
 }
 void RenderGroup1Impl(Ark_NativePointer node,
                       const Opt_Boolean* value)
@@ -3320,7 +3320,7 @@ void Freeze0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
-    ViewAbstract::SetFreeze(frameNode, convValue);
+    // ViewAbstract::SetFreeze(frameNode, convValue);
 }
 void Freeze1Impl(Ark_NativePointer node,
                  const Opt_Boolean* value)
@@ -3340,7 +3340,7 @@ void Translate0Impl(Ark_NativePointer node,
     CalcDimension x = options.x.value_or(CalcDimension(0.0));
     CalcDimension y = options.y.value_or(CalcDimension(0.0));
     CalcDimension z = options.z.value_or(CalcDimension(0.0));
-    ViewAbstract::SetTranslate(frameNode, TranslateOptions(x, y, z));
+    // ViewAbstract::SetTranslate(frameNode, TranslateOptions(x, y, z));
 }
 void Translate1Impl(Ark_NativePointer node,
                     const Opt_TranslateOptions* value)
@@ -3359,7 +3359,7 @@ void Scale0Impl(Ark_NativePointer node,
 
     float scaleX = scaleOptions.x.value_or(1.0f);
     float scaleY = scaleOptions.y.value_or(1.0f);
-    ViewAbstract::SetScale(frameNode, VectorF(scaleX, scaleY));
+    // ViewAbstract::SetScale(frameNode, VectorF(scaleX, scaleY));
 
     CalcDimension centerX = scaleOptions.centerX.value_or(0.5_pct);
     CalcDimension centerY = scaleOptions.centerY.value_or(0.5_pct);
@@ -3380,7 +3380,7 @@ void GridSpanImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<int32_t>(value);
     Validator::ValidateNonNegative(convValue);
-    ViewAbstract::SetGrid(frameNode, convValue, std::nullopt, GridSizeType::UNDEFINED);
+    // ViewAbstract::SetGrid(frameNode, convValue, std::nullopt, GridSizeType::UNDEFINED);
 }
 void GridOffsetImpl(Ark_NativePointer node,
                     const Opt_Number* value)
@@ -3389,7 +3389,7 @@ void GridOffsetImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<int32_t>(value);
     Validator::ValidateNonNegative(convValue);
-    ViewAbstract::SetGrid(frameNode, std::nullopt, convValue, GridSizeType::UNDEFINED);
+    // ViewAbstract::SetGrid(frameNode, std::nullopt, convValue, GridSizeType::UNDEFINED);
 }
 void Rotate0Impl(Ark_NativePointer node,
                  const Opt_RotateOptions* value)
@@ -3445,7 +3445,7 @@ void OnAppearImpl(Ark_NativePointer node,
     auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
         arkCallback.Invoke();
     };
-    ViewAbstract::SetOnAppear(frameNode, std::move(onEvent));
+    // ViewAbstract::SetOnAppear(frameNode, std::move(onEvent));
 }
 void OnDisAppearImpl(Ark_NativePointer node,
                      const Opt_Callback_Void* value)
@@ -3460,7 +3460,7 @@ void OnDisAppearImpl(Ark_NativePointer node,
     auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
         arkCallback.Invoke();
     };
-    ViewAbstract::SetOnDisappear(frameNode, std::move(onEvent));
+    // ViewAbstract::SetOnDisappear(frameNode, std::move(onEvent));
 }
 void OnAttachImpl(Ark_NativePointer node,
                   const Opt_Callback_Void* value)
@@ -3477,7 +3477,7 @@ void OnAttachImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(node);
         arkCallback.Invoke();
     };
-    ViewAbstract::SetOnAttach(frameNode, std::move(onAttach));
+    // ViewAbstract::SetOnAttach(frameNode, std::move(onAttach));
 }
 void OnDetachImpl(Ark_NativePointer node,
                   const Opt_Callback_Void* value)
@@ -3494,7 +3494,7 @@ void OnDetachImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(node);
         arkCallback.Invoke();
     };
-    ViewAbstract::SetOnDetach(frameNode, std::move(onDetach));
+    // ViewAbstract::SetOnDetach(frameNode, std::move(onDetach));
 }
 void OnAreaChangeImpl(Ark_NativePointer node,
                       const Opt_Callback_Area_Area_Void* value)
@@ -3546,7 +3546,7 @@ void OnAreaChangeImpl(Ark_NativePointer node,
             Offset(oldOrigin.GetX(), oldOrigin.GetY()), Rect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height()),
             Offset(origin.GetX(), origin.GetY()));
     };
-    ViewAbstract::SetOnAreaChanged(frameNode, std::move(areaChangeCallback));
+    // ViewAbstract::SetOnAreaChanged(frameNode, std::move(areaChangeCallback));
 }
 void VisibilityImpl(Ark_NativePointer node,
                     const Opt_Visibility* value)
@@ -3558,7 +3558,7 @@ void VisibilityImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetVisibility(frameNode, convValue.value());
+    // ViewAbstract::SetVisibility(frameNode, convValue.value());
 }
 void FlexGrowImpl(Ark_NativePointer node,
                   const Opt_Number* value)
@@ -3624,7 +3624,7 @@ void ZIndexImpl(Ark_NativePointer node,
     auto result = Converter::OptConvertPtr<int>(value);
     if (result) {
         // TODO: Reset value
-        ViewAbstract::SetZIndex(frameNode, result.value());
+        // ViewAbstract::SetZIndex(frameNode, result.value());
     }
 }
 void DirectionImpl(Ark_NativePointer node,
@@ -3729,7 +3729,7 @@ void EnabledImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetEnabled(frameNode, *convValue);
+    // ViewAbstract::SetEnabled(frameNode, *convValue);
 }
 void UseSizeTypeImpl(Ark_NativePointer node,
                      const Opt_Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs* value)
@@ -3743,19 +3743,19 @@ void UseSizeTypeImpl(Ark_NativePointer node,
     }
     auto gridSizeOpt = Converter::OptConvert<GridSizeOpt>(optValue->xs);
     if (gridSizeOpt.has_value()) {
-        ViewAbstract::SetGrid(frameNode, gridSizeOpt.value().span, gridSizeOpt.value().offset, GridSizeType::XS);
+        // ViewAbstract::SetGrid(frameNode, gridSizeOpt.value().span, gridSizeOpt.value().offset, GridSizeType::XS);
     }
     gridSizeOpt = Converter::OptConvert<GridSizeOpt>(optValue->sm);
     if (gridSizeOpt.has_value()) {
-        ViewAbstract::SetGrid(frameNode, gridSizeOpt.value().span, gridSizeOpt.value().offset, GridSizeType::SM);
+        // ViewAbstract::SetGrid(frameNode, gridSizeOpt.value().span, gridSizeOpt.value().offset, GridSizeType::SM);
     }
     gridSizeOpt = Converter::OptConvert<GridSizeOpt>(optValue->md);
     if (gridSizeOpt.has_value()) {
-        ViewAbstract::SetGrid(frameNode, gridSizeOpt.value().span, gridSizeOpt.value().offset, GridSizeType::MD);
+        // ViewAbstract::SetGrid(frameNode, gridSizeOpt.value().span, gridSizeOpt.value().offset, GridSizeType::MD);
     }
     gridSizeOpt= Converter::OptConvert<GridSizeOpt>(optValue->lg);
     if (gridSizeOpt.has_value()) {
-        ViewAbstract::SetGrid(frameNode, gridSizeOpt.value().span, gridSizeOpt.value().offset, GridSizeType::LG);
+        // ViewAbstract::SetGrid(frameNode, gridSizeOpt.value().span, gridSizeOpt.value().offset, GridSizeType::LG);
     }
 }
 void AlignRules0Impl(Ark_NativePointer node,
@@ -3814,12 +3814,12 @@ void ClickEffect0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Ark_ClickEffect>(value);
     if (!convValue.has_value()) {
-        ViewAbstract::SetClickEffectLevel(frameNode, std::nullopt, std::nullopt);
+        // ViewAbstract::SetClickEffectLevel(frameNode, std::nullopt, std::nullopt);
         return;
     }
     const std::optional<ClickEffectLevel>& level = Converter::OptConvert<ClickEffectLevel>(convValue.value().level);
     const std::optional<float> scaleValue = Converter::OptConvert<float>(convValue.value().scale);
-    ViewAbstract::SetClickEffectLevel(frameNode, level, scaleValue);
+    // ViewAbstract::SetClickEffectLevel(frameNode, level, scaleValue);
 }
 void ClickEffect1Impl(Ark_NativePointer node,
                       const Opt_ClickEffect* value)
@@ -3868,7 +3868,7 @@ void OnDragStartImpl(Ark_NativePointer node,
             Callback_Union_CustomBuilder_DragItemInfo_Void>(handler, callback, arkDragInfo, arkExtraParam);
         return result;
     };
-    ViewAbstract::SetOnDragStart(frameNode, std::move(onDragStart));
+    // ViewAbstract::SetOnDragStart(frameNode, std::move(onDragStart));
 }
 void OnDragEnterImpl(Ark_NativePointer node,
                      const Opt_Callback_DragEvent_String_Void* value)
@@ -3886,7 +3886,7 @@ void OnDragEnterImpl(Ark_NativePointer node,
         Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
         callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
-    ViewAbstract::SetOnDragEnter(frameNode, std::move(onDragEnter));
+    // ViewAbstract::SetOnDragEnter(frameNode, std::move(onDragEnter));
 }
 void OnDragMoveImpl(Ark_NativePointer node,
                     const Opt_Callback_DragEvent_String_Void* value)
@@ -3904,7 +3904,7 @@ void OnDragMoveImpl(Ark_NativePointer node,
         Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
         callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
-    ViewAbstract::SetOnDragMove(frameNode, std::move(onDragMove));
+    // ViewAbstract::SetOnDragMove(frameNode, std::move(onDragMove));
 }
 void OnDragLeaveImpl(Ark_NativePointer node,
                      const Opt_Callback_DragEvent_String_Void* value)
@@ -3922,7 +3922,7 @@ void OnDragLeaveImpl(Ark_NativePointer node,
         Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
         callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
-    ViewAbstract::SetOnDragLeave(frameNode, std::move(onDragLeave));
+    // ViewAbstract::SetOnDragLeave(frameNode, std::move(onDragLeave));
 }
 void OnDrop0Impl(Ark_NativePointer node,
                  const Opt_Callback_DragEvent_String_Void* value)
@@ -3940,7 +3940,7 @@ void OnDrop0Impl(Ark_NativePointer node,
         Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
         callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
-    ViewAbstract::SetOnDrop(frameNode, std::move(onDrop));
+    // ViewAbstract::SetOnDrop(frameNode, std::move(onDrop));
 }
 void OnDrop1Impl(Ark_NativePointer node,
                  const Opt_OnDragEventCallback* eventCallback,
@@ -3968,7 +3968,7 @@ void OnDragEndImpl(Ark_NativePointer node,
         std::string extraParams = "";
         callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
-    ViewAbstract::SetOnDragEnd(frameNode, std::move(onDragEnd));
+    // ViewAbstract::SetOnDragEnd(frameNode, std::move(onDragEnd));
 }
 void AllowDropImpl(Ark_NativePointer node,
                    const Opt_Array_UniformDataType* value)
@@ -3976,7 +3976,7 @@ void AllowDropImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto allowDrop = Converter::OptConvertPtr<std::set<std::string>>(value);
-    ViewAbstract::SetAllowDrop(frameNode, allowDrop);
+    // ViewAbstract::SetAllowDrop(frameNode, allowDrop);
 }
 void DraggableImpl(Ark_NativePointer node,
                    const Opt_Boolean* value)
@@ -3988,48 +3988,48 @@ void DraggableImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetDraggable(frameNode, *convValue);
+    // ViewAbstract::SetDraggable(frameNode, *convValue);
 }
 void DragPreview0Impl(Ark_NativePointer node,
                       const Opt_Union_CustomBuilder_DragItemInfo_String* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    Converter::VisitUnionPtr(value,
-        [frameNode](const Ark_String& val) {
-            ViewAbstract::SetDragPreview(frameNode,
-                DragDropInfo { .inspectorId = Converter::Convert<std::string>(val) });
-        },
-        [node, frameNode](const CustomNodeBuilder& val) {
-            CallbackHelper(val).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
-                ViewAbstract::SetDragPreview(frameNode, DragDropInfo { .customNode = uiNode });
-                }, node);
-        },
-        [node, frameNode](const Ark_DragItemInfo& value) {
-            auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
-            DragDropInfo dragDropInfo {
-                .pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr),
-                .extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string())
-            };
-            if (builder) {
-                CallbackHelper(builder.value()).BuildAsync([frameNode, dragDropInfo = std::move(dragDropInfo)](
-                    const RefPtr<UINode>& uiNode) {
-                    DragDropInfo info;
-                    info.customNode = uiNode;
-                    info.pixelMap = dragDropInfo.pixelMap;
-                    info.extraInfo = dragDropInfo.extraInfo;
-                    ViewAbstract::SetDragPreview(frameNode, info);
-                    }, node);
-            } else {
-                ViewAbstract::SetDragPreview(frameNode, DragDropInfo {
-                    .pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr),
-                    .extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string()) });
-            }
-        },
-        [frameNode]() {
-            std::optional<DragDropInfo> empty = std::nullopt;
-            ViewAbstract::SetDragPreview(frameNode, empty);
-        });
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // Converter::VisitUnionPtr(value,
+    //     [frameNode](const Ark_String& val) {
+    //         // ViewAbstract::SetDragPreview(frameNode,
+    //             // DragDropInfo { .inspectorId = Converter::Convert<std::string>(val) });
+    //     },
+    //     [node, frameNode](const CustomNodeBuilder& val) {
+    //         CallbackHelper(val).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+    //             // ViewAbstract::SetDragPreview(frameNode, DragDropInfo { .customNode = uiNode });
+    //             // }, node);
+    //     },
+    //     [node, frameNode](const Ark_DragItemInfo& value) {
+    //         auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
+    //         DragDropInfo dragDropInfo {
+    //             .pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr),
+    //             .extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string())
+    //         };
+    //         // if (builder) {
+    //         //     // CallbackHelper(builder.value()).BuildAsync([frameNode, dragDropInfo = std::move(dragDropInfo)](
+    //         //     //     const RefPtr<UINode>& uiNode) {
+    //         //     //     DragDropInfo info;
+    //         //     //     info.customNode = uiNode;
+    //         //     //     info.pixelMap = dragDropInfo.pixelMap;
+    //         //     //     info.extraInfo = dragDropInfo.extraInfo;
+    //         //     //      ViewAbstract::SetDragPreview(frameNode, info);
+    //         //     //     }, node);
+    //         // } else {
+    //         //     // ViewAbstract::SetDragPreview(frameNode, DragDropInfo {
+    //         //         // .pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr),
+    //         //         // .extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string()) });
+    //         // }
+    //     },
+    //     [frameNode]() {
+    //         std::optional<DragDropInfo> empty = std::nullopt;
+    //         // ViewAbstract::SetDragPreview(frameNode, empty);
+    //     });
 }
 void DragPreview1Impl(Ark_NativePointer node,
                       const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
@@ -4054,7 +4054,7 @@ void OnPreDragImpl(Ark_NativePointer node,
     auto onPreDrag = [callback = CallbackHelper(*optValue)](const PreDragStatus info) {
         callback.Invoke(Converter::ArkValue<Ark_PreDragStatus>(info));
     };
-    ViewAbstract::SetOnPreDrag(frameNode, onPreDrag);
+    // ViewAbstract::SetOnPreDrag(frameNode, onPreDrag);
 }
 void LinearGradient0Impl(Ark_NativePointer node,
                          const Opt_LinearGradientOptions* value)
@@ -4079,7 +4079,7 @@ void LinearGradient0Impl(Ark_NativePointer node,
         Converter::AssignLinearGradientDirection(linear, direction.value());
     }
     Converter::AssignGradientColors(&gradient, &optValue->colors);
-    ViewAbstract::SetLinearGradient(frameNode, gradient);
+    // ViewAbstract::SetLinearGradient(frameNode, gradient);
 }
 void LinearGradient1Impl(Ark_NativePointer node,
                          const Opt_LinearGradientOptions* value)
@@ -4117,7 +4117,7 @@ void SweepGradient0Impl(Ark_NativePointer node,
     if (endAngle) sweep->endAngle = endAngle.value();
     if (rotation) sweep->rotation = rotation.value();
     Converter::AssignGradientColors(&gradient, &optValue->colors);
-    ViewAbstract::SetSweepGradient(frameNode, gradient);
+    // ViewAbstract::SetSweepGradient(frameNode, gradient);
 }
 void SweepGradient1Impl(Ark_NativePointer node,
                         const Opt_SweepGradientOptions* value)
@@ -4137,7 +4137,7 @@ void RadialGradient0Impl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetRadialGradient(frameNode, *convValue);
+    // ViewAbstract::SetRadialGradient(frameNode, *convValue);
 }
 void RadialGradient1Impl(Ark_NativePointer node,
                          const Opt_RadialGradientOptions* value)
@@ -4153,7 +4153,7 @@ void MotionPathImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<MotionPathOption>(value);
-    ViewAbstract::SetMotionPath(frameNode, convValue);
+    // ViewAbstract::SetMotionPath(frameNode, convValue);
 }
 void Shadow0Impl(Ark_NativePointer node,
                  const Opt_Union_ShadowOptions_ShadowStyle* value)
@@ -4163,7 +4163,7 @@ void Shadow0Impl(Ark_NativePointer node,
     auto shadow = Converter::OptConvertPtr<Shadow>(value);
     if (shadow) {
         // TODO: Reset value
-        ViewAbstract::SetBackShadow(frameNode, shadow.value());
+        // ViewAbstract::SetBackShadow(frameNode, shadow.value());
     }
 }
 void Shadow1Impl(Ark_NativePointer node,
@@ -4205,7 +4205,7 @@ void ClipShape0Impl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<RefPtr<BasicShape>>(value);
     if (convValue.has_value() && convValue.value()) {
         // TODO: Reset value
-        ViewAbstract::SetClipShape(convValue.value());
+        // ViewAbstract::SetClipShape(convValue.value());
     }
 }
 void ClipShape1Impl(Ark_NativePointer node,
@@ -4224,7 +4224,7 @@ void Mask0Impl(Ark_NativePointer node,
     auto mask = Converter::OptConvertPtr<Ark_ProgressMask>(value);
     if (!mask) return;
     const auto& progressMask = mask.value()->GetProperty();
-    ViewAbstract::SetProgressMask(frameNode, progressMask);
+    // ViewAbstract::SetProgressMask(frameNode, progressMask);
 }
 void Mask1Impl(Ark_NativePointer node,
                const Opt_ProgressMask* value)
@@ -4250,7 +4250,7 @@ void MaskShape0Impl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<RefPtr<BasicShape>>(value);
     if (convValue.has_value() && convValue.value()) {
         // TODO: Reset value
-        ViewAbstract::SetMask(convValue.value());
+        // ViewAbstract::SetMask(convValue.value());
     }
 }
 void MaskShape1Impl(Ark_NativePointer node,
@@ -4271,7 +4271,7 @@ void KeyImpl(Ark_NativePointer node,
         // keep the same processing
         return;
     }
-    ViewAbstract::SetInspectorId(frameNode, *convValue);
+    // ViewAbstract::SetInspectorId(frameNode, *convValue);
 }
 void IdImpl(Ark_NativePointer node,
             const Opt_String* value)
@@ -4283,7 +4283,7 @@ void IdImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetInspectorId(frameNode, *id);
+    // ViewAbstract::SetInspectorId(frameNode, *id);
 }
 void GeometryTransition0Impl(Ark_NativePointer node,
                              const Opt_String* value)
@@ -4293,7 +4293,7 @@ void GeometryTransition0Impl(Ark_NativePointer node,
     auto id = Converter::OptConvertPtr<std::string>(value).value_or("");
     bool followWithoutTransition {false};
     bool doRegisterSharedTransition {false};
-    ViewAbstract::SetGeometryTransition(frameNode, id, followWithoutTransition, doRegisterSharedTransition);
+    // ViewAbstract::SetGeometryTransition(frameNode, id, followWithoutTransition, doRegisterSharedTransition);
 }
 void GeometryTransition1Impl(Ark_NativePointer node,
                              const Opt_String* id,
@@ -4312,7 +4312,7 @@ void GeometryTransition1Impl(Ark_NativePointer node,
         hierarchyStrategy = optOptions.value().hierarchyStrategy.value_or(TransitionHierarchyStrategy::NONE);
         doRegisterSharedTransition = hierarchyStrategy == TransitionHierarchyStrategy::ADAPTIVE;
     }
-    ViewAbstract::SetGeometryTransition(frameNode, idValue, followWithoutTransition, doRegisterSharedTransition);
+    // ViewAbstract::SetGeometryTransition(frameNode, idValue, followWithoutTransition, doRegisterSharedTransition);
 }
 void StateStylesImpl(Ark_NativePointer node,
                      const Opt_StateStyles* value)
@@ -4333,7 +4333,7 @@ void RestoreIdImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetRestoreId(frameNode, *convValue);
+    // ViewAbstract::SetRestoreId(frameNode, *convValue);
 }
 void SphericalEffect0Impl(Ark_NativePointer node,
                           const Opt_Number* value)
@@ -4344,7 +4344,7 @@ void SphericalEffect0Impl(Ark_NativePointer node,
     const float minValue = 0.0;
     const float maxValue = 1.0;
     Validator::ValidateByRange(convValue, minValue, maxValue);
-    ViewAbstract::SetSphericalEffect(frameNode, convValue);
+    // ViewAbstract::SetSphericalEffect(frameNode, convValue);
 }
 void SphericalEffect1Impl(Ark_NativePointer node,
                           const Opt_Number* value)
@@ -4363,7 +4363,7 @@ void LightUpEffect0Impl(Ark_NativePointer node,
     const float minValue = 0.0;
     const float maxValue = 1.0;
     Validator::ValidateByRange(convValue, minValue, maxValue);
-    ViewAbstract::SetLightUpEffect(frameNode, convValue);
+    // ViewAbstract::SetLightUpEffect(frameNode, convValue);
 }
 void LightUpEffect1Impl(Ark_NativePointer node,
                         const Opt_Number* value)
@@ -4379,7 +4379,7 @@ void PixelStretchEffect0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<PixStretchEffectOption>(value);
-    ViewAbstract::SetPixelStretchEffect(frameNode, convValue);
+    // ViewAbstract::SetPixelStretchEffect(frameNode, convValue);
 }
 void PixelStretchEffect1Impl(Ark_NativePointer node,
                              const Opt_PixelStretchEffectOptions* value)
@@ -4399,7 +4399,7 @@ void AccessibilityGroup0Impl(Ark_NativePointer node,
     if (convValue) {
         isGroupFlag = *convValue;
     }
-    ViewAbstractModelNG::SetAccessibilityGroup(frameNode, isGroupFlag);
+    // ViewAbstractModelNG::SetAccessibilityGroup(frameNode, isGroupFlag);
 }
 void AccessibilityGroup1Impl(Ark_NativePointer node,
                              const Opt_Boolean* isGroup,
@@ -4415,8 +4415,8 @@ void AccessibilityGroup1Impl(Ark_NativePointer node,
     auto optValue = Converter::GetOptPtr(accessibilityOptions);
     auto accessibilityPreferred = optValue ?
         Converter::OptConvert<bool>(optValue->accessibilityPreferred) : std::nullopt;
-    ViewAbstractModelNG::SetAccessibilityGroup(frameNode, isGroupFlag);
-    ViewAbstractModelNG::SetAccessibilityTextPreferred(frameNode, accessibilityPreferred.value_or(false));
+    // ViewAbstractModelNG::SetAccessibilityGroup(frameNode, isGroupFlag);
+    // ViewAbstractModelNG::SetAccessibilityTextPreferred(frameNode, accessibilityPreferred.value_or(false));
 }
 void AccessibilityText0Impl(Ark_NativePointer node,
                             const Opt_String* value)
@@ -4428,7 +4428,7 @@ void AccessibilityText0Impl(Ark_NativePointer node,
         // keep the same processing
         return;
     }
-    ViewAbstractModelNG::SetAccessibilityText(frameNode, *convValue);
+    // ViewAbstractModelNG::SetAccessibilityText(frameNode, *convValue);
 }
 void AccessibilityText1Impl(Ark_NativePointer node,
                             const Opt_Resource* value)
@@ -4440,7 +4440,7 @@ void AccessibilityText1Impl(Ark_NativePointer node,
         // keep the same processing
         return;
     }
-    ViewAbstractModelNG::SetAccessibilityText(frameNode, optValue.value());
+    // ViewAbstractModelNG::SetAccessibilityText(frameNode, optValue.value());
 }
 void AccessibilityNextFocusIdImpl(Ark_NativePointer node,
                                   const Opt_String* value)
@@ -4452,7 +4452,7 @@ void AccessibilityNextFocusIdImpl(Ark_NativePointer node,
         // keep the same processing
         return;
     }
-    ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, *convValue);
+    // ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, *convValue);
 }
 void AccessibilityDefaultFocusImpl(Ark_NativePointer node,
                                    const Opt_Boolean* value)
@@ -4465,7 +4465,7 @@ void AccessibilityDefaultFocusImpl(Ark_NativePointer node,
     if (convValue) {
         isFocus = *convValue;
     }
-    ViewAbstractModelNG::SetAccessibilityDefaultFocus(frameNode, isFocus);
+    // ViewAbstractModelNG::SetAccessibilityDefaultFocus(frameNode, isFocus);
 }
 void AccessibilityUseSamePageImpl(Ark_NativePointer node,
                                   const Opt_AccessibilitySamePageMode* value)
@@ -4474,11 +4474,11 @@ void AccessibilityUseSamePageImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Ark_AccessibilitySamePageMode>(value);
     if (!convValue) {
-        ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, "");
+        // ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, "");
         return;
     }
     auto pageMode = AccessibilityUtils::GetPageModeType(convValue.value());
-    ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, pageMode);
+    // ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, pageMode);
 }
 void AccessibilityScrollTriggerableImpl(Ark_NativePointer node,
                                         const Opt_Boolean* value)
@@ -4493,7 +4493,7 @@ void AccessibilityScrollTriggerableImpl(Ark_NativePointer node,
     } else  {
         scrollTriggerable = *convValue;
     }
-    ViewAbstractModelNG::SetAccessibilityScrollTriggerable(frameNode, scrollTriggerable, resetValue);
+    // ViewAbstractModelNG::SetAccessibilityScrollTriggerable(frameNode, scrollTriggerable, resetValue);
 }
 void AccessibilityRoleImpl(Ark_NativePointer node,
                            const Opt_AccessibilityRoleType* value)
@@ -4504,7 +4504,7 @@ void AccessibilityRoleImpl(Ark_NativePointer node,
     std::string role;
     auto convValue = Converter::OptConvertPtr<Ark_AccessibilityRoleType>(value);
     if (!convValue) {
-        ViewAbstractModelNG::SetAccessibilityRole(frameNode, role, true);
+        // ViewAbstractModelNG::SetAccessibilityRole(frameNode, role, true);
         return;
     }
     auto roleType = static_cast<AccessibilityRoleType>(convValue.value());
@@ -4512,7 +4512,7 @@ void AccessibilityRoleImpl(Ark_NativePointer node,
     if (role.empty()) {
         resetValue = true;
     }
-    ViewAbstractModelNG::SetAccessibilityRole(frameNode, role, resetValue);
+    // ViewAbstractModelNG::SetAccessibilityRole(frameNode, role, resetValue);
 }
 void OnAccessibilityFocusImpl(Ark_NativePointer node,
                               const Opt_AccessibilityFocusCallback* value)
@@ -4521,13 +4521,13 @@ void OnAccessibilityFocusImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        ViewAbstractModelNG::ResetOnAccessibilityFocus(frameNode);
+        // ViewAbstractModelNG::ResetOnAccessibilityFocus(frameNode);
         return;
     }
     auto onFocus = [callback = CallbackHelper(*optValue)](bool isFocus) -> void {
         callback.Invoke(ArkValue<Ark_Boolean>(isFocus));
     };
-    ViewAbstractModelNG::SetOnAccessibilityFocus(frameNode, std::move(onFocus));
+    // ViewAbstractModelNG::SetOnAccessibilityFocus(frameNode, std::move(onFocus));
 }
 void AccessibilityTextHintImpl(Ark_NativePointer node,
                                const Opt_String* value)
@@ -4539,7 +4539,7 @@ void AccessibilityTextHintImpl(Ark_NativePointer node,
         // keep the same processing
         return;
     }
-    ViewAbstractModelNG::SetAccessibilityTextHint(frameNode, *convValue);
+    // ViewAbstractModelNG::SetAccessibilityTextHint(frameNode, *convValue);
 }
 void AccessibilityDescription0Impl(Ark_NativePointer node,
                                    const Opt_String* value)
@@ -4551,7 +4551,7 @@ void AccessibilityDescription0Impl(Ark_NativePointer node,
         // keep the same processing
         return;
     }
-    ViewAbstractModelNG::SetAccessibilityDescription(frameNode, *convValue);
+    // ViewAbstractModelNG::SetAccessibilityDescription(frameNode, *convValue);
 }
 void AccessibilityDescription1Impl(Ark_NativePointer node,
                                    const Opt_Resource* value)
@@ -4560,7 +4560,7 @@ void AccessibilityDescription1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::OptConvertPtr<std::string>(value);
     CHECK_EQUAL_VOID(optValue.has_value(), false);
-    ViewAbstractModelNG::SetAccessibilityDescription(frameNode, optValue.value());
+    // ViewAbstractModelNG::SetAccessibilityDescription(frameNode, optValue.value());
 }
 void AccessibilityLevelImpl(Ark_NativePointer node,
                             const Opt_String* value)
@@ -4572,7 +4572,7 @@ void AccessibilityLevelImpl(Ark_NativePointer node,
         // keep the same processing
         return;
     }
-    ViewAbstractModelNG::SetAccessibilityImportance(frameNode, *convValue);
+    // ViewAbstractModelNG::SetAccessibilityImportance(frameNode, *convValue);
 }
 void AccessibilityVirtualNodeImpl(Ark_NativePointer node,
                                   const Opt_CustomNodeBuilder* value)
@@ -4588,7 +4588,7 @@ void AccessibilityVirtualNodeImpl(Ark_NativePointer node,
         auto builder = [uiNode]() -> RefPtr<UINode> {
             return uiNode;
         };
-        ViewAbstractModelNG::SetAccessibilityVirtualNode(frameNode, std::move(builder));
+        // ViewAbstractModelNG::SetAccessibilityVirtualNode(frameNode, std::move(builder));
     }, node);
 }
 void AccessibilityCheckedImpl(Ark_NativePointer node,
@@ -4604,7 +4604,7 @@ void AccessibilityCheckedImpl(Ark_NativePointer node,
     } else {
         checked = *convValue;
     }
-    ViewAbstractModelNG::SetAccessibilityChecked(frameNode, checked, resetValue);
+    // ViewAbstractModelNG::SetAccessibilityChecked(frameNode, checked, resetValue);
 }
 void AccessibilitySelectedImpl(Ark_NativePointer node,
                                const Opt_Boolean* value)
@@ -4619,7 +4619,7 @@ void AccessibilitySelectedImpl(Ark_NativePointer node,
     } else {
         selected = *convValue;
     }
-    ViewAbstractModelNG::SetAccessibilitySelected(frameNode, selected, resetValue);
+    // ViewAbstractModelNG::SetAccessibilitySelected(frameNode, selected, resetValue);
 }
 void ObscuredImpl(Ark_NativePointer node,
                   const Opt_Array_ObscuredReasons* value)
@@ -4637,7 +4637,7 @@ void ObscuredImpl(Ark_NativePointer node,
             vec.emplace_back(reason.value());
         }
     }
-    ViewAbstract::SetObscured(frameNode, vec);
+    // ViewAbstract::SetObscured(frameNode, vec);
 }
 void ReuseIdImpl(Ark_NativePointer node,
                  const Opt_String* value)
@@ -4692,7 +4692,7 @@ void BackgroundBrightness0Impl(Ark_NativePointer node,
     }
     auto rate = Converter::Convert<float>(optValue->rate);
     auto lightUpDegree = Converter::Convert<float>(optValue->lightUpDegree);
-    ViewAbstract::SetDynamicLightUp(frameNode, rate, lightUpDegree);
+    // ViewAbstract::SetDynamicLightUp(frameNode, rate, lightUpDegree);
 }
 void BackgroundBrightness1Impl(Ark_NativePointer node,
                                const Opt_BackgroundBrightnessOptions* value)
@@ -4725,7 +4725,7 @@ void OnGestureJudgeBeginImpl(Ark_NativePointer node,
             <GestureJudgeResult, Ark_GestureJudgeResult, Callback_GestureJudgeResult_Void>(arkGestInfo, arkGestEvent);
         return resultOpt.value_or(defVal);
     };
-    ViewAbstract::SetOnGestureJudgeBegin(frameNode, std::move(onGestureJudgefunc));
+    // ViewAbstract::SetOnGestureJudgeBegin(frameNode, std::move(onGestureJudgefunc));
 }
 void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
                                         const Opt_GestureRecognizerJudgeBeginCallback* callback,
@@ -4740,44 +4740,44 @@ void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
                                         const Opt_GestureRecognizerJudgeBeginCallback* callback_,
                                         const Opt_Boolean* exposeInnerGesture)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(callback_);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto weakNode = AceType::WeakClaim(frameNode);
-    auto onGestureRecognizerJudgefunc = [callback = CallbackHelper(*optValue), node = weakNode](
-            const std::shared_ptr<BaseGestureEvent>& info,
-            const RefPtr<NG::NGGestureRecognizer>& current,
-            const std::list<RefPtr<NG::NGGestureRecognizer>>& others
-        ) -> GestureJudgeResult {
-        GestureJudgeResult defVal = GestureJudgeResult::CONTINUE;
-        CHECK_NULL_RETURN(info && current, defVal);
-        PipelineContext::SetCallBackNode(node);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto optValue = Converter::GetOptPtr(callback_);
+    // if (!optValue) {
+    //     // TODO: Reset value
+    //     return;
+    // }
+    // auto weakNode = AceType::WeakClaim(frameNode);
+    // auto onGestureRecognizerJudgefunc = [callback = CallbackHelper(*optValue), node = weakNode](
+    //         const std::shared_ptr<BaseGestureEvent>& info,
+    //         const RefPtr<NG::NGGestureRecognizer>& current,
+    //         const std::list<RefPtr<NG::NGGestureRecognizer>>& others
+    //     ) -> GestureJudgeResult {
+    //     GestureJudgeResult defVal = GestureJudgeResult::CONTINUE;
+    //     CHECK_NULL_RETURN(info && current, defVal);
+    //     PipelineContext::SetCallBackNode(node);
 
-        auto arkGestEvent = Converter::ArkValue<Ark_BaseGestureEvent>(info);
-        auto arkValCurrent = Converter::ArkValue<Ark_GestureRecognizer>(current);
-        Converter::ArkArrayHolder<Array_GestureRecognizer> holderOthers(others);
-        auto arkValOthers = holderOthers.ArkValue();
-        auto resultOpt = callback.InvokeWithOptConvertResult<GestureJudgeResult, Ark_GestureJudgeResult,
-            Callback_GestureJudgeResult_Void>(arkGestEvent, arkValCurrent, arkValOthers);
-        if (auto accessor = GetGestureRecognizerAccessor(); accessor) {
-            accessor->destroyPeer(arkValCurrent);
-            holderOthers.Release([accessor](Ark_GestureRecognizer& item) {
-                accessor->destroyPeer(item);
-            });
-        }
-        return resultOpt.value_or(defVal);
-    };
-    auto convValue = Converter::OptConvertPtr<bool>(exposeInnerGesture);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    ViewAbstract::SetOnGestureRecognizerJudgeBegin(frameNode,
-        std::move(onGestureRecognizerJudgefunc), *convValue);
+    //     auto arkGestEvent = Converter::ArkValue<Ark_BaseGestureEvent>(info);
+    //     auto arkValCurrent = Converter::ArkValue<Ark_GestureRecognizer>(current);
+    //     Converter::ArkArrayHolder<Array_GestureRecognizer> holderOthers(others);
+    //     auto arkValOthers = holderOthers.ArkValue();
+    //     auto resultOpt = callback.InvokeWithOptConvertResult<GestureJudgeResult, Ark_GestureJudgeResult,
+    //         Callback_GestureJudgeResult_Void>(arkGestEvent, arkValCurrent, arkValOthers);
+    //     if (auto accessor = GetGestureRecognizerAccessor(); accessor) {
+    //         accessor->destroyPeer(arkValCurrent);
+    //         holderOthers.Release([accessor](Ark_GestureRecognizer& item) {
+    //             accessor->destroyPeer(item);
+    //         });
+    //     }
+    //     return resultOpt.value_or(defVal);
+    // };
+    // auto convValue = Converter::OptConvertPtr<bool>(exposeInnerGesture);
+    // if (!convValue) {
+    //     // TODO: Reset value
+    //     return;
+    // }
+    // // ViewAbstract::SetOnGestureRecognizerJudgeBegin(frameNode,
+    //     // std::move(onGestureRecognizerJudgefunc), *convValue);
 }
 void ShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
                                              const Opt_ShouldBuiltInRecognizerParallelWithCallback* value)
@@ -4808,7 +4808,7 @@ void ShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
         }
         return resultOpt.value_or(nullptr);
     };
-    ViewAbstract::SetShouldBuiltInRecognizerParallelWith(frameNode, std::move(shouldBuiltInRecognizerParallelWithFunc));
+    // ViewAbstract::SetShouldBuiltInRecognizerParallelWith(frameNode, std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
 void MonopolizeEventsImpl(Ark_NativePointer node,
                           const Opt_Boolean* value)
@@ -4820,7 +4820,7 @@ void MonopolizeEventsImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetMonopolizeEvents(frameNode, *convValue);
+    // ViewAbstract::SetMonopolizeEvents(frameNode, *convValue);
 }
 void OnTouchInterceptImpl(Ark_NativePointer node,
                           const Opt_Callback_TouchEvent_HitTestMode* value)
@@ -4840,7 +4840,7 @@ void OnTouchInterceptImpl(Ark_NativePointer node,
             HitTestMode, Ark_HitTestMode, Callback_HitTestMode_Void>(event.ArkValue());
         return resultOpt.value_or(HitTestMode::HTMDEFAULT);
     };
-    ViewAbstract::SetOnTouchIntercept(frameNode, std::move(onTouchIntercept));
+    // ViewAbstract::SetOnTouchIntercept(frameNode, std::move(onTouchIntercept));
 }
 void OnSizeChangeImpl(Ark_NativePointer node,
                       const Opt_SizeChangeCallback* value)
@@ -4861,7 +4861,7 @@ void OnSizeChangeImpl(Ark_NativePointer node,
         newSize.height = Converter::ArkValue<Opt_Length>(newRect.Height());
         callback.Invoke(oldSize, newSize);
     };
-    ViewAbstract::SetOnSizeChanged(frameNode, std::move(onSizeChange));
+    // ViewAbstract::SetOnSizeChanged(frameNode, std::move(onSizeChange));
 }
 void AccessibilityFocusDrawLevelImpl(Ark_NativePointer node,
                                      const Opt_FocusDrawLevel* value)
@@ -4877,7 +4877,7 @@ void AccessibilityFocusDrawLevelImpl(Ark_NativePointer node,
             drawLevel = 0;
         }
     }
-    ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode, drawLevel);
+    // ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode, drawLevel);
 }
 void CustomPropertyImpl(Ark_NativePointer node,
                         const Opt_String* name,
@@ -4921,21 +4921,21 @@ void BackgroundImpl(Ark_NativePointer node,
                     const Opt_CustomNodeBuilder* builder,
                     const Opt_Literal_Alignment_align* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optAlign = Converter::OptConvertPtr<Alignment>(options);
-    auto optBuilder = Converter::GetOptPtr(builder);
-    if (!optBuilder) {
-        // TODO: Reset value
-        return;
-    }
-    CallbackHelper(*optBuilder).BuildAsync([frameNode, optAlign](const RefPtr<UINode>& uiNode) {
-        CHECK_NULL_VOID(uiNode);
-        auto builder = [uiNode]() -> RefPtr<UINode> {
-            return uiNode;
-        };
-        ViewAbstractModelNG::BindBackground(frameNode, builder, optAlign);
-        }, node);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto optAlign = Converter::OptConvertPtr<Alignment>(options);
+    // auto optBuilder = Converter::GetOptPtr(builder);
+    // if (!optBuilder) {
+    //     // TODO: Reset value
+    //     return;
+    // }
+    // CallbackHelper(*optBuilder).BuildAsync([frameNode, optAlign](const RefPtr<UINode>& uiNode) {
+    //     CHECK_NULL_VOID(uiNode);
+    //     auto builder = [uiNode]() -> RefPtr<UINode> {
+    //         return uiNode;
+    //     };
+        // ViewAbstractModelNG::BindBackground(frameNode, builder, optAlign);
+        // }, node);
 }
 void BackgroundImage0Impl(Ark_NativePointer node,
                           const Opt_Union_ResourceStr_PixelMap* src,
@@ -4945,10 +4945,10 @@ void BackgroundImage0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
 
     std::optional<ImageSourceInfo> sourceInfo = Converter::OptConvertPtr<ImageSourceInfo>(src);
-    ViewAbstract::SetBackgroundImage(frameNode, sourceInfo);
+    // ViewAbstract::SetBackgroundImage(frameNode, sourceInfo);
 
     auto imageRepeat = Converter::OptConvertPtr<ImageRepeat>(repeat);
-    ViewAbstract::SetBackgroundImageRepeat(frameNode, imageRepeat);
+    // ViewAbstract::SetBackgroundImageRepeat(frameNode, imageRepeat);
 }
 void BackgroundImage1Impl(Ark_NativePointer node,
                           const Opt_Union_ResourceStr_PixelMap* src,
@@ -4973,7 +4973,7 @@ void BackgroundBlurStyle0Impl(Ark_NativePointer node,
     if (auto style = Converter::OptConvertPtr<BlurStyle>(value); style) {
         convValue.blurStyle = *style;
     }
-    ViewAbstract::SetBackgroundBlurStyle(frameNode, convValue);
+    // ViewAbstract::SetBackgroundBlurStyle(frameNode, convValue);
 }
 void BackgroundBlurStyle1Impl(Ark_NativePointer node,
                               const Opt_BlurStyle* style,
@@ -4999,7 +4999,7 @@ void ForegroundBlurStyle0Impl(Ark_NativePointer node,
     if (auto style = Converter::OptConvertPtr<BlurStyle>(value); style) {
         convValue.blurStyle = *style;
     }
-    ViewAbstract::SetForegroundBlurStyle(frameNode, convValue);
+    // ViewAbstract::SetForegroundBlurStyle(frameNode, convValue);
 }
 void ForegroundBlurStyle1Impl(Ark_NativePointer node,
                               const Opt_BlurStyle* style,
@@ -5040,7 +5040,7 @@ void FocusScopeId1Impl(Ark_NativePointer node,
     }
     auto convIsGroupValue = Converter::OptConvertPtr<bool>(isGroup);
     auto convArrowStepOutValue = Converter::OptConvertPtr<bool>(arrowStepOut);
-    ViewAbstract::SetFocusScopeId(frameNode, *convIdValue, convIsGroupValue, convArrowStepOutValue);
+    // ViewAbstract::SetFocusScopeId(frameNode, *convIdValue, convIsGroupValue, convArrowStepOutValue);
 }
 void FocusScopePriorityImpl(Ark_NativePointer node,
                             const Opt_String* scopeId,
@@ -5112,7 +5112,7 @@ void Blur0Impl(Ark_NativePointer node,
         blurOptions = optionsOpt.value();
     }
     CalcDimension dimensionBlur(*blur, DimensionUnit::PX);
-    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur, blurOptions);
+    // ViewAbstract::SetFrontBlur(frameNode, dimensionBlur, blurOptions);
 }
 void Blur1Impl(Ark_NativePointer node,
                const Opt_Number* blurRadius,
@@ -5128,7 +5128,7 @@ void Blur1Impl(Ark_NativePointer node,
         blurOptions = optionsOpt.value();
     }
     CalcDimension dimensionBlur(blur, DimensionUnit::PX);
-    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur, blurOptions);
+    // ViewAbstract::SetFrontBlur(frameNode, dimensionBlur, blurOptions);
 }
 void LinearGradientBlur0Impl(Ark_NativePointer node,
                              const Opt_Number* value,
@@ -5199,7 +5199,7 @@ void SharedTransitionImpl(Ark_NativePointer node,
     if (auto transOpt = Converter::OptConvertPtr<SharedTransitionOption>(options); transOpt) {
         *modelOptions = std::move(*transOpt);
     }
-    ViewAbstract::SetSharedTransition(frameNode, *modelId, modelOptions);
+    // ViewAbstract::SetSharedTransition(frameNode, *modelId, modelOptions);
 }
 void ChainModeImpl(Ark_NativePointer node,
                    const Opt_Axis* direction,
@@ -5238,37 +5238,37 @@ void DragPreviewOptionsImpl(Ark_NativePointer node,
         }
     }
     LOGE("CommonMethodModifier::DragPreviewOptionsImpl Ark_ImageModifier is not supported yet.");
-    ViewAbstract::SetDragPreviewOptions(frameNode, *previewOption);
+    // ViewAbstract::SetDragPreviewOptions(frameNode, *previewOption);
 }
 void OverlayImpl(Ark_NativePointer node,
                  const Opt_Union_String_CustomBuilder_ComponentContent* value,
                  const Opt_OverlayOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    OverlayOptions overlay { .align = Alignment::TOP_LEFT};
-    overlay = Converter::OptConvertPtr<OverlayOptions>(options).value_or(overlay);
-    Converter::VisitUnionPtr(value,
-        [frameNode, &overlay](const Ark_String& src) {
-            overlay.content = Converter::Convert<std::string>(src);
-            ViewAbstract::SetOverlay(frameNode, overlay);
-        },
-        [node, frameNode, overlay](const CustomNodeBuilder& builder) {
-            CallbackHelper(builder).BuildAsync([overlay, frameNode](const RefPtr<UINode>& uiNode) {
-                auto builderFunc = [frameNode, uiNode]() {
-                    PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-                    ViewStackProcessor::GetInstance()->Push(uiNode);
-                };
-                ViewAbstract::SetOverlayBuilder(
-                    frameNode, std::move(builderFunc), overlay.align, overlay.x, overlay.y);
-                }, node);
-        },
-        [](const Ark_ComponentContent& src) {
-            LOGE("OverlayImpl() Ark_ComponentContent.ComponentContentStub not implemented");
-        },
-        []() {
-            LOGE("OverlayImpl(): Invalid union argument");
-        });
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // OverlayOptions overlay { .align = Alignment::TOP_LEFT};
+    // overlay = Converter::OptConvertPtr<OverlayOptions>(options).value_or(overlay);
+    // Converter::VisitUnionPtr(value,
+    //     [frameNode, &overlay](const Ark_String& src) {
+    //         overlay.content = Converter::Convert<std::string>(src);
+    //         // ViewAbstract::SetOverlay(frameNode, overlay);
+    //     },
+    //     [node, frameNode, overlay](const CustomNodeBuilder& builder) {
+    //         CallbackHelper(builder).BuildAsync([overlay, frameNode](const RefPtr<UINode>& uiNode) {
+    //             auto builderFunc = [frameNode, uiNode]() {
+    //                 PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+    //                 ViewStackProcessor::GetInstance()->Push(uiNode);
+    //             };
+    //             // ViewAbstract::SetOverlayBuilder(
+    //             //     frameNode, std::move(builderFunc), overlay.align, overlay.x, overlay.y);
+    //             // }, node);
+    //     },
+    //     [](const Ark_ComponentContent& src) {
+    //         LOGE("OverlayImpl() Ark_ComponentContent.ComponentContentStub not implemented");
+    //     },
+    //     []() {
+    //         LOGE("OverlayImpl(): Invalid union argument");
+    //     });
 }
 void BlendMode0Impl(Ark_NativePointer node,
                     const Opt_BlendMode* value,
@@ -5329,44 +5329,44 @@ void BindPopupImpl(Ark_NativePointer node,
                    const Opt_Boolean* show,
                    const Opt_Union_PopupOptions_CustomPopupOptions* popup)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optShow = Converter::OptConvert<bool>(*show);
-    Converter::VisitUnion(*popup,
-        [frameNode, optShow](const Ark_PopupOptions& value) {
-            auto popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
-            CHECK_NULL_VOID(popupParam);
-            g_onWillDismissPopup(value.onWillDismiss, popupParam);
-            if (optShow) {
-                popupParam->SetIsShow(*optShow);
-            }
-            ViewAbstractModelNG::BindPopup(frameNode, popupParam, nullptr);
-        },
-        [frameNode, node, optShow](const Ark_CustomPopupOptions& value) {
-            auto popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
-            CHECK_NULL_VOID(popupParam);
-            g_onWillDismissPopup(value.onWillDismiss, popupParam);
-            if (popupParam->IsShow() && !g_isPopupCreated(frameNode)) {
-                if (optShow) {
-                    popupParam->SetIsShow(*optShow);
-                }
-                CallbackHelper(value.builder).BuildAsync([frameNode, popupParam](const RefPtr<UINode>& uiNode) {
-                    ViewAbstractModelNG::BindPopup(frameNode, popupParam, uiNode);
-                    }, node);
-            } else {
-                if (optShow) {
-                    popupParam->SetIsShow(*optShow);
-                }
-                ViewAbstractModelNG::BindPopup(frameNode, popupParam, nullptr);
-            }
-        },
-        [frameNode, optShow]() {
-            auto popupParam = AceType::MakeRefPtr<PopupParam>();
-            if (optShow) {
-                popupParam->SetIsShow(*optShow);
-            }
-            ViewAbstractModelNG::BindPopup(frameNode, popupParam, nullptr);
-        });
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto optShow = Converter::OptConvert<bool>(*show);
+    // Converter::VisitUnion(*popup,
+    //     [frameNode, optShow](const Ark_PopupOptions& value) {
+    //         auto popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
+    //         CHECK_NULL_VOID(popupParam);
+    //         g_onWillDismissPopup(value.onWillDismiss, popupParam);
+    //         if (optShow) {
+    //             popupParam->SetIsShow(*optShow);
+    //         }
+    //        ViewAbstractModelNG::BindPopup(frameNode, popupParam, nullptr);
+    //     },
+    //     [frameNode, node, optShow](const Ark_CustomPopupOptions& value) {
+    //         auto popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
+    //         CHECK_NULL_VOID(popupParam);
+    //         g_onWillDismissPopup(value.onWillDismiss, popupParam);
+    //         if (popupParam->IsShow() && !g_isPopupCreated(frameNode)) {
+    //             if (optShow) {
+    //                 popupParam->SetIsShow(*optShow);
+    //             }
+    //             CallbackHelper(value.builder).BuildAsync([frameNode, popupParam](const RefPtr<UINode>& uiNode) {
+    //                 ViewAbstractModelNG::BindPopup(frameNode, popupParam, uiNode);
+    //                 }, node);
+    //         } else {
+    //             if (optShow) {
+    //                 popupParam->SetIsShow(*optShow);
+    //             }
+    //             ViewAbstractModelNG::BindPopup(frameNode, popupParam, nullptr);
+    //         }
+    //     },
+    //     [frameNode, optShow]() {
+    //         auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    //         if (optShow) {
+    //             popupParam->SetIsShow(*optShow);
+    //         }
+    //         ViewAbstractModelNG::BindPopup(frameNode, popupParam, nullptr);
+    //     });
 }
 void BindMenuBase(Ark_NativePointer node,
     const Opt_Boolean *isShow,
@@ -5525,14 +5525,14 @@ void BindContentCover0Impl(Ark_NativePointer node,
                 return uiNode;
             };
             ContentCoverParam contentCoverParam;
-            ViewAbstractModelNG::BindContentCover(frameNode, true, nullptr, std::move(buildFunc),
-                modalStyle, nullptr, nullptr, nullptr, nullptr, contentCoverParam);
+            // ViewAbstractModelNG::BindContentCover(frameNode, true, nullptr, std::move(buildFunc),
+                // modalStyle, nullptr, nullptr, nullptr, nullptr, contentCoverParam);
             }, node);
     } else {
         ContentCoverParam contentCoverParam;
         std::function<RefPtr<UINode>()> buildFunc = nullptr;
-        ViewAbstractModelNG::BindContentCover(frameNode, false, nullptr, std::move(buildFunc),
-            modalStyle, nullptr, nullptr, nullptr, nullptr, contentCoverParam);
+        // ViewAbstractModelNG::BindContentCover(frameNode, false, nullptr, std::move(buildFunc),
+            // modalStyle, nullptr, nullptr, nullptr, nullptr, contentCoverParam);
     }
 }
 void BindContentCover1Impl(Ark_NativePointer node,
@@ -5540,112 +5540,112 @@ void BindContentCover1Impl(Ark_NativePointer node,
                            const Opt_CustomNodeBuilder* builder,
                            const Opt_ContentCoverOptions* options)
 {
-    CHECK_NULL_VOID(builder);
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto isShowValue = Converter::OptConvertPtr<bool>(isShow);
-    ModalStyle modalStyle;
-    modalStyle.modalTransition = ModalTransition::DEFAULT;
-    std::function<void()> onShowCallback;
-    std::function<void()> onDismissCallback;
-    std::function<void()> onWillShowCallback;
-    std::function<void()> onWillDismissCallback;
-    std::function<void(const int32_t&)> onWillDismissFunc;
-    ContentCoverParam contentCoverParam;
-    auto weakNode = AceType::WeakClaim(frameNode);
-    auto coverOption = Converter::OptConvertPtr<Ark_ContentCoverOptions>(options);
-    if (coverOption) {
-        g_contentCoverCallbacks(weakNode, coverOption.value(), onShowCallback, onDismissCallback, onWillShowCallback,
-            onWillDismissCallback, onWillDismissFunc);
-        modalStyle.modalTransition = Converter::OptConvert<ModalTransition>(coverOption->modalTransition)
-            .value_or(ModalTransition::DEFAULT);
-        modalStyle.backgroundColor = Converter::OptConvert<Color>(coverOption->backgroundColor);
-        contentCoverParam.transitionEffect = OptConvert<RefPtr<NG::ChainedTransitionEffect>>(coverOption->transition)
-            .value_or(contentCoverParam.transitionEffect);
-    }
-    contentCoverParam.onWillDismiss = std::move(onWillDismissFunc);
+    // CHECK_NULL_VOID(builder);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto isShowValue = Converter::OptConvertPtr<bool>(isShow);
+    // ModalStyle modalStyle;
+    // modalStyle.modalTransition = ModalTransition::DEFAULT;
+    // std::function<void()> onShowCallback;
+    // std::function<void()> onDismissCallback;
+    // std::function<void()> onWillShowCallback;
+    // std::function<void()> onWillDismissCallback;
+    // std::function<void(const int32_t&)> onWillDismissFunc;
+    // ContentCoverParam contentCoverParam;
+    // auto weakNode = AceType::WeakClaim(frameNode);
+    // auto coverOption = Converter::OptConvertPtr<Ark_ContentCoverOptions>(options);
+    // if (coverOption) {
+    //     g_contentCoverCallbacks(weakNode, coverOption.value(), onShowCallback, onDismissCallback, onWillShowCallback,
+    //         onWillDismissCallback, onWillDismissFunc);
+    //     modalStyle.modalTransition = Converter::OptConvert<ModalTransition>(coverOption->modalTransition)
+    //         .value_or(ModalTransition::DEFAULT);
+    //     modalStyle.backgroundColor = Converter::OptConvert<Color>(coverOption->backgroundColor);
+    //     contentCoverParam.transitionEffect = OptConvert<RefPtr<NG::ChainedTransitionEffect>>(coverOption->transition)
+    //         .value_or(contentCoverParam.transitionEffect);
+    // }
+    // contentCoverParam.onWillDismiss = std::move(onWillDismissFunc);
 
-    auto optBuilder = Converter::GetOptPtr(builder);
-    if (isShowValue && *isShowValue && optBuilder) {
-        CallbackHelper(*optBuilder).BuildAsync([weakNode, frameNode, modalStyle, contentCoverParam,
-            onShowCallback = std::move(onShowCallback),
-            onDismissCallback = std::move(onDismissCallback),
-            onWillShowCallback = std::move(onWillShowCallback),
-            onWillDismissCallback = std::move(onWillDismissCallback)
-        ](const RefPtr<UINode>& uiNode) mutable {
-            PipelineContext::SetCallBackNode(weakNode);
-            auto buildFunc = [uiNode]() -> RefPtr<UINode> {
-                return uiNode;
-            };
-            ViewAbstractModelNG::BindContentCover(frameNode, true, nullptr, std::move(buildFunc),
-                modalStyle, std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
-                std::move(onWillDismissCallback), contentCoverParam);
-            }, node);
-    } else {
-        ViewAbstractModelNG::BindContentCover(frameNode, false, nullptr, nullptr,
-            modalStyle, std::move(onShowCallback), std::move(onDismissCallback),
-            std::move(onWillShowCallback), std::move(onWillDismissCallback), contentCoverParam);
-    }
+    // auto optBuilder = Converter::GetOptPtr(builder);
+    // if (isShowValue && *isShowValue && optBuilder) {
+    //     CallbackHelper(*optBuilder).BuildAsync([weakNode, frameNode, modalStyle, contentCoverParam,
+    //         onShowCallback = std::move(onShowCallback),
+    //         onDismissCallback = std::move(onDismissCallback),
+    //         onWillShowCallback = std::move(onWillShowCallback),
+    //         onWillDismissCallback = std::move(onWillDismissCallback)
+    //     ](const RefPtr<UINode>& uiNode) mutable {
+    //         PipelineContext::SetCallBackNode(weakNode);
+    //         auto buildFunc = [uiNode]() -> RefPtr<UINode> {
+    //             return uiNode;
+    //         };
+    //         // ViewAbstractModelNG::BindContentCover(frameNode, true, nullptr, std::move(buildFunc),
+    //             modalStyle, std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
+    //             std::move(onWillDismissCallback), contentCoverParam);
+    //         }, node);
+    // } else {
+    //     // ViewAbstractModelNG::BindContentCover(frameNode, false, nullptr, nullptr,
+    //         modalStyle, std::move(onShowCallback), std::move(onDismissCallback),
+    //         std::move(onWillShowCallback), std::move(onWillDismissCallback), contentCoverParam);
+    // }
 }
 void BindSheetImpl(Ark_NativePointer node,
                    const Opt_Boolean* isShow,
                    const Opt_CustomNodeBuilder* builder,
                    const Opt_SheetOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(builder);
-    auto isShowValue = Converter::OptConvertPtr<Ark_Boolean>(isShow);
-    if (!isShowValue) {
-        // TODO: Reset value
-        return;
-    }
-    SheetStyle sheetStyle;
-    sheetStyle.sheetHeight.sheetMode = NG::SheetMode::LARGE;
-    sheetStyle.showDragBar = true;
-    sheetStyle.showCloseIcon = true;
-    sheetStyle.showInPage = false;
-    SheetCallbacks cbs;
-    auto sheetOptions = Converter::OptConvertPtr<Ark_SheetOptions>(options);
-    if (sheetOptions) {
-        g_bindSheetCallbacks1(cbs, sheetOptions.value());
-        g_bindSheetCallbacks2(cbs, sheetOptions.value());
-        Converter::VisitUnion(sheetOptions->title,
-            [&sheetStyle](const Ark_SheetTitleOptions& value) {
-                sheetStyle.sheetTitle = OptConvert<std::string>(value.title);
-                sheetStyle.sheetSubtitle = OptConvert<std::string>(value.title);
-            },
-            [frameNode, node, &cbs](const CustomNodeBuilder& value) {
-                cbs.titleBuilder = [callback = CallbackHelper(value), node]() {
-                    auto uiNode = callback.BuildSync(node);
-                    ViewStackProcessor::GetInstance()->Push(uiNode);
-                };
-            }, []() {});
-        g_bindSheetParams(sheetStyle, sheetOptions.value());
-    }
-    auto optBuilder = Converter::GetOptPtr(builder);
-    if (!optBuilder) {
-        // TODO: Reset value
-        return;
-    }
-    CallbackHelper(*optBuilder).BuildAsync([frameNode, isShowValue, sheetStyle,
-        titleBuilder = std::move(cbs.titleBuilder), onAppear = std::move(cbs.onAppear),
-        onDisappear = std::move(cbs.onDisappear), shouldDismiss = std::move(cbs.shouldDismiss),
-        onWillDismiss = std::move(cbs.onWillDismiss), onWillAppear = std::move(cbs.onWillAppear),
-        onWillDisappear = std::move(cbs.onWillDisappear), onHeightDidChange = std::move(cbs.onHeightDidChange),
-        onDetentsDidChange = std::move(cbs.onDetentsDidChange), onWidthDidChange = std::move(cbs.onWidthDidChange),
-        onTypeDidChange = std::move(cbs.onTypeDidChange), sheetSpringBack = std::move(cbs.sheetSpringBack)](
-        const RefPtr<UINode>& uiNode) mutable {
-        auto buildFunc = [frameNode, uiNode]() {
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-            ViewStackProcessor::GetInstance()->Push(uiNode);
-        };
-        ViewAbstractModelNG::BindSheet(frameNode, *isShowValue, nullptr, std::move(buildFunc),
-            std::move(titleBuilder), sheetStyle, std::move(onAppear), std::move(onDisappear),
-            std::move(shouldDismiss), std::move(onWillDismiss), std::move(onWillAppear), std::move(onWillDisappear),
-            std::move(onHeightDidChange), std::move(onDetentsDidChange), std::move(onWidthDidChange),
-            std::move(onTypeDidChange), std::move(sheetSpringBack));
-        }, node);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // CHECK_NULL_VOID(builder);
+    // auto isShowValue = Converter::OptConvertPtr<Ark_Boolean>(isShow);
+    // if (!isShowValue) {
+    //     // TODO: Reset value
+    //     return;
+    // }
+    // SheetStyle sheetStyle;
+    // sheetStyle.sheetHeight.sheetMode = NG::SheetMode::LARGE;
+    // sheetStyle.showDragBar = true;
+    // sheetStyle.showCloseIcon = true;
+    // sheetStyle.showInPage = false;
+    // SheetCallbacks cbs;
+    // auto sheetOptions = Converter::OptConvertPtr<Ark_SheetOptions>(options);
+    // if (sheetOptions) {
+    //     g_bindSheetCallbacks1(cbs, sheetOptions.value());
+    //     g_bindSheetCallbacks2(cbs, sheetOptions.value());
+    //     Converter::VisitUnion(sheetOptions->title,
+    //         [&sheetStyle](const Ark_SheetTitleOptions& value) {
+    //             sheetStyle.sheetTitle = OptConvert<std::string>(value.title);
+    //             sheetStyle.sheetSubtitle = OptConvert<std::string>(value.title);
+    //         },
+    //         [frameNode, node, &cbs](const CustomNodeBuilder& value) {
+    //             cbs.titleBuilder = [callback = CallbackHelper(value), node]() {
+    //                 auto uiNode = callback.BuildSync(node);
+    //                 ViewStackProcessor::GetInstance()->Push(uiNode);
+    //             };
+    //         }, []() {});
+    //     g_bindSheetParams(sheetStyle, sheetOptions.value());
+    // }
+    // auto optBuilder = Converter::GetOptPtr(builder);
+    // if (!optBuilder) {
+    //     // TODO: Reset value
+    //     return;
+    // }
+    // CallbackHelper(*optBuilder).BuildAsync([frameNode, isShowValue, sheetStyle,
+    //     titleBuilder = std::move(cbs.titleBuilder), onAppear = std::move(cbs.onAppear),
+    //     onDisappear = std::move(cbs.onDisappear), shouldDismiss = std::move(cbs.shouldDismiss),
+    //     onWillDismiss = std::move(cbs.onWillDismiss), onWillAppear = std::move(cbs.onWillAppear),
+    //     onWillDisappear = std::move(cbs.onWillDisappear), onHeightDidChange = std::move(cbs.onHeightDidChange),
+    //     onDetentsDidChange = std::move(cbs.onDetentsDidChange), onWidthDidChange = std::move(cbs.onWidthDidChange),
+    //     onTypeDidChange = std::move(cbs.onTypeDidChange), sheetSpringBack = std::move(cbs.sheetSpringBack)](
+    //     const RefPtr<UINode>& uiNode) mutable {
+    //     auto buildFunc = [frameNode, uiNode]() {
+    //         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+    //         ViewStackProcessor::GetInstance()->Push(uiNode);
+    //     };
+    //     // ViewAbstractModelNG::BindSheet(frameNode, *isShowValue, nullptr, std::move(buildFunc),
+    //     //     std::move(titleBuilder), sheetStyle, std::move(onAppear), std::move(onDisappear),
+    //     //     std::move(shouldDismiss), std::move(onWillDismiss), std::move(onWillAppear), std::move(onWillDisappear),
+    //     //     std::move(onHeightDidChange), std::move(onDetentsDidChange), std::move(onWidthDidChange),
+    //     //     std::move(onTypeDidChange), std::move(sheetSpringBack));
+    //     }, node);
 }
 void OnVisibleAreaChangeImpl(Ark_NativePointer node,
                              const Opt_Array_Number* ratios,
@@ -5685,7 +5685,7 @@ void OnVisibleAreaChangeImpl(Ark_NativePointer node,
             PipelineContext::SetCallBackNode(node);
             arkCallback.Invoke(isExpanding, currentRatio);
         };
-    ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioVec);
+    // ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioVec);
 }
 void OnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
                                         const Opt_VisibleAreaEventOptions* options,
@@ -5731,8 +5731,8 @@ void OnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(node);
         arkCallback.Invoke(isExpanding, currentRatio);
     };
-    ViewAbstract::SetOnVisibleAreaApproximateChange(
-        frameNode, std::move(onVisibleAreaChange), ratioVec, expectedUpdateInterval);
+    // ViewAbstract::SetOnVisibleAreaApproximateChange(
+        // frameNode, std::move(onVisibleAreaChange), ratioVec, expectedUpdateInterval);
 }
 void KeyboardShortcutImpl(Ark_NativePointer node,
                           const Opt_Union_String_FunctionKey* value,
@@ -5747,7 +5747,7 @@ void KeyboardShortcutImpl(Ark_NativePointer node,
     }
     auto strValue = Converter::OptConvertPtr<std::string>(value);
     if (!strValue.has_value() || strValue.value().size() != 1) {
-        ViewAbstract::SetKeyboardShortcut(frameNode, {}, {}, nullptr);
+        // ViewAbstract::SetKeyboardShortcut(frameNode, {}, {}, nullptr);
         return;
     }
     auto keysOptVect = Converter::OptConvertPtr<std::vector<std::optional<ModifierKey>>>(keys);

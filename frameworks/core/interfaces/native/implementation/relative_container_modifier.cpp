@@ -81,14 +81,17 @@ BarrierInfo Convert(const Ark_BarrierStyle& src)
 template<>
 BarrierInfo Convert(const Ark_LocalizedBarrierStyle& src)
 {
-    LocalizedBarrierInfo info;
-    info.id = Convert<std::string>(src.id);
-    info.referencedId = Convert<std::vector<std::string>>(src.referencedId);
-    auto direction = OptConvert<BarrierDirection>(src.localizedDirection);
-    if (direction.has_value()) {
-        info.direction = direction.value();
-    }
-    return info;
+    // LocalizedBarrierInfo info;
+    // info.id = Convert<std::string>(src.id);
+    // info.referencedId = Convert<std::vector<std::string>>(src.referencedId);
+    // auto direction = OptConvert<BarrierDirection>(src.localizedDirection);
+    // if (direction.has_value()) {
+    //     info.direction = direction.value();
+    // }
+    // return info;
+    return  {
+        .id = "stub"
+    };
 }
 
 } // namespace OHOS::Ace::NG
