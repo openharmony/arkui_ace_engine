@@ -61,6 +61,8 @@ const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 380.0f, 34.0f);
 const RefPtr<InterpolatingSpring> MAIN_MENU_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 528.0f, 35.0f);
+const RefPtr<InterpolatingSpring> STACK_SUB_MENU_ANIMATION_CURVE =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 28.0f);
 const float MINIMUM_AMPLITUDE_RATION = 0.08f;
 
 constexpr double MOUNT_MENU_FINAL_SCALE = 0.95f;
@@ -1513,28 +1515,59 @@ void MenuPattern::ShowStackMenuAppearAnimation()
     CHECK_NULL_VOID(menuWrapperPattern);
     auto mainMenu = menuWrapperPattern->GetMenu();
     CHECK_NULL_VOID(mainMenu);
+    auto mainMenuContext = mainMenu->GetRenderContext();
+    CHECK_NULL_VOID(mainMenuContext);
+    auto subMenuContext = host->GetRenderContext();
+    CHECK_NULL_VOID(subMenuContext);
+    auto subMenuPattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(subMenuPattern);
 
-    auto [originOffset, endOffset] = GetMenuOffset(mainMenu);
+    auto [originOffset, endOffset] = GetMenuOffset(mainMenu, host);
     if (originOffset ==  OffsetF()) {
         TAG_LOGW(AceLogTag::ACE_MENU, "not found parent MenuItem when show stack sub menu");
     }
-    auto mainMenuContext = mainMenu->GetRenderContext();
     ShowStackMenuAppearOpacityAndBlurAnimation(mainMenuContext);
-    auto subMenuContext = host->GetRenderContext();
-    CHECK_NULL_VOID(subMenuContext);
+    
     subMenuContext->UpdatePosition(
         OffsetT<Dimension>(Dimension(originOffset.GetX()), Dimension(originOffset.GetY())));
 
+    auto preview = isShowHoverImage_ ? menuWrapperPattern->GetHoverImageFlexNode() : menuWrapperPattern->GetPreview();
+    float translateYForStack = subMenuPattern->GetTranslateYForStack();
     AnimationOption translateOption = AnimationOption();
-    translateOption.SetCurve(MAIN_MENU_ANIMATION_CURVE);
-    AnimationUtils::Animate(translateOption, [subMenuContext, menuPosition = endOffset, mainMenuContext]() {
+    translateOption.SetCurve(STACK_SUB_MENU_ANIMATION_CURVE);
+    AnimationUtils::Animate(
+        translateOption,
+        [subMenuContext, menuPosition = endOffset, mainMenuContext, mainMenu, translateYForStack, preview]() {
         if (subMenuContext) {
             subMenuContext->UpdatePosition(
                 OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
         }
+        auto mainMenuOffset = mainMenu->GetPaintRectOffset(false, true);
         if (mainMenuContext) {
             mainMenuContext->UpdateTransformScale(VectorF(MOUNT_MENU_FINAL_SCALE, MOUNT_MENU_FINAL_SCALE));
         }
+        if (NearZero(translateYForStack)) {
+            return;
+        }
+        auto mainMenuPattern = mainMenu->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(mainMenuPattern);
+        mainMenuPattern->SetOriginMenuYForStack(mainMenuOffset.GetY());
+        mainMenuContext->UpdatePosition(
+            OffsetT<Dimension>(Dimension(mainMenuOffset.GetX()),
+                Dimension(mainMenuOffset.GetY() - translateYForStack)));
+        mainMenu->GetGeometryNode()->SetMarginFrameOffset(OffsetF(mainMenuOffset.GetX(),
+            mainMenuOffset.GetY() - translateYForStack));
+
+        CHECK_NULL_VOID(preview);
+        auto previewFrameOffset = preview->GetGeometryNode()->GetFrameOffset();
+        mainMenuPattern->SetOriginPreviewYForStack(previewFrameOffset.GetY());
+        auto previewRenderContext = preview->GetRenderContext();
+        CHECK_NULL_VOID(previewRenderContext);
+        previewRenderContext->UpdatePosition(
+            OffsetT<Dimension>(Dimension(previewFrameOffset.GetX()),
+                Dimension(previewFrameOffset.GetY() - translateYForStack)));
+        preview->GetGeometryNode()->SetMarginFrameOffset(OffsetF(previewFrameOffset.GetX(),
+            previewFrameOffset.GetY() - translateYForStack));
     });
     ShowArrowRotateAnimation();
     isSubMenuShow_ = false;
@@ -1588,7 +1621,7 @@ void MenuPattern::ShowStackMenuAppearOpacityAndBlurAnimation(const RefPtr<Render
 }
 
 std::pair<OffsetF, OffsetF> MenuPattern::GetMenuOffset(const RefPtr<FrameNode>& mainMenu,
-    bool isNeedRestoreNodeId) const
+    const RefPtr<FrameNode>& subMenu, bool isNeedRestoreNodeId) const
 {
     CHECK_NULL_RETURN(mainMenu, std::make_pair(OffsetF(), OffsetF()));
     auto scroll = mainMenu->GetFirstChild();
@@ -1598,7 +1631,7 @@ std::pair<OffsetF, OffsetF> MenuPattern::GetMenuOffset(const RefPtr<FrameNode>& 
     auto children = innerMenu->GetChildren();
     MenuItemInfo menuItemInfo;
     for (auto child : children) {
-        menuItemInfo = GetInnerMenuOffset(child, isNeedRestoreNodeId);
+        menuItemInfo = GetInnerMenuOffset(child, subMenu, isNeedRestoreNodeId);
         if (menuItemInfo.isFindTargetId) {
             break;
         }
@@ -1606,19 +1639,20 @@ std::pair<OffsetF, OffsetF> MenuPattern::GetMenuOffset(const RefPtr<FrameNode>& 
     return {menuItemInfo.originOffset, menuItemInfo.endOffset};
 }
 
-MenuItemInfo MenuPattern::GetInnerMenuOffset(const RefPtr<UINode>& child, bool isNeedRestoreNodeId) const
+MenuItemInfo MenuPattern::GetInnerMenuOffset(const RefPtr<UINode>& child, const RefPtr<FrameNode>& subMenu,
+    bool isNeedRestoreNodeId) const
 {
     MenuItemInfo menuItemInfo;
     CHECK_NULL_RETURN(child, menuItemInfo);
     if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
-        menuItemInfo = GetMenuItemInfo(child, isNeedRestoreNodeId);
+        menuItemInfo = GetMenuItemInfo(child, subMenu, isNeedRestoreNodeId);
         if (menuItemInfo.isFindTargetId) {
             return menuItemInfo;
         }
     } else {
         const auto& groupChildren = child->GetChildren();
         for (auto child : groupChildren) {
-            menuItemInfo = GetInnerMenuOffset(child, isNeedRestoreNodeId);
+            menuItemInfo = GetInnerMenuOffset(child, subMenu, isNeedRestoreNodeId);
             if (menuItemInfo.isFindTargetId) {
                 return menuItemInfo;
             }
@@ -1627,7 +1661,8 @@ MenuItemInfo MenuPattern::GetInnerMenuOffset(const RefPtr<UINode>& child, bool i
     return menuItemInfo;
 }
 
-MenuItemInfo MenuPattern::GetMenuItemInfo(const RefPtr<UINode>& child, bool isNeedRestoreNodeId) const
+MenuItemInfo MenuPattern::GetMenuItemInfo(const RefPtr<UINode>& child, const RefPtr<FrameNode>& subMenu,
+    bool isNeedRestoreNodeId) const
 {
     MenuItemInfo menuItemInfo;
     auto menuItem = AceType::DynamicCast<FrameNode>(child);
@@ -1646,8 +1681,7 @@ MenuItemInfo MenuPattern::GetMenuItemInfo(const RefPtr<UINode>& child, bool isNe
                 offset -= OffsetF(0.0f, static_cast<float>(pipeline->GetCustomTitleHeight().ConvertToPx()));
             }
             menuItemInfo.originOffset = offset - OffsetF(PADDING.ConvertToPx(), PADDING.ConvertToPx());
-            auto menuItemFrameSize = menuItem->GetGeometryNode()->GetFrameSize();
-            menuItemInfo.endOffset = menuItemInfo.originOffset + OffsetF(0.0f, menuItemFrameSize.Height());
+            menuItemInfo.endOffset = subMenu->GetPaintRectOffset(false, true);
             menuItemInfo.isFindTargetId = true;
             if (isNeedRestoreNodeId) {
                 menuItemPattern->SetClickMenuItemId(-1);
@@ -1655,6 +1689,68 @@ MenuItemInfo MenuPattern::GetMenuItemInfo(const RefPtr<UINode>& child, bool isNe
         }
     }
     return menuItemInfo;
+}
+
+RefPtr<FrameNode> MenuPattern::GetFirstMenuItem()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    uint32_t depth = 0;
+    auto child = host->GetFirstChild();
+    while (child && depth < MAX_SEARCH_DEPTH) {
+        if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
+            return AceType::DynamicCast<FrameNode>(child);
+        }
+        if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            child = child->GetFirstChild();
+            if (child && child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+                child  = child->GetFirstChild();
+                ++depth;
+            }
+            continue;
+        }
+        child = child->GetFirstChild();
+        ++depth;
+    }
+    return nullptr;
+}
+
+RefPtr<FrameNode> MenuPattern::GetLastMenuItem()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    uint32_t depth = 0;
+    auto child = host->GetLastChild();
+    while (child && depth < MAX_SEARCH_DEPTH) {
+        if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
+            return AceType::DynamicCast<FrameNode>(child);
+        }
+        if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            child = child->GetLastChild();
+            if (child && child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+                child  = child->GetLastChild();
+                ++depth;
+            }
+            continue;
+        }
+        child = child->GetLastChild();
+        ++depth;
+    }
+    return nullptr;
+}
+
+std::pair<float, float> MenuPattern::GetPreviewPositionY()
+{
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_RETURN(menuWrapper, std::make_pair(0.0f, 0.0f));
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, std::make_pair(0.0f, 0.0f));
+    auto preview = menuWrapperPattern->GetPreview();
+    CHECK_NULL_RETURN(preview, std::make_pair(0.0f, 0.0f));
+    auto geometryNode = preview->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, std::make_pair(0.0f, 0.0f));
+    return {preview->GetPaintRectOffset(false, true).GetY(),
+        preview->GetPaintRectOffset(false, true).GetY() + geometryNode->GetMarginFrameSize().Height()};
 }
 
 void MenuPattern::ShowArrowRotateAnimation() const
@@ -1725,14 +1821,19 @@ void MenuPattern::ShowStackMenuDisappearAnimation(const RefPtr<FrameNode>& menuN
     });
 
     CHECK_NULL_VOID(menuNode);
-    auto [originOffset, endOffset] = GetMenuOffset(menuNode, true);
     CHECK_NULL_VOID(subMenuNode);
+    auto [originOffset, endOffset] = GetMenuOffset(menuNode, subMenuNode, true);
     auto subMenuPos = subMenuNode->GetPaintRectOffset(false, true);
     auto menuPosition = OffsetF(subMenuPos.GetX(), originOffset.GetY());
 
     option.SetCurve(MAIN_MENU_ANIMATION_CURVE);
     auto subImageNode = GetArrowNode(subMenuNode);
-    AnimationUtils::Animate(option, [menuNode, menuPosition, subMenuNode, subImageNode]() {
+    auto menuWarpper = GetMenuWrapper();
+    CHECK_NULL_VOID(menuWarpper);
+    auto menuWrapperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto preview = isShowHoverImage_ ? menuWrapperPattern->GetHoverImageFlexNode() : menuWrapperPattern->GetPreview();
+    AnimationUtils::Animate(option, [menuNode, menuPosition, subMenuNode, subImageNode, preview]() {
         auto menuContext = menuNode->GetRenderContext();
         auto subMenuContext = subMenuNode->GetRenderContext();
         if (subMenuContext) {
@@ -1741,6 +1842,24 @@ void MenuPattern::ShowStackMenuDisappearAnimation(const RefPtr<FrameNode>& menuN
         }
         if (menuContext) {
             menuContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
+            auto menuPattern = menuNode->GetPattern<MenuPattern>();
+            if (GreatNotEqual(menuPattern->GetOriginMenuYForStack(), 0.0f)) {
+                menuContext->UpdatePosition(
+                    OffsetT<Dimension>(Dimension(menuPosition.GetX()),
+                        Dimension(menuPattern->GetOriginMenuYForStack())));
+                menuNode->GetGeometryNode()->SetMarginFrameOffset(OffsetF(menuPosition.GetX(),
+                    menuPattern->GetOriginMenuYForStack()));
+            }
+            if (GreatNotEqual(menuPattern->GetOriginPreviewYForStack(), 0.0f)) {
+                auto previewRenderContext = preview->GetRenderContext();
+                CHECK_NULL_VOID(previewRenderContext);
+                auto previewFrameOffsetX = preview->GetGeometryNode()->GetFrameOffset().GetX();
+                previewRenderContext->UpdatePosition(
+                    OffsetT<Dimension>(Dimension(previewFrameOffsetX),
+                        Dimension(menuPattern->GetOriginPreviewYForStack())));
+                preview->GetGeometryNode()->SetMarginFrameOffset(OffsetF(previewFrameOffsetX,
+                    menuPattern->GetOriginPreviewYForStack()));
+            }
         }
         if (subImageNode) {
             auto subImageContext = subImageNode->GetRenderContext();

@@ -516,10 +516,14 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
         // Record the latest touch finger ID. If other fingers are pressed, the latest one prevails
         fingerId_ = touch.GetFingerId();
         TAG_LOGD(AceLogTag::ACE_MENU, "record newest finger ID %{public}d", fingerId_);
+        bool hasStackMenu = HasStackSubMenu();
         for (auto child = children.rbegin(); child != children.rend(); ++child) {
             // get child frame node of menu wrapper
             auto menuWrapperChildNode = DynamicCast<FrameNode>(*child);
             CHECK_NULL_VOID(menuWrapperChildNode);
+            if (hasStackMenu && (host->GetChildIndex(menuWrapperChildNode) == 0)) {
+                break;
+            }
             // get menuWrapperChildNode's touch region
             if (CheckPointInMenuZone(menuWrapperChildNode, position)) {
                 HandleInteraction(info);

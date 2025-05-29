@@ -89,6 +89,9 @@ protected:
     RefPtr<MenuPaintProperty> GetPaintProperty(const LayoutWrapper* layoutWrapper);
     OffsetF GetMenuWrapperOffset(const LayoutWrapper* layoutWrapper);
     void ClipMenuPath(LayoutWrapper* layoutWrapper);
+    float GetFirstItemBottomPositionY(const RefPtr<FrameNode>& menu);
+    float GetLastItemTopPositionY(const RefPtr<FrameNode>& menu);
+    float GetMenuBottomPositionY(const RefPtr<FrameNode>& menu);
 
     // position input is relative to main window left top point,
     // menu show position is relative to menuWrapper.
@@ -279,6 +282,8 @@ private:
     std::string CalculateMenuPath(LayoutWrapper* layoutWrapper, bool didNeedArrow);
     bool UpdateSelectOverlayMenuColumnInfo(
         const RefPtr<MenuPattern>& menuPattern, const RefPtr<GridColumnInfo>& columnInfo);
+    float CalcSubMenuMaxHeightConstraint(LayoutWrapper* layoutWrapper,
+        LayoutConstraintF& childConstraint, RefPtr<FrameNode> parentItem);
 
     std::optional<OffsetF> lastPosition_;
     OffsetF targetOffset_;

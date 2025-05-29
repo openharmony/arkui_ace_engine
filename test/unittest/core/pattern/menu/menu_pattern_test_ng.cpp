@@ -1568,12 +1568,16 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg088, TestSize.Level1)
     auto menuItemPattern = child->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
     menuItemPattern->SetClickMenuItemId(child->GetId());
-    auto testInfo = menuPattern->GetInnerMenuOffset(child, false);
+    RefPtr<FrameNode> subMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(2, "", TYPE); });
+    ASSERT_NE(subMenuNode, nullptr);
+    auto testInfo = menuPattern->GetInnerMenuOffset(child, subMenuNode, false);
     EXPECT_TRUE(testInfo.isFindTargetId);
     /**
      * @tc.steps: step1+. test GetInnerMenuOffset and isNeedRestoreNodeId if true;
      */
-    testInfo = menuPattern->GetInnerMenuOffset(child, true);
+    testInfo = menuPattern->GetInnerMenuOffset(child, subMenuNode, true);
     EXPECT_TRUE(testInfo.isFindTargetId);
     /**
      * @tc.steps: step2. Create menuitemgroup node and isNeedRestoreNodeId if false;
@@ -1587,12 +1591,12 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg088, TestSize.Level1)
     itemchildOne->MountToParent(menuitemgroupNode);
     itemchildTwo->MountToParent(menuitemgroupNode);
     menuPattern = menuNode->GetPattern<MenuPattern>();
-    testInfo = menuPattern->GetInnerMenuOffset(menuitemgroupNode, false);
+    testInfo = menuPattern->GetInnerMenuOffset(menuitemgroupNode, subMenuNode, false);
     EXPECT_FALSE(testInfo.isFindTargetId);
     /**
      * @tc.steps: step2. Create menuitemgroup node and isNeedRestoreNodeId if true;
      */
-    testInfo = menuPattern->GetInnerMenuOffset(menuitemgroupNode, true);
+    testInfo = menuPattern->GetInnerMenuOffset(menuitemgroupNode, subMenuNode, true);
     EXPECT_EQ(testInfo.originOffset, OffsetF(0.0, 0.0));
     EXPECT_FALSE(testInfo.isFindTargetId);
 }

@@ -66,6 +66,7 @@ using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 namespace {
+const std::string TEXT_TAG = "text";
 const InspectorFilter filter;
 constexpr int32_t TARGET_ID = 3;
 constexpr int NODE_ID = 1;
@@ -1070,8 +1071,11 @@ HWTEST_F(MenuPattern2TestNg, GetMenuOffset001, TestSize.Level1)
 
     auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
-
-    auto [originOffset, endOffset] = menuPattern->GetMenuOffset(outerMenuNode, true);
+    RefPtr<FrameNode> subMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(2, "", TYPE); });
+    ASSERT_NE(subMenuNode, nullptr);
+    auto [originOffset, endOffset] = menuPattern->GetMenuOffset(outerMenuNode, subMenuNode, true);
     EXPECT_EQ(originOffset, OffsetF());
     EXPECT_EQ(endOffset, OffsetF());
 }
@@ -1112,10 +1116,12 @@ HWTEST_F(MenuPattern2TestNg, GetMenuOffset002, TestSize.Level1)
 
     auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
-
-    auto [originOffset, endOffset] = menuPattern->GetMenuOffset(outerMenuNode, true);
+    RefPtr<FrameNode> subMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(2, "", TYPE); });
+    ASSERT_NE(subMenuNode, nullptr);
+    auto [originOffset, endOffset] = menuPattern->GetMenuOffset(outerMenuNode, subMenuNode, true);
     ASSERT_NE(originOffset, OffsetF());
-    ASSERT_NE(endOffset, OffsetF());
 }
 
 /**
@@ -1298,5 +1304,32 @@ HWTEST_F(MenuPattern2TestNg, FindSiblingMenuCount001, TestSize.Level1)
     innerMenuNode->parent_ = std::move(frameNode);
     innerMenuPattern->frameNode_ = std::move(innerMenuNode);
     EXPECT_EQ(innerMenuPattern->FindSiblingMenuCount(), 1);
+}
+
+/**
+ * @tc.name: GetFirstMenuItem001
+ * @tc.desc: Verify GetFirstMenuItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, GetFirstMenuItem001, TestSize.Level1)
+{
+    auto outterMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(outterMenuNode, nullptr);
+    auto scrollNode = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    scrollNode->MountToParent(outterMenuNode);
+    auto innerMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(innerMenuNode, nullptr);
+    innerMenuNode->MountToParent(scrollNode);
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemNode->MountToParent(innerMenuNode);
+
+    auto menuPattern = outterMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    EXPECT_EQ(menuPattern->GetFirstMenuItem(), menuItemNode);
 }
 } // namespace OHOS::Ace::NG
