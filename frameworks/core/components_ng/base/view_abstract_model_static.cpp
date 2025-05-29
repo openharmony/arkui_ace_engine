@@ -770,7 +770,7 @@ void ViewAbstractModelStatic::SetFlexBasis(FrameNode* frameNode, const std::opti
         }
         ViewAbstract::SetFlexBasis(frameNode, value);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, frameNode);
+        // ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, frameNode);
     }
 }
 
@@ -780,7 +780,7 @@ void ViewAbstractModelStatic::SetPadding(FrameNode* frameNode, const std::option
     if (value) {
         ViewAbstract::SetPadding(frameNode, value.value());
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, frameNode);
+        // ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, frameNode);
     }
 }
 
@@ -790,7 +790,7 @@ void ViewAbstractModelStatic::SetMargin(FrameNode* frameNode, const std::optiona
     if (value) {
         ViewAbstract::SetMargin(frameNode, value.value());
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, frameNode);
+        // ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, frameNode);
     }
 }
 
@@ -881,7 +881,7 @@ void ViewAbstractModelStatic::SetPositionEdges(FrameNode* frameNode, const Edges
 void ViewAbstractModelStatic::SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized)
 {
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetPositionLocalizedEdges(frameNode, needLocalized);
+    // ViewAbstract::SetPositionLocalizedEdges(frameNode, needLocalized);
 }
 
 
@@ -910,7 +910,7 @@ void ViewAbstractModelStatic::MarkAnchor(FrameNode* frameNode, const std::option
 void ViewAbstractModelStatic::ResetMarkAnchorStart(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ResetMarkAnchorStart(frameNode);
+    // ViewAbstract::ResetMarkAnchorStart(frameNode);
 }
 
 void ViewAbstractModelStatic::SetOffset(FrameNode* frameNode, const OffsetT<Dimension>& value)
@@ -928,7 +928,7 @@ void ViewAbstractModelStatic::SetOffsetEdges(FrameNode* frameNode, const EdgesPa
 void ViewAbstractModelStatic::SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized)
 {
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetOffsetLocalizedEdges(frameNode, needLocalized);
+    // ViewAbstract::SetOffsetLocalizedEdges(frameNode, needLocalized);
 }
 
 void ViewAbstractModelStatic::UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts)

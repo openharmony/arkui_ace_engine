@@ -24,10 +24,11 @@ namespace RowSplitModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = LinearSplitModelNG::CreateFrameNode(id, NG::SplitType::ROW_SPLIT);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = LinearSplitModelNG::CreateFrameNode(id, NG::SplitType::ROW_SPLIT);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 } // RowSplitModifier
 namespace RowSplitInterfaceModifier {
@@ -40,14 +41,14 @@ namespace RowSplitAttributeModifier {
 void ResizeableImpl(Ark_NativePointer node,
                     const Opt_Boolean* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::ROW_SPLIT, *convValue);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto convValue = Converter::OptConvert<bool>(*value);
+    // if (!convValue) {
+    //     // TODO: Reset value
+    //     return;
+    // }
+    // LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::ROW_SPLIT, *convValue);
 }
 } // RowSplitAttributeModifier
 const GENERATED_ArkUIRowSplitModifier* GetRowSplitModifier()

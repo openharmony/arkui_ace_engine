@@ -87,16 +87,16 @@ namespace ColumnAttributeModifier {
 void AlignItemsImpl(Ark_NativePointer node,
                     const Opt_HorizontalAlign* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    ColumnModelNG::SetAlignItems(frameNode, Converter::OptConvert<FlexAlign>(*value));
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // ColumnModelNG::SetAlignItems(frameNode, Converter::OptConvert<FlexAlign>(*value));
 }
 void JustifyContentImpl(Ark_NativePointer node,
                         const Opt_FlexAlign* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    ColumnModelNG::SetJustifyContent(frameNode, Converter::OptConvert<FlexAlign>(*value));
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // ColumnModelNG::SetJustifyContent(frameNode, Converter::OptConvert<FlexAlign>(*value));
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Opt_PointLightStyle* value)

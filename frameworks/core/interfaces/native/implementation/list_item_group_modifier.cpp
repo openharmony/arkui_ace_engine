@@ -41,59 +41,59 @@ namespace ListItemGroupInterfaceModifier {
 void SetListItemGroupOptionsImpl(Ark_NativePointer node,
                                  const Opt_ListItemGroupOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto arkOptions = Converter::OptConvert<Ark_ListItemGroupOptions>(*options);
-    CHECK_NULL_VOID(arkOptions);
-    auto space = Converter::OptConvert<Dimension>(arkOptions.value().space);
-    ListItemGroupModelNG::SetSpace(frameNode, space);
-    auto style = Converter::OptConvert<V2::ListItemGroupStyle>(arkOptions.value().style);
-    ListItemGroupModelNG::SetStyle(frameNode, style);
-    auto header = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().header);
-    if (header.has_value()) {
-        CallbackHelper(header.value()).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
-            auto builder = [uiNode]() -> RefPtr<UINode> {
-                return uiNode;
-            };
-            ListItemGroupModelNG::SetHeader(frameNode, std::move(builder));
-            }, node);
-    }
-    auto footer = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().footer);
-    if (footer.has_value()) {
-        CallbackHelper(footer.value()).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
-            auto builder = [uiNode]() -> RefPtr<UINode> {
-                return uiNode;
-            };
-            ListItemGroupModelNG::SetFooter(frameNode, std::move(builder));
-            }, node);
-    }
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // CHECK_NULL_VOID(options);
+    // auto arkOptions = Converter::OptConvert<Ark_ListItemGroupOptions>(*options);
+    // CHECK_NULL_VOID(arkOptions);
+    // auto space = Converter::OptConvert<Dimension>(arkOptions.value().space);
+    // ListItemGroupModelNG::SetSpace(frameNode, space);
+    // auto style = Converter::OptConvert<V2::ListItemGroupStyle>(arkOptions.value().style);
+    // ListItemGroupModelNG::SetStyle(frameNode, style);
+    // auto header = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().header);
+    // if (header.has_value()) {
+    //     CallbackHelper(header.value()).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+    //         auto builder = [uiNode]() -> RefPtr<UINode> {
+    //             return uiNode;
+    //         };
+    //         ListItemGroupModelNG::SetHeader(frameNode, std::move(builder));
+    //         }, node);
+    // }
+    // auto footer = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().footer);
+    // if (footer.has_value()) {
+    //     CallbackHelper(footer.value()).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+    //         auto builder = [uiNode]() -> RefPtr<UINode> {
+    //             return uiNode;
+    //         };
+    //         ListItemGroupModelNG::SetFooter(frameNode, std::move(builder));
+    //         }, node);
+    // }
 }
 } // ListItemGroupInterfaceModifier
 namespace ListItemGroupAttributeModifier {
 void DividerImpl(Ark_NativePointer node,
                  const Opt_ListDividerOptions* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
-    ListItemGroupModelStatic::SetDivider(frameNode, divider);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // CHECK_NULL_VOID(value);
+    // auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
+    // ListItemGroupModelStatic::SetDivider(frameNode, divider);
 }
 void ChildrenMainSizeImpl(Ark_NativePointer node,
                           const Opt_ChildrenMainSize* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto peer = *optValue;
-    CHECK_NULL_VOID(peer);
-    RefPtr<ListChildrenMainSize> handler = ListItemGroupModelNG::GetOrCreateListChildrenMainSize(frameNode);
-    peer->SetHandler(handler);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto optValue = Converter::GetOptPtr(value);
+    // if (!optValue) {
+    //     // TODO: Reset value
+    //     return;
+    // }
+    // auto peer = *optValue;
+    // CHECK_NULL_VOID(peer);
+    // RefPtr<ListChildrenMainSize> handler = ListItemGroupModelNG::GetOrCreateListChildrenMainSize(frameNode);
+    // peer->SetHandler(handler);
 }
 } // ListItemGroupAttributeModifier
 const GENERATED_ArkUIListItemGroupModifier* GetListItemGroupModifier()

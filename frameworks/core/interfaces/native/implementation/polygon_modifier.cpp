@@ -46,25 +46,26 @@ namespace PolygonModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = PolygonModelNG::CreateFrameNode(id, true);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = PolygonModelNG::CreateFrameNode(id, true);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 } // PolygonModifier
 namespace PolygonInterfaceModifier {
 void SetPolygonOptionsImpl(Ark_NativePointer node,
                            const Opt_PolygonOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto opt = Converter::OptConvert<PolygonOptions>(*options);
-    CHECK_NULL_VOID(opt);
-    Validator::ValidateNonNegative(opt->width);
-    ShapeAbstractModelNG::SetWidth(frameNode, opt->width);
-    Validator::ValidateNonNegative(opt->height);
-    ShapeAbstractModelNG::SetHeight(frameNode, opt->height);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // CHECK_NULL_VOID(options);
+    // auto opt = Converter::OptConvert<PolygonOptions>(*options);
+    // CHECK_NULL_VOID(opt);
+    // Validator::ValidateNonNegative(opt->width);
+    // ShapeAbstractModelNG::SetWidth(frameNode, opt->width);
+    // Validator::ValidateNonNegative(opt->height);
+    // ShapeAbstractModelNG::SetHeight(frameNode, opt->height);
 }
 } // PolygonInterfaceModifier
 namespace PolygonAttributeModifier {
@@ -85,7 +86,7 @@ void PointsImpl(Ark_NativePointer node,
     if (points && points->size() < POINTS_NUMBER_MIN) {
         points.reset();
     }
-    PolygonModelNG::SetPoints(frameNode, points);
+    // PolygonModelNG::SetPoints(frameNode, points);
 }
 } // PolygonAttributeModifier
 const GENERATED_ArkUIPolygonModifier* GetPolygonModifier()

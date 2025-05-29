@@ -26,16 +26,9 @@ public:
     void Create(const RefPtr<ScrollProxy>& proxy, bool infoflag, bool proxyFlag,
         int directionValue, int stateValue, bool isCreateArc = false) override;
     void SetEnableNestedScroll(bool enableNestedSroll) override;
-
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static RefPtr<ScrollProxy> SetScrollBarProxy(FrameNode* frameNode, const RefPtr<ScrollProxy>& proxy);
-    static void SetDirection(FrameNode* frameNode, const std::optional<Axis>& direction);
-    static void SetState(FrameNode* frameNode, const std::optional<DisplayMode>& state);
-    static void SetEnableNestedScroll(FrameNode* frameNode, const std::optional<bool>& enable);
+    static void SetEnableNestedScroll(FrameNode* frameNode, bool enableNestedSroll);
     static void SetNestedScroll(RefPtr<FrameNode>& frameNode, RefPtr<ScrollablePattern>& pattern);
     static void UnSetNestedScroll(RefPtr<FrameNode>& frameNode, RefPtr<ScrollablePattern>& pattern);
-private:
-    static void UpdateLayoutProperty();
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_BAR_SCROLL_BAR_MODEL_NG_H

@@ -25,44 +25,46 @@ Ark_NativePointer RegisterBarModeImpl(Ark_NativePointer node,
                                       const Opt_BarMode* value,
                                       const Opt_ScrollableBarModeOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto mode = Converter::OptConvert<TabBarMode>(*value);
-    if (mode && *mode == TabBarMode::SCROLLABLE) {
-        ScrollableBarModeOptions barModeOptions;
-        auto defaultMargin = barModeOptions.margin;
-        if (options) {
-            auto optionsOpt = Converter::OptConvert<Ark_ScrollableBarModeOptions>(*options);
-            if (optionsOpt) {
-                auto marginOpt = Converter::OptConvert<Dimension>(optionsOpt.value().margin);
-                Validator::ValidateNonPercent(marginOpt);
-                auto styleOpt = Converter::OptConvert<LayoutStyle>(optionsOpt.value().nonScrollableLayoutStyle);
-                barModeOptions.margin = marginOpt.value_or(defaultMargin);
-                barModeOptions.nonScrollableLayoutStyle = styleOpt;
-            }
-        }
-        TabsModelNG::SetScrollableBarModeOptions(frameNode, barModeOptions);
-    }
-    TabsModelNG::SetTabBarMode(frameNode, mode);
-    return node;
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // auto mode = Converter::OptConvert<TabBarMode>(*value);
+    // if (mode && *mode == TabBarMode::SCROLLABLE) {
+    //     ScrollableBarModeOptions barModeOptions;
+    //     auto defaultMargin = barModeOptions.margin;
+    //     if (options) {
+    //         auto optionsOpt = Converter::OptConvert<Ark_ScrollableBarModeOptions>(*options);
+    //         if (optionsOpt) {
+    //             auto marginOpt = Converter::OptConvert<Dimension>(optionsOpt.value().margin);
+    //             Validator::ValidateNonPercent(marginOpt);
+    //             auto styleOpt = Converter::OptConvert<LayoutStyle>(optionsOpt.value().nonScrollableLayoutStyle);
+    //             barModeOptions.margin = marginOpt.value_or(defaultMargin);
+    //             barModeOptions.nonScrollableLayoutStyle = styleOpt;
+    //         }
+    //     }
+    //     TabsModelNG::SetScrollableBarModeOptions(frameNode, barModeOptions);
+    // }
+    // TabsModelNG::SetTabBarMode(frameNode, mode);
+    // return node;
+    return nullptr;
 }
 Ark_NativePointer RegisterBarBackgroundBlurStyleImpl(Ark_NativePointer node,
                                                      const Opt_BlurStyle* style,
                                                      const Opt_BackgroundBlurStyleOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    BlurStyleOption option;
-    auto blurStyle = Converter::OptConvert<BlurStyle>(*style);
-    auto bluroption = Converter::OptConvert<BlurStyleOption>(*options);
-    if (bluroption) {
-        option = bluroption.value();
-    }
-    if (blurStyle) {
-        option.blurStyle = blurStyle.value();
-    }
-    TabsModelNG::SetBarBackgroundBlurStyle(frameNode, option);
-    return node;
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // BlurStyleOption option;
+    // auto blurStyle = Converter::OptConvert<BlurStyle>(*style);
+    // auto bluroption = Converter::OptConvert<BlurStyleOption>(*options);
+    // if (bluroption) {
+    //     option = bluroption.value();
+    // }
+    // if (blurStyle) {
+    //     option.blurStyle = blurStyle.value();
+    // }
+    // TabsModelNG::SetBarBackgroundBlurStyle(frameNode, option);
+    // return node;
+    return nullptr;
 }
 } // TabsOpsAccessor
 const GENERATED_ArkUITabsOpsAccessor* GetTabsOpsAccessor()

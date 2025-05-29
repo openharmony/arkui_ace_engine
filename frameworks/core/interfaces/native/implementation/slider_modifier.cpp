@@ -356,12 +356,12 @@ void SlideRangeImpl(Ark_NativePointer node,
 void DigitalCrownSensitivityImpl(Ark_NativePointer node,
                                  const Opt_CrownSensitivity* value)
 {
-#ifdef SUPPORT_DIGITAL_CROWN
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<CrownSensitivity>(*value) : std::nullopt;
-    SliderModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
-#endif
+// #ifdef SUPPORT_DIGITAL_CROWN
+//     auto frameNode = reinterpret_cast<FrameNode *>(node);
+//     CHECK_NULL_VOID(frameNode);
+//     auto convValue = value ? Converter::OptConvert<CrownSensitivity>(*value) : std::nullopt;
+//     SliderModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
+// #endif
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
                               const Opt_Boolean* value)
@@ -400,7 +400,7 @@ void _onChangeEvent_valueImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
     };
-    SliderModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
+    // SliderModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
 } // SliderAttributeModifier
 const GENERATED_ArkUISliderModifier* GetSliderModifier()

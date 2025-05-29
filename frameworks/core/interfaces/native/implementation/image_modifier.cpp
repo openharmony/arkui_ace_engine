@@ -108,7 +108,8 @@ void SetImageOptions0Impl(Ark_NativePointer node,
     if (info) {
         auto frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        ImageModelNG::InitImage(frameNode, info->GetSrc());
+        std::string source = info->GetSrc();
+        ImageModelNG::InitImage(frameNode, source);
     }
 }
 void SetImageOptions1Impl(Ark_NativePointer node,
@@ -127,7 +128,8 @@ void SetImageOptions1Impl(Ark_NativePointer node,
     if (info) {
         auto frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        ImageModelNG::InitImage(frameNode, info->GetSrc());
+        std::string source = info->GetSrc();
+        ImageModelNG::InitImage(frameNode, source);
     }
 }
 void SetImageOptions2Impl(Ark_NativePointer node,
@@ -444,9 +446,9 @@ void ResizableImpl(Ark_NativePointer node,
 void PrivacySensitiveImpl(Ark_NativePointer node,
                           const Opt_Boolean* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetPrivacySensitive(frameNode, Converter::OptConvert<bool>(*value));
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // ViewAbstract::SetPrivacySensitive(frameNode, Converter::OptConvert<bool>(*value));
 }
 void EnhancedImageQualityImpl(Ark_NativePointer node,
                               const Opt_ResolutionQuality* value)

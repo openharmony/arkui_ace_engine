@@ -48,10 +48,11 @@ namespace ColumnSplitModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = LinearSplitModelNG::CreateFrameNode(id, NG::SplitType::COLUMN_SPLIT);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = LinearSplitModelNG::CreateFrameNode(id, NG::SplitType::COLUMN_SPLIT);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 } // ColumnSplitModifier
 namespace ColumnSplitInterfaceModifier {
@@ -76,11 +77,11 @@ void ResizeableImpl(Ark_NativePointer node,
 void DividerImpl(Ark_NativePointer node,
                  const Opt_ColumnSplitDividerStyle* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto divider = Converter::OptConvert<ItemDivider>(*value);
-    LinearSplitModelNG::SetDivider(frameNode, NG::SplitType::COLUMN_SPLIT, divider);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // CHECK_NULL_VOID(value);
+    // auto divider = Converter::OptConvert<ItemDivider>(*value);
+    // LinearSplitModelNG::SetDivider(frameNode, NG::SplitType::COLUMN_SPLIT, divider);
 }
 } // ColumnSplitAttributeModifier
 const GENERATED_ArkUIColumnSplitModifier* GetColumnSplitModifier()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H
 
+#include "core/components/common/layout/constants.h"
 #include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_model.h"
@@ -27,6 +28,7 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
 public:
+    void Create(const RefPtr<DrawableDescriptor>& drawable) override;
     void Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap) override;
     void ResetImage() override;
     void CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) override;
@@ -76,9 +78,10 @@ public:
     void SetResizableSlice(const ImageResizableSlice& slice) override;
     void SetResizableLattice(const RefPtr<DrawingLattice>& lattice) override;
     void ResetResizableLattice() override;
+    static void SetDraggableForFrameNode(RefPtr<FrameNode> frameNode, bool isImageSpan = false);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
-    static void InitImage(FrameNode* frameNode, const std::string& src);
+    static void InitImage(FrameNode* frameNode, std::string& src);
     static void ResetImage(FrameNode* frameNode);
     static void SetInitialSrc(FrameNode* frameNode, const std::string& src, const std::string& bundleName,
         const std::string& moduleName, bool isUriPureNumber = false);
@@ -93,7 +96,6 @@ public:
     static void SetSyncMode(FrameNode* frameNode, bool syncMode);
     static void SetImageMatrix(FrameNode* frameNode, const Matrix4& value);
     static void SetImageFit(FrameNode* frameNode, ImageFit value);
-    static void SetImageFit(FrameNode* frameNode, std::optional<ImageFit> value);
     static void SetDrawingColorFilter(FrameNode* frameNode, RefPtr<DrawingColorFilter>& colorFilter);
     static void SetFitOriginSize(FrameNode* framNode, bool value);
     static void SetImageSourceSize(FrameNode* frameNode, const std::pair<Dimension, Dimension>& size);

@@ -24,7 +24,6 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT EllipseModelNG : public OHOS::Ace::EllipseModel {
 public:
     void Create() override;
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 };
 
 } // namespace OHOS::Ace::NG

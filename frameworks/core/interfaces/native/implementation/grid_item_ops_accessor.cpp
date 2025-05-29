@@ -34,7 +34,7 @@ Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(isSelected));
     };
-    GridItemModelNG::SetSelectChangeEvent(frameNode, std::move(changeEvent));
+    // GridItemModelNG::SetSelectChangeEvent(frameNode, std::move(changeEvent));
     return node;
 }
 } // namespace GridItemOpsAccessor

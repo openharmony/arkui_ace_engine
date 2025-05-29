@@ -169,9 +169,8 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     if (filter.IsFastFilter()) {
         return;
     }
-    ExpandSafeAreaToJsonValue(json, filter);
-    PaddingToJsonValue(safeAreaPadding_, "safeAreaPadding", json, filter);
-    PaddingToJsonValue(padding_, "padding", json, filter);
+
+    PaddingToJsonValue(json, filter);
     MarginToJsonValue(json, filter);
     SafeAreaPaddingToJsonValue(json, filter);
 
@@ -181,34 +180,27 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     json->PutExtAttr("pixelRound", PixelRoundToJsonValue().c_str(), filter);
 }
 
-void LayoutProperty::ExpandSafeAreaToJsonValue(std::unique_ptr<JsonValue>& json,
+void LayoutProperty::PaddingToJsonValue(std::unique_ptr<JsonValue>& json,
     const InspectorFilter& filter) const
 {
-    auto SAJson = JsonUtil::Create(true);
-    json->PutExtAttr("expandSafeArea", SAJson, filter);
-}
-
-void LayoutProperty::PaddingToJsonValue(const std::unique_ptr<PaddingProperty>& padding,
-    std::string attrName, std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
-{
-    if (padding) {
-        if (!padding->top.has_value() || !padding->right.has_value()
-            || !padding->left.has_value() || !padding->bottom.has_value()) {
+    if (padding_) {
+        if (!padding_->top.has_value() || !padding_->right.has_value()
+            || !padding_->left.has_value() || !padding_->bottom.has_value()) {
             auto paddingJsonValue = JsonUtil::Create(true);
-            paddingJsonValue->Put("top", padding->top.has_value()
-                ? padding->top.value().ToString().c_str() : "0.00vp");
-            paddingJsonValue->Put("right", padding->right.has_value()
-                ? padding->right.value().ToString().c_str() : "0.00vp");
-            paddingJsonValue->Put("bottom", padding->bottom.has_value()
-                ? padding->bottom.value().ToString().c_str() : "0.00vp");
-            paddingJsonValue->Put("left", padding->left.has_value()
-                ? padding->left.value().ToString().c_str() : "0.00vp");
-            json->PutExtAttr(attrName.c_str(), paddingJsonValue->ToString().c_str(), filter);
+            paddingJsonValue->Put("top", padding_->top.has_value()
+                ? padding_->top.value().ToString().c_str() : "0.00vp");
+            paddingJsonValue->Put("right", padding_->right.has_value()
+                ? padding_->right.value().ToString().c_str() : "0.00vp");
+            paddingJsonValue->Put("bottom", padding_->bottom.has_value()
+                ? padding_->bottom.value().ToString().c_str() : "0.00vp");
+            paddingJsonValue->Put("left", padding_->left.has_value()
+                ? padding_->left.value().ToString().c_str() : "0.00vp");
+            json->PutExtAttr("padding", paddingJsonValue->ToString().c_str(), filter);
         } else {
-            json->PutExtAttr(attrName.c_str(), padding->ToJsonString().c_str(), filter);
+            json->PutExtAttr("padding", padding_->ToJsonString().c_str(), filter);
         }
     } else {
-        json->PutExtAttr(attrName.c_str(), "0.00vp", filter);
+        json->PutExtAttr("padding", "0.00vp", filter);
     }
 }
 
@@ -569,6 +561,7 @@ void LayoutProperty::UpdateGridProperty(std::optional<int32_t> span, std::option
     if (!gridProperty_) {
         gridProperty_ = std::make_unique<GridProperty>();
     }
+
     bool isSpanUpdated = (span.has_value() && gridProperty_->UpdateSpan(span.value(), type));
     bool isOffsetUpdated = (offset.has_value() && gridProperty_->UpdateOffset(offset.value(), type));
     if (isSpanUpdated || isOffsetUpdated) {
@@ -1131,15 +1124,6 @@ void LayoutProperty::UpdateMargin(const MarginProperty& value)
     }
 }
 
-void LayoutProperty::ResetMargin()
-{
-    if (!margin_) {
-        return;
-    }
-    margin_.reset();
-    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
-}
-
 void LayoutProperty::UpdatePadding(const PaddingProperty& value)
 {
     if (!padding_) {
@@ -1148,15 +1132,6 @@ void LayoutProperty::UpdatePadding(const PaddingProperty& value)
     if (padding_->UpdateWithCheck(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
     }
-}
-
-void LayoutProperty::ResetPadding()
-{
-    if (!padding_) {
-        return;
-    }
-    padding_.reset();
-    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
 }
 
 void LayoutProperty::UpdateSafeAreaPadding(const PaddingProperty& value)
@@ -1336,17 +1311,6 @@ void LayoutProperty::UpdateFlexBasis(const Dimension& flexBasis)
     if (flexItemProperty_->UpdateFlexBasis(flexBasis)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     }
-}
-
-void LayoutProperty::ResetFlexBasis()
-{
-    if (!flexItemProperty_) {
-        return;
-    }
-    if (flexItemProperty_->HasFlexBasis()) {
-        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
-    }
-    flexItemProperty_->ResetFlexBasis();
 }
 
 void LayoutProperty::UpdateAlignSelf(const FlexAlign& flexAlign)
@@ -1785,10 +1749,10 @@ void LayoutProperty::CheckLocalizedPadding(const RefPtr<LayoutProperty>& layoutP
         padding.bottom = paddingProperty->bottom;
     }
     if (padding.left.has_value() && !padding.right.has_value()) {
-        padding.right = std::optional<CalcLength>(CalcLength(0, DimensionUnit::VP));
+        padding.right = std::optional<CalcLength>(CalcLength(0));
     }
     if (!padding.left.has_value() && padding.right.has_value()) {
-        padding.left = std::optional<CalcLength>(CalcLength(0, DimensionUnit::VP));
+        padding.left = std::optional<CalcLength>(CalcLength(0));
     }
     LocalizedPaddingOrMarginChange(padding, padding_);
 }
@@ -1825,10 +1789,10 @@ void LayoutProperty::CheckLocalizedMargin(const RefPtr<LayoutProperty>& layoutPr
         margin.bottom = marginProperty->bottom;
     }
     if (margin.left.has_value() && !margin.right.has_value()) {
-        margin.right = std::optional<CalcLength>(CalcLength(0, DimensionUnit::VP));
+        margin.right = std::optional<CalcLength>(CalcLength(0));
     }
     if (!margin.left.has_value() && margin.right.has_value()) {
-        margin.left = std::optional<CalcLength>(CalcLength(0, DimensionUnit::VP));
+        margin.left = std::optional<CalcLength>(CalcLength(0));
     }
     LocalizedPaddingOrMarginChange(margin, margin_);
 }
