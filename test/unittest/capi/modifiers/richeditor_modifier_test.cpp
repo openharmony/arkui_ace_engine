@@ -555,8 +555,8 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setBindSelectionMenuTest, TestSize.Lev
     auto options = Converter::ArkValue<Opt_SelectionMenuOptions>(value);
     uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
     auto buildFunc = getBuilderCb();
-    auto optBuildFunc = Converter::ArkValue<Opt_CustomNodeBuilder>(buildFunc);    
-    auto optResponseType = Converter::ArkValue<Opt_Union_ResponseType_RichEditorResponseType>(responseType);    
+    auto optBuildFunc = Converter::ArkValue<Opt_CustomNodeBuilder>(buildFunc);
+    auto optResponseType = Converter::ArkValue<Opt_Union_ResponseType_RichEditorResponseType>(responseType);
     auto optValue =
         Converter::ArkValue<Opt_RichEditorSpanType>(Ark_RichEditorSpanType::ARK_RICH_EDITOR_SPAN_TYPE_TEXT);
     modifier_->setBindSelectionMenu(node_, &optValue, &optBuildFunc, &optResponseType, &options);

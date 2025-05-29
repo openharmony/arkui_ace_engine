@@ -267,9 +267,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSelectCallbackWithImageSpanTest, Tes
         bool hasPixelMap = false;
 
         Converter::VisitUnion(data.spans.array[0],
-            [&hasText](const Ark_RichEditorTextSpanResult& value) {
-                hasText = true;
-            },
+            [&hasText](const Ark_RichEditorTextSpanResult& value) { hasText = true; },
             [&hasPixelMap](const Ark_RichEditorImageSpanResult& value) {
                 PixelMapPeer* pixelMapPeer = value.valuePixelMap.value;
                 hasPixelMap = pixelMapPeer && pixelMapPeer->pixelMap;
