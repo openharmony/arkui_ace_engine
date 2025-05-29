@@ -279,7 +279,7 @@ bool NavigationModelNG::CreatePrimaryContentIfNeeded(const RefPtr<NavigationGrou
     auto contentNode = FrameNode::GetOrCreateFrameNode(
         V2::PRIMARY_CONTENT_NODE_ETS_TAG, contentId, []() { return AceType::MakeRefPtr<NavigationContentPattern>(); });
     contentNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
-    contentNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+    contentNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
         HitTestMode::HTMTRANSPARENT_SELF);
     navigationGroupNode->AddChild(contentNode);
     navigationGroupNode->SetPrimaryContentNode(contentNode);
