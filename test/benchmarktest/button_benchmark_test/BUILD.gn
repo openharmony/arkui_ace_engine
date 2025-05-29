@@ -15,8 +15,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 module_output_path = "capi_benchmarktest/button"
 
-ohos_benchmarktest("ButtonBM_CAPI") {
-  module_out_path = module_output_path
+config("capi_bm_config") {
   include_dirs = [ 
     "../",
     "$ace_root/frameworks/core/interfaces/native/generated/interface/",
@@ -29,13 +28,30 @@ ohos_benchmarktest("ButtonBM_CAPI") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
+}
+
+source_set("capi_bm_deps") {
+  testonly = true
+  public_configs = [ ":capi_bm_config" ]
+  public_external_deps = [
+    "benchmark:benchmark",
+    "googletest:gmock_main",
+  ]
+}
+
+ace_unittest("ButtonBM_CAPI") {
+  type = "new"
+  module_out_path = module_output_path
+  
   sources = [
     "button_benchmark_test.cpp",
   ]
-  external_deps = [
-    "benchmark:benchmark",
-  ]
-  deps = [
+
+  extra_deps = []
+  extra_deps += [
+    ":capi_bm_deps",
+    "//foundation/arkui/ace_engine/test/unittest/capi:ace_core_interfaces_native_node_linux_unittest",
+    "//foundation/arkui/ace_engine/test/unittest/capi/stubs:capi-ut-stubs", 
     "$ace_root/build:libace",
     "$ace_root/build:libace_compatible",
     "$ace_root/build:libace_engine_pa_ark",
