@@ -21,6 +21,7 @@
 #include "base/utils/macros.h"
 #include "ui_content.h"
 #include "event_handler.h"
+#include "render_service_client/core/ui/rs_ui_context.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -53,6 +54,7 @@ public:
     bool IsAllowUpdate();
     void SetVisible(bool isVisible);
     bool IsVisible();
+    void SetMultiInstanceEnabled(bool isMultiInstanceEnabled) override;
 
     void DispatchSurfaceChangeEvent(float width, float height, uint32_t reason = 0,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, float borderWidth = 0.0) override;
@@ -69,9 +71,11 @@ private:
     std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     bool allowUpdate_ = true;
     bool isVisible_ = true;
+    bool isMultiInstanceEnabled_ = false;
     static std::recursive_mutex globalLock_;
     void HandleSurfaceChangeEvent(const std::shared_ptr<UIContent>& uiContent, float width, float height,
         uint32_t reason, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, float borderWidth);
+    std::shared_ptr<Rosen::RSUIContext> GetRSUIContext(const std::shared_ptr<UIContent>& uiContent);
 };
 } // namespace Ace
 } // namespace OHOS

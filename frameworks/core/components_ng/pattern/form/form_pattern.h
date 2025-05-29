@@ -270,6 +270,7 @@ private:
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     void enhancesSubContainer(bool hasContainer);
     bool GetFormDumpInfo(std::vector<std::string> &dumpInfo);
+    void GetRSUIContext();
 
     RefPtr<RenderContext> externalRenderContext_;
 
@@ -308,6 +309,7 @@ private:
     bool ShouldAddChildAtReuildFrame();
     bool isStaticFormSnaping_ = false;
     int64_t updateFormComponentTimestamp_ = 0;
+    std::shared_ptr<Rosen::RSUIContext> rsUIContext_ = nullptr;
 };
 } // namespace NG
 } // namespace Ace

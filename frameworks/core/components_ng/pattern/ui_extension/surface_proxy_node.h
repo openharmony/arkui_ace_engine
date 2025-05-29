@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/pattern.h"
 #include "transaction/rs_interfaces.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 class SurfaceProxyNode : public AceType {
@@ -31,11 +32,13 @@ public:
     void CreateSurfaceProxyNode();
     virtual void OnAddSurfaceNode();
     RefPtr<FrameNode> GetSurfaceProxyNode();
+    void GetRSUIContext();
 
 private:
     RefPtr<FrameNode> surfaceProxyNode_;
     WeakPtr<FrameNode> host_;
     AceLogTag aceLogTag_ = AceLogTag::ACE_DEFAULT_DOMAIN;
+    std::shared_ptr<Rosen::RSUIContext> rsUIContext_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SURFACE_PROXY_NODE_H

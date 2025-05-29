@@ -20,6 +20,7 @@
 #include "form_renderer.h"
 #include "form_renderer_hilog.h"
 #include "wm_common.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS {
 namespace Ace {
@@ -160,8 +161,19 @@ void FormRendererDispatcherImpl::HandleSurfaceChangeEvent(const std::shared_ptr<
             needSync = true;
         }
     }
-
-    if (needSync) {
+    std::shared_ptr<Rosen::RSUIContext> rsUIContext = nullptr;
+    if (isMultiInstanceEnabled_) {
+        rsUIContext = GetRSUIContext(uiContent);
+        if (rsUIContext == nullptr) {
+            HILOG_ERROR("rsUIContext is nullptr");
+            return;
+        }
+    }
+    if (isMultiInstanceEnabled_ && needSync) {
+        globalLock_.lock();
+        rsUIContext->GetRSTransaction()->FlushImplicitTransaction();
+        rsTransaction->Begin();
+    } else if (needSync) {
         globalLock_.lock();
         Rosen::RSTransaction::FlushImplicitTransaction();
         rsTransaction->Begin();
@@ -169,18 +181,27 @@ void FormRendererDispatcherImpl::HandleSurfaceChangeEvent(const std::shared_ptr<
     Rosen::RSAnimationTimingProtocol protocol;
     protocol.SetDuration(DEFAULT_FORM_ROTATION_ANIM_DURATION);
     auto curve = Rosen::RSAnimationTimingCurve::LINEAR;
-    Rosen::RSNode::OpenImplicitAnimation(protocol, curve, []() {});
-
+    if (isMultiInstanceEnabled_) {
+        Rosen::RSNode::OpenImplicitAnimation(rsUIContext, protocol, curve, []() {});
+    } else {
+        Rosen::RSNode::OpenImplicitAnimation(protocol, curve, []() {});
+    }
     float uiWidth = width - borderWidth * DOUBLE;
     float uiHeight = height - borderWidth * DOUBLE;
     uiContent->SetFormWidth(uiWidth);
     uiContent->SetFormHeight(uiHeight);
     uiContent->OnFormSurfaceChange(uiWidth, uiHeight, static_cast<OHOS::Rosen::WindowSizeChangeReason>(reason),
         rsTransaction);
-    Rosen::RSNode::CloseImplicitAnimation();
+    if (isMultiInstanceEnabled_) {
+        Rosen::RSNode::CloseImplicitAnimation(rsUIContext);
+    } else {
+        Rosen::RSNode::CloseImplicitAnimation();
+    }
     if (needSync) {
         rsTransaction->Commit();
         globalLock_.unlock();
+    } else if (isMultiInstanceEnabled_) {
+        rsUIContext->GetRSTransaction()->FlushImplicitTransaction();
     } else {
         Rosen::RSTransaction::FlushImplicitTransaction();
     }
@@ -319,6 +340,22 @@ void FormRendererDispatcherImpl::OnNotifyDumpInfo(
         info.push_back("dump timeout " + std::to_string(DUMP_WAIT_TIME) + "ms");
         handler->RemoveTask("OnNotifyDumpInfoTask");
     }
+}
+
+void FormRendererDispatcherImpl::SetMultiInstanceEnabled(bool isMultiInstanceEnabled)
+{
+    isMultiInstanceEnabled_ = isMultiInstanceEnabled;
+}
+
+std::shared_ptr<Rosen::RSUIContext> FormRendererDispatcherImpl::GetRSUIContext(
+    const std::shared_ptr<UIContent>& uiContent)
+{
+    auto rsSurfaceNode = uiContent->GetFormRootNode();
+    if (rsSurfaceNode == nullptr) {
+        HILOG_ERROR("GetRSUIContext: rsSurfaceNode is nullptr");
+        return nullptr;
+    }
+    return rsSurfaceNode->GetRSUIContext();
 }
 } // namespace Ace
 } // namespace OHOS
