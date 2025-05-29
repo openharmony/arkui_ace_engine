@@ -196,7 +196,8 @@ public:
     bool HasStateStyle(UIState state) const;
     void AddSupportedState(UIState state);
     void SetSupportedStates(UIState state);
-    void AddSupportedUIStateWithCallback(UIState state, std::function<void(uint64_t)>& callback, bool isInner);
+    void AddSupportedUIStateWithCallback(
+        UIState state, std::function<void(uint64_t)>& callback, bool isInner, bool excludeInner = false);
     void RemoveSupportedUIState(UIState state, bool isInner);
     bool GetUserSetStateStyle();
     void SetScrollingFeatureForbidden(bool isSetStateStyle);
@@ -317,6 +318,8 @@ protected:
     std::function<void()> onJSFrameNodeAppear_;
 
 private:
+    void AddPressedListener();
+
     WeakPtr<FrameNode> host_;
     RefPtr<GestureEventHub> gestureEventHub_;
     RefPtr<InputEventHub> inputEventHub_;

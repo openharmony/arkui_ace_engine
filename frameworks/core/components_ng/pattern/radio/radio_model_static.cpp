@@ -22,6 +22,10 @@
 namespace OHOS::Ace::NG {
 void RadioModelStatic::SetChecked(FrameNode* frameNode, const std::optional<bool> isChecked)
 {
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, isChecked.value_or(false));
     if (isChecked) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheck, isChecked.value(), frameNode);
     } else {
